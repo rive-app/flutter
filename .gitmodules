@@ -1,3 +1,6 @@
 [submodule "dependencies/core-dart"]
 	path = dependencies/core-dart
 	url = git@github.com:rive-app/core-dart.git
+[submodule "rive_core/rive-core-defs"]
+	path = rive_core/rive-core-defs
+	url = git@github.com:rive-app/rive-core-defs.git
