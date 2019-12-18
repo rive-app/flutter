@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "editor"
+		},
+		{
+			"path": "rive_core"
+		},
+		{
+			"path": "dependencies/core-dart"
+		}
+	],
+	"settings": {}
+}
