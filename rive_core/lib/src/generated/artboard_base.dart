@@ -1,0 +1,170 @@
+/// Core automatically generated lib/src/generated/artboard_base.dart.
+/// Do not modify manually.
+
+import 'package:core/core.dart';
+
+abstract class ArtboardBase extends Core {
+  static const int typeKey = 1;
+
+  /// --------------------------------------------------------------------------
+  /// Name field with key 4.
+  String _name;
+  static const int namePropertyKey = 4;
+
+  /// Non-unique identifier, friendly name. Runtimes provide an API for finding
+  /// artboards by this [name].
+  String get name => _name;
+
+  /// Change the [_name] field value.
+  /// [nameChanged] will be invoked only if the field's value has changed.
+  set name(String value) {
+    if (_name == value) {
+      return;
+    }
+    String from = _name;
+    _name = value;
+    nameChanged(from, value);
+  }
+
+  void nameChanged(String from, String to) {
+    context?.changeProperty(this, namePropertyKey, from, to);
+  }
+
+  /// --------------------------------------------------------------------------
+  /// Width field with key 5.
+  double _width;
+  static const int widthPropertyKey = 5;
+
+  /// Width of the artboard.
+  double get width => _width;
+
+  /// Change the [_width] field value.
+  /// [widthChanged] will be invoked only if the field's value has changed.
+  set width(double value) {
+    if (_width == value) {
+      return;
+    }
+    double from = _width;
+    _width = value;
+    widthChanged(from, value);
+  }
+
+  void widthChanged(double from, double to) {
+    context?.changeProperty(this, widthPropertyKey, from, to);
+  }
+
+  /// --------------------------------------------------------------------------
+  /// Height field with key 6.
+  double _height;
+  static const int heightPropertyKey = 6;
+
+  /// Height of the artboard.
+  double get height => _height;
+
+  /// Change the [_height] field value.
+  /// [heightChanged] will be invoked only if the field's value has changed.
+  set height(double value) {
+    if (_height == value) {
+      return;
+    }
+    double from = _height;
+    _height = value;
+    heightChanged(from, value);
+  }
+
+  void heightChanged(double from, double to) {
+    context?.changeProperty(this, heightPropertyKey, from, to);
+  }
+
+  /// --------------------------------------------------------------------------
+  /// X field with key 7.
+  double _x;
+  static const int xPropertyKey = 7;
+
+  /// X coordinate in editor world space.
+  double get x => _x;
+
+  /// Change the [_x] field value.
+  /// [xChanged] will be invoked only if the field's value has changed.
+  set x(double value) {
+    if (_x == value) {
+      return;
+    }
+    double from = _x;
+    _x = value;
+    xChanged(from, value);
+  }
+
+  void xChanged(double from, double to) {
+    context?.changeProperty(this, xPropertyKey, from, to);
+  }
+
+  /// --------------------------------------------------------------------------
+  /// Y field with key 8.
+  double _y;
+  static const int yPropertyKey = 8;
+
+  /// Y coordinate in editor world space.
+  double get y => _y;
+
+  /// Change the [_y] field value.
+  /// [yChanged] will be invoked only if the field's value has changed.
+  set y(double value) {
+    if (_y == value) {
+      return;
+    }
+    double from = _y;
+    _y = value;
+    yChanged(from, value);
+  }
+
+  void yChanged(double from, double to) {
+    context?.changeProperty(this, yPropertyKey, from, to);
+  }
+
+  /// --------------------------------------------------------------------------
+  /// OriginX field with key 9.
+  double _originX;
+  static const int originXPropertyKey = 9;
+
+  /// Origin x in normalized coordinates (0 = center, -1 = left, 1 = right).
+  double get originX => _originX;
+
+  /// Change the [_originX] field value.
+  /// [originXChanged] will be invoked only if the field's value has changed.
+  set originX(double value) {
+    if (_originX == value) {
+      return;
+    }
+    double from = _originX;
+    _originX = value;
+    originXChanged(from, value);
+  }
+
+  void originXChanged(double from, double to) {
+    context?.changeProperty(this, originXPropertyKey, from, to);
+  }
+
+  /// --------------------------------------------------------------------------
+  /// OriginY field with key 10.
+  double _originY;
+  static const int originYPropertyKey = 10;
+
+  /// Origin y in normalized coordinates (0 = center, -1 = left, 1 = right).
+  double get originY => _originY;
+
+  /// Change the [_originY] field value.
+  /// [originYChanged] will be invoked only if the field's value has changed.
+  set originY(double value) {
+    if (_originY == value) {
+      return;
+    }
+    double from = _originY;
+    _originY = value;
+    originYChanged(from, value);
+  }
+
+  void originYChanged(double from, double to) {
+    context?.changeProperty(this, originYPropertyKey, from, to);
+  }
+}

@@ -4,12 +4,12 @@
 import '../../container_component.dart';
 
 abstract class NodeBase extends ContainerComponent {
-  static const int typeKey = 4;
+  static const int typeKey = 2;
 
   /// --------------------------------------------------------------------------
-  /// X field with key 8.
+  /// X field with key 11.
   double _x;
-  static const int xPropertyKey = 8;
+  static const int xPropertyKey = 11;
   double get x => _x;
 
   /// Change the [_x] field value.
@@ -28,9 +28,9 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// Y field with key 9.
+  /// Y field with key 12.
   double _y;
-  static const int yPropertyKey = 9;
+  static const int yPropertyKey = 12;
   double get y => _y;
 
   /// Change the [_y] field value.
@@ -49,9 +49,9 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// Rotation field with key 10.
+  /// Rotation field with key 13.
   double _rotation;
-  static const int rotationPropertyKey = 10;
+  static const int rotationPropertyKey = 13;
   double get rotation => _rotation;
 
   /// Change the [_rotation] field value.
@@ -70,9 +70,9 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// ScaleX field with key 11.
+  /// ScaleX field with key 14.
   double _scaleX;
-  static const int scaleXPropertyKey = 11;
+  static const int scaleXPropertyKey = 14;
   double get scaleX => _scaleX;
 
   /// Change the [_scaleX] field value.
@@ -91,9 +91,9 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// ScaleY field with key 12.
+  /// ScaleY field with key 15.
   double _scaleY;
-  static const int scaleYPropertyKey = 12;
+  static const int scaleYPropertyKey = 15;
   double get scaleY => _scaleY;
 
   /// Change the [_scaleY] field value.
@@ -112,9 +112,9 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// Opacity field with key 13.
+  /// Opacity field with key 16.
   double _opacity;
-  static const int opacityPropertyKey = 13;
+  static const int opacityPropertyKey = 16;
   double get opacity => _opacity;
 
   /// Change the [_opacity] field value.

@@ -4,6 +4,4 @@
 
 import '../../component.dart';
 
-abstract class ContainerComponentBase extends Component {
-  static const int typeKey = 5;
-}
+abstract class ContainerComponentBase extends Component {}

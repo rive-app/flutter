@@ -4,18 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "core_builder run",
-            "type": "shell",
-            "command": "flutter packages pub run build_runner build lib",
-            "problemMatcher": [
-                "$dart-pub-build_runner"
-            ],
-            "isBackground": true
-        },
-        {
             "label": "gen core",
             "type": "shell",
-            "command": "dart ../core_generator/lib/main.dart",
+            "command": "dart ../dependencies/core-dart/core_generator/lib/main.dart --definitions-folder=rive-core-defs/defs/ --core-context=RiveCoreContext",
             "problemMatcher": [
                 "$dart-pub-build_runner"
             ],
