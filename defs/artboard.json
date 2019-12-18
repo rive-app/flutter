@@ -11,7 +11,8 @@
         "int": 4,
         "string": "name"
       },
-      "description": "Non-unique identifier, friendly name. Runtimes provide an API for finding artboards by this [name]."
+      "description": "Non-unique identifier, friendly name. Runtimes provide an API for finding artboards by this [name].",
+      "nullable": true
     },
     "width": {
       "type": "double",
