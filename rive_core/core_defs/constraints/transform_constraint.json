@@ -1,0 +1,24 @@
+{
+  "name": "TransformConstraint",
+  "key": {
+    "int": 2,
+    "string": "transformconstraint"
+  },
+  "extends": "constraints/ik_constraint.json",
+  "properties": {
+    "name": {
+      "type": "String",
+      "key": {
+        "int": 6,
+        "string": "name"
+      }
+    },
+    "parent": {
+      "type": "int",
+      "key": {
+        "int": 7,
+        "string": "parent"
+      }
+    }
+  }
+}
