@@ -1,0 +1,65 @@
+{
+  "name": "Artboard",
+  "key": {
+    "int": 1,
+    "string": "artboard"
+  },
+  "properties": {
+    "name": {
+      "type": "String",
+      "key": {
+        "int": 4,
+        "string": "name"
+      },
+      "description": "Non-unique identifier, friendly name. Runtimes provide an API for finding artboards by this [name]."
+    },
+    "width": {
+      "type": "double",
+      "key": {
+        "int": 5,
+        "string": "w"
+      },
+      "description": "Width of the artboard."
+    },
+    "height": {
+      "type": "double",
+      "key": {
+        "int": 6,
+        "string": "h"
+      },
+      "description": "Height of the artboard."
+    },
+    "x": {
+      "type": "double",
+      "key": {
+        "int": 7,
+        "string": "x"
+      },
+      "description": "X coordinate in editor world space."
+    },
+    "y": {
+      "type": "double",
+      "key": {
+        "int": 8,
+        "string": "y"
+      },
+      "description": "Y coordinate in editor world space."
+    },
+    "originX": {
+      "type": "double",
+      "key": {
+        "int": 9,
+        "string": "ox"
+      },
+      "description": "Origin x in normalized coordinates (0 = center, -1 = left, 1 = right)."
+    },
+    "originY": {
+      "type": "double",
+      "key": {
+        "int": 10,
+        "string": "oy"
+      },
+      "description": "Origin y in normalized coordinates (0 = center, -1 = left, 1 = right)."
+    }
+  }
+}

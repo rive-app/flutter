@@ -1,0 +1,5 @@
+{
+  "name": "ContainerComponent",
+  "abstract": true,
+  "extends": "component.json"
+}

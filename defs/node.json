@@ -1,0 +1,52 @@
+{
+  "name": "Node",
+  "key": {
+    "int": 2,
+    "string": "node"
+  },
+  "extends": "container_component.json",
+  "properties": {
+    "x": {
+      "type": "double",
+      "key": {
+        "int": 11,
+        "string": "x"
+      }
+    },
+    "y": {
+      "type": "double",
+      "key": {
+        "int": 12,
+        "string": "y"
+      }
+    },
+    "rotation": {
+      "type": "double",
+      "key": {
+        "int": 13,
+        "string": "r"
+      }
+    },
+    "scaleX": {
+      "type": "double",
+      "key": {
+        "int": 14,
+        "string": "sx"
+      }
+    },
+    "scaleY": {
+      "type": "double",
+      "key": {
+        "int": 15,
+        "string": "sy"
+      }
+    },
+    "opacity": {
+      "type": "double",
+      "key": {
+        "int": 16,
+        "string": "opacity"
+      }
+    }
+  }
+}
