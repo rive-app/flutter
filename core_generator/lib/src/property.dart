@@ -11,6 +11,7 @@ class Property {
   final Definition definition;
   Key key;
   String description;
+  bool isNullable = false;
 
   factory Property(Definition type, String name, Map<String, dynamic> data) {
     var fieldType = FieldType.find(data["type"]);
@@ -27,12 +28,16 @@ class Property {
     if (descriptionValue is String) {
       description = descriptionValue;
     }
+    dynamic nullableValue = data['nullable'];
+    if (nullableValue is bool) {
+      isNullable = nullableValue;
+    }
     key = Key.fromJSON(data["key"]) ?? Key.forProperty(this);
   }
 
   String generateCode() {
     String propertyKey = '${name}PropertyKey';
-    var code = StringBuffer('  /// ${'-'*74}\n');
+    var code = StringBuffer('  /// ${'-' * 74}\n');
     code.write(comment('${capitalize(name)} field with key ${key.intValue}.',
         indent: 1));
     code.writeln('${type.name} _$name;');
@@ -62,11 +67,14 @@ class Property {
   }
 
   Map<String, dynamic> serialize() {
-    Map<String, dynamic> data = <String, dynamic>{"type": type.name};
+    Map<String, dynamic> data = <String, dynamic>{'type': type.name};
 
-    data["key"] = key.serialize();
+    data['key'] = key.serialize();
     if (description != null) {
-      data["description"] = description;
+      data['description'] = description;
+    }
+    if (isNullable) {
+      data['nullable'] = true;
     }
     return data;
   }

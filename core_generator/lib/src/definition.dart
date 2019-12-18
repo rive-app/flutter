@@ -82,11 +82,12 @@ class Definition {
 
   String get name => _name;
 
+  String get localCodeFilename => '${stripExtension(_filename)}_base.dart';
+  String get codeFilename => 'lib/src/generated/$localCodeFilename';
+
   void generateCode() {
-    var codeLocalFilename = stripExtension(_filename);
-    String codeFilename = 'lib/src/generated/${codeLocalFilename}_base.dart';
-    var code =
-        StringBuffer(comment('Core automatically generated $codeFilename.'));
+    String filename = codeFilename;
+    var code = StringBuffer(comment('Core automatically generated $filename.'));
     code.writeln(comment('Do not modify manually.'));
 
     if (_extensionOf != null) {
@@ -111,7 +112,7 @@ class Definition {
       code.write(field.generateCode());
     }
     code.write('}');
-    var file = File(codeFilename);
+    var file = File(filename);
     file.createSync(recursive: true);
     var formattedCode = _formatter.format(code.toString());
     file.writeAsStringSync(formattedCode, flush: true);
@@ -243,14 +244,43 @@ class Definition {
     var snakeName = coreContextName.replaceAllMapped(RegExp('(.+?)([A-Z])'),
         (Match m) => "${m[1].toLowerCase()}_${m[2].toLowerCase()}");
 
-    StringBuffer contextCode =
-        StringBuffer('import \'package:core/core.dart\';\n');
-    contextCode.writeln('class $coreContextName extends CoreContext {}');
+    StringBuffer ctxCode = StringBuffer('import \'package:core/core.dart\';\n');
+    for (final definition in definitions.values) {
+      if (definition._properties.isNotEmpty) {
+        ctxCode.writeln('import \'${definition.localCodeFilename}\';');
+      }
+    }
+    ctxCode.writeln('class $coreContextName extends CoreContext {');
+
+    // Build field changer
+    ctxCode.writeln('''@override
+        void setObjectProperty(Core object, int propertyKey, Object value) {
+          switch(propertyKey) {
+          ''');
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        ctxCode.writeln(
+            'case ${definition._name}Base.${property.name}PropertyKey:');
+        if (property.isNullable) {
+          ctxCode.writeln('''if(object is ${definition._name}Base) {
+                      if(value is ${property.type.name}) {
+                      object.${property.name} = value;
+                  } else if(value == null) {object.${property.name} = null;}}''');
+        } else {
+          ctxCode.writeln('''if(object is ${definition._name}Base
+                      && value is ${property.type.name}) {
+                      object.${property.name} = value;
+                  }''');
+        }
+        ctxCode.writeln('break;');
+      }
+    }
+    ctxCode.writeln('}}}');
 
     var file = File('lib/src/generated/$snakeName.dart');
     file.createSync(recursive: true);
 
-    var formattedCode = _formatter.format(contextCode.toString());
+    var formattedCode = _formatter.format(ctxCode.toString());
     file.writeAsStringSync(formattedCode, flush: true);
 
     // save out definitions
