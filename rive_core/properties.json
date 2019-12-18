@@ -1,0 +1,11 @@
+{
+    "name": "Component",
+    "fields": {
+        "name": {
+            "type": "String"
+        },
+        "parent": {
+            "type": "int"
+        }
+    }
+}

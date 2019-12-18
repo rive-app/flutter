@@ -1,0 +1,8 @@
+{
+  "name": "ContainerComponent",
+  "key": {
+    "int": 5,
+    "string": "containercomponent"
+  },
+  "extends": "component.json"
+}
