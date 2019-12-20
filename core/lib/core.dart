@@ -1,3 +1,10 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
 class ChangeEntry {
   final Object from;
   Object to;
@@ -24,6 +31,15 @@ abstract class CoreContext {
   void changeProperty<T>(Core object, int propertyKey, T from, T to) {
     if (!_isRecording) {
       return;
+    }
+    if (to is String) {
+      _channel.sink.add(to);
+      var buffer = Uint8List(4);
+      buffer[0] = 0;
+      buffer[1] = 1;
+      buffer[2] = 2;
+      buffer[3] = 3;
+      _channel.sink.add(buffer);
     }
     _currentChanges ??= <int, Map<int, ChangeEntry>>{};
     var changes = _currentChanges[object.id];
@@ -68,7 +84,7 @@ abstract class CoreContext {
     }
 
     _isRecording = false;
-    _journalIndex = index+1;
+    _journalIndex = index + 1;
     var changes = journal[index];
     changes.forEach((objectId, changes) {
       var object = _objects[objectId];
@@ -106,6 +122,97 @@ abstract class CoreContext {
   bool isHolding(Core object) {
     return _objects.containsValue(object);
   }
+
+  bool _isConnected = false;
+  WebSocketChannel _channel;
+  // WebSocket _socket;
+
+  int _reconnectAttempt = 0;
+  Timer _reconnectTimer;
+  Future<void> _reconnect() async {
+    _reconnectTimer?.cancel();
+    if (_reconnectAttempt < 1) {
+      _reconnectAttempt = 1;
+    }
+    _reconnectAttempt *= 2;
+    print("WILL WAIT ${_reconnectAttempt * 500}");
+    _reconnectTimer =
+        Timer(Duration(milliseconds: _reconnectAttempt * 500), connect);
+  }
+
+  Future<bool> connect() async {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    print("CALLING CONNECT");
+    const url = 'ws://localhost:8000/';
+    // await _channel?.sink?.close();
+    _channel = WebSocketChannel.connect(Uri.parse(url));
+    var completer = Completer<bool>();
+
+    _isConnected = false;
+    // first message to force a message back...
+    print("GO!");
+
+    _channel.stream.listen((dynamic data) {
+      if (!_isConnected) {
+        _reconnectAttempt = 0;
+        _isConnected = true;
+        completer.complete(true);
+        completer = null;
+      }
+      print("socket message: $data");
+
+      // _channel.stream.listen(_dataHandler);
+    }, onError: (dynamic error) {
+      _isConnected = false;
+      print("ERROR $error");
+      //_reconnect();
+    }, onDone: () {
+      _isConnected = false;
+      print("DONE!");
+      completer?.complete(false);
+      _reconnect();
+    });
+    return completer.future;
+
+    // try {
+    //   _socket = await WebSocket.connect(url.toString())
+    //       .timeout(const Duration(seconds: 10));
+    // } on WebSocketException catch (error) {
+    //   await _socket?.close();
+    //   print(error);
+    //   return false;
+    // } on TimeoutException catch (error) {
+    //   await _socket?.close();
+    //   print(error);
+    //   return false;
+    // }
+    // _socket.listen(_dataHandler);
+    // return true;
+    // _channel = IOWebSocketChannel(socket);
+    // bool connected = false;
+    // // _channel = IOWebSocketChannel.connect('wss://echo.websocket.org');
+    // StreamSubscription subscription;
+    // var completer = Completer<bool>();
+    // subscription = _channel.stream.listen((dynamic data) {
+    //   print('huh');
+    //   if (connected) {
+    //     return;
+    //   }
+    //   print("CONNECT DATA $data");
+    //   subscription.cancel();
+    //   connected = true;
+    //   completer.complete(true);
+    //   _channel.stream.listen(_dataHandler);
+    // });
+    // return completer.future;
+  }
+
+  // void _dataHandler(dynamic message) {
+  //   print("socket message: $message");
+  // }
+
+  void onConnected() {}
 }
 
 int localId = 0;
