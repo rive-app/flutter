@@ -3,6 +3,17 @@ import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
 
 void main() {
+  test('connecting to server', () async {
+    final file = RiveFile();
+    expect(await file.connect(), true);
+
+    print('connected');
+    var node = file.add(Node()..name = 'test');
+    node.name = 'name change';
+    file.captureJournalEntry();
+    await Future.delayed(const Duration(seconds: 10), () {});
+    print('done');
+  });
   test('undo/redo node name', () {
     final file = RiveFile();
 

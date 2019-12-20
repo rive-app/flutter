@@ -8,6 +8,12 @@
 		},
 		{
 			"path": "dependencies/core-dart"
+		},
+        {
+            "path": "dependencies/binary-buffer-dart"
+        },
+		{
+			"path": "dependencies/coop-server-dart"
 		}
 	],
 	"settings": {}

@@ -4,3 +4,9 @@
 [submodule "rive_core/rive-core-defs"]
 	path = rive_core/rive-core-defs
 	url = git@github.com:rive-app/rive-core-defs.git
+[submodule "dependencies/binary-buffer-dart"]
+	path = dependencies/binary-buffer-dart
+	url = git@github.com:rive-app/binary-buffer-dart.git
+[submodule "dependencies/coop-server-dart"]
+	path = dependencies/coop-server-dart
+	url = git@github.com:rive-app/coop-server-dart.git

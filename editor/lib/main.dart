@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/node.dart';
+import 'package:rive_core/rive_file.dart';
 
-void main() => runApp(MyApp());
+var file = RiveFile();
+Node node;
+void main() {
+  print("CONNECTING");
+  file.connect().then((connected) {
+    print("CONNECTED $connected");
+    if (!connected) {
+      return;
+    }
+    node = file.add(Node()..name = 'test');
+    node.name = 'My Shiny Node';
+    file.captureJournalEntry();
+    runApp(MyApp());
+  });
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -54,6 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+      node.name = 'My Shiny Node $_counter';
+      file.captureJournalEntry();
     });
   }
 
