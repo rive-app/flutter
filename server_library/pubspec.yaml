@@ -1,0 +1,4 @@
+name: coop_server_library
+
+environment:
+  sdk: '>=2.6.0 <3.0.0'

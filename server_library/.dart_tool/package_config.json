@@ -1,0 +1,14 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "coop_server_library",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.6"
+    }
+  ],
+  "generated": "2019-12-19T23:29:09.780232Z",
+  "generator": "pub",
+  "generatorVersion": "2.8.0-dev.0.0.flutter-c9d89d55a6"
+}
