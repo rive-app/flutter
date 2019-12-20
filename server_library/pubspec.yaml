@@ -4,8 +4,12 @@ environment:
   sdk: '>=2.6.0 <3.0.0'
 
 dependencies:
-  binary_buffer:
-    path: ../dependencies/binary-buffer-dart
+  core:
+    path: ../dependencies/core-dart/core
+
+dependency_overrides:
+  core:
+    path: ../../core-dart/core
 
 dev_dependencies:
   test: ^1.9.4

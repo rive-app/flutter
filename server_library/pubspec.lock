@@ -30,9 +30,9 @@ packages:
     source: hosted
     version: "2.4.0"
   binary_buffer:
-    dependency: "direct main"
+    dependency: transitive
     description:
-      path: "../dependencies/binary-buffer-dart"
+      path: "../../core-dart/dependencies/binary-buffer-dart"
       relative: true
     source: path
     version: "0.0.0"
@@ -64,6 +64,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
+  core:
+    dependency: "direct main"
+    description:
+      path: "../../core-dart/core"
+      relative: true
+    source: path
+    version: "0.0.1"
   coverage:
     dependency: transitive
     description:

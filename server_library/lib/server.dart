@@ -3,8 +3,10 @@ import 'dart:convert' show json;
 import 'dart:io' show HttpServer, HttpRequest, WebSocket, WebSocketTransformer;
 
 import 'dart:typed_data';
+import 'package:core/coop/change.dart';
 
 class CoopServer {
+  Change change;
   void listen([int port = 8000]) {
     HttpServer.bind('localhost', port).then((HttpServer server) {
       print('[+]WebSocket listening at -- ws://localhost:$port/');
