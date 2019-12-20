@@ -16,7 +16,7 @@ All integers support signed and unsigned read/write.
 - 64 bit
 
 ## Strings
-Strings utf8 encoded with a variable length unsigned integer written before the encoded string representing the number of bytes in the string.
+Strings are utf8 encoded with a variable length unsigned integer written before the encoded string representing the number of bytes in the string.
 
 ```dart
 var writer = BinaryWriter();
