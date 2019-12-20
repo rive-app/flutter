@@ -11,14 +11,14 @@ class Change {
 
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(op);
-    writer.writeVarUint(objectId);
+    writer.writeVarInt(objectId);
     writer.writeVarUint(value.length);
     writer.write(value);
   }
 
   void deserialize(BinaryReader reader) {
     op = reader.readVarUint();
-    objectId = reader.readVarUint();
+    objectId = reader.readVarInt();
     int length = reader.readVarUint();
     value = reader.read(length);
   }
