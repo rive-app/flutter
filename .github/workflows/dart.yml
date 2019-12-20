@@ -14,8 +14,8 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: develop
-        submodules: true
         token: ${{ secrets.RIVE_TOKEN }}
+        submodules: true
     - name: Install core dependencies
       run: cd core && pub get
     - name: Run core tests
