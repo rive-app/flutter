@@ -118,4 +118,10 @@ class BinaryReader {
     _readIndex += length;
     return value;
   }
+
+  Uint8List read(int length, [bool allocNew = false]) {
+    var view = Uint8List.view(
+        buffer.buffer, buffer.offsetInBytes + _readIndex, length);
+    return allocNew ? Uint8List.fromList(view) : view;
+  }
 }
