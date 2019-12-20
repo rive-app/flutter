@@ -9,7 +9,7 @@ All integers support signed and unsigned read/write.
 - 16 bit
 - 32 bit
 - 64 bit
-- variable bit LEB128 encoded 
+- variable bit [LEB128](https://en.wikipedia.org/wiki/LEB128) encoded 
 
 ## Floating Point
 - 32 bit
