@@ -244,4 +244,12 @@ void main() {
     expect(reader.readFloat32(), 129.3000030517578);
     expect(reader.readInt32(), 1920);
   });
+
+  test('bytes', () {
+    var writer = BinaryWriter();
+    writer.write(Uint8List.fromList([7, 31, 1982]));
+
+    var reader = BinaryReader(writer.buffer);
+    expect(reader.read(3), Uint8List.fromList([7, 31, 1982]));
+  });
 }
