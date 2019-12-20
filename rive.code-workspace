@@ -9,11 +9,11 @@
 		{
 			"path": "dependencies/core-dart"
 		},
-        {
-            "path": "dependencies/binary-buffer-dart"
-        },
 		{
-			"path": "dependencies/coop-server-dart"
+			"path": "dependencies/coop-server-dart/server_library"
+		},
+		{
+			"path": "dependencies/coop-server-dart/server_process"
 		}
 	],
 	"settings": {}
