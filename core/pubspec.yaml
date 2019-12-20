@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   web_socket_channel: ^1.1.0
+  binary_buffer:
+    path: ../dependencies/binary-buffer-dart
 
 dev_dependencies:
   flutter_test:
