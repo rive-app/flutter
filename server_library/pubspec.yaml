@@ -6,3 +6,6 @@ environment:
 dependencies:
   binary_buffer:
     path: ../dependencies/binary-buffer-dart
+
+dev_dependencies:
+  test: ^1.9.4
