@@ -90,6 +90,8 @@ class BinaryWriter {
     _writeIndex += 8;
   }
 
+  /// Write bytes into the buffer. Optional [length] to write a specific number
+  /// of [bytes], otherwise the length from [bytes] is used.
   void write(Uint8List bytes, [int length]) {
     length ??= bytes.length;
     _ensureAvailable(length);
