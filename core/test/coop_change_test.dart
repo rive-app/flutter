@@ -37,4 +37,11 @@ void main() {
       expect(changeSet.changes[1].value, Uint8List.fromList([10]));
     }
   });
+
+  test('valid change ids', () {
+    var changeSet = ChangeSet();
+    expect(() => changeSet.id = 0, throwsA(isA<AssertionError>()));
+    changeSet.id = 1982;
+    expect(changeSet.id, 1982);
+  });
 }

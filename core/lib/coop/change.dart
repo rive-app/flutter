@@ -26,7 +26,17 @@ class Change {
 
 /// A set of changes associated to an id.
 class ChangeSet {
-  int id;
+  static const int minId = 1;
+  int _id;
+
+  /// Session scoped change identifier. Should never be 0 as this is reserved
+  /// for the 'Hello' action.
+  int get id => _id;
+  set id(int value) {
+    assert(value >= minId, 'ChangeSet id must be >= $minId.');
+    _id = value;
+  }
+
   List<Change> changes;
 
   void serialize(BinaryWriter writer) {
