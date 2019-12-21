@@ -3,6 +3,10 @@ import 'dart:typed_data';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'coop/connect_result.dart';
+import 'coop/coop_client.dart';
+import 'coop/local_settings.dart';
+
 class ChangeEntry {
   final Object from;
   Object to;
@@ -16,7 +20,11 @@ class ChangeEntry {
 // - catches up to perform network sync of changes
 // journal[change_index][object_id][property] = {from, to}
 
-abstract class CoreContext {
+abstract class CoreContext implements LocalSettings {
+  final String fileId;
+  CoopClient _client;
+  CoreContext(this.fileId);
+
   final Map<int, Core> objects = <int, Core>{};
   final List<Map<int, Map<int, ChangeEntry>>> journal =
       <Map<int, Map<int, ChangeEntry>>>[];
@@ -29,15 +37,6 @@ abstract class CoreContext {
   void changeProperty<T>(Core object, int propertyKey, T from, T to) {
     if (!_isRecording) {
       return;
-    }
-    if (to is String) {
-      _channel.sink.add(to);
-      var buffer = Uint8List(4);
-      buffer[0] = 0;
-      buffer[1] = 1;
-      buffer[2] = 2;
-      buffer[3] = 3;
-      _channel.sink.add(buffer);
     }
     _currentChanges ??= <int, Map<int, ChangeEntry>>{};
     var changes = _currentChanges[object.id];
@@ -121,96 +120,11 @@ abstract class CoreContext {
     return _objects.containsValue(object);
   }
 
-  bool _isConnected = false;
-  WebSocketChannel _channel;
-  // WebSocket _socket;
-
-  int _reconnectAttempt = 0;
-  Timer _reconnectTimer;
-  Future<void> _reconnect() async {
-    _reconnectTimer?.cancel();
-    if (_reconnectAttempt < 1) {
-      _reconnectAttempt = 1;
-    }
-    _reconnectAttempt *= 2;
-    print("WILL WAIT ${_reconnectAttempt * 500}");
-    _reconnectTimer =
-        Timer(Duration(milliseconds: _reconnectAttempt * 500), connect);
+  Future<ConnectResult> connect(String url) async {
+    var client =
+        CoopClient(url, fileId: fileId, localSettings: this);
+    return client.connect();
   }
-
-  Future<bool> connect() async {
-    _reconnectTimer?.cancel();
-    _reconnectTimer = null;
-    print("CALLING CONNECT");
-    const url = 'ws://localhost:8000/';
-    // await _channel?.sink?.close();
-    _channel = WebSocketChannel.connect(Uri.parse(url));
-    var completer = Completer<bool>();
-
-    _isConnected = false;
-    // first message to force a message back...
-    print("GO!");
-
-    _channel.stream.listen((dynamic data) {
-      if (!_isConnected) {
-        _reconnectAttempt = 0;
-        _isConnected = true;
-        completer.complete(true);
-        completer = null;
-      }
-      print("socket message: $data");
-
-      // _channel.stream.listen(_dataHandler);
-    }, onError: (dynamic error) {
-      _isConnected = false;
-      print("ERROR $error");
-      //_reconnect();
-    }, onDone: () {
-      _isConnected = false;
-      print("DONE!");
-      completer?.complete(false);
-      _reconnect();
-    });
-    return completer.future;
-
-    // try {
-    //   _socket = await WebSocket.connect(url.toString())
-    //       .timeout(const Duration(seconds: 10));
-    // } on WebSocketException catch (error) {
-    //   await _socket?.close();
-    //   print(error);
-    //   return false;
-    // } on TimeoutException catch (error) {
-    //   await _socket?.close();
-    //   print(error);
-    //   return false;
-    // }
-    // _socket.listen(_dataHandler);
-    // return true;
-    // _channel = IOWebSocketChannel(socket);
-    // bool connected = false;
-    // // _channel = IOWebSocketChannel.connect('wss://echo.websocket.org');
-    // StreamSubscription subscription;
-    // var completer = Completer<bool>();
-    // subscription = _channel.stream.listen((dynamic data) {
-    //   print('huh');
-    //   if (connected) {
-    //     return;
-    //   }
-    //   print("CONNECT DATA $data");
-    //   subscription.cancel();
-    //   connected = true;
-    //   completer.complete(true);
-    //   _channel.stream.listen(_dataHandler);
-    // });
-    // return completer.future;
-  }
-
-  // void _dataHandler(dynamic message) {
-  //   print("socket message: $message");
-  // }
-
-  void onConnected() {}
 }
 
 int localId = 0;

@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:binary_buffer/binary_reader.dart';
 
+import 'coop_command.dart';
+
 /// An individual change.
 class Change {
   int op;
@@ -26,14 +28,14 @@ class Change {
 
 /// A set of changes associated to an id.
 class ChangeSet {
-  static const int minId = 1;
   int _id;
 
-  /// Session scoped change identifier. Should never be 0 as this is reserved
-  /// for the 'Hello' action.
+  /// Session scoped change identifier. Should never be 0-9 as these are
+  /// reserved for other (non-change) actions.
   int get id => _id;
   set id(int value) {
-    assert(value >= minId, 'ChangeSet id must be >= $minId.');
+    assert(value >= CoopCommand.minChangeId,
+        'ChangeSet id must be >= $CoopCommand.minChangeId.');
     _id = value;
   }
 
@@ -47,8 +49,8 @@ class ChangeSet {
     }
   }
 
-  void deserialize(BinaryReader reader) {
-    id = reader.readVarUint();
+  void deserialize(BinaryReader reader, [int preReadOp]) {
+    id = preReadOp ?? reader.readVarUint();
     int changesLength = reader.readVarUint();
     changes = List<Change>(changesLength);
     for (int i = 0; i < changes.length; i++) {

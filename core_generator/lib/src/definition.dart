@@ -250,7 +250,8 @@ class Definition {
         ctxCode.writeln('import \'${definition.localCodeFilename}\';');
       }
     }
-    ctxCode.writeln('class $coreContextName extends CoreContext {');
+    ctxCode.writeln('abstract class $coreContextName extends CoreContext {');
+    ctxCode.writeln('$coreContextName(String fileId) : super(fileId);\n');
 
     // Build field changer
     ctxCode.writeln('''@override

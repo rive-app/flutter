@@ -1,0 +1,50 @@
+import 'dart:typed_data';
+
+import 'package:binary_buffer/binary_writer.dart';
+
+import 'change.dart';
+import 'coop_command.dart';
+
+typedef Write = void Function(Uint8List buffer);
+
+class CoopWriter {
+  final Write write;
+  CoopWriter(this.write);
+
+  void writeHello() {
+    var writer = BinaryWriter(alignment: 1);
+    writer.writeVarUint(CoopCommand.hello);
+    write(writer.uint8Buffer);
+  }
+
+  void writeHand(
+      int session, String fileId, String token, int lastServerChangeId) {
+    var writer = BinaryWriter();
+    writer.writeVarUint(CoopCommand.hand);
+    writer.writeVarUint(session);
+    writer.writeString(fileId);
+    writer.writeString(token);
+    writer.writeVarUint(lastServerChangeId);
+    write(writer.uint8Buffer);
+  }
+
+  void writeShake(int session, int lastSeenChangeId) {
+    var writer = BinaryWriter();
+    writer.writeVarUint(CoopCommand.shake);
+    writer.writeVarUint(session);
+    writer.writeVarUint(lastSeenChangeId);
+    write(writer.uint8Buffer);
+  }
+
+  void writeGoodbye() {
+    var writer = BinaryWriter(alignment: 1);
+    writer.writeVarUint(CoopCommand.goodbye);
+    write(writer.uint8Buffer);
+  }
+
+  void writeChanges(ChangeSet changes) {
+    var writer = BinaryWriter();
+    changes.serialize(writer);
+    write(writer.uint8Buffer);
+  }
+}
