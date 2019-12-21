@@ -9,7 +9,10 @@ class BinaryWriter {
   final int alignment;
   final Endian endian;
   Uint8List _buffer;
-  ByteData get buffer => ByteData.view(_buffer.buffer, 0, size);
+  ByteData get buffer =>
+      ByteData.view(_buffer.buffer, _buffer.offsetInBytes, size);
+  Uint8List get uint8Buffer =>
+      Uint8List.view(_buffer.buffer, _buffer.offsetInBytes, size);
 
   ByteData _byteData;
   int _writeIndex = 0;
