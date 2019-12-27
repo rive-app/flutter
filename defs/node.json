@@ -9,42 +9,42 @@
     "x": {
       "type": "double",
       "key": {
-        "int": 11,
+        "int": 13,
         "string": "x"
       }
     },
     "y": {
       "type": "double",
       "key": {
-        "int": 12,
+        "int": 14,
         "string": "y"
       }
     },
     "rotation": {
       "type": "double",
       "key": {
-        "int": 13,
+        "int": 15,
         "string": "r"
       }
     },
     "scaleX": {
       "type": "double",
       "key": {
-        "int": 14,
+        "int": 16,
         "string": "sx"
       }
     },
     "scaleY": {
       "type": "double",
       "key": {
-        "int": 15,
+        "int": 17,
         "string": "sy"
       }
     },
     "opacity": {
       "type": "double",
       "key": {
-        "int": 16,
+        "int": 18,
         "string": "opacity"
       }
     }

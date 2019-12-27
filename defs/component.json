@@ -5,7 +5,7 @@
     "name": {
       "type": "String",
       "key": {
-        "int": 1,
+        "int": 10,
         "string": "name"
       },
       "description": "Non-unique identifier, used to give friendly names to elements in the hierarchy. Runtimes provide an API for finding components by this [name]."
@@ -13,7 +13,7 @@
     "parent": {
       "type": "int",
       "key": {
-        "int": 2,
+        "int": 11,
         "string": "parent"
       },
       "description": "Identifier used to track parent ContainerComponent."
@@ -21,7 +21,7 @@
     "order": {
       "type": "int",
       "key": {
-        "int": 3,
+        "int": 12,
         "string": "order"
       },
       "description": "Order value for sorting child elements in ContainerComponent parent."
