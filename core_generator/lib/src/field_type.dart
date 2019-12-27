@@ -1,17 +1,6 @@
 Map<String, FieldType> _types = <String, FieldType>{};
 
-// All supported field types.
-List<FieldType> fields;
-
-void initializeFields() {
-  fields = [
-    FieldType("String"),
-    FieldType("int"),
-    FieldType("double"),
-  ];
-}
-
-class FieldType {
+abstract class FieldType {
   final String name;
   FieldType(this.name) {
     _types[name] = this;
@@ -28,4 +17,8 @@ class FieldType {
   String toString() {
     return name;
   }
+
+  int get encodingAlignment;
+  String encode(String writerName, String varName);
+  String decode(String readerName);
 }

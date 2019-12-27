@@ -47,4 +47,26 @@ class CoopWriter {
     changes.serialize(writer);
     write(writer.uint8Buffer);
   }
+
+  void writeSync(int lastId) {
+    var writer = BinaryWriter(alignment: 8);
+    writer.writeVarUint(CoopCommand.synchronize);
+    writer.writeVarUint(lastId);
+    write(writer.uint8Buffer);
+  }
+
+  void writeAccept(int changeId, int serverChangeId) {
+    var writer = BinaryWriter(alignment: 8);
+    writer.writeVarUint(CoopCommand.accept);
+    writer.writeVarUint(changeId);
+    writer.writeVarUint(serverChangeId);
+    write(writer.uint8Buffer);
+  }
+
+  void writeReject(int changeId) {
+    var writer = BinaryWriter(alignment: 8);
+    writer.writeVarUint(CoopCommand.reject);
+    writer.writeVarUint(changeId);
+    write(writer.uint8Buffer);
+  }
 }

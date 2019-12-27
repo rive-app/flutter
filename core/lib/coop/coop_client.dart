@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'connect_result.dart';
+import 'coop_command.dart';
 import 'coop_reader.dart';
 import 'coop_writer.dart';
 import 'local_settings.dart';
@@ -20,6 +22,8 @@ class CoopClient extends CoopReader {
   Timer _reconnectTimer;
   final LocalSettings localSettings;
   final String fileId;
+  bool _allowReconnect = true;
+  int _lastChangeId;
 
   CoopClient(this.url, {this.fileId, this.localSettings}) {
     _writer = CoopWriter(write);
@@ -36,6 +40,12 @@ class CoopClient extends CoopReader {
         Timer(Duration(milliseconds: _reconnectAttempt * 500), connect);
   }
 
+  Future<bool> disconnect() async {
+    _allowReconnect = false;
+    await _channel.sink.close();
+    return true;
+  }
+
   // Future<int> handshake(int sessionId, String fileId, String token) async {
   //   _writer.writeHello(sessionId, fileId, token);
 
@@ -46,31 +56,26 @@ class CoopClient extends CoopReader {
   Future<ConnectResult> connect() async {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
-    print("CALLING CONNECT $url");
     _channel = WebSocketChannel.connect(Uri.parse(url));
     _connectionCompleter = Completer<ConnectResult>();
 
     _isConnected = false;
-    // first message to force a message back...
-    print("GO!");
 
     _channel.stream.listen((dynamic data) {
       print("socket message: $data ${data.runtimeType}");
       if (data is Uint8List) {
         read(data);
       }
-      // _channel.stream.listen(_dataHandler);
     }, onError: (dynamic error) {
       _isConnected = false;
-      print("ERROR $error");
-      //_reconnect();
     }, onDone: () {
       _isConnected = false;
       _channel = null;
-      print("DONE!");
       _connectionCompleter?.complete(ConnectResult.networkError);
       _connectionCompleter = null;
-      _reconnect();
+      if (_allowReconnect) {
+        _reconnect();
+      }
     });
     return _connectionCompleter.future;
   }
@@ -98,12 +103,13 @@ class CoopClient extends CoopReader {
 
   @override
   Future<void> recvHello() async {
-    print("GOT HELLO? $_isConnected");
     if (!_isConnected) {
       var session = await localSettings.getIntSetting('session') ?? 0;
       var token = await localSettings.getStringSetting('token') ?? '';
       var lastServerChangeId =
           await localSettings.getIntSetting('lastServerChangeId') ?? 0;
+      _lastChangeId = await localSettings.getIntSetting('lastChangeId') ??
+          CoopCommand.minChangeId;
 
       _reconnectAttempt = 0;
       _isConnected = true;
@@ -123,5 +129,42 @@ class CoopClient extends CoopReader {
     await localSettings.setIntSetting('session', session);
     _connectionCompleter?.complete(ConnectResult.connected);
     _connectionCompleter = null;
+  }
+
+  ChangeSet makeChangeSet() {
+    var changes = ChangeSet()
+      ..id = _lastChangeId++
+      ..changes = [];
+    localSettings.setIntSetting('lastChangeId', _lastChangeId);
+    return changes;
+  }
+
+  final List<ChangeSet> _fresh = [];
+  ChangeSet _unacknowledged;
+  void queueChanges(ChangeSet changes) {
+    print("QUEUE CHANGES $changes");
+
+    // For now we send and save changes locally directly. Eventually we should
+    // flatten them until they've been sent to a server as an atomic set.
+
+    _fresh.add(changes);
+    _sendFreshChanges();
+  }
+
+  // Need to call this on connect too.
+  void _sendFreshChanges() {
+    if (_unacknowledged != null ||
+        _fresh.isEmpty ||
+        _channel == null ||
+        _channel.sink == null) {
+      return;
+    }
+    var writer = BinaryWriter();
+    _fresh.first.serialize(writer);
+    _channel.sink.add(writer.uint8Buffer);
+    print("SENT CHANGES! ${_fresh.first.id} ${_fresh.first.changes.length}");
+    _unacknowledged = _fresh.removeAt(0);
+    _fresh.clear();
+    
   }
 }

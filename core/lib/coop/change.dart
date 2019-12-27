@@ -14,6 +14,10 @@ class Change {
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(op);
     writer.writeVarInt(objectId);
+    if (value == null) {
+      writer.writeVarUint(0);
+      return;
+    }
     writer.writeVarUint(value.length);
     writer.write(value);
   }
@@ -43,9 +47,11 @@ class ChangeSet {
 
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(id);
-    writer.writeVarUint(changes.length ?? 0);
-    for (final change in changes) {
-      change.serialize(writer);
+    writer.writeVarUint(changes?.length ?? 0);
+    if (changes != null) {
+      for (final change in changes) {
+        change.serialize(writer);
+      }
     }
   }
 

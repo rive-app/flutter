@@ -5,6 +5,7 @@ import 'package:colorize/colorize.dart';
 import 'package:dart_style/dart_style.dart';
 
 import 'comment.dart';
+import 'field_type.dart';
 import 'key.dart';
 import 'property.dart';
 
@@ -154,7 +155,8 @@ class Definition {
     return '$_name[${_key?.intValue ?? '-'}]';
   }
 
-  static bool generate(String coreContextName) {
+  static const int minPropertyId = 3;
+  static bool generate(String coreContextName, bool regenerateKeys) {
     // Check dupe ids.
     bool runGenerator = true;
     Map<int, Definition> ids = {};
@@ -171,6 +173,9 @@ class Definition {
         }
       }
       for (final property in definition._properties) {
+        if(regenerateKeys) {
+          property.key = property.key.withIntValue(null);
+        }
         if (property.key.isMissing) {
           continue;
         }
@@ -181,6 +186,12 @@ class Definition {
               '''and ${other.definition}.$other.''',
               front: Styles.RED);
           runGenerator = false;
+        } else if (property.key.intValue < minPropertyId) {
+          color(
+              '${property.definition}.$property: ids less than '
+              '$minPropertyId are reserved.',
+              front: Styles.RED);
+          runGenerator = false;
         } else {
           properties[property.key.intValue] = property;
         }
@@ -188,7 +199,7 @@ class Definition {
     }
 
     // Find max id, we use this to assign to types that don't have ids yet.
-    int nextFieldId = 0;
+    int nextFieldId = minPropertyId-1;
     int nextId = 0;
     for (final definition in definitions.values) {
       if (definition._key != null &&
@@ -244,7 +255,12 @@ class Definition {
     var snakeName = coreContextName.replaceAllMapped(RegExp('(.+?)([A-Z])'),
         (Match m) => "${m[1].toLowerCase()}_${m[2].toLowerCase()}");
 
-    StringBuffer ctxCode = StringBuffer('import \'package:core/core.dart\';\n');
+    StringBuffer ctxCode =
+        StringBuffer('''import \'package:core/coop/change.dart\';
+                        import \'package:core/core.dart\';
+                        import 'package:binary_buffer/binary_writer.dart';
+                        
+                        ''');
     for (final definition in definitions.values) {
       if (definition._properties.isNotEmpty) {
         ctxCode.writeln('import \'${definition.localCodeFilename}\';');
@@ -252,6 +268,44 @@ class Definition {
     }
     ctxCode.writeln('abstract class $coreContextName extends CoreContext {');
     ctxCode.writeln('$coreContextName(String fileId) : super(fileId);\n');
+    ctxCode.writeln('''@override
+    Change makeCoopChange(int propertyKey, Object value) {
+      var change = Change()..op = propertyKey;
+       switch(propertyKey) {
+          ''');
+
+    // Group them by definition type.
+    Map<FieldType, List<Property>> groups = {};
+
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        groups[property.type] ??= <Property>[];
+        groups[property.type].add(property);
+      }
+    }
+
+    ctxCode.write('''case CoreContext.addKey:
+                    case CoreContext.removeKey:
+                    change.op = value as int;
+                    break;''');
+
+    groups.forEach((fieldType, properties) {
+      for (final property in properties) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.writeln('.${property.name}PropertyKey:');
+      }
+
+      var fieldType = properties.first.type;
+      ctxCode.writeln('if(value != null && value is ${fieldType.name}) {');
+
+      ctxCode.writeln('''var writer = 
+            BinaryWriter(alignment: ${fieldType.encodingAlignment});''');
+      ctxCode.write(fieldType.encode('writer', 'value'));
+      ctxCode.writeln(';');
+      ctxCode.writeln('change.value = writer.uint8Buffer;');
+      ctxCode.writeln('}break;');
+    });
+    ctxCode.writeln('default:break;}  return change;}');
 
     // Build field changer
     ctxCode.writeln('''@override
