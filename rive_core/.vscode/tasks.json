@@ -11,6 +11,15 @@
                 "$dart-pub-build_runner"
             ],
             "isBackground": true
+        },
+        {
+            "label": "gen core --regen-keys",
+            "type": "shell",
+            "command": "dart ../dependencies/core-dart/core_generator/lib/main.dart --definitions-folder=rive-core-defs/defs/ --core-context=RiveCoreContext --regen-keys",
+            "problemMatcher": [
+                "$dart-pub-build_runner"
+            ],
+            "isBackground": true
         }
     ]
 }

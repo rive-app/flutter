@@ -1,9 +1,62 @@
+import 'package:core/coop/change.dart';
 import 'package:core/core.dart';
+import 'package:binary_buffer/binary_writer.dart';
+
 import 'artboard_base.dart';
 import 'component_base.dart';
 import 'node_base.dart';
 
-class RiveCoreContext extends CoreContext {
+abstract class RiveCoreContext extends CoreContext {
+  RiveCoreContext(String fileId) : super(fileId);
+
+  @override
+  Change makeCoopChange(int propertyKey, Object value) {
+    var change = Change()..op = propertyKey;
+    switch (propertyKey) {
+      case CoreContext.addKey:
+      case CoreContext.removeKey:
+        change.op = value as int;
+        break;
+      case ArtboardBase.namePropertyKey:
+      case ComponentBase.namePropertyKey:
+        if (value != null && value is String) {
+          var writer = BinaryWriter(alignment: 32);
+          writer.writeString(value);
+          change.value = writer.uint8Buffer;
+        }
+        break;
+      case ArtboardBase.widthPropertyKey:
+      case ArtboardBase.heightPropertyKey:
+      case ArtboardBase.xPropertyKey:
+      case ArtboardBase.yPropertyKey:
+      case ArtboardBase.originXPropertyKey:
+      case ArtboardBase.originYPropertyKey:
+      case NodeBase.xPropertyKey:
+      case NodeBase.yPropertyKey:
+      case NodeBase.rotationPropertyKey:
+      case NodeBase.scaleXPropertyKey:
+      case NodeBase.scaleYPropertyKey:
+      case NodeBase.opacityPropertyKey:
+        if (value != null && value is double) {
+          var writer = BinaryWriter(alignment: 8);
+          writer.writeFloat64(value);
+          change.value = writer.uint8Buffer;
+        }
+        break;
+      case ComponentBase.parentPropertyKey:
+      case ComponentBase.orderPropertyKey:
+        if (value != null && value is int) {
+          var writer = BinaryWriter(alignment: 4);
+          writer.writeVarInt(value);
+          change.value = writer.uint8Buffer;
+        }
+        break;
+      default:
+        break;
+    }
+    return change;
+  }
+
   @override
   void setObjectProperty(Core object, int propertyKey, Object value) {
     switch (propertyKey) {

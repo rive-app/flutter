@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   core:
     path: ../dependencies/core-dart/core
+  shared_preferences: ^0.5.6
+  path_provider: 1.5.1
 
 dev_dependencies:
   flutter_test:

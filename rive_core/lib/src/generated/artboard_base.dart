@@ -7,9 +7,9 @@ abstract class ArtboardBase extends Core {
   static const int typeKey = 1;
 
   /// --------------------------------------------------------------------------
-  /// Name field with key 4.
+  /// Name field with key 3.
   String _name;
-  static const int namePropertyKey = 4;
+  static const int namePropertyKey = 3;
 
   /// Non-unique identifier, friendly name. Runtimes provide an API for finding
   /// artboards by this [name].
@@ -31,9 +31,9 @@ abstract class ArtboardBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// Width field with key 5.
+  /// Width field with key 4.
   double _width;
-  static const int widthPropertyKey = 5;
+  static const int widthPropertyKey = 4;
 
   /// Width of the artboard.
   double get width => _width;
@@ -54,9 +54,9 @@ abstract class ArtboardBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// Height field with key 6.
+  /// Height field with key 5.
   double _height;
-  static const int heightPropertyKey = 6;
+  static const int heightPropertyKey = 5;
 
   /// Height of the artboard.
   double get height => _height;
@@ -77,9 +77,9 @@ abstract class ArtboardBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// X field with key 7.
+  /// X field with key 6.
   double _x;
-  static const int xPropertyKey = 7;
+  static const int xPropertyKey = 6;
 
   /// X coordinate in editor world space.
   double get x => _x;
@@ -100,9 +100,9 @@ abstract class ArtboardBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// Y field with key 8.
+  /// Y field with key 7.
   double _y;
-  static const int yPropertyKey = 8;
+  static const int yPropertyKey = 7;
 
   /// Y coordinate in editor world space.
   double get y => _y;
@@ -123,9 +123,9 @@ abstract class ArtboardBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// OriginX field with key 9.
+  /// OriginX field with key 8.
   double _originX;
-  static const int originXPropertyKey = 9;
+  static const int originXPropertyKey = 8;
 
   /// Origin x in normalized coordinates (0 = center, -1 = left, 1 = right).
   double get originX => _originX;
@@ -146,9 +146,9 @@ abstract class ArtboardBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// OriginY field with key 10.
+  /// OriginY field with key 9.
   double _originY;
-  static const int originYPropertyKey = 10;
+  static const int originYPropertyKey = 9;
 
   /// Origin y in normalized coordinates (0 = center, -1 = left, 1 = right).
   double get originY => _originY;

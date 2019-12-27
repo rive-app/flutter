@@ -5,9 +5,9 @@ import 'package:core/core.dart';
 
 abstract class ComponentBase extends Core {
   /// --------------------------------------------------------------------------
-  /// Name field with key 1.
+  /// Name field with key 10.
   String _name;
-  static const int namePropertyKey = 1;
+  static const int namePropertyKey = 10;
 
   /// Non-unique identifier, used to give friendly names to elements in the
   /// hierarchy. Runtimes provide an API for finding components by this [name].
@@ -29,9 +29,9 @@ abstract class ComponentBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// Parent field with key 2.
+  /// Parent field with key 11.
   int _parent;
-  static const int parentPropertyKey = 2;
+  static const int parentPropertyKey = 11;
 
   /// Identifier used to track parent ContainerComponent.
   int get parent => _parent;
@@ -52,9 +52,9 @@ abstract class ComponentBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// Order field with key 3.
+  /// Order field with key 12.
   int _order;
-  static const int orderPropertyKey = 3;
+  static const int orderPropertyKey = 12;
 
   /// Order value for sorting child elements in ContainerComponent parent.
   int get order => _order;

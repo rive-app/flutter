@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:core/coop/connect_result.dart';
 
-var file = RiveFile();
+var file = RiveFile("102:15468");
 Node node;
 void main() {
   print("CONNECTING");
-  file.connect().then((connected) {
-    print("CONNECTED $connected");
-    if (!connected) {
+  file.connect('ws://localhost:8000/').then((result) {
+    // if(file.isAvailable){
+
+    // }
+    print("CONNECTED $result");
+    if (result != ConnectResult.connected) {
       return;
     }
     node = file.add(Node()..name = 'test');
