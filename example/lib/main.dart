@@ -385,7 +385,9 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
               TreeItem("leg_right"),
               TreeItem("head"),
               TreeItem("leg_left", children: [
-                TreeItem("one"),
+                TreeItem("one", children: [
+                  PropertyTreeItem("Translation Constraint"),
+                ]),
                 TreeItem("ik_head", children: [
                   PropertyTreeItem("Translation Constraint"),
                   TreeItem("neck"),

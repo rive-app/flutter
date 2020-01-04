@@ -235,7 +235,7 @@ abstract class TreeController<T> extends ChangeNotifier {
     if (target != null && dropState != null) {
       drop(target, dropState, items);
     }
-    
+
     notifyListeners();
   }
 
@@ -298,7 +298,7 @@ abstract class TreeController<T> extends ChangeNotifier {
       for (int i = 0; i < length; i++) {
         var item = propertyItems[i];
         var spacing = spacingOf(item);
-        var itemDepth = childLength == 0 ? depth : depth + [spacing, 1];
+        var itemDepth = childLength == 0 ? depth + [1] : depth + [1, 1];
 
         var meta = FlatTreeItem(
           item,
