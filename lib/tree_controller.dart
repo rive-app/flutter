@@ -112,7 +112,7 @@ abstract class TreeController<T> extends ChangeNotifier {
   /// change.
   void flatten() {
     var flat = <FlatTreeItem<T>>[];
-    var context = FlattenedTreeDataContext(_expanded);
+    var context = FlattenedTreeDataContext<T>(_expanded);
     var lookup = HashMap<Key, int>();
     _flatten(context, _data, flat, lookup, [], null);
     _flat = flat;
@@ -268,7 +268,7 @@ abstract class TreeController<T> extends ChangeNotifier {
   }
 
   void _flatten(
-      FlattenedTreeDataContext context,
+      FlattenedTreeDataContext<T> context,
       List<T> data,
       List<FlatTreeItem<T>> flat,
       HashMap<Key, int> lookup,
@@ -300,7 +300,7 @@ abstract class TreeController<T> extends ChangeNotifier {
         var spacing = spacingOf(item);
         var itemDepth = childLength == 0 ? depth + [1] : depth + [1, 1];
 
-        var meta = FlatTreeItem(
+        var meta = FlatTreeItem<T>(
           item,
           parent: parent,
           isProperty: true,
@@ -333,7 +333,7 @@ abstract class TreeController<T> extends ChangeNotifier {
       var children = childrenOf(item);
       bool hasChildren = children?.isNotEmpty ?? false;
       var itemDepth = depth + [1];
-      var meta = FlatTreeItem(
+      var meta = FlatTreeItem<T>(
         item,
         parent: parent,
         prev: context.prev,

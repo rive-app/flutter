@@ -1,6 +1,8 @@
+import 'package:flutter/src/gestures/drag_details.dart';
+import 'package:flutter/src/gestures/events.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:tree_widget/tree_widget.dart';
+import 'package:tree_widget/flat_tree_item.dart';
+import 'package:tree_widget/tree_controller.dart';
 
 class TreeItem {
   final String name;
@@ -36,6 +38,25 @@ class MyTreeController extends TreeController<TreeItem> {
   int spacingOf(TreeItem treeItem) {
     return 1;
   }
+
+  @override
+  void drop(FlatTreeItem<TreeItem> target, DropState state,
+      List<FlatTreeItem<TreeItem>> items) {}
+
+  @override
+  List<FlatTreeItem<TreeItem>> onDragStart(
+      DragStartDetails details, FlatTreeItem<TreeItem> item) {
+    return [];
+  }
+
+  @override
+  void onMouseEnter(PointerEnterEvent event, FlatTreeItem<TreeItem> item) {}
+
+  @override
+  void onMouseExit(PointerExitEvent event, FlatTreeItem<TreeItem> item) {}
+
+  @override
+  void onTap(FlatTreeItem<TreeItem> item) {}
 }
 
 void main() {
@@ -66,14 +87,8 @@ void main() {
 
     var controller = MyTreeController(data);
     controller.flatten();
-    // ..expanded = <TreeItem>{tree, tree.children[6]};
     controller.expand(data[0]);
     controller.expand(data[0].children[6]);
     expect(controller.flat.length, 13);
-    // final calculator = Calculator();
-    // expect(calculator.addOne(2), 3);
-    // expect(calculator.addOne(-7), -6);
-    // expect(calculator.addOne(0), 1);
-    // expect(() => calculator.addOne(null), throwsNoSuchMethodError);
   });
 }

@@ -81,6 +81,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fractional:
+    dependency: "direct main"
+    description:
+      path: "../dependencies/fractional-dart"
+      relative: true
+    source: path
+    version: "0.0.1"
   image:
     dependency: transitive
     description:

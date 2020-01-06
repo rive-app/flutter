@@ -5,10 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Context used internally to flatten the tree.
-class FlattenedTreeDataContext {
+class FlattenedTreeDataContext<T> {
   final Set<Object> expanded;
   int lastDepth = 0;
-  FlatTreeItem prev;
+  FlatTreeItem<T> prev;
 
   FlattenedTreeDataContext(this.expanded);
 }
@@ -48,10 +48,10 @@ class FlatTreeItem<T> {
   final T data;
 
   /// Previous flattened sibling.
-  final FlatTreeItem prev;
+  final FlatTreeItem<T> prev;
 
   /// Next flattened sibling.
-  FlatTreeItem next;
+  FlatTreeItem<T> next;
 
   /// Parent [FlatTreeItem] from the hierarchy.
   final FlatTreeItem parent;

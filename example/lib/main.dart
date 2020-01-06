@@ -6,287 +6,44 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_arrow_icon.dart';
-import 'package:tree_widget/tree_controller.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
-void main() => runApp(MyApp());
+import 'my_tree_controller.dart';
+import 'tree_item.dart';
 
-class ExampleTreeView extends StatefulWidget {
-  @override
-  _ExampleTreeViewState createState() => _ExampleTreeViewState();
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData.dark(),
-        home: Scaffold(body: ExampleTreeView()));
-  }
-}
-
-class MyTreeController extends TreeController<TreeItem> {
-  MyTreeController(List<TreeItem> data) : super(data);
-
-  @override
-  bool get hasProperties => true;
-
-  @override
-  List<TreeItem> childrenOf(TreeItem treeItem) {
-    return treeItem.children;
-  }
-
-  @override
-  bool isDisabled(TreeItem treeItem) {
-    return false;
-  }
-
-  @override
-  bool isProperty(TreeItem treeItem) {
-    return treeItem is PropertyTreeItem;
-  }
-
-  @override
-  List<FlatTreeItem<TreeItem>> onDragStart(
-      DragStartDetails details, FlatTreeItem<TreeItem> item) {
-    return [item];
-  }
-
-  @override
-  void onMouseEnter(PointerEnterEvent event, FlatTreeItem<TreeItem> item) {
-    if (item.data.selectionState.value == SelectionState.selected) {
-      return;
-    }
-    item.data.select(SelectionState.hovered);
-  }
-
-  @override
-  void onMouseExit(PointerExitEvent event, FlatTreeItem<TreeItem> item) {
-    if (item.data.selectionState.value == SelectionState.selected) {
-      return;
-    }
-    item.data.select(SelectionState.none);
-  }
-
-  @override
-  void onTap(FlatTreeItem<TreeItem> item) {
-    item.data.select(item.data.selectionState.value == SelectionState.selected
-        ? SelectionState.hovered
-        : SelectionState.selected);
-  }
-
-  @override
-  int spacingOf(TreeItem treeItem) {
-    if (treeItem.name == 'leg_left') {
-      return 3;
-    }
-    return treeItem.name != 'eye_happy' && treeItem.parent is SoloTreeItem
-        ? 2
-        : 1;
-  }
-
-  @override
-  void drop(FlatTreeItem<TreeItem> target, DropState state,
-      List<FlatTreeItem<TreeItem>> items) {
-    switch (state) {
-      case DropState.above:
-        var newParent = target.data.parent;
-        var idx = newParent.children.indexOf(target.data);
-        for (final item in items) {
-          var treeItem = item.data;
-
-          treeItem.parent.children.remove(treeItem);
-
-          treeItem.parent = newParent;
-          newParent.children.insert(idx, treeItem);
-        }
-        break;
-      case DropState.below:
-        var newParent = target.data.parent;
-        var idx = newParent.children.indexOf(target.data) + 1;
-        for (final item in items) {
-          var treeItem = item.data;
-
-          treeItem.parent.children.remove(treeItem);
-
-          treeItem.parent = newParent;
-          newParent.children.insert(idx, treeItem);
-        }
-        break;
-      case DropState.into:
-        for (final item in items) {
-          var treeItem = item.data;
-          treeItem.parent.children.remove(treeItem);
-          treeItem.parent = target.data;
-          target.data.children.add(treeItem);
-        }
-        break;
-      default:
-        break;
-    }
-
-    // Force re-flatten the tree (N.B. you should do this when the children
-    // change some other way too).
-    flatten();
-  }
-}
-
-class PropertyTreeItem extends TreeItem {
-  PropertyTreeItem(String name, {List<TreeItem> children})
-      : super(name, children: children);
-}
-
-abstract class SelectableItem {
-  ValueListenable<SelectionState> get selectionState;
-  void select(SelectionState state);
-}
-
-enum SelectionState { selected, hovered, none }
-
-class SoloTreeItem extends TreeItem {
-  SoloTreeItem(String name, {List<TreeItem> children})
-      : super(name, children: children);
-}
-
-class TreeExpander extends StatefulWidget {
-  final bool isExpanded;
-
-  const TreeExpander({Key key, this.isExpanded}) : super(key: key);
-  @override
-  _TreeExpanderState createState() {
-    // print("CREATING STATE FOR $key");
-    return _TreeExpanderState();
-  }
-}
-
-class TreeItem implements SelectableItem {
-  final String name;
-  List<TreeItem> children;
-
-  TreeItem parent;
-
-  final ValueNotifier<SelectionState> _selectionState =
-      ValueNotifier<SelectionState>(SelectionState.none);
-
-  TreeItem(this.name, {this.children}) {
-    children ??= [];
-    for (final child in children) {
-      child.parent = this;
-    }
-  }
-
-  @override
-  ValueListenable<SelectionState> get selectionState => _selectionState;
-  @override
-  void select(SelectionState state) {
-    _selectionState.value = state;
-  }
-
-  @override
-  String toString() {
-    return name;
-  }
-}
-
-class _ExampleTreeViewState extends State<ExampleTreeView> {
-  MyTreeController _controller;
-  @override
-  Widget build(BuildContext context) {
-    return TreeView<TreeItem>(
-      style: TreeStyle(
-        padding: const EdgeInsets.all(10),
-        lineColor: Colors.grey.shade700,
-      ),
-      controller: _controller,
-      expanderBuilder: (context, item) => Container(
-        child: Center(
-          child: TreeExpander(
-            key: item.key,
-            isExpanded: item.isExpanded,
-          ),
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.grey.shade700,
-            width: 1.0,
-            style: BorderStyle.solid,
-          ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(7.5),
-          ),
-        ),
-      ),
-      iconBuilder: (context, item) => Container(
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          borderRadius: const BorderRadius.all(
-            Radius.circular(2),
-          ),
-        ),
-      ),
-      extraBuilder: (context, item, index) => Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.white,
-            width: 1.0,
-            style: BorderStyle.solid,
-          ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(7.5),
-          ),
-        ),
-      ),
-      backgroundBuilder: (context, item) => ValueListenableBuilder<DropState>(
-        valueListenable: item.dropState,
-        builder: (context, dropState, _) =>
-            ValueListenableBuilder<SelectionState>(
-          builder: (context, selectionState, _) {
-            return background(dropState, selectionState);
-          },
-          valueListenable: item.data.selectionState,
-        ),
-      ),
-      itemBuilder: (context, item) => ValueListenableBuilder<SelectionState>(
-        builder: (context, state, _) => Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: IgnorePointer(
-                  child: Text(
-                    item.data.name,
-                    style: TextStyle(
-                      fontFamily: 'Roboto-Regular',
-                      fontSize: 13,
-                      color: state == SelectionState.selected
-                          ? Colors.white
-                          : Colors.grey.shade500,
-                    ),
-                  ),
-                ),
-              ),
-              Text(
-                "lock",
-                style: TextStyle(
-                  fontFamily: 'Roboto-Regular',
-                  fontSize: 13,
-                  color: state == SelectionState.selected
-                      ? Colors.white
-                      : Colors.grey.shade500,
-                ),
-              ),
-              const SizedBox(width: 5)
-            ],
-          ),
-        ),
-        valueListenable: item.data.selectionState,
+      title: 'Flutter Demo',
+      theme: ThemeData.dark(),
+      home: Scaffold(
+        body: ExampleTreeView(),
       ),
     );
   }
+}
 
-  Widget background(DropState dropState, SelectionState selectionState) {
+/// An example tree view, shows how to implement TreeView widget and style it.
+class ExampleTreeView extends StatefulWidget {
+  @override
+  _ExampleTreeViewState createState() => _ExampleTreeViewState();
+}
+
+class _ExampleTreeViewState extends State<ExampleTreeView> {
+  /// TreeView controller which handles things like expanding items, responding
+  /// to whether drag/drop is allowed for a specific item, etc.
+  MyTreeController _controller;
+
+  /// Callback for creating the background of a tree row. This has some special
+  /// state management for conditions like allowing dropping above/below/into an
+  /// item. The TreeView is specifically built to allow theming all aspects,
+  /// including stylings for drag and drop.
+  Widget itemBackground(DropState dropState, SelectionState selectionState) {
     switch (dropState) {
       case DropState.parent:
         return Padding(
@@ -371,8 +128,103 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
   }
 
   @override
+  Widget build(BuildContext context) {
+    return TreeView<TreeItem>(
+      style: TreeStyle(
+        padding: const EdgeInsets.all(10),
+        lineColor: Colors.grey.shade700,
+      ),
+      controller: _controller,
+      expanderBuilder: (context, item) => Container(
+        child: Center(
+          child: TreeExpander(
+            key: item.key,
+            isExpanded: item.isExpanded,
+          ),
+        ),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey.shade700,
+            width: 1.0,
+            style: BorderStyle.solid,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(7.5),
+          ),
+        ),
+      ),
+      iconBuilder: (context, item) => Container(
+        decoration: BoxDecoration(
+          color: Colors.grey,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(2),
+          ),
+        ),
+      ),
+      extraBuilder: (context, item, index) => Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.white,
+            width: 1.0,
+            style: BorderStyle.solid,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(7.5),
+          ),
+        ),
+      ),
+      backgroundBuilder: (context, item) => ValueListenableBuilder<DropState>(
+        valueListenable: item.dropState,
+        builder: (context, dropState, _) =>
+            ValueListenableBuilder<SelectionState>(
+          builder: (context, selectionState, _) {
+            return itemBackground(dropState, selectionState);
+          },
+          valueListenable: item.data.selectionState,
+        ),
+      ),
+      itemBuilder: (context, item) => ValueListenableBuilder<SelectionState>(
+        builder: (context, state, _) => Expanded(
+          child: Row(
+            children: [
+              Expanded(
+                child: IgnorePointer(
+                  child: Text(
+                    item.data.name,
+                    style: TextStyle(
+                      fontFamily: 'Roboto-Regular',
+                      fontSize: 13,
+                      color: state == SelectionState.selected
+                          ? Colors.white
+                          : Colors.grey.shade500,
+                    ),
+                  ),
+                ),
+              ),
+              Text(
+                "lock",
+                style: TextStyle(
+                  fontFamily: 'Roboto-Regular',
+                  fontSize: 13,
+                  color: state == SelectionState.selected
+                      ? Colors.white
+                      : Colors.grey.shade500,
+                ),
+              ),
+              const SizedBox(width: 5)
+            ],
+          ),
+        ),
+        valueListenable: item.data.selectionState,
+      ),
+    );
+  }
+
+  @override
   void initState() {
     super.initState();
+
+    // Just some test data...
     var data = [
       TreeItem(
         "Artboard",
@@ -453,9 +305,23 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
       )
     ];
     _controller = MyTreeController(data);
+
+    // Programmatically expand some items in the tree
     _controller.expand(data[0]);
     _controller.expand(data[0].children[0]);
     _controller.expand(data[0].children[0].children[5]);
+  }
+}
+
+/// Widget used to draw a circular expansion arrow for items in the tree that
+/// can be opened to reveal more content.
+class TreeExpander extends StatefulWidget {
+  final bool isExpanded;
+
+  const TreeExpander({Key key, this.isExpanded}) : super(key: key);
+  @override
+  _TreeExpanderState createState() {
+    return _TreeExpanderState();
   }
 }
 
@@ -481,7 +347,6 @@ class _TreeExpanderState extends State<TreeExpander>
 
   @override
   void didUpdateWidget(TreeExpander oldWidget) {
-    // print("UPDATE EXPANDER ${widget.key}");
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isExpanded == widget.isExpanded) {
       return;
@@ -506,7 +371,6 @@ class _TreeExpanderState extends State<TreeExpander>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    // print("INIT EXPANDER ${widget.key}");
 
     if (widget.isExpanded) {
       _controller.value = 0;
