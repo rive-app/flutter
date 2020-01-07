@@ -1,14 +1,9 @@
 # cursor
 
-A new flutter plugin project.
+A plugin for replacing the system cursor with a Flutter drawn one. Currently only supports Mac.
+
+<img src='custom_cursor.gif'/>
 
 ## Getting Started
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+This is done with a plugin in order to hide the system cursor. There are utility widgets that use provider to automatically hide/show custom cursors (built with builders). Take a look at the example.
