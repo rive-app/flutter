@@ -7,5 +7,5 @@ class CoopCommand {
   static const int synchronize = 5;
   static const int accept = 6;
   static const int reject = 7;
-  static const int minChangeId = 5;
+  static const int minChangeId = 8;
 }

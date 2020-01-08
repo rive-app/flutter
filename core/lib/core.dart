@@ -6,16 +6,30 @@ import 'coop/connect_result.dart';
 import 'coop/coop_client.dart';
 import 'coop/local_settings.dart';
 
+int localId = 0;
+
+// TODO:
+// - catches up to perform network sync of changes
+// journal[change_index][object_id][property] = {from, to}
+
 class ChangeEntry {
-  final Object from;
+  Object from;
   Object to;
 
   ChangeEntry(this.from, this.to);
 }
 
-// TODO:
-// - catches up to perform network sync of changes
-// journal[change_index][object_id][property] = {from, to}
+class Core {
+  int id;
+  CoreContext context;
+}
+
+class FreshChange {
+  final Map<int, Map<int, ChangeEntry>> change;
+  final bool useFrom;
+
+  const FreshChange(this.change, this.useFrom);
+}
 
 abstract class CoreContext implements LocalSettings {
   static const int addKey = 1;
@@ -23,16 +37,36 @@ abstract class CoreContext implements LocalSettings {
 
   final String fileId;
   CoopClient _client;
-  CoreContext(this.fileId);
-
   final Map<int, Core> objects = <int, Core>{};
+
   final List<Map<int, Map<int, ChangeEntry>>> journal =
       <Map<int, Map<int, ChangeEntry>>>[];
-
   Map<int, Map<int, ChangeEntry>> _currentChanges;
+
   int _journalIndex = 0;
   bool _isRecording = true;
   final Map<int, Core> _objects = {};
+  final Map<ChangeSet, FreshChange> _freshChanges = {};
+  CoreContext(this.fileId);
+
+  T add<T extends Core>(T object) {
+    object.id ??= localId--;
+    object.context = this;
+    _objects[object.id] = object;
+    changeProperty(object, addKey, removeKey, addKey);
+    return object;
+  }
+
+  void captureJournalEntry() {
+    if (_currentChanges == null) {
+      return;
+    }
+    journal.removeRange(_journalIndex, journal.length);
+    journal.add(_currentChanges);
+    _coopMakeChangeSet(_currentChanges, false);
+    _journalIndex = journal.length;
+    _currentChanges = null;
+  }
 
   void changeProperty<T>(Core object, int propertyKey, T from, T to) {
     if (!_isRecording) {
@@ -51,34 +85,27 @@ abstract class CoreContext implements LocalSettings {
     }
   }
 
-  bool undo() {
-    int index = _journalIndex - 1;
-    if (journal.isEmpty || index >= journal.length || index < 0) {
-      return false;
-    }
+  Future<ConnectResult> connect(String url) async {
+    _client = CoopClient(url, fileId: fileId, localSettings: this)
+      ..changesAccepted = _changesAccepted
+      ..changesRejected = _changesRejected;
 
-    _isRecording = false;
-    _journalIndex = index;
-    var changes = journal[index];
-    changes.forEach((objectId, changes) {
-      var object = _objects[objectId];
-      if (object != null) {
-        changes.forEach((propertyKey, change) {
-          if (propertyKey == 0) {
-            // create
-          } else if (propertyKey == 1) {
-            // delete
-          }
-          setObjectProperty(object, propertyKey, change.from);
-        });
-      }
-    });
-    _coopMakeChangeSet(changes, true);
-    _isRecording = true;
-    return true;
+    return _client.connect();
   }
 
-  void setObjectProperty(Core object, int propertyKey, Object value);
+  Future<bool> disconnect() async {
+    var disconnectResult = await _client.disconnect();
+    _client = null;
+    return disconnectResult;
+  }
+
+  Object getObjectProperty(Core object, int propertyKey);
+
+  bool isHolding(Core object) {
+    return _objects.containsValue(object);
+  }
+
+  Change makeCoopChange(int propertyKey, Object value);
 
   bool redo() {
     int index = _journalIndex;
@@ -93,6 +120,11 @@ abstract class CoreContext implements LocalSettings {
       var object = _objects[objectId];
       if (object != null) {
         changes.forEach((propertyKey, change) {
+          // Need to re-write history (grab current value as the change.from).
+          // We do this to patch-up history items that change when the server
+          // sends changes from other clients (or previous changes get
+          // rejected).
+          change.from = getObjectProperty(object, propertyKey);
           setObjectProperty(object, propertyKey, change.to);
         });
       }
@@ -100,25 +132,6 @@ abstract class CoreContext implements LocalSettings {
     _coopMakeChangeSet(changes, false);
     _isRecording = true;
     return true;
-  }
-
-  void captureJournalEntry() {
-    if (_currentChanges == null) {
-      return;
-    }
-    journal.removeRange(_journalIndex, journal.length);
-    journal.add(_currentChanges);
-    _coopMakeChangeSet(_currentChanges, false);
-    _journalIndex = journal.length;
-    _currentChanges = null;
-  }
-
-  T add<T extends Core>(T object) {
-    object.id ??= localId--;
-    object.context = this;
-    _objects[object.id] = object;
-    changeProperty(object, addKey, removeKey, addKey);
-    return object;
   }
 
   void remove<T extends Core>(T object) {
@@ -143,22 +156,64 @@ abstract class CoreContext implements LocalSettings {
     }
   }
 
-  bool isHolding(Core object) {
-    return _objects.containsValue(object);
+  void setObjectProperty(Core object, int propertyKey, Object value);
+
+  bool undo() {
+    int index = _journalIndex - 1;
+    if (journal.isEmpty || index >= journal.length || index < 0) {
+      return false;
+    }
+
+    _isRecording = false;
+    _journalIndex = index;
+    var changes = journal[index];
+    changes.forEach((objectId, changes) {
+      var object = _objects[objectId];
+      if (object != null) {
+        changes.forEach((propertyKey, change) {
+          if (propertyKey == addKey) {
+            // create
+          } else if (propertyKey == removeKey) {
+            // delete
+          }
+          // Need to re-write history (grab current value as the change.to). We
+          // do this to patch-up history items that change when the server sends
+          // changes from other clients (or previous changes get rejected).
+          change.to = getObjectProperty(object, propertyKey);
+          setObjectProperty(object, propertyKey, change.from);
+        });
+      }
+    });
+    _coopMakeChangeSet(changes, true);
+    _isRecording = true;
+    return true;
   }
 
-  Future<ConnectResult> connect(String url) async {
-    _client = CoopClient(url, fileId: fileId, localSettings: this);
-    return _client.connect();
+  void _changesAccepted(ChangeSet changes) {
+    print("ACCEPTING ${changes.id}.");
+    _freshChanges.remove(changes);
   }
 
-  Future<bool> disconnect() async {
-    var disconnectResult = await _client.disconnect();
-    _client = null;
-    return disconnectResult;
+  void _changesRejected(ChangeSet changes) {
+    // Re-apply the original value if the changed value matches the current one.
+    var fresh = _freshChanges[changes];
+    fresh.change.forEach((objectId, changes) {
+      var object = _objects[objectId];
+      if (object != null) {
+        changes.forEach((key, entry) {
+          // value is still what we had tried to change it too (nothing else has
+          // changed it since).
+          if ((fresh.useFrom ? entry.from : entry.to) ==
+              getObjectProperty(object, key)) {
+            // If so, we can reset it to the original value since this change
+            // got rejected.
+            setObjectProperty(
+                object, key, fresh.useFrom ? entry.to : entry.from);
+          }
+        });
+      }
+    });
   }
-
-  Change makeCoopChange(int propertyKey, Object value);
 
   void _coopMakeChangeSet(
       Map<int, Map<int, ChangeEntry>> changes, bool useFrom) {
@@ -176,13 +231,7 @@ abstract class CoreContext implements LocalSettings {
         }
       });
     });
+    _freshChanges[sendChanges] = FreshChange(changes, useFrom);
     _client.queueChanges(sendChanges);
   }
-}
-
-int localId = 0;
-
-class Core {
-  int id;
-  CoreContext context;
 }

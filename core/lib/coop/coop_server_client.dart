@@ -42,9 +42,10 @@ class CoopServerClient extends CoopReader {
   }
 
   @override
-  Future<void> recvChange(ChangeSet changes) {
+  Future<void> recvChange(ChangeSet changes) async {
     print("CHANGES ${changes.id} ${changes.changes.length}");
     print("SERVER GOT CHANGES $changes");
+    _writer.writeAccept(changes.id, 0);
   }
 
   @override
@@ -67,11 +68,21 @@ class CoopServerClient extends CoopReader {
 
   @override
   Future<void> recvHello() {
-    throw UnimplementedError();
+    throw UnsupportedError("Server should never receive hello.");
   }
 
   @override
   Future<void> recvShake(int session, int lastSeenChangeId) {
-    throw UnimplementedError();
+    throw UnsupportedError("Server should never receive shake.");
+  }
+
+  @override
+  Future<void> recvAccept(int changeId, int serverChangeId) {
+    throw UnsupportedError("Server should never receive accept.");
+  }
+
+  @override
+  Future<void> recvReject(int changeId) {
+    throw UnsupportedError("Server should never receive reject.");
   }
 }

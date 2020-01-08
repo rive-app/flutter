@@ -11,6 +11,8 @@ import 'coop_reader.dart';
 import 'coop_writer.dart';
 import 'local_settings.dart';
 
+typedef ChangeSetCallback = void Function(ChangeSet changeSet);
+
 class CoopClient extends CoopReader {
   final String url;
   WebSocketChannel _channel;
@@ -24,6 +26,9 @@ class CoopClient extends CoopReader {
   final String fileId;
   bool _allowReconnect = true;
   int _lastChangeId;
+
+  ChangeSetCallback changesAccepted;
+  ChangeSetCallback changesRejected;
 
   CoopClient(this.url, {this.fileId, this.localSettings}) {
     _writer = CoopWriter(write);
@@ -86,18 +91,44 @@ class CoopClient extends CoopReader {
   }
 
   @override
-  Future<void> recvChange(ChangeSet changes) {
-    // TODO: implement recvChange
+  Future<void> recvChange(ChangeSet changes) async {
+    // Receiving other property changes.
+    // Make sure we do not apply changes that conflict with unacknowledged ones.
   }
 
   @override
-  Future<void> recvGoodbye() {
-    // TODO: implement recvGoodbye
+  Future<void> recvGoodbye() async {
+    // Handle the server telling us to disconnect.
+  }
+
+  @override
+  Future<void> recvAccept(int changeId, int serverChangeId) async {
+    // Accept changes, remove the unacknowledge change that matches this
+    // changeId.
+    var change = _unacknowledged.id == changeId ? _unacknowledged : null;
+    if (change != null) {
+      _unacknowledged = null;
+      changesAccepted?.call(change);
+    }
+    await localSettings.setIntSetting('lastServerChangeId', serverChangeId);
+    _sendFreshChanges();
+  }
+
+  @override
+  Future<void> recvReject(int changeId) async {
+    // The server rejected one of our changes. We need to re-apply the old
+    // state.
+    var change = _unacknowledged.id == changeId ? _unacknowledged : null;
+    if (change != null) {
+      _unacknowledged = null;
+      changesRejected?.call(change);
+    }
+    _sendFreshChanges();
   }
 
   @override
   Future<void> recvHand(
-      int session, String fileId, String token, int lastSeenChangeId) {
+      int session, String fileId, String token, int lastSeenChangeId) async {
     assert(false, 'Client should never receive hand.');
   }
 
@@ -162,9 +193,7 @@ class CoopClient extends CoopReader {
     var writer = BinaryWriter();
     _fresh.first.serialize(writer);
     _channel.sink.add(writer.uint8Buffer);
-    print("SENT CHANGES! ${_fresh.first.id} ${_fresh.first.changes.length}");
     _unacknowledged = _fresh.removeAt(0);
     _fresh.clear();
-    
   }
 }

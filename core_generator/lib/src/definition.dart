@@ -173,7 +173,7 @@ class Definition {
         }
       }
       for (final property in definition._properties) {
-        if(regenerateKeys) {
+        if (regenerateKeys) {
           property.key = property.key.withIntValue(null);
         }
         if (property.key.isMissing) {
@@ -199,7 +199,7 @@ class Definition {
     }
 
     // Find max id, we use this to assign to types that don't have ids yet.
-    int nextFieldId = minPropertyId-1;
+    int nextFieldId = minPropertyId - 1;
     int nextId = 0;
     for (final definition in definitions.values) {
       if (definition._key != null &&
@@ -307,7 +307,7 @@ class Definition {
     });
     ctxCode.writeln('default:break;}  return change;}');
 
-    // Build field changer
+    // Build object property setter
     ctxCode.writeln('''@override
         void setObjectProperty(Core object, int propertyKey, Object value) {
           switch(propertyKey) {
@@ -330,7 +330,25 @@ class Definition {
         ctxCode.writeln('break;');
       }
     }
-    ctxCode.writeln('}}}');
+    ctxCode.writeln('}}');
+
+    // Build object property getter
+    ctxCode.writeln('''@override
+        Object getObjectProperty(Core object, int propertyKey) {
+          switch(propertyKey) {
+          ''');
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        ctxCode.writeln(
+            'case ${definition._name}Base.${property.name}PropertyKey:');
+
+        ctxCode.writeln('''if(object is ${definition._name}Base) {
+                      return object.${property.name};
+                  }''');
+        ctxCode.writeln('break;');
+      }
+    }
+    ctxCode.writeln('}return null;}}');
 
     var file = File('lib/src/generated/$snakeName.dart');
     file.createSync(recursive: true);

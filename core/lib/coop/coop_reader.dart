@@ -15,6 +15,15 @@ abstract class CoopReader {
       case CoopCommand.hello:
         recvHello();
         break;
+      case CoopCommand.accept:
+        var changeId = reader.readVarUint();
+        var serverChangeId = reader.readVarUint();
+        recvAccept(changeId, serverChangeId);
+        break;
+      case CoopCommand.reject:
+        var changeId = reader.readVarUint();
+        recvReject(changeId);
+        break;
       case CoopCommand.hand:
         var session = reader.readVarUint();
         var fileId = reader.readString();
@@ -38,6 +47,8 @@ abstract class CoopReader {
     }
   }
 
+  Future<void> recvAccept(int changeId, int serverChangeId);
+  Future<void> recvReject(int changeId);
   Future<void> recvChange(ChangeSet changes);
   Future<void> recvHello();
   Future<void> recvGoodbye();
