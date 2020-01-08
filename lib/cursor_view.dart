@@ -163,6 +163,7 @@ class _CursorViewState extends State<CursorView> {
             });
           },
           child: Stack(
+        textDirection: TextDirection.ltr,
             children: [
               Positioned.fill(
                 child: widget.child,
