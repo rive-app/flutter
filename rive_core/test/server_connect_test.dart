@@ -33,6 +33,8 @@ void main() {
     var node = file.add(Node()..name = 'test');
     node.name = 'name change';
     file.captureJournalEntry();
+    node.name = 'name change2';
+    file.captureJournalEntry();
     // Give opportunity to save...
     await Future.delayed(const Duration(milliseconds: 1000), () {});
 

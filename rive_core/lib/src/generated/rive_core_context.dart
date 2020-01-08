@@ -146,4 +146,91 @@ abstract class RiveCoreContext extends CoreContext {
         break;
     }
   }
+
+  @override
+  Object getObjectProperty(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case ArtboardBase.namePropertyKey:
+        if (object is ArtboardBase) {
+          return object.name;
+        }
+        break;
+      case ArtboardBase.widthPropertyKey:
+        if (object is ArtboardBase) {
+          return object.width;
+        }
+        break;
+      case ArtboardBase.heightPropertyKey:
+        if (object is ArtboardBase) {
+          return object.height;
+        }
+        break;
+      case ArtboardBase.xPropertyKey:
+        if (object is ArtboardBase) {
+          return object.x;
+        }
+        break;
+      case ArtboardBase.yPropertyKey:
+        if (object is ArtboardBase) {
+          return object.y;
+        }
+        break;
+      case ArtboardBase.originXPropertyKey:
+        if (object is ArtboardBase) {
+          return object.originX;
+        }
+        break;
+      case ArtboardBase.originYPropertyKey:
+        if (object is ArtboardBase) {
+          return object.originY;
+        }
+        break;
+      case ComponentBase.namePropertyKey:
+        if (object is ComponentBase) {
+          return object.name;
+        }
+        break;
+      case ComponentBase.parentPropertyKey:
+        if (object is ComponentBase) {
+          return object.parent;
+        }
+        break;
+      case ComponentBase.orderPropertyKey:
+        if (object is ComponentBase) {
+          return object.order;
+        }
+        break;
+      case NodeBase.xPropertyKey:
+        if (object is NodeBase) {
+          return object.x;
+        }
+        break;
+      case NodeBase.yPropertyKey:
+        if (object is NodeBase) {
+          return object.y;
+        }
+        break;
+      case NodeBase.rotationPropertyKey:
+        if (object is NodeBase) {
+          return object.rotation;
+        }
+        break;
+      case NodeBase.scaleXPropertyKey:
+        if (object is NodeBase) {
+          return object.scaleX;
+        }
+        break;
+      case NodeBase.scaleYPropertyKey:
+        if (object is NodeBase) {
+          return object.scaleY;
+        }
+        break;
+      case NodeBase.opacityPropertyKey:
+        if (object is NodeBase) {
+          return object.opacity;
+        }
+        break;
+    }
+    return null;
+  }
 }
