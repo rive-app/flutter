@@ -1,0 +1,39 @@
+PODS:
+  - cursor (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+  - shared_preferences (0.0.1)
+  - shared_preferences_macos (0.0.1):
+    - FlutterMacOS
+  - window_utils (0.0.1):
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - cursor (from `Flutter/ephemeral/.symlinks/plugins/cursor/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral/.symlinks/flutter/darwin-x64`)
+  - shared_preferences (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences/macos`)
+  - shared_preferences_macos (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos`)
+  - window_utils (from `Flutter/ephemeral/.symlinks/plugins/window_utils/macos`)
+
+EXTERNAL SOURCES:
+  cursor:
+    :path: Flutter/ephemeral/.symlinks/plugins/cursor/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral/.symlinks/flutter/darwin-x64
+  shared_preferences:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences/macos
+  shared_preferences_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos
+  window_utils:
+    :path: Flutter/ephemeral/.symlinks/plugins/window_utils/macos
+
+SPEC CHECKSUMS:
+  cursor: a6af26800f481057b2a34b66bd5b5cb4fe0375c6
+  FlutterMacOS: 15bea8a44d2fa024068daa0140371c020b4b6ff9
+  shared_preferences: 9fec34d1bd906196a4da48fcf6c3ad521cc00b8d
+  shared_preferences_macos: 5e5c2839894accb56b7d23328905b757f2bafaf6
+  window_utils: 92122752520df13f39e784e82d830b20e6ffe960
+
+PODFILE CHECKSUM: d8ba9b3e9e93c62c74a660b46c6fcb09f03991a7
+
+COCOAPODS: 1.8.4

@@ -46,6 +46,7 @@ class _ResizePanelState extends State<ResizePanel> {
   bool _isDragging = false;
   bool _showDragEdge = false;
   Timer _lightTimer;
+  OverlayEntry _resizeOverlay;
 
   @override
   void initState() {
@@ -63,7 +64,12 @@ class _ResizePanelState extends State<ResizePanel> {
     }
   }
 
+  /// When we show the resize cursor, we also create an overlay that allows us
+  /// to detect drag operations on the edge of resize panel.
   void _showResizeCursor(BuildContext context, Duration delay) {
+    if (_resizeOverlay != null) {
+      return;
+    }
     Cursor.pathBlack(
         context,
         widget.direction == ResizeDirection.vertical
@@ -72,6 +78,54 @@ class _ResizePanelState extends State<ResizePanel> {
         Offset(-10, -10),
         0.035);
     _lightTimer?.cancel();
+
+    RenderBox renderBox = context.findRenderObject();
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+    _resizeOverlay?.remove();
+
+    double left = 0, top = 0, width = 0, height = 0;
+    switch (widget.direction) {
+      case ResizeDirection.horizontal:
+        height = size.height;
+        width = widget.hitSize;
+        top = offset.dy;
+        if (widget.side == ResizeSide.start) {
+          left = offset.dx - widget.hitSize;
+        } else {
+          left = offset.dx + size.width;
+        }
+        break;
+      case ResizeDirection.vertical:
+        height = widget.hitSize;
+        width = size.width;
+        left = offset.dx;
+        if (widget.side == ResizeSide.start) {
+          top = offset.dy - widget.hitSize;
+        } else {
+          top = offset.dy + size.height;
+        }
+        break;
+    }
+    _resizeOverlay = OverlayEntry(
+        maintainState: true,
+        builder: (context) {
+          return Positioned(
+            key: _key,
+            left: left,
+            top: top,
+            width: width,
+            height: height,
+            child: detectDrag(
+              // Set this to Colors.red to see the drag overlay created to help
+              // gesture detect.
+              Container(color: Colors.transparent),
+            ),
+          );
+        });
+
+    Overlay.of(context).insert(_resizeOverlay);
+
     _lightTimer = Timer(delay, () {
       setState(() {
         _showDragEdge = true;
@@ -82,6 +136,8 @@ class _ResizePanelState extends State<ResizePanel> {
   void _hideResizeCursor(BuildContext context) {
     Cursor.reset(context);
     _lightTimer?.cancel();
+    _resizeOverlay?.remove();
+    _resizeOverlay = null;
     setState(() {
       _showDragEdge = false;
     });
@@ -111,10 +167,84 @@ class _ResizePanelState extends State<ResizePanel> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Key _key = GlobalKey();
+  GestureDetector detectDrag(Widget child) {
     bool isHorizontal = widget.direction == ResizeDirection.horizontal;
     bool isVertical = widget.direction == ResizeDirection.vertical;
+    return GestureDetector(
+        dragStartBehavior: DragStartBehavior.down,
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragStart: isVertical
+            ? (details) {
+                _dragStartSize = _size;
+                _dragStartPosition = details.globalPosition.dy;
+                setState(() {
+                  _isDragging = true;
+                  _updateCursor(context);
+                });
+              }
+            : null,
+        onVerticalDragEnd: isVertical
+            ? (details) {
+                _resizeOverlay?.remove();
+                _resizeOverlay = null;
+                setState(() {
+                  _isDragging = false;
+                  _updateCursor(context);
+                });
+              }
+            : null,
+        onVerticalDragUpdate: isVertical
+            ? (details) {
+                var diff = details.globalPosition.dy - _dragStartPosition;
+
+                var size = widget.side == ResizeSide.end
+                    ? _dragStartSize + diff
+                    : _dragStartSize - diff;
+
+                setState(() {
+                  _size = size.clamp(widget.min, widget.max).roundToDouble();
+                });
+              }
+            : null,
+        onHorizontalDragStart: isHorizontal
+            ? (details) {
+                _dragStartSize = _size;
+                _dragStartPosition = details.globalPosition.dx;
+                setState(() {
+                  _isDragging = true;
+                  _updateCursor(context);
+                });
+              }
+            : null,
+        onHorizontalDragEnd: isHorizontal
+            ? (details) {
+                _resizeOverlay?.remove();
+                _resizeOverlay = null;
+                setState(() {
+                  _isDragging = false;
+                  _updateCursor(context);
+                });
+              }
+            : null,
+        onHorizontalDragUpdate: isHorizontal
+            ? (details) {
+                var diff = details.globalPosition.dx - _dragStartPosition;
+
+                var size = widget.side == ResizeSide.end
+                    ? _dragStartSize + diff
+                    : _dragStartSize - diff;
+
+                setState(() {
+                  _size = size.clamp(widget.min, widget.max).roundToDouble();
+                });
+              }
+            : null,
+        child: child);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: widget.direction == ResizeDirection.horizontal ? _size : null,
       height: widget.direction == ResizeDirection.vertical ? _size : null,
@@ -130,7 +260,7 @@ class _ResizePanelState extends State<ResizePanel> {
           position(
             widget.hitSize,
             // -widget.hitSize/2,
-            0,
+            -widget.hitSize,
             MouseRegion(
               opaque: false,
               onEnter: (details) {
@@ -145,85 +275,15 @@ class _ResizePanelState extends State<ResizePanel> {
                   _updateCursor(context);
                 });
               },
-              child: GestureDetector(
-                dragStartBehavior: DragStartBehavior.down,
-                behavior: HitTestBehavior.opaque,
-                onVerticalDragStart: isVertical
-                    ? (details) {
-                        _dragStartSize = _size;
-                        _dragStartPosition = details.globalPosition.dy;
-                        setState(() {
-                          _isDragging = true;
-                          _updateCursor(context);
-                        });
-                      }
-                    : null,
-                onVerticalDragEnd: isVertical
-                    ? (details) {
-                        setState(() {
-                          _isDragging = false;
-                          _updateCursor(context);
-                        });
-                      }
-                    : null,
-                onVerticalDragUpdate: isVertical
-                    ? (details) {
-                        var diff =
-                            details.globalPosition.dy - _dragStartPosition;
-
-                        var size = widget.side == ResizeSide.end
-                            ? _dragStartSize + diff
-                            : _dragStartSize - diff;
-
-                        setState(() {
-                          _size = size.clamp(widget.min, widget.max);
-                        });
-                      }
-                    : null,
-                onHorizontalDragStart: isHorizontal
-                    ? (details) {
-                        _dragStartSize = _size;
-                        _dragStartPosition = details.globalPosition.dx;
-                        setState(() {
-                          _isDragging = true;
-                          _updateCursor(context);
-                        });
-                      }
-                    : null,
-                onHorizontalDragEnd: isHorizontal
-                    ? (details) {
-                        setState(() {
-                          _isDragging = false;
-                          _updateCursor(context);
-                        });
-                      }
-                    : null,
-                onHorizontalDragUpdate: isHorizontal
-                    ? (details) {
-                        var diff =
-                            details.globalPosition.dx - _dragStartPosition;
-
-                        var size = widget.side == ResizeSide.end
-                            ? _dragStartSize + diff
-                            : _dragStartSize - diff;
-
-                        setState(() {
-                          _size = size.clamp(widget.min, widget.max);
-                        });
-                      }
-                    : null,
-                child: Stack(
-                  children: [
-                    position(
-                      2,
-                      // widget.hitSize/2,
-                      0,
-                      Container(
-                          color:
-                              _showDragEdge ? Colors.blue : Colors.transparent),
-                    ),
-                  ],
-                ),
+              child: Stack(
+                overflow: Overflow.visible,
+                children: [
+                  position(
+                    2,
+                    widget.hitSize,
+                    Container(color: _showDragEdge ? Colors.blue : null),
+                  ),
+                ],
               ),
             ),
           )
