@@ -1,11 +1,23 @@
+import 'package:core/core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'artboard.dart';
 import 'src/generated/rive_core_context.dart';
+
+/// Delegate type that can be passed to [RiveFile] to listen to events.
+abstract class RiveFileDelegate {
+  void onArtboardsChanged();
+}
 
 class RiveFile extends RiveCoreContext {
   final Map<String, dynamic> overridePreferences;
   final bool useSharedPreferences;
+  final List<Artboard> artboards = [];
+  final RiveFileDelegate delegate;
+
   RiveFile(String fileId,
-      {this.overridePreferences, this.useSharedPreferences = true})
+      {this.delegate,
+      this.overridePreferences,
+      this.useSharedPreferences = true})
       : super(fileId);
 
   SharedPreferences _prefs;
@@ -56,5 +68,21 @@ class RiveFile extends RiveCoreContext {
     }
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs.setString(key, value);
+  }
+
+  @override
+  void onAdded(Core object) {
+    if (object is Artboard) {
+      artboards.add(object);
+      delegate?.onArtboardsChanged();
+    }
+  }
+
+  @override
+  void onRemoved(Core object) {
+    if (object is Artboard) {
+      artboards.remove(object);
+      delegate?.onArtboardsChanged();
+    }
   }
 }

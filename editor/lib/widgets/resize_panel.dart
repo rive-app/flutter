@@ -18,15 +18,15 @@ class ResizePanel extends StatefulWidget {
   final Widget child;
   final double hitSize;
 
-  const ResizePanel(
-      {Key key,
-      this.max,
-      this.min,
-      this.direction,
-      this.side,
-      this.child,
-      this.hitSize = 10})
-      : super(key: key);
+  const ResizePanel({
+    Key key,
+    this.max,
+    this.min,
+    this.direction,
+    this.side,
+    this.child,
+    this.hitSize = 10,
+  }) : super(key: key);
 
   @override
   _ResizePanelState createState() => _ResizePanelState();

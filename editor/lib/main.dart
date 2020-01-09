@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/node.dart';
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'widgets/hierarchy.dart';
 import 'widgets/resize_panel.dart';
 
 import 'package:window_utils/window_utils.dart';
-// import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/rive_file.dart';
 // import 'package:core/coop/connect_result.dart';
 
-// var file = RiveFile("102:15468");
+import 'package:provider/provider.dart';
+
+import 'widgets/tab_bar/rive_tab_bar.dart';
+
+var file = RiveFile("102:15468");
+
 Node node;
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,19 +42,35 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    var rive = Rive();
+    rive.open("test");
     return CursorView(
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: Scaffold(
-          body: Editor(),
+      child: MultiProvider(
+        providers: [
+          Provider.value(value: rive),
+          ChangeNotifierProvider.value(value: rive.file),
+          ChangeNotifierProvider.value(value: rive.treeController)
+        ],
+        child: MaterialApp(
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: Scaffold(
+            body: Editor(),
+          ),
         ),
       ),
     );
   }
 }
+
+var tabs = [
+  RiveTabItem(name: "Guido's Files", closeable: false),
+  RiveTabItem(name: "Ellipse Testing"),
+  RiveTabItem(name: "Spaceman"),
+];
+
+int selectedTab = 1;
 
 class Editor extends StatelessWidget {
   @override
@@ -67,32 +89,15 @@ class Editor extends StatelessWidget {
                       WindowUtils.startDrag();
                     }),
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  SizedBox(width: 95),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (_) {
-                      print("HIT BUTTON");
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      color: Color.fromRGBO(60, 60, 60, 1.0),
-                      child: Center(
-                        child: Text(
-                          'Testing File',
-                          style: TextStyle(
-                            fontFamily: 'Roboto-Regular',
-                            fontSize: 13,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              RiveTabBar(
+                  offset: 95,
+                  tabs: tabs,
+                  selected: tabs[selectedTab],
+                  select: (tab) {
+                    // Hackity hack to test the tabs.
+                    selectedTab = tabs.indexOf(tab);
+                    (context as Element).markNeedsBuild();
+                  }),
             ],
           ),
         ),
