@@ -53,9 +53,13 @@ abstract class CoreContext implements LocalSettings {
     object.id ??= localId--;
     object.context = this;
     _objects[object.id] = object;
+    onAdded(object);
     changeProperty(object, addKey, removeKey, addKey);
     return object;
   }
+
+  void onAdded(Core object);
+  void onRemoved(Core object);
 
   void captureJournalEntry() {
     if (_currentChanges == null) {
@@ -136,6 +140,7 @@ abstract class CoreContext implements LocalSettings {
 
   void remove<T extends Core>(T object) {
     _objects.remove(object.id);
+    onRemoved(object);
 
     bool wasJustAdded = false;
     if (_currentChanges != null) {
