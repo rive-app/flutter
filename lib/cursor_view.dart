@@ -78,9 +78,11 @@ class Cursor extends ChangeNotifier {
     ]);
     Path renderPath = path.transform(transform);
     change(
-        context,
-        (context) => CustomPaint(
-            painter: _PathPainter(renderPath, fill, stroke, shadowPaint)));
+      context,
+      (context) => CustomPaint(
+        painter: _PathPainter(renderPath, fill, stroke, shadowPaint),
+      ),
+    );
   }
 
   static void pathBlack(
@@ -163,7 +165,7 @@ class _CursorViewState extends State<CursorView> {
             });
           },
           child: Stack(
-        textDirection: TextDirection.ltr,
+            textDirection: TextDirection.ltr,
             children: [
               Positioned.fill(
                 child: widget.child,
