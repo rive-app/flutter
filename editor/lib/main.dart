@@ -75,7 +75,7 @@ var tabs = [
 int selectedTab = 1;
 
 List<ContextItem> contextItems = [
-  ContextItem("Shape"),
+  ContextItem("Shape", select:()=>print("SELECT SHAPE!")),
   ContextItem("Pen", shortcut: "P"),
   ContextItem.separator(),
   ContextItem("Artboard", shortcut: "A"),

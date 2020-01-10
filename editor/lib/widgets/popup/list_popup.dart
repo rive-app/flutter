@@ -7,6 +7,7 @@ import 'popup.dart';
 abstract class PopupListItem {
   bool get canSelect;
   double get height;
+  VoidCallback get select;
 }
 
 typedef ListPopupItemBuilder<T> = Widget Function(
@@ -120,23 +121,32 @@ class __PopupListItemShellState<T extends PopupListItem>
   bool _isHovered = false;
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (details) {
+    return GestureDetector(
+      onTapDown: (details) {
         if (!widget.item.canSelect) {
           return;
         }
-        setState(() {
-          _isHovered = true;
-        });
+        widget.item.select?.call();
+        Popup.closeAll();
       },
-      onExit: (details) {
-        setState(() {
-          _isHovered = false;
-        });
-      },
-      child: Container(
-        color: _isHovered ? Color.fromRGBO(26, 26, 26, 1) : null,
-        child: widget.itemBuilder(context, widget.item, _isHovered),
+      child: MouseRegion(
+        onEnter: (details) {
+          if (!widget.item.canSelect) {
+            return;
+          }
+          setState(() {
+            _isHovered = true;
+          });
+        },
+        onExit: (details) {
+          setState(() {
+            _isHovered = false;
+          });
+        },
+        child: Container(
+          color: _isHovered ? Color.fromRGBO(26, 26, 26, 1) : null,
+          child: widget.itemBuilder(context, widget.item, _isHovered),
+        ),
       ),
     );
   }

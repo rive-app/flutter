@@ -11,13 +11,15 @@ class ContextItem extends PopupListItem {
   final VoidCallback select;
   final bool isActive;
 
-  ContextItem(this.name,
-      {this.iconBuilder,
-      this.shortcut,
-      this.widgetBuilder,
-      this.popup,
-      this.select,
-      this.isActive = false});
+  ContextItem(
+    this.name, {
+    this.iconBuilder,
+    this.shortcut,
+    this.widgetBuilder,
+    this.popup,
+    this.select,
+    this.isActive = false,
+  });
 
   ContextItem.separator()
       : iconBuilder = null,
