@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/node.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'widgets/hierarchy.dart';
+import 'widgets/popup/context_popup.dart';
 import 'widgets/resize_panel.dart';
 
 import 'package:window_utils/window_utils.dart';
@@ -72,6 +74,16 @@ var tabs = [
 
 int selectedTab = 1;
 
+List<ContextItem> contextItems = [
+  ContextItem("Shape"),
+  ContextItem("Pen", shortcut: "P"),
+  ContextItem.separator(),
+  ContextItem("Artboard", shortcut: "A"),
+  ContextItem("Bone", shortcut: "B"),
+  ContextItem("Node", shortcut: "G"),
+  ContextItem("Solo", shortcut: "Y")
+];
+
 class Editor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -90,20 +102,60 @@ class Editor extends StatelessWidget {
                     }),
               ),
               RiveTabBar(
-                  offset: 95,
-                  tabs: tabs,
-                  selected: tabs[selectedTab],
-                  select: (tab) {
-                    // Hackity hack to test the tabs.
-                    selectedTab = tabs.indexOf(tab);
-                    (context as Element).markNeedsBuild();
-                  }),
+                offset: 95,
+                tabs: tabs,
+                selected: tabs[selectedTab],
+                select: (tab) {
+                  // Hackity hack to test the tabs.
+                  selectedTab = tabs.indexOf(tab);
+                  (context as Element).markNeedsBuild();
+                },
+              ),
             ],
           ),
         ),
         Container(
+          padding: EdgeInsets.all(5),
           height: 42,
           color: Color.fromRGBO(60, 60, 60, 1.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PopupButton(
+                builder: (context) {
+                  return Container(
+                    margin:
+                        EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                    child: Center(
+                      child: Text(
+                        "hey",
+                        style: TextStyle(
+                          fontFamily: 'Roboto-Regular',
+                          fontSize: 13,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                items: contextItems,
+                itemBuilder: (context, item, isHovered) => item
+                    .itemBuilder(context,
+                        isHovered) /*(
+                  child: Text(
+                    "Item $index",
+                    style: TextStyle(
+                      fontFamily: 'Roboto-Regular',
+                      fontSize: 13,
+                      color: Colors.white,
+                    ),
+                  ),
+                )*/
+                ,
+                itemSelected: (context, index) {},
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: Row(
