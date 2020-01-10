@@ -76,6 +76,9 @@ void WindowUtils::HandleMethodCall(
     version_stream << "Linux " << uname_data.version;
     flutter::EncodableValue response(version_stream.str());
     result->Success(&response);
+  } else if (method_call.method_name().compare("hideTitleBar") == 0) {
+    flutter::EncodableValue response(true);
+    result->Success(&response);
   } else {
     result->NotImplemented();
   }
