@@ -361,77 +361,79 @@ void WindowUtils::HandleMethodCall(
     bool update = map.at(flutter::EncodableValue("update")).BoolValue();
     std::string type = map.at(flutter::EncodableValue("type")).StringValue();
     HCURSOR cursor;
-    // HWND hWnd = GetActiveWindow();
-    // HINSTANCE instance = GetModuleHandle(0);
-    // set wincl.hCursor = NULL;
     if (type.compare("appStart") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_APPSTARTING);
+      cursor = LoadCursor(0, IDC_APPSTARTING);
     }
     else if (type.compare("arrow") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_ARROW);
+      cursor = LoadCursor(0, IDC_ARROW);
     }
     else if (type.compare("cross") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_CROSS);
+      cursor = LoadCursor(0, IDC_CROSS);
     }
     else if (type.compare("hand") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_HAND);
+      cursor = LoadCursor(0, IDC_HAND);
     }
     else if (type.compare("help") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_HELP);
+      cursor = LoadCursor(0, IDC_HELP);
     }
     else if (type.compare("iBeam") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_IBEAM);
+      cursor = LoadCursor(0, IDC_IBEAM);
     }
     else if (type.compare("no") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_NO);
+      cursor = LoadCursor(0, IDC_NO);
     }
     else if (type.compare("resizeAll") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_SIZEALL);
+      cursor = LoadCursor(0, IDC_SIZEALL);
     }
     else if (type.compare("resizeNESW") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_SIZENESW);
+      cursor = LoadCursor(0, IDC_SIZENESW);
     }
     else if (type.compare("resizeNS") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_SIZENS);
+      cursor = LoadCursor(0, IDC_SIZENS);
     }
     else if (type.compare("resizeNWSE") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_SIZENWSE);
+      cursor = LoadCursor(0, IDC_SIZENWSE);
     }
     else if (type.compare("resizeWE") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_SIZEWE);
+      cursor = LoadCursor(0, IDC_SIZEWE);
     }
     else if (type.compare("upArrow") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_UPARROW);
+      cursor = LoadCursor(0, IDC_UPARROW);
     }
     else if (type.compare("wait") == 0)
     {
-      cursor = LoadCursor(NULL, IDC_WAIT);
+      cursor = LoadCursor(0, IDC_WAIT);
     }
     else
     {
-      cursor = LoadCursor(NULL, IDC_ARROW);
+      cursor = LoadCursor(0, IDC_ARROW);
     }
-    if (update)
-    {
-      SetCursor(cursor);
-    }
-    else
-    {
-      SetCursor(cursor);
-    }
+    HWND hWnd = GetActiveWindow();
+    HWND hWndDesktop = GetDesktopWindow();
+    SetClassLongPtrA(hWnd, -12, (LONG_PTR)cursor);
+    SetClassLongPtrA(hWndDesktop, -12, (LONG_PTR)cursor);
+    // if (update)
+    // {
+    //   SetCursor(cursor);
+    // }
+    // else
+    // {
+    //   SetCursor(cursor);
+    // }
+    SetCursor(cursor);
     flutter::EncodableValue response(true);
     result->Success(&response);
   }
