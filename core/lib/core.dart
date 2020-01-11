@@ -4,6 +4,7 @@ import 'coop/change.dart';
 import 'coop/connect_result.dart';
 import 'coop/coop_client.dart';
 import 'coop/local_settings.dart';
+export 'package:fractional/fractional.dart';
 
 int localId = 0;
 

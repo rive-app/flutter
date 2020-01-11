@@ -318,7 +318,6 @@ class Definition {
       ctxCode.writeln('''var writer = 
             BinaryWriter(alignment: ${fieldType.encodingAlignment});''');
       ctxCode.write(fieldType.encode('writer', 'value'));
-      ctxCode.writeln(';');
       ctxCode.writeln('change.value = writer.uint8Buffer;');
       ctxCode.writeln('}break;');
     });

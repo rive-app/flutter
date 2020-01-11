@@ -5,12 +5,12 @@ class IntFieldType extends FieldType {
 
   @override
   String encode(String writerName, String varName) {
-    return '$writerName.writeVarInt($varName)';
+    return '$writerName.writeVarInt($varName);';
   }
 
   @override
-  String decode(String readerName) {
-    return '$readerName.readVarInt()';
+  String decode(String readerName, String varName) {
+    return '$varName = $readerName.readVarInt();';
   }
 
   @override

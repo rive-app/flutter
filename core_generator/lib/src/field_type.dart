@@ -20,5 +20,5 @@ abstract class FieldType {
 
   int get encodingAlignment;
   String encode(String writerName, String varName);
-  String decode(String readerName);
+  String decode(String readerName, String varName);
 }

@@ -85,6 +85,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  fractional:
+    dependency: "direct main"
+    description:
+      path: "../dependencies/fractional-dart"
+      relative: true
+    source: path
+    version: "0.0.2"
   glob:
     dependency: transitive
     description:
