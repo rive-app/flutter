@@ -23,6 +23,8 @@ abstract class FractionallyIndexedList<T> extends Iterable<T> {
     _values.add(item);
   }
 
+  bool remove(T item) => _values.remove(item);
+
   void append(T item) {
     assert(!contains(item));
     var previousIndex = _values.isEmpty ? _minIndex : orderOf(_values.last);
