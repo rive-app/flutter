@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'coop/change.dart';
 import 'coop/connect_result.dart';
@@ -19,9 +18,10 @@ class ChangeEntry {
   ChangeEntry(this.from, this.to);
 }
 
-class Core {
+abstract class Core<T extends CoreContext> {
   int id;
-  CoreContext context;
+  T context;
+  int get coreType;
 }
 
 class FreshChange {
@@ -54,7 +54,7 @@ abstract class CoreContext implements LocalSettings {
     object.context = this;
     _objects[object.id] = object;
     onAdded(object);
-    changeProperty(object, addKey, removeKey, addKey);
+    changeProperty(object, addKey, removeKey, object.coreType);
     return object;
   }
 

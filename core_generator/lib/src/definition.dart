@@ -86,7 +86,8 @@ class Definition {
   String get localCodeFilename => '${stripExtension(_filename)}_base.dart';
   String get codeFilename => 'lib/src/generated/$localCodeFilename';
 
-  void generateCode() {
+  void generateCode(
+      String outputFolder, String coreContextName, String snakeContextName) {
     String filename = codeFilename;
     var code = StringBuffer(comment('Core automatically generated $filename.'));
     code.writeln(comment('Do not modify manually.'));
@@ -104,16 +105,30 @@ class Definition {
       code.writeln('import \'package:core/core.dart\';');
     }
 
-    code.write('''abstract class ${_name}Base 
-            extends ${_extensionOf?._name ?? 'Core'} {''');
+    bool defineContextExtension = _extensionOf?._name == null;
+    if (defineContextExtension) {
+      code.writeln('import \'$snakeContextName.dart\';');
+    }
+
+    code.write(
+        '''abstract class ${_name}Base${defineContextExtension ? '<T extends $coreContextName>' : ''} 
+            extends ${_extensionOf?._name ?? 'Core<T>'} {''');
     if (!_isAbstract) {
       code.write('static const int typeKey = ${_key.intValue};');
+      code.write('@override int get coreType => ${_name}Base.typeKey;');
     }
     for (final field in _properties) {
       code.write(field.generateCode());
     }
     code.write('}');
-    var file = File(filename);
+
+    var folder = outputFolder != null &&
+            outputFolder.isNotEmpty &&
+            outputFolder[outputFolder.length - 1] == '/'
+        ? outputFolder.substring(0, outputFolder.length - 1)
+        : outputFolder;
+
+    var file = File('$folder/$filename');
     file.createSync(recursive: true);
     var formattedCode = _formatter.format(code.toString());
     file.writeAsStringSync(formattedCode, flush: true);
@@ -156,7 +171,8 @@ class Definition {
   }
 
   static const int minPropertyId = 3;
-  static bool generate(String coreContextName, bool regenerateKeys) {
+  static bool generate(
+      String outputFolder, String coreContextName, bool regenerateKeys) {
     // Check dupe ids.
     bool runGenerator = true;
     Map<int, Definition> ids = {};
@@ -247,13 +263,14 @@ class Definition {
       return false;
     }
 
-    for (final definition in definitions.values) {
-      definition.generateCode();
-    }
-
     // Generate core context.
-    var snakeName = coreContextName.replaceAllMapped(RegExp('(.+?)([A-Z])'),
+    var snakeContextName = coreContextName.replaceAllMapped(
+        RegExp('(.+?)([A-Z])'),
         (Match m) => "${m[1].toLowerCase()}_${m[2].toLowerCase()}");
+
+    for (final definition in definitions.values) {
+      definition.generateCode(outputFolder, coreContextName, snakeContextName);
+    }
 
     StringBuffer ctxCode =
         StringBuffer('''import \'package:core/coop/change.dart\';
@@ -350,7 +367,13 @@ class Definition {
     }
     ctxCode.writeln('}return null;}}');
 
-    var file = File('lib/src/generated/$snakeName.dart');
+    var folder = outputFolder != null &&
+            outputFolder.isNotEmpty &&
+            outputFolder[outputFolder.length - 1] == '/'
+        ? outputFolder.substring(0, outputFolder.length - 1)
+        : outputFolder;
+
+    var file = File('$folder/lib/src/generated/$snakeContextName.dart');
     file.createSync(recursive: true);
 
     var formattedCode = _formatter.format(ctxCode.toString());
