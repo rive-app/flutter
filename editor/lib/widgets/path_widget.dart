@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Draws a path with custom paint and a nuge property.
+/// Draws a path with custom paint and a nudge property.
 class PathWidget extends LeafRenderObjectWidget {
   /// The path that will be drawn inside this widget.
   final Path path;

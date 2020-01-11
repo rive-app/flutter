@@ -75,6 +75,9 @@ var tabs = [
 int selectedTab = 1;
 
 List<ContextItem> contextItems = [
+  ContextItem("Artboard", select:()=>print("Make artboard...")),
+  ContextItem("Node", select:()=>print("Make node...")),
+  ContextItem.separator(),
   ContextItem("Shape", select:()=>print("SELECT SHAPE!")),
   ContextItem("Pen", shortcut: "P"),
   ContextItem.separator(),
@@ -128,7 +131,7 @@ class Editor extends StatelessWidget {
                         EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
                     child: Center(
                       child: Text(
-                        "hey",
+                        "Add",
                         style: TextStyle(
                           fontFamily: 'Roboto-Regular',
                           fontSize: 13,

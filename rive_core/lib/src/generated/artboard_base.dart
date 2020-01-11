@@ -1,34 +1,12 @@
 /// Core automatically generated lib/src/generated/artboard_base.dart.
 /// Do not modify manually.
 
-import 'package:core/core.dart';
+import '../../container_component.dart';
 
-abstract class ArtboardBase extends Core {
+abstract class ArtboardBase extends ContainerComponent {
   static const int typeKey = 1;
-
-  /// --------------------------------------------------------------------------
-  /// Name field with key 3.
-  String _name;
-  static const int namePropertyKey = 3;
-
-  /// Non-unique identifier, friendly name. Runtimes provide an API for finding
-  /// artboards by this [name].
-  String get name => _name;
-
-  /// Change the [_name] field value.
-  /// [nameChanged] will be invoked only if the field's value has changed.
-  set name(String value) {
-    if (_name == value) {
-      return;
-    }
-    String from = _name;
-    _name = value;
-    nameChanged(from, value);
-  }
-
-  void nameChanged(String from, String to) {
-    context?.changeProperty(this, namePropertyKey, from, to);
-  }
+  @override
+  int get coreType => ArtboardBase.typeKey;
 
   /// --------------------------------------------------------------------------
   /// Width field with key 4.

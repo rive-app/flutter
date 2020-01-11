@@ -2,8 +2,9 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
+import 'rive_core_context.dart';
 
-abstract class ComponentBase extends Core {
+abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   /// --------------------------------------------------------------------------
   /// Name field with key 10.
   String _name;
@@ -29,48 +30,48 @@ abstract class ComponentBase extends Core {
   }
 
   /// --------------------------------------------------------------------------
-  /// Parent field with key 11.
-  int _parent;
-  static const int parentPropertyKey = 11;
+  /// ParentId field with key 11.
+  int _parentId;
+  static const int parentIdPropertyKey = 11;
 
   /// Identifier used to track parent ContainerComponent.
-  int get parent => _parent;
+  int get parentId => _parentId;
 
-  /// Change the [_parent] field value.
-  /// [parentChanged] will be invoked only if the field's value has changed.
-  set parent(int value) {
-    if (_parent == value) {
+  /// Change the [_parentId] field value.
+  /// [parentIdChanged] will be invoked only if the field's value has changed.
+  set parentId(int value) {
+    if (_parentId == value) {
       return;
     }
-    int from = _parent;
-    _parent = value;
-    parentChanged(from, value);
+    int from = _parentId;
+    _parentId = value;
+    parentIdChanged(from, value);
   }
 
-  void parentChanged(int from, int to) {
-    context?.changeProperty(this, parentPropertyKey, from, to);
+  void parentIdChanged(int from, int to) {
+    context?.changeProperty(this, parentIdPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
-  /// Order field with key 12.
-  int _order;
-  static const int orderPropertyKey = 12;
+  /// ChildOrder field with key 12.
+  FractionalIndex _childOrder;
+  static const int childOrderPropertyKey = 12;
 
   /// Order value for sorting child elements in ContainerComponent parent.
-  int get order => _order;
+  FractionalIndex get childOrder => _childOrder;
 
-  /// Change the [_order] field value.
-  /// [orderChanged] will be invoked only if the field's value has changed.
-  set order(int value) {
-    if (_order == value) {
+  /// Change the [_childOrder] field value.
+  /// [childOrderChanged] will be invoked only if the field's value has changed.
+  set childOrder(FractionalIndex value) {
+    if (_childOrder == value) {
       return;
     }
-    int from = _order;
-    _order = value;
-    orderChanged(from, value);
+    FractionalIndex from = _childOrder;
+    _childOrder = value;
+    childOrderChanged(from, value);
   }
 
-  void orderChanged(int from, int to) {
-    context?.changeProperty(this, orderPropertyKey, from, to);
+  void childOrderChanged(FractionalIndex from, FractionalIndex to) {
+    context?.changeProperty(this, childOrderPropertyKey, from, to);
   }
 }

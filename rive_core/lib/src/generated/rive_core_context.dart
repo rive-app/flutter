@@ -2,8 +2,8 @@ import 'package:core/coop/change.dart';
 import 'package:core/core.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
-import 'artboard_base.dart';
 import 'component_base.dart';
+import 'artboard_base.dart';
 import 'node_base.dart';
 
 abstract class RiveCoreContext extends CoreContext {
@@ -17,11 +17,25 @@ abstract class RiveCoreContext extends CoreContext {
       case CoreContext.removeKey:
         change.op = value as int;
         break;
-      case ArtboardBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
         if (value != null && value is String) {
           var writer = BinaryWriter(alignment: 32);
           writer.writeString(value);
+          change.value = writer.uint8Buffer;
+        }
+        break;
+      case ComponentBase.parentIdPropertyKey:
+        if (value != null && value is int) {
+          var writer = BinaryWriter(alignment: 4);
+          writer.writeVarInt(value);
+          change.value = writer.uint8Buffer;
+        }
+        break;
+      case ComponentBase.childOrderPropertyKey:
+        if (value != null && value is FractionalIndex) {
+          var writer = BinaryWriter(alignment: 8);
+          writer.writeVarInt(value.numerator);
+          writer.writeVarInt(value.denominator);
           change.value = writer.uint8Buffer;
         }
         break;
@@ -43,14 +57,6 @@ abstract class RiveCoreContext extends CoreContext {
           change.value = writer.uint8Buffer;
         }
         break;
-      case ComponentBase.parentPropertyKey:
-      case ComponentBase.orderPropertyKey:
-        if (value != null && value is int) {
-          var writer = BinaryWriter(alignment: 4);
-          writer.writeVarInt(value);
-          change.value = writer.uint8Buffer;
-        }
-        break;
       default:
         break;
     }
@@ -60,13 +66,19 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   void setObjectProperty(Core object, int propertyKey, Object value) {
     switch (propertyKey) {
-      case ArtboardBase.namePropertyKey:
-        if (object is ArtboardBase) {
-          if (value is String) {
-            object.name = value;
-          } else if (value == null) {
-            object.name = null;
-          }
+      case ComponentBase.namePropertyKey:
+        if (object is ComponentBase && value is String) {
+          object.name = value;
+        }
+        break;
+      case ComponentBase.parentIdPropertyKey:
+        if (object is ComponentBase && value is int) {
+          object.parentId = value;
+        }
+        break;
+      case ComponentBase.childOrderPropertyKey:
+        if (object is ComponentBase && value is FractionalIndex) {
+          object.childOrder = value;
         }
         break;
       case ArtboardBase.widthPropertyKey:
@@ -97,21 +109,6 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originYPropertyKey:
         if (object is ArtboardBase && value is double) {
           object.originY = value;
-        }
-        break;
-      case ComponentBase.namePropertyKey:
-        if (object is ComponentBase && value is String) {
-          object.name = value;
-        }
-        break;
-      case ComponentBase.parentPropertyKey:
-        if (object is ComponentBase && value is int) {
-          object.parent = value;
-        }
-        break;
-      case ComponentBase.orderPropertyKey:
-        if (object is ComponentBase && value is int) {
-          object.order = value;
         }
         break;
       case NodeBase.xPropertyKey:
@@ -150,9 +147,19 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   Object getObjectProperty(Core object, int propertyKey) {
     switch (propertyKey) {
-      case ArtboardBase.namePropertyKey:
-        if (object is ArtboardBase) {
+      case ComponentBase.namePropertyKey:
+        if (object is ComponentBase) {
           return object.name;
+        }
+        break;
+      case ComponentBase.parentIdPropertyKey:
+        if (object is ComponentBase) {
+          return object.parentId;
+        }
+        break;
+      case ComponentBase.childOrderPropertyKey:
+        if (object is ComponentBase) {
+          return object.childOrder;
         }
         break;
       case ArtboardBase.widthPropertyKey:
@@ -183,21 +190,6 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originYPropertyKey:
         if (object is ArtboardBase) {
           return object.originY;
-        }
-        break;
-      case ComponentBase.namePropertyKey:
-        if (object is ComponentBase) {
-          return object.name;
-        }
-        break;
-      case ComponentBase.parentPropertyKey:
-        if (object is ComponentBase) {
-          return object.parent;
-        }
-        break;
-      case ComponentBase.orderPropertyKey:
-        if (object is ComponentBase) {
-          return object.order;
         }
         break;
       case NodeBase.xPropertyKey:

@@ -10,6 +10,3 @@
 [submodule "dependencies/cursor-flutter"]
 	path = dependencies/cursor-flutter
 	url = git@github.com:rive-app/cursor-flutter.git
-[submodule "dependencies/fractional-dart"]
-	path = dependencies/fractional-dart
-	url = git@github.com:rive-app/fractional-dart.git

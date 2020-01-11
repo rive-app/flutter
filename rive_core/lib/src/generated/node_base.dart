@@ -5,6 +5,8 @@ import '../../container_component.dart';
 
 abstract class NodeBase extends ContainerComponent {
   static const int typeKey = 2;
+  @override
+  int get coreType => NodeBase.typeKey;
 
   /// --------------------------------------------------------------------------
   /// X field with key 13.

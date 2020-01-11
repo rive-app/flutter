@@ -5,22 +5,30 @@ import 'src/generated/rive_core_context.dart';
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.
 abstract class RiveFileDelegate {
-  void onArtboardsChanged();
+  void onArtboardsChanged() {}
+  void onObjectAdded(Core object) {}
+  void onObjectRemoved(Core object) {}
+}
+
+class RiveDirt {
+  static const int dependencies = 1 << 0;
 }
 
 class RiveFile extends RiveCoreContext {
   final Map<String, dynamic> overridePreferences;
   final bool useSharedPreferences;
   final List<Artboard> artboards = [];
-  final RiveFileDelegate delegate;
+  final Set<RiveFileDelegate> delegates = {};
+  int _dirt = 0;
 
   RiveFile(String fileId,
-      {this.delegate,
-      this.overridePreferences,
-      this.useSharedPreferences = true})
+      {this.overridePreferences, this.useSharedPreferences = true})
       : super(fileId);
 
   SharedPreferences _prefs;
+
+  bool addDelegate(RiveFileDelegate delegate) => delegates.add(delegate);
+  bool removeDelegate(RiveFileDelegate delegate) => delegates.remove(delegate);
 
   @override
   Future<int> getIntSetting(String key) async {
@@ -72,17 +80,33 @@ class RiveFile extends RiveCoreContext {
 
   @override
   void onAdded(Core object) {
+    delegates.forEach((delegate) => delegate.onObjectAdded(object));
     if (object is Artboard) {
       artboards.add(object);
-      delegate?.onArtboardsChanged();
+      delegates.forEach((delegate) => delegate.onArtboardsChanged());
     }
   }
 
   @override
   void onRemoved(Core object) {
+    delegates.forEach((delegate) => delegate.onObjectRemoved(object));
     if (object is Artboard) {
       artboards.remove(object);
-      delegate?.onArtboardsChanged();
+      delegates.forEach((delegate) => delegate.onArtboardsChanged());
     }
+  }
+
+  @override
+  void captureJournalEntry() {
+    // Make sure we've updated dependents if some change occurred to them.
+    if(_dirt & RiveDirt.dependencies != 0)
+    {
+      
+    }
+    super.captureJournalEntry();
+  }
+
+  void markDependenciesDirty() {
+    _dirt |= RiveDirt.dependencies;
   }
 }
