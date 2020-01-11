@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:fractional/fractional.dart';
+import 'package:test/test.dart';
 
 class Component {
   FractionalIndex hierarchyOrder;
@@ -49,7 +49,7 @@ void main() {
     expect(children[2].hierarchyOrder.numerator, 3);
     expect(children[2].hierarchyOrder.denominator, 4);
 
-    children.sort();
+    children.sort((a, b) => a.hierarchyOrder.compareTo(b.hierarchyOrder));
 
     expect(children[0].name, "First");
     expect(children[1].name, "Second");
@@ -59,7 +59,7 @@ void main() {
     // children[0].hierarchyOrder = FractionalIndex.between(
     //     children[1].hierarchyOrder, children[2].hierarchyOrder);
     children.move(children[0], after: children[1], before: children[2]);
-    children.sort();
+    children.sort((a, b) => a.hierarchyOrder.compareTo(b.hierarchyOrder));
 
     expect(children[0].name, "Second");
     expect(children[1].name, "First");
