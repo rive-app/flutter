@@ -1,23 +1,59 @@
 library fractional;
 
-var _minIndex = FractionalIndex.min();
-var _maxIndex = FractionalIndex.max();
+import 'dart:collection';
 
-abstract class FractionallyIndexedList<T> extends Iterable<T> {
-  final List<T> _values = List<T>();
+const _minIndex = FractionalIndex.min();
+const _maxIndex = FractionalIndex.max();
+
+abstract class FractionallyIndexedList<T> extends ListBase<T> {
+  final List<T> _values;
   FractionalIndex orderOf(T value);
+  List<T> get values => _values;
 
+  @override
   int get length => _values.length;
-  void setOrderOf(T value, FractionalIndex order);
 
-  operator [](int i) => _values[i];
+  @override
+  set length(int value) => _values.length = value;
+
+  @override
+  T operator [](int index) => _values[index];
+
+  @override
+  void operator []=(int index, T value) => _values[index] = value;
+
+  FractionallyIndexedList({List<T> values}) : _values = values ?? <T>[] {
+    if (_values.isEmpty) {
+      return;
+    }
+    int mid = _values.length ~/ 2;
+    var midIndex = const FractionalIndex(1, 2);
+    setOrderOf(_values[mid], midIndex);
+
+    var lastIndex = midIndex;
+    for (int i = mid + 1; i < _values.length; i++) {
+      var index = FractionalIndex.between(lastIndex, _maxIndex);
+      setOrderOf(_values[i], index);
+      lastIndex = index;
+    }
+
+    lastIndex = midIndex;
+    for (int i = mid - 1; i >= 0; i--) {
+      var index = FractionalIndex.between(_minIndex, lastIndex);
+      setOrderOf(_values[i], index);
+      lastIndex = index;
+    }
+  }
+
+  void setOrderOf(T value, FractionalIndex order);
 
   int _compareIndex(T a, T b) {
     return orderOf(a).compareTo(orderOf(b));
   }
 
-  void sort() => _values.sort(_compareIndex);
+  void sortFractional() => _values.sort(_compareIndex);
 
+  @override
   void add(T item) {
     assert(!contains(item));
     _values.add(item);
@@ -50,15 +86,11 @@ abstract class FractionallyIndexedList<T> extends Iterable<T> {
   }
 
   void move(T item, {T before, T after}) {
-    assert(before != null && after != null);
-    setOrderOf(item, FractionalIndex.between(orderOf(before), orderOf(after)));
+    setOrderOf(
+        item,
+        FractionalIndex.between(before != null ? orderOf(before) : _minIndex,
+            after != null ? orderOf(after) : _maxIndex));
   }
-
-  @override
-  Iterator<T> get iterator => _values.iterator;
-
-  @override
-  bool contains(Object element) => _values.contains(element);
 }
 
 class FractionalIndex {
@@ -69,11 +101,11 @@ class FractionalIndex {
       : assert(numerator < denominator);
 
   const FractionalIndex.min()
-      : this.numerator = 0,
-        this.denominator = 1;
+      : numerator = 0,
+        denominator = 1;
   const FractionalIndex.max()
-      : this.numerator = 1,
-        this.denominator = 1;
+      : numerator = 1,
+        denominator = 1;
 
   int compareTo(FractionalIndex other) {
     return numerator * other.denominator - denominator * other.numerator;
@@ -84,7 +116,7 @@ class FractionalIndex {
         numerator + other.numerator, denominator + other.denominator);
   }
 
-  static FractionalIndex between(FractionalIndex a, FractionalIndex b) {
+  factory FractionalIndex.between(FractionalIndex a, FractionalIndex b) {
     return FractionalIndex(
             a.numerator + b.numerator, a.denominator + b.denominator)
         .reduce();
