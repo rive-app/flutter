@@ -4,16 +4,8 @@
     "int": 1,
     "string": "artboard"
   },
+  "extends": "container_component.json",
   "properties": {
-    "name": {
-      "type": "String",
-      "key": {
-        "int": 3,
-        "string": "name"
-      },
-      "description": "Non-unique identifier, friendly name. Runtimes provide an API for finding artboards by this [name].",
-      "nullable": true
-    },
     "width": {
       "type": "double",
       "key": {

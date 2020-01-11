@@ -10,19 +10,19 @@
       },
       "description": "Non-unique identifier, used to give friendly names to elements in the hierarchy. Runtimes provide an API for finding components by this [name]."
     },
-    "parent": {
+    "parentId": {
       "type": "int",
       "key": {
         "int": 11,
-        "string": "parent"
+        "string": "parentId"
       },
       "description": "Identifier used to track parent ContainerComponent."
     },
-    "order": {
-      "type": "int",
+    "childOrder": {
+      "type": "FractionalIndex",
       "key": {
         "int": 12,
-        "string": "order"
+        "string": "childOrder"
       },
       "description": "Order value for sorting child elements in ContainerComponent parent."
     }
