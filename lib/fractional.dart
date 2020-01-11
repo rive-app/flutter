@@ -59,7 +59,8 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
     _values.add(item);
   }
 
-  bool remove(T item) => _values.remove(item);
+  @override
+  bool remove(Object element) => _values.remove(element);
 
   void append(T item) {
     assert(!contains(item));
