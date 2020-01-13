@@ -55,7 +55,7 @@ class _TreeDragOperation<T> {
 abstract class TreeController<T> extends ChangeNotifier {
   final HashSet<T> _expanded = HashSet<T>();
   List<FlatTreeItem<T>> _flat;
-  HashMap<Key, int> _indexLookup;
+  HashMap<Key, int> _indexLookup = HashMap<Key, int>();
   HashMap<Key, int> get indexLookup => _indexLookup;
   final List<T> _data;
 
@@ -114,6 +114,7 @@ abstract class TreeController<T> extends ChangeNotifier {
     var flat = <FlatTreeItem<T>>[];
     var context = FlattenedTreeDataContext<T>(_expanded);
     var lookup = HashMap<Key, int>();
+    
     _flatten(context, _data, flat, lookup, [], null);
     _flat = flat;
     _indexLookup = lookup;
