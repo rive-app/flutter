@@ -394,7 +394,7 @@ class TreeView<T> extends StatelessWidget {
                     ),
                   );
                 },
-                childCount: controller.flat.length,
+                childCount: controller?.flat?.length ?? 0,
                 findChildIndexCallback: (Key key) {
                   return controller.indexLookup[key];
                 },
