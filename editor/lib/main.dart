@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'widgets/hierarchy.dart';
@@ -8,14 +10,14 @@ import 'widgets/popup/context_popup.dart';
 import 'widgets/resize_panel.dart';
 
 import 'package:window_utils/window_utils.dart';
-import 'package:rive_core/rive_file.dart';
+// import 'package:rive_core/rive_file.dart';
 // import 'package:core/coop/connect_result.dart';
 
 import 'package:provider/provider.dart';
 
 import 'widgets/tab_bar/rive_tab_bar.dart';
 
-var file = RiveFile("102:15468");
+// var file = RiveFile("102:15468");
 
 Node node;
 void main() {
@@ -44,14 +46,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // Instance the app context.
     var rive = Rive();
+
+    // Fake load a test file.
     rive.open("test");
     return CursorView(
       child: MultiProvider(
         providers: [
           Provider.value(value: rive),
-          ChangeNotifierProvider.value(value: rive.file),
-          ChangeNotifierProvider.value(value: rive.treeController)
         ],
         child: MaterialApp(
           theme: ThemeData(
@@ -66,19 +69,28 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// Just some fake tabs to test the widgets.
 var tabs = [
   RiveTabItem(name: "Guido's Files", closeable: false),
   RiveTabItem(name: "Ellipse Testing"),
   RiveTabItem(name: "Spaceman"),
 ];
 
+// Hacky way to track which tab is selected (just for testing).
 int selectedTab = 1;
 
-List<ContextItem> contextItems = [
-  ContextItem("Artboard", select:()=>print("Make artboard...")),
-  ContextItem("Node", select:()=>print("Make node...")),
+// Testing context menu items.
+List<ContextItem<Rive>> contextItems = [
+  ContextItem(
+    "Artboard",
+    select: (Rive rive) {
+      var artboard = Artboard()..name = "New Artboard";
+      rive.file.value.add(artboard);
+    },
+  ),
+  ContextItem("Node", select: (rive) => print("Make node...")),
   ContextItem.separator(),
-  ContextItem("Shape", select:()=>print("SELECT SHAPE!")),
+  ContextItem("Shape", select: (rive) => print("SELECT SHAPE!")),
   ContextItem("Pen", shortcut: "P"),
   ContextItem.separator(),
   ContextItem("Artboard", shortcut: "A"),
@@ -124,27 +136,29 @@ class Editor extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              PopupButton(
-                builder: (context) {
-                  return Container(
-                    margin:
-                        EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-                    child: Center(
-                      child: Text(
-                        "Add",
-                        style: TextStyle(
-                          fontFamily: 'Roboto-Regular',
-                          fontSize: 13,
-                          color: Colors.white,
+              Consumer<Rive>(
+                builder: (context, rive, _) => PopupButton(
+                  selectArg: rive,
+                  builder: (context) {
+                    return Container(
+                      margin: EdgeInsets.only(
+                          left: 10, right: 10, top: 5, bottom: 5),
+                      child: Center(
+                        child: Text(
+                          "Add",
+                          style: TextStyle(
+                            fontFamily: 'Roboto-Regular',
+                            fontSize: 13,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-                items: contextItems,
-                itemBuilder: (context, item, isHovered) => item
-                    .itemBuilder(context,
-                        isHovered) /*(
+                    );
+                  },
+                  items: contextItems,
+                  itemBuilder: (context, item, isHovered) => item.itemBuilder(
+                      context,
+                      isHovered) /*(
                   child: Text(
                     "Item $index",
                     style: TextStyle(
@@ -154,8 +168,9 @@ class Editor extends StatelessWidget {
                     ),
                   ),
                 )*/
-                ,
-                itemSelected: (context, index) {},
+                  ,
+                  itemSelected: (context, index) {},
+                ),
               ),
             ],
           ),
@@ -170,7 +185,14 @@ class Editor extends StatelessWidget {
                 max: 500,
                 child: Container(
                   color: Color.fromRGBO(50, 50, 50, 1.0),
-                  child: ExampleTreeView(),
+                  child: Consumer<Rive>(
+                    builder: (context, rive, _) =>
+                        ValueListenableBuilder<HierarchyTreeController>(
+                      valueListenable: rive.treeController,
+                      builder: (context, controller, _) =>
+                          HierarchyTreeView(controller: controller),
+                    ),
+                  ),
                 ),
               ),
               Expanded(

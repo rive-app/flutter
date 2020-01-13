@@ -10,6 +10,7 @@ class ComponentDirt {
 
 abstract class Component extends ComponentBase<RiveFile> {
   Artboard _artboard;
+  dynamic userData;
 
   ContainerComponent _parent;
   ContainerComponent get parent => _parent;

@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import '../path_widget.dart';
 import 'popup.dart';
 
-abstract class PopupListItem {
+typedef SelectCallback<T> = void Function(T param);
+
+abstract class PopupListItem<T> {
   bool get canSelect;
   double get height;
-  VoidCallback get select;
+  SelectCallback<T> get select;
 }
 
 typedef ListPopupItemBuilder<T> = Widget Function(
@@ -20,9 +22,10 @@ final _pathArrow = Path()
   ..close();
 
 class ListPopup {
-  static void show<T extends PopupListItem>(
+  static void show<A, T extends PopupListItem<A>>(
     BuildContext context, {
-    @required ListPopupItemBuilder itemBuilder,
+    @required ListPopupItemBuilder<T> itemBuilder,
+    A selectArg,
     double width = 177,
     double margin = 10,
     double arrow = 10,
@@ -72,9 +75,10 @@ class ListPopup {
                           var item = items[index];
                           return Container(
                             height: item.height,
-                            child: _PopupListItemShell<T>(
+                            child: _PopupListItemShell<A, T>(
                               itemBuilder: itemBuilder,
                               item: item,
+                              selectArg: selectArg,
                             ),
                           );
                         },
@@ -102,22 +106,28 @@ class ListPopup {
   }
 }
 
-class _PopupListItemShell<T extends PopupListItem> extends StatefulWidget {
+class _PopupListItemShell<A, T extends PopupListItem<A>>
+    extends StatefulWidget {
   final ListPopupItemBuilder itemBuilder;
   final T item;
+  final A selectArg;
 
   const _PopupListItemShell({
     Key key,
     this.itemBuilder,
     this.item,
+    this.selectArg,
   }) : super(key: key);
 
   @override
-  __PopupListItemShellState<T> createState() => __PopupListItemShellState<T>();
+  __PopupListItemShellState<A, T> createState() =>
+      __PopupListItemShellState<A, T>();
 }
 
-class __PopupListItemShellState<T extends PopupListItem>
+class __PopupListItemShellState<A, T extends PopupListItem<A>>
     extends State<_PopupListItemShell> {
+  _PopupListItemShell<A, T> get selectWidget =>
+      widget as _PopupListItemShell<A, T>;
   bool _isHovered = false;
   @override
   Widget build(BuildContext context) {
@@ -126,7 +136,7 @@ class __PopupListItemShellState<T extends PopupListItem>
         if (!widget.item.canSelect) {
           return;
         }
-        widget.item.select?.call();
+        selectWidget.item.select?.call(widget.selectArg);
         Popup.closeAll();
       },
       child: MouseRegion(

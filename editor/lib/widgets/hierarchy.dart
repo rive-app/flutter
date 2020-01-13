@@ -4,24 +4,20 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/component.dart';
+import '../rive/stage/stage_item.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_arrow_icon.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
-
-import 'my_tree_controller.dart';
-import 'tree_item.dart';
+import 'package:rive_core/selectable_item.dart';
+import '../rive/hierarchy_tree_controller.dart';
 
 /// An example tree view, shows how to implement TreeView widget and style it.
-class ExampleTreeView extends StatefulWidget {
-  @override
-  _ExampleTreeViewState createState() => _ExampleTreeViewState();
-}
+class HierarchyTreeView extends StatelessWidget {
+  final HierarchyTreeController controller;
 
-class _ExampleTreeViewState extends State<ExampleTreeView> {
-  /// TreeView controller which handles things like expanding items, responding
-  /// to whether drag/drop is allowed for a specific item, etc.
-  MyTreeController _controller;
+  const HierarchyTreeView({Key key, @required this.controller}) : super(key: key);
 
   /// Callback for creating the background of a tree row. This has some special
   /// state management for conditions like allowing dropping above/below/into an
@@ -113,12 +109,12 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
 
   @override
   Widget build(BuildContext context) {
-    return TreeView<TreeItem>(
+    return TreeView<Component>(
       style: TreeStyle(
         padding: const EdgeInsets.all(10),
         lineColor: Colors.grey.shade700,
       ),
-      controller: _controller,
+      controller: controller,
       expanderBuilder: (context, item) => Container(
         child: Center(
           child: TreeExpander(
@@ -158,13 +154,13 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
         ),
       ),
       backgroundBuilder: (context, item) => ValueListenableBuilder<DropState>(
-        valueListenable: item.dropState,
+        valueListenable: item.dropState,  
         builder: (context, dropState, _) =>
             ValueListenableBuilder<SelectionState>(
           builder: (context, selectionState, _) {
             return itemBackground(dropState, selectionState);
           },
-          valueListenable: item.data.selectionState,
+          valueListenable: item.data.stageItem?.selectionState,
         ),
       ),
       itemBuilder: (context, item) => ValueListenableBuilder<SelectionState>(
@@ -200,102 +196,102 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
             ],
           ),
         ),
-        valueListenable: item.data.selectionState,
+        valueListenable: item.data.stageItem.selectionState,
       ),
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
+  // @override
+  // void initState() {
+  //   super.initState();
 
-    // Just some test data...
-    var data = [
-      TreeItem(
-        "Artboard",
-        children: [
-          TreeItem(
-            "Group",
-            children: [
-              TreeItem("body"),
-              TreeItem("neck"),
-              TreeItem("leg_right"),
-              TreeItem("head"),
-              TreeItem("leg_left", children: [
-                TreeItem("one", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                ]),
-                TreeItem("ik_head", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                  TreeItem("neck"),
-                  TreeItem("leg_left", children: [
-                    TreeItem("one"),
-                    TreeItem("ik_head", children: [
-                      PropertyTreeItem("Translation Constraint"),
-                      TreeItem("neck"),
-                    ]),
-                    TreeItem("two"),
-                    TreeItem("three"),
-                  ]),
-                ]),
-                TreeItem("two"),
-                TreeItem("three"),
-              ]),
-              TreeItem("root", children: [
-                TreeItem("ik_head", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                  TreeItem("neck"),
-                ]),
-                TreeItem("ctrl_foot_left"),
-                TreeItem("ctrl_foot_right"),
-              ]),
-              TreeItem("leg_left"),
-              SoloTreeItem("eyes", children: [
-                TreeItem("eye_normal"),
-                TreeItem("eye_angry"),
-                TreeItem("eye_happy", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                  TreeItem("something"),
-                  TreeItem("something2"),
-                ]),
-                TreeItem("eye_other", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                  TreeItem("something"),
-                  TreeItem("something2"),
-                  SoloTreeItem("sub_eyes", children: [
-                    TreeItem("eye_normal"),
-                    TreeItem("eye_angry"),
-                    TreeItem("eye_happy", children: [
-                      PropertyTreeItem("Translation Constraint"),
-                      PropertyTreeItem("Rotation Constraint"),
-                      TreeItem("something"),
-                      TreeItem("something2"),
-                    ]),
-                    TreeItem("eye_other", children: [
-                      PropertyTreeItem("Translation Constraint"),
-                      TreeItem("something"),
-                      TreeItem("something2"),
-                    ]),
-                    TreeItem("ctrl_foot_left"),
-                    TreeItem("ctrl_foot_right"),
-                  ]),
-                ]),
-                TreeItem("ctrl_foot_left"),
-                TreeItem("ctrl_foot_right"),
-              ]),
-              TreeItem("leg_right"),
-            ],
-          ),
-        ],
-      )
-    ];
-    _controller = MyTreeController(data);
+  //   // Just some test data...
+  //   var data = [
+  //     TreeItem(
+  //       "Artboard",
+  //       children: [
+  //         TreeItem(
+  //           "Group",
+  //           children: [
+  //             TreeItem("body"),
+  //             TreeItem("neck"),
+  //             TreeItem("leg_right"),
+  //             TreeItem("head"),
+  //             TreeItem("leg_left", children: [
+  //               TreeItem("one", children: [
+  //                 PropertyTreeItem("Translation Constraint"),
+  //               ]),
+  //               TreeItem("ik_head", children: [
+  //                 PropertyTreeItem("Translation Constraint"),
+  //                 TreeItem("neck"),
+  //                 TreeItem("leg_left", children: [
+  //                   TreeItem("one"),
+  //                   TreeItem("ik_head", children: [
+  //                     PropertyTreeItem("Translation Constraint"),
+  //                     TreeItem("neck"),
+  //                   ]),
+  //                   TreeItem("two"),
+  //                   TreeItem("three"),
+  //                 ]),
+  //               ]),
+  //               TreeItem("two"),
+  //               TreeItem("three"),
+  //             ]),
+  //             TreeItem("root", children: [
+  //               TreeItem("ik_head", children: [
+  //                 PropertyTreeItem("Translation Constraint"),
+  //                 TreeItem("neck"),
+  //               ]),
+  //               TreeItem("ctrl_foot_left"),
+  //               TreeItem("ctrl_foot_right"),
+  //             ]),
+  //             TreeItem("leg_left"),
+  //             SoloTreeItem("eyes", children: [
+  //               TreeItem("eye_normal"),
+  //               TreeItem("eye_angry"),
+  //               TreeItem("eye_happy", children: [
+  //                 PropertyTreeItem("Translation Constraint"),
+  //                 TreeItem("something"),
+  //                 TreeItem("something2"),
+  //               ]),
+  //               TreeItem("eye_other", children: [
+  //                 PropertyTreeItem("Translation Constraint"),
+  //                 TreeItem("something"),
+  //                 TreeItem("something2"),
+  //                 SoloTreeItem("sub_eyes", children: [
+  //                   TreeItem("eye_normal"),
+  //                   TreeItem("eye_angry"),
+  //                   TreeItem("eye_happy", children: [
+  //                     PropertyTreeItem("Translation Constraint"),
+  //                     PropertyTreeItem("Rotation Constraint"),
+  //                     TreeItem("something"),
+  //                     TreeItem("something2"),
+  //                   ]),
+  //                   TreeItem("eye_other", children: [
+  //                     PropertyTreeItem("Translation Constraint"),
+  //                     TreeItem("something"),
+  //                     TreeItem("something2"),
+  //                   ]),
+  //                   TreeItem("ctrl_foot_left"),
+  //                   TreeItem("ctrl_foot_right"),
+  //                 ]),
+  //               ]),
+  //               TreeItem("ctrl_foot_left"),
+  //               TreeItem("ctrl_foot_right"),
+  //             ]),
+  //             TreeItem("leg_right"),
+  //           ],
+  //         ),
+  //       ],
+  //     )
+  //   ];
+  //   _controller = MyTreeController(data);
 
-    // Programmatically expand some items in the tree
-    _controller.expand(data[0]);
-    _controller.expand(data[0].children[0]);
-    _controller.expand(data[0].children[0].children[5]);
-  }
+  //   // Programmatically expand some items in the tree
+  //   _controller.expand(data[0]);
+  //   _controller.expand(data[0].children[0]);
+  //   _controller.expand(data[0].children[0].children[5]);
+  // }
 }
 
 /// Widget used to draw a circular expansion arrow for items in the tree that

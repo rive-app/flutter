@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'list_popup.dart';
 
-class ContextItem extends PopupListItem {
+class ContextItem<T> extends PopupListItem<T> {
   final WidgetBuilder iconBuilder;
   final String name;
   final String shortcut;
   final WidgetBuilder widgetBuilder;
   final List<ContextItem> popup;
-  final VoidCallback select;
+  final SelectCallback<T> select;
   final bool isActive;
 
   ContextItem(

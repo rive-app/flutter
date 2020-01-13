@@ -34,8 +34,9 @@ abstract class ContainerComponent extends ContainerComponentBase {
     if (child.parent != this) {
       return false;
     }
-    children.remove(child);
+    var removed = children.remove(child);
     childRemoved(child);
+    return removed;
   }
 
   void childRemoved(Component child) {}

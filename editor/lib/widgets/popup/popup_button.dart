@@ -4,11 +4,12 @@ import 'list_popup.dart';
 
 typedef ItemCounter = int Function();
 
-class PopupButton<T extends PopupListItem> extends StatelessWidget {
+class PopupButton<A, T extends PopupListItem<A>> extends StatelessWidget {
   final WidgetBuilder builder;
   final List<T> items;
   final ListPopupItemBuilder itemBuilder;
   final ListPopupItemEvent itemSelected;
+  final A selectArg;
 
   const PopupButton({
     Key key,
@@ -16,6 +17,7 @@ class PopupButton<T extends PopupListItem> extends StatelessWidget {
     this.items,
     this.itemBuilder,
     this.itemSelected,
+    this.selectArg,
   }) : super(key: key);
 
   @override
@@ -24,6 +26,7 @@ class PopupButton<T extends PopupListItem> extends StatelessWidget {
       onTapDown: (details) {
         ListPopup.show(
           context,
+          selectArg: selectArg,
           items: items,
           itemBuilder: itemBuilder,
         );

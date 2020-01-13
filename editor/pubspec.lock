@@ -108,12 +108,12 @@ packages:
     source: sdk
     version: "0.0.0"
   fractional:
-    dependency: "direct main"
+    dependency: transitive
     description:
-      path: "../dependencies/fractional-dart"
+      path: "../dependencies/core-dart/dependencies/fractional-dart"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "0.0.2"
   image:
     dependency: transitive
     description:

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/rive_file.dart';
 
 import 'hierarchy_tree_controller.dart';
-import 'selectable_item.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'stage/stage.dart';
+import 'package:core/core.dart';
 
 class Rive with RiveFileDelegate {
   final ValueNotifier<RiveFile> file = ValueNotifier<RiveFile>(null);
@@ -14,10 +15,12 @@ class Rive with RiveFileDelegate {
 
   void _changeFile(RiveFile nextFile) {
     file.value = nextFile;
-    treeController.value = HierarchyTreeController(nextFile.artboards);
     selectedItems.clear();
     _stage?.dispose();
     _stage = Stage(this, file.value);
+
+    // Tree controller is based off of stage items.
+    treeController.value = HierarchyTreeController(nextFile.artboards);
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
@@ -32,4 +35,10 @@ class Rive with RiveFileDelegate {
   void onArtboardsChanged() {
     treeController.value.flatten();
   }
+
+  @override
+  void onObjectAdded(Core object) {
+    _stage.initComponent(object);
+  }
+
 }
