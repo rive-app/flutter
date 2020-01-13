@@ -111,6 +111,7 @@ class HierarchyTreeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return TreeView<Component>(
       style: TreeStyle(
+        showFirstLine: true,
         padding: const EdgeInsets.all(10),
         lineColor: Colors.grey.shade700,
       ),

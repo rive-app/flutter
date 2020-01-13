@@ -15,6 +15,7 @@ import 'package:window_utils/window_utils.dart';
 
 import 'package:provider/provider.dart';
 
+import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
 
 // var file = RiveFile("102:15468");
@@ -84,7 +85,12 @@ List<ContextItem<Rive>> contextItems = [
   ContextItem(
     "Artboard",
     select: (Rive rive) {
-      var artboard = Artboard()..name = "New Artboard";
+      var artboard = Artboard()
+        ..name = "New Artboard"
+        ..x = 0
+        ..y = 0
+        ..width = 200
+        ..height = 100;
       rive.file.value.add(artboard);
     },
   ),
@@ -210,6 +216,9 @@ class Editor extends StatelessWidget {
                     Expanded(
                       child: Container(
                         color: Color.fromRGBO(29, 29, 29, 1.0),
+                        child: Consumer<Rive>(
+                          builder: (context, rive, _) => StageView(rive),
+                        ),
                       ),
                     ),
                     ResizePanel(

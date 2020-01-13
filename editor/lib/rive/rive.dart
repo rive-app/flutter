@@ -12,7 +12,8 @@ class Rive with RiveFileDelegate {
       ValueNotifier<HierarchyTreeController>(null);
   final Set<SelectableItem> selectedItems = {};
   Stage _stage;
-
+  Stage get stage => _stage;
+  
   void _changeFile(RiveFile nextFile) {
     file.value = nextFile;
     selectedItems.clear();
@@ -34,11 +35,12 @@ class Rive with RiveFileDelegate {
   @override
   void onArtboardsChanged() {
     treeController.value.flatten();
+    // TODO: this will get handled by dependency manager.
+    _stage.markNeedsAdvance();
   }
 
   @override
   void onObjectAdded(Core object) {
     _stage.initComponent(object);
   }
-
 }
