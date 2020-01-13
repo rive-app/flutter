@@ -8,6 +8,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 
@@ -22,8 +23,14 @@ abstract class StageDelegate {
 }
 
 class Stage {
+  static const double _minZoom = 0.1;
+  static const double _maxZoom = 8.0;
+
   Mat2D _viewTransform = Mat2D();
   Mat2D _inverseViewTransform = Mat2D();
+  Vec2D _lastMousePosition = Vec2D();
+  // bool _isRightMouseDown = false;
+  double _rightMouseMoveAccum = 0.0;
   Mat2D get inverseViewTransform => _inverseViewTransform;
   double _viewportWidth = 0.0, _viewportHeight = 0.0;
   Mat2D get viewTransform => _viewTransform;
@@ -53,7 +60,82 @@ class Stage {
     }
     _viewportWidth = width;
     _viewportHeight = height;
+    markNeedsAdvance();
     return true;
+  }
+
+  void zoomTo(double x, double y, double scale) {
+    scale = scale.clamp(_minZoom, _maxZoom);
+    double zoomDelta = scale / this._viewZoomTarget;
+    this._viewZoomTarget = scale;
+
+    double ox = x - _viewTranslationTarget[0];
+    double oy = y - _viewTranslationTarget[1];
+
+    double ox2 = ox * zoomDelta;
+    double oy2 = oy * zoomDelta;
+
+    _viewTranslationTarget[0] += ox - ox2;
+    _viewTranslationTarget[1] += oy - oy2;
+    markNeedsAdvance();
+  }
+
+  void mouseWheel(double x, double y, double dx, double dy) {
+    _lastMousePosition[0] = x;
+    _lastMousePosition[1] = y;
+    zoomTo(x, y, _viewZoomTarget - dy / 30.0);
+  }
+
+  StageItem _hover;
+  void mouseMove(int button, double x, double y) {
+    AABB viewAABB = obbToAABB(
+        AABB.fromValues(x, y, x + 1.0, y + 1.0), _inverseViewTransform);
+    // print("VI $viewAABB");
+    var old = _hover;
+    _hover?.select(SelectionState.none);
+    _hover = null;
+    visTree.query(viewAABB, (int proxyId, StageItem item) {
+      _hover = item;
+      return true;
+    });
+    _hover?.select(SelectionState.hovered);
+    if (old != _hover) {
+      markNeedsAdvance();
+    }
+
+    // print("HIT $hover");
+    _lastMousePosition[0] = x;
+    _lastMousePosition[1] = y;
+  }
+
+  void mouseDown(int button, double x, double y) {
+    _lastMousePosition[0] = x;
+    _lastMousePosition[1] = y;
+  }
+
+  void mouseDrag(int button, double x, double y) {
+    switch (button) {
+      case 2:
+        double dx = (x - _lastMousePosition[0]);
+        double dy = (y - _lastMousePosition[1]);
+
+        _rightMouseMoveAccum += sqrt(dx * dx + dy * dy);
+        _viewTranslationTarget[0] += dx;
+        _viewTranslationTarget[1] += dy;
+
+        _lastMousePosition[0] = x;
+        _lastMousePosition[1] = y;
+        markNeedsAdvance();
+        break;
+    }
+  }
+
+  void mouseUp(int button, double x, double y) {
+    _lastMousePosition[0] = x;
+    _lastMousePosition[1] = y;
+    if (button == 2 && _rightMouseMoveAccum < 5) {
+      // show a popup.
+    }
   }
 
   final Set<VoidCallback> _debounce = {};
@@ -61,7 +143,7 @@ class Stage {
   final Rive rive;
   final RiveFile riveFile;
   // final Set<StageItem> items = {};
-  final AABBTree<StageItem> visTree = AABBTree<StageItem>();
+  final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding:0);
 
   Stage(this.rive, this.riveFile) {
     for (final object in riveFile.objects.values) {
@@ -131,18 +213,28 @@ class Stage {
     _debounce.clear();
 
     double ds = _viewZoomTarget - _viewZoom;
+    double dx = _viewTranslationTarget[0] - _viewTranslation[0];
+    double dy = _viewTranslationTarget[1] - _viewTranslation[1];
 
-    double factor = min(1.0, elapsed * 15.0);
+    double factor = min(1.0, elapsed * 30.0);
 
     _needsAdvance = false;
     if (ds.abs() > 0.00001) {
       _needsAdvance = true;
       ds *= factor;
     }
+    if (dx.abs() > 0.01) {
+      _needsAdvance = true;
+      dx *= factor;
+    }
+    if (dy.abs() > 0.01) {
+      _needsAdvance = true;
+      dy *= factor;
+    }
 
     _viewZoom += ds;
-    _viewTranslation[0] = _viewTranslationTarget[0];
-    _viewTranslation[1] = _viewTranslationTarget[1];
+    _viewTranslation[0] += dx;
+    _viewTranslation[1] += dy;
 
     Mat2D view = viewTransform;
     view[0] = _viewZoom;
@@ -164,6 +256,7 @@ class Stage {
 
     var canvas = context.canvas;
     canvas.save();
+    canvas.clipRect(offset & size);
     canvas.translate(offset.dx, offset.dy);
     canvas.transform(viewTransform.mat4);
 

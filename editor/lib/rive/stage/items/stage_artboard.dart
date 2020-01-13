@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/selectable_item.dart';
 
 import '../stage.dart';
 import '../stage_item.dart';
@@ -49,6 +50,6 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
     canvas.drawRect(
         Rect.fromLTWH(
             component.x, component.y, component.width, component.height),
-        Paint()..color = Color.fromRGBO(255, 0, 0, 1.0));
+        Paint()..color = selectionState.value == SelectionState.none ? Color.fromRGBO(100, 100, 100, 1.0) : Color.fromRGBO(200, 200, 200, 1.0));
   }
 }

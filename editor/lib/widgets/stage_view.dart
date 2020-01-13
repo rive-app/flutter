@@ -50,6 +50,11 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
   }
 
   @override
+  void performLayout() {
+    _rive.stage.setViewport(size.width, size.height);
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (isPlaying) {
       // Paint again
