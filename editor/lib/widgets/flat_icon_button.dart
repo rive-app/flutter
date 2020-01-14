@@ -16,27 +16,25 @@ class FlatIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: ThemeUtils.buttonColor,
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: <Widget>[
-                icon,
-                Container(width: 5.0),
-                Text(
-                  label,
-                  style: TextStyle(color: ThemeUtils.buttonTextColor),
-                ),
-              ],
-            ),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: ThemeUtils.buttonColor,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: <Widget>[
+              Container(width: 10.0),
+              icon,
+              Container(width: 10.0),
+              Text(
+                label,
+                style: TextStyle(color: ThemeUtils.buttonTextColor),
+              ),
+            ],
           ),
         ),
       ),

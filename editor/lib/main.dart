@@ -6,11 +6,10 @@ import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'widgets/files_view/file.dart';
-import 'widgets/files_view/folder.dart';
+import 'rive/file_browser/file.dart';
+import 'rive/file_browser/folder.dart';
 import 'widgets/files_view/view.dart';
 import 'widgets/hierarchy.dart';
-import 'widgets/path_widget.dart';
 import 'widgets/popup/context_popup.dart';
 import 'widgets/profile_view.dart';
 import 'widgets/resize_panel.dart';
@@ -64,10 +63,12 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          home: DefaultTextStyle(
+            style: TextStyle(fontFamily: "Roboto-Regular"),
+            child: Editor(),
           ),
-          home: Editor(),
         ),
       ),
     );
@@ -151,7 +152,7 @@ class Editor extends StatelessWidget {
   }
 
   Widget _buildFiles(BuildContext context) {
-    const kProfileWidth = 280.0;
+    const kProfileWidth = 215.0;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -175,14 +176,12 @@ class Editor extends StatelessWidget {
                 name: "Partical Systems",
               ),
               FolderItem(
-                selected: true,
                 key: ValueKey("005"),
                 name: "Raiders of Odin",
               ),
             ],
             files: [
               FileItem(
-                selected: true,
                 key: ValueKey("001"),
                 name: "Dragon",
                 image: "https://www.lunapic.com/editor/premade/transparent.gif",
@@ -212,7 +211,7 @@ class Editor extends StatelessWidget {
           width: kProfileWidth,
           color: ThemeUtils.backgroundLightGrey,
           child: Padding(
-            padding: EdgeInsets.only(bottom: 20.0, top: 20.0),
+            padding: EdgeInsets.all(20.0),
             child: ProfileView(),
           ),
         ),
