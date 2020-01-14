@@ -98,9 +98,7 @@ class FileBrowser extends FileBrowserController {
 
   @override
   void selectFolder(FolderItem value, bool selection) {
-    _folders.forEach((f, i) {
-      i.onSelect(false);
-    });
+    _folders.forEach((f, i) => i.onSelect(false));
     _folders[value.key].onSelect(selection);
     notifyListeners();
   }
