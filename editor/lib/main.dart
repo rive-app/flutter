@@ -157,55 +157,7 @@ class Editor extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Expanded(
-          child: FilesView(
-            folders: [
-              FolderItem(
-                key: ValueKey("001"),
-                name: "2D Characters",
-              ),
-              FolderItem(
-                key: ValueKey("002"),
-                name: "Sample Characters",
-              ),
-              FolderItem(
-                key: ValueKey("003"),
-                name: "Quanta Tests",
-              ),
-              FolderItem(
-                key: ValueKey("004"),
-                name: "Partical Systems",
-              ),
-              FolderItem(
-                key: ValueKey("005"),
-                name: "Raiders of Odin",
-              ),
-            ],
-            files: [
-              FileItem(
-                key: ValueKey("001"),
-                name: "Dragon",
-                image: "https://www.lunapic.com/editor/premade/transparent.gif",
-              ),
-              FileItem(
-                key: ValueKey("002"),
-                name: "Flossy",
-                image:
-                    "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
-              ),
-              FileItem(
-                key: ValueKey("003"),
-                name: "The Kid",
-                image:
-                    "http://www.pngmart.com/files/9/Marvel-Thanos-PNG-Free-Download.png",
-              ),
-              FileItem(
-                key: ValueKey("004"),
-                name: "Yellow Mech",
-                image:
-                    "https://webstockreview.net/images/clipart-baby-sea-otter-13.png",
-              ),
-            ],
-          ),
+          child: FilesView(),
         ),
         Container(
           width: kProfileWidth,

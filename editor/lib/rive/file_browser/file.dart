@@ -14,7 +14,9 @@ class FileItem extends ChangeNotifier {
   bool _selected = false;
   bool get selected => _selected;
   void onSelect(bool value) {
-    _selected = value;
-    notifyListeners();
+    if (value != _selected) {
+      _selected = value;
+      notifyListeners();
+    }
   }
 }

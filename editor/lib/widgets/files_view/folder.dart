@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
 import 'package:rive_editor/widgets/path_widget.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -13,6 +14,7 @@ class FolderViewWidget extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
     return ChangeNotifierProvider.value(
       value: folder,
       child: Container(
@@ -28,9 +30,15 @@ class FolderViewWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12.0),
             shadowColor: Color.fromRGBO(238, 248, 255, 1.0),
             child: GestureDetector(
-              onTap: () => folder.onSelect(!folder.selected),
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 150),
+              onTap: () {
+                _fileBrowser.selectFolder(folder, !folder.selected);
+              },
+              onDoubleTap: () {
+                _fileBrowser.selectFolder(folder, true);
+                _fileBrowser.openFolder(folder);
+              },
+              child: Container(
+                // duration: Duration(milliseconds: 150),
                 decoration: folder.selected
                     ? BoxDecoration(
                         border: Border.all(

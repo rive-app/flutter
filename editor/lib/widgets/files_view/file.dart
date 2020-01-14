@@ -29,8 +29,8 @@ class FileViewWidget extends StatelessWidget {
             shadowColor: Color.fromRGBO(238, 248, 255, 1.0),
             child: GestureDetector(
               onTap: () => file.onSelect(!file.selected),
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 150),
+              child: Container(
+                // duration: Duration(milliseconds: 150),
                 decoration: file.selected
                     ? BoxDecoration(
                         border: Border.all(
