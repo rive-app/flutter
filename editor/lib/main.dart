@@ -5,8 +5,14 @@ import 'package:cursor/cursor_view.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
+import 'package:rive_editor/widgets/theme.dart';
+import 'widgets/files_view/file.dart';
+import 'widgets/files_view/folder.dart';
+import 'widgets/files_view/view.dart';
 import 'widgets/hierarchy.dart';
+import 'widgets/path_widget.dart';
 import 'widgets/popup/context_popup.dart';
+import 'widgets/profile_view.dart';
 import 'widgets/resize_panel.dart';
 
 import 'package:window_utils/window_utils.dart';
@@ -57,12 +63,11 @@ class MyApp extends StatelessWidget {
           Provider.value(value: rive),
         ],
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: Scaffold(
-            body: Editor(),
-          ),
+          home: Editor(),
         ),
       ),
     );
@@ -102,33 +107,122 @@ List<ContextItem<Rive>> contextItems = [
 class Editor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: 39,
-          color: Color.fromRGBO(50, 50, 50, 1.0),
-          child: Stack(
-            children: <Widget>[
-              Positioned.fill(
-                child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (_) {
-                      WindowUtils.startDrag();
-                    }),
+    return Material(
+      child: Column(
+        children: [
+          Container(
+            height: 39,
+            color: Color.fromRGBO(50, 50, 50, 1.0),
+            child: Stack(
+              children: <Widget>[
+                Positioned.fill(
+                  child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (_) {
+                        WindowUtils.startDrag();
+                      }),
+                ),
+                RiveTabBar(
+                  offset: 95,
+                  tabs: tabs,
+                  selected: tabs[selectedTab],
+                  select: (tab) {
+                    // Hackity hack to test the tabs.
+                    selectedTab = tabs.indexOf(tab);
+                    (context as Element).markNeedsBuild();
+                  },
+                ),
+              ],
+            ),
+          ),
+          Expanded(child: _buildBody(context))
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    switch (selectedTab) {
+      case 0:
+        return _buildFiles(context);
+      default:
+        return _buildEditor(context);
+    }
+  }
+
+  Widget _buildFiles(BuildContext context) {
+    const kProfileWidth = 280.0;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+          child: FilesView(
+            folders: [
+              FolderItem(
+                key: ValueKey("001"),
+                name: "2D Characters",
               ),
-              RiveTabBar(
-                offset: 95,
-                tabs: tabs,
-                selected: tabs[selectedTab],
-                select: (tab) {
-                  // Hackity hack to test the tabs.
-                  selectedTab = tabs.indexOf(tab);
-                  (context as Element).markNeedsBuild();
-                },
+              FolderItem(
+                key: ValueKey("002"),
+                name: "Sample Characters",
+              ),
+              FolderItem(
+                key: ValueKey("003"),
+                name: "Quanta Tests",
+              ),
+              FolderItem(
+                key: ValueKey("004"),
+                name: "Partical Systems",
+              ),
+              FolderItem(
+                selected: true,
+                key: ValueKey("005"),
+                name: "Raiders of Odin",
+              ),
+            ],
+            files: [
+              FileItem(
+                selected: true,
+                key: ValueKey("001"),
+                name: "Dragon",
+                image: "https://www.lunapic.com/editor/premade/transparent.gif",
+              ),
+              FileItem(
+                key: ValueKey("002"),
+                name: "Flossy",
+                image:
+                    "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
+              ),
+              FileItem(
+                key: ValueKey("003"),
+                name: "The Kid",
+                image:
+                    "http://www.pngmart.com/files/9/Marvel-Thanos-PNG-Free-Download.png",
+              ),
+              FileItem(
+                key: ValueKey("004"),
+                name: "Yellow Mech",
+                image:
+                    "https://webstockreview.net/images/clipart-baby-sea-otter-13.png",
               ),
             ],
           ),
         ),
+        Container(
+          width: kProfileWidth,
+          color: ThemeUtils.backgroundLightGrey,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 20.0, top: 20.0),
+            child: ProfileView(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEditor(BuildContext context) {
+    return Column(
+      children: <Widget>[
         Container(
           padding: EdgeInsets.all(5),
           height: 42,
@@ -159,15 +253,15 @@ class Editor extends StatelessWidget {
                   itemBuilder: (context, item, isHovered) => item.itemBuilder(
                       context,
                       isHovered) /*(
-                  child: Text(
-                    "Item $index",
-                    style: TextStyle(
-                      fontFamily: 'Roboto-Regular',
-                      fontSize: 13,
-                      color: Colors.white,
-                    ),
+                child: Text(
+                  "Item $index",
+                  style: TextStyle(
+                    fontFamily: 'Roboto-Regular',
+                    fontSize: 13,
+                    color: Colors.white,
                   ),
-                )*/
+                ),
+              )*/
                   ,
                   itemSelected: (context, index) {},
                 ),

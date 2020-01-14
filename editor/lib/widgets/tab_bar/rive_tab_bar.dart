@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_drawing/path_drawing.dart';
+import 'package:rive_editor/widgets/theme.dart';
 
 import '../path_widget.dart';
 import 'tab_decoration.dart';
@@ -19,8 +20,6 @@ class RiveTabItem {
   });
 }
 
-var _closeIcon = parseSvgPathData(
-    'M9.68198 8.83883L7.20711 6.36396L9.68198 3.88909C9.87714 3.69393 9.87714 3.37714 9.68198 3.18198C9.48682 2.98682 9.17004 2.98682 8.97487 3.18198L6.5 5.65685L4.02513 3.18198C3.82996 2.98682 3.51318 2.98682 3.31802 3.18198C3.12286 3.37714 3.12286 3.69393 3.31802 3.88909L5.79289 6.36396L3.31802 8.83883C3.12286 9.034 3.12286 9.35078 3.31802 9.54594C3.51318 9.7411 3.82996 9.7411 4.02513 9.54594L6.5 7.07107L8.97487 9.54594C9.17004 9.7411 9.48682 9.7411 9.68198 9.54594C9.87714 9.35078 9.87714 9.034 9.68198 8.83883Z');
 
 typedef TabSelectedCallback = void Function(RiveTabItem item);
 
@@ -54,7 +53,7 @@ class _TabBarItem extends StatelessWidget {
             if (tab.closeable) SizedBox(width: 10),
             if (tab.closeable)
               PathWidget(
-                path: _closeIcon,
+                path: ThemeUtils.closeIcon,
                 nudge: Offset(0.5, 0),
                 paint: Paint()
                   ..color = Color.fromRGBO(140, 140, 140, 1.0)
@@ -70,6 +69,7 @@ class _TabBarItem extends StatelessWidget {
     );
   }
 }
+
 
 class RiveTabBar extends StatelessWidget {
   final List<RiveTabItem> tabs;

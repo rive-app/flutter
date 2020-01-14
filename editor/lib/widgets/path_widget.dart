@@ -84,6 +84,7 @@ class _PathRenderObject extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     var canvas = context.canvas;
     canvas.save();
+    // canvas.saveLayer(offset & size, Paint());
     canvas.translate(offset.dx.roundToDouble() + nudge.dx - _bounds.left,
         offset.dy.roundToDouble() + nudge.dy - _bounds.top);
     canvas.drawPath(path, pathPaint);
