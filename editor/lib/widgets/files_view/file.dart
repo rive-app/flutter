@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/file_browser/file.dart';
+import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -13,6 +14,7 @@ class FileViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const kBottomHeight = 40.0;
+    final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
     return ChangeNotifierProvider.value(
       value: file,
       child: Container(
@@ -28,7 +30,12 @@ class FileViewWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(25.0),
             shadowColor: Color.fromRGBO(238, 248, 255, 1.0),
             child: GestureDetector(
-              onTap: () => file.onSelect(!file.selected),
+              onTap: () {
+                _fileBrowser.selectFile(file, !file.selected);
+              },
+              onDoubleTap: () {
+                _fileBrowser.openFile(file);
+              },
               child: Container(
                 // duration: Duration(milliseconds: 150),
                 decoration: file.selected

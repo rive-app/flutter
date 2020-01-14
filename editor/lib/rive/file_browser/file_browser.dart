@@ -45,31 +45,31 @@ class FileBrowser extends FileBrowserController {
           image: "https://www.lunapic.com/editor/premade/transparent.gif",
         ),
         FileItem(
-          key: ValueKey("002"),
-          name: "Flossy",
-          image:
-              "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
-        ),
-        FileItem(
           key: ValueKey("003"),
           name: "The Kid",
           image:
               "http://www.pngmart.com/files/9/Marvel-Thanos-PNG-Free-Download.png",
+        ),
+        FileItem(
+          key: ValueKey("002"),
+          name: "Flossy",
+          image:
+              "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
         ),
       ]),
       ValueKey("003"):
           FolderItem(key: ValueKey("003"), name: "Quanta Tests", files: [
         FileItem(
-          key: ValueKey("002"),
-          name: "Flossy",
-          image:
-              "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
-        ),
-        FileItem(
           key: ValueKey("003"),
           name: "The Kid",
           image:
               "http://www.pngmart.com/files/9/Marvel-Thanos-PNG-Free-Download.png",
+        ),
+        FileItem(
+          key: ValueKey("002"),
+          name: "Flossy",
+          image:
+              "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
         ),
       ]),
       ValueKey("004"):
@@ -98,9 +98,16 @@ class FileBrowser extends FileBrowserController {
 
   @override
   void selectFolder(FolderItem value, bool selection) {
-    _folders.forEach((f, i) => i.onSelect(false));
+    _reset();
     _folders[value.key].onSelect(selection);
     notifyListeners();
+  }
+
+  void _reset() {
+    _folders.forEach((f, i) => i.onSelect(false));
+    if (_selectedFolder != null) {
+      _selectedFolder.files.forEach((f) => f.onSelect(false));
+    }
   }
 
   @override
@@ -120,4 +127,19 @@ class FileBrowser extends FileBrowserController {
 
   @override
   SelectionMode get selectionMode => _mode;
+
+  @override
+  void selectFile(FileItem value, bool selection) {
+    _reset();
+    _folders.forEach((f, i) => i.onSelect(false));
+    _selectedFolder.files
+        .firstWhere((f) => f.key == value.key)
+        .onSelect(selection);
+    notifyListeners();
+  }
+
+  @override
+  void openFile(FileItem value) {
+    // TODO: implement openFile
+  }
 }
