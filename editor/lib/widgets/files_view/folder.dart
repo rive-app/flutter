@@ -13,8 +13,8 @@ class FolderViewWidget extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<FolderItem>(
-      create: (_) => folder,
+    return ChangeNotifierProvider.value(
+      value: folder,
       child: Container(
         margin: const EdgeInsets.only(
           left: 10.0,
@@ -29,7 +29,8 @@ class FolderViewWidget extends StatelessWidget {
             shadowColor: Color.fromRGBO(238, 248, 255, 1.0),
             child: GestureDetector(
               onTap: () => folder.onSelect(!folder.selected),
-              child: Container(
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 150),
                 decoration: folder.selected
                     ? BoxDecoration(
                         border: Border.all(

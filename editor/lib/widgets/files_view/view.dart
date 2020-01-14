@@ -31,6 +31,37 @@ class FilesView extends StatelessWidget {
         Container(
           width: 252.0,
           color: ThemeUtils.backgroundLightGrey,
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            filled: true,
+                            border: InputBorder.none,
+                            hintText: 'Search',
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(width: 4.0),
+                    FloatingActionButton(
+                      mini: true,
+                      elevation: 2.0,
+                      backgroundColor: Colors.black,
+                      child: Icon(Icons.add),
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: LayoutBuilder(

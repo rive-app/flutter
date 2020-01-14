@@ -13,8 +13,8 @@ class FileViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const kBottomHeight = 40.0;
-    return ChangeNotifierProvider<FileItem>(
-      create: (_) => file,
+    return ChangeNotifierProvider.value(
+      value: file,
       child: Container(
         padding: const EdgeInsets.only(
           left: 10.0,
@@ -29,7 +29,8 @@ class FileViewWidget extends StatelessWidget {
             shadowColor: Color.fromRGBO(238, 248, 255, 1.0),
             child: GestureDetector(
               onTap: () => file.onSelect(!file.selected),
-              child: Container(
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 150),
                 decoration: file.selected
                     ? BoxDecoration(
                         border: Border.all(
