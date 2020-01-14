@@ -132,8 +132,16 @@ class FilesView extends StatelessWidget {
                                 ),
                                 childrenDelegate: SliverChildBuilderDelegate(
                                   (context, index) {
+                                    final _fileBrowser =
+                                        Provider.of<FileBrowser>(context,
+                                            listen: false);
+                                    final file = files[index];
                                     return Draggable<FileItem>(
                                       dragAnchor: DragAnchor.pointer,
+                                      onDragStarted: () {
+                                        _fileBrowser.selectFile(
+                                            file, !file.selected);
+                                      },
                                       feedback: Material(
                                         elevation: 30.0,
                                         shadowColor: Colors.grey[50],
@@ -148,7 +156,7 @@ class FilesView extends StatelessWidget {
                                             padding:
                                                 EdgeInsets.only(left: 20.0),
                                             child: Text(
-                                              files[0].name,
+                                              file.name,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
