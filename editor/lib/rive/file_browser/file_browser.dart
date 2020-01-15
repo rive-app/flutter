@@ -1,113 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
+import 'dart:math' as math;
 
 import 'controller.dart';
 import 'file.dart';
 
 class FileBrowser extends FileBrowserController {
-  Map<Key, FolderItem> _folders = {};
+  Set<FolderItem> _folders = {};
   FolderItem _selectedFolder;
   SelectionMode _mode = SelectionMode.single;
 
   void init() {
-    _folders.addAll({
-      ValueKey("001"):
-          FolderItem(key: ValueKey("001"), name: "2D Characters", files: [
-        FileItem(
-          key: ValueKey("001"),
-          name: "Dragon",
-          image: "https://www.lunapic.com/editor/premade/transparent.gif",
-        ),
-        FileItem(
-          key: ValueKey("002"),
-          name: "Flossy",
-          image:
-              "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
-        ),
-        FileItem(
-          key: ValueKey("003"),
-          name: "The Kid",
-          image:
-              "http://www.pngmart.com/files/9/Marvel-Thanos-PNG-Free-Download.png",
-        ),
-        FileItem(
-          key: ValueKey("004"),
-          name: "Yellow Mech",
-          image:
-              "https://webstockreview.net/images/clipart-baby-sea-otter-13.png",
-        ),
-      ]),
-      ValueKey("002"):
-          FolderItem(key: ValueKey("002"), name: "Sample Characters", files: [
-        FileItem(
-          key: ValueKey("001"),
-          name: "Dragon",
-          image: "https://www.lunapic.com/editor/premade/transparent.gif",
-        ),
-        FileItem(
-          key: ValueKey("003"),
-          name: "The Kid",
-          image:
-              "http://www.pngmart.com/files/9/Marvel-Thanos-PNG-Free-Download.png",
-        ),
-        FileItem(
-          key: ValueKey("002"),
-          name: "Flossy",
-          image:
-              "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
-        ),
-      ]),
-      ValueKey("003"):
-          FolderItem(key: ValueKey("003"), name: "Quanta Tests", files: [
-        FileItem(
-          key: ValueKey("003"),
-          name: "The Kid",
-          image:
-              "http://www.pngmart.com/files/9/Marvel-Thanos-PNG-Free-Download.png",
-        ),
-        FileItem(
-          key: ValueKey("002"),
-          name: "Flossy",
-          image:
-              "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
-        ),
-      ]),
-      ValueKey("004"):
-          FolderItem(key: ValueKey("004"), name: "Partical Systems", files: [
-        FileItem(
-          key: ValueKey("002"),
-          name: "Flossy",
-          image:
-              "http://www.pngmart.com/files/10/Dog-Looking-PNG-Transparent-Picture.png",
-        ),
-      ]),
-      ValueKey("005"):
-          FolderItem(key: ValueKey("005"), name: "Raiders of Odin", files: [
-        FileItem(
-          key: ValueKey("001"),
-          name: "Dragon",
-          image: "https://www.lunapic.com/editor/premade/transparent.gif",
-        ),
-      ]),
+    List.generate(110, (i) {
+      _folders.add(
+        FolderItem(
+            key: ValueKey('00$i'),
+            name: "2D Characters",
+            files: List.generate(math.Random().nextInt(50), (p) {
+              return FileItem(
+                key: ValueKey("00$p"),
+                name: "Dragon",
+                image: "https://www.lunapic.com/editor/premade/transparent.gif",
+              );
+            })),
+      );
     });
     notifyListeners();
   }
 
   @override
-  List<FolderItem> get folders => _folders.values.toList();
+  List<FolderItem> get folders => _folders.toList();
+  List<FolderItem> _selectedFolders = [];
+  List<FolderItem> get selectedFolders => _selectedFolders;
+  List<FileItem> _selectedFiles = [];
+  List<FileItem> get selectedFiles => _selectedFiles;
 
   @override
   void selectFolder(FolderItem value, bool selection) {
-    _reset();
-    _folders[value.key].onSelect(selection);
-    notifyListeners();
-  }
-
-  void _reset() {
-    _folders.forEach((f, i) => i.onSelect(false));
-    if (_selectedFolder != null) {
-      _selectedFolder.files.forEach((f) => f.onSelect(false));
+    if (selection && selectionMode == SelectionMode.single) {
+      for (var file in _selectedFiles) {
+        file.select(SelectionState.none);
+      }
+      for (var folder in _selectedFolders) {
+        folder.select(SelectionState.none);
+      }
     }
+    value.select(selection ? SelectionState.selected : SelectionState.none);
+    if (selection) {
+      _selectedFolders.add(value);
+    } else {
+      _selectedFolders.remove(value);
+    }
+    // notifyListeners();
   }
 
   @override
@@ -130,12 +75,21 @@ class FileBrowser extends FileBrowserController {
 
   @override
   void selectFile(FileItem value, bool selection) {
-    _reset();
-    _folders.forEach((f, i) => i.onSelect(false));
-    _selectedFolder.files
-        .firstWhere((f) => f.key == value.key)
-        .onSelect(selection);
-    notifyListeners();
+    if (selection && selectionMode == SelectionMode.single) {
+      for (var file in _selectedFiles) {
+        file.select(SelectionState.none);
+      }
+      for (var folder in _selectedFolders) {
+        folder.select(SelectionState.none);
+      }
+    }
+    value.select(selection ? SelectionState.selected : SelectionState.none);
+    if (selection) {
+      _selectedFiles.add(value);
+    } else {
+      _selectedFiles.remove(value);
+    }
+    // notifyListeners();
   }
 
   @override

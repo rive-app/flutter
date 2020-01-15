@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/selectable_item.dart';
 
 import 'file.dart';
 
-class FolderItem extends ChangeNotifier {
+class FolderItem extends SelectableItem {
   final String name;
   final Key key;
   final List<FileItem> files;
@@ -13,12 +15,11 @@ class FolderItem extends ChangeNotifier {
     this.files = const [],
   });
 
-  bool _selected = false;
-  bool get selected => _selected;
-  void onSelect(bool value) {
-    if (value != _selected) {
-      _selected = value;
-      notifyListeners();
-    }
-  }
+  final _state = ValueNotifier<SelectionState>(SelectionState.none);
+
+  @override
+  void select(SelectionState state) => _state.value = state;
+
+  @override
+  ValueListenable<SelectionState> get selectionState => _state;
 }

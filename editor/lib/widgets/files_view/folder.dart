@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
 import 'package:rive_editor/widgets/path_widget.dart';
@@ -15,31 +16,31 @@ class FolderViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
-    return ChangeNotifierProvider.value(
-      value: folder,
-      child: Container(
-        margin: const EdgeInsets.only(
-          left: 10.0,
-          right: 10.0,
-          bottom: 20.0,
-        ),
-        child: Consumer<FolderItem>(
-          builder: (context, folder, child) => Material(
-            elevation: folder.selected ? 8.0 : 0.0,
+    return ValueListenableBuilder<SelectionState>(
+      valueListenable: folder.selectionState,
+      builder: (context, state, child) {
+        final _isSelected = state == SelectionState.selected;
+        return Container(
+          margin: const EdgeInsets.only(
+            left: 10.0,
+            right: 10.0,
+            bottom: 20.0,
+          ),
+          child: Material(
+            elevation: _isSelected ? 8.0 : 0.0,
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(12.0),
             shadowColor: Color.fromRGBO(238, 248, 255, 1.0),
             child: GestureDetector(
               onTap: () {
-                _fileBrowser.selectFolder(folder, !folder.selected);
+                _fileBrowser.selectFolder(folder, !_isSelected);
               },
               onDoubleTap: () {
                 _fileBrowser.selectFolder(folder, true);
                 _fileBrowser.openFolder(folder);
               },
               child: Container(
-                // duration: Duration(milliseconds: 150),
-                decoration: folder.selected
+                decoration: _isSelected
                     ? BoxDecoration(
                         border: Border.all(
                           color: ThemeUtils.selectedBlue,
@@ -52,6 +53,7 @@ class FolderViewWidget extends StatelessWidget {
                   color: ThemeUtils.backgroundLightGrey,
                   borderRadius: BorderRadius.circular(10.0),
                   clipBehavior: Clip.antiAlias,
+                  animationDuration: Duration.zero,
                   child: Container(
                     padding: const EdgeInsets.only(left: 12.0),
                     child: Row(
@@ -60,7 +62,7 @@ class FolderViewWidget extends StatelessWidget {
                           path: ThemeUtils.folderIcon,
                           nudge: Offset(0.5, 0.5),
                           paint: Paint()
-                            ..color = folder.selected
+                            ..color = _isSelected
                                 ? ThemeUtils.selectedBlue
                                 : ThemeUtils.iconColor
                             ..style = PaintingStyle.stroke
@@ -73,7 +75,7 @@ class FolderViewWidget extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                                color: folder.selected
+                                color: _isSelected
                                     ? ThemeUtils.selectedBlue
                                     : ThemeUtils.textGrey),
                           ),
@@ -85,8 +87,8 @@ class FolderViewWidget extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
