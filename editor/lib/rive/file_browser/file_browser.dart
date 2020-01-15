@@ -12,15 +12,15 @@ class FileBrowser extends FileBrowserController {
   SelectionMode _mode = SelectionMode.single;
 
   void init() {
-    List.generate(110, (i) {
+    List.generate(25, (i) {
       _folders.add(
         FolderItem(
             key: ValueKey('00$i'),
-            name: "2D Characters",
-            files: List.generate(math.Random().nextInt(50), (p) {
+            name: "Name $i",
+            files: List.generate(math.Random().nextInt(20), (p) {
               return FileItem(
                 key: ValueKey("00$p"),
-                name: "Dragon",
+                name: "File $p",
                 image: "https://www.lunapic.com/editor/premade/transparent.gif",
               );
             })),

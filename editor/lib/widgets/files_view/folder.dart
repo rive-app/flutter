@@ -26,11 +26,23 @@ class FolderViewWidget extends StatelessWidget {
             right: 10.0,
             bottom: 20.0,
           ),
-          child: Material(
-            elevation: _isSelected ? 8.0 : 0.0,
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12.0),
-            shadowColor: Color.fromRGBO(238, 248, 255, 1.0),
+          child: Container(
+            // elevation: _isSelected ? 8.0 : 0.0,
+            // shadowColor: Color.fromRGBO(238, 248, 255, 1.0),
+            decoration: !_isSelected
+                ? null
+                : BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue[50],
+                          blurRadius: 18.0,
+                          spreadRadius: 5.0,
+                          offset: Offset(0.0, 15.0),
+                        ),
+                      ]),
+
             child: GestureDetector(
               onTap: () {
                 _fileBrowser.selectFolder(folder, !_isSelected);
