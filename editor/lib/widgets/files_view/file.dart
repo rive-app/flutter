@@ -17,6 +17,7 @@ class FileViewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     const kBottomHeight = 40.0;
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
+     final _rive = Provider.of<Rive>(context, listen: false);
     return ValueListenableBuilder<SelectionState>(
       valueListenable: file.selectionState,
       child: Column(
@@ -25,8 +26,8 @@ class FileViewWidget extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20.0),
-                  topRight: Radius.circular(20.0),
+                  topLeft: Radius.circular(5.0),
+                  topRight: Radius.circular(5.0),
                 ),
                 color: ThemeUtils.backgroundDarkGrey,
               ),
@@ -60,8 +61,8 @@ class FileViewWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: ThemeUtils.backgroundLightGrey,
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20.0),
-                bottomRight: Radius.circular(20.0),
+                bottomLeft: Radius.circular(5.0),
+                bottomRight: Radius.circular(5.0),
               ),
             ),
             child: Container(
@@ -79,47 +80,42 @@ class FileViewWidget extends StatelessWidget {
       ),
       builder: (context, state, child) {
         final _isSelected = state == SelectionState.selected;
-        return Container(
-          padding: const EdgeInsets.only(
-            left: 10.0,
-            right: 10.0,
-            bottom: 20.0,
-          ),
-          child: Container(
-            decoration: !_isSelected
-                ? null
-                : BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(12.0),
-                    boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue[50],
-                          blurRadius: 18.0,
-                          spreadRadius: 5.0,
-                          offset: Offset(0.0, 15.0),
-                        ),
-                      ]),
-            child: GestureDetector(
-              onTapDown: (_) {
-                _fileBrowser.selectFile(file, !_isSelected);
-              },
-              onDoubleTap: () {
-                final _rive = Provider.of<Rive>(context, listen: false);
-                _fileBrowser.openFile(_rive, file);
-              },
+        return Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Visibility(
+              visible: _isSelected,
               child: Container(
-                  decoration: _isSelected
-                      ? BoxDecoration(
-                          border: Border.all(
-                            color: ThemeUtils.selectedBlue,
-                            width: 3.5,
-                          ),
-                          borderRadius: BorderRadius.circular(25.0),
-                        )
-                      : null,
-                  child: child),
+                decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    border: Border.all(
+                      color: ThemeUtils.selectedBlue,
+                      width: 4.0,
+                    ),
+                    borderRadius: BorderRadius.circular(10.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeUtils.selectedBlue.withOpacity(0.5),
+                        blurRadius: 50.0,
+                        offset: Offset(0.0, 10.0),
+                      ),
+                    ]),
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: GestureDetector(
+                onTapDown: (_) {
+                  _fileBrowser.selectFile(_rive, file);
+                },
+                onDoubleTap: () {
+                  final _rive = Provider.of<Rive>(context, listen: false);
+                  _fileBrowser.openFile(_rive, file);
+                },
+                child: child,
+              ),
+            ),
+          ],
         );
       },
     );

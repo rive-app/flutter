@@ -26,5 +26,5 @@ class ThemeUtils {
   static const Color iconColor = Color.fromRGBO(0, 0, 0, 0.3);
   static const Color buttonColor = Color.fromRGBO(0, 0, 0, 0.1);
   static const Color buttonTextColor = Color.fromRGBO(136, 136, 136, 1);
-  static const Color selectedBlue = Color.fromRGBO(108, 162, 221, 1.0);
+  static const Color selectedBlue = Color.fromRGBO(87, 165, 224, 1.0);
 }

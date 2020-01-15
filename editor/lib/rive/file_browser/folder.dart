@@ -14,12 +14,4 @@ class FolderItem extends SelectableItem {
     @required this.name,
     this.files = const [],
   });
-
-  final _state = ValueNotifier<SelectionState>(SelectionState.none);
-
-  @override
-  void select(SelectionState state) => _state.value = state;
-
-  @override
-  ValueListenable<SelectionState> get selectionState => _state;
 }

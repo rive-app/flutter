@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 
-import 'file_browser/file.dart';
+import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'selection_context.dart';
@@ -13,11 +13,16 @@ import 'package:core/core.dart';
 enum SelectionMode { single, multi, range }
 
 class Rive with RiveFileDelegate {
-  final ValueNotifier<RiveFile> file = ValueNotifier<RiveFile>(null);
-  final ValueNotifier<HierarchyTreeController> treeController =
-      ValueNotifier<HierarchyTreeController>(null);
-  final Set<SelectableItem> selectedItems = {};
-  final Set<FileItem> openFiles = {};
+  final file = ValueNotifier<RiveFile>(null);
+  final treeController = ValueNotifier<HierarchyTreeController>(null);
+  final selection = SelectionContext<SelectableItem>();
+  final selectionMode = ValueNotifier<SelectionMode>(SelectionMode.single);
+  final fileBrowser = FileBrowser();
+  final Set<String> openFiles = {
+    "Ellipse Testing",
+    "Spaceman",
+  };
+
   Stage _stage;
   Stage get stage => _stage;
 
@@ -38,6 +43,7 @@ class Rive with RiveFileDelegate {
     var opening = RiveFile(id);
     opening.addDelegate(this);
     _changeFile(opening);
+    openFiles.add(id);
     return opening;
   }
 
@@ -51,5 +57,32 @@ class Rive with RiveFileDelegate {
   @override
   void onObjectAdded(Core object) {
     _stage.initComponent(object);
+  }
+
+  void onKeyEvent(RawKeyEvent keyEvent, bool hasFocusObject) {
+    selectionMode.value = keyEvent.isMetaPressed
+        ? SelectionMode.multi
+        : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
+    // print(
+    //     "IS ${keyEvent.physicalKey == PhysicalKeyboardKey.keyZ} ${keyEvent is RawKeyDownEvent} ${keyEvent.isMetaPressed} && ${keyEvent.isShiftPressed} ${keyEvent.physicalKey} ${keyEvent.isMetaPressed && keyEvent.isShiftPressed && keyEvent is RawKeyDownEvent && keyEvent.physicalKey == physicalKeyboardKey.keyZ}");
+    if (keyEvent.isMetaPressed &&
+        keyEvent.isShiftPressed &&
+        keyEvent is RawKeyDownEvent &&
+        keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
+      file.value.redo();
+      print("redo");
+    } else if (keyEvent.isMetaPressed &&
+        keyEvent is RawKeyDownEvent &&
+        keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
+      file.value.undo();
+      print("undo");
+    }
+  }
+
+  bool select(SelectableItem item, {bool append}) {
+    if (append == null) {
+      append = selectionMode.value == SelectionMode.multi;
+    }
+    return selection.select(item, append: append);
   }
 }

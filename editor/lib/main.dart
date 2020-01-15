@@ -39,6 +39,7 @@ void main() {
   );
   // Fake load a test file.
   rive.open("test");
+  rive.fileBrowser.init();
 
   // print("CONNECTING");
   // file.connect('ws://localhost:8000/').then((result) {
@@ -77,20 +78,36 @@ class MyApp extends StatelessWidget {
           darkTheme: ThemeData.dark(),
           home: DefaultTextStyle(
             style: TextStyle(fontFamily: "Roboto-Regular"),
-            child: Editor(),
+            child: Scaffold(
+              body: Listener(
+                onPointerDown: (details) => focusNode.requestFocus(),
+                child: RawKeyboardListener(
+                  autofocus: true,
+                  focusNode: focusNode,
+                  onKey: (event) {
+                    var primary = FocusManager.instance.primaryFocus;
+                    rive.onKeyEvent(
+                        event,
+                        primary != focusNode &&
+                            focusScope.nearestScope != primary);
+                    // print("PRIMARY $primary");
+                    // if (primary == focusNode ||
+                    //     focusScope.nearestScope == primary) {
+                    //   print("Key ${event}");
+                    //   return;
+                    // }
+                    // print("NO FOCUS");
+                  },
+                  child: Editor(),
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 }
-
-// Just some fake tabs to test the widgets.
-var tabs = [
-  RiveTabItem(name: "Guido's Files", closeable: false),
-  RiveTabItem(name: "Ellipse Testing"),
-  RiveTabItem(name: "Spaceman"),
-];
 
 // Hacky way to track which tab is selected (just for testing).
 int selectedTab = 1;
@@ -123,37 +140,47 @@ List<ContextItem<Rive>> contextItems = [
 class Editor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            height: 39,
-            color: Color.fromRGBO(50, 50, 50, 1.0),
-            child: Stack(
-              children: <Widget>[
-                Positioned.fill(
-                  child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTapDown: (_) {
-                        WindowUtils.startDrag();
-                      }),
-                ),
-                RiveTabBar(
-                  offset: 95,
-                  tabs: tabs,
-                  selected: tabs[selectedTab],
-                  select: (tab) {
-                    // Hackity hack to test the tabs.
-                    selectedTab = tabs.indexOf(tab);
-                    (context as Element).markNeedsBuild();
-                  },
-                ),
-              ],
-            ),
+    return Column(
+      children: [
+        Container(
+          height: 39,
+          color: Color.fromRGBO(50, 50, 50, 1.0),
+          child: Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapDown: (_) {
+                      WindowUtils.startDrag();
+                    }),
+              ),
+              Builder(
+                builder: (_) {
+                  // Just some fake tabs to test the widgets.
+                  var tabs = [
+                    RiveTabItem(name: "Guido's Files", closeable: false),
+                  ];
+                  final _rive = Provider.of<Rive>(context);
+                  tabs.addAll(_rive.openFiles
+                      .map((f) => RiveTabItem(name: f))
+                      .toList());
+                  return RiveTabBar(
+                    offset: 95,
+                    tabs: tabs,
+                    selected: tabs[selectedTab],
+                    select: (tab) {
+                      // Hackity hack to test the tabs.
+                      selectedTab = tabs.indexOf(tab);
+                      (context as Element).markNeedsBuild();
+                    },
+                  );
+                },
+              ),
+            ],
           ),
-          Expanded(child: _buildBody(context))
-        ],
-      ),
+        ),
+        Expanded(child: _buildBody(context))
+      ],
     );
   }
 

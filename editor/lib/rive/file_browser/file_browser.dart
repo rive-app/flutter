@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/main.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
 import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
+import 'package:rive_editor/rive/selection_context.dart';
 import 'dart:math' as math;
 
 import 'controller.dart';
 import 'file.dart';
 
 class FileBrowser extends FileBrowserController {
+  final selection = SelectionContext<SelectableItem>();
   Set<FolderItem> _folders = {};
   FolderItem _selectedFolder;
-  SelectionMode _mode = SelectionMode.single;
 
   void init() {
     List.generate(25, (i) {
@@ -34,28 +33,16 @@ class FileBrowser extends FileBrowserController {
 
   @override
   List<FolderItem> get folders => _folders.toList();
-  List<FolderItem> _selectedFolders = [];
-  List<FolderItem> get selectedFolders => _selectedFolders;
-  List<FileItem> _selectedFiles = [];
-  List<FileItem> get selectedFiles => _selectedFiles;
 
   @override
-  void selectFolder(FolderItem value, bool selection) {
-    if (selection && selectionMode == SelectionMode.single) {
-      for (var file in _selectedFiles) {
-        file.select(SelectionState.none);
-      }
-      for (var folder in _selectedFolders) {
-        folder.select(SelectionState.none);
-      }
+  void selectFolder(Rive rive, FolderItem value) {
+    if (rive.selectionMode.value == SelectionMode.single) {
+      selection.clear();
     }
-    value.select(selection ? SelectionState.selected : SelectionState.none);
-    if (selection) {
-      _selectedFolders.add(value);
-    } else {
-      _selectedFolders.remove(value);
-    }
-    // notifyListeners();
+    bool append = rive.selectionMode.value == SelectionMode.multi;
+    selection.select(value, append: append);
+    value.isSelected = true;
+    notifyListeners();
   }
 
   @override
@@ -68,37 +55,18 @@ class FileBrowser extends FileBrowserController {
   }
 
   @override
-  void changeSelectionMode(SelectionMode value) {
-    _mode = value;
+  void selectFile(Rive rive, FileItem value) {
+    if (rive.selectionMode.value == SelectionMode.single) {
+      selection.clear();
+    }
+    bool append = rive.selectionMode.value == SelectionMode.multi;
+    selection.select(value, append: append);
+    value.isSelected;
     notifyListeners();
-  }
-
-  @override
-  SelectionMode get selectionMode => _mode;
-
-  @override
-  void selectFile(FileItem value, bool selection) {
-    if (selection && selectionMode == SelectionMode.single) {
-      for (var file in _selectedFiles) {
-        file.select(SelectionState.none);
-      }
-      for (var folder in _selectedFolders) {
-        folder.select(SelectionState.none);
-      }
-    }
-    value.select(selection ? SelectionState.selected : SelectionState.none);
-    if (selection) {
-      _selectedFiles.add(value);
-    } else {
-      _selectedFiles.remove(value);
-    }
-    // notifyListeners();
   }
 
   @override
   void openFile(Rive rive, FileItem value) {
     rive.open(value.key.value);
-    tabs.add(RiveTabItem(name: value.name));
-    selectedTab = tabs.length;
   }
 }

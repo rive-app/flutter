@@ -1,5 +1,5 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/change_notifier.dart';
 import 'package:rive_core/selectable_item.dart';
 
 class FileItem extends SelectableItem {
@@ -13,11 +13,5 @@ class FileItem extends SelectableItem {
     @required this.image,
   });
 
-  final _state = ValueNotifier<SelectionState>(SelectionState.none);
 
-  @override
-  void select(SelectionState state) => _state.value = state;
-
-  @override
-  ValueListenable<SelectionState> get selectionState => _state;
 }

@@ -2,6 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/file_browser/file.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -19,8 +20,9 @@ class FilesView extends StatelessWidget {
       horizontal: 30.0,
       vertical: 10.0,
     );
-    return ChangeNotifierProvider<FileBrowser>(
-      create: (_) => FileBrowser()..init(),
+    final _rive = Provider.of<Rive>(context, listen: false);
+    return ChangeNotifierProvider.value(
+      value: _rive.fileBrowser,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -79,30 +81,36 @@ class FilesView extends StatelessWidget {
                               showDropdown: true,
                             ),
                           ),
-                          SliverGrid(
-                            gridDelegate:
-                                SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 265.0,
-                              childAspectRatio: 187 / 60,
-                            ),
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                return DragTarget<FileItem>(
-                                  key: folders[index].key,
-                                  builder: (context, accepts, rejects) {
-                                    return FolderViewWidget(
-                                      folder: folders[index],
-                                    );
-                                  },
-                                );
-                              },
-                              childCount: folders.length,
-                              findChildIndexCallback: (Key key) {
-                                return folders.indexWhere((i) => i.key == key);
-                              },
-                              addRepaintBoundaries: false,
-                              addAutomaticKeepAlives: false,
-                              addSemanticIndexes: false,
+                          SliverPadding(
+                            padding: EdgeInsets.all(20.0),
+                            sliver: SliverGrid(
+                              gridDelegate:
+                                  SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 187,
+                                childAspectRatio: 187 / 60,
+                                mainAxisSpacing: 20.0,
+                                crossAxisSpacing: 20.0,
+                              ),
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  return DragTarget<FileItem>(
+                                    key: folders[index].key,
+                                    builder: (context, accepts, rejects) {
+                                      return FolderViewWidget(
+                                        folder: folders[index],
+                                      );
+                                    },
+                                  );
+                                },
+                                childCount: folders.length,
+                                findChildIndexCallback: (Key key) {
+                                  return folders
+                                      .indexWhere((i) => i.key == key);
+                                },
+                                addRepaintBoundaries: false,
+                                addAutomaticKeepAlives: false,
+                                addSemanticIndexes: false,
+                              ),
                             ),
                           ),
                           if (files != null && files.isNotEmpty) ...[
@@ -114,67 +122,75 @@ class FilesView extends StatelessWidget {
                                     folders == null || folders.isEmpty,
                               ),
                             ),
-                            SliverGrid(
-                              gridDelegate:
-                                  SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 200.0,
-                                childAspectRatio: 187 / 190,
-                              ),
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  final file = files[index];
-                                  return Draggable<FileItem>(
-                                    dragAnchor: DragAnchor.pointer,
-                                    onDragStarted: () =>
-                                        _fileBrowser.selectFile(file, true),
-                                    feedback: Material(
-                                      elevation: 30.0,
-                                      shadowColor: Colors.grey[50],
-                                      color: ThemeUtils.backgroundLightGrey,
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      child: Container(
-                                        width: 187,
-                                        height: 50,
+                            SliverPadding(
+                              padding: EdgeInsets.all(20.0),
+                              sliver: SliverGrid(
+                                gridDelegate:
+                                    SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 187,
+                                  childAspectRatio: 187 / 190,
+                                  mainAxisSpacing: 20.0,
+                                  crossAxisSpacing: 20.0,
+                                ),
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    final file = files[index];
+                                    return Draggable<FileItem>(
+                                      dragAnchor: DragAnchor.pointer,
+                                      onDragStarted: () =>
+                                          _fileBrowser.selectFile(_rive, file),
+                                      feedback: Material(
+                                        elevation: 30.0,
+                                        shadowColor: Colors.grey[50],
+                                        color: ThemeUtils.backgroundLightGrey,
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
                                         child: Container(
-                                          alignment: Alignment.centerLeft,
-                                          padding: EdgeInsets.only(left: 20.0),
-                                          child: Text(
-                                            file.name,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                color: ThemeUtils.textGrey),
+                                          width: 187,
+                                          height: 50,
+                                          child: Container(
+                                            alignment: Alignment.centerLeft,
+                                            padding:
+                                                EdgeInsets.only(left: 20.0),
+                                            child: Text(
+                                              file.name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  color: ThemeUtils.textGrey),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    childWhenDragging: Container(
-                                      width: 187,
-                                      height: 190,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[100],
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
+                                      childWhenDragging: Container(
+                                        width: 187,
+                                        height: 190,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                        ),
+                                        child: DottedBorder(
+                                          borderType: BorderType.RRect,
+                                          radius: Radius.circular(12),
+                                          padding: EdgeInsets.all(6),
+                                          color: ThemeUtils.iconColor,
+                                          child: Container(),
+                                          dashPattern: [4, 3],
+                                        ),
                                       ),
-                                      child: DottedBorder(
-                                        borderType: BorderType.RRect,
-                                        radius: Radius.circular(12),
-                                        padding: EdgeInsets.all(6),
-                                        color: ThemeUtils.iconColor,
-                                        child: Container(),
-                                        dashPattern: [4, 3],
-                                      ),
-                                    ),
-                                    child: FileViewWidget(file: files[index]),
-                                  );
-                                },
-                                childCount: files.length,
-                                findChildIndexCallback: (Key key) {
-                                  return files.indexWhere((i) => i.key == key);
-                                },
-                                addRepaintBoundaries: false,
-                                addAutomaticKeepAlives: false,
-                                addSemanticIndexes: false,
+                                      child: FileViewWidget(file: files[index]),
+                                    );
+                                  },
+                                  childCount: files.length,
+                                  findChildIndexCallback: (Key key) {
+                                    return files
+                                        .indexWhere((i) => i.key == key);
+                                  },
+                                  addRepaintBoundaries: false,
+                                  addAutomaticKeepAlives: false,
+                                  addSemanticIndexes: false,
+                                ),
                               ),
                             ),
                           ],
@@ -182,135 +198,6 @@ class FilesView extends StatelessWidget {
                       ],
                     ),
                   );
-                  // return SingleChildScrollView(
-                  //   child: Column(
-                  //     mainAxisSize: MainAxisSize.min,
-                  //     mainAxisAlignment: MainAxisAlignment.center,
-                  //     crossAxisAlignment: CrossAxisAlignment.start,
-                  //     children: <Widget>[
-                  //       if (folders != null && folders.isNotEmpty) ...[
-                  //         TitleSection(
-                  //           padding: padding,
-                  //           name: 'Folders',
-                  //           showDropdown: true,
-                  //         ),
-                  //         Container(
-                  //           padding: padding,
-                  //           child: GridView.custom(
-                  //             shrinkWrap: true,
-                  //             physics: NeverScrollableScrollPhysics(),
-                  //             gridDelegate:
-                  //                 SliverGridDelegateWithMaxCrossAxisExtent(
-                  //               maxCrossAxisExtent: 265.0,
-                  //               childAspectRatio: 7 / 2, //187 / 60
-                  //               // crossAxisSpacing: 20.0,
-                  //               // mainAxisSpacing: 20.0,
-                  //             ),
-                  //             childrenDelegate: SliverChildBuilderDelegate(
-                  //               (context, index) {
-                  //                 return DragTarget<FileItem>(
-                  //                   key: folders[index].key,
-                  //                   builder: (context, accepts, rejects) {
-                  //                     return FolderViewWidget(
-                  //                         folder: folders[index]);
-                  //                   },
-                  //                 );
-                  //               },
-                  //               childCount: folders.length,
-                  //               findChildIndexCallback: (Key key) {
-                  //                 return folders
-                  //                     .indexWhere((i) => i.key == key);
-                  //               },
-                  //               addRepaintBoundaries: false,
-                  //               addAutomaticKeepAlives: false,
-                  //               addSemanticIndexes: false,
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ],
-                  //       if (files != null && files.isNotEmpty) ...[
-                  //         TitleSection(
-                  //           padding: padding,
-                  //           name: 'Files',
-                  //           showDropdown: folders == null || folders.isEmpty,
-                  //         ),
-                  //         Container(
-                  //           padding: padding,
-                  //           child: GridView.custom(
-                  //             shrinkWrap: true,
-                  //             physics: NeverScrollableScrollPhysics(),
-                  //             gridDelegate:
-                  //                 SliverGridDelegateWithMaxCrossAxisExtent(
-                  //               maxCrossAxisExtent: 200.0,
-                  //               childAspectRatio: 187 / 190,
-                  //               // crossAxisSpacing: 20.0,
-                  //               // mainAxisSpacing: 20.0,
-                  //             ),
-                  //             childrenDelegate: SliverChildBuilderDelegate(
-                  //               (context, index) {
-                  //                 final _fileBrowser = Provider.of<FileBrowser>(
-                  //                     context,
-                  //                     listen: false);
-                  //                 final file = files[index];
-                  //                 return Draggable<FileItem>(
-                  //                   dragAnchor: DragAnchor.pointer,
-                  //                   onDragStarted: () {
-                  //                     _fileBrowser.selectFile(
-                  //                         file, !file.selected);
-                  //                   },
-                  //                   feedback: Material(
-                  //                     elevation: 30.0,
-                  //                     shadowColor: Colors.grey[50],
-                  //                     color: ThemeUtils.backgroundLightGrey,
-                  //                     borderRadius: BorderRadius.circular(10.0),
-                  //                     child: Container(
-                  //                       width: 187,
-                  //                       height: 50,
-                  //                       child: Container(
-                  //                         alignment: Alignment.centerLeft,
-                  //                         padding: EdgeInsets.only(left: 20.0),
-                  //                         child: Text(
-                  //                           file.name,
-                  //                           maxLines: 1,
-                  //                           overflow: TextOverflow.ellipsis,
-                  //                           style: TextStyle(
-                  //                               color: ThemeUtils.textGrey),
-                  //                         ),
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                   childWhenDragging: Container(
-                  //                     decoration: BoxDecoration(
-                  //                       color: Colors.grey[100],
-                  //                       borderRadius:
-                  //                           BorderRadius.circular(12.0),
-                  //                     ),
-                  //                     child: DottedBorder(
-                  //                       borderType: BorderType.RRect,
-                  //                       radius: Radius.circular(12),
-                  //                       padding: EdgeInsets.all(6),
-                  //                       color: ThemeUtils.iconColor,
-                  //                       child: Container(),
-                  //                       dashPattern: [4, 3],
-                  //                     ),
-                  //                   ),
-                  //                   child: FileViewWidget(file: files[index]),
-                  //                 );
-                  //               },
-                  //               childCount: files.length,
-                  //               findChildIndexCallback: (Key key) {
-                  //                 return files.indexWhere((i) => i.key == key);
-                  //               },
-                  //               addRepaintBoundaries: false,
-                  //               addAutomaticKeepAlives: false,
-                  //               addSemanticIndexes: false,
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ],
-                  //   ),
-                  // );
                 },
               ),
             ),
