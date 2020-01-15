@@ -5,7 +5,7 @@ import 'package:rive_core/selectable_item.dart';
 class FileItem extends SelectableItem {
   final String name;
   final String image;
-  final Key key;
+  final ValueKey<String> key;
 
   FileItem({
     @required this.key,

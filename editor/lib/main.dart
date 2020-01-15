@@ -108,8 +108,8 @@ List<ContextItem<Rive>> contextItems = [
 class Editor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Column(
+    return Scaffold(
+      body: Column(
         children: [
           Container(
             height: 39,

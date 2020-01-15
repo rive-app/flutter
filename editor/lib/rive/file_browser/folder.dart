@@ -6,7 +6,7 @@ import 'file.dart';
 
 class FolderItem extends SelectableItem {
   final String name;
-  final Key key;
+  final ValueKey<String> key;
   final List<FileItem> files;
 
   FolderItem({

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/rive_file.dart';
 
+import 'file_browser/file.dart';
 import 'hierarchy_tree_controller.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'stage/stage.dart';
@@ -11,6 +12,7 @@ class Rive with RiveFileDelegate {
   final ValueNotifier<HierarchyTreeController> treeController =
       ValueNotifier<HierarchyTreeController>(null);
   final Set<SelectableItem> selectedItems = {};
+  final Set<FileItem> openFiles = {};
   Stage _stage;
 
   void _changeFile(RiveFile nextFile) {
@@ -40,5 +42,4 @@ class Rive with RiveFileDelegate {
   void onObjectAdded(Core object) {
     _stage.initComponent(object);
   }
-
 }

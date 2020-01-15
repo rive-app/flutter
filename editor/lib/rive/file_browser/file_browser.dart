@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/main.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
+import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'dart:math' as math;
 
 import 'controller.dart';
@@ -93,7 +96,9 @@ class FileBrowser extends FileBrowserController {
   }
 
   @override
-  void openFile(FileItem value) {
-    // TODO: implement openFile
+  void openFile(Rive rive, FileItem value) {
+    rive.open(value.key.value);
+    tabs.add(RiveTabItem(name: value.name));
+    selectedTab = tabs.length;
   }
 }
