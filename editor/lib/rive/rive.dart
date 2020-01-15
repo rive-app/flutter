@@ -1,27 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_core/rive_file.dart';
 
 import 'hierarchy_tree_controller.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'selection_context.dart';
 import 'stage/stage.dart';
 import 'package:core/core.dart';
+
+enum SelectionMode { single, multi, range }
 
 class Rive with RiveFileDelegate {
   final ValueNotifier<RiveFile> file = ValueNotifier<RiveFile>(null);
   final ValueNotifier<HierarchyTreeController> treeController =
       ValueNotifier<HierarchyTreeController>(null);
-  final Set<SelectableItem> selectedItems = {};
+  final SelectionContext<SelectableItem> selection =
+      SelectionContext<SelectableItem>();
+
+  final ValueNotifier<SelectionMode> selectionMode =
+      ValueNotifier<SelectionMode>(SelectionMode.single);
   Stage _stage;
   Stage get stage => _stage;
-  
+
   void _changeFile(RiveFile nextFile) {
     file.value = nextFile;
-    selectedItems.clear();
+    selection.clear();
     _stage?.dispose();
     _stage = Stage(this, file.value);
 
     // Tree controller is based off of stage items.
-    treeController.value = HierarchyTreeController(nextFile.artboards);
+    treeController.value =
+        HierarchyTreeController(nextFile.artboards, rive: this);
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
@@ -42,5 +51,18 @@ class Rive with RiveFileDelegate {
   @override
   void onObjectAdded(Core object) {
     _stage.initComponent(object);
+  }
+
+  void onKeyEvent(RawKeyEvent keyEvent, bool hasFocusObject) {
+    selectionMode.value = keyEvent.isMetaPressed
+        ? SelectionMode.multi
+        : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
+  }
+
+  bool select(SelectableItem item, {bool append}) {
+    if (append == null) {
+      append = selectionMode.value == SelectionMode.multi;
+    }
+    return selection.select(item, append: append);
   }
 }

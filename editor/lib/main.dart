@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
 import 'package:cursor/cursor_view.dart';
@@ -23,11 +24,17 @@ import 'widgets/tab_bar/rive_tab_bar.dart';
 
 const double resizeEdgeSize = 10;
 Node node;
+
+var rive = Rive();
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addPostFrameCallback(
     (_) => WindowUtils.hideTitleBar(),
   );
+  // Fake load a test file.
+  rive.open("test");
+
   // print("CONNECTING");
   // file.connect('ws://localhost:8000/').then((result) {
   //   // if(file.isAvailable){
@@ -47,13 +54,13 @@ void main() {
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  FocusNode focusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
-    // Instance the app context.
-    var rive = Rive();
+    var focusScope = FocusScope.of(context);
 
-    // Fake load a test file.
-    rive.open("test");
     return CursorView(
       child: MultiProvider(
         providers: [
@@ -63,8 +70,31 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
+          // shortcuts: {
+          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
+          // },
           home: Scaffold(
-            body: Editor(),
+            body: Listener(
+              onPointerDown: (details) => focusNode.requestFocus(),
+              child: RawKeyboardListener(
+                  onKey: (event) {
+                    var primary = FocusManager.instance.primaryFocus;
+                    rive.onKeyEvent(
+                        event,
+                        primary != focusNode &&
+                            focusScope.nearestScope != primary);
+                    // print("PRIMARY $primary");
+                    // if (primary == focusNode ||
+                    //     focusScope.nearestScope == primary) {
+                    //   print("Key ${event}");
+                    //   return;
+                    // }
+                    // print("NO FOCUS");
+                  },
+                  child: Editor(),
+                  autofocus: true,
+                  focusNode: focusNode),
+            ),
           ),
         ),
       ),
@@ -180,6 +210,10 @@ class Editor extends StatelessWidget {
                   itemSelected: (context, index) {},
                 ),
               ),
+              Container(
+                width: 100,
+                child: TextField(),
+              ),
             ],
           ),
         ),
@@ -273,6 +307,11 @@ class StagePanel extends StatelessWidget {
               right: resizeEdgeSize,
               child: MouseRegion(
                 opaque: true,
+                onExit: (details) {
+                  RenderBox getBox = context.findRenderObject() as RenderBox;
+                  var local = getBox.globalToLocal(details.position);
+                  rive.stage.mouseExit(details.buttons, local.dx, local.dy);
+                },
                 onHover: (details) {
                   RenderBox getBox = context.findRenderObject() as RenderBox;
                   var local = getBox.globalToLocal(details.position);

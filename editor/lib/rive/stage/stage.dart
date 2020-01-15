@@ -8,7 +8,6 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 
@@ -86,24 +85,32 @@ class Stage {
     zoomTo(x, y, _viewZoomTarget - dy / 30.0);
   }
 
-  StageItem _hover;
+  StageItem _hoverItem;
+  StageItem get hoverItem => _hoverItem;
+  set hoverItem(StageItem value) {
+    if (value == _hoverItem) {
+      return;
+    }
+    var last = _hoverItem;
+    _hoverItem = value;
+    last?.isHovered = false;
+
+    markNeedsAdvance();
+  }
+
   void mouseMove(int button, double x, double y) {
     AABB viewAABB = obbToAABB(
         AABB.fromValues(x, y, x + 1.0, y + 1.0), _inverseViewTransform);
-    // print("VI $viewAABB");
-    var old = _hover;
-    _hover?.select(SelectionState.none);
-    _hover = null;
+    StageItem hover;
     visTree.query(viewAABB, (int proxyId, StageItem item) {
-      _hover = item;
+      hover = item;
       return true;
     });
-    _hover?.select(SelectionState.hovered);
-    if (old != _hover) {
-      markNeedsAdvance();
+    hover?.isHovered = true;
+    if (hover == null) {
+      hoverItem = null;
     }
 
-    // print("HIT $hover");
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
   }
@@ -111,6 +118,12 @@ class Stage {
   void mouseDown(int button, double x, double y) {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
+
+    if (_hoverItem != null) {
+      rive.select(_hoverItem);
+    } else if (rive.selectionMode.value == SelectionMode.single) {
+      rive.selection.clear();
+    }
   }
 
   void mouseDrag(int button, double x, double y) {
@@ -138,12 +151,16 @@ class Stage {
     }
   }
 
+  void mouseExit(int button, double x, double y) {
+    hoverItem = null;
+  }
+
   final Set<VoidCallback> _debounce = {};
 
   final Rive rive;
   final RiveFile riveFile;
   // final Set<StageItem> items = {};
-  final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding:0);
+  final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 
   Stage(this.rive, this.riveFile) {
     for (final object in riveFile.objects.values) {

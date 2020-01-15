@@ -17,9 +17,6 @@ extension StageItemComponent on Component {
 }
 
 abstract class StageItem<T> extends SelectableItem {
-  final ValueNotifier<SelectionState> _selectionState =
-      ValueNotifier<SelectionState>(SelectionState.none);
-
   T _component;
   T get component => _component;
 
@@ -44,10 +41,21 @@ abstract class StageItem<T> extends SelectableItem {
   }
 
   @override
-  ValueListenable<SelectionState> get selectionState => _selectionState;
+  void onHoverChanged(bool value) {
+    // No longer hovered?
+    if (value) {
+      _stage?.hoverItem = this;
+    } else if (_stage?.hoverItem == this) {
+      _stage?.hoverItem = null;
+    }
+
+    _stage?.markNeedsAdvance();
+  }
 
   @override
-  void select(SelectionState state) => _selectionState.value = state;
+  void onSelectedChanged(bool value) {
+    _stage?.markNeedsAdvance();
+  }
 
   /// Provide an aabb for this stage item.
   AABB get aabb;
