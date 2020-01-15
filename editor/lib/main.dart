@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
 import 'package:cursor/cursor_view.dart';
@@ -20,16 +22,24 @@ import 'package:window_utils/window_utils.dart';
 
 import 'package:provider/provider.dart';
 
+import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
 
 // var file = RiveFile("102:15468");
 
+const double resizeEdgeSize = 10;
 Node node;
+
+var rive = Rive();
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addPostFrameCallback(
     (_) => WindowUtils.hideTitleBar(),
   );
+  // Fake load a test file.
+  rive.open("test");
+
   // print("CONNECTING");
   // file.connect('ws://localhost:8000/').then((result) {
   //   // if(file.isAvailable){
@@ -49,13 +59,13 @@ void main() {
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  FocusNode focusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
-    // Instance the app context.
-    var rive = Rive();
+    var focusScope = FocusScope.of(context);
 
-    // Fake load a test file.
-    rive.open("test");
     return CursorView(
       child: MultiProvider(
         providers: [
@@ -90,7 +100,12 @@ List<ContextItem<Rive>> contextItems = [
   ContextItem(
     "Artboard",
     select: (Rive rive) {
-      var artboard = Artboard()..name = "New Artboard";
+      var artboard = Artboard()
+        ..name = "New Artboard"
+        ..x = 0
+        ..y = 0
+        ..width = 200
+        ..height = 100;
       rive.file.value.add(artboard);
     },
   ),
@@ -217,6 +232,10 @@ class Editor extends StatelessWidget {
                   itemSelected: (context, index) {},
                 ),
               ),
+              Container(
+                width: 100,
+                child: TextField(),
+              ),
             ],
           ),
         ),
@@ -224,6 +243,7 @@ class Editor extends StatelessWidget {
           child: Row(
             children: [
               ResizePanel(
+                hitSize: resizeEdgeSize,
                 direction: ResizeDirection.horizontal,
                 side: ResizeSide.end,
                 min: 300,
@@ -244,6 +264,7 @@ class Editor extends StatelessWidget {
                 child: Column(
                   children: [
                     ResizePanel(
+                      hitSize: resizeEdgeSize,
                       direction: ResizeDirection.vertical,
                       side: ResizeSide.end,
                       min: 100,
@@ -253,11 +274,10 @@ class Editor extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: Container(
-                        color: Color.fromRGBO(29, 29, 29, 1.0),
-                      ),
+                      child: StagePanel(),
                     ),
                     ResizePanel(
+                      hitSize: resizeEdgeSize,
                       direction: ResizeDirection.vertical,
                       side: ResizeSide.start,
                       min: 100,
@@ -270,6 +290,7 @@ class Editor extends StatelessWidget {
                 ),
               ),
               ResizePanel(
+                hitSize: resizeEdgeSize,
                 direction: ResizeDirection.horizontal,
                 side: ResizeSide.start,
                 min: 300,
@@ -282,6 +303,80 @@ class Editor extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class StagePanel extends StatelessWidget {
+  const StagePanel({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Color.fromRGBO(29, 29, 29, 1.0),
+      child: Consumer<Rive>(
+        builder: (context, rive, _) => Stack(
+          children: [
+            Positioned.fill(
+              child: StageView(rive),
+            ),
+            Positioned(
+              left: resizeEdgeSize,
+              top: resizeEdgeSize,
+              bottom: resizeEdgeSize,
+              right: resizeEdgeSize,
+              child: MouseRegion(
+                opaque: true,
+                onExit: (details) {
+                  RenderBox getBox = context.findRenderObject() as RenderBox;
+                  var local = getBox.globalToLocal(details.position);
+                  rive.stage.mouseExit(details.buttons, local.dx, local.dy);
+                },
+                onHover: (details) {
+                  RenderBox getBox = context.findRenderObject() as RenderBox;
+                  var local = getBox.globalToLocal(details.position);
+                  rive.stage.mouseMove(details.buttons, local.dx, local.dy);
+                  // print("MOVE $local");
+                },
+                child: Listener(
+                    behavior: HitTestBehavior.opaque,
+                    onPointerSignal: (details) {
+                      if (details is PointerScrollEvent) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var local = getBox.globalToLocal(details.position);
+                        rive.stage.mouseWheel(local.dx, local.dy,
+                            details.scrollDelta.dx, details.scrollDelta.dy);
+                      }
+                    },
+                    onPointerDown: (details) {
+                      RenderBox getBox =
+                          context.findRenderObject() as RenderBox;
+                      var local = getBox.globalToLocal(details.position);
+                      rive.stage.mouseDown(details.buttons, local.dx, local.dy);
+                      // print("POINTER DOWN ${local}");
+                    },
+                    onPointerUp: (details) {
+                      RenderBox getBox =
+                          context.findRenderObject() as RenderBox;
+                      var local = getBox.globalToLocal(details.position);
+                      rive.stage.mouseUp(details.buttons, local.dx, local.dy);
+                      // print("POINTER UP ${local}");
+                    },
+                    onPointerMove: (details) {
+                      RenderBox getBox =
+                          context.findRenderObject() as RenderBox;
+                      var local = getBox.globalToLocal(details.position);
+                      rive.stage.mouseDrag(details.buttons, local.dx, local.dy);
+                      // print("POINTER DRAG ${local}");
+                    }),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

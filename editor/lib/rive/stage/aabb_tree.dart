@@ -6,7 +6,7 @@ import 'package:rive_core/math/aabb.dart';
 // https://github.com/behdad/box2d/blob/master/Box2D/Box2D/Collision/b2DynamicTree.h
 
 const int NullNode = -1;
-const int AABBExtension = 10;
+// const int AABBExtension = 10;
 const double AABBMultiplier = 2.0;
 
 typedef bool QueryCallback<T>(int id, T userData);
@@ -39,13 +39,14 @@ class TreeNode<T> {
 }
 
 class AABBTree<T> {
+  final int padding;
   int _root = NullNode;
   int _capacity = 0;
   int _nodeCount = 0;
   List<TreeNode> _nodes = [];
   int _freeNode = 0;
 
-  AABBTree() {
+  AABBTree({this.padding = 10}) {
     _allocateNodes();
   }
 
@@ -112,10 +113,10 @@ class AABBTree<T> {
   int createProxy(AABB aabb, T userData) {
     int proxyId = _allocateNode();
     TreeNode<T> node = _nodes[proxyId];
-    node.aabb[0] = aabb[0] - AABBExtension;
-    node.aabb[1] = aabb[1] - AABBExtension;
-    node.aabb[2] = aabb[2] + AABBExtension;
-    node.aabb[3] = aabb[3] + AABBExtension;
+    node.aabb[0] = aabb[0] - padding;
+    node.aabb[1] = aabb[1] - padding;
+    node.aabb[2] = aabb[2] + padding;
+    node.aabb[3] = aabb[3] + padding;
     node.userData = userData;
     node.height = 0;
 
@@ -157,10 +158,10 @@ class AABBTree<T> {
     removeLeaf(proxyId);
 
     AABB extended = AABB.clone(aabb);
-    extended[0] = aabb[0] - AABBExtension;
-    extended[1] = aabb[1] - AABBExtension;
-    extended[2] = aabb[2] + AABBExtension;
-    extended[3] = aabb[3] + AABBExtension;
+    extended[0] = aabb[0] - padding;
+    extended[1] = aabb[1] - padding;
+    extended[2] = aabb[2] + padding;
+    extended[3] = aabb[3] + padding;
     AABB.copy(node.aabb, extended);
 
     insertLeaf(proxyId);
@@ -185,10 +186,10 @@ class AABBTree<T> {
     removeLeaf(proxyId);
 
     AABB extended = AABB.clone(aabb);
-    extended[0] = aabb[0] - AABBExtension;
-    extended[1] = aabb[1] - AABBExtension;
-    extended[2] = aabb[2] + AABBExtension;
-    extended[3] = aabb[3] + AABBExtension;
+    extended[0] = aabb[0] - padding;
+    extended[1] = aabb[1] - padding;
+    extended[2] = aabb[2] + padding;
+    extended[3] = aabb[3] + padding;
 
     double dx = AABBMultiplier * displacement[0];
     double dy = AABBMultiplier * displacement[1];
