@@ -14,6 +14,7 @@ import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import '../rive.dart';
 import 'aabb_tree.dart';
 import 'stage_item.dart';
+import 'tools/stage_tool.dart';
 
 typedef _ItemFactory = StageItem Function();
 
@@ -40,8 +41,21 @@ class Stage {
   double _viewZoom = 1.0;
   Vec2D _viewTranslationTarget = Vec2D();
   double _viewZoomTarget = 1.0;
+  Vec2D _worldMouse = Vec2D();
+  bool _mouseDownSelected = false;
 
   StageDelegate _delegate;
+  StageTool _tool;
+  StageTool _activeDragTool;
+  StageTool get tool => _tool;
+  set tool(StageTool value) {
+    if (_tool == value) {
+      return;
+    }
+    if (value.activate(this)) {
+      _tool = value;
+    }
+  }
 
   void clearDelegate(StageDelegate value) {
     if (_delegate == value) {
@@ -98,9 +112,15 @@ class Stage {
     markNeedsAdvance();
   }
 
+  void _computeWorldMouse(double localX, double localY) {
+    _worldMouse = Vec2D.transformMat2D(
+        Vec2D(), Vec2D.fromValues(localX, localY), _inverseViewTransform);
+  }
+
   void mouseMove(int button, double x, double y) {
-    AABB viewAABB = obbToAABB(
-        AABB.fromValues(x, y, x + 1.0, y + 1.0), _inverseViewTransform);
+    _computeWorldMouse(x, y);
+    AABB viewAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
+        _worldMouse[0] + 1.0, _worldMouse[1] + 1.0);
     StageItem hover;
     visTree.query(viewAABB, (int proxyId, StageItem item) {
       hover = item;
@@ -116,17 +136,21 @@ class Stage {
   }
 
   void mouseDown(int button, double x, double y) {
+    _computeWorldMouse(x, y);
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
     if (_hoverItem != null) {
+      _mouseDownSelected = true;
       rive.select(_hoverItem);
-    } else if (rive.selectionMode.value == SelectionMode.single) {
-      rive.selection.clear();
+    } else {
+      _mouseDownSelected = false;
     }
   }
 
   void mouseDrag(int button, double x, double y) {
+    _computeWorldMouse(x, y);
+
     switch (button) {
       case 2:
         double dx = (x - _lastMousePosition[0]);
@@ -140,18 +164,38 @@ class Stage {
         _lastMousePosition[1] = y;
         markNeedsAdvance();
         break;
+      case 1:
+        if (_activeDragTool == null) {
+          _activeDragTool = _tool;
+          _activeDragTool?.startDrag(
+              rive.selection.items.whereType<StageItem>(), _worldMouse);
+        } else {
+          _activeDragTool?.drag(_worldMouse);
+        }
+        break;
     }
   }
 
   void mouseUp(int button, double x, double y) {
+    _computeWorldMouse(x, y);
+
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
     if (button == 2 && _rightMouseMoveAccum < 5) {
       // show a popup.
     }
+
+    if (_activeDragTool != null) {
+      _activeDragTool.endDrag();
+      _activeDragTool = null;
+      rive.file.value.captureJournalEntry();
+    } else if (!_mouseDownSelected) {
+      rive.selection.clear();
+    }
   }
 
   void mouseExit(int button, double x, double y) {
+    _computeWorldMouse(x, y);
     hoverItem = null;
   }
 

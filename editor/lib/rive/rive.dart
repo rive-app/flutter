@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 
 import 'hierarchy_tree_controller.dart';
 import 'package:rive_core/selectable_item.dart';
@@ -27,6 +28,7 @@ class Rive with RiveFileDelegate {
     selection.clear();
     _stage?.dispose();
     _stage = Stage(this, file.value);
+    _stage.tool = TranslateTool();
 
     // Tree controller is based off of stage items.
     treeController.value =
@@ -57,6 +59,20 @@ class Rive with RiveFileDelegate {
     selectionMode.value = keyEvent.isMetaPressed
         ? SelectionMode.multi
         : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
+    // print(
+    //     "IS ${keyEvent.physicalKey == PhysicalKeyboardKey.keyZ} ${keyEvent is RawKeyDownEvent} ${keyEvent.isMetaPressed} && ${keyEvent.isShiftPressed} ${keyEvent.physicalKey} ${keyEvent.isMetaPressed && keyEvent.isShiftPressed && keyEvent is RawKeyDownEvent && keyEvent.physicalKey == physicalKeyboardKey.keyZ}");
+    if (keyEvent.isMetaPressed &&
+        keyEvent.isShiftPressed &&
+        keyEvent is RawKeyDownEvent &&
+        keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
+      file.value.redo();
+      print("redo");
+    } else if (keyEvent.isMetaPressed &&
+        keyEvent is RawKeyDownEvent &&
+        keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
+      file.value.undo();
+      print("undo");
+    }
   }
 
   bool select(SelectableItem item, {bool append}) {
