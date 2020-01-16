@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 
@@ -8,6 +9,8 @@ import 'package:rive_core/selectable_item.dart';
 import 'selection_context.dart';
 import 'stage/stage.dart';
 import 'package:core/core.dart';
+
+import 'stage/stage_item.dart';
 
 enum SelectionMode { single, multi, range }
 
@@ -55,6 +58,14 @@ class Rive with RiveFileDelegate {
     _stage.initComponent(object);
   }
 
+  @override
+  void onObjectRemoved(covariant Component object) {
+    print("OBJECT REMOVED $object ${object.stageItem}");
+    if (object.stageItem != null) {
+      _stage.removeItem(object.stageItem);
+    }
+  }
+
   void onKeyEvent(RawKeyEvent keyEvent, bool hasFocusObject) {
     selectionMode.value = keyEvent.isMetaPressed
         ? SelectionMode.multi
@@ -72,6 +83,15 @@ class Rive with RiveFileDelegate {
         keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
       file.value.undo();
       print("undo");
+    } else if (keyEvent is RawKeyDownEvent &&
+        keyEvent.physicalKey == PhysicalKeyboardKey.delete) {
+      for (final item in selection.items) {
+        if (item is StageItem) {
+          file.value.remove(item.component as Core);
+        }
+      }
+      selection.clear();
+      file.value.captureJournalEntry();
     }
   }
 

@@ -310,6 +310,7 @@ class Stage {
         AABB.fromValues(0.0, 0.0, _viewportWidth, _viewportHeight),
         _inverseViewTransform);
 
+    _visibleItems.clear();
     visTree.query(viewAABB, (int proxyId, StageItem item) {
       _visibleItems.add(item);
       return true;

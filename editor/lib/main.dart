@@ -62,6 +62,12 @@ class MyApp extends StatelessWidget {
     var focusScope = FocusScope.of(context);
 
     return CursorView(
+      onPointerDown: (details) {
+        focusNode.requestFocus();
+      },
+      onPointerUp: (details) {
+        rive.file.value.captureJournalEntry();
+      },
       child: MultiProvider(
         providers: [
           Provider.value(value: rive),
@@ -74,27 +80,24 @@ class MyApp extends StatelessWidget {
           //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
           // },
           home: Scaffold(
-            body: Listener(
-              onPointerDown: (details) => focusNode.requestFocus(),
-              child: RawKeyboardListener(
-                  onKey: (event) {
-                    var primary = FocusManager.instance.primaryFocus;
-                    rive.onKeyEvent(
-                        event,
-                        primary != focusNode &&
-                            focusScope.nearestScope != primary);
-                    // print("PRIMARY $primary");
-                    // if (primary == focusNode ||
-                    //     focusScope.nearestScope == primary) {
-                    //   print("Key ${event}");
-                    //   return;
-                    // }
-                    // print("NO FOCUS");
-                  },
-                  child: Editor(),
-                  autofocus: true,
-                  focusNode: focusNode),
-            ),
+            body: RawKeyboardListener(
+                onKey: (event) {
+                  var primary = FocusManager.instance.primaryFocus;
+                  rive.onKeyEvent(
+                      event,
+                      primary != focusNode &&
+                          focusScope.nearestScope != primary);
+                  // print("PRIMARY $primary");
+                  // if (primary == focusNode ||
+                  //     focusScope.nearestScope == primary) {
+                  //   print("Key ${event}");
+                  //   return;
+                  // }
+                  // print("NO FOCUS");
+                },
+                child: Editor(),
+                autofocus: true,
+                focusNode: focusNode),
           ),
         ),
       ),
@@ -117,6 +120,13 @@ List<ContextItem<Rive>> contextItems = [
   ContextItem(
     "Artboard",
     select: (Rive rive) {
+      // var artboard = Artboard()
+      //   ..name = "New Artboard"
+      //   ..x = 0
+      //   ..y = 0
+      //   ..width = 200
+      //   ..height = 100;
+      // rive.file.value.add(artboard);
       var artboard = Artboard()
         ..name = "New Artboard"
         ..x = 0

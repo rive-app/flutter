@@ -2,12 +2,27 @@ import 'package:core/coop/change.dart';
 import 'package:core/core.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
-import 'component_base.dart';
+import '../../artboard.dart';
+import '../../component.dart';
+import '../../node.dart';
 import 'artboard_base.dart';
+import 'component_base.dart';
 import 'node_base.dart';
 
 abstract class RiveCoreContext extends CoreContext {
   RiveCoreContext(String fileId) : super(fileId);
+
+  @override
+  Core makeCoreInstance(int typeKey) {
+    switch (typeKey) {
+      case ArtboardBase.typeKey:
+        return Artboard();
+      case NodeBase.typeKey:
+        return Node();
+      default:
+        return null;
+    }
+  }
 
   @override
   Change makeCoopChange(int propertyKey, Object value) {
