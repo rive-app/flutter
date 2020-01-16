@@ -77,7 +77,9 @@ class _PathRenderObject extends RenderBox {
 
   @override
   void performLayout() {
-    size = _bounds.size;
+    // size = _bounds.size;
+    final ar = _bounds.width / _bounds.height;
+    size = Size(15, 15);
   }
 
   @override

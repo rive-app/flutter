@@ -39,7 +39,7 @@ void main() {
   );
   // Fake load a test file.
   rive.open("test");
-  rive.fileBrowser.init();
+  rive.fileBrowser.init(rive);
 
   // print("CONNECTING");
   // file.connect('ws://localhost:8000/').then((result) {
@@ -58,11 +58,10 @@ void main() {
   runApp(MyApp());
 }
 
+final focusNode = FocusNode();
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
-
-  FocusNode focusNode = FocusNode();
-
   @override
   Widget build(BuildContext context) {
     var focusScope = FocusScope.of(context);
@@ -194,30 +193,10 @@ class Editor extends StatelessWidget {
   Widget _buildBody(BuildContext context) {
     switch (selectedTab) {
       case 0:
-        return _buildFiles(context);
+        return FilesView();
       default:
         return _buildEditor(context);
     }
-  }
-
-  Widget _buildFiles(BuildContext context) {
-    const kProfileWidth = 215.0;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Expanded(
-          child: FilesView(),
-        ),
-        Container(
-          width: kProfileWidth,
-          color: ThemeUtils.backgroundLightGrey,
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: ProfileView(),
-          ),
-        ),
-      ],
-    );
   }
 
   Widget _buildEditor(BuildContext context) {

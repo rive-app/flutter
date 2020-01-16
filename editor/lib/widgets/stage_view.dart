@@ -37,7 +37,7 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
       return;
     }
     _rive = value;
-    _rive.stage.delegate(this);
+    _rive?.stage?.delegate(this);
     markNeedsPaint();
   }
 

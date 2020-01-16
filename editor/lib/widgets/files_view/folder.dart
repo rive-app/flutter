@@ -48,7 +48,7 @@ class FolderViewWidget extends StatelessWidget {
               padding: const EdgeInsets.all(4.0),
               child: GestureDetector(
                 onTap: () {
-                  _fileBrowser.selectFolder(_rive, folder);
+                  _fileBrowser.selectItem(_rive, folder);
                 },
                 onDoubleTap: () {
                   // _fileBrowser.selectFolder(_rive, folder);

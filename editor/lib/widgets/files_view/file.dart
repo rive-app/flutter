@@ -107,7 +107,7 @@ class FileViewWidget extends StatelessWidget {
               padding: const EdgeInsets.all(4.0),
               child: GestureDetector(
                 onTap: () {
-                  _fileBrowser.selectFile(_rive, file);
+                  _fileBrowser.selectItem(_rive, file);
                 },
                 onDoubleTap: () {
                   final _rive = Provider.of<Rive>(context, listen: false);
