@@ -60,7 +60,6 @@ class Rive with RiveFileDelegate {
 
   @override
   void onObjectRemoved(covariant Component object) {
-    print("OBJECT REMOVED $object ${object.stageItem}");
     if (object.stageItem != null) {
       _stage.removeItem(object.stageItem);
     }
@@ -77,12 +76,10 @@ class Rive with RiveFileDelegate {
         keyEvent is RawKeyDownEvent &&
         keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
       file.value.redo();
-      print("redo");
     } else if (keyEvent.isMetaPressed &&
         keyEvent is RawKeyDownEvent &&
         keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
       file.value.undo();
-      print("undo");
     } else if (keyEvent is RawKeyDownEvent &&
         keyEvent.physicalKey == PhysicalKeyboardKey.delete) {
       for (final item in selection.items) {
