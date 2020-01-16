@@ -135,8 +135,15 @@ class Cursor extends ChangeNotifier {
 
 class CursorView extends StatefulWidget {
   final Widget child;
+  final PointerDownEventListener onPointerDown;
+  final PointerUpEventListener onPointerUp;
 
-  const CursorView({Key key, this.child}) : super(key: key);
+  const CursorView({
+    Key key,
+    this.child,
+    this.onPointerDown,
+    this.onPointerUp,
+  }) : super(key: key);
 
   @override
   _CursorViewState createState() => _CursorViewState();
@@ -164,6 +171,8 @@ class _CursorViewState extends State<CursorView> {
               _position = details.position;
             });
           },
+          onPointerDown: widget.onPointerDown,
+          onPointerUp: widget.onPointerUp,
           child: Stack(
             textDirection: TextDirection.ltr,
             children: [
