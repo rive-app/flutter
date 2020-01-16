@@ -63,6 +63,7 @@ class Property {
         context?.changeProperty(this, $propertyKey, from, to);
       }\n''');
 
+
     return code.toString();
   }
 

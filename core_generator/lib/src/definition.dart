@@ -84,6 +84,7 @@ class Definition {
   String get name => _name;
 
   String get localCodeFilename => '${stripExtension(_filename)}_base.dart';
+  String get concreteCodeFilename => '${stripExtension(_filename)}.dart';
   String get codeFilename => 'lib/src/generated/$localCodeFilename';
 
   void generateCode(
@@ -120,6 +121,25 @@ class Definition {
     for (final field in _properties) {
       code.write(field.generateCode());
     }
+
+    if (_properties.isNotEmpty) {
+// override changeNonNull to report all set fields as a change
+      code.writeln('''@override
+    void changeNonNull() {''');
+    if(_extensionOf != null) {
+      code.writeln('super.changeNonNull();');
+    }
+      // for (final definition in definitions.values) {
+      for (final property in _properties) {
+        code.writeln('''if(${property.name} != null) {
+          context?.changeProperty(this, 
+          ${property.name}PropertyKey, ${property.name}, ${property.name});
+        }''');
+      }
+      // }
+      code.writeln('}');
+    }
+
     code.write('}');
 
     var folder = outputFolder != null &&
@@ -278,13 +298,34 @@ class Definition {
                         import 'package:binary_buffer/binary_writer.dart';
                         
                         ''');
+
+    List<String> imports = [];
     for (final definition in definitions.values) {
       if (definition._properties.isNotEmpty) {
-        ctxCode.writeln('import \'${definition.localCodeFilename}\';');
+        imports.add('import \'${definition.localCodeFilename}\';\n');
+        imports.add('import \'../../${definition.concreteCodeFilename}\';\n');
       }
     }
+    // Sort the imports to avoid linter warnings.
+    imports.sort();
+    ctxCode.writeAll(imports);
+
     ctxCode.writeln('abstract class $coreContextName extends CoreContext {');
     ctxCode.writeln('$coreContextName(String fileId) : super(fileId);\n');
+
+    ctxCode.writeln('''@override
+    Core makeCoreInstance(int typeKey) {
+       switch(typeKey) {
+          ''');
+    for (final definition in definitions.values) {
+      if (definition._isAbstract) {
+        continue;
+      }
+      ctxCode.writeln('''case ${definition._name}Base.typeKey:
+        return ${definition._name}();''');
+    }
+    ctxCode.writeln('default:return null;}}');
+
     ctxCode.writeln('''@override
     Change makeCoopChange(int propertyKey, Object value) {
       var change = Change()..op = propertyKey;

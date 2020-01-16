@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'coop/change.dart';
 import 'coop/connect_result.dart';
 import 'coop/coop_client.dart';
@@ -23,6 +25,9 @@ abstract class Core<T extends CoreContext> {
   int id;
   T context;
   int get coreType;
+
+  @protected
+  void changeNonNull();
 }
 
 class FreshChange {
@@ -56,21 +61,23 @@ abstract class CoreContext implements LocalSettings {
     _objects[object.id] = object;
     onAdded(object);
     changeProperty(object, addKey, removeKey, object.coreType);
+    object.changeNonNull();
     return object;
   }
 
   void onAdded(Core object);
   void onRemoved(Core object);
 
-  void captureJournalEntry() {
+  bool captureJournalEntry() {
     if (_currentChanges == null) {
-      return;
+      return false;
     }
     journal.removeRange(_journalIndex, journal.length);
     journal.add(_currentChanges);
     _coopMakeChangeSet(_currentChanges, false);
     _journalIndex = journal.length;
     _currentChanges = null;
+    return true;
   }
 
   void changeProperty<T>(Core object, int propertyKey, T from, T to) {
@@ -110,7 +117,11 @@ abstract class CoreContext implements LocalSettings {
     return _objects.containsValue(object);
   }
 
+  @protected
   Change makeCoopChange(int propertyKey, Object value);
+
+  @protected
+  Core makeCoreInstance(int typeKey);
 
   bool redo() {
     int index = _journalIndex;
@@ -122,16 +133,46 @@ abstract class CoreContext implements LocalSettings {
     _journalIndex = index + 1;
     var changes = journal[index];
     changes.forEach((objectId, changes) {
+      bool regenerated = false;
       var object = _objects[objectId];
+      if (object == null) {
+        // The object may have been previously deleted, if so this change set
+        // would had an add key.
+        entryLoop:
+        for (final entry in changes.entries) {
+          switch (entry.key) {
+            case addKey:
+              object = makeCoreInstance(entry.value.to as int);
+              regenerated = true;
+              break entryLoop;
+          }
+        }
+      }
       if (object != null) {
         changes.forEach((propertyKey, change) {
+          if (propertyKey == addKey) {
+            print("REDO ADD KEY?");
+            // delete
+            
+          } else if (propertyKey == removeKey) {
+            print("REDO HAD A REMOVE KEY");
+            // add
+            remove(object);
+          } else {
           // Need to re-write history (grab current value as the change.from).
           // We do this to patch-up history items that change when the server
           // sends changes from other clients (or previous changes get
           // rejected).
           change.from = getObjectProperty(object, propertyKey);
           setObjectProperty(object, propertyKey, change.to);
+          }
         });
+      }
+      if (regenerated) {
+        object.id = objectId;
+        object.context = this;
+        _objects[object.id] = object;
+        onAdded(object);
       }
     });
     _coopMakeChangeSet(changes, false);
@@ -142,7 +183,9 @@ abstract class CoreContext implements LocalSettings {
   void remove<T extends Core>(T object) {
     _objects.remove(object.id);
     onRemoved(object);
-
+    if (!_isRecording) {
+      return;
+    }
     bool wasJustAdded = false;
     if (_currentChanges != null) {
       var objectChanges = _currentChanges[object.id];
@@ -157,8 +200,11 @@ abstract class CoreContext implements LocalSettings {
       }
     }
     if (!wasJustAdded) {
-      // TODO: need to serialize and add logic for re-hydrating on undo.
-      changeProperty(object, removeKey, addKey, removeKey);
+      changeProperty(object, removeKey, addKey, object.coreType);
+      // TODO: Is there a way we can do this and not network change these? We do
+      // this to re-hydrate the object by storing the changes in the undo/redo
+      // stack. 
+      object.changeNonNull();
     }
   }
 
@@ -174,20 +220,45 @@ abstract class CoreContext implements LocalSettings {
     _journalIndex = index;
     var changes = journal[index];
     changes.forEach((objectId, changes) {
+      bool regenerated = false;
       var object = _objects[objectId];
+      if (object == null) {
+        // The object may have been previously deleted, if so this change set
+        // would had an add key.
+        entryLoop:
+        for (final entry in changes.entries) {
+          switch (entry.key) {
+            case removeKey:
+              object = makeCoreInstance(entry.value.to as int);
+              regenerated = true;
+              break entryLoop;
+          }
+        }
+      }
       if (object != null) {
         changes.forEach((propertyKey, change) {
           if (propertyKey == addKey) {
-            // create
-          } else if (propertyKey == removeKey) {
+            print("ADD KEY?");
             // delete
+            remove(object);
+          } else if (propertyKey == removeKey) {
+            print("HAD A REMOVE KEY");
+            // add
+          } else {
+            // Need to re-write history (grab current value as the change.to).
+            // We do this to patch-up history items that change when the server
+            // sends changes from other clients (or previous changes get
+            // rejected).
+            change.to = getObjectProperty(object, propertyKey);
+            setObjectProperty(object, propertyKey, change.from);
           }
-          // Need to re-write history (grab current value as the change.to). We
-          // do this to patch-up history items that change when the server sends
-          // changes from other clients (or previous changes get rejected).
-          change.to = getObjectProperty(object, propertyKey);
-          setObjectProperty(object, propertyKey, change.from);
         });
+      }
+      if (regenerated) {
+        object.id = objectId;
+        object.context = this;
+        _objects[object.id] = object;
+        onAdded(object);
       }
     });
     _coopMakeChangeSet(changes, true);
