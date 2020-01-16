@@ -74,7 +74,7 @@ abstract class CoreContext implements LocalSettings {
     }
     journal.removeRange(_journalIndex, journal.length);
     journal.add(_currentChanges);
-    _coopMakeChangeSet(_currentChanges, false);
+    _coopMakeChangeSet(_currentChanges, useFrom: false);
     _journalIndex = journal.length;
     _currentChanges = null;
     return true;
@@ -123,48 +123,48 @@ abstract class CoreContext implements LocalSettings {
   @protected
   Core makeCoreInstance(int typeKey);
 
-  bool redo() {
-    int index = _journalIndex;
-    if (journal.isEmpty || index >= journal.length || index < 0) {
-      return false;
-    }
-
-    _isRecording = false;
-    _journalIndex = index + 1;
-    var changes = journal[index];
-    changes.forEach((objectId, changes) {
+  void _applyJournalEntry(Map<int, Map<int, ChangeEntry>> entry,
+      {bool isUndo}) {
+    entry.forEach((objectId, changes) {
       bool regenerated = false;
       var object = _objects[objectId];
       if (object == null) {
+        var hydrateKey = isUndo ? removeKey : addKey;
         // The object may have been previously deleted, if so this change set
         // would had an add key.
         entryLoop:
         for (final entry in changes.entries) {
-          switch (entry.key) {
-            case addKey:
-              object = makeCoreInstance(entry.value.to as int);
-              regenerated = true;
-              break entryLoop;
+          if (entry.key == hydrateKey) {
+            object = makeCoreInstance(entry.value.to as int);
+            regenerated = true;
+            break entryLoop;
           }
         }
       }
       if (object != null) {
         changes.forEach((propertyKey, change) {
           if (propertyKey == addKey) {
-            print("REDO ADD KEY?");
-            // delete
-            
+            if (isUndo) {
+              // Had an add key, this is undo, remove it.
+              remove(object);
+            }
           } else if (propertyKey == removeKey) {
-            print("REDO HAD A REMOVE KEY");
-            // add
-            remove(object);
+            if (!isUndo) {
+              // Had an remove key, this is redo, remove it.
+              remove(object);
+            }
           } else {
-          // Need to re-write history (grab current value as the change.from).
-          // We do this to patch-up history items that change when the server
-          // sends changes from other clients (or previous changes get
-          // rejected).
-          change.from = getObjectProperty(object, propertyKey);
-          setObjectProperty(object, propertyKey, change.to);
+            // Need to re-write history (grab current value as the change.from).
+            // We do this to patch-up history items that change when the server
+            // sends changes from other clients (or previous changes get
+            // rejected).
+            if (isUndo) {
+              change.to = getObjectProperty(object, propertyKey);
+              setObjectProperty(object, propertyKey, change.from);
+            } else {
+              change.from = getObjectProperty(object, propertyKey);
+              setObjectProperty(object, propertyKey, change.to);
+            }
           }
         });
       }
@@ -175,7 +175,19 @@ abstract class CoreContext implements LocalSettings {
         onAdded(object);
       }
     });
-    _coopMakeChangeSet(changes, false);
+
+    _coopMakeChangeSet(entry, useFrom: isUndo);
+  }
+
+  bool redo() {
+    int index = _journalIndex;
+    if (journal.isEmpty || index >= journal.length || index < 0) {
+      return false;
+    }
+
+    _isRecording = false;
+    _journalIndex = index + 1;
+    _applyJournalEntry(journal[index], isUndo: false);
     _isRecording = true;
     return true;
   }
@@ -203,7 +215,7 @@ abstract class CoreContext implements LocalSettings {
       changeProperty(object, removeKey, addKey, object.coreType);
       // TODO: Is there a way we can do this and not network change these? We do
       // this to re-hydrate the object by storing the changes in the undo/redo
-      // stack. 
+      // stack.
       object.changeNonNull();
     }
   }
@@ -218,50 +230,7 @@ abstract class CoreContext implements LocalSettings {
 
     _isRecording = false;
     _journalIndex = index;
-    var changes = journal[index];
-    changes.forEach((objectId, changes) {
-      bool regenerated = false;
-      var object = _objects[objectId];
-      if (object == null) {
-        // The object may have been previously deleted, if so this change set
-        // would had an add key.
-        entryLoop:
-        for (final entry in changes.entries) {
-          switch (entry.key) {
-            case removeKey:
-              object = makeCoreInstance(entry.value.to as int);
-              regenerated = true;
-              break entryLoop;
-          }
-        }
-      }
-      if (object != null) {
-        changes.forEach((propertyKey, change) {
-          if (propertyKey == addKey) {
-            print("ADD KEY?");
-            // delete
-            remove(object);
-          } else if (propertyKey == removeKey) {
-            print("HAD A REMOVE KEY");
-            // add
-          } else {
-            // Need to re-write history (grab current value as the change.to).
-            // We do this to patch-up history items that change when the server
-            // sends changes from other clients (or previous changes get
-            // rejected).
-            change.to = getObjectProperty(object, propertyKey);
-            setObjectProperty(object, propertyKey, change.from);
-          }
-        });
-      }
-      if (regenerated) {
-        object.id = objectId;
-        object.context = this;
-        _objects[object.id] = object;
-        onAdded(object);
-      }
-    });
-    _coopMakeChangeSet(changes, true);
+    _applyJournalEntry(journal[index], isUndo: true);
     _isRecording = true;
     return true;
   }
@@ -292,8 +261,8 @@ abstract class CoreContext implements LocalSettings {
     });
   }
 
-  void _coopMakeChangeSet(
-      Map<int, Map<int, ChangeEntry>> changes, bool useFrom) {
+  void _coopMakeChangeSet(Map<int, Map<int, ChangeEntry>> changes,
+      {bool useFrom}) {
     if (_client == null) {
       return;
     }
