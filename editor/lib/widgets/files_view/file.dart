@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/file.dart';
@@ -17,7 +18,7 @@ class FileViewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     const kBottomHeight = 40.0;
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
-     final _rive = Provider.of<Rive>(context, listen: false);
+    final _rive = Provider.of<Rive>(context, listen: false);
     return ValueListenableBuilder<SelectionState>(
       valueListenable: file.selectionState,
       child: Column(
@@ -105,7 +106,7 @@ class FileViewWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(4.0),
               child: GestureDetector(
-                onTapDown: (_) {
+                onTap: () {
                   _fileBrowser.selectFile(_rive, file);
                 },
                 onDoubleTap: () {

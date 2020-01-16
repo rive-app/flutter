@@ -12,6 +12,8 @@ class FileItem extends SelectableItem {
     @required this.name,
     @required this.image,
   });
-
-
+  final _draggingState = ValueNotifier<bool>(false);
+  ValueListenable<bool> get draggingState => _draggingState;
+  set isDragging(bool val) => _draggingState.value = val;
+  bool get isDragging => _draggingState.value;
 }

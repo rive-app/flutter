@@ -12,8 +12,8 @@ class _SelectionFlags {
 /// tree widget itself assumes nothing regarding selections. We chose to
 /// implement it as an interface.
 abstract class SelectableItem {
-  final ValueNotifier<SelectionState> _selectionState =
-      ValueNotifier<SelectionState>(SelectionState.none);
+  final _selectionState = ValueNotifier<SelectionState>(SelectionState.none);
+
   ValueListenable<SelectionState> get selectionState => _selectionState;
 
   int _selectionFlags = 0;
