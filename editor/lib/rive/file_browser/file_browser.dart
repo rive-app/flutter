@@ -11,45 +11,91 @@ import 'file.dart';
 
 class FileBrowser extends FileBrowserController {
   final selection = SelectionContext<SelectableItem>();
-  Set<FolderItem> _folders = {};
+  FolderItem _myFiles;
   List<FileItem> get selectedFiles =>
-      _selectedFolder.files.where((f) => f.isSelected).toList();
+      (_selectedFolder?.files ?? []).where((f) => f.isSelected).toList();
   List<FolderItem> get selectedFolders =>
-      _selectedFolder.folders.where((f) => f.isSelected).toList();
+      (_selectedFolder?.folders ?? []).where((f) => f.isSelected).toList();
   int get selectedItemCount => selectedFiles.length + selectedFolders.length;
   FolderItem _selectedFolder;
   int _lastSelectedFileIndex;
   int _lastSelectedFolderIndex;
 
   void init() {
-    List.generate(25, (i) {
-      _folders.add(
-        FolderItem(
-            key: ValueKey('00$i'),
-            name: "Name $i",
-            files: List.generate(math.Random().nextInt(20), (p) {
-              return FileItem(
-                key: ValueKey("00$p"),
-                name: "File $p",
-                image: "https://www.lunapic.com/editor/premade/transparent.gif",
-              );
-            })),
-      );
-    });
+    _myFiles = FolderItem(
+      key: ValueKey('0'),
+      name: "My Files",
+      files: _genFiles(0),
+      folders: _getFolders(math.Random().nextInt(6)),
+    );
+    reset();
+  }
+
+  void reset() {
+    _selectedFolder = _myFiles;
     notifyListeners();
   }
 
-  @override
-  List<FolderItem> get folders => _folders.toList();
+  List<FolderItem> _getFolders(int level) {
+    return List.generate(
+      25,
+      (i) => FolderItem(
+        key: ValueKey('folder_$level$i'),
+        name: "Name $i ($level)",
+        files: _genFiles(level),
+        folders: level == 0 ? [] : _getFolders(level - 1),
+      ),
+    );
+  }
+
+  List<FileItem> _genFiles(int level) {
+    return List.generate(
+      math.Random().nextInt(20),
+      (p) => FileItem(
+        key: ValueKey("file_$level$p"),
+        name: "File $p ($level)",
+        image: "https://www.lunapic.com/editor/premade/transparent.gif",
+      ),
+    );
+  }
 
   @override
   void selectFolder(Rive rive, FolderItem value) {
-    if (rive.selectionMode.value == SelectionMode.single) {
-      selection.clear();
+    switch (rive.selectionMode.value) {
+      case SelectionMode.single:
+        _resetSelection();
+        _selectFolderItem(value, false);
+        _lastSelectedFolderIndex = _selectedFolder.folders.indexOf(value);
+        break;
+      case SelectionMode.multi:
+        _selectFolderItem(value, true);
+        _lastSelectedFolderIndex = _selectedFolder.folders.indexOf(value);
+        break;
+      case SelectionMode.range:
+        if (_lastSelectedFolderIndex == null) {
+          _selectFolderItem(value, false);
+          _lastSelectedFolderIndex = _selectedFolder.folders.indexOf(value);
+        } else {
+          List<FolderItem> _items;
+          final _itemIndex = _selectedFolder.folders.indexOf(value);
+
+          if (_lastSelectedFolderIndex < _itemIndex) {
+            _items = _selectedFolder.folders
+                .getRange(_lastSelectedFolderIndex, _itemIndex + 1)
+                .toList();
+          } else {
+            _items = _selectedFolder.folders
+                .getRange(_itemIndex, _lastSelectedFolderIndex + 1)
+                .toList();
+          }
+          _resetSelection();
+          for (var item in _items) {
+            _selectFolderItem(item, true);
+          }
+          selection.selectMultiple(_items, append: true);
+        }
+        break;
     }
-    bool append = rive.selectionMode.value == SelectionMode.multi;
-    selection.select(value, append: append);
-    value.isSelected = true;
     notifyListeners();
   }
 
@@ -59,6 +105,9 @@ class FileBrowser extends FileBrowserController {
   @override
   void openFolder(FolderItem value) {
     _selectedFolder = value;
+    selection.clear();
+    _lastSelectedFileIndex = null;
+    _lastSelectedFolderIndex = null;
     notifyListeners();
   }
 
@@ -132,6 +181,20 @@ class FileBrowser extends FileBrowserController {
     }
   }
 
+  void _selectFolderItem(FolderItem value, bool append) {
+    if (value.isSelected) {
+      value.isSelected = false;
+      selection.items.remove(value);
+      _selectedFolder.folders.firstWhere((f) => f.key == value.key).isSelected =
+          false;
+    } else {
+      value.isSelected = true;
+      selection.select(value, append: append);
+      _selectedFolder.folders.firstWhere((f) => f.key == value.key).isSelected =
+          true;
+    }
+  }
+
   @override
   void openFile(Rive rive, FileItem value) {
     rive.open(value.key.value);
@@ -149,7 +212,7 @@ class FileBrowser extends FileBrowserController {
     for (var item in selectedFolders) {
       item.isDragging = true;
     }
-     notifyListeners();
+    notifyListeners();
   }
 
   void endDrag() {
@@ -160,6 +223,6 @@ class FileBrowser extends FileBrowserController {
     for (var item in selectedFolders) {
       item.isDragging = false;
     }
-     notifyListeners();
+    notifyListeners();
   }
 }

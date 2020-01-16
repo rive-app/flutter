@@ -76,6 +76,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: ThemeData.light(),
           darkTheme: ThemeData.dark(),
+          themeMode: ThemeMode.light,
           home: DefaultTextStyle(
             style: TextStyle(fontFamily: "Roboto-Regular"),
             child: Scaffold(
@@ -170,8 +171,14 @@ class Editor extends StatelessWidget {
                     selected: tabs[selectedTab],
                     select: (tab) {
                       // Hackity hack to test the tabs.
-                      selectedTab = tabs.indexOf(tab);
-                      (context as Element).markNeedsBuild();
+                      if (selectedTab == tabs.indexOf(tab)) {
+                        if (selectedTab == 0) {
+                          _rive.fileBrowser.reset();
+                        }
+                      } else {
+                        selectedTab = tabs.indexOf(tab);
+                        (context as Element).markNeedsBuild();
+                      }
                     },
                   );
                 },

@@ -17,7 +17,7 @@ class FolderViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
-     final _rive = Provider.of<Rive>(context, listen: false);
+    final _rive = Provider.of<Rive>(context, listen: false);
     return ValueListenableBuilder<SelectionState>(
       valueListenable: folder.selectionState,
       builder: (context, state, child) {
@@ -51,7 +51,7 @@ class FolderViewWidget extends StatelessWidget {
                   _fileBrowser.selectFolder(_rive, folder);
                 },
                 onDoubleTap: () {
-                  _fileBrowser.selectFolder(_rive, folder);
+                  // _fileBrowser.selectFolder(_rive, folder);
                   _fileBrowser.openFolder(folder);
                 },
                 child: Container(

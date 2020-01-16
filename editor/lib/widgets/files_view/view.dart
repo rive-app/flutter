@@ -10,17 +10,13 @@ import 'package:provider/provider.dart';
 import 'file.dart';
 import 'folder.dart';
 
-class FilesView extends StatefulWidget {
+final _controller = ScrollController();
+
+class FilesView extends StatelessWidget {
   const FilesView({
     Key key,
   }) : super(key: key);
 
-  @override
-  _FilesViewState createState() => _FilesViewState();
-}
-
-class _FilesViewState extends State<FilesView> {
-  final _controller = ScrollController();
   @override
   Widget build(BuildContext context) {
     final padding = const EdgeInsets.symmetric(
@@ -72,8 +68,27 @@ class _FilesViewState extends State<FilesView> {
             child: Consumer<FileBrowser>(
               builder: (context, browser, child) => LayoutBuilder(
                 builder: (_, dimens) {
-                  final folders = browser?.folders;
-                  final files = browser?.selectedFolder?.files;
+                  final folders = browser?.selectedFolder?.folders ?? [];
+                  final files = browser?.selectedFolder?.files ?? [];
+                  if (folders.isEmpty && files.isEmpty) {
+                    return Column(
+                      children: <Widget>[
+                        TitleSection(
+                          padding: padding,
+                          name: 'Files',
+                          showDropdown: true,
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              "This View is empty.",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
                   return ValueListenableBuilder<bool>(
                     valueListenable: browser.draggingState,
                     builder: (context, dragging, child) => MarqueeScrollView(
@@ -118,83 +133,82 @@ class _FilesViewState extends State<FilesView> {
                                     );
                                   },
                                   childCount: folders.length,
-                                  findChildIndexCallback: (Key key) {
-                                    return folders
-                                        .indexWhere((i) => i.key == key);
-                                  },
+                                  // findChildIndexCallback: (Key key) {
+                                  //   return folders
+                                  //       .indexWhere((i) => i.key == key);
+                                  // },
                                   addRepaintBoundaries: false,
                                   addAutomaticKeepAlives: false,
                                   addSemanticIndexes: false,
                                 ),
                               ),
                             ),
-                            if (files != null && files.isNotEmpty) ...[
-                              SliverToBoxAdapter(
-                                child: TitleSection(
-                                  padding: padding,
-                                  name: 'Files',
-                                  showDropdown:
-                                      folders == null || folders.isEmpty,
+                          ],
+                          if (files != null && files.isNotEmpty) ...[
+                            SliverToBoxAdapter(
+                              child: TitleSection(
+                                padding: padding,
+                                name: 'Files',
+                                showDropdown:
+                                    folders == null || folders.isEmpty,
+                              ),
+                            ),
+                            SliverPadding(
+                              padding: EdgeInsets.all(20.0),
+                              sliver: SliverGrid(
+                                gridDelegate:
+                                    SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 187,
+                                  childAspectRatio: 187 / 190,
+                                  mainAxisSpacing: 20.0,
+                                  crossAxisSpacing: 20.0,
+                                ),
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    final file = files[index];
+                                    return ValueListenableBuilder<bool>(
+                                      valueListenable: file.draggingState,
+                                      builder: (context, fileDragging, child) {
+                                        return Draggable<FileItem>(
+                                          dragAnchor: DragAnchor.pointer,
+                                          onDragStarted: () {
+                                            if (!file.isSelected) {
+                                              browser.selectFile(_rive, file);
+                                            }
+                                            browser.startDrag();
+                                          },
+                                          onDragCompleted: () {
+                                            browser.endDrag();
+                                          },
+                                          onDragEnd: (_) {
+                                            browser.endDrag();
+                                          },
+                                          onDraggableCanceled: (_, __) {
+                                            browser.endDrag();
+                                          },
+                                          feedback:
+                                              _buildFeedback(file, browser),
+                                          childWhenDragging:
+                                              _buildChildWhenDragging(),
+                                          child: fileDragging
+                                              ? _buildChildWhenDragging()
+                                              : FileViewWidget(
+                                                  file: files[index]),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  childCount: files.length,
+                                  // findChildIndexCallback: (Key key) {
+                                  //   return files
+                                  //       .indexWhere((i) => i.key == key);
+                                  // },
+                                  addRepaintBoundaries: false,
+                                  addAutomaticKeepAlives: false,
+                                  addSemanticIndexes: false,
                                 ),
                               ),
-                              SliverPadding(
-                                padding: EdgeInsets.all(20.0),
-                                sliver: SliverGrid(
-                                  gridDelegate:
-                                      SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: 187,
-                                    childAspectRatio: 187 / 190,
-                                    mainAxisSpacing: 20.0,
-                                    crossAxisSpacing: 20.0,
-                                  ),
-                                  delegate: SliverChildBuilderDelegate(
-                                    (context, index) {
-                                      final file = files[index];
-                                      return ValueListenableBuilder<bool>(
-                                        valueListenable: file.draggingState,
-                                        builder:
-                                            (context, fileDragging, child) {
-                                          return Draggable<FileItem>(
-                                            dragAnchor: DragAnchor.pointer,
-                                            onDragStarted: () {
-                                              if (!file.isSelected) {
-                                                browser.selectFile(_rive, file);
-                                              }
-                                              browser.startDrag();
-                                            },
-                                            onDragCompleted: () {
-                                              browser.endDrag();
-                                            },
-                                            onDragEnd: (_) {
-                                              browser.endDrag();
-                                            },
-                                            onDraggableCanceled: (_, __) {
-                                              browser.endDrag();
-                                            },
-                                            feedback:
-                                                _buildFeedback(file, browser),
-                                            childWhenDragging:
-                                                _buildChildWhenDragging(),
-                                            child: fileDragging
-                                                ? _buildChildWhenDragging()
-                                                : FileViewWidget(
-                                                    file: files[index]),
-                                          );
-                                        },
-                                      );
-                                    },
-                                    childCount: files.length,
-                                    findChildIndexCallback: (Key key) {
-                                      return files
-                                          .indexWhere((i) => i.key == key);
-                                    },
-                                    addRepaintBoundaries: false,
-                                    addAutomaticKeepAlives: false,
-                                    addSemanticIndexes: false,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ],
                         ],
                       ),
