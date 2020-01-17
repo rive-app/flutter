@@ -20,7 +20,6 @@ class RiveTabItem {
   });
 }
 
-
 typedef TabSelectedCallback = void Function(RiveTabItem item);
 
 class _TabBarItem extends StatelessWidget {
@@ -52,14 +51,7 @@ class _TabBarItem extends StatelessWidget {
             ),
             if (tab.closeable) SizedBox(width: 10),
             if (tab.closeable)
-              PathWidget(
-                path: ThemeUtils.closeIcon,
-                nudge: Offset(0.5, 0),
-                paint: Paint()
-                  ..color = Color.fromRGBO(140, 140, 140, 1.0)
-                  ..style = PaintingStyle.stroke
-                  ..isAntiAlias = false,
-              )
+              RiveIcons.close(Color.fromRGBO(140, 140, 140, 1.0), 13)
           ],
         ),
         decoration: isSelected
@@ -69,7 +61,6 @@ class _TabBarItem extends StatelessWidget {
     );
   }
 }
-
 
 class RiveTabBar extends StatelessWidget {
   final List<RiveTabItem> tabs;

@@ -9,7 +9,11 @@ import 'browser_tree_controller.dart';
 import 'controller.dart';
 import 'file.dart';
 
+const kTreeItemHeight = 35.0;
+
 class FileBrowser extends FileBrowserController {
+  final filesScrollController = ScrollController();
+  final treeScrollController = ScrollController();
   // final selection = SelectionContext<SelectableItem>();
   int get selectedCount => selectedItems.length;
   List<SelectableItem> get selectedItems {
@@ -36,7 +40,7 @@ class FileBrowser extends FileBrowserController {
     );
     browserController.value = FolderTreeController([_myFiles], rive: rive);
     reset();
-    openFolder(_myFiles);
+    openFolder(_myFiles, false);
   }
 
   void onFoldersChanged() {
@@ -76,7 +80,7 @@ class FileBrowser extends FileBrowserController {
   FolderItem get selectedFolder => _current;
 
   @override
-  void openFolder(FolderItem value) {
+  void openFolder(FolderItem value, bool jumpTo) {
     _current = value;
     if (selectedCount != 0) {
       for (var item in selectedItems) {
@@ -86,6 +90,13 @@ class FileBrowser extends FileBrowserController {
     browserController.value.expand(value);
     _lastSelectedIndex = null;
     notifyListeners();
+    if (jumpTo) {
+      final _index = browserController.value.flat
+          .indexWhere((f) => f.data.key == value.key);
+      final _offset = _index * kTreeItemHeight;
+      treeScrollController.jumpTo(_offset);
+    }
+    // Scrollable.ensureVisible(context);
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
@@ -49,7 +50,7 @@ class FolderTreeController extends TreeController<FolderItem> {
       if (rive.fileBrowser.currentFolder.key == item.data.key) {
         rive.fileBrowser.selectItem(rive, item.data);
       } else {
-        rive.fileBrowser.openFolder(item.data);
+        rive.fileBrowser.openFolder(item.data, false);
       }
       // rive.fileBrowser.selectItem(rive, item.data);
     }

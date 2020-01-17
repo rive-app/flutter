@@ -8,6 +8,6 @@ import 'folder.dart';
 abstract class FileBrowserController extends ChangeNotifier {
   FolderItem get selectedFolder;
   void selectItem(Rive rive, SelectableItem value);
-  void openFolder(FolderItem value);
+  void openFolder(FolderItem value, bool jumpTo);
   void openFile(Rive rive, FileItem value);
 }

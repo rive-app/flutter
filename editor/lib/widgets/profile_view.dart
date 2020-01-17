@@ -42,26 +42,12 @@ class ProfileView extends StatelessWidget {
           Column(
             children: <Widget>[
               FlatIconButton(
-                icon: PathWidget(
-                  path: ThemeUtils.profileIcon,
-                  nudge: Offset(0.5, 0.5),
-                  paint: Paint()
-                    ..color = ThemeUtils.iconColor
-                    ..style = PaintingStyle.fill
-                    ..isAntiAlias = true,
-                ),
+                icon: RiveIcons.profile(ThemeUtils.iconColor),
                 label: "Your Profile",
               ),
               Container(height: 20.0),
               FlatIconButton(
-                icon: PathWidget(
-                  path: ThemeUtils.settingsIcon,
-                  nudge: Offset(0.5, 0.5),
-                  paint: Paint()
-                    ..color = ThemeUtils.iconColor
-                    ..style = PaintingStyle.fill
-                    ..isAntiAlias = true,
-                ),
+                icon: RiveIcons.settings(ThemeUtils.iconColor),
                 label: "Settings",
               ),
             ],

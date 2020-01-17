@@ -51,8 +51,7 @@ class FolderViewWidget extends StatelessWidget {
                   _fileBrowser.selectItem(_rive, folder);
                 },
                 onDoubleTap: () {
-                  // _fileBrowser.selectFolder(_rive, folder);
-                  _fileBrowser.openFolder(folder);
+                  _fileBrowser.openFolder(folder, true);
                 },
                 child: Container(
                   child: Container(
@@ -65,16 +64,9 @@ class FolderViewWidget extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 12.0),
                       child: Row(
                         children: <Widget>[
-                          PathWidget(
-                            path: ThemeUtils.folderIcon,
-                            nudge: Offset(0.5, 0.5),
-                            paint: Paint()
-                              ..color = _isSelected
-                                  ? ThemeUtils.selectedBlue
-                                  : ThemeUtils.iconColor
-                              ..style = PaintingStyle.stroke
-                              ..isAntiAlias = true,
-                          ),
+                          RiveIcons.folder(_isSelected
+                              ? ThemeUtils.selectedBlue
+                              : ThemeUtils.iconColor),
                           Container(width: 8.0),
                           Expanded(
                             child: Text(

@@ -1,22 +1,21 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/main.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
-import 'package:rive_editor/rive/file_browser/controller.dart';
 import 'package:rive_editor/rive/file_browser/file.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
-import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/widgets/hierarchy.dart';
+import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
+import 'package:rive_editor/widgets/path_widget.dart';
 import 'package:rive_editor/widgets/profile_view.dart';
+import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:provider/provider.dart';
 
 import 'file.dart';
 import 'folder.dart';
 import 'folder_tree.dart';
-
-final _controller = ScrollController();
 
 class FilesView extends StatelessWidget {
   const FilesView({
@@ -42,52 +41,99 @@ class FilesView extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Container(
-                    width: 252.0,
-                    color: ThemeUtils.backgroundLightGrey,
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Container(
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      border: InputBorder.none,
-                                      hintText: 'Search',
-                                      prefixIcon: Icon(Icons.search),
+                  ResizePanel(
+                    hitSize: resizeEdgeSize,
+                    direction: ResizeDirection.horizontal,
+                    side: ResizeSide.end,
+                    min: 252.0,
+                    max: 500,
+                    child: Container(
+                      color: ThemeUtils.backgroundLightGrey,
+                      padding: EdgeInsets.only(left: 20.0, top: 20.0),
+                      child: Column(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 20.0),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Container(
+                                    height: 35,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      color: Color.fromRGBO(227, 227, 227, 1.0),
+                                    ),
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: 'Search',
+                                        contentPadding: EdgeInsets.zero,
+                                        prefixIcon: RiveIcons.search(
+                                            Color.fromRGBO(153, 153, 153, 1.0)),
+                                      ),
+                                      style: TextStyle(
+                                        color:
+                                            Color.fromRGBO(153, 153, 153, 1.0),
+                                        fontSize: 13.0,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Container(width: 4.0),
-                              FloatingActionButton(
-                                mini: true,
-                                elevation: 2.0,
-                                heroTag: ValueKey("add_file"),
-                                backgroundColor: Colors.black,
-                                child: Icon(Icons.add),
-                                onPressed: () {},
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Consumer<Rive>(
-                            builder: (context, rive, _) =>
-                                ValueListenableBuilder<FolderTreeController>(
-                              valueListenable:
-                                  rive.fileBrowser.browserController,
-                              builder: (context, controller, _) {
-                                return FolderTreeView(controller: controller);
-                              },
+                                Container(width: 10.0),
+                                Container(
+                                  width: 29,
+                                  height: 29,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: RiveIcons.add(Colors.white),
+                                )
+                              ],
                             ),
                           ),
-                        )
-                      ],
+                          IconTile(
+                            label: "Recents",
+                            icon: RiveIcons.clock(ThemeUtils.iconColor, 15),
+                            onTap: () {},
+                          ),
+                          IconTile(
+                            icon: RiveIcons.trash(ThemeUtils.iconColor, 15),
+                            label: "Deleted Files",
+                            onTap: () {},
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Container(
+                                    margin: EdgeInsets.only(
+                                      top: 21,
+                                      bottom: 11,
+                                    ),
+                                    color: ThemeUtils.lineGrey,
+                                    height: 1),
+                              )
+                            ],
+                          ),
+                          Expanded(
+                            child: Consumer<Rive>(
+                              builder: (context, rive, _) =>
+                                  ValueListenableBuilder<FolderTreeController>(
+                                valueListenable:
+                                    rive.fileBrowser.browserController,
+                                builder: (context, controller, _) {
+                                  return FolderTreeView(
+                                    controller: controller,
+                                    scrollController:
+                                        rive.fileBrowser.treeScrollController,
+                                    itemHeight: kTreeItemHeight,
+                                  );
+                                },
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                   Expanded(
@@ -120,15 +166,15 @@ class FilesView extends StatelessWidget {
                             valueListenable: browser.draggingState,
                             builder: (context, dragging, child) =>
                                 MarqueeScrollView(
-                              controller: _controller,
+                              controller: browser.filesScrollController,
                               enable: !dragging,
                               child: child,
                             ),
                             child: Scrollbar(
-                              controller: _controller,
+                              controller: browser.filesScrollController,
                               child: CustomScrollView(
                                 // semanticChildCount: 4,
-                                controller: _controller,
+                                controller: browser.filesScrollController,
                                 physics: NeverScrollableScrollPhysics(),
                                 slivers: <Widget>[
                                   if (folders != null &&

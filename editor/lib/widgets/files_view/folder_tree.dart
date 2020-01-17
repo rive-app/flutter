@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
-import 'package:rive_editor/widgets/path_widget.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
@@ -15,16 +14,25 @@ import 'package:provider/provider.dart';
 
 class FolderTreeView extends StatelessWidget {
   final FolderTreeController controller;
+  final ScrollController scrollController;
+  final double itemHeight;
 
-  const FolderTreeView({Key key, @required this.controller}) : super(key: key);
+  const FolderTreeView({
+    Key key,
+    @required this.controller,
+    @required this.scrollController,
+    @required this.itemHeight,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TreeView<FolderItem>(
+      scrollController: scrollController,
       style: TreeStyle(
         showFirstLine: true,
-        padding: const EdgeInsets.all(10),
-        lineColor: Colors.grey.shade700,
+        padding: const EdgeInsets.all(5),
+        lineColor: ThemeUtils.lineGrey,
+        itemHeight: itemHeight,
       ),
       controller: controller,
       expanderBuilder: (context, item) => Container(
@@ -37,7 +45,7 @@ class FolderTreeView extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade700,
+            color: ThemeUtils.lineGrey,
             width: 1.0,
             style: BorderStyle.solid,
           ),
@@ -51,17 +59,12 @@ class FolderTreeView extends StatelessWidget {
           width: 15,
           height: 15,
           child: Center(
-            child: PathWidget(
-              path: ThemeUtils.folderIcon,
-              nudge: Offset(0.0, 0.0),
-              paint: Paint()
-                ..color = browser.selectedFolder == item.data
-                    ? Colors.white
-                    : ThemeUtils.iconColor
-                ..style = PaintingStyle.stroke
-                ..isAntiAlias = true,
-            ),
-          ),
+              child: RiveIcons.folder(
+            browser.selectedFolder == item.data
+                ? Colors.white
+                : ThemeUtils.iconColor,
+            15.0,
+          )),
         ),
       ),
       extraBuilder: (context, item, index) => Container(
