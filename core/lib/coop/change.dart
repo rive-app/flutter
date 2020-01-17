@@ -14,6 +14,7 @@ class Change {
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(op);
     writer.writeVarInt(objectId);
+    print("SE $objectId");
     if (value == null) {
       writer.writeVarUint(0);
       return;
@@ -25,6 +26,7 @@ class Change {
   void deserialize(BinaryReader reader) {
     op = reader.readVarUint();
     objectId = reader.readVarInt();
+    print("DE $objectId");
     int length = reader.readVarUint();
     value = reader.read(length);
   }

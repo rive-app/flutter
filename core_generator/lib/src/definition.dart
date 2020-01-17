@@ -126,9 +126,9 @@ class Definition {
 // override changeNonNull to report all set fields as a change
       code.writeln('''@override
     void changeNonNull() {''');
-    if(_extensionOf != null) {
-      code.writeln('super.changeNonNull();');
-    }
+      if (_extensionOf != null) {
+        code.writeln('super.changeNonNull();');
+      }
       // for (final definition in definitions.values) {
       for (final property in _properties) {
         code.writeln('''if(${property.name} != null) {
@@ -343,9 +343,12 @@ class Definition {
     }
 
     ctxCode.write('''case CoreContext.addKey:
-                    case CoreContext.removeKey:
-                    change.op = value as int;
-                    break;''');
+                    case CoreContext.removeKey:           
+        if (value != null && value is int) {
+          var writer = BinaryWriter(alignment: 4);
+          writer.writeVarInt(value);
+          change.value = writer.uint8Buffer;
+        }break;''');
 
     groups.forEach((fieldType, properties) {
       for (final property in properties) {
