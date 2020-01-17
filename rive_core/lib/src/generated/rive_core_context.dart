@@ -30,7 +30,11 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case CoreContext.addKey:
       case CoreContext.removeKey:
-        change.op = value as int;
+        if (value != null && value is int) {
+          var writer = BinaryWriter(alignment: 4);
+          writer.writeVarInt(value);
+          change.value = writer.uint8Buffer;
+        }
         break;
       case ComponentBase.namePropertyKey:
         if (value != null && value is String) {

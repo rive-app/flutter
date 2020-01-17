@@ -9,6 +9,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'selection_context.dart';
 import 'stage/stage.dart';
 import 'package:core/core.dart';
+import 'package:core/coop/connect_result.dart';
 
 import 'stage/stage_item.dart';
 
@@ -23,8 +24,9 @@ class Rive with RiveFileDelegate {
 
   final ValueNotifier<SelectionMode> selectionMode =
       ValueNotifier<SelectionMode>(SelectionMode.single);
+
+  final ValueNotifier<Stage> stage = ValueNotifier<Stage>(null);
   Stage _stage;
-  Stage get stage => _stage;
 
   void _changeFile(RiveFile nextFile) {
     file.value = nextFile;
@@ -32,6 +34,7 @@ class Rive with RiveFileDelegate {
     _stage?.dispose();
     _stage = Stage(this, file.value);
     _stage.tool = TranslateTool();
+    stage.value = _stage;
 
     // Tree controller is based off of stage items.
     treeController.value =
@@ -41,6 +44,10 @@ class Rive with RiveFileDelegate {
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
   Future<RiveFile> open(String id) async {
     var opening = RiveFile(id);
+    var result = await opening.connect('ws://localhost:8000/$id');
+    if (result == ConnectResult.connected) {
+      print("Connected");
+    }
     opening.addDelegate(this);
     _changeFile(opening);
     return opening;
