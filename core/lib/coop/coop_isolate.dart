@@ -8,6 +8,8 @@ import 'dart:typed_data';
 import 'coop_server.dart';
 import 'coop_server_client.dart';
 import 'coop_session.dart';
+import 'change.dart';
+import 'package:core/core.dart';
 
 typedef CoopIsolateHandler = void Function(CoopIsolateArgument);
 typedef CoopIsolateHandlerMaker = CoopIsolateHandler Function();
@@ -175,10 +177,10 @@ abstract class CoopIsolateProcess {
 
   // bool remove(CoopServerClient client) => _clients.remove(client);
 
-  Future<bool> initProcess(
-      SendPort sendToMainPort, Map<String, String> options) async {
+  Future<bool> initProcess(SendPort sendToMainPort, Map<String, String> options,
+      int ownerId, int fileId) async {
     _sendToMainPort = sendToMainPort;
-    if (await initialize(options)) {
+    if (await initialize(ownerId, fileId, options)) {
       _sendToMainPort.send(_receiveFromMainPort.sendPort);
       return true;
     }
@@ -189,7 +191,9 @@ abstract class CoopIsolateProcess {
     _sendToMainPort.send(_CoopServerProcessData(client.id, data));
   }
 
-  Future<bool> initialize([Map<String, String> options]);
+  bool attemptChange(ChangeSet changes);
+
+  Future<bool> initialize(int ownerId, int fileId, Map<String, String> options);
   Future<bool> saveData(String key, Uint8List data);
   Future<Uint8List> loadData(String key);
   Future<bool> shutdown();

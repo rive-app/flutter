@@ -1,4 +1,10 @@
-import 'dart:io' show HttpRequest, HttpServer, WebSocketTransformer, stderr;
+import 'dart:io'
+    show
+        HttpRequest,
+        HttpServer,
+        WebSocketTransformer,
+        WebSocketException,
+        stderr;
 
 import 'coop_isolate.dart';
 
@@ -34,6 +40,7 @@ abstract class CoopServer {
     print('Listening localhost:$port');
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
+      print("SEG $segments");
       if (segments.length == 2) {
         int ownerId, fileId;
         try {
@@ -46,24 +53,28 @@ abstract class CoopServer {
         if (!await validate(request, ownerId, fileId)) {
           // TODO: fail the login.
         }
-        var ws = await WebSocketTransformer.upgrade(request);
-        String key = _isolateKey(ownerId, fileId);
-        var isolate = _isolates[key];
-        if (isolate == null) {
-          isolate = CoopIsolate(this, ownerId, fileId);
-          if (await isolate.spawn(handler, options)) {
-            _isolates[key] = isolate;
-          } else {
-            stderr.write('Unable to spawn isolate for file $key.');
-            await ws.close();
-            return;
+        try {
+          var ws = await WebSocketTransformer.upgrade(request);
+          String key = _isolateKey(ownerId, fileId);
+          var isolate = _isolates[key];
+          if (isolate == null) {
+            isolate = CoopIsolate(this, ownerId, fileId);
+            if (await isolate.spawn(handler, options)) {
+              _isolates[key] = isolate;
+            } else {
+              stderr.write('Unable to spawn isolate for file $key.');
+              await ws.close();
+              return;
+            }
           }
-        }
-        if (!await isolate.addClient(ws)) {
-          stderr.write('Unable to add client for file $key. '
-              'This could be due to a previous shutdown attempt, check logs for'
-              ' indication of shutdown prior to this.');
-          await ws.close();
+          if (!await isolate.addClient(ws)) {
+            stderr.write('Unable to add client for file $key. '
+                'This could be due to a previous shutdown attempt, check logs for'
+                ' indication of shutdown prior to this.');
+            await ws.close();
+          }
+        } on WebSocketException catch (error) {
+          stderr.write(error.toString());
         }
       }
     }, onError: (dynamic err) => stderr.write('[!]Error -- ${err.toString()}'));
