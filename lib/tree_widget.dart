@@ -1,5 +1,6 @@
 library tree_widget;
 
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -86,7 +87,13 @@ class TreeView<T> extends StatelessWidget {
                 (BuildContext context, int index) {
                   var item = controller.flat[index];
                   var lines = <Widget>[];
-                  int depthCount = item.depth.length;
+                  var depth = item.depth;
+                  if (style.showFirstLine) {
+                    depth = Int8List.fromList(
+                      depth.toList(growable: true)..insert(0, 0),
+                    );
+                  }
+                  int depthCount = depth.length;
                   bool hasChildren = item.hasChildren;
                   int numberOfLines = hasChildren ? depthCount - 1 : depthCount;
                   bool shortLastLine = !hasChildren && item.isLastChild;
@@ -98,7 +105,7 @@ class TreeView<T> extends StatelessWidget {
                   int dragDepth = item.dragDepth ?? 255;
                   for (var i = 0; i < numberOfLines; i++) {
                     double opacity = 1.0;
-                    var d = item.depth[i];
+                    var d = depth[i];
                     offset += indent * (d.abs() - 1);
                     if (d > 0) {
                       // var style = {left:px(offset)};
@@ -131,8 +138,8 @@ class TreeView<T> extends StatelessWidget {
                   var opacity = 1.0;
 
                   var lastLineSpace =
-                      numberOfLines < item.depth.length && numberOfLines > 0
-                          ? item.depth[numberOfLines]
+                      numberOfLines < depth.length && numberOfLines > 0
+                          ? depth[numberOfLines]
                           : 0;
                   if (lastLineSpace > 0 && !(index == 0 && item.isLastChild)) {
                     bool isPropertyLine = !item.hasChildren && item.isProperty;
@@ -178,14 +185,14 @@ class TreeView<T> extends StatelessWidget {
                   }
 
                   var spaces = -1;
-                  for (final s in item.depth) {
+                  for (final s in depth) {
                     spaces += s.abs();
                   }
                   double spaceLeft = spaces * indent;
 
                   var dashing = item.isProperty ? propertyDashPattern : null;
 
-                  bool showOurLine = item.depth[item.depth.length - 1] != -1;
+                  bool showOurLine = depth[depth.length - 1] != -1;
 
                   var nextDragDepth = 255;
                   var prevDragDepth = 255;
@@ -257,7 +264,7 @@ class TreeView<T> extends StatelessWidget {
                         );
                       }
                     }
-                  } else if (!(item.depth.length == 1 && item.depth[0] == -1)) {
+                  } else if (!(depth.length == 1 && depth[0] == -1)) {
                     //(this.props.hideFirstHorizontalLine && depth.length === 1 && depth[0] === -1) ? null : <div className={horizontalLineStyle} style={{background:showOurLine && showLines ? null : "initial", opacity:dragOpacity}}></div>
                     lines.insert(
                       0,
