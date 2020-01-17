@@ -36,47 +36,38 @@ class FilesView extends StatelessWidget {
     const kProfileWidth = 215.0;
     final _rive = Provider.of<Rive>(context, listen: false);
     return ChangeNotifierProvider.value(
-      value: _rive.fileBrowser,
-      child: LayoutBuilder(
-        builder: (context, dimens) {
-          final int crossAxisCount =
-              (dimens.maxWidth / (kGridWidth + kGridSpacing)).ceil();
-          print("crossAxisCount: $crossAxisCount");
-          _rive.fileBrowser.sizeChanged(dimens, crossAxisCount);
-          return GestureDetector(
-            onTap: () => _rive.fileBrowser.deselectAll(),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      ResizePanel(
-                        hitSize: resizeEdgeSize,
-                        direction: ResizeDirection.horizontal,
-                        side: ResizeSide.end,
-                        min: 252.0,
-                        max: 500,
-                        child: _buildLeftSide(),
-                      ),
-                      Expanded(
-                        child: _buildCenter(crossAxisCount, padding, _rive),
-                      ),
-                    ],
-                  ),
+        value: _rive.fileBrowser,
+        child: GestureDetector(
+          onTap: () => _rive.fileBrowser.deselectAll(),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    ResizePanel(
+                      hitSize: resizeEdgeSize,
+                      direction: ResizeDirection.horizontal,
+                      side: ResizeSide.end,
+                      min: 252.0,
+                      max: 500,
+                      child: _buildLeftSide(),
+                    ),
+                    Expanded(
+                      child: _buildCenter(padding, _rive),
+                    ),
+                  ],
                 ),
-                Container(
-                  width: kProfileWidth,
-                  color: ThemeUtils.backgroundLightGrey,
-                  child: _buildRightSide(_rive),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+              ),
+              Container(
+                width: kProfileWidth,
+                color: ThemeUtils.backgroundLightGrey,
+                child: _buildRightSide(_rive),
+              ),
+            ],
+          ),
+        ));
   }
 
   Widget _buildRightSide(Rive _rive) {
@@ -93,81 +84,83 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildCenter(int crossCount, EdgeInsets padding, Rive _rive) {
-    return Consumer<FileBrowser>(
-      builder: (context, browser, child) => LayoutBuilder(
-        builder: (_, dimens) {
-          final folders = browser?.selectedFolder?.folders ?? [];
-          final files = browser?.selectedFolder?.files ?? [];
-          if (folders.isEmpty && files.isEmpty) {
-            return Column(
-              children: <Widget>[
-                TitleSection(
-                  padding: padding,
-                  name: 'Files',
-                  showDropdown: true,
-                ),
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      "This View is empty.",
-                      style: TextStyle(color: Colors.grey),
+  Widget _buildCenter(EdgeInsets padding, Rive _rive) {
+    return LayoutBuilder(builder: (context, dimens) {
+      _rive.fileBrowser.sizeChanged(dimens);
+      return Consumer<FileBrowser>(
+        builder: (context, browser, child) => LayoutBuilder(
+          builder: (_, dimens) {
+            final folders = browser?.selectedFolder?.folders ?? [];
+            final files = browser?.selectedFolder?.files ?? [];
+            if (folders.isEmpty && files.isEmpty) {
+              return Column(
+                children: <Widget>[
+                  TitleSection(
+                    padding: padding,
+                    name: 'Files',
+                    showDropdown: true,
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        "This View is empty.",
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }
-          return ValueListenableBuilder<bool>(
-            valueListenable: browser.draggingState,
-            builder: (context, dragging, child) => MarqueeScrollView(
-              controller: browser.filesScrollController,
-              enable: !dragging,
-              child: child,
-            ),
-            child: Scrollbar(
-              controller: browser.filesScrollController,
-              child: CustomScrollView(
-                controller: browser.filesScrollController,
-                physics: NeverScrollableScrollPhysics(),
-                slivers: <Widget>[
-                  if (folders != null && folders.isNotEmpty) ...[
-                    SliverToBoxAdapter(
-                      child: TitleSection(
-                        padding: padding,
-                        name: 'Folders',
-                        showDropdown: true,
-                      ),
-                    ),
-                    _buildFolders(crossCount, folders, browser),
-                  ],
-                  if (files != null && files.isNotEmpty) ...[
-                    SliverToBoxAdapter(
-                      child: TitleSection(
-                        padding: padding,
-                        name: 'Files',
-                        showDropdown: folders == null || folders.isEmpty,
-                      ),
-                    ),
-                    _buildFiles(crossCount, files, browser, _rive),
-                  ],
                 ],
+              );
+            }
+            return ValueListenableBuilder<bool>(
+              valueListenable: browser.draggingState,
+              builder: (context, dragging, child) => MarqueeScrollView(
+                controller: browser.filesScrollController,
+                enable: !dragging,
+                child: child,
               ),
-            ),
-          );
-        },
-      ),
-    );
+              child: Scrollbar(
+                controller: browser.filesScrollController,
+                child: CustomScrollView(
+                  controller: browser.filesScrollController,
+                  physics: NeverScrollableScrollPhysics(),
+                  slivers: <Widget>[
+                    if (folders != null && folders.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: TitleSection(
+                          padding: padding,
+                          name: 'Folders',
+                          showDropdown: true,
+                        ),
+                      ),
+                      _buildFolders(folders, browser),
+                    ],
+                    if (files != null && files.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: TitleSection(
+                          padding: padding,
+                          name: 'Files',
+                          showDropdown: folders == null || folders.isEmpty,
+                        ),
+                      ),
+                      _buildFiles(files, browser, _rive),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    });
   }
 
-  Widget _buildFolders(
-      int crossCount, List<FolderItem> folders, FileBrowser browser) {
+  Widget _buildFolders(List<FolderItem> folders, FileBrowser browser) {
     return SliverPadding(
       padding: EdgeInsets.all(20.0),
       sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: kGridWidth,
-          // crossAxisCount: crossCount,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          // maxCrossAxisExtent: kGridWidth,
+          crossAxisCount: browser.crossAxisCount,
           childAspectRatio: 187 / 60,
           mainAxisSpacing: kGridSpacing,
           crossAxisSpacing: kGridSpacing,
@@ -200,14 +193,13 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildFiles(
-      int crossCount, List<FileItem> files, FileBrowser browser, Rive _rive) {
+  Widget _buildFiles(List<FileItem> files, FileBrowser browser, Rive _rive) {
     return SliverPadding(
       padding: EdgeInsets.all(20.0),
       sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: kGridWidth,
-          // crossAxisCount: crossCount,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          // maxCrossAxisExtent: kGridWidth,
+          crossAxisCount: browser.crossAxisCount,
           childAspectRatio: 187 / 190,
           mainAxisSpacing: kGridSpacing,
           crossAxisSpacing: kGridSpacing,

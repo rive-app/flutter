@@ -56,44 +56,47 @@ class FileBrowser extends FileBrowserController {
     }
   }
 
-  int crossAxisCount = 1;
   BoxConstraints _constraints;
-  void sizeChanged(BoxConstraints constraints, int crossAxisCount) {
-    crossAxisCount = crossAxisCount;
-    _constraints = constraints;
+  int get crossAxisCount {
+    final w = _constraints.maxWidth;
+    final _count = (w / 174).floor();
+    return _count == 0 ? 1 : _count;
   }
 
+  void sizeChanged(BoxConstraints constraints) => _constraints = constraints;
+
   void _marqueeSelect(Rive rive) {
-    final _gridEven = crossAxisCount * kGridWidth;
-    final _itemWidth = _constraints.maxWidth /
-        (_gridEven + ((crossAxisCount + 1) * kGridSpacing) / _gridEven);
-    print("Width: $_itemWidth");
-    final _offset = filesScrollController.offset;
-    final _selectedRow = (_offset / kTreeItemHeight).floor();
-    final _itemsPerRow = crossAxisCount;
-    List<SelectableItem> _visibleList =
-        selectableItems.skip(_selectedRow * _itemsPerRow).toList();
-    for (var item in _visibleList) {
-      if (item is FolderItem) {
-        // final _info = item.rectChanged.value;
-        // print(
-        //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
-        // if ((_info?.visibleFraction ?? 0) > 0) {
-        //   final _rect = _info.visibleBounds;
-        //   item.isSelected = value.overlaps(_rect);
-        // }
-        // final _rect = Recrt.fromLTWH(left, top, width, height);
-      }
-      if (item is FileItem) {
-        // final _info = item.rectChanged.value;
-        // print(
-        //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
-        // if ((_info?.visibleFraction ?? 0) > 0) {
-        //   final _rect = _info.visibleBounds;
-        //   item.isSelected = value.overlaps(_rect);
-        // }
-      }
-    }
+    // print("Marque Select: ${_constraints}");
+    // final _gridEven = crossAxisCount * kGridWidth;
+    // final _itemWidth = _constraints.maxWidth /
+    //     (_gridEven + ((crossAxisCount + 1) * kGridSpacing) / _gridEven);
+    // print("Width: $_itemWidth");
+    // final _offset = filesScrollController.offset;
+    // final _selectedRow = (_offset / kTreeItemHeight).floor();
+    // final _itemsPerRow = crossAxisCount;
+    // List<SelectableItem> _visibleList =
+    //     selectableItems.skip(_selectedRow * _itemsPerRow).toList();
+    // for (var item in _visibleList) {
+    //   if (item is FolderItem) {
+    //     // final _info = item.rectChanged.value;
+    //     // print(
+    //     //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
+    //     // if ((_info?.visibleFraction ?? 0) > 0) {
+    //     //   final _rect = _info.visibleBounds;
+    //     //   item.isSelected = value.overlaps(_rect);
+    //     // }
+    //     // final _rect = Recrt.fromLTWH(left, top, width, height);
+    //   }
+    //   if (item is FileItem) {
+    //     // final _info = item.rectChanged.value;
+    //     // print(
+    //     //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
+    //     // if ((_info?.visibleFraction ?? 0) > 0) {
+    //     //   final _rect = _info.visibleBounds;
+    //     //   item.isSelected = value.overlaps(_rect);
+    //     // }
+    //   }
+    // }
   }
 
   void onFoldersChanged() {
