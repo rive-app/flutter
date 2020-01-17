@@ -28,12 +28,13 @@ class ItemView extends StatelessWidget {
         FlatIconButton(
           label: "Delete",
         ),
-        FlatIconButton(
-          label: "Open",
-          color: Colors.black,
-          textColor: Colors.white,
-          elevated: true,
-        ),
+        if (item is FileItem)
+          FlatIconButton(
+            label: "Open",
+            color: Colors.black,
+            textColor: Colors.white,
+            elevated: true,
+          ),
       ],
     );
   }

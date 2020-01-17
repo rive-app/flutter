@@ -91,6 +91,7 @@ class FilesView extends StatelessWidget {
                                                 hintText: 'Search',
                                                 contentPadding: EdgeInsets.zero,
                                                 filled: true,
+                                                hoverColor: Colors.transparent,
                                                 fillColor: Colors.transparent,
                                               ),
                                               style: TextStyle(
