@@ -104,9 +104,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Hacky way to track which tab is selected (just for testing).
-int selectedTab = 1;
-
 // Testing context menu items.
 List<ContextItem<Rive>> contextItems = [
   ContextItem(
@@ -149,44 +146,41 @@ class Editor extends StatelessWidget {
                       WindowUtils.startDrag();
                     }),
               ),
-              Builder(
-                builder: (_) {
-                  // Just some fake tabs to test the widgets.
-                  var tabs = [
-                    RiveTabItem(name: "Guido's Files", closeable: false),
-                  ];
-                  final _rive = Provider.of<Rive>(context);
-                  tabs.addAll(_rive.openFiles
-                      .map((f) => RiveTabItem(name: f))
-                      .toList());
-                  return RiveTabBar(
-                    offset: 95,
-                    tabs: tabs,
-                    selected: tabs[selectedTab],
-                    select: (tab) {
-                      // Hackity hack to test the tabs.
-                      if (selectedTab == tabs.indexOf(tab)) {
-                        if (selectedTab == 0) {
-                          _rive.fileBrowser.reset();
-                        }
-                      } else {
-                        selectedTab = tabs.indexOf(tab);
-                        (context as Element).markNeedsBuild();
-                      }
-                    },
+              ValueListenableBuilder<List<RiveTabItem>>(
+                valueListenable: rive.tabs,
+                builder: (context, tabs, child) {
+                  return ValueListenableBuilder<RiveTabItem>(
+                    valueListenable: rive.selectedTab,
+                    builder: (context, selectedTab, child) => RiveTabBar(
+                      offset: 95,
+                      tabs: tabs,
+                      selected: selectedTab,
+                      select: rive.openTab,
+                      close: rive.closeTab,
+                    ),
                   );
                 },
               ),
             ],
           ),
         ),
-        Expanded(child: _buildBody(context))
+        Expanded(
+          child: ValueListenableBuilder<List<RiveTabItem>>(
+            valueListenable: rive.tabs,
+            builder: (context, tabs, child) =>
+                ValueListenableBuilder<RiveTabItem>(
+              valueListenable: rive.selectedTab,
+              builder: (context, tab, child) =>
+                  _buildBody(context, tabs.indexOf(tab)),
+            ),
+          ),
+        )
       ],
     );
   }
 
-  Widget _buildBody(BuildContext context) {
-    switch (selectedTab) {
+  Widget _buildBody(BuildContext context, int index) {
+    switch (index) {
       case 0:
         return FilesView();
       default:

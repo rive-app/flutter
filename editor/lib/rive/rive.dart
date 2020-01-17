@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
+import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 
 import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
@@ -18,10 +19,12 @@ class Rive with RiveFileDelegate {
   final selection = SelectionContext<SelectableItem>();
   final selectionMode = ValueNotifier<SelectionMode>(SelectionMode.single);
   final fileBrowser = FileBrowser();
-  final Set<String> openFiles = {
-    "Ellipse Testing",
-    "Spaceman",
-  };
+  final tabs = ValueNotifier<List<RiveTabItem>>([
+    RiveTabItem(name: "Guido's Files", closeable: false),
+    RiveTabItem(name: "Ellipse Testing"),
+    RiveTabItem(name: "Spaceman"),
+  ]);
+  final selectedTab = ValueNotifier<RiveTabItem>(null);
 
   Stage _stage;
   Stage get stage => _stage;
@@ -43,8 +46,21 @@ class Rive with RiveFileDelegate {
     var opening = RiveFile(id);
     opening.addDelegate(this);
     _changeFile(opening);
-    openFiles.add(id);
+    final _tab = RiveTabItem(name: id);
+    if (!tabs.value.map((t) => t.name).contains(id)) {
+      tabs.value.add(_tab);
+    }
+    openTab(_tab);
     return opening;
+  }
+
+  void closeTab(RiveTabItem value) {
+    tabs.value.remove(value);
+    selectedTab.value = tabs.value.last;
+  }
+
+  void openTab(RiveTabItem value) {
+    selectedTab.value = value;
   }
 
   @override
