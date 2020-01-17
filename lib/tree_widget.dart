@@ -49,6 +49,8 @@ class TreeView<T> extends StatelessWidget {
   /// Styling (colors, margins, padding) for the tree.
   final TreeStyle style;
 
+  final ScrollController scrollController;
+
   const TreeView({
     @required this.controller,
     @required this.expanderBuilder,
@@ -57,6 +59,7 @@ class TreeView<T> extends StatelessWidget {
     this.extraBuilder,
     this.backgroundBuilder,
     this.style = defaultTreeStyle,
+    this.scrollController,
   });
 
   @override
@@ -76,6 +79,7 @@ class TreeView<T> extends StatelessWidget {
       child: Consumer<TreeController<T>>(
         builder: (context, controller, _) => Scrollbar(
           child: ListView.custom(
+            controller: scrollController,
             // semanticChildCount: controller.flat.length,
             padding: style.padding,
             childrenDelegate: SliverChildBuilderDelegate(
