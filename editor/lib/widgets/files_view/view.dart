@@ -59,23 +59,48 @@ class FilesView extends StatelessWidget {
                                 Expanded(
                                   child: Container(
                                     height: 35,
+                                    padding:
+                                        EdgeInsets.only(left: 10, right: 10),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(5.0),
                                       color: Color.fromRGBO(227, 227, 227, 1.0),
                                     ),
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: 'Search',
-                                        contentPadding: EdgeInsets.zero,
-                                        prefixIcon: RiveIcons.search(
-                                            Color.fromRGBO(153, 153, 153, 1.0)),
-                                      ),
-                                      style: TextStyle(
-                                        color:
-                                            Color.fromRGBO(153, 153, 153, 1.0),
-                                        fontSize: 13.0,
-                                      ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        RiveIcons.search(
+                                          Color.fromRGBO(153, 153, 153, 1.0),
+                                          16.0,
+                                        ),
+                                        Container(width: 10),
+                                        Expanded(
+                                          child: Container(
+                                            height: 35,
+                                            alignment: Alignment.centerLeft,
+                                            child: TextField(
+                                              textAlign: TextAlign.left,
+                                              textAlignVertical:
+                                                  TextAlignVertical.center,
+                                              decoration: InputDecoration(
+                                                isDense: true,
+                                                border: InputBorder.none,
+                                                hintText: 'Search',
+                                                contentPadding: EdgeInsets.zero,
+                                                filled: true,
+                                                fillColor: Colors.transparent,
+                                              ),
+                                              style: TextStyle(
+                                                color: Color.fromRGBO(
+                                                    153, 153, 153, 1.0),
+                                                fontSize: 13.0,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
