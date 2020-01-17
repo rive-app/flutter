@@ -47,12 +47,7 @@ class FolderTreeController extends TreeController<FolderItem> {
   @override
   void onTap(FlatTreeItem<FolderItem> item) {
     if (item.data != null) {
-      if (rive.fileBrowser.currentFolder.key == item.data.key) {
-        rive.fileBrowser.selectItem(rive, item.data);
-      } else {
-        rive.fileBrowser.openFolder(item.data, false);
-      }
-      // rive.fileBrowser.selectItem(rive, item.data);
+      rive.fileBrowser.openFolder(item.data, false);
     }
   }
 
