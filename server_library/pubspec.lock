@@ -32,7 +32,7 @@ packages:
   binary_buffer:
     dependency: transitive
     description:
-      path: "../../core-dart/dependencies/binary-buffer-dart"
+      path: "../dependencies/core-dart/dependencies/binary-buffer-dart"
       relative: true
     source: path
     version: "0.0.0"
@@ -67,7 +67,7 @@ packages:
   core:
     dependency: "direct main"
     description:
-      path: "../../core-dart/core"
+      path: "../dependencies/core-dart/core"
       relative: true
     source: path
     version: "0.0.1"
@@ -92,6 +92,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  fractional:
+    dependency: transitive
+    description:
+      path: "../dependencies/core-dart/dependencies/fractional-dart"
+      relative: true
+    source: path
+    version: "0.0.2"
   glob:
     dependency: transitive
     description:

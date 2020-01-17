@@ -7,9 +7,9 @@ dependencies:
   core:
     path: ../dependencies/core-dart/core
 
-dependency_overrides:
-  core:
-    path: ../../core-dart/core
+# dependency_overrides:
+#   core:
+#     path: ../../core-dart/core
 
 dev_dependencies:
   test: ^1.9.4

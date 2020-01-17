@@ -4,11 +4,14 @@ import 'entity.dart';
 import 'session.dart';
 
 class CoopFile {
-  String ownerId;
-  String fileId;
+  int ownerId;
+  int fileId;
 
   List<CoopFileObject> objects;
-  List<Entity> deletedObjects;
+}
+
+// Store session, nextObjectId, nextChange Id in Dynamo
+class CoopFileServerData {
   List<Session> sessions;
   int nextObjectId;
   int nextChangeId;

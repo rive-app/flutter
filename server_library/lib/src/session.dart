@@ -8,5 +8,5 @@ class Session {
   int changeId;
 
   /// User id from the database.
-  String userId;
+  int userId;
 }

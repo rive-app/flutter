@@ -71,6 +71,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.4"
+  fractional:
+    dependency: transitive
+    description:
+      path: "../dependencies/core-dart/dependencies/fractional-dart"
+      relative: true
+    source: path
+    version: "0.0.2"
+  meta:
+    dependency: transitive
+    description:
+      name: meta
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.8"
   stream_channel:
     dependency: transitive
     description:
