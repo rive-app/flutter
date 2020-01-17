@@ -1,7 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/rive.dart';
+import 'package:provider/provider.dart';
 
 class MarqueeScrollView extends StatefulWidget {
   final Widget child;
@@ -37,6 +37,7 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
 
   @override
   Widget build(BuildContext context) {
+    final _rive = Provider.of<Rive>(context, listen: false);
     return LayoutBuilder(
       builder: (_, dimens) => Listener(
         onPointerDown: (event) {
@@ -47,11 +48,14 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
         onPointerMove: (event) {
           _end = event.localPosition;
           if (mounted) setState(() {});
+          final _rect = Rect.fromPoints(_start, _end);
+          _rive.fileBrowser.rectChanged(_rect, _rive);
         },
         onPointerUp: (event) {
           _start = null;
           _end = null;
           _drag(false);
+           _rive.fileBrowser.rectChanged(null, _rive);
         },
         behavior: HitTestBehavior.opaque,
         onPointerSignal: (details) {

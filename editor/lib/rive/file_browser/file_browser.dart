@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/files_view/view.dart';
 import 'dart:math' as math;
 
 import 'browser_tree_controller.dart';
@@ -25,6 +26,7 @@ class FileBrowser extends FileBrowserController {
   FolderItem _myFiles;
   final selection = ValueNotifier<SelectableItem>(null);
   final browserController = ValueNotifier<FolderTreeController>(null);
+  final marqueeSelection = ValueNotifier<Rect>(null);
   FolderItem _current;
   FolderItem get currentFolder => _current;
   List<SelectableItem> get selectableItems =>
@@ -41,6 +43,57 @@ class FileBrowser extends FileBrowserController {
     browserController.value = FolderTreeController([_myFiles], rive: rive);
     reset();
     openFolder(_myFiles, false);
+  }
+
+  void rectChanged(Rect value, Rive rive) {
+    marqueeSelection.value = value;
+    final _listener = () => _marqueeSelect(rive);
+    if (value != null) {
+      _listener();
+      filesScrollController.addListener(_listener);
+    } else {
+      filesScrollController.removeListener(_listener);
+    }
+  }
+
+  int crossAxisCount = 1;
+  BoxConstraints _constraints;
+  void sizeChanged(BoxConstraints constraints, int crossAxisCount) {
+    crossAxisCount = crossAxisCount;
+    _constraints = constraints;
+  }
+
+  void _marqueeSelect(Rive rive) {
+    final _gridEven = crossAxisCount * kGridWidth;
+    final _itemWidth = _constraints.maxWidth /
+        (_gridEven + ((crossAxisCount + 1) * kGridSpacing) / _gridEven);
+    print("Width: $_itemWidth");
+    final _offset = filesScrollController.offset;
+    final _selectedRow = (_offset / kTreeItemHeight).floor();
+    final _itemsPerRow = crossAxisCount;
+    List<SelectableItem> _visibleList =
+        selectableItems.skip(_selectedRow * _itemsPerRow).toList();
+    for (var item in _visibleList) {
+      if (item is FolderItem) {
+        // final _info = item.rectChanged.value;
+        // print(
+        //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
+        // if ((_info?.visibleFraction ?? 0) > 0) {
+        //   final _rect = _info.visibleBounds;
+        //   item.isSelected = value.overlaps(_rect);
+        // }
+        // final _rect = Recrt.fromLTWH(left, top, width, height);
+      }
+      if (item is FileItem) {
+        // final _info = item.rectChanged.value;
+        // print(
+        //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
+        // if ((_info?.visibleFraction ?? 0) > 0) {
+        //   final _rect = _info.visibleBounds;
+        //   item.isSelected = value.overlaps(_rect);
+        // }
+      }
+    }
   }
 
   void onFoldersChanged() {

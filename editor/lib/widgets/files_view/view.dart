@@ -19,6 +19,9 @@ import 'folder_tree.dart';
 import 'item_view.dart';
 import 'profile_view.dart';
 
+const kGridSpacing = 20.0;
+const kGridWidth = 187.0;
+
 class FilesView extends StatelessWidget {
   const FilesView({
     Key key,
@@ -34,36 +37,44 @@ class FilesView extends StatelessWidget {
     final _rive = Provider.of<Rive>(context, listen: false);
     return ChangeNotifierProvider.value(
       value: _rive.fileBrowser,
-      child: GestureDetector(
-        onTap: () => _rive.fileBrowser.deselectAll(),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  ResizePanel(
-                    hitSize: resizeEdgeSize,
-                    direction: ResizeDirection.horizontal,
-                    side: ResizeSide.end,
-                    min: 252.0,
-                    max: 500,
-                    child: _buildLeftSide(),
+      child: LayoutBuilder(
+        builder: (context, dimens) {
+          final int crossAxisCount =
+              (dimens.maxWidth / (kGridWidth + kGridSpacing)).ceil();
+          print("crossAxisCount: $crossAxisCount");
+          _rive.fileBrowser.sizeChanged(dimens, crossAxisCount);
+          return GestureDetector(
+            onTap: () => _rive.fileBrowser.deselectAll(),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      ResizePanel(
+                        hitSize: resizeEdgeSize,
+                        direction: ResizeDirection.horizontal,
+                        side: ResizeSide.end,
+                        min: 252.0,
+                        max: 500,
+                        child: _buildLeftSide(),
+                      ),
+                      Expanded(
+                        child: _buildCenter(crossAxisCount, padding, _rive),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: _buildCenter(padding, _rive),
-                  ),
-                ],
-              ),
+                ),
+                Container(
+                  width: kProfileWidth,
+                  color: ThemeUtils.backgroundLightGrey,
+                  child: _buildRightSide(_rive),
+                ),
+              ],
             ),
-            Container(
-              width: kProfileWidth,
-              color: ThemeUtils.backgroundLightGrey,
-              child: _buildRightSide(_rive),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -82,7 +93,7 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildCenter(EdgeInsets padding, Rive _rive) {
+  Widget _buildCenter(int crossCount, EdgeInsets padding, Rive _rive) {
     return Consumer<FileBrowser>(
       builder: (context, browser, child) => LayoutBuilder(
         builder: (_, dimens) {
@@ -128,7 +139,7 @@ class FilesView extends StatelessWidget {
                         showDropdown: true,
                       ),
                     ),
-                    _buildFolders(folders),
+                    _buildFolders(crossCount, folders, browser),
                   ],
                   if (files != null && files.isNotEmpty) ...[
                     SliverToBoxAdapter(
@@ -138,7 +149,7 @@ class FilesView extends StatelessWidget {
                         showDropdown: folders == null || folders.isEmpty,
                       ),
                     ),
-                    _buildFiles(files, browser, _rive),
+                    _buildFiles(crossCount, files, browser, _rive),
                   ],
                 ],
               ),
@@ -149,25 +160,31 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildFolders(List<FolderItem> folders) {
+  Widget _buildFolders(
+      int crossCount, List<FolderItem> folders, FileBrowser browser) {
     return SliverPadding(
       padding: EdgeInsets.all(20.0),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 187,
+          maxCrossAxisExtent: kGridWidth,
+          // crossAxisCount: crossCount,
           childAspectRatio: 187 / 60,
-          mainAxisSpacing: 20.0,
-          crossAxisSpacing: 20.0,
+          mainAxisSpacing: kGridSpacing,
+          crossAxisSpacing: kGridSpacing,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            return DragTarget<FileItem>(
-              key: folders[index].key,
-              builder: (context, accepts, rejects) {
-                return FolderViewWidget(
-                  folder: folders[index],
-                );
-              },
+            final _folder = folders[index];
+            return ValueListenableBuilder<Rect>(
+              valueListenable: browser.marqueeSelection,
+              builder: (context, rect, child) => DragTarget<FileItem>(
+                key: _folder.key,
+                builder: (context, accepts, rejects) {
+                  return FolderViewWidget(
+                    folder: _folder,
+                  );
+                },
+              ),
             );
           },
           childCount: folders.length,
@@ -183,46 +200,51 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildFiles(List<FileItem> files, FileBrowser browser, Rive _rive) {
+  Widget _buildFiles(
+      int crossCount, List<FileItem> files, FileBrowser browser, Rive _rive) {
     return SliverPadding(
       padding: EdgeInsets.all(20.0),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 187,
+          maxCrossAxisExtent: kGridWidth,
+          // crossAxisCount: crossCount,
           childAspectRatio: 187 / 190,
-          mainAxisSpacing: 20.0,
-          crossAxisSpacing: 20.0,
+          mainAxisSpacing: kGridSpacing,
+          crossAxisSpacing: kGridSpacing,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            final file = files[index];
-            return ValueListenableBuilder<bool>(
-              valueListenable: file.draggingState,
-              builder: (context, fileDragging, child) {
-                return Draggable<FileItem>(
-                  dragAnchor: DragAnchor.pointer,
-                  onDragStarted: () {
-                    if (!file.isSelected) {
-                      browser.selectItem(_rive, file);
-                    }
-                    browser.startDrag();
-                  },
-                  onDragCompleted: () {
-                    browser.endDrag();
-                  },
-                  onDragEnd: (_) {
-                    browser.endDrag();
-                  },
-                  onDraggableCanceled: (_, __) {
-                    browser.endDrag();
-                  },
-                  feedback: _buildFeedback(file, browser),
-                  childWhenDragging: _buildChildWhenDragging(),
-                  child: fileDragging
-                      ? _buildChildWhenDragging()
-                      : FileViewWidget(file: files[index]),
-                );
-              },
+            final _file = files[index];
+            return Container(
+              key: files[index].key,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _file.draggingState,
+                builder: (context, fileDragging, child) {
+                  return Draggable<FileItem>(
+                    dragAnchor: DragAnchor.pointer,
+                    onDragStarted: () {
+                      if (!_file.isSelected) {
+                        browser.selectItem(_rive, _file);
+                      }
+                      browser.startDrag();
+                    },
+                    onDragCompleted: () {
+                      browser.endDrag();
+                    },
+                    onDragEnd: (_) {
+                      browser.endDrag();
+                    },
+                    onDraggableCanceled: (_, __) {
+                      browser.endDrag();
+                    },
+                    feedback: _buildFeedback(_file, browser),
+                    childWhenDragging: _buildChildWhenDragging(),
+                    child: fileDragging
+                        ? _buildChildWhenDragging()
+                        : FileViewWidget(file: files[index]),
+                  );
+                },
+              ),
             );
           },
           childCount: files.length,
