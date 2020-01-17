@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/inspector_view.dart';
-import 'package:rive_editor/widgets/flat_icon_button.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 class ProfileView extends StatelessWidget {

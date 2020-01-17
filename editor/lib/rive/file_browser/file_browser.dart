@@ -147,6 +147,7 @@ class FileBrowser extends FileBrowserController {
     for (var item in selectedItems) {
       item.isSelected = false;
     }
+    selection.value = null;
   }
 
   void _selectItem(SelectableItem value, bool append) {

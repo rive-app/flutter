@@ -19,7 +19,7 @@ class InspectorView extends StatelessWidget {
           Column(
             children: <Widget>[
               for (var action in actions) ...[
-                Container(height: 20.0),
+                Container(height: 10.0),
                 action,
               ],
             ],
