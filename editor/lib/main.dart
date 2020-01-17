@@ -1,19 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
-import 'package:rive_editor/widgets/theme.dart';
-import 'rive/file_browser/file.dart';
-import 'rive/file_browser/folder.dart';
 import 'widgets/files_view/view.dart';
 import 'widgets/hierarchy.dart';
 import 'widgets/popup/context_popup.dart';
-import 'widgets/profile_view.dart';
 import 'widgets/resize_panel.dart';
 
 import 'package:window_utils/window_utils.dart';
@@ -77,7 +72,7 @@ class MyApp extends StatelessWidget {
           darkTheme: ThemeData.dark(),
           themeMode: ThemeMode.light,
           home: DefaultTextStyle(
-            style: TextStyle(fontFamily: "Roboto-Regular"),
+            style: TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
             child: Scaffold(
               body: Listener(
                 onPointerDown: (details) => focusNode.requestFocus(),

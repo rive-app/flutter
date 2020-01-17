@@ -6,7 +6,7 @@ class FlatIconButton extends StatelessWidget {
   const FlatIconButton({
     Key key,
     @required this.label,
-    @required this.icon,
+    this.icon,
     this.onTap,
   }) : super(key: key);
 
@@ -23,19 +23,22 @@ class FlatIconButton extends StatelessWidget {
           color: ThemeUtils.buttonColor,
           borderRadius: BorderRadius.circular(20.0),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: <Widget>[
-              Container(width: 10.0),
+        height: 30,
+        child: Row(
+          children: <Widget>[
+            if (icon != null) ...[
+              Container(width: 15.0),
               icon,
-              Container(width: 10.0),
-              Text(
-                label,
-                style: TextStyle(color: ThemeUtils.buttonTextColor),
-              ),
             ],
-          ),
+            Container(width: 15.0),
+            Text(
+              label,
+              style: TextStyle(
+                color: ThemeUtils.buttonTextColor,
+                fontSize: 13,
+              ),
+            ),
+          ],
         ),
       ),
     );

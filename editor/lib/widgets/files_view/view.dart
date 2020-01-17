@@ -1,5 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/main.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file.dart';
@@ -7,8 +8,6 @@ import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
-import 'package:rive_editor/widgets/path_widget.dart';
-import 'package:rive_editor/widgets/profile_view.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +15,8 @@ import 'package:provider/provider.dart';
 import 'file.dart';
 import 'folder.dart';
 import 'folder_tree.dart';
+import 'item_view.dart';
+import 'profile_view.dart';
 
 class FilesView extends StatelessWidget {
   const FilesView({
@@ -112,7 +113,7 @@ class FilesView extends StatelessWidget {
                                     color: Colors.black,
                                     borderRadius: BorderRadius.circular(15),
                                   ),
-                                  child: RiveIcons.add(Colors.white),
+                                  child: RiveIcons.add(Colors.white, 16),
                                 )
                               ],
                             ),
@@ -235,8 +236,8 @@ class FilesView extends StatelessWidget {
                                           },
                                           childCount: folders.length,
                                           // findChildIndexCallback: (Key key) {
-                                          //   return folders
-                                          //       .indexWhere((i) => i.key == key);
+                                          //   return folders.indexWhere(
+                                          //       (i) => i.key == key);
                                           // },
                                           addRepaintBoundaries: false,
                                           addAutomaticKeepAlives: false,
@@ -305,8 +306,8 @@ class FilesView extends StatelessWidget {
                                           },
                                           childCount: files.length,
                                           // findChildIndexCallback: (Key key) {
-                                          //   return files
-                                          //       .indexWhere((i) => i.key == key);
+                                          //   return files.indexWhere(
+                                          //       (i) => i.key == key);
                                           // },
                                           addRepaintBoundaries: false,
                                           addAutomaticKeepAlives: false,
@@ -331,7 +332,14 @@ class FilesView extends StatelessWidget {
               color: ThemeUtils.backgroundLightGrey,
               child: Padding(
                 padding: EdgeInsets.all(20.0),
-                child: ProfileView(),
+                child: ValueListenableBuilder<SelectableItem>(
+                    valueListenable: _rive.fileBrowser.selection,
+                    builder: (context, selection, child) {
+                      if (selection != null) {
+                        return ItemView(item: selection);
+                      }
+                      return ProfileView();
+                    }),
               ),
             ),
           ],

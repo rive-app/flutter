@@ -14,21 +14,21 @@ const kTreeItemHeight = 35.0;
 class FileBrowser extends FileBrowserController {
   final filesScrollController = ScrollController();
   final treeScrollController = ScrollController();
-  // final selection = SelectionContext<SelectableItem>();
   int get selectedCount => selectedItems.length;
   List<SelectableItem> get selectedItems {
-    final _selectedFiles = _current.files.where((f) => f.isSelected).toList();
     final _selectedFolders =
         _current.folders.where((f) => f.isSelected).toList();
-    return [..._selectedFiles, ..._selectedFolders];
+    final _selectedFiles = _current.files.where((f) => f.isSelected).toList();
+    return [..._selectedFolders, ..._selectedFiles];
   }
 
   FolderItem _myFiles;
+  final selection = ValueNotifier<SelectableItem>(null);
   final browserController = ValueNotifier<FolderTreeController>(null);
   FolderItem _current;
   FolderItem get currentFolder => _current;
   List<SelectableItem> get selectableItems =>
-      [..._current.files, ..._current.folders];
+      [..._current.folders, ..._current.files];
   int _lastSelectedIndex;
 
   void init(Rive rive) {
@@ -49,6 +49,7 @@ class FileBrowser extends FileBrowserController {
 
   void reset() {
     _current = _myFiles;
+    selection.value = null;
     onFoldersChanged();
     notifyListeners();
   }
@@ -134,6 +135,7 @@ class FileBrowser extends FileBrowserController {
         }
         break;
     }
+    selection.value = value;
     notifyListeners();
   }
 

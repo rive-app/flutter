@@ -42,7 +42,6 @@ class _TabBarItem extends StatelessWidget {
             Text(
               tab.name,
               style: TextStyle(
-                fontFamily: 'Roboto-Regular',
                 fontSize: 13,
                 color: isSelected
                     ? Colors.white
