@@ -93,8 +93,14 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
             if (_enable && _dragging) ...[
               ValueListenableBuilder<double>(
                 valueListenable: widget.rive.fileBrowser.scrollOffset,
-                builder: (context, offset, child) =>
-                    _buildMarquee(dimens, _rive, offset ?? 0.0),
+                builder: (context, offset, child) {
+                  // if (_start.dy < _end.dy) {
+                  //   _start = Offset(_start.dx, _start.dy - offset);
+                  // } else {
+                  //   _end = Offset(_end.dx, _end.dy - offset);
+                  // }
+                  return _buildMarquee(dimens, _rive, offset);
+                },
               )
             ],
           ],
@@ -106,10 +112,8 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
   Widget _buildMarquee(BoxConstraints dimens, Rive rive, double offset) {
     if (_start == null || _end == null) return Container();
     Rect _rect = Rect.fromPoints(_start, _end);
-    double dx = _rect.topLeft.dx;
-    double dy = _rect.topLeft.dy - offset;
     _rect = Rect.fromPoints(
-      Offset(dx ?? 0, dy ?? 0),
+      Offset(_rect.left, _rect.top - offset),
       _rect.bottomRight,
     );
     return Positioned.fromRect(

@@ -47,14 +47,13 @@ class FileBrowser extends FileBrowserController {
 
   void rectChanged(Rect value, Rive rive) {
     marqueeSelection.value = value;
-    _marqueeSelect(rive);
-    // final _listener = () => _marqueeSelect(rive);
-    // if (value != null) {
-    //   _listener();
-    //   filesScrollController.addListener(_listener);
-    // } else {
-    //   filesScrollController.removeListener(_listener);
-    // }
+    final _listener = () => _marqueeSelect(rive);
+    if (value != null) {
+      _marqueeSelect(rive);
+      scrollOffset.addListener(_listener);
+    } else {
+      scrollOffset.removeListener(_listener);
+    }
   }
 
   BoxConstraints _constraints;
@@ -86,7 +85,25 @@ class FileBrowser extends FileBrowserController {
             (_current.files.length / crossAxisCount) *
                 (kFileAspectRatio * _itemWidth)
         : 0;
-    debugPrint("W: $_itemWidth, O: $_offset");
+    final _marqueeRect = marqueeSelection.value;
+    for (var item in selectableItems) {
+      if (hasFolders) {
+        if (item is FolderItem) {
+          int _index = _current.folders.indexOf(item);
+          int _rowIndex = _index % crossAxisCount;
+          int _columnIndex = (_index / crossAxisCount).ceil();
+          debugPrint('_rowIndex$_rowIndex, _columnIndex$_columnIndex');
+          // final a = Offset(dx, dy);
+          // final b = Offset(dx, dy);
+          // final _itemRect = Rect.fromPoints(a, b);
+        }
+      } else {}
+    }
+    //  List<SelectableItem> _visibleList =
+    //     selectableItems.skip(_selectedRow * crossAxisCount).toList();
+    print("Marquee Rect: $_marqueeRect");
+    // for (var item in )
+    // debugPrint("W: $_itemWidth, O: $_offset");
     // final _selectedRow = (_offset / kTreeItemHeight).floor();
     // final _itemsPerRow = crossAxisCount;
     // List<SelectableItem> _visibleList =
