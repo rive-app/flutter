@@ -103,10 +103,15 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
     );
   }
 
-  Positioned _buildMarquee(BoxConstraints dimens, Rive rive, double offset) {
+  Widget _buildMarquee(BoxConstraints dimens, Rive rive, double offset) {
+    if (_start == null || _end == null) return Container();
     Rect _rect = Rect.fromPoints(_start, _end);
+    double dx = _rect.topLeft.dx;
+    double dy = _rect.topLeft.dy - offset;
     _rect = Rect.fromPoints(
-        Offset(_rect.topLeft.dx, _rect.topLeft.dy - offset), _rect.bottomRight);
+      Offset(dx ?? 0, dy ?? 0),
+      _rect.bottomRight,
+    );
     return Positioned.fromRect(
       rect: _rect,
       child: Container(color: Colors.blue.withOpacity(0.2)),
