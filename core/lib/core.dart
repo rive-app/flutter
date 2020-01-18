@@ -8,6 +8,7 @@ import 'coop/coop_client.dart';
 import 'coop/local_settings.dart';
 export 'package:fractional/fractional.dart';
 
+
 int localId = 0;
 
 // TODO:
@@ -56,7 +57,7 @@ abstract class CoreContext implements LocalSettings {
   CoreContext(this.fileId);
 
   T add<T extends Core>(T object) {
-    object.id ??= localId--;
+    object.id ??= --localId;
     object.context = this;
     _objects[object.id] = object;
     onAdded(object);
