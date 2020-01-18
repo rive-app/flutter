@@ -11,6 +11,15 @@ class CoopServerClient extends CoopReader {
   // final HttpRequest request;
   final CoopIsolateProcess context;
 
+  // Do these need to be persisted somewhere? If a user stores local changes
+  // against an old id and the server is restarted/the user reconnects, they
+  // could send up old ids that still need to be remapped. Consider storing
+  // these somewhere where they can be retrieved during authentication of the
+  // session.
+  final Map<int, int> changedIds = {};
+
+  CoopWriter get writer => _writer;
+
   void receiveData(dynamic data) {
     if (data is Uint8List) {
       read(data);
@@ -44,8 +53,15 @@ class CoopServerClient extends CoopReader {
   Future<void> recvChange(ChangeSet changes) async {
     print("CHANGES ${changes.id} ${changes.changes.length}");
     print("SERVER GOT CHANGES $changes");
-    if (context.attemptChange(changes)) {
+    if (context.attemptChange(this, changes)) {
       _writer.writeAccept(changes.id, 0);
+
+      // this should acctually be done by the attempt change as it needs to
+      // modify the data
+
+      // context.propagateChanges(this, changes);
+      // propagate changes to everyone else... need to write it to the context,
+      // and it needs to propagate to other clients
     }
   }
 
@@ -85,5 +101,10 @@ class CoopServerClient extends CoopReader {
   @override
   Future<void> recvReject(int changeId) {
     throw UnsupportedError("Server should never receive reject.");
+  }
+
+  @override
+  Future<void> recvChangeId(int from, int to) {
+    throw UnsupportedError("Server should never receive change id.");
   }
 }

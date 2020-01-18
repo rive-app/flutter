@@ -156,6 +156,8 @@ abstract class CoopIsolateProcess {
     _receiveFromMainPort.listen(_receive);
   }
 
+  Iterable<CoopServerClient> get clients => _clients.values;
+
   Future<void> _receive(dynamic data) async {
     print("RECEIVING DATA $data");
     if (data is _CoopServerAddClient) {
@@ -191,7 +193,8 @@ abstract class CoopIsolateProcess {
     _sendToMainPort.send(_CoopServerProcessData(client.id, data));
   }
 
-  bool attemptChange(ChangeSet changes);
+  bool attemptChange(CoopServerClient client, ChangeSet changes);
+  void propagateChanges(CoopServerClient client, ChangeSet changes);
 
   Future<bool> initialize(int ownerId, int fileId, Map<String, String> options);
   Future<bool> saveData(String key, Uint8List data);

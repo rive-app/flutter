@@ -28,6 +28,13 @@ class Change {
     int length = reader.readVarUint();
     value = reader.read(length);
   }
+
+  Change clone() {
+    return Change()
+      ..op = op
+      ..objectId = objectId
+      ..value = Uint8List.fromList(value);
+  }
 }
 
 /// A set of changes associated to an id.
