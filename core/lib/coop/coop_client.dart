@@ -12,6 +12,7 @@ import 'coop_writer.dart';
 import 'local_settings.dart';
 
 typedef ChangeSetCallback = void Function(ChangeSet changeSet);
+typedef ChangeIdCallback = bool Function(int from, int to);
 
 class CoopClient extends CoopReader {
   final String url;
@@ -29,6 +30,7 @@ class CoopClient extends CoopReader {
 
   ChangeSetCallback changesAccepted;
   ChangeSetCallback changesRejected;
+  ChangeIdCallback changeObjectId;
 
   CoopClient(this.url, {this.fileId, this.localSettings}) {
     _writer = CoopWriter(write);
@@ -162,6 +164,19 @@ class CoopClient extends CoopReader {
     _connectionCompleter = null;
   }
 
+  @override
+  Future<void> recvChangeId(int from, int to) {
+    if (changeObjectId?.call(from, to) ?? false) {
+      for (final changeSet in _fresh) {
+        for (final change in changeSet.changes) {
+          if (change.objectId == from) {
+            change.objectId = to;
+          }
+        }
+      }
+    }
+  }
+
   ChangeSet makeChangeSet() {
     var changes = ChangeSet()
       ..id = _lastChangeId++
@@ -194,6 +209,6 @@ class CoopClient extends CoopReader {
     _fresh.first.serialize(writer);
     _channel.sink.add(writer.uint8Buffer);
     _unacknowledged = _fresh.removeAt(0);
-    _fresh.clear();
+    // _fresh.clear();
   }
 }

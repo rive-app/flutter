@@ -8,7 +8,6 @@ import 'coop/coop_client.dart';
 import 'coop/local_settings.dart';
 export 'package:fractional/fractional.dart';
 
-
 int localId = 0;
 
 // TODO:
@@ -101,7 +100,8 @@ abstract class CoreContext implements LocalSettings {
   Future<ConnectResult> connect(String url) async {
     _client = CoopClient(url, fileId: fileId, localSettings: this)
       ..changesAccepted = _changesAccepted
-      ..changesRejected = _changesRejected;
+      ..changesRejected = _changesRejected
+      ..changeObjectId = _changeObjectId;
 
     return _client.connect();
   }
@@ -239,6 +239,31 @@ abstract class CoreContext implements LocalSettings {
   void _changesAccepted(ChangeSet changes) {
     print("ACCEPTING ${changes.id}.");
     _freshChanges.remove(changes);
+  }
+
+  bool _changeObjectId(int from, int to) {
+    var object = _objects[from];
+    if (object == null) {
+      return false;
+    }
+    // Remove old mapping
+    _objects.remove(from);
+
+    // Add new mapping
+    object.id = to;
+    _objects[to] = object;
+
+    // change journal ids to new one
+    // journal[change_index][object_id][property]
+    for (final entry in journal) {
+      var objectChanges = entry[from];
+      // Remap to new id
+      if (objectChanges != null) {
+        entry.remove(from);
+        entry[to] = objectChanges;
+      }
+    }
+    return true;
   }
 
   void _changesRejected(ChangeSet changes) {
