@@ -20,4 +20,7 @@ class FolderItem extends SelectableItem {
   ValueListenable<bool> get draggingState => _draggingState;
   set isDragging(bool val) => _draggingState.value = val;
   bool get isDragging => _draggingState.value;
+
+  bool get hasFiles => files != null && files.isNotEmpty;
+  bool get hasFolders => folders != null && folders.isNotEmpty;
 }

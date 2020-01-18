@@ -19,8 +19,12 @@ import 'folder_tree.dart';
 import 'item_view.dart';
 import 'profile_view.dart';
 
-const kGridSpacing = 20.0;
-const kGridWidth = 187.0;
+const kGridSpacing = 30.0;
+const kGridWidth = 185.0;
+const kGridHeaderHeight = 40.0;
+const kSectionSpacing = 10.0;
+const kFolderAspectRatio = 187 / 60;
+const kFileAspectRatio = 187 / 190;
 
 class FilesView extends StatelessWidget {
   const FilesView({
@@ -85,6 +89,7 @@ class FilesView extends StatelessWidget {
   }
 
   Widget _buildCenter(EdgeInsets padding, Rive _rive) {
+    final _scrollController = ScrollController();
     return LayoutBuilder(builder: (context, dimens) {
       _rive.fileBrowser.sizeChanged(dimens);
       return Consumer<FileBrowser>(
@@ -95,10 +100,12 @@ class FilesView extends StatelessWidget {
             if (folders.isEmpty && files.isEmpty) {
               return Column(
                 children: <Widget>[
+                  Container(height: kSectionSpacing),
                   TitleSection(
                     padding: padding,
                     name: 'Files',
                     showDropdown: true,
+                    height: kGridHeaderHeight,
                   ),
                   Expanded(
                     child: Center(
@@ -114,34 +121,41 @@ class FilesView extends StatelessWidget {
             return ValueListenableBuilder<bool>(
               valueListenable: browser.draggingState,
               builder: (context, dragging, child) => MarqueeScrollView(
-                controller: browser.filesScrollController,
+                rive: _rive,
                 enable: !dragging,
                 child: child,
+                controller: _scrollController,
               ),
               child: Scrollbar(
-                controller: browser.filesScrollController,
+                controller: _scrollController,
                 child: CustomScrollView(
-                  controller: browser.filesScrollController,
+                  controller: _scrollController,
                   physics: NeverScrollableScrollPhysics(),
                   slivers: <Widget>[
                     if (folders != null && folders.isNotEmpty) ...[
+                      _buildSliverSpacer(),
                       SliverToBoxAdapter(
                         child: TitleSection(
                           padding: padding,
                           name: 'Folders',
+                          height: kGridHeaderHeight,
                           showDropdown: true,
                         ),
                       ),
+                      _buildSliverSpacer(),
                       _buildFolders(folders, browser),
                     ],
                     if (files != null && files.isNotEmpty) ...[
+                      _buildSliverSpacer(),
                       SliverToBoxAdapter(
                         child: TitleSection(
                           padding: padding,
                           name: 'Files',
+                          height: kGridHeaderHeight,
                           showDropdown: folders == null || folders.isEmpty,
                         ),
                       ),
+                      _buildSliverSpacer(),
                       _buildFiles(files, browser, _rive),
                     ],
                   ],
@@ -154,14 +168,17 @@ class FilesView extends StatelessWidget {
     });
   }
 
+  SliverToBoxAdapter _buildSliverSpacer() =>
+      SliverToBoxAdapter(child: Container(height: kSectionSpacing));
+
   Widget _buildFolders(List<FolderItem> folders, FileBrowser browser) {
     return SliverPadding(
-      padding: EdgeInsets.all(20.0),
+      padding: EdgeInsets.symmetric(horizontal: kGridSpacing),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           // maxCrossAxisExtent: kGridWidth,
           crossAxisCount: browser.crossAxisCount,
-          childAspectRatio: 187 / 60,
+          childAspectRatio: kFolderAspectRatio,
           mainAxisSpacing: kGridSpacing,
           crossAxisSpacing: kGridSpacing,
         ),
@@ -195,12 +212,12 @@ class FilesView extends StatelessWidget {
 
   Widget _buildFiles(List<FileItem> files, FileBrowser browser, Rive _rive) {
     return SliverPadding(
-      padding: EdgeInsets.all(20.0),
+      padding: EdgeInsets.symmetric(horizontal: kGridSpacing),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           // maxCrossAxisExtent: kGridWidth,
           crossAxisCount: browser.crossAxisCount,
-          childAspectRatio: 187 / 190,
+          childAspectRatio: kFileAspectRatio,
           mainAxisSpacing: kGridSpacing,
           crossAxisSpacing: kGridSpacing,
         ),
@@ -473,17 +490,19 @@ class TitleSection extends StatelessWidget {
     Key key,
     @required this.padding,
     @required this.name,
+    @required this.height,
     this.showDropdown = false,
   }) : super(key: key);
 
   final EdgeInsets padding;
   final String name;
   final bool showDropdown;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20.0),
+    return Container(
+      height: height,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[

@@ -13,7 +13,6 @@ import 'file.dart';
 const kTreeItemHeight = 35.0;
 
 class FileBrowser extends FileBrowserController {
-  final filesScrollController = ScrollController();
   final treeScrollController = ScrollController();
   int get selectedCount => selectedItems.length;
   List<SelectableItem> get selectedItems {
@@ -25,6 +24,7 @@ class FileBrowser extends FileBrowserController {
 
   FolderItem _myFiles;
   final selection = ValueNotifier<SelectableItem>(null);
+  final scrollOffset = ValueNotifier<double>(0);
   final browserController = ValueNotifier<FolderTreeController>(null);
   final marqueeSelection = ValueNotifier<Rect>(null);
   FolderItem _current;
@@ -47,31 +47,46 @@ class FileBrowser extends FileBrowserController {
 
   void rectChanged(Rect value, Rive rive) {
     marqueeSelection.value = value;
-    final _listener = () => _marqueeSelect(rive);
-    if (value != null) {
-      _listener();
-      filesScrollController.addListener(_listener);
-    } else {
-      filesScrollController.removeListener(_listener);
-    }
+    _marqueeSelect(rive);
+    // final _listener = () => _marqueeSelect(rive);
+    // if (value != null) {
+    //   _listener();
+    //   filesScrollController.addListener(_listener);
+    // } else {
+    //   filesScrollController.removeListener(_listener);
+    // }
   }
 
   BoxConstraints _constraints;
   int get crossAxisCount {
     final w = _constraints.maxWidth;
-    final _count = (w / 174).floor();
+    final _count = (w / kGridWidth).floor();
     return _count == 0 ? 1 : _count;
   }
 
   void sizeChanged(BoxConstraints constraints) => _constraints = constraints;
 
   void _marqueeSelect(Rive rive) {
-    // print("Marque Select: ${_constraints}");
-    // final _gridEven = crossAxisCount * kGridWidth;
-    // final _itemWidth = _constraints.maxWidth /
-    //     (_gridEven + ((crossAxisCount + 1) * kGridSpacing) / _gridEven);
-    // print("Width: $_itemWidth");
-    // final _offset = filesScrollController.offset;
+    final _itemWidth =
+        (_constraints.maxWidth - (kGridSpacing * (crossAxisCount + 1))) /
+            crossAxisCount;
+    final _offset = scrollOffset.value;
+    final hasFolders = _current.hasFolders;
+    final hasFiles = _current.hasFiles;
+    final _folderGridSize = hasFolders
+        ? (_current.folders.length / crossAxisCount) *
+            (kFolderAspectRatio * _itemWidth)
+        : 0;
+    final _folderHeaderOffset = kGridHeaderHeight;
+    final _fileHeaderOffset = hasFolders ? kGridHeaderHeight : _folderGridSize;
+    final _fileGridSize = hasFiles
+        ? kGridHeaderHeight +
+            _folderGridSize +
+            kGridHeaderHeight +
+            (_current.files.length / crossAxisCount) *
+                (kFileAspectRatio * _itemWidth)
+        : 0;
+    debugPrint("W: $_itemWidth, O: $_offset");
     // final _selectedRow = (_offset / kTreeItemHeight).floor();
     // final _itemsPerRow = crossAxisCount;
     // List<SelectableItem> _visibleList =
