@@ -6,11 +6,13 @@ var _utf8Decoder = const Utf8Decoder();
 class BinaryReader {
   final ByteData buffer;
   final Endian endian;
-  int _readIndex;
+  int _readIndex = 0;
 
-  BinaryReader(this.buffer, {this.endian = Endian.little}) {
-    _readIndex = 0;
-  }
+  BinaryReader(this.buffer, {this.endian = Endian.little});
+
+  BinaryReader.fromList(Uint8List list, {this.endian = Endian.little})
+      : buffer =
+            ByteData.view(list.buffer, list.offsetInBytes, list.lengthInBytes);
 
   double readFloat32() {
     double value = buffer.getFloat32(_readIndex, endian);
