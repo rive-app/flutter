@@ -103,18 +103,15 @@ class FileViewWidget extends StatelessWidget {
                     ]),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: GestureDetector(
-                onTap: () {
-                  _fileBrowser.selectItem(_rive, file);
-                },
-                onDoubleTap: () {
-                  final _rive = Provider.of<Rive>(context, listen: false);
-                  _fileBrowser.openFile(_rive, file);
-                },
-                child: child,
-              ),
+            GestureDetector(
+              onTap: () {
+                _fileBrowser.selectItem(_rive, file);
+              },
+              onDoubleTap: () {
+                final _rive = Provider.of<Rive>(context, listen: false);
+                _fileBrowser.openFile(_rive, file);
+              },
+              child: child,
             ),
           ],
         );

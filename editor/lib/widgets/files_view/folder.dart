@@ -44,43 +44,40 @@ class FolderViewWidget extends StatelessWidget {
                     ]),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: GestureDetector(
-                onTap: () {
-                  _fileBrowser.selectItem(_rive, folder);
-                },
-                onDoubleTap: () {
-                  _fileBrowser.openFolder(folder, true);
-                },
+            GestureDetector(
+              onTap: () {
+                _fileBrowser.selectItem(_rive, folder);
+              },
+              onDoubleTap: () {
+                _fileBrowser.openFolder(folder, true);
+              },
+              child: Container(
                 child: Container(
+                  decoration: BoxDecoration(
+                    color: ThemeUtils.backgroundLightGrey,
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  clipBehavior: Clip.antiAlias,
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: ThemeUtils.backgroundLightGrey,
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Container(
-                      padding: const EdgeInsets.only(left: 12.0),
-                      child: Row(
-                        children: <Widget>[
-                          RiveIcons.folder(_isSelected
-                              ? ThemeUtils.selectedBlue
-                              : ThemeUtils.iconColor),
-                          Container(width: 8.0),
-                          Expanded(
-                            child: Text(
-                              folder.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: _isSelected
-                                      ? ThemeUtils.selectedBlue
-                                      : ThemeUtils.textGrey),
-                            ),
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: Row(
+                      children: <Widget>[
+                        RiveIcons.folder(_isSelected
+                            ? ThemeUtils.selectedBlue
+                            : ThemeUtils.iconColor),
+                        Container(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            folder.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: _isSelected
+                                    ? ThemeUtils.selectedBlue
+                                    : ThemeUtils.textGrey),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

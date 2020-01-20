@@ -272,11 +272,14 @@ class FilesView extends StatelessWidget {
   Widget _buildLeftSide() {
     return Container(
       color: ThemeUtils.backgroundLightGrey,
-      padding: EdgeInsets.only(left: 20.0, top: 20.0),
+      padding: EdgeInsets.only(top: 20.0),
       child: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(right: 20.0),
+            padding: const EdgeInsets.only(
+              right: 20.0,
+              left: 20.0,
+            ),
             child: Row(
               children: <Widget>[
                 Expanded(
@@ -336,15 +339,22 @@ class FilesView extends StatelessWidget {
               ],
             ),
           ),
-          IconTile(
-            label: "Recents",
-            icon: RiveIcons.clock(ThemeUtils.iconColor, 15),
-            onTap: () {},
-          ),
-          IconTile(
-            icon: RiveIcons.trash(ThemeUtils.iconColor, 15),
-            label: "Deleted Files",
-            onTap: () {},
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0),
+            child: Column(
+              children: <Widget>[
+                IconTile(
+                  label: "Recents",
+                  icon: RiveIcons.clock(ThemeUtils.iconColor, 15),
+                  onTap: () {},
+                ),
+                IconTile(
+                  icon: RiveIcons.trash(ThemeUtils.iconColor, 15),
+                  label: "Deleted Files",
+                  onTap: () {},
+                ),
+              ],
+            ),
           ),
           Row(
             children: <Widget>[
@@ -352,7 +362,7 @@ class FilesView extends StatelessWidget {
                 child: Container(
                     margin: EdgeInsets.only(
                       top: 21,
-                      bottom: 11,
+                      bottom: 5,
                     ),
                     color: ThemeUtils.lineGrey,
                     height: 1),
@@ -360,17 +370,20 @@ class FilesView extends StatelessWidget {
             ],
           ),
           Expanded(
-            child: Consumer<Rive>(
-              builder: (context, rive, _) =>
-                  ValueListenableBuilder<FolderTreeController>(
-                valueListenable: rive.fileBrowser.browserController,
-                builder: (context, controller, _) {
-                  return FolderTreeView(
-                    controller: controller,
-                    scrollController: rive.fileBrowser.treeScrollController,
-                    itemHeight: kTreeItemHeight,
-                  );
-                },
+            child: Padding(
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Consumer<Rive>(
+                builder: (context, rive, _) =>
+                    ValueListenableBuilder<FolderTreeController>(
+                  valueListenable: rive.fileBrowser.browserController,
+                  builder: (context, controller, _) {
+                    return FolderTreeView(
+                      controller: controller,
+                      scrollController: rive.fileBrowser.treeScrollController,
+                      itemHeight: kTreeItemHeight,
+                    );
+                  },
+                ),
               ),
             ),
           )

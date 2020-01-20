@@ -28,6 +28,7 @@ class FolderTreeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return TreeView<FolderItem>(
       scrollController: scrollController,
+      shrinkWrap: false,
       style: TreeStyle(
         showFirstLine: true,
         padding: const EdgeInsets.all(5),

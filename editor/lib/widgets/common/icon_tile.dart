@@ -29,7 +29,7 @@ class IconTile extends StatelessWidget {
               height: 15,
               child: Center(child: icon),
             ),
-            Container(width: 15.0),
+            Container(width: 5.0),
             Text(
               label,
               style: TextStyle(
