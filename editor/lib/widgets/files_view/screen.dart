@@ -75,7 +75,13 @@ class FilesView extends StatelessWidget {
   }
 
   Widget _buildRightSide(Rive _rive) {
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+            left: BorderSide(
+          color: Color.fromARGB(255, 216, 216, 216),
+        )),
+      ),
       padding: const EdgeInsets.all(20.0),
       child: ValueListenableBuilder<SelectableItem>(
           valueListenable: _rive.fileBrowser.selection,
@@ -271,7 +277,13 @@ class FilesView extends StatelessWidget {
 
   Widget _buildLeftSide() {
     return Container(
-      color: ThemeUtils.backgroundLightGrey,
+      decoration: BoxDecoration(
+        color: ThemeUtils.backgroundLightGrey,
+        border: Border(
+            right: BorderSide(
+          color: Color.fromARGB(255, 216, 216, 216),
+        )),
+      ),
       padding: EdgeInsets.only(top: 20.0),
       child: Column(
         children: <Widget>[
@@ -371,7 +383,7 @@ class FilesView extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 15.0),
+              padding: const EdgeInsets.only(left: 15.0, right: 10.0),
               child: Consumer<Rive>(
                 builder: (context, rive, _) =>
                     ValueListenableBuilder<FolderTreeController>(
