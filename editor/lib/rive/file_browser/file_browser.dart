@@ -1,14 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/rive/file_browser/folder.dart';
-import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/widgets/files_view/view.dart';
-import 'dart:math' as math;
 
+import '../../widgets/files_view/screen.dart';
+import '../rive.dart';
 import 'browser_tree_controller.dart';
 import 'controller.dart';
 import 'file.dart';
+import 'folder.dart';
 
 const kTreeItemHeight = 35.0;
 

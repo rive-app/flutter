@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/rive.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 
+import '../rive.dart';
 import 'folder.dart';
 
 class FolderTreeController extends TreeController<FolderItem> {

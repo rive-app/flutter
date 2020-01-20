@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/rive/rive.dart';
 
+import '../rive.dart';
 import 'file.dart';
 import 'folder.dart';
 
