@@ -86,6 +86,7 @@ class FolderTreeView extends StatelessWidget {
           browser.selectedFolder.key == item.data.key
               ? SelectionState.selected
               : SelectionState.none,
+          selectedElevation: 4.0,
         ),
       ),
       itemBuilder: (context, item) => Consumer<FileBrowser>(
