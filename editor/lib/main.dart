@@ -251,7 +251,10 @@ class Editor extends StatelessWidget {
                   ),
                 ),
               ),
-              Expanded(
+              const Expanded(
+                child: StagePanel(),
+              ),
+              /*Expanded(
                 child: Column(
                   children: [
                     ResizePanel(
@@ -289,7 +292,7 @@ class Editor extends StatelessWidget {
                 child: Container(
                   color: Color.fromRGBO(50, 50, 50, 1.0),
                 ),
-              ),
+              ),*/
             ],
           ),
         ),
