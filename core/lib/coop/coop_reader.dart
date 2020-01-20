@@ -11,6 +11,7 @@ abstract class CoopReader {
     var reader = BinaryReader(
         ByteData.view(data.buffer, data.offsetInBytes, data.length));
     int command = reader.readVarUint();
+    print("COMMAND IS $command");
     switch (command) {
       case CoopCommand.hello:
         recvHello();
@@ -41,6 +42,11 @@ abstract class CoopReader {
         break;
       case CoopCommand.cursor:
         break;
+      case CoopCommand.changeId:
+        var fromId = reader.readVarInt();
+        var toId = reader.readVarUint();
+        recvChangeId(fromId, toId);
+        break;
       default:
         recvChange(ChangeSet()..deserialize(reader, command));
         break;
@@ -55,4 +61,5 @@ abstract class CoopReader {
   Future<void> recvHand(
       int session, String fileId, String token, int lastServerChangeId);
   Future<void> recvShake(int session, int lastSeenChangeId);
+  Future<void> recvChangeId(int from, int to);
 }

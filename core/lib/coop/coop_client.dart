@@ -12,6 +12,8 @@ import 'coop_writer.dart';
 import 'local_settings.dart';
 
 typedef ChangeSetCallback = void Function(ChangeSet changeSet);
+typedef ChangeIdCallback = bool Function(int from, int to);
+typedef MakeChangeCallback = void Function(ObjectChanges change);
 
 class CoopClient extends CoopReader {
   final String url;
@@ -29,6 +31,8 @@ class CoopClient extends CoopReader {
 
   ChangeSetCallback changesAccepted;
   ChangeSetCallback changesRejected;
+  ChangeIdCallback changeObjectId;
+  MakeChangeCallback makeChange;
 
   CoopClient(this.url, {this.fileId, this.localSettings}) {
     _writer = CoopWriter(write);
@@ -91,9 +95,16 @@ class CoopClient extends CoopReader {
   }
 
   @override
-  Future<void> recvChange(ChangeSet changes) async {
+  Future<void> recvChange(ChangeSet changeSet) async {
     // Receiving other property changes.
     // Make sure we do not apply changes that conflict with unacknowledged ones.
+
+    // That means that we need to re-apply them if that changeset is rejected.
+
+    for (final objectChanges in changeSet.objects) {
+      //change.objectId
+      makeChange?.call(objectChanges);
+    }
   }
 
   @override
@@ -101,10 +112,15 @@ class CoopClient extends CoopReader {
     // Handle the server telling us to disconnect.
   }
 
+  /// Accept changes, remove the unacknowledge change that matches this
+  /// changeId.
   @override
   Future<void> recvAccept(int changeId, int serverChangeId) async {
-    // Accept changes, remove the unacknowledge change that matches this
-    // changeId.
+    // Kind of odd to assert a network requirement (this is something the server
+    // would mess up) but it helps track things down if they go wrong.
+    assert(_unacknowledged != null,
+        "Shouldn't receive an accept without sending changes.");
+
     var change = _unacknowledged.id == changeId ? _unacknowledged : null;
     if (change != null) {
       _unacknowledged = null;
@@ -162,10 +178,23 @@ class CoopClient extends CoopReader {
     _connectionCompleter = null;
   }
 
+  @override
+  Future<void> recvChangeId(int from, int to) async {
+    if (changeObjectId?.call(from, to) ?? false) {
+      for (final changeSet in _fresh) {
+        for (final objectChanges in changeSet.objects) {
+          if (objectChanges.objectId == from) {
+            objectChanges.objectId = to;
+          }
+        }
+      }
+    }
+  }
+
   ChangeSet makeChangeSet() {
     var changes = ChangeSet()
       ..id = _lastChangeId++
-      ..changes = [];
+      ..objects = [];
     localSettings.setIntSetting('lastChangeId', _lastChangeId);
     return changes;
   }
@@ -173,8 +202,6 @@ class CoopClient extends CoopReader {
   final List<ChangeSet> _fresh = [];
   ChangeSet _unacknowledged;
   void queueChanges(ChangeSet changes) {
-    print("QUEUE CHANGES $changes");
-
     // For now we send and save changes locally directly. Eventually we should
     // flatten them until they've been sent to a server as an atomic set.
 
@@ -194,6 +221,6 @@ class CoopClient extends CoopReader {
     _fresh.first.serialize(writer);
     _channel.sink.add(writer.uint8Buffer);
     _unacknowledged = _fresh.removeAt(0);
-    _fresh.clear();
+    // _fresh.clear();
   }
 }

@@ -69,4 +69,13 @@ class CoopWriter {
     writer.writeVarUint(changeId);
     write(writer.uint8Buffer);
   }
+
+  /// Upgrade an object id from a signed (local) to an unsigned (server) one.
+  void writeChangeId(int fromId, int toId) {
+    var writer = BinaryWriter(alignment: 8);
+    writer.writeVarUint(CoopCommand.changeId);
+    writer.writeVarInt(fromId);
+    writer.writeVarUint(toId);
+    write(writer.uint8Buffer);
+  }
 }

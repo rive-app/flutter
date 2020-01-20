@@ -84,6 +84,7 @@ class Definition {
   String get name => _name;
 
   String get localCodeFilename => '${stripExtension(_filename)}_base.dart';
+  String get concreteCodeFilename => '${stripExtension(_filename)}.dart';
   String get codeFilename => 'lib/src/generated/$localCodeFilename';
 
   void generateCode(
@@ -120,6 +121,25 @@ class Definition {
     for (final field in _properties) {
       code.write(field.generateCode());
     }
+
+    if (_properties.isNotEmpty) {
+// override changeNonNull to report all set fields as a change
+      code.writeln('''@override
+    void changeNonNull() {''');
+      if (_extensionOf != null) {
+        code.writeln('super.changeNonNull();');
+      }
+      // for (final definition in definitions.values) {
+      for (final property in _properties) {
+        code.writeln('''if(${property.name} != null) {
+          context?.changeProperty(this, 
+          ${property.name}PropertyKey, ${property.name}, ${property.name});
+        }''');
+      }
+      // }
+      code.writeln('}');
+    }
+
     code.write('}');
 
     var folder = outputFolder != null &&
@@ -275,23 +295,39 @@ class Definition {
     StringBuffer ctxCode =
         StringBuffer('''import \'package:core/coop/change.dart\';
                         import \'package:core/core.dart\';
+                        import 'package:binary_buffer/binary_reader.dart';
                         import 'package:binary_buffer/binary_writer.dart';
                         
                         ''');
+
+    List<String> imports = [];
     for (final definition in definitions.values) {
       if (definition._properties.isNotEmpty) {
-        ctxCode.writeln('import \'${definition.localCodeFilename}\';');
+        imports.add('import \'${definition.localCodeFilename}\';\n');
+        imports.add('import \'../../${definition.concreteCodeFilename}\';\n');
       }
     }
+    // Sort the imports to avoid linter warnings.
+    imports.sort();
+    ctxCode.writeAll(imports);
+
     ctxCode.writeln('abstract class $coreContextName extends CoreContext {');
     ctxCode.writeln('$coreContextName(String fileId) : super(fileId);\n');
-    ctxCode.writeln('''@override
-    Change makeCoopChange(int propertyKey, Object value) {
-      var change = Change()..op = propertyKey;
-       switch(propertyKey) {
-          ''');
 
-    // Group them by definition type.
+    ctxCode.writeln('''@override
+    Core makeCoreInstance(int typeKey) {
+       switch(typeKey) {
+          ''');
+    for (final definition in definitions.values) {
+      if (definition._isAbstract) {
+        continue;
+      }
+      ctxCode.writeln('''case ${definition._name}Base.typeKey:
+        return ${definition._name}();''');
+    }
+    ctxCode.writeln('default:return null;}}');
+
+    // Group fields by definition type.
     Map<FieldType, List<Property>> groups = {};
 
     for (final definition in definitions.values) {
@@ -300,11 +336,50 @@ class Definition {
         groups[property.type].add(property);
       }
     }
+    ctxCode.writeln('''@override
+    void applyCoopChanges(ObjectChanges objectChanges) {
+      var object = objects[objectChanges.objectId];
+      var justAdded = false;
+      for (final change in objectChanges.changes) {
+        var reader = BinaryReader.fromList(change.value);
+        switch (change.op) {
+          ''');
 
     ctxCode.write('''case CoreContext.addKey:
-                    case CoreContext.removeKey:
-                    change.op = value as int;
-                    break;''');
+          object = makeCoreInstance(reader.readVarInt())
+            ..id = objectChanges.objectId;
+          justAdded = true;
+          break;
+        case CoreContext.removeKey:           
+          break;''');
+
+    groups.forEach((fieldType, properties) {
+      for (final property in properties) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.writeln('.${property.name}PropertyKey:');
+      }
+
+      var fieldType = properties.first.type;
+      ctxCode.writeln(fieldType.decode('reader', 'value'));
+      ctxCode.writeln('setObjectProperty(object, change.op, value);');
+      ctxCode.writeln('break;');
+    });
+
+    ctxCode.writeln('default:break;}}');
+
+    ctxCode.writeln('''@override
+    Change makeCoopChange(int propertyKey, Object value) {
+      var change = Change()..op = propertyKey;
+       switch(propertyKey) {
+          ''');
+
+    ctxCode.write('''case CoreContext.addKey:
+                    case CoreContext.removeKey:           
+        if (value != null && value is int) {
+          var writer = BinaryWriter(alignment: 4);
+          writer.writeVarInt(value);
+          change.value = writer.uint8Buffer;
+        }break;''');
 
     groups.forEach((fieldType, properties) {
       for (final property in properties) {
