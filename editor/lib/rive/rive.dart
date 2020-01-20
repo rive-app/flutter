@@ -27,41 +27,10 @@ class Rive with RiveFileDelegate {
   ]);
   final selectedTab = ValueNotifier<RiveTabItem>(null);
 
-
   Stage _stage;
-  Stage get stage => _stage;
-
-  void _changeFile(RiveFile nextFile) {
-    file.value = nextFile;
-    selection.clear();
-    _stage?.dispose();
-    _stage = Stage(this, file.value);
-    _stage.tool = TranslateTool();
-
-    // Tree controller is based off of stage items.
-    treeController.value =
-        HierarchyTreeController(nextFile.artboards, rive: this);
-  }
-
-  /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
-  Future<RiveFile> open(String id) async {
-    var opening = RiveFile(id);
-    opening.addDelegate(this);
-    _changeFile(opening);
-    final _tab = RiveTabItem(name: id);
-    if (!tabs.value.map((t) => t.name).contains(id)) {
-      tabs.value.add(_tab);
-    }
-    openTab(_tab);
-    return opening;
-  }
-
-  final ValueNotifier<SelectionMode> selectionMode =
-      ValueNotifier<SelectionMode>(SelectionMode.single);
+  // Stage get stage => _stage;
 
   final ValueNotifier<Stage> stage = ValueNotifier<Stage>(null);
-  Stage _stage;
-
 
   void closeTab(RiveTabItem value) {
     tabs.value.remove(value);
@@ -144,7 +113,11 @@ class Rive with RiveFileDelegate {
     _stage = Stage(this, file.value);
     _stage.tool = TranslateTool();
     stage.value = _stage;
-
+    final _tab = RiveTabItem(name: nextFile.fileId);
+    if (!tabs.value.map((t) => t.name).contains(nextFile.fileId)) {
+      tabs.value.add(_tab);
+    }
+    openTab(_tab);
     // Tree controller is based off of stage items.
     treeController.value =
         HierarchyTreeController(nextFile.artboards, rive: this);

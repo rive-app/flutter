@@ -45,62 +45,11 @@ void main() {
   runApp(MyApp());
 }
 
-
 final focusNode = FocusNode();
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    var focusScope = FocusScope.of(context);
-
-    return CursorView(
-      child: MultiProvider(
-        providers: [
-          Provider.value(value: rive),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
-          themeMode: ThemeMode.light,
-          home: DefaultTextStyle(
-            style: TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
-            child: Scaffold(
-              body: Listener(
-                onPointerDown: (details) => focusNode.requestFocus(),
-                child: RawKeyboardListener(
-                  autofocus: true,
-                  focusNode: focusNode,
-                  onKey: (event) {
-                    var primary = FocusManager.instance.primaryFocus;
-                    rive.onKeyEvent(
-                        event,
-                        primary != focusNode &&
-                            focusScope.nearestScope != primary);
-                    // print("PRIMARY $primary");
-                    // if (primary == focusNode ||
-                    //     focusScope.nearestScope == primary) {
-                    //   print("Key ${event}");
-                    //   return;
-                    // }
-                    // print("NO FOCUS");
-                  },
-                  child: Editor(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // Testing context menu items.
 
 const double resizeEdgeSize = 10;
-
 
 List<ContextItem<Rive>> contextItems = [
   ContextItem(
@@ -148,6 +97,65 @@ final tabs = [
   RiveTabItem(name: "Ellipse Testing"),
   RiveTabItem(name: "Spaceman"),
 ];
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+
+  FocusNode focusNode = FocusNode();
+
+  @override
+  Widget build(BuildContext context) {
+    var focusScope = FocusScope.of(context);
+
+    return CursorView(
+      // onPointerDown: (details) {
+      //   focusNode.requestFocus();
+      // },
+      // onPointerUp: (details) {
+      //   rive.file.value.captureJournalEntry();
+      // },
+      child: MultiProvider(
+        providers: [
+          Provider.value(value: rive),
+        ],
+        child: MaterialApp(
+          // shortcuts: {
+          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
+          // },
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: ThemeMode.light,
+          home: DefaultTextStyle(
+            style: TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
+            child: Container(
+              child: Scaffold(
+                body: RawKeyboardListener(
+                    onKey: (event) {
+                      var primary = FocusManager.instance.primaryFocus;
+                      rive.onKeyEvent(
+                          event,
+                          primary != focusNode &&
+                              focusScope.nearestScope != primary);
+                      // print("PRIMARY $primary");
+                      // if (primary == focusNode ||
+                      //     focusScope.nearestScope == primary) {
+                      //   print("Key ${event}");
+                      //   return;
+                      // }
+                      // print("NO FOCUS");
+                    },
+                    child: Editor(),
+                    autofocus: true,
+                    focusNode: focusNode),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // Testing context menu items.
 class Editor extends StatelessWidget {
@@ -329,59 +337,6 @@ class Editor extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-
-  FocusNode focusNode = FocusNode();
-
-  @override
-  Widget build(BuildContext context) {
-    var focusScope = FocusScope.of(context);
-
-    return CursorView(
-      onPointerDown: (details) {
-        focusNode.requestFocus();
-      },
-      onPointerUp: (details) {
-        rive.file.value.captureJournalEntry();
-      },
-      child: MultiProvider(
-        providers: [
-          Provider.value(value: rive),
-        ],
-        child: MaterialApp(
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          // shortcuts: {
-          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
-          // },
-          home: Scaffold(
-            body: RawKeyboardListener(
-                onKey: (event) {
-                  var primary = FocusManager.instance.primaryFocus;
-                  rive.onKeyEvent(
-                      event,
-                      primary != focusNode &&
-                          focusScope.nearestScope != primary);
-                  // print("PRIMARY $primary");
-                  // if (primary == focusNode ||
-                  //     focusScope.nearestScope == primary) {
-                  //   print("Key ${event}");
-                  //   return;
-                  // }
-                  // print("NO FOCUS");
-                },
-                child: Editor(),
-                autofocus: true,
-                focusNode: focusNode),
-          ),
-        ),
-      ),
     );
   }
 }
