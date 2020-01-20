@@ -7,6 +7,7 @@ import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
+import 'widgets/files_view/view.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'rive/stage/stage.dart';
@@ -24,6 +25,7 @@ void main() {
     (_) => WindowUtils.hideTitleBar(),
   );
   // Fake load a test file.
+  rive.fileBrowser.init(rive);
   rive.open("100/100");
 
   // print("CONNECTING");
@@ -42,6 +44,10 @@ void main() {
   // });
   runApp(MyApp());
 }
+
+final focusNode = FocusNode();
+
+// Testing context menu items.
 
 const double resizeEdgeSize = 10;
 
@@ -92,6 +98,65 @@ final tabs = [
   RiveTabItem(name: "Spaceman"),
 ];
 
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+
+  FocusNode focusNode = FocusNode();
+
+  @override
+  Widget build(BuildContext context) {
+    var focusScope = FocusScope.of(context);
+
+    return CursorView(
+      // onPointerDown: (details) {
+      //   focusNode.requestFocus();
+      // },
+      // onPointerUp: (details) {
+      //   rive.file.value.captureJournalEntry();
+      // },
+      child: MultiProvider(
+        providers: [
+          Provider.value(value: rive),
+        ],
+        child: MaterialApp(
+          // shortcuts: {
+          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
+          // },
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: ThemeMode.light,
+          home: DefaultTextStyle(
+            style: TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
+            child: Container(
+              child: Scaffold(
+                body: RawKeyboardListener(
+                    onKey: (event) {
+                      var primary = FocusManager.instance.primaryFocus;
+                      rive.onKeyEvent(
+                          event,
+                          primary != focusNode &&
+                              focusScope.nearestScope != primary);
+                      // print("PRIMARY $primary");
+                      // if (primary == focusNode ||
+                      //     focusScope.nearestScope == primary) {
+                      //   print("Key ${event}");
+                      //   return;
+                      // }
+                      // print("NO FOCUS");
+                    },
+                    child: Editor(),
+                    autofocus: true,
+                    focusNode: focusNode),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // Testing context menu items.
 class Editor extends StatelessWidget {
   @override
@@ -110,19 +175,51 @@ class Editor extends StatelessWidget {
                       WindowUtils.startDrag();
                     }),
               ),
-              RiveTabBar(
-                offset: 95,
-                tabs: tabs,
-                selected: tabs[selectedTab],
-                select: (tab) {
-                  // Hackity hack to test the tabs.
-                  selectedTab = tabs.indexOf(tab);
-                  (context as Element).markNeedsBuild();
+              ValueListenableBuilder<List<RiveTabItem>>(
+                valueListenable: rive.tabs,
+                builder: (context, tabs, child) {
+                  return ValueListenableBuilder<RiveTabItem>(
+                    valueListenable: rive.selectedTab,
+                    builder: (context, selectedTab, child) => RiveTabBar(
+                      offset: 95,
+                      tabs: tabs,
+                      selected: selectedTab,
+                      select: rive.openTab,
+                      close: rive.closeTab,
+                    ),
+                  );
                 },
               ),
             ],
           ),
         ),
+        Expanded(
+          child: ValueListenableBuilder<List<RiveTabItem>>(
+            valueListenable: rive.tabs,
+            builder: (context, tabs, child) =>
+                ValueListenableBuilder<RiveTabItem>(
+              valueListenable: rive.selectedTab,
+              builder: (context, tab, child) =>
+                  _buildBody(context, tabs.indexOf(tab)),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildBody(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        return FilesView();
+      default:
+        return _buildEditor(context);
+    }
+  }
+
+  Widget _buildEditor(BuildContext context) {
+    return Column(
+      children: <Widget>[
         Container(
           padding: const EdgeInsets.all(5),
           height: 42,
@@ -153,15 +250,15 @@ class Editor extends StatelessWidget {
                   itemBuilder: (context, item, isHovered) => item.itemBuilder(
                       context,
                       isHovered) /*(
-                  child: Text(
-                    "Item $index",
-                    style: TextStyle(
-                      fontFamily: 'Roboto-Regular',
-                      fontSize: 13,
-                      color: Colors.white,
-                    ),
+                child: Text(
+                  "Item $index",
+                  style: TextStyle(
+                    fontFamily: 'Roboto-Regular',
+                    fontSize: 13,
+                    color: Colors.white,
                   ),
-                )*/
+                ),
+              )*/
                   ,
                   itemSelected: (context, index) {},
                 ),
@@ -240,59 +337,6 @@ class Editor extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-
-  FocusNode focusNode = FocusNode();
-
-  @override
-  Widget build(BuildContext context) {
-    var focusScope = FocusScope.of(context);
-
-    return CursorView(
-      onPointerDown: (details) {
-        focusNode.requestFocus();
-      },
-      onPointerUp: (details) {
-        rive.file.value.captureJournalEntry();
-      },
-      child: MultiProvider(
-        providers: [
-          Provider.value(value: rive),
-        ],
-        child: MaterialApp(
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          // shortcuts: {
-          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
-          // },
-          home: Scaffold(
-            body: RawKeyboardListener(
-                onKey: (event) {
-                  var primary = FocusManager.instance.primaryFocus;
-                  rive.onKeyEvent(
-                      event,
-                      primary != focusNode &&
-                          focusScope.nearestScope != primary);
-                  // print("PRIMARY $primary");
-                  // if (primary == focusNode ||
-                  //     focusScope.nearestScope == primary) {
-                  //   print("Key ${event}");
-                  //   return;
-                  // }
-                  // print("NO FOCUS");
-                },
-                child: Editor(),
-                autofocus: true,
-                focusNode: focusNode),
-          ),
-        ),
-      ),
     );
   }
 }

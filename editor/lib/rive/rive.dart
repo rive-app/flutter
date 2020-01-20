@@ -6,24 +6,40 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
+import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 
+import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
 import 'selection_context.dart';
 import 'stage/stage.dart';
 import 'stage/stage_item.dart';
 
 class Rive with RiveFileDelegate {
-  final ValueNotifier<RiveFile> file = ValueNotifier<RiveFile>(null);
-  final ValueNotifier<HierarchyTreeController> treeController =
-      ValueNotifier<HierarchyTreeController>(null);
-  final SelectionContext<SelectableItem> selection =
-      SelectionContext<SelectableItem>();
+  final file = ValueNotifier<RiveFile>(null);
+  final treeController = ValueNotifier<HierarchyTreeController>(null);
+  final selection = SelectionContext<SelectableItem>();
+  final selectionMode = ValueNotifier<SelectionMode>(SelectionMode.single);
+  final fileBrowser = FileBrowser();
+  final tabs = ValueNotifier<List<RiveTabItem>>([
+    RiveTabItem(name: "Guido's Files", closeable: false),
+    RiveTabItem(name: "Ellipse Testing"),
+    RiveTabItem(name: "Spaceman"),
+  ]);
+  final selectedTab = ValueNotifier<RiveTabItem>(null);
 
-  final ValueNotifier<SelectionMode> selectionMode =
-      ValueNotifier<SelectionMode>(SelectionMode.single);
+  Stage _stage;
+  // Stage get stage => _stage;
 
   final ValueNotifier<Stage> stage = ValueNotifier<Stage>(null);
-  Stage _stage;
+
+  void closeTab(RiveTabItem value) {
+    tabs.value.remove(value);
+    selectedTab.value = tabs.value.last;
+  }
+
+  void openTab(RiveTabItem value) {
+    selectedTab.value = value;
+  }
 
   @override
   void onArtboardsChanged() {
@@ -97,7 +113,11 @@ class Rive with RiveFileDelegate {
     _stage = Stage(this, file.value);
     _stage.tool = TranslateTool();
     stage.value = _stage;
-
+    final _tab = RiveTabItem(name: nextFile.fileId);
+    if (!tabs.value.map((t) => t.name).contains(nextFile.fileId)) {
+      tabs.value.add(_tab);
+    }
+    openTab(_tab);
     // Tree controller is based off of stage items.
     treeController.value =
         HierarchyTreeController(nextFile.artboards, rive: this);
