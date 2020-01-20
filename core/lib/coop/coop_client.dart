@@ -101,9 +101,9 @@ class CoopClient extends CoopReader {
 
     // That means that we need to re-apply them if that changeset is rejected.
 
-    for (final change in changeSet.changes) {
+    for (final objectChanges in changeSet.objects) {
       //change.objectId
-      makeChange?.call(change);
+      makeChange?.call(objectChanges);
     }
   }
 
@@ -112,10 +112,15 @@ class CoopClient extends CoopReader {
     // Handle the server telling us to disconnect.
   }
 
+  /// Accept changes, remove the unacknowledge change that matches this
+  /// changeId.
   @override
   Future<void> recvAccept(int changeId, int serverChangeId) async {
-    // Accept changes, remove the unacknowledge change that matches this
-    // changeId.
+    // Kind of odd to assert a network requirement (this is something the server
+    // would mess up) but it helps track things down if they go wrong.
+    assert(_unacknowledged != null,
+        "Shouldn't receive an accept without sending changes.");
+
     var change = _unacknowledged.id == changeId ? _unacknowledged : null;
     if (change != null) {
       _unacknowledged = null;
@@ -177,9 +182,9 @@ class CoopClient extends CoopReader {
   Future<void> recvChangeId(int from, int to) async {
     if (changeObjectId?.call(from, to) ?? false) {
       for (final changeSet in _fresh) {
-        for (final change in changeSet.changes) {
-          if (change.objectId == from) {
-            change.objectId = to;
+        for (final objectChanges in changeSet.objects) {
+          if (objectChanges.objectId == from) {
+            objectChanges.objectId = to;
           }
         }
       }
@@ -189,7 +194,7 @@ class CoopClient extends CoopReader {
   ChangeSet makeChangeSet() {
     var changes = ChangeSet()
       ..id = _lastChangeId++
-      ..changes = [];
+      ..objects = [];
     localSettings.setIntSetting('lastChangeId', _lastChangeId);
     return changes;
   }
@@ -197,8 +202,6 @@ class CoopClient extends CoopReader {
   final List<ChangeSet> _fresh = [];
   ChangeSet _unacknowledged;
   void queueChanges(ChangeSet changes) {
-    print("QUEUE CHANGES $changes");
-
     // For now we send and save changes locally directly. Eventually we should
     // flatten them until they've been sent to a server as an atomic set.
 

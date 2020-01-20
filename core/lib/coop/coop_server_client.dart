@@ -51,7 +51,7 @@ class CoopServerClient extends CoopReader {
 
   @override
   Future<void> recvChange(ChangeSet changes) async {
-    print("CHANGES ${changes.id} ${changes.changes.length}");
+    print("CHANGES ${changes.id} ${changes.objects.length}");
     print("SERVER GOT CHANGES $changes");
     if (context.attemptChange(this, changes)) {
       _writer.writeAccept(changes.id, 0);

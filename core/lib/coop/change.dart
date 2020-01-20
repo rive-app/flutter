@@ -77,13 +77,13 @@ class ChangeSet {
     _id = value;
   }
 
-  List<ObjectChanges> changes;
+  List<ObjectChanges> objects;
 
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(id);
-    writer.writeVarUint(changes?.length ?? 0);
-    if (changes != null) {
-      for (final change in changes) {
+    writer.writeVarUint(objects?.length ?? 0);
+    if (objects != null) {
+      for (final change in objects) {
         change.serialize(writer);
       }
     }
@@ -92,9 +92,9 @@ class ChangeSet {
   void deserialize(BinaryReader reader, [int preReadOp]) {
     id = preReadOp ?? reader.readVarUint();
     int changesLength = reader.readVarUint();
-    changes = List<ObjectChanges>(changesLength);
-    for (int i = 0; i < changes.length; i++) {
-      changes[i] = ObjectChanges()..deserialize(reader);
+    objects = List<ObjectChanges>(changesLength);
+    for (int i = 0; i < objects.length; i++) {
+      objects[i] = ObjectChanges()..deserialize(reader);
     }
   }
 }

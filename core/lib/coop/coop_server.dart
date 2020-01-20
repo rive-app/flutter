@@ -59,9 +59,9 @@ abstract class CoopServer {
           var isolate = _isolates[key];
           if (isolate == null) {
             isolate = CoopIsolate(this, ownerId, fileId);
-            if (await isolate.spawn(handler, options)) {
-              _isolates[key] = isolate;
-            } else {
+            // Immediately make it available...
+            _isolates[key] = isolate;
+            if (!await isolate.spawn(handler, options)) {
               stderr.write('Unable to spawn isolate for file $key.');
               await ws.close();
               return;

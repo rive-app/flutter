@@ -1,49 +1,16 @@
-// import 'dart:async';
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'change.dart';
 import 'coop_server.dart';
 import 'coop_server_client.dart';
 import 'coop_session.dart';
-import 'change.dart';
-import 'package:core/core.dart';
 
 typedef CoopIsolateHandler = void Function(CoopIsolateArgument);
 typedef CoopIsolateHandlerMaker = CoopIsolateHandler Function();
-
-class CoopIsolateArgument {
-  int ownerId;
-  int fileId;
-  final SendPort sendPort;
-  final Map<String, String> options;
-  CoopIsolateArgument(
-    this.ownerId,
-    this.fileId, {
-    this.sendPort,
-    this.options,
-  });
-}
-
-class _CoopServerProcessData {
-  final int id;
-  final Uint8List data;
-  _CoopServerProcessData(this.id, this.data);
-}
-
-class _CoopServerAddClient {
-  final int id;
-  _CoopServerAddClient(this.id);
-}
-
-class _CoopServerRemoveClient {
-  final int id;
-  _CoopServerRemoveClient(this.id);
-}
-
-class _CoopServerShutdown {}
 
 class CoopIsolate {
   static const Duration killTimeout = Duration(seconds: 3);
@@ -52,47 +19,24 @@ class CoopIsolate {
   SendPort _sendToIsolatePort;
   Isolate _isolate;
   final Map<int, WebSocket> _clients = {};
-  int get clientCount => _clients.length;
+
+  /// Sockets queue during concurrent open request.
+  final List<_WebSocketDelayedAdd> _queuedSockets = [];
+
   Completer<bool> _shutdownCompleter;
   final CoopServer server;
   final int ownerId;
   final int fileId;
   CoopIsolate(this.server, this.ownerId, this.fileId);
-
-  Future<bool> spawn(void entryPoint(CoopIsolateArgument message),
-      Map<String, String> options) async {
-    var completer = Completer<bool>();
-    _isolate = await Isolate.spawn(
-        entryPoint,
-        CoopIsolateArgument(ownerId, fileId,
-            sendPort: _receiveFromIsolatePort.sendPort, options: options));
-    _receiveFromIsolatePort.listen((dynamic data) {
-      if (data is SendPort && _sendToIsolatePort == null) {
-        _sendToIsolatePort = data;
-        completer.complete(true);
-      } else if (data is _CoopServerProcessData) {
-        _clients[data.id]?.add(data.data);
-      } else if (data is _CoopServerShutdown && _shutdownCompleter != null) {
-        _isolate?.kill();
-        _isolate = null;
-        _shutdownCompleter.complete(true);
-        server.remove(this);
-      }
-    });
-    return completer.future;
-  }
-
-  Future<bool> shutdown() async {
-    // Don't attempt a shutdown if one is already in progress.
-    if (_shutdownCompleter != null) {
-      return false;
-    }
-    _shutdownCompleter = Completer<bool>();
-    _sendToIsolatePort.send(_CoopServerShutdown());
-    return _shutdownCompleter.future;
-  }
+  int get clientCount => _clients.length;
 
   Future<bool> addClient(WebSocket socket) async {
+    if (_sendToIsolatePort == null) {
+      // tryign to add while booting.
+      var queued = _WebSocketDelayedAdd(socket);
+      _queuedSockets.add(queued);
+      return queued.completer.future;
+    }
     // Cancel a kill timer if we have one. This prevents the shutdown from
     // occuring if a client reconnects during the graceperiod between 0
     // connections and shutdown.
@@ -106,7 +50,10 @@ class CoopIsolate {
       print("Not allowed to add a client while completing shutdown.");
       return false;
     }
-    int id = _clients.keys.length;
+
+    // Make sure the chosen id is available.
+    var ids = List<int>.from(_clients.keys)..sort();
+    var id = ids.isEmpty ? 0 : ids.reduce(max)+1;
     _clients[id] = socket;
 
     _sendToIsolatePort.send(_CoopServerAddClient(id));
@@ -133,19 +80,57 @@ class CoopIsolate {
     return true;
   }
 
-  // static Future<void> _process(CoopIsolateArgument arguments) async {
-  //   var isolateProcess = arguments.process;
-  //   if (!await isolateProcess.initProcess(
-  //       arguments.sendPort, arguments.options)) {
-  //     print('Failed to initialize coop isolate process.');
-  //   }
-  //   // arguments.sendPort.send(receiveFromMainPort.sendPort);
-  //   // arguments.sendPort.send(Uint8List.fromList([1, 2, 3, 4]));
-  //   // print("TRY LISTEN2");
-  //   // receiveFromMainPort.listen((dynamic data) {
-  //   //   print("ISOLATE GOT $data");
-  //   // });
-  // }
+  Future<bool> shutdown() async {
+    // Don't attempt a shutdown if one is already in progress.
+    if (_shutdownCompleter != null) {
+      return false;
+    }
+    _shutdownCompleter = Completer<bool>();
+    _sendToIsolatePort.send(_CoopServerShutdown());
+    return _shutdownCompleter.future;
+  }
+
+  Future<bool> spawn(void entryPoint(CoopIsolateArgument message),
+      Map<String, String> options) async {
+    var completer = Completer<bool>();
+    _isolate = await Isolate.spawn(
+        entryPoint,
+        CoopIsolateArgument(ownerId, fileId,
+            sendPort: _receiveFromIsolatePort.sendPort, options: options));
+    _receiveFromIsolatePort.listen((dynamic data) {
+      if (data is SendPort && _sendToIsolatePort == null) {
+        _sendToIsolatePort = data;
+        completer.complete(true);
+        // Make sure any queued add operations are completed when the isolate
+        // has spawned.
+        for (final q in _queuedSockets) {
+          addClient(q.socket).then(q.completer.complete);
+        }
+        _queuedSockets.clear();
+      } else if (data is _CoopServerProcessData) {
+        _clients[data.id]?.add(data.data);
+      } else if (data is _CoopServerShutdown && _shutdownCompleter != null) {
+        _isolate?.kill();
+        _isolate = null;
+        _shutdownCompleter.complete(true);
+        server.remove(this);
+      }
+    });
+    return completer.future;
+  }
+}
+
+class CoopIsolateArgument {
+  int ownerId;
+  int fileId;
+  final SendPort sendPort;
+  final Map<String, String> options;
+  CoopIsolateArgument(
+    this.ownerId,
+    this.fileId, {
+    this.sendPort,
+    this.options,
+  });
 }
 
 abstract class CoopIsolateProcess {
@@ -158,6 +143,31 @@ abstract class CoopIsolateProcess {
 
   Iterable<CoopServerClient> get clients => _clients.values;
 
+  bool attemptChange(CoopServerClient client, ChangeSet changes);
+
+  // bool remove(CoopServerClient client) => _clients.remove(client);
+
+  Future<bool> initialize(int ownerId, int fileId, Map<String, String> options);
+
+  Future<bool> initProcess(SendPort sendToMainPort, Map<String, String> options,
+      int ownerId, int fileId) async {
+    _sendToMainPort = sendToMainPort;
+    if (await initialize(ownerId, fileId, options)) {
+      _sendToMainPort.send(_receiveFromMainPort.sendPort);
+      return true;
+    }
+    return false;
+  }
+
+  Future<Uint8List> loadData(String key);
+  Future<CoopSession> login(String token, int session);
+
+  void propagateChanges(CoopServerClient client, ChangeSet changes);
+  Future<bool> saveData(String key, Uint8List data);
+  Future<bool> shutdown();
+  void write(CoopServerClient client, Uint8List data) {
+    _sendToMainPort.send(_CoopServerProcessData(client.id, data));
+  }
   Future<void> _receive(dynamic data) async {
     print("RECEIVING DATA $data");
     if (data is _CoopServerAddClient) {
@@ -176,29 +186,29 @@ abstract class CoopIsolateProcess {
       _sendToMainPort.send(data);
     }
   }
+}
 
-  // bool remove(CoopServerClient client) => _clients.remove(client);
+class _CoopServerAddClient {
+  final int id;
+  _CoopServerAddClient(this.id);
+}
 
-  Future<bool> initProcess(SendPort sendToMainPort, Map<String, String> options,
-      int ownerId, int fileId) async {
-    _sendToMainPort = sendToMainPort;
-    if (await initialize(ownerId, fileId, options)) {
-      _sendToMainPort.send(_receiveFromMainPort.sendPort);
-      return true;
-    }
-    return false;
-  }
+class _CoopServerProcessData {
+  final int id;
+  final Uint8List data;
+  _CoopServerProcessData(this.id, this.data);
+}
 
-  void write(CoopServerClient client, Uint8List data) {
-    _sendToMainPort.send(_CoopServerProcessData(client.id, data));
-  }
+class _CoopServerRemoveClient {
+  final int id;
+  _CoopServerRemoveClient(this.id);
+}
 
-  bool attemptChange(CoopServerClient client, ChangeSet changes);
-  void propagateChanges(CoopServerClient client, ChangeSet changes);
+class _CoopServerShutdown {}
 
-  Future<bool> initialize(int ownerId, int fileId, Map<String, String> options);
-  Future<bool> saveData(String key, Uint8List data);
-  Future<Uint8List> loadData(String key);
-  Future<bool> shutdown();
-  Future<CoopSession> login(String token, int session);
+class _WebSocketDelayedAdd {
+  final Completer<bool> completer = Completer<bool>();
+  final WebSocket socket;
+
+  _WebSocketDelayedAdd(this.socket);
 }
