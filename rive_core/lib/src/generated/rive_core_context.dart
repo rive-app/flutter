@@ -66,6 +66,8 @@ abstract class RiveCoreContext extends CoreContext {
         case NodeBase.scaleYPropertyKey:
         case NodeBase.opacityPropertyKey:
           var value = reader.readFloat64();
+          print(
+              "SETTING $object ${change.op} $value $objects ${objectChanges.objectId}");
           setObjectProperty(object, change.op, value);
           break;
         default:

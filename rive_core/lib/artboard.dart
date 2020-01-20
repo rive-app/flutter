@@ -29,7 +29,6 @@ class Artboard extends ArtboardBase {
 
   @override
   void xChanged(double from, double to) {
-    print("CHANGING X $to");
     super.xChanged(from, to);
     _delegate?.markBoundsDirty();
   }

@@ -7,8 +7,8 @@ typedef ItemCounter = int Function();
 class PopupButton<A, T extends PopupListItem<A>> extends StatelessWidget {
   final WidgetBuilder builder;
   final List<T> items;
-  final ListPopupItemBuilder itemBuilder;
-  final ListPopupItemEvent itemSelected;
+  final ListPopupItemBuilder<T> itemBuilder;
+  final ListPopupItemEvent<T> itemSelected;
   final A selectArg;
 
   const PopupButton({
@@ -33,7 +33,7 @@ class PopupButton<A, T extends PopupListItem<A>> extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Color.fromRGBO(68, 68, 68, 1),
+          color: const Color.fromRGBO(68, 68, 68, 1),
           borderRadius: BorderRadius.circular(5.0),
         ),
         child: builder(context),

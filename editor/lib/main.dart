@@ -1,32 +1,22 @@
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
-import 'package:cursor/cursor_view.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
+import 'package:window_utils/window_utils.dart';
+
 import 'rive/stage/stage.dart';
 import 'widgets/hierarchy.dart';
 import 'widgets/popup/context_popup.dart';
 import 'widgets/resize_panel.dart';
-
-import 'package:window_utils/window_utils.dart';
-// import 'package:rive_core/rive_file.dart';
-// import 'package:core/coop/connect_result.dart';
-
-import 'package:provider/provider.dart';
-
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
 
 // var file = RiveFile("102:15468");
-
-const double resizeEdgeSize = 10;
-Node node;
-
-var rive = Rive();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,70 +43,8 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+const double resizeEdgeSize = 10;
 
-  FocusNode focusNode = FocusNode();
-
-  @override
-  Widget build(BuildContext context) {
-    var focusScope = FocusScope.of(context);
-
-    return CursorView(
-      onPointerDown: (details) {
-        focusNode.requestFocus();
-      },
-      onPointerUp: (details) {
-        rive.file.value.captureJournalEntry();
-      },
-      child: MultiProvider(
-        providers: [
-          Provider.value(value: rive),
-        ],
-        child: MaterialApp(
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          // shortcuts: {
-          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
-          // },
-          home: Scaffold(
-            body: RawKeyboardListener(
-                onKey: (event) {
-                  var primary = FocusManager.instance.primaryFocus;
-                  rive.onKeyEvent(
-                      event,
-                      primary != focusNode &&
-                          focusScope.nearestScope != primary);
-                  // print("PRIMARY $primary");
-                  // if (primary == focusNode ||
-                  //     focusScope.nearestScope == primary) {
-                  //   print("Key ${event}");
-                  //   return;
-                  // }
-                  // print("NO FOCUS");
-                },
-                child: Editor(),
-                autofocus: true,
-                focusNode: focusNode),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Just some fake tabs to test the widgets.
-var tabs = [
-  RiveTabItem(name: "Guido's Files", closeable: false),
-  RiveTabItem(name: "Ellipse Testing"),
-  RiveTabItem(name: "Spaceman"),
-];
-
-// Hacky way to track which tab is selected (just for testing).
-int selectedTab = 1;
-
-// Testing context menu items.
 List<ContextItem<Rive>> contextItems = [
   ContextItem(
     "Artboard",
@@ -150,6 +78,21 @@ List<ContextItem<Rive>> contextItems = [
   ContextItem("Solo", shortcut: "Y")
 ];
 
+Node node;
+
+var rive = Rive();
+
+// Just some fake tabs to test the widgets.
+int selectedTab = 1;
+
+// Hacky way to track which tab is selected (just for testing).
+final tabs = [
+  RiveTabItem(name: "Guido's Files", closeable: false),
+  RiveTabItem(name: "Ellipse Testing"),
+  RiveTabItem(name: "Spaceman"),
+];
+
+// Testing context menu items.
 class Editor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -157,7 +100,7 @@ class Editor extends StatelessWidget {
       children: [
         Container(
           height: 39,
-          color: Color.fromRGBO(50, 50, 50, 1.0),
+          color: const Color.fromRGBO(50, 50, 50, 1.0),
           child: Stack(
             children: <Widget>[
               Positioned.fill(
@@ -181,9 +124,9 @@ class Editor extends StatelessWidget {
           ),
         ),
         Container(
-          padding: EdgeInsets.all(5),
+          padding: const EdgeInsets.all(5),
           height: 42,
-          color: Color.fromRGBO(60, 60, 60, 1.0),
+          color: const Color.fromRGBO(60, 60, 60, 1.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -192,7 +135,7 @@ class Editor extends StatelessWidget {
                   selectArg: rive,
                   builder: (context) {
                     return Container(
-                      margin: EdgeInsets.only(
+                      margin: const EdgeInsets.only(
                           left: 10, right: 10, top: 5, bottom: 5),
                       child: Center(
                         child: Text(
@@ -297,6 +240,59 @@ class Editor extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+
+  FocusNode focusNode = FocusNode();
+
+  @override
+  Widget build(BuildContext context) {
+    var focusScope = FocusScope.of(context);
+
+    return CursorView(
+      onPointerDown: (details) {
+        focusNode.requestFocus();
+      },
+      onPointerUp: (details) {
+        rive.file.value.captureJournalEntry();
+      },
+      child: MultiProvider(
+        providers: [
+          Provider.value(value: rive),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          // shortcuts: {
+          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
+          // },
+          home: Scaffold(
+            body: RawKeyboardListener(
+                onKey: (event) {
+                  var primary = FocusManager.instance.primaryFocus;
+                  rive.onKeyEvent(
+                      event,
+                      primary != focusNode &&
+                          focusScope.nearestScope != primary);
+                  // print("PRIMARY $primary");
+                  // if (primary == focusNode ||
+                  //     focusScope.nearestScope == primary) {
+                  //   print("Key ${event}");
+                  //   return;
+                  // }
+                  // print("NO FOCUS");
+                },
+                child: Editor(),
+                autofocus: true,
+                focusNode: focusNode),
+          ),
+        ),
+      ),
     );
   }
 }
