@@ -10,7 +10,7 @@ class StringFieldType extends FieldType {
 
   @override
   String decode(String readerName, String varName) {
-    return '$varName = $readerName.readString();';
+    return 'var $varName = $readerName.readString();';
   }
 
   @override

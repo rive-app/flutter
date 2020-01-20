@@ -56,12 +56,16 @@ abstract class CoreContext implements LocalSettings {
   CoreContext(this.fileId);
 
   T add<T extends Core>(T object) {
-    object.id ??= --localId;
+    if (_isRecording) {
+      object.id ??= --localId;
+    }
     object.context = this;
     _objects[object.id] = object;
     onAdded(object);
-    changeProperty(object, addKey, removeKey, object.coreType);
-    object.changeNonNull();
+    if (_isRecording) {
+      changeProperty(object, addKey, removeKey, object.coreType);
+      object.changeNonNull();
+    }
     return object;
   }
 
@@ -101,7 +105,8 @@ abstract class CoreContext implements LocalSettings {
     _client = CoopClient(url, fileId: fileId, localSettings: this)
       ..changesAccepted = _changesAccepted
       ..changesRejected = _changesRejected
-      ..changeObjectId = _changeObjectId;
+      ..changeObjectId = _changeObjectId
+      ..makeChange = _makeChange;
 
     return _client.connect();
   }
@@ -123,6 +128,9 @@ abstract class CoreContext implements LocalSettings {
 
   @protected
   Core makeCoreInstance(int typeKey);
+
+  @protected
+  void applyCoopChanges(ObjectChanges objectChanges);
 
   void _applyJournalEntry(Map<int, Map<int, ChangeEntry>> entry,
       {bool isUndo}) {
@@ -241,6 +249,24 @@ abstract class CoreContext implements LocalSettings {
     _freshChanges.remove(changes);
   }
 
+  void _makeChange(ObjectChanges change) {
+    var wasRecording = _isRecording;
+    _isRecording = false;
+    // print("GOT CHANGE ${change.objectId} ${change.op} ${change.value}");
+    // var object = _objects[change.objectId];
+    applyCoopChanges(change);
+    // switch(change.op) {
+    //   case addKey:
+    //     break;
+    //   case removeKey:
+    //     break;
+    //   default:
+    //     setObjectProperty(object, change.op, change)
+    //     break;
+    // }
+    _isRecording = wasRecording;
+  }
+
   bool _changeObjectId(int from, int to) {
     var object = _objects[from];
     if (object == null) {
@@ -295,13 +321,18 @@ abstract class CoreContext implements LocalSettings {
     // Client should only be null during some testing.
     var sendChanges = _client.makeChangeSet();
     changes.forEach((objectId, changes) {
+      var objectChanges = ObjectChanges()
+        ..objectId = objectId
+        ..changes = [];
+
       changes.forEach((key, entry) {
         var change = makeCoopChange(key, useFrom ? entry.from : entry.to);
         if (change != null) {
-          change.objectId = objectId;
-          sendChanges.changes.add(change);
+          objectChanges.changes.add(change);
         }
       });
+
+      sendChanges.changes.add(objectChanges);
     });
     _freshChanges[sendChanges] = FreshChange(changes, useFrom);
     _client.queueChanges(sendChanges);

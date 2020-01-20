@@ -10,7 +10,7 @@ class DoubleFieldType extends FieldType {
 
   @override
   String decode(String readerName, String varName) {
-    return '$varName = $readerName.readFloat64();';
+    return 'var $varName = $readerName.readFloat64();';
   }
 
   @override

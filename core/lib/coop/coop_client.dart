@@ -13,6 +13,7 @@ import 'local_settings.dart';
 
 typedef ChangeSetCallback = void Function(ChangeSet changeSet);
 typedef ChangeIdCallback = bool Function(int from, int to);
+typedef MakeChangeCallback = void Function(ObjectChanges change);
 
 class CoopClient extends CoopReader {
   final String url;
@@ -31,6 +32,7 @@ class CoopClient extends CoopReader {
   ChangeSetCallback changesAccepted;
   ChangeSetCallback changesRejected;
   ChangeIdCallback changeObjectId;
+  MakeChangeCallback makeChange;
 
   CoopClient(this.url, {this.fileId, this.localSettings}) {
     _writer = CoopWriter(write);
@@ -93,9 +95,16 @@ class CoopClient extends CoopReader {
   }
 
   @override
-  Future<void> recvChange(ChangeSet changes) async {
+  Future<void> recvChange(ChangeSet changeSet) async {
     // Receiving other property changes.
     // Make sure we do not apply changes that conflict with unacknowledged ones.
+
+    // That means that we need to re-apply them if that changeset is rejected.
+
+    for (final change in changeSet.changes) {
+      //change.objectId
+      makeChange?.call(change);
+    }
   }
 
   @override
@@ -165,7 +174,7 @@ class CoopClient extends CoopReader {
   }
 
   @override
-  Future<void> recvChangeId(int from, int to) {
+  Future<void> recvChangeId(int from, int to) async {
     if (changeObjectId?.call(from, to) ?? false) {
       for (final changeSet in _fresh) {
         for (final change in changeSet.changes) {

@@ -11,6 +11,7 @@ abstract class CoopReader {
     var reader = BinaryReader(
         ByteData.view(data.buffer, data.offsetInBytes, data.length));
     int command = reader.readVarUint();
+    print("COMMAND IS $command");
     switch (command) {
       case CoopCommand.hello:
         recvHello();

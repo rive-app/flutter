@@ -295,6 +295,7 @@ class Definition {
     StringBuffer ctxCode =
         StringBuffer('''import \'package:core/coop/change.dart\';
                         import \'package:core/core.dart\';
+                        import 'package:binary_buffer/binary_reader.dart';
                         import 'package:binary_buffer/binary_writer.dart';
                         
                         ''');
@@ -326,13 +327,7 @@ class Definition {
     }
     ctxCode.writeln('default:return null;}}');
 
-    ctxCode.writeln('''@override
-    Change makeCoopChange(int propertyKey, Object value) {
-      var change = Change()..op = propertyKey;
-       switch(propertyKey) {
-          ''');
-
-    // Group them by definition type.
+    // Group fields by definition type.
     Map<FieldType, List<Property>> groups = {};
 
     for (final definition in definitions.values) {
@@ -341,6 +336,42 @@ class Definition {
         groups[property.type].add(property);
       }
     }
+    ctxCode.writeln('''@override
+    void applyCoopChanges(ObjectChanges objectChanges) {
+      var object = objects[objectChanges.objectId];
+      var justAdded = false;
+      for (final change in objectChanges.changes) {
+        var reader = BinaryReader.fromList(change.value);
+        switch (change.op) {
+          ''');
+
+    ctxCode.write('''case CoreContext.addKey:
+          object = makeCoreInstance(reader.readVarInt())
+            ..id = objectChanges.objectId;
+          justAdded = true;
+          break;
+        case CoreContext.removeKey:           
+          break;''');
+
+    groups.forEach((fieldType, properties) {
+      for (final property in properties) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.writeln('.${property.name}PropertyKey:');
+      }
+
+      var fieldType = properties.first.type;
+      ctxCode.writeln(fieldType.decode('reader', 'value'));
+      ctxCode.writeln('setObjectProperty(object, change.op, value);');
+      ctxCode.writeln('break;');
+    });
+
+    ctxCode.writeln('default:break;}}');
+
+    ctxCode.writeln('''@override
+    Change makeCoopChange(int propertyKey, Object value) {
+      var change = Change()..op = propertyKey;
+       switch(propertyKey) {
+          ''');
 
     ctxCode.write('''case CoreContext.addKey:
                     case CoreContext.removeKey:           

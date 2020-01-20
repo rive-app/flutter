@@ -13,7 +13,7 @@ class FractionalIndexFieldType extends FieldType {
   String decode(String readerName, String varName) {
     return '''var numerator = $readerName.readVarInt();
               var denominator = $readerName.readVarInt();
-              $varName = FractionalIndex(numerator, denominator);''';
+              var $varName = FractionalIndex(numerator, denominator);''';
   }
 
   @override

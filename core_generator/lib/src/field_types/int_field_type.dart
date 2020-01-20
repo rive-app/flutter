@@ -10,7 +10,7 @@ class IntFieldType extends FieldType {
 
   @override
   String decode(String readerName, String varName) {
-    return '$varName = $readerName.readVarInt();';
+    return 'var $varName = $readerName.readVarInt();';
   }
 
   @override
