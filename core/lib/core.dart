@@ -43,7 +43,7 @@ abstract class CoreContext implements LocalSettings {
 
   final String fileId;
   CoopClient _client;
-  final Map<int, Core> objects = <int, Core>{};
+  Map<int, Core> get objects => _objects;
 
   final List<Map<int, Map<int, ChangeEntry>>> journal =
       <Map<int, Map<int, ChangeEntry>>>[];
@@ -60,7 +60,9 @@ abstract class CoreContext implements LocalSettings {
       object.id ??= --localId;
     }
     object.context = this;
+
     _objects[object.id] = object;
+    print("ADDING ${object.id} $object $_objects");
     onAdded(object);
     if (_isRecording) {
       changeProperty(object, addKey, removeKey, object.coreType);
