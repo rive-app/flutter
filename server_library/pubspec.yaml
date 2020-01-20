@@ -1,15 +1,15 @@
 name: coop_server_library
 
 environment:
-  sdk: '>=2.6.0 <3.0.0'
+  sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
   core:
-    path: ../dependencies/core-dart/core
+    path: ../dependencies/rive-editor-flutter/dependencies/core-dart/core
 
 # dependency_overrides:
 #   core:
-#     path: ../../core-dart/core
+#     path: ../../rive-editor/dependencies/core-dart/core
 
 dev_dependencies:
   test: ^1.9.4

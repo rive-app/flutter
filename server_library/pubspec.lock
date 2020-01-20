@@ -32,7 +32,7 @@ packages:
   binary_buffer:
     dependency: transitive
     description:
-      path: "../dependencies/core-dart/dependencies/binary-buffer-dart"
+      path: "../dependencies/rive-editor-flutter/dependencies/core-dart/dependencies/binary-buffer-dart"
       relative: true
     source: path
     version: "0.0.0"
@@ -67,7 +67,7 @@ packages:
   core:
     dependency: "direct main"
     description:
-      path: "../dependencies/core-dart/core"
+      path: "../dependencies/rive-editor-flutter/dependencies/core-dart/core"
       relative: true
     source: path
     version: "0.0.1"
@@ -95,7 +95,7 @@ packages:
   fractional:
     dependency: transitive
     description:
-      path: "../dependencies/core-dart/dependencies/fractional-dart"
+      path: "../dependencies/rive-editor-flutter/dependencies/core-dart/dependencies/fractional-dart"
       relative: true
     source: path
     version: "0.0.2"

@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
-
+import 'package:binary_buffer/binary_reader.dart';
+import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
+import 'package:core/coop/coop_command.dart';
 import 'package:core/coop/coop_server.dart';
+import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/coop_user.dart';
 import 'package:core/coop/coop_session.dart';
 import 'package:core/coop/coop_isolate.dart';
@@ -28,7 +31,7 @@ class _CoopIsolate extends CoopIsolateProcess {
       ..objects = [];
     fileMeta = CoopFileServerData()
       ..sessions = []
-      ..nextChangeId = 1
+      ..nextChangeId = CoopCommand.minChangeId
       ..nextObjectId = 1;
 
     return _dataDir != null;
@@ -64,21 +67,69 @@ class _CoopIsolate extends CoopIsolateProcess {
   }
 
   @override
-  bool attemptChange(ChangeSet changes) {
-    for (final change in changes.changes) {
-      switch (change.op) {
-        case CoreContext.addKey:
-        // id is change.objectId
-          print("MAKE OBJECT ${change.objectId} ${change.value}");
-          // create object with id
-          break;
-        case CoreContext.removeKey:
-          print("DESTROY OBJECT ${change.objectId} ${change.value}");
-          // Destroy object with id
-          break;
+  bool attemptChange(CoopServerClient client, ChangeSet changes) {
+    var serverChangeSet = ChangeSet()
+      ..id = fileMeta.nextChangeId++
+      ..changes = [];
+    for (final objectChanges in changes.changes) {
+      print("CHANGING ${objectChanges.objectId}");
+      var serverChange = objectChanges.clone();
+      serverChangeSet.changes.add(serverChange);
+      for (final change in objectChanges.changes) {
+        switch (change.op) {
+          case CoreContext.addKey:
+            // id is change.objectId
+
+            var reader = BinaryReader(
+              ByteData.view(
+                change.value.buffer,
+                change.value.offsetInBytes,
+                change.value.length,
+              ),
+            );
+
+            // TODO: need to upgrade the object id to a global/server one.
+            var nextId = fileMeta.nextObjectId++;
+            serverChange.objectId = nextId;
+            print("ADDING SERVER OBJECT WITH ID ${serverChange.objectId}");
+            file.objects.add(
+              CoopFileObject()
+                ..localId = nextId
+                ..key = reader.readVarUint(),
+            );
+            client.changedIds[objectChanges.objectId] = nextId;
+            client.writer.writeChangeId(objectChanges.objectId, nextId);
+            print("MAKE OBJECT ${objectChanges.objectId} ${change.value}");
+            // create object with id
+            break;
+          case CoreContext.removeKey:
+            print("DESTROY OBJECT ${objectChanges.objectId} ${change.value}");
+            // Destroy object with id
+            break;
+          default:
+            // Transform object id if necessary (was an object that got created).
+            var objectId = client.changedIds[objectChanges.objectId] ??
+                objectChanges.objectId;
+            serverChange.objectId = objectId;
+            break;
+        }
       }
     }
+    print("CHANGE ID ${serverChangeSet.id}");
+    propagateChanges(client, serverChangeSet);
     return true;
+  }
+
+  @override
+  void propagateChanges(CoopServerClient client, ChangeSet changes) {
+    var writer = BinaryWriter();
+    changes.serialize(writer);
+    for (final to in clients) {
+      if (to == client) {
+        continue;
+      }
+      to.write(writer.uint8Buffer);
+    }
   }
 }
 
