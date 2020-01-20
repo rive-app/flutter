@@ -4,22 +4,27 @@ import 'package:flutter/scheduler.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import '../rive/rive.dart';
 
-/// Draws a path with custom paint and a nuge property.
+/// Draws a path with custom paint and a nudge property.
 class StageView extends LeafRenderObjectWidget {
   /// The Rive context.
   final Rive rive;
+  final Stage stage;
 
-  const StageView(this.rive);
+  const StageView({this.rive, this.stage});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _StageViewRenderObject()..rive = rive;
+    return _StageViewRenderObject()
+      ..rive = rive
+      ..stage = stage;
   }
 
   @override
   void updateRenderObject(
       BuildContext context, covariant _StageViewRenderObject renderObject) {
-    renderObject..rive = rive;
+    renderObject
+      ..rive = rive
+      ..stage = stage;
   }
 
   @override
@@ -41,6 +46,17 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
     markNeedsPaint();
   }
 
+  Stage _stage;
+  Stage get stage => _stage;
+  set stage(Stage value) {
+    if (_stage == value) {
+      return;
+    }
+    _stage = value;
+    stage.delegate(this);
+    markNeedsPaint();
+  }
+
   @override
   bool get sizedByParent => true;
 
@@ -51,7 +67,7 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
 
   @override
   void performLayout() {
-    _rive.stage.setViewport(size.width, size.height);
+    _stage.setViewport(size.width, size.height);
   }
 
   @override
@@ -65,13 +81,13 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
           SchedulerBinding.instance.scheduleFrameCallback(_beginFrame);
     }
 
-    rive.stage.paint(context, offset, size);
+    _stage.paint(context, offset, size);
   }
 
   int _frameCallbackID;
   double _lastFrameTime = 0.0;
 
-  bool get isPlaying => _rive.stage.shouldAdvance;
+  bool get isPlaying => _stage.shouldAdvance;
 
   void _beginFrame(Duration timestamp) {
     _frameCallbackID = null;
@@ -81,7 +97,7 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
     _lastFrameTime = t;
 
     // advance(elapsedSeconds);
-    rive.stage.advance(elapsedSeconds);
+    _stage.advance(elapsedSeconds);
     if (!isPlaying) {
       _lastFrameTime = 0.0;
     }
@@ -107,7 +123,7 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
 
   void dispose() {
     updatePlayState();
-    rive?.stage?.clearDelegate(this);
+    _stage?.clearDelegate(this);
     rive = null;
   }
 

@@ -26,9 +26,9 @@ class Stage {
   static const double _minZoom = 0.1;
   static const double _maxZoom = 8.0;
 
-  Mat2D _viewTransform = Mat2D();
-  Mat2D _inverseViewTransform = Mat2D();
-  Vec2D _lastMousePosition = Vec2D();
+  final Mat2D _viewTransform = Mat2D();
+  final Mat2D _inverseViewTransform = Mat2D();
+  final Vec2D _lastMousePosition = Vec2D();
   // bool _isRightMouseDown = false;
   double _rightMouseMoveAccum = 0.0;
   Mat2D get inverseViewTransform => _inverseViewTransform;
@@ -37,9 +37,9 @@ class Stage {
   double get viewportWidth => _viewportWidth;
   double get viewportHeight => _viewportHeight;
   final List<StageItem> _visibleItems = [];
-  Vec2D _viewTranslation = Vec2D();
+  final Vec2D _viewTranslation = Vec2D();
   double _viewZoom = 1.0;
-  Vec2D _viewTranslationTarget = Vec2D();
+  final Vec2D _viewTranslationTarget = Vec2D();
   double _viewZoomTarget = 1.0;
   Vec2D _worldMouse = Vec2D();
   bool _mouseDownSelected = false;
@@ -78,9 +78,9 @@ class Stage {
   }
 
   void zoomTo(double x, double y, double scale) {
-    scale = scale.clamp(_minZoom, _maxZoom);
-    double zoomDelta = scale / this._viewZoomTarget;
-    this._viewZoomTarget = scale;
+    scale = scale.clamp(_minZoom, _maxZoom).toDouble();
+    double zoomDelta = scale / _viewZoomTarget;
+    _viewZoomTarget = scale;
 
     double ox = x - _viewTranslationTarget[0];
     double oy = y - _viewTranslationTarget[1];
@@ -208,7 +208,9 @@ class Stage {
 
   Stage(this.rive, this.riveFile) {
     for (final object in riveFile.objects.values) {
-      initComponent(object);
+      if (object is Component) {
+        initComponent(object);
+      }
     }
   }
 
@@ -222,8 +224,10 @@ class Stage {
   /// Register a Core object with the stage.
   void initComponent(Component component) {
     var stageItemFactory = _factories[component.coreType];
-    assert(stageItemFactory != null,
-        "Factory shouldn't be null for component $component with type key ${component.coreType}");
+    assert(
+        stageItemFactory != null,
+        'Factory shouldn\'t be null for component $component '
+        'with type key ${component.coreType}');
     if (stageItemFactory != null) {
       var stageItem = stageItemFactory();
       if (stageItem != null && stageItem.initialize(component)) {
@@ -239,7 +243,7 @@ class Stage {
 
   bool addItem(StageItem item) {
     assert(item != null);
-    if (item.visTreeProxy != NullNode) {
+    if (item.visTreeProxy != nullNode) {
       return false;
     }
 
@@ -250,12 +254,12 @@ class Stage {
 
   bool removeItem(StageItem item) {
     assert(item != null);
-    if (item.visTreeProxy == NullNode) {
+    if (item.visTreeProxy == nullNode) {
       return false;
     }
 
     visTree.destroyProxy(item.visTreeProxy);
-    item.visTreeProxy = NullNode;
+    item.visTreeProxy = nullNode;
     item.removedFromStage(this);
     return true;
   }
@@ -310,6 +314,7 @@ class Stage {
         AABB.fromValues(0.0, 0.0, _viewportWidth, _viewportHeight),
         _inverseViewTransform);
 
+    _visibleItems.clear();
     visTree.query(viewAABB, (int proxyId, StageItem item) {
       _visibleItems.add(item);
       return true;

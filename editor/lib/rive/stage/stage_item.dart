@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -25,7 +24,7 @@ abstract class StageItem<T> extends SelectableItem {
 
   int get drawOrder => 1;
 
-  int visTreeProxy = NullNode;
+  int visTreeProxy = nullNode;
 
   bool initialize(T component) {
     _component = component;

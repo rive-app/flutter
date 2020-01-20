@@ -74,4 +74,18 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   void childOrderChanged(FractionalIndex from, FractionalIndex to) {
     context?.changeProperty(this, childOrderPropertyKey, from, to);
   }
+
+  @override
+  void changeNonNull() {
+    if (name != null) {
+      context?.changeProperty(this, namePropertyKey, name, name);
+    }
+    if (parentId != null) {
+      context?.changeProperty(this, parentIdPropertyKey, parentId, parentId);
+    }
+    if (childOrder != null) {
+      context?.changeProperty(
+          this, childOrderPropertyKey, childOrder, childOrder);
+    }
+  }
 }

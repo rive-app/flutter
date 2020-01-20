@@ -32,7 +32,7 @@ class ListPopup {
     List<T> items = const [],
     Color background = const Color.fromRGBO(17, 17, 17, 1),
   }) {
-    RenderBox renderBox = context.findRenderObject();
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
 
@@ -58,7 +58,7 @@ class ListPopup {
                 children: [
                   PathWidget(
                     path: _pathArrow,
-                    nudge: Offset(10.0, 0),
+                    nudge: const Offset(10.0, 0),
                     paint: Paint()
                       ..color = background
                       ..style = PaintingStyle.fill
@@ -68,7 +68,7 @@ class ListPopup {
                     height: height,
                     child: Scrollbar(
                       child: ListView.builder(
-                        physics: ClampingScrollPhysics(),
+                        physics: const ClampingScrollPhysics(),
                         padding: EdgeInsets.only(top: margin, bottom: margin),
                         itemCount: items.length,
                         itemBuilder: (context, index) {
@@ -90,7 +90,7 @@ class ListPopup {
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.3473),
-                          offset: new Offset(0.0, 30.0),
+                          offset: const Offset(0.0, 30.0),
                           blurRadius: 30,
                         )
                       ],
@@ -108,7 +108,7 @@ class ListPopup {
 
 class _PopupListItemShell<A, T extends PopupListItem<A>>
     extends StatefulWidget {
-  final ListPopupItemBuilder itemBuilder;
+  final ListPopupItemBuilder<T> itemBuilder;
   final T item;
   final A selectArg;
 
@@ -136,7 +136,7 @@ class __PopupListItemShellState<A, T extends PopupListItem<A>>
         if (!widget.item.canSelect) {
           return;
         }
-        selectWidget.item.select?.call(widget.selectArg);
+        selectWidget.item.select?.call(selectWidget.selectArg);
         Popup.closeAll();
       },
       child: MouseRegion(
@@ -154,7 +154,7 @@ class __PopupListItemShellState<A, T extends PopupListItem<A>>
           });
         },
         child: Container(
-          color: _isHovered ? Color.fromRGBO(26, 26, 26, 1) : null,
+          color: _isHovered ? const Color.fromRGBO(26, 26, 26, 1) : null,
           child: widget.itemBuilder(context, widget.item, _isHovered),
         ),
       ),

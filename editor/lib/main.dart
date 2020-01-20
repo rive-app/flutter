@@ -1,31 +1,23 @@
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
-import 'package:cursor/cursor_view.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'widgets/files_view/view.dart';
+import 'package:window_utils/window_utils.dart';
+
+import 'rive/stage/stage.dart';
 import 'widgets/hierarchy.dart';
 import 'widgets/popup/context_popup.dart';
 import 'widgets/resize_panel.dart';
-
-import 'package:window_utils/window_utils.dart';
-// import 'package:rive_core/rive_file.dart';
-// import 'package:core/coop/connect_result.dart';
-
-import 'package:provider/provider.dart';
-
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
 
 // var file = RiveFile("102:15468");
-
-const double resizeEdgeSize = 10;
-Node node;
-
-var rive = Rive();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,8 +25,8 @@ void main() {
     (_) => WindowUtils.hideTitleBar(),
   );
   // Fake load a test file.
-  rive.open("test");
   rive.fileBrowser.init(rive);
+  rive.open("100/100");
 
   // print("CONNECTING");
   // file.connect('ws://localhost:8000/').then((result) {
@@ -52,6 +44,7 @@ void main() {
   // });
   runApp(MyApp());
 }
+
 
 final focusNode = FocusNode();
 
@@ -105,10 +98,23 @@ class MyApp extends StatelessWidget {
 }
 
 // Testing context menu items.
+
+const double resizeEdgeSize = 10;
+
+
 List<ContextItem<Rive>> contextItems = [
   ContextItem(
     "Artboard",
     select: (Rive rive) {
+      // var artboard =
+      //     rive.file.value.makeCoreInstance(ArtboardBase.typeKey) as Artboard;
+      // var artboard = Artboard()
+      //   ..name = "New Artboard"
+      //   ..x = 0
+      //   ..y = 0
+      //   ..width = 200
+      //   ..height = 100;
+      // rive.file.value.add(artboard);
       var artboard = Artboard()
         ..name = "New Artboard"
         ..x = 0
@@ -129,6 +135,21 @@ List<ContextItem<Rive>> contextItems = [
   ContextItem("Solo", shortcut: "Y")
 ];
 
+Node node;
+
+var rive = Rive();
+
+// Just some fake tabs to test the widgets.
+int selectedTab = 1;
+
+// Hacky way to track which tab is selected (just for testing).
+final tabs = [
+  RiveTabItem(name: "Guido's Files", closeable: false),
+  RiveTabItem(name: "Ellipse Testing"),
+  RiveTabItem(name: "Spaceman"),
+];
+
+// Testing context menu items.
 class Editor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -136,7 +157,7 @@ class Editor extends StatelessWidget {
       children: [
         Container(
           height: 39,
-          color: Color.fromRGBO(50, 50, 50, 1.0),
+          color: const Color.fromRGBO(50, 50, 50, 1.0),
           child: Stack(
             children: <Widget>[
               Positioned.fill(
@@ -192,9 +213,9 @@ class Editor extends StatelessWidget {
     return Column(
       children: <Widget>[
         Container(
-          padding: EdgeInsets.all(5),
+          padding: const EdgeInsets.all(5),
           height: 42,
-          color: Color.fromRGBO(60, 60, 60, 1.0),
+          color: const Color.fromRGBO(60, 60, 60, 1.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -203,7 +224,7 @@ class Editor extends StatelessWidget {
                   selectArg: rive,
                   builder: (context) {
                     return Container(
-                      margin: EdgeInsets.only(
+                      margin: const EdgeInsets.only(
                           left: 10, right: 10, top: 5, bottom: 5),
                       child: Center(
                         child: Text(
@@ -262,7 +283,10 @@ class Editor extends StatelessWidget {
                   ),
                 ),
               ),
-              Expanded(
+              const Expanded(
+                child: StagePanel(),
+              ),
+              /*Expanded(
                 child: Column(
                   children: [
                     ResizePanel(
@@ -300,11 +324,64 @@ class Editor extends StatelessWidget {
                 child: Container(
                   color: Color.fromRGBO(50, 50, 50, 1.0),
                 ),
-              ),
+              ),*/
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+
+  FocusNode focusNode = FocusNode();
+
+  @override
+  Widget build(BuildContext context) {
+    var focusScope = FocusScope.of(context);
+
+    return CursorView(
+      onPointerDown: (details) {
+        focusNode.requestFocus();
+      },
+      onPointerUp: (details) {
+        rive.file.value.captureJournalEntry();
+      },
+      child: MultiProvider(
+        providers: [
+          Provider.value(value: rive),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          // shortcuts: {
+          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
+          // },
+          home: Scaffold(
+            body: RawKeyboardListener(
+                onKey: (event) {
+                  var primary = FocusManager.instance.primaryFocus;
+                  rive.onKeyEvent(
+                      event,
+                      primary != focusNode &&
+                          focusScope.nearestScope != primary);
+                  // print("PRIMARY $primary");
+                  // if (primary == focusNode ||
+                  //     focusScope.nearestScope == primary) {
+                  //   print("Key ${event}");
+                  //   return;
+                  // }
+                  // print("NO FOCUS");
+                },
+                child: Editor(),
+                autofocus: true,
+                focusNode: focusNode),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -319,37 +396,44 @@ class StagePanel extends StatelessWidget {
     return Container(
       color: Color.fromRGBO(29, 29, 29, 1.0),
       child: Consumer<Rive>(
-        builder: (context, rive, _) => Stack(
-          children: [
-            Positioned.fill(
-              child: StageView(rive),
-            ),
-            Positioned(
-              left: resizeEdgeSize,
-              top: resizeEdgeSize,
-              bottom: resizeEdgeSize,
-              right: resizeEdgeSize,
-              child: MouseRegion(
-                opaque: true,
-                onExit: (details) {
-                  RenderBox getBox = context.findRenderObject() as RenderBox;
-                  var local = getBox.globalToLocal(details.position);
-                  rive.stage.mouseExit(details.buttons, local.dx, local.dy);
-                },
-                onHover: (details) {
-                  RenderBox getBox = context.findRenderObject() as RenderBox;
-                  var local = getBox.globalToLocal(details.position);
-                  rive.stage.mouseMove(details.buttons, local.dx, local.dy);
-                  // print("MOVE $local");
-                },
-                child: Listener(
+        builder: (context, rive, _) => ValueListenableBuilder<Stage>(
+          valueListenable: rive.stage,
+          builder: (context, stage, _) => Stack(
+            children: [
+              Positioned.fill(
+                child: stage == null
+                    ? Container()
+                    : StageView(
+                        rive: rive,
+                        stage: stage,
+                      ),
+              ),
+              Positioned(
+                left: resizeEdgeSize,
+                top: resizeEdgeSize,
+                bottom: resizeEdgeSize,
+                right: resizeEdgeSize,
+                child: MouseRegion(
+                  opaque: true,
+                  onExit: (details) {
+                    RenderBox getBox = context.findRenderObject() as RenderBox;
+                    var local = getBox.globalToLocal(details.position);
+                    stage.mouseExit(details.buttons, local.dx, local.dy);
+                  },
+                  onHover: (details) {
+                    RenderBox getBox = context.findRenderObject() as RenderBox;
+                    var local = getBox.globalToLocal(details.position);
+                    stage.mouseMove(details.buttons, local.dx, local.dy);
+                    // print("MOVE $local");
+                  },
+                  child: Listener(
                     behavior: HitTestBehavior.opaque,
                     onPointerSignal: (details) {
                       if (details is PointerScrollEvent) {
                         RenderBox getBox =
                             context.findRenderObject() as RenderBox;
                         var local = getBox.globalToLocal(details.position);
-                        rive.stage.mouseWheel(local.dx, local.dy,
+                        stage.mouseWheel(local.dx, local.dy,
                             details.scrollDelta.dx, details.scrollDelta.dy);
                       }
                     },
@@ -357,26 +441,28 @@ class StagePanel extends StatelessWidget {
                       RenderBox getBox =
                           context.findRenderObject() as RenderBox;
                       var local = getBox.globalToLocal(details.position);
-                      rive.stage.mouseDown(details.buttons, local.dx, local.dy);
+                      stage.mouseDown(details.buttons, local.dx, local.dy);
                       // print("POINTER DOWN ${local}");
                     },
                     onPointerUp: (details) {
                       RenderBox getBox =
                           context.findRenderObject() as RenderBox;
                       var local = getBox.globalToLocal(details.position);
-                      rive.stage.mouseUp(details.buttons, local.dx, local.dy);
+                      stage.mouseUp(details.buttons, local.dx, local.dy);
                       // print("POINTER UP ${local}");
                     },
                     onPointerMove: (details) {
                       RenderBox getBox =
                           context.findRenderObject() as RenderBox;
                       var local = getBox.globalToLocal(details.position);
-                      rive.stage.mouseDrag(details.buttons, local.dx, local.dy);
+                      stage.mouseDrag(details.buttons, local.dx, local.dy);
                       // print("POINTER DRAG ${local}");
-                    }),
+                    },
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

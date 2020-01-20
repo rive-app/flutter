@@ -24,7 +24,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
 
   @override
   void markBoundsDirty() {
-    stage.debounce(updateBounds);
+    stage?.debounce(updateBounds);
   }
 
   void updateBounds() {
