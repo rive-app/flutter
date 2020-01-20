@@ -67,27 +67,31 @@ void main() {
   });
 
   test('fractional indices can compare', () {
-    expect(FractionalIndex(2, 7) < FractionalIndex(5, 8), true);
+    expect(const FractionalIndex(2, 7) < const FractionalIndex(5, 8), true);
 
-    expect(FractionalIndex(1, 2) < FractionalIndex(4, 7), true);
+    expect(const FractionalIndex(1, 2) < const FractionalIndex(4, 7), true);
   });
 
   test('between values are correct', () {
     expect(
-        FractionalIndex.between(FractionalIndex(2, 7), FractionalIndex(5, 8)) <
-            FractionalIndex(5, 8),
+        FractionalIndex.between(
+                const FractionalIndex(2, 7), const FractionalIndex(5, 8)) <
+            const FractionalIndex(5, 8),
         true);
     expect(
-        FractionalIndex.between(FractionalIndex(2, 7), FractionalIndex(5, 8)) >
-            FractionalIndex(2, 7),
+        FractionalIndex.between(
+                const FractionalIndex(2, 7), const FractionalIndex(5, 8)) >
+            const FractionalIndex(2, 7),
         true);
     expect(
-        FractionalIndex.between(FractionalIndex(1, 3), FractionalIndex(5, 8)) <
-            FractionalIndex(5, 8),
+        FractionalIndex.between(
+                const FractionalIndex(1, 3), const FractionalIndex(5, 8)) <
+            const FractionalIndex(5, 8),
         true);
     expect(
-        FractionalIndex.between(FractionalIndex(1, 3), FractionalIndex(5, 8)) >
-            FractionalIndex(1, 3),
+        FractionalIndex.between(
+                const FractionalIndex(1, 3), const FractionalIndex(5, 8)) >
+            const FractionalIndex(1, 3),
         true);
   });
 
