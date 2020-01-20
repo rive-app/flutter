@@ -4,7 +4,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import '../rive/rive.dart';
 
-/// Draws a path with custom paint and a nuge property.
+/// Draws a path with custom paint and a nudge property.
 class StageView extends LeafRenderObjectWidget {
   /// The Rive context.
   final Rive rive;

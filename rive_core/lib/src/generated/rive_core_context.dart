@@ -1,5 +1,6 @@
 import 'package:core/coop/change.dart';
 import 'package:core/core.dart';
+import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
 import '../../artboard.dart';
@@ -21,6 +22,58 @@ abstract class RiveCoreContext extends CoreContext {
         return Node();
       default:
         return null;
+    }
+  }
+
+  @override
+  void applyCoopChanges(ObjectChanges objectChanges) {
+    var object = objects[objectChanges.objectId];
+    var justAdded = false;
+    for (final change in objectChanges.changes) {
+      var reader = BinaryReader.fromList(change.value);
+      switch (change.op) {
+        case CoreContext.addKey:
+          object = makeCoreInstance(reader.readVarInt())
+            ..id = objectChanges.objectId;
+          justAdded = true;
+          break;
+        case CoreContext.removeKey:
+          break;
+        case ComponentBase.namePropertyKey:
+          var value = reader.readString();
+          setObjectProperty(object, change.op, value);
+          break;
+        case ComponentBase.parentIdPropertyKey:
+          var value = reader.readVarInt();
+          setObjectProperty(object, change.op, value);
+          break;
+        case ComponentBase.childOrderPropertyKey:
+          var numerator = reader.readVarInt();
+          var denominator = reader.readVarInt();
+          var value = FractionalIndex(numerator, denominator);
+          setObjectProperty(object, change.op, value);
+          break;
+        case ArtboardBase.widthPropertyKey:
+        case ArtboardBase.heightPropertyKey:
+        case ArtboardBase.xPropertyKey:
+        case ArtboardBase.yPropertyKey:
+        case ArtboardBase.originXPropertyKey:
+        case ArtboardBase.originYPropertyKey:
+        case NodeBase.xPropertyKey:
+        case NodeBase.yPropertyKey:
+        case NodeBase.rotationPropertyKey:
+        case NodeBase.scaleXPropertyKey:
+        case NodeBase.scaleYPropertyKey:
+        case NodeBase.opacityPropertyKey:
+          var value = reader.readFloat64();
+          setObjectProperty(object, change.op, value);
+          break;
+        default:
+          break;
+      }
+    }
+    if (justAdded) {
+      add(object);
     }
   }
 
