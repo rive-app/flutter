@@ -99,21 +99,11 @@ final tabs = [
 ];
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-
-  FocusNode focusNode = FocusNode();
-
   @override
   Widget build(BuildContext context) {
     var focusScope = FocusScope.of(context);
 
     return CursorView(
-      // onPointerDown: (details) {
-      //   focusNode.requestFocus();
-      // },
-      // onPointerUp: (details) {
-      //   rive.file.value.captureJournalEntry();
-      // },
       child: MultiProvider(
         providers: [
           Provider.value(value: rive),
