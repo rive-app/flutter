@@ -5,6 +5,12 @@
 		},
 		{
 			"path": "server_process"
+		},
+		{
+			"path": "dependencies/rive-editor-flutter/dependencies/core-dart"
+		},
+		{
+			"path": "dependencies/rive-editor-flutter/editor"
 		}
 	],
 	"settings": {}

@@ -67,14 +67,14 @@ class _CoopIsolate extends CoopIsolateProcess {
   }
 
   @override
-  bool attemptChange(CoopServerClient client, ChangeSet changes) {
+  bool attemptChange(CoopServerClient client, ChangeSet changeSet) {
     var serverChangeSet = ChangeSet()
       ..id = fileMeta.nextChangeId++
-      ..changes = [];
-    for (final objectChanges in changes.changes) {
+      ..objects = [];
+    for (final objectChanges in changeSet.objects) {
       print("CHANGING ${objectChanges.objectId}");
       var serverChange = objectChanges.clone();
-      serverChangeSet.changes.add(serverChange);
+      serverChangeSet.objects.add(serverChange);
       for (final change in objectChanges.changes) {
         switch (change.op) {
           case CoreContext.addKey:
