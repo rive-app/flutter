@@ -89,7 +89,7 @@ class RiveTabBar extends StatelessWidget {
           .map(
             (tab) => _TabBarItem(
               tab: tab,
-              isSelected: selected.name == tab.name,
+              isSelected: selected?.name == tab?.name,
               select: select,
               close: close,
             ),
