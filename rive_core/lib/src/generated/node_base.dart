@@ -133,4 +133,27 @@ abstract class NodeBase extends ContainerComponent {
   void opacityChanged(double from, double to) {
     context?.changeProperty(this, opacityPropertyKey, from, to);
   }
+
+  @override
+  void changeNonNull() {
+    super.changeNonNull();
+    if (x != null) {
+      context?.changeProperty(this, xPropertyKey, x, x);
+    }
+    if (y != null) {
+      context?.changeProperty(this, yPropertyKey, y, y);
+    }
+    if (rotation != null) {
+      context?.changeProperty(this, rotationPropertyKey, rotation, rotation);
+    }
+    if (scaleX != null) {
+      context?.changeProperty(this, scaleXPropertyKey, scaleX, scaleX);
+    }
+    if (scaleY != null) {
+      context?.changeProperty(this, scaleYPropertyKey, scaleY, scaleY);
+    }
+    if (opacity != null) {
+      context?.changeProperty(this, opacityPropertyKey, opacity, opacity);
+    }
+  }
 }

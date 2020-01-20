@@ -75,11 +75,11 @@ class _ResizePanelState extends State<ResizePanel> {
         widget.direction == ResizeDirection.vertical
             ? _resizeVIcon
             : _resizeHIcon,
-        Offset(-10, -10),
+        const Offset(-10, -10),
         0.035);
     _lightTimer?.cancel();
 
-    RenderBox renderBox = context.findRenderObject();
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
     _resizeOverlay?.remove();
@@ -167,7 +167,7 @@ class _ResizePanelState extends State<ResizePanel> {
     );
   }
 
-  Key _key = GlobalKey();
+  final Key _key = GlobalKey();
   GestureDetector detectDrag(Widget child) {
     bool isHorizontal = widget.direction == ResizeDirection.horizontal;
     bool isVertical = widget.direction == ResizeDirection.vertical;

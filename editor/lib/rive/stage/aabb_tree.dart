@@ -1,21 +1,21 @@
-import 'dart:math';
 import 'dart:collection';
+import 'dart:math';
 import 'package:rive_core/math/aabb.dart';
 
 // Inspired from Box2D Dynamic Tree:
 // https://github.com/behdad/box2d/blob/master/Box2D/Box2D/Collision/b2DynamicTree.h
 
-const int NullNode = -1;
-const int AABBExtension = 10;
-const double AABBMultiplier = 2.0;
+const int nullNode = -1;
+// const int AABBExtension = 10;
+const double _multiplier = 2.0;
 
 typedef bool QueryCallback<T>(int id, T userData);
 
 class TreeNode<T> {
   int next = 0;
-  int child1 = NullNode;
-  int child2 = NullNode;
-  AABB _aabb = AABB();
+  int child1 = nullNode;
+  int child2 = nullNode;
+  final AABB _aabb = AABB();
   int height = -1;
   T userData;
 
@@ -26,40 +26,40 @@ class TreeNode<T> {
   }
 
   bool get isLeaf {
-    return child1 == NullNode;
+    return child1 == nullNode;
   }
 
   int get parent {
     return next;
   }
 
-  set parent(n) {
+  set parent(int n) {
     next = n;
   }
 }
 
 class AABBTree<T> {
-  int _root = NullNode;
+  final int padding;
+  int _root = nullNode;
   int _capacity = 0;
   int _nodeCount = 0;
-  List<TreeNode> _nodes = [];
+  final List<TreeNode<T>> _nodes = [];
   int _freeNode = 0;
 
-  AABBTree() {
+  AABBTree({this.padding = 10}) {
     _allocateNodes();
   }
 
-  clear() {
-    _root = NullNode;
+  void clear() {
+    _root = nullNode;
     _capacity = 0;
     _nodeCount = 0;
-    _nodes = [];
+    _nodes.clear();
     _freeNode = 0;
     _allocateNodes();
   }
 
-  _allocateNodes() {
-    List<TreeNode> list = _nodes;
+  void _allocateNodes() {
     _freeNode = _nodeCount;
 
     if (_capacity == 0) {
@@ -70,30 +70,30 @@ class AABBTree<T> {
     int count = _capacity;
     for (int i = _nodeCount; i < count; i++) {
       TreeNode<T> node = TreeNode<T>();
-      node.next = list.length + 1;
-      list.add(node);
+      node.next = _nodes.length + 1;
+      _nodes.add(node);
     }
-    list[list.length - 1].next = NullNode;
+    _nodes[_nodes.length - 1].next = nullNode;
   }
 
   int _allocateNode() {
-    if (_freeNode == NullNode) {
+    if (_freeNode == nullNode) {
       _allocateNodes();
     }
 
     int nodeId = _freeNode;
     TreeNode<T> node = _nodes[nodeId];
     _freeNode = node.next;
-    node.parent = NullNode;
-    node.child1 = NullNode;
-    node.child2 = NullNode;
+    node.parent = nullNode;
+    node.child1 = nullNode;
+    node.child2 = nullNode;
     node.height = 0;
     node.userData = null;
     _nodeCount++;
     return nodeId;
   }
 
-  _disposeNode(nodeId) {
+  void _disposeNode(int nodeId) {
     if (nodeId < 0 || nodeId >= _capacity) {
       throw RangeError.range(nodeId, 0, _capacity, 'NodeID', 'Out of bounds!');
     }
@@ -112,10 +112,10 @@ class AABBTree<T> {
   int createProxy(AABB aabb, T userData) {
     int proxyId = _allocateNode();
     TreeNode<T> node = _nodes[proxyId];
-    node.aabb[0] = aabb[0] - AABBExtension;
-    node.aabb[1] = aabb[1] - AABBExtension;
-    node.aabb[2] = aabb[2] + AABBExtension;
-    node.aabb[3] = aabb[3] + AABBExtension;
+    node.aabb[0] = aabb[0] - padding;
+    node.aabb[1] = aabb[1] - padding;
+    node.aabb[2] = aabb[2] + padding;
+    node.aabb[3] = aabb[3] + padding;
     node.userData = userData;
     node.height = 0;
 
@@ -124,7 +124,7 @@ class AABBTree<T> {
     return proxyId;
   }
 
-  destroyProxy(int proxyId) {
+  void destroyProxy(int proxyId) {
     if (proxyId < 0 || proxyId >= _capacity) {
       throw RangeError.range(
           proxyId, 0, _capacity, 'proxyId', 'Out of bounds!');
@@ -157,10 +157,10 @@ class AABBTree<T> {
     removeLeaf(proxyId);
 
     AABB extended = AABB.clone(aabb);
-    extended[0] = aabb[0] - AABBExtension;
-    extended[1] = aabb[1] - AABBExtension;
-    extended[2] = aabb[2] + AABBExtension;
-    extended[3] = aabb[3] + AABBExtension;
+    extended[0] = aabb[0] - padding;
+    extended[1] = aabb[1] - padding;
+    extended[2] = aabb[2] + padding;
+    extended[3] = aabb[3] + padding;
     AABB.copy(node.aabb, extended);
 
     insertLeaf(proxyId);
@@ -185,13 +185,13 @@ class AABBTree<T> {
     removeLeaf(proxyId);
 
     AABB extended = AABB.clone(aabb);
-    extended[0] = aabb[0] - AABBExtension;
-    extended[1] = aabb[1] - AABBExtension;
-    extended[2] = aabb[2] + AABBExtension;
-    extended[3] = aabb[3] + AABBExtension;
+    extended[0] = aabb[0] - padding;
+    extended[1] = aabb[1] - padding;
+    extended[2] = aabb[2] + padding;
+    extended[3] = aabb[3] + padding;
 
-    double dx = AABBMultiplier * displacement[0];
-    double dy = AABBMultiplier * displacement[1];
+    double dx = _multiplier * displacement[0];
+    double dy = _multiplier * displacement[1];
 
     if (dx < 0.0) {
       extended[0] += dx;
@@ -211,26 +211,25 @@ class AABBTree<T> {
     return true;
   }
 
-  insertLeaf(int leaf) {
-    List<TreeNode> nodes = _nodes;
-
-    if (_root == NullNode) {
+  void insertLeaf(int leaf) {
+    if (_root == nullNode) {
       _root = leaf;
-      nodes[_root].parent = NullNode;
+      _nodes[_root].parent = nullNode;
       return;
     }
 
     // Find the best sibling for this node
-    AABB leafAABB = nodes[leaf].aabb;
+    AABB leafAABB = _nodes[leaf].aabb;
     int index = _root;
 
-    while (nodes[index].isLeaf == false) {
-      int child1 = nodes[index].child1;
-      int child2 = nodes[index].child2;
+    while (_nodes[index].isLeaf == false) {
+      var node = _nodes[index];
+      int child1 = node.child1;
+      int child2 = node.child2;
 
-      double area = AABB.perimeter(nodes[index].aabb);
+      double area = AABB.perimeter(node.aabb);
 
-      AABB combinedAABB = AABB.combine(AABB(), nodes[index].aabb, leafAABB);
+      AABB combinedAABB = AABB.combine(AABB(), node.aabb, leafAABB);
       double combinedArea = AABB.perimeter(combinedAABB);
 
       // Cost of creating a parent for this node and the leaf
@@ -241,23 +240,23 @@ class AABBTree<T> {
 
       // Cost of descending into child1
       double cost1;
-      if (nodes[child1].isLeaf) {
-        AABB aabb = AABB.combine(AABB(), leafAABB, nodes[child1].aabb);
+      if (_nodes[child1].isLeaf) {
+        AABB aabb = AABB.combine(AABB(), leafAABB, _nodes[child1].aabb);
         cost1 = AABB.perimeter(aabb) + inheritanceCost;
       } else {
-        AABB aabb = AABB.combine(AABB(), leafAABB, nodes[child1].aabb);
-        double oldArea = AABB.perimeter(nodes[child1].aabb);
+        AABB aabb = AABB.combine(AABB(), leafAABB, _nodes[child1].aabb);
+        double oldArea = AABB.perimeter(_nodes[child1].aabb);
         double newArea = AABB.perimeter(aabb);
         cost1 = (newArea - oldArea) + inheritanceCost;
       }
 
       double cost2;
-      if (nodes[child2].isLeaf) {
-        AABB aabb = AABB.combine(AABB(), leafAABB, nodes[child2].aabb);
+      if (_nodes[child2].isLeaf) {
+        AABB aabb = AABB.combine(AABB(), leafAABB, _nodes[child2].aabb);
         cost2 = AABB.perimeter(aabb) + inheritanceCost;
       } else {
-        AABB aabb = AABB.combine(AABB(), leafAABB, nodes[child2].aabb);
-        double oldArea = AABB.perimeter(nodes[child2].aabb);
+        AABB aabb = AABB.combine(AABB(), leafAABB, _nodes[child2].aabb);
+        double oldArea = AABB.perimeter(_nodes[child2].aabb);
         double newArea = AABB.perimeter(aabb);
         cost2 = (newArea - oldArea) + inheritanceCost;
       }
@@ -278,103 +277,105 @@ class AABBTree<T> {
     int sibling = index;
 
     // Create parent
-    int oldParent = nodes[sibling].parent;
+    int oldParent = _nodes[sibling].parent;
     int newParent = _allocateNode();
-    nodes[newParent].parent = oldParent;
-    nodes[newParent].userData = null;
-    AABB.combine(nodes[newParent].aabb, leafAABB, nodes[sibling].aabb);
-    nodes[newParent].height = nodes[sibling].height + 1;
+    _nodes[newParent].parent = oldParent;
+    _nodes[newParent].userData = null;
+    AABB.combine(_nodes[newParent].aabb, leafAABB, _nodes[sibling].aabb);
+    _nodes[newParent].height = _nodes[sibling].height + 1;
 
-    if (oldParent != NullNode) {
+    if (oldParent != nullNode) {
       // The sibling was not the root
-      if (nodes[oldParent].child1 == sibling) {
-        nodes[oldParent].child1 = newParent;
+      if (_nodes[oldParent].child1 == sibling) {
+        _nodes[oldParent].child1 = newParent;
       } else {
-        nodes[oldParent].child2 = newParent;
+        _nodes[oldParent].child2 = newParent;
       }
 
-      nodes[newParent].child1 = sibling;
-      nodes[newParent].child2 = leaf;
-      nodes[sibling].parent = newParent;
-      nodes[leaf].parent = newParent;
+      _nodes[newParent].child1 = sibling;
+      _nodes[newParent].child2 = leaf;
+      _nodes[sibling].parent = newParent;
+      _nodes[leaf].parent = newParent;
     } else {
       // The sibling was the root
-      nodes[newParent].child1 = sibling;
-      nodes[newParent].child2 = leaf;
-      nodes[sibling].parent = newParent;
-      nodes[leaf].parent = newParent;
+      _nodes[newParent].child1 = sibling;
+      _nodes[newParent].child2 = leaf;
+      _nodes[sibling].parent = newParent;
+      _nodes[leaf].parent = newParent;
       _root = newParent;
     }
 
     // Walk back up the tree fixing heights and AABBs
-    index = nodes[leaf].parent;
-    while (index != NullNode) {
+    index = _nodes[leaf].parent;
+    while (index != nullNode) {
       index = _balance(index);
 
-      int child1 = nodes[index].child1;
-      int child2 = nodes[index].child2;
+      var node = _nodes[index];
 
-      if (child1 == NullNode) {
+      int child1 = node.child1;
+      int child2 = node.child2;
+
+      if (child1 == nullNode) {
         throw StateError('Child1 is NULL!');
       }
-      if (child2 == NullNode) {
+      if (child2 == nullNode) {
         throw StateError('Child2 is NULL!');
       }
 
-      nodes[index].height = 1 + max(nodes[child1].height, nodes[child2].height);
-      AABB.combine(nodes[index].aabb, nodes[child1].aabb, nodes[child2].aabb);
+      node.height =
+          1 + max(_nodes[child1].height, _nodes[child2].height).toInt();
+      AABB.combine(node.aabb, _nodes[child1].aabb, _nodes[child2].aabb);
 
-      index = nodes[index].parent;
+      index = node.parent;
     }
   }
 
-  removeLeaf(int leaf) {
+  void removeLeaf(int leaf) {
     if (leaf == _root) {
-      _root = NullNode;
+      _root = nullNode;
       return;
     }
 
-    List<TreeNode> nodes = _nodes;
-
-    int parent = nodes[leaf].parent;
-    int grandParent = nodes[parent].parent;
+    int parent = _nodes[leaf].parent;
+    int grandParent = _nodes[parent].parent;
     int sibling;
 
-    if (nodes[parent].child1 == leaf) {
-      sibling = nodes[parent].child2;
+    if (_nodes[parent].child1 == leaf) {
+      sibling = _nodes[parent].child2;
     } else {
-      sibling = nodes[parent].child1;
+      sibling = _nodes[parent].child1;
     }
 
-    if (grandParent != NullNode) {
+    if (grandParent != nullNode) {
       // Destroy parent and connect sibling to grandParent
-      if (nodes[grandParent].child1 == parent) {
-        nodes[grandParent].child1 = sibling;
+      if (_nodes[grandParent].child1 == parent) {
+        _nodes[grandParent].child1 = sibling;
       } else {
-        nodes[grandParent].child2 = sibling;
+        _nodes[grandParent].child2 = sibling;
       }
 
-      nodes[sibling].parent = grandParent;
+      _nodes[sibling].parent = grandParent;
       _disposeNode(parent);
 
       // Adjust ancestor bounds
 
       int index = grandParent;
-      while (index != NullNode) {
+      while (index != nullNode) {
         index = _balance(index);
 
-        int child1 = nodes[index].child1;
-        int child2 = nodes[index].child2;
+        int child1 = _nodes[index].child1;
+        int child2 = _nodes[index].child2;
 
-        AABB.combine(nodes[index].aabb, nodes[child1].aabb, nodes[child2].aabb);
-        nodes[index].height =
-            1 + max(nodes[child1].height, nodes[child2].height);
+        AABB.combine(
+            _nodes[index].aabb, _nodes[child1].aabb, _nodes[child2].aabb);
+        _nodes[index].height =
+            1 + max(_nodes[child1].height, _nodes[child2].height).toInt();
 
-        index = nodes[index].parent;
+        index = _nodes[index].parent;
       }
     } else {
       _root = sibling;
-      nodes[sibling].parent = NullNode;
+      _nodes[sibling].parent = nullNode;
       _disposeNode(parent);
     }
   }
@@ -382,12 +383,11 @@ class AABBTree<T> {
   // Perform a left or right rotation if node A is imbalanced
   // Returns the root index
   int _balance(int iA) {
-    if (iA == NullNode) {
+    if (iA == nullNode) {
       throw StateError('iA should not be Null!');
     }
 
-    List<TreeNode> nodes = _nodes;
-    TreeNode<T> A = nodes[iA];
+    TreeNode<T> A = _nodes[iA];
     if (A.isLeaf || A.height < 2) {
       return iA;
     }
@@ -402,8 +402,8 @@ class AABBTree<T> {
       throw RangeError.range(iC, 0, _capacity, 'iC', 'Out of bounds!');
     }
 
-    TreeNode<T> B = nodes[iB];
-    TreeNode<T> C = nodes[iC];
+    TreeNode<T> B = _nodes[iB];
+    TreeNode<T> C = _nodes[iC];
 
     int balance = C.height - B.height;
 
@@ -411,8 +411,8 @@ class AABBTree<T> {
     if (balance > 1) {
       int iF = C.child1;
       int iG = C.child2;
-      TreeNode<T> F = nodes[iF];
-      TreeNode<T> G = nodes[iG];
+      TreeNode<T> F = _nodes[iF];
+      TreeNode<T> G = _nodes[iG];
 
       if (iF < 0 || iF >= _capacity) {
         throw RangeError.range(iF, 0, _capacity, 'iF', 'Out of bounds!');
@@ -427,14 +427,14 @@ class AABBTree<T> {
       A.parent = iC;
 
       // A's old parent should point to C
-      if (C.parent != NullNode) {
-        if (nodes[C.parent].child1 == iA) {
-          nodes[C.parent].child1 = iC;
+      if (C.parent != nullNode) {
+        if (_nodes[C.parent].child1 == iA) {
+          _nodes[C.parent].child1 = iC;
         } else {
-          if (nodes[C.parent].child2 != iA) {
+          if (_nodes[C.parent].child2 != iA) {
             throw StateError('Bad child2');
           }
-          nodes[C.parent].child2 = iC;
+          _nodes[C.parent].child2 = iC;
         }
       } else {
         _root = iC;
@@ -448,8 +448,8 @@ class AABBTree<T> {
         AABB.combine(A.aabb, B.aabb, G.aabb);
         AABB.combine(C.aabb, A.aabb, F.aabb);
 
-        A.height = 1 + max(B.height, G.height);
-        C.height = 1 + max(A.height, F.height);
+        A.height = 1 + max(B.height, G.height).toInt();
+        C.height = 1 + max(A.height, F.height).toInt();
       } else {
         C.child2 = iG;
         A.child2 = iF;
@@ -457,8 +457,8 @@ class AABBTree<T> {
         AABB.combine(A.aabb, B.aabb, F.aabb);
         AABB.combine(C.aabb, A.aabb, G.aabb);
 
-        A.height = 1 + max(B.height, F.height);
-        C.height = 1 + max(A.height, G.height);
+        A.height = 1 + max(B.height, F.height).toInt();
+        C.height = 1 + max(A.height, G.height).toInt();
       }
 
       return iC;
@@ -468,8 +468,8 @@ class AABBTree<T> {
     if (balance < -1) {
       int iD = B.child1;
       int iE = B.child2;
-      TreeNode<T> D = nodes[iD];
-      TreeNode<T> E = nodes[iE];
+      TreeNode<T> D = _nodes[iD];
+      TreeNode<T> E = _nodes[iE];
 
       if (iD < 0 || iD >= _capacity) {
         throw RangeError.range(iD, 0, _capacity, 'iD', 'Out of bounds!');
@@ -484,14 +484,14 @@ class AABBTree<T> {
       A.parent = iB;
 
       // A's old parent should point to B
-      if (B.parent != NullNode) {
-        if (nodes[B.parent].child1 == iA) {
-          nodes[B.parent].child1 = iB;
+      if (B.parent != nullNode) {
+        if (_nodes[B.parent].child1 == iA) {
+          _nodes[B.parent].child1 = iB;
         } else {
-          if (nodes[B.parent].child2 != iA) {
+          if (_nodes[B.parent].child2 != iA) {
             throw StateError('Bad child2, expected equal iA: $iA');
           }
-          nodes[B.parent].child2 = iB;
+          _nodes[B.parent].child2 = iB;
         }
       } else {
         _root = iB;
@@ -505,8 +505,8 @@ class AABBTree<T> {
         AABB.combine(A.aabb, C.aabb, E.aabb);
         AABB.combine(B.aabb, A.aabb, D.aabb);
 
-        A.height = 1 + max(C.height, E.height);
-        B.height = 1 + max(A.height, D.height);
+        A.height = 1 + max(C.height, E.height).toInt();
+        B.height = 1 + max(A.height, D.height).toInt();
       } else {
         B.child2 = iE;
         A.child1 = iD;
@@ -514,8 +514,8 @@ class AABBTree<T> {
         AABB.combine(A.aabb, C.aabb, D.aabb);
         AABB.combine(B.aabb, A.aabb, E.aabb);
 
-        A.height = 1 + max(C.height, D.height);
-        B.height = 1 + max(A.height, E.height);
+        A.height = 1 + max(C.height, D.height).toInt();
+        B.height = 1 + max(A.height, E.height).toInt();
       }
 
       return iB;
@@ -525,7 +525,7 @@ class AABBTree<T> {
   }
 
   int getHeight() {
-    if (_root == NullNode) {
+    if (_root == nullNode) {
       return 0;
     }
 
@@ -533,18 +533,17 @@ class AABBTree<T> {
   }
 
   double getAreaRatio() {
-    if (_root == NullNode) {
+    if (_root == nullNode) {
       return 0.0;
     }
 
-    List<TreeNode> nodes = _nodes;
-    TreeNode<T> root = nodes[_root];
+    TreeNode<T> root = _nodes[_root];
     double rootArea = AABB.perimeter(root.aabb);
 
     double totalArea = 0.0;
     int capacity = _capacity;
     for (int i = 0; i < capacity; i++) {
-      TreeNode<T> node = nodes[i];
+      TreeNode<T> node = _nodes[i];
       if (node.height < 0) {
         continue;
       }
@@ -557,14 +556,12 @@ class AABBTree<T> {
 
   // Compute the height of a subtree
   int computeHeight(int nodeId) {
-    if (nodeId == null) {
-      nodeId = _root;
-    }
+    nodeId ??= _root;
 
     if (nodeId < 0 || nodeId >= _capacity) {
       throw RangeError.range(nodeId, 0, _capacity, 'nodeId', 'Out of bounds!');
     }
-    TreeNode<T> node = _nodes[nodeId];
+    var node = _nodes[nodeId];
 
     if (node.isLeaf) {
       return 0;
@@ -572,30 +569,30 @@ class AABBTree<T> {
 
     int height1 = computeHeight(node.child1);
     int height2 = computeHeight(node.child2);
-    return 1 + max(height1, height2);
+    return 1 + max(height1, height2).toInt();
   }
 
-  validateStructure(int index) {
-    if (index == NullNode) {
+  void validateStructure(int index) {
+    if (index == nullNode) {
       return;
     }
 
     List<TreeNode> nodes = _nodes;
     if (index == _root) {
-      if (nodes[index].parent != NullNode) {
+      if (nodes[index].parent != nullNode) {
         throw StateError('Expected parent to be null!');
       }
     }
 
-    TreeNode<T> node = nodes[index];
+    var node = nodes[index];
     int child1 = node.child1;
     int child2 = node.child2;
 
     if (node.isLeaf) {
-      if (child1 != NullNode) {
+      if (child1 != nullNode) {
         throw StateError('Expected child1 to be null!');
       }
-      if (child2 != NullNode) {
+      if (child2 != nullNode) {
         throw StateError('Expected child2 to be null!');
       }
       if (node.height != 0) {
@@ -622,22 +619,21 @@ class AABBTree<T> {
     validateStructure(child2);
   }
 
-  validateMetrics(int index) {
-    if (index == NullNode) {
+  void validateMetrics(int index) {
+    if (index == nullNode) {
       return;
     }
 
-    List<TreeNode> nodes = _nodes;
-    TreeNode<T> node = nodes[index];
+    var node = _nodes[index];
 
     int child1 = node.child1;
     int child2 = node.child2;
 
     if (node.isLeaf) {
-      if (child1 != NullNode) {
+      if (child1 != nullNode) {
         throw StateError('Expected child1 to be null!');
       }
-      if (child2 != NullNode) {
+      if (child2 != nullNode) {
         throw StateError('Expected child2 to be null!');
       }
       if (node.height != 0) {
@@ -653,16 +649,16 @@ class AABBTree<T> {
       throw RangeError.range(child2, 0, _capacity, 'child2', 'Out of bounds!');
     }
 
-    int height1 = nodes[child1].height;
-    int height2 = nodes[child2].height;
+    int height1 = _nodes[child1].height;
+    int height2 = _nodes[child2].height;
     int height;
-    height = 1 + max(height1, height2);
+    height = 1 + max(height1, height2).toInt();
 
     if (node.height != height) {
       throw StateError('Expected node\'s height to be $height');
     }
 
-    AABB aabb = AABB.combine(AABB(), nodes[child1].aabb, nodes[child2].aabb);
+    AABB aabb = AABB.combine(AABB(), _nodes[child1].aabb, _nodes[child2].aabb);
 
     if (aabb[0] != node.aabb[0] || aabb[1] != node.aabb[1]) {
       throw StateError('Lower Bound is not equal!');
@@ -681,7 +677,7 @@ class AABBTree<T> {
 
     int freeCount = 0;
     int freeIndex = _freeNode;
-    while (freeIndex != NullNode) {
+    while (freeIndex != nullNode) {
       if (freeIndex < 0 || freeIndex >= _capacity) {
         throw RangeError.range(
             freeIndex, 0, _capacity, 'freeIndex', 'Out of bounds!');
@@ -700,12 +696,11 @@ class AABBTree<T> {
     }
   }
 
-  getMaxBalance() {
+  int getMaxBalance() {
     int maxBalance = 0;
     int capacity = _capacity;
-    List<TreeNode> nodes = _nodes;
     for (int i = 0; i < capacity; i++) {
-      TreeNode<T> node = nodes[i];
+      var node = _nodes[i];
       if (node.height < 1) {
         continue;
       }
@@ -716,7 +711,7 @@ class AABBTree<T> {
 
       int child1 = node.child1;
       int child2 = node.child2;
-      int balance = (nodes[child2].height - nodes[child1].height).abs();
+      int balance = (_nodes[child2].height - _nodes[child1].height).abs();
       maxBalance = max(maxBalance, balance);
     }
 
@@ -731,18 +726,17 @@ class AABBTree<T> {
     return _nodes[proxyId].aabb;
   }
 
-  all(QueryCallback callback) {
-    List<TreeNode> nodes = _nodes;
-    ListQueue stack = ListQueue();
+  void all(QueryCallback callback) {
+    var stack = ListQueue<int>();
     stack.addLast(_root);
 
-    while (stack.length > 0) {
+    while (stack.isNotEmpty) {
       int nodeId = stack.removeLast();
-      if (nodeId == NullNode) {
+      if (nodeId == nullNode) {
         continue;
       }
 
-      TreeNode<T> node = nodes[nodeId];
+      var node = _nodes[nodeId];
 
       if (node.isLeaf) {
         bool proceed = callback(nodeId, node.userData);
@@ -756,18 +750,17 @@ class AABBTree<T> {
     }
   }
 
-  query(AABB aabb, QueryCallback<T> callback) {
-    List<TreeNode> nodes = _nodes;
-    ListQueue stack = ListQueue();
+  void query(AABB aabb, QueryCallback<T> callback) {
+    var stack = ListQueue<int>();
     stack.addLast(_root);
 
-    while (stack.length > 0) {
+    while (stack.isNotEmpty) {
       int nodeId = stack.removeLast();
-      if (nodeId == NullNode) {
+      if (nodeId == nullNode) {
         continue;
       }
 
-      TreeNode<T> node = nodes[nodeId];
+      TreeNode<T> node = _nodes[nodeId];
 
       if (AABB.testOverlap(node.aabb, aabb)) {
         if (node.isLeaf) {

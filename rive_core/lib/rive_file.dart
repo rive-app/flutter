@@ -97,13 +97,13 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void captureJournalEntry() {
+  bool captureJournalEntry() {
     // Make sure we've updated dependents if some change occurred to them.
     if(_dirt & RiveDirt.dependencies != 0)
     {
       
     }
-    super.captureJournalEntry();
+    return super.captureJournalEntry();
   }
 
   void markDependenciesDirty() {

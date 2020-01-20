@@ -6,12 +6,36 @@ abstract class ArtboardDelegate {
 }
 
 class Artboard extends ArtboardBase {
-  ArtboardDelegate delegate;
+  ArtboardDelegate _delegate;
+
+  @override
+  void userDataChanged(dynamic from, dynamic to) {
+    if (to is ArtboardDelegate) {
+      _delegate = to;
+    }
+  }
 
   @override
   void widthChanged(double from, double to) {
     super.widthChanged(from, to);
-    delegate?.markBoundsDirty();
+    _delegate?.markBoundsDirty();
+  }
 
+  @override
+  void heightChanged(double from, double to) {
+    super.heightChanged(from, to);
+    _delegate?.markBoundsDirty();
+  }
+
+  @override
+  void xChanged(double from, double to) {
+    super.xChanged(from, to);
+    _delegate?.markBoundsDirty();
+  }
+
+  @override
+  void yChanged(double from, double to) {
+    super.yChanged(from, to);
+    _delegate?.markBoundsDirty();
   }
 }

@@ -1,13 +1,20 @@
-import 'package:flutter/src/gestures/drag_details.dart';
-import 'package:flutter/src/gestures/events.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
-import 'package:rive_core/artboard.dart';
 
+import 'rive.dart';
+import 'stage/stage_item.dart';
+
+/// Tree Controller for the hierarchy, requires rive context in order to
+/// propagate selections.
 class HierarchyTreeController extends TreeController<Component> {
-  HierarchyTreeController(List<Artboard> artboards) : super(artboards);
+  final Rive rive;
+  HierarchyTreeController(List<Artboard> artboards, {this.rive})
+      : super(artboards);
 
   @override
   List<Component> childrenOf(Component treeItem) =>
@@ -34,13 +41,21 @@ class HierarchyTreeController extends TreeController<Component> {
   }
 
   @override
-  void onMouseEnter(PointerEnterEvent event, FlatTreeItem<Component> item) {}
+  void onMouseEnter(PointerEnterEvent event, FlatTreeItem<Component> item) {
+    item.data.stageItem.isHovered = true;
+  }
 
   @override
-  void onMouseExit(PointerExitEvent event, FlatTreeItem<Component> item) {}
+  void onMouseExit(PointerExitEvent event, FlatTreeItem<Component> item) {
+    item.data.stageItem.isHovered = false;
+  }
 
   @override
-  void onTap(FlatTreeItem<Component> item) {}
+  void onTap(FlatTreeItem<Component> item) {
+    if (item.data.stageItem != null) {
+      rive.select(item.data.stageItem);
+    }
+  }
 
   @override
   int spacingOf(Component treeItem) {

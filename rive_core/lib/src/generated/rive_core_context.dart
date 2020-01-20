@@ -1,13 +1,83 @@
 import 'package:core/coop/change.dart';
 import 'package:core/core.dart';
+import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
-import 'component_base.dart';
+import '../../artboard.dart';
+import '../../component.dart';
+import '../../node.dart';
 import 'artboard_base.dart';
+import 'component_base.dart';
 import 'node_base.dart';
 
 abstract class RiveCoreContext extends CoreContext {
   RiveCoreContext(String fileId) : super(fileId);
+
+  @override
+  Core makeCoreInstance(int typeKey) {
+    switch (typeKey) {
+      case ArtboardBase.typeKey:
+        return Artboard();
+      case NodeBase.typeKey:
+        return Node();
+      default:
+        return null;
+    }
+  }
+
+  @override
+  void applyCoopChanges(ObjectChanges objectChanges) {
+    var object = objects[objectChanges.objectId];
+    var justAdded = false;
+    for (final change in objectChanges.changes) {
+      var reader = BinaryReader.fromList(change.value);
+      switch (change.op) {
+        case CoreContext.addKey:
+          object = makeCoreInstance(reader.readVarInt())
+            ..id = objectChanges.objectId;
+          justAdded = true;
+          break;
+        case CoreContext.removeKey:
+          break;
+        case ComponentBase.namePropertyKey:
+          var value = reader.readString();
+          setObjectProperty(object, change.op, value);
+          break;
+        case ComponentBase.parentIdPropertyKey:
+          var value = reader.readVarInt();
+          setObjectProperty(object, change.op, value);
+          break;
+        case ComponentBase.childOrderPropertyKey:
+          var numerator = reader.readVarInt();
+          var denominator = reader.readVarInt();
+          var value = FractionalIndex(numerator, denominator);
+          setObjectProperty(object, change.op, value);
+          break;
+        case ArtboardBase.widthPropertyKey:
+        case ArtboardBase.heightPropertyKey:
+        case ArtboardBase.xPropertyKey:
+        case ArtboardBase.yPropertyKey:
+        case ArtboardBase.originXPropertyKey:
+        case ArtboardBase.originYPropertyKey:
+        case NodeBase.xPropertyKey:
+        case NodeBase.yPropertyKey:
+        case NodeBase.rotationPropertyKey:
+        case NodeBase.scaleXPropertyKey:
+        case NodeBase.scaleYPropertyKey:
+        case NodeBase.opacityPropertyKey:
+          var value = reader.readFloat64();
+          print(
+              "SETTING $object ${change.op} $value $objects ${objectChanges.objectId}");
+          setObjectProperty(object, change.op, value);
+          break;
+        default:
+          break;
+      }
+    }
+    if (justAdded) {
+      add(object);
+    }
+  }
 
   @override
   Change makeCoopChange(int propertyKey, Object value) {
@@ -15,7 +85,11 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case CoreContext.addKey:
       case CoreContext.removeKey:
-        change.op = value as int;
+        if (value != null && value is int) {
+          var writer = BinaryWriter(alignment: 4);
+          writer.writeVarInt(value);
+          change.value = writer.uint8Buffer;
+        }
         break;
       case ComponentBase.namePropertyKey:
         if (value != null && value is String) {

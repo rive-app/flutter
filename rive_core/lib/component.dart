@@ -10,7 +10,19 @@ class ComponentDirt {
 
 abstract class Component extends ComponentBase<RiveFile> {
   Artboard _artboard;
-  dynamic userData;
+  dynamic _userData;
+
+  dynamic get userData => _userData;
+  set userData(dynamic value) {
+    if (value == _userData) {
+      return;
+    }
+    var last = _userData;
+    _userData = value;
+    userDataChanged(last, value);
+  }
+
+  void userDataChanged(dynamic from, dynamic to) {}
 
   ContainerComponent _parent;
   ContainerComponent get parent => _parent;

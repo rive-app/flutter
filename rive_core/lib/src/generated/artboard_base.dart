@@ -145,4 +145,27 @@ abstract class ArtboardBase extends ContainerComponent {
   void originYChanged(double from, double to) {
     context?.changeProperty(this, originYPropertyKey, from, to);
   }
+
+  @override
+  void changeNonNull() {
+    super.changeNonNull();
+    if (width != null) {
+      context?.changeProperty(this, widthPropertyKey, width, width);
+    }
+    if (height != null) {
+      context?.changeProperty(this, heightPropertyKey, height, height);
+    }
+    if (x != null) {
+      context?.changeProperty(this, xPropertyKey, x, x);
+    }
+    if (y != null) {
+      context?.changeProperty(this, yPropertyKey, y, y);
+    }
+    if (originX != null) {
+      context?.changeProperty(this, originXPropertyKey, originX, originX);
+    }
+    if (originY != null) {
+      context?.changeProperty(this, originYPropertyKey, originY, originY);
+    }
+  }
 }
