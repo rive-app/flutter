@@ -25,14 +25,13 @@ class FileBrowser extends FileBrowserController {
     return [..._selectedFolders, ..._selectedFiles];
   }
 
-  ValueNotifier<List<ValueNotifier<FolderTreeController>>> get teams =>
-      _teamTreeControllers;
-  final _teamTreeControllers =
-      ValueNotifier<List<ValueNotifier<FolderTreeController>>>([]);
+  final treeController = ValueNotifier<FolderTreeController>(null);
+  List<FlatTreeItem<FolderItem>> get teams =>
+      treeController.value.flat.skip(1).toList();
   FolderItem _myFiles;
   final selection = ValueNotifier<SelectableItem>(null);
   final scrollOffset = ValueNotifier<double>(0);
-  final myFilesController = ValueNotifier<FolderTreeController>(null);
+
   final marqueeSelection = ValueNotifier<Rect>(null);
   FolderItem _current;
   FolderItem get currentFolder => _current;
@@ -45,28 +44,25 @@ class FileBrowser extends FileBrowserController {
       key: ValueKey('0'),
       name: "My Files",
       files: _genFiles(0),
-      folders: _getFolders(math.Random().nextInt(6)),
+      folders: _getFolders(math.Random().nextInt(2)),
     );
-    myFilesController.value = FolderTreeController([_myFiles], rive: rive);
-    _addTeam(rive, 1);
-    _addTeam(rive, 2);
+    treeController.value = FolderTreeController([
+      _myFiles,
+      _addTeam(rive, 1),
+      _addTeam(rive, 2),
+    ], rive: rive);
     reset();
     openFolder(_myFiles, false);
   }
 
-  void _addTeam(Rive rive, int number) {
+  FolderItem _addTeam(Rive rive, int number) {
     final _teamFolder = FolderItem(
       key: ValueKey('team_$number'),
       name: "Team $number",
       files: _genFiles(0),
-      folders: _getFolders(math.Random().nextInt(6)),
+      folders: _getFolders(math.Random().nextInt(2)),
     );
-    final _teamController = FolderTreeController([
-      _teamFolder,
-    ], rive: rive);
-    _teamController.flatten();
-    _teamTreeControllers.value
-        .add(ValueNotifier<FolderTreeController>(_teamController));
+    return _teamFolder;
   }
 
   void rectChanged(Rect value, Rive rive) {
@@ -156,7 +152,7 @@ class FileBrowser extends FileBrowserController {
   }
 
   void onFoldersChanged() {
-    myFilesController.value.flatten();
+    treeController.value.flatten();
   }
 
   void reset() {
@@ -179,16 +175,9 @@ class FileBrowser extends FileBrowserController {
     }
     _lastSelectedIndex = null;
     notifyListeners();
-    myFilesController.value.expand(value);
-    for (var team in teams.value) {
-      team.value.expand(value);
-    }
+    treeController.value.expand(value);
     if (jumpTo) {
-      List<FlatTreeItem<FolderItem>> _all = [];
-      _all.addAll(myFilesController.value.flat);
-      for (var team in teams.value) {
-        _all.addAll(team.value.flat);
-      }
+      List<FlatTreeItem<FolderItem>> _all = treeController.value.flat;
       int _index = _all.indexWhere((f) => f.data.key == value.key);
       double _offset = _index * kTreeItemHeight;
       treeScrollController.jumpTo(_offset);

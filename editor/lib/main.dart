@@ -114,8 +114,8 @@ class MyApp extends StatelessWidget {
           // },
           debugShowCheckedModeBanner: false,
           theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
-          themeMode: ThemeMode.light,
+          // darkTheme: ThemeData.dark(),
+          // themeMode: ThemeMode.light,
           home: DefaultTextStyle(
             style: TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
             child: Container(

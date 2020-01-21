@@ -377,31 +377,19 @@ class FilesView extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 15.0, right: 10.0),
-              child: SingleChildScrollView(
-                controller: rive.fileBrowser.treeScrollController,
-                child: Consumer<Rive>(
-                  builder: (context, rive, _) {
-                    return ValueListenableBuilder<
-                        List<ValueNotifier<FolderTreeController>>>(
-                      valueListenable: rive.fileBrowser.teams,
-                      builder: (context, teams, _) {
-                        return Column(
-                          children: <Widget>[
-                            _buildTree(
-                                rive, rive.fileBrowser.myFilesController),
-                            for (var team in teams) ...[
-                              Container(
-                                height: kTreeItemHeight,
-                                child: _buildDivider(20),
-                              ),
-                              _buildTree(rive, team),
-                            ],
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
+              child: Consumer<Rive>(
+                builder: (context, rive, _) {
+                  return ValueListenableBuilder<FolderTreeController>(
+                    valueListenable: rive.fileBrowser.treeController,
+                    builder: (context, controller, _) {
+                      return FolderTreeView(
+                        scrollController: rive.fileBrowser.treeScrollController,
+                        controller: controller,
+                        itemHeight: kTreeItemHeight,
+                      );
+                    },
+                  );
+                },
               ),
             ),
           )
@@ -416,16 +404,16 @@ class FilesView extends StatelessWidget {
     ]);
   }
 
-  Widget _buildTree(
-      Rive rive, ValueListenable<FolderTreeController> treeController) {
-    return ValueListenableBuilder<FolderTreeController>(
-      valueListenable: treeController,
-      builder: (context, controller, _) => FolderTreeView(
-        controller: controller,
-        itemHeight: kTreeItemHeight,
-      ),
-    );
-  }
+  // Widget _buildTree(
+  //     Rive rive, ValueListenable<FolderTreeController> treeController) {
+  //   return ValueListenableBuilder<FolderTreeController>(
+  //     valueListenable: treeController,
+  //     builder: (context, controller, _) => FolderTreeView(
+  //       controllers: controller,
+  //       itemHeight: kTreeItemHeight,
+  //     ),
+  //   );
+  // }
 
   Widget _buildChildWhenDragging() {
     return Container(

@@ -15,17 +15,20 @@ import 'package:provider/provider.dart';
 class FolderTreeView extends StatelessWidget {
   final FolderTreeController controller;
   final double itemHeight;
+  final ScrollController scrollController;
 
   const FolderTreeView({
     Key key,
     @required this.controller,
     @required this.itemHeight,
+    this.scrollController,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TreeView<FolderItem>(
-      shrinkWrap: true,
+      scrollController: scrollController,
+      shrinkWrap: false,
       style: TreeStyle(
         showFirstLine: true,
         padding: const EdgeInsets.all(5),
