@@ -232,7 +232,7 @@ abstract class TreeController<T> extends ChangeNotifier {
     _dragOperation.dispose();
     _dragOperation = null;
     for (final item in _flat) {
-      item.dragDepth = null;
+      item?.dragDepth = null;
     }
 
     if (target != null && dropState != null) {
