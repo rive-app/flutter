@@ -21,6 +21,7 @@ class CoopClient extends CoopReader {
   CoopWriter _writer;
   bool _isAuthenticated = false;
   bool get isAuthenticated => _isAuthenticated;
+  bool get isConnected => _isConnected;
   bool _isConnected = false;
   int _reconnectAttempt = 0;
   Timer _reconnectTimer;
@@ -63,6 +64,10 @@ class CoopClient extends CoopReader {
 
   Completer<ConnectResult> _connectionCompleter;
   Future<ConnectResult> connect() async {
+    // Grab the last change id immediately so we have it even if the connection
+    // fails.
+    _lastChangeId = await localSettings.getIntSetting('lastChangeId') ??
+        CoopCommand.minChangeId;
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
     _channel = WebSocketChannel.connect(Uri.parse(url));
@@ -155,8 +160,6 @@ class CoopClient extends CoopReader {
       var token = await localSettings.getStringSetting('token') ?? '';
       var lastServerChangeId =
           await localSettings.getIntSetting('lastServerChangeId') ?? 0;
-      _lastChangeId = await localSettings.getIntSetting('lastChangeId') ??
-          CoopCommand.minChangeId;
 
       _reconnectAttempt = 0;
       _isConnected = true;
@@ -193,7 +196,7 @@ class CoopClient extends CoopReader {
 
   ChangeSet makeChangeSet() {
     var changes = ChangeSet()
-      ..id = _lastChangeId++
+      ..id = _lastChangeId == null ? null : _lastChangeId++
       ..objects = [];
     localSettings.setIntSetting('lastChangeId', _lastChangeId);
     return changes;

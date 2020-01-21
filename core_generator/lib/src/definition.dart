@@ -92,7 +92,10 @@ class Definition {
     String filename = codeFilename;
     var code = StringBuffer(comment('Core automatically generated $filename.'));
     code.writeln(comment('Do not modify manually.'));
-
+    if (_extensionOf == null || _properties.isNotEmpty) {
+      // We need core if we need PropertyChanger or Core to inherit from.
+      code.writeln('import \'package:core/core.dart\';');
+    }
     if (_extensionOf != null) {
       int foldersUp = '/'.allMatches(_filename).length;
       StringBuffer prefix = StringBuffer('../../');
@@ -102,8 +105,6 @@ class Definition {
       }
       code.writeln(
           'import \'$prefix${stripExtension(_extensionOf._filename)}.dart\';');
-    } else {
-      code.writeln('import \'package:core/core.dart\';');
     }
 
     bool defineContextExtension = _extensionOf?._name == null;
@@ -125,9 +126,10 @@ class Definition {
     if (_properties.isNotEmpty) {
 // override changeNonNull to report all set fields as a change
       code.writeln('''@override
-    void changeNonNull() {''');
+    void changeNonNull([PropertyChanger changer]) {
+      changer ??= context?.changeProperty;''');
       if (_extensionOf != null) {
-        code.writeln('super.changeNonNull();');
+        code.writeln('super.changeNonNull(changer);');
       }
       // for (final definition in definitions.values) {
       for (final property in _properties) {
@@ -351,6 +353,11 @@ class Definition {
           justAdded = true;
           break;
         case CoreContext.removeKey:           
+        if (object != null) {
+            remove(object);
+          } else {
+            print("ATTEMPTED TO DELETE NULL OBJECT \${objectChanges.objectId}");
+          }
           break;''');
 
     groups.forEach((fieldType, properties) {
@@ -365,7 +372,8 @@ class Definition {
       ctxCode.writeln('break;');
     });
 
-    ctxCode.writeln('default:break;}}');
+    ctxCode.writeln('''default:break;}}
+    if(justAdded) { add(object); }}''');
 
     ctxCode.writeln('''@override
     Change makeCoopChange(int propertyKey, Object value) {
@@ -394,7 +402,7 @@ class Definition {
             BinaryWriter(alignment: ${fieldType.encodingAlignment});''');
       ctxCode.write(fieldType.encode('writer', 'value'));
       ctxCode.writeln('change.value = writer.uint8Buffer;');
-      ctxCode.writeln('}break;');
+      ctxCode.writeln('}else { return null;}break;');
     });
     ctxCode.writeln('default:break;}  return change;}');
 
