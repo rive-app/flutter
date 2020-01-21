@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
-import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/widgets/popup/popup_button.dart';
-import 'widgets/files_view/view.dart';
 import 'package:window_utils/window_utils.dart';
 
+import 'rive/hierarchy_tree_controller.dart';
+import 'rive/rive.dart';
 import 'rive/stage/stage.dart';
+import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
 import 'widgets/popup/context_popup.dart';
+import 'widgets/popup/popup_button.dart';
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
@@ -99,10 +99,6 @@ final tabs = [
 ];
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-
-  FocusNode focusNode = FocusNode();
-
   @override
   Widget build(BuildContext context) {
     var focusScope = FocusScope.of(context);
@@ -124,8 +120,8 @@ class MyApp extends StatelessWidget {
           // },
           debugShowCheckedModeBanner: false,
           theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
-          themeMode: ThemeMode.light,
+          // darkTheme: ThemeData.dark(),
+          // themeMode: ThemeMode.light,
           home: DefaultTextStyle(
             style: TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
             child: Container(

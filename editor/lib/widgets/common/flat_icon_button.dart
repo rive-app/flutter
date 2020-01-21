@@ -23,6 +23,7 @@ class FlatIconButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.0),
         decoration: BoxDecoration(
           color: color ?? ThemeUtils.buttonColor,
           borderRadius: BorderRadius.circular(20.0),
@@ -38,12 +39,8 @@ class FlatIconButton extends StatelessWidget {
         ),
         height: 30,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            if (icon != null) ...[
-              Container(width: 15.0),
-              icon,
-            ],
-            Container(width: 15.0),
             Text(
               label,
               style: TextStyle(
@@ -51,6 +48,7 @@ class FlatIconButton extends StatelessWidget {
                 fontSize: 13,
               ),
             ),
+            if (icon != null) ...[icon],
           ],
         ),
       ),

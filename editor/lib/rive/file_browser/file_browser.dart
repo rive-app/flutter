@@ -1,14 +1,17 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/rive/file_browser/folder.dart';
-import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/widgets/files_view/view.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:shortid/shortid.dart';
+import 'package:rive_core/selectable_item.dart';
+import 'package:tree_widget/flat_tree_item.dart';
+
+import '../../widgets/files_view/screen.dart';
+import '../rive.dart';
 import 'browser_tree_controller.dart';
 import 'controller.dart';
 import 'file.dart';
+import 'folder.dart';
 
 const kTreeItemHeight = 35.0;
 
@@ -22,10 +25,13 @@ class FileBrowser extends FileBrowserController {
     return [..._selectedFolders, ..._selectedFiles];
   }
 
+  final treeController = ValueNotifier<FolderTreeController>(null);
+  List<FlatTreeItem<FolderItem>> get teams =>
+      treeController.value.flat.skip(1).toList();
   FolderItem _myFiles;
   final selection = ValueNotifier<SelectableItem>(null);
   final scrollOffset = ValueNotifier<double>(0);
-  final browserController = ValueNotifier<FolderTreeController>(null);
+
   final marqueeSelection = ValueNotifier<Rect>(null);
   FolderItem _current;
   FolderItem get currentFolder => _current;
@@ -38,11 +44,25 @@ class FileBrowser extends FileBrowserController {
       key: ValueKey('0'),
       name: "My Files",
       files: _genFiles(0),
-      folders: _getFolders(math.Random().nextInt(6)),
+      folders: _getFolders(math.Random().nextInt(2)),
     );
-    browserController.value = FolderTreeController([_myFiles], rive: rive);
+    treeController.value = FolderTreeController([
+      _myFiles,
+      _addTeam(rive, 1),
+      _addTeam(rive, 2),
+    ], rive: rive);
     reset();
     openFolder(_myFiles, false);
+  }
+
+  FolderItem _addTeam(Rive rive, int number) {
+    final _teamFolder = FolderItem(
+      key: ValueKey('team_$number'),
+      name: "Team $number",
+      files: _genFiles(0),
+      folders: _getFolders(math.Random().nextInt(2)),
+    );
+    return _teamFolder;
   }
 
   void rectChanged(Rect value, Rive rive) {
@@ -69,12 +89,13 @@ class FileBrowser extends FileBrowserController {
     final _itemWidth =
         (_constraints.maxWidth - (kGridSpacing * (crossAxisCount + 1))) /
             crossAxisCount;
+    final _itemFolderHeight = (kFolderHeight * _itemWidth) / kGridWidth;
     final _offset = scrollOffset.value;
     final hasFolders = _current.hasFolders;
     final hasFiles = _current.hasFiles;
     final _folderGridSize = hasFolders
-        ? (_current.folders.length / crossAxisCount) *
-            (kFolderAspectRatio * _itemWidth)
+        ? (_current.folders.length / crossAxisCount) * _itemFolderHeight +
+            kGridSpacing
         : 0;
     final _folderHeaderOffset = kGridHeaderHeight;
     final _fileHeaderOffset = hasFolders ? kGridHeaderHeight : _folderGridSize;
@@ -90,49 +111,21 @@ class FileBrowser extends FileBrowserController {
       if (hasFolders) {
         if (item is FolderItem) {
           int _index = _current.folders.indexOf(item);
-          int _rowIndex = _index % crossAxisCount;
-          int _columnIndex = (_index / crossAxisCount).ceil();
-          debugPrint('_rowIndex$_rowIndex, _columnIndex$_columnIndex');
-          // final a = Offset(dx, dy);
-          // final b = Offset(dx, dy);
-          // final _itemRect = Rect.fromPoints(a, b);
+          int col = _index % crossAxisCount;
+          int row = (_index / crossAxisCount).ceil();
+          final w = _itemWidth;
+          final h = _itemFolderHeight;
+          final l = kGridSpacing + (col * (kGridSpacing + w));
+          final t = (_folderHeaderOffset + (((kGridSpacing / 2) + h) * row));
+          Rect _itemRect = Rect.fromLTWH(l, t, w, h);
+          item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
         }
       } else {}
     }
-    //  List<SelectableItem> _visibleList =
-    //     selectableItems.skip(_selectedRow * crossAxisCount).toList();
-    print("Marquee Rect: $_marqueeRect");
-    // for (var item in )
-    // debugPrint("W: $_itemWidth, O: $_offset");
-    // final _selectedRow = (_offset / kTreeItemHeight).floor();
-    // final _itemsPerRow = crossAxisCount;
-    // List<SelectableItem> _visibleList =
-    //     selectableItems.skip(_selectedRow * _itemsPerRow).toList();
-    // for (var item in _visibleList) {
-    //   if (item is FolderItem) {
-    //     // final _info = item.rectChanged.value;
-    //     // print(
-    //     //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
-    //     // if ((_info?.visibleFraction ?? 0) > 0) {
-    //     //   final _rect = _info.visibleBounds;
-    //     //   item.isSelected = value.overlaps(_rect);
-    //     // }
-    //     // final _rect = Recrt.fromLTWH(left, top, width, height);
-    //   }
-    //   if (item is FileItem) {
-    //     // final _info = item.rectChanged.value;
-    //     // print(
-    //     //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
-    //     // if ((_info?.visibleFraction ?? 0) > 0) {
-    //     //   final _rect = _info.visibleBounds;
-    //     //   item.isSelected = value.overlaps(_rect);
-    //     // }
-    //   }
-    // }
   }
 
   void onFoldersChanged() {
-    browserController.value.flatten();
+    treeController.value.flatten();
   }
 
   void reset() {
@@ -140,29 +133,6 @@ class FileBrowser extends FileBrowserController {
     selection.value = null;
     onFoldersChanged();
     notifyListeners();
-  }
-
-  List<FolderItem> _getFolders(int level) {
-    return List.generate(
-      25,
-      (i) => FolderItem(
-        key: ValueKey('folder_$level$i'),
-        name: "Name $i ($level)",
-        files: _genFiles(level),
-        folders: level == 0 ? [] : _getFolders(level - 1),
-      ),
-    );
-  }
-
-  List<FileItem> _genFiles(int level) {
-    return List.generate(
-      math.Random().nextInt(20),
-      (p) => FileItem(
-        key: ValueKey("file_$level$p"),
-        name: "File $p ($level)",
-        image: "https://www.lunapic.com/editor/premade/transparent.gif",
-      ),
-    );
   }
 
   @override
@@ -176,13 +146,13 @@ class FileBrowser extends FileBrowserController {
         item.isSelected = false;
       }
     }
-    browserController.value.expand(value);
     _lastSelectedIndex = null;
     notifyListeners();
+    treeController.value.expand(value);
     if (jumpTo) {
-      final _index = browserController.value.flat
-          .indexWhere((f) => f.data.key == value.key);
-      final _offset = _index * kTreeItemHeight;
+      List<FlatTreeItem<FolderItem>> _all = treeController.value.flat;
+      int _index = _all.indexWhere((f) => f?.data?.key == value.key);
+      double _offset = _index * kTreeItemHeight;
       treeScrollController.jumpTo(_offset);
     }
     // Scrollable.ensureVisible(context);
@@ -283,4 +253,31 @@ class FileBrowser extends FileBrowserController {
     }
     notifyListeners();
   }
+}
+
+List<FolderItem> _getFolders(int level, [int max = 25]) {
+  return List.generate(
+    max,
+    (i) {
+      final _key = shortid.generate();
+      return FolderItem(
+        key: ValueKey(_key),
+        name: "Folder $_key",
+        files: _genFiles(level),
+        folders: level == 0 ? [] : _getFolders(level - 1),
+      );
+    },
+  );
+}
+
+List<FileItem> _genFiles(int level) {
+  final _key = shortid.generate();
+  return List.generate(
+    math.Random().nextInt(20),
+    (p) => FileItem(
+      key: ValueKey(_key),
+      name: "File $_key",
+      image: "https://www.lunapic.com/editor/premade/transparent.gif",
+    ),
+  );
 }

@@ -1,6 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
 /// Callback for creating the background of a tree row. This has some special
@@ -8,10 +9,12 @@ import 'package:tree_widget/flat_tree_item.dart';
 /// item. The TreeView is specifically built to allow theming all aspects,
 /// including stylings for drag and drop.
 class DropItemBackground extends StatelessWidget {
-  const DropItemBackground(this.dropState, this.selectionState);
+  const DropItemBackground(this.dropState, this.selectionState,
+      {this.selectedElevation = 0.0});
 
   final DropState dropState;
   final SelectionState selectionState;
+  final double selectedElevation;
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +85,18 @@ class DropItemBackground extends StatelessWidget {
             );
           case SelectionState.selected:
             return Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Color.fromRGBO(87, 165, 224, 1.0),
                 borderRadius: BorderRadius.all(
                   Radius.circular(5.0),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromARGB((0.28 * 255).round(), 0, 88, 166),
+                    offset: Offset(0.0, 6),
+                    blurRadius: 10.0,
+                  ),
+                ],
               ),
             );
           case SelectionState.none:

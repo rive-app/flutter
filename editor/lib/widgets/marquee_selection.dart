@@ -24,7 +24,7 @@ class MarqueeScrollView extends StatefulWidget {
 class _MarqueeScrollViewState extends State<MarqueeScrollView> {
   bool _dragging = false;
   bool _enable = true;
-  Offset _start, _end;
+  Offset _start, _end, _offset;
 
   @override
   void initState() {
