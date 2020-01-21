@@ -116,7 +116,7 @@ class FileBrowser extends FileBrowserController {
           final w = _itemWidth;
           final h = _itemFolderHeight;
           final l = kGridSpacing + (col * (kGridSpacing + w));
-          final t = _folderHeaderOffset + ((kGridSpacing / 2) + h) * row;
+          final t = (_folderHeaderOffset + (((kGridSpacing / 2) + h) * row));
           Rect _itemRect = Rect.fromLTWH(l, t, w, h);
           item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
         }
