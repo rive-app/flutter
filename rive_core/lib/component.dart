@@ -17,7 +17,7 @@ abstract class Component extends ComponentBase<RiveFile> {
     if (value == _userData) {
       return;
     }
-    var last = _userData;
+    dynamic last = _userData;
     _userData = value;
     userDataChanged(last, value);
   }
