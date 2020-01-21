@@ -8,7 +8,8 @@ import 'folder.dart';
 
 class FolderTreeController extends TreeController<FolderItem> {
   final Rive rive;
-  FolderTreeController(List<FolderItem> data, {this.rive}) : super(data);
+  FolderTreeController(List<FolderItem> data, {this.rive})
+      : super(data, showTopLevelSeperator: true);
 
   @override
   List<FolderItem> childrenOf(FolderItem treeItem) =>

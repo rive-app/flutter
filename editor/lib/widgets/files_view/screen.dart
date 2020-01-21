@@ -378,18 +378,15 @@ class FilesView extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 15.0, right: 10.0),
               child: Consumer<Rive>(
-                builder: (context, rive, _) {
-                  return ValueListenableBuilder<FolderTreeController>(
-                    valueListenable: rive.fileBrowser.treeController,
-                    builder: (context, controller, _) {
-                      return FolderTreeView(
-                        scrollController: rive.fileBrowser.treeScrollController,
-                        controller: controller,
-                        itemHeight: kTreeItemHeight,
-                      );
-                    },
-                  );
-                },
+                builder: (context, rive, _) =>
+                    ValueListenableBuilder<FolderTreeController>(
+                  valueListenable: rive.fileBrowser.treeController,
+                  builder: (context, controller, _) => FolderTreeView(
+                    scrollController: rive.fileBrowser.treeScrollController,
+                    controller: controller,
+                    itemHeight: kTreeItemHeight,
+                  ),
+                ),
               ),
             ),
           )

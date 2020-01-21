@@ -3,7 +3,6 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
 import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/widgets/path_widget.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -66,7 +65,7 @@ class FolderViewWidget extends StatelessWidget {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Container(
-                    padding: const EdgeInsets.only(left: 12.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Row(
                       children: <Widget>[
                         RiveIcons.folder(_isSelected
