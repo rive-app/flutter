@@ -14,21 +14,18 @@ import 'package:provider/provider.dart';
 
 class FolderTreeView extends StatelessWidget {
   final FolderTreeController controller;
-  final ScrollController scrollController;
   final double itemHeight;
 
   const FolderTreeView({
     Key key,
     @required this.controller,
-    @required this.scrollController,
     @required this.itemHeight,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TreeView<FolderItem>(
-      scrollController: scrollController,
-      shrinkWrap: false,
+      shrinkWrap: true,
       style: TreeStyle(
         showFirstLine: true,
         padding: const EdgeInsets.all(5),
@@ -56,17 +53,19 @@ class FolderTreeView extends StatelessWidget {
         ),
       ),
       iconBuilder: (context, item) => Consumer<FileBrowser>(
-        builder: (context, browser, child) => Container(
-          width: 15,
-          height: 15,
-          child: Center(
-              child: RiveIcons.folder(
-            browser.selectedFolder == item.data
-                ? Colors.white
-                : ThemeUtils.iconColor,
-            15.0,
-          )),
-        ),
+        builder: (context, browser, child) {
+          return Container(
+            width: 15,
+            height: 15,
+            child: Center(
+                child: RiveIcons.folder(
+              browser.selectedFolder == item.data
+                  ? Colors.white
+                  : ThemeUtils.iconColor,
+              15.0,
+            )),
+          );
+        },
       ),
       extraBuilder: (context, item, index) => Container(
         decoration: BoxDecoration(
@@ -90,20 +89,22 @@ class FolderTreeView extends StatelessWidget {
         ),
       ),
       itemBuilder: (context, item) => Consumer<FileBrowser>(
-        builder: (context, browser, child) => Expanded(
-          child: IgnorePointer(
-            child: Text(
-              item.data.name,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                color: browser.selectedFolder.key == item.data.key
-                    ? Colors.white
-                    : Colors.grey.shade500,
+        builder: (context, browser, child) {
+          return Expanded(
+            child: IgnorePointer(
+              child: Text(
+                item.data.name,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: browser.selectedFolder.key == item.data.key
+                      ? Colors.white
+                      : Colors.grey.shade500,
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

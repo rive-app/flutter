@@ -83,24 +83,31 @@ class FileViewWidget extends StatelessWidget {
         final _isSelected = state == SelectionState.selected;
         return Stack(
           fit: StackFit.expand,
+          overflow: Overflow.visible,
           children: <Widget>[
-            Visibility(
-              visible: _isSelected,
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    border: Border.all(
-                      color: ThemeUtils.selectedBlue,
-                      width: 4.0,
-                    ),
-                    borderRadius: BorderRadius.circular(10.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeUtils.selectedBlue.withOpacity(0.5),
-                        blurRadius: 50.0,
-                        offset: Offset(0.0, 10.0),
+            Positioned.fill(
+              left: -4,
+              top: -4,
+              bottom: -4,
+              right: -4,
+              child: Visibility(
+                visible: _isSelected,
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border.all(
+                        color: ThemeUtils.selectedBlue,
+                        width: 4.0,
                       ),
-                    ]),
+                      borderRadius: BorderRadius.circular(10.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeUtils.selectedBlue.withOpacity(0.5),
+                          blurRadius: 50.0,
+                          offset: Offset(0.0, 10.0),
+                        ),
+                      ]),
+                ),
               ),
             ),
             GestureDetector(

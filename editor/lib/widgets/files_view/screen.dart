@@ -1,4 +1,5 @@
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/main.dart';
@@ -368,31 +369,36 @@ class FilesView extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                    margin: EdgeInsets.only(
-                      top: 21,
-                      bottom: 5,
-                    ),
-                    color: ThemeUtils.lineGrey,
-                    height: 1),
-              )
-            ],
+          Container(
+            height: kTreeItemHeight,
+            padding: const EdgeInsets.only(top: 21, bottom: 5),
+            child: _buildDivider(0),
           ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 15.0, right: 10.0),
-              child: Consumer<Rive>(
-                builder: (context, rive, _) =>
-                    ValueListenableBuilder<FolderTreeController>(
-                  valueListenable: rive.fileBrowser.browserController,
-                  builder: (context, controller, _) {
-                    return FolderTreeView(
-                      controller: controller,
-                      scrollController: rive.fileBrowser.treeScrollController,
-                      itemHeight: kTreeItemHeight,
+              child: SingleChildScrollView(
+                controller: rive.fileBrowser.treeScrollController,
+                child: Consumer<Rive>(
+                  builder: (context, rive, _) {
+                    return ValueListenableBuilder<
+                        List<ValueNotifier<FolderTreeController>>>(
+                      valueListenable: rive.fileBrowser.teams,
+                      builder: (context, teams, _) {
+                        return Column(
+                          children: <Widget>[
+                            _buildTree(
+                                rive, rive.fileBrowser.myFilesController),
+                            for (var team in teams) ...[
+                              Container(
+                                height: kTreeItemHeight,
+                                child: _buildDivider(20),
+                              ),
+                              _buildTree(rive, team),
+                            ],
+                          ],
+                        );
+                      },
                     );
                   },
                 ),
@@ -400,6 +406,23 @@ class FilesView extends StatelessWidget {
             ),
           )
         ],
+      ),
+    );
+  }
+
+  Widget _buildDivider(double left) {
+    return Row(children: <Widget>[
+      Expanded(child: Container(color: ThemeUtils.lineGrey, height: 1))
+    ]);
+  }
+
+  Widget _buildTree(
+      Rive rive, ValueListenable<FolderTreeController> treeController) {
+    return ValueListenableBuilder<FolderTreeController>(
+      valueListenable: treeController,
+      builder: (context, controller, _) => FolderTreeView(
+        controller: controller,
+        itemHeight: kTreeItemHeight,
       ),
     );
   }

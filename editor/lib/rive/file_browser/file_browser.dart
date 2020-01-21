@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shortid/shortid.dart';
 import 'package:rive_core/selectable_item.dart';
 
 import '../../widgets/files_view/screen.dart';
@@ -23,10 +24,14 @@ class FileBrowser extends FileBrowserController {
     return [..._selectedFolders, ..._selectedFiles];
   }
 
+  ValueNotifier<List<ValueNotifier<FolderTreeController>>> get teams =>
+      _teamTreeControllers;
+  final _teamTreeControllers =
+      ValueNotifier<List<ValueNotifier<FolderTreeController>>>([]);
   FolderItem _myFiles;
   final selection = ValueNotifier<SelectableItem>(null);
   final scrollOffset = ValueNotifier<double>(0);
-  final browserController = ValueNotifier<FolderTreeController>(null);
+  final myFilesController = ValueNotifier<FolderTreeController>(null);
   final marqueeSelection = ValueNotifier<Rect>(null);
   FolderItem _current;
   FolderItem get currentFolder => _current;
@@ -41,9 +46,27 @@ class FileBrowser extends FileBrowserController {
       files: _genFiles(0),
       folders: _getFolders(math.Random().nextInt(6)),
     );
-    browserController.value = FolderTreeController([_myFiles], rive: rive);
+    myFilesController.value = FolderTreeController([_myFiles], rive: rive);
+    _addTeam(rive, 1);
+    _addTeam(rive, 2);
     reset();
     openFolder(_myFiles, false);
+    myFilesController.value.expand(_myFiles);
+  }
+
+  void _addTeam(Rive rive, int number) {
+    final _teamFolder = FolderItem(
+      key: ValueKey('team_$number'),
+      name: "Team $number",
+      files: _genFiles(0),
+      folders: _getFolders(math.Random().nextInt(6)),
+    );
+    final _teamController = FolderTreeController([
+      _teamFolder,
+    ], rive: rive);
+    _teamController.flatten();
+    _teamTreeControllers.value
+        .add(ValueNotifier<FolderTreeController>(_teamController));
   }
 
   void rectChanged(Rect value, Rive rive) {
@@ -133,7 +156,7 @@ class FileBrowser extends FileBrowserController {
   }
 
   void onFoldersChanged() {
-    browserController.value.flatten();
+    myFilesController.value.flatten();
   }
 
   void reset() {
@@ -141,29 +164,6 @@ class FileBrowser extends FileBrowserController {
     selection.value = null;
     onFoldersChanged();
     notifyListeners();
-  }
-
-  List<FolderItem> _getFolders(int level) {
-    return List.generate(
-      25,
-      (i) => FolderItem(
-        key: ValueKey('folder_$level$i'),
-        name: "Name $i ($level)",
-        files: _genFiles(level),
-        folders: level == 0 ? [] : _getFolders(level - 1),
-      ),
-    );
-  }
-
-  List<FileItem> _genFiles(int level) {
-    return List.generate(
-      math.Random().nextInt(20),
-      (p) => FileItem(
-        key: ValueKey("file_$level$p"),
-        name: "File $p ($level)",
-        image: "https://www.lunapic.com/editor/premade/transparent.gif",
-      ),
-    );
   }
 
   @override
@@ -177,14 +177,32 @@ class FileBrowser extends FileBrowserController {
         item.isSelected = false;
       }
     }
-    browserController.value.expand(value);
     _lastSelectedIndex = null;
     notifyListeners();
     if (jumpTo) {
-      final _index = browserController.value.flat
+      myFilesController.value.expand(value);
+      for (var team in teams.value) {
+        team.value.expand(value);
+      }
+      int _index = myFilesController.value.flat
           .indexWhere((f) => f.data.key == value.key);
-      final _offset = _index * kTreeItemHeight;
-      treeScrollController.jumpTo(_offset);
+      double _offset = 0.0;
+      if (_index != -1) {
+        _offset = _index * kTreeItemHeight;
+        treeScrollController.jumpTo(_offset);
+      } else {
+        _offset = kTreeItemHeight +
+            kTreeItemHeight * myFilesController.value.flat.length;
+        for (var team in teams.value) {
+          _index = team.value.flat.indexWhere((f) => f.data.key == value.key);
+          if (_index != -1) {
+            treeScrollController.jumpTo((_index * kTreeItemHeight) + _offset);
+          } else {
+            _offset =
+                kTreeItemHeight + kTreeItemHeight * team.value.flat.length;
+          }
+        }
+      }
     }
     // Scrollable.ensureVisible(context);
   }
@@ -284,4 +302,31 @@ class FileBrowser extends FileBrowserController {
     }
     notifyListeners();
   }
+}
+
+List<FolderItem> _getFolders(int level, [int max = 25]) {
+  return List.generate(
+    max,
+    (i) {
+      final _key = shortid.generate();
+      return FolderItem(
+        key: ValueKey(_key),
+        name: "Folder $_key",
+        files: _genFiles(level),
+        folders: level == 0 ? [] : _getFolders(level - 1),
+      );
+    },
+  );
+}
+
+List<FileItem> _genFiles(int level) {
+  final _key = shortid.generate();
+  return List.generate(
+    math.Random().nextInt(20),
+    (p) => FileItem(
+      key: ValueKey(_key),
+      name: "File $_key",
+      image: "https://www.lunapic.com/editor/premade/transparent.gif",
+    ),
+  );
 }
