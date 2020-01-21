@@ -391,7 +391,7 @@ class FilesView extends StatelessWidget {
                                 rive, rive.fileBrowser.myFilesController),
                             for (var team in teams) ...[
                               Container(
-                                height: kTreeItemHeight /2,
+                                height: kTreeItemHeight,
                                 child: _buildDivider(20),
                               ),
                               _buildTree(rive, team),
