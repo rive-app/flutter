@@ -22,8 +22,7 @@ import 'profile_view.dart';
 
 const kGridSpacing = 30.0;
 const kGridWidth = 187.0;
-const kGridHeaderHeight = 40.0;
-const kSectionSpacing = 10.0;
+const kGridHeaderHeight = 50.0;
 const kFolderHeight = 60;
 const kFileHeight = 190;
 const kFolderAspectRatio = kGridWidth / kFolderHeight;
@@ -36,10 +35,6 @@ class FilesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final padding = const EdgeInsets.symmetric(
-      horizontal: 30.0,
-      vertical: 10.0,
-    );
     const kProfileWidth = 215.0;
     final _rive = Provider.of<Rive>(context, listen: false);
     return ChangeNotifierProvider.value(
@@ -62,7 +57,7 @@ class FilesView extends StatelessWidget {
                       child: _buildLeftSide(),
                     ),
                     Expanded(
-                      child: _buildCenter(padding, _rive),
+                      child: _buildCenter(_rive),
                     ),
                   ],
                 ),
@@ -97,88 +92,76 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildCenter(EdgeInsets padding, Rive _rive) {
+  Widget _buildCenter(Rive _rive) {
     final _scrollController = ScrollController();
     return LayoutBuilder(builder: (context, dimens) {
       _rive.fileBrowser.sizeChanged(dimens);
+
       return Consumer<FileBrowser>(
-        builder: (context, browser, child) => LayoutBuilder(
-          builder: (_, dimens) {
-            final folders = browser?.selectedFolder?.folders ?? [];
-            final files = browser?.selectedFolder?.files ?? [];
-            if (folders.isEmpty && files.isEmpty) {
-              return Column(
-                children: <Widget>[
-                  Container(height: kSectionSpacing),
-                  TitleSection(
-                    padding: padding,
-                    name: 'Files',
-                    showDropdown: true,
-                    height: kGridHeaderHeight,
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "This View is empty.",
-                        style: TextStyle(color: Colors.grey),
-                      ),
+        builder: (context, browser, child) {
+          final folders = browser?.selectedFolder?.folders ?? [];
+          final files = browser?.selectedFolder?.files ?? [];
+          if (folders.isEmpty && files.isEmpty) {
+            return Column(
+              children: <Widget>[
+                TitleSection(
+                  name: 'Files',
+                  showDropdown: true,
+                  height: kGridHeaderHeight,
+                ),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      "This View is empty.",
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ),
-                ],
-              );
-            }
-            return ValueListenableBuilder<bool>(
-              valueListenable: browser.draggingState,
-              builder: (context, dragging, child) => MarqueeScrollView(
-                rive: _rive,
-                enable: !dragging,
-                child: child,
-                controller: _scrollController,
-              ),
-              child: Scrollbar(
-                controller: _scrollController,
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  physics: NeverScrollableScrollPhysics(),
-                  slivers: <Widget>[
-                    if (folders != null && folders.isNotEmpty) ...[
-                      _buildSliverSpacer(),
-                      SliverToBoxAdapter(
-                        child: TitleSection(
-                          padding: padding,
-                          name: 'Folders',
-                          height: kGridHeaderHeight,
-                          showDropdown: true,
-                        ),
-                      ),
-                      _buildSliverSpacer(),
-                      _buildFolders(folders, browser),
-                    ],
-                    if (files != null && files.isNotEmpty) ...[
-                      _buildSliverSpacer(),
-                      SliverToBoxAdapter(
-                        child: TitleSection(
-                          padding: padding,
-                          name: 'Files',
-                          height: kGridHeaderHeight,
-                          showDropdown: folders == null || folders.isEmpty,
-                        ),
-                      ),
-                      _buildSliverSpacer(),
-                      _buildFiles(files, browser, _rive),
-                    ],
-                  ],
                 ),
-              ),
+              ],
             );
-          },
-        ),
+          }
+          return ValueListenableBuilder<bool>(
+            valueListenable: browser.draggingState,
+            builder: (context, dragging, child) => MarqueeScrollView(
+              rive: _rive,
+              enable: !dragging,
+              child: child,
+              controller: _scrollController,
+            ),
+            child: Scrollbar(
+              controller: _scrollController,
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: NeverScrollableScrollPhysics(),
+                slivers: <Widget>[
+                  if (folders != null && folders.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: TitleSection(
+                        name: 'Folders',
+                        height: kGridHeaderHeight,
+                        showDropdown: true,
+                      ),
+                    ),
+                    _buildFolders(folders, browser),
+                  ],
+                  if (files != null && files.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: TitleSection(
+                        name: 'Files',
+                        height: kGridHeaderHeight,
+                        showDropdown: folders == null || folders.isEmpty,
+                      ),
+                    ),
+                    _buildFiles(files, browser, _rive),
+                  ],
+                ],
+              ),
+            ),
+          );
+        },
       );
     });
   }
-
-  SliverToBoxAdapter _buildSliverSpacer() =>
-      SliverToBoxAdapter(child: Container(height: kSectionSpacing));
 
   Widget _buildFolders(List<FolderItem> folders, FileBrowser browser) {
     return SliverPadding(
@@ -523,13 +506,11 @@ class DropDownSortButton extends StatelessWidget {
 class TitleSection extends StatelessWidget {
   const TitleSection({
     Key key,
-    @required this.padding,
     @required this.name,
     @required this.height,
     this.showDropdown = false,
   }) : super(key: key);
 
-  final EdgeInsets padding;
   final String name;
   final bool showDropdown;
   final double height;
@@ -538,11 +519,11 @@ class TitleSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: height,
+      padding: EdgeInsets.only(left: 30.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            padding: padding,
             child: Text(
               name,
               style: TextStyle(color: Colors.grey[700]),
