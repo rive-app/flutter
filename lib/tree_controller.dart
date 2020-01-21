@@ -64,7 +64,9 @@ abstract class TreeController<T> extends ChangeNotifier {
   bool get isDragging => _dragOperation != null;
   _TreeDragOperation get dragOperation => _dragOperation;
 
-  TreeController(this._data);
+  final bool showTopLevelSeperator;
+
+  TreeController(this._data, {this.showTopLevelSeperator = false});
 
   /// The flattened data structure representing the hierarchical tree data that
   /// is currently expanded. This will be used by the TreeView to build a
@@ -319,7 +321,6 @@ abstract class TreeController<T> extends ChangeNotifier {
         }
         context.prev = meta;
         lookup[meta.key] = flat.length;
-        flat.add(meta);
       }
     } else {
       childItems = data;
@@ -334,6 +335,9 @@ abstract class TreeController<T> extends ChangeNotifier {
       var children = childrenOf(item);
       bool hasChildren = children?.isNotEmpty ?? false;
       var itemDepth = depth + [1];
+      if (parent == null && showTopLevelSeperator) {
+        itemDepth = [-1];
+      }
       var meta = FlatTreeItem<T>(
         item,
         parent: parent,
@@ -352,7 +356,15 @@ abstract class TreeController<T> extends ChangeNotifier {
       }
       context.prev = meta;
       lookup[meta.key] = flat.length;
-      flat.add(meta);
+      if (parent == null && showTopLevelSeperator) {
+        // meta.depth = Int8List.fromList([-1]);
+        flat.add(meta);
+        if (!isExpanded) {
+          flat.add(null);
+        }
+      } else {
+        flat.add(meta);
+      }
       if (isExpanded && hasChildren) {
         // update item depth for children
         int d = itemDepth.length - 1;
@@ -361,10 +373,19 @@ abstract class TreeController<T> extends ChangeNotifier {
         }
 
         itemDepth[d] = spacing < 0 || isLast ? -1 : 1;
-
+        if (parent == null && showTopLevelSeperator) {
+          itemDepth = [-1];
+        }
         _flatten(
             context, children, flat, lookup, List<int>.from(itemDepth), meta);
+
+        if (isExpanded && parent == null && showTopLevelSeperator) {
+          flat.add(null);
+        }
       }
+    }
+    if (showTopLevelSeperator) {
+      flat.removeAt(flat.length - 1);
     }
   }
 }

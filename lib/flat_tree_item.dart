@@ -59,10 +59,10 @@ class FlatTreeItem<T> {
   /// Depths stored as a Uint8List. Each entry represents a horizontal space to
   /// move right by. If the entry is positive, a solid vertical line should also
   /// be drawn. This is used to connect up the lines in the hierarchy.
-  final Int8List depth;
+  Int8List depth;
 
   /// Whether this is the last of the siblings under [parent].
-  final bool isLastChild;
+  bool isLastChild;
 
   /// Whether this item has more children which can be expanded.
   final bool hasChildren;

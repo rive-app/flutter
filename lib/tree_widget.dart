@@ -20,6 +20,8 @@ typedef TreeViewExtraPartBuilder<T> = Widget Function(
     BuildContext context, FlatTreeItem<T> item, int spaceIndex);
 typedef TreeViewPartBuilder<T> = Widget Function(
     BuildContext context, FlatTreeItem<T> item);
+typedef TreeViewIndexBuilder<T> = Widget Function(
+    BuildContext context, int index);
 
 class TreeView<T> extends StatelessWidget {
   /// The controller used to provide data and extract hierarchical information
@@ -54,11 +56,14 @@ class TreeView<T> extends StatelessWidget {
 
   final bool shrinkWrap;
 
+  final TreeViewIndexBuilder seperatorBuilder;
+
   const TreeView({
     @required this.controller,
     @required this.expanderBuilder,
     @required this.iconBuilder,
     @required this.itemBuilder,
+    this.seperatorBuilder,
     this.extraBuilder,
     this.backgroundBuilder,
     this.style = defaultTreeStyle,
@@ -82,234 +87,197 @@ class TreeView<T> extends StatelessWidget {
       value: controller,
       child: Consumer<TreeController<T>>(
         builder: (context, controller, _) => Scrollbar(
-          child: ListView.custom(
+          child: ListView.separated(
             controller: scrollController,
             // semanticChildCount: controller.flat.length,
+            separatorBuilder: (context, index) {
+              var item = controller.flat[index];
+              if (item == null && seperatorBuilder != null) {
+                return Container(
+                  height: itemHeight,
+                  child: seperatorBuilder(context, index),
+                );
+              }
+              return Container();
+            },
             shrinkWrap: shrinkWrap,
             padding: style.padding,
             // itemExtent: style.itemHeight,
-            childrenDelegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  var item = controller.flat[index];
-                  var lines = <Widget>[];
-                  var depth = item.depth;
+            itemBuilder: (context, index) {
+              var item = controller.flat[index];
+              if (item == null) return Container(height: 0);
 
-                  if (style.showFirstLine) {
-                    depth = Int8List.fromList(
-                      depth.toList(growable: true)..insert(0, 0),
-                    );
-                  }
-                  int depthCount = depth.length;
-                  bool hasChildren = item.hasChildren;
-                  int numberOfLines = hasChildren ? depthCount - 1 : depthCount;
-                  bool shortLastLine = !hasChildren && item.isLastChild;
-                  numberOfLines--;
-                  double toLineCenter = iconWidth / 2;
-                  double offset = toLineCenter; // 20 + toLineCenter;
-                  double indent = iconWidth + style.padIndent;
-                  bool showLines = !style.hideLines;
-                  int dragDepth = item.dragDepth ?? 255;
-                  for (var i = 0; i < numberOfLines; i++) {
-                    double opacity = 1.0;
-                    var d = depth[i];
-                    offset += indent * (d.abs() - 1);
-                    if (d > 0) {
-                      // var style = {left:px(offset)};
-                      if (i >= dragDepth || item.isDisabled) {
-                        //style.opacity = DragOpacity;
-                        opacity = inactiveOpacity;
-                      }
+              var lines = <Widget>[];
+              var depth = item.depth;
 
-                      lines.add(
-                        Positioned(
-                          top: -0.5,
-                          bottom: -0.5,
-                          left: offset,
-                          child: Container(
-                            width: 1,
-                            child: CustomPaint(
-                              painter: TreeLine(
-                                color: lineColor
-                                    .withOpacity(lineColor.opacity * opacity),
-                                strokeCap: StrokeCap.butt,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    offset += indent;
+              if (style.showFirstLine) {
+                depth = Int8List.fromList(
+                  depth.toList(growable: true)..insert(0, 0),
+                );
+              }
+              int depthCount = depth.length;
+              bool hasChildren = item.hasChildren;
+              int numberOfLines = hasChildren ? depthCount - 1 : depthCount;
+              bool shortLastLine = !hasChildren && item.isLastChild;
+              numberOfLines--;
+              double toLineCenter = iconWidth / 2;
+              double offset = toLineCenter; // 20 + toLineCenter;
+              double indent = iconWidth + style.padIndent;
+              bool showLines = !style.hideLines;
+              int dragDepth = item.dragDepth ?? 255;
+              for (var i = 0; i < numberOfLines; i++) {
+                double opacity = 1.0;
+                var d = depth[i];
+                offset += indent * (d.abs() - 1);
+                if (d > 0) {
+                  // var style = {left:px(offset)};
+                  if (i >= dragDepth || item.isDisabled) {
+                    //style.opacity = DragOpacity;
+                    opacity = inactiveOpacity;
                   }
 
-                  var opacity = 1.0;
-
-                  var lastLineSpace =
-                      numberOfLines < depth.length && numberOfLines > 0
-                          ? depth[numberOfLines]
-                          : 0;
-                  if (lastLineSpace > 0 && !(index == 0 && item.isLastChild)) {
-                    bool isPropertyLine = !item.hasChildren && item.isProperty;
-                    // let lastLineStyle = !item.hasChildren && item.isProperty ? styles.PropertyLine : styles.Line;
-                    if (lastLineSpace > 1) {
-                      offset += (lastLineSpace - 1) * indent;
-                    }
-                    double top = 0;
-                    double bottom = shortLastLine ? itemHeight / 2 : 0;
-                    // let style = {bottom:shortLastLine ? "50%" : null, left:px(offset)};
-
-                    if (index == 0) {
-                      // Correction for this case: https://cl.ly/3d300n1C2E0E where the line extends up instead we want it to look like this on the first item: https://cl.ly/2U1U3Z1h0D2D
-                      top = itemHeight / 2;
-                      bottom = 0;
-                      // style.bottom = "0";
-                    }
-                    if (numberOfLines >= dragDepth || item.isDisabled) {
-                      opacity = inactiveOpacity;
-                      // style.opacity = DragOpacity;
-                    }
-                    // verticalLines.push(<div className={lastLineStyle} key={numberOfLines} style={style}></div>);
-                    lines.add(
-                      Positioned(
-                        left: offset,
-                        top: top - 0.5,
-                        bottom: bottom - 0.5,
-                        child: Container(
-                          width: 1,
-                          child: CustomPaint(
-                            painter: TreeLine(
-                              dashPattern: !item.hasChildren && item.isProperty
-                                  ? propertyDashPattern
-                                  : null,
-                              color: lineColor
-                                  .withOpacity(lineColor.opacity * opacity),
-                              strokeCap: StrokeCap.butt,
-                            ),
+                  lines.add(
+                    Positioned(
+                      top: -0.5,
+                      bottom: -0.5,
+                      left: offset,
+                      child: Container(
+                        width: 1,
+                        child: CustomPaint(
+                          painter: TreeLine(
+                            color: lineColor
+                                .withOpacity(lineColor.opacity * opacity),
+                            strokeCap: StrokeCap.butt,
                           ),
                         ),
                       ),
-                    );
-                  }
+                    ),
+                  );
+                }
+                offset += indent;
+              }
 
-                  var spaces = -1;
-                  for (final s in depth) {
-                    spaces += s.abs();
-                  }
-                  double spaceLeft = spaces * indent;
+              var opacity = 1.0;
 
-                  var dashing = item.isProperty ? propertyDashPattern : null;
+              var lastLineSpace =
+                  numberOfLines < depth.length && numberOfLines > 0
+                      ? depth[numberOfLines]
+                      : 0;
+              if (lastLineSpace > 0 && !(index == 0 && item.isLastChild)) {
+                bool isPropertyLine = !item.hasChildren && item.isProperty;
+                // let lastLineStyle = !item.hasChildren && item.isProperty ? styles.PropertyLine : styles.Line;
+                if (lastLineSpace > 1) {
+                  offset += (lastLineSpace - 1) * indent;
+                }
+                double top = 0;
+                double bottom = shortLastLine ? itemHeight / 2 : 0;
+                // let style = {bottom:shortLastLine ? "50%" : null, left:px(offset)};
 
-                  bool showOurLine = depth[depth.length - 1] != -1;
+                if (index == 0) {
+                  // Correction for this case: https://cl.ly/3d300n1C2E0E where the line extends up instead we want it to look like this on the first item: https://cl.ly/2U1U3Z1h0D2D
+                  top = itemHeight / 2;
+                  bottom = 0;
+                  // style.bottom = "0";
+                }
+                if (numberOfLines >= dragDepth || item.isDisabled) {
+                  opacity = inactiveOpacity;
+                  // style.opacity = DragOpacity;
+                }
+                // verticalLines.push(<div className={lastLineStyle} key={numberOfLines} style={style}></div>);
+                lines.add(
+                  Positioned(
+                    left: offset,
+                    top: top - 0.5,
+                    bottom: bottom - 0.5,
+                    child: Container(
+                      width: 1,
+                      child: CustomPaint(
+                        painter: TreeLine(
+                          dashPattern: !item.hasChildren && item.isProperty
+                              ? propertyDashPattern
+                              : null,
+                          color: lineColor
+                              .withOpacity(lineColor.opacity * opacity),
+                          strokeCap: StrokeCap.butt,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
 
-                  var nextDragDepth = 255;
-                  var prevDragDepth = 255;
-                  bool isNextProperty = item.next?.isProperty ?? false;
-                  var nextDepth = item.next?.depth;
-                  if (dragDepth != null) {
-                    if (item.prev != null) {
-                      prevDragDepth = item.prev.dragDepth;
-                    }
-                    if (item.next != null) {
-                      nextDragDepth = item.next.dragDepth;
-                    }
-                  }
+              var spaces = -1;
+              for (final s in depth) {
+                spaces += s.abs();
+              }
+              double spaceLeft = spaces * indent;
 
-                  bool dragging = numberOfLines + 2 >= dragDepth;
+              var dashing = item.isProperty ? propertyDashPattern : null;
 
-                  double dragOpacity =
-                      dragging || item.isDisabled ? inactiveOpacity : 1.0;
-                  double aboveDragOpacity =
-                      dragging && prevDragDepth != null ? inactiveOpacity : 1.0;
-                  double belowDragOpacity =
-                      numberOfLines + 1 >= dragDepth && nextDragDepth != null
-                          ? inactiveOpacity
-                          : 1.0;
+              bool showOurLine = depth[depth.length - 1] != -1;
 
-                  if (hasChildren) {
-                    if (showLines && showOurLine && index != 0) {
-                      // Example: Red connector above expander: https://cl.ly/0Z452u3b3S1z
-                      // <div className={styles.ConnectorLine} style={{height:px((rowHeight-iconSize)/2), top:px(-(rowHeight-iconSize)/2-1), bottom:"initial", opacity:aboveDragOpacity}}></div>}
-                      lines.insert(
-                        0,
-                        Positioned(
-                          left: spaceLeft + iconWidth / 2,
-                          top: 0.5,
-                          child: Container(
-                            width: 1,
-                            height: (itemHeight - iconHeight) / 2,
-                            child: CustomPaint(
-                              painter: TreeLine(
-                                color: lineColor.withOpacity(
-                                    lineColor.opacity * aboveDragOpacity),
-                                strokeCap: StrokeCap.butt,
-                              ),
-                            ),
+              var nextDragDepth = 255;
+              var prevDragDepth = 255;
+              bool isNextProperty = item.next?.isProperty ?? false;
+              var nextDepth = item.next?.depth;
+              if (dragDepth != null) {
+                if (item.prev != null) {
+                  prevDragDepth = item.prev.dragDepth;
+                }
+                if (item.next != null) {
+                  nextDragDepth = item.next.dragDepth;
+                }
+              }
+
+              bool dragging = numberOfLines + 2 >= dragDepth;
+
+              double dragOpacity =
+                  dragging || item.isDisabled ? inactiveOpacity : 1.0;
+              double aboveDragOpacity =
+                  dragging && prevDragDepth != null ? inactiveOpacity : 1.0;
+              double belowDragOpacity =
+                  numberOfLines + 1 >= dragDepth && nextDragDepth != null
+                      ? inactiveOpacity
+                      : 1.0;
+
+              if (hasChildren) {
+                if (showLines && showOurLine && index != 0) {
+                  // Example: Red connector above expander: https://cl.ly/0Z452u3b3S1z
+                  // <div className={styles.ConnectorLine} style={{height:px((rowHeight-iconSize)/2), top:px(-(rowHeight-iconSize)/2-1), bottom:"initial", opacity:aboveDragOpacity}}></div>}
+                  lines.insert(
+                    0,
+                    Positioned(
+                      left: spaceLeft + iconWidth / 2,
+                      top: 0.5,
+                      child: Container(
+                        width: 1,
+                        height: (itemHeight - iconHeight) / 2,
+                        child: CustomPaint(
+                          painter: TreeLine(
+                            color: lineColor.withOpacity(
+                                lineColor.opacity * aboveDragOpacity),
+                            strokeCap: StrokeCap.butt,
                           ),
                         ),
-                      );
-                      if (showLines && showOurLine && !item.isLastChild) {
-                        // Example: Red connector under expander: https://cl.ly/473J3m462g0e
-                        lines.insert(
-                          0,
-                          Positioned(
-                            left: spaceLeft + iconWidth / 2,
-                            top: itemHeight / 2 + iconHeight / 2 + 0.5,
-                            child: Container(
-                              width: 1,
-                              // extra 0.5 here to avoid precision errors leaving a
-                              // gap
-                              height: (itemHeight - iconHeight) / 2 + 1.5,
-                              child: CustomPaint(
-                                painter: TreeLine(
-                                  color: lineColor.withOpacity(
-                                      lineColor.opacity * belowDragOpacity),
-                                  strokeCap: StrokeCap.butt,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                  } else if (!(depth.length == 1 && depth[0] == -1)) {
-                    //(this.props.hideFirstHorizontalLine && depth.length === 1 && depth[0] === -1) ? null : <div className={horizontalLineStyle} style={{background:showOurLine && showLines ? null : "initial", opacity:dragOpacity}}></div>
+                      ),
+                    ),
+                  );
+                  if (showLines && showOurLine && !item.isLastChild) {
+                    // Example: Red connector under expander: https://cl.ly/473J3m462g0e
                     lines.insert(
                       0,
                       Positioned(
                         left: spaceLeft + iconWidth / 2,
-                        top: itemHeight / 2,
-                        child: Container(
-                          width: iconWidth / 2 + padIndent - iconMargin,
-                          height: 1,
-                          child: CustomPaint(
-                            painter: TreeLine(
-                              dashPattern: dashing,
-                              color: lineColor
-                                  .withOpacity(lineColor.opacity * dragOpacity),
-                              strokeCap: StrokeCap.butt,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (item.isExpanded && showLines) {
-                    // Example: https://cl.ly/1D1j2p0d1k1N connector red line below torso and head
-                    // <div className={isNextProperty && nextDepth.length - depth.length === 1 ? styles.IconPropertyConnectorLine : styles.IconConnectorLine} style={{marginLeft:px(Math.floor(space*Indent+ToLineCenter)), top:px(rowHeight/2+iconHeight/2), opacity:dragOpacity}}></div> : null
-                    // marginLeft:px(Math.floor(space*Indent+ToLineCenter)), top:px(rowHeight/2+iconHeight/2)
-                    lines.insert(
-                      0,
-                      Positioned(
-                        left:
-                            spaceLeft + (item.spacing * indent) + iconWidth / 2,
                         top: itemHeight / 2 + iconHeight / 2 + 0.5,
                         child: Container(
                           width: 1,
+                          // extra 0.5 here to avoid precision errors leaving a
+                          // gap
                           height: (itemHeight - iconHeight) / 2 + 1.5,
                           child: CustomPaint(
                             painter: TreeLine(
-                              color: lineColor
-                                  .withOpacity(lineColor.opacity * dragOpacity),
+                              color: lineColor.withOpacity(
+                                  lineColor.opacity * belowDragOpacity),
                               strokeCap: StrokeCap.butt,
                             ),
                           ),
@@ -317,110 +285,153 @@ class TreeView<T> extends StatelessWidget {
                       ),
                     );
                   }
-
-                  if (backgroundBuilder != null) {
-                    lines.add(
-                      Positioned(
-                        left: indent + spaceLeft - iconMargin,
-                        top: 0,
-                        bottom: 0,
-                        right: 0,
-                        child: _InputHelper<T>(
-                          style: style,
-                          isDragging: dragging,
-                          item: item,
-                          child: backgroundBuilder(context, item),
+                }
+              } else if (!(depth.length == 1 && depth[0] == -1)) {
+                //(this.props.hideFirstHorizontalLine && depth.length === 1 && depth[0] === -1) ? null : <div className={horizontalLineStyle} style={{background:showOurLine && showLines ? null : "initial", opacity:dragOpacity}}></div>
+                lines.insert(
+                  0,
+                  Positioned(
+                    left: spaceLeft + iconWidth / 2,
+                    top: itemHeight / 2,
+                    child: Container(
+                      width: iconWidth / 2 + padIndent - iconMargin,
+                      height: 1,
+                      child: CustomPaint(
+                        painter: TreeLine(
+                          dashPattern: dashing,
+                          color: lineColor
+                              .withOpacity(lineColor.opacity * dragOpacity),
+                          strokeCap: StrokeCap.butt,
                         ),
                       ),
-                    );
-                    // Draw background before lines?
-                    //lines.insert(0, value);
-                  }
+                    ),
+                  ),
+                );
+              }
 
-                  return KeepAlive(
-                    /// We need a KeepAlive here to make sure the input helper
-                    /// stays around when it's being dragged.
-                    key: item.key,
-                    keepAlive: controller.dragOperation?.startItem == item,
+              if (item.isExpanded && showLines) {
+                // Example: https://cl.ly/1D1j2p0d1k1N connector red line below torso and head
+                // <div className={isNextProperty && nextDepth.length - depth.length === 1 ? styles.IconPropertyConnectorLine : styles.IconConnectorLine} style={{marginLeft:px(Math.floor(space*Indent+ToLineCenter)), top:px(rowHeight/2+iconHeight/2), opacity:dragOpacity}}></div> : null
+                // marginLeft:px(Math.floor(space*Indent+ToLineCenter)), top:px(rowHeight/2+iconHeight/2)
+                lines.insert(
+                  0,
+                  Positioned(
+                    left: spaceLeft + (item.spacing * indent) + iconWidth / 2,
+                    top: itemHeight / 2 + iconHeight / 2 + 0.5,
                     child: Container(
-                      height: itemHeight,
-                      child: Stack(
-                        overflow: Overflow.visible,
-                        children: <Widget>[
-                          Positioned.fill(
-                            top: 0,
-                            child: Stack(
-                              children: lines,
-                              overflow: Overflow.visible,
-                            ),
-                          ),
-                          Positioned(
-                            left: spaceLeft,
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
-                            child: Opacity(
-                              opacity: dragOpacity,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  ...hasChildren
-                                      ? [
-                                          Container(
-                                            padding: EdgeInsets.only(
-                                                right: padIndent),
-                                            width: indent,
-                                            height: iconHeight,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                if (item.isExpanded) {
-                                                  controller
-                                                      .collapse(item.data);
-                                                } else {
-                                                  controller.expand(item.data);
-                                                }
-                                              },
-                                              child: expanderBuilder(
-                                                  context, item),
-                                            ),
-                                          ),
-                                        ]
-                                      : [SizedBox(width: indent)],
-                                  for (int i = 0; i < item.spacing - 1; i++)
-                                    Container(
-                                      padding:
-                                          EdgeInsets.only(right: padIndent),
-                                      width: indent,
-                                      height: iconHeight,
-                                      child:
-                                          extraBuilder?.call(context, item, i),
-                                    ),
-                                  Container(
-                                    padding: EdgeInsets.only(right: padIndent),
-                                    width: indent,
-                                    height: iconHeight,
-                                    child: IgnorePointer(
-                                      child: iconBuilder(context, item),
-                                    ),
-                                  ),
-                                  itemBuilder(context, item),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                      width: 1,
+                      height: (itemHeight - iconHeight) / 2 + 1.5,
+                      child: CustomPaint(
+                        painter: TreeLine(
+                          color: lineColor
+                              .withOpacity(lineColor.opacity * dragOpacity),
+                          strokeCap: StrokeCap.butt,
+                        ),
                       ),
                     ),
-                  );
-                },
-                childCount: controller?.flat?.length ?? 0,
-                findChildIndexCallback: (Key key) {
-                  return controller.indexLookup[key];
-                },
-                addRepaintBoundaries: false,
-                addAutomaticKeepAlives: false,
-                addSemanticIndexes: false),
+                  ),
+                );
+              }
+
+              if (backgroundBuilder != null) {
+                lines.add(
+                  Positioned(
+                    left: indent + spaceLeft - iconMargin,
+                    top: 0,
+                    bottom: 0,
+                    right: 0,
+                    child: _InputHelper<T>(
+                      style: style,
+                      isDragging: dragging,
+                      item: item,
+                      child: backgroundBuilder(context, item),
+                    ),
+                  ),
+                );
+                // Draw background before lines?
+                //lines.insert(0, value);
+              }
+
+              return KeepAlive(
+                /// We need a KeepAlive here to make sure the input helper
+                /// stays around when it's being dragged.
+                key: item.key,
+                keepAlive: controller.dragOperation?.startItem == item,
+                child: Container(
+                  height: itemHeight,
+                  child: Stack(
+                    overflow: Overflow.visible,
+                    children: <Widget>[
+                      Positioned.fill(
+                        top: 0,
+                        child: Stack(
+                          children: lines,
+                          overflow: Overflow.visible,
+                        ),
+                      ),
+                      Positioned(
+                        left: spaceLeft,
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        child: Opacity(
+                          opacity: dragOpacity,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ...hasChildren
+                                  ? [
+                                      Container(
+                                        padding:
+                                            EdgeInsets.only(right: padIndent),
+                                        width: indent,
+                                        height: iconHeight,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            if (item.isExpanded) {
+                                              controller.collapse(item.data);
+                                            } else {
+                                              controller.expand(item.data);
+                                            }
+                                          },
+                                          child: expanderBuilder(context, item),
+                                        ),
+                                      ),
+                                    ]
+                                  : [SizedBox(width: indent)],
+                              for (int i = 0; i < item.spacing - 1; i++)
+                                Container(
+                                  padding: EdgeInsets.only(right: padIndent),
+                                  width: indent,
+                                  height: iconHeight,
+                                  child: extraBuilder?.call(context, item, i),
+                                ),
+                              Container(
+                                padding: EdgeInsets.only(right: padIndent),
+                                width: indent,
+                                height: iconHeight,
+                                child: IgnorePointer(
+                                  child: iconBuilder(context, item),
+                                ),
+                              ),
+                              itemBuilder(context, item),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            itemCount: controller?.flat?.length ?? 0,
+            // findChildIndexCallback: (Key key) {
+            //   return controller.indexLookup[key];
+            // },
+            addRepaintBoundaries: false,
+            addAutomaticKeepAlives: false,
+            addSemanticIndexes: false,
           ),
         ),
       ),
