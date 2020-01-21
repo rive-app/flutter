@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_arrow_icon.dart';
+import 'package:tree_widget/tree_line.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
@@ -129,12 +130,31 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
 
   @override
   Widget build(BuildContext context) {
-    return TreeView<TreeItem>(
-      style: TreeStyle(
+    var treeStyle = TreeStyle(
         padding: const EdgeInsets.all(10),
         lineColor: Colors.grey.shade700,
-      ),
+        showFirstLine: false);
+    return TreeView<TreeItem>(
+      style: treeStyle,
       controller: _controller,
+      separatorBuilder: (context, index) => Stack(
+        children: [
+          Positioned(
+            left: treeStyle.iconSize.width,
+            top: treeStyle.itemHeight/2-1,
+            bottom: treeStyle.itemHeight/2,
+            right: 0,
+            child: Container(
+              child: CustomPaint(
+                painter: TreeLine(
+                  color: treeStyle.lineColor,
+                  strokeCap: StrokeCap.butt,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       expanderBuilder: (context, item) => Container(
         child: Center(
           child: TreeExpander(
@@ -227,6 +247,23 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
     // Just some test data...
     var data = [
       TreeItem(
+        "Artboard 1",
+        children: [
+          TreeItem(
+            "Group Test",
+            children: [
+              TreeItem("body"),
+              TreeItem("neck"),
+              TreeItem("leg_right"),
+              TreeItem("head"),
+            ],
+          ),
+        ],
+      ),
+      TreeItem(
+        "Artboard2",
+      ),
+      TreeItem(
         "Artboard",
         children: [
           TreeItem(
@@ -305,11 +342,12 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
       )
     ];
     _controller = MyTreeController(data);
-
+    _controller.flatten();
     // Programmatically expand some items in the tree
     _controller.expand(data[0]);
-    _controller.expand(data[0].children[0]);
-    _controller.expand(data[0].children[0].children[5]);
+    _controller.expand(data[1]);
+    // _controller.expand(data[0].children[0]);
+    // _controller.expand(data[0].children[0].children[5]);
   }
 }
 

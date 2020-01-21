@@ -56,14 +56,14 @@ class TreeView<T> extends StatelessWidget {
 
   final bool shrinkWrap;
 
-  final TreeViewIndexBuilder seperatorBuilder;
+  final TreeViewIndexBuilder separatorBuilder;
 
   const TreeView({
     @required this.controller,
     @required this.expanderBuilder,
     @required this.iconBuilder,
     @required this.itemBuilder,
-    this.seperatorBuilder,
+    this.separatorBuilder,
     this.extraBuilder,
     this.backgroundBuilder,
     this.style = defaultTreeStyle,
@@ -96,10 +96,10 @@ class TreeView<T> extends StatelessWidget {
             itemBuilder: (context, index) {
               var item = controller.flat[index];
               if (item == null) {
-                if (seperatorBuilder != null) {
+                if (separatorBuilder != null) {
                   return Container(
                     height: itemHeight,
-                    child: seperatorBuilder(context, index),
+                    child: separatorBuilder(context, index),
                   );
                 }
                 return Container();
@@ -111,6 +111,8 @@ class TreeView<T> extends StatelessWidget {
                 depth = Int8List.fromList(
                   depth.toList(growable: true)..insert(0, 0),
                 );
+              } else if (depth.isNotEmpty) {
+                depth[0] = -1;
               }
               int depthCount = depth.length;
               bool hasChildren = item.hasChildren;
@@ -259,29 +261,29 @@ class TreeView<T> extends StatelessWidget {
                       ),
                     ),
                   );
-                  if (showLines && showOurLine && !item.isLastChild) {
-                    // Example: Red connector under expander: https://cl.ly/473J3m462g0e
-                    lines.insert(
-                      0,
-                      Positioned(
-                        left: spaceLeft + iconWidth / 2,
-                        top: itemHeight / 2 + iconHeight / 2 + 0.5,
-                        child: Container(
-                          width: 1,
-                          // extra 0.5 here to avoid precision errors leaving a
-                          // gap
-                          height: (itemHeight - iconHeight) / 2 + 1.5,
-                          child: CustomPaint(
-                            painter: TreeLine(
-                              color: lineColor.withOpacity(
-                                  lineColor.opacity * belowDragOpacity),
-                              strokeCap: StrokeCap.butt,
-                            ),
+                }
+                if (showLines && showOurLine && !item.isLastChild) {
+                  // Example: Red connector under expander: https://cl.ly/473J3m462g0e
+                  lines.insert(
+                    0,
+                    Positioned(
+                      left: spaceLeft + iconWidth / 2,
+                      top: itemHeight / 2 + iconHeight / 2 + 0.5,
+                      child: Container(
+                        width: 1,
+                        // extra 0.5 here to avoid precision errors leaving a
+                        // gap
+                        height: (itemHeight - iconHeight) / 2 + 1.5,
+                        child: CustomPaint(
+                          painter: TreeLine(
+                            color: lineColor.withOpacity(
+                                lineColor.opacity * belowDragOpacity),
+                            strokeCap: StrokeCap.butt,
                           ),
                         ),
                       ),
-                    );
-                  }
+                    ),
+                  );
                 }
               } else if (!(depth.length == 1 && depth[0] == -1)) {
                 //(this.props.hideFirstHorizontalLine && depth.length === 1 && depth[0] === -1) ? null : <div className={horizontalLineStyle} style={{background:showOurLine && showLines ? null : "initial", opacity:dragOpacity}}></div>
