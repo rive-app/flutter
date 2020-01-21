@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shortid/shortid.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:tree_widget/flat_tree_item.dart';
 
 import '../../widgets/files_view/screen.dart';
 import '../rive.dart';
@@ -51,7 +52,6 @@ class FileBrowser extends FileBrowserController {
     _addTeam(rive, 2);
     reset();
     openFolder(_myFiles, false);
-    myFilesController.value.expand(_myFiles);
   }
 
   void _addTeam(Rive rive, int number) {
@@ -179,30 +179,19 @@ class FileBrowser extends FileBrowserController {
     }
     _lastSelectedIndex = null;
     notifyListeners();
+    myFilesController.value.expand(value);
+    for (var team in teams.value) {
+      team.value.expand(value);
+    }
     if (jumpTo) {
-      myFilesController.value.expand(value);
+      List<FlatTreeItem<FolderItem>> _all = [];
+      _all.addAll(myFilesController.value.flat);
       for (var team in teams.value) {
-        team.value.expand(value);
+        _all.addAll(team.value.flat);
       }
-      int _index = myFilesController.value.flat
-          .indexWhere((f) => f.data.key == value.key);
-      double _offset = 0.0;
-      if (_index != -1) {
-        _offset = _index * kTreeItemHeight;
-        treeScrollController.jumpTo(_offset);
-      } else {
-        _offset = kTreeItemHeight +
-            kTreeItemHeight * myFilesController.value.flat.length;
-        for (var team in teams.value) {
-          _index = team.value.flat.indexWhere((f) => f.data.key == value.key);
-          if (_index != -1) {
-            treeScrollController.jumpTo((_index * kTreeItemHeight) + _offset);
-          } else {
-            _offset =
-                kTreeItemHeight + kTreeItemHeight * team.value.flat.length;
-          }
-        }
-      }
+      int _index = _all.indexWhere((f) => f.data.key == value.key);
+      double _offset = _index * kTreeItemHeight;
+      treeScrollController.jumpTo(_offset);
     }
     // Scrollable.ensureVisible(context);
   }
