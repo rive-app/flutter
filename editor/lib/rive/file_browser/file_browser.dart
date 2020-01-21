@@ -93,19 +93,6 @@ class FileBrowser extends FileBrowserController {
     final _itemFileHeight = (kFileHeight / kGridWidth) * _itemWidth;
     final hasFolders = _current.hasFolders;
     final hasFiles = _current.hasFiles;
-    // final _folderGridSize = hasFolders
-    //     ? (_current.folders.length / crossAxisCount) * _itemFolderHeight +
-    //         kGridSpacing
-    //     : 0;
-    // final _folderHeaderOffset = kGridHeaderHeight;
-    // final _fileHeaderOffset = hasFolders ? kGridHeaderHeight : _folderGridSize;
-    // final _fileGridSize = hasFiles
-    //     ? kGridHeaderHeight +
-    //         _folderGridSize +
-    //         kGridHeaderHeight +
-    //         (_current.files.length / crossAxisCount) *
-    //             (kFileAspectRatio * _itemWidth)
-    //     : 0;
     final _marqueeRect = marqueeSelection.value;
 
     for (var item in selectableItems) {
