@@ -89,12 +89,13 @@ class FileBrowser extends FileBrowserController {
     final _itemWidth =
         (_constraints.maxWidth - (kGridSpacing * (crossAxisCount + 1))) /
             crossAxisCount;
+    final _itemFolderHeight = (kFolderHeight * _itemWidth) / kGridWidth;
     final _offset = scrollOffset.value;
     final hasFolders = _current.hasFolders;
     final hasFiles = _current.hasFiles;
     final _folderGridSize = hasFolders
-        ? (_current.folders.length / crossAxisCount) *
-            (kFolderAspectRatio * _itemWidth)
+        ? (_current.folders.length / crossAxisCount) * _itemFolderHeight +
+            kGridSpacing
         : 0;
     final _folderHeaderOffset = kGridHeaderHeight;
     final _fileHeaderOffset = hasFolders ? kGridHeaderHeight : _folderGridSize;
@@ -110,45 +111,17 @@ class FileBrowser extends FileBrowserController {
       if (hasFolders) {
         if (item is FolderItem) {
           int _index = _current.folders.indexOf(item);
-          int _rowIndex = _index % crossAxisCount;
-          int _columnIndex = (_index / crossAxisCount).ceil();
-          debugPrint('_rowIndex$_rowIndex, _columnIndex$_columnIndex');
-          // final a = Offset(dx, dy);
-          // final b = Offset(dx, dy);
-          // final _itemRect = Rect.fromPoints(a, b);
+          int col = _index % crossAxisCount;
+          int row = (_index / crossAxisCount).ceil();
+          final w = _itemWidth;
+          final h = _itemFolderHeight;
+          final l = kGridSpacing + (col * (kGridSpacing + w));
+          final t = _folderHeaderOffset + ((kGridSpacing / 2) + h) * row;
+          Rect _itemRect = Rect.fromLTWH(l, t, w, h);
+          item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
         }
       } else {}
     }
-    //  List<SelectableItem> _visibleList =
-    //     selectableItems.skip(_selectedRow * crossAxisCount).toList();
-    print("Marquee Rect: $_marqueeRect");
-    // for (var item in )
-    // debugPrint("W: $_itemWidth, O: $_offset");
-    // final _selectedRow = (_offset / kTreeItemHeight).floor();
-    // final _itemsPerRow = crossAxisCount;
-    // List<SelectableItem> _visibleList =
-    //     selectableItems.skip(_selectedRow * _itemsPerRow).toList();
-    // for (var item in _visibleList) {
-    //   if (item is FolderItem) {
-    //     // final _info = item.rectChanged.value;
-    //     // print(
-    //     //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
-    //     // if ((_info?.visibleFraction ?? 0) > 0) {
-    //     //   final _rect = _info.visibleBounds;
-    //     //   item.isSelected = value.overlaps(_rect);
-    //     // }
-    //     // final _rect = Recrt.fromLTWH(left, top, width, height);
-    //   }
-    //   if (item is FileItem) {
-    //     // final _info = item.rectChanged.value;
-    //     // print(
-    //     //     "${item.key.value}: ${_info?.visibleFraction}, ${_info?.visibleBounds}");
-    //     // if ((_info?.visibleFraction ?? 0) > 0) {
-    //     //   final _rect = _info.visibleBounds;
-    //     //   item.isSelected = value.overlaps(_rect);
-    //     // }
-    //   }
-    // }
   }
 
   void onFoldersChanged() {
@@ -178,7 +151,7 @@ class FileBrowser extends FileBrowserController {
     treeController.value.expand(value);
     if (jumpTo) {
       List<FlatTreeItem<FolderItem>> _all = treeController.value.flat;
-      int _index = _all.indexWhere((f) => f.data.key == value.key);
+      int _index = _all.indexWhere((f) => f?.data?.key == value.key);
       double _offset = _index * kTreeItemHeight;
       treeScrollController.jumpTo(_offset);
     }

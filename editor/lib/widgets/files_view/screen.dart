@@ -21,11 +21,13 @@ import 'item_view.dart';
 import 'profile_view.dart';
 
 const kGridSpacing = 30.0;
-const kGridWidth = 185.0;
+const kGridWidth = 187.0;
 const kGridHeaderHeight = 40.0;
 const kSectionSpacing = 10.0;
-const kFolderAspectRatio = 187 / 60;
-const kFileAspectRatio = 187 / 190;
+const kFolderHeight = 60;
+const kFileHeight = 190;
+const kFolderAspectRatio = kGridWidth / kFolderHeight;
+const kFileAspectRatio = kGridWidth / kFileHeight;
 
 class FilesView extends StatelessWidget {
   const FilesView({
