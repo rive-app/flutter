@@ -10,6 +10,9 @@
 			"path": "dependencies/rive-editor-flutter/dependencies/core-dart"
 		},
 		{
+			"path": "dependencies/rive-editor-flutter/rive_core"
+		},
+		{
 			"path": "dependencies/rive-editor-flutter/editor"
 		}
 	],

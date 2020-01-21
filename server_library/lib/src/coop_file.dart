@@ -7,7 +7,7 @@ class CoopFile {
   int ownerId;
   int fileId;
 
-  List<CoopFileObject> objects;
+  Map<int, CoopFileObject> objects;
 }
 
 // Store session, nextObjectId, nextChange Id in Dynamo

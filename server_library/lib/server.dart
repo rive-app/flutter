@@ -28,7 +28,7 @@ class _CoopIsolate extends CoopIsolateProcess {
     file = CoopFile()
       ..ownerId = ownerId
       ..fileId = ownerId
-      ..objects = [];
+      ..objects = {};
     fileMeta = CoopFileServerData()
       ..sessions = []
       ..nextChangeId = CoopCommand.minChangeId
@@ -92,17 +92,18 @@ class _CoopIsolate extends CoopIsolateProcess {
             var nextId = fileMeta.nextObjectId++;
             serverChange.objectId = nextId;
             print("ADDING SERVER OBJECT WITH ID ${serverChange.objectId}");
-            file.objects.add(
-              CoopFileObject()
-                ..localId = nextId
-                ..key = reader.readVarUint(),
-            );
+            file.objects[nextId] = CoopFileObject()
+              ..localId = nextId
+              ..key = reader.readVarUint();
             client.changedIds[objectChanges.objectId] = nextId;
             client.writer.writeChangeId(objectChanges.objectId, nextId);
             print("MAKE OBJECT ${objectChanges.objectId} ${change.value}");
             // create object with id
             break;
           case CoreContext.removeKey:
+            var objectId = client.changedIds[objectChanges.objectId] ??
+                objectChanges.objectId;
+            file.objects.remove(objectId);
             print("DESTROY OBJECT ${objectChanges.objectId} ${change.value}");
             // Destroy object with id
             break;
