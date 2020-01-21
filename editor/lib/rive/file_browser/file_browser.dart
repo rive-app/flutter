@@ -89,38 +89,46 @@ class FileBrowser extends FileBrowserController {
     final _itemWidth =
         (_constraints.maxWidth - (kGridSpacing * (crossAxisCount + 1))) /
             crossAxisCount;
-    final _itemFolderHeight = (kFolderHeight * _itemWidth) / kGridWidth;
-    final _offset = scrollOffset.value;
+    final _itemFolderHeight = (kFolderHeight / kGridWidth) * _itemWidth;
+    final _itemFileHeight = (kFileHeight / kGridWidth) * _itemWidth;
     final hasFolders = _current.hasFolders;
     final hasFiles = _current.hasFiles;
-    final _folderGridSize = hasFolders
-        ? (_current.folders.length / crossAxisCount) * _itemFolderHeight +
-            kGridSpacing
-        : 0;
-    final _folderHeaderOffset = kGridHeaderHeight;
-    final _fileHeaderOffset = hasFolders ? kGridHeaderHeight : _folderGridSize;
-    final _fileGridSize = hasFiles
-        ? kGridHeaderHeight +
-            _folderGridSize +
-            kGridHeaderHeight +
-            (_current.files.length / crossAxisCount) *
-                (kFileAspectRatio * _itemWidth)
-        : 0;
     final _marqueeRect = marqueeSelection.value;
+
     for (var item in selectableItems) {
       if (hasFolders) {
         if (item is FolderItem) {
           int _index = _current.folders.indexOf(item);
           int col = _index % crossAxisCount;
-          int row = (_index / crossAxisCount).ceil();
+          int row = (_index / crossAxisCount).floor();
           final w = _itemWidth;
           final h = _itemFolderHeight;
           final l = kGridSpacing + (col * (kGridSpacing + w));
-          final t = (_folderHeaderOffset + (((kGridSpacing / 2) + h) * row));
+          final t = kGridHeaderHeight + ((h + kGridSpacing) * row);
           Rect _itemRect = Rect.fromLTWH(l, t, w, h);
           item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
         }
-      } else {}
+      }
+      if (hasFiles) {
+        final _offset = hasFolders
+            ? (((_current.folders.length / crossAxisCount).ceil() *
+                        (_itemFolderHeight + kGridSpacing)) +
+                    kGridHeaderHeight) +
+                kGridHeaderHeight -
+                kGridSpacing
+            : kGridHeaderHeight;
+        if (item is FileItem) {
+          int _index = _current.files.indexOf(item);
+          int col = _index % crossAxisCount;
+          int row = (_index / crossAxisCount).floor();
+          final w = _itemWidth;
+          final h = _itemFileHeight;
+          final l = kGridSpacing + (col * (kGridSpacing + w));
+          final t = _offset + ((h + kGridSpacing) * row);
+          Rect _itemRect = Rect.fromLTWH(l, t, w, h);
+          item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
+        }
+      }
     }
   }
 
