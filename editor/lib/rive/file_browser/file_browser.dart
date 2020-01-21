@@ -35,9 +35,11 @@ class FileBrowser extends FileBrowserController {
 
   void init(Rive rive) {
     _myFiles = FolderItem(
-        key: ValueKey('0'), name: "My Files", files: [], //_genFiles(0),
-        folders: [] //_getFolders(math.Random().nextInt(6)),
-        );
+      key: ValueKey('0'),
+      name: "My Files",
+      files: _genFiles(0),
+      folders: _getFolders(math.Random().nextInt(6)),
+    );
     browserController.value = FolderTreeController([_myFiles], rive: rive);
     reset();
     openFolder(_myFiles, false);
