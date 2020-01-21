@@ -52,6 +52,8 @@ class TreeView<T> extends StatelessWidget {
 
   final ScrollController scrollController;
 
+  final bool shrinkWrap;
+
   const TreeView({
     @required this.controller,
     @required this.expanderBuilder,
@@ -61,6 +63,7 @@ class TreeView<T> extends StatelessWidget {
     this.backgroundBuilder,
     this.style = defaultTreeStyle,
     this.scrollController,
+    this.shrinkWrap = false,
   });
 
   @override
@@ -82,12 +85,15 @@ class TreeView<T> extends StatelessWidget {
           child: ListView.custom(
             controller: scrollController,
             // semanticChildCount: controller.flat.length,
+            shrinkWrap: shrinkWrap,
             padding: style.padding,
+            itemExtent: style.itemHeight,
             childrenDelegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
+                (context, index) {
                   var item = controller.flat[index];
                   var lines = <Widget>[];
                   var depth = item.depth;
+
                   if (style.showFirstLine) {
                     depth = Int8List.fromList(
                       depth.toList(growable: true)..insert(0, 0),
@@ -341,9 +347,12 @@ class TreeView<T> extends StatelessWidget {
                       child: Stack(
                         overflow: Overflow.visible,
                         children: <Widget>[
-                          Stack(
-                            children: lines,
-                            overflow: Overflow.visible,
+                          Positioned.fill(
+                            top: 0,
+                            child: Stack(
+                              children: lines,
+                              overflow: Overflow.visible,
+                            ),
                           ),
                           Positioned(
                             left: spaceLeft,

@@ -114,7 +114,7 @@ abstract class TreeController<T> extends ChangeNotifier {
     var flat = <FlatTreeItem<T>>[];
     var context = FlattenedTreeDataContext<T>(_expanded);
     var lookup = HashMap<Key, int>();
-    
+
     _flatten(context, _data, flat, lookup, [], null);
     _flat = flat;
     _indexLookup = lookup;

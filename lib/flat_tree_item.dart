@@ -85,16 +85,17 @@ class FlatTreeItem<T> {
   /// The observable drop state of this item.
   final ValueNotifier<DropState> dropState = _DropStateValueNotifier();
 
-  FlatTreeItem(this.data,
-      {this.parent,
-      this.next,
-      this.prev,
-      this.depth,
-      this.isLastChild,
-      this.hasChildren,
-      this.isExpanded,
-      this.spacing,
-      this.isDisabled,
-      this.isProperty = false})
-      : key = ValueKey(data);
+  FlatTreeItem(
+    this.data, {
+    this.parent,
+    this.next,
+    this.prev,
+    this.depth,
+    this.isLastChild,
+    this.hasChildren,
+    this.isExpanded,
+    this.spacing,
+    this.isDisabled,
+    this.isProperty = false,
+  }) : key = ValueKey(data);
 }
