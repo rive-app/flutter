@@ -87,26 +87,23 @@ class TreeView<T> extends StatelessWidget {
       value: controller,
       child: Consumer<TreeController<T>>(
         builder: (context, controller, _) => Scrollbar(
-          child: ListView.separated(
+          child: ListView.builder(
             controller: scrollController,
             // semanticChildCount: controller.flat.length,
-            separatorBuilder: (context, index) {
-              var item = controller.flat[index];
-              if (item == null && seperatorBuilder != null) {
-                return Container(
-                  height: itemHeight,
-                  child: seperatorBuilder(context, index),
-                );
-              }
-              return Container();
-            },
             shrinkWrap: shrinkWrap,
             padding: style.padding,
             // itemExtent: style.itemHeight,
             itemBuilder: (context, index) {
               var item = controller.flat[index];
-              if (item == null) return Container(height: 0);
-
+              if (item == null) {
+                if (seperatorBuilder != null) {
+                  return Container(
+                    height: itemHeight,
+                    child: seperatorBuilder(context, index),
+                  );
+                }
+                return Container();
+              }
               var lines = <Widget>[];
               var depth = item.depth;
 
