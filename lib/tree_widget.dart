@@ -87,7 +87,7 @@ class TreeView<T> extends StatelessWidget {
             // semanticChildCount: controller.flat.length,
             shrinkWrap: shrinkWrap,
             padding: style.padding,
-            itemExtent: style.itemHeight,
+            // itemExtent: style.itemHeight,
             childrenDelegate: SliverChildBuilderDelegate(
                 (context, index) {
                   var item = controller.flat[index];
