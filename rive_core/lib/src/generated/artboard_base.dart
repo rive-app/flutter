@@ -1,6 +1,7 @@
 /// Core automatically generated lib/src/generated/artboard_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import '../../container_component.dart';
 
 abstract class ArtboardBase extends ContainerComponent {
@@ -147,8 +148,9 @@ abstract class ArtboardBase extends ContainerComponent {
   }
 
   @override
-  void changeNonNull() {
-    super.changeNonNull();
+  void changeNonNull([PropertyChanger changer]) {
+    changer ??= context?.changeProperty;
+    super.changeNonNull(changer);
     if (width != null) {
       context?.changeProperty(this, widthPropertyKey, width, width);
     }

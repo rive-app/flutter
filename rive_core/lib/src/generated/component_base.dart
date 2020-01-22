@@ -76,7 +76,8 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   }
 
   @override
-  void changeNonNull() {
+  void changeNonNull([PropertyChanger changer]) {
+    changer ??= context?.changeProperty;
     if (name != null) {
       context?.changeProperty(this, namePropertyKey, name, name);
     }

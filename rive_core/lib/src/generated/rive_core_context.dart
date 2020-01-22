@@ -38,6 +38,11 @@ abstract class RiveCoreContext extends CoreContext {
           justAdded = true;
           break;
         case CoreContext.removeKey:
+          if (object != null) {
+            remove(object);
+          } else {
+            print("ATTEMPTED TO DELETE NULL OBJECT ${objectChanges.objectId}");
+          }
           break;
         case ComponentBase.namePropertyKey:
           var value = reader.readString();
@@ -66,8 +71,6 @@ abstract class RiveCoreContext extends CoreContext {
         case NodeBase.scaleYPropertyKey:
         case NodeBase.opacityPropertyKey:
           var value = reader.readFloat64();
-          print(
-              "SETTING $object ${change.op} $value $objects ${objectChanges.objectId}");
           setObjectProperty(object, change.op, value);
           break;
         default:
@@ -96,6 +99,8 @@ abstract class RiveCoreContext extends CoreContext {
           var writer = BinaryWriter(alignment: 32);
           writer.writeString(value);
           change.value = writer.uint8Buffer;
+        } else {
+          return null;
         }
         break;
       case ComponentBase.parentIdPropertyKey:
@@ -103,6 +108,8 @@ abstract class RiveCoreContext extends CoreContext {
           var writer = BinaryWriter(alignment: 4);
           writer.writeVarInt(value);
           change.value = writer.uint8Buffer;
+        } else {
+          return null;
         }
         break;
       case ComponentBase.childOrderPropertyKey:
@@ -111,6 +118,8 @@ abstract class RiveCoreContext extends CoreContext {
           writer.writeVarInt(value.numerator);
           writer.writeVarInt(value.denominator);
           change.value = writer.uint8Buffer;
+        } else {
+          return null;
         }
         break;
       case ArtboardBase.widthPropertyKey:
@@ -129,6 +138,8 @@ abstract class RiveCoreContext extends CoreContext {
           var writer = BinaryWriter(alignment: 8);
           writer.writeFloat64(value);
           change.value = writer.uint8Buffer;
+        } else {
+          return null;
         }
         break;
       default:

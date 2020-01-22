@@ -18,9 +18,9 @@ class FolderTreeView extends StatelessWidget {
   final ScrollController scrollController;
 
   const FolderTreeView({
-    Key key,
     @required this.controller,
     @required this.itemHeight,
+    Key key,
     this.scrollController,
   }) : super(key: key);
 
@@ -34,13 +34,13 @@ class FolderTreeView extends StatelessWidget {
           lineColor: ThemeUtils.lineGrey,
           itemHeight: itemHeight,
         ),
-        seperatorBuilder: (_, index) => Center(
-            child: Container(
-              height: 1,
-              padding: EdgeInsets.only(left: 20.0),
-              color: Color.fromRGBO(227, 227, 227, 1),
-            ),
+        separatorBuilder: (_, index) => Center(
+          child: Container(
+            height: 1,
+            padding: const EdgeInsets.only(left: 20.0),
+            color: const Color.fromRGBO(227, 227, 227, 1),
           ),
+        ),
         controller: controller,
         expanderBuilder: (context, item) => Container(
           child: Center(

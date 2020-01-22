@@ -1,6 +1,7 @@
 /// Core automatically generated lib/src/generated/node_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import '../../container_component.dart';
 
 abstract class NodeBase extends ContainerComponent {
@@ -135,8 +136,9 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   @override
-  void changeNonNull() {
-    super.changeNonNull();
+  void changeNonNull([PropertyChanger changer]) {
+    changer ??= context?.changeProperty;
+    super.changeNonNull(changer);
     if (x != null) {
       context?.changeProperty(this, xPropertyKey, x, x);
     }
