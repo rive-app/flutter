@@ -188,7 +188,16 @@ class Editor extends StatelessWidget {
                 icon: Icon(Icons.account_circle),
                 color: Colors.white,
                 onPressed: () {
-                  WindowController.createWindow("auth", size: Size(1024, 1024));
+                  // WindowController.openWebView(
+                  //     'auth_window', "https://rive.app/signin",
+                  //     size: Size(1024, 1024));
+                  WindowController.openWebView(
+                          'auth_window', "http://127.0.0.1:5500/test.html",
+                          jsMessage: "jsHandler", size: Size(1024, 1024))
+                      .then((value) {
+                    print("Message: $value");
+                    WindowController.closeWebView('auth_window');
+                  });
                 },
               ),
             ],

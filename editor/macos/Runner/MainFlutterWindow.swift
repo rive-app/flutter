@@ -7,9 +7,8 @@
 //    let windowFrame = self.frame
 //    self.contentViewController = flutterViewController
 //    self.setFrame(windowFrame, display: true)
-//
+//    WindowManagerPlugin.register(with: flutterViewController.registrar(forPlugin: "WindowManagerPlugin"))
 //    RegisterGeneratedPlugins(registry: flutterViewController)
-//
 //    super.awakeFromNib()
 //  }
 //}

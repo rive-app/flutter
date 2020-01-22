@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class WindowController {
-  static const _channel = const MethodChannel('plugins.rive.app/window_controller');
+  static const _channel =
+      const MethodChannel('plugins.rive.app/window_controller');
 
   static final Random _random = Random.secure();
 
@@ -20,6 +21,37 @@ class WindowController {
     });
     var _key = await lastWindowKey();
     return _key == key;
+  }
+
+  static Future<bool> closeWindow(String key) {
+    try {
+      return _channel.invokeMethod<bool>('closeWindow', {"key": key});
+    } catch (e) {
+      return Future.value(false);
+    }
+  }
+
+  static Future<String> openWebView(String key, String url,
+      {Offset offset, Size size, String jsMessage}) async {
+    return _channel.invokeMethod<String>('openWebView', {
+      "key": key,
+      "url": url,
+      "jsMessage": jsMessage,
+      "x": offset?.dx,
+      "y": offset?.dy,
+      "width": size?.width,
+      "height": size?.height,
+    });
+  }
+
+  static Future<bool> closeWebView(String key) {
+    try {
+      return _channel.invokeMethod<bool>('closeWebView', {
+        "key": key,
+      });
+    } catch (e) {
+      return Future.value(false);
+    }
   }
 
   static Future<bool> resizeWindow(String key, Size size) async {
@@ -44,14 +76,6 @@ class WindowController {
 
   static Future<int> windowCount() {
     return _channel.invokeMethod<int>('windowCount');
-  }
-
-  static Future<bool> closeWindow(String key) {
-    try {
-      return _channel.invokeMethod<bool>('closeWindow', {"key": key});
-    } catch (e) {
-      return Future.value(false);
-    }
   }
 
   static Future<String> lastWindowKey() {
