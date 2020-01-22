@@ -21,7 +21,7 @@ class AppDelegate: FlutterAppDelegate {
   }
 
   override func applicationDidFinishLaunching(_ notification: Notification) {
-      _windowManager.createNewWindow(key: "base", x: 300, y: 300, width: 1280, height: 720)
+      _windowManager.createNewWindow(key: "base", width: 1280, height: 720)
   }
 }
 
@@ -30,7 +30,7 @@ class WindowManagerPlugin: NSObject, FlutterPlugin {
     var _controllers: [(String, FlutterViewController, NSWindow)] = []
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channelName = "plugins.rive.app/window_manager"
+        let channelName = "plugins.rive.app/window_controller"
         let channel = FlutterMethodChannel(name: channelName, binaryMessenger: registrar.messenger)
         let instance = WindowManagerPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)

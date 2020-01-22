@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_editor/plugins/window_utils.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'rive/hierarchy_tree_controller.dart';
@@ -114,8 +115,6 @@ class MyApp extends StatelessWidget {
           // },
           debugShowCheckedModeBanner: false,
           theme: ThemeData.light(),
-          // darkTheme: ThemeData.dark(),
-          // themeMode: ThemeMode.light,
           home: DefaultTextStyle(
             style: TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
             child: Container(
@@ -156,28 +155,40 @@ class Editor extends StatelessWidget {
         Container(
           height: 39,
           color: const Color.fromRGBO(50, 50, 50, 1.0),
-          child: Stack(
+          child: Row(
             children: <Widget>[
-              Positioned.fill(
-                child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (_) {
-                      WindowUtils.startDrag();
-                    }),
-              ),
-              ValueListenableBuilder<List<RiveTabItem>>(
-                valueListenable: rive.tabs,
-                builder: (context, tabs, child) {
-                  return ValueListenableBuilder<RiveTabItem>(
-                    valueListenable: rive.selectedTab,
-                    builder: (context, selectedTab, child) => RiveTabBar(
-                      offset: 95,
-                      tabs: tabs,
-                      selected: selectedTab,
-                      select: rive.openTab,
-                      close: rive.closeTab,
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                      child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTapDown: (_) {
+                            WindowUtils.startDrag();
+                          }),
                     ),
-                  );
+                    ValueListenableBuilder<List<RiveTabItem>>(
+                      valueListenable: rive.tabs,
+                      builder: (context, tabs, child) =>
+                          ValueListenableBuilder<RiveTabItem>(
+                        valueListenable: rive.selectedTab,
+                        builder: (context, selectedTab, child) => RiveTabBar(
+                          offset: 95,
+                          tabs: tabs,
+                          selected: selectedTab,
+                          select: rive.openTab,
+                          close: rive.closeTab,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.account_circle),
+                color: Colors.white,
+                onPressed: () {
+                  WindowController.createWindow("auth", size: Size(1024, 1024));
                 },
               ),
             ],
