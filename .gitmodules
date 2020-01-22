@@ -1,0 +1,3 @@
+[submodule "dependencies/local-data-flutter"]
+	path = dependencies/local-data-flutter
+	url = git@github.com:rive-app/local-data-flutter.git
