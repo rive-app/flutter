@@ -34,7 +34,7 @@ class FolderTreeView extends StatelessWidget {
           lineColor: ThemeUtils.lineGrey,
           itemHeight: itemHeight,
         ),
-        separatorBuilder: (_, index) => Center(
+        seperatorBuilder: (_, index) => Center(
           child: Container(
             height: 1,
             padding: const EdgeInsets.only(left: 20.0),
