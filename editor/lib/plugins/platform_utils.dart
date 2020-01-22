@@ -32,7 +32,7 @@ class PlatformUtils {
   }
 
   static Future<String> openWebView(String key, String url,
-      {Offset offset, Size size, String jsMessage}) async {
+      {Offset offset, Size size, String jsMessage = ""}) async {
     return _channel.invokeMethod<String>('openWebView', {
       "key": key,
       "url": url,

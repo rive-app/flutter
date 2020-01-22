@@ -27,10 +27,7 @@ class WindowManagerPlugin: NSObject, FlutterPlugin {
             let y: Double? = args?["y"] as? Double
             let key: String = args?["key"] as! String
             let url: String = args?["url"] as! String
-            var jsHandler: String?
-            if args?.keys.contains("jsMessage") ?? false {
-                jsHandler = args?["jsMessage"] as! String?
-            }
+            let jsHandler: String = args?["jsMessage"] as! String
             createWebWindow(
                 key: key,
                 url: url,
@@ -143,14 +140,14 @@ class WindowManagerPlugin: NSObject, FlutterPlugin {
         windowController.showWindow(self)
     }
 
-    func createWebWindow(key: String, url: String, jsMessage: String? = nil, x: Double? = nil, y: Double? = nil, width: Int? = nil, height: Int? = nil, result: @escaping FlutterResult) {
+    func createWebWindow(key: String, url: String, jsMessage: String, x: Double? = nil, y: Double? = nil, width: Int? = nil, height: Int? = nil, result: @escaping FlutterResult) {
         let window = NSWindow()
         window.styleMask = NSWindow.StyleMask(rawValue: 0xf)
         window.backingType = .buffered
         let _auth = FullScreenWebView()
         _auth.url = url
-        if (jsMessage != nil) {
-            _auth.jsHandler = jsMessage
+        _auth.jsHandler = jsMessage
+        if (jsMessage != "") {
             _auth.jsResponse = { (message: Any) -> Void in
                 result(message)
             }
@@ -188,7 +185,7 @@ class WindowManagerPlugin: NSObject, FlutterPlugin {
 class FullScreenWebView: NSViewController, WKUIDelegate, WKScriptMessageHandler {
     var webView: WKWebView!
     var url = "https://www.apple.com"
-    var jsHandler: String?
+    var jsHandler: String = ""
     var jsResponse: (Any?) -> Void? = { (message: Any) -> Void in
         print(message)
     }
@@ -197,8 +194,8 @@ class FullScreenWebView: NSViewController, WKUIDelegate, WKScriptMessageHandler 
         let webConfig = WKWebViewConfiguration()
         webView = WKWebView(frame: .zero, configuration: webConfig)
         webView.uiDelegate = self
-        if (jsHandler != nil) {
-            webView.configuration.userContentController.add(self, name: jsHandler!)
+        if (jsHandler != "") {
+            webView.configuration.userContentController.add(self, name: jsHandler)
         }
         view = webView
     }

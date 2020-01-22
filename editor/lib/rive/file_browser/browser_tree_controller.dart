@@ -30,6 +30,9 @@ class FolderTreeController extends TreeController<FolderItem> {
   }
 
   @override
+  bool get showTopLevelSeperator => true;
+
+  @override
   List<FlatTreeItem<FolderItem>> onDragStart(
       DragStartDetails details, FlatTreeItem<FolderItem> item) {
     return [item];
