@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_editor/plugins/window_utils.dart';
+import 'package:rive_editor/plugins/platform_utils.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'rive/hierarchy_tree_controller.dart';
@@ -191,12 +191,12 @@ class Editor extends StatelessWidget {
                   // WindowController.openWebView(
                   //     'auth_window', "https://rive.app/signin",
                   //     size: Size(1024, 1024));
-                  WindowController.openWebView(
+                  PlatformUtils.openWebView(
                           'auth_window', "http://127.0.0.1:5500/test.html",
                           jsMessage: "jsHandler", size: Size(1024, 1024))
                       .then((value) {
                     print("Message: $value");
-                    WindowController.closeWebView('auth_window');
+                    PlatformUtils.closeWebView('auth_window');
                   });
                 },
               ),

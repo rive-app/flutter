@@ -12,7 +12,7 @@ import WebKit
 
 class WindowManagerPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channelName = "plugins.rive.app/window_controller"
+        let channelName = "plugins.rive.app"
         let channel = FlutterMethodChannel(name: channelName, binaryMessenger: registrar.messenger)
         let instance = WindowManagerPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)

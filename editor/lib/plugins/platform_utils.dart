@@ -4,9 +4,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class WindowController {
+class PlatformUtils {
   static const _channel =
-      const MethodChannel('plugins.rive.app/window_controller');
+      const MethodChannel('plugins.rive.app');
 
   static final Random _random = Random.secure();
 
