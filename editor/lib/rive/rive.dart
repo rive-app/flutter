@@ -1,5 +1,6 @@
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_core/component.dart';
@@ -7,6 +8,10 @@ import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/auth.dart';
+import 'package:rive_api/user.dart';
+import 'package:rive_api/files.dart';
 
 import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
@@ -14,12 +19,17 @@ import 'selection_context.dart';
 import 'stage/stage.dart';
 import 'stage/stage_item.dart';
 
+enum RiveState { init, login, editor, catastrophe }
+
 class Rive with RiveFileDelegate {
   final file = ValueNotifier<RiveFile>(null);
   final treeController = ValueNotifier<HierarchyTreeController>(null);
   final selection = SelectionContext<SelectableItem>();
   final selectionMode = ValueNotifier<SelectionMode>(SelectionMode.single);
   final fileBrowser = FileBrowser();
+  final _user = ValueNotifier<RiveUser>(null);
+  ValueListenable<RiveUser> get user => _user;
+
   final tabs = ValueNotifier<List<RiveTabItem>>([
     RiveTabItem(name: "Guido's Files", closeable: false),
     RiveTabItem(name: "Ellipse Testing"),
@@ -27,10 +37,57 @@ class Rive with RiveFileDelegate {
   ]);
   final selectedTab = ValueNotifier<RiveTabItem>(null);
 
+  final api = RiveApi();
+
   Stage _stage;
   // Stage get stage => _stage;
 
   final ValueNotifier<Stage> stage = ValueNotifier<Stage>(null);
+
+  final _state = ValueNotifier<RiveState>(RiveState.init);
+  ValueListenable<RiveState> get state => _state;
+
+  /// Initial service client and determine what state the app should be in.
+  Future<RiveState> initialize() async {
+    assert(state.value == RiveState.init);
+    bool ready = await api.initialize();
+    if (!ready) {
+      return _state.value = RiveState.catastrophe;
+    }
+    if (ready) {
+      await updateUser();
+    }
+    return _state.value = RiveState.login;
+  }
+
+  Future<RiveUser> updateUser() async {
+    var auth = RiveAuth(api);
+    var me = await auth.whoami();
+    if (me != null) {
+      _user.value = me;
+      _state.value = RiveState.editor;
+      // TODO: load last opened file list (from localdata)
+      var files = RiveFiles(api);
+      var result = await files.myFolders();
+      print("result ${result.folders}");
+      if (result.folders.isNotEmpty) {
+        //, result.folders.first
+        var folderFiles = await files.folderFiles(
+            result.sortOptions[0], result.folders.first);
+        // Fill details for the files (normally do this as content scrolls into
+        // view)
+        print("FOLDER FILES $folderFiles");
+        if(await files.fillDetails(folderFiles))
+        {
+          print("FILLED FILES $folderFiles");
+        }
+        
+      }
+
+      return me;
+    }
+    return null;
+  }
 
   void closeTab(RiveTabItem value) {
     tabs.value.remove(value);

@@ -25,6 +25,9 @@ dependencies:
     path: ../dependencies/tree-widget-flutter
   cursor:
     path: ../dependencies/cursor-flutter
+  rive_api:
+    path: ../dependencies/rive-api-flutter
+    
   # core depends on this already, do we care?
   # fractional:
   #   path: ../rive_core/dependencies/fractional-dart

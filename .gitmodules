@@ -10,3 +10,6 @@
 [submodule "dependencies/cursor-flutter"]
 	path = dependencies/cursor-flutter
 	url = git@github.com:rive-app/cursor-flutter.git
+[submodule "dependencies/rive-api-flutter"]
+	path = dependencies/rive-api-flutter
+	url = git@github.com:rive-app/rive-api-flutter.git
