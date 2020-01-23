@@ -177,7 +177,7 @@
     <Image Include="resources\app_icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\windows\custom_cursor.vcxproj">
+    <ProjectReference Include="..\..\windows\window_utils.vcxproj">
       <Project>{95e21b2c-c18a-4ced-8509-585cb2570fde}</Project>
     </ProjectReference>
   </ItemGroup>
