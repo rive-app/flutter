@@ -6,8 +6,8 @@ import 'file.dart';
 import 'folder.dart';
 
 abstract class FileBrowserController extends ChangeNotifier {
-  FolderItem get selectedFolder;
+  RiveFolder get selectedFolder;
   void selectItem(Rive rive, SelectableItem value);
-  void openFolder(FolderItem value, bool jumpTo);
+  void openFolder(RiveFolder value, bool jumpTo);
   void openFile(Rive rive, FileItem value);
 }

@@ -6,107 +6,55 @@ import 'package:tree_widget/tree_controller.dart';
 import '../rive.dart';
 import 'folder.dart';
 
-class FolderTreeController extends TreeController<FolderItem> {
+class FolderTreeController extends TreeController<RiveFolder> {
   final Rive rive;
-  FolderTreeController(List<FolderItem> data, {this.rive})
+  final List<RiveFolder> data;
+  FolderTreeController(this.data, {this.rive})
       : super(data, showTopLevelSeparator: true);
 
   @override
-  List<FolderItem> childrenOf(FolderItem treeItem) =>
-      treeItem is FolderItem ? treeItem.folders : null;
+  List<RiveFolder> childrenOf(RiveFolder treeItem) =>
+      treeItem.children.cast<RiveFolder>();
 
   @override
-  void drop(FlatTreeItem<FolderItem> target, DropState state,
-      List<FlatTreeItem<FolderItem>> items) {}
+  void drop(FlatTreeItem<RiveFolder> target, DropState state,
+      List<FlatTreeItem<RiveFolder>> items) {}
 
   @override
-  bool isDisabled(FolderItem treeItem) {
+  bool isDisabled(RiveFolder treeItem) {
     return false;
   }
 
   @override
-  bool isProperty(FolderItem treeItem) {
+  bool isProperty(RiveFolder treeItem) {
     return false;
   }
 
   @override
-  List<FlatTreeItem<FolderItem>> onDragStart(
-      DragStartDetails details, FlatTreeItem<FolderItem> item) {
+  List<FlatTreeItem<RiveFolder>> onDragStart(
+      DragStartDetails details, FlatTreeItem<RiveFolder> item) {
     return [item];
   }
 
   @override
-  void onMouseEnter(PointerEnterEvent event, FlatTreeItem<FolderItem> item) {
+  void onMouseEnter(PointerEnterEvent event, FlatTreeItem<RiveFolder> item) {
     item.data.isHovered = true;
   }
 
   @override
-  void onMouseExit(PointerExitEvent event, FlatTreeItem<FolderItem> item) {
+  void onMouseExit(PointerExitEvent event, FlatTreeItem<RiveFolder> item) {
     item.data.isHovered = false;
   }
 
   @override
-  void onTap(FlatTreeItem<FolderItem> item) {
+  void onTap(FlatTreeItem<RiveFolder> item) {
     if (item.data != null) {
       rive.fileBrowser.openFolder(item.data, false);
     }
   }
 
   @override
-  int spacingOf(FolderItem treeItem) {
-    return 1;
-  }
-}
-
-class MultiTreeController extends TreeController<FolderItem> {
-  final Rive rive;
-  MultiTreeController(List<List<FolderItem>> data, {this.rive})
-      : super(data
-            .fold([], (previous, items) => previous..addAll(items)).toList());
-
-  @override
-  List<FolderItem> childrenOf(FolderItem treeItem) =>
-      treeItem is FolderItem ? treeItem.folders : null;
-
-  @override
-  void drop(FlatTreeItem<FolderItem> target, DropState state,
-      List<FlatTreeItem<FolderItem>> items) {}
-
-  @override
-  bool isDisabled(FolderItem treeItem) {
-    return false;
-  }
-
-  @override
-  bool isProperty(FolderItem treeItem) {
-    return false;
-  }
-
-  @override
-  List<FlatTreeItem<FolderItem>> onDragStart(
-      DragStartDetails details, FlatTreeItem<FolderItem> item) {
-    return [item];
-  }
-
-  @override
-  void onMouseEnter(PointerEnterEvent event, FlatTreeItem<FolderItem> item) {
-    item.data.isHovered = true;
-  }
-
-  @override
-  void onMouseExit(PointerExitEvent event, FlatTreeItem<FolderItem> item) {
-    item.data.isHovered = false;
-  }
-
-  @override
-  void onTap(FlatTreeItem<FolderItem> item) {
-    if (item.data != null) {
-      rive.fileBrowser.openFolder(item.data, false);
-    }
-  }
-
-  @override
-  int spacingOf(FolderItem treeItem) {
+  int spacingOf(RiveFolder treeItem) {
     return 1;
   }
 }

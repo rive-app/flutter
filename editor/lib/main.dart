@@ -27,8 +27,6 @@ Future<void> main() async {
     (_) => WindowUtils.hideTitleBar(),
   );
   if (await rive.initialize() != RiveState.catastrophe) {
-    // Fake load a test file.
-    rive.fileBrowser.init(rive);
     await rive.open("100/100");
   }
 

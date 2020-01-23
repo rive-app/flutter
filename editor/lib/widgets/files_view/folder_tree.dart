@@ -16,21 +16,23 @@ class FolderTreeView extends StatelessWidget {
   final FolderTreeController controller;
   final double itemHeight;
   final ScrollController scrollController;
+  final EdgeInsets padding;
 
   const FolderTreeView({
     @required this.controller,
     @required this.itemHeight,
+    this.padding = const EdgeInsets.all(5),
     Key key,
     this.scrollController,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => TreeView<FolderItem>(
+  Widget build(BuildContext context) => TreeView<RiveFolder>(
         scrollController: scrollController,
         shrinkWrap: false,
         style: TreeStyle(
           showFirstLine: false,
-          padding: const EdgeInsets.all(5),
+          padding: padding,
           lineColor: ThemeUtils.lineGrey,
           itemHeight: itemHeight,
         ),
@@ -92,7 +94,6 @@ class FolderTreeView extends StatelessWidget {
             browser.selectedFolder.key == item.data.key
                 ? SelectionState.selected
                 : SelectionState.none,
-            selectedElevation: 4.0,
           ),
         ),
         itemBuilder: (context, item) => Consumer<FileBrowser>(

@@ -1,6 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_api/file.dart';
+
+class RiveFile extends RiveApiFile {
+  RiveFile(String id) : super(id);
+}
 
 class FileItem extends SelectableItem {
   final String name;

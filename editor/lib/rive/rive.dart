@@ -11,7 +11,6 @@ import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/user.dart';
-import 'package:rive_api/files.dart';
 
 import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
@@ -51,13 +50,12 @@ class Rive with RiveFileDelegate {
   Future<RiveState> initialize() async {
     assert(state.value == RiveState.init);
     bool ready = await api.initialize();
+    fileBrowser.initialize(this);
     if (!ready) {
       return _state.value = RiveState.catastrophe;
     }
-    if (ready) {
-      await updateUser();
-    }
-    return _state.value = RiveState.login;
+    await updateUser();
+    return _state.value;
   }
 
   Future<RiveUser> updateUser() async {
@@ -67,24 +65,9 @@ class Rive with RiveFileDelegate {
       _user.value = me;
       _state.value = RiveState.editor;
       // TODO: load last opened file list (from localdata)
-      var files = RiveFiles(api);
-      var result = await files.myFolders();
-      print("result ${result.folders}");
-      if (result.folders.isNotEmpty) {
-        //, result.folders.first
-        var folderFiles = await files.folderFiles(
-            result.sortOptions[0], result.folders.first);
-        // Fill details for the files (normally do this as content scrolls into
-        // view)
-        print("FOLDER FILES $folderFiles");
-        if(await files.fillDetails(folderFiles))
-        {
-          print("FILLED FILES $folderFiles");
-        }
-        
-      }
-
       return me;
+    } else {
+      _state.value = RiveState.login;
     }
     return null;
   }
@@ -95,6 +78,10 @@ class Rive with RiveFileDelegate {
   }
 
   void openTab(RiveTabItem value) {
+    if(!value.closeable) {
+      // hackity hack hack, this is the files tab.
+      fileBrowser.load();
+    }
     selectedTab.value = value;
   }
 

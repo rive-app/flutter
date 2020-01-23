@@ -99,12 +99,13 @@ class FilesView extends StatelessWidget {
 
       return Consumer<FileBrowser>(
         builder: (context, browser, child) {
-          final folders = browser?.selectedFolder?.folders ?? [];
-          final files = browser?.selectedFolder?.files ?? [];
+          final folders =
+              browser?.selectedFolder?.children?.cast<RiveFolder>() ?? [];
+          final files = <FileItem>[]; //browser?.selectedFolder?.files ?? [];
           if (folders.isEmpty && files.isEmpty) {
             return Column(
               children: <Widget>[
-                TitleSection(
+                const TitleSection(
                   name: 'Files',
                   showDropdown: true,
                   height: kGridHeaderHeight,
@@ -163,9 +164,9 @@ class FilesView extends StatelessWidget {
     });
   }
 
-  Widget _buildFolders(List<FolderItem> folders, FileBrowser browser) {
+  Widget _buildFolders(List<RiveFolder> folders, FileBrowser browser) {
     return SliverPadding(
-      padding: EdgeInsets.symmetric(horizontal: kGridSpacing),
+      padding: const EdgeInsets.symmetric(horizontal: kGridSpacing),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           // maxCrossAxisExtent: kGridWidth,
@@ -360,17 +361,20 @@ class FilesView extends StatelessWidget {
             child: _buildDivider(0),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 15.0, right: 10.0),
-              child: Consumer<Rive>(
-                builder: (context, rive, _) =>
-                    ValueListenableBuilder<FolderTreeController>(
-                  valueListenable: rive.fileBrowser.treeController,
-                  builder: (context, controller, _) => FolderTreeView(
-                    scrollController: rive.fileBrowser.treeScrollController,
-                    controller: controller,
-                    itemHeight: kTreeItemHeight,
+            child: Consumer<Rive>(
+              builder: (context, rive, _) =>
+                  ValueListenableBuilder<FolderTreeController>(
+                valueListenable: rive.fileBrowser.treeController,
+                builder: (context, controller, _) => FolderTreeView(
+                  padding: const EdgeInsets.only(
+                    left: 20.0,
+                    right: 10.0,
+                    bottom: 5,
+                    top: 5,
                   ),
+                  scrollController: rive.fileBrowser.treeScrollController,
+                  controller: controller,
+                  itemHeight: kTreeItemHeight,
                 ),
               ),
             ),

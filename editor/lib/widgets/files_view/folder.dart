@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'package:provider/provider.dart';
 
 class FolderViewWidget extends StatelessWidget {
-  final FolderItem folder;
+  final RiveFolder folder;
 
   const FolderViewWidget({
-    Key key,
     @required this.folder,
+    Key key,
   }) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
@@ -44,7 +45,7 @@ class FolderViewWidget extends StatelessWidget {
                         BoxShadow(
                           color: ThemeUtils.selectedBlue.withOpacity(0.5),
                           blurRadius: 50.0,
-                          offset: Offset(0.0, 10.0),
+                          offset: const Offset(0.0, 10.0),
                         ),
                       ]),
                 ),
