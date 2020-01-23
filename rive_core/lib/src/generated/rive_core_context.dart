@@ -4,7 +4,6 @@ import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
 import '../../artboard.dart';
-import '../../component.dart';
 import '../../node.dart';
 import 'artboard_base.dart';
 import 'component_base.dart';
