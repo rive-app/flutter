@@ -12,6 +12,8 @@ void main() {
   runApp(MyApp());
 }
 
+const kBaseKey = 'base';
+
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
@@ -81,13 +83,13 @@ class _MyAppState extends State<MyApp> {
                           color: Colors.white,
                           icon: Icon(Icons.info_outline),
                           onPressed: () {
-                            WindowUtils.getWindowSize()
+                            WindowUtils.getWindowSize(kBaseKey)
                                 // ignore: avoid_print
                                 .then((val) => print('Window: $val'));
                             WindowUtils.getScreenSize()
                                 // ignore: avoid_print
                                 .then((val) => print('Screen: $val'));
-                            WindowUtils.getWindowOffset()
+                            WindowUtils.getWindowOffset(kBaseKey)
                                 // ignore: avoid_print
                                 .then((val) => print('Offset: $val'));
                           },
@@ -118,7 +120,7 @@ class _MyAppState extends State<MyApp> {
                 trailing: IconButton(
                   icon: Icon(Icons.desktop_windows),
                   onPressed: () {
-                    WindowUtils.getWindowSize().then((val) {
+                    WindowUtils.getWindowSize(kBaseKey).then((val) {
                       WindowUtils.setSize(
                         Size(val.width + 20, val.height + 20),
                       );
@@ -131,7 +133,7 @@ class _MyAppState extends State<MyApp> {
                 trailing: IconButton(
                   icon: Icon(Icons.drag_handle),
                   onPressed: () {
-                    WindowUtils.getWindowOffset().then((val) {
+                    WindowUtils.getWindowOffset(kBaseKey).then((val) {
                       WindowUtils.setPosition(
                         Offset(val.dx + 20, val.dy + 20),
                       );
