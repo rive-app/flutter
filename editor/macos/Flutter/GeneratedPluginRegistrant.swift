@@ -12,5 +12,5 @@ import window_utils
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   CursorPlugin.register(with: registry.registrar(forPlugin: "CursorPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
-  WindowUtilsPlugin.register(with: registry.registrar(forPlugin: "WindowUtilsPlugin"))
+  WindowUtils.register(with: registry.registrar(forPlugin: "WindowUtils"))
 }

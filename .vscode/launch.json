@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Editor",
-            "program": "editor/lib/main.dart",
+            "name": "Flutter",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "program": "editor/lib/main.dart"
         }
     ]
 }
