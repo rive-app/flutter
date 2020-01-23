@@ -32,7 +32,7 @@ packages:
   binary_buffer:
     dependency: "direct main"
     description:
-      path: "../dependencies/binary-buffer-dart"
+      path: "..\\dependencies\\binary-buffer-dart"
       relative: true
     source: path
     version: "0.0.0"
@@ -88,7 +88,7 @@ packages:
   fractional:
     dependency: "direct main"
     description:
-      path: "../dependencies/fractional-dart"
+      path: "..\\dependencies\\fractional-dart"
       relative: true
     source: path
     version: "0.0.2"
