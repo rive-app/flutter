@@ -10,8 +10,10 @@ import 'package:window_utils/window_utils.dart';
 import 'rive/hierarchy_tree_controller.dart';
 import 'rive/rive.dart';
 import 'rive/stage/stage.dart';
+import 'widgets/catastrophe.dart';
 import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
+import 'widgets/login.dart';
 import 'widgets/popup/context_popup.dart';
 import 'widgets/popup/popup_button.dart';
 import 'widgets/resize_panel.dart';
@@ -20,14 +22,16 @@ import 'widgets/tab_bar/rive_tab_bar.dart';
 
 // var file = RiveFile("102:15468");
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addPostFrameCallback(
     (_) => WindowUtils.hideTitleBar(),
   );
-  // Fake load a test file.
-  rive.fileBrowser.init(rive);
-  rive.open("100/100");
+  if (await rive.initialize() != RiveState.catastrophe) {
+    // Fake load a test file.
+    rive.fileBrowser.init(rive);
+    await rive.open("100/100");
+  }
 
   // print("CONNECTING");
   // file.connect('ws://localhost:8000/').then((result) {
@@ -116,13 +120,10 @@ class MyApp extends StatelessWidget {
           Provider.value(value: rive),
         ],
         child: MaterialApp(
-          // shortcuts: {
-          //   LogicalKeySet.fromSet({LogicalKeyboardKey.meta}): Actio
-          // },
           debugShowCheckedModeBanner: false,
           theme: ThemeData.light(),
           home: DefaultTextStyle(
-            style: TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
+            style: const TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
             child: Container(
               child: Scaffold(
                 body: RawKeyboardListener(
@@ -140,7 +141,22 @@ class MyApp extends StatelessWidget {
                       // }
                       // print("NO FOCUS");
                     },
-                    child: Editor(),
+                    child: ValueListenableBuilder<RiveState>(
+                      valueListenable: rive.state,
+                      builder: (context, state, _) {
+                        switch (state) {
+                          case RiveState.login:
+                            return Login();
+
+                          case RiveState.editor:
+                            return Editor();
+
+                          case RiveState.catastrophe:
+                          default:
+                            return Catastrophe();
+                        }
+                      },
+                    ),
                     autofocus: true,
                     focusNode: focusNode),
               ),

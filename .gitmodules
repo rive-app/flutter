@@ -13,3 +13,6 @@
 [submodule "dependencies/window-utils"]
 	path = dependencies/window-utils
 	url = https://github.com/rive-app/window-utils
+[submodule "dependencies/rive-api-flutter"]
+	path = dependencies/rive-api-flutter
+	url = git@github.com:rive-app/rive-api-flutter.git

@@ -27,6 +27,8 @@ dependencies:
     path: ../dependencies/cursor-flutter
   window_utils:
     path: ../dependencies/window-utils
+  rive_api:
+    path: ../dependencies/rive-api-flutter
   # core depends on this already, do we care?
   # fractional:
   #   path: ../rive_core/dependencies/fractional-dart
