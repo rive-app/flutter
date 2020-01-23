@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:encrypt/encrypt.dart';
+
+import 'package:local_data/local_data.dart';
 
 /// A callback for status code occurences.
 typedef void StatusCodeHandler(http.Response response);
 
 /// Web Service class to help facilitate making requests that have some form
 /// of state maintained in cookies.
-class WebService {
+class WebServiceClient {
   final Map<String, String> headers = {"content-type": "text/json"};
   final Map<String, String> cookies = {};
   final Map<int, List<StatusCodeHandler>> statusCodeHandlers = {};
@@ -19,9 +20,12 @@ class WebService {
   Timer _persistTimer;
 
   /// Encrypter we use to read/write the local session storage.
-  static final _encrypter =
-      Encrypter(AES(Key.fromUtf8('}Mk#33zm^PiiP9C2riMozVynojddVc6/')));
-  Directory _dataDirectory;
+  final Encrypter _encrypter;
+  final LocalData localData;
+
+  WebServiceClient(String context, [String key = '}Mk#33zm^PiiP9C2riMozVynojddVc6/'])
+      : _encrypter = Encrypter(AES(Key.fromUtf8(key))),
+        localData = LocalData.make(context);
 
   void addStatusCodeHandler(int code, StatusCodeHandler handler) {
     List<StatusCodeHandler> handlers = statusCodeHandlers[code];
@@ -118,14 +122,14 @@ class WebService {
     _processResponse(response);
     return response;
   }
-  Future<bool> initialize(Directory directory) async {
-    _dataDirectory = directory;
-    var file = File('${directory.path}/service');
-    if (!await file.exists()) {
-      return false;
+
+  Future<bool> initialize() async {
+    await localData.initialize();
+    var contents = await localData.load('cookie');
+    if (contents == null) {
+      return true;
     }
 
-    var contents = await file.readAsBytes();
     var iv = IV.fromLength(16);
     var decrypted =
         _encrypter.decrypt(Encrypted(Uint8List.fromList(contents)), iv: iv);
@@ -134,19 +138,13 @@ class WebService {
     }
     _setCookiesFromString(decrypted);
     headers['cookie'] = _generateCookieHeader();
-    print("GOT COO");
 
     return true;
   }
 
   void persist() {
-    print("PERSIST?");
-    var file = File('${_dataDirectory.path}/service');
-
     var iv = IV.fromLength(16);
     var encrypted = _encrypter.encrypt(_generateCookieHeader(), iv: iv);
-
-    file.writeAsBytesSync(encrypted.bytes);
-    print("DONE?");
+    localData.save('cookie', encrypted.bytes);
   }
 }
