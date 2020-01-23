@@ -194,7 +194,7 @@ class Editor extends StatelessWidget {
                 icon: Icon(Icons.account_circle),
                 color: Colors.white,
                 onPressed: () {
-                  PlatformUtils.openWebView(
+                  WindowUtils.openWebView(
                       'auth_window', "https://rive.app/signin",
                       size: Size(1024, 1024));
                   // PlatformUtils.openWebView(
