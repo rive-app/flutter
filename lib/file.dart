@@ -1,14 +1,14 @@
 import 'cdn.dart';
 import 'src/deserialize_helper.dart';
 
-class RiveFile {
+class RiveApiFile {
   final String id;
   String _name;
   String get name => _name;
   String _preview;
   String get preview => _preview;
 
-  RiveFile(this.id);
+  RiveApiFile(this.id);
 
   void deserialize(RiveCDN cdn, Map<String, dynamic> data) {
     _name = data["name"]?.toString();
@@ -18,7 +18,6 @@ class RiveFile {
     } else {
       _preview = null;
     }
-    print(_preview);
   }
 
   String toString() => 'RiveFile($id:$_name)';
