@@ -346,10 +346,10 @@ packages:
   window_utils:
     dependency: "direct main"
     description:
-      name: window_utils
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
+      path: "../dependencies/window-utils"
+      relative: true
+    source: path
+    version: "1.0.2"
   xml:
     dependency: transitive
     description:
