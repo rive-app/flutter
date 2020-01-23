@@ -32,7 +32,7 @@ packages:
   binary_buffer:
     dependency: transitive
     description:
-      path: "../dependencies/core-dart/dependencies/binary-buffer-dart"
+      path: "..\\dependencies\\core-dart\\dependencies\\binary-buffer-dart"
       relative: true
     source: path
     version: "0.0.0"
@@ -74,7 +74,7 @@ packages:
   core:
     dependency: transitive
     description:
-      path: "../dependencies/core-dart/core"
+      path: "..\\dependencies\\core-dart\\core"
       relative: true
     source: path
     version: "0.0.1"
@@ -102,7 +102,7 @@ packages:
   cursor:
     dependency: "direct main"
     description:
-      path: "../dependencies/cursor-flutter"
+      path: "..\\dependencies\\cursor-flutter"
       relative: true
     source: path
     version: "0.0.1"
@@ -145,7 +145,7 @@ packages:
   fractional:
     dependency: transitive
     description:
-      path: "../dependencies/core-dart/dependencies/fractional-dart"
+      path: "..\\dependencies\\core-dart\\dependencies\\fractional-dart"
       relative: true
     source: path
     version: "0.0.2"
@@ -180,7 +180,7 @@ packages:
   local_data:
     dependency: transitive
     description:
-      path: "../dependencies/rive-api-flutter/dependencies/local-data-flutter"
+      path: "..\\dependencies\\rive-api-flutter\\dependencies\\local-data-flutter"
       relative: true
     source: path
     version: "0.0.1"
@@ -278,14 +278,14 @@ packages:
   rive_api:
     dependency: "direct main"
     description:
-      path: "../dependencies/rive-api-flutter"
+      path: "..\\dependencies\\rive-api-flutter"
       relative: true
     source: path
     version: "0.0.1"
   rive_core:
     dependency: "direct main"
     description:
-      path: "../rive_core"
+      path: "..\\rive_core"
       relative: true
     source: path
     version: "0.0.1"
@@ -374,7 +374,7 @@ packages:
   tree_widget:
     dependency: "direct main"
     description:
-      path: "../dependencies/tree-widget-flutter"
+      path: "..\\dependencies\\tree-widget-flutter"
       relative: true
     source: path
     version: "0.0.1"
