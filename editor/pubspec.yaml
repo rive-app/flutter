@@ -25,15 +25,15 @@ dependencies:
     path: ../dependencies/tree-widget-flutter
   cursor:
     path: ../dependencies/cursor-flutter
+  window_utils:
+    path: ../dependencies/window-utils
   rive_api:
     path: ../dependencies/rive-api-flutter
-    
   # core depends on this already, do we care?
   # fractional:
   #   path: ../rive_core/dependencies/fractional-dart
   path_drawing: ^0.4.1
   dotted_border: ^1.0.4
-  window_utils: ^1.0.0
   cupertino_icons: ^0.1.2
   flutter_widgets: ^0.1.9
   shortid: ^0.1.1
