@@ -6,13 +6,13 @@ import 'coop/change.dart';
 import 'coop/connect_result.dart';
 import 'coop/coop_client.dart';
 import 'coop/local_settings.dart';
+import 'core_property_changes.dart';
 export 'package:fractional/fractional.dart';
 
 int localId = 0;
 
-// TODO:
-// - catches up to perform network sync of changes
-// journal[change_index][object_id][property] = {from, to}
+typedef PropertyChanger = void Function<T>(
+    Core object, int propertyKey, T from, T to);
 
 class ChangeEntry {
   Object from;
@@ -27,11 +27,11 @@ abstract class Core<T extends CoreContext> {
   int get coreType;
 
   @protected
-  void changeNonNull();
+  void changeNonNull([PropertyChanger changer]);
 }
 
 class FreshChange {
-  final Map<int, Map<int, ChangeEntry>> change;
+  final CorePropertyChanges change;
   final bool useFrom;
 
   const FreshChange(this.change, this.useFrom);
@@ -45,9 +45,8 @@ abstract class CoreContext implements LocalSettings {
   CoopClient _client;
   Map<int, Core> get objects => _objects;
 
-  final List<Map<int, Map<int, ChangeEntry>>> journal =
-      <Map<int, Map<int, ChangeEntry>>>[];
-  Map<int, Map<int, ChangeEntry>> _currentChanges;
+  final List<CorePropertyChanges> journal = [];
+  CorePropertyChanges _currentChanges;
 
   int _journalIndex = 0;
   bool _isRecording = true;
@@ -90,17 +89,8 @@ abstract class CoreContext implements LocalSettings {
     if (!_isRecording) {
       return;
     }
-    _currentChanges ??= <int, Map<int, ChangeEntry>>{};
-    var changes = _currentChanges[object.id];
-    if (changes == null) {
-      _currentChanges[object.id] = changes = <int, ChangeEntry>{};
-    }
-    var change = changes[propertyKey];
-    if (change == null) {
-      changes[propertyKey] = change = ChangeEntry(from, to);
-    } else {
-      change.to = to;
-    }
+    _currentChanges ??= CorePropertyChanges();
+    _currentChanges.change(object, propertyKey, from, to);
   }
 
   Future<ConnectResult> connect(String url) async {
@@ -134,17 +124,16 @@ abstract class CoreContext implements LocalSettings {
   @protected
   void applyCoopChanges(ObjectChanges objectChanges);
 
-  void _applyJournalEntry(Map<int, Map<int, ChangeEntry>> entry,
-      {bool isUndo}) {
-    entry.forEach((objectId, changes) {
+  void _applyJournalEntry(CorePropertyChanges changes, {bool isUndo}) {
+    changes.entries.forEach((objectId, objectChanges) {
       bool regenerated = false;
       var object = _objects[objectId];
       if (object == null) {
         var hydrateKey = isUndo ? removeKey : addKey;
         // The object may have been previously deleted, if so this change set
-        // would had an add key.
+        // would have had an add key.
         entryLoop:
-        for (final entry in changes.entries) {
+        for (final entry in objectChanges.entries) {
           if (entry.key == hydrateKey) {
             object = makeCoreInstance(entry.value.to as int);
             regenerated = true;
@@ -153,7 +142,7 @@ abstract class CoreContext implements LocalSettings {
         }
       }
       if (object != null) {
-        changes.forEach((propertyKey, change) {
+        objectChanges.forEach((propertyKey, change) {
           if (propertyKey == addKey) {
             if (isUndo) {
               // Had an add key, this is undo, remove it.
@@ -184,10 +173,15 @@ abstract class CoreContext implements LocalSettings {
         object.context = this;
         _objects[object.id] = object;
         onAdded(object);
+
+        // var changes = CorePropertyChanges();
+        // changes.change(object, addKey, removeKey, object.coreType);
+        // object.changeNonNull(changes.change);
+        // Now need to add it to coop
       }
     });
 
-    _coopMakeChangeSet(entry, useFrom: isUndo);
+    _coopMakeChangeSet(changes, useFrom: isUndo);
   }
 
   bool redo() {
@@ -211,13 +205,13 @@ abstract class CoreContext implements LocalSettings {
     }
     bool wasJustAdded = false;
     if (_currentChanges != null) {
-      var objectChanges = _currentChanges[object.id];
+      var objectChanges = _currentChanges.entries[object.id];
       if (objectChanges != null) {
         // When the add key is present in the changes, it means the object was
         // just created in this same operation, so we can prune it from the
         // changes.
         if (objectChanges[addKey] != null) {
-          _currentChanges.remove(object.id);
+          _currentChanges.entries.remove(object.id);
           wasJustAdded = true;
         }
       }
@@ -281,15 +275,8 @@ abstract class CoreContext implements LocalSettings {
     object.id = to;
     _objects[to] = object;
 
-    // change journal ids to new one
-    // journal[change_index][object_id][property]
-    for (final entry in journal) {
-      var objectChanges = entry[from];
-      // Remap to new id
-      if (objectChanges != null) {
-        entry.remove(from);
-        entry[to] = objectChanges;
-      }
+    for (final changes in journal) {
+      changes.changeId(from, to);
     }
     return true;
   }
@@ -297,7 +284,7 @@ abstract class CoreContext implements LocalSettings {
   void _changesRejected(ChangeSet changes) {
     // Re-apply the original value if the changed value matches the current one.
     var fresh = _freshChanges[changes];
-    fresh.change.forEach((objectId, changes) {
+    fresh.change.entries.forEach((objectId, changes) {
       var object = _objects[objectId];
       if (object != null) {
         changes.forEach((key, entry) {
@@ -315,22 +302,39 @@ abstract class CoreContext implements LocalSettings {
     });
   }
 
-  void _coopMakeChangeSet(Map<int, Map<int, ChangeEntry>> changes,
-      {bool useFrom}) {
+  void _coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
     if (_client == null) {
       return;
     }
     // Client should only be null during some testing.
     var sendChanges = _client.makeChangeSet();
-    changes.forEach((objectId, changes) {
+    changes.entries.forEach((objectId, changes) {
       var objectChanges = ObjectChanges()
         ..objectId = objectId
         ..changes = [];
 
+      var hydrateKey = useFrom ? removeKey : addKey;
+      var dehydrateKey = useFrom ? addKey : removeKey;
       changes.forEach((key, entry) {
-        var change = makeCoopChange(key, useFrom ? entry.from : entry.to);
-        if (change != null) {
-          objectChanges.changes.add(change);
+        if (key == hydrateKey) {
+          //changeProperty(object, addKey, removeKey, object.coreType);
+          //changeProperty(object, removeKey, addKey, object.coreType);
+          print("GOT HYDRATION! $objectId ${entry.from} ${entry.to}");
+          var change = makeCoopChange(addKey, entry.to);
+          if (change != null) {
+            objectChanges.changes.add(change);
+          }
+        } else if (key == dehydrateKey) {
+          print("DEHYDRATE THIS THING.");
+          var change = makeCoopChange(removeKey, objectId);
+          if (change != null) {
+            objectChanges.changes.add(change);
+          }
+        } else {
+          var change = makeCoopChange(key, useFrom ? entry.from : entry.to);
+          if (change != null) {
+            objectChanges.changes.add(change);
+          }
         }
       });
 
