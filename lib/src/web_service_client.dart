@@ -6,6 +6,8 @@ import 'package:encrypt/encrypt.dart';
 
 import 'package:local_data/local_data.dart';
 
+import 'http_exception.dart';
+
 /// A callback for status code occurences.
 typedef void StatusCodeHandler(http.Response response);
 
@@ -23,7 +25,8 @@ class WebServiceClient {
   final Encrypter _encrypter;
   final LocalData localData;
 
-  WebServiceClient(String context, [String key = '}Mk#33zm^PiiP9C2riMozVynojddVc6/'])
+  WebServiceClient(String context,
+      [String key = '}Mk#33zm^PiiP9C2riMozVynojddVc6/'])
       : _encrypter = Encrypter(AES(Key.fromUtf8(key))),
         localData = LocalData.make(context);
 
@@ -107,20 +110,42 @@ class WebServiceClient {
   }
 
   Future<http.Response> get(String url) async {
-    var response = await http.get(url, headers: headers);
+    try {
+      var response = await http.get(url, headers: headers);
 
-    _processResponse(response);
+      _processResponse(response);
 
-    return response;
+      return response;
+    } on Exception catch (error) {
+      var errorString = error.toString();
+      // print('er \'$errorString\'');
+      if (errorString.startsWith('XMLHttpRequest') ||
+          errorString.startsWith('SocketException')) {
+        throw HttpException(errorString, error);
+      } else {
+        rethrow;
+      }
+    }
   }
 
   Future<http.Response> post(String url,
       {dynamic body, Encoding encoding}) async {
-    var response =
-        await http.post(url, body: body, headers: headers, encoding: encoding);
+    try {
+      var response = await http.post(url,
+          body: body, headers: headers, encoding: encoding);
 
-    _processResponse(response);
-    return response;
+      _processResponse(response);
+      return response;
+    } on Exception catch (error) {
+      //SocketException
+      var errorString = error.toString();
+      if (errorString.startsWith('XMLHttpRequest') ||
+          errorString.startsWith('SocketException')) {
+        throw HttpException(errorString, error);
+      } else {
+        rethrow;
+      }
+    }
   }
 
   Future<bool> initialize() async {
