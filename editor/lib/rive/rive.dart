@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
@@ -18,7 +21,7 @@ import 'selection_context.dart';
 import 'stage/stage.dart';
 import 'stage/stage_item.dart';
 
-enum RiveState { init, login, editor, catastrophe }
+enum RiveState { init, login, editor, disconnected, catastrophe }
 
 class Rive with RiveFileDelegate {
   final file = ValueNotifier<RiveFile>(null);
@@ -54,10 +57,39 @@ class Rive with RiveFileDelegate {
     if (!ready) {
       return _state.value = RiveState.catastrophe;
     }
-    await updateUser();
+
+    await _updateUserWithRetry();
     return _state.value;
   }
 
+  Timer _reconnectTimer;
+  int _reconnectAttempt = 0;
+
+  /// Retry getting the current user with backoff.
+  Future<void> _updateUserWithRetry() async {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+
+    try {
+      await updateUser();
+    } on HttpException {
+      _state.value = RiveState.disconnected;
+    }
+    if (_state.value != RiveState.disconnected) {
+      _reconnectAttempt = 0;
+      return;
+    }
+      
+    if (_reconnectAttempt < 1) {
+      _reconnectAttempt = 1;
+    }
+    _reconnectAttempt *= 2;
+    var duration = Duration(milliseconds: min(10000, _reconnectAttempt * 500));
+    print('Will retry connection in $duration.');
+    _reconnectTimer = Timer(Duration(milliseconds: _reconnectAttempt * 500),
+        _updateUserWithRetry);
+  }
+  
   Future<RiveUser> updateUser() async {
     var auth = RiveAuth(api);
     var me = await auth.whoami();
@@ -78,7 +110,7 @@ class Rive with RiveFileDelegate {
   }
 
   void openTab(RiveTabItem value) {
-    if(!value.closeable) {
+    if (!value.closeable) {
       // hackity hack hack, this is the files tab.
       fileBrowser.load();
     }

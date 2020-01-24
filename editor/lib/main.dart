@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/plugins/platform_utils.dart';
+import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'rive/hierarchy_tree_controller.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
     (_) => WindowUtils.hideTitleBar(),
   );
   if (await rive.initialize() != RiveState.catastrophe) {
+    // this is just for the prototype...
     await rive.open("100/100");
   }
 
@@ -148,6 +150,10 @@ class MyApp extends StatelessWidget {
 
                           case RiveState.editor:
                             return Editor();
+
+                          case RiveState.disconnected:
+                            return DisconnectedScreen();
+                            break;
 
                           case RiveState.catastrophe:
                           default:
