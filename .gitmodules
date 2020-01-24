@@ -12,7 +12,7 @@
 	url = git@github.com:rive-app/cursor-flutter.git
 [submodule "dependencies/window-utils"]
 	path = dependencies/window-utils
-	url = https://github.com/rive-app/window-utils
+	url = git@github.com:rive-app/window-utils.git
 [submodule "dependencies/rive-api-flutter"]
 	path = dependencies/rive-api-flutter
 	url = git@github.com:rive-app/rive-api-flutter.git
