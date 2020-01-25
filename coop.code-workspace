@@ -10,11 +10,32 @@
 			"path": "dependencies/rive-editor-flutter/dependencies/core-dart"
 		},
 		{
+			"path": "dependencies/rive-editor-flutter/dependencies/cursor-flutter"
+		},
+		{
+			"path": "dependencies/rive-editor-flutter/dependencies/rive-api-flutter"
+		},
+		{
+			"path": "dependencies/rive-editor-flutter/dependencies/tree-widget-flutter"
+		},
+		{
+			"path": "dependencies/rive-editor-flutter/dependencies/window-utils"
+		},
+		{
 			"path": "dependencies/rive-editor-flutter/rive_core"
 		},
 		{
 			"path": "dependencies/rive-editor-flutter/editor"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/dependencies": true
+		}
+	}
 }
