@@ -83,7 +83,7 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                     file.name ?? "",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: ThemeUtils.textGrey),
+                    style: const TextStyle(color: ThemeUtils.textGrey),
                   ),
                 ),
               ),

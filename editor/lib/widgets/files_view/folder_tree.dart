@@ -68,26 +68,16 @@ class FolderTreeView extends StatelessWidget {
             width: 15,
             height: 15,
             child: Center(
-                child: RiveIcons.folder(
-              browser.selectedFolder == item.data
-                  ? Colors.white
-                  : ThemeUtils.iconColor,
-              15.0,
-            )),
-          ),
-        ),
-        extraBuilder: (context, item, index) => Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.white,
-              width: 1.0,
-              style: BorderStyle.solid,
-            ),
-            borderRadius: const BorderRadius.all(
-              Radius.circular(7.5),
+              child: RiveIcons.folder(
+                browser.selectedFolder == item.data
+                    ? Colors.white
+                    : ThemeUtils.iconColor,
+                15.0,
+              ),
             ),
           ),
         ),
+        extraBuilder: (context, item, index) => Container(),
         backgroundBuilder: (context, item) => Consumer<FileBrowser>(
           builder: (context, browser, child) => DropItemBackground(
             DropState.none,
@@ -98,15 +88,18 @@ class FolderTreeView extends StatelessWidget {
         ),
         itemBuilder: (context, item) => Consumer<FileBrowser>(
           builder: (context, browser, child) => Expanded(
-            child: IgnorePointer(
-              child: Text(
-                item.data.name,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: browser.selectedFolder.key == item.data.key
-                      ? Colors.white
-                      : Colors.grey.shade500,
+            child: Container(
+              child: IgnorePointer(
+                child: Text(
+                  item.data.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    // fontWeight: FontWeight.w100,
+                    color: browser.selectedFolder.key == item.data.key
+                        ? Colors.white
+                        : ThemeUtils.textLightGrey,
+                  ),
                 ),
               ),
             ),
