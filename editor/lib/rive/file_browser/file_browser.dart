@@ -208,7 +208,9 @@ class FileBrowser extends FileBrowserController {
       List<FlatTreeItem<RiveFolder>> _all = treeController.value.flat;
       int _index = _all.indexWhere((f) => f?.data?.key == value.key);
       double _offset = _index * kTreeItemHeight;
-      treeScrollController.jumpTo(_offset);
+      treeScrollController.jumpTo(_offset.clamp(
+          treeScrollController.position.minScrollExtent,
+          treeScrollController.position.maxScrollExtent));
     }
 
     var lastFiles = _current.files.value;
