@@ -5,7 +5,6 @@ import 'api.dart';
 import 'cdn.dart';
 import 'file.dart';
 import 'folder.dart';
-import 'src/deserialize_helper.dart';
 
 /// Result returned by getting a list of folders and the sort options for the
 /// file contents.

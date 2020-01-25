@@ -1,4 +1,5 @@
 // import 'package:flare_dart/math/vec2d.dart';
+import 'dart:core';
 
 extension DeserializeHelper on Map<String, dynamic> {
   double getDouble(String key) {
@@ -26,7 +27,7 @@ extension DeserializeHelper on Map<String, dynamic> {
   }
 
   bool getBool(String key) {
-    var value = this[key];
+    dynamic value = this[key];
     if (value is bool) {
       return value;
     }
@@ -35,7 +36,7 @@ extension DeserializeHelper on Map<String, dynamic> {
   }
 
   String getString(String key) {
-    var value = this[key];
+    dynamic value = this[key];
     if (value != null) {
       return value.toString();
     }
@@ -72,13 +73,3 @@ bool deserializeBool(dynamic value) {
 
   return false;
 }
-
-// Vec2D deserializeVec2(dynamic data, {Vec2D def})
-// {
-// 	if (data is! List || data.length != 2)
-// 	{
-// 		return def ?? Vec2D.fromValues(0.0, 0.0);
-// 	}
-
-// 	return Vec2D.fromValues(deserializeDouble(data[0]), deserializeDouble(data[1]));
-// }

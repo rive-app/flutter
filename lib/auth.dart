@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:core';
 
 import 'api.dart';
-import 'src/deserialize_helper.dart';
 import 'user.dart';
 
 class RiveAuth {
