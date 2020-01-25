@@ -131,7 +131,7 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
   @override
   Widget build(BuildContext context) {
     var treeStyle = TreeStyle(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(20),
         lineColor: Colors.grey.shade700,
         showFirstLine: false);
     return TreeView<TreeItem>(
@@ -140,7 +140,7 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
       separatorBuilder: (context, index) => Stack(
         children: [
           Positioned(
-            left: treeStyle.iconSize.width,
+            left: 0,
             top: treeStyle.itemHeight/2-1,
             bottom: treeStyle.itemHeight/2,
             right: 0,

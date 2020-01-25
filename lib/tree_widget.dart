@@ -88,6 +88,7 @@ class TreeView<T> extends StatelessWidget {
       child: Consumer<TreeController<T>>(
         builder: (context, controller, _) => Scrollbar(
           child: ListView.builder(
+            physics: const ClampingScrollPhysics(),
             controller: scrollController,
             // semanticChildCount: controller.flat.length,
             shrinkWrap: shrinkWrap,
