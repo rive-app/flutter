@@ -23,6 +23,7 @@ import 'stage/stage_item.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
+/// Main context for Rive editor.
 class Rive with RiveFileDelegate {
   final file = ValueNotifier<RiveFile>(null);
   final treeController = ValueNotifier<HierarchyTreeController>(null);
@@ -32,11 +33,7 @@ class Rive with RiveFileDelegate {
   final _user = ValueNotifier<RiveUser>(null);
   ValueListenable<RiveUser> get user => _user;
 
-  final tabs = ValueNotifier<List<RiveTabItem>>([
-    RiveTabItem(name: "Guido's Files", closeable: false),
-    RiveTabItem(name: "Ellipse Testing"),
-    RiveTabItem(name: "Spaceman"),
-  ]);
+  final tabs = ValueNotifier<List<RiveTabItem>>([]);
   final selectedTab = ValueNotifier<RiveTabItem>(null);
 
   final api = RiveApi();
@@ -79,22 +76,27 @@ class Rive with RiveFileDelegate {
       _reconnectAttempt = 0;
       return;
     }
-      
+
     if (_reconnectAttempt < 1) {
       _reconnectAttempt = 1;
     }
     _reconnectAttempt *= 2;
     var duration = Duration(milliseconds: min(10000, _reconnectAttempt * 500));
     print('Will retry connection in $duration.');
-    _reconnectTimer = Timer(Duration(milliseconds: _reconnectAttempt * 500),
-        _updateUserWithRetry);
+    _reconnectTimer = Timer(
+        Duration(milliseconds: _reconnectAttempt * 500), _updateUserWithRetry);
   }
-  
+
   Future<RiveUser> updateUser() async {
     var auth = RiveAuth(api);
     var me = await auth.whoami();
     if (me != null) {
       _user.value = me;
+      tabs.value = [
+        RiveTabItem(name: me.name, closeable: false),
+        RiveTabItem(name: "Ellipse Testing"),
+        RiveTabItem(name: "Spaceman"),
+      ];
       _state.value = RiveState.editor;
       // TODO: load last opened file list (from localdata)
       return me;

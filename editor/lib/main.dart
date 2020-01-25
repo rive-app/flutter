@@ -3,8 +3,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
-import 'package:rive_core/node.dart';
-import 'package:rive_editor/plugins/platform_utils.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:window_utils/window_utils.dart';
 
@@ -28,6 +26,8 @@ Future<void> main() async {
   WidgetsBinding.instance.addPostFrameCallback(
     (_) => WindowUtils.hideTitleBar(),
   );
+
+  var rive = Rive();
   if (await rive.initialize() != RiveState.catastrophe) {
     // this is just for the prototype...
     await rive.open("100/100");
@@ -47,7 +47,11 @@ Future<void> main() async {
   //   file.captureJournalEntry();
   //   runApp(MyApp());
   // });
-  runApp(MyApp());
+  runApp(
+    RiveEditorApp(
+      rive: rive,
+    ),
+  );
 }
 
 final focusNode = FocusNode();
@@ -56,6 +60,7 @@ final focusNode = FocusNode();
 
 const double resizeEdgeSize = 10;
 
+// Hack
 List<ContextItem<Rive>> contextItems = [
   ContextItem(
     "Artboard",
@@ -89,21 +94,11 @@ List<ContextItem<Rive>> contextItems = [
   ContextItem("Solo", shortcut: "Y")
 ];
 
-Node node;
+class RiveEditorApp extends StatelessWidget {
+  final Rive rive;
 
-var rive = Rive();
+  const RiveEditorApp({Key key, this.rive}) : super(key: key);
 
-// Just some fake tabs to test the widgets.
-int selectedTab = 1;
-
-// Hacky way to track which tab is selected (just for testing).
-final tabs = [
-  RiveTabItem(name: "Guido's Files", closeable: false),
-  RiveTabItem(name: "Ellipse Testing"),
-  RiveTabItem(name: "Spaceman"),
-];
-
-class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var focusScope = FocusScope.of(context);
@@ -176,6 +171,7 @@ class MyApp extends StatelessWidget {
 class Editor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var rive = Provider.of<Rive>(context);
     return Column(
       children: [
         Container(

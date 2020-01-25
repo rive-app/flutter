@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:rive_api/user.dart';
+import '../../rive/rive.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/inspector_view.dart';
 import 'package:rive_editor/widgets/theme.dart';
+import 'package:provider/provider.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({
@@ -10,6 +13,7 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var rive = Provider.of<Rive>(context);
     return InspectorView(
       header: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -18,11 +22,14 @@ class ProfileView extends StatelessWidget {
             child: Icon(Icons.person),
           ),
           Container(height: 10.0),
-          Text(
-            "Guido's Files",
-            style: TextStyle(
-              fontSize: 16,
-              color: ThemeUtils.textGrey,
+          ValueListenableBuilder<RiveUser>(
+            valueListenable: rive.user,
+            builder: (context, user, _) => Text(
+              user.name,
+              style: TextStyle(
+                fontSize: 16,
+                color: ThemeUtils.textGrey,
+              ),
             ),
           ),
           Container(height: 10.0),
