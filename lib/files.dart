@@ -21,6 +21,8 @@ class FoldersResult<T extends RiveApiFolder> {
   });
 }
 
+typedef FileLocator<T extends RiveApiFile> = T Function(String id);
+
 /// Api for accessing the signed in users folders and files.
 abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
   final RiveApi api;
@@ -78,7 +80,11 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
   /// by debouncing a list of files that are in view. This can be computed by
   /// tracking when a file item widget is attached/unattached to the flutter
   /// widget tree.
-  Future<List<K>> folderFiles(RiveFileSortOption sort, [T folder]) async {
+  ///
+  /// You can provide a [cacheLocator] to re-use previously loaded files (helps
+  /// prevent flickering in your UI layer).
+  Future<List<K>> folderFiles(RiveFileSortOption sort,
+      {T folder, FileLocator<K> cacheLocator}) async {
     var response =
         await api.get(api.host + sort.route + 'flare/' + (folder?.id ?? ''));
 
@@ -95,7 +101,8 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
           if (value == null) {
             continue;
           }
-          results.add(makeFile(value.toString()));
+          var id = value.toString();
+          results.add(cacheLocator?.call(id) ?? makeFile(id));
         }
       }
       return results;

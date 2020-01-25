@@ -10,14 +10,20 @@ class RiveApiFile {
 
   RiveApiFile(this.id);
 
-  void deserialize(RiveCDN cdn, Map<String, dynamic> data) {
-    _name = data["name"]?.toString();
-    var preview = data.getString('preview');
-    if (preview != null) {
-      _preview = '${cdn.base}$preview${cdn.params}';
-    } else {
-      _preview = null;
+  bool deserialize(RiveCDN cdn, Map<String, dynamic> data) {
+    var changed = false;
+    var name = data["name"]?.toString();
+    if(_name != name) {
+      _name = name;
+      changed = true;
     }
+    var preview = data.getString('preview');
+    var url = preview != null ? '${cdn.base}$preview${cdn.params}' : null;
+    if(_preview != url){
+      _preview = url;
+      changed = true;
+    }
+    return changed;
   }
 
   String toString() => 'RiveFile($id:$_name)';

@@ -21,7 +21,7 @@ class RiveAuth {
     if (response.statusCode == 200) {
       return true;
     }
-    return null;
+    return false;
   }
 
   Future<RiveUser> whoami() async {
