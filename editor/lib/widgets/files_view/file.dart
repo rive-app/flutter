@@ -7,77 +7,113 @@ import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:provider/provider.dart';
 
-class FileViewWidget extends StatelessWidget {
-  final FileItem file;
+import '../listenable_builder.dart';
+
+class FileViewWidget extends StatefulWidget {
+  final RiveFile file;
 
   const FileViewWidget({
     Key key,
     @required this.file,
   }) : super(key: key);
+
+  @override
+  _FileViewWidgetState createState() => _FileViewWidgetState();
+}
+
+class _FileViewWidgetState extends State<FileViewWidget> {
+  @override
+  void initState() {
+    widget.file.needDetails();
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(FileViewWidget oldWidget) {
+    if (oldWidget.file != widget.file) {
+      oldWidget.file.doneWithDetails();
+      if (mounted) {
+        widget.file.needDetails();
+      }
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    widget.file.doneWithDetails();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     const kBottomHeight = 40.0;
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
     final _rive = Provider.of<Rive>(context, listen: false);
+
     return ValueListenableBuilder<SelectionState>(
-      valueListenable: file.selectionState,
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(5.0),
-                  topRight: Radius.circular(5.0),
-                ),
-                color: ThemeUtils.backgroundDarkGrey,
-              ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  Positioned.fill(
-                    child: Image.asset(
-                      "assets/images/file_background.png",
-                      fit: BoxFit.none,
-                      filterQuality: FilterQuality.none,
+      valueListenable: widget.file.selectionState,
+      child: ListenableBuilder<RiveFile>(
+        listenable: widget.file,
+        builder: (context, file, _) {
+          // print("BUILD $file ${file.name}");
+          return Column(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(5.0),
+                      topRight: Radius.circular(5.0),
                     ),
+                    color: ThemeUtils.backgroundDarkGrey,
                   ),
-                  if (file?.image != null && file.image.isNotEmpty) ...[
-                    Positioned.fill(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.network(
-                          file.image,
-                          fit: BoxFit.contain,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      Positioned.fill(
+                        child: Image.asset(
+                          "assets/images/file_background.png",
+                          fit: BoxFit.none,
+                          filterQuality: FilterQuality.none,
                         ),
                       ),
-                    ),
-                  ],
-                ],
+                      if (file.preview != null && file.preview.isNotEmpty) ...[
+                        Positioned.fill(
+                          child: Image.network(
+                            file.preview,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.medium,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          Container(
-            height: kBottomHeight,
-            decoration: BoxDecoration(
-              color: ThemeUtils.backgroundLightGrey,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(5.0),
-                bottomRight: Radius.circular(5.0),
+              Container(
+                height: kBottomHeight,
+                decoration: BoxDecoration(
+                  color: ThemeUtils.backgroundLightGrey,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(5.0),
+                    bottomRight: Radius.circular(5.0),
+                  ),
+                ),
+                child: Container(
+                  padding: EdgeInsets.only(left: 20.0),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    file.name ?? "",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: ThemeUtils.textGrey),
+                  ),
+                ),
               ),
-            ),
-            child: Container(
-              padding: EdgeInsets.only(left: 20.0),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                file.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: ThemeUtils.textGrey),
-              ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
       builder: (context, state, child) {
         final _isSelected = state == SelectionState.selected;
@@ -112,11 +148,11 @@ class FileViewWidget extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                _fileBrowser.selectItem(_rive, file);
+                _fileBrowser.selectItem(_rive, widget.file);
               },
               onDoubleTap: () {
                 final _rive = Provider.of<Rive>(context, listen: false);
-                _fileBrowser.openFile(_rive, file);
+                _fileBrowser.openFile(_rive, widget.file);
               },
               child: child,
             ),

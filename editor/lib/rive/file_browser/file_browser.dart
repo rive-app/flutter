@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -18,12 +19,12 @@ import 'folder.dart';
 const kTreeItemHeight = 35.0;
 
 class _EditorRiveFilesApi extends RiveFilesApi<RiveFolder, RiveFile> {
-  _EditorRiveFilesApi(RiveApi api) : super(api);
+  final FileBrowser _browser;
+  _EditorRiveFilesApi(RiveApi api, this._browser) : super(api);
 
   @override
   RiveFile makeFile(String id) {
-    // return RiveFile(id);
-    return RiveFile(id);
+    return RiveFile(id, _browser);
   }
 
   @override
@@ -35,7 +36,36 @@ class _EditorRiveFilesApi extends RiveFilesApi<RiveFolder, RiveFile> {
 class FileBrowser extends FileBrowserController {
   final treeScrollController = ScrollController();
   int get selectedCount => selectedItems.length;
-  List<SelectableItem> get selectedItems => [];/*{
+  List<SelectableItem> get selectedItems => [];
+
+  Set<RiveFile> _queuedFileDetails = {};
+  Timer _detailsTimer;
+
+  bool queueLoadDetails(RiveFile file) {
+    if (_queuedFileDetails.add(file)) {
+      _detailsTimer ??= Timer(Duration(milliseconds: 100), _loadQueuedDetails);
+      return true;
+    }
+    return false;
+  }
+
+  bool dequeueLoadDetails(RiveFile file) {
+    if (_queuedFileDetails.remove(file)) {
+      _detailsTimer ??= Timer(Duration(milliseconds: 100), _loadQueuedDetails);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> _loadQueuedDetails() async {
+    print("QUEUE IS $_queuedFileDetails");
+    _detailsTimer?.cancel();
+    _detailsTimer = null;
+    var files = _queuedFileDetails.toList(growable: false);
+    _queuedFileDetails.clear();
+    if (await _filesApi.fillDetails(files)) {}
+  }
+  /*{
     final _selectedFolders =
         _current.folders.where((f) => f.isSelected).toList();
     final _selectedFiles = _current.files.where((f) => f.isSelected).toList();
@@ -49,39 +79,30 @@ class FileBrowser extends FileBrowserController {
   final scrollOffset = ValueNotifier<double>(0);
 
   final marqueeSelection = ValueNotifier<Rect>(null);
+  final sortOptions = ValueNotifier<List<RiveFileSortOption>>([]);
+
   RiveFolder _current;
   RiveFolder get currentFolder => _current;
   List<SelectableItem> get selectableItems =>
-      [];//[..._current.folders, ..._current.files];
+      []; //[..._current.folders, ..._current.files];
   int _lastSelectedIndex;
 
   _EditorRiveFilesApi _filesApi;
 
   void initialize(Rive rive) {
-    _filesApi = _EditorRiveFilesApi(rive.api);
+    _filesApi = _EditorRiveFilesApi(rive.api, this);
     treeController.value = FolderTreeController([], rive: rive);
   }
 
   Future<bool> load() async {
     var result = await _filesApi.myFolders();
-    // result.root
+    sortOptions.value = result.sortOptions;
+
     var data = treeController.value.data;
     data.clear();
     data.addAll(result.root);
-    _current = result.root.isEmpty ? null : result.root.first;
-    // if (result.folders.isNotEmpty) {
-    //   //, result.folders.first
-    //   var folderFiles = await _filesApi.folderFiles(
-    //       result.sortOptions[0], result.folders.first);
-    //   // Fill details for the files (normally do this as content scrolls into
-    //   // view)
-    //   //print("FOLDER FILES $folderFiles");
-    //   if (await _filesApi.fillDetails(folderFiles)) {
-    //     //print("FILLED FILES $folderFiles");
-    //   }
-    // }
+    openFolder(result.root.isEmpty ? null : result.root.first, false);
     onFoldersChanged();
-    notifyListeners();
     return true;
   }
 
@@ -122,7 +143,7 @@ class FileBrowser extends FileBrowserController {
     final _itemFolderHeight = (kFolderHeight / kGridWidth) * _itemWidth;
     final _itemFileHeight = (kFileHeight / kGridWidth) * _itemWidth;
     final hasFolders = _current.hasFolders;
-    final hasFiles = false;//_current.hasFiles;
+    final hasFiles = false; //_current.hasFiles;
     final _marqueeRect = marqueeSelection.value;
 
     for (var item in selectableItems) {
@@ -148,7 +169,7 @@ class FileBrowser extends FileBrowserController {
                 kGridSpacing
             : kGridHeaderHeight;
         if (item is FileItem) {
-          int _index = 0;//_current.files.indexOf(item);
+          int _index = 0; //_current.files.indexOf(item);
           int col = _index % crossAxisCount;
           int row = (_index / crossAxisCount).floor();
           final w = _itemWidth;
@@ -170,7 +191,7 @@ class FileBrowser extends FileBrowserController {
   RiveFolder get selectedFolder => _current;
 
   @override
-  void openFolder(RiveFolder value, bool jumpTo) {
+  Future<bool> openFolder(RiveFolder value, bool jumpTo) async {
     _current = value;
     if (selectedCount != 0) {
       for (final item in selectedItems) {
@@ -179,6 +200,9 @@ class FileBrowser extends FileBrowserController {
     }
     _lastSelectedIndex = null;
     notifyListeners();
+    if (value == null) {
+      return false;
+    }
     treeController.value.expand(value);
     if (jumpTo) {
       List<FlatTreeItem<RiveFolder>> _all = treeController.value.flat;
@@ -186,7 +210,46 @@ class FileBrowser extends FileBrowserController {
       double _offset = _index * kTreeItemHeight;
       treeScrollController.jumpTo(_offset);
     }
-    // Scrollable.ensureVisible(context);
+
+    var lastFiles = _current.files.value;
+
+    // Map last files in case they have data we can re-use. This generates a
+    // lookup of file-id to old/previously loaded files for this folder. This
+    // allows the loading process to re-use the previously loaded file object
+    // for this id.
+    Map<String, RiveFile> lookup = {};
+    if (lastFiles.isNotEmpty) {
+      for (final file in lastFiles) {
+        lookup[file.id] = file;
+      }
+    }
+
+    var folderFiles = await _filesApi.folderFiles(sortOptions.value[0],
+        folder: _current, cacheLocator: (id) {
+      var previous = lookup[id];
+      // Make sure to allow it to re-load so it gets the data again when it's
+      // first scrolled into view. Most of the time this will just get the same
+      // data, but in case the user has updated the file in a different view
+      // (page/website) or a team-member has done it, we aggressively reload
+      // data. We eventually can look into using a socket server to notify when
+      // files need to be removed from cache.
+      previous?.allowReloadDetails();
+      return previous;
+    });
+
+    _current.files.value = folderFiles;
+    return true;
+    // if (result.folders.isNotEmpty) {
+    //   //, result.folders.first
+    //   var folderFiles = await _filesApi.folderFiles(
+    //       result.sortOptions[0], result.folders.first);
+    //   // Fill details for the files (normally do this as content scrolls into
+    //   // view)
+    //   //print("FOLDER FILES $folderFiles");
+    //   if (await _filesApi.fillDetails(folderFiles)) {
+    //     //print("FILLED FILES $folderFiles");
+    //   }
+    // }
   }
 
   @override
@@ -251,7 +314,7 @@ class FileBrowser extends FileBrowserController {
   }
 
   @override
-  void openFile(Rive rive, FileItem value) {
+  void openFile(Rive rive, RiveFile value) {
     rive.open(value.key.value);
   }
 

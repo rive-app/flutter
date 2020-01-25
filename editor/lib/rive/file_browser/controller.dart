@@ -9,5 +9,5 @@ abstract class FileBrowserController extends ChangeNotifier {
   RiveFolder get selectedFolder;
   void selectItem(Rive rive, SelectableItem value);
   void openFolder(RiveFolder value, bool jumpTo);
-  void openFile(Rive rive, FileItem value);
+  void openFile(Rive rive, RiveFile value);
 }

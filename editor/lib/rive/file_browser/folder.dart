@@ -19,6 +19,8 @@ class RiveFolder extends RiveApiFolder with SelectableItem {
 
   // bool get hasFiles => files != null && files.isNotEmpty;
   bool get hasFolders => children?.isNotEmpty ?? false;
+
+  final files = ValueNotifier<List<RiveFile>>([]);
 }
 
 class FolderItem extends SelectableItem {
