@@ -336,7 +336,7 @@ class TreeView<T> extends StatelessWidget {
               if (backgroundBuilder != null) {
                 lines.add(
                   Positioned(
-                    left: indent + spaceLeft - iconMargin,
+                    left: indent + spaceLeft - iconMargin/2,
                     top: 0,
                     bottom: 0,
                     right: 0,
@@ -402,14 +402,14 @@ class TreeView<T> extends StatelessWidget {
                                   : [SizedBox(width: indent)],
                               for (int i = 0; i < item.spacing - 1; i++)
                                 Container(
-                                  padding: EdgeInsets.only(right: padIndent),
-                                  width: indent,
+                                  margin: EdgeInsets.only(right: padIndent),
+                                  width: iconWidth,
                                   height: iconHeight,
                                   child: extraBuilder?.call(context, item, i),
                                 ),
                               Container(
-                                padding: EdgeInsets.only(right: padIndent),
-                                width: indent,
+                                margin: EdgeInsets.only(right: padIndent),
+                                width: iconWidth,
                                 height: iconHeight,
                                 child: IgnorePointer(
                                   child: iconBuilder(context, item),

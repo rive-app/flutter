@@ -49,7 +49,7 @@ class TreeStyle {
     this.iconSize = const Size(15, 15),
     this.lineColor = Colors.black,
     this.propertyDashPattern = const [3.0, 2.0],
-    this.padIndent = 10,
+    this.padIndent = 5,
     this.iconMargin = 5,
     this.inactiveOpacity = 0.28,
     this.padding,
