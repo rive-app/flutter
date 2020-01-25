@@ -25,18 +25,24 @@ enum RiveState { init, login, editor, disconnected, catastrophe }
 
 /// Main context for Rive editor.
 class Rive with RiveFileDelegate {
-  final file = ValueNotifier<RiveFile>(null);
-  final treeController = ValueNotifier<HierarchyTreeController>(null);
-  final selection = SelectionContext<SelectableItem>();
-  final selectionMode = ValueNotifier<SelectionMode>(SelectionMode.single);
-  final fileBrowser = FileBrowser();
+  final ValueNotifier<RiveFile> file = ValueNotifier<RiveFile>(null);
+  final ValueNotifier<HierarchyTreeController> treeController =
+      ValueNotifier<HierarchyTreeController>(null);
+  final SelectionContext<SelectableItem> selection =
+      SelectionContext<SelectableItem>();
+  final ValueNotifier<SelectionMode> selectionMode =
+      ValueNotifier<SelectionMode>(SelectionMode.single);
+
+  final FileBrowser fileBrowser = FileBrowser();
   final _user = ValueNotifier<RiveUser>(null);
   ValueListenable<RiveUser> get user => _user;
 
-  final tabs = ValueNotifier<List<RiveTabItem>>([]);
-  final selectedTab = ValueNotifier<RiveTabItem>(null);
+  final ValueNotifier<List<RiveTabItem>> tabs =
+      ValueNotifier<List<RiveTabItem>>([]);
+  final ValueNotifier<RiveTabItem> selectedTab =
+      ValueNotifier<RiveTabItem>(null);
 
-  final api = RiveApi();
+  final RiveApi api = RiveApi();
 
   Stage _stage;
   // Stage get stage => _stage;
@@ -130,8 +136,7 @@ class Rive with RiveFileDelegate {
     selectionMode.value = keyEvent.isMetaPressed
         ? SelectionMode.multi
         : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
-    // print(
-    //     "IS ${keyEvent.physicalKey == PhysicalKeyboardKey.keyZ} ${keyEvent is RawKeyDownEvent} ${keyEvent.isMetaPressed} && ${keyEvent.isShiftPressed} ${keyEvent.physicalKey} ${keyEvent.isMetaPressed && keyEvent.isShiftPressed && keyEvent is RawKeyDownEvent && keyEvent.physicalKey == physicalKeyboardKey.keyZ}");
+
     if (keyEvent.isMetaPressed &&
         keyEvent.isShiftPressed &&
         keyEvent is RawKeyDownEvent &&
@@ -178,9 +183,7 @@ class Rive with RiveFileDelegate {
   }
 
   bool select(SelectableItem item, {bool append}) {
-    if (append == null) {
-      append = selectionMode.value == SelectionMode.multi;
-    }
+    append ??= selectionMode.value == SelectionMode.multi;
     return selection.select(item, append: append);
   }
 

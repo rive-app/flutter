@@ -1,32 +1,71 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/main.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
-import 'package:rive_editor/rive/file_browser/file.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
-import 'package:rive_editor/rive/file_browser/folder.dart';
+import 'package:rive_editor/rive/file_browser/rive_file.dart';
+import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'package:provider/provider.dart';
 
 import 'file.dart';
-import 'folder.dart';
 import 'folder_tree.dart';
+import 'folder_view_widget.dart';
 import 'item_view.dart';
 import 'profile_view.dart';
 
-const kGridSpacing = 30.0;
-const kGridWidth = 187.0;
-const kGridHeaderHeight = 50.0;
-const kFolderHeight = 60;
+const kFileAspectRatio = kGridWidth / kFileHeight;
 const kFileHeight = 190;
 const kFolderAspectRatio = kGridWidth / kFolderHeight;
-const kFileAspectRatio = kGridWidth / kFileHeight;
+const kFolderHeight = 60;
+const kGridHeaderHeight = 50.0;
+const kGridSpacing = 30.0;
+const kGridWidth = 187.0;
+
+class DropDownSortButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final dropDownStyle = const TextStyle(
+      color: ThemeUtils.textGrey,
+      fontSize: 14.0,
+    );
+    return DropdownButton<int>(
+      value: 0,
+      isDense: true,
+      underline: Container(),
+      icon: Icon(
+        Icons.keyboard_arrow_down,
+        color: ThemeUtils.iconColor,
+      ),
+      itemHeight: 50.0,
+      items: [
+        DropdownMenuItem(
+          value: 0,
+          child: Text('Recent', style: dropDownStyle),
+        ),
+        DropdownMenuItem(
+          value: 1,
+          child: Text('Oldest', style: dropDownStyle),
+        ),
+        DropdownMenuItem(
+          value: 2,
+          child: Text('A - Z', style: dropDownStyle),
+        ),
+        DropdownMenuItem(
+          value: 3,
+          child: Text('Z - A', style: dropDownStyle),
+        ),
+      ],
+      onChanged: (val) {},
+    );
+  }
+}
 
 class FilesView extends StatelessWidget {
   const FilesView({
@@ -40,7 +79,7 @@ class FilesView extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: _rive.fileBrowser,
       child: GestureDetector(
-        onTap: () => _rive.fileBrowser.deselectAll(),
+        onTap: _rive.fileBrowser.deselectAll,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -70,46 +109,6 @@ class FilesView extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildRightSide(Rive _rive) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-            left: BorderSide(
-          color: Color.fromARGB(255, 216, 216, 216),
-        )),
-      ),
-      padding: const EdgeInsets.all(20.0),
-      child: ValueListenableBuilder<SelectableItem>(
-          valueListenable: _rive.fileBrowser.selection,
-          builder: (context, selection, child) {
-            if (selection != null) {
-              return ItemView(item: selection);
-            }
-            return ProfileView();
-          }),
-    );
-  }
-
-  Widget _buildEmpty(BuildContext context) {
-    return Column(
-      children: [
-        const TitleSection(
-          name: 'Files',
-          showDropdown: true,
-          height: kGridHeaderHeight,
-        ),
-        Expanded(
-          child: Center(
-            child: Text(
-              "This View is empty.",
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -179,41 +178,94 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildFolders(List<RiveFolder> folders, FileBrowser browser) {
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: kGridSpacing),
-      sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          // maxCrossAxisExtent: kGridWidth,
-          crossAxisCount: browser.crossAxisCount,
-          childAspectRatio: kFolderAspectRatio,
-          mainAxisSpacing: kGridSpacing,
-          crossAxisSpacing: kGridSpacing,
+  Widget _buildChildWhenDragging() {
+    return Container(
+      width: 187,
+      height: 190,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: DottedBorder(
+        borderType: BorderType.RRect,
+        radius: Radius.circular(12),
+        padding: EdgeInsets.all(6),
+        color: ThemeUtils.iconColor,
+        child: Container(),
+        dashPattern: [4, 3],
+      ),
+    );
+  }
+
+  Widget _buildDivider(double left) {
+    return Row(children: <Widget>[
+      Expanded(child: Container(color: ThemeUtils.lineGrey, height: 1))
+    ]);
+  }
+
+  Widget _buildEmpty(BuildContext context) {
+    return Column(
+      children: [
+        const TitleSection(
+          name: 'Files',
+          showDropdown: true,
+          height: kGridHeaderHeight,
         ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final _folder = folders[index];
-            return ValueListenableBuilder<Rect>(
-              valueListenable: browser.marqueeSelection,
-              builder: (context, rect, child) => DragTarget<FileItem>(
-                key: _folder.key,
-                builder: (context, accepts, rejects) {
-                  return FolderViewWidget(
-                    folder: _folder,
-                  );
-                },
+        Expanded(
+          child: Center(
+            child: Text(
+              "This View is empty.",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeedback(RiveFile file, FileBrowser _fileBrowser) {
+    return SizedBox(
+      width: 187,
+      height: 50,
+      child: Stack(
+        fit: StackFit.expand,
+        overflow: Overflow.visible,
+        children: <Widget>[
+          Material(
+            elevation: 30.0,
+            shadowColor: Colors.grey[50],
+            color: ThemeUtils.backgroundLightGrey,
+            borderRadius: BorderRadius.circular(10.0),
+            child: Container(
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.only(left: 20.0),
+              child: Text(
+                file.name ?? "",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: ThemeUtils.textGrey),
               ),
-            );
-          },
-          childCount: folders.length,
-          addRepaintBoundaries: false,
-          addAutomaticKeepAlives: false,
-          addSemanticIndexes: false,
-          // findChildIndexCallback: (Key key) {
-          //   return folders.indexWhere(
-          //       (i) => i.key == key);
-          // },
-        ),
+            ),
+          ),
+          if (_fileBrowser.selectedCount > 1)
+            Positioned(
+              right: -5,
+              top: -5,
+              width: 20,
+              height: 20,
+              child: Container(
+                child: CircleAvatar(
+                  backgroundColor: Colors.red,
+                  child: Text(
+                    _fileBrowser.selectedCount.toString(),
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -237,7 +289,7 @@ class FilesView extends StatelessWidget {
               child: ValueListenableBuilder<bool>(
                 valueListenable: _file.draggingState,
                 builder: (context, fileDragging, child) {
-                  return Draggable<FileItem>(
+                  return Draggable<RiveFile>(
                     dragAnchor: DragAnchor.pointer,
                     onDragStarted: () {
                       if (!_file.isSelected) {
@@ -273,6 +325,45 @@ class FilesView extends StatelessWidget {
           addSemanticIndexes: false,
           // findChildIndexCallback: (Key key) {
           //   return files.indexWhere(
+          //       (i) => i.key == key);
+          // },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFolders(List<RiveFolder> folders, FileBrowser browser) {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: kGridSpacing),
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          // maxCrossAxisExtent: kGridWidth,
+          crossAxisCount: browser.crossAxisCount,
+          childAspectRatio: kFolderAspectRatio,
+          mainAxisSpacing: kGridSpacing,
+          crossAxisSpacing: kGridSpacing,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final _folder = folders[index];
+            return ValueListenableBuilder<Rect>(
+              valueListenable: browser.marqueeSelection,
+              builder: (context, rect, child) => DragTarget<RiveFile>(
+                key: _folder.key,
+                builder: (context, accepts, rejects) {
+                  return FolderViewWidget(
+                    folder: _folder,
+                  );
+                },
+              ),
+            );
+          },
+          childCount: folders.length,
+          addRepaintBoundaries: false,
+          addAutomaticKeepAlives: false,
+          addSemanticIndexes: false,
+          // findChildIndexCallback: (Key key) {
+          //   return folders.indexWhere(
           //       (i) => i.key == key);
           // },
         ),
@@ -402,129 +493,38 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider(double left) {
-    return Row(children: <Widget>[
-      Expanded(child: Container(color: ThemeUtils.lineGrey, height: 1))
-    ]);
-  }
-
-  Widget _buildChildWhenDragging() {
+  Widget _buildRightSide(Rive _rive) {
     return Container(
-      width: 187,
-      height: 190,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12.0),
+        border: Border(
+            left: BorderSide(
+          color: Color.fromARGB(255, 216, 216, 216),
+        )),
       ),
-      child: DottedBorder(
-        borderType: BorderType.RRect,
-        radius: Radius.circular(12),
-        padding: EdgeInsets.all(6),
-        color: ThemeUtils.iconColor,
-        child: Container(),
-        dashPattern: [4, 3],
-      ),
-    );
-  }
-
-  Widget _buildFeedback(RiveFile file, FileBrowser _fileBrowser) {
-    return SizedBox(
-      width: 187,
-      height: 50,
-      child: Stack(
-        fit: StackFit.expand,
-        overflow: Overflow.visible,
-        children: <Widget>[
-          Material(
-            elevation: 30.0,
-            shadowColor: Colors.grey[50],
-            color: ThemeUtils.backgroundLightGrey,
-            borderRadius: BorderRadius.circular(10.0),
-            child: Container(
-              alignment: Alignment.centerLeft,
-              padding: EdgeInsets.only(left: 20.0),
-              child: Text(
-                file.name ?? "",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: ThemeUtils.textGrey),
-              ),
-            ),
-          ),
-          if (_fileBrowser.selectedCount > 1)
-            Positioned(
-              right: -5,
-              top: -5,
-              width: 20,
-              height: 20,
-              child: Container(
-                child: CircleAvatar(
-                  backgroundColor: Colors.red,
-                  child: Text(
-                    _fileBrowser.selectedCount.toString(),
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class DropDownSortButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final dropDownStyle = const TextStyle(
-      color: ThemeUtils.textGrey,
-      fontSize: 14.0,
-    );
-    return DropdownButton<int>(
-      value: 0,
-      isDense: true,
-      underline: Container(),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: ThemeUtils.iconColor,
-      ),
-      itemHeight: 50.0,
-      items: [
-        DropdownMenuItem(
-          value: 0,
-          child: Text('Recent', style: dropDownStyle),
-        ),
-        DropdownMenuItem(
-          value: 1,
-          child: Text('Oldest', style: dropDownStyle),
-        ),
-        DropdownMenuItem(
-          value: 2,
-          child: Text('A - Z', style: dropDownStyle),
-        ),
-        DropdownMenuItem(
-          value: 3,
-          child: Text('Z - A', style: dropDownStyle),
-        ),
-      ],
-      onChanged: (val) {},
+      padding: const EdgeInsets.all(20.0),
+      child: ValueListenableBuilder<SelectableItem>(
+          valueListenable: _rive.fileBrowser.selectedItem,
+          builder: (context, selection, child) {
+            if (selection != null) {
+              return ItemView(item: selection);
+            }
+            return ProfileView();
+          }),
     );
   }
 }
 
 class TitleSection extends StatelessWidget {
+  final String name;
+
+  final bool showDropdown;
+  final double height;
   const TitleSection({
     Key key,
     @required this.name,
     @required this.height,
     this.showDropdown = false,
   }) : super(key: key);
-
-  final String name;
-  final bool showDropdown;
-  final double height;
 
   @override
   Widget build(BuildContext context) {

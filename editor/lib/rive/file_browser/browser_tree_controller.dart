@@ -4,8 +4,9 @@ import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 
 import '../rive.dart';
-import 'folder.dart';
+import 'rive_folder.dart';
 
+/// TreeController for the Rive folders displayed in the FileBrowser screen.
 class FolderTreeController extends TreeController<RiveFolder> {
   final Rive rive;
   final List<RiveFolder> data;

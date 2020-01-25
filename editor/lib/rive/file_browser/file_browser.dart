@@ -1,70 +1,44 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
-import 'package:shortid/shortid.dart';
+import 'package:rive_api/files.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:tree_widget/flat_tree_item.dart';
-import 'package:rive_api/files.dart';
 
 import '../../widgets/files_view/screen.dart';
 import '../rive.dart';
 import 'browser_tree_controller.dart';
 import 'controller.dart';
-import 'file.dart';
-import 'folder.dart';
+import 'rive_file.dart';
+import 'rive_folder.dart';
 
 const kTreeItemHeight = 35.0;
 
-class _EditorRiveFilesApi extends RiveFilesApi<RiveFolder, RiveFile> {
-  final FileBrowser _browser;
-  _EditorRiveFilesApi(RiveApi api, this._browser) : super(api);
-
-  @override
-  RiveFile makeFile(String id) {
-    return RiveFile(id, _browser);
-  }
-
-  @override
-  RiveFolder makeFolder(Map<String, dynamic> data) {
-    return RiveFolder(data);
-  }
-}
-
 class FileBrowser extends FileBrowserController {
   final treeScrollController = ScrollController();
-  int get selectedCount => selectedItems.length;
-  List<SelectableItem> get selectedItems => [];
-
   Set<RiveFile> _queuedFileDetails = {};
   Timer _detailsTimer;
 
-  bool queueLoadDetails(RiveFile file) {
-    if (_queuedFileDetails.add(file)) {
-      _detailsTimer ??= Timer(Duration(milliseconds: 100), _loadQueuedDetails);
-      return true;
-    }
-    return false;
-  }
+  /// Controller for the folder tree. Allows expanding, selecting, bringing
+  /// folders into view.
+  final ValueNotifier<FolderTreeController> treeController =
+      ValueNotifier<FolderTreeController>(null);
 
-  bool dequeueLoadDetails(RiveFile file) {
-    if (_queuedFileDetails.remove(file)) {
-      _detailsTimer ??= Timer(Duration(milliseconds: 100), _loadQueuedDetails);
-      return true;
-    }
-    return false;
-  }
+  /// Currently selected item.
+  final ValueNotifier<SelectableItem> selectedItem =
+      ValueNotifier<SelectableItem>(null);
 
-  Future<void> _loadQueuedDetails() async {
-    print("QUEUE IS $_queuedFileDetails");
-    _detailsTimer?.cancel();
-    _detailsTimer = null;
-    var files = _queuedFileDetails.toList(growable: false);
-    _queuedFileDetails.clear();
-    if (await _filesApi.fillDetails(files)) {}
-  }
+  /// Scroll offset of the files view.
+  final ValueNotifier<double> scrollOffset = ValueNotifier<double>(0);
+
+  /// Rectangle marking the start/end of the marquee area.
+  final ValueNotifier<Rect> marqueeSelection = ValueNotifier<Rect>(null);
+
+  /// Sort options for the files view.
+  final ValueNotifier<List<RiveFileSortOption>> sortOptions =
+      ValueNotifier<List<RiveFileSortOption>>([]);
   /*{
     final _selectedFolders =
         _current.folders.where((f) => f.isSelected).toList();
@@ -72,22 +46,60 @@ class FileBrowser extends FileBrowserController {
     return [..._selectedFolders, ..._selectedFiles];
   }*/
 
-  final treeController = ValueNotifier<FolderTreeController>(null);
+  RiveFolder _current;
+  int _lastSelectedIndex;
+  _EditorRiveFilesApi _filesApi;
+  BoxConstraints _constraints;
+
+  final _draggingState = ValueNotifier<bool>(false);
+  int get crossAxisCount {
+    final w = _constraints.maxWidth;
+    final _count = (w / kGridWidth).floor();
+    return _count == 0 ? 1 : _count;
+  }
+
+  RiveFolder get currentFolder => _current;
+  ValueListenable<bool> get draggingState => _draggingState;
+  bool get isDragging =>
+      _draggingState.value; //[..._current.folders, ..._current.files];
+  set isDragging(bool val) => _draggingState.value = val;
+
+  List<SelectableItem> get selectableItems => [];
+
+  int get selectedCount => selectedItems.length;
+
+  @override
+  RiveFolder get selectedFolder => _current;
+
+  List<SelectableItem> get selectedItems => [];
+
   List<FlatTreeItem<RiveFolder>> get teams =>
       treeController.value.flat.skip(1).toList();
-  final selection = ValueNotifier<SelectableItem>(null);
-  final scrollOffset = ValueNotifier<double>(0);
+  bool dequeueLoadDetails(RiveFile file) {
+    if (_queuedFileDetails.remove(file)) {
+      _detailsTimer ??=
+          Timer(const Duration(milliseconds: 100), _loadQueuedDetails);
+      return true;
+    }
+    return false;
+  }
 
-  final marqueeSelection = ValueNotifier<Rect>(null);
-  final sortOptions = ValueNotifier<List<RiveFileSortOption>>([]);
+  void deselectAll() {
+    _resetSelection(true);
+  }
 
-  RiveFolder _current;
-  RiveFolder get currentFolder => _current;
-  List<SelectableItem> get selectableItems =>
-      []; //[..._current.folders, ..._current.files];
-  int _lastSelectedIndex;
-
-  _EditorRiveFilesApi _filesApi;
+  void endDrag() {
+    isDragging = false;
+    for (final item in selectedItems) {
+      if (item is RiveFolder) {
+        item.isDragging = false;
+      }
+      if (item is RiveFile) {
+        item.isDragging = false;
+      }
+    }
+    notifyListeners();
+  }
 
   void initialize(Rive rive) {
     _filesApi = _EditorRiveFilesApi(rive.api, this);
@@ -101,86 +113,9 @@ class FileBrowser extends FileBrowserController {
     var data = treeController.value.data;
     data.clear();
     data.addAll(result.root);
-    openFolder(result.root.isEmpty ? null : result.root.first, false);
+    await openFolder(result.root.isEmpty ? null : result.root.first, false);
     onFoldersChanged();
     return true;
-  }
-
-  FolderItem _addTeam(Rive rive, int number) {
-    final _teamFolder = FolderItem(
-      key: ValueKey('team_$number'),
-      name: "Team $number",
-      files: _genFiles(0),
-      folders: _getFolders(math.Random().nextInt(2)),
-    );
-    return _teamFolder;
-  }
-
-  void rectChanged(Rect value, Rive rive) {
-    marqueeSelection.value = value;
-    final _listener = () => _marqueeSelect(rive);
-    if (value != null) {
-      _marqueeSelect(rive);
-      scrollOffset.addListener(_listener);
-    } else {
-      scrollOffset.removeListener(_listener);
-    }
-  }
-
-  BoxConstraints _constraints;
-  int get crossAxisCount {
-    final w = _constraints.maxWidth;
-    final _count = (w / kGridWidth).floor();
-    return _count == 0 ? 1 : _count;
-  }
-
-  void sizeChanged(BoxConstraints constraints) => _constraints = constraints;
-
-  void _marqueeSelect(Rive rive) {
-    final _itemWidth =
-        (_constraints.maxWidth - (kGridSpacing * (crossAxisCount + 1))) /
-            crossAxisCount;
-    final _itemFolderHeight = (kFolderHeight / kGridWidth) * _itemWidth;
-    final _itemFileHeight = (kFileHeight / kGridWidth) * _itemWidth;
-    final hasFolders = _current.hasFolders;
-    final hasFiles = false; //_current.hasFiles;
-    final _marqueeRect = marqueeSelection.value;
-
-    for (var item in selectableItems) {
-      if (hasFolders) {
-        if (item is RiveFolder) {
-          int _index = _current.children.indexOf(item);
-          int col = _index % crossAxisCount;
-          int row = (_index / crossAxisCount).floor();
-          final w = _itemWidth;
-          final h = _itemFolderHeight;
-          final l = kGridSpacing + (col * (kGridSpacing + w));
-          final t = kGridHeaderHeight + ((h + kGridSpacing) * row);
-          Rect _itemRect = Rect.fromLTWH(l, t, w, h);
-          item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
-        }
-      }
-      if (hasFiles) {
-        final _offset = hasFolders
-            ? (((_current.children.length / crossAxisCount).ceil() *
-                        (_itemFolderHeight + kGridSpacing)) +
-                    kGridHeaderHeight) +
-                kGridHeaderHeight -
-                kGridSpacing
-            : kGridHeaderHeight;
-        if (item is FileItem) {
-          int _index = 0; //_current.files.indexOf(item);
-          int col = _index % crossAxisCount;
-          int row = (_index / crossAxisCount).floor();
-          final w = _itemWidth;
-          final h = _itemFileHeight;
-          final l = kGridSpacing + (col * (kGridSpacing + w));
-          final t = _offset + ((h + kGridSpacing) * row);
-          Rect _itemRect = Rect.fromLTWH(l, t, w, h);
-          item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
-        }
-      }
-    }
   }
 
   void onFoldersChanged() {
@@ -188,7 +123,9 @@ class FileBrowser extends FileBrowserController {
   }
 
   @override
-  RiveFolder get selectedFolder => _current;
+  void openFile(Rive rive, RiveFile value) {
+    rive.open(value.key.value);
+  }
 
   @override
   Future<bool> openFolder(RiveFolder value, bool jumpTo) async {
@@ -208,9 +145,10 @@ class FileBrowser extends FileBrowserController {
       List<FlatTreeItem<RiveFolder>> _all = treeController.value.flat;
       int _index = _all.indexWhere((f) => f?.data?.key == value.key);
       double _offset = _index * kTreeItemHeight;
-      treeScrollController.jumpTo(_offset.clamp(
-          treeScrollController.position.minScrollExtent,
-          treeScrollController.position.maxScrollExtent));
+      treeScrollController.jumpTo(_offset
+          .clamp(treeScrollController.position.minScrollExtent,
+              treeScrollController.position.maxScrollExtent)
+          .toDouble());
     }
 
     var lastFiles = _current.files.value;
@@ -254,6 +192,25 @@ class FileBrowser extends FileBrowserController {
     // }
   }
 
+  bool queueLoadDetails(RiveFile file) {
+    if (_queuedFileDetails.add(file)) {
+      _detailsTimer ??= Timer(Duration(milliseconds: 100), _loadQueuedDetails);
+      return true;
+    }
+    return false;
+  }
+
+  void rectChanged(Rect value, Rive rive) {
+    marqueeSelection.value = value;
+    final _listener = () => _marqueeSelect(rive);
+    if (value != null) {
+      _marqueeSelect(rive);
+      scrollOffset.addListener(_listener);
+    } else {
+      scrollOffset.removeListener(_listener);
+    }
+  }
+
   @override
   void selectItem(Rive rive, SelectableItem value) {
     switch (rive.selectionMode.value) {
@@ -289,19 +246,85 @@ class FileBrowser extends FileBrowserController {
         }
         break;
     }
-    selection.value = value;
+    selectedItem.value = value;
     notifyListeners();
   }
 
-  void deselectAll() {
-    _resetSelection(true);
+  void sizeChanged(BoxConstraints constraints) => _constraints = constraints;
+  void startDrag() {
+    isDragging = true;
+    for (final item in selectedItems.toList()) {
+      if (item is RiveFolder) {
+        item.isDragging = true;
+      }
+      if (item is RiveFile) {
+        item.isDragging = true;
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<void> _loadQueuedDetails() async {
+    print("QUEUE IS $_queuedFileDetails");
+    _detailsTimer?.cancel();
+    _detailsTimer = null;
+    var files = _queuedFileDetails.toList(growable: false);
+    _queuedFileDetails.clear();
+    if (await _filesApi.fillDetails(files)) {}
+  }
+
+  void _marqueeSelect(Rive rive) {
+    final _itemWidth =
+        (_constraints.maxWidth - (kGridSpacing * (crossAxisCount + 1))) /
+            crossAxisCount;
+    final _itemFolderHeight = (kFolderHeight / kGridWidth) * _itemWidth;
+    final _itemFileHeight = (kFileHeight / kGridWidth) * _itemWidth;
+    final hasFolders = _current.hasFolders;
+    final hasFiles = false; //_current.hasFiles;
+    final _marqueeRect = marqueeSelection.value;
+
+    for (var item in selectableItems) {
+      if (hasFolders) {
+        if (item is RiveFolder) {
+          int _index = _current.children.indexOf(item);
+          int col = _index % crossAxisCount;
+          int row = (_index / crossAxisCount).floor();
+          final w = _itemWidth;
+          final h = _itemFolderHeight;
+          final l = kGridSpacing + (col * (kGridSpacing + w));
+          final t = kGridHeaderHeight + ((h + kGridSpacing) * row);
+          Rect _itemRect = Rect.fromLTWH(l, t, w, h);
+          item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
+        }
+      }
+      if (hasFiles) {
+        final _offset = hasFolders
+            ? (((_current.children.length / crossAxisCount).ceil() *
+                        (_itemFolderHeight + kGridSpacing)) +
+                    kGridHeaderHeight) +
+                kGridHeaderHeight -
+                kGridSpacing
+            : kGridHeaderHeight;
+        if (item is RiveFile) {
+          int _index = 0; //_current.files.indexOf(item);
+          int col = _index % crossAxisCount;
+          int row = (_index / crossAxisCount).floor();
+          final w = _itemWidth;
+          final h = _itemFileHeight;
+          final l = kGridSpacing + (col * (kGridSpacing + w));
+          final t = _offset + ((h + kGridSpacing) * row);
+          Rect _itemRect = Rect.fromLTWH(l, t, w, h);
+          item.isSelected = _marqueeRect?.overlaps(_itemRect) ?? false;
+        }
+      }
+    }
   }
 
   void _resetSelection([bool force = false]) {
     for (var item in selectedItems) {
       item.isSelected = false;
     }
-    selection.value = null;
+    selectedItem.value = null;
   }
 
   void _selectItem(SelectableItem value, bool append) {
@@ -314,66 +337,19 @@ class FileBrowser extends FileBrowserController {
       value.isSelected = true;
     }
   }
+}
+
+class _EditorRiveFilesApi extends RiveFilesApi<RiveFolder, RiveFile> {
+  final FileBrowser _browser;
+  _EditorRiveFilesApi(RiveApi api, this._browser) : super(api);
 
   @override
-  void openFile(Rive rive, RiveFile value) {
-    rive.open(value.key.value);
+  RiveFile makeFile(String id) {
+    return RiveFile(id, _browser);
   }
 
-  final _draggingState = ValueNotifier<bool>(false);
-  ValueListenable<bool> get draggingState => _draggingState;
-  set isDragging(bool val) => _draggingState.value = val;
-  bool get isDragging => _draggingState.value;
-  void startDrag() {
-    isDragging = true;
-    for (var item in selectedItems.toList()) {
-      if (item is FolderItem) {
-        item.isDragging = true;
-      }
-      if (item is FileItem) {
-        item.isDragging = true;
-      }
-    }
-    notifyListeners();
+  @override
+  RiveFolder makeFolder(Map<String, dynamic> data) {
+    return RiveFolder(data);
   }
-
-  void endDrag() {
-    isDragging = false;
-    for (var item in selectedItems) {
-      if (item is FolderItem) {
-        item.isDragging = false;
-      }
-      if (item is FileItem) {
-        item.isDragging = false;
-      }
-    }
-    notifyListeners();
-  }
-}
-
-List<FolderItem> _getFolders(int level, [int max = 25]) {
-  return List.generate(
-    max,
-    (i) {
-      final _key = shortid.generate();
-      return FolderItem(
-        key: ValueKey(_key),
-        name: "Folder $_key",
-        files: _genFiles(level),
-        folders: level == 0 ? [] : _getFolders(level - 1),
-      );
-    },
-  );
-}
-
-List<FileItem> _genFiles(int level) {
-  final _key = shortid.generate();
-  return List.generate(
-    math.Random().nextInt(20),
-    (p) => FileItem(
-      key: ValueKey(_key),
-      name: "File $_key",
-      image: "https://www.lunapic.com/editor/premade/transparent.gif",
-    ),
-  );
 }

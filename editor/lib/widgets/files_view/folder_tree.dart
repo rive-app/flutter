@@ -1,16 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
-import 'package:rive_editor/rive/file_browser/folder.dart';
+import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
-import 'package:rive_core/selectable_item.dart';
-import 'package:provider/provider.dart';
 
 class FolderTreeView extends StatelessWidget {
   final FolderTreeController controller;

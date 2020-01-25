@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/rive/file_browser/file.dart';
-import 'package:rive_editor/rive/file_browser/folder.dart';
+import 'package:rive_editor/rive/file_browser/rive_file.dart';
+import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/inspector_view.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 class ItemView extends StatelessWidget {
+  final SelectableItem item;
+
   const ItemView({
     Key key,
     @required this.item,
   }) : super(key: key);
-
-  final SelectableItem item;
 
   @override
   Widget build(BuildContext context) {
     return InspectorView(
       header: _buildHeader(),
       actions: <Widget>[
-        FlatIconButton(
+        const FlatIconButton(
           label: "Export for Runtime",
         ),
-        FlatIconButton(
+        const FlatIconButton(
           label: "Duplicate",
         ),
-        FlatIconButton(
+        const FlatIconButton(
           label: "Delete",
         ),
-        if (item is FileItem)
+        if (item is RiveFile)
           FlatIconButton(
             label: "Open",
             color: Colors.black,
@@ -40,8 +40,8 @@ class ItemView extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    if (item is FileItem) {
-      final _file = item as FileItem;
+    if (item is RiveFile) {
+      final _file = item as RiveFile;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -63,8 +63,8 @@ class ItemView extends StatelessWidget {
         ],
       );
     }
-    if (item is FolderItem) {
-      final _folder = item as FolderItem;
+    if (item is RiveFolder) {
+      final _folder = item as RiveFolder;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

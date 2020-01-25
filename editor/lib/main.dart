@@ -32,32 +32,15 @@ Future<void> main() async {
     // this is just for the prototype...
     await rive.open("100/100");
   }
-
-  // print("CONNECTING");
-  // file.connect('ws://localhost:8000/').then((result) {
-  //   // if(file.isAvailable){
-
-  //   // }
-  //   print("CONNECTED $result");
-  //   if (result != ConnectResult.connected) {
-  //     return;
-  //   }
-  //   node = file.add(Node()..name = 'test');
-  //   node.name = 'My Shiny Node';
-  //   file.captureJournalEntry();
-  //   runApp(MyApp());
-  // });
   runApp(
     RiveEditorApp(
       rive: rive,
+      focusNode: FocusNode(),
     ),
   );
 }
 
-final focusNode = FocusNode();
-
 // Testing context menu items.
-
 const double resizeEdgeSize = 10;
 
 // Hack
@@ -96,8 +79,13 @@ List<ContextItem<Rive>> contextItems = [
 
 class RiveEditorApp extends StatelessWidget {
   final Rive rive;
+  final FocusNode focusNode;
 
-  const RiveEditorApp({Key key, this.rive}) : super(key: key);
+  const RiveEditorApp({
+    Key key,
+    this.rive,
+    this.focusNode,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -128,13 +116,6 @@ class RiveEditorApp extends StatelessWidget {
                           event,
                           primary != focusNode &&
                               focusScope.nearestScope != primary);
-                      // print("PRIMARY $primary");
-                      // if (primary == focusNode ||
-                      //     focusScope.nearestScope == primary) {
-                      //   print("Key ${event}");
-                      //   return;
-                      // }
-                      // print("NO FOCUS");
                     },
                     child: ValueListenableBuilder<RiveState>(
                       valueListenable: rive.state,
@@ -212,7 +193,7 @@ class Editor extends StatelessWidget {
                 onPressed: () {
                   WindowUtils.openWebView(
                       'auth_window', "https://rive.app/signin",
-                      size: Size(1024, 1024));
+                      size: const Size(1024, 1024));
                   // PlatformUtils.openWebView(
                   //         'auth_window', "http://127.0.0.1:5500/test.html",
                   //         jsMessage: "jsHandler", size: Size(1024, 1024))
@@ -260,8 +241,13 @@ class Editor extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Consumer<Rive>(
-                builder: (context, rive, _) => PopupButton(
+                builder: (context, rive, _) =>
+                    // Needed to explicitly define the generic types here or the
+                    // analyzer would complain that itemBuilder couldn't resolve
+                    // them.
+                    PopupButton<Rive, ContextItem<Rive>>(
                   selectArg: rive,
+                  items: contextItems,
                   builder: (context) {
                     return Container(
                       margin: const EdgeInsets.only(
@@ -278,26 +264,18 @@ class Editor extends StatelessWidget {
                       ),
                     );
                   },
-                  items: contextItems,
                   itemBuilder: (context, item, isHovered) => item.itemBuilder(
-                      context,
-                      isHovered) /*(
-                child: Text(
-                  "Item $index",
-                  style: TextStyle(
-                    fontFamily: 'Roboto-Regular',
-                    fontSize: 13,
-                    color: Colors.white,
+                    context,
+                    isHovered,
                   ),
-                ),
-              )*/
-                  ,
                   itemSelected: (context, index) {},
                 ),
               ),
+              // Just a test to make sure text focus works with general editor
+              // keypresses/shortcuts.
               Container(
                 width: 100,
-                child: TextField(),
+                child: const TextField(),
               ),
             ],
           ),
@@ -312,7 +290,7 @@ class Editor extends StatelessWidget {
                 min: 300,
                 max: 500,
                 child: Container(
-                  color: Color.fromRGBO(50, 50, 50, 1.0),
+                  color: const Color.fromRGBO(50, 50, 50, 1.0),
                   child: Consumer<Rive>(
                     builder: (context, rive, _) =>
                         ValueListenableBuilder<HierarchyTreeController>(
@@ -381,7 +359,7 @@ class StagePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color.fromRGBO(29, 29, 29, 1.0),
+      color: const Color.fromRGBO(29, 29, 29, 1.0),
       child: Consumer<Rive>(
         builder: (context, rive, _) => ValueListenableBuilder<Stage>(
           valueListenable: rive.stage,
@@ -429,21 +407,18 @@ class StagePanel extends StatelessWidget {
                           context.findRenderObject() as RenderBox;
                       var local = getBox.globalToLocal(details.position);
                       stage.mouseDown(details.buttons, local.dx, local.dy);
-                      // print("POINTER DOWN ${local}");
                     },
                     onPointerUp: (details) {
                       RenderBox getBox =
                           context.findRenderObject() as RenderBox;
                       var local = getBox.globalToLocal(details.position);
                       stage.mouseUp(details.buttons, local.dx, local.dy);
-                      // print("POINTER UP ${local}");
                     },
                     onPointerMove: (details) {
                       RenderBox getBox =
                           context.findRenderObject() as RenderBox;
                       var local = getBox.globalToLocal(details.position);
                       stage.mouseDrag(details.buttons, local.dx, local.dy);
-                      // print("POINTER DRAG ${local}");
                     },
                   ),
                 ),
