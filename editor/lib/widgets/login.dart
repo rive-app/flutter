@@ -62,6 +62,17 @@ class _LoginState extends State<Login> {
               child: Text(_isLoggingIn ? 'Verifying' : 'Login'),
               onPressed: _isLoggingIn ? null : () => _submit(rive),
             ),
+            FlatButton(
+              child: Text('Login with Twitter'),
+              onPressed: _isLoggingIn
+                  ? null
+                  : () async {
+                      var auth = RiveAuth(rive.api);
+                      if (await auth.loginTwitter()) {
+                        await rive.updateUser();
+                      }
+                    },
+            ),
           ],
         ),
       ),
@@ -73,7 +84,7 @@ class _LoginState extends State<Login> {
       _isLoggingIn = true;
     });
     var auth = RiveAuth(rive.api);
-    if(await auth.login(
+    if (await auth.login(
       usernameController.text,
       passwordController.text,
     )) {

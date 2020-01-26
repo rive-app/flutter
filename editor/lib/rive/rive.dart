@@ -96,7 +96,7 @@ class Rive with RiveFileDelegate {
   Future<RiveUser> updateUser() async {
     var auth = RiveAuth(api);
     var me = await auth.whoami();
-    if (me != null) {
+    if (false) {//me != null) {
       _user.value = me;
       tabs.value = [
         RiveTabItem(name: me.name, closeable: false),
