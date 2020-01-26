@@ -283,7 +283,7 @@ class FileBrowser extends FileBrowserController {
     final hasFiles = false; //_current.hasFiles;
     final _marqueeRect = marqueeSelection.value;
 
-    for (var item in selectableItems) {
+    for (final item in selectableItems) {
       if (hasFolders) {
         if (item is RiveFolder) {
           int _index = _current.children.indexOf(item);
@@ -321,7 +321,7 @@ class FileBrowser extends FileBrowserController {
   }
 
   void _resetSelection([bool force = false]) {
-    for (var item in selectedItems) {
+    for (final item in selectedItems) {
       item.isSelected = false;
     }
     selectedItem.value = null;
