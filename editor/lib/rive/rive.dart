@@ -60,7 +60,6 @@ class Rive with RiveFileDelegate {
     if (!ready) {
       return _state.value = RiveState.catastrophe;
     }
-
     await _updateUserWithRetry();
     return _state.value;
   }
@@ -95,7 +94,9 @@ class Rive with RiveFileDelegate {
 
   Future<RiveUser> updateUser() async {
     var auth = RiveAuth(api);
+    // await api.clearCookies();
     var me = await auth.whoami();
+    
     if (me != null) {
       _user.value = me;
       tabs.value = [
