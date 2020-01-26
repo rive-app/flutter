@@ -125,9 +125,7 @@ class _PopupListItemShell<A, T extends PopupListItem<A>>
 }
 
 class __PopupListItemShellState<A, T extends PopupListItem<A>>
-    extends State<_PopupListItemShell> {
-  _PopupListItemShell<A, T> get selectWidget =>
-      widget as _PopupListItemShell<A, T>;
+    extends State<_PopupListItemShell<A, T>> {
   bool _isHovered = false;
   @override
   Widget build(BuildContext context) {
@@ -136,7 +134,7 @@ class __PopupListItemShellState<A, T extends PopupListItem<A>>
         if (!widget.item.canSelect) {
           return;
         }
-        selectWidget.item.select?.call(selectWidget.selectArg);
+        widget.item.select?.call(widget.selectArg);
         Popup.closeAll();
       },
       child: MouseRegion(

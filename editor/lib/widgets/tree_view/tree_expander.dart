@@ -1,6 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:tree_widget/tree_arrow_icon.dart';
-import 'dart:math';
 
 /// Widget used to draw a circular expansion arrow for items in the tree that
 /// can be opened to reveal more content.
@@ -9,9 +10,9 @@ class TreeExpander extends StatefulWidget {
   final Color iconColor;
 
   const TreeExpander({
-    Key key,
     @required this.isExpanded,
     @required this.iconColor,
+    Key key,
   }) : super(key: key);
   @override
   _TreeExpanderState createState() {

@@ -24,7 +24,7 @@ class PopupButton<A, T extends PopupListItem<A>> extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (details) {
-        ListPopup.show(
+        ListPopup.show<A, T>(
           context,
           selectArg: selectArg,
           items: items,
