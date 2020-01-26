@@ -39,9 +39,20 @@ class RiveAuth {
 
   Future<bool> _loginOAuth(String provider) async {
     assert(!kIsWeb, 'Shouldn\'t be authenticating from Flutter Web.');
+    var offset = await WindowUtils.getWindowOffset();
+    var size = await WindowUtils.getWindowSize();
+
+    var windowSize = const Size(500, 600);
     String spectre = await WindowUtils.openWebView(
-        'auth', api.host + '/desktop/signin/$provider',
-        size: const Size(500, 600), jsMessage: 'jsHandler');
+      'auth',
+      api.host + '/desktop/signin/$provider',
+      size: windowSize,
+      offset: Offset(
+        offset.dx + size.width / 2 - windowSize.width / 2,
+        offset.dy + size.height / 2 - windowSize.height / 2,
+      ),
+      jsMessage: 'jsHandler',
+    );
     if (spectre != null) {
       api.setCookie('spectre', spectre);
       await WindowUtils.closeWebView('auth');
