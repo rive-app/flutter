@@ -63,18 +63,18 @@ class WindowUtils {
     return _channel.invokeMethod<String>("lastWindowKey");
   }
 
-  static Future<Map> getWindowStats(String key) {
+  static Future<Map> getWindowStats([String key]) {
     return _channel.invokeMethod<Map>("getWindowStats", {"key": key});
   }
 
-  static Future<Size> getWindowSize(String key) async {
+  static Future<Size> getWindowSize([String key]) async {
     final _stats = await getWindowStats(key);
     final w = _stats['width'] as double;
     final h = _stats['height'] as double;
     return Size(w, h);
   }
 
-  static Future<Offset> getWindowOffset(String key) async {
+  static Future<Offset> getWindowOffset([String key]) async {
     final _stats = await getWindowStats(key);
     final x = _stats['offsetX'] as double;
     final y = _stats['offsetY'] as double;

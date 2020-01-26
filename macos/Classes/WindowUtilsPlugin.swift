@@ -188,7 +188,7 @@ public class WindowUtils: NSObject, FlutterPlugin {
         case "getWindowStats":
             let args = call.arguments as? [String: Any]
             let _key: String? = args?["key"] as? String
-            let window = NSApp.windows.first(where: { $0.title == _key })
+            let window = _key ? NSApp.windows.first(where: { $0.title == _key }) : NSApplication.shared.keyWindow
             let screen = window?.frame
             let origin = screen?.origin
             let size = screen?.size
