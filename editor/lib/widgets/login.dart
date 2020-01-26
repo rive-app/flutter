@@ -84,6 +84,17 @@ class _LoginState extends State<Login> {
                       }
                     },
             ),
+            FlatButton(
+              child: const Text('Login with Google'),
+              onPressed: _isLoggingIn
+                  ? null
+                  : () async {
+                      var auth = RiveAuth(rive.api);
+                      if (await auth.loginGoogle()) {
+                        await rive.updateUser();
+                      }
+                    },
+            ),
           ],
         ),
       ),
