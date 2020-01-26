@@ -28,12 +28,16 @@ void main() {
     expect(file.undo(), true);
     // Expect the name to have been changed back to name1.
     expect(node.name, name1);
+    // Expect there to still be one change in the journal.
+    expect(file.journal.length, 1);
     // Expect the undo to fail as the journal is now empty.
     expect(file.undo(), false);
     // Expect the redo operation to succeed.
     expect(file.redo(), true);
-    // Execpt the name to have changed back to name2.
+    // Expect the name to have changed back to name2.
     expect(node.name, name2);
+    // Expect there to still be one change in the journal.
+    expect(file.journal.length, 1);
     // Expect undo to succeed.
     expect(file.undo(), true);
     // Expect name to have changed back to name1.

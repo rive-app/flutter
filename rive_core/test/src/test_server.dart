@@ -2,6 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:core/coop/change.dart';
+import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/coop_server.dart';
 import 'package:core/coop/coop_user.dart';
 import 'package:core/coop/coop_session.dart';
@@ -10,8 +13,14 @@ import 'package:core/coop/coop_isolate.dart';
 
 class _TestCoopIsolate extends CoopIsolateProcess {
   Directory _dataDir;
+  int ownerId;
+  int fileId;
+
   @override
-  Future<bool> initialize([Map<String, String> options]) async {
+  Future<bool> initialize(int ownerId, int fileId,
+      [Map<String, String> options]) async {
+    this.ownerId = ownerId;
+    this.fileId = fileId;
     _dataDir = await dataDirectory("test_coop_server");
     return _dataDir != null;
   }
@@ -44,6 +53,16 @@ class _TestCoopIsolate extends CoopIsolateProcess {
       ..changeId = 2
       ..user = CoopUser(1);
   }
+
+  @override
+  bool attemptChange(CoopServerClient client, ChangeSet changes) {
+    return true;
+  }
+
+  @override
+  void propagateChanges(CoopServerClient client, ChangeSet changes) {
+    // TODO: implement
+  }
 }
 
 class TestCoopServer extends CoopServer {
@@ -52,7 +71,8 @@ class TestCoopServer extends CoopServer {
 
   static void makeProcess(CoopIsolateArgument argument) {
     var process = _TestCoopIsolate();
-    process.initProcess(argument.sendPort, argument.options);
+    process.initProcess(
+        argument.sendPort, argument.options, process.ownerId, process.fileId);
   }
 
   @override
