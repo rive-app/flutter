@@ -77,6 +77,17 @@ class WebServiceClient {
     return changed;
   }
 
+  void setCookie(String key, String value) {
+    cookies[key] = value;
+    headers['cookie'] = _generateCookieHeader();
+  }
+
+  Future<void> clearCookies() async {
+    cookies.clear();
+    headers['cookie'] = _generateCookieHeader();
+    await persist();
+  }
+
   bool _setCookie(String rawCookie) {
     if (rawCookie.isNotEmpty) {
       var keyValue = rawCookie.split('=');
@@ -151,7 +162,7 @@ class WebServiceClient {
   Future<bool> initialize() async {
     await localData.initialize();
     var contents = await localData.load('cookie');
-    if (contents == null) {
+    if (contents == null || contents.isEmpty) {
       return true;
     }
 
@@ -167,9 +178,13 @@ class WebServiceClient {
     return true;
   }
 
-  void persist() {
+  Future<void> persist() async {
+    var data = _generateCookieHeader();
+    if(data.isEmpty) {
+      return localData.save('cookie', Uint8List(0));  
+    }
     var iv = IV.fromLength(16);
     var encrypted = _encrypter.encrypt(_generateCookieHeader(), iv: iv);
-    localData.save('cookie', encrypted.bytes);
+    await localData.save('cookie', encrypted.bytes);
   }
 }

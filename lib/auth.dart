@@ -28,13 +28,33 @@ class RiveAuth {
     return false;
   }
 
+  /// Initiate an OAuth login session with Twitter.
   Future<bool> loginTwitter() async {
     assert(!kIsWeb, "Shouldn't be authenticating from Flutter Web.");
-    print('go ${api.host + '/desktop/signin/twitter'}');
     String spectre = await WindowUtils.openWebView(
-        'auth_window', api.host + '/desktop/signin/twitter',
-        size: const Size(1024, 1024), jsMessage: 'jsHandler');
-    print('GOT A SPECTRE OF $spectre');
+        'auth', api.host + '/desktop/signin/twitter',
+        size: const Size(500, 600), jsMessage: 'jsHandler');
+    if (spectre != null) {
+      api.setCookie('spectre', spectre);
+      await WindowUtils.closeWebView('auth');
+      await api.persist();
+    }
+
+    return true;
+  }
+
+  /// Initiate an OAuth login session with Facebook.
+  Future<bool> loginFacebook() async {
+    assert(!kIsWeb, "Shouldn't be authenticating from Flutter Web.");
+    String spectre = await WindowUtils.openWebView(
+        'auth', api.host + '/desktop/signin/facebook',
+        size: const Size(500, 600), jsMessage: 'jsHandler');
+    if (spectre != null) {
+      api.setCookie('spectre', spectre);
+      await WindowUtils.closeWebView('auth');
+      await api.persist();
+    }
+
     return true;
   }
 
