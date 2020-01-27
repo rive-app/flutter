@@ -141,8 +141,20 @@ class FractionalIndex {
     return compareTo(other) > 0;
   }
 
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    final FractionalIndex typedOther = other;
+    return numerator == typedOther.numerator &&
+        denominator == typedOther.denominator;
+  }
+
   @override
   String toString() {
-    return "$numerator/$denominator";
+    return '$numerator/$denominator';
   }
 }
