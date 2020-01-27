@@ -15,14 +15,19 @@ class ContainerChildren extends FractionallyIndexedList<Component> {
 abstract class ContainerComponent extends ContainerComponentBase {
   final ContainerChildren children = ContainerChildren();
 
-  bool addChild(Component child) {
+  bool addChild(Component child, {bool updateIndex = true}) {
     assert(child != null);
 
     if (child.parent == this) {
       return false;
     }
     child.parent?.removeChild(child);
-    children.append(child);
+    child.parent = this;
+    if (updateIndex) {
+      children.append(child);
+    } else {
+      children.add(child);
+    }
     childAdded(child);
     return true;
   }

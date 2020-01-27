@@ -24,6 +24,15 @@ abstract class Component extends ComponentBase<RiveFile> {
 
   void userDataChanged(dynamic from, dynamic to) {}
 
+  @override
+  void parentIdChanged(int from, int to) {
+    super.parentIdChanged(from, to);
+    var parent = context.objects[to];
+    if (parent is ContainerComponent) {
+      parent.addChild(this, updateIndex: false);
+    }
+  }
+
   ContainerComponent _parent;
   ContainerComponent get parent => _parent;
   set parent(ContainerComponent value) {
@@ -32,6 +41,7 @@ abstract class Component extends ComponentBase<RiveFile> {
     }
     var old = _parent;
     _parent = value;
+    parentId = value.id;
     parentChanged(old, value);
   }
 
@@ -66,9 +76,8 @@ abstract class Component extends ComponentBase<RiveFile> {
     context.markDependenciesDirty();
   }
 
-  // @override
-  // void nameChanged(String from, String to) {
-  //   super.nameChanged(from, to);
-  //   print("Name changed $from $to");
-  // }
+  @override
+  String toString() {
+    return '${super.toString()} ($id)';
+  }
 }
