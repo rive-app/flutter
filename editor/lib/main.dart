@@ -3,12 +3,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/container_component.dart';
+import 'package:rive_core/node.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'rive/hierarchy_tree_controller.dart';
 import 'rive/rive.dart';
 import 'rive/stage/stage.dart';
+import 'rive/stage/stage_item.dart';
 import 'widgets/catastrophe.dart';
 import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
@@ -48,15 +51,6 @@ List<ContextItem<Rive>> contextItems = [
   ContextItem(
     "Artboard",
     select: (Rive rive) {
-      // var artboard =
-      //     rive.file.value.makeCoreInstance(ArtboardBase.typeKey) as Artboard;
-      // var artboard = Artboard()
-      //   ..name = "New Artboard"
-      //   ..x = 0
-      //   ..y = 0
-      //   ..width = 200
-      //   ..height = 100;
-      // rive.file.value.add(artboard);
       var artboard = Artboard()
         ..name = "New Artboard"
         ..x = 0
@@ -64,9 +58,32 @@ List<ContextItem<Rive>> contextItems = [
         ..width = 200
         ..height = 100;
       rive.file.value.add(artboard);
+      rive.file.value.captureJournalEntry();
     },
   ),
-  ContextItem("Node", select: (rive) => print("Make node...")),
+  ContextItem("Node", select: (rive) {
+    if (rive.selection.isEmpty) {
+      print("No selection to parent Node to.");
+      return;
+    }
+
+    var selection = rive.selection.first;
+    if (selection is StageItem && selection.component is ContainerComponent) {
+      var container = selection.component as ContainerComponent;
+      var nodes = rive.file.value.objects.values.whereType<Node>();
+
+      var node = Node()
+        ..name = "Node ${nodes.length + 1}"
+        ..x = 0
+        ..y = 0;
+      rive.file.value.add(node);
+
+      container.appendChild(node);
+    } else {
+      print("No selection to parent Node to.");
+    }
+    rive.file.value.captureJournalEntry();
+  }),
   ContextItem.separator(),
   ContextItem("Shape", select: (rive) => print("SELECT SHAPE!")),
   ContextItem("Pen", shortcut: "P"),
@@ -94,9 +111,6 @@ class RiveEditorApp extends StatelessWidget {
     return CursorView(
       onPointerDown: (details) {
         focusNode.requestFocus();
-      },
-      onPointerUp: (details) {
-        rive.file.value.captureJournalEntry();
       },
       child: MultiProvider(
         providers: [

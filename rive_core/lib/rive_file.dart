@@ -10,6 +10,7 @@ abstract class RiveFileDelegate {
   void onArtboardsChanged() {}
   void onObjectAdded(Core object) {}
   void onObjectRemoved(Core object) {}
+  void onDirtCleaned();
 }
 
 class RiveDirt {
@@ -41,6 +42,9 @@ class RiveFile extends RiveCoreContext {
 
   /// Perform any cleanup required due to properties being marked dirty.
   void cleanDirt() {
+    if(_needResolveArtboard.isEmpty && _needChildSort.isEmpty) {
+      return;
+    }
     for (final component in _needResolveArtboard) {
       component.resolveArtboard();
     }
@@ -49,6 +53,8 @@ class RiveFile extends RiveCoreContext {
     }
     _needChildSort.clear();
     _needResolveArtboard.clear();
+
+    delegates.forEach((delegate) => delegate.onDirtCleaned());
   }
 
   @override
@@ -133,6 +139,7 @@ class RiveFile extends RiveCoreContext {
 
   @override
   bool captureJournalEntry() {
+    print("CAP");
     // Make sure we've updated dependents if some change occurred to them.
     if (_dirt & RiveDirt.dependencies != 0) {}
     return super.captureJournalEntry();

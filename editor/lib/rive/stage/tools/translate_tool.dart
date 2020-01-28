@@ -5,7 +5,9 @@ import 'stage_tool.dart';
 
 class TranslateTool extends StageTool {
   @override
-  void endDrag() {}
+  void endDrag() {
+    stage.riveFile.captureJournalEntry();
+  }
 
   @override
   void updateDrag(Vec2D worldMouse) {

@@ -5,6 +5,9 @@ import 'package:rive_core/selectable_item.dart';
 class SelectionContext<T extends SelectableItem> {
   final Set<T> _items = {};
   Set<T> get items => _items;
+  T get first => _items.first;
+  bool get isEmpty => _items.isEmpty;
+  bool get isNotEmpty => _items.isNotEmpty;
 
   void clear() {
     for (final prev in _items) {

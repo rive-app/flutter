@@ -96,7 +96,7 @@ class Rive with RiveFileDelegate {
     var auth = RiveAuth(api);
     // await api.clearCookies();
     var me = await auth.whoami();
-    
+
     if (me != null) {
       _user.value = me;
       tabs.value = [
@@ -131,6 +131,11 @@ class Rive with RiveFileDelegate {
     treeController.value.flatten();
     // TODO: this will get handled by dependency manager.
     _stage.markNeedsAdvance();
+  }
+
+  @override
+  void onDirtCleaned() {
+    treeController.value.flatten();
   }
 
   void onKeyEvent(RawKeyEvent keyEvent, bool hasFocusObject) {

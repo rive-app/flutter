@@ -43,12 +43,10 @@ abstract class Component extends ComponentBase<RiveFile> {
   @override
   void parentIdChanged(int from, int to) {
     super.parentIdChanged(from, to);
-    var parent = context.objects[to];
-    if (parent is ContainerComponent) {
-      parent.addChild(this, updateIndex: false);
+    var p = context?.objects[to];
+    if (p is ContainerComponent) {
+      parent = p;
     }
-    // Let the context know that this item needs its artboard resolved.
-    context?.markArtboardDirty(this);
   }
 
   @override
@@ -69,11 +67,23 @@ abstract class Component extends ComponentBase<RiveFile> {
     }
     var old = _parent;
     _parent = value;
-    parentId = value.id;
+    // TODO: what's the implication here? That id 0 is always a non-component?
+    parentId = value?.id ?? 0;
     parentChanged(old, value);
   }
 
-  void parentChanged(ContainerComponent from, ContainerComponent to) {}
+  void parentChanged(ContainerComponent from, ContainerComponent to) {
+    if (from != null) {
+      from.children.remove(this);
+      from.childRemoved(this);
+    }
+    if (to != null) {
+      to.children.add(this);
+      to.childAdded(this);
+    }
+    // Let the context know that this item needs its artboard resolved.
+    context?.markArtboardDirty(this);
+  }
 
   /// Components that depend on this component.
   final Set<Component> _dependents = {};

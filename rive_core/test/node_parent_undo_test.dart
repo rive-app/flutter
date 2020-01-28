@@ -16,8 +16,8 @@ void main() {
     var node2 = file.add(Node()..name = 'Node 2');
 
     var artboard1 = file.add(Artboard()..name = 'Artboard A')
-      ..addChild(node1)
-      ..addChild(node2);
+      ..appendChild(node1)
+      ..appendChild(node2);
 
     // Expect node1 to be at 1/2 and node2 at 2/3
     expect(node1.childOrder, const FractionalIndex(1, 2));
@@ -36,7 +36,7 @@ void main() {
     expect(node1.parentId, artboard1.id);
 
     // move node to second artboard
-    artboard2.addChild(node1);
+    artboard2.appendChild(node1);
 
     file.captureJournalEntry();
 
@@ -110,14 +110,14 @@ void main() {
     var e = file.add(Node()..name = 'e');
     var f = file.add(Node()..name = 'f');
 
-    a.addChild(c);
-    a.addChild(d);
+    a.appendChild(c);
+    a.appendChild(d);
 
-    b.addChild(e);
-    b.addChild(f);
+    b.appendChild(e);
+    b.appendChild(f);
 
-    artboard.addChild(a);
-    artboard.addChild(b);
+    artboard.appendChild(a);
+    artboard.appendChild(b);
 
     file.captureJournalEntry();
 
@@ -137,7 +137,7 @@ void main() {
     expect(f.childOrder, const FractionalIndex(2, 3));
 
     // Move a under b between e and f
-    b.addChild(a, updateIndex: false);
+    a.parent = b;
     b.children.move(a, after: e, before:f);
 
     file.captureJournalEntry();
