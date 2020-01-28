@@ -96,6 +96,10 @@ class Definition {
       // We need core if we need PropertyChanger or Core to inherit from.
       code.writeln('import \'package:core/core.dart\';');
     }
+    if (_properties.isNotEmpty) {
+      code.writeln('import \'package:flutter/material.dart\';');
+    }
+
     if (_extensionOf != null) {
       int foldersUp = '/'.allMatches(_filename).length;
       StringBuffer prefix = StringBuffer('../../');

@@ -61,7 +61,6 @@ abstract class CoreContext implements LocalSettings {
     object.context = this;
 
     _objects[object.id] = object;
-    print("ADDING ${object.id} $object $_objects");
     onAdded(object);
     if (_isRecording) {
       changeProperty(object, addKey, removeKey, object.coreType);
@@ -77,6 +76,7 @@ abstract class CoreContext implements LocalSettings {
     if (_currentChanges == null) {
       return false;
     }
+    completeJournalOperation();
     journal.removeRange(_journalIndex, journal.length);
     journal.add(_currentChanges);
     _coopMakeChangeSet(_currentChanges, useFrom: false);
@@ -182,6 +182,7 @@ abstract class CoreContext implements LocalSettings {
     });
 
     _coopMakeChangeSet(changes, useFrom: isUndo);
+    completeJournalOperation();
   }
 
   bool redo() {
@@ -196,6 +197,10 @@ abstract class CoreContext implements LocalSettings {
     _isRecording = true;
     return true;
   }
+
+  /// Method called when a journal entry is created or applied via an undo/redo.
+  @protected
+  void completeJournalOperation();
 
   void remove<T extends Core>(T object) {
     _objects.remove(object.id);
@@ -227,6 +232,7 @@ abstract class CoreContext implements LocalSettings {
 
   void setObjectProperty(Core object, int propertyKey, Object value);
 
+  @mustCallSuper
   bool undo() {
     int index = _journalIndex - 1;
     if (journal.isEmpty || index >= journal.length || index < 0) {

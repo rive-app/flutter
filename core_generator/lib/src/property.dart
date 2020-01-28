@@ -59,7 +59,8 @@ class Property {
         _$name = value;
         ${name}Changed(from, value);
       }''');
-    code.writeln('''void ${name}Changed(${type.name} from, ${type.name} to) {
+    code.writeln('''@mustCallSuper
+    void ${name}Changed(${type.name} from, ${type.name} to) {
         context?.changeProperty(this, $propertyKey, from, to);
       }\n''');
 
