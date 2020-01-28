@@ -2,6 +2,7 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 import '../../container_component.dart';
 
 abstract class NodeBase extends ContainerComponent {
@@ -26,6 +27,7 @@ abstract class NodeBase extends ContainerComponent {
     xChanged(from, value);
   }
 
+  @mustCallSuper
   void xChanged(double from, double to) {
     context?.changeProperty(this, xPropertyKey, from, to);
   }
@@ -47,6 +49,7 @@ abstract class NodeBase extends ContainerComponent {
     yChanged(from, value);
   }
 
+  @mustCallSuper
   void yChanged(double from, double to) {
     context?.changeProperty(this, yPropertyKey, from, to);
   }
@@ -68,6 +71,7 @@ abstract class NodeBase extends ContainerComponent {
     rotationChanged(from, value);
   }
 
+  @mustCallSuper
   void rotationChanged(double from, double to) {
     context?.changeProperty(this, rotationPropertyKey, from, to);
   }
@@ -89,6 +93,7 @@ abstract class NodeBase extends ContainerComponent {
     scaleXChanged(from, value);
   }
 
+  @mustCallSuper
   void scaleXChanged(double from, double to) {
     context?.changeProperty(this, scaleXPropertyKey, from, to);
   }
@@ -110,6 +115,7 @@ abstract class NodeBase extends ContainerComponent {
     scaleYChanged(from, value);
   }
 
+  @mustCallSuper
   void scaleYChanged(double from, double to) {
     context?.changeProperty(this, scaleYPropertyKey, from, to);
   }
@@ -131,6 +137,7 @@ abstract class NodeBase extends ContainerComponent {
     opacityChanged(from, value);
   }
 
+  @mustCallSuper
   void opacityChanged(double from, double to) {
     context?.changeProperty(this, opacityPropertyKey, from, to);
   }

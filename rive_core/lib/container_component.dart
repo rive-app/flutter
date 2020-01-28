@@ -28,6 +28,10 @@ abstract class ContainerComponent extends ContainerComponentBase {
     } else {
       children.add(child);
     }
+
+    // Let the context know that this item needs its children re-sorted.
+    context?.markChildSortDirty(this);
+
     childAdded(child);
     return true;
   }

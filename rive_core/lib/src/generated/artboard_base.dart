@@ -2,6 +2,7 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 import '../../container_component.dart';
 
 abstract class ArtboardBase extends ContainerComponent {
@@ -28,6 +29,7 @@ abstract class ArtboardBase extends ContainerComponent {
     widthChanged(from, value);
   }
 
+  @mustCallSuper
   void widthChanged(double from, double to) {
     context?.changeProperty(this, widthPropertyKey, from, to);
   }
@@ -51,6 +53,7 @@ abstract class ArtboardBase extends ContainerComponent {
     heightChanged(from, value);
   }
 
+  @mustCallSuper
   void heightChanged(double from, double to) {
     context?.changeProperty(this, heightPropertyKey, from, to);
   }
@@ -74,6 +77,7 @@ abstract class ArtboardBase extends ContainerComponent {
     xChanged(from, value);
   }
 
+  @mustCallSuper
   void xChanged(double from, double to) {
     context?.changeProperty(this, xPropertyKey, from, to);
   }
@@ -97,6 +101,7 @@ abstract class ArtboardBase extends ContainerComponent {
     yChanged(from, value);
   }
 
+  @mustCallSuper
   void yChanged(double from, double to) {
     context?.changeProperty(this, yPropertyKey, from, to);
   }
@@ -120,6 +125,7 @@ abstract class ArtboardBase extends ContainerComponent {
     originXChanged(from, value);
   }
 
+  @mustCallSuper
   void originXChanged(double from, double to) {
     context?.changeProperty(this, originXPropertyKey, from, to);
   }
@@ -143,6 +149,7 @@ abstract class ArtboardBase extends ContainerComponent {
     originYChanged(from, value);
   }
 
+  @mustCallSuper
   void originYChanged(double from, double to) {
     context?.changeProperty(this, originYPropertyKey, from, to);
   }

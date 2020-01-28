@@ -2,6 +2,7 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 import 'rive_core_context.dart';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
@@ -25,6 +26,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     nameChanged(from, value);
   }
 
+  @mustCallSuper
   void nameChanged(String from, String to) {
     context?.changeProperty(this, namePropertyKey, from, to);
   }
@@ -48,6 +50,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     parentIdChanged(from, value);
   }
 
+  @mustCallSuper
   void parentIdChanged(int from, int to) {
     context?.changeProperty(this, parentIdPropertyKey, from, to);
   }
@@ -71,6 +74,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     childOrderChanged(from, value);
   }
 
+  @mustCallSuper
   void childOrderChanged(FractionalIndex from, FractionalIndex to) {
     context?.changeProperty(this, childOrderPropertyKey, from, to);
   }

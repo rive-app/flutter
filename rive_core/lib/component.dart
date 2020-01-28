@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:rive_core/rive_file.dart';
 
 import 'artboard.dart';
@@ -11,6 +12,21 @@ class ComponentDirt {
 abstract class Component extends ComponentBase<RiveFile> {
   Artboard _artboard;
   dynamic _userData;
+
+  /// The artboard this component belongs to.
+  Artboard get artboard => _artboard;
+
+  /// Find the artboard in the hierarchy.
+  bool resolveArtboard() {
+    for (var curr = parent; curr != null; curr = curr.parent) {
+      if (curr is Artboard) {
+        _artboard = curr;
+        return true;
+      }
+    }
+    _artboard = null;
+    return false;
+  }
 
   dynamic get userData => _userData;
   set userData(dynamic value) {
@@ -30,6 +46,18 @@ abstract class Component extends ComponentBase<RiveFile> {
     var parent = context.objects[to];
     if (parent is ContainerComponent) {
       parent.addChild(this, updateIndex: false);
+    }
+    // Let the context know that this item needs its artboard resolved.
+    context?.markArtboardDirty(this);
+  }
+
+  @override
+  void childOrderChanged(FractionalIndex from, FractionalIndex to) {
+    super.childOrderChanged(from, to);
+
+    if (parent != null) {
+      // Let the context know that our parent needs to be re-sorted.
+      context?.markChildSortDirty(parent);
     }
   }
 

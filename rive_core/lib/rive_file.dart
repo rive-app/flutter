@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'artboard.dart';
+import 'component.dart';
+import 'container_component.dart';
 import 'src/generated/rive_core_context.dart';
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.
@@ -20,6 +22,39 @@ class RiveFile extends RiveCoreContext {
   final List<Artboard> artboards = [];
   final Set<RiveFileDelegate> delegates = {};
   int _dirt = 0;
+
+  /// Set of components that need to be resorted after the current operation
+  /// (undo/redo/capture) completes.
+  final Set<ContainerComponent> _needChildSort = {};
+
+  /// Set of components that need to their artboard resolved after the current
+  /// operation (undo/redo/capture) completes.
+  final Set<Component> _needResolveArtboard = {};
+
+  /// Mark a component as needing its children to be sorted.
+  void markChildSortDirty(ContainerComponent component) =>
+      _needChildSort.add(component);
+
+  /// Mark a component as needing its artboard to be resolved.
+  void markArtboardDirty(Component component) =>
+      _needResolveArtboard.add(component);
+
+  /// Perform any cleanup required due to properties being marked dirty.
+  void cleanDirt() {
+    for (final component in _needResolveArtboard) {
+      component.resolveArtboard();
+    }
+    for (final parent in _needChildSort) {
+      parent.children.sortFractional();
+    }
+    _needChildSort.clear();
+    _needResolveArtboard.clear();
+  }
+
+  @override
+  void completeJournalOperation() {
+    cleanDirt();
+  }
 
   RiveFile(String fileId,
       {this.overridePreferences, this.useSharedPreferences = true})
@@ -99,10 +134,7 @@ class RiveFile extends RiveCoreContext {
   @override
   bool captureJournalEntry() {
     // Make sure we've updated dependents if some change occurred to them.
-    if(_dirt & RiveDirt.dependencies != 0)
-    {
-      
-    }
+    if (_dirt & RiveDirt.dependencies != 0) {}
     return super.captureJournalEntry();
   }
 
