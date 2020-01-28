@@ -26,7 +26,7 @@ dependencies:
   cursor:
     path: ../dependencies/cursor-flutter
   window_utils:
-    path: ../dependencies/window-utils
+    path: ../dependencies/rive-api-flutter/dependencies/window-utils
   rive_api:
     path: ../dependencies/rive-api-flutter
   # core depends on this already, do we care?

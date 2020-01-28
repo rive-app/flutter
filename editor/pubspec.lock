@@ -395,7 +395,7 @@ packages:
   window_utils:
     dependency: "direct main"
     description:
-      path: "../dependencies/window-utils"
+      path: "../dependencies/rive-api-flutter/dependencies/window-utils"
       relative: true
     source: path
     version: "1.0.2"
