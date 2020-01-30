@@ -144,7 +144,8 @@ abstract class TreeController<T> extends ChangeNotifier {
   void onMouseExit(PointerExitEvent event, FlatTreeItem<T> item);
 
   /// Override this to return whether or not the drop operation is allowed.
-  bool allowDrop(FlatTreeItem<T> item, DropState state) {
+  bool allowDrop(
+      FlatTreeItem<T> item, DropState state, List<FlatTreeItem<T>> items) {
     if (item.isDisabled || item.dragDepth != null) {
       return false;
     }
@@ -263,13 +264,13 @@ abstract class TreeController<T> extends ChangeNotifier {
             ? DropState.below
             : DropState.into;
 
-    if (dropTarget != null && allowDrop(dropTarget, state)) {
+    if (dropTarget != null &&
+        allowDrop(dropTarget, state, _dragOperation.items)) {
       _dragOperation.dropTarget(dropTarget, state);
     } else {
       _dragOperation.dropTarget(null, null);
     }
   }
-  
 
   void _flatten(
       FlattenedTreeDataContext<T> context,
@@ -362,11 +363,11 @@ abstract class TreeController<T> extends ChangeNotifier {
         if (spacing > 1) {
           itemDepth.add(-(spacing - 1));
         }
-        itemDepth[d] =  spacing < 0 || isLast ? -1 : 1;
+        itemDepth[d] = spacing < 0 || isLast ? -1 : 1;
         _flatten(
             context, children, flat, lookup, List<int>.from(itemDepth), meta);
       }
-      if(depth.isEmpty && showTopLevelSeparator && !isLast) {
+      if (depth.isEmpty && showTopLevelSeparator && !isLast) {
         flat.add(null);
       }
     }
