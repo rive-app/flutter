@@ -21,4 +21,8 @@ abstract class FieldType {
   int get encodingAlignment;
   String encode(String writerName, String varName);
   String decode(String readerName, String varName);
+
+  String equalityCheck(String varAName, String varBName) {
+    return "$varAName == $varBName";
+  }
 }

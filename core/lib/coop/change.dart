@@ -57,10 +57,11 @@ class ObjectChanges {
     }
   }
 
-  ObjectChanges clone() {
+  ObjectChanges clone([bool test(Change change)]) {
+    var cloneChanges = test == null ? changes : changes?.where(test);
     return ObjectChanges()
       ..objectId = objectId
-      ..changes = changes?.map((change) => change.clone())?.toList();
+      ..changes = cloneChanges?.map((change) => change.clone())?.toList();
   }
 }
 

@@ -54,7 +54,7 @@ class Property {
         indent: 1));
 
     code.writeln('''set $name(${type.name} value) {
-        if(_$name == value) { return; }
+        if(${type.equalityCheck('_$name', 'value')}) { return; }
         ${type.name} from = _$name;
         _$name = value;
         ${name}Changed(from, value);
@@ -63,7 +63,6 @@ class Property {
     void ${name}Changed(${type.name} from, ${type.name} to) {
         context?.changeProperty(this, $propertyKey, from, to);
       }\n''');
-
 
     return code.toString();
   }

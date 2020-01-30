@@ -8,6 +8,7 @@ import 'coop/coop_client.dart';
 import 'coop/local_settings.dart';
 import 'core_property_changes.dart';
 export 'package:fractional/fractional.dart';
+export 'src/list_equality.dart';
 
 int localId = 0;
 
@@ -40,6 +41,7 @@ class FreshChange {
 abstract class CoreContext implements LocalSettings {
   static const int addKey = 1;
   static const int removeKey = 2;
+  static const int dependentsKey = 3;
 
   final String fileId;
   CoopClient _client;
