@@ -9,7 +9,7 @@
     "width": {
       "type": "double",
       "key": {
-        "int": 4,
+        "int": 7,
         "string": "w"
       },
       "description": "Width of the artboard."
@@ -17,7 +17,7 @@
     "height": {
       "type": "double",
       "key": {
-        "int": 5,
+        "int": 8,
         "string": "h"
       },
       "description": "Height of the artboard."
@@ -25,7 +25,7 @@
     "x": {
       "type": "double",
       "key": {
-        "int": 6,
+        "int": 9,
         "string": "x"
       },
       "description": "X coordinate in editor world space."
@@ -33,7 +33,7 @@
     "y": {
       "type": "double",
       "key": {
-        "int": 7,
+        "int": 10,
         "string": "y"
       },
       "description": "Y coordinate in editor world space."
@@ -41,7 +41,7 @@
     "originX": {
       "type": "double",
       "key": {
-        "int": 8,
+        "int": 11,
         "string": "ox"
       },
       "description": "Origin x in normalized coordinates (0 = center, -1 = left, 1 = right)."
@@ -49,7 +49,7 @@
     "originY": {
       "type": "double",
       "key": {
-        "int": 9,
+        "int": 12,
         "string": "oy"
       },
       "description": "Origin y in normalized coordinates (0 = center, -1 = left, 1 = right)."
