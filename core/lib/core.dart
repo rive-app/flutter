@@ -43,10 +43,25 @@ abstract class CoreContext implements LocalSettings {
 
   final String fileId;
   CoopClient _client;
-  Map<int, Core> get objects => _objects;
+  // Map<int, Core> get objects => _objects;
 
   final List<CorePropertyChanges> journal = [];
   CorePropertyChanges _currentChanges;
+
+  /// Find a Core object by id.
+  T resolve<T>(int id) {
+    var object = _objects[id];
+    if (object is T) {
+      return object as T;
+    }
+    return null;
+  }
+
+  /// Find Core objects of type [T].
+  Iterable<T> objectsOfType<T>() => _objects.values.whereType<T>();
+
+  /// Get all objects
+  Iterable<Core<CoreContext>> get objects => _objects.values;
 
   int _journalIndex = 0;
   bool _isRecording = true;
@@ -69,8 +84,8 @@ abstract class CoreContext implements LocalSettings {
     return object;
   }
 
-  void onAdded(Core object);
-  void onRemoved(Core object);
+  void onAdded(covariant Core object);
+  void onRemoved(covariant Core object);
 
   bool captureJournalEntry() {
     if (_currentChanges == null) {
@@ -204,30 +219,29 @@ abstract class CoreContext implements LocalSettings {
 
   void remove<T extends Core>(T object) {
     _objects.remove(object.id);
-    onRemoved(object);
-    if (!_isRecording) {
-      return;
-    }
-    bool wasJustAdded = false;
-    if (_currentChanges != null) {
-      var objectChanges = _currentChanges.entries[object.id];
-      if (objectChanges != null) {
-        // When the add key is present in the changes, it means the object was
-        // just created in this same operation, so we can prune it from the
-        // changes.
-        if (objectChanges[addKey] != null) {
-          _currentChanges.entries.remove(object.id);
-          wasJustAdded = true;
+    if (_isRecording) {
+      bool wasJustAdded = false;
+      if (_currentChanges != null) {
+        var objectChanges = _currentChanges.entries[object.id];
+        if (objectChanges != null) {
+          // When the add key is present in the changes, it means the object was
+          // just created in this same operation, so we can prune it from the
+          // changes.
+          if (objectChanges[addKey] != null) {
+            _currentChanges.entries.remove(object.id);
+            wasJustAdded = true;
+          }
         }
       }
+      if (!wasJustAdded) {
+        changeProperty(object, removeKey, addKey, object.coreType);
+        // TODO: Is there a way we can do this and not network change these? We
+        // do this to re-hydrate the object by storing the changes in the
+        // undo/redo stack.
+        object.changeNonNull();
+      }
     }
-    if (!wasJustAdded) {
-      changeProperty(object, removeKey, addKey, object.coreType);
-      // TODO: Is there a way we can do this and not network change these? We do
-      // this to re-hydrate the object by storing the changes in the undo/redo
-      // stack.
-      object.changeNonNull();
-    }
+    onRemoved(object);
   }
 
   void setObjectProperty(Core object, int propertyKey, Object value);
@@ -267,6 +281,7 @@ abstract class CoreContext implements LocalSettings {
     //     break;
     // }
     _isRecording = wasRecording;
+    completeJournalOperation();
   }
 
   bool _changeObjectId(int from, int to) {

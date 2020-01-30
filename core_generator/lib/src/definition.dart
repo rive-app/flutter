@@ -344,7 +344,7 @@ class Definition {
     }
     ctxCode.writeln('''@override
     void applyCoopChanges(ObjectChanges objectChanges) {
-      var object = objects[objectChanges.objectId];
+      Core<CoreContext> object = resolve(objectChanges.objectId);
       var justAdded = false;
       for (final change in objectChanges.changes) {
         var reader = BinaryReader.fromList(change.value);
