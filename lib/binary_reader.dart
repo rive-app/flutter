@@ -127,4 +127,14 @@ class BinaryReader {
     _readIndex += length;
     return allocNew ? Uint8List.fromList(view) : view;
   }
+
+  /// Read a list of encoded integers.
+  List<int> readIntList() {
+    int length = readVarUint();
+    var list = List<int>(length);
+    for (int i = 0; i < length; i++) {
+      list[i] = readVarInt();
+    }
+    return list;
+  }
 }

@@ -252,4 +252,18 @@ void main() {
     var reader = BinaryReader(writer.buffer);
     expect(reader.read(3), Uint8List.fromList([7, 31, 1982]));
   });
+
+  test('integer list', () {
+    List<int> ids = [1, 3, 3, 7, 256];
+
+    var writer = BinaryWriter();
+    writer.writeIntList(ids);
+
+    var reader = BinaryReader(writer.buffer);
+    var readIds = reader.readIntList();
+    expect(readIds.length, ids.length);
+    for (int i = 0; i < readIds.length; i++) {
+      expect(readIds[i], readIds[i]);
+    }
+  });
 }

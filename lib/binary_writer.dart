@@ -149,4 +149,11 @@ class BinaryWriter {
     writeVarUint(list.length);
     write(list);
   }
+
+  /// Write a list of integers as varint.
+  void writeIntList(List<int> list) {
+    assert(list != null);
+    writeVarUint(list.length);
+    list.forEach(writeVarInt);
+  }
 }
