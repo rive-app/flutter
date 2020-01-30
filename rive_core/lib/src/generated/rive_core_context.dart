@@ -44,6 +44,10 @@ abstract class RiveCoreContext extends CoreContext {
             print("ATTEMPTED TO DELETE NULL OBJECT ${objectChanges.objectId}");
           }
           break;
+        case ComponentBase.dependentIdsPropertyKey:
+          var value = reader.readIntList();
+          setObjectProperty(object, change.op, value);
+          break;
         case ComponentBase.namePropertyKey:
           var value = reader.readString();
           setObjectProperty(object, change.op, value);
@@ -92,6 +96,15 @@ abstract class RiveCoreContext extends CoreContext {
           var writer = BinaryWriter(alignment: 4);
           writer.writeVarInt(value);
           change.value = writer.uint8Buffer;
+        }
+        break;
+      case ComponentBase.dependentIdsPropertyKey:
+        if (value != null && value is List<int>) {
+          var writer = BinaryWriter(alignment: 8);
+          writer.writeIntList(value);
+          change.value = writer.uint8Buffer;
+        } else {
+          return null;
         }
         break;
       case ComponentBase.namePropertyKey:
@@ -151,6 +164,11 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   void setObjectProperty(Core object, int propertyKey, Object value) {
     switch (propertyKey) {
+      case ComponentBase.dependentIdsPropertyKey:
+        if (object is ComponentBase && value is List<int>) {
+          object.dependentIds = value;
+        }
+        break;
       case ComponentBase.namePropertyKey:
         if (object is ComponentBase && value is String) {
           object.name = value;
@@ -232,6 +250,11 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   Object getObjectProperty(Core object, int propertyKey) {
     switch (propertyKey) {
+      case ComponentBase.dependentIdsPropertyKey:
+        if (object is ComponentBase) {
+          return object.dependentIds;
+        }
+        break;
       case ComponentBase.namePropertyKey:
         if (object is ComponentBase) {
           return object.name;

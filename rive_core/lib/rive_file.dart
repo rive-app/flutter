@@ -37,6 +37,10 @@ class RiveFile extends RiveCoreContext {
   /// Set of artboards that need their dependencies sorted.
   final Set<Artboard> _needDependenciesOrdered = {};
 
+  /// Set of components that have had dependents changes and should recompute
+  /// their dependentIds once the dependencies have been recomputed.
+  final Set<Component> _needDependentIdsRebuilt = {};
+
   /// Mark a component as needing its children to be sorted.
   void markChildSortDirty(ContainerComponent component) {
     _dirt |= _RiveDirt.childSort;
@@ -54,6 +58,11 @@ class RiveFile extends RiveCoreContext {
     _dirt |= _RiveDirt.dependencies;
     _needDependenciesBuilt.add(component);
     markNeedsAdvance();
+  }
+
+  /// Mark a component as needing its dependent ids recalculated.
+  void markDependentIdsDirty(Component component) {
+    _needDependentIdsRebuilt.add(component);
   }
 
   /// Perform any cleanup required due to properties being marked dirty.
@@ -80,6 +89,14 @@ class RiveFile extends RiveCoreContext {
       _needDependenciesOrdered.add(component.artboard);
       component.buildDependencies();
     }
+
+    // Rebuild any dependent ids that will have changed from building
+    // dependencies.
+    for (final component in _needDependentIdsRebuilt) {
+      component.dependentIds =
+          component.dependents.map((other) => other.id).toList(growable: false);
+    }
+    _needDependentIdsRebuilt.clear();
 
     for (final parent in _needChildSort) {
       parent.children.sortFractional();
@@ -196,8 +213,8 @@ class RiveFile extends RiveCoreContext {
   bool advance(double elapsed) {
     cleanDirt();
     bool advanced = false;
-    for(final artboard in artboards) {
-      if(artboard.advance(elapsed)) {
+    for (final artboard in artboards) {
+      if (artboard.advance(elapsed)) {
         advanced = true;
       }
     }

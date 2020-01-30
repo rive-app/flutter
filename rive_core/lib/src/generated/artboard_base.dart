@@ -11,9 +11,9 @@ abstract class ArtboardBase extends ContainerComponent {
   int get coreType => ArtboardBase.typeKey;
 
   /// --------------------------------------------------------------------------
-  /// Width field with key 4.
+  /// Width field with key 7.
   double _width;
-  static const int widthPropertyKey = 4;
+  static const int widthPropertyKey = 7;
 
   /// Width of the artboard.
   double get width => _width;
@@ -35,9 +35,9 @@ abstract class ArtboardBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// Height field with key 5.
+  /// Height field with key 8.
   double _height;
-  static const int heightPropertyKey = 5;
+  static const int heightPropertyKey = 8;
 
   /// Height of the artboard.
   double get height => _height;
@@ -59,9 +59,9 @@ abstract class ArtboardBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// X field with key 6.
+  /// X field with key 9.
   double _x;
-  static const int xPropertyKey = 6;
+  static const int xPropertyKey = 9;
 
   /// X coordinate in editor world space.
   double get x => _x;
@@ -83,9 +83,9 @@ abstract class ArtboardBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// Y field with key 7.
+  /// Y field with key 10.
   double _y;
-  static const int yPropertyKey = 7;
+  static const int yPropertyKey = 10;
 
   /// Y coordinate in editor world space.
   double get y => _y;
@@ -107,9 +107,9 @@ abstract class ArtboardBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// OriginX field with key 8.
+  /// OriginX field with key 11.
   double _originX;
-  static const int originXPropertyKey = 8;
+  static const int originXPropertyKey = 11;
 
   /// Origin x in normalized coordinates (0 = center, -1 = left, 1 = right).
   double get originX => _originX;
@@ -131,9 +131,9 @@ abstract class ArtboardBase extends ContainerComponent {
   }
 
   /// --------------------------------------------------------------------------
-  /// OriginY field with key 9.
+  /// OriginY field with key 12.
   double _originY;
-  static const int originYPropertyKey = 9;
+  static const int originYPropertyKey = 12;
 
   /// Origin y in normalized coordinates (0 = center, -1 = left, 1 = right).
   double get originY => _originY;

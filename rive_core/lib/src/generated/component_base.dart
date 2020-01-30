@@ -7,9 +7,35 @@ import 'rive_core_context.dart';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   /// --------------------------------------------------------------------------
-  /// Name field with key 10.
+  /// DependentIds field with key 3.
+  List<int> _dependentIds;
+  static const int dependentIdsPropertyKey = 3;
+
+  /// List of integer ids for objects registered in the same context that depend
+  /// on this object.
+  List<int> get dependentIds => _dependentIds;
+
+  /// Change the [_dependentIds] field value.
+  /// [dependentIdsChanged] will be invoked only if the field's value has
+  /// changed.
+  set dependentIds(List<int> value) {
+    if (listEquals(_dependentIds, value)) {
+      return;
+    }
+    List<int> from = _dependentIds;
+    _dependentIds = value;
+    dependentIdsChanged(from, value);
+  }
+
+  @mustCallSuper
+  void dependentIdsChanged(List<int> from, List<int> to) {
+    context?.changeProperty(this, dependentIdsPropertyKey, from, to);
+  }
+
+  /// --------------------------------------------------------------------------
+  /// Name field with key 4.
   String _name;
-  static const int namePropertyKey = 10;
+  static const int namePropertyKey = 4;
 
   /// Non-unique identifier, used to give friendly names to elements in the
   /// hierarchy. Runtimes provide an API for finding components by this [name].
@@ -32,9 +58,9 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   }
 
   /// --------------------------------------------------------------------------
-  /// ParentId field with key 11.
+  /// ParentId field with key 5.
   int _parentId;
-  static const int parentIdPropertyKey = 11;
+  static const int parentIdPropertyKey = 5;
 
   /// Identifier used to track parent ContainerComponent.
   int get parentId => _parentId;
@@ -56,9 +82,9 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   }
 
   /// --------------------------------------------------------------------------
-  /// ChildOrder field with key 12.
+  /// ChildOrder field with key 6.
   FractionalIndex _childOrder;
-  static const int childOrderPropertyKey = 12;
+  static const int childOrderPropertyKey = 6;
 
   /// Order value for sorting child elements in ContainerComponent parent.
   FractionalIndex get childOrder => _childOrder;
@@ -82,6 +108,10 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   @override
   void changeNonNull([PropertyChanger changer]) {
     changer ??= context?.changeProperty;
+    if (dependentIds != null) {
+      context?.changeProperty(
+          this, dependentIdsPropertyKey, dependentIds, dependentIds);
+    }
     if (name != null) {
       context?.changeProperty(this, namePropertyKey, name, name);
     }

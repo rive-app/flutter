@@ -136,11 +136,33 @@ void main() {
     expect(e.childOrder, const FractionalIndex(1, 2));
     expect(f.childOrder, const FractionalIndex(2, 3));
 
+    // Expect dependent ids to match tree hierarchy.
+    expect(artboard.dependentIds.length, 2);
+    expect(artboard.dependentIds.contains(a.id), true);
+    expect(artboard.dependentIds.contains(b.id), true);
+    expect(b.dependentIds.length, 2);
+    expect(b.dependentIds.contains(e.id), true);
+    expect(b.dependentIds.contains(f.id), true);
+    expect(a.dependentIds.length, 2);
+    expect(a.dependentIds.contains(c.id), true);
+    expect(a.dependentIds.contains(d.id), true);
+
     // Move a under b between e and f
     a.parent = b;
     b.children.move(a, after: e, before:f);
 
     file.captureJournalEntry();
+
+    // Expect dependent ids to have updated.
+    expect(artboard.dependentIds.length, 1);
+    expect(artboard.dependentIds.contains(b.id), true);
+    expect(b.dependentIds.length, 3);
+    expect(b.dependentIds.contains(e.id), true);
+    expect(b.dependentIds.contains(a.id), true);
+    expect(b.dependentIds.contains(f.id), true);
+    expect(a.dependentIds.length, 2);
+    expect(a.dependentIds.contains(c.id), true);
+    expect(a.dependentIds.contains(d.id), true);
 
     // Expect structure to match the second diagram above
     expect(a.parent, b);

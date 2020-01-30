@@ -10,6 +10,7 @@ class ComponentDirt {
   static const int dependents = 1 << 0;
 }
 
+
 abstract class Component extends ComponentBase<RiveFile> {
   Artboard _artboard;
   dynamic _userData;
@@ -126,13 +127,18 @@ abstract class Component extends ComponentBase<RiveFile> {
       return false;
     }
     dependent._dependsOn.add(this);
+    markRebuildDependentIds();
     return true;
+  }
+
+  void markRebuildDependentIds() {
+    context?.markDependentIdsDirty(this);
   }
 
   bool isValidParent(Component parent) => parent is ContainerComponent;
 
   void markDependenciesDirty() {
-    context.markDependenciesDirty(this);
+    context?.markDependenciesDirty(this);
     for (final dependent in _dependents) {
       dependent.markDependenciesDirty();
     }
@@ -142,8 +148,13 @@ abstract class Component extends ComponentBase<RiveFile> {
   void buildDependencies() {
     for (final parentDep in _dependsOn) {
       parentDep._dependents.remove(this);
+      parentDep.markRebuildDependentIds();
     }
     _dependsOn.clear();
+
+    // List<int> test = [1, 2, 3];
+    // List<int> test2 = [1, 2, 3];
+    // listEquals(test, test2);
 
     parent?.addDependent(this);
   }
