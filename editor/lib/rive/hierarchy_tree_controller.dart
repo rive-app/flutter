@@ -21,10 +21,25 @@ class HierarchyTreeController extends TreeController<Component> {
       treeItem is ContainerComponent ? treeItem.children : null;
 
   @override
+  bool allowDrop(FlatTreeItem<Component> target, DropState state,
+      List<FlatTreeItem<Component>> items) {
+    if (!super.allowDrop(target, state, items)) {
+      return false;
+    }
+
+    var desiredParent =
+        state == DropState.into ? target.data : target.data.parent;
+    for (final item in items) {
+      if (!item.data.isValidParent(desiredParent)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
   void drop(FlatTreeItem<Component> target, DropState state,
       List<FlatTreeItem<Component>> items) {
-        
-        
     switch (state) {
       case DropState.above:
       case DropState.below:
@@ -38,7 +53,6 @@ class HierarchyTreeController extends TreeController<Component> {
         }
         for (final item in items) {
           var treeItem = item.data;
-
           if (state == DropState.above) {
             newParent.children.move(treeItem,
                 before: target.prev?.parent == target.parent
@@ -63,9 +77,8 @@ class HierarchyTreeController extends TreeController<Component> {
         // }
         break;
       case DropState.into:
-
         var targetComponent = target.data;
-        if(targetComponent is! ContainerComponent) {
+        if (targetComponent is! ContainerComponent) {
           return;
         }
         var targetContainer = targetComponent as ContainerComponent;

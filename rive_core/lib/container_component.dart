@@ -21,6 +21,14 @@ abstract class ContainerComponent extends ContainerComponentBase {
     child.parent = this;
   }
 
+  // @override
+  // void markArtboardDirty() {
+  //   super.markArtboardDirty();
+  //   for (final child in children) {
+  //     child.markArtboardDirty();
+  //   }
+  // }
+
   // bool addChild(Component child, {bool updateIndex = true}) {
   //   assert(child != null);
 

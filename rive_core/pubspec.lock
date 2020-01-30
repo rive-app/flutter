@@ -93,6 +93,13 @@ packages:
       relative: true
     source: path
     version: "0.0.2"
+  graphs:
+    dependency: "direct main"
+    description:
+      name: graphs
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   image:
     dependency: transitive
     description:

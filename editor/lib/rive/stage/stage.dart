@@ -78,9 +78,9 @@ class Stage {
   }
 
   void zoomTo(double x, double y, double scale) {
-    scale = scale.clamp(_minZoom, _maxZoom).toDouble();
-    double zoomDelta = scale / _viewZoomTarget;
-    _viewZoomTarget = scale;
+    double zoom = scale.clamp(_minZoom, _maxZoom).toDouble();
+    double zoomDelta = zoom / _viewZoomTarget;
+    _viewZoomTarget = zoom;
 
     double ox = x - _viewTranslationTarget[0];
     double oy = y - _viewTranslationTarget[1];
@@ -153,8 +153,8 @@ class Stage {
 
     switch (button) {
       case 2:
-        double dx = (x - _lastMousePosition[0]);
-        double dy = (y - _lastMousePosition[1]);
+        double dx = x - _lastMousePosition[0];
+        double dy = y - _lastMousePosition[1];
 
         _rightMouseMoveAccum += sqrt(dx * dx + dy * dy);
         _viewTranslationTarget[0] += dx;
@@ -207,7 +207,7 @@ class Stage {
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 
   Stage(this.rive, this.riveFile) {
-    for (final object in riveFile.objects.values) {
+    for (final object in riveFile.objects) {
       if (object is Component) {
         initComponent(object);
       }
@@ -217,6 +217,7 @@ class Stage {
   void markNeedsAdvance() {
     if (!_needsAdvance) {
       _needsAdvance = true;
+      rive.markNeedsAdvance();
       _delegate?.stageNeedsAdvance();
     }
   }
@@ -249,6 +250,7 @@ class Stage {
 
     item.visTreeProxy = visTree.createProxy(item.aabb, item);
     item.addedToStage(this);
+    markNeedsAdvance();
     return true;
   }
 
@@ -261,6 +263,7 @@ class Stage {
     visTree.destroyProxy(item.visTreeProxy);
     item.visTreeProxy = nullNode;
     item.removedFromStage(this);
+    markNeedsAdvance();
     return true;
   }
 
@@ -268,7 +271,7 @@ class Stage {
 
   void _onFileChanged() {}
 
-  bool get shouldAdvance => _needsAdvance || _debounce.length > 0;
+  bool get shouldAdvance => _needsAdvance || _debounce.isNotEmpty;
   bool _needsAdvance = true;
 
   void advance(double elapsed) {

@@ -5,6 +5,7 @@ import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
@@ -61,7 +62,29 @@ class Rive with RiveFileDelegate {
       return _state.value = RiveState.catastrophe;
     }
     await _updateUserWithRetry();
+
+    // Start the frame callback loop.
+    SchedulerBinding.instance.addPersistentFrameCallback(_drawFrame);
+
     return _state.value;
+  }
+
+  int _lastFrameTime = 0;
+  void _drawFrame(Duration elapsed) {
+    int elapsedMicroseconds = elapsed.inMicroseconds;
+
+    double elapsedSeconds = (elapsedMicroseconds - _lastFrameTime) * 1e-6;
+    _lastFrameTime = elapsedMicroseconds;
+
+    if ((file.value?.advance(elapsedSeconds) ?? false) ||
+        _stage.shouldAdvance) {
+      _stage.advance(elapsedSeconds);
+    }
+  }
+
+  @override
+  void markNeedsAdvance() {
+    SchedulerBinding.instance.scheduleFrame();
   }
 
   Timer _reconnectTimer;
@@ -130,12 +153,13 @@ class Rive with RiveFileDelegate {
   void onArtboardsChanged() {
     treeController.value.flatten();
     // TODO: this will get handled by dependency manager.
-    _stage.markNeedsAdvance();
+    // _stage.markNeedsAdvance();
   }
 
   @override
   void onDirtCleaned() {
     treeController.value.flatten();
+    _stage.markNeedsAdvance();
   }
 
   void onKeyEvent(RawKeyEvent keyEvent, bool hasFocusObject) {

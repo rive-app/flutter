@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rive_core/rive_file.dart';
 
 import 'artboard.dart';
@@ -13,20 +14,40 @@ abstract class Component extends ComponentBase<RiveFile> {
   Artboard _artboard;
   dynamic _userData;
 
+  // Used during update process.
+  int graphOrder = 0;
+  int dirt = 0;
+
+  bool addDirt(int value, {bool recurse = false}) {
+    if ((dirt & value) == value) {
+      // Already marked.
+      return false;
+    }
+
+    // Make sure dirt is set before calling anything that can set more dirt.
+    dirt |= value;
+
+    onDirty(dirt);
+    artboard?.onComponentDirty(this);
+
+    if (!recurse) {
+      return true;
+    }
+
+    for (final d in dependents) {
+      d.addDirt(value, recurse: recurse);
+    }
+    return true;
+  }
+
+  void onDirty(int mask) {}
+  void update(int dirt);
+
   /// The artboard this component belongs to.
-  Artboard get artboard => _artboard;
+  Artboard get artboard;
 
   /// Find the artboard in the hierarchy.
-  bool resolveArtboard() {
-    for (var curr = parent; curr != null; curr = curr.parent) {
-      if (curr is Artboard) {
-        _artboard = curr;
-        return true;
-      }
-    }
-    _artboard = null;
-    return false;
-  }
+  bool resolveArtboard();
 
   dynamic get userData => _userData;
   set userData(dynamic value) {
@@ -43,10 +64,7 @@ abstract class Component extends ComponentBase<RiveFile> {
   @override
   void parentIdChanged(int from, int to) {
     super.parentIdChanged(from, to);
-    var p = context?.objects[to];
-    if (p is ContainerComponent) {
-      parent = p;
-    }
+    parent = context?.resolve(to);
   }
 
   @override
@@ -67,8 +85,7 @@ abstract class Component extends ComponentBase<RiveFile> {
     }
     var old = _parent;
     _parent = value;
-    // TODO: what's the implication here? That id 0 is always a non-component?
-    parentId = value?.id ?? 0;
+    parentId = value?.id;
     parentChanged(old, value);
   }
 
@@ -81,9 +98,15 @@ abstract class Component extends ComponentBase<RiveFile> {
       to.children.add(this);
       to.childAdded(this);
     }
-    // Let the context know that this item needs its artboard resolved.
-    context?.markArtboardDirty(this);
+    // We need to resolve our artboard.
+    markDependenciesDirty();
   }
+
+  // @mustCallSuper
+  // @protected
+  // void markArtboardDirty() {
+  //   context?.markArtboardDirty(this);
+  // }
 
   /// Components that depend on this component.
   final Set<Component> _dependents = {};
@@ -92,26 +115,75 @@ abstract class Component extends ComponentBase<RiveFile> {
   final Set<Component> _dependsOn = {};
 
   Set<Component> get dependents => _dependents;
-  int _dirt = 0;
+  // int _dirt = 0;
 
   bool addDependent(Component dependent) {
+    assert(dependent != null, "Dependent cannot be null.");
+    assert(artboard == dependent.artboard,
+        "Components must be in the same artboard.");
+
     if (!_dependents.add(dependent)) {
-      dependent._dependsOn.add(this);
       return false;
     }
-    _dirt |= ComponentDirt.dependents;
-    context.markDependenciesDirty();
-
+    dependent._dependsOn.add(this);
     return true;
   }
 
-  void remove() {
+  bool isValidParent(Component parent) => parent is ContainerComponent;
+
+  void markDependenciesDirty() {
+    context.markDependenciesDirty(this);
+    for (final dependent in _dependents) {
+      dependent.markDependenciesDirty();
+    }
+  }
+
+  @mustCallSuper
+  void buildDependencies() {
     for (final parentDep in _dependsOn) {
       parentDep._dependents.remove(this);
     }
     _dependsOn.clear();
-    _dirt |= ComponentDirt.dependents;
-    context.markDependenciesDirty();
+
+    parent?.addDependent(this);
+  }
+
+  /// Something we depend on has been removed. It's important to clear out any
+  /// stored references to that dependency so it can be garbage collected (if
+  /// necessary).
+  void onDependencyRemoved(Component dependent) {}
+
+  void onRemoved() {
+    for (final parentDep in _dependsOn) {
+      parentDep._dependents.remove(this);
+    }
+    _dependsOn.clear();
+
+    for (final dependent in _dependents) {
+      dependent.onDependencyRemoved(this);
+    }
+    _dependents.clear();
+
+    // silently clear from the parent in order to not cause any further undo
+    // stack changes
+    if (parent != null) {
+      parent.children.remove(this);
+      parent.childRemoved(this);
+    }
+
+    // The artboard containing this component will need it's dependencies
+    // re-sorted.
+    if (artboard != null) {
+      context?.markDependencyOrderDirty(artboard);
+    }
+    // _dirt |= ComponentDirt.dependents;
+    // parent?.children?.remove(this);
+    // parent.childRemoved(this);
+    // parentId = null;
+    // var c = context;
+    // context = null;
+    // parentId = null;
+    // context = c;
   }
 
   @override

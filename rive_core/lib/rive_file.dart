@@ -11,10 +11,13 @@ abstract class RiveFileDelegate {
   void onObjectAdded(Core object) {}
   void onObjectRemoved(Core object) {}
   void onDirtCleaned();
+  void markNeedsAdvance();
 }
 
-class RiveDirt {
+class _RiveDirt {
   static const int dependencies = 1 << 0;
+  static const int childSort = 1 << 1;
+  static const int dependencyOrder = 1 << 2;
 }
 
 class RiveFile extends RiveCoreContext {
@@ -28,33 +31,75 @@ class RiveFile extends RiveCoreContext {
   /// (undo/redo/capture) completes.
   final Set<ContainerComponent> _needChildSort = {};
 
-  /// Set of components that need to their artboard resolved after the current
-  /// operation (undo/redo/capture) completes.
-  final Set<Component> _needResolveArtboard = {};
+  /// Set of components that need to their dependencies re-built.
+  final Set<Component> _needDependenciesBuilt = {};
+
+  /// Set of artboards that need their dependencies sorted.
+  final Set<Artboard> _needDependenciesOrdered = {};
 
   /// Mark a component as needing its children to be sorted.
-  void markChildSortDirty(ContainerComponent component) =>
-      _needChildSort.add(component);
+  void markChildSortDirty(ContainerComponent component) {
+    _dirt |= _RiveDirt.childSort;
+    _needChildSort.add(component);
+  }
+
+  /// Mark as an artboard as needing its dependencies sorted.
+  void markDependencyOrderDirty(Artboard artboard) {
+    _dirt |= _RiveDirt.dependencyOrder;
+    _needDependenciesOrdered.add(artboard);
+  }
 
   /// Mark a component as needing its artboard to be resolved.
-  void markArtboardDirty(Component component) =>
-      _needResolveArtboard.add(component);
+  void markDependenciesDirty(Component component) {
+    _dirt |= _RiveDirt.dependencies;
+    _needDependenciesBuilt.add(component);
+    markNeedsAdvance();
+  }
 
   /// Perform any cleanup required due to properties being marked dirty.
-  void cleanDirt() {
-    if(_needResolveArtboard.isEmpty && _needChildSort.isEmpty) {
-      return;
+  bool cleanDirt([int escapeHatch = 0]) {
+    assert(escapeHatch < 1000);
+    if (_dirt == 0) {
+      return false;
     }
-    for (final component in _needResolveArtboard) {
+    _dirt = 0;
+
+    // Copy it in case it is changed during the building (meaning this process
+    // needs to recurse).
+    Set<Component> needDependenciesBuilt =
+        Set<Component>.from(_needDependenciesBuilt);
+    _needDependenciesBuilt.clear();
+
+    // First resolve the artboards
+    for (final component in needDependenciesBuilt) {
       component.resolveArtboard();
     }
+
+    // Then build the dependencies
+    for (final component in needDependenciesBuilt) {
+      _needDependenciesOrdered.add(component.artboard);
+      component.buildDependencies();
+    }
+
     for (final parent in _needChildSort) {
       parent.children.sortFractional();
     }
     _needChildSort.clear();
-    _needResolveArtboard.clear();
 
+    // finally sort dependencies
+    for (final artboard in _needDependenciesOrdered) {
+      artboard.sortDependencies();
+    }
+    _needDependenciesOrdered.clear();
+
+    if (_dirt != 0) {
+      cleanDirt(escapeHatch + 1);
+      return true;
+    }
+
+    // Only call dirt cleaned when it's really finally cleaned.
     delegates.forEach((delegate) => delegate.onDirtCleaned());
+    return true;
   }
 
   @override
@@ -120,7 +165,14 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void onAdded(Core object) {
+  void onAdded(Component object) {
+    print("ADDED OBJECT $object ${object.parent}");
+    if (object.parentId != null) {
+      print("REOSLVE ${object.parentId}");
+      object.parent = object.context?.resolve(object.parentId);
+      // object.parent.children.add(object);
+      object.parent.childAdded(object);
+    }
     delegates.forEach((delegate) => delegate.onObjectAdded(object));
     if (object is Artboard) {
       artboards.add(object);
@@ -129,7 +181,8 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void onRemoved(Core object) {
+  void onRemoved(Component object) {
+    object.onRemoved();
     delegates.forEach((delegate) => delegate.onObjectRemoved(object));
     if (object is Artboard) {
       artboards.remove(object);
@@ -137,15 +190,17 @@ class RiveFile extends RiveCoreContext {
     }
   }
 
-  @override
-  bool captureJournalEntry() {
-    print("CAP");
-    // Make sure we've updated dependents if some change occurred to them.
-    if (_dirt & RiveDirt.dependencies != 0) {}
-    return super.captureJournalEntry();
-  }
+  void markNeedsAdvance() =>
+      delegates.forEach((delegate) => delegate.markNeedsAdvance());
 
-  void markDependenciesDirty() {
-    _dirt |= RiveDirt.dependencies;
+  bool advance(double elapsed) {
+    cleanDirt();
+    bool advanced = false;
+    for(final artboard in artboards) {
+      if(artboard.advance(elapsed)) {
+        advanced = true;
+      }
+    }
+    return advanced;
   }
 }

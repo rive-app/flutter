@@ -4,6 +4,7 @@ import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
 import '../../artboard.dart';
+import '../../component.dart';
 import '../../node.dart';
 import 'artboard_base.dart';
 import 'component_base.dart';
@@ -26,7 +27,7 @@ abstract class RiveCoreContext extends CoreContext {
 
   @override
   void applyCoopChanges(ObjectChanges objectChanges) {
-    var object = objects[objectChanges.objectId];
+    Core<CoreContext> object = resolve(objectChanges.objectId);
     var justAdded = false;
     for (final change in objectChanges.changes) {
       var reader = BinaryReader.fromList(change.value);

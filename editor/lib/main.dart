@@ -22,8 +22,6 @@ import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
 
-// var file = RiveFile("102:15468");
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addPostFrameCallback(
@@ -70,7 +68,7 @@ List<ContextItem<Rive>> contextItems = [
     var selection = rive.selection.first;
     if (selection is StageItem && selection.component is ContainerComponent) {
       var container = selection.component as ContainerComponent;
-      var nodes = rive.file.value.objects.values.whereType<Node>();
+      var nodes = rive.file.value.objectsOfType<Node>();
 
       var node = Node()
         ..name = "Node ${nodes.length + 1}"
@@ -200,22 +198,6 @@ class Editor extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              IconButton(
-                icon: Icon(Icons.account_circle),
-                color: Colors.white,
-                onPressed: () {
-                  WindowUtils.openWebView(
-                      'auth_window', "https://rive.app/signin",
-                      size: const Size(1024, 1024));
-                  // PlatformUtils.openWebView(
-                  //         'auth_window', "http://127.0.0.1:5500/test.html",
-                  //         jsMessage: "jsHandler", size: Size(1024, 1024))
-                  //     .then((value) {
-                  //   print("Message: $value");
-                  //   PlatformUtils.closeWebView('auth_window');
-                  // });
-                },
               ),
             ],
           ),
