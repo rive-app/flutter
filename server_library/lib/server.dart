@@ -1,80 +1,71 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
+
 import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_command.dart';
+import 'package:core/coop/coop_isolate.dart';
 import 'package:core/coop/coop_server.dart';
 import 'package:core/coop/coop_server_client.dart';
-import 'package:core/coop/coop_user.dart';
 import 'package:core/coop/coop_session.dart';
-import 'package:core/coop/coop_isolate.dart';
+import 'package:core/coop/coop_user.dart';
 import 'package:core/core.dart';
 
 import 'src/coop_file.dart';
+import 'src/private_api.dart';
+
+class RiveCoopServer extends CoopServer {
+  @override
+  CoopIsolateHandler get handler => makeProcess;
+
+  @override
+  Future<bool> validate(HttpRequest request, int ownerId, int fileId) async {
+    return true;
+  }
+
+  static Future<void> makeProcess(CoopIsolateArgument argument) async {
+    var process = _CoopIsolate();
+    var success = await process.initProcess(
+        argument.sendPort, argument.options, argument.ownerId, argument.fileId);
+    if (success) {
+      // ok, anything to do?
+    }
+  }
+}
 
 class _CoopIsolate extends CoopIsolateProcess {
   CoopFile file;
-  CoopFileServerData fileMeta;
-
-  Directory _dataDir;
-  @override
-  Future<bool> initialize(
-      int ownerId, int fileId, Map<String, String> options) async {
-    _dataDir = Directory(options['data-dir']);
-
-    // TODO: get the file from some source (S3?). For now we just instance a new
-    // file.
-    file = CoopFile()
-      ..ownerId = ownerId
-      ..fileId = ownerId
-      ..objects = {};
-    fileMeta = CoopFileServerData()
-      ..sessions = []
-      ..nextChangeId = CoopCommand.minChangeId
-      ..nextObjectId = 1;
-
-    return _dataDir != null;
-  }
+  int _nextObjectId;
+  int _nextChangeId;
+  final _privateApi = PrivateApi();
 
   @override
-  Future<Uint8List> loadData(String key) async {
-    print("WRITING TO KEY $key ${_dataDir.path + key}");
-    var file = File(_dataDir.path + key);
-    return file.readAsBytes();
-  }
-
-  @override
-  Future<bool> saveData(String key, Uint8List data) async {
-    var file = File(_dataDir.path + key);
-    await file.writeAsBytes(data, flush: true);
-    return true;
-  }
-
-  @override
-  Future<bool> shutdown() async {
-    await _dataDir.delete(recursive: true);
-    return true;
-  }
-
-  @override
-  Future<CoopSession> login(String token, int desiredSession) async {
-    // In test mode we validate any user...
-    return CoopSession()
-      ..id = desiredSession
-      ..changeId = 2
-      ..user = CoopUser(1);
-  }
-
-  @override
-  bool attemptChange(CoopServerClient client, ChangeSet changeSet) {
+  int attemptChange(CoopServerClient client, ChangeSet changeSet) {
+    // Make the change on a clone.
+    var modifiedFile = file.clone();
+    var serverChangeId = _nextChangeId++;
     var serverChangeSet = ChangeSet()
-      ..id = fileMeta.nextChangeId++
+      ..id = serverChangeId
       ..objects = [];
+    bool validateDependencies = false;
     for (final objectChanges in changeSet.objects) {
-      print("CHANGING ${objectChanges.objectId}");
-      var serverChange = objectChanges.clone();
+      // print("CHANGING ${objectChanges.objectId}");
+
+      // Don't propagate changes to dependent ids. Clients build these up and
+      // send them to the server for validating concurrent changes, there's no
+      // need to send them to other clients.
+      var serverChange = objectChanges
+          .clone((change) => change.op != CoreContext.dependentsKey);
+
       serverChangeSet.objects.add(serverChange);
+
+      // Transform object id if necessary (was an object that got created).
+      serverChange.objectId =
+          client.changedIds[objectChanges.objectId] ?? objectChanges.objectId;
+      CoopFileObject object = modifiedFile.objects[serverChange.objectId];
+
       for (final change in objectChanges.changes) {
         switch (change.op) {
           case CoreContext.addKey:
@@ -89,10 +80,10 @@ class _CoopIsolate extends CoopIsolateProcess {
             );
 
             // TODO: need to upgrade the object id to a global/server one.
-            var nextId = fileMeta.nextObjectId++;
+            var nextId = _nextObjectId++;
             serverChange.objectId = nextId;
             print("ADDING SERVER OBJECT WITH ID ${serverChange.objectId}");
-            file.objects[nextId] = CoopFileObject()
+            modifiedFile.objects[nextId] = object = CoopFileObject()
               ..localId = nextId
               ..key = reader.readVarUint();
             client.changedIds[objectChanges.objectId] = nextId;
@@ -103,22 +94,116 @@ class _CoopIsolate extends CoopIsolateProcess {
           case CoreContext.removeKey:
             var objectId = client.changedIds[objectChanges.objectId] ??
                 objectChanges.objectId;
-            file.objects.remove(objectId);
+            object = modifiedFile.objects.remove(objectId);
+
             print("DESTROY OBJECT ${objectChanges.objectId} ${change.value}");
             // Destroy object with id
             break;
           default:
-            // Transform object id if necessary (was an object that got created).
-            var objectId = client.changedIds[objectChanges.objectId] ??
-                objectChanges.objectId;
-            serverChange.objectId = objectId;
             break;
         }
       }
+
+      // now actually make changes to the object (if we have one).
+      if (object != null) {
+        object.serverChangeId = serverChangeId;
+        object.userId = client.user?.id ?? 0;
+        for (final change in objectChanges.changes) {
+          switch (change.op) {
+            case CoreContext.addKey:
+              // Handled previously
+              break;
+            case CoreContext.removeKey:
+              // Handled previously
+              break;
+            case CoreContext.dependentsKey:
+              // need to re-validate dependencies as the dependents have
+              // changed.
+              validateDependencies = true;
+              continue general;
+            general:
+            default:
+              var prop = object.properties[change.op] ??= ObjectProperty();
+              prop.key = change.op;
+              prop.serverChangeId = serverChangeId;
+              prop.userId = client.user?.id ?? 0;
+              prop.data = change.value;
+              break;
+          }
+        }
+      }
     }
-    print("CHANGE ID ${serverChangeSet.id}");
-    propagateChanges(client, serverChangeSet);
+
+    bool isChangeValid = true;
+    if (validateDependencies) {}
+
+    if (isChangeValid) {
+      // Changes were good, modify file and propagate them to other clients.
+      file = modifiedFile;
+      print("CHANGE ID ${serverChangeSet.id}");
+      propagateChanges(client, serverChangeSet);
+      return serverChangeSet.id;
+    } else {
+      // do not change the file, reject the change.
+      return 0;
+    }
+  }
+
+  @override
+  ChangeSet initialChanges() {
+    return file.toChangeSet();
+  }
+
+  @override
+  Future<bool> initialize(
+      int ownerId, int fileId, Map<String, String> options) async {
+    // check data is not null, check signature, if it's RIVE deserialize
+    // if it's { or something else, send wtf.
+
+    // TODO: get the file from some source (S3?). For now we just instance a new
+    // file.
+    var data = await _privateApi.load(ownerId, fileId);
+
+    if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
+        (data == null || data.isEmpty)) {
+      _nextObjectId = 1;
+      _nextChangeId = 1;
+
+      file = CoopFile()
+        ..ownerId = ownerId
+        ..fileId = fileId
+        ..objects = {};
+    } else {
+      file = CoopFile()
+        ..deserialize(
+          BinaryReader(
+            ByteData.view(
+              data.buffer,
+              data.offsetInBytes,
+              data.lengthInBytes,
+            ),
+          ),
+        );
+
+      _nextObjectId = file.objects.values
+              .fold<int>(0, (curr, object) => max(curr, object.localId)) +
+          1;
+
+      _nextChangeId = file.objects.values.fold<int>(
+              0, (curr, object) => max(curr, object.serverChangeId)) +
+          1;
+    }
     return true;
+  }
+
+  @override
+  Future<CoopUser> login(String token) async {
+    var result = await _privateApi.validate(token);
+    if (result == null) {
+      return null;
+    }
+
+    return CoopUser(result.ownerId);
   }
 
   @override
@@ -132,23 +217,20 @@ class _CoopIsolate extends CoopIsolateProcess {
       to.write(writer.uint8Buffer);
     }
   }
-}
 
-class RiveCoopServer extends CoopServer {
   @override
-  CoopIsolateHandler get handler => makeProcess;
-
-  static Future<void> makeProcess(CoopIsolateArgument argument) async {
-    var process = _CoopIsolate();
-    var success = await process.initProcess(
-        argument.sendPort, argument.options, argument.ownerId, argument.fileId);
-    if (success) {
-      // ok, anything to do?
-    }
+  Future<void> persist() async {
+    var writer = BinaryWriter(alignment: file.objects.length * 256);
+    file.serialize(writer);
+    print("PERSISTING! ${writer.uint8Buffer} ${file.ownerId} ${file.fileId}");
+    var result =
+        await _privateApi.save(file.ownerId, file.fileId, writer.uint8Buffer);
+    print("GOT REVISION ID ${result.revisionId}");
   }
 
   @override
-  Future<bool> validate(HttpRequest request, int ownerId, int fileId) async {
+  Future<bool> shutdown() async {
+    // TODO: Make sure debounced save has completed.
     return true;
   }
 }
