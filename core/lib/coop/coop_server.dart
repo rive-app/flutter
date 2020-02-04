@@ -41,6 +41,12 @@ abstract class CoopServer {
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
       print("SEG $segments");
+      if (segments.isEmpty) {
+        request.response.statusCode = 200;
+        request.response.write('Healthy!');
+        await request.response.close();
+        return;
+      }
       if (segments.length == 2) {
         int ownerId, fileId;
         try {
