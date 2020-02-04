@@ -2,8 +2,9 @@ import 'dart:io'
     show
         HttpRequest,
         HttpServer,
-        WebSocketTransformer,
+        InternetAddress,
         WebSocketException,
+        WebSocketTransformer,
         stderr;
 
 import 'coop_isolate.dart';
@@ -32,12 +33,12 @@ abstract class CoopServer {
 
   Future<bool> listen({int port = 8000, Map<String, String> options}) async {
     try {
-      _server = await HttpServer.bind('localhost', port);
+      _server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
     } on Exception catch (ex) {
       print('[!]Error -- ${ex.toString()}');
       return false;
     }
-    print('Listening localhost:$port');
+    print('Listening ${InternetAddress.loopbackIPv4}:$port');
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
       print("SEG $segments");
