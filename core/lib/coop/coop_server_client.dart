@@ -1,12 +1,17 @@
 import 'dart:typed_data';
 
+import 'package:core/coop/goodbye_reason.dart';
+
+import '../debounce.dart';
 import 'change.dart';
 import 'coop_isolate.dart';
 import 'coop_reader.dart';
+import 'coop_user.dart';
 import 'coop_writer.dart';
 
 class CoopServerClient extends CoopReader {
   CoopWriter _writer;
+  CoopUser user;
   final int id;
   // final HttpRequest request;
   final CoopIsolateProcess context;
@@ -30,57 +35,43 @@ class CoopServerClient extends CoopReader {
     _writer = CoopWriter(write);
 
     _writer.writeHello();
-
-    // socket.listen(
-    //   (dynamic data) {
-    //     if (data is Uint8List) {
-    //       read(data);
-    //     }
-    //   },
-    //   onDone: () => context.remove(this),
-    //   onError: (dynamic err) => print('[!]Error -- ${err.toString()}'),
-    //   cancelOnError: true,
-    // );
   }
 
   void write(Uint8List buffer) {
-    // assert(_isConnected);
-    // socket.add(buffer);
     context.write(this, buffer);
   }
 
   @override
   Future<void> recvChange(ChangeSet changes) async {
-    print("CHANGES ${changes.id} ${changes.objects.length}");
-    print("SERVER GOT CHANGES $changes");
-    if (context.attemptChange(this, changes)) {
-      _writer.writeAccept(changes.id, 0);
-
-      // this should acctually be done by the attempt change as it needs to
-      // modify the data
-
-      // context.propagateChanges(this, changes);
-      // propagate changes to everyone else... need to write it to the context,
-      // and it needs to propagate to other clients
-    }
-  }
-
-  @override
-  Future<void> recvGoodbye() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> recvHand(int desiredSession, String fileId, String token,
-      int lastServerChangeId) async {
-    var session = await context.login(token, desiredSession);
-    if (session == null) {
-      _writer.writeGoodbye();
+    int serverChangeId = context.attemptChange(this, changes);
+    if (serverChangeId != 0) {
+      _writer.writeAccept(changes.id, serverChangeId);
+      debounce(context.persist, duration: const Duration(seconds: 2));
     } else {
-      print("GOT THE HAND $session $fileId $token $lastServerChangeId");
-      // Get session from user
-      _writer.writeShake(session.id, session.changeId);
+      _writer.writeReject(changes.id);
     }
+  }  
+
+  @override
+  Future<void> recvGoodbye(GoodbyeReason reason) {
+    throw UnsupportedError("Server should never receive goodbye.");
+  }
+
+  @override
+  Future<void> recvHand(String token) async {
+    user = await context.login(token);
+    if (user == null) {
+      _writer.writeGoodbye(GoodbyeReason.badToken);
+    } else {
+      _writer.writeShake();
+    }
+  }
+
+  @override
+  Future<void> recvSync() async {
+    _writer.writeChanges(context.initialChanges());
+
+    _writer.writeReady();
   }
 
   @override
@@ -89,7 +80,7 @@ class CoopServerClient extends CoopReader {
   }
 
   @override
-  Future<void> recvShake(int session, int lastSeenChangeId) {
+  Future<void> recvShake() {
     throw UnsupportedError("Server should never receive shake.");
   }
 
@@ -106,5 +97,10 @@ class CoopServerClient extends CoopReader {
   @override
   Future<void> recvChangeId(int from, int to) {
     throw UnsupportedError("Server should never receive change id.");
+  }
+
+  @override
+  Future<void> recvReady() {
+    throw UnsupportedError("Server should never receive ready.");
   }
 }

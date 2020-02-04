@@ -4,10 +4,10 @@ import 'package:binary_buffer/binary_reader.dart';
 
 import 'change.dart';
 import 'coop_command.dart';
+import 'goodbye_reason.dart';
 
 abstract class CoopReader {
   void read(Uint8List data) {
-    print("GOT READER DATA $data");
     var reader = BinaryReader(
         ByteData.view(data.buffer, data.offsetInBytes, data.length));
     int command = reader.readVarUint();
@@ -26,19 +26,17 @@ abstract class CoopReader {
         recvReject(changeId);
         break;
       case CoopCommand.hand:
-        var session = reader.readVarUint();
-        var fileId = reader.readString();
         var token = reader.readString();
-        var lastServerChangeId = reader.readVarUint();
-        recvHand(session, fileId, token, lastServerChangeId);
+        recvHand(token);
+        break;
+      case CoopCommand.synchronize:
+        recvSync();
         break;
       case CoopCommand.shake:
-        var session = reader.readVarUint();
-        var lastSeenChangeId = reader.readVarUint();
-        recvShake(session, lastSeenChangeId);
+        recvShake();
         break;
       case CoopCommand.goodbye:
-        recvGoodbye();
+        recvGoodbye(GoodbyeReason.values[reader.readVarUint()]);
         break;
       case CoopCommand.cursor:
         break;
@@ -46,6 +44,9 @@ abstract class CoopReader {
         var fromId = reader.readVarInt();
         var toId = reader.readVarUint();
         recvChangeId(fromId, toId);
+        break;
+      case CoopCommand.ready:
+        recvReady();
         break;
       default:
         recvChange(ChangeSet()..deserialize(reader, command));
@@ -56,10 +57,11 @@ abstract class CoopReader {
   Future<void> recvAccept(int changeId, int serverChangeId);
   Future<void> recvReject(int changeId);
   Future<void> recvChange(ChangeSet changes);
+  Future<void> recvReady();
   Future<void> recvHello();
-  Future<void> recvGoodbye();
-  Future<void> recvHand(
-      int session, String fileId, String token, int lastServerChangeId);
-  Future<void> recvShake(int session, int lastSeenChangeId);
+  Future<void> recvGoodbye(GoodbyeReason reason);
+  Future<void> recvHand(String token);
+  Future<void> recvSync();
+  Future<void> recvShake();
   Future<void> recvChangeId(int from, int to);
 }

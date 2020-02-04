@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:binary_buffer/binary_writer.dart';
+import 'package:core/coop/goodbye_reason.dart';
 
 import 'change.dart';
 import 'coop_command.dart';
@@ -17,28 +18,29 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  void writeHand(
-      int session, String fileId, String token, int lastServerChangeId) {
+  void writeHand(String token) {
     var writer = BinaryWriter();
     writer.writeVarUint(CoopCommand.hand);
-    writer.writeVarUint(session);
-    writer.writeString(fileId);
     writer.writeString(token);
-    writer.writeVarUint(lastServerChangeId);
     write(writer.uint8Buffer);
   }
 
-  void writeShake(int session, int lastSeenChangeId) {
+  void writeShake() {
     var writer = BinaryWriter();
     writer.writeVarUint(CoopCommand.shake);
-    writer.writeVarUint(session);
-    writer.writeVarUint(lastSeenChangeId);
     write(writer.uint8Buffer);
   }
 
-  void writeGoodbye() {
-    var writer = BinaryWriter(alignment: 1);
+  void writeReady() {
+    var writer = BinaryWriter();
+    writer.writeVarUint(CoopCommand.ready);
+    write(writer.uint8Buffer);
+  }
+
+  void writeGoodbye(GoodbyeReason reason) {
+    var writer = BinaryWriter(alignment: 2);
     writer.writeVarUint(CoopCommand.goodbye);
+    writer.writeVarUint(reason.index);
     write(writer.uint8Buffer);
   }
 
@@ -48,10 +50,9 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  void writeSync(int lastId) {
-    var writer = BinaryWriter(alignment: 8);
+  void writeSync() {
+    var writer = BinaryWriter(alignment: 1);
     writer.writeVarUint(CoopCommand.synchronize);
-    writer.writeVarUint(lastId);
     write(writer.uint8Buffer);
   }
 

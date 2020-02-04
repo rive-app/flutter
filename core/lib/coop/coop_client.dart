@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
+import 'package:core/coop/goodbye_reason.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'connect_result.dart';
@@ -105,7 +106,6 @@ class CoopClient extends CoopReader {
     // Make sure we do not apply changes that conflict with unacknowledged ones.
 
     // That means that we need to re-apply them if that changeset is rejected.
-
     for (final objectChanges in changeSet.objects) {
       //change.objectId
       makeChange?.call(objectChanges);
@@ -113,8 +113,15 @@ class CoopClient extends CoopReader {
   }
 
   @override
-  Future<void> recvGoodbye() async {
+  Future<void> recvGoodbye(GoodbyeReason reason) async {
     // Handle the server telling us to disconnect.
+    _allowReconnect = false;
+    _isConnected = false;
+    await _channel?.sink?.close();
+    _channel = null;
+    print("GOT GOODBYE");
+    _connectionCompleter?.complete(ConnectResult.notAuthorized);
+    _connectionCompleter = null;
   }
 
   /// Accept changes, remove the unacknowledge change that matches this
@@ -148,35 +155,34 @@ class CoopClient extends CoopReader {
   }
 
   @override
-  Future<void> recvHand(
-      int session, String fileId, String token, int lastSeenChangeId) async {
+  Future<void> recvHand(String token) async {
     assert(false, 'Client should never receive hand.');
   }
 
   @override
   Future<void> recvHello() async {
     if (!_isConnected) {
-      var session = await localSettings.getIntSetting('session') ?? 0;
       var token = await localSettings.getStringSetting('token') ?? '';
-      var lastServerChangeId =
-          await localSettings.getIntSetting('lastServerChangeId') ?? 0;
 
       _reconnectAttempt = 0;
       _isConnected = true;
 
-      _writer.writeHand(session, fileId, token, lastServerChangeId);
+      _writer.writeHand(token);
     }
   }
 
   @override
-  Future<void> recvShake(int session, int lastSeenChangeId) async {
-    if (session == 0) {
-      _isAuthenticated = false;
-      _connectionCompleter?.complete(ConnectResult.notAuthorized);
-      _connectionCompleter = null;
-    }
+  Future<void> recvShake() async {
     _isAuthenticated = true;
-    await localSettings.setIntSetting('session', session);
+
+    // TODO: send offline changes
+
+    // Once all offline changes are sent...
+    _writer.writeSync();
+  }
+
+  @override
+  Future<void> recvReady() async {
     _connectionCompleter?.complete(ConnectResult.connected);
     _connectionCompleter = null;
   }
@@ -225,5 +231,11 @@ class CoopClient extends CoopReader {
     _channel.sink.add(writer.uint8Buffer);
     _unacknowledged = _fresh.removeAt(0);
     // _fresh.clear();
+  }
+
+  @override
+  Future<void> recvSync() {
+    throw UnsupportedError(
+        "Client should never receive sync (gets sent only to server");
   }
 }

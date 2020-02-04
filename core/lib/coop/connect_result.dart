@@ -1,1 +1,5 @@
-enum ConnectResult { connected, networkError, notAuthorized }
+enum ConnectResult {
+  connected,
+  networkError,
+  notAuthorized,
+}

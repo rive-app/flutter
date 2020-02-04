@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'change.dart';
 import 'coop_server.dart';
 import 'coop_server_client.dart';
-import 'coop_session.dart';
+import 'coop_user.dart';
 
 typedef CoopIsolateHandler = void Function(CoopIsolateArgument);
 typedef CoopIsolateHandlerMaker = CoopIsolateHandler Function();
@@ -143,7 +143,8 @@ abstract class CoopIsolateProcess {
 
   Iterable<CoopServerClient> get clients => _clients.values;
 
-  bool attemptChange(CoopServerClient client, ChangeSet changes);
+  int attemptChange(CoopServerClient client, ChangeSet changes);
+  ChangeSet initialChanges();
 
   // bool remove(CoopServerClient client) => _clients.remove(client);
 
@@ -159,11 +160,11 @@ abstract class CoopIsolateProcess {
     return false;
   }
 
-  Future<Uint8List> loadData(String key);
-  Future<CoopSession> login(String token, int session);
+  Future<CoopUser> login(String token);
+  /// Save the data somewhere persistent where we can re-load it later.
+  Future<void> persist();
 
   void propagateChanges(CoopServerClient client, ChangeSet changes);
-  Future<bool> saveData(String key, Uint8List data);
   Future<bool> shutdown();
   void write(CoopServerClient client, Uint8List data) {
     _sendToMainPort.send(_CoopServerProcessData(client.id, data));
