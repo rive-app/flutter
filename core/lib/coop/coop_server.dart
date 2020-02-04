@@ -33,12 +33,12 @@ abstract class CoopServer {
 
   Future<bool> listen({int port = 8000, Map<String, String> options}) async {
     try {
-      _server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
+      _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
     } on Exception catch (ex) {
       print('[!]Error -- ${ex.toString()}');
       return false;
     }
-    print('Listening ${InternetAddress.loopbackIPv4}:$port');
+    print('Listening ${InternetAddress.anyIPv4}:$port');
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
       print("SEG $segments");
