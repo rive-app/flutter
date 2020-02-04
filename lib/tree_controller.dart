@@ -66,7 +66,9 @@ abstract class TreeController<T> extends ChangeNotifier {
 
   final bool showTopLevelSeparator;
 
-  TreeController(this._data, {this.showTopLevelSeparator = false});
+  TreeController(this._data, {this.showTopLevelSeparator = false}) {
+    flatten();
+  }
 
   /// The flattened data structure representing the hierarchical tree data that
   /// is currently expanded. This will be used by the TreeView to build a
