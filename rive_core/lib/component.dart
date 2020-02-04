@@ -151,12 +151,8 @@ abstract class Component extends ComponentBase<RiveFile> {
       parentDep.markRebuildDependentIds();
     }
     _dependsOn.clear();
-
-    // List<int> test = [1, 2, 3];
-    // List<int> test2 = [1, 2, 3];
-    // listEquals(test, test2);
-
-    parent?.addDependent(this);
+    // by default a component depends on nothing (likely it will depend on the
+    // parent but we leave that for specific implementations to supply).
   }
 
   /// Something we depend on has been removed. It's important to clear out any

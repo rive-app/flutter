@@ -124,7 +124,7 @@ class FileBrowser extends FileBrowserController {
 
   @override
   void openFile(Rive rive, RiveFile value) {
-    rive.open(value.key.value);
+    rive.open(value.ownerId, value.id);
   }
 
   @override

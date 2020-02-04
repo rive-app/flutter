@@ -22,4 +22,10 @@ class Node extends NodeBase {
     _artboard = null;
     return false;
   }
+
+  @override
+  void buildDependencies() {
+    super.buildDependencies();
+    parent?.addDependent(this);
+  }
 }

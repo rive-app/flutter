@@ -46,22 +46,26 @@ class _TestCoopIsolate extends CoopIsolateProcess {
   }
 
   @override
-  Future<CoopSession> login(String token, int desiredSession) async {
+  Future<CoopUser> login(String token) async {
     // In test mode we validate any user...
-    return CoopSession()
-      ..id = desiredSession
-      ..changeId = 2
-      ..user = CoopUser(1);
+    return CoopUser(1);
   }
 
   @override
-  bool attemptChange(CoopServerClient client, ChangeSet changes) {
-    return true;
+  int attemptChange(CoopServerClient client, ChangeSet changes) {
+    // return server change id
+    return 1;
   }
 
   @override
   void propagateChanges(CoopServerClient client, ChangeSet changes) {
     // TODO: implement
+  }
+
+  @override
+  ChangeSet initialChanges() {
+    // TODO: implement initialChanges
+    return null;
   }
 }
 

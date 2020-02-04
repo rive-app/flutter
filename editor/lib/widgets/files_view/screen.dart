@@ -272,7 +272,7 @@ class FilesView extends StatelessWidget {
 
   Widget _buildFiles(List<RiveFile> files, FileBrowser browser, Rive _rive) {
     return SliverPadding(
-      padding: EdgeInsets.symmetric(horizontal: kGridSpacing),
+      padding: const EdgeInsets.symmetric(horizontal: kGridSpacing),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           // maxCrossAxisExtent: kGridWidth,

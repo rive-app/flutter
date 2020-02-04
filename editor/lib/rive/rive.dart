@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
@@ -44,6 +45,7 @@ class Rive with RiveFileDelegate {
       ValueNotifier<RiveTabItem>(null);
 
   final RiveApi api = RiveApi();
+  SharedPreferences _prefs;
 
   Stage _stage;
   // Stage get stage => _stage;
@@ -77,7 +79,7 @@ class Rive with RiveFileDelegate {
     _lastFrameTime = elapsedMicroseconds;
 
     if ((file.value?.advance(elapsedSeconds) ?? false) ||
-        _stage.shouldAdvance) {
+        (_stage?.shouldAdvance ?? false)) {
       _stage.advance(elapsedSeconds);
     }
   }
@@ -124,10 +126,15 @@ class Rive with RiveFileDelegate {
       _user.value = me;
       tabs.value = [
         RiveTabItem(name: me.name, closeable: false),
-        RiveTabItem(name: "Ellipse Testing"),
-        RiveTabItem(name: "Spaceman"),
+        // RiveTabItem(name: "Ellipse Testing"),
+        // RiveTabItem(name: "Spaceman"),
       ];
       _state.value = RiveState.editor;
+      // Save token in localSettings
+      _prefs ??= await SharedPreferences.getInstance();
+
+      // spectre is our session token
+      await _prefs.setString('token', api.cookies['spectre']);
       // TODO: load last opened file list (from localdata)
       return me;
     } else {
@@ -201,12 +208,15 @@ class Rive with RiveFileDelegate {
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
-  Future<RiveFile> open(String id) async {
-    var opening = RiveFile(id);
-    var result = await opening.connect('ws://localhost:8000/$id');
+  Future<RiveFile> open(String ownerId, String fileId) async {
+    String fullId = '$ownerId/$fileId';
+
+    var opening = RiveFile(fullId);
+    var result = await opening.connect('ws://localhost:8000/$fullId');
     if (result == ConnectResult.connected) {
       print("Connected");
     }
+    print("RIVE FILE OPEN RESUL $result");
     opening.addDelegate(this);
     _changeFile(opening);
     return opening;

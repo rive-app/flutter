@@ -31,7 +31,7 @@ Future<void> main() async {
   var rive = Rive();
   if (await rive.initialize() != RiveState.catastrophe) {
     // this is just for the prototype...
-    await rive.open("100/100");
+    // await rive.open("100/100");
   }
   runApp(
     RiveEditorApp(
@@ -264,7 +264,7 @@ class Editor extends StatelessWidget {
                     context,
                     isHovered,
                   ),
-                  itemSelected: (context, index) {},
+                  itemSelected: (context, item) {},
                 ),
               ),
               // Just a test to make sure text focus works with general editor
@@ -374,50 +374,60 @@ class StagePanel extends StatelessWidget {
                 top: resizeEdgeSize,
                 bottom: resizeEdgeSize,
                 right: resizeEdgeSize,
-                child: MouseRegion(
-                  opaque: true,
-                  onExit: (details) {
-                    RenderBox getBox = context.findRenderObject() as RenderBox;
-                    var local = getBox.globalToLocal(details.position);
-                    stage.mouseExit(details.buttons, local.dx, local.dy);
-                  },
-                  onHover: (details) {
-                    RenderBox getBox = context.findRenderObject() as RenderBox;
-                    var local = getBox.globalToLocal(details.position);
-                    stage.mouseMove(details.buttons, local.dx, local.dy);
-                    // print("MOVE $local");
-                  },
-                  child: Listener(
-                    behavior: HitTestBehavior.opaque,
-                    onPointerSignal: (details) {
-                      if (details is PointerScrollEvent) {
-                        RenderBox getBox =
-                            context.findRenderObject() as RenderBox;
-                        var local = getBox.globalToLocal(details.position);
-                        stage.mouseWheel(local.dx, local.dy,
-                            details.scrollDelta.dx, details.scrollDelta.dy);
-                      }
-                    },
-                    onPointerDown: (details) {
-                      RenderBox getBox =
-                          context.findRenderObject() as RenderBox;
-                      var local = getBox.globalToLocal(details.position);
-                      stage.mouseDown(details.buttons, local.dx, local.dy);
-                    },
-                    onPointerUp: (details) {
-                      RenderBox getBox =
-                          context.findRenderObject() as RenderBox;
-                      var local = getBox.globalToLocal(details.position);
-                      stage.mouseUp(details.buttons, local.dx, local.dy);
-                    },
-                    onPointerMove: (details) {
-                      RenderBox getBox =
-                          context.findRenderObject() as RenderBox;
-                      var local = getBox.globalToLocal(details.position);
-                      stage.mouseDrag(details.buttons, local.dx, local.dy);
-                    },
-                  ),
-                ),
+                child: stage == null
+                    ? Container()
+                    : MouseRegion(
+                        opaque: true,
+                        onExit: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseExit(details.buttons, local.dx, local.dy);
+                        },
+                        onHover: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseMove(details.buttons, local.dx, local.dy);
+                          // print("MOVE $local");
+                        },
+                        child: Listener(
+                          behavior: HitTestBehavior.opaque,
+                          onPointerSignal: (details) {
+                            if (details is PointerScrollEvent) {
+                              RenderBox getBox =
+                                  context.findRenderObject() as RenderBox;
+                              var local =
+                                  getBox.globalToLocal(details.position);
+                              stage.mouseWheel(
+                                  local.dx,
+                                  local.dy,
+                                  details.scrollDelta.dx,
+                                  details.scrollDelta.dy);
+                            }
+                          },
+                          onPointerDown: (details) {
+                            RenderBox getBox =
+                                context.findRenderObject() as RenderBox;
+                            var local = getBox.globalToLocal(details.position);
+                            stage.mouseDown(
+                                details.buttons, local.dx, local.dy);
+                          },
+                          onPointerUp: (details) {
+                            RenderBox getBox =
+                                context.findRenderObject() as RenderBox;
+                            var local = getBox.globalToLocal(details.position);
+                            stage.mouseUp(details.buttons, local.dx, local.dy);
+                          },
+                          onPointerMove: (details) {
+                            RenderBox getBox =
+                                context.findRenderObject() as RenderBox;
+                            var local = getBox.globalToLocal(details.position);
+                            stage.mouseDrag(
+                                details.buttons, local.dx, local.dy);
+                          },
+                        ),
+                      ),
               ),
             ],
           ),

@@ -22,6 +22,8 @@ class FileViewWidget extends StatefulWidget {
 }
 
 class _FileViewWidgetState extends State<FileViewWidget> {
+  DateTime _firstClickTime;
+
   @override
   Widget build(BuildContext context) {
     const kBottomHeight = 40.0;
@@ -123,14 +125,34 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: () {
+            Listener(
+              // onTapDown: (e) {
+              //   print("TD");
+              // },
+              // onTap: () {
+              //   print("TAB");
+              //   _fileBrowser.selectItem(_rive, widget.file);
+              // },
+              // onDoubleTap: () {
+              //   final _rive = Provider.of<Rive>(context, listen: false);
+              //   _fileBrowser.openFile(_rive, widget.file);
+              // },
+              onPointerUp: (_) {
+                var time = DateTime.now();
+                if (_firstClickTime != null) {
+                  var diff = time.difference(_firstClickTime);
+                  _firstClickTime = time;
+                  if (diff > kDoubleTapMinTime && diff < kDoubleTapTimeout) {
+                    _fileBrowser.openFile(_rive, widget.file);
+                    return;
+                  }
+                } else {
+                  _firstClickTime = time;
+                }
+
                 _fileBrowser.selectItem(_rive, widget.file);
               },
-              onDoubleTap: () {
-                final _rive = Provider.of<Rive>(context, listen: false);
-                _fileBrowser.openFile(_rive, widget.file);
-              },
+
               child: child,
             ),
           ],
