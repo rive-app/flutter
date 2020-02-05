@@ -47,8 +47,8 @@ class PrivateApi {
 
   Future<SaveResult> save(int ownerId, int fileId, Uint8List data) async {
     try {
-      print("WE TRY ${'$host/revise/$ownerId/$fileId'}");
-      var response = await http.post('$host/revise/$ownerId/$fileId', body: data);
+      var response =
+          await http.post('$host/revise/$ownerId/$fileId', body: data);
       if (response.statusCode == 200) {
         Map<String, dynamic> data;
         try {
@@ -56,7 +56,6 @@ class PrivateApi {
         } on FormatException catch (_) {
           return null;
         }
-        print("WAT $data");
 
         return SaveResult(
           data['key'] is String ? data['key'] as String : null,
