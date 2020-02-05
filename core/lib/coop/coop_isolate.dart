@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'change.dart';
 import 'coop_server.dart';
 import 'coop_server_client.dart';
-import 'coop_user.dart';
 
 typedef CoopIsolateHandler = void Function(CoopIsolateArgument);
 typedef CoopIsolateHandlerMaker = CoopIsolateHandler Function();
@@ -30,10 +29,10 @@ class CoopIsolate {
   CoopIsolate(this.server, this.ownerId, this.fileId);
   int get clientCount => _clients.length;
 
-  Future<bool> addClient(WebSocket socket) async {
+  Future<bool> addClient(int userOwnerId, WebSocket socket) async {
     if (_sendToIsolatePort == null) {
       // tryign to add while booting.
-      var queued = _WebSocketDelayedAdd(socket);
+      var queued = _WebSocketDelayedAdd(userOwnerId, socket);
       _queuedSockets.add(queued);
       return queued.completer.future;
     }
@@ -53,10 +52,10 @@ class CoopIsolate {
 
     // Make sure the chosen id is available.
     var ids = List<int>.from(_clients.keys)..sort();
-    var id = ids.isEmpty ? 0 : ids.reduce(max)+1;
+    var id = ids.isEmpty ? 0 : ids.reduce(max) + 1;
     _clients[id] = socket;
 
-    _sendToIsolatePort.send(_CoopServerAddClient(id));
+    _sendToIsolatePort.send(_CoopServerAddClient(id, userOwnerId));
     socket.listen(
       (dynamic data) {
         if (data is Uint8List) {
@@ -104,7 +103,7 @@ class CoopIsolate {
         // Make sure any queued add operations are completed when the isolate
         // has spawned.
         for (final q in _queuedSockets) {
-          addClient(q.socket).then(q.completer.complete);
+          addClient(q.userOwnerId, q.socket).then(q.completer.complete);
         }
         _queuedSockets.clear();
       } else if (data is _CoopServerProcessData) {
@@ -159,8 +158,7 @@ abstract class CoopIsolateProcess {
     }
     return false;
   }
-
-  Future<CoopUser> login(String token);
+  
   /// Save the data somewhere persistent where we can re-load it later.
   Future<void> persist();
 
@@ -169,10 +167,11 @@ abstract class CoopIsolateProcess {
   void write(CoopServerClient client, Uint8List data) {
     _sendToMainPort.send(_CoopServerProcessData(client.id, data));
   }
+
   Future<void> _receive(dynamic data) async {
     print("RECEIVING DATA $data");
     if (data is _CoopServerAddClient) {
-      _clients[data.id] = CoopServerClient(this, data.id);
+      _clients[data.id] = CoopServerClient(this, data.id, data.userOwnerId);
     } else if (data is _CoopServerRemoveClient) {
       var client = _clients[data.id];
       if (client != null) {
@@ -191,7 +190,8 @@ abstract class CoopIsolateProcess {
 
 class _CoopServerAddClient {
   final int id;
-  _CoopServerAddClient(this.id);
+  final int userOwnerId;
+  _CoopServerAddClient(this.id, this.userOwnerId);
 }
 
 class _CoopServerProcessData {
@@ -210,6 +210,7 @@ class _CoopServerShutdown {}
 class _WebSocketDelayedAdd {
   final Completer<bool> completer = Completer<bool>();
   final WebSocket socket;
+  final int userOwnerId;
 
-  _WebSocketDelayedAdd(this.socket);
+  _WebSocketDelayedAdd(this.userOwnerId, this.socket);
 }

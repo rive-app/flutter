@@ -69,6 +69,7 @@ abstract class CoreContext implements LocalSettings {
   bool _isRecording = true;
   final Map<int, Core> _objects = {};
   final Map<ChangeSet, FreshChange> _freshChanges = {};
+  final List<ChangeSet> _unsyncedChanges = [];
   CoreContext(this.fileId);
 
   T add<T extends Core>(T object) {
@@ -94,8 +95,15 @@ abstract class CoreContext implements LocalSettings {
       return false;
     }
     completeJournalOperation();
+
+    // nuke remainder of journal, in case we weren't at the end
     journal.removeRange(_journalIndex, journal.length);
+
+    // add the new changes to the journal
     journal.add(_currentChanges);
+
+    // schedule those changes to be sent to other clients (and server for
+    // saving)
     _coopMakeChangeSet(_currentChanges, useFrom: false);
     _journalIndex = journal.length;
     _currentChanges = null;
@@ -110,12 +118,14 @@ abstract class CoreContext implements LocalSettings {
     _currentChanges.change(object, propertyKey, from, to);
   }
 
-  Future<ConnectResult> connect(String url) async {
-    _client = CoopClient(url, fileId: fileId, localSettings: this)
+  Future<ConnectResult> connect(String host, String path) async {
+    _client = CoopClient(host, path, fileId: fileId, localSettings: this)
       ..changesAccepted = _changesAccepted
       ..changesRejected = _changesRejected
       ..changeObjectId = _changeObjectId
-      ..makeChange = _makeChange;
+      ..makeChange = _makeChange
+      ..wipe = _wipe
+      ..sendOfflineChanges = _sendOfflineChanges;
 
     return _client.connect();
   }
@@ -265,6 +275,28 @@ abstract class CoreContext implements LocalSettings {
   void _changesAccepted(ChangeSet changes) {
     print("ACCEPTING ${changes.id}.");
     _freshChanges.remove(changes);
+
+    // TODO: remove changes from unsynced list, serialize that and save it into
+    // an unsynced_change.data file
+    _unsyncedChanges.remove(changes);
+    // save...
+  }
+
+  void _wipe() {
+    _objects.clear();
+    _journalIndex = 0;
+    journal.clear();
+    _freshChanges.clear();
+    _unsyncedChanges.clear();
+  }
+
+  void _sendOfflineChanges() {
+    // TODO: load unsynced changes from data file
+    // loop through them and _client.queueChanges(sendChanges);
+    var unsentChanges = <ChangeSet>[]; // <-- loaded from file
+    for (final change in unsentChanges) {
+      _client.sendOfflineChange(change);
+    }
   }
 
   void _makeChange(ObjectChanges change) {
@@ -305,6 +337,10 @@ abstract class CoreContext implements LocalSettings {
   }
 
   void _changesRejected(ChangeSet changes) {
+    // TODO: remove the rejected change from unsycned list, and save the local
+    // file
+    _unsyncedChanges.remove(changes);
+
     // Re-apply the original value if the changed value matches the current one.
     var fresh = _freshChanges[changes];
     fresh.change.entries.forEach((objectId, changes) {
@@ -365,5 +401,9 @@ abstract class CoreContext implements LocalSettings {
     });
     _freshChanges[sendChanges] = FreshChange(changes, useFrom);
     _client.queueChanges(sendChanges);
+    // TODO: add sendChanges to a list, serialize that and save it into an
+    // unsynced_change.data file
+    _unsyncedChanges.add(sendChanges);
+    // TODO: debounce/isolate/append(_unsyncedChanges);
   }
 }

@@ -1,17 +1,13 @@
 import 'dart:typed_data';
-
-import 'package:core/coop/goodbye_reason.dart';
-
 import '../debounce.dart';
 import 'change.dart';
 import 'coop_isolate.dart';
 import 'coop_reader.dart';
-import 'coop_user.dart';
 import 'coop_writer.dart';
 
 class CoopServerClient extends CoopReader {
   CoopWriter _writer;
-  CoopUser user;
+  final int userOwnerId;
   final int id;
   // final HttpRequest request;
   final CoopIsolateProcess context;
@@ -31,7 +27,7 @@ class CoopServerClient extends CoopReader {
     }
   }
 
-  CoopServerClient(this.context, this.id) {
+  CoopServerClient(this.context, this.id, this.userOwnerId) {
     _writer = CoopWriter(write);
 
     _writer.writeHello();
@@ -42,7 +38,7 @@ class CoopServerClient extends CoopReader {
   }
 
   @override
-  Future<void> recvChange(ChangeSet changes) async {
+  void recvChange(ChangeSet changes) {
     int serverChangeId = context.attemptChange(this, changes);
     if (serverChangeId != 0) {
       _writer.writeAccept(changes.id, serverChangeId);
@@ -53,37 +49,27 @@ class CoopServerClient extends CoopReader {
   }
 
   @override
-  Future<void> recvGoodbye(GoodbyeReason reason) {
+  Future<void> recvGoodbye() {
     throw UnsupportedError("Server should never receive goodbye.");
-  }
-
-  @override
-  Future<void> recvHand(String token) async {
-    user = await context.login(token);
-    if (user == null) {
-      _writer.writeGoodbye(GoodbyeReason.badToken);
-    } else {
-      _writer.writeShake();
-    }
   }
 
   @override
   Future<void> recvSync() async {
     _writer.writeWipe();
-    
+
     _writer.writeChanges(context.initialChanges());
 
     _writer.writeReady();
   }
 
   @override
-  Future<void> recvHello() {
-    throw UnsupportedError("Server should never receive hello.");
+  Future<void> recvWipe() {
+    throw UnsupportedError("Server should never receive wipe.");
   }
 
   @override
-  Future<void> recvShake() {
-    throw UnsupportedError("Server should never receive shake.");
+  Future<void> recvHello() {
+    throw UnsupportedError("Server should never receive hello.");
   }
 
   @override

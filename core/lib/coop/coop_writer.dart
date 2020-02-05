@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:binary_buffer/binary_writer.dart';
-import 'package:core/coop/goodbye_reason.dart';
 
 import 'change.dart';
 import 'coop_command.dart';
@@ -15,19 +14,6 @@ class CoopWriter {
   void writeHello() {
     var writer = BinaryWriter(alignment: 1);
     writer.writeVarUint(CoopCommand.hello);
-    write(writer.uint8Buffer);
-  }
-
-  void writeHand(String token) {
-    var writer = BinaryWriter();
-    writer.writeVarUint(CoopCommand.hand);
-    writer.writeString(token);
-    write(writer.uint8Buffer);
-  }
-
-  void writeShake() {
-    var writer = BinaryWriter();
-    writer.writeVarUint(CoopCommand.shake);
     write(writer.uint8Buffer);
   }
 
@@ -45,10 +31,9 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  void writeGoodbye(GoodbyeReason reason) {
-    var writer = BinaryWriter(alignment: 2);
+  void writeGoodbye() {
+    var writer = BinaryWriter(alignment: 1);
     writer.writeVarUint(CoopCommand.goodbye);
-    writer.writeVarUint(reason.index);
     write(writer.uint8Buffer);
   }
 

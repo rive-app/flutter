@@ -7,6 +7,8 @@ import 'dart:io'
         WebSocketTransformer,
         stderr;
 
+import 'package:core/coop/protocol_version.dart';
+
 import 'coop_isolate.dart';
 
 String _isolateKey(int ownerId, int fileId) => '$ownerId-$fileId';
@@ -48,17 +50,33 @@ abstract class CoopServer {
         await request.response.close();
         return;
       }
-      if (segments.length == 2) {
-        int ownerId, fileId;
+      if (segments.length == 4) {
+        int version, ownerId, fileId;
+        String token;
         try {
-          ownerId = int.parse(segments[0]);
-          fileId = int.parse(segments[1]);
+          // kill the v in v2
+          version = int.parse(segments[0].substring(1));
+          ownerId = int.parse(segments[1]);
+          fileId = int.parse(segments[2]);
+          token = segments[3];
         } on FormatException catch (error) {
           print('Invalid file id $error for ${request.requestedUri}.');
+          request.response.statusCode = 422;
+          await request.response.close();
+          return;
+        }
+        if (version != protocolVersion) {
+          request.response.statusCode = 418;
+          await request.response.close();
+          return;
         }
 
-        if (!await validate(request, ownerId, fileId)) {
-          // TODO: fail the login.
+        // TODO: Max fix user owner ids :)
+        int userOwnerId = await validate(request, ownerId, fileId, token);
+        if(userOwnerId == null) {
+          request.response.statusCode = 403;
+          await request.response.close();
+          return;
         }
         try {
           var ws = await WebSocketTransformer.upgrade(request);
@@ -74,7 +92,7 @@ abstract class CoopServer {
               return;
             }
           }
-          if (!await isolate.addClient(ws)) {
+          if (!await isolate.addClient(userOwnerId, ws)) {
             stderr.write('Unable to add client for file $key. '
                 'This could be due to a previous shutdown attempt, check logs for'
                 ' indication of shutdown prior to this.');
@@ -99,6 +117,9 @@ abstract class CoopServer {
   // There'll be a row locking stored procedure that'll grab a valid
   // server_index for a file when it is first opened. This only runs if the
   // server_index is currently null. server_index is reset to null when all
-  // clients have disconnected and some timeout elapses.
-  Future<bool> validate(HttpRequest request, int ownerId, int fileId);
+  // clients have disconnected and some timeout elapses. 
+  
+  // Also take this opportunity to check that the token matches a valid user.
+  Future<int> validate(
+      HttpRequest request, int ownerId, int fileId, String token);
 }

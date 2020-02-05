@@ -4,7 +4,6 @@ import 'package:binary_buffer/binary_reader.dart';
 
 import 'change.dart';
 import 'coop_command.dart';
-import 'goodbye_reason.dart';
 
 abstract class CoopReader {
   void read(Uint8List data) {
@@ -25,18 +24,14 @@ abstract class CoopReader {
         var changeId = reader.readVarUint();
         recvReject(changeId);
         break;
-      case CoopCommand.hand:
-        var token = reader.readString();
-        recvHand(token);
+      case CoopCommand.wipe:
+        recvWipe();
         break;
       case CoopCommand.synchronize:
         recvSync();
         break;
-      case CoopCommand.shake:
-        recvShake();
-        break;
       case CoopCommand.goodbye:
-        recvGoodbye(GoodbyeReason.values[reader.readVarUint()]);
+        recvGoodbye();
         break;
       case CoopCommand.cursor:
         break;
@@ -56,12 +51,11 @@ abstract class CoopReader {
 
   Future<void> recvAccept(int changeId, int serverChangeId);
   Future<void> recvReject(int changeId);
-  Future<void> recvChange(ChangeSet changes);
+  void recvChange(ChangeSet changes);
   Future<void> recvReady();
   Future<void> recvHello();
-  Future<void> recvGoodbye(GoodbyeReason reason);
-  Future<void> recvHand(String token);
+  Future<void> recvGoodbye();
   Future<void> recvSync();
-  Future<void> recvShake();
+  Future<void> recvWipe();
   Future<void> recvChangeId(int from, int to);
 }
