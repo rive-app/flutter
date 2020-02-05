@@ -191,7 +191,6 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
       return null;
     }
 
-    print("BODY ${response.body}");
     Map<String, dynamic> data;
     try {
       data = json.decode(response.body) as Map<String, dynamic>;
@@ -199,14 +198,14 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
       return null;
     }
 
-    return CoopConnectionInfo(data.getString('socketUrl'));
+    return CoopConnectionInfo(data.getString('socketHost'));
   }
 }
 
 class CoopConnectionInfo {
-  final String socketUrl;
+  final String socketHost;
 
-  CoopConnectionInfo(this.socketUrl);
+  CoopConnectionInfo(this.socketHost);
 }
 
 class RiveFileSortOption {
