@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:rive_api/files.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
@@ -208,11 +209,13 @@ class Rive with RiveFileDelegate {
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
-  Future<RiveFile> open(String ownerId, String fileId) async {
+  Future<RiveFile> open(
+      CoopConnectionInfo connectionInfo, int ownerId, int fileId) async {
     String fullId = '$ownerId/$fileId';
 
     var opening = RiveFile(fullId);
-    var result = await opening.connect('ws://localhost:8000/$fullId');
+    print("CONNECT TO ${connectionInfo.socketUrl}/$fullId");
+    var result = await opening.connect('${connectionInfo.socketUrl}/$fullId');
     if (result == ConnectResult.connected) {
       print("Connected");
     }

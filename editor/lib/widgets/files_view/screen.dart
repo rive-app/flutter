@@ -2,6 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rive_api/files.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/main.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
@@ -11,6 +12,8 @@ import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
+import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
@@ -31,38 +34,38 @@ const kGridWidth = 187.0;
 class DropDownSortButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final dropDownStyle = const TextStyle(
+    const dropDownStyle = TextStyle(
       color: ThemeUtils.textGrey,
       fontSize: 14.0,
     );
-    return DropdownButton<int>(
-      value: 0,
-      isDense: true,
-      underline: Container(),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: ThemeUtils.iconColor,
+    final fileBrowser = Provider.of<Rive>(context, listen: false).fileBrowser;
+    var options = fileBrowser.sortOptions.value;
+
+    return ValueListenableBuilder<RiveFileSortOption>(
+      valueListenable: fileBrowser.selectedSortOption,
+      builder: (context, sortOption, _) => DropdownButton<RiveFileSortOption>(
+        value: sortOption,
+        isDense: true,
+        underline: Container(),
+        icon: Icon(
+          Icons.keyboard_arrow_down,
+          color: ThemeUtils.iconColor,
+        ),
+        itemHeight: 50.0,
+        items: [
+          for (int i = 0; i < options.length; i++)
+            DropdownMenuItem(
+              value: options[i],
+              child: Text(
+                options[i].name,
+                style: dropDownStyle,
+              ),
+            ),
+        ],
+        onChanged: (val) {
+          fileBrowser.loadFileList(sortOption: val);
+        },
       ),
-      itemHeight: 50.0,
-      items: [
-        DropdownMenuItem(
-          value: 0,
-          child: Text('Recent', style: dropDownStyle),
-        ),
-        DropdownMenuItem(
-          value: 1,
-          child: Text('Oldest', style: dropDownStyle),
-        ),
-        DropdownMenuItem(
-          value: 2,
-          child: Text('A - Z', style: dropDownStyle),
-        ),
-        DropdownMenuItem(
-          value: 3,
-          child: Text('Z - A', style: dropDownStyle),
-        ),
-      ],
-      onChanged: (val) {},
     );
   }
 }
@@ -130,7 +133,7 @@ class FilesView extends StatelessWidget {
 
             return ValueListenableBuilder<List<RiveFile>>(
               valueListenable: files,
-              builder: (context, files, _) => files.isEmpty
+              builder: (context, files, _) => files.isEmpty && folders.isEmpty
                   ? _buildEmpty(context)
                   : ValueListenableBuilder<bool>(
                       valueListenable: browser.draggingState,
@@ -423,7 +426,7 @@ class FilesView extends StatelessWidget {
                                 hoverColor: Colors.transparent,
                                 fillColor: Colors.transparent,
                               ),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color.fromRGBO(153, 153, 153, 1.0),
                                 fontSize: 13.0,
                               ),
@@ -435,15 +438,44 @@ class FilesView extends StatelessWidget {
                   ),
                 ),
                 Container(width: 10.0),
-                Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(15),
+                Consumer<Rive>(
+                  builder: (context, rive, _) =>
+                      PopupButton<Rive, ContextItem<Rive>>(
+                    backgroundOpacity: 0,
+                    selectArg: rive,
+                    items: [
+                      ContextItem(
+                        "New File",
+                        select: (rive) {
+                          rive.fileBrowser.createFile();
+                          print("MAKE FILE");
+                        },
+                      ),
+                      ContextItem("New Folder", select: (rive) {}),
+                      ContextItem.separator(),
+                      ContextItem(
+                        "New Team",
+                        select: (rive) => print("make team!"),
+                      ),
+                    ],
+                    builder: (context) {
+                      return Container(
+                        width: 29,
+                        height: 29,
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: RiveIcons.add(Colors.white, 16),
+                      );
+                    },
+                    itemBuilder: (context, item, isHovered) => item.itemBuilder(
+                      context,
+                      isHovered,
+                    ),
+                    itemSelected: (context, item) {},
                   ),
-                  child: RiveIcons.add(Colors.white, 16),
-                )
+                ),
               ],
             ),
           ),

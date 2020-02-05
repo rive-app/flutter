@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
-import '../rive/stage/stage_item.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
-import 'package:rive_core/selectable_item.dart';
+
 import '../rive/hierarchy_tree_controller.dart';
+import '../rive/stage/stage_item.dart';
 import 'tree_view/drop_item_background.dart';
 import 'tree_view/tree_expander.dart';
 
@@ -14,8 +15,10 @@ import 'tree_view/tree_expander.dart';
 class HierarchyTreeView extends StatelessWidget {
   final HierarchyTreeController controller;
 
-  const HierarchyTreeView({Key key, @required this.controller})
-      : super(key: key);
+  const HierarchyTreeView({
+    @required this.controller,
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

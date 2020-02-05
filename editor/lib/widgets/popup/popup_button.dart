@@ -10,15 +10,20 @@ class PopupButton<A, T extends PopupListItem<A>> extends StatelessWidget {
   final ListPopupItemBuilder<T> itemBuilder;
   final ListPopupItemEvent<T> itemSelected;
   final A selectArg;
+  
+  /// TODO: figure out if we want to break this into sets of more generic
+  /// widgets or somehow manage the styling across different popup buttons.
+  final double backgroundOpacity;
 
-  const PopupButton({
-    Key key,
-    this.builder,
-    this.items,
-    this.itemBuilder,
-    this.itemSelected,
-    this.selectArg,
-  }) : super(key: key);
+  const PopupButton(
+      {Key key,
+      this.builder,
+      this.items,
+      this.itemBuilder,
+      this.itemSelected,
+      this.selectArg,
+      this.backgroundOpacity = 1.0})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +38,7 @@ class PopupButton<A, T extends PopupListItem<A>> extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: const Color.fromRGBO(68, 68, 68, 1),
+          color: Color.fromRGBO(68, 68, 68, backgroundOpacity),
           borderRadius: BorderRadius.circular(5.0),
         ),
         child: builder(context),

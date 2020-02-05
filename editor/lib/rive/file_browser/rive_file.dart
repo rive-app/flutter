@@ -8,14 +8,14 @@ import 'file_browser.dart';
 
 /// Metadata for a file stored on the Rive cloud.
 class RiveFile extends RiveApiFile with SelectableItem, ChangeNotifier {
-  final ValueKey<String> key;
+  final ValueKey<int> key;
   final FileBrowser browser;
   bool _loaded = false;
 
   final _draggingState = ValueNotifier<bool>(false);
 
-  RiveFile(String id, this.browser)
-      : key = ValueKey<String>(id),
+  RiveFile(int id, this.browser)
+      : key = ValueKey<int>(id),
         super(id);
 
   ValueListenable<bool> get draggingState => _draggingState;

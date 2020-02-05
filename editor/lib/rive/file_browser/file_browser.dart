@@ -39,6 +39,10 @@ class FileBrowser extends FileBrowserController {
   /// Sort options for the files view.
   final ValueNotifier<List<RiveFileSortOption>> sortOptions =
       ValueNotifier<List<RiveFileSortOption>>([]);
+
+  /// The currently selected sort option.
+  final ValueNotifier<RiveFileSortOption> selectedSortOption =
+      ValueNotifier<RiveFileSortOption>(null);
   /*{
     final _selectedFolders =
         _current.folders.where((f) => f.isSelected).toList();
@@ -109,6 +113,14 @@ class FileBrowser extends FileBrowserController {
   Future<bool> load() async {
     var result = await _filesApi.myFolders();
     sortOptions.value = result.sortOptions;
+    if (selectedSortOption.value != null) {
+      selectedSortOption.value = result.sortOptions.firstWhere(
+          (option) => option.route == selectedSortOption.value.route);
+    }
+    // Set the first sort option if we haven't got one yet.
+    if (result.sortOptions.isNotEmpty && selectedSortOption.value == null) {
+      selectedSortOption.value = result.sortOptions[0];
+    }
 
     var data = treeController.value.data;
     data.clear();
@@ -123,8 +135,60 @@ class FileBrowser extends FileBrowserController {
   }
 
   @override
-  void openFile(Rive rive, RiveFile value) {
-    rive.open(value.ownerId, value.id);
+  Future<void> openFile(Rive rive, RiveFile value) async {
+    var connectionInfo = await _filesApi.establishCoop(value);
+    return rive.open(connectionInfo, value.ownerId, value.id);
+  }
+
+  Future<void> createFile() async {
+    var newFile = await _filesApi.createFile(folder: _current);
+    if (newFile != null) {
+      //file.id
+      await loadFileList();
+      //file.id
+
+      int index =
+          _current.files.value.indexWhere((item) => item.id == newFile.id);
+      print("File is at index $index");
+    }
+  }
+
+  Future<bool> loadFileList({RiveFileSortOption sortOption}) async {
+    var lastFiles = _current.files.value;
+
+    // Map last files in case they have data we can re-use. This generates a
+    // lookup of file-id to old/previously loaded files for this folder. This
+    // allows the loading process to re-use the previously loaded file object
+    // for this id.
+    Map<int, RiveFile> lookup = {};
+    if (lastFiles.isNotEmpty) {
+      for (final file in lastFiles) {
+        lookup[file.id] = file;
+      }
+    }
+
+    // if the user passes a sort option, update the currently selected sort
+    // option.
+    if (sortOption != null) {
+      selectedSortOption.value = sortOption;
+    }
+
+    var folderFiles = await _filesApi.folderFiles(
+        sortOption ?? selectedSortOption.value ?? sortOptions.value[0],
+        folder: _current, cacheLocator: (id) {
+      var previous = lookup[id];
+      // Make sure to allow it to re-load so it gets the data again when it's
+      // first scrolled into view. Most of the time this will just get the same
+      // data, but in case the user has updated the file in a different view
+      // (page/website) or a team-member has done it, we aggressively reload
+      // data. We eventually can look into using a socket server to notify when
+      // files need to be removed from cache.
+      previous?.allowReloadDetails();
+      return previous;
+    });
+
+    _current.files.value = folderFiles;
+    return true;
   }
 
   @override
@@ -150,51 +214,13 @@ class FileBrowser extends FileBrowserController {
               treeScrollController.position.maxScrollExtent)
           .toDouble());
     }
-
-    var lastFiles = _current.files.value;
-
-    // Map last files in case they have data we can re-use. This generates a
-    // lookup of file-id to old/previously loaded files for this folder. This
-    // allows the loading process to re-use the previously loaded file object
-    // for this id.
-    Map<String, RiveFile> lookup = {};
-    if (lastFiles.isNotEmpty) {
-      for (final file in lastFiles) {
-        lookup[file.id] = file;
-      }
-    }
-
-    var folderFiles = await _filesApi.folderFiles(sortOptions.value[0],
-        folder: _current, cacheLocator: (id) {
-      var previous = lookup[id];
-      // Make sure to allow it to re-load so it gets the data again when it's
-      // first scrolled into view. Most of the time this will just get the same
-      // data, but in case the user has updated the file in a different view
-      // (page/website) or a team-member has done it, we aggressively reload
-      // data. We eventually can look into using a socket server to notify when
-      // files need to be removed from cache.
-      previous?.allowReloadDetails();
-      return previous;
-    });
-
-    _current.files.value = folderFiles;
-    return true;
-    // if (result.folders.isNotEmpty) {
-    //   //, result.folders.first
-    //   var folderFiles = await _filesApi.folderFiles(
-    //       result.sortOptions[0], result.folders.first);
-    //   // Fill details for the files (normally do this as content scrolls into
-    //   // view)
-    //   //print("FOLDER FILES $folderFiles");
-    //   if (await _filesApi.fillDetails(folderFiles)) {
-    //     //print("FILLED FILES $folderFiles");
-    //   }
-    // }
+    return loadFileList();
   }
 
   bool queueLoadDetails(RiveFile file) {
     if (_queuedFileDetails.add(file)) {
-      _detailsTimer ??= Timer(Duration(milliseconds: 100), _loadQueuedDetails);
+      _detailsTimer ??=
+          Timer(const Duration(milliseconds: 100), _loadQueuedDetails);
       return true;
     }
     return false;
@@ -344,7 +370,7 @@ class _EditorRiveFilesApi extends RiveFilesApi<RiveFolder, RiveFile> {
   _EditorRiveFilesApi(RiveApi api, this._browser) : super(api);
 
   @override
-  RiveFile makeFile(String id) {
+  RiveFile makeFile(int id) {
     return RiveFile(id, _browser);
   }
 
