@@ -7,7 +7,6 @@ import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/coop_server.dart';
 import 'package:core/coop/coop_user.dart';
-import 'package:core/coop/coop_session.dart';
 import 'package:rive_core/data_directory.dart';
 import 'package:core/coop/coop_isolate.dart';
 

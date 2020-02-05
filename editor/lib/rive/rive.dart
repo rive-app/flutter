@@ -211,11 +211,11 @@ class Rive with RiveFileDelegate {
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
   Future<RiveFile> open(
       CoopConnectionInfo connectionInfo, int ownerId, int fileId) async {
-    String fullId = '$ownerId/$fileId';
+    var urlEncodedSpectre = Uri.encodeComponent(api.cookies['spectre']);
+    String filePath = '$ownerId/$fileId/$urlEncodedSpectre';
 
-    var opening = RiveFile(fullId);
-    print("CONNECT TO ${connectionInfo.socketUrl}/$fullId");
-    var result = await opening.connect('${connectionInfo.socketUrl}/$fullId');
+    var opening = RiveFile(filePath);
+    var result = await opening.connect(connectionInfo.socketHost, filePath);
     if (result == ConnectResult.connected) {
       print("Connected");
     }
