@@ -50,7 +50,7 @@ class CoopServerClient extends CoopReader {
     } else {
       _writer.writeReject(changes.id);
     }
-  }  
+  }
 
   @override
   Future<void> recvGoodbye(GoodbyeReason reason) {
@@ -69,6 +69,8 @@ class CoopServerClient extends CoopReader {
 
   @override
   Future<void> recvSync() async {
+    _writer.writeWipe();
+    
     _writer.writeChanges(context.initialChanges());
 
     _writer.writeReady();

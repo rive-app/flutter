@@ -26,6 +26,7 @@ class CoopClient extends CoopReader {
   bool _isConnected = false;
   int _reconnectAttempt = 0;
   Timer _reconnectTimer;
+  Timer _pingTimer;
   final LocalSettings localSettings;
   final String fileId;
   bool _allowReconnect = true;
@@ -51,8 +52,18 @@ class CoopClient extends CoopReader {
         Timer(Duration(milliseconds: _reconnectAttempt * 500), connect);
   }
 
+  void _ping() {
+    if (!_isConnected) {
+      return;
+    }
+    _writer.writeCursor(0, 0);
+    _pingTimer?.cancel();
+    _pingTimer = Timer(const Duration(seconds: 30), _ping);
+  }
+
   Future<bool> disconnect() async {
     _allowReconnect = false;
+    _pingTimer?.cancel();
     await _channel.sink.close();
     return true;
   }
@@ -82,9 +93,13 @@ class CoopClient extends CoopReader {
         read(data);
       }
     }, onError: (dynamic error) {
+      print("CONNECTION ERROR");
       _isConnected = false;
+      _pingTimer?.cancel();
     }, onDone: () {
+      print("CONNECTION MURDERED");
       _isConnected = false;
+      _pingTimer?.cancel();
       _channel = null;
       _connectionCompleter?.complete(ConnectResult.networkError);
       _connectionCompleter = null;
@@ -102,7 +117,6 @@ class CoopClient extends CoopReader {
 
   @override
   Future<void> recvChange(ChangeSet changeSet) async {
-    // Receiving other property changes.
     // Make sure we do not apply changes that conflict with unacknowledged ones.
 
     // That means that we need to re-apply them if that changeset is rejected.
@@ -117,6 +131,7 @@ class CoopClient extends CoopReader {
     // Handle the server telling us to disconnect.
     _allowReconnect = false;
     _isConnected = false;
+    _pingTimer?.cancel();
     await _channel?.sink?.close();
     _channel = null;
     print("GOT GOODBYE");
@@ -185,6 +200,7 @@ class CoopClient extends CoopReader {
   Future<void> recvReady() async {
     _connectionCompleter?.complete(ConnectResult.connected);
     _connectionCompleter = null;
+    _ping();
   }
 
   @override

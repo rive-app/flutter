@@ -37,10 +37,24 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
+  void writeCursor(int x, int y) {
+    var writer = BinaryWriter();
+    writer.writeVarUint(CoopCommand.cursor);
+    writer.writeVarInt(x);
+    writer.writeVarInt(y);
+    write(writer.uint8Buffer);
+  }
+
   void writeGoodbye(GoodbyeReason reason) {
     var writer = BinaryWriter(alignment: 2);
     writer.writeVarUint(CoopCommand.goodbye);
     writer.writeVarUint(reason.index);
+    write(writer.uint8Buffer);
+  }
+
+  void writeWipe() {
+    var writer = BinaryWriter(alignment: 1);
+    writer.writeVarUint(CoopCommand.wipe);
     write(writer.uint8Buffer);
   }
 
