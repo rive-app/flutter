@@ -23,9 +23,10 @@ class PrivateApi {
   final String host =
       Platform.environment['PRIVATE_API'] ?? 'http://localhost:3003';
 
-  Future<ValidationResult> validate(String token) async {
+  Future<ValidationResult> validate(
+      int ownerId, int fileId, String token) async {
     try {
-      var response = await http.get('$host/validate/$token');
+      var response = await http.get('$host/validate/$ownerId/$fileId/$token');
       if (response.statusCode == 200) {
         Map<String, dynamic> data;
         try {

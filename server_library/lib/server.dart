@@ -5,12 +5,9 @@ import 'dart:typed_data';
 import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
-import 'package:core/coop/coop_command.dart';
 import 'package:core/coop/coop_isolate.dart';
 import 'package:core/coop/coop_server.dart';
 import 'package:core/coop/coop_server_client.dart';
-import 'package:core/coop/coop_session.dart';
-import 'package:core/coop/coop_user.dart';
 import 'package:core/core.dart';
 
 import 'src/coop_file.dart';
@@ -21,8 +18,11 @@ class RiveCoopServer extends CoopServer {
   CoopIsolateHandler get handler => makeProcess;
 
   @override
-  Future<bool> validate(HttpRequest request, int ownerId, int fileId) async {
-    return true;
+  Future<int> validate(
+      HttpRequest request, int ownerId, int fileId, String token) async {
+    var api = PrivateApi();
+    var validationResult = await api.validate(ownerId, fileId, token);
+    return validationResult.ownerId;
   }
 
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
@@ -107,7 +107,7 @@ class _CoopIsolate extends CoopIsolateProcess {
       // now actually make changes to the object (if we have one).
       if (object != null) {
         object.serverChangeId = serverChangeId;
-        object.userId = client.user?.id ?? 0;
+        object.userId = client.userOwnerId;
         for (final change in objectChanges.changes) {
           switch (change.op) {
             case CoreContext.addKey:
@@ -126,7 +126,7 @@ class _CoopIsolate extends CoopIsolateProcess {
               var prop = object.properties[change.op] ??= ObjectProperty();
               prop.key = change.op;
               prop.serverChangeId = serverChangeId;
-              prop.userId = client.user?.id ?? 0;
+              prop.userId = client.userOwnerId;
               prop.data = change.value;
               break;
           }
@@ -197,19 +197,12 @@ class _CoopIsolate extends CoopIsolateProcess {
   }
 
   @override
-  Future<CoopUser> login(String token) async {
-    var result = await _privateApi.validate(token);
-    if (result == null) {
-      return null;
-    }
-
-    return CoopUser(result.ownerId);
-  }
-
-  @override
   void propagateChanges(CoopServerClient client, ChangeSet changes) {
     var writer = BinaryWriter();
     changes.serialize(writer);
+    // TODO: consider changing this to readyClients as clients that are
+    // connecting/sending offline changes should not receive mid-flight changes
+    // prior to their ready.
     for (final to in clients) {
       if (to == client) {
         continue;

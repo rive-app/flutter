@@ -14,19 +14,16 @@ void main() {
       ..objects = {
         7: CoopFileObject()
           ..key = 3
-          ..sessionId = 20
           ..serverChangeId = 1
           ..localId = 343
           ..properties = {
             12: ObjectProperty()
               ..key = 12
-              ..sessionId = 653
               ..serverChangeId = 453
               ..data = Uint8List.fromList([1, 1, 1760]),
           },
         31: CoopFileObject()
           ..key = 6
-          ..sessionId = 30
           ..serverChangeId = 2
           ..localId = 22
           ..properties = {},
@@ -43,18 +40,15 @@ void main() {
     expect(file.objects.length, check.objects.length);
     expect(file.objects[7] != null, true);
     expect(file.objects[7].key, 3);
-    expect(file.objects[7].sessionId, 20);
     expect(file.objects[7].serverChangeId, 1);
     expect(file.objects[7].localId, 343);
     expect(file.objects[7].properties.length, 1);
     expect(file.objects[7].properties[12].key, 12);
-    expect(file.objects[7].properties[12].sessionId, 653);
     expect(file.objects[7].properties[12].serverChangeId, 453);
     expect(
         file.objects[7].properties[12].data, Uint8List.fromList([1, 1, 1760]));
     expect(file.objects[31] != null, true);
     expect(file.objects[31].key, 6);
-    expect(file.objects[31].sessionId, 30);
     expect(file.objects[31].serverChangeId, 2);
     expect(file.objects[31].localId, 22);
     expect(file.objects[31].properties.length, 0);
@@ -100,7 +94,6 @@ void main() {
     for (int i = 0; i < 10000; i++) {
       var obj = CoopFileObject()
         ..key = i
-        ..sessionId = 20
         ..serverChangeId = 1
         ..localId = 343;
       file.objects[i] = obj;
@@ -108,7 +101,6 @@ void main() {
         obj.addProperty(
           ObjectProperty()
             ..key = 12
-            ..sessionId = 653
             ..serverChangeId = 453
             ..data = Uint8List.fromList(
                 [1, 1, 1760, 1, 1, 1760, 1, 1, 1760, 1, 1, 1760]),
