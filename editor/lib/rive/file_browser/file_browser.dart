@@ -137,7 +137,7 @@ class FileBrowser extends FileBrowserController {
   @override
   Future<void> openFile(Rive rive, RiveFile value) async {
     var connectionInfo = await _filesApi.establishCoop(value);
-    return rive.open(connectionInfo, value.ownerId, value.id);
+    return rive.open(connectionInfo, value.ownerId, value.id, value.name);
   }
 
   Future<void> createFile() async {

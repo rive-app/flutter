@@ -21,6 +21,7 @@ class _RiveDirt {
 }
 
 class RiveFile extends RiveCoreContext {
+  final String name;
   final Map<String, dynamic> overridePreferences;
   final bool useSharedPreferences;
   final List<Artboard> artboards = [];
@@ -124,7 +125,7 @@ class RiveFile extends RiveCoreContext {
     cleanDirt();
   }
 
-  RiveFile(String fileId,
+  RiveFile(String fileId, this.name,
       {this.overridePreferences, this.useSharedPreferences = true})
       : super(fileId);
 

@@ -209,12 +209,12 @@ class Rive with RiveFileDelegate {
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
-  Future<RiveFile> open(
-      CoopConnectionInfo connectionInfo, int ownerId, int fileId) async {
+  Future<RiveFile> open(CoopConnectionInfo connectionInfo, int ownerId,
+      int fileId, String name) async {
     var urlEncodedSpectre = Uri.encodeComponent(api.cookies['spectre']);
     String filePath = '$ownerId/$fileId/$urlEncodedSpectre';
 
-    var opening = RiveFile(filePath);
+    var opening = RiveFile(filePath, name);
     var result = await opening.connect(connectionInfo.socketHost, filePath);
     if (result == ConnectResult.connected) {
       print("Connected");
@@ -237,8 +237,8 @@ class Rive with RiveFileDelegate {
     _stage = Stage(this, file.value);
     _stage.tool = TranslateTool();
     stage.value = _stage;
-    final _tab = RiveTabItem(name: nextFile.fileId);
-    if (!tabs.value.map((t) => t.name).contains(nextFile.fileId)) {
+    final _tab = RiveTabItem(name: nextFile.name);
+    if (!tabs.value.map((t) => t.name).contains(nextFile.name)) {
       tabs.value.add(_tab);
     }
     openTab(_tab);
