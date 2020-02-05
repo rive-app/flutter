@@ -6,8 +6,8 @@ import 'src/deserialize_helper.dart';
 /// this class in order to add application specific functionality. For example,
 /// a UI layer may be interested in selection states or loading image assets.
 class RiveApiFile {
-  final String id;
-  String ownerId;
+  final int id;
+  int ownerId;
   String _name;
   String get name => _name;
   String _preview;
@@ -17,7 +17,7 @@ class RiveApiFile {
 
   bool deserialize(RiveCDN cdn, Map<String, dynamic> data) {
     var changed = false;
-    ownerId = data["oid"]?.toString();
+    ownerId = data.getInt("oid");
     var name = data["name"]?.toString();
     if (_name != name) {
       _name = name;
