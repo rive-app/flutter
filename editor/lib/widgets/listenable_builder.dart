@@ -18,9 +18,9 @@ typedef ListenableWidgetBuilder<T> = Widget Function(
 
 class ListenableBuilder<T extends Listenable> extends StatefulWidget {
   const ListenableBuilder({
-    Key key,
     @required this.listenable,
     @required this.builder,
+    Key key,
     this.child,
   })  : assert(listenable != null),
         assert(builder != null),

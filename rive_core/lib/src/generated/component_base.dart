@@ -29,7 +29,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
 
   @mustCallSuper
   void dependentIdsChanged(List<int> from, List<int> to) {
-    context?.changeProperty(this, dependentIdsPropertyKey, from, to);
+    onPropertyChanged(dependentIdsPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -54,7 +54,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
 
   @mustCallSuper
   void nameChanged(String from, String to) {
-    context?.changeProperty(this, namePropertyKey, from, to);
+    onPropertyChanged(namePropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -78,7 +78,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
 
   @mustCallSuper
   void parentIdChanged(int from, int to) {
-    context?.changeProperty(this, parentIdPropertyKey, from, to);
+    onPropertyChanged(parentIdPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -102,25 +102,22 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
 
   @mustCallSuper
   void childOrderChanged(FractionalIndex from, FractionalIndex to) {
-    context?.changeProperty(this, childOrderPropertyKey, from, to);
+    onPropertyChanged(childOrderPropertyKey, from, to);
   }
 
   @override
-  void changeNonNull([PropertyChanger changer]) {
-    changer ??= context?.changeProperty;
+  void changeNonNull() {
     if (dependentIds != null) {
-      context?.changeProperty(
-          this, dependentIdsPropertyKey, dependentIds, dependentIds);
+      onPropertyChanged(dependentIdsPropertyKey, dependentIds, dependentIds);
     }
     if (name != null) {
-      context?.changeProperty(this, namePropertyKey, name, name);
+      onPropertyChanged(namePropertyKey, name, name);
     }
     if (parentId != null) {
-      context?.changeProperty(this, parentIdPropertyKey, parentId, parentId);
+      onPropertyChanged(parentIdPropertyKey, parentId, parentId);
     }
     if (childOrder != null) {
-      context?.changeProperty(
-          this, childOrderPropertyKey, childOrder, childOrder);
+      onPropertyChanged(childOrderPropertyKey, childOrder, childOrder);
     }
   }
 }

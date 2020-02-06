@@ -31,7 +31,7 @@ abstract class ArtboardBase extends ContainerComponent {
 
   @mustCallSuper
   void widthChanged(double from, double to) {
-    context?.changeProperty(this, widthPropertyKey, from, to);
+    onPropertyChanged(widthPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -55,7 +55,7 @@ abstract class ArtboardBase extends ContainerComponent {
 
   @mustCallSuper
   void heightChanged(double from, double to) {
-    context?.changeProperty(this, heightPropertyKey, from, to);
+    onPropertyChanged(heightPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -79,7 +79,7 @@ abstract class ArtboardBase extends ContainerComponent {
 
   @mustCallSuper
   void xChanged(double from, double to) {
-    context?.changeProperty(this, xPropertyKey, from, to);
+    onPropertyChanged(xPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -103,7 +103,7 @@ abstract class ArtboardBase extends ContainerComponent {
 
   @mustCallSuper
   void yChanged(double from, double to) {
-    context?.changeProperty(this, yPropertyKey, from, to);
+    onPropertyChanged(yPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -127,7 +127,7 @@ abstract class ArtboardBase extends ContainerComponent {
 
   @mustCallSuper
   void originXChanged(double from, double to) {
-    context?.changeProperty(this, originXPropertyKey, from, to);
+    onPropertyChanged(originXPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -151,30 +151,29 @@ abstract class ArtboardBase extends ContainerComponent {
 
   @mustCallSuper
   void originYChanged(double from, double to) {
-    context?.changeProperty(this, originYPropertyKey, from, to);
+    onPropertyChanged(originYPropertyKey, from, to);
   }
 
   @override
-  void changeNonNull([PropertyChanger changer]) {
-    changer ??= context?.changeProperty;
-    super.changeNonNull(changer);
+  void changeNonNull() {
+    super.changeNonNull();
     if (width != null) {
-      context?.changeProperty(this, widthPropertyKey, width, width);
+      onPropertyChanged(widthPropertyKey, width, width);
     }
     if (height != null) {
-      context?.changeProperty(this, heightPropertyKey, height, height);
+      onPropertyChanged(heightPropertyKey, height, height);
     }
     if (x != null) {
-      context?.changeProperty(this, xPropertyKey, x, x);
+      onPropertyChanged(xPropertyKey, x, x);
     }
     if (y != null) {
-      context?.changeProperty(this, yPropertyKey, y, y);
+      onPropertyChanged(yPropertyKey, y, y);
     }
     if (originX != null) {
-      context?.changeProperty(this, originXPropertyKey, originX, originX);
+      onPropertyChanged(originXPropertyKey, originX, originX);
     }
     if (originY != null) {
-      context?.changeProperty(this, originYPropertyKey, originY, originY);
+      onPropertyChanged(originYPropertyKey, originY, originY);
     }
   }
 }

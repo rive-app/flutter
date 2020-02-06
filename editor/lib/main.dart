@@ -3,18 +3,24 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'rive/hierarchy_tree_controller.dart';
 import 'rive/rive.dart';
+import 'rive/stage/items/stage_artboard.dart';
 import 'rive/stage/stage.dart';
 import 'rive/stage/stage_item.dart';
 import 'widgets/catastrophe.dart';
 import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
+import 'widgets/inspector/property_dual.dart';
+import 'widgets/listenable_builder.dart';
 import 'widgets/login.dart';
 import 'widgets/popup/context_popup.dart';
 import 'widgets/popup/popup_button.dart';
@@ -308,6 +314,51 @@ class Editor extends StatelessWidget {
               ),
               const Expanded(
                 child: StagePanel(),
+              ),
+              ResizePanel(
+                hitSize: resizeEdgeSize,
+                direction: ResizeDirection.horizontal,
+                side: ResizeSide.start,
+                min: 235,
+                max: 500,
+                child: Container(
+                  color: const Color.fromRGBO(50, 50, 50, 1.0),
+                  child: Consumer<Rive>(
+                    builder: (context, rive, _) => ListenableBuilder(
+                      listenable: rive.selection,
+                      builder: (context,
+                          SelectionContext<SelectableItem> selection, _) {
+                        var artboards = selection.items
+                            .whereType<StageArtboard>()
+                            .map((stageItem) => stageItem.component)
+                            .toList(growable: false);
+
+                        return Column(
+                          children: [
+                            artboards.isEmpty
+                                ? Container()
+                                : PropertyDual(
+                                    name: "Pos",
+                                    objects: artboards,
+                                    propertyKeyA: ArtboardBase.xPropertyKey,
+                                    propertyKeyB: ArtboardBase.yPropertyKey,
+                                  ),
+                            artboards.isEmpty
+                                ? Container()
+                                : PropertyDual(
+                                    name: "Size",
+                                    objects: artboards,
+                                    propertyKeyA: ArtboardBase.widthPropertyKey,
+                                    propertyKeyB:
+                                        ArtboardBase.heightPropertyKey,
+                                  ),
+                            // selection. PropertyDual()
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ),
               /*Expanded(
                 child: Column(

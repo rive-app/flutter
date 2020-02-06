@@ -29,7 +29,7 @@ abstract class NodeBase extends ContainerComponent {
 
   @mustCallSuper
   void xChanged(double from, double to) {
-    context?.changeProperty(this, xPropertyKey, from, to);
+    onPropertyChanged(xPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -51,7 +51,7 @@ abstract class NodeBase extends ContainerComponent {
 
   @mustCallSuper
   void yChanged(double from, double to) {
-    context?.changeProperty(this, yPropertyKey, from, to);
+    onPropertyChanged(yPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -73,7 +73,7 @@ abstract class NodeBase extends ContainerComponent {
 
   @mustCallSuper
   void rotationChanged(double from, double to) {
-    context?.changeProperty(this, rotationPropertyKey, from, to);
+    onPropertyChanged(rotationPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -95,7 +95,7 @@ abstract class NodeBase extends ContainerComponent {
 
   @mustCallSuper
   void scaleXChanged(double from, double to) {
-    context?.changeProperty(this, scaleXPropertyKey, from, to);
+    onPropertyChanged(scaleXPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -117,7 +117,7 @@ abstract class NodeBase extends ContainerComponent {
 
   @mustCallSuper
   void scaleYChanged(double from, double to) {
-    context?.changeProperty(this, scaleYPropertyKey, from, to);
+    onPropertyChanged(scaleYPropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -139,30 +139,29 @@ abstract class NodeBase extends ContainerComponent {
 
   @mustCallSuper
   void opacityChanged(double from, double to) {
-    context?.changeProperty(this, opacityPropertyKey, from, to);
+    onPropertyChanged(opacityPropertyKey, from, to);
   }
 
   @override
-  void changeNonNull([PropertyChanger changer]) {
-    changer ??= context?.changeProperty;
-    super.changeNonNull(changer);
+  void changeNonNull() {
+    super.changeNonNull();
     if (x != null) {
-      context?.changeProperty(this, xPropertyKey, x, x);
+      onPropertyChanged(xPropertyKey, x, x);
     }
     if (y != null) {
-      context?.changeProperty(this, yPropertyKey, y, y);
+      onPropertyChanged(yPropertyKey, y, y);
     }
     if (rotation != null) {
-      context?.changeProperty(this, rotationPropertyKey, rotation, rotation);
+      onPropertyChanged(rotationPropertyKey, rotation, rotation);
     }
     if (scaleX != null) {
-      context?.changeProperty(this, scaleXPropertyKey, scaleX, scaleX);
+      onPropertyChanged(scaleXPropertyKey, scaleX, scaleX);
     }
     if (scaleY != null) {
-      context?.changeProperty(this, scaleYPropertyKey, scaleY, scaleY);
+      onPropertyChanged(scaleYPropertyKey, scaleY, scaleY);
     }
     if (opacity != null) {
-      context?.changeProperty(this, opacityPropertyKey, opacity, opacity);
+      onPropertyChanged(opacityPropertyKey, opacity, opacity);
     }
   }
 }
