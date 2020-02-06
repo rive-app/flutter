@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:binary_buffer/binary_writer.dart';
@@ -49,9 +50,12 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  void writeSync() {
-    var writer = BinaryWriter(alignment: 1);
+  void writeSync(List<ChangeSet> changes) {
+    var writer = BinaryWriter(alignment: max(1, changes.length * 16));
     writer.writeVarUint(CoopCommand.synchronize);
+    for (final change in changes) {
+      change.serialize(writer);
+    }
     write(writer.uint8Buffer);
   }
 

@@ -107,6 +107,7 @@ class CoopIsolate {
         }
         _queuedSockets.clear();
       } else if (data is _CoopServerProcessData) {
+        print("ACTUALLY SENDING TO CLIENT ${data.data[0]}");
         _clients[data.id]?.add(data.data);
       } else if (data is _CoopServerShutdown && _shutdownCompleter != null) {
         _isolate?.kill();
@@ -158,7 +159,7 @@ abstract class CoopIsolateProcess {
     }
     return false;
   }
-  
+
   /// Save the data somewhere persistent where we can re-load it later.
   Future<void> persist();
 

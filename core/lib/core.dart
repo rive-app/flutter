@@ -5,9 +5,12 @@ import 'package:meta/meta.dart';
 import 'coop/change.dart';
 import 'coop/connect_result.dart';
 import 'coop/coop_client.dart';
+import 'coop/coop_command.dart';
 import 'coop/local_settings.dart';
 import 'core_property_changes.dart';
+
 export 'package:fractional/fractional.dart';
+
 export 'src/list_equality.dart';
 
 int localId = 0;
@@ -31,13 +34,6 @@ abstract class Core<T extends CoreContext> {
   void changeNonNull([PropertyChanger changer]);
 }
 
-class FreshChange {
-  final CorePropertyChanges change;
-  final bool useFrom;
-
-  const FreshChange(this.change, this.useFrom);
-}
-
 abstract class CoreContext implements LocalSettings {
   static const int addKey = 1;
   static const int removeKey = 2;
@@ -45,33 +41,24 @@ abstract class CoreContext implements LocalSettings {
 
   final String fileId;
   CoopClient _client;
+  int _lastChangeId;
   // Map<int, Core> get objects => _objects;
 
   final List<CorePropertyChanges> journal = [];
   CorePropertyChanges _currentChanges;
 
-  /// Find a Core object by id.
-  T resolve<T>(int id) {
-    var object = _objects[id];
-    if (object is T) {
-      return object as T;
-    }
-    return null;
-  }
+  int _journalIndex = 0;
 
-  /// Find Core objects of type [T].
-  Iterable<T> objectsOfType<T>() => _objects.values.whereType<T>();
+  bool _isRecording = true;
+
+  final Map<int, Core> _objects = {};
+
+  final Map<ChangeSet, FreshChange> _freshChanges = {};
+  // final List<ChangeSet> _unsyncedChanges = [];
+  CoreContext(this.fileId) : _lastChangeId = CoopCommand.minChangeId;
 
   /// Get all objects
   Iterable<Core<CoreContext>> get objects => _objects.values;
-
-  int _journalIndex = 0;
-  bool _isRecording = true;
-  final Map<int, Core> _objects = {};
-  final Map<ChangeSet, FreshChange> _freshChanges = {};
-  final List<ChangeSet> _unsyncedChanges = [];
-  CoreContext(this.fileId);
-
   T add<T extends Core>(T object) {
     if (_isRecording) {
       object.id ??= --localId;
@@ -87,8 +74,8 @@ abstract class CoreContext implements LocalSettings {
     return object;
   }
 
-  void onAdded(covariant Core object);
-  void onRemoved(covariant Core object);
+  @protected
+  void applyCoopChanges(ObjectChanges objectChanges);
 
   bool captureJournalEntry() {
     if (_currentChanges == null) {
@@ -118,6 +105,10 @@ abstract class CoreContext implements LocalSettings {
     _currentChanges.change(object, propertyKey, from, to);
   }
 
+  /// Method called when a journal entry is created or applied via an undo/redo.
+  @protected
+  void completeJournalOperation();
+
   Future<ConnectResult> connect(String host, String path) async {
     _client = CoopClient(host, path, fileId: fileId, localSettings: this)
       ..changesAccepted = _changesAccepted
@@ -125,7 +116,15 @@ abstract class CoreContext implements LocalSettings {
       ..changeObjectId = _changeObjectId
       ..makeChange = _makeChange
       ..wipe = _wipe
-      ..sendOfflineChanges = _sendOfflineChanges;
+      ..getOfflineChanges = () async {
+        var changes = await getOfflineChanges();
+        for (final change in changes) {
+          if (change.id > _lastChangeId) {
+            _lastChangeId = change.id;
+          }
+        }
+        return changes;
+      };
 
     return _client.connect();
   }
@@ -134,6 +133,10 @@ abstract class CoreContext implements LocalSettings {
     var disconnectResult = await _client.disconnect();
     _client = null;
     return disconnectResult;
+  }
+
+  Future<bool> forceReconnect() async {
+    return _client.forceReconnect();
   }
 
   Object getObjectProperty(Core object, int propertyKey);
@@ -148,8 +151,79 @@ abstract class CoreContext implements LocalSettings {
   @protected
   Core makeCoreInstance(int typeKey);
 
-  @protected
-  void applyCoopChanges(ObjectChanges objectChanges);
+  /// Find Core objects of type [T].
+  Iterable<T> objectsOfType<T>() => _objects.values.whereType<T>();
+
+  void onAdded(covariant Core object);
+
+  void onRemoved(covariant Core object);
+
+  void onWipe();
+
+  bool redo() {
+    int index = _journalIndex;
+    if (journal.isEmpty || index >= journal.length || index < 0) {
+      return false;
+    }
+
+    _isRecording = false;
+    _journalIndex = index + 1;
+    _applyJournalEntry(journal[index], isUndo: false);
+    _isRecording = true;
+    return true;
+  }
+
+  void remove<T extends Core>(T object) {
+    _objects.remove(object.id);
+    if (_isRecording) {
+      bool wasJustAdded = false;
+      if (_currentChanges != null) {
+        var objectChanges = _currentChanges.entries[object.id];
+        if (objectChanges != null) {
+          // When the add key is present in the changes, it means the object was
+          // just created in this same operation, so we can prune it from the
+          // changes.
+          if (objectChanges[addKey] != null) {
+            _currentChanges.entries.remove(object.id);
+            wasJustAdded = true;
+          }
+        }
+      }
+      if (!wasJustAdded) {
+        changeProperty(object, removeKey, addKey, object.coreType);
+        // TODO: Is there a way we can do this and not network change these? We
+        // do this to re-hydrate the object by storing the changes in the
+        // undo/redo stack.
+        object.changeNonNull();
+      }
+    }
+    onRemoved(object);
+  }
+
+  /// Find a Core object by id.
+  T resolve<T>(int id) {
+    var object = _objects[id];
+    if (object is T) {
+      return object as T;
+    }
+    return null;
+  }
+
+  void setObjectProperty(Core object, int propertyKey, Object value);
+
+  @mustCallSuper
+  bool undo() {
+    int index = _journalIndex - 1;
+    if (journal.isEmpty || index >= journal.length || index < 0) {
+      return false;
+    }
+
+    _isRecording = false;
+    _journalIndex = index;
+    _applyJournalEntry(journal[index], isUndo: true);
+    _isRecording = true;
+    return true;
+  }
 
   void _applyJournalEntry(CorePropertyChanges changes, {bool isUndo}) {
     changes.entries.forEach((objectId, objectChanges) {
@@ -212,112 +286,6 @@ abstract class CoreContext implements LocalSettings {
     completeJournalOperation();
   }
 
-  bool redo() {
-    int index = _journalIndex;
-    if (journal.isEmpty || index >= journal.length || index < 0) {
-      return false;
-    }
-
-    _isRecording = false;
-    _journalIndex = index + 1;
-    _applyJournalEntry(journal[index], isUndo: false);
-    _isRecording = true;
-    return true;
-  }
-
-  /// Method called when a journal entry is created or applied via an undo/redo.
-  @protected
-  void completeJournalOperation();
-
-  void remove<T extends Core>(T object) {
-    _objects.remove(object.id);
-    if (_isRecording) {
-      bool wasJustAdded = false;
-      if (_currentChanges != null) {
-        var objectChanges = _currentChanges.entries[object.id];
-        if (objectChanges != null) {
-          // When the add key is present in the changes, it means the object was
-          // just created in this same operation, so we can prune it from the
-          // changes.
-          if (objectChanges[addKey] != null) {
-            _currentChanges.entries.remove(object.id);
-            wasJustAdded = true;
-          }
-        }
-      }
-      if (!wasJustAdded) {
-        changeProperty(object, removeKey, addKey, object.coreType);
-        // TODO: Is there a way we can do this and not network change these? We
-        // do this to re-hydrate the object by storing the changes in the
-        // undo/redo stack.
-        object.changeNonNull();
-      }
-    }
-    onRemoved(object);
-  }
-
-  void setObjectProperty(Core object, int propertyKey, Object value);
-
-  @mustCallSuper
-  bool undo() {
-    int index = _journalIndex - 1;
-    if (journal.isEmpty || index >= journal.length || index < 0) {
-      return false;
-    }
-
-    _isRecording = false;
-    _journalIndex = index;
-    _applyJournalEntry(journal[index], isUndo: true);
-    _isRecording = true;
-    return true;
-  }
-
-  void _changesAccepted(ChangeSet changes) {
-    print("ACCEPTING ${changes.id}.");
-    _freshChanges.remove(changes);
-
-    // TODO: remove changes from unsynced list, serialize that and save it into
-    // an unsynced_change.data file
-    _unsyncedChanges.remove(changes);
-    // save...
-  }
-
-  void _wipe() {
-    _objects.clear();
-    _journalIndex = 0;
-    journal.clear();
-    _freshChanges.clear();
-    _unsyncedChanges.clear();
-  }
-
-  void _sendOfflineChanges() {
-    // TODO: load unsynced changes from data file
-    // loop through them and _client.queueChanges(sendChanges);
-    var unsentChanges = <ChangeSet>[]; // <-- loaded from file
-    for (final change in unsentChanges) {
-      _client.sendOfflineChange(change);
-    }
-  }
-
-  void _makeChange(ObjectChanges change) {
-    var wasRecording = _isRecording;
-    _isRecording = false;
-    // print("GOT CHANGE ${change.objectId} ${change.op} ${change.value}");
-    // var object = _objects[change.objectId];
-    applyCoopChanges(change);
-    // switch(change.op) {
-    //   case addKey:
-    //     break;
-    //   case removeKey:
-    //     break;
-    //   default:
-    //     setObjectProperty(object, change.op, change)
-    //     break;
-    // }
-    _isRecording = wasRecording;
-    completeJournalOperation();
-  }
-
   bool _changeObjectId(int from, int to) {
     var object = _objects[from];
     if (object == null) {
@@ -336,11 +304,16 @@ abstract class CoreContext implements LocalSettings {
     return true;
   }
 
-  void _changesRejected(ChangeSet changes) {
-    // TODO: remove the rejected change from unsycned list, and save the local
-    // file
-    _unsyncedChanges.remove(changes);
+  @mustCallSuper
+  void _changesAccepted(ChangeSet changes) {
+    print("ACCEPTING ${changes.id}.");
+    _freshChanges.remove(changes);
+    abandonChanges(changes);
+  }
 
+  @mustCallSuper
+  void _changesRejected(ChangeSet changes) {
+    abandonChanges(changes);
     // Re-apply the original value if the changed value matches the current one.
     var fresh = _freshChanges[changes];
     fresh.change.entries.forEach((objectId, changes) {
@@ -362,11 +335,10 @@ abstract class CoreContext implements LocalSettings {
   }
 
   void _coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
-    if (_client == null) {
-      return;
-    }
     // Client should only be null during some testing.
-    var sendChanges = _client.makeChangeSet();
+    var sendChanges = ChangeSet()
+      ..id = _lastChangeId == null ? null : _lastChangeId++
+      ..objects = [];
     changes.entries.forEach((objectId, changes) {
       var objectChanges = ObjectChanges()
         ..objectId = objectId
@@ -400,10 +372,49 @@ abstract class CoreContext implements LocalSettings {
       sendChanges.objects.add(objectChanges);
     });
     _freshChanges[sendChanges] = FreshChange(changes, useFrom);
-    _client.queueChanges(sendChanges);
-    // TODO: add sendChanges to a list, serialize that and save it into an
-    // unsynced_change.data file
-    _unsyncedChanges.add(sendChanges);
-    // TODO: debounce/isolate/append(_unsyncedChanges);
+    _client?.queueChanges(sendChanges);
+    persistChanges(sendChanges);
   }
+
+  void persistChanges(ChangeSet changes);
+  void abandonChanges(ChangeSet changes);
+
+  void _makeChange(ObjectChanges change) {
+    var wasRecording = _isRecording;
+    _isRecording = false;
+    // print("GOT CHANGE ${change.objectId} ${change.op} ${change.value}");
+    // var object = _objects[change.objectId];
+    applyCoopChanges(change);
+    // switch(change.op) {
+    //   case addKey:
+    //     break;
+    //   case removeKey:
+    //     break;
+    //   default:
+    //     setObjectProperty(object, change.op, change)
+    //     break;
+    // }
+    _isRecording = wasRecording;
+    completeJournalOperation();
+  }
+
+  Future<List<ChangeSet>> getOfflineChanges();
+
+  void _wipe() {
+    onWipe();
+    _objects.clear();
+    _journalIndex = 0;
+    journal.clear();
+    _freshChanges.clear();
+
+    // TODO: rethink this
+    // _unsyncedChanges.clear();
+  }
+}
+
+class FreshChange {
+  final CorePropertyChanges change;
+  final bool useFrom;
+
+  const FreshChange(this.change, this.useFrom);
 }

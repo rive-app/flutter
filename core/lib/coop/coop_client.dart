@@ -7,7 +7,6 @@ import 'package:core/coop/protocol_version.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'connect_result.dart';
-import 'coop_command.dart';
 import 'coop_reader.dart';
 import 'coop_writer.dart';
 import 'local_settings.dart';
@@ -16,7 +15,7 @@ typedef ChangeSetCallback = void Function(ChangeSet changeSet);
 typedef ChangeIdCallback = bool Function(int from, int to);
 typedef MakeChangeCallback = void Function(ObjectChanges change);
 typedef WipeCallback = void Function();
-typedef SendOfflineChangesCallback = void Function();
+typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
 
 enum ConnectionState { disconnected, connecting, handshaking, connected }
 
@@ -34,14 +33,13 @@ class CoopClient extends CoopReader {
   final LocalSettings localSettings;
   final String fileId;
   bool _allowReconnect = true;
-  int _lastChangeId;
 
   ChangeSetCallback changesAccepted;
   ChangeSetCallback changesRejected;
   ChangeIdCallback changeObjectId;
   MakeChangeCallback makeChange;
   WipeCallback wipe;
-  SendOfflineChangesCallback sendOfflineChanges;
+  GetOfflineChangesCallback getOfflineChanges;
 
   CoopClient(String host, String path, {this.fileId, this.localSettings})
       : url = '$host/v$protocolVersion/$path' {
@@ -54,9 +52,9 @@ class CoopClient extends CoopReader {
       _reconnectAttempt = 1;
     }
     _reconnectAttempt *= 2;
-    print("WILL WAIT ${_reconnectAttempt * 500}");
+    print("WILL WAIT ${_reconnectAttempt * 8000}");
     _reconnectTimer =
-        Timer(Duration(milliseconds: _reconnectAttempt * 500), connect);
+        Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
   }
 
   void _ping() {
@@ -75,6 +73,13 @@ class CoopClient extends CoopReader {
     return true;
   }
 
+  Future<bool> forceReconnect() async {
+    _allowReconnect = true;
+    _pingTimer?.cancel();
+    await _channel.sink.close();
+    return true;
+  }
+
   // Future<int> handshake(int sessionId, String fileId, String token) async {
   //   _writer.writeHello(sessionId, fileId, token);
 
@@ -83,9 +88,6 @@ class CoopClient extends CoopReader {
 
   Completer<ConnectResult> _connectionCompleter;
   Future<ConnectResult> connect() async {
-    // Grab the last change id immediately so we have it even if the connection
-    // fails.
-    _lastChangeId = CoopCommand.minChangeId;
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
     _channel = WebSocketChannel.connect(Uri.parse(url));
@@ -191,9 +193,11 @@ class CoopClient extends CoopReader {
     // the connection process)
 
     // Once all offline changes are sent...
-    sendOfflineChanges?.call();
 
-    _writer.writeSync();
+    assert(_connectionState == ConnectionState.handshaking);
+
+    var changes = await getOfflineChanges?.call();
+    _writer.writeSync(changes);
   }
 
   @override
@@ -214,14 +218,6 @@ class CoopClient extends CoopReader {
         }
       }
     }
-  }
-
-  ChangeSet makeChangeSet() {
-    var changes = ChangeSet()
-      ..id = _lastChangeId == null ? null : _lastChangeId++
-      ..objects = [];
-    localSettings.setIntSetting('lastChangeId', _lastChangeId);
-    return changes;
   }
 
   final List<ChangeSet> _fresh = [];
@@ -249,16 +245,8 @@ class CoopClient extends CoopReader {
     // _fresh.clear();
   }
 
-  void sendOfflineChange(ChangeSet offlineChange) {
-    assert(_connectionState == ConnectionState.handshaking);
-    
-    var writer = BinaryWriter();
-    _fresh.first.serialize(writer);
-    _channel.sink.add(writer.uint8Buffer);
-  }
-
   @override
-  Future<void> recvSync() {
+  Future<void> recvSync(List<ChangeSet> _) {
     throw UnsupportedError(
         "Client should never receive sync (gets sent only to server");
   }

@@ -6,12 +6,16 @@ environment:
   sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
+  flutter:
+    sdk: flutter
   web_socket_channel: ^1.1.0
   meta: ^1.1.8
   binary_buffer:
     path: ../dependencies/binary-buffer-dart
   fractional:
     path: ../dependencies/fractional-dart
+  local_data:
+    path: ../../rive-api-flutter/dependencies/local-data-flutter
 
 dev_dependencies:
   test: ^1.9.4

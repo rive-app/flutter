@@ -32,7 +32,7 @@ packages:
   binary_buffer:
     dependency: "direct main"
     description:
-      path: "..\\dependencies\\binary-buffer-dart"
+      path: "../dependencies/binary-buffer-dart"
       relative: true
     source: path
     version: "0.0.0"
@@ -85,10 +85,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  flutter:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   fractional:
     dependency: "direct main"
     description:
-      path: "..\\dependencies\\fractional-dart"
+      path: "../dependencies/fractional-dart"
       relative: true
     source: path
     version: "0.0.2"
@@ -141,6 +146,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.1+1"
+  local_data:
+    dependency: "direct main"
+    description:
+      path: "../../rive-api-flutter/dependencies/local-data-flutter"
+      relative: true
+    source: path
+    version: "0.0.1"
   logging:
     dependency: transitive
     description:
@@ -218,6 +230,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.4"
+  path_provider:
+    dependency: transitive
+    description:
+      name: path_provider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.6.0"
   pedantic:
     dependency: transitive
     description:
@@ -225,6 +244,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0+1"
+  platform:
+    dependency: transitive
+    description:
+      name: platform
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.1"
   pool:
     dependency: transitive
     description:
@@ -267,6 +293,11 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
+  sky_engine:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.99"
   source_map_stack_trace:
     dependency: transitive
     description:
@@ -344,6 +375,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  vector_math:
+    dependency: transitive
+    description:
+      name: vector_math
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.8"
   vm_service:
     dependency: transitive
     description:
@@ -374,3 +412,4 @@ packages:
     version: "2.2.0"
 sdks:
   dart: ">=2.6.0 <3.0.0"
+  flutter: ">=1.10.0 <2.0.0"

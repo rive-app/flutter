@@ -34,6 +34,7 @@ class CoopServerClient extends CoopReader {
   }
 
   void write(Uint8List buffer) {
+    print("WRITING COMMAND ${buffer[0]}");
     context.write(this, buffer);
   }
 
@@ -54,7 +55,18 @@ class CoopServerClient extends CoopReader {
   }
 
   @override
-  Future<void> recvSync() async {
+  Future<void> recvSync(List<ChangeSet> changes) async {
+    print("got sync!");
+    // Apply offline changes.
+    if (changes.isNotEmpty) {
+      for (final change in changes) {
+        print("sync attempt change!");
+        context.attemptChange(this, change);
+      }
+      debounce(context.persist, duration: const Duration(seconds: 2));
+    }
+    print("start the wipe!");
+
     _writer.writeWipe();
 
     _writer.writeChanges(context.initialChanges());

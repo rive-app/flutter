@@ -7,6 +7,7 @@ import 'coop_command.dart';
 
 abstract class CoopReader {
   void read(Uint8List data) {
+    print("RAW COMMAND ${data[0]}");
     var reader = BinaryReader(
         ByteData.view(data.buffer, data.offsetInBytes, data.length));
     int command = reader.readVarUint();
@@ -28,7 +29,11 @@ abstract class CoopReader {
         recvWipe();
         break;
       case CoopCommand.synchronize:
-        recvSync();
+        var changes = <ChangeSet>[];
+        while (!reader.isEOF) {
+          changes.add(ChangeSet()..deserialize(reader));
+        }
+        recvSync(changes);
         break;
       case CoopCommand.goodbye:
         recvGoodbye();
@@ -55,7 +60,7 @@ abstract class CoopReader {
   Future<void> recvReady();
   Future<void> recvHello();
   Future<void> recvGoodbye();
-  Future<void> recvSync();
+  Future<void> recvSync(List<ChangeSet> changes);
   Future<void> recvWipe();
   Future<void> recvChangeId(int from, int to);
 }
