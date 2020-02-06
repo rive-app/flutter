@@ -18,7 +18,8 @@ class BinaryWriter {
   int _writeIndex = 0;
   int get size => _writeIndex;
 
-  BinaryWriter({this.alignment = 1024, this.endian = Endian.little}) {
+  BinaryWriter({this.alignment = 1024, this.endian = Endian.little})
+      : assert(alignment != 0) {
     _buffer = Uint8List(alignment);
     _byteData = ByteData.view(_buffer.buffer);
   }

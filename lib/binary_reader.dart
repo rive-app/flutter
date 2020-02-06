@@ -14,6 +14,8 @@ class BinaryReader {
       : buffer =
             ByteData.view(list.buffer, list.offsetInBytes, list.lengthInBytes);
 
+  bool get isEOF => _readIndex >= buffer.lengthInBytes;
+
   double readFloat32() {
     double value = buffer.getFloat32(_readIndex, endian);
     _readIndex += 4;
