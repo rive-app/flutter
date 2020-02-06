@@ -57,6 +57,13 @@ abstract class CoreContext implements LocalSettings {
   // final List<ChangeSet> _unsyncedChanges = [];
   CoreContext(this.fileId) : _lastChangeId = CoopCommand.minChangeId;
 
+  /// When this is set, delay calling onAdded for any object added to Core. This
+  /// is helpful when applying many changes at once, knowing that further
+  /// changes will be made to the added object. This ensures that we can later
+  /// call onAdded when we're done making the changes and onAdded can be called
+  /// with sane/stable data.
+  List<Core<CoreContext>> _delayAdd;
+
   /// Get all objects
   Iterable<Core<CoreContext>> get objects => _objects.values;
   T add<T extends Core>(T object) {
@@ -66,7 +73,11 @@ abstract class CoreContext implements LocalSettings {
     object.context = this;
 
     _objects[object.id] = object;
-    onAdded(object);
+    if (_delayAdd != null) {
+      _delayAdd.add(object);
+    } else {
+      onAdded(object);
+    }
     if (_isRecording) {
       changeProperty(object, addKey, removeKey, object.coreType);
       object.changeNonNull();
@@ -81,7 +92,7 @@ abstract class CoreContext implements LocalSettings {
     if (_currentChanges == null) {
       return false;
     }
-    completeJournalOperation();
+    completeChanges();
 
     // nuke remainder of journal, in case we weren't at the end
     journal.removeRange(_journalIndex, journal.length);
@@ -107,14 +118,14 @@ abstract class CoreContext implements LocalSettings {
 
   /// Method called when a journal entry is created or applied via an undo/redo.
   @protected
-  void completeJournalOperation();
+  void completeChanges();
 
   Future<ConnectResult> connect(String host, String path) async {
     _client = CoopClient(host, path, fileId: fileId, localSettings: this)
       ..changesAccepted = _changesAccepted
       ..changesRejected = _changesRejected
       ..changeObjectId = _changeObjectId
-      ..makeChange = _makeChange
+      ..makeChanges = _receiveCoopChanges
       ..wipe = _wipe
       ..getOfflineChanges = () async {
         var changes = await getOfflineChanges();
@@ -283,7 +294,7 @@ abstract class CoreContext implements LocalSettings {
     });
 
     _coopMakeChangeSet(changes, useFrom: isUndo);
-    completeJournalOperation();
+    completeChanges();
   }
 
   bool _changeObjectId(int from, int to) {
@@ -379,23 +390,27 @@ abstract class CoreContext implements LocalSettings {
   void persistChanges(ChangeSet changes);
   void abandonChanges(ChangeSet changes);
 
-  void _makeChange(ObjectChanges change) {
+  void _receiveCoopChanges(ChangeSet changes) {
+    // We've received changes from Coop. Initialize the delayAdd list so that
+    // onAdded doesn't get called as objects are created. We'll manually call it
+    // at the end of this method once all the changes have been made.
+    _delayAdd = [];
+
+    // Track whether recording was on/off, definitely turn it off during these
+    // changes.
     var wasRecording = _isRecording;
     _isRecording = false;
-    // print("GOT CHANGE ${change.objectId} ${change.op} ${change.value}");
-    // var object = _objects[change.objectId];
-    applyCoopChanges(change);
-    // switch(change.op) {
-    //   case addKey:
-    //     break;
-    //   case removeKey:
-    //     break;
-    //   default:
-    //     setObjectProperty(object, change.op, change)
-    //     break;
-    // }
+    for (final objectChanges in changes.objects) {
+      // TODO: (maybe) This would be the moment to strip out in-flight (fresh)
+      // changes from this set to avoid the flickering issue.
+      applyCoopChanges(objectChanges);
+    }
+    for(final object in _delayAdd) {
+      onAdded(object);
+    }
+    _delayAdd = null;
     _isRecording = wasRecording;
-    completeJournalOperation();
+    completeChanges();
   }
 
   Future<List<ChangeSet>> getOfflineChanges();

@@ -80,7 +80,6 @@ class ChangeSet {
 
   List<ObjectChanges> objects;
 
-  @override
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(id);
     writer.writeVarUint(objects?.length ?? 0);
@@ -91,7 +90,6 @@ class ChangeSet {
     }
   }
 
-  @override
   void deserialize(BinaryReader reader, [int preReadOp]) {
     id = preReadOp ?? reader.readVarUint();
     int changesLength = reader.readVarUint();

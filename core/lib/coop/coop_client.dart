@@ -13,7 +13,6 @@ import 'local_settings.dart';
 
 typedef ChangeSetCallback = void Function(ChangeSet changeSet);
 typedef ChangeIdCallback = bool Function(int from, int to);
-typedef MakeChangeCallback = void Function(ObjectChanges change);
 typedef WipeCallback = void Function();
 typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
 
@@ -37,7 +36,7 @@ class CoopClient extends CoopReader {
   ChangeSetCallback changesAccepted;
   ChangeSetCallback changesRejected;
   ChangeIdCallback changeObjectId;
-  MakeChangeCallback makeChange;
+  ChangeSetCallback makeChanges;
   WipeCallback wipe;
   GetOfflineChangesCallback getOfflineChanges;
 
@@ -127,12 +126,7 @@ class CoopClient extends CoopReader {
   @override
   void recvChange(ChangeSet changeSet) {
     // Make sure we do not apply changes that conflict with unacknowledged ones.
-
-    // That means that we need to re-apply them if that changeset is rejected.
-    for (final objectChanges in changeSet.objects) {
-      //change.objectId
-      makeChange?.call(objectChanges);
-    }
+    makeChanges?.call(changeSet);
   }
 
   @override
