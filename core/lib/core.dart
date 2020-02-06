@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:meta/meta.dart';
 
@@ -15,9 +16,6 @@ export 'src/list_equality.dart';
 
 int localId = 0;
 
-typedef PropertyChanger = void Function<T>(
-    Core object, int propertyKey, T from, T to);
-
 class ChangeEntry {
   Object from;
   Object to;
@@ -25,13 +23,97 @@ class ChangeEntry {
   ChangeEntry(this.from, this.to);
 }
 
+typedef PropertyChangeCallback = void Function(dynamic from, dynamic to);
+
 abstract class Core<T extends CoreContext> {
   int id;
   T context;
   int get coreType;
 
+  HashMap<int, Set<PropertyChangeCallback>> _changeListeners;
+
   @protected
-  void changeNonNull([PropertyChanger changer]);
+  void changeNonNull();
+
+  /// TODO: reconsider this: clean this up into a generared getProperty per base
+  /// class.
+  K getProperty<K>(int propertyKey) {
+    var v = context?.getObjectProperty(this, propertyKey);
+    return v as K;
+  }
+  // In artboard_base.dart
+  // @override
+  // T todoGetProperty<T>(int propertyKey) {
+  //   switch (propertyKey) {
+  //     case ArtboardBase.widthPropertyKey:
+  //       return width as T;
+  //     case ArtboardBase.heightPropertyKey:
+  //       return height;
+  //     case ArtboardBase.xPropertyKey:
+  //       return x;
+  //       break;
+  //     case ArtboardBase.yPropertyKey:
+  //       return y;
+  //     case ArtboardBase.originXPropertyKey:
+  //       return originX;
+  //     case ArtboardBase.originYPropertyKey:
+  //       return originY;
+  //     default:
+  //     //super.todoGetProperty(propertyKey);
+  //   }
+  //   return null;
+  // }
+
+  /// Register to receive a notification whenever a property with propertyKey
+  /// changes on this object.
+  bool addListener(int propertyKey, PropertyChangeCallback callback) {
+    assert(callback != null, 'no null listener callbacks');
+    _changeListeners ??= HashMap<int, Set<PropertyChangeCallback>>();
+    var listeners = _changeListeners[propertyKey];
+    if (listeners == null) {
+      _changeListeners[propertyKey] = listeners = {};
+    }
+    return listeners.add(callback);
+  }
+
+  /// Remove a previously registered notification for when a property with
+  /// propertyKey changes on this object.
+  bool removeListener(int propertyKey, PropertyChangeCallback callback) {
+    assert(callback != null, 'no null listener callbacks');
+    if (_changeListeners == null) {
+      return false;
+    }
+    var listeners = _changeListeners[propertyKey];
+    if (listeners == null) {
+      return false;
+    }
+    if (listeners.remove(callback)) {
+      // Do some memory cleanup.
+      if (listeners.isEmpty) {
+        _changeListeners.remove(propertyKey);
+      }
+      if (_changeListeners.isEmpty) {
+        _changeListeners = null;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  @protected
+  void onPropertyChanged<K>(int propertyKey, K from, K to) {
+    context?.changeProperty(this, propertyKey, from, to);
+    if (_changeListeners == null) {
+      return;
+    }
+    // notify listeners too
+    var listeners = _changeListeners[propertyKey];
+    if (listeners != null) {
+      for (final listener in listeners) {
+        listener(from, to);
+      }
+    }
+  }
 }
 
 abstract class CoreContext implements LocalSettings {
@@ -405,7 +487,7 @@ abstract class CoreContext implements LocalSettings {
       // changes from this set to avoid the flickering issue.
       applyCoopChanges(objectChanges);
     }
-    for(final object in _delayAdd) {
+    for (final object in _delayAdd) {
       onAdded(object);
     }
     _delayAdd = null;

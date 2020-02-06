@@ -130,15 +130,14 @@ class Definition {
     if (_properties.isNotEmpty) {
 // override changeNonNull to report all set fields as a change
       code.writeln('''@override
-    void changeNonNull([PropertyChanger changer]) {
-      changer ??= context?.changeProperty;''');
+    void changeNonNull() {''');
       if (_extensionOf != null) {
-        code.writeln('super.changeNonNull(changer);');
+        code.writeln('super.changeNonNull();');
       }
       // for (final definition in definitions.values) {
       for (final property in _properties) {
         code.writeln('''if(${property.name} != null) {
-          context?.changeProperty(this, 
+          onPropertyChanged( 
           ${property.name}PropertyKey, ${property.name}, ${property.name});
         }''');
       }

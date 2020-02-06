@@ -61,7 +61,7 @@ class Property {
       }''');
     code.writeln('''@mustCallSuper
     void ${name}Changed(${type.name} from, ${type.name} to) {
-        context?.changeProperty(this, $propertyKey, from, to);
+        onPropertyChanged($propertyKey, from, to);
       }\n''');
 
     return code.toString();
