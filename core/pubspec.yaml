@@ -14,8 +14,6 @@ dependencies:
     path: ../dependencies/binary-buffer-dart
   fractional:
     path: ../dependencies/fractional-dart
-  local_data:
-    path: ../../rive-api-flutter/dependencies/local-data-flutter
 
 dev_dependencies:
   test: ^1.9.4
