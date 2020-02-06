@@ -57,7 +57,10 @@ class CoopFile {
       if (object.serverChangeId > id) {
         id = object.serverChangeId;
       }
-      changedObjects.add(object.toObjectChanges());
+      changedObjects.add(object.toObjectCreationChanges());
+    }
+    for (final object in objects.values) {
+      changedObjects.add(object.toObjectPropertyChanges());
     }
     var changeSet = ChangeSet()
       ..id = id
@@ -78,7 +81,7 @@ class CoopFileObject extends Entity {
     properties[property.key] = property;
   }
 
-  ObjectChanges toObjectChanges() {
+  ObjectChanges toObjectCreationChanges() {
     var writer = BinaryWriter();
     writer.writeVarUint(key);
 
@@ -87,12 +90,22 @@ class CoopFileObject extends Entity {
         Change()
           ..op = CoreContext.addKey
           ..value = writer.uint8Buffer,
-        ...properties.values.map(
-          (prop) => Change()
-            ..op = prop.key
-            ..value = prop.data,
-        )
       ]
+      ..objectId = localId;
+  }
+
+  ObjectChanges toObjectPropertyChanges() {
+    var writer = BinaryWriter();
+    writer.writeVarUint(key);
+
+    return ObjectChanges()
+      ..changes = properties.values
+          .map(
+            (prop) => Change()
+              ..op = prop.key
+              ..value = prop.data,
+          )
+          .toList(growable: false)
       ..objectId = localId;
   }
 

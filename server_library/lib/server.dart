@@ -204,9 +204,6 @@ class _CoopIsolate extends CoopIsolateProcess {
     // connecting/sending offline changes should not receive mid-flight changes
     // prior to their ready.
     for (final to in clients) {
-      if (to == client) {
-        continue;
-      }
       to.write(writer.uint8Buffer);
     }
   }
