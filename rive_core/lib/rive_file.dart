@@ -62,6 +62,7 @@ class RiveFile extends RiveCoreContext {
     if (_dirt == 0) {
       return false;
     }
+    print("CLEAN!");
     _dirt = 0;
 
     // Copy it in case it is changed during the building (meaning this process
@@ -77,7 +78,13 @@ class RiveFile extends RiveCoreContext {
 
     // Then build the dependencies
     for (final component in needDependenciesBuilt) {
-      _needDependenciesOrdered.add(component.artboard);
+      if (component.artboard != null) {
+        _needDependenciesOrdered.add(component.artboard);
+        print("Component with good artboard ${component.name}");
+      }
+      else {
+        print("WHY IS THE ARTBOARD NULL $component ${component.name}??");
+      }
       component.buildDependencies();
     }
 
@@ -111,7 +118,7 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void completeJournalOperation() {
+  void completeChanges() {
     cleanDirt();
   }
 
@@ -132,7 +139,7 @@ class RiveFile extends RiveCoreContext {
 
   @override
   Future<List<ChangeSet>> getOfflineChanges() => _isolatedPersist.changes();
-  
+
   @override
   Future<String> getStringSetting(String key) async {
     if (overridePreferences != null) {
@@ -179,7 +186,11 @@ class RiveFile extends RiveCoreContext {
   void onAdded(Component object) {
     if (object.parentId != null) {
       object.parent = object.context?.resolve(object.parentId);
-      object.parent.childAdded(object);
+      if (object.parent == null) {
+        print("Failed to resolve parent with id ${object.parentId}");
+      } else {
+        object.parent.childAdded(object);
+      }
     }
     delegates.forEach((delegate) => delegate.onObjectAdded(object));
     if (object is Artboard) {
