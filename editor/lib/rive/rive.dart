@@ -208,6 +208,14 @@ class Rive with RiveFileDelegate {
     }
   }
 
+  @override
+  void onWipe() {
+    print("WIPED! --- 2");
+    _stage?.wipe();
+    treeController.value =
+        HierarchyTreeController(file.value.artboards, rive: this);
+  }
+
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
   Future<RiveFile> open(CoopConnectionInfo connectionInfo, int ownerId,
       int fileId, String name) async {
@@ -245,6 +253,10 @@ class Rive with RiveFileDelegate {
     // Tree controller is based off of stage items.
     treeController.value =
         HierarchyTreeController(nextFile.artboards, rive: this);
+  }
+
+  void forceReconnect() {
+    file.value.forceReconnect();
   }
 }
 

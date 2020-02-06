@@ -267,6 +267,13 @@ class Stage {
     return true;
   }
 
+  /// Clear out all stage items. Normally called when the file is also wiped.
+  void wipe() {
+    _visibleItems.clear();
+    visTree.clear();
+    hoverItem = null;
+  }
+
   void dispose() {}
 
   void _onFileChanged() {}
