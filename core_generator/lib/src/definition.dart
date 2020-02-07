@@ -128,24 +128,34 @@ class Definition {
     }
 
     if (_properties.isNotEmpty) {
-// override changeNonNull to report all set fields as a change
+      // override changeNonNull to report all set fields as a change
       code.writeln('''@override
     void changeNonNull() {''');
       if (_extensionOf != null) {
         code.writeln('super.changeNonNull();');
       }
-      // for (final definition in definitions.values) {
       for (final property in _properties) {
         code.writeln('''if(${property.name} != null) {
           onPropertyChanged( 
           ${property.name}PropertyKey, ${property.name}, ${property.name});
         }''');
       }
-      // }
+      code.writeln('}');
+
+      code.writeln('''@override
+      K getProperty<K>(int propertyKey) {
+      switch (propertyKey) {''');
+      for (final property in _properties) {
+        code.writeln('''case ${property.name}PropertyKey:
+          return ${property.name} as K;''');
+      }
+        code.writeln('''
+          default: 
+          return super.getProperty<K>(propertyKey);
+        }''');
       code.writeln('}');
     }
-
-    code.write('}');
+    code.writeln('}');
 
     var folder = outputFolder != null &&
             outputFolder.isNotEmpty &&

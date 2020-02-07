@@ -35,34 +35,9 @@ abstract class Core<T extends CoreContext> {
   @protected
   void changeNonNull();
 
-  /// TODO: reconsider this: clean this up into a generared getProperty per base
-  /// class.
-  K getProperty<K>(int propertyKey) {
-    var v = context?.getObjectProperty(this, propertyKey);
-    return v as K;
-  }
-  // In artboard_base.dart
-  // @override
-  // T todoGetProperty<T>(int propertyKey) {
-  //   switch (propertyKey) {
-  //     case ArtboardBase.widthPropertyKey:
-  //       return width as T;
-  //     case ArtboardBase.heightPropertyKey:
-  //       return height;
-  //     case ArtboardBase.xPropertyKey:
-  //       return x;
-  //       break;
-  //     case ArtboardBase.yPropertyKey:
-  //       return y;
-  //     case ArtboardBase.originXPropertyKey:
-  //       return originX;
-  //     case ArtboardBase.originYPropertyKey:
-  //       return originY;
-  //     default:
-  //     //super.todoGetProperty(propertyKey);
-  //   }
-  //   return null;
-  // }
+  /// Generated classes override this to return the value stored in the field
+  /// matching the propertyKey.
+  K getProperty<K>(int propertyKey) { return null; }
 
   /// Register to receive a notification whenever a property with propertyKey
   /// changes on this object.
