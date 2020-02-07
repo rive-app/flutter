@@ -22,7 +22,7 @@ class RiveCoopServer extends CoopServer {
       HttpRequest request, int ownerId, int fileId, String token) async {
     var api = PrivateApi();
     var validationResult = await api.validate(ownerId, fileId, token);
-    return validationResult.ownerId;
+    return validationResult?.ownerId;
   }
 
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
