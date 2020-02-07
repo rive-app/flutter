@@ -75,7 +75,7 @@ class CoopClient extends CoopReader {
   Future<bool> forceReconnect() async {
     _allowReconnect = true;
     _pingTimer?.cancel();
-    await _channel.sink.close();
+    await _channel?.sink?.close();
     return true;
   }
 
