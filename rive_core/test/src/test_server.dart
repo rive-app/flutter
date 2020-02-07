@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/coop_server.dart';
-import 'package:core/coop/coop_user.dart';
 import 'package:rive_core/data_directory.dart';
 import 'package:core/coop/coop_isolate.dart';
 
@@ -18,20 +17,16 @@ class _TestCoopIsolate extends CoopIsolateProcess {
   @override
   Future<bool> initialize(int ownerId, int fileId,
       [Map<String, String> options]) async {
-    this.ownerId = ownerId;
-    this.fileId = fileId;
-    _dataDir = await dataDirectory("test_coop_server");
-    return _dataDir != null;
+    //this.ownerId = ownerId;
+    //this.fileId = fileId;
+    return true;
   }
 
-  @override
   Future<Uint8List> loadData(String key) async {
-    print("WRITING TO KEY $key ${_dataDir.path + key}");
     var file = File(_dataDir.path + key);
     return file.readAsBytes();
   }
 
-  @override
   Future<bool> saveData(String key, Uint8List data) async {
     var file = File(_dataDir.path + key);
     await file.writeAsBytes(data, flush: true);
@@ -40,14 +35,7 @@ class _TestCoopIsolate extends CoopIsolateProcess {
 
   @override
   Future<bool> shutdown() async {
-    await _dataDir.delete(recursive: true);
     return true;
-  }
-
-  @override
-  Future<CoopUser> login(String token) async {
-    // In test mode we validate any user...
-    return CoopUser(1);
   }
 
   @override
@@ -62,9 +50,15 @@ class _TestCoopIsolate extends CoopIsolateProcess {
   }
 
   @override
-  ChangeSet initialChanges() {
+  ChangeSet buildFileChangeSet() {
     // TODO: implement initialChanges
     return null;
+  }
+
+  @override
+  Future<void> persist() {
+    // TODO: implement persist
+    return Future<void>.value();
   }
 }
 
@@ -79,7 +73,9 @@ class TestCoopServer extends CoopServer {
   }
 
   @override
-  Future<bool> validate(HttpRequest request, int ownerId, int fileId) async {
-    return true;
+  Future<int> validate(
+      HttpRequest request, int ownerId, int fileId, String token) {
+    // TODO: implement validate
+    return Future.value(1);
   }
 }
