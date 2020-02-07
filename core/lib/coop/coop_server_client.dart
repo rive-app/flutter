@@ -69,8 +69,10 @@ class CoopServerClient extends CoopReader {
 
     _writer.writeWipe();
 
-    _writer.writeChanges(context.initialChanges());
-
+    final initialChanges = context.buildFileChangeSet();
+    if (initialChanges != null) {
+      _writer.writeChanges(initialChanges);
+    }
     _writer.writeReady();
   }
 

@@ -73,13 +73,14 @@ abstract class CoopServer {
 
         // TODO: Max fix user owner ids :)
         int userOwnerId = await validate(request, ownerId, fileId, token);
-        if(userOwnerId == null) {
+        if (userOwnerId == null) {
           request.response.statusCode = 403;
           await request.response.close();
           return;
         }
         try {
           var ws = await WebSocketTransformer.upgrade(request);
+
           String key = _isolateKey(ownerId, fileId);
           var isolate = _isolates[key];
           if (isolate == null) {
@@ -117,8 +118,8 @@ abstract class CoopServer {
   // There'll be a row locking stored procedure that'll grab a valid
   // server_index for a file when it is first opened. This only runs if the
   // server_index is currently null. server_index is reset to null when all
-  // clients have disconnected and some timeout elapses. 
-  
+  // clients have disconnected and some timeout elapses.
+
   // Also take this opportunity to check that the token matches a valid user.
   Future<int> validate(
       HttpRequest request, int ownerId, int fileId, String token);

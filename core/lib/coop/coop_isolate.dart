@@ -144,7 +144,7 @@ abstract class CoopIsolateProcess {
   Iterable<CoopServerClient> get clients => _clients.values;
 
   int attemptChange(CoopServerClient client, ChangeSet changes);
-  ChangeSet initialChanges();
+  ChangeSet buildFileChangeSet();
 
   // bool remove(CoopServerClient client) => _clients.remove(client);
 

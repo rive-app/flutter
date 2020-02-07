@@ -37,7 +37,9 @@ abstract class Core<T extends CoreContext> {
 
   /// Generated classes override this to return the value stored in the field
   /// matching the propertyKey.
-  K getProperty<K>(int propertyKey) { return null; }
+  K getProperty<K>(int propertyKey) {
+    return null;
+  }
 
   /// Register to receive a notification whenever a property with propertyKey
   /// changes on this object.
@@ -186,6 +188,7 @@ abstract class CoreContext implements LocalSettings {
       ..wipe = _wipe
       ..getOfflineChanges = () async {
         var changes = await getOfflineChanges();
+
         for (final change in changes) {
           if (change.id > _lastChangeId) {
             _lastChangeId = change.id;
