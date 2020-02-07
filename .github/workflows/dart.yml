@@ -11,10 +11,13 @@ jobs:
       image:  google/dart:latest
 
     steps:
-    - uses: actions/checkout@v1
-      with:
-        token: ${{ secrets.RIVE_TOKEN }}
-        submodules: true
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive
     - name: Install core dependencies
       run: cd core && pub get
     - name: Run core tests
