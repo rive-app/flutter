@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:rive_api/files.dart';
+import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
@@ -21,6 +22,7 @@ import 'package:rive_api/user.dart';
 import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
 import 'selection_context.dart';
+import 'shortcuts/shortcut_actions.dart';
 import 'stage/stage.dart';
 import 'stage/stage_item.dart';
 
@@ -170,29 +172,46 @@ class Rive with RiveFileDelegate {
     _stage.markNeedsAdvance();
   }
 
+  final Set<PhysicalKeyboardKey> _pressed = {};
+
   void onKeyEvent(RawKeyEvent keyEvent, bool hasFocusObject) {
     selectionMode.value = keyEvent.isMetaPressed
         ? SelectionMode.multi
         : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
 
-    if (keyEvent.isMetaPressed &&
-        keyEvent.isShiftPressed &&
-        keyEvent is RawKeyDownEvent &&
-        keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
-      file.value.redo();
-    } else if (keyEvent.isMetaPressed &&
-        keyEvent is RawKeyDownEvent &&
-        keyEvent.physicalKey == PhysicalKeyboardKey.keyZ) {
-      file.value.undo();
-    } else if (keyEvent is RawKeyDownEvent &&
-        keyEvent.physicalKey == PhysicalKeyboardKey.delete) {
-      for (final item in selection.items) {
-        if (item is StageItem) {
-          file.value.remove(item.component as Core);
-        }
+    if (keyEvent is RawKeyDownEvent) {
+      _pressed.add(keyEvent.physicalKey);
+    } else if (keyEvent is RawKeyUpEvent) {
+      _pressed.remove(keyEvent.physicalKey);
+    }
+
+    var actions =
+        defaultKeyBinding.lookupAction(_pressed.toList(growable: false));
+
+    if (actions == null) {
+      return;
+    }
+
+    for (final action in actions) {
+      switch (action) {
+        case ShortcutAction.undo:
+          file.value.undo();
+          break;
+        case ShortcutAction.redo:
+          file.value.redo();
+          break;
+        case ShortcutAction.delete:
+          for (final item in selection.items) {
+            if (item is StageItem) {
+              file.value.remove(item.component as Core);
+            }
+          }
+          selection.clear();
+          file.value.captureJournalEntry();
+          break;
+        default:
+          break;
       }
-      selection.clear();
-      file.value.captureJournalEntry();
     }
   }
 
