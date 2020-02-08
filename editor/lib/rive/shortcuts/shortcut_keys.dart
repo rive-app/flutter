@@ -148,18 +148,11 @@ String keyname(ShortcutKey key) {
   }
   switch (key) {
     case ShortcutKey.systemCmd:
-      return _isMac() ? 'cmd' : 'ctrl';
+      return Platform.instance.isMac ? 'cmd' : 'ctrl';
       break;
     default:
       return null;
   }
-}
-
-bool _isMac() {
-  return true;
-  // return kIsWeb
-  //     ? html.window.navigator.appVersion.contains('Mac')
-  //     : Platform.isMacOS;
 }
 
 enum ShortcutKey {
