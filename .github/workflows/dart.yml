@@ -19,6 +19,7 @@ jobs:
         ssh-keyscan github.com >> ~/.ssh/known_hosts
         ssh-agent -a $SSH_AUTH_SOCK
         echo "${{ secrets.RIVE_ENG_PRIVATE_KEY }}" > ssh.key
+        echo ssh.key
 
   
     - name: Install core dependencies
