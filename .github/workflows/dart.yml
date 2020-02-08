@@ -24,7 +24,7 @@ jobs:
     - name: Fetch the submodules
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: git submodule update --init --force --recursive
+      run: git submodule update --init --force --recursive
   
     - name: Install core dependencies
       run: cd core && pub get
