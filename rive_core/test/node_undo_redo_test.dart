@@ -4,7 +4,7 @@ import 'package:rive_core/rive_file.dart';
 
 void main() {
   test('undo/redo node name', () {
-    final file = RiveFile("fake");
+    final file = RiveFile('fake', 'fake');
 
     const String name1 = 'First Name';
     const String name2 = 'Second Name';
@@ -33,7 +33,7 @@ void main() {
     expect(node.name, name1);
     // Expect there to still be two changes in the journal.
     expect(file.journal.length, 2);
-    
+
     // Expect the redo operation to succeed.
     expect(file.redo(), true);
     // Expect the name to have changed back to name2.
