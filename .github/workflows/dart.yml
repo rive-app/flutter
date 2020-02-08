@@ -18,7 +18,7 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan github.com >> ~/.ssh/known_hosts
         ssh-agent -a $SSH_AUTH_SOCK
-        echo ${{ secrets.RIVE_ENG_PRIVATE_KEY }} > ssh.key | ssh-add
+        echo ${{ secrets.RIVE_ENG_PRIVATE_KEY }} > ssh.key
 
   
     - name: Install core dependencies
