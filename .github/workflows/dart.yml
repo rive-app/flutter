@@ -16,6 +16,8 @@ jobs:
       run: |
         export SSH_AUTH_SOCK=/tmp/ssh_agent.sock
         mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        ssh-agent -a $SSH_AUTH_SOCK
   
     - name: Install core dependencies
       run: cd core && pub get
