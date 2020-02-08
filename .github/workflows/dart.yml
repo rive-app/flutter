@@ -21,10 +21,10 @@ jobs:
         ssh-agent -a $SSH_AUTH_SOCK > /dev/null
         ssh-add - <<< "${{ secrets.RIVE_ENG_PRIVATE_KEY }}"
 
-    - name: Fetch the submodules
-      env:
-        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: git submodule update --init --force --recursive
+    # - name: Fetch the submodules
+    #   env:
+    #     SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+    #   run: git submodule update --init --force --recursive
   
     - name: Install core dependencies
       run: cd core && pub get
