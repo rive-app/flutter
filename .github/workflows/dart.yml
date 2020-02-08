@@ -12,6 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Setup SSH Keys and known_hosts
+      # Warning, this took a lot of massaging. Please don't mess with this unless the build is broken.
       env:
         GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"  
       run: |
