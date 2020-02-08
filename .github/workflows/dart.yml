@@ -4,9 +4,8 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-18.04
-
+    
     container:
       image:  google/dart:latest
 
@@ -24,8 +23,6 @@ jobs:
         chmod 600 ssh.key
         ssh-add ssh.key
         git submodule update --init --force --recursive
-        
-
   
     - name: Install core dependencies
       run: cd core && pub get
