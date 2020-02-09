@@ -149,7 +149,7 @@ class Definition {
         code.writeln('''case ${property.name}PropertyKey:
           return ${property.name} as K;''');
       }
-        code.writeln('''
+      code.writeln('''
           default: 
           return super.getProperty<K>(propertyKey);
         }''');
@@ -319,7 +319,11 @@ class Definition {
     for (final definition in definitions.values) {
       if (definition._properties.isNotEmpty) {
         imports.add('import \'${definition.localCodeFilename}\';\n');
-        imports.add('import \'../../${definition.concreteCodeFilename}\';\n');
+
+        // We only instance concrete versions.
+        if (!definition._isAbstract) {
+          imports.add('import \'../../${definition.concreteCodeFilename}\';\n');
+        }
       }
     }
     // Sort the imports to avoid linter warnings.
@@ -361,15 +365,21 @@ class Definition {
           ''');
 
     ctxCode.write('''case CoreContext.addKey:
-          object = makeCoreInstance(reader.readVarInt())
-            ..id = objectChanges.objectId;
-          justAdded = true;
+          // make sure object doesn't exist (we propagate changes to all
+          // clients, so we'll receive our own adds which will result in
+          // duplicates if we don't check here).
+          if (object == null) {
+            object = makeCoreInstance(reader.readVarInt())
+              ..id = objectChanges.objectId;
+            justAdded = true;
+          }
           break;
         case CoreContext.removeKey:           
-        if (object != null) {
+          // Don't remove null objects. This can happen as we acknowledge
+          // changes, so we'll attempt to delete an object we ourselves have
+          // already deleted.
+          if (object != null) {
             remove(object);
-          } else {
-            print("ATTEMPTED TO DELETE NULL OBJECT \${objectChanges.objectId}");
           }
           break;''');
 

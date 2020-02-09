@@ -7,7 +7,6 @@ import 'coop_command.dart';
 
 abstract class CoopReader {
   void read(Uint8List data) {
-    print("RAW COMMAND ${data[0]}");
     var reader = BinaryReader(
         ByteData.view(data.buffer, data.offsetInBytes, data.length));
     int command = reader.readVarUint();

@@ -245,6 +245,7 @@ abstract class CoreContext implements LocalSettings {
   }
 
   void remove<T extends Core>(T object) {
+    assert(object != null, 'Attempted to delete a null object');
     _objects.remove(object.id);
     if (_isRecording) {
       bool wasJustAdded = false;
