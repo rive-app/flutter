@@ -4,7 +4,6 @@ import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
 import '../../artboard.dart';
-import '../../component.dart';
 import '../../node.dart';
 import 'artboard_base.dart';
 import 'component_base.dart';
@@ -33,15 +32,21 @@ abstract class RiveCoreContext extends CoreContext {
       var reader = BinaryReader.fromList(change.value);
       switch (change.op) {
         case CoreContext.addKey:
-          object = makeCoreInstance(reader.readVarInt())
-            ..id = objectChanges.objectId;
-          justAdded = true;
+          // make sure object doesn't exist (we propagate changes to all
+          // clients, so we'll receive our own adds which will result in
+          // duplicates if we don't check here).
+          if (object == null) {
+            object = makeCoreInstance(reader.readVarInt())
+              ..id = objectChanges.objectId;
+            justAdded = true;
+          }
           break;
         case CoreContext.removeKey:
+          // Don't remove null objects. This can happen as we acknowledge
+          // changes, so we'll attempt to delete an object we ourselves have
+          // already deleted.
           if (object != null) {
             remove(object);
-          } else {
-            print("ATTEMPTED TO DELETE NULL OBJECT ${objectChanges.objectId}");
           }
           break;
         case ComponentBase.dependentIdsPropertyKey:
