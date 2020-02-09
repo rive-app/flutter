@@ -150,7 +150,7 @@ class _CoopIsolate extends CoopIsolateProcess {
   }
 
   @override
-  ChangeSet initialChanges() {
+  ChangeSet buildFileChangeSet() {
     return file.toChangeSet();
   }
 
