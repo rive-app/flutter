@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
 
-class RiveDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
 Widget _riveDialogTransition(BuildContext context, Animation<double> animation,
     Animation<double> secondaryAnimation, Widget child) {
   return FadeTransition(
@@ -34,18 +27,20 @@ Future<T> showRiveDialog<T>({
         margin: const EdgeInsets.all(20),
         // TODO: material is too heavy to use here, replace with something
         // lighterweight that keeps text styled properly.
+        // Look at wrapping in Theme/TextTheme
         child: Center(
           child: Material(
             type: MaterialType.transparency,
             child: Container(
               constraints: const BoxConstraints(
+                // TODO: what should be the scale behavior? Talk to Guido
                 minWidth: 800,
                 maxWidth: 800,
                 minHeight: double.infinity,
                 maxHeight: double.infinity,
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(10),
                 child: Builder(builder: builder),
               ),
               decoration: BoxDecoration(
@@ -54,12 +49,9 @@ Future<T> showRiveDialog<T>({
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.4),
-                    blurRadius: 100.0,
-                    spreadRadius: 0.0,
-                    offset: const Offset(
-                      0.0,
-                      50.0,
-                    ),
+                    blurRadius: 100,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 50),
                   )
                 ],
               ),

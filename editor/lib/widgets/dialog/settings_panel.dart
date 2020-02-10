@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
+
 import 'package:rive_core/selectable_item.dart';
 import 'package:tree_widget/flat_tree_item.dart';
-import '../tree_view/drop_item_background.dart';
 
-class _SettingsTabItem<T> extends StatelessWidget {
+import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
+import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
+
+Future<T> showRiveSettings<T>(
+    {BuildContext context, List<SettingsScreen> screens}) {
+  return showRiveDialog(
+      context: context,
+      builder: (context) {
+        return SettingsPanel(screens: screens);
+      });
+}
+
+class _SettingsTabItem extends StatelessWidget {
   final String label;
-  final T type;
+
   final bool isSelected;
   final VoidCallback onSelect;
 
   const _SettingsTabItem(
-      {Key key, this.label, this.type, this.isSelected = false, this.onSelect})
+      {Key key, this.label, this.isSelected = false, this.onSelect})
       : super(key: key);
 
   @override
@@ -41,29 +53,44 @@ class _SettingsTabItem<T> extends StatelessWidget {
   }
 }
 
-abstract class SettingsPanel<T> extends StatefulWidget {
-  final List<T> contents;
-
-  const SettingsPanel({Key key, this.contents}) : super(key: key);
-  Widget buildSettingsPage(BuildContext context, T type);
-
-  String label(T type);
-
-  @override
-  _SettingsPanelState<T> createState() => _SettingsPanelState<T>();
+class SettingsScreen {
+  SettingsScreen({this.label, this.child});
+  final String label;
+  final Widget child;
 }
 
-class _SettingsPanelState<T> extends State<SettingsPanel<T>> {
-  T _selectedItem;
+class SettingsPanel extends StatefulWidget {
+  const SettingsPanel({@required this.screens});
+
+  final List<SettingsScreen> screens;
+
+  @override
+  _SettingsPanelState createState() => _SettingsPanelState();
+}
+
+class _SettingsPanelState extends State<SettingsPanel> {
+  int _selectedIndex;
 
   @override
   void initState() {
-    _selectedItem = widget.contents.first;
+    _selectedIndex = 0;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget _item(SettingsScreen screen, int index) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _SettingsTabItem(
+            onSelect: () {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            label: screen.label,
+            isSelected: index == _selectedIndex,
+          ),
+        );
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,26 +102,13 @@ class _SettingsPanelState<T> extends State<SettingsPanel<T>> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.start,
-            children: widget.contents
-                .map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _SettingsTabItem(
-                      onSelect: () {
-                        setState(() {
-                          _selectedItem = item;
-                        });
-                      },
-                      label: widget.label(item),
-                      type: item,
-                      isSelected: item == _selectedItem,
-                    ),
-                  ),
-                )
-                .toList(growable: false),
+            children: [
+              for (int i = 0; i < widget.screens.length; i++)
+                _item(widget.screens[i], i)
+            ],
           ),
         ),
-        widget.buildSettingsPage(context, _selectedItem),
+        widget.screens[_selectedIndex].child,
       ],
     );
   }

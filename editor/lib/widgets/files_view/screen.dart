@@ -11,6 +11,7 @@ import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
+import 'package:rive_editor/widgets/dialog/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -18,7 +19,6 @@ import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
-import '../dialog/rive_dialog.dart';
 import 'file.dart';
 import 'folder_tree.dart';
 import 'folder_view_widget.dart';
@@ -457,9 +457,9 @@ class FilesView extends StatelessWidget {
                       ContextItem.separator(),
                       ContextItem(
                         "New Team",
-                        select: (rive) => showRiveDialog<void>(
+                        select: (rive) => showRiveSettings<void>(
                           context: context,
-                          builder: (context) => const TeamSettingsPanel(),
+                          screens: teamSettingsScreens,
                         ),
                       ),
                     ],
