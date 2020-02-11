@@ -14,8 +14,7 @@ import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/dialog/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
-import 'package:rive_editor/widgets/popup/context_popup.dart';
-import 'package:rive_editor/widgets/popup/popup_button.dart';
+import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
@@ -442,19 +441,19 @@ class FilesView extends StatelessWidget {
                 Container(width: 10.0),
                 Consumer<Rive>(
                   builder: (context, rive, _) =>
-                      PopupButton<Rive, ContextItem<Rive>>(
+                      PopupButton<Rive, PopupContextItem<Rive>>(
                     selectArg: rive,
                     items: [
-                      ContextItem(
+                      PopupContextItem(
                         "New File",
                         select: (rive) {
                           rive.fileBrowser.createFile();
                           print("MAKE FILE");
                         },
                       ),
-                      ContextItem("New Folder", select: (rive) {}),
-                      ContextItem.separator(),
-                      ContextItem(
+                      PopupContextItem("New Folder", select: (rive) {}),
+                      PopupContextItem.separator(),
+                      PopupContextItem(
                         "New Team",
                         select: (rive) => showRiveSettings<void>(
                           context: context,
