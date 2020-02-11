@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'list_popup.dart';
 
-class ContextItem<T> extends PopupListItem<T> {
+class PopupContextItem<T> extends PopupListItem<T> {
   final WidgetBuilder iconBuilder;
   final String iconFilename;
   final Color iconColor;
@@ -11,12 +11,12 @@ class ContextItem<T> extends PopupListItem<T> {
   final WidgetBuilder widgetBuilder;
 
   @override
-  final List<ContextItem<T>> popup;
+  final List<PopupContextItem<T>> popup;
 
   @override
   final SelectCallback<T> select;
 
-  ContextItem(
+  PopupContextItem(
     this.name, {
     this.iconFilename,
     this.iconColor,
@@ -31,8 +31,8 @@ class ContextItem<T> extends PopupListItem<T> {
   String toString() {
     return name ?? super.toString();
   }
-  
-  ContextItem.separator()
+
+  PopupContextItem.separator()
       : iconBuilder = null,
         iconFilename = null,
         iconColor = null,

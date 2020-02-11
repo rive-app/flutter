@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import '../path_widget.dart';
-import 'popup.dart';
+import 'package:rive_editor/widgets/path_widget.dart';
+import 'base_popup.dart';
 
 typedef SelectCallback<T> = void Function(T param);
 

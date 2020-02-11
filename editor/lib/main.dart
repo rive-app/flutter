@@ -22,8 +22,8 @@ import 'widgets/hierarchy.dart';
 import 'widgets/inspector/property_dual.dart';
 import 'widgets/listenable_builder.dart';
 import 'widgets/login.dart';
-import 'widgets/popup/context_popup.dart';
-import 'widgets/popup/popup_button.dart';
+
+import 'widgets/popup/popup.dart';
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
@@ -51,8 +51,8 @@ Future<void> main() async {
 const double resizeEdgeSize = 10;
 
 // Hack
-List<ContextItem<Rive>> contextItems = [
-  ContextItem(
+List<PopupContextItem<Rive>> contextItems = [
+  PopupContextItem(
     'Artboard',
     select: (Rive rive) {
       var artboard = Artboard()
@@ -65,7 +65,7 @@ List<ContextItem<Rive>> contextItems = [
       rive.file.value.captureJournalEntry();
     },
   ),
-  ContextItem(
+  PopupContextItem(
     'Node',
     select: (rive) {
       if (rive.selection.isEmpty) {
@@ -91,61 +91,61 @@ List<ContextItem<Rive>> contextItems = [
       rive.file.value.captureJournalEntry();
     },
   ),
-  ContextItem.separator(),
-  ContextItem('Shape',
+  PopupContextItem.separator(),
+  PopupContextItem('Shape',
       iconFilename: 'tool-shapes.png',
       select: (rive) => print('SELECT SHAPE!'),
       popup: [
-        ContextItem(
+        PopupContextItem(
           'Rectangle',
         ),
-        ContextItem('Ellipse', popup: [
-          ContextItem(
+        PopupContextItem('Ellipse', popup: [
+          PopupContextItem(
             'Rectangle',
           ),
-          ContextItem('Ellipse', popup: [
-            ContextItem(
+          PopupContextItem('Ellipse', popup: [
+            PopupContextItem(
               'Rectangle',
             ),
-            ContextItem(
+            PopupContextItem(
               'Ellipse',
             ),
-            ContextItem(
+            PopupContextItem(
               'Polygon',
             ),
-            ContextItem(
+            PopupContextItem(
               'Star',
             ),
-            ContextItem(
+            PopupContextItem(
               'Triangle',
             ),
           ]),
-          ContextItem(
+          PopupContextItem(
             'Polygon',
           ),
-          ContextItem(
+          PopupContextItem(
             'Star',
           ),
-          ContextItem(
+          PopupContextItem(
             'Triangle',
           ),
         ]),
-        ContextItem(
+        PopupContextItem(
           'Polygon',
         ),
-        ContextItem(
+        PopupContextItem(
           'Star',
         ),
-        ContextItem(
+        PopupContextItem(
           'Triangle',
         ),
       ]),
-  ContextItem('Pen', iconFilename: 'tool-pen.png', shortcut: 'P'),
-  ContextItem.separator(),
-  ContextItem('Artboard', shortcut: 'A'),
-  ContextItem('Bone', shortcut: 'B'),
-  ContextItem('Node', shortcut: 'G'),
-  ContextItem('Solo', shortcut: 'Y')
+  PopupContextItem('Pen', iconFilename: 'tool-pen.png', shortcut: 'P'),
+  PopupContextItem.separator(),
+  PopupContextItem('Artboard', shortcut: 'A'),
+  PopupContextItem('Bone', shortcut: 'B'),
+  PopupContextItem('Node', shortcut: 'G'),
+  PopupContextItem('Solo', shortcut: 'Y')
 ];
 
 class RiveEditorApp extends StatelessWidget {
@@ -306,7 +306,7 @@ class Editor extends StatelessWidget {
                     // Needed to explicitly define the generic types here or the
                     // analyzer would complain that itemBuilder couldn't resolve
                     // them.
-                    PopupButton<Rive, ContextItem<Rive>>(
+                    PopupButton<Rive, PopupContextItem<Rive>>(
                   selectArg: rive,
                   items: contextItems,
                   builder: (context) {
