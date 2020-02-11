@@ -9,6 +9,7 @@ typedef SelectCallback<T> = void Function(T param);
 abstract class PopupListItem<T> {
   bool get canSelect;
   double get height;
+  List<PopupListItem<T>> get popup;
   SelectCallback<T> get select;
 }
 
@@ -21,14 +22,75 @@ final _pathArrow = Path()
   ..lineTo(12, 0)
   ..close();
 
-class ListPopup {
-  static void show<A, T extends PopupListItem<A>>(
+/// Displays list of items in a popup, internally stores which item is currently
+/// opened with a sub-popup so that sub-popups can be closed if the top level
+/// one is closed.
+///
+/// Consider re-architecting this in the future as there is quite a bit of
+/// complexity with the management of the sub-popups.
+class ListPopup<A, T extends PopupListItem<A>> {
+  OverlayEntry _overlayEntry;
+  ListPopup();
+  ListPopup<A, T> _subPopup;
+  __PopupListItemShellState<A, T> _subPopupRow;
+
+  bool get isOpen => Popup.isOpen(_overlayEntry);
+
+  void rowEntered(__PopupListItemShellState<A, T> row) {
+    if (_subPopupRow == row || _subPopup == null) {
+      return;
+    }
+    closeSubPopup();
+  }
+
+  void closeSubPopup() {
+    if (_subPopup == null) {
+      return;
+    }
+    _subPopup.closeSubPopup();
+    Popup.remove(_subPopup._overlayEntry);
+    _subPopupRow.hover = false;
+    _subPopupRow = null;
+    _subPopup = null;
+  }
+
+  bool showChildPopup(
     BuildContext context, {
     @required ListPopupItemBuilder<T> itemBuilder,
+    __PopupListItemShellState<A, T> parentState,
     A selectArg,
     double width = 177,
     double margin = 10,
-    double arrow = 10,
+    // double arrow = 10,
+    List<T> items = const [],
+    Color background = const Color.fromRGBO(17, 17, 17, 1),
+  }) {
+    if (_subPopupRow == parentState) {
+      return false;
+    }
+    _subPopup = ListPopup.show(
+      context,
+      itemBuilder: itemBuilder,
+      isChild: true,
+      selectArg: selectArg,
+      width: width,
+      margin: margin,
+      // double arrow = 10,
+      items: items,
+      background: background,
+    );
+    _subPopupRow = parentState;
+    return true;
+  }
+
+  factory ListPopup.show(
+    BuildContext context, {
+    @required ListPopupItemBuilder<T> itemBuilder,
+    bool isChild = false,
+    A selectArg,
+    double width = 177,
+    double margin = 10,
+    // double arrow = 10,
     List<T> items = const [],
     Color background = const Color.fromRGBO(17, 17, 17, 1),
   }) {
@@ -37,17 +99,20 @@ class ListPopup {
     final offset = renderBox.localToGlobal(Offset.zero);
 
     var media = MediaQuery.of(context);
-    var top = offset.dy + size.height + margin;
+    var top = !isChild ? offset.dy + size.height + margin : offset.dy - margin;
+    var left = isChild ? offset.dx + size.width : offset.dx;
 
     var height = min(media.size.height - top,
         items.fold<double>(0.0, (v, item) => v + item.height) + margin * 2);
 
     // bool useList = media.size.height > height;
-    Popup.show(
+    var list = ListPopup<A, T>();
+
+    list._overlayEntry = Popup.show(
       context,
       builder: (context) {
         return Positioned(
-          left: offset.dx,
+          left: left,
           top: top,
           width: width,
           child: MouseRegion(
@@ -56,14 +121,16 @@ class ListPopup {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PathWidget(
-                    path: _pathArrow,
-                    nudge: const Offset(10.0, 0),
-                    paint: Paint()
-                      ..color = background
-                      ..style = PaintingStyle.fill
-                      ..isAntiAlias = true,
-                  ),
+                  !isChild
+                      ? PathWidget(
+                          path: _pathArrow,
+                          nudge: const Offset(10, 0),
+                          paint: Paint()
+                            ..color = background
+                            ..style = PaintingStyle.fill
+                            ..isAntiAlias = true,
+                        )
+                      : null,
                   Container(
                     height: height,
                     child: Scrollbar(
@@ -76,6 +143,7 @@ class ListPopup {
                           return Container(
                             height: item.height,
                             child: _PopupListItemShell<A, T>(
+                              list,
                               itemBuilder: itemBuilder,
                               item: item,
                               selectArg: selectArg,
@@ -96,23 +164,26 @@ class ListPopup {
                       ],
                     ),
                   ),
-                ],
+                ].where((item) => item != null).toList(growable: false),
               ),
             ),
           ),
         );
       },
     );
+    return list;
   }
 }
 
 class _PopupListItemShell<A, T extends PopupListItem<A>>
     extends StatefulWidget {
+  final ListPopup<A, T> listPopup;
   final ListPopupItemBuilder<T> itemBuilder;
   final T item;
   final A selectArg;
 
-  const _PopupListItemShell({
+  const _PopupListItemShell(
+    this.listPopup, {
     Key key,
     this.itemBuilder,
     this.item,
@@ -127,6 +198,18 @@ class _PopupListItemShell<A, T extends PopupListItem<A>>
 class __PopupListItemShellState<A, T extends PopupListItem<A>>
     extends State<_PopupListItemShell<A, T>> {
   bool _isHovered = false;
+
+  bool get hover => _isHovered;
+
+  set hover(bool value) {
+    if (_isHovered == value) {
+      return;
+    }
+    setState(() {
+      _isHovered = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -139,17 +222,31 @@ class __PopupListItemShellState<A, T extends PopupListItem<A>>
       },
       child: MouseRegion(
         onEnter: (details) {
+          widget.listPopup.rowEntered(this);
           if (!widget.item.canSelect) {
             return;
           }
-          setState(() {
-            _isHovered = true;
-          });
+
+          // Hic Sunt Dracones: Please don't touch this.
+          if (_isHovered || !widget.listPopup.isOpen) {
+            return;
+          }
+          hover = true;
+          if (widget.item.popup != null) {
+            widget.listPopup.showChildPopup(
+              context,
+              parentState: this,
+              selectArg: widget.selectArg,
+              items: widget.item.popup.cast<T>(),
+              itemBuilder: widget.itemBuilder,
+            );
+          }
         },
         onExit: (details) {
-          setState(() {
-            _isHovered = false;
-          });
+          if (widget.listPopup._subPopupRow == this) {
+            return;
+          }
+          hover = false;
         },
         child: Container(
           color: _isHovered ? const Color.fromRGBO(26, 26, 26, 1) : null,

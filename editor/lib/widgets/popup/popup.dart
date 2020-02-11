@@ -3,12 +3,22 @@ import 'package:flutter/material.dart';
 /// Manage a set of popup windows and close them when you click anywhere on the
 /// screen outside the popups.
 class Popup {
-  static List<OverlayEntry> _entries = [];
+  static final List<OverlayEntry> _entries = [];
   static void closeAll() {
     for (final entry in _entries) {
       entry.remove();
     }
     _entries.clear();
+  }
+
+  static bool isOpen(OverlayEntry entry) => _entries.contains(entry);
+
+  static bool remove(OverlayEntry entry) {
+    if (_entries.remove(entry)) {
+      entry.remove();
+      return true;
+    }
+    return false;
   }
 
   static OverlayEntry show(BuildContext context,
