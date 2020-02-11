@@ -9,6 +9,8 @@ import 'package:rive_core/node.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
+import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
+import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'rive/hierarchy_tree_controller.dart';
@@ -93,7 +95,7 @@ List<ContextItem<Rive>> contextItems = [
   ),
   ContextItem.separator(),
   ContextItem('Shape',
-      iconFilename: 'tool-shapes.png',
+      iconFilename: 'tool-shapes',
       select: (rive) => print('SELECT SHAPE!'),
       popup: [
         ContextItem(
@@ -140,7 +142,7 @@ List<ContextItem<Rive>> contextItems = [
           'Triangle',
         ),
       ]),
-  ContextItem('Pen', iconFilename: 'tool-pen.png', shortcut: 'P'),
+  ContextItem('Pen', iconFilename: 'tool-pen', shortcut: 'P'),
   ContextItem.separator(),
   ContextItem('Artboard', shortcut: 'A'),
   ContextItem('Bone', shortcut: 'B'),
@@ -295,12 +297,15 @@ class Editor extends StatelessWidget {
     return Column(
       children: <Widget>[
         Container(
-          padding: const EdgeInsets.all(5),
+          padding: const EdgeInsets.all(6),
           height: 42,
           color: const Color.fromRGBO(60, 60, 60, 1.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.max,
             children: [
+              HamburgerPopupButton(),
+              TransformPopupButton(),
               Consumer<Rive>(
                 builder: (context, rive, _) =>
                     // Needed to explicitly define the generic types here or the
@@ -329,7 +334,6 @@ class Editor extends StatelessWidget {
                     context,
                     isHovered,
                   ),
-                  itemSelected: (context, item) {},
                 ),
               ),
               // Just a test to make sure text focus works with general editor

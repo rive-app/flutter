@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 
 import 'list_popup.dart';
 
@@ -31,7 +32,7 @@ class ContextItem<T> extends PopupListItem<T> {
   String toString() {
     return name ?? super.toString();
   }
-  
+
   ContextItem.separator()
       : iconBuilder = null,
         iconFilename = null,
@@ -59,17 +60,17 @@ class ContextItem<T> extends PopupListItem<T> {
         if (iconBuilder != null) iconBuilder.call(context),
         if (iconBuilder != null) const SizedBox(width: 10),
         if (iconFilename != null)
-          ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              iconColor ??
-                  (isHovered
-                      ? Colors.white
-                      : const Color.fromRGBO(112, 112, 112, 1)),
-              BlendMode.srcIn,
-            ),
-            child: Image(
-              image: AssetImage('assets/images/icons/$iconFilename'),
-            ),
+          TintedIcon(
+            color: iconColor ??
+                (isHovered
+                    ? Colors.white
+                    : const Color.fromRGBO(
+                        112,
+                        112,
+                        112,
+                        1,
+                      )),
+            icon: iconFilename,
           ),
         if (iconFilename != null) const SizedBox(width: 10),
         Text(
