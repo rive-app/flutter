@@ -40,12 +40,14 @@ dependencies:
   flutter_widgets: ^0.1.9
 
 dev_dependencies:
+  image_res: ^0.2.3
   flutter_test:
     sdk: flutter
 
 flutter:
   assets:
     - assets/images/
+    - assets/images/icons/
   uses-material-design: true
   fonts:
     - family: Roboto-Regular

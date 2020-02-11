@@ -10,7 +10,7 @@ class PopupButton<A, T extends PopupListItem<A>> extends StatelessWidget {
   final ListPopupItemBuilder<T> itemBuilder;
   final ListPopupItemEvent<T> itemSelected;
   final A selectArg;
-  
+
   /// TODO: figure out if we want to break this into sets of more generic
   /// widgets or somehow manage the styling across different popup buttons.
   final double backgroundOpacity;
@@ -29,7 +29,7 @@ class PopupButton<A, T extends PopupListItem<A>> extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (details) {
-        ListPopup.show<A, T>(
+        ListPopup<A, T>.show(
           context,
           selectArg: selectArg,
           items: items,

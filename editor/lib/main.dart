@@ -22,8 +22,8 @@ import 'widgets/hierarchy.dart';
 import 'widgets/inspector/property_dual.dart';
 import 'widgets/listenable_builder.dart';
 import 'widgets/login.dart';
-import 'widgets/popup/context_popup.dart';
-import 'widgets/popup/popup_button.dart';
+
+import 'widgets/popup/popup.dart';
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
@@ -37,7 +37,7 @@ Future<void> main() async {
   var rive = Rive();
   if (await rive.initialize() != RiveState.catastrophe) {
     // this is just for the prototype...
-    // await rive.open("100/100");
+    // await rive.open('100/100');
   }
   runApp(
     RiveEditorApp(
@@ -51,12 +51,12 @@ Future<void> main() async {
 const double resizeEdgeSize = 10;
 
 // Hack
-List<ContextItem<Rive>> contextItems = [
-  ContextItem(
-    "Artboard",
+List<PopupContextItem<Rive>> contextItems = [
+  PopupContextItem(
+    'Artboard',
     select: (Rive rive) {
       var artboard = Artboard()
-        ..name = "New Artboard"
+        ..name = 'New Artboard'
         ..x = 0
         ..y = 0
         ..width = 200
@@ -65,37 +65,87 @@ List<ContextItem<Rive>> contextItems = [
       rive.file.value.captureJournalEntry();
     },
   ),
-  ContextItem("Node", select: (rive) {
-    if (rive.selection.isEmpty) {
-      print("No selection to parent Node to.");
-      return;
-    }
+  PopupContextItem(
+    'Node',
+    select: (rive) {
+      if (rive.selection.isEmpty) {
+        print('No selection to parent Node to.');
+        return;
+      }
 
-    var selection = rive.selection.first;
-    if (selection is StageItem && selection.component is ContainerComponent) {
-      var container = selection.component as ContainerComponent;
-      var nodes = rive.file.value.objectsOfType<Node>();
+      var selection = rive.selection.first;
+      if (selection is StageItem && selection.component is ContainerComponent) {
+        var container = selection.component as ContainerComponent;
+        var nodes = rive.file.value.objectsOfType<Node>();
 
-      var node = Node()
-        ..name = "Node ${nodes.length + 1}"
-        ..x = 0
-        ..y = 0;
-      rive.file.value.add(node);
+        var node = Node()
+          ..name = 'Node ${nodes.length + 1}'
+          ..x = 0
+          ..y = 0;
+        rive.file.value.add(node);
 
-      container.appendChild(node);
-    } else {
-      print("No selection to parent Node to.");
-    }
-    rive.file.value.captureJournalEntry();
-  }),
-  ContextItem.separator(),
-  ContextItem("Shape", select: (rive) => print("SELECT SHAPE!")),
-  ContextItem("Pen", shortcut: "P"),
-  ContextItem.separator(),
-  ContextItem("Artboard", shortcut: "A"),
-  ContextItem("Bone", shortcut: "B"),
-  ContextItem("Node", shortcut: "G"),
-  ContextItem("Solo", shortcut: "Y")
+        container.appendChild(node);
+      } else {
+        print('No selection to parent Node to.');
+      }
+      rive.file.value.captureJournalEntry();
+    },
+  ),
+  PopupContextItem.separator(),
+  PopupContextItem('Shape',
+      iconFilename: 'tool-shapes.png',
+      select: (rive) => print('SELECT SHAPE!'),
+      popup: [
+        PopupContextItem(
+          'Rectangle',
+        ),
+        PopupContextItem('Ellipse', popup: [
+          PopupContextItem(
+            'Rectangle',
+          ),
+          PopupContextItem('Ellipse', popup: [
+            PopupContextItem(
+              'Rectangle',
+            ),
+            PopupContextItem(
+              'Ellipse',
+            ),
+            PopupContextItem(
+              'Polygon',
+            ),
+            PopupContextItem(
+              'Star',
+            ),
+            PopupContextItem(
+              'Triangle',
+            ),
+          ]),
+          PopupContextItem(
+            'Polygon',
+          ),
+          PopupContextItem(
+            'Star',
+          ),
+          PopupContextItem(
+            'Triangle',
+          ),
+        ]),
+        PopupContextItem(
+          'Polygon',
+        ),
+        PopupContextItem(
+          'Star',
+        ),
+        PopupContextItem(
+          'Triangle',
+        ),
+      ]),
+  PopupContextItem('Pen', iconFilename: 'tool-pen.png', shortcut: 'P'),
+  PopupContextItem.separator(),
+  PopupContextItem('Artboard', shortcut: 'A'),
+  PopupContextItem('Bone', shortcut: 'B'),
+  PopupContextItem('Node', shortcut: 'G'),
+  PopupContextItem('Solo', shortcut: 'Y')
 ];
 
 class RiveEditorApp extends StatelessWidget {
@@ -124,7 +174,7 @@ class RiveEditorApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: ThemeData.light(),
           home: DefaultTextStyle(
-            style: const TextStyle(fontFamily: "Roboto-Regular", fontSize: 13),
+            style: const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13),
             child: Container(
               child: Scaffold(
                 body: RawKeyboardListener(
@@ -207,7 +257,7 @@ class Editor extends StatelessWidget {
               ),
               FlatButton(
                 child: const Text(
-                  "Force Reconnect",
+                  'Force Reconnect',
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () {
@@ -256,7 +306,7 @@ class Editor extends StatelessWidget {
                     // Needed to explicitly define the generic types here or the
                     // analyzer would complain that itemBuilder couldn't resolve
                     // them.
-                    PopupButton<Rive, ContextItem<Rive>>(
+                    PopupButton<Rive, PopupContextItem<Rive>>(
                   selectArg: rive,
                   items: contextItems,
                   builder: (context) {
@@ -265,7 +315,7 @@ class Editor extends StatelessWidget {
                           left: 10, right: 10, top: 5, bottom: 5),
                       child: Center(
                         child: Text(
-                          "Add",
+                          'Add',
                           style: TextStyle(
                             fontFamily: 'Roboto-Regular',
                             fontSize: 13,
@@ -338,7 +388,7 @@ class Editor extends StatelessWidget {
                             artboards.isEmpty
                                 ? Container()
                                 : PropertyDual(
-                                    name: "Pos",
+                                    name: 'Pos',
                                     objects: artboards,
                                     propertyKeyA: ArtboardBase.xPropertyKey,
                                     propertyKeyB: ArtboardBase.yPropertyKey,
@@ -346,7 +396,7 @@ class Editor extends StatelessWidget {
                             artboards.isEmpty
                                 ? Container()
                                 : PropertyDual(
-                                    name: "Size",
+                                    name: 'Size',
                                     objects: artboards,
                                     propertyKeyA: ArtboardBase.widthPropertyKey,
                                     propertyKeyB:
@@ -449,7 +499,7 @@ class StagePanel extends StatelessWidget {
                               context.findRenderObject() as RenderBox;
                           var local = getBox.globalToLocal(details.position);
                           stage.mouseMove(details.buttons, local.dx, local.dy);
-                          // print("MOVE $local");
+                          // print('MOVE $local');
                         },
                         child: Listener(
                           behavior: HitTestBehavior.opaque,
