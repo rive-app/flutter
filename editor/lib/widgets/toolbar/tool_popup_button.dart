@@ -56,13 +56,15 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
             _popup = popup;
           },
           contextItems: items,
-          iconBuilder: (context, rive) {
+          iconBuilder: (context, rive, isHovered) {
             bool hasActiveIcon = PopupContextItem.hasIcon(tool.icon, items);
 
             return TintedIcon(
               color: hasActiveIcon
                   ? const Color(0xFF57A5E0)
-                  : const Color.fromRGBO(140, 140, 140, 1),
+                  : isHovered
+                      ? Colors.white
+                      : const Color.fromRGBO(140, 140, 140, 1),
               icon: PopupContextItem.hasIcon(tool.icon, items)
                   ? tool.icon
                   : widget.defaultIcon,
