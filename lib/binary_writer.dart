@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 var _variableEncodeList = Uint8List(8);
@@ -6,7 +7,9 @@ var _utf8Encoder = const Utf8Encoder();
 
 class BinaryWriter {
   /// Stride we allocate buffer in chunks of.
-  final int alignment;
+  final int _alignment;
+  int get alignment => _alignment;
+
   final Endian endian;
   Uint8List _buffer;
   ByteData get buffer =>
@@ -18,16 +21,16 @@ class BinaryWriter {
   int _writeIndex = 0;
   int get size => _writeIndex;
 
-  BinaryWriter({this.alignment = 1024, this.endian = Endian.little})
-      : assert(alignment != 0) {
-    _buffer = Uint8List(alignment);
+  BinaryWriter({int alignment = 1024, this.endian = Endian.little})
+      : _alignment = max(1, alignment) {
+    _buffer = Uint8List(_alignment);
     _byteData = ByteData.view(_buffer.buffer);
   }
 
   void _ensureAvailable(int byteLength) {
     if (_writeIndex + byteLength > _buffer.length) {
       do {
-        _buffer = Uint8List(_buffer.length + alignment)
+        _buffer = Uint8List(_buffer.length + _alignment)
           ..setRange(0, _buffer.length, _buffer);
       } while (_writeIndex + byteLength > _buffer.length);
       _byteData = ByteData.view(_buffer.buffer);
