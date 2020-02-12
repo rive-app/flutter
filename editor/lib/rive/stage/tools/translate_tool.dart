@@ -18,4 +18,9 @@ class TranslateTool extends StageTool {
       }
     }
   }
+
+  @override
+  String get icon => 'tool-translate';
+
+  static final TranslateTool instance = TranslateTool();
 }

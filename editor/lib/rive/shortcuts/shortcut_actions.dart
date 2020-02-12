@@ -1,5 +1,6 @@
 enum ShortcutAction {
   artboardTool,
+  autoTool,
   boneTool,
   cancel,
   copy,

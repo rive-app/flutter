@@ -1,22 +1,24 @@
-import 'dart:math';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:provider/provider.dart';
 
 /// Draws an icon tinted by [color].
 class TintedIcon extends StatelessWidget {
   final Color color;
   final String icon;
 
-  const TintedIcon({Key key, this.color, this.icon}) : super(key: key);
+  const TintedIcon({
+    @required this.color,
+    @required this.icon,
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    var cache = Provider.of<RiveIconCache>(context);
     return Container(
       child: TintedIconRenderer(
-        assetBundle: rootBundle,
+        cache: cache,
         filename: 'assets/images/icons/$icon.png',
         color: color,
       ),
@@ -27,17 +29,17 @@ class TintedIcon extends StatelessWidget {
 /// Draws an image with custom paint.
 class TintedIconRenderer extends LeafRenderObjectWidget {
   final String filename;
-  final AssetBundle assetBundle;
+  final RiveIconCache cache;
   final Color color;
 
   const TintedIconRenderer(
-      {@required this.filename, @required this.assetBundle, this.color});
+      {@required this.filename, @required this.cache, this.color});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _TintedIconRendererObject()
       ..filename = filename
-      ..assetBundle = assetBundle
+      ..cache = cache
       ..color = color;
   }
 
@@ -52,26 +54,25 @@ class TintedIconRenderer extends LeafRenderObjectWidget {
       BuildContext context, covariant _TintedIconRendererObject renderObject) {
     renderObject
       ..filename = filename
-      ..assetBundle = assetBundle
+      ..cache = cache
       ..color = color;
   }
 }
 
 class _TintedIconRendererObject extends RenderBox {
   String _filename;
-  AssetBundle _assetBundle;
+  RiveIconCache _cache;
   Color _color;
-  final Paint _paint = Paint()
-    ..isAntiAlias = false;
+  final Paint _paint = Paint()..isAntiAlias = false;
 
-  ui.Image _image;
-  AssetBundle get assetBundle => _assetBundle;
+  CachedImage _cachedImage;
+  RiveIconCache get cache => _cache;
 
-  set assetBundle(AssetBundle value) {
-    if (_assetBundle == value) {
+  set cache(RiveIconCache value) {
+    if (_cache == value) {
       return;
     }
-    _assetBundle = value;
+    _cache = value;
     _load();
   }
 
@@ -101,14 +102,15 @@ class _TintedIconRendererObject extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_image == null) {
+    if (_cachedImage == null) {
       return;
     }
     var canvas = context.canvas;
+    var image = _cachedImage.image;
     canvas.save();
     canvas.drawImageRect(
-        _image,
-        Rect.fromLTWH(0, 0, _image.width.toDouble(), _image.height.toDouble()),
+        image,
+        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
         offset & size,
         _paint);
     canvas.restore();
@@ -116,52 +118,33 @@ class _TintedIconRendererObject extends RenderBox {
 
   @override
   void performLayout() {
-    size = constraints.constrain(_image == null
+    size = constraints.constrain(_cachedImage == null
         ? Size.zero
-        : Size(_image.width.toDouble() / _loadedDPR,
-            _image.height.toDouble() / _loadedDPR));
+        : Size(_cachedImage.image.width.toDouble() / _cachedImage.resolution,
+            _cachedImage.image.height.toDouble() / _cachedImage.resolution));
   }
 
-  int _loadedDPR = 1;
-
-  Future<void> _load() async {
-    if (_assetBundle == null || _filename == null) {
+  void _load() {
+    if (_cache == null) {
       return;
     }
-
-    String path = '';
-    String file = _filename;
-    int lastSlash = _filename.lastIndexOf('/');
-    if (lastSlash != -1) {
-      path = _filename.substring(0, lastSlash);
-      file = _filename.substring(lastSlash + 1);
+    var cachedImage = _cache.image(_filename);
+    if (cachedImage == null) {
+      // Not in the cache, load it up.
+      _cache.load(filename).then((cachedImage) {
+        _cachedImage = cachedImage;
+        markNeedsLayout();
+      });
+    } else if (cachedImage.completer.isCompleted) {
+      // In the cache and ready to go.
+      _cachedImage = cachedImage;
+      markNeedsLayout();
+    } else {
+      // In the cache but not done loading, wait for it to be ready.
+      cachedImage.completer.future.then((_) {
+        _cachedImage = cachedImage;
+        markNeedsLayout();
+      });
     }
-
-    int closestDPR = ui.window.devicePixelRatio.ceil();
-    ByteData data;
-    for (int i = closestDPR; i > 1; i--) {
-      try {
-        data = await _assetBundle.load('$path/$i.0x/$file');
-      } catch (_) {
-        continue;
-      }
-      _loadedDPR = i;
-      break;
-    }
-
-    if (data == null) {
-      _loadedDPR = 1;
-      data = await _assetBundle.load(_filename);
-    }
-    if (data == null) {
-      return;
-    }
-
-    var byteBuffer = Uint8List.view(data.buffer);
-
-    ui.Codec codec = await ui.instantiateImageCodec(byteBuffer);
-    ui.FrameInfo frame = await codec.getNextFrame();
-    _image = frame.image;
-    markNeedsLayout();
   }
 }

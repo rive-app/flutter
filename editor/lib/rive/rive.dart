@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:rive_api/files.dart';
-import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
@@ -27,6 +28,29 @@ import 'stage/stage.dart';
 import 'stage/stage_item.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
+
+class _Key {
+  final LogicalKeyboardKey logical;
+  final PhysicalKeyboardKey physical;
+
+  _Key(this.logical, this.physical);
+
+  @override
+  int get hashCode => logical.keyId;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is _Key && other.logical.keyId == logical.keyId;
+  }
+
+  @override
+  String toString() {
+    return physical.toString();
+  }
+}
 
 /// Main context for Rive editor.
 class Rive with RiveFileDelegate {
@@ -129,8 +153,6 @@ class Rive with RiveFileDelegate {
       _user.value = me;
       tabs.value = [
         RiveTabItem(name: me.name, closeable: false),
-        // RiveTabItem(name: "Ellipse Testing"),
-        // RiveTabItem(name: "Spaceman"),
       ];
       _state.value = RiveState.editor;
       // Save token in localSettings
@@ -138,6 +160,9 @@ class Rive with RiveFileDelegate {
 
       // spectre is our session token
       await _prefs.setString('token', api.cookies['spectre']);
+
+      openTab(tabs.value.first);
+
       // TODO: load last opened file list (from localdata)
       return me;
     } else {
@@ -172,21 +197,27 @@ class Rive with RiveFileDelegate {
     _stage.markNeedsAdvance();
   }
 
-  final Set<PhysicalKeyboardKey> _pressed = {};
+  final Set<_Key> _pressed = {};
 
-  void onKeyEvent(RawKeyEvent keyEvent, bool hasFocusObject) {
+  void onKeyEvent(ShortcutKeyBinding keyBinding, RawKeyEvent keyEvent,
+      bool hasFocusObject) {
     selectionMode.value = keyEvent.isMetaPressed
         ? SelectionMode.multi
         : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
 
     if (keyEvent is RawKeyDownEvent) {
-      _pressed.add(keyEvent.physicalKey);
+      _pressed.add(_Key(keyEvent.logicalKey, keyEvent.physicalKey));
     } else if (keyEvent is RawKeyUpEvent) {
-      _pressed.remove(keyEvent.physicalKey);
+      _pressed.remove(_Key(keyEvent.logicalKey, keyEvent.physicalKey));
     }
 
-    var actions =
-        defaultKeyBinding.lookupAction(_pressed.toList(growable: false));
+    // Attempt to synchronize with Flutter's tracked keyset, unfortunately this
+    // seems to have an issue where certain keys don't get removed when pressing
+    // multiple keys and cmd tabbing.
+    _pressed.removeWhere((key) => !keyEvent.isKeyPressed(key.logical));
+    // print("PRESSED IS $_pressed ${RawKeyboard.instance.keysPressed}");
+    var actions = keyBinding.lookupAction(
+        _pressed.map((key) => key.physical).toList(growable: false));
 
     if (actions == null) {
       return;
@@ -194,6 +225,14 @@ class Rive with RiveFileDelegate {
 
     for (final action in actions) {
       switch (action) {
+        case ShortcutAction.translateTool:
+          stage?.value?.tool = TranslateTool.instance;
+          break;
+
+        case ShortcutAction.artboardTool:
+          stage?.value?.tool = ArtboardTool.instance;
+          break;
+
         case ShortcutAction.undo:
           file.value.undo();
           break;
@@ -201,7 +240,11 @@ class Rive with RiveFileDelegate {
           file.value.redo();
           break;
         case ShortcutAction.delete:
-          for (final item in selection.items) {
+          // Need to make a new list because as we delete we also remove them from
+          // the selection. This avoids modifying the selection set while
+          // iterating.
+          var toRemove = selection.items.toList();
+          for (final item in toRemove) {
             if (item is StageItem) {
               file.value.remove(item.component as Core);
             }
@@ -223,6 +266,7 @@ class Rive with RiveFileDelegate {
   @override
   void onObjectRemoved(covariant Component object) {
     if (object.stageItem != null) {
+      selection.deselect(object.stageItem);
       _stage.removeItem(object.stageItem);
     }
   }

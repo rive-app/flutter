@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/rive.dart';
 import 'package:provider/provider.dart';
-import 'package:rive_editor/widgets/popup/context_popup.dart';
-import 'package:rive_editor/widgets/popup/popup_button.dart';
+import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
-import 'dart:math';
 
 typedef RiveWidgetBuilder = Widget Function(BuildContext, Rive);
 
@@ -24,13 +22,18 @@ class RiveBuilder extends StatelessWidget {
 
 /// A button that triggers a popup and gets the current Rive context.
 class RivePopupButton extends StatefulWidget {
-  final List<ContextItem<Rive>> contextItems;
+  final List<PopupContextItem<Rive>> contextItems;
   final RiveWidgetBuilder iconBuilder;
   final bool showChevron;
+  final PopupOpened<Rive, PopupContextItem<Rive>> opened;
 
-  const RivePopupButton(
-      {Key key, this.contextItems, this.iconBuilder, this.showChevron = true})
-      : super(key: key);
+  const RivePopupButton({
+    Key key,
+    this.contextItems,
+    this.iconBuilder,
+    this.showChevron = true,
+    this.opened,
+  }) : super(key: key);
 
   @override
   _RivePopupButtonState createState() => _RivePopupButtonState();
@@ -41,7 +44,8 @@ class _RivePopupButtonState extends State<RivePopupButton> {
   @override
   Widget build(BuildContext context) {
     return RiveBuilder(
-      builder: (context, rive) => PopupButton<Rive, ContextItem<Rive>>(
+      builder: (context, rive) => PopupButton<Rive, PopupContextItem<Rive>>(
+        opened: widget.opened,
         selectArg: rive,
         items: widget.contextItems,
         builder: (context) => MouseRegion(

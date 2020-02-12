@@ -2,13 +2,17 @@ import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/selection_context.dart';
+import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
+import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:window_utils/window_utils.dart';
@@ -95,7 +99,7 @@ List<PopupContextItem<Rive>> contextItems = [
   ),
   PopupContextItem.separator(),
   PopupContextItem('Shape',
-      iconFilename: 'tool-shapes.png',
+      icon: 'tool-shapes.png',
       select: (rive) => print('SELECT SHAPE!'),
       popup: [
         PopupContextItem(
@@ -142,12 +146,12 @@ List<PopupContextItem<Rive>> contextItems = [
           'Triangle',
         ),
       ]),
-  PopupContextItem('Pen', iconFilename: 'tool-pen', shortcut: 'P'),
+  PopupContextItem('Pen', icon: 'tool-pen'),
   PopupContextItem.separator(),
-  PopupContextItem('Artboard', shortcut: 'A'),
-  PopupContextItem('Bone', shortcut: 'B'),
-  PopupContextItem('Node', shortcut: 'G'),
-  PopupContextItem('Solo', shortcut: 'Y')
+  PopupContextItem('Artboard'),
+  PopupContextItem('Bone'),
+  PopupContextItem('Node'),
+  PopupContextItem('Solo')
 ];
 
 class RiveEditorApp extends StatelessWidget {
@@ -171,6 +175,8 @@ class RiveEditorApp extends StatelessWidget {
       child: MultiProvider(
         providers: [
           Provider.value(value: rive),
+          Provider.value(value: defaultKeyBinding),
+          Provider.value(value: RiveIconCache(rootBundle)),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -183,6 +189,7 @@ class RiveEditorApp extends StatelessWidget {
                     onKey: (event) {
                       var primary = FocusManager.instance.primaryFocus;
                       rive.onKeyEvent(
+                          defaultKeyBinding,
                           event,
                           primary != focusNode &&
                               focusScope.nearestScope != primary);
@@ -306,42 +313,7 @@ class Editor extends StatelessWidget {
             children: [
               HamburgerPopupButton(),
               TransformPopupButton(),
-              Consumer<Rive>(
-                builder: (context, rive, _) =>
-                    // Needed to explicitly define the generic types here or the
-                    // analyzer would complain that itemBuilder couldn't resolve
-                    // them.
-                    PopupButton<Rive, PopupContextItem<Rive>>(
-                  selectArg: rive,
-                  items: contextItems,
-                  builder: (context) {
-                    return Container(
-                      margin: const EdgeInsets.only(
-                          left: 10, right: 10, top: 5, bottom: 5),
-                      child: Center(
-                        child: Text(
-                          'Add',
-                          style: TextStyle(
-                            fontFamily: 'Roboto-Regular',
-                            fontSize: 13,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  itemBuilder: (context, item, isHovered) => item.itemBuilder(
-                    context,
-                    isHovered,
-                  ),
-                ),
-              ),
-              // Just a test to make sure text focus works with general editor
-              // keypresses/shortcuts.
-              Container(
-                width: 100,
-                child: const TextField(),
-              ),
+              CreatePopupButton(),
             ],
           ),
         ),
