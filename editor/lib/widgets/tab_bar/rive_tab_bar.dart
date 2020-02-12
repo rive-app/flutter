@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 
 import 'tab_decoration.dart';
 
@@ -67,6 +68,54 @@ class _TabBarItem extends StatelessWidget {
   }
 }
 
+class _UserTabBarItem extends StatelessWidget {
+  final RiveTabItem tab;
+  final bool isSelected;
+  final TabSelectedCallback select, close;
+
+  const _UserTabBarItem({
+    Key key,
+    this.tab,
+    this.isSelected,
+    this.select,
+    this.close,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => select?.call(tab),
+      child: Container(
+        padding: const EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 10,
+          bottom: 10,
+        ),
+        child: Row(
+          children: [
+            TintedIcon(
+                color: isSelected
+                    ? const Color(0xFF323232)
+                    : const Color(0xFF8C8C8C),
+                icon: 'rive'),
+            if (tab.closeable) const SizedBox(width: 10),
+            if (tab.closeable)
+              GestureDetector(
+                onTap: close == null ? null : () => close(tab),
+                child: RiveIcons.close(
+                    const Color.fromRGBO(140, 140, 140, 1.0), 13),
+              )
+          ],
+        ),
+        decoration:
+            isSelected ? const TabDecoration(color: Color(0xFFF1F1F1)) : null,
+      ),
+    );
+  }
+}
+
 class RiveTabBar extends StatelessWidget {
   final List<RiveTabItem> tabs;
   final RiveTabItem selected;
@@ -83,18 +132,25 @@ class RiveTabBar extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      SizedBox(width: offset),
-      ...tabs
-          .map(
-            (tab) => _TabBarItem(
-              tab: tab,
-              isSelected: selected?.name == tab?.name,
-              select: select,
-              close: close,
-            ),
-          )
-          .toList(growable: false),
-    ]);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(width: offset),
+        for (int i = 0; i < tabs.length; i++)
+          i == 0
+              ? _UserTabBarItem(
+                  tab: tabs[i],
+                  isSelected: selected == tabs[i],
+                  select: select,
+                  close: close,
+                )
+              : _TabBarItem(
+                  tab: tabs[i],
+                  isSelected: selected == tabs[i],
+                  select: select,
+                  close: close,
+                ),
+      ],
+    );
   }
 }

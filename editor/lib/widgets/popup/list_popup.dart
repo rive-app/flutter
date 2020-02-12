@@ -1,16 +1,29 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/nullable_listenable_builder.dart';
 import 'package:rive_editor/widgets/path_widget.dart';
 import 'base_popup.dart';
 
 typedef SelectCallback<T> = void Function(T param);
 
 abstract class PopupListItem<T> {
+  /// Whether the item can be interacted with/selected by the user. For example,
+  /// a separator cannot be clicked on.
   bool get canSelect;
+
+  /// Height for the item in the popup list.
   double get height;
+
+  /// Child popup displayed when this list item is hovered over.
   List<PopupListItem<T>> get popup;
+
+  /// Callback to invoke when the item is pressed on/selected.
   SelectCallback<T> get select;
+
+  /// Optional change notifier that can be used to signal the item needs to be
+  /// rebuilt in response to some external event.
+  ChangeNotifier get rebuildItem;
 }
 
 typedef ListPopupItemBuilder<T> = Widget Function(
@@ -53,6 +66,8 @@ class ListPopup<A, T extends PopupListItem<A>> {
     _subPopupRow = null;
     _subPopup = null;
   }
+
+  bool close() => Popup.remove(_overlayEntry);
 
   bool showChildPopup(
     BuildContext context, {
@@ -248,10 +263,29 @@ class __PopupListItemShellState<A, T extends PopupListItem<A>>
           }
           hover = false;
         },
+
+        // We had replaced the container with a Stack to fix the rebuilding of the sub-widget tree returned by the itemBuilder. This is due to Container being stateless, hence everything underneath it rebuilds when any property of the container changes.
+        // child: Stack(children: [
+        //   Positioned.fill(
+        //     child: Container(
+        //       color: _isHovered ? const Color.fromRGBO(26, 26, 26, 1) : null,
+        //     ),
+        //   ),
+        //   Positioned.fill(
+        //     child: widget.itemBuilder(context, widget.item, _isHovered),
+        //   )
+        // ]
         child: Container(
           color: _isHovered ? const Color.fromRGBO(26, 26, 26, 1) : null,
-          child: widget.itemBuilder(context, widget.item, _isHovered),
+          child: NullableListenableBuilder(
+            listenable: widget.item.rebuildItem,
+            builder: (context, ChangeNotifier value, _) =>
+                widget.itemBuilder(context, widget.item, _isHovered),
+          ),
         ),
+
+        // color: _isHovered ? const Color.fromRGBO(26, 26, 26, 1) : null,
+        // child:  TintedIcon(color:Colors.red, icon:'tool-auto')//widget.itemBuilder(context, widget.item, _isHovered),
       ),
     );
   }

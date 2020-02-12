@@ -7,6 +7,8 @@ import '../stage_item.dart';
 abstract class StageTool {
   Stage _stage;
   Stage get stage => _stage;
+  
+  String get icon;
 
   /// Override this to check if this tool is valid.
   bool activate(Stage stage) {

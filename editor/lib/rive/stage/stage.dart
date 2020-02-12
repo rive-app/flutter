@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
@@ -45,15 +46,16 @@ class Stage {
   bool _mouseDownSelected = false;
 
   StageDelegate _delegate;
-  StageTool _tool;
+  final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
+
   StageTool _activeDragTool;
-  StageTool get tool => _tool;
+  StageTool get tool => toolNotifier.value;
   set tool(StageTool value) {
-    if (_tool == value) {
+    if (toolNotifier.value == value) {
       return;
     }
     if (value.activate(this)) {
-      _tool = value;
+      toolNotifier.value = value;
     }
   }
 
@@ -166,7 +168,7 @@ class Stage {
         break;
       case 1:
         if (_activeDragTool == null) {
-          _activeDragTool = _tool;
+          _activeDragTool = tool;
           _activeDragTool?.startDrag(
               rive.selection.items.whereType<StageItem>(), _worldMouse);
         } else {

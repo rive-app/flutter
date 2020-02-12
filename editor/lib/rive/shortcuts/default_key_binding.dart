@@ -133,5 +133,47 @@ var defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.p,
       ],
     ),
+    Shortcut(
+      ShortcutAction.ellipseTool,
+      [
+        ShortcutKey.o,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.rectangleTool,
+      [
+        ShortcutKey.u,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.penTool,
+      [
+        ShortcutKey.v,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.artboardTool,
+      [
+        ShortcutKey.a,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.boneTool,
+      [
+        ShortcutKey.b,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.nodeTool,
+      [
+        ShortcutKey.g,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.soloTool,
+      [
+        ShortcutKey.y,
+      ],
+    ),
   ],
 );

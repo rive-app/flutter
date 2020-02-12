@@ -442,7 +442,6 @@ class FilesView extends StatelessWidget {
                 Consumer<Rive>(
                   builder: (context, rive, _) =>
                       PopupButton<Rive, PopupContextItem<Rive>>(
-                    backgroundOpacity: 0,
                     selectArg: rive,
                     items: [
                       PopupContextItem(
@@ -477,7 +476,6 @@ class FilesView extends StatelessWidget {
                       context,
                       isHovered,
                     ),
-                    itemSelected: (context, item) {},
                   ),
                 ),
               ],
