@@ -11,6 +11,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
+import 'package:rive_editor/rive/theme.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
@@ -168,54 +169,58 @@ class RiveEditorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     var focusScope = FocusScope.of(context);
 
-    return CursorView(
-      onPointerDown: (details) {
-        focusNode.requestFocus();
-      },
-      child: MultiProvider(
-        providers: [
-          Provider.value(value: rive),
-          Provider.value(value: defaultKeyBinding),
-          Provider.value(value: RiveIconCache(rootBundle)),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData.light(),
-          home: DefaultTextStyle(
-            style: const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13),
-            child: Container(
-              child: Scaffold(
-                body: RawKeyboardListener(
-                    onKey: (event) {
-                      var primary = FocusManager.instance.primaryFocus;
-                      rive.onKeyEvent(
-                          defaultKeyBinding,
-                          event,
-                          primary != focusNode &&
-                              focusScope.nearestScope != primary);
-                    },
-                    child: ValueListenableBuilder<RiveState>(
-                      valueListenable: rive.state,
-                      builder: (context, state, _) {
-                        switch (state) {
-                          case RiveState.login:
-                            return Login();
+    return RiveTheme(
+      child: Builder(
+        builder: (context) => CursorView(
+          onPointerDown: (details) {
+            focusNode.requestFocus();
+          },
+          child: MultiProvider(
+            providers: [
+              Provider.value(value: rive),
+              Provider.value(value: defaultKeyBinding),
+              Provider.value(value: RiveIconCache(rootBundle)),
+            ],
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData.light(),
+              home: DefaultTextStyle(
+                style: RiveTheme.of(context).textStyles.basic,
+                child: Container(
+                  child: Scaffold(
+                    body: RawKeyboardListener(
+                        onKey: (event) {
+                          var primary = FocusManager.instance.primaryFocus;
+                          rive.onKeyEvent(
+                              defaultKeyBinding,
+                              event,
+                              primary != focusNode &&
+                                  focusScope.nearestScope != primary);
+                        },
+                        child: ValueListenableBuilder<RiveState>(
+                          valueListenable: rive.state,
+                          builder: (context, state, _) {
+                            switch (state) {
+                              case RiveState.login:
+                                return Login();
 
-                          case RiveState.editor:
-                            return Editor();
+                              case RiveState.editor:
+                                return Editor();
 
-                          case RiveState.disconnected:
-                            return DisconnectedScreen();
-                            break;
+                              case RiveState.disconnected:
+                                return DisconnectedScreen();
+                                break;
 
-                          case RiveState.catastrophe:
-                          default:
-                            return Catastrophe();
-                        }
-                      },
-                    ),
-                    autofocus: true,
-                    focusNode: focusNode),
+                              case RiveState.catastrophe:
+                              default:
+                                return Catastrophe();
+                            }
+                          },
+                        ),
+                        autofocus: true,
+                        focusNode: focusNode),
+                  ),
+                ),
               ),
             ),
           ),
@@ -234,7 +239,7 @@ class Editor extends StatelessWidget {
       children: [
         Container(
           height: 39,
-          color: const Color.fromRGBO(50, 50, 50, 1.0),
+          color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
           child: Row(
             children: <Widget>[
               Expanded(
