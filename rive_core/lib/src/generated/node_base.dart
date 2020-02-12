@@ -1,7 +1,6 @@
 /// Core automatically generated lib/src/generated/node_base.dart.
 /// Do not modify manually.
 
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import '../../container_component.dart';
 

@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/coop_server.dart';
-import 'package:rive_core/data_directory.dart';
 import 'package:core/coop/coop_isolate.dart';
 
 class _TestCoopIsolate extends CoopIsolateProcess {
