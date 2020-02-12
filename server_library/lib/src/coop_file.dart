@@ -9,13 +9,20 @@ import 'package:core/core.dart';
 import 'entity.dart';
 import 'session.dart';
 
+const int _coopFileVersion = 2;
+
 class CoopFile {
   int ownerId;
   int fileId;
+  int nextObjectId = 1;
 
   Map<int, CoopFileObject> objects;
 
-  void deserialize(BinaryReader reader) {
+  bool deserialize(BinaryReader reader) {
+    if (reader.readVarUint() != _coopFileVersion) {
+      return false;
+    }
+    nextObjectId = reader.readVarUint();
     ownerId = reader.readVarUint();
     fileId = reader.readVarUint();
 
@@ -24,10 +31,16 @@ class CoopFile {
     for (int i = 0; i < objectLength; i++) {
       var object = CoopFileObject()..deserialize(reader);
       objects[object.localId] = object;
+      if (object.localId >= nextObjectId) {
+        nextObjectId = object.localId + 1;
+      }
     }
+    return true;
   }
 
   void serialize(BinaryWriter writer) {
+    writer.writeVarUint(_coopFileVersion);
+    writer.writeVarUint(nextObjectId);
     writer.writeVarUint(ownerId);
     writer.writeVarUint(fileId);
 
@@ -47,6 +60,7 @@ class CoopFile {
     return CoopFile()
       ..ownerId = ownerId
       ..fileId = fileId
+      ..nextObjectId = nextObjectId
       ..objects = cloneObjects;
   }
 

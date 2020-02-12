@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
+import 'package:core/coop/coop_command.dart';
 import 'package:core/coop/coop_isolate.dart';
 import 'package:core/coop/coop_server.dart';
 import 'package:core/coop/coop_server_client.dart';
@@ -37,7 +38,6 @@ class RiveCoopServer extends CoopServer {
 
 class _CoopIsolate extends CoopIsolateProcess {
   CoopFile file;
-  int _nextObjectId;
   int _nextChangeId;
   final _privateApi = PrivateApi();
 
@@ -69,7 +69,7 @@ class _CoopIsolate extends CoopIsolateProcess {
       for (final change in objectChanges.changes) {
         switch (change.op) {
           case CoreContext.addKey:
-            // id is change.objectId
+            // id is objectChanges.objectId
 
             var reader = BinaryReader(
               ByteData.view(
@@ -79,24 +79,31 @@ class _CoopIsolate extends CoopIsolateProcess {
               ),
             );
 
-            // TODO: need to upgrade the object id to a global/server one.
-            var nextId = _nextObjectId++;
-            serverChange.objectId = nextId;
-            print("ADDING SERVER OBJECT WITH ID ${serverChange.objectId}");
-            modifiedFile.objects[nextId] = object = CoopFileObject()
-              ..localId = nextId
+            // If the client sent a newly created object, it will do so with a
+            // negative client side only id. If the id is positive, it should be
+            // a re-generated server id. We could validate no other object is
+            // currently using it.
+            var serverObjectId = objectChanges.objectId;
+
+            // If the client has sent a client id or the requested server id is
+            // already in use, assign the next incrementing server id.
+            if (objectChanges.objectId < 0 ||
+                modifiedFile.objects.containsKey(objectChanges.objectId)) {
+              serverObjectId = modifiedFile.nextObjectId++;
+              serverChange.objectId = serverObjectId;
+              print("ASSIGNING SERVER ID ${serverObjectId}");
+            }
+            modifiedFile.objects[serverObjectId] = object = CoopFileObject()
+              ..localId = serverObjectId
               ..key = reader.readVarUint();
-            client.changedIds[objectChanges.objectId] = nextId;
-            client.writer.writeChangeId(objectChanges.objectId, nextId);
-            print("MAKE OBJECT ${objectChanges.objectId} ${change.value}");
+            client.changedIds[objectChanges.objectId] = serverObjectId;
+            client.writer.writeChangeId(objectChanges.objectId, serverObjectId);
             // create object with id
             break;
           case CoreContext.removeKey:
             var objectId = client.changedIds[objectChanges.objectId] ??
                 objectChanges.objectId;
             object = modifiedFile.objects.remove(objectId);
-
-            print("DESTROY OBJECT ${objectChanges.objectId} ${change.value}");
             // Destroy object with id
             break;
           default:
@@ -166,31 +173,33 @@ class _CoopIsolate extends CoopIsolateProcess {
 
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
         (data == null || data.isEmpty)) {
-      _nextObjectId = 1;
-      _nextChangeId = 1;
+      _nextChangeId = CoopCommand.minChangeId;
 
       file = CoopFile()
         ..ownerId = ownerId
         ..fileId = fileId
+        ..nextObjectId = 1
         ..objects = {};
     } else {
-      file = CoopFile()
-        ..deserialize(
-          BinaryReader(
-            ByteData.view(
-              data.buffer,
-              data.offsetInBytes,
-              data.lengthInBytes,
-            ),
+      file = CoopFile();
+      if (!file.deserialize(
+        BinaryReader(
+          ByteData.view(
+            data.buffer,
+            data.offsetInBytes,
+            data.lengthInBytes,
           ),
-        );
+        ),
+      )) {
+        file = CoopFile()
+          ..ownerId = ownerId
+          ..fileId = fileId
+          ..nextObjectId = 1
+          ..objects = {};
+      }
 
-      _nextObjectId = file.objects.values
-              .fold<int>(0, (curr, object) => max(curr, object.localId)) +
-          1;
-
-      _nextChangeId = file.objects.values.fold<int>(
-              0, (curr, object) => max(curr, object.serverChangeId)) +
+      _nextChangeId = file.objects.values.fold<int>(CoopCommand.minChangeId,
+              (curr, object) => max(curr, object.serverChangeId)) +
           1;
     }
     return true;
@@ -203,6 +212,7 @@ class _CoopIsolate extends CoopIsolateProcess {
     // TODO: consider changing this to readyClients as clients that are
     // connecting/sending offline changes should not receive mid-flight changes
     // prior to their ready.
+    print("PROPAGATING TO ${clients.length} CLIENTS");
     for (final to in clients) {
       to.write(writer.uint8Buffer);
     }
@@ -210,7 +220,8 @@ class _CoopIsolate extends CoopIsolateProcess {
 
   @override
   Future<void> persist() async {
-    var writer = BinaryWriter(alignment: file.objects.length * 256);
+    print("ALIGNMENT ${file.objects.length * 256}");
+    var writer = BinaryWriter(alignment: max(1, file.objects.length) * 256);
     file.serialize(writer);
     print("PERSISTING! ${writer.uint8Buffer} ${file.ownerId} ${file.fileId}");
     var result =
