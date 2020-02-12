@@ -87,14 +87,20 @@ class Definition {
   String get concreteCodeFilename => '${stripExtension(_filename)}.dart';
   String get codeFilename => 'lib/src/generated/$localCodeFilename';
 
+  /// Generates Dart code based on the Definition
   void generateCode(
       String outputFolder, String coreContextName, String snakeContextName) {
     String filename = codeFilename;
-    var code = StringBuffer(comment('Core automatically generated $filename.'));
+    final code =
+        StringBuffer(comment('Core automatically generated $filename.'));
     code.writeln(comment('Do not modify manually.'));
     if (_extensionOf == null || _properties.isNotEmpty) {
       // We need core if we need PropertyChanger or Core to inherit from.
-      code.writeln('import \'package:core/core.dart\';');
+
+      // Don't import core if it's not used
+      if (_extensionOf?._name == null) {
+        code.writeln('import \'package:core/core.dart\';');
+      }
     }
     if (_properties.isNotEmpty) {
       code.writeln('import \'package:flutter/material.dart\';');
