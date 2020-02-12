@@ -84,7 +84,7 @@ packages:
   fractional:
     dependency: "direct main"
     description:
-      path: "..\\dependencies\\fractional-dart"
+      path: "../dependencies/fractional-dart"
       relative: true
     source: path
     version: "0.0.2"
