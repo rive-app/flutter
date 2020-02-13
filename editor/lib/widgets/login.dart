@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -39,7 +39,7 @@ class _LoginState extends State<Login> {
   bool _isLoggingIn = false;
   @override
   Widget build(BuildContext context) {
-    var rive = Provider.of<Rive>(context);
+    var rive = RiveContext.of(context);
     return Center(
       child: Container(
         constraints: const BoxConstraints(minWidth: 100, maxWidth: 400),

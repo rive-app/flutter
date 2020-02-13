@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rive_api/user.dart';
-import '../../rive/rive.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/inspector_view.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'package:provider/provider.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({
@@ -13,7 +12,8 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var rive = Provider.of<Rive>(context);
+    var rive = RiveContext.of(context);
+    ;
     return InspectorView(
       header: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

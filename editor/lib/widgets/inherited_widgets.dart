@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/theme.dart';
@@ -71,4 +72,27 @@ class ShortcutBindings extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ShortcutBindings old) => bindings != old.bindings;
+}
+
+/// Inherited widget that will pass the rive context? down the tree
+/// To access rive anywhere in a Flutter context, use:
+///
+/// Rive.of(context).colors.buttonLight
+///
+class RiveContext extends InheritedWidget {
+  const RiveContext({
+    @required this.rive,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final Rive rive;
+
+  static Rive of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<RiveContext>().rive;
+  }
+
+  @override
+  bool updateShouldNotify(RiveContext old) => rive != old.rive;
 }
