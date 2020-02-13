@@ -1,0 +1,31 @@
+name: Dart CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup SSH Keys and known_hosts
+        # Warning, this took a lot of massaging. Please don't mess with this unless the build is broken.
+        env:
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+        run: |
+          export SSH_AUTH_SOCK=/tmp/ssh_agent.sock
+          mkdir -p ~/.ssh
+          ssh-keyscan -t rsa github.com
+          ssh-agent -a $SSH_AUTH_SOCK
+          echo "${{ secrets.RIVE_ENG_PRIVATE_KEY }}" > ssh.key
+          chmod 600 ssh.key
+          ssh-add ssh.key
+          git submodule update --init --force --recursive
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'dev' # or: 'dev' or 'beta'
+      - name: Install dependencies
+        run: flutter packages get
+
+      - name: Run editor tests
+        run: flutter test
