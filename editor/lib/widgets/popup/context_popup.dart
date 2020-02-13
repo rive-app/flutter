@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
-import 'package:provider/provider.dart';
 
 import 'list_popup.dart';
 
@@ -121,7 +120,7 @@ class PopupContextItem<T> extends PopupListItem<T> {
         Expanded(child: Container()),
         if (shortcut != null)
           Text(
-            Provider.of<ShortcutKeyBinding>(context)
+            ShortcutBindings.of(context)
                     ?.lookupKeysLabel(shortcut)
                     ?.toUpperCase() ??
                 "",

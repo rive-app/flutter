@@ -170,56 +170,57 @@ class RiveEditorApp extends StatelessWidget {
     var focusScope = FocusScope.of(context);
 
     return RiveTheme(
-      child: IconCache(
-        cache: RiveIconCache(rootBundle),
-        child: Builder(
-          builder: (context) => CursorView(
-            onPointerDown: (details) {
-              focusNode.requestFocus();
-            },
-            child: MultiProvider(
-              providers: [
-                Provider.value(value: rive),
-                Provider.value(value: defaultKeyBinding),
-              ],
-              child: MaterialApp(
-                debugShowCheckedModeBanner: false,
-                theme: ThemeData.light(),
-                home: DefaultTextStyle(
-                  style: RiveTheme.of(context).textStyles.basic,
-                  child: Container(
-                    child: Scaffold(
-                      body: RawKeyboardListener(
-                          onKey: (event) {
-                            var primary = FocusManager.instance.primaryFocus;
-                            rive.onKeyEvent(
-                                defaultKeyBinding,
-                                event,
-                                primary != focusNode &&
-                                    focusScope.nearestScope != primary);
-                          },
-                          child: ValueListenableBuilder<RiveState>(
-                            valueListenable: rive.state,
-                            builder: (context, state, _) {
-                              switch (state) {
-                                case RiveState.login:
-                                  return Login();
-
-                                case RiveState.editor:
-                                  return Editor();
-
-                                case RiveState.disconnected:
-                                  return DisconnectedScreen();
-                                  break;
-
-                                case RiveState.catastrophe:
-                                default:
-                                  return Catastrophe();
-                              }
+      child: ShortcutBindings(
+        child: IconCache(
+          cache: RiveIconCache(rootBundle),
+          child: Builder(
+            builder: (context) => CursorView(
+              onPointerDown: (details) {
+                focusNode.requestFocus();
+              },
+              child: MultiProvider(
+                providers: [
+                  Provider.value(value: rive),
+                ],
+                child: MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  theme: ThemeData.light(),
+                  home: DefaultTextStyle(
+                    style: RiveTheme.of(context).textStyles.basic,
+                    child: Container(
+                      child: Scaffold(
+                        body: RawKeyboardListener(
+                            onKey: (event) {
+                              var primary = FocusManager.instance.primaryFocus;
+                              rive.onKeyEvent(
+                                  defaultKeyBinding,
+                                  event,
+                                  primary != focusNode &&
+                                      focusScope.nearestScope != primary);
                             },
-                          ),
-                          autofocus: true,
-                          focusNode: focusNode),
+                            child: ValueListenableBuilder<RiveState>(
+                              valueListenable: rive.state,
+                              builder: (context, state, _) {
+                                switch (state) {
+                                  case RiveState.login:
+                                    return Login();
+
+                                  case RiveState.editor:
+                                    return Editor();
+
+                                  case RiveState.disconnected:
+                                    return DisconnectedScreen();
+                                    break;
+
+                                  case RiveState.catastrophe:
+                                  default:
+                                    return Catastrophe();
+                                }
+                              },
+                            ),
+                            autofocus: true,
+                            focusNode: focusNode),
+                      ),
                     ),
                   ),
                 ),
