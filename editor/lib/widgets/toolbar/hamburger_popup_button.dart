@@ -7,8 +7,11 @@ class HamburgerPopupButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return RivePopupButton(
       showChevron: false,
-      iconBuilder: (context, rive) => const TintedIcon(
-          color: Color.fromRGBO(140, 140, 140, 1), icon: 'tool-menu'),
+      iconBuilder: (context, rive, isHovered) => TintedIcon(
+        color:
+            isHovered ? Colors.white : const Color.fromRGBO(140, 140, 140, 1),
+        icon: 'tool-menu',
+      ),
     );
   }
 }

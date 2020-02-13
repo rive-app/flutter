@@ -5,6 +5,7 @@ import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 typedef RiveWidgetBuilder = Widget Function(BuildContext, Rive);
+typedef RiveHoverWidgetBuilder = Widget Function(BuildContext, Rive, bool);
 
 /// Create a widget builder that grabs the Rive context from Provider.
 class RiveBuilder extends StatelessWidget {
@@ -21,7 +22,7 @@ class RiveBuilder extends StatelessWidget {
 /// A button that triggers a popup and gets the current Rive context.
 class RivePopupButton extends StatefulWidget {
   final List<PopupContextItem<Rive>> contextItems;
-  final RiveWidgetBuilder iconBuilder;
+  final RiveHoverWidgetBuilder iconBuilder;
   final bool showChevron;
   final PopupOpened<Rive, PopupContextItem<Rive>> opened;
 
@@ -71,14 +72,14 @@ class _RivePopupButtonState extends State<RivePopupButton> {
               child: widget.showChevron
                   ? Row(
                       children: [
-                        widget.iconBuilder(context, rive),
+                        widget.iconBuilder(context, rive, _isHovered),
                         const TintedIcon(
                           color: Color.fromRGBO(140, 140, 140, 1),
                           icon: 'dropdown',
                         ),
                       ],
                     )
-                  : widget.iconBuilder(context, rive),
+                  : widget.iconBuilder(context, rive, _isHovered),
             ),
           ),
         ),
