@@ -141,20 +141,23 @@ class FractionalIndex {
     return compareTo(other) > 0;
   }
 
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (runtimeType != other.runtimeType) {
-      return false;
-    }
-    final FractionalIndex typedOther = other;
-    return numerator == typedOther.numerator &&
-        denominator == typedOther.denominator;
-  }
+  @override
+  bool operator ==(Object other) =>
+      other is FractionalIndex &&
+      other.numerator == numerator &&
+      other.denominator == denominator;
 
   @override
-  String toString() {
-    return '$numerator/$denominator';
-  }
+  int get hashCode => szudzik(numerator, denominator);
+
+  @override
+  String toString() => '$numerator/$denominator';
+}
+
+/// Szudzik's function for hashing two ints together
+int szudzik(int a, int b) {
+  // a and b must be >= 0
+  int x = a.abs();
+  int y = b.abs();
+  return x >= y ? x * x + x + y : x + y * y;
 }
