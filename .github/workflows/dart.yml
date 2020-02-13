@@ -26,7 +26,7 @@ jobs:
         git submodule update --init --force --recursive
   
     - name: Install core dependencies
-      run: cd core && pub get
+      run: pub get
   
     - name: Run core tests
-      run: cd core && pub run test
+      run: pub run test
