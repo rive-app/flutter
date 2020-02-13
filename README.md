@@ -1,6 +1,6 @@
 # tree_widget
 
-A new Flutter package project.
+Tree widget package
 
 ## Build Status
 
