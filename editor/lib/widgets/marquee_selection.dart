@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/rive.dart';
-import 'package:provider/provider.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class MarqueeScrollView extends StatefulWidget {
   final Widget child;
@@ -47,7 +47,7 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
 
   @override
   Widget build(BuildContext context) {
-    final _rive = Provider.of<Rive>(context, listen: false);
+    final _rive = RiveContext.of(context);
     return LayoutBuilder(
       builder: (_, dimens) => Listener(
         onPointerDown: (event) {

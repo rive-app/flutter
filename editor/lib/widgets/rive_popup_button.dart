@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -14,9 +14,7 @@ class RiveBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<Rive>(
-      builder: (context, rive, _) => builder(context, rive),
-    );
+    return builder(context, RiveContext.of(context));
   }
 }
 

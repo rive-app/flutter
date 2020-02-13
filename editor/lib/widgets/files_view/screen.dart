@@ -13,6 +13,7 @@ import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/dialog/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
@@ -39,7 +40,7 @@ class DropDownSortButton extends StatelessWidget {
       color: ThemeUtils.textGrey,
       fontSize: 14.0,
     );
-    final fileBrowser = Provider.of<Rive>(context, listen: false).fileBrowser;
+    final fileBrowser = RiveContext.of(context).fileBrowser;
     var options = fileBrowser.sortOptions.value;
 
     return ValueListenableBuilder<RiveFileSortOption>(
@@ -79,7 +80,7 @@ class FilesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const kProfileWidth = 215.0;
-    final _rive = Provider.of<Rive>(context, listen: false);
+    final _rive = RiveContext.of(context);
     return ChangeNotifierProvider.value(
       value: _rive.fileBrowser,
       child: GestureDetector(
@@ -97,7 +98,7 @@ class FilesView extends StatelessWidget {
                     side: ResizeSide.end,
                     min: 252.0,
                     max: 500,
-                    child: _buildLeftSide(),
+                    child: _buildLeftSide(context),
                   ),
                   Expanded(
                     child: _buildCenter(_rive),
@@ -375,7 +376,7 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftSide() {
+  Widget _buildLeftSide(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: ThemeUtils.backgroundLightGrey,
@@ -439,43 +440,40 @@ class FilesView extends StatelessWidget {
                   ),
                 ),
                 Container(width: 10.0),
-                Consumer<Rive>(
-                  builder: (context, rive, _) =>
-                      PopupButton<Rive, PopupContextItem<Rive>>(
-                    selectArg: rive,
-                    items: [
-                      PopupContextItem(
-                        "New File",
-                        select: (rive) {
-                          rive.fileBrowser.createFile();
-                          print("MAKE FILE");
-                        },
-                      ),
-                      PopupContextItem("New Folder", select: (rive) {}),
-                      PopupContextItem.separator(),
-                      PopupContextItem(
-                        "New Team",
-                        select: (rive) => showRiveSettings<void>(
-                          context: context,
-                          screens: teamSettingsScreens,
-                        ),
-                      ),
-                    ],
-                    builder: (context) {
-                      return Container(
-                        width: 29,
-                        height: 29,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: RiveIcons.add(Colors.white, 16),
-                      );
-                    },
-                    itemBuilder: (context, item, isHovered) => item.itemBuilder(
-                      context,
-                      isHovered,
+                PopupButton<Rive, PopupContextItem<Rive>>(
+                  selectArg: RiveContext.of(context),
+                  items: [
+                    PopupContextItem(
+                      "New File",
+                      select: (rive) {
+                        rive.fileBrowser.createFile();
+                        print("MAKE FILE");
+                      },
                     ),
+                    PopupContextItem("New Folder", select: (rive) {}),
+                    PopupContextItem.separator(),
+                    PopupContextItem(
+                      "New Team",
+                      select: (rive) => showRiveSettings<void>(
+                        context: context,
+                        screens: teamSettingsScreens,
+                      ),
+                    ),
+                  ],
+                  builder: (context) {
+                    return Container(
+                      width: 29,
+                      height: 29,
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: RiveIcons.add(Colors.white, 16),
+                    );
+                  },
+                  itemBuilder: (context, item, isHovered) => item.itemBuilder(
+                    context,
+                    isHovered,
                   ),
                 ),
               ],
@@ -504,21 +502,20 @@ class FilesView extends StatelessWidget {
             child: _buildDivider(0),
           ),
           Expanded(
-            child: Consumer<Rive>(
-              builder: (context, rive, _) =>
-                  ValueListenableBuilder<FolderTreeController>(
-                valueListenable: rive.fileBrowser.treeController,
-                builder: (context, controller, _) => FolderTreeView(
-                  padding: const EdgeInsets.only(
-                    left: 20.0,
-                    right: 10.0,
-                    bottom: 5,
-                    top: 5,
-                  ),
-                  scrollController: rive.fileBrowser.treeScrollController,
-                  controller: controller,
-                  itemHeight: kTreeItemHeight,
+            child: ValueListenableBuilder<FolderTreeController>(
+              valueListenable:
+                  RiveContext.of(context).fileBrowser.treeController,
+              builder: (context, controller, _) => FolderTreeView(
+                padding: const EdgeInsets.only(
+                  left: 20.0,
+                  right: 10.0,
+                  bottom: 5,
+                  top: 5,
                 ),
+                scrollController:
+                    RiveContext.of(context).fileBrowser.treeScrollController,
+                controller: controller,
+                itemHeight: kTreeItemHeight,
               ),
             ),
           )

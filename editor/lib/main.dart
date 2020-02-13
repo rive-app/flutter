@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
@@ -12,6 +11,7 @@ import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
@@ -168,54 +168,59 @@ class RiveEditorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     var focusScope = FocusScope.of(context);
 
-    return CursorView(
-      onPointerDown: (details) {
-        focusNode.requestFocus();
-      },
-      child: MultiProvider(
-        providers: [
-          Provider.value(value: rive),
-          Provider.value(value: defaultKeyBinding),
-          Provider.value(value: RiveIconCache(rootBundle)),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData.light(),
-          home: DefaultTextStyle(
-            style: const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13),
-            child: Container(
-              child: Scaffold(
-                body: RawKeyboardListener(
-                    onKey: (event) {
-                      var primary = FocusManager.instance.primaryFocus;
-                      rive.onKeyEvent(
-                          defaultKeyBinding,
-                          event,
-                          primary != focusNode &&
-                              focusScope.nearestScope != primary);
-                    },
-                    child: ValueListenableBuilder<RiveState>(
-                      valueListenable: rive.state,
-                      builder: (context, state, _) {
-                        switch (state) {
-                          case RiveState.login:
-                            return Login();
+    return RiveTheme(
+      child: ShortcutBindings(
+        child: RiveContext(
+          rive: rive,
+          child: IconCache(
+            cache: RiveIconCache(rootBundle),
+            child: Builder(
+              builder: (context) => CursorView(
+                onPointerDown: (details) {
+                  focusNode.requestFocus();
+                },
+                child: MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  theme: ThemeData.light(),
+                  home: DefaultTextStyle(
+                    style: RiveTheme.of(context).textStyles.basic,
+                    child: Container(
+                      child: Scaffold(
+                        body: RawKeyboardListener(
+                            onKey: (event) {
+                              var primary = FocusManager.instance.primaryFocus;
+                              rive.onKeyEvent(
+                                  defaultKeyBinding,
+                                  event,
+                                  primary != focusNode &&
+                                      focusScope.nearestScope != primary);
+                            },
+                            child: ValueListenableBuilder<RiveState>(
+                              valueListenable: rive.state,
+                              builder: (context, state, _) {
+                                switch (state) {
+                                  case RiveState.login:
+                                    return Login();
 
-                          case RiveState.editor:
-                            return Editor();
+                                  case RiveState.editor:
+                                    return Editor();
 
-                          case RiveState.disconnected:
-                            return DisconnectedScreen();
-                            break;
+                                  case RiveState.disconnected:
+                                    return DisconnectedScreen();
+                                    break;
 
-                          case RiveState.catastrophe:
-                          default:
-                            return Catastrophe();
-                        }
-                      },
+                                  case RiveState.catastrophe:
+                                  default:
+                                    return Catastrophe();
+                                }
+                              },
+                            ),
+                            autofocus: true,
+                            focusNode: focusNode),
+                      ),
                     ),
-                    autofocus: true,
-                    focusNode: focusNode),
+                  ),
+                ),
               ),
             ),
           ),
@@ -229,12 +234,12 @@ class RiveEditorApp extends StatelessWidget {
 class Editor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var rive = Provider.of<Rive>(context);
+    var rive = RiveContext.of(context);
     return Column(
       children: [
         Container(
           height: 39,
-          color: const Color.fromRGBO(50, 50, 50, 1.0),
+          color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
           child: Row(
             children: <Widget>[
               Expanded(
@@ -301,6 +306,7 @@ class Editor extends StatelessWidget {
   }
 
   Widget _buildEditor(BuildContext context) {
+    final rive = RiveContext.of(context);
     return Column(
       children: <Widget>[
         Container(
@@ -328,13 +334,10 @@ class Editor extends StatelessWidget {
                 max: 500,
                 child: Container(
                   color: const Color.fromRGBO(50, 50, 50, 1.0),
-                  child: Consumer<Rive>(
-                    builder: (context, rive, _) =>
-                        ValueListenableBuilder<HierarchyTreeController>(
-                      valueListenable: rive.treeController,
-                      builder: (context, controller, _) =>
-                          HierarchyTreeView(controller: controller),
-                    ),
+                  child: ValueListenableBuilder<HierarchyTreeController>(
+                    valueListenable: rive.treeController,
+                    builder: (context, controller, _) =>
+                        HierarchyTreeView(controller: controller),
                   ),
                 ),
               ),
@@ -349,40 +352,37 @@ class Editor extends StatelessWidget {
                 max: 500,
                 child: Container(
                   color: const Color.fromRGBO(50, 50, 50, 1.0),
-                  child: Consumer<Rive>(
-                    builder: (context, rive, _) => ListenableBuilder(
-                      listenable: rive.selection,
-                      builder: (context,
-                          SelectionContext<SelectableItem> selection, _) {
-                        var artboards = selection.items
-                            .whereType<StageArtboard>()
-                            .map((stageItem) => stageItem.component)
-                            .toList(growable: false);
+                  child: ListenableBuilder(
+                    listenable: rive.selection,
+                    builder: (context,
+                        SelectionContext<SelectableItem> selection, _) {
+                      var artboards = selection.items
+                          .whereType<StageArtboard>()
+                          .map((stageItem) => stageItem.component)
+                          .toList(growable: false);
 
-                        return Column(
-                          children: [
-                            artboards.isEmpty
-                                ? Container()
-                                : PropertyDual(
-                                    name: 'Pos',
-                                    objects: artboards,
-                                    propertyKeyA: ArtboardBase.xPropertyKey,
-                                    propertyKeyB: ArtboardBase.yPropertyKey,
-                                  ),
-                            artboards.isEmpty
-                                ? Container()
-                                : PropertyDual(
-                                    name: 'Size',
-                                    objects: artboards,
-                                    propertyKeyA: ArtboardBase.widthPropertyKey,
-                                    propertyKeyB:
-                                        ArtboardBase.heightPropertyKey,
-                                  ),
-                            // selection. PropertyDual()
-                          ],
-                        );
-                      },
-                    ),
+                      return Column(
+                        children: [
+                          artboards.isEmpty
+                              ? Container()
+                              : PropertyDual(
+                                  name: 'Pos',
+                                  objects: artboards,
+                                  propertyKeyA: ArtboardBase.xPropertyKey,
+                                  propertyKeyB: ArtboardBase.yPropertyKey,
+                                ),
+                          artboards.isEmpty
+                              ? Container()
+                              : PropertyDual(
+                                  name: 'Size',
+                                  objects: artboards,
+                                  propertyKeyA: ArtboardBase.widthPropertyKey,
+                                  propertyKeyB: ArtboardBase.heightPropertyKey,
+                                ),
+                          // selection. PropertyDual()
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -440,83 +440,76 @@ class StagePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rive = RiveContext.of(context);
     return Container(
       color: const Color.fromRGBO(29, 29, 29, 1.0),
-      child: Consumer<Rive>(
-        builder: (context, rive, _) => ValueListenableBuilder<Stage>(
-          valueListenable: rive.stage,
-          builder: (context, stage, _) => Stack(
-            children: [
-              Positioned.fill(
-                child: stage == null
-                    ? Container()
-                    : StageView(
-                        rive: rive,
-                        stage: stage,
-                      ),
-              ),
-              Positioned(
-                left: resizeEdgeSize,
-                top: resizeEdgeSize,
-                bottom: resizeEdgeSize,
-                right: resizeEdgeSize,
-                child: stage == null
-                    ? Container()
-                    : MouseRegion(
-                        opaque: true,
-                        onExit: (details) {
+      child: ValueListenableBuilder<Stage>(
+        valueListenable: rive.stage,
+        builder: (context, stage, _) => Stack(
+          children: [
+            Positioned.fill(
+              child: stage == null
+                  ? Container()
+                  : StageView(
+                      rive: rive,
+                      stage: stage,
+                    ),
+            ),
+            Positioned(
+              left: resizeEdgeSize,
+              top: resizeEdgeSize,
+              bottom: resizeEdgeSize,
+              right: resizeEdgeSize,
+              child: stage == null
+                  ? Container()
+                  : MouseRegion(
+                      opaque: true,
+                      onExit: (details) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var local = getBox.globalToLocal(details.position);
+                        stage.mouseExit(details.buttons, local.dx, local.dy);
+                      },
+                      onHover: (details) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var local = getBox.globalToLocal(details.position);
+                        stage.mouseMove(details.buttons, local.dx, local.dy);
+                        // print('MOVE $local');
+                      },
+                      child: Listener(
+                        behavior: HitTestBehavior.opaque,
+                        onPointerSignal: (details) {
+                          if (details is PointerScrollEvent) {
+                            RenderBox getBox =
+                                context.findRenderObject() as RenderBox;
+                            var local = getBox.globalToLocal(details.position);
+                            stage.mouseWheel(local.dx, local.dy,
+                                details.scrollDelta.dx, details.scrollDelta.dy);
+                          }
+                        },
+                        onPointerDown: (details) {
                           RenderBox getBox =
                               context.findRenderObject() as RenderBox;
                           var local = getBox.globalToLocal(details.position);
-                          stage.mouseExit(details.buttons, local.dx, local.dy);
+                          stage.mouseDown(details.buttons, local.dx, local.dy);
                         },
-                        onHover: (details) {
+                        onPointerUp: (details) {
                           RenderBox getBox =
                               context.findRenderObject() as RenderBox;
                           var local = getBox.globalToLocal(details.position);
-                          stage.mouseMove(details.buttons, local.dx, local.dy);
-                          // print('MOVE $local');
+                          stage.mouseUp(details.buttons, local.dx, local.dy);
                         },
-                        child: Listener(
-                          behavior: HitTestBehavior.opaque,
-                          onPointerSignal: (details) {
-                            if (details is PointerScrollEvent) {
-                              RenderBox getBox =
-                                  context.findRenderObject() as RenderBox;
-                              var local =
-                                  getBox.globalToLocal(details.position);
-                              stage.mouseWheel(
-                                  local.dx,
-                                  local.dy,
-                                  details.scrollDelta.dx,
-                                  details.scrollDelta.dy);
-                            }
-                          },
-                          onPointerDown: (details) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseDown(
-                                details.buttons, local.dx, local.dy);
-                          },
-                          onPointerUp: (details) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseUp(details.buttons, local.dx, local.dy);
-                          },
-                          onPointerMove: (details) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseDrag(
-                                details.buttons, local.dx, local.dy);
-                          },
-                        ),
+                        onPointerMove: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseDrag(details.buttons, local.dx, local.dy);
+                        },
                       ),
-              ),
-            ],
-          ),
+                    ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
@@ -38,7 +38,7 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
 
   @override
   Widget build(BuildContext context) {
-    var rive = Provider.of<Rive>(context);
+    var rive = RiveContext.of(context);
     return ValueListenableBuilder<StageTool>(
       valueListenable: rive.stage.value.toolNotifier,
       builder: (context, tool, _) {
