@@ -65,25 +65,3 @@ class RiveThemeData {
   Gradients get gradients => const Gradients();
   TextStyles get textStyles => const TextStyles();
 }
-
-/// Inherited widget that will pass the theme down the tree
-/// Too access the theme data anywhere in a Flutter context, use:
-///
-/// RiveTheme.of(context).colors.buttonLight
-///
-class RiveTheme extends InheritedWidget {
-  const RiveTheme({
-    @required Widget child,
-    Key key,
-  })  : assert(child != null),
-        super(key: key, child: child);
-
-  RiveThemeData get theme => const RiveThemeData();
-
-  static RiveThemeData of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<RiveTheme>().theme;
-  }
-
-  @override
-  bool updateShouldNotify(RiveTheme old) => theme != old.theme;
-}

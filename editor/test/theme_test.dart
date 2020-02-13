@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rive_editor/rive/theme.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 void main() {
   test('Theme data is available from RiveThemeData', () {

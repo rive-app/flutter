@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:provider/provider.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 /// Draws an icon tinted by [color].
 class TintedIcon extends StatelessWidget {
@@ -15,7 +15,7 @@ class TintedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var cache = Provider.of<RiveIconCache>(context);
+    var cache = IconCache.of(context);
     return Container(
       child: TintedIconRenderer(
         cache: cache,
