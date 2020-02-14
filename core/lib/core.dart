@@ -27,6 +27,7 @@ typedef PropertyChangeCallback = void Function(dynamic from, dynamic to);
 
 abstract class Core<T extends CoreContext> {
   int id;
+
   T context;
   int get coreType;
 
@@ -365,7 +366,6 @@ abstract class CoreContext implements LocalSettings {
     }
     // Remove old mapping
     _objects.remove(from);
-
     // Add new mapping
     object.id = to;
     _objects[to] = object;
@@ -451,11 +451,22 @@ abstract class CoreContext implements LocalSettings {
   void persistChanges(ChangeSet changes);
   void abandonChanges(ChangeSet changes);
 
+  void startAdd() {
+    _delayAdd = [];
+  }
+
+  void completeAdd() {
+    for (final object in _delayAdd) {
+      onAdded(object);
+    }
+    _delayAdd = null;
+  }
+
   void _receiveCoopChanges(ChangeSet changes) {
     // We've received changes from Coop. Initialize the delayAdd list so that
     // onAdded doesn't get called as objects are created. We'll manually call it
     // at the end of this method once all the changes have been made.
-    _delayAdd = [];
+    startAdd();
 
     // Track whether recording was on/off, definitely turn it off during these
     // changes.
@@ -466,10 +477,7 @@ abstract class CoreContext implements LocalSettings {
       // changes from this set to avoid the flickering issue.
       applyCoopChanges(objectChanges);
     }
-    for (final object in _delayAdd) {
-      onAdded(object);
-    }
-    _delayAdd = null;
+    completeAdd();
     _isRecording = wasRecording;
     completeChanges();
   }

@@ -2,7 +2,8 @@ Map<String, FieldType> _types = <String, FieldType>{};
 
 abstract class FieldType {
   final String name;
-  FieldType(this.name) {
+  final String import;
+  FieldType(this.name, {this.import}) {
     _types[name] = this;
   }
 
