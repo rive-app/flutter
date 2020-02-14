@@ -1,0 +1,17 @@
+{
+  "name": "Shape",
+  "key": {
+    "int": 3,
+    "string": "shape"
+  },
+  "extends": "drawable.json",
+  "properties": {
+    "transformAffectsStroke": {
+      "type": "bool",
+      "key": {
+        "int": 19,
+        "string": "transformAffectsStroke"
+      }
+    }
+  }
+}

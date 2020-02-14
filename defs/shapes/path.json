@@ -1,0 +1,5 @@
+{
+  "name": "Path",
+  "abstract": true,
+  "extends": "node.json"
+}

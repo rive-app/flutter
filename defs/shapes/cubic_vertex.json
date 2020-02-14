@@ -1,0 +1,42 @@
+{
+  "name": "CubicVertex",
+  "key": {
+    "int": 6,
+    "string": "cubicvertex"
+  },
+  "extends": "shapes/path_vertex.json",
+  "properties": {
+    "inX": {
+      "type": "double",
+      "key": {
+        "int": 27,
+        "string": "inx"
+      },
+      "description": "In point's x value"
+    },
+    "inY": {
+      "type": "double",
+      "key": {
+        "int": 28,
+        "string": "iny"
+      },
+      "description": "In point's y value"
+    },
+    "outX": {
+      "type": "double",
+      "key": {
+        "int": 29,
+        "string": "outx"
+      },
+      "description": "Out point's x value"
+    },
+    "outY": {
+      "type": "double",
+      "key": {
+        "int": 30,
+        "string": "outy"
+      },
+      "description": "Out point's y value"
+    }
+  }
+}
