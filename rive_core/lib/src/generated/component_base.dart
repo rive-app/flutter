@@ -3,6 +3,7 @@
 
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:fractional/fractional.dart';
 import 'rive_core_context.dart';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {

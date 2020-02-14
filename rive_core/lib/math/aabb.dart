@@ -29,6 +29,10 @@ class AABB {
     _buffer = Float32List.fromList([a, b, c, d]);
   }
 
+  static bool areEqual(AABB a, AABB b) {
+    return a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3];
+  }
+
   double operator [](int idx) {
     return _buffer[idx];
   }

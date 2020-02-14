@@ -8,12 +8,17 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
+import 'package:core/debounce.dart';
 
 import '../rive.dart';
 import 'aabb_tree.dart';
+import 'items/stage_ellipse.dart';
+import 'items/stage_shape.dart';
 import 'stage_item.dart';
 import 'tools/stage_tool.dart';
 
@@ -23,7 +28,7 @@ abstract class StageDelegate {
   void stageNeedsAdvance();
 }
 
-class Stage {
+class Stage extends Debouncer {
   static const double _minZoom = 0.1;
   static const double _maxZoom = 8.0;
 
@@ -201,8 +206,6 @@ class Stage {
     hoverItem = null;
   }
 
-  final Set<VoidCallback> _debounce = {};
-
   final Rive rive;
   final RiveFile riveFile;
   // final Set<StageItem> items = {};
@@ -242,6 +245,7 @@ class Stage {
 
   void updateBounds(StageItem item) {
     visTree.placeProxy(item.visTreeProxy, item.aabb);
+    markNeedsAdvance();
   }
 
   bool addItem(StageItem item) {
@@ -280,14 +284,11 @@ class Stage {
 
   void _onFileChanged() {}
 
-  bool get shouldAdvance => _needsAdvance || _debounce.isNotEmpty;
+  bool get shouldAdvance => _needsAdvance || needsDebounce;
   bool _needsAdvance = true;
 
   void advance(double elapsed) {
-    for (final call in _debounce) {
-      call();
-    }
-    _debounce.clear();
+    debounceAll();
 
     double ds = _viewZoomTarget - _viewZoom;
     double dx = _viewTranslationTarget[0] - _viewTranslation[0];
@@ -334,8 +335,12 @@ class Stage {
 
     var canvas = context.canvas;
     canvas.save();
+    // Translate to widget space
     canvas.clipRect(offset & size);
     canvas.translate(offset.dx, offset.dy);
+    canvas.save();
+
+    // Transform to world space
     canvas.transform(viewTransform.mat4);
 
     _visibleItems.sort((StageItem a, StageItem b) => a.drawOrder - b.drawOrder);
@@ -345,20 +350,19 @@ class Stage {
     }
 
     canvas.restore();
+
+    // Widget space
+    _activeDragTool?.paint(canvas);
+    canvas.restore();
   }
 
   final Map<int, _ItemFactory> _factories = {
     ArtboardBase.typeKey: () => StageArtboard(),
     NodeBase.typeKey: () => StageNode(),
+    ShapeBase.typeKey: () => StageShape(),
+    EllipseBase.typeKey: () => StageEllipse(),
   };
 
-  bool debounce(VoidCallback call) {
-    if (_debounce.add(call)) {
-      markNeedsAdvance();
-      return true;
-    }
-    return false;
-  }
-
-  bool cancelDebounce(VoidCallback call) => _debounce.remove(call);
+  @override
+  void onNeedsDebounce() => markNeedsAdvance();
 }

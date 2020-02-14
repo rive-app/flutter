@@ -5,9 +5,20 @@ import 'package:binary_buffer/binary_writer.dart';
 
 import '../../artboard.dart';
 import '../../node.dart';
+import '../../shapes/cubic_vertex.dart';
+import '../../shapes/ellipse.dart';
+import '../../shapes/shape.dart';
+import '../../shapes/straight_vertex.dart';
 import 'artboard_base.dart';
 import 'component_base.dart';
+import 'drawable_base.dart';
 import 'node_base.dart';
+import 'shapes/cubic_vertex_base.dart';
+import 'shapes/ellipse_base.dart';
+import 'shapes/parametric_path_base.dart';
+import 'shapes/path_vertex_base.dart';
+import 'shapes/shape_base.dart';
+import 'shapes/straight_vertex_base.dart';
 
 abstract class RiveCoreContext extends CoreContext {
   RiveCoreContext(String fileId) : super(fileId);
@@ -15,10 +26,18 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   Core makeCoreInstance(int typeKey) {
     switch (typeKey) {
-      case ArtboardBase.typeKey:
-        return Artboard();
       case NodeBase.typeKey:
         return Node();
+      case ShapeBase.typeKey:
+        return Shape();
+      case StraightVertexBase.typeKey:
+        return StraightVertex();
+      case CubicVertexBase.typeKey:
+        return CubicVertex();
+      case EllipseBase.typeKey:
+        return Ellipse();
+      case ArtboardBase.typeKey:
+        return Artboard();
       default:
         return null;
     }
@@ -58,28 +77,43 @@ abstract class RiveCoreContext extends CoreContext {
           setObjectProperty(object, change.op, value);
           break;
         case ComponentBase.parentIdPropertyKey:
+        case DrawableBase.blendModePropertyKey:
           var value = reader.readVarInt();
           setObjectProperty(object, change.op, value);
           break;
         case ComponentBase.childOrderPropertyKey:
+        case DrawableBase.drawOrderPropertyKey:
           var numerator = reader.readVarInt();
           var denominator = reader.readVarInt();
           var value = FractionalIndex(numerator, denominator);
           setObjectProperty(object, change.op, value);
           break;
-        case ArtboardBase.widthPropertyKey:
-        case ArtboardBase.heightPropertyKey:
-        case ArtboardBase.xPropertyKey:
-        case ArtboardBase.yPropertyKey:
-        case ArtboardBase.originXPropertyKey:
-        case ArtboardBase.originYPropertyKey:
         case NodeBase.xPropertyKey:
         case NodeBase.yPropertyKey:
         case NodeBase.rotationPropertyKey:
         case NodeBase.scaleXPropertyKey:
         case NodeBase.scaleYPropertyKey:
         case NodeBase.opacityPropertyKey:
+        case PathVertexBase.xPropertyKey:
+        case PathVertexBase.yPropertyKey:
+        case StraightVertexBase.radiusPropertyKey:
+        case CubicVertexBase.inXPropertyKey:
+        case CubicVertexBase.inYPropertyKey:
+        case CubicVertexBase.outXPropertyKey:
+        case CubicVertexBase.outYPropertyKey:
+        case ParametricPathBase.widthPropertyKey:
+        case ParametricPathBase.heightPropertyKey:
+        case ArtboardBase.widthPropertyKey:
+        case ArtboardBase.heightPropertyKey:
+        case ArtboardBase.xPropertyKey:
+        case ArtboardBase.yPropertyKey:
+        case ArtboardBase.originXPropertyKey:
+        case ArtboardBase.originYPropertyKey:
           var value = reader.readFloat64();
+          setObjectProperty(object, change.op, value);
+          break;
+        case ShapeBase.transformAffectsStrokePropertyKey:
+          var value = reader.readInt8() == 1;
           setObjectProperty(object, change.op, value);
           break;
         default:
@@ -122,6 +156,7 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ComponentBase.parentIdPropertyKey:
+      case DrawableBase.blendModePropertyKey:
         if (value != null && value is int) {
           var writer = BinaryWriter(alignment: 4);
           writer.writeVarInt(value);
@@ -131,6 +166,7 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ComponentBase.childOrderPropertyKey:
+      case DrawableBase.drawOrderPropertyKey:
         if (value != null && value is FractionalIndex) {
           var writer = BinaryWriter(alignment: 8);
           writer.writeVarInt(value.numerator);
@@ -140,21 +176,39 @@ abstract class RiveCoreContext extends CoreContext {
           return null;
         }
         break;
-      case ArtboardBase.widthPropertyKey:
-      case ArtboardBase.heightPropertyKey:
-      case ArtboardBase.xPropertyKey:
-      case ArtboardBase.yPropertyKey:
-      case ArtboardBase.originXPropertyKey:
-      case ArtboardBase.originYPropertyKey:
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
       case NodeBase.rotationPropertyKey:
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
       case NodeBase.opacityPropertyKey:
+      case PathVertexBase.xPropertyKey:
+      case PathVertexBase.yPropertyKey:
+      case StraightVertexBase.radiusPropertyKey:
+      case CubicVertexBase.inXPropertyKey:
+      case CubicVertexBase.inYPropertyKey:
+      case CubicVertexBase.outXPropertyKey:
+      case CubicVertexBase.outYPropertyKey:
+      case ParametricPathBase.widthPropertyKey:
+      case ParametricPathBase.heightPropertyKey:
+      case ArtboardBase.widthPropertyKey:
+      case ArtboardBase.heightPropertyKey:
+      case ArtboardBase.xPropertyKey:
+      case ArtboardBase.yPropertyKey:
+      case ArtboardBase.originXPropertyKey:
+      case ArtboardBase.originYPropertyKey:
         if (value != null && value is double) {
           var writer = BinaryWriter(alignment: 8);
           writer.writeFloat64(value);
+          change.value = writer.uint8Buffer;
+        } else {
+          return null;
+        }
+        break;
+      case ShapeBase.transformAffectsStrokePropertyKey:
+        if (value != null && value is bool) {
+          var writer = BinaryWriter(alignment: 1);
+          writer.writeInt8(value ? 1 : 0);
           change.value = writer.uint8Buffer;
         } else {
           return null;
@@ -189,36 +243,6 @@ abstract class RiveCoreContext extends CoreContext {
           object.childOrder = value;
         }
         break;
-      case ArtboardBase.widthPropertyKey:
-        if (object is ArtboardBase && value is double) {
-          object.width = value;
-        }
-        break;
-      case ArtboardBase.heightPropertyKey:
-        if (object is ArtboardBase && value is double) {
-          object.height = value;
-        }
-        break;
-      case ArtboardBase.xPropertyKey:
-        if (object is ArtboardBase && value is double) {
-          object.x = value;
-        }
-        break;
-      case ArtboardBase.yPropertyKey:
-        if (object is ArtboardBase && value is double) {
-          object.y = value;
-        }
-        break;
-      case ArtboardBase.originXPropertyKey:
-        if (object is ArtboardBase && value is double) {
-          object.originX = value;
-        }
-        break;
-      case ArtboardBase.originYPropertyKey:
-        if (object is ArtboardBase && value is double) {
-          object.originY = value;
-        }
-        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase && value is double) {
           object.x = value;
@@ -249,6 +273,96 @@ abstract class RiveCoreContext extends CoreContext {
           object.opacity = value;
         }
         break;
+      case DrawableBase.drawOrderPropertyKey:
+        if (object is DrawableBase && value is FractionalIndex) {
+          object.drawOrder = value;
+        }
+        break;
+      case DrawableBase.blendModePropertyKey:
+        if (object is DrawableBase && value is int) {
+          object.blendMode = value;
+        }
+        break;
+      case ShapeBase.transformAffectsStrokePropertyKey:
+        if (object is ShapeBase && value is bool) {
+          object.transformAffectsStroke = value;
+        }
+        break;
+      case PathVertexBase.xPropertyKey:
+        if (object is PathVertexBase && value is double) {
+          object.x = value;
+        }
+        break;
+      case PathVertexBase.yPropertyKey:
+        if (object is PathVertexBase && value is double) {
+          object.y = value;
+        }
+        break;
+      case StraightVertexBase.radiusPropertyKey:
+        if (object is StraightVertexBase && value is double) {
+          object.radius = value;
+        }
+        break;
+      case CubicVertexBase.inXPropertyKey:
+        if (object is CubicVertexBase && value is double) {
+          object.inX = value;
+        }
+        break;
+      case CubicVertexBase.inYPropertyKey:
+        if (object is CubicVertexBase && value is double) {
+          object.inY = value;
+        }
+        break;
+      case CubicVertexBase.outXPropertyKey:
+        if (object is CubicVertexBase && value is double) {
+          object.outX = value;
+        }
+        break;
+      case CubicVertexBase.outYPropertyKey:
+        if (object is CubicVertexBase && value is double) {
+          object.outY = value;
+        }
+        break;
+      case ParametricPathBase.widthPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.width = value;
+        }
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.height = value;
+        }
+        break;
+      case ArtboardBase.widthPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.width = value;
+        }
+        break;
+      case ArtboardBase.heightPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.height = value;
+        }
+        break;
+      case ArtboardBase.xPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.x = value;
+        }
+        break;
+      case ArtboardBase.yPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.y = value;
+        }
+        break;
+      case ArtboardBase.originXPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.originX = value;
+        }
+        break;
+      case ArtboardBase.originYPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.originY = value;
+        }
+        break;
     }
   }
 
@@ -273,36 +387,6 @@ abstract class RiveCoreContext extends CoreContext {
       case ComponentBase.childOrderPropertyKey:
         if (object is ComponentBase) {
           return object.childOrder;
-        }
-        break;
-      case ArtboardBase.widthPropertyKey:
-        if (object is ArtboardBase) {
-          return object.width;
-        }
-        break;
-      case ArtboardBase.heightPropertyKey:
-        if (object is ArtboardBase) {
-          return object.height;
-        }
-        break;
-      case ArtboardBase.xPropertyKey:
-        if (object is ArtboardBase) {
-          return object.x;
-        }
-        break;
-      case ArtboardBase.yPropertyKey:
-        if (object is ArtboardBase) {
-          return object.y;
-        }
-        break;
-      case ArtboardBase.originXPropertyKey:
-        if (object is ArtboardBase) {
-          return object.originX;
-        }
-        break;
-      case ArtboardBase.originYPropertyKey:
-        if (object is ArtboardBase) {
-          return object.originY;
         }
         break;
       case NodeBase.xPropertyKey:
@@ -333,6 +417,96 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.opacityPropertyKey:
         if (object is NodeBase) {
           return object.opacity;
+        }
+        break;
+      case DrawableBase.drawOrderPropertyKey:
+        if (object is DrawableBase) {
+          return object.drawOrder;
+        }
+        break;
+      case DrawableBase.blendModePropertyKey:
+        if (object is DrawableBase) {
+          return object.blendMode;
+        }
+        break;
+      case ShapeBase.transformAffectsStrokePropertyKey:
+        if (object is ShapeBase) {
+          return object.transformAffectsStroke;
+        }
+        break;
+      case PathVertexBase.xPropertyKey:
+        if (object is PathVertexBase) {
+          return object.x;
+        }
+        break;
+      case PathVertexBase.yPropertyKey:
+        if (object is PathVertexBase) {
+          return object.y;
+        }
+        break;
+      case StraightVertexBase.radiusPropertyKey:
+        if (object is StraightVertexBase) {
+          return object.radius;
+        }
+        break;
+      case CubicVertexBase.inXPropertyKey:
+        if (object is CubicVertexBase) {
+          return object.inX;
+        }
+        break;
+      case CubicVertexBase.inYPropertyKey:
+        if (object is CubicVertexBase) {
+          return object.inY;
+        }
+        break;
+      case CubicVertexBase.outXPropertyKey:
+        if (object is CubicVertexBase) {
+          return object.outX;
+        }
+        break;
+      case CubicVertexBase.outYPropertyKey:
+        if (object is CubicVertexBase) {
+          return object.outY;
+        }
+        break;
+      case ParametricPathBase.widthPropertyKey:
+        if (object is ParametricPathBase) {
+          return object.width;
+        }
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        if (object is ParametricPathBase) {
+          return object.height;
+        }
+        break;
+      case ArtboardBase.widthPropertyKey:
+        if (object is ArtboardBase) {
+          return object.width;
+        }
+        break;
+      case ArtboardBase.heightPropertyKey:
+        if (object is ArtboardBase) {
+          return object.height;
+        }
+        break;
+      case ArtboardBase.xPropertyKey:
+        if (object is ArtboardBase) {
+          return object.x;
+        }
+        break;
+      case ArtboardBase.yPropertyKey:
+        if (object is ArtboardBase) {
+          return object.y;
+        }
+        break;
+      case ArtboardBase.originXPropertyKey:
+        if (object is ArtboardBase) {
+          return object.originX;
+        }
+        break;
+      case ArtboardBase.originYPropertyKey:
+        if (object is ArtboardBase) {
+          return object.originY;
         }
         break;
     }
