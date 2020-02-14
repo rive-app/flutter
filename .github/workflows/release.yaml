@@ -38,12 +38,6 @@ jobs:
       - run: cd editor && flutter config --enable-web
       - run: cd editor && flutter build web --release -v
 
-      - name: Archive Production Artifact
-        uses: actions/upload-artifact@master
-        with:
-          name: web-build
-          path: editor/build/web
-
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -53,17 +47,8 @@ jobs:
           files: |
             CHANGELOG.md
 
-      # - name: Checkout code
-      #   uses: actions/checkout@master
-      # - name: Create Release
-      #   id: create_release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions
-      #   with:
-      #     tag_name: ${{ github.ref }}
-      #     release_name: Release ${{ github.ref }}
-      #     body: |
-      #       Changes in this Release:
-      #     draft: false
-      #     prerelease: false
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          deploy_key: ${{ secrets.RIVE_ENG_PRIVATE_KEY }}
+          publish_dir: ./editor/build/web
