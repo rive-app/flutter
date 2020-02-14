@@ -9,7 +9,7 @@ on:
       # tags:
       # - 'v*'
 
-name: Create Release
+name: Release
 
 jobs:
   build:

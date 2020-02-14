@@ -1,4 +1,4 @@
-![Create Release](https://github.com/rive-app/rive-editor-flutter/workflows/Create%20Release/badge.svg)
+![Release](https://github.com/rive-app/rive-editor-flutter/workflows/Create%20Release/badge.svg)
 
 # core-dart
 
