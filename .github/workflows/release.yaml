@@ -47,8 +47,8 @@ jobs:
           files: |
             CHANGELOG.md
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          deploy_key: ${{ secrets.RIVE_ENG_PRIVATE_KEY }}
-          publish_dir: ./editor/build/web
+      # - name: Deploy
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     deploy_key: ${{ secrets.RIVE_ENG_PRIVATE_KEY }}
+      #     publish_dir: ./editor/build/web
