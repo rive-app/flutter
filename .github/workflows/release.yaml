@@ -125,7 +125,7 @@ jobs:
       - run: mkdir release
       - run: cd release && mkdir web
       - run: cd release && mkdir macos
-      - run: cd release && mkdir windows
+      # - run: cd release && mkdir windows
       - uses: actions/download-artifact@master
         with:
           name: changes
@@ -138,19 +138,43 @@ jobs:
         with:
           name: macos-build
           path: release/macos
-      - uses: actions/download-artifact@master
-        with:
-          name: windows-build
-          path: release/windows
+      # - uses: actions/download-artifact@master
+      #   with:
+      #     name: windows-build
+      #     path: release/windows
       - uses: montudor/action-zip@v0.1.0
         with:
           args: zip -qq -r ./release/release.zip ./release
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: actions/upload-artifact@master
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
-          files: |
-            CHANGELOG.md
-            release/*.zip
+          name: archive
+          path: ./release
+
+  deploy:
+    needs: bundle
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - run: mkdir release
+    - uses: actions/download-artifact@master
+      with:
+        name: archive
+        path: ./release
+    - uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --follow-symlinks --delete
+      env:
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # AWS_REGION: 'us-west-1'   # optional: defaults to us-east-1
+        SOURCE_DIR: './release'      # optional: defaults to entire repository
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Development Build"
+        files: |
+          CHANGELOG.md
+          release/*.zip
