@@ -1,7 +1,7 @@
 import '../field_type.dart';
 
 class BoolFieldType extends FieldType {
-  BoolFieldType() : super("bool");
+  BoolFieldType() : super('bool');
 
   @override
   String encode(String writerName, String varName) {

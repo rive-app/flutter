@@ -1,7 +1,7 @@
 import '../field_type.dart';
 
 class DoubleFieldType extends FieldType {
-  DoubleFieldType() : super("double");
+  DoubleFieldType() : super('double');
 
   @override
   String encode(String writerName, String varName) {

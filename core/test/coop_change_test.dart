@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
+import 'package:core/id.dart';
 import "package:test/test.dart";
 
 void main() {
@@ -13,14 +14,14 @@ void main() {
         ..id = 42
         ..objects = [
           ObjectChanges()
-            ..objectId = 222
+            ..objectId = const Id(1, 222)
             ..changes = [
               Change()
                 ..op = 10
                 ..value = Uint8List.fromList([7, 31, 1982]),
             ],
           ObjectChanges()
-            ..objectId = -1
+            ..objectId = const Id(1, 1)
             ..changes = [
               Change()
                 ..op = 1
@@ -36,12 +37,12 @@ void main() {
       expect(changeSet.id, 42);
       expect(changeSet.objects.length, 2);
 
-      expect(changeSet.objects[0].objectId, 222);
+      expect(changeSet.objects[0].objectId, const Id(1, 222));
       expect(changeSet.objects[0].changes[0].op, 10);
       expect(changeSet.objects[0].changes[0].value,
           Uint8List.fromList([7, 31, 1982]));
 
-      expect(changeSet.objects[1].objectId, -1);
+      expect(changeSet.objects[1].objectId, const Id(1, 1));
       expect(changeSet.objects[1].changes[0].op, 1);
       expect(changeSet.objects[1].changes[0].value, Uint8List.fromList([10]));
     }

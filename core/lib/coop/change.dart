@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:binary_buffer/binary_reader.dart';
+import 'package:core/id.dart';
 
 import 'coop_command.dart';
 
@@ -35,11 +36,11 @@ class Change {
 
 /// A list of changes for an object.
 class ObjectChanges {
-  int objectId;
+  Id objectId;
   List<Change> changes;
 
   void serialize(BinaryWriter writer) {
-    writer.writeVarInt(objectId);
+    objectId.serialize(writer);
     writer.writeVarUint(changes?.length ?? 0);
     if (changes != null) {
       for (final change in changes) {
@@ -49,7 +50,7 @@ class ObjectChanges {
   }
 
   void deserialize(BinaryReader reader) {
-    objectId = reader.readVarInt();
+    objectId = Id.deserialize(reader);
     int changesLength = reader.readVarUint();
     changes = List<Change>(changesLength);
     for (int i = 0; i < changes.length; i++) {

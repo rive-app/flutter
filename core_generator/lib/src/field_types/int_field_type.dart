@@ -1,7 +1,7 @@
 import '../field_type.dart';
 
 class IntFieldType extends FieldType {
-  IntFieldType() : super("int");
+  IntFieldType({String name = 'int'}) : super(name, dartName: 'int');
 
   @override
   String encode(String writerName, String varName) {

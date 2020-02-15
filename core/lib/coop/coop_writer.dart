@@ -12,9 +12,10 @@ class CoopWriter {
   final Write write;
   CoopWriter(this.write);
 
-  void writeHello() {
-    var writer = BinaryWriter(alignment: 1);
+  void writeHello(int clientId) {
+    var writer = BinaryWriter(alignment: 4);
     writer.writeVarUint(CoopCommand.hello);
+    writer.writeVarUint(clientId);
     write(writer.uint8Buffer);
   }
 
@@ -59,11 +60,10 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  void writeAccept(int changeId, int serverChangeId) {
+  void writeAccept(int changeId) {
     var writer = BinaryWriter(alignment: 8);
     writer.writeVarUint(CoopCommand.accept);
     writer.writeVarUint(changeId);
-    writer.writeVarUint(serverChangeId);
     write(writer.uint8Buffer);
   }
 
@@ -74,12 +74,19 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  /// Upgrade an object id from a signed (local) to an unsigned (server) one.
-  void writeChangeId(int fromId, int toId) {
+
+  void writeIds(int min, int max) {
     var writer = BinaryWriter(alignment: 8);
-    writer.writeVarUint(CoopCommand.changeId);
-    writer.writeVarInt(fromId);
-    writer.writeVarUint(toId);
+    writer.writeVarUint(CoopCommand.ids);
+    writer.writeVarUint(min);
+    writer.writeVarUint(max);
+    write(writer.uint8Buffer);
+  }
+
+  void writeRequestIds(int amount) {
+    var writer = BinaryWriter(alignment: 8);
+    writer.writeVarUint(CoopCommand.requestIds);
+    writer.writeVarUint(amount);
     write(writer.uint8Buffer);
   }
 }

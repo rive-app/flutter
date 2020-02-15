@@ -9,15 +9,9 @@ class CoopServerClient extends CoopReader {
   CoopWriter _writer;
   final int userOwnerId;
   final int id;
+  final int clientId;
   // final HttpRequest request;
   final CoopIsolateProcess context;
-
-  // Do these need to be persisted somewhere? If a user stores local changes
-  // against an old id and the server is restarted/the user reconnects, they
-  // could send up old ids that still need to be remapped. Consider storing
-  // these somewhere where they can be retrieved during authentication of the
-  // session.
-  final Map<int, int> changedIds = {};
 
   CoopWriter get writer => _writer;
 
@@ -27,10 +21,10 @@ class CoopServerClient extends CoopReader {
     }
   }
 
-  CoopServerClient(this.context, this.id, this.userOwnerId) {
+  CoopServerClient(this.context, this.id, this.userOwnerId, this.clientId) {
     _writer = CoopWriter(write);
 
-    _writer.writeHello();
+    _writer.writeHello(clientId);
   }
 
   void write(Uint8List buffer) {
@@ -40,9 +34,8 @@ class CoopServerClient extends CoopReader {
 
   @override
   void recvChange(ChangeSet changes) {
-    int serverChangeId = context.attemptChange(this, changes);
-    if (serverChangeId != 0) {
-      _writer.writeAccept(changes.id, serverChangeId);
+    if (context.attemptChange(this, changes)) {
+      _writer.writeAccept(changes.id);
       debounce(context.persist, duration: const Duration(seconds: 2));
     } else {
       _writer.writeReject(changes.id);
@@ -82,12 +75,12 @@ class CoopServerClient extends CoopReader {
   }
 
   @override
-  Future<void> recvHello() {
+  Future<void> recvHello(int clientId) {
     throw UnsupportedError("Server should never receive hello.");
   }
 
   @override
-  Future<void> recvAccept(int changeId, int serverChangeId) {
+  Future<void> recvAccept(int changeId) {
     throw UnsupportedError("Server should never receive accept.");
   }
 
@@ -97,12 +90,26 @@ class CoopServerClient extends CoopReader {
   }
 
   @override
-  Future<void> recvChangeId(int from, int to) {
-    throw UnsupportedError("Server should never receive change id.");
+  Future<void> recvIds(int min, int max) {
+    throw UnsupportedError("Server should never receive ids.");
+  }
+
+  @override
+  Future<void> recvRequestIds(int amount) async {
+    IdRange range = context.allocateIds(amount);
+    debounce(context.persist, duration: const Duration(seconds: 2));
+    writer.writeIds(range.min, range.max);
   }
 
   @override
   Future<void> recvReady() {
     throw UnsupportedError("Server should never receive ready.");
   }
+}
+
+class IdRange {
+  final int min;
+  final int max;
+
+  IdRange(this.min, this.max);
 }
