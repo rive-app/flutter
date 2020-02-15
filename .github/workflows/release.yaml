@@ -41,6 +41,64 @@ jobs:
           name: web-build
           path: ./editor/build/web
 
+  build_macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup SSH Keys and known_hosts
+        env:
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+        run: |
+          export SSH_AUTH_SOCK=/tmp/ssh_agent.sock
+          mkdir -p ~/.ssh
+          ssh-keyscan -t rsa github.com
+          ssh-agent -a $SSH_AUTH_SOCK
+          echo "${{ secrets.RIVE_ENG_PRIVATE_KEY }}" > ssh.key
+          chmod 600 ssh.key
+          ssh-add ssh.key
+          git submodule update --init --force --recursive
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'dev'
+      - run: cd editor && flutter pub get
+      - run: cd editor && flutter test
+      - run: cd editor && flutter config --enable-web
+      - run: cd editor && flutter build macos --release -v
+    
+      - uses: actions/upload-artifact@master
+        with:
+          name: macos-build
+          path: ./editor/build/macos
+
+  build_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup SSH Keys and known_hosts
+        env:
+          GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
+        run: |
+          export SSH_AUTH_SOCK=/tmp/ssh_agent.sock
+          mkdir -p ~/.ssh
+          ssh-keyscan -t rsa github.com
+          ssh-agent -a $SSH_AUTH_SOCK
+          echo "${{ secrets.RIVE_ENG_PRIVATE_KEY }}" > ssh.key
+          chmod 600 ssh.key
+          ssh-add ssh.key
+          git submodule update --init --force --recursive
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'dev'
+      - run: cd editor && flutter pub get
+      - run: cd editor && flutter test
+      - run: cd editor && flutter config --enable-web
+      - run: cd editor && flutter build windows --release -v
+    
+      - uses: actions/upload-artifact@master
+        with:
+          name: windows-build
+          path: ./editor/build/windows
+
   changes:
     runs-on: ubuntu-latest
     steps:
@@ -60,7 +118,7 @@ jobs:
           path: changes
 
   bundle:
-    needs: [changes, build_web]
+    needs: [changes, build_web, build_macos, build_windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -76,6 +134,14 @@ jobs:
         with:
           name: web-build
           path: release/web
+      - uses: actions/download-artifact@master
+        with:
+          name: macos-build
+          path: release/macos
+      - uses: actions/download-artifact@master
+        with:
+          name: windows-build
+          path: release/windows
       - uses: montudor/action-zip@v0.1.0
         with:
           args: zip -qq -r ./release/release.zip ./release
@@ -87,4 +153,4 @@ jobs:
           title: "Development Build"
           files: |
             CHANGELOG.md
-            ./release/release.zip
+            release/*.zip
