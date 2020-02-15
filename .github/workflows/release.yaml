@@ -2,8 +2,8 @@ on:
     push:
       branches:
         - master
-      #   - 'releases/**'
-      #   - '!releases/**-alpha'
+        - 'releases/**'
+        # - '!releases/**-alpha'
       # paths:
       #     - '**.dart'
       # tags:
@@ -12,13 +12,11 @@ on:
 name: Release
 
 jobs:
-  build:
+  build_web:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v1
       - name: Setup SSH Keys and known_hosts
-        # Warning, this took a lot of massaging. Please don't mess with this unless the build is broken.
         env:
           GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no"
         run: |
@@ -37,7 +35,50 @@ jobs:
       - run: cd editor && flutter test
       - run: cd editor && flutter config --enable-web
       - run: cd editor && flutter build web --release -v
+    
+      - uses: actions/upload-artifact@master
+        with:
+          name: web-build
+          path: ./editor/build/web
 
+  changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Conventional Changelog Action
+        uses: TriPSs/conventional-changelog-action@v1.2.0
+        with:
+          github-token: ${{ secrets.github_token }}
+          tag-prefix: 'v'
+          output-file: 'CHANGELOG.md'
+          changelog-release-count: 0
+      - run: mkdir changes
+      - run: cp -R ./CHANGELOG.md ./changes
+      - uses: actions/upload-artifact@master
+        with:
+          name: changes
+          path: changes
+
+  bundle:
+    needs: [changes, build_web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: mkdir release
+      - run: cd release release && mkdir web
+      - run: cd release release && mkdir macos
+      - run: cd release release && mkdir windows
+      - uses: actions/download-artifact@master
+        with:
+          name: changes
+          path: release
+      - uses: actions/download-artifact@master
+        with:
+          name: web-build
+          path: release/web
+      - uses: montudor/action-zip@v0.1.0
+        with:
+          args: zip -qq -r ./release/release.zip ./release
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -46,9 +87,4 @@ jobs:
           title: "Development Build"
           files: |
             CHANGELOG.md
-
-      # - name: Deploy
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     deploy_key: ${{ secrets.RIVE_ENG_PRIVATE_KEY }}
-      #     publish_dir: ./editor/build/web
+            ./release/release.zip
