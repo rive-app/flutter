@@ -163,6 +163,7 @@ jobs:
         path: ./release
     - run: cp -R ./release/release.zip ./release/archive
     - run: cp -R ./releases.xml ./release/archive
+    - run: cp -R ./CHANGELOG.md ./release/archive
     # - name: Configure AWS credentials
     #   uses: aws-actions/configure-aws-credentials@v1
     #   with:
@@ -179,5 +180,4 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          CHANGELOG.md
-          release/archive/*.zip
+            ./release/archive/*
