@@ -39,11 +39,14 @@ class EllipseTool extends StageTool {
 
     var file = stage.riveFile;
     var artboard = file.artboards.first;
+    
     file.startAdd();
     file.add(_shape);
     file.add(_ellipse);
+
     _shape.appendChild(_ellipse);
     artboard.appendChild(_shape);
+
     file.cleanDirt();
     file.completeAdd();
   }

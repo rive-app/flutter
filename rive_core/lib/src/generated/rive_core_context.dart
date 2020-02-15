@@ -44,6 +44,16 @@ abstract class RiveCoreContext extends CoreContext {
   }
 
   @override
+  bool isPropertyId(int propertyKey) {
+    switch (propertyKey) {
+      case ComponentBase.parentIdPropertyKey:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  @override
   void applyCoopChanges(ObjectChanges objectChanges) {
     Core<CoreContext> object = resolve(objectChanges.objectId);
     var justAdded = false;
@@ -69,7 +79,10 @@ abstract class RiveCoreContext extends CoreContext {
           }
           break;
         case ComponentBase.dependentIdsPropertyKey:
-          var value = reader.readIntList();
+          var value = List<Id>(reader.readVarUint());
+          for (int i = 0; i < value.length; i++) {
+            value[i] = Id.deserialize(reader);
+          }
           setObjectProperty(object, change.op, value);
           break;
         case ComponentBase.namePropertyKey:
@@ -77,8 +90,7 @@ abstract class RiveCoreContext extends CoreContext {
           setObjectProperty(object, change.op, value);
           break;
         case ComponentBase.parentIdPropertyKey:
-        case DrawableBase.blendModePropertyKey:
-          var value = reader.readVarInt();
+          var value = Id.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
         case ComponentBase.childOrderPropertyKey:
@@ -112,6 +124,10 @@ abstract class RiveCoreContext extends CoreContext {
           var value = reader.readFloat64();
           setObjectProperty(object, change.op, value);
           break;
+        case DrawableBase.blendModePropertyKey:
+          var value = reader.readVarInt();
+          setObjectProperty(object, change.op, value);
+          break;
         case ShapeBase.transformAffectsStrokePropertyKey:
           var value = reader.readInt8() == 1;
           setObjectProperty(object, change.op, value);
@@ -138,9 +154,12 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ComponentBase.dependentIdsPropertyKey:
-        if (value != null && value is List<int>) {
+        if (value != null && value is List<Id>) {
           var writer = BinaryWriter(alignment: 8);
-          writer.writeIntList(value);
+          writer.writeVarUint(value.length);
+          for (final id in value) {
+            id.serialize(writer);
+          }
           change.value = writer.uint8Buffer;
         } else {
           return null;
@@ -156,10 +175,9 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ComponentBase.parentIdPropertyKey:
-      case DrawableBase.blendModePropertyKey:
-        if (value != null && value is int) {
+        if (value != null && value is Id) {
           var writer = BinaryWriter(alignment: 4);
-          writer.writeVarInt(value);
+          value.serialize(writer);
           change.value = writer.uint8Buffer;
         } else {
           return null;
@@ -205,6 +223,15 @@ abstract class RiveCoreContext extends CoreContext {
           return null;
         }
         break;
+      case DrawableBase.blendModePropertyKey:
+        if (value != null && value is int) {
+          var writer = BinaryWriter(alignment: 4);
+          writer.writeVarInt(value);
+          change.value = writer.uint8Buffer;
+        } else {
+          return null;
+        }
+        break;
       case ShapeBase.transformAffectsStrokePropertyKey:
         if (value != null && value is bool) {
           var writer = BinaryWriter(alignment: 1);
@@ -224,7 +251,7 @@ abstract class RiveCoreContext extends CoreContext {
   void setObjectProperty(Core object, int propertyKey, Object value) {
     switch (propertyKey) {
       case ComponentBase.dependentIdsPropertyKey:
-        if (object is ComponentBase && value is List<int>) {
+        if (object is ComponentBase && value is List<Id>) {
           object.dependentIds = value;
         }
         break;
@@ -234,7 +261,7 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ComponentBase.parentIdPropertyKey:
-        if (object is ComponentBase && value is int) {
+        if (object is ComponentBase && value is Id) {
           object.parentId = value;
         }
         break;

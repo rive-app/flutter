@@ -27,6 +27,7 @@ abstract class Path extends PathBase {
 
   @override
   void visitAncestor(Component ancestor) {
+    print("PATH IS VISITING FRIENDS $ancestor");
     if (ancestor is Shape) {
       _changeShape(ancestor);
     }

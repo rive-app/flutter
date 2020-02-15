@@ -50,6 +50,7 @@ abstract class Component extends ComponentBase<RiveFile> {
 
   /// Find the artboard in the hierarchy.
   bool resolveArtboard() {
+    print("RESOLVING ARTBOARD FOR $name");
     for (Component curr = this; curr != null; curr = curr.parent) {
       visitAncestor(curr);
       if (curr is Artboard) {
@@ -74,7 +75,7 @@ abstract class Component extends ComponentBase<RiveFile> {
   void userDataChanged(dynamic from, dynamic to) {}
 
   @override
-  void parentIdChanged(int from, int to) {
+  void parentIdChanged(Id from, Id to) {
     super.parentIdChanged(from, to);
     parent = context?.resolve(to);
   }

@@ -2,6 +2,7 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
+import 'package:core/id.dart';
 import 'package:flutter/material.dart';
 import 'package:fractional/fractional.dart';
 import 'rive_core_context.dart';
@@ -9,27 +10,27 @@ import 'rive_core_context.dart';
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   /// --------------------------------------------------------------------------
   /// DependentIds field with key 3.
-  List<int> _dependentIds;
+  List<Id> _dependentIds;
   static const int dependentIdsPropertyKey = 3;
 
   /// List of integer ids for objects registered in the same context that depend
   /// on this object.
-  List<int> get dependentIds => _dependentIds;
+  List<Id> get dependentIds => _dependentIds;
 
   /// Change the [_dependentIds] field value.
   /// [dependentIdsChanged] will be invoked only if the field's value has
   /// changed.
-  set dependentIds(List<int> value) {
+  set dependentIds(List<Id> value) {
     if (listEquals(_dependentIds, value)) {
       return;
     }
-    List<int> from = _dependentIds;
+    List<Id> from = _dependentIds;
     _dependentIds = value;
     dependentIdsChanged(from, value);
   }
 
   @mustCallSuper
-  void dependentIdsChanged(List<int> from, List<int> to) {
+  void dependentIdsChanged(List<Id> from, List<Id> to) {
     onPropertyChanged(dependentIdsPropertyKey, from, to);
   }
 
@@ -60,25 +61,25 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
 
   /// --------------------------------------------------------------------------
   /// ParentId field with key 5.
-  int _parentId;
+  Id _parentId;
   static const int parentIdPropertyKey = 5;
 
   /// Identifier used to track parent ContainerComponent.
-  int get parentId => _parentId;
+  Id get parentId => _parentId;
 
   /// Change the [_parentId] field value.
   /// [parentIdChanged] will be invoked only if the field's value has changed.
-  set parentId(int value) {
+  set parentId(Id value) {
     if (_parentId == value) {
       return;
     }
-    int from = _parentId;
+    Id from = _parentId;
     _parentId = value;
     parentIdChanged(from, value);
   }
 
   @mustCallSuper
-  void parentIdChanged(int from, int to) {
+  void parentIdChanged(Id from, Id to) {
     onPropertyChanged(parentIdPropertyKey, from, to);
   }
 
