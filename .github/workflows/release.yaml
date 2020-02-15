@@ -62,7 +62,7 @@ jobs:
           channel: 'dev'
       - run: cd editor && flutter pub get
       - run: cd editor && flutter test
-      - run: cd editor && flutter config --enable-web
+      - run: cd editor && flutter config --enable-macos-desktop
       - run: cd editor && flutter build macos --release -v
     
       - uses: actions/upload-artifact@master
@@ -91,7 +91,7 @@ jobs:
           channel: 'dev'
       - run: cd editor && flutter pub get
       - run: cd editor && flutter test
-      - run: cd editor && flutter config --enable-web
+      - run: cd editor && flutter config --enable-windows-desktop
       - run: cd editor && flutter build windows --release -v
     
       - uses: actions/upload-artifact@master
