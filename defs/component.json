@@ -3,7 +3,7 @@
   "abstract": true,
   "properties": {
     "dependentIds": {
-      "type": "List<int>",
+      "type": "List<Id>",
       "key": {
         "int": 3,
         "string": "dependentIds"
@@ -19,7 +19,7 @@
       "description": "Non-unique identifier, used to give friendly names to elements in the hierarchy. Runtimes provide an API for finding components by this [name]."
     },
     "parentId": {
-      "type": "int",
+      "type": "Id",
       "key": {
         "int": 5,
         "string": "parentId"
