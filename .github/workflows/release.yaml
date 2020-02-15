@@ -65,9 +65,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: mkdir release
-      - run: cd release release && mkdir web
-      - run: cd release release && mkdir macos
-      - run: cd release release && mkdir windows
+      - run: cd release && mkdir web
+      - run: cd release && mkdir macos
+      - run: cd release && mkdir windows
       - uses: actions/download-artifact@master
         with:
           name: changes
