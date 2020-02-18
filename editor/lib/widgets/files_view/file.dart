@@ -29,13 +29,32 @@ class _FileViewWidgetState extends State<FileViewWidget> {
     const kBottomHeight = 40.0;
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
     final _rive = RiveContext.of(context);
-    ;
 
     return ValueListenableBuilder<SelectionState>(
       valueListenable: widget.file.selectionState,
       child: ListenableBuilder<RiveFile>(
         listenable: widget.file,
         builder: (context, file, _) {
+          // Attempt to load the file thumbnail
+
+          var background = Image.asset(
+            'assets/images/file_background.png',
+            fit: BoxFit.none,
+            filterQuality: FilterQuality.none,
+          );
+
+          if (file.preview != null && file.preview.isNotEmpty) {
+            // TODO: Do some resilient handling of network errors here
+            // Commenting out this for the moment to remove network errors
+            /*
+            background = Image.network(
+              file.preview,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.medium,
+            );
+            */
+          }
+
           return Column(
             children: <Widget>[
               Expanded(
@@ -47,26 +66,9 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                     ),
                     color: ThemeUtils.backgroundDarkGrey,
                   ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: <Widget>[
-                      Positioned.fill(
-                        child: Image.asset(
-                          "assets/images/file_background.png",
-                          fit: BoxFit.none,
-                          filterQuality: FilterQuality.none,
-                        ),
-                      ),
-                      if (file.preview != null && file.preview.isNotEmpty) ...[
-                        Positioned.fill(
-                          child: Image.network(
-                            file.preview,
-                            fit: BoxFit.cover,
-                            filterQuality: FilterQuality.medium,
-                          ),
-                        ),
-                      ],
-                    ],
+                  child: Container(
+                    constraints: const BoxConstraints.expand(),
+                    child: background,
                   ),
                 ),
               ),
