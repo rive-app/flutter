@@ -6,14 +6,29 @@ on:
         # - '!releases/**-alpha'
       # paths:
       #     - '**.dart'
-      # tags:
-      # - 'v*'
+      tags:
+      - 'v*'
 
 name: Release
 
 jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          
   build_web:
     runs-on: ubuntu-latest
+    needs: create_release
     steps:
       - uses: actions/checkout@v1
       - name: Setup SSH Keys and known_hosts
@@ -36,13 +51,28 @@ jobs:
       - run: cd editor && flutter config --enable-web
       - run: cd editor && flutter build web --release -v
     
-      - uses: actions/upload-artifact@master
+      # - uses: actions/upload-artifact@master
+      #   with:
+      #     name: web-build
+      #     path: ./editor/build/web
+
+      - uses: montudor/action-zip@v0.1.0
         with:
-          name: web-build
-          path: ./editor/build/web
+          args: zip -qq -r ./editor/build/web/web-app.zip ./editor/build/web
+      - name: Upload Web Zip
+        id: web-zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./editor/build/web/web-app.zip
+          asset_name: web-app.zip
+          asset_content_type: application/zip
 
   build_macos:
     runs-on: macos-latest
+    needs: create_release
     steps:
       - uses: actions/checkout@v1
       - name: Setup SSH Keys and known_hosts
@@ -65,10 +95,25 @@ jobs:
       - run: cd editor && flutter config --enable-macos-desktop
       - run: cd editor && flutter build macos --release -v
     
-      - uses: actions/upload-artifact@master
+      # - uses: actions/upload-artifact@master
+      #   with:
+      #     name: macos-build
+      #     path: ./editor/build/macos
+
+      - uses: montudor/action-zip@v0.1.0
         with:
-          name: macos-build
-          path: ./editor/build/macos
+          args: zip -qq -r ./editor/build/macos/mac-app.zip ./editor/build/macos
+      - name: Upload MacOS Zip
+        id: macos-zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./editor/build/web/mac-app.zip
+          asset_name: mac-app.zip
+          asset_content_type: application/zip
+
 
   # build_windows:
   #   runs-on: windows-latest
@@ -99,85 +144,96 @@ jobs:
   #         name: windows-build
   #         path: ./editor/build/windows
 
-  changes:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: Conventional Changelog Action
-        uses: TriPSs/conventional-changelog-action@v1.2.0
-        with:
-          github-token: ${{ secrets.github_token }}
-          tag-prefix: 'v'
-          output-file: 'CHANGELOG.md'
-          changelog-release-count: 0
-      - run: mkdir changes
-      - run: cp -R ./CHANGELOG.md ./changes
-      - uses: actions/upload-artifact@master
-        with:
-          name: changes
-          path: changes
+  # changes:
+  #   runs-on: ubuntu-latest
+  #   needs: create_release
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - name: Conventional Changelog Action
+  #       uses: TriPSs/conventional-changelog-action@v1.2.0
+  #       with:
+  #         github-token: ${{ secrets.github_token }}
+  #         tag-prefix: 'v'
+  #         output-file: 'CHANGELOG.md'
+  #         changelog-release-count: 0
+  #     - run: mkdir changes
+  #     - run: cp -R ./CHANGELOG.md ./changes
+  #     - uses: actions/upload-artifact@master
+  #       with:
+  #         name: changes
+  #         path: changes
 
-  bundle:
-    needs: [changes, build_web, build_macos]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - run: mkdir release
-      - run: cd release && mkdir web
-      - run: cd release && mkdir macos
-      # - run: cd release && mkdir windows
-      - uses: actions/download-artifact@master
-        with:
-          name: changes
-          path: release
-      - uses: actions/download-artifact@master
-        with:
-          name: web-build
-          path: release/web
-      - uses: actions/download-artifact@master
-        with:
-          name: macos-build
-          path: release/macos
-      # - uses: actions/download-artifact@master
-      #   with:
-      #     name: windows-build
-      #     path: release/windows
-      - uses: montudor/action-zip@v0.1.0
-        with:
-          args: zip -qq -r ./release/release.zip ./release
-      - uses: actions/upload-artifact@master
-        with:
-          name: archive
-          path: ./release
+  # bundle:
+  #   needs: [changes, build_web, build_macos]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v1
+  #     - run: mkdir release
+  #     - run: cd release && mkdir web
+  #     - run: cd release && mkdir macos
+  #     # - run: cd release && mkdir windows
+  #     - uses: actions/download-artifact@master
+  #       with:
+  #         name: changes
+  #         path: release
+  #     - uses: actions/download-artifact@master
+  #       with:
+  #         name: web-build
+  #         path: release/web
+  #     - uses: actions/download-artifact@master
+  #       with:
+  #         name: macos-build
+  #         path: release/macos
+  #     # - uses: actions/download-artifact@master
+  #     #   with:
+  #     #     name: windows-build
+  #     #     path: release/windows
+  #     - uses: montudor/action-zip@v0.1.0
+  #       with:
+  #         args: zip -qq -r ./release/release.zip ./release
+  #     - uses: actions/upload-artifact@master
+  #       with:
+  #         name: archive
+  #         path: ./release
 
-  deploy:
-    needs: bundle
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - run: mkdir release
-    - run: cd release && mkdir archive
-    - uses: actions/download-artifact@master
-      with:
-        name: archive
-        path: ./release
-    - run: cp -R ./release/release.zip ./release/archive
-    - run: cp -R ./releases.xml ./release/archive
-    - run: cp -R ./CHANGELOG.md ./release/archive
-    # - name: Configure AWS credentials
-    #   uses: aws-actions/configure-aws-credentials@v1
-    #   with:
-    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     aws-region: us-east-2
-    # - name: Copy files to S3 with the AWS CLI
-    #   run: |
-    #     aws s3 cp ./release/archive s3://rive-builds/releases/ --recursive 
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        prerelease: true
-        title: "Development Build"
-        # files: |
-        #     ./release/archive/*
+  # deploy:
+  #   needs: bundle
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - run: mkdir release
+  #   - run: cd release && mkdir archive
+  #   - uses: actions/download-artifact@master
+  #     with:
+  #       name: archive
+  #       path: ./release
+  #   - run: cp -R ./release/release.zip ./release/archive
+  #   - run: cp -R ./releases.xml ./release/archive
+  #   - run: cp -R ./CHANGELOG.md ./release/archive
+  #   # - name: Configure AWS credentials
+  #   #   uses: aws-actions/configure-aws-credentials@v1
+  #   #   with:
+  #   #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #   #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #   #     aws-region: us-east-2
+  #   # - name: Copy files to S3 with the AWS CLI
+  #   #   run: |
+  #   #     aws s3 cp ./release/archive s3://rive-builds/releases/ --recursive 
+  #   # - uses: "marvinpinto/action-automatic-releases@latest"
+  #   #   with:
+  #   #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+  #   #     automatic_release_tag: "latest"
+  #   #     prerelease: true
+  #   #     title: "Development Build"
+  #       # files: |
+  #       #     ./release/archive/*
+  #   - name: Upload Release Asset
+  #     id: upload-release-asset 
+  #     uses: actions/upload-release-asset@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #       asset_path: ./release/archive/archive.zip
+  #       asset_name: archive.zip
+  #       asset_content_type: application/zip
