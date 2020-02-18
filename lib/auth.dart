@@ -58,8 +58,7 @@ class RiveAuth {
       await WindowUtils.closeWebView('auth');
       await api.persist();
     }
-
-    return true;
+    return spectre.isNotEmpty;
   }
 
   Future<RiveUser> whoami() async {
