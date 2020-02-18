@@ -69,7 +69,8 @@ class _LoginState extends State<Login> {
                     decoration: const InputDecoration(hintText: 'Password'),
                     onSubmitted: (_) => _submit(rive),
                   ),
-                  FlatButton(
+                  Container(height: 20.0),
+                  RaisedButton(
                     child: Text(_isLoggingIn ? 'Verifying' : 'Login'),
                     onPressed: _isLoggingIn ? null : () => _submit(rive),
                   ),

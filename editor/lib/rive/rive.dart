@@ -150,6 +150,8 @@ class Rive with RiveFileDelegate {
     // await api.clearCookies();
     var me = await auth.whoami();
 
+    print("whoami ready: ${me != null}");
+
     if (me != null) {
       _user.value = me;
       tabs.value = [
@@ -160,7 +162,8 @@ class Rive with RiveFileDelegate {
       _prefs ??= await SharedPreferences.getInstance();
 
       // spectre is our session token
-      await _prefs.setString('token', api.cookies['spectre']);
+      final _spectreToken = api.cookies['spectre'];
+      await _prefs.setString('token', _spectreToken);
 
       openTab(tabs.value.first);
 
@@ -310,7 +313,7 @@ class Rive with RiveFileDelegate {
     file.value = nextFile;
     selection.clear();
     _stage?.dispose();
-      nextFile.advance(0);
+    nextFile.advance(0);
     _stage = Stage(this, file.value);
     _stage.tool = TranslateTool();
     stage.value = _stage;
