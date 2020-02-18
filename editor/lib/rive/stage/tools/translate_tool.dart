@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:rive_core/math/vec2d.dart';
 import '../items/stage_artboard.dart';
 
@@ -18,6 +20,9 @@ class TranslateTool extends StageTool {
       }
     }
   }
+
+  @override
+  void paint(Canvas canvas) {}
 
   @override
   String get icon => 'tool-translate';

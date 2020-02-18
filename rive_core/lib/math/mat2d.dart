@@ -93,6 +93,13 @@ class Mat2D {
     o[5] = a5;
   }
 
+  static void scaleByValues(Mat2D o, double x, double y) {
+    o[0] *= x;
+    o[1] *= x;
+    o[2] *= y;
+    o[3] *= y;
+  }
+
   static void multiply(Mat2D o, Mat2D a, Mat2D b) {
     double a0 = a[0],
         a1 = a[1],

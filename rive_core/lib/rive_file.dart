@@ -81,8 +81,7 @@ class RiveFile extends RiveCoreContext {
       if (component.artboard != null) {
         _needDependenciesOrdered.add(component.artboard);
         print("Component with good artboard ${component.name}");
-      }
-      else {
+      } else {
         print("WHY IS THE ARTBOARD NULL $component ${component.name}??");
       }
       component.buildDependencies();
@@ -168,7 +167,7 @@ class RiveFile extends RiveCoreContext {
     markNeedsAdvance();
   }
 
-  /// Mark as an artboard as needing its dependencies sorted.
+  /// Mark an artboard as needing its dependencies sorted.
   void markDependencyOrderDirty(Artboard artboard) {
     _dirt |= _RiveDirt.dependencyOrder;
     _needDependenciesOrdered.add(artboard);
@@ -183,7 +182,8 @@ class RiveFile extends RiveCoreContext {
       delegates.forEach((delegate) => delegate.markNeedsAdvance());
 
   @override
-  void onAdded(Component object) {
+  void onAddedDirty(Component object) {
+    print("ADDING ${object.name} ${object.id} ${object.parentId}");
     if (object.parentId != null) {
       object.parent = object.context?.resolve(object.parentId);
       if (object.parent == null) {
@@ -192,6 +192,10 @@ class RiveFile extends RiveCoreContext {
         object.parent.childAdded(object);
       }
     }
+  }
+
+  @override
+  void onAddedClean(Component object) {
     delegates.forEach((delegate) => delegate.onObjectAdded(object));
     if (object is Artboard) {
       artboards.add(object);

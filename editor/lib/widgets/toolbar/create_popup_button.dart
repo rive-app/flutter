@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
+import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
@@ -25,11 +26,11 @@ class CreatePopupButton extends StatelessWidget {
               shortcut: ShortcutAction.rectangleTool,
               select: (Rive rive) {},
             ),
-            PopupContextItem(
+            ToolPopupItem(
               'Ellipse',
-              icon: 'tool-ellipse',
+              rive: rive,
+              tool: EllipseTool.instance,
               shortcut: ShortcutAction.ellipseTool,
-              select: (Rive rive) {},
             ),
             PopupContextItem(
               'Polygon',

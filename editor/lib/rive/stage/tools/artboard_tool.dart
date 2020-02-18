@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -36,6 +37,9 @@ class ArtboardTool extends StageTool {
     _artboard.height = (_startWorldMouse[1] - worldMouse[1]).abs();
   }
 
+  @override
+  void paint(Canvas canvas) {}
+  
   @override
   String get icon => 'tool-artboard';
 

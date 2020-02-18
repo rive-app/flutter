@@ -6,11 +6,6 @@ import 'artboard.dart';
 import 'container_component.dart';
 import 'src/generated/component_base.dart';
 
-class ComponentDirt {
-  static const int dependents = 1 << 0;
-}
-
-
 abstract class Component extends ComponentBase<RiveFile> {
   Artboard _artboard;
   dynamic _userData;
@@ -45,10 +40,27 @@ abstract class Component extends ComponentBase<RiveFile> {
   void update(int dirt);
 
   /// The artboard this component belongs to.
-  Artboard get artboard;
+  Artboard get artboard => _artboard;
+
+  /// Called whenever we're resolving the artboard, we piggy back on that
+  /// process to visit ancestors in the tree. This is a good opportunity to
+  /// check if we have an ancestor of a specific type. For example, a Path needs
+  /// to know which Shape it's within.
+  void visitAncestor(Component ancestor) {}
 
   /// Find the artboard in the hierarchy.
-  bool resolveArtboard();
+  bool resolveArtboard() {
+    print("RESOLVING ARTBOARD FOR $name");
+    for (Component curr = this; curr != null; curr = curr.parent) {
+      visitAncestor(curr);
+      if (curr is Artboard) {
+        _artboard = curr;
+        return true;
+      }
+    }
+    _artboard = null;
+    return false;
+  }
 
   dynamic get userData => _userData;
   set userData(dynamic value) {
@@ -63,7 +75,7 @@ abstract class Component extends ComponentBase<RiveFile> {
   void userDataChanged(dynamic from, dynamic to) {}
 
   @override
-  void parentIdChanged(int from, int to) {
+  void parentIdChanged(Id from, Id to) {
     super.parentIdChanged(from, to);
     parent = context?.resolve(to);
   }

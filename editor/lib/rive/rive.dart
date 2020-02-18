@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:rive_api/files.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
+import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
@@ -233,6 +234,10 @@ class Rive with RiveFileDelegate {
           stage?.value?.tool = ArtboardTool.instance;
           break;
 
+        case ShortcutAction.ellipseTool:
+          stage?.value?.tool = EllipseTool.instance;
+          break;
+
         case ShortcutAction.undo:
           file.value.undo();
           break;
@@ -305,6 +310,7 @@ class Rive with RiveFileDelegate {
     file.value = nextFile;
     selection.clear();
     _stage?.dispose();
+      nextFile.advance(0);
     _stage = Stage(this, file.value);
     _stage.tool = TranslateTool();
     stage.value = _stage;

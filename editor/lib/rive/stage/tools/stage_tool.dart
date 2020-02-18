@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:rive_core/math/vec2d.dart';
 
@@ -7,7 +9,7 @@ import '../stage_item.dart';
 abstract class StageTool {
   Stage _stage;
   Stage get stage => _stage;
-  
+
   String get icon;
 
   /// Override this to check if this tool is valid.
@@ -39,4 +41,6 @@ abstract class StageTool {
   }
 
   void endDrag();
+
+  void paint(Canvas canvas);
 }
