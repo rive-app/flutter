@@ -8,7 +8,7 @@ class ChangeEntry {
 }
 
 class CorePropertyChanges {
-  final Map<int, Map<int, ChangeEntry>> entries = {};
+  final Map<Id, Map<int, ChangeEntry>> entries = {};
 
   void change<T>(Core object, int propertyKey, T from, T to) {
     var changes = entries[object.id];
@@ -20,15 +20,6 @@ class CorePropertyChanges {
       changes[propertyKey] = change = ChangeEntry(from, to);
     } else {
       change.to = to;
-    }
-  }
-
-  void changeId(int from, int to) {
-    var objectChanges = entries[from];
-    // Remap to new id
-    if (objectChanges != null) {
-      entries.remove(from);
-      entries[to] = objectChanges;
     }
   }
 }

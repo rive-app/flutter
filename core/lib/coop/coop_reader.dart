@@ -13,12 +13,11 @@ abstract class CoopReader {
     print("COMMAND IS $command");
     switch (command) {
       case CoopCommand.hello:
-        recvHello();
+        recvHello(reader.readVarUint());
         break;
       case CoopCommand.accept:
         var changeId = reader.readVarUint();
-        var serverChangeId = reader.readVarUint();
-        recvAccept(changeId, serverChangeId);
+        recvAccept(changeId);
         break;
       case CoopCommand.reject:
         var changeId = reader.readVarUint();
@@ -39,10 +38,14 @@ abstract class CoopReader {
         break;
       case CoopCommand.cursor:
         break;
-      case CoopCommand.changeId:
-        var fromId = reader.readVarInt();
-        var toId = reader.readVarUint();
-        recvChangeId(fromId, toId);
+      case CoopCommand.ids:
+        var min = reader.readVarUint();
+        var max = reader.readVarUint();
+        recvIds(min, max);
+        break;
+      case CoopCommand.requestIds:
+        var amount = reader.readVarUint();
+        recvRequestIds(amount);
         break;
       case CoopCommand.ready:
         recvReady();
@@ -53,13 +56,14 @@ abstract class CoopReader {
     }
   }
 
-  Future<void> recvAccept(int changeId, int serverChangeId);
+  Future<void> recvAccept(int changeId);
   Future<void> recvReject(int changeId);
   void recvChange(ChangeSet changes);
   Future<void> recvReady();
-  Future<void> recvHello();
+  Future<void> recvHello(int clientId);
   Future<void> recvGoodbye();
   Future<void> recvSync(List<ChangeSet> changes);
   Future<void> recvWipe();
-  Future<void> recvChangeId(int from, int to);
+  Future<void> recvIds(int min, int max);
+  Future<void> recvRequestIds(int amount);
 }

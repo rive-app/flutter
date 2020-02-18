@@ -40,27 +40,27 @@ class Property {
     var code = StringBuffer('  /// ${'-' * 74}\n');
     code.write(comment('${capitalize(name)} field with key ${key.intValue}.',
         indent: 1));
-    code.writeln('${type.name} _$name;');
+    code.writeln('${type.dartName} _$name;');
     code.writeln('static const int $propertyKey = ${key.intValue};');
 
     if (description != null) {
       code.write(comment(description, indent: 1));
     }
-    code.writeln('${type.name} get $name => _$name;');
+    code.writeln('${type.dartName} get $name => _$name;');
     code.write(comment('Change the [_$name] field value.', indent: 1));
     code.write(comment(
         '[${name}Changed] will be invoked only if the '
         'field\'\s value has changed.',
         indent: 1));
 
-    code.writeln('''set $name(${type.name} value) {
+    code.writeln('''set $name(${type.dartName} value) {
         if(${type.equalityCheck('_$name', 'value')}) { return; }
-        ${type.name} from = _$name;
+        ${type.dartName} from = _$name;
         _$name = value;
         ${name}Changed(from, value);
       }''');
     code.writeln('''@mustCallSuper
-    void ${name}Changed(${type.name} from, ${type.name} to) {
+    void ${name}Changed(${type.dartName} from, ${type.dartName} to) {
         onPropertyChanged($propertyKey, from, to);
       }\n''');
 

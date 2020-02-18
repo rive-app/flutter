@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:core/id.dart';
 import 'package:meta/meta.dart';
 
 import 'coop/change.dart';
@@ -11,10 +12,9 @@ import 'coop/local_settings.dart';
 import 'core_property_changes.dart';
 
 export 'package:fractional/fractional.dart';
+export 'package:core/id.dart';
 
 export 'src/list_equality.dart';
-
-int localId = 0;
 
 class ChangeEntry {
   Object from;
@@ -26,7 +26,8 @@ class ChangeEntry {
 typedef PropertyChangeCallback = void Function(dynamic from, dynamic to);
 
 abstract class Core<T extends CoreContext> {
-  int id;
+  Id id;
+
   T context;
   int get coreType;
 
@@ -101,6 +102,7 @@ abstract class CoreContext implements LocalSettings {
   final String fileId;
   CoopClient _client;
   int _lastChangeId;
+  Id _nextObjectId;
   // Map<int, Core> get objects => _objects;
 
   final List<CorePropertyChanges> journal = [];
@@ -110,7 +112,7 @@ abstract class CoreContext implements LocalSettings {
 
   bool _isRecording = true;
 
-  final Map<int, Core> _objects = {};
+  final Map<Id, Core> _objects = {};
 
   final Map<ChangeSet, FreshChange> _freshChanges = {};
   // final List<ChangeSet> _unsyncedChanges = [];
@@ -127,7 +129,8 @@ abstract class CoreContext implements LocalSettings {
   Iterable<Core<CoreContext>> get objects => _objects.values;
   T add<T extends Core>(T object) {
     if (_isRecording) {
-      object.id ??= --localId;
+      object.id ??= _nextObjectId;
+      _nextObjectId = _nextObjectId.next;
     }
     object.context = this;
 
@@ -135,7 +138,10 @@ abstract class CoreContext implements LocalSettings {
     if (_delayAdd != null) {
       _delayAdd.add(object);
     } else {
-      onAdded(object);
+      onAddedDirty(object);
+      // Does this ever happen anymore? Shouldn't all our object creations get
+      // wrapped in a startAdd?
+      onAddedClean(object);
     }
     if (_isRecording) {
       changeProperty(object, addKey, removeKey, object.coreType);
@@ -146,6 +152,9 @@ abstract class CoreContext implements LocalSettings {
 
   @protected
   void applyCoopChanges(ObjectChanges objectChanges);
+
+  @protected
+  bool isPropertyId(int propertyKey);
 
   bool captureJournalEntry() {
     if (_currentChanges == null) {
@@ -180,12 +189,17 @@ abstract class CoreContext implements LocalSettings {
   void completeChanges();
 
   Future<ConnectResult> connect(String host, String path) async {
-    _client = CoopClient(host, path, fileId: fileId, localSettings: this)
+    int clientId = await getIntSetting('clientId');
+    _client = CoopClient(host, path,
+        fileId: fileId, clientId: clientId, localSettings: this)
       ..changesAccepted = _changesAccepted
       ..changesRejected = _changesRejected
-      ..changeObjectId = _changeObjectId
       ..makeChanges = _receiveCoopChanges
       ..wipe = _wipe
+      ..gotClientId = (actualClientId) {
+        clientId = actualClientId;
+        setIntSetting('clientId', clientId);
+      }
       ..getOfflineChanges = () async {
         var changes = await getOfflineChanges();
 
@@ -197,7 +211,19 @@ abstract class CoreContext implements LocalSettings {
         return changes;
       };
 
-    return _client.connect();
+    var result = await _client.connect();
+    if (result == ConnectResult.connected) {
+      int maxId = 0;
+      for (final object in _objects.values) {
+        if (object.id.client == clientId) {
+          if (object.id.object >= maxId) {
+            maxId = object.id.object;
+          }
+        }
+      }
+      _nextObjectId = Id(clientId, maxId + 1);
+    }
+    return result;
   }
 
   Future<bool> disconnect() async {
@@ -225,7 +251,8 @@ abstract class CoreContext implements LocalSettings {
   /// Find Core objects of type [T].
   Iterable<T> objectsOfType<T>() => _objects.values.whereType<T>();
 
-  void onAdded(covariant Core object);
+  void onAddedDirty(covariant Core object);
+  void onAddedClean(covariant Core object);
 
   void onRemoved(covariant Core object);
 
@@ -273,7 +300,7 @@ abstract class CoreContext implements LocalSettings {
   }
 
   /// Find a Core object by id.
-  T resolve<T>(int id) {
+  T resolve<T>(Id id) {
     var object = _objects[id];
     if (object is T) {
       return object as T;
@@ -298,6 +325,7 @@ abstract class CoreContext implements LocalSettings {
   }
 
   void _applyJournalEntry(CorePropertyChanges changes, {bool isUndo}) {
+    Set<Core> regeneratedObjects = {};
     changes.entries.forEach((objectId, objectChanges) {
       bool regenerated = false;
       var object = _objects[objectId];
@@ -342,10 +370,11 @@ abstract class CoreContext implements LocalSettings {
         });
       }
       if (regenerated) {
+        regeneratedObjects.add(object);
         object.id = objectId;
         object.context = this;
         _objects[object.id] = object;
-        onAdded(object);
+        onAddedDirty(object);
 
         // var changes = CorePropertyChanges();
         // changes.change(object, addKey, removeKey, object.coreType);
@@ -356,24 +385,9 @@ abstract class CoreContext implements LocalSettings {
 
     _coopMakeChangeSet(changes, useFrom: isUndo);
     completeChanges();
-  }
-
-  bool _changeObjectId(int from, int to) {
-    var object = _objects[from];
-    if (object == null) {
-      return false;
+    for (final object in regeneratedObjects) {
+      onAddedClean(object);
     }
-    // Remove old mapping
-    _objects.remove(from);
-
-    // Add new mapping
-    object.id = to;
-    _objects[to] = object;
-
-    for (final changes in journal) {
-      changes.changeId(from, to);
-    }
-    return true;
   }
 
   @mustCallSuper
@@ -451,11 +465,30 @@ abstract class CoreContext implements LocalSettings {
   void persistChanges(ChangeSet changes);
   void abandonChanges(ChangeSet changes);
 
+  void startAdd() {
+    _delayAdd = [];
+  }
+
+  void completeAdd() {
+    if (_delayAdd == null) {
+      return;
+    }
+    for (final object in _delayAdd) {
+      onAddedDirty(object);
+    }
+    completeChanges();
+    for (final object in _delayAdd) {
+      onAddedClean(object);
+    }
+    _delayAdd = null;
+  }
+
   void _receiveCoopChanges(ChangeSet changes) {
     // We've received changes from Coop. Initialize the delayAdd list so that
     // onAdded doesn't get called as objects are created. We'll manually call it
     // at the end of this method once all the changes have been made.
-    _delayAdd = [];
+    print("STARTING ADD");
+    startAdd();
 
     // Track whether recording was on/off, definitely turn it off during these
     // changes.
@@ -466,12 +499,14 @@ abstract class CoreContext implements LocalSettings {
       // changes from this set to avoid the flickering issue.
       applyCoopChanges(objectChanges);
     }
-    for (final object in _delayAdd) {
-      onAdded(object);
-    }
-    _delayAdd = null;
+    print("COMPLETING ADD");
+    completeAdd();
+    // completeAddDirty();
     _isRecording = wasRecording;
-    completeChanges();
+    print("COMPLETE CHANGES");
+    // completeChanges();
+    // completeAddClean();
+    print("ALL DONE!");
   }
 
   Future<List<ChangeSet>> getOfflineChanges();

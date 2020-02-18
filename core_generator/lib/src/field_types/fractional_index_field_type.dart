@@ -1,7 +1,8 @@
 import '../field_type.dart';
 
 class FractionalIndexFieldType extends FieldType {
-  FractionalIndexFieldType() : super("FractionalIndex");
+  FractionalIndexFieldType()
+      : super("FractionalIndex", import: "package:fractional/fractional.dart");
 
   @override
   String encode(String writerName, String varName) {

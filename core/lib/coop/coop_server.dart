@@ -50,8 +50,8 @@ abstract class CoopServer {
         await request.response.close();
         return;
       }
-      if (segments.length == 4) {
-        int version, ownerId, fileId;
+      if (segments.length == 5) {
+        int version, ownerId, fileId, clientId;
         String token;
         try {
           // kill the v in v2
@@ -59,6 +59,11 @@ abstract class CoopServer {
           ownerId = int.parse(segments[1]);
           fileId = int.parse(segments[2]);
           token = segments[3];
+          try {
+            clientId = int.parse(segments[4]);
+          } on FormatException catch (_) {
+            clientId = 0;
+          }
         } on FormatException catch (error) {
           print('Invalid file id $error for ${request.requestedUri}.');
           request.response.statusCode = 422;
@@ -93,7 +98,7 @@ abstract class CoopServer {
               return;
             }
           }
-          if (!await isolate.addClient(userOwnerId, ws)) {
+          if (!await isolate.addClient(userOwnerId, clientId, ws)) {
             stderr.write('Unable to add client for file $key. '
                 'This could be due to a previous shutdown attempt, check logs for'
                 ' indication of shutdown prior to this.');

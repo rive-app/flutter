@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:colorize/colorize.dart';
+import 'package:core_generator/src/field_types/id_field_type.dart';
 import 'package:dart_style/dart_style.dart';
 
 import 'comment.dart';
-import 'field_type.dart';
 import 'key.dart';
 import 'property.dart';
 
@@ -91,6 +91,7 @@ class Definition {
   void generateCode(
       String outputFolder, String coreContextName, String snakeContextName) {
     String filename = codeFilename;
+    Set<String> imports = {};
     final code =
         StringBuffer(comment('Core automatically generated $filename.'));
     code.writeln(comment('Do not modify manually.'));
@@ -99,11 +100,18 @@ class Definition {
 
       // Don't import core if it's not used
       if (_extensionOf?._name == null) {
-        code.writeln('import \'package:core/core.dart\';');
+        imports.add('import \'package:core/core.dart\';');
       }
     }
     if (_properties.isNotEmpty) {
-      code.writeln('import \'package:flutter/material.dart\';');
+      imports.add('import \'package:flutter/material.dart\';');
+    }
+
+    for (final property in _properties) {
+      if (property.type.import == null) {
+        continue;
+      }
+      imports.add('import \'${property.type.import}\';');
     }
 
     if (_extensionOf != null) {
@@ -113,14 +121,23 @@ class Definition {
         prefix.write('../');
         foldersUp--;
       }
-      code.writeln(
+      imports.add(
           'import \'$prefix${stripExtension(_extensionOf._filename)}.dart\';');
     }
 
     bool defineContextExtension = _extensionOf?._name == null;
     if (defineContextExtension) {
-      code.writeln('import \'$snakeContextName.dart\';');
+      imports.add('import \'$snakeContextName.dart\';');
     }
+
+    var importList = imports.toList(growable: false)..sort();
+    code.writeAll(
+        importList.where((item) => item.indexOf('import \'package:') == 0),
+        '\n');
+    code.writeAll(
+        importList.where((item) => item.indexOf('import \'package:') != 0),
+        '\n');
+    // code.writeAll(importList, '\n');
 
     code.write(
         '''abstract class ${_name}Base${defineContextExtension ? '<T extends $coreContextName>' : ''} 
@@ -323,7 +340,10 @@ class Definition {
 
     List<String> imports = [];
     for (final definition in definitions.values) {
-      if (definition._properties.isNotEmpty) {
+      // We want the base version if there are properties or we need to instance
+      // the concrete version as we need to the typeKey which is in the base
+      // class.
+      if (definition._properties.isNotEmpty || !definition._isAbstract) {
         imports.add('import \'${definition.localCodeFilename}\';\n');
 
         // We only instance concrete versions.
@@ -353,14 +373,39 @@ class Definition {
     ctxCode.writeln('default:return null;}}');
 
     // Group fields by definition type.
-    Map<FieldType, List<Property>> groups = {};
+    Map<String, List<Property>> groups = {};
 
     for (final definition in definitions.values) {
       for (final property in definition._properties) {
-        groups[property.type] ??= <Property>[];
-        groups[property.type].add(property);
+        groups[property.type.dartName] ??= <Property>[];
+        groups[property.type.dartName].add(property);
       }
     }
+
+    // Build the isPropertyId method.
+    ctxCode.writeln('''@override
+      bool isPropertyId(int propertyKey) {
+        switch(propertyKey) {
+          ''');
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        bool wroteCase = false;
+        if (property.type is IdFieldType) {
+          wroteCase = true;
+          ctxCode.writeln(
+              'case ${definition._name}Base.${property.name}PropertyKey:');
+        }
+        if (wroteCase) {
+          ctxCode.writeln('     return true;');
+        }
+      }
+    }
+    ctxCode.writeln('''default: 
+                      return false; 
+          }
+        }''');
+
+    // Build the applyCoopChanges method.
     ctxCode.writeln('''@override
     void applyCoopChanges(ObjectChanges objectChanges) {
       Core<CoreContext> object = resolve(objectChanges.objectId);
@@ -389,7 +434,7 @@ class Definition {
           }
           break;''');
 
-    groups.forEach((fieldType, properties) {
+    groups.forEach((_, properties) {
       for (final property in properties) {
         ctxCode.write('case ${property.definition._name}Base');
         ctxCode.writeln('.${property.name}PropertyKey:');
@@ -418,14 +463,14 @@ class Definition {
           change.value = writer.uint8Buffer;
         }break;''');
 
-    groups.forEach((fieldType, properties) {
+    groups.forEach((_, properties) {
       for (final property in properties) {
         ctxCode.write('case ${property.definition._name}Base');
         ctxCode.writeln('.${property.name}PropertyKey:');
       }
 
       var fieldType = properties.first.type;
-      ctxCode.writeln('if(value != null && value is ${fieldType.name}) {');
+      ctxCode.writeln('if(value != null && value is ${fieldType.dartName}) {');
 
       ctxCode.writeln('''var writer = 
             BinaryWriter(alignment: ${fieldType.encodingAlignment});''');
@@ -446,12 +491,12 @@ class Definition {
             'case ${definition._name}Base.${property.name}PropertyKey:');
         if (property.isNullable) {
           ctxCode.writeln('''if(object is ${definition._name}Base) {
-                      if(value is ${property.type.name}) {
+                      if(value is ${property.type.dartName}) {
                       object.${property.name} = value;
                   } else if(value == null) {object.${property.name} = null;}}''');
         } else {
           ctxCode.writeln('''if(object is ${definition._name}Base
-                      && value is ${property.type.name}) {
+                      && value is ${property.type.dartName}) {
                       object.${property.name} = value;
                   }''');
         }

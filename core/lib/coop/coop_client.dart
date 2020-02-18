@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
+import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/protocol_version.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -12,9 +13,9 @@ import 'coop_writer.dart';
 import 'local_settings.dart';
 
 typedef ChangeSetCallback = void Function(ChangeSet changeSet);
-typedef ChangeIdCallback = bool Function(int from, int to);
 typedef WipeCallback = void Function();
 typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
+typedef HelloCallback = void Function(int clientId);
 
 enum ConnectionState { disconnected, connecting, handshaking, connected }
 
@@ -31,18 +32,33 @@ class CoopClient extends CoopReader {
   Timer _pingTimer;
   final LocalSettings localSettings;
   final String fileId;
+  int _clientId;
+  int get clientId => _clientId;
   bool _allowReconnect = true;
 
   ChangeSetCallback changesAccepted;
   ChangeSetCallback changesRejected;
-  ChangeIdCallback changeObjectId;
   ChangeSetCallback makeChanges;
   WipeCallback wipe;
   GetOfflineChangesCallback getOfflineChanges;
+  HelloCallback gotClientId;
 
-  CoopClient(String host, String path, {this.fileId, this.localSettings})
-      : url = '$host/v$protocolVersion/$path' {
+  CoopClient(
+    String host,
+    String path, {
+    this.fileId,
+    this.localSettings,
+    int clientId,
+  }) : url = '$host/v$protocolVersion/$path/$clientId' {
     _writer = CoopWriter(write);
+  }
+
+  Completer<IdRange> _allocateIdCompleter;
+
+  Future<IdRange> allocateIds(int count) {
+    _allocateIdCompleter = Completer<IdRange>();
+    _writer.writeRequestIds(count);
+    return _allocateIdCompleter.future;
   }
 
   Future<void> _reconnect() async {
@@ -145,7 +161,7 @@ class CoopClient extends CoopReader {
   /// Accept changes, remove the unacknowledge change that matches this
   /// changeId.
   @override
-  Future<void> recvAccept(int changeId, int serverChangeId) async {
+  Future<void> recvAccept(int changeId) async {
     // Kind of odd to assert a network requirement (this is something the server
     // would mess up) but it helps track things down if they go wrong.
     assert(_unacknowledged != null,
@@ -156,7 +172,6 @@ class CoopClient extends CoopReader {
       _unacknowledged = null;
       changesAccepted?.call(change);
     }
-    await localSettings.setIntSetting('lastServerChangeId', serverChangeId);
     _sendFreshChanges();
   }
 
@@ -173,18 +188,12 @@ class CoopClient extends CoopReader {
   }
 
   @override
-  Future<void> recvHand(String token) async {
-    assert(false, 'Client should never receive hand.');
-  }
-
-  @override
-  Future<void> recvHello() async {
+  Future<void> recvHello(int clientId) async {
+    _clientId = clientId;
+    gotClientId?.call(clientId);
     _connectionState = ConnectionState.handshaking;
     _reconnectAttempt = 0;
     _isAuthenticated = true;
-
-    // TODO: send offline changes (N.B. this will actually be hello when we fix
-    // the connection process)
 
     // Once all offline changes are sent...
 
@@ -199,19 +208,6 @@ class CoopClient extends CoopReader {
     _connectionCompleter?.complete(ConnectResult.connected);
     _connectionCompleter = null;
     _ping();
-  }
-
-  @override
-  Future<void> recvChangeId(int from, int to) async {
-    if (changeObjectId?.call(from, to) ?? false) {
-      for (final changeSet in _fresh) {
-        for (final objectChanges in changeSet.objects) {
-          if (objectChanges.objectId == from) {
-            objectChanges.objectId = to;
-          }
-        }
-      }
-    }
   }
 
   final List<ChangeSet> _fresh = [];
@@ -242,11 +238,26 @@ class CoopClient extends CoopReader {
   @override
   Future<void> recvSync(List<ChangeSet> _) {
     throw UnsupportedError(
-        "Client should never receive sync (gets sent only to server");
+        "Client should never receive sync (gets sent only to server)");
   }
 
   @override
   Future<void> recvWipe() async {
     wipe?.call();
+  }
+
+  @override
+  Future<void> recvIds(int min, int max) async {
+    if (_allocateIdCompleter == null) {
+      return;
+    }
+    var completer = _allocateIdCompleter;
+    _allocateIdCompleter = null;
+    completer.complete(IdRange(min, max));
+  }
+
+  @override
+  Future<void> recvRequestIds(int amount) {
+    throw UnsupportedError("Client should never receive request for ids");
   }
 }
