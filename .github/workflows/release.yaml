@@ -23,9 +23,16 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-          
+          draft: true
+          prerelease: true
+      - name: Output Release URL File
+        run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+      - name: Save Release URL File for publish
+        uses: actions/upload-artifact@v1
+        with:
+          name: release_url
+          path: release_url.txt
+
   build_web:
     runs-on: ubuntu-latest
     needs: create_release
@@ -59,13 +66,26 @@ jobs:
       - uses: montudor/action-zip@v0.1.0
         with:
           args: zip -qq -r ./editor/build/web/web-app.zip ./editor/build/web
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v1
+        with:
+          name: release_url
+      - name: Get Release File Name & Upload URL
+        id: get_release_info
+        run: |
+          echo ::set-output name=file_name::${REPOSITORY_NAME##*/}-${TAG_REF_NAME##*/v} # RepositoryName-v1.0.0
+          value=`cat release_url/release_url.txt`
+          echo ::set-output name=upload_url::$value
+        env:
+          TAG_REF_NAME: ${{ github.ref }}
+          REPOSITORY_NAME: ${{ github.repository }}
       - name: Upload Web Zip
         id: web-zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
           asset_path: ./editor/build/web/web-app.zip
           asset_name: web-app.zip
           asset_content_type: application/zip
@@ -103,13 +123,26 @@ jobs:
       - uses: montudor/action-zip@v0.1.0
         with:
           args: zip -qq -r ./editor/build/macos/mac-app.zip ./editor/build/macos
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v1
+        with:
+          name: release_url
+      - name: Get Release File Name & Upload URL
+        id: get_release_info
+        run: |
+          echo ::set-output name=file_name::${REPOSITORY_NAME##*/}-${TAG_REF_NAME##*/v} # RepositoryName-v1.0.0
+          value=`cat release_url/release_url.txt`
+          echo ::set-output name=upload_url::$value
+        env:
+          TAG_REF_NAME: ${{ github.ref }}
+          REPOSITORY_NAME: ${{ github.repository }}
       - name: Upload MacOS Zip
         id: macos-zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
           asset_path: ./editor/build/web/mac-app.zip
           asset_name: mac-app.zip
           asset_content_type: application/zip
