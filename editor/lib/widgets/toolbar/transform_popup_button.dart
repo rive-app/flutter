@@ -16,7 +16,7 @@ class TransformPopupButton extends StatelessWidget {
       defaultIcon: 'tool-auto',
       makeItems: (rive) => <PopupContextItem<Rive>>[
         PopupContextItem(
-          'Auto',
+          'Select',
           icon: 'tool-auto',
           shortcut: ShortcutAction.autoTool,
           select: (Rive rive) {},
@@ -39,6 +39,46 @@ class TransformPopupButton extends StatelessWidget {
           shortcut: ShortcutAction.scaleTool,
           select: (Rive rive) {},
         ),
+        PopupContextItem(
+          'Pose',
+          icon: 'tool-pose',
+          shortcut: ShortcutAction.poseTool,
+          select: (Rive rive) {},
+        ),
+        PopupContextItem(
+          'Origin',
+          icon: 'tool-origin',
+          select: (Rive rive) {},
+        ),
+        PopupContextItem.separator(),
+        PopupContextItem('Show Axis',
+            popup: [
+              PopupContextItem(
+                'Local',
+                icon: 'popup-check',
+                select: (Rive rive) {},
+              ),
+              PopupContextItem(
+                'Parent',
+                icon: 'popup-check',
+                select: (Rive rive) {},
+              ),
+              PopupContextItem(
+                'World',
+                icon: 'popup-check',
+                select: (Rive rive) {},
+              ),
+            ],
+            select: (Rive rive) {},
+            padIcon: true),
+        PopupContextItem('Freeze Joints',
+            select: (Rive rive) {},
+            shortcut: ShortcutAction.freezeJointsToggle,
+            padIcon: true),
+        PopupContextItem('Freeze Images',
+            select: (Rive rive) {},
+            shortcut: ShortcutAction.freezeImagesToggle,
+            padIcon: true),
       ],
     );
   }
