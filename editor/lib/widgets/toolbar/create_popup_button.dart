@@ -3,6 +3,7 @@ import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
@@ -20,11 +21,11 @@ class CreatePopupButton extends StatelessWidget {
           'Shape',
           icon: 'tool-shapes',
           popup: [
-            PopupContextItem(
+            ToolPopupItem(
               'Rectangle',
-              icon: 'tool-rectangle',
+              rive: rive,
+              tool: RectangleTool.instance,
               shortcut: ShortcutAction.rectangleTool,
-              select: (Rive rive) {},
             ),
             ToolPopupItem(
               'Ellipse',
