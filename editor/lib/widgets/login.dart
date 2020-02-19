@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:window_utils/window_utils.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -40,64 +41,78 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     var rive = RiveContext.of(context);
-    return Center(
-      child: Container(
-        constraints: const BoxConstraints(minWidth: 100, maxWidth: 400),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              enabled: !_isLoggingIn,
-              controller: usernameController,
-              decoration: const InputDecoration(hintText: 'Username'),
-              onSubmitted: (_) => _submit(rive),
-            ),
-            TextField(
-              enabled: !_isLoggingIn,
-              controller: passwordController,
-              decoration: const InputDecoration(hintText: 'Password'),
-              onSubmitted: (_) => _submit(rive),
-            ),
-            FlatButton(
-              child: Text(_isLoggingIn ? 'Verifying' : 'Login'),
-              onPressed: _isLoggingIn ? null : () => _submit(rive),
-            ),
-            FlatButton(
-              child: const Text('Login with Twitter'),
-              onPressed: _isLoggingIn
-                  ? null
-                  : () async {
-                      var auth = RiveAuth(rive.api);
-                      if (await auth.loginTwitter()) {
-                        await rive.updateUser();
-                      }
-                    },
-            ),
-            FlatButton(
-              child: const Text('Login with Facebook'),
-              onPressed: _isLoggingIn
-                  ? null
-                  : () async {
-                      var auth = RiveAuth(rive.api);
-                      if (await auth.loginFacebook()) {
-                        await rive.updateUser();
-                      }
-                    },
-            ),
-            FlatButton(
-              child: const Text('Login with Google'),
-              onPressed: _isLoggingIn
-                  ? null
-                  : () async {
-                      var auth = RiveAuth(rive.api);
-                      if (await auth.loginGoogle()) {
-                        await rive.updateUser();
-                      }
-                    },
-            ),
-          ],
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          child: GestureDetector(
+            onTapDown: (_) {
+              WindowUtils.startDrag();
+            },
+          ),
         ),
-      ),
+        Positioned.fill(
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 100, maxWidth: 400),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextField(
+                    enabled: !_isLoggingIn,
+                    controller: usernameController,
+                    decoration: const InputDecoration(hintText: 'Username'),
+                    onSubmitted: (_) => _submit(rive),
+                  ),
+                  TextField(
+                    enabled: !_isLoggingIn,
+                    controller: passwordController,
+                    decoration: const InputDecoration(hintText: 'Password'),
+                    onSubmitted: (_) => _submit(rive),
+                  ),
+                  Container(height: 20.0),
+                  RaisedButton(
+                    child: Text(_isLoggingIn ? 'Verifying' : 'Login'),
+                    onPressed: _isLoggingIn ? null : () => _submit(rive),
+                  ),
+                  FlatButton(
+                    child: const Text('Login with Twitter'),
+                    onPressed: _isLoggingIn
+                        ? null
+                        : () async {
+                            var auth = RiveAuth(rive.api);
+                            if (await auth.loginTwitter()) {
+                              await rive.updateUser();
+                            }
+                          },
+                  ),
+                  FlatButton(
+                    child: const Text('Login with Facebook'),
+                    onPressed: _isLoggingIn
+                        ? null
+                        : () async {
+                            var auth = RiveAuth(rive.api);
+                            if (await auth.loginFacebook()) {
+                              await rive.updateUser();
+                            }
+                          },
+                  ),
+                  FlatButton(
+                    child: const Text('Login with Google'),
+                    onPressed: _isLoggingIn
+                        ? null
+                        : () async {
+                            var auth = RiveAuth(rive.api);
+                            if (await auth.loginGoogle()) {
+                              await rive.updateUser();
+                            }
+                          },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
