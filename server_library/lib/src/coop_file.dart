@@ -9,20 +9,20 @@ import 'package:core/core.dart';
 import 'entity.dart';
 import 'session.dart';
 
-const int _coopFileVersion = 2;
+const int _coopFileVersion = 3;
 
 class CoopFile {
   int ownerId;
   int fileId;
-  int nextObjectId = 1;
+  int nextClientId = 1;
 
-  Map<int, CoopFileObject> objects;
+  Map<Id, CoopFileObject> objects;
 
   bool deserialize(BinaryReader reader) {
     if (reader.readVarUint() != _coopFileVersion) {
       return false;
     }
-    nextObjectId = reader.readVarUint();
+    nextClientId = reader.readVarUint();
     ownerId = reader.readVarUint();
     fileId = reader.readVarUint();
 
@@ -30,17 +30,14 @@ class CoopFile {
     int objectLength = reader.readVarUint();
     for (int i = 0; i < objectLength; i++) {
       var object = CoopFileObject()..deserialize(reader);
-      objects[object.localId] = object;
-      if (object.localId >= nextObjectId) {
-        nextObjectId = object.localId + 1;
-      }
+      objects[object.objectId] = object;
     }
     return true;
   }
 
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(_coopFileVersion);
-    writer.writeVarUint(nextObjectId);
+    writer.writeVarUint(nextClientId);
     writer.writeVarUint(ownerId);
     writer.writeVarUint(fileId);
 
@@ -51,16 +48,16 @@ class CoopFile {
   }
 
   CoopFile clone() {
-    var cloneObjects = <int, CoopFileObject>{};
+    var cloneObjects = <Id, CoopFileObject>{};
     for (final object in objects.values) {
       var clone = object.clone();
-      cloneObjects[clone.localId] = clone;
+      cloneObjects[clone.objectId] = clone;
     }
 
     return CoopFile()
       ..ownerId = ownerId
       ..fileId = fileId
-      ..nextObjectId = nextObjectId
+      ..nextClientId = nextClientId
       ..objects = cloneObjects;
   }
 
@@ -87,7 +84,7 @@ class CoopFile {
 // Store session, nextObjectId, nextChange Id in Dynamo
 class CoopFileObject extends Entity {
   /// The local id received from the session representing this object.
-  int localId;
+  Id objectId;
 
   Map<int, ObjectProperty> properties = {};
 
@@ -105,7 +102,7 @@ class CoopFileObject extends Entity {
           ..op = CoreContext.addKey
           ..value = writer.uint8Buffer,
       ]
-      ..objectId = localId;
+      ..objectId = objectId;
   }
 
   ObjectChanges toObjectPropertyChanges() {
@@ -120,13 +117,13 @@ class CoopFileObject extends Entity {
               ..value = prop.data,
           )
           .toList(growable: false)
-      ..objectId = localId;
+      ..objectId = objectId;
   }
 
   @override
   void serialize(BinaryWriter writer) {
     super.serialize(writer);
-    writer.writeVarInt(localId);
+    objectId.serialize(writer);
 
     writer.writeVarUint(properties.length);
     for (final prop in properties.values) {
@@ -137,7 +134,7 @@ class CoopFileObject extends Entity {
   @override
   void deserialize(BinaryReader reader) {
     super.deserialize(reader);
-    localId = reader.readVarInt();
+    objectId = Id.deserialize(reader);
 
     properties.clear();
     int propertyCount = reader.readVarUint();
@@ -154,7 +151,7 @@ class CoopFileObject extends Entity {
       clonedProperties[cp.key] = cp;
     }
     return CoopFileObject()
-      ..localId = localId
+      ..objectId = objectId
       ..properties = clonedProperties
       ..copy(this);
   }

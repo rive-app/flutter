@@ -4,6 +4,7 @@ import 'package:binary_buffer/binary_writer.dart';
 
 import 'package:coop_server_library/src/coop_file.dart';
 import 'package:coop_server_library/src/session.dart';
+import 'package:core/core.dart';
 import "package:test/test.dart";
 
 void main() {
@@ -12,20 +13,20 @@ void main() {
       ..ownerId = 19
       ..fileId = 82
       ..objects = {
-        7: CoopFileObject()
+        const Id(1, 7): CoopFileObject()
           ..key = 3
           ..serverChangeId = 1
-          ..localId = 343
+          ..objectId = const Id(1, 7)
           ..properties = {
             12: ObjectProperty()
               ..key = 12
               ..serverChangeId = 453
               ..data = Uint8List.fromList([1, 1, 1760]),
           },
-        31: CoopFileObject()
+        const Id(1, 31): CoopFileObject()
           ..key = 6
           ..serverChangeId = 2
-          ..localId = 22
+          ..objectId = const Id(1, 31)
           ..properties = {},
       };
 
@@ -38,20 +39,20 @@ void main() {
     expect(file.ownerId, check.ownerId);
     expect(file.fileId, check.fileId);
     expect(file.objects.length, check.objects.length);
-    expect(file.objects[7] != null, true);
-    expect(file.objects[7].key, 3);
-    expect(file.objects[7].serverChangeId, 1);
-    expect(file.objects[7].localId, 343);
-    expect(file.objects[7].properties.length, 1);
-    expect(file.objects[7].properties[12].key, 12);
-    expect(file.objects[7].properties[12].serverChangeId, 453);
+    expect(file.objects[const Id(1, 7)] != null, true);
+    expect(file.objects[const Id(1, 7)].key, 3);
+    expect(file.objects[const Id(1, 7)].serverChangeId, 1);
+    expect(file.objects[const Id(1, 7)].objectId, const Id(1, 7));
+    expect(file.objects[const Id(1, 7)].properties.length, 1);
+    expect(file.objects[const Id(1, 7)].properties[12].key, 12);
+    expect(file.objects[const Id(1, 7)].properties[12].serverChangeId, 453);
     expect(
         file.objects[7].properties[12].data, Uint8List.fromList([1, 1, 1760]));
-    expect(file.objects[31] != null, true);
-    expect(file.objects[31].key, 6);
-    expect(file.objects[31].serverChangeId, 2);
-    expect(file.objects[31].localId, 22);
-    expect(file.objects[31].properties.length, 0);
+    expect(file.objects[const Id(1, 31)] != null, true);
+    expect(file.objects[const Id(1, 31)].key, 6);
+    expect(file.objects[const Id(1, 31)].serverChangeId, 2);
+    expect(file.objects[const Id(1, 31)].objectId, const Id(1, 31));
+    expect(file.objects[const Id(1, 31)].properties.length, 0);
   });
 
   test('serialize server data', () {
@@ -95,8 +96,8 @@ void main() {
       var obj = CoopFileObject()
         ..key = i
         ..serverChangeId = 1
-        ..localId = 343;
-      file.objects[i] = obj;
+        ..objectId = const Id(1, 343);
+      file.objects[Id(1, i)] = obj;
       for (int j = 0; j < 30; j++) {
         obj.addProperty(
           ObjectProperty()

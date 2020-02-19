@@ -42,7 +42,16 @@ class _CoopIsolate extends CoopIsolateProcess {
   final _privateApi = PrivateApi();
 
   @override
-  int attemptChange(CoopServerClient client, ChangeSet changeSet) {
+  IdRange allocateIds(int amount) {
+    int min = file.nextClientId;
+    int max = file.nextClientId + amount - 1;
+    file.nextClientId += amount;
+
+    return IdRange(min, max);
+  }
+
+  @override
+  bool attemptChange(CoopServerClient client, ChangeSet changeSet) {
     // Make the change on a clone.
     var modifiedFile = file.clone();
     var serverChangeId = _nextChangeId++;
@@ -50,26 +59,23 @@ class _CoopIsolate extends CoopIsolateProcess {
       ..id = serverChangeId
       ..objects = [];
     bool validateDependencies = false;
-    for (final objectChanges in changeSet.objects) {
+    for (final clientObjectChanges in changeSet.objects) {
       // print("CHANGING ${objectChanges.objectId}");
 
       // Don't propagate changes to dependent ids. Clients build these up and
       // send them to the server for validating concurrent changes, there's no
       // need to send them to other clients.
-      var serverChange = objectChanges
+      var serverChange = clientObjectChanges
           .clone((change) => change.op != CoreContext.dependentsKey);
 
       serverChangeSet.objects.add(serverChange);
 
-      // Transform object id if necessary (was an object that got created).
-      serverChange.objectId =
-          client.changedIds[objectChanges.objectId] ?? objectChanges.objectId;
       CoopFileObject object = modifiedFile.objects[serverChange.objectId];
 
-      for (final change in objectChanges.changes) {
+      for (final change in clientObjectChanges.changes) {
         switch (change.op) {
           case CoreContext.addKey:
-            // id is objectChanges.objectId
+            // id is clientObjectChanges.objectId
 
             var reader = BinaryReader(
               ByteData.view(
@@ -79,30 +85,18 @@ class _CoopIsolate extends CoopIsolateProcess {
               ),
             );
 
-            // If the client sent a newly created object, it will do so with a
-            // negative client side only id. If the id is positive, it should be
-            // a re-generated server id. We could validate no other object is
-            // currently using it.
-            var serverObjectId = objectChanges.objectId;
+            var objectId = clientObjectChanges.objectId;
 
-            // If the client has sent a client id or the requested server id is
-            // already in use, assign the next incrementing server id.
-            if (objectChanges.objectId < 0 ||
-                modifiedFile.objects.containsKey(objectChanges.objectId)) {
-              serverObjectId = modifiedFile.nextObjectId++;
-              serverChange.objectId = serverObjectId;
-              print("ASSIGNING SERVER ID ${serverObjectId}");
+            // Does an object with this id already exist? Abort!
+            if (modifiedFile.objects.containsKey(objectId)) {
+              return false;
             }
-            modifiedFile.objects[serverObjectId] = object = CoopFileObject()
-              ..localId = serverObjectId
+            modifiedFile.objects[objectId] = object = CoopFileObject()
+              ..objectId = objectId
               ..key = reader.readVarUint();
-            client.changedIds[objectChanges.objectId] = serverObjectId;
-            client.writer.writeChangeId(objectChanges.objectId, serverObjectId);
-            // create object with id
             break;
           case CoreContext.removeKey:
-            var objectId = client.changedIds[objectChanges.objectId] ??
-                objectChanges.objectId;
+            var objectId = clientObjectChanges.objectId;
             object = modifiedFile.objects.remove(objectId);
             // Destroy object with id
             break;
@@ -115,7 +109,7 @@ class _CoopIsolate extends CoopIsolateProcess {
       if (object != null) {
         object.serverChangeId = serverChangeId;
         object.userId = client.userOwnerId;
-        for (final change in objectChanges.changes) {
+        for (final change in clientObjectChanges.changes) {
           switch (change.op) {
             case CoreContext.addKey:
               // Handled previously
@@ -142,17 +136,19 @@ class _CoopIsolate extends CoopIsolateProcess {
     }
 
     bool isChangeValid = true;
-    if (validateDependencies) {}
+    if (validateDependencies) {
+      // TODO: do the validation
+    }
 
     if (isChangeValid) {
       // Changes were good, modify file and propagate them to other clients.
       file = modifiedFile;
       print("CHANGE ID ${serverChangeSet.id}");
       propagateChanges(client, serverChangeSet);
-      return serverChangeSet.id;
+      return true;
     } else {
       // do not change the file, reject the change.
-      return 0;
+      return false;
     }
   }
 
@@ -166,9 +162,6 @@ class _CoopIsolate extends CoopIsolateProcess {
       int ownerId, int fileId, Map<String, String> options) async {
     // check data is not null, check signature, if it's RIVE deserialize
     // if it's { or something else, send wtf.
-
-    // TODO: get the file from some source (S3?). For now we just instance a new
-    // file.
     var data = await _privateApi.load(ownerId, fileId);
 
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
@@ -178,7 +171,7 @@ class _CoopIsolate extends CoopIsolateProcess {
       file = CoopFile()
         ..ownerId = ownerId
         ..fileId = fileId
-        ..nextObjectId = 1
+        ..nextClientId = 1
         ..objects = {};
     } else {
       file = CoopFile();
@@ -194,7 +187,7 @@ class _CoopIsolate extends CoopIsolateProcess {
         file = CoopFile()
           ..ownerId = ownerId
           ..fileId = fileId
-          ..nextObjectId = 1
+          ..nextClientId = 1
           ..objects = {};
       }
 
@@ -220,10 +213,8 @@ class _CoopIsolate extends CoopIsolateProcess {
 
   @override
   Future<void> persist() async {
-    print("ALIGNMENT ${file.objects.length * 256}");
     var writer = BinaryWriter(alignment: max(1, file.objects.length) * 256);
     file.serialize(writer);
-    print("PERSISTING! ${writer.uint8Buffer} ${file.ownerId} ${file.fileId}");
     var result =
         await _privateApi.save(file.ownerId, file.fileId, writer.uint8Buffer);
     print("GOT REVISION ID ${result.revisionId}");
@@ -233,5 +224,10 @@ class _CoopIsolate extends CoopIsolateProcess {
   Future<bool> shutdown() async {
     // TODO: Make sure debounced save has completed.
     return true;
+  }
+
+  @override
+  int nextClientId() {
+    return file.nextClientId++;
   }
 }
