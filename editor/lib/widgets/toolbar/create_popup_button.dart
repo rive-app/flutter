@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
@@ -15,71 +15,77 @@ class CreatePopupButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolPopupButton(
       defaultIcon: 'tool-create',
-      makeItems: (rive) => <PopupContextItem<Rive>>[
+      makeItems: (rive) => <PopupContextItem>[
         PopupContextItem(
           'Shape',
           icon: 'tool-shapes',
           popup: [
-            PopupContextItem(
+            ToolPopupItem(
               'Rectangle',
-              icon: 'tool-rectangle',
+              icon: RectangleTool.instance.icon,
+              notifier: rive.stage.value.toolNotifier,
+              isSelected: () => rive.stage.value.tool == RectangleTool.instance,
               shortcut: ShortcutAction.rectangleTool,
-              select: (Rive rive) {},
+              select: () => rive.stage.value.tool = RectangleTool.instance,
             ),
             ToolPopupItem(
               'Ellipse',
-              rive: rive,
-              tool: EllipseTool.instance,
+              icon: EllipseTool.instance.icon,
+              notifier: rive.stage.value.toolNotifier,
+              isSelected: () => rive.stage.value.tool == EllipseTool.instance,
               shortcut: ShortcutAction.ellipseTool,
+              select: () => rive.stage.value.tool = EllipseTool.instance,
             ),
             PopupContextItem(
               'Polygon',
               icon: 'tool-polygon',
-              select: (Rive rive) {},
+              select: () {},
             ),
             PopupContextItem(
               'Star',
               icon: 'tool-star',
-              select: (Rive rive) {},
+              select: () {},
             ),
             PopupContextItem(
               'Triangle',
               icon: 'tool-triangle',
-              select: (Rive rive) {},
+              select: () {},
             ),
           ],
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Pen',
           icon: 'tool-pen',
           shortcut: ShortcutAction.penTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem.separator(),
         ToolPopupItem(
           'Artboard',
-          rive: rive,
-          tool: ArtboardTool.instance,
+          icon: ArtboardTool.instance.icon,
+          notifier: rive.stage.value.toolNotifier,
+          isSelected: () => rive.stage.value.tool == ArtboardTool.instance,
           shortcut: ShortcutAction.artboardTool,
+          select: () => rive.stage.value.tool = ArtboardTool.instance,
         ),
         PopupContextItem(
           'Bone',
           icon: 'tool-bone',
           shortcut: ShortcutAction.boneTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Node',
           icon: 'tool-node',
           shortcut: ShortcutAction.nodeTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Solo',
           icon: 'tool-solo',
           shortcut: ShortcutAction.soloTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
       ],
     );

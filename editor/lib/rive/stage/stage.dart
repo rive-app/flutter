@@ -10,6 +10,7 @@ import 'package:rive_core/node.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/ellipse.dart';
+import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
@@ -18,9 +19,12 @@ import 'package:core/debounce.dart';
 import '../rive.dart';
 import 'aabb_tree.dart';
 import 'items/stage_ellipse.dart';
+import 'items/stage_rectangle.dart';
 import 'items/stage_shape.dart';
 import 'stage_item.dart';
 import 'tools/stage_tool.dart';
+
+enum AxisCheckState { local, parent, world }
 
 typedef _ItemFactory = StageItem Function();
 
@@ -52,7 +56,6 @@ class Stage extends Debouncer {
 
   StageDelegate _delegate;
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
-
   StageTool _activeDragTool;
   StageTool get tool => toolNotifier.value;
   set tool(StageTool value) {
@@ -61,6 +64,34 @@ class Stage extends Debouncer {
     }
     if (value.activate(this)) {
       toolNotifier.value = value;
+    }
+  }
+
+  // Joints freezed flag
+  final ValueNotifier<bool> freezeJointsNotifier = ValueNotifier<bool>(false);
+  bool get freezeJoints => freezeJointsNotifier.value;
+  set freezeJoints(bool value) {
+    if (freezeJointsNotifier.value != value) {
+      freezeJointsNotifier.value = value;
+    }
+  }
+
+  // Images freezed flag
+  final ValueNotifier<bool> freezeImagesNotifier = ValueNotifier<bool>(false);
+  bool get freezeImages => freezeImagesNotifier.value;
+  set freezeImages(bool value) {
+    if (freezeImagesNotifier.value != value) {
+      freezeImagesNotifier.value = value;
+    }
+  }
+
+  // Axis check state
+  final ValueNotifier<AxisCheckState> axisCheckNotifier =
+      ValueNotifier<AxisCheckState>(AxisCheckState.local);
+  AxisCheckState get axisCheck => axisCheckNotifier.value;
+  set axisCheck(AxisCheckState value) {
+    if (axisCheckNotifier.value != value) {
+      axisCheckNotifier.value = value;
     }
   }
 
@@ -361,6 +392,7 @@ class Stage extends Debouncer {
     NodeBase.typeKey: () => StageNode(),
     ShapeBase.typeKey: () => StageShape(),
     EllipseBase.typeKey: () => StageEllipse(),
+    RectangleBase.typeKey: () => StageRectangle(),
   };
 
   @override

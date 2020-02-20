@@ -5,9 +5,9 @@ import 'package:rive_editor/widgets/nullable_listenable_builder.dart';
 import 'package:rive_editor/widgets/path_widget.dart';
 import 'base_popup.dart';
 
-typedef SelectCallback<T> = void Function(T param);
+typedef SelectCallback<T> = void Function();
 
-abstract class PopupListItem<T> {
+abstract class PopupListItem {
   /// Whether the item can be interacted with/selected by the user. For example,
   /// a separator cannot be clicked on.
   bool get canSelect;
@@ -16,10 +16,10 @@ abstract class PopupListItem<T> {
   double get height;
 
   /// Child popup displayed when this list item is hovered over.
-  List<PopupListItem<T>> get popup;
+  List<PopupListItem> get popup;
 
   /// Callback to invoke when the item is pressed on/selected.
-  SelectCallback<T> get select;
+  SelectCallback get select;
 
   /// Optional change notifier that can be used to signal the item needs to be
   /// rebuilt in response to some external event.
@@ -41,15 +41,15 @@ final _pathArrow = Path()
 ///
 /// Consider re-architecting this in the future as there is quite a bit of
 /// complexity with the management of the sub-popups.
-class ListPopup<A, T extends PopupListItem<A>> {
+class ListPopup<T extends PopupListItem> {
   OverlayEntry _overlayEntry;
   ListPopup();
-  ListPopup<A, T> _subPopup;
-  __PopupListItemShellState<A, T> _subPopupRow;
+  ListPopup<T> _subPopup;
+  __PopupListItemShellState<T> _subPopupRow;
 
   bool get isOpen => Popup.isOpen(_overlayEntry);
 
-  void rowEntered(__PopupListItemShellState<A, T> row) {
+  void rowEntered(__PopupListItemShellState<T> row) {
     if (_subPopupRow == row || _subPopup == null) {
       return;
     }
@@ -72,8 +72,7 @@ class ListPopup<A, T extends PopupListItem<A>> {
   bool showChildPopup(
     BuildContext context, {
     @required ListPopupItemBuilder<T> itemBuilder,
-    __PopupListItemShellState<A, T> parentState,
-    A selectArg,
+    __PopupListItemShellState<T> parentState,
     double width = 177,
     double margin = 10,
     // double arrow = 10,
@@ -87,7 +86,6 @@ class ListPopup<A, T extends PopupListItem<A>> {
       context,
       itemBuilder: itemBuilder,
       isChild: true,
-      selectArg: selectArg,
       width: width,
       margin: margin,
       // double arrow = 10,
@@ -102,7 +100,6 @@ class ListPopup<A, T extends PopupListItem<A>> {
     BuildContext context, {
     @required ListPopupItemBuilder<T> itemBuilder,
     bool isChild = false,
-    A selectArg,
     double width = 177,
     double margin = 10,
     // double arrow = 10,
@@ -121,7 +118,7 @@ class ListPopup<A, T extends PopupListItem<A>> {
         items.fold<double>(0.0, (v, item) => v + item.height) + margin * 2);
 
     // bool useList = media.size.height > height;
-    var list = ListPopup<A, T>();
+    var list = ListPopup<T>();
 
     list._overlayEntry = Popup.show(
       context,
@@ -157,11 +154,10 @@ class ListPopup<A, T extends PopupListItem<A>> {
                           var item = items[index];
                           return Container(
                             height: item.height,
-                            child: _PopupListItemShell<A, T>(
+                            child: _PopupListItemShell<T>(
                               list,
                               itemBuilder: itemBuilder,
                               item: item,
-                              selectArg: selectArg,
                             ),
                           );
                         },
@@ -190,28 +186,24 @@ class ListPopup<A, T extends PopupListItem<A>> {
   }
 }
 
-class _PopupListItemShell<A, T extends PopupListItem<A>>
-    extends StatefulWidget {
-  final ListPopup<A, T> listPopup;
+class _PopupListItemShell<T extends PopupListItem> extends StatefulWidget {
+  final ListPopup<T> listPopup;
   final ListPopupItemBuilder<T> itemBuilder;
   final T item;
-  final A selectArg;
 
   const _PopupListItemShell(
     this.listPopup, {
     Key key,
     this.itemBuilder,
     this.item,
-    this.selectArg,
   }) : super(key: key);
 
   @override
-  __PopupListItemShellState<A, T> createState() =>
-      __PopupListItemShellState<A, T>();
+  __PopupListItemShellState<T> createState() => __PopupListItemShellState<T>();
 }
 
-class __PopupListItemShellState<A, T extends PopupListItem<A>>
-    extends State<_PopupListItemShell<A, T>> {
+class __PopupListItemShellState<T extends PopupListItem>
+    extends State<_PopupListItemShell<T>> {
   bool _isHovered = false;
 
   bool get hover => _isHovered;
@@ -232,7 +224,7 @@ class __PopupListItemShellState<A, T extends PopupListItem<A>>
         if (!widget.item.canSelect) {
           return;
         }
-        widget.item.select?.call(widget.selectArg);
+        widget.item.select?.call();
         Popup.closeAll();
       },
       child: MouseRegion(
@@ -251,7 +243,6 @@ class __PopupListItemShellState<A, T extends PopupListItem<A>>
             widget.listPopup.showChildPopup(
               context,
               parentState: this,
-              selectArg: widget.selectArg,
               items: widget.item.popup.cast<T>(),
               itemBuilder: widget.itemBuilder,
             );

@@ -8,7 +8,7 @@ import 'list_popup.dart';
 typedef PopupItemWidgetBuilder = Widget Function(BuildContext, bool);
 typedef ColorBuilder = Color Function(bool);
 
-class PopupContextItem<T> extends PopupListItem<T> {
+class PopupContextItem extends PopupListItem {
   /// When provided this will be called to build a widget to be displayed at the
   /// start of the row, use this for custom (or changing) icons in the popup
   /// item. For example, the Avatar in the hamburger menu.
@@ -39,27 +39,29 @@ class PopupContextItem<T> extends PopupListItem<T> {
   /// implemented!
   final WidgetBuilder widgetBuilder;
 
+  /// When set to true this will add padding when no icons option is selected.
+  final bool padIcon;
+
   @override
   final ChangeNotifier rebuildItem;
 
   @override
-  final List<PopupContextItem<T>> popup;
+  final List<PopupContextItem> popup;
 
   @override
-  final SelectCallback<T> select;
+  final SelectCallback select;
 
-  PopupContextItem(
-    this.name, {
-    this.icon,
-    this.iconColor,
-    this.iconBuilder,
-    this.shortcut,
-    this.widgetBuilder,
-    this.popup,
-    this.select,
-    this.rebuildItem,
-    this.iconColorBuilder,
-  });
+  PopupContextItem(this.name,
+      {this.icon,
+      this.iconColor,
+      this.iconBuilder,
+      this.shortcut,
+      this.widgetBuilder,
+      this.popup,
+      this.select,
+      this.rebuildItem,
+      this.iconColorBuilder,
+      this.padIcon = false});
 
   @override
   String toString() {
@@ -76,7 +78,8 @@ class PopupContextItem<T> extends PopupListItem<T> {
         widgetBuilder = null,
         popup = null,
         select = null,
-        rebuildItem = null;
+        rebuildItem = null,
+        padIcon = null;
 
   bool get isSeparator => name == null;
 
@@ -89,59 +92,65 @@ class PopupContextItem<T> extends PopupListItem<T> {
         ),
       );
     }
-    return Row(
-      children: [
-        const SizedBox(width: 20),
-        if (iconBuilder != null) iconBuilder.call(context, isHovered),
-        if (iconBuilder != null) const SizedBox(width: 10),
-        if (icon != null)
-          TintedIcon(
-            color: iconColorBuilder?.call(isHovered) ??
-                iconColor ??
-                (isHovered
-                    ? Colors.white
-                    : const Color.fromRGBO(
-                        112,
-                        112,
-                        112,
-                        1,
-                      )),
-            icon: icon,
-          ),
-        if (icon != null) const SizedBox(width: 10),
+    final children = <Widget>[const SizedBox(width: 20)];
+
+    if (iconBuilder != null) {
+      children.addAll(
+          [iconBuilder.call(context, isHovered), const SizedBox(width: 10)]);
+    } else if (icon != null) {
+      children.addAll([
+        TintedIcon(
+          color: iconColorBuilder?.call(isHovered) ??
+              iconColor ??
+              (isHovered
+                  ? RiveTheme.of(context).colors.buttonHover
+                  : RiveTheme.of(context).colors.buttonNoHover),
+          icon: icon,
+        ),
+        const SizedBox(width: 10)
+      ]);
+    }
+    // create other stuff
+    else if (padIcon) {
+      children.addAll([const SizedBox(width: 30)]);
+    }
+    // pad icon space
+    children.addAll([
+      Text(
+        name,
+        style: TextStyle(
+          fontFamily: 'Roboto-Regular',
+          fontSize: 13,
+          color: isHovered ? Colors.white : const Color(0xFF8C8C8C),
+        ),
+      ),
+      Expanded(child: Container()),
+      if (shortcut != null)
         Text(
-          name,
-          style: TextStyle(
+          ShortcutBindings.of(context)
+                  ?.lookupKeysLabel(shortcut)
+                  ?.toUpperCase() ??
+              "",
+          style: const TextStyle(
             fontFamily: 'Roboto-Regular',
             fontSize: 13,
-            color: isHovered ? Colors.white : const Color(0xFF8C8C8C),
+            color: Color(0xFF666666),
           ),
         ),
-        Expanded(child: Container()),
-        if (shortcut != null)
-          Text(
-            ShortcutBindings.of(context)
-                    ?.lookupKeysLabel(shortcut)
-                    ?.toUpperCase() ??
-                "",
-            style: const TextStyle(
-              fontFamily: 'Roboto-Regular',
-              fontSize: 13,
-              color: Color(0xFF666666),
-            ),
+      if (popup != null && popup.isNotEmpty)
+        ColorFiltered(
+          colorFilter: ColorFilter.mode(
+            isHovered ? Colors.white : const Color.fromRGBO(112, 112, 112, 1),
+            BlendMode.srcIn,
           ),
-        if (popup != null && popup.isNotEmpty)
-          ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              isHovered ? Colors.white : const Color.fromRGBO(112, 112, 112, 1),
-              BlendMode.srcIn,
-            ),
-            child: const Image(
-              image: AssetImage('assets/images/icons/tool-chevron.png'),
-            ),
+          child: const Image(
+            image: AssetImage('assets/images/icons/tool-chevron.png'),
           ),
-        const SizedBox(width: 20),
-      ],
+        ),
+      const SizedBox(width: 20),
+    ]);
+    return Row(
+      children: children,
     );
   }
 
@@ -151,7 +160,7 @@ class PopupContextItem<T> extends PopupListItem<T> {
   @override
   double get height => isSeparator ? 20 : 40;
 
-  static bool hasIcon<T>(String icon, List<PopupContextItem<T>> list) {
+  static bool hasIcon(String icon, List<PopupContextItem> list) {
     for (final item in list) {
       if (item.icon == icon) {
         return true;

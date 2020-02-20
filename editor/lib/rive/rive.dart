@@ -5,6 +5,7 @@ import 'package:rive_api/files.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
@@ -244,6 +245,10 @@ class Rive with RiveFileDelegate {
         case ShortcutAction.ellipseTool:
           stage?.value?.tool = EllipseTool.instance;
           break;
+        
+        case ShortcutAction.rectangleTool:
+          stage?.value?.tool = RectangleTool.instance;
+          break;
 
         case ShortcutAction.undo:
           file.value.undo();
@@ -252,8 +257,8 @@ class Rive with RiveFileDelegate {
           file.value.redo();
           break;
         case ShortcutAction.delete:
-          // Need to make a new list because as we delete we also remove them from
-          // the selection. This avoids modifying the selection set while
+          // Need to make a new list because as we delete we also remove them
+          // from the selection. This avoids modifying the selection set while
           // iterating.
           var toRemove = selection.items.toList();
           for (final item in toRemove) {
@@ -263,6 +268,12 @@ class Rive with RiveFileDelegate {
           }
           selection.clear();
           file.value.captureJournalEntry();
+          break;
+        case ShortcutAction.freezeImagesToggle:
+          stage?.value?.freezeImages = !stage.value.freezeImages;
+          break;
+        case ShortcutAction.freezeJointsToggle:
+          stage?.value?.freezeJoints = !stage.value.freezeJoints;
           break;
         default:
           break;

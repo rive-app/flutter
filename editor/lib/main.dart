@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
@@ -18,14 +19,12 @@ import 'package:window_utils/window_utils.dart';
 import 'rive/hierarchy_tree_controller.dart';
 import 'rive/rive.dart';
 import 'rive/stage/stage.dart';
-import 'rive/stage/stage_item.dart';
 import 'widgets/catastrophe.dart';
 import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
 import 'widgets/inspector/pannel.dart';
 import 'widgets/login.dart';
 
-import 'widgets/popup/popup.dart';
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
@@ -54,104 +53,6 @@ Future<void> main() async {
 
 // Testing context menu items.
 const double resizeEdgeSize = 10;
-
-// Hack
-List<PopupContextItem<Rive>> contextItems = [
-  PopupContextItem(
-    'Artboard',
-    select: (Rive rive) {
-      var artboard = Artboard()
-        ..name = 'New Artboard'
-        ..x = 0
-        ..y = 0
-        ..width = 200
-        ..height = 100;
-      rive.file.value.add(artboard);
-      rive.file.value.captureJournalEntry();
-    },
-  ),
-  PopupContextItem(
-    'Node',
-    select: (rive) {
-      if (rive.selection.isEmpty) {
-        print('No selection to parent Node to.');
-        return;
-      }
-
-      var selection = rive.selection.first;
-      if (selection is StageItem && selection.component is ContainerComponent) {
-        var container = selection.component as ContainerComponent;
-        var nodes = rive.file.value.objectsOfType<Node>();
-
-        var node = Node()
-          ..name = 'Node ${nodes.length + 1}'
-          ..x = 0
-          ..y = 0;
-        rive.file.value.add(node);
-
-        container.appendChild(node);
-      } else {
-        print('No selection to parent Node to.');
-      }
-      rive.file.value.captureJournalEntry();
-    },
-  ),
-  PopupContextItem.separator(),
-  PopupContextItem('Shape',
-      icon: 'tool-shapes.png',
-      select: (rive) => print('SELECT SHAPE!'),
-      popup: [
-        PopupContextItem(
-          'Rectangle',
-        ),
-        PopupContextItem('Ellipse', popup: [
-          PopupContextItem(
-            'Rectangle',
-          ),
-          PopupContextItem('Ellipse', popup: [
-            PopupContextItem(
-              'Rectangle',
-            ),
-            PopupContextItem(
-              'Ellipse',
-            ),
-            PopupContextItem(
-              'Polygon',
-            ),
-            PopupContextItem(
-              'Star',
-            ),
-            PopupContextItem(
-              'Triangle',
-            ),
-          ]),
-          PopupContextItem(
-            'Polygon',
-          ),
-          PopupContextItem(
-            'Star',
-          ),
-          PopupContextItem(
-            'Triangle',
-          ),
-        ]),
-        PopupContextItem(
-          'Polygon',
-        ),
-        PopupContextItem(
-          'Star',
-        ),
-        PopupContextItem(
-          'Triangle',
-        ),
-      ]),
-  PopupContextItem('Pen', icon: 'tool-pen'),
-  PopupContextItem.separator(),
-  PopupContextItem('Artboard'),
-  PopupContextItem('Bone'),
-  PopupContextItem('Node'),
-  PopupContextItem('Solo')
-];
 
 class RiveEditorApp extends StatelessWidget {
   final Rive rive;

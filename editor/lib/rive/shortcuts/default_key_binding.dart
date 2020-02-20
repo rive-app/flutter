@@ -3,7 +3,7 @@ import 'shortcut_key_binding.dart';
 import 'shortcut_keys.dart';
 
 /// Default key binding for Rive.
-var defaultKeyBinding = ShortcutKeyBinding(
+final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
   [
     Shortcut(
       ShortcutAction.copy,
@@ -109,6 +109,30 @@ var defaultKeyBinding = ShortcutKeyBinding(
       ],
     ),
     Shortcut(
+      ShortcutAction.autoTool,
+      [
+        ShortcutKey.v,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.rotateTool,
+      [
+        ShortcutKey.r,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.scaleTool,
+      [
+        ShortcutKey.s,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.poseTool,
+      [
+        ShortcutKey.x,
+      ],
+    ),
+    Shortcut(
       ShortcutAction.translateTool,
       [
         ShortcutKey.t,
@@ -173,6 +197,18 @@ var defaultKeyBinding = ShortcutKeyBinding(
       ShortcutAction.soloTool,
       [
         ShortcutKey.y,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.freezeImagesToggle,
+      [
+        ShortcutKey.k,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.freezeJointsToggle,
+      [
+        ShortcutKey.j,
       ],
     ),
   ],
