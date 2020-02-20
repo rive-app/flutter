@@ -320,7 +320,10 @@ class Editor extends StatelessWidget {
               TransformPopupButton(),
               CreatePopupButton(),
               const Spacer(),
-              ConnectedUsers(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: ConnectedUsers(),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: ViewScaleDropdown(),
