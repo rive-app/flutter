@@ -24,9 +24,9 @@ class ConntectedUsersContext {
   }
 
   void _removeFakeUser(int amount) {
-    print('Removing Users: $amount');
+    // print('Removing Users: $amount');
     for (var i = 0; i < amount; i++) {
-      if (users.value.isEmpty) return;
+      if (users.value.length == 1) return;
       final _list = List<ConnectedUser>.from(users.value);
       _list.removeLast();
       users.value = _list;
@@ -35,7 +35,7 @@ class ConntectedUsersContext {
   }
 
   void _addFakeUser(int amount) {
-    print('Adding Users: $amount');
+    // print('Adding Users: $amount');
     for (var i = 0; i < amount; i++) {
       if (users.value.length > 10) return;
       final _list = List<ConnectedUser>.from(users.value);
@@ -44,7 +44,7 @@ class ConntectedUsersContext {
           name: String.fromCharCodes(List.generate(20, (index) {
             return randomBetween(ASCII_START, ASCII_END);
           })),
-          avatar: 'https://i.pravatar.cc/300',
+          avatar: 'https://i.pravatar.cc/?img=$i',
         ),
         colorValue: _getRandomColor(),
       ));
