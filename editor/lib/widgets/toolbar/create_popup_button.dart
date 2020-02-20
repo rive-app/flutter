@@ -3,6 +3,7 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
+import 'package:rive_editor/rive/stage/tools/triangle_tool.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
@@ -46,10 +47,12 @@ class CreatePopupButton extends StatelessWidget {
               icon: 'tool-star',
               select: () {},
             ),
-            PopupContextItem(
+            ToolPopupItem(
               'Triangle',
-              icon: 'tool-triangle',
-              select: () {},
+              icon: TriangleTool.instance.icon,
+              notifier: rive.stage.value.toolNotifier,
+              isSelected: () => rive.stage.value.tool == TriangleTool.instance,
+              select: () => rive.stage.value.tool = TriangleTool.instance,
             ),
           ],
           select: () {},
