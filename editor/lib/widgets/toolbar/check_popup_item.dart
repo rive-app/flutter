@@ -1,4 +1,3 @@
-import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -8,12 +7,12 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 /// Custom PopupContextItem that automatically wires itself up to respond to
 /// selected state changes in the stage. Also automatically wires up the tool
 /// icon and selection states.
-class CheckPopupItem extends PopupContextItem<Rive> {
+class CheckPopupItem<T> extends PopupContextItem<T> {
   CheckPopupItem(
     String name, {
     ShortcutAction shortcut,
     ValueNotifier notifier,
-    Function(Rive) select,
+    Function(T) select,
     bool Function() isChecked,
   }) : super(
           name,
