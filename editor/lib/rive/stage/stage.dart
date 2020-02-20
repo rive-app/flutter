@@ -54,7 +54,6 @@ class Stage extends Debouncer {
 
   StageDelegate _delegate;
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
-
   StageTool _activeDragTool;
   StageTool get tool => toolNotifier.value;
   set tool(StageTool value) {
@@ -66,17 +65,32 @@ class Stage extends Debouncer {
     }
   }
 
+  // Joints freezed flag
+  final ValueNotifier<bool> freezeJointsNotifier = ValueNotifier<bool>(false);
+  bool get freezeJoints => freezeJointsNotifier.value;
+  set freezeJoints(bool value) {
+    if (freezeJointsNotifier.value != value) {
+      freezeJointsNotifier.value = value;
+    }
+  }
+
+  // Images freezed flag
+  final ValueNotifier<bool> freezeImagesNotifier = ValueNotifier<bool>(false);
+  bool get freezeImages => freezeImagesNotifier.value;
+  set freezeImages(bool value) {
+    if (freezeImagesNotifier.value != value) {
+      freezeImagesNotifier.value = value;
+    }
+  }
+
   // Axis check state
   final ValueNotifier<AxisCheckState> axisCheckNotifier =
       ValueNotifier<AxisCheckState>(AxisCheckState.local);
-
   AxisCheckState get axisCheck => axisCheckNotifier.value;
   set axisCheck(AxisCheckState value) {
-    print('Selecting axis $value');
-    if (axisCheckNotifier.value == value) {
-      return;
+    if (axisCheckNotifier.value != value) {
+      axisCheckNotifier.value = value;
     }
-    axisCheckNotifier.value = value;
   }
 
   void clearDelegate(StageDelegate value) {

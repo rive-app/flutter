@@ -58,29 +58,46 @@ class TransformPopupButton extends StatelessWidget {
               CheckPopupItem(
                 'Local',
                 notifier: rive.stage.value.axisCheckNotifier,
-                value: AxisCheckState.local,
+                isChecked: () =>
+                    rive.stage.value.axisCheck == AxisCheckState.local,
+                select: (rive) =>
+                    rive.stage.value.axisCheck = AxisCheckState.local,
               ),
               CheckPopupItem(
                 'Parent',
                 notifier: rive.stage.value.axisCheckNotifier,
-                value: AxisCheckState.parent,
+                isChecked: () =>
+                    rive.stage.value.axisCheck == AxisCheckState.parent,
+                select: (rive) =>
+                    rive.stage.value.axisCheck = AxisCheckState.parent,
               ),
               CheckPopupItem(
                 'World',
                 notifier: rive.stage.value.axisCheckNotifier,
-                value: AxisCheckState.world,
+                isChecked: () =>
+                    rive.stage.value.axisCheck == AxisCheckState.world,
+                select: (rive) =>
+                    rive.stage.value.axisCheck = AxisCheckState.world,
               ),
             ],
             select: (Rive rive) {},
             padIcon: true),
-        PopupContextItem('Freeze Joints',
-            select: (Rive rive) {},
-            shortcut: ShortcutAction.freezeJointsToggle,
-            padIcon: true),
-        PopupContextItem('Freeze Images',
-            select: (Rive rive) {},
-            shortcut: ShortcutAction.freezeImagesToggle,
-            padIcon: true),
+        CheckPopupItem(
+          'Freeze Joints',
+          notifier: rive.stage.value.freezeJointsNotifier,
+          shortcut: ShortcutAction.freezeJointsToggle,
+          isChecked: () => rive.stage.value.freezeJoints,
+          select: (rive) =>
+              rive.stage.value.freezeJoints = !rive.stage.value.freezeJoints,
+        ),
+        CheckPopupItem(
+          'Freeze Images',
+          notifier: rive.stage.value.freezeImagesNotifier,
+          shortcut: ShortcutAction.freezeImagesToggle,
+          isChecked: () => rive.stage.value.freezeImages,
+          select: (rive) =>
+              rive.stage.value.freezeImages = !rive.stage.value.freezeImages,
+        ),
       ],
     );
   }
