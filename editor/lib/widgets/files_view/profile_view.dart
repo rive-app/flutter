@@ -25,7 +25,7 @@ class ProfileView extends StatelessWidget {
           ValueListenableBuilder<RiveUser>(
             valueListenable: rive.user,
             builder: (context, user, _) => Text(
-              user.name,
+              user.name ?? user.username,
               style: TextStyle(
                 fontSize: 16,
                 color: ThemeUtils.textGrey,
