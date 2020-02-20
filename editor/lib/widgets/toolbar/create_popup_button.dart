@@ -24,7 +24,7 @@ class CreatePopupButton extends StatelessWidget {
               'Rectangle',
               icon: 'tool-rectangle',
               shortcut: ShortcutAction.rectangleTool,
-              select: (Rive rive) {},
+              select: () {},
             ),
             ToolPopupItem(
               'Ellipse',
@@ -35,26 +35,26 @@ class CreatePopupButton extends StatelessWidget {
             PopupContextItem(
               'Polygon',
               icon: 'tool-polygon',
-              select: (Rive rive) {},
+              select: () {},
             ),
             PopupContextItem(
               'Star',
               icon: 'tool-star',
-              select: (Rive rive) {},
+              select: () {},
             ),
             PopupContextItem(
               'Triangle',
               icon: 'tool-triangle',
-              select: (Rive rive) {},
+              select: () {},
             ),
           ],
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Pen',
           icon: 'tool-pen',
           shortcut: ShortcutAction.penTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem.separator(),
         ToolPopupItem(
@@ -67,19 +67,19 @@ class CreatePopupButton extends StatelessWidget {
           'Bone',
           icon: 'tool-bone',
           shortcut: ShortcutAction.boneTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Node',
           icon: 'tool-node',
           shortcut: ShortcutAction.nodeTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Solo',
           icon: 'tool-solo',
           shortcut: ShortcutAction.soloTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
       ],
     );

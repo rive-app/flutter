@@ -377,6 +377,7 @@ class FilesView extends StatelessWidget {
   }
 
   Widget _buildLeftSide(BuildContext context) {
+    final rive = RiveContext.of(context);
     return Container(
       decoration: BoxDecoration(
         color: ThemeUtils.backgroundLightGrey,
@@ -445,16 +446,16 @@ class FilesView extends StatelessWidget {
                   items: [
                     PopupContextItem(
                       "New File",
-                      select: (rive) {
+                      select: () {
                         rive.fileBrowser.createFile();
                         print("MAKE FILE");
                       },
                     ),
-                    PopupContextItem("New Folder", select: (rive) {}),
+                    PopupContextItem("New Folder", select: () {}),
                     PopupContextItem.separator(),
                     PopupContextItem(
                       "New Team",
-                      select: (rive) => showRiveSettings<void>(
+                      select: () => showRiveSettings<void>(
                         context: context,
                         screens: teamSettingsScreens,
                       ),

@@ -5,7 +5,7 @@ import 'package:rive_editor/widgets/nullable_listenable_builder.dart';
 import 'package:rive_editor/widgets/path_widget.dart';
 import 'base_popup.dart';
 
-typedef SelectCallback<T> = void Function(T param);
+typedef SelectCallback<T> = void Function();
 
 abstract class PopupListItem<T> {
   /// Whether the item can be interacted with/selected by the user. For example,
@@ -19,7 +19,7 @@ abstract class PopupListItem<T> {
   List<PopupListItem<T>> get popup;
 
   /// Callback to invoke when the item is pressed on/selected.
-  SelectCallback<T> get select;
+  SelectCallback get select;
 
   /// Optional change notifier that can be used to signal the item needs to be
   /// rebuilt in response to some external event.
@@ -232,7 +232,7 @@ class __PopupListItemShellState<A, T extends PopupListItem<A>>
         if (!widget.item.canSelect) {
           return;
         }
-        widget.item.select?.call(widget.selectArg);
+        widget.item.select?.call();
         Popup.closeAll();
       },
       child: MouseRegion(

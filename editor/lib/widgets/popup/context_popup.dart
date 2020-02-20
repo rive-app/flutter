@@ -49,7 +49,7 @@ class PopupContextItem<T> extends PopupListItem<T> {
   final List<PopupContextItem<T>> popup;
 
   @override
-  final SelectCallback<T> select;
+  final SelectCallback select;
 
   PopupContextItem(this.name,
       {this.icon,

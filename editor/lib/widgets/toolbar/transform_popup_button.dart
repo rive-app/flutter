@@ -21,36 +21,38 @@ class TransformPopupButton extends StatelessWidget {
           'Select',
           icon: 'tool-auto',
           shortcut: ShortcutAction.autoTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         ToolPopupItem(
           'Translate',
-          rive: rive,
-          tool: TranslateTool.instance,
+          icon: TranslateTool.instance.icon,
+          notifier: rive.stage.value.toolNotifier,
+          isSelected: () => rive.stage.value.tool == TranslateTool.instance,
           shortcut: ShortcutAction.translateTool,
+          select: () => rive.stage.value.tool = TranslateTool.instance,
         ),
         PopupContextItem(
           'Rotate',
           icon: 'tool-rotate',
           shortcut: ShortcutAction.rotateTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Scale',
           icon: 'tool-scale',
           shortcut: ShortcutAction.scaleTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Pose',
           icon: 'tool-pose',
           shortcut: ShortcutAction.poseTool,
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem(
           'Origin',
           icon: 'tool-origin',
-          select: (Rive rive) {},
+          select: () {},
         ),
         PopupContextItem.separator(),
         PopupContextItem('Show Axis',
@@ -60,15 +62,14 @@ class TransformPopupButton extends StatelessWidget {
                 notifier: rive.stage.value.axisCheckNotifier,
                 isChecked: () =>
                     rive.stage.value.axisCheck == AxisCheckState.local,
-                select: (rive) =>
-                    rive.stage.value.axisCheck = AxisCheckState.local,
+                select: () => rive.stage.value.axisCheck = AxisCheckState.local,
               ),
               CheckPopupItem(
                 'Parent',
                 notifier: rive.stage.value.axisCheckNotifier,
                 isChecked: () =>
                     rive.stage.value.axisCheck == AxisCheckState.parent,
-                select: (rive) =>
+                select: () =>
                     rive.stage.value.axisCheck = AxisCheckState.parent,
               ),
               CheckPopupItem(
@@ -76,18 +77,17 @@ class TransformPopupButton extends StatelessWidget {
                 notifier: rive.stage.value.axisCheckNotifier,
                 isChecked: () =>
                     rive.stage.value.axisCheck == AxisCheckState.world,
-                select: (rive) =>
-                    rive.stage.value.axisCheck = AxisCheckState.world,
+                select: () => rive.stage.value.axisCheck = AxisCheckState.world,
               ),
             ],
-            select: (Rive rive) {},
+            select: () {},
             padIcon: true),
         CheckPopupItem(
           'Freeze Joints',
           notifier: rive.stage.value.freezeJointsNotifier,
           shortcut: ShortcutAction.freezeJointsToggle,
           isChecked: () => rive.stage.value.freezeJoints,
-          select: (rive) =>
+          select: () =>
               rive.stage.value.freezeJoints = !rive.stage.value.freezeJoints,
         ),
         CheckPopupItem(
@@ -95,7 +95,7 @@ class TransformPopupButton extends StatelessWidget {
           notifier: rive.stage.value.freezeImagesNotifier,
           shortcut: ShortcutAction.freezeImagesToggle,
           isChecked: () => rive.stage.value.freezeImages,
-          select: (rive) =>
+          select: () =>
               rive.stage.value.freezeImages = !rive.stage.value.freezeImages,
         ),
       ],
