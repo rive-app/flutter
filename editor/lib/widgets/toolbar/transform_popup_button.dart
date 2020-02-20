@@ -57,18 +57,18 @@ class TransformPopupButton extends StatelessWidget {
             popup: [
               CheckPopupItem(
                 'Local',
-                rive: rive,
-                axisCheck: AxisCheckState.local,
+                notifier: rive.stage.value.axisCheckNotifier,
+                value: AxisCheckState.local,
               ),
               CheckPopupItem(
                 'Parent',
-                rive: rive,
-                axisCheck: AxisCheckState.parent,
+                notifier: rive.stage.value.axisCheckNotifier,
+                value: AxisCheckState.parent,
               ),
               CheckPopupItem(
                 'World',
-                rive: rive,
-                axisCheck: AxisCheckState.world,
+                notifier: rive.stage.value.axisCheckNotifier,
+                value: AxisCheckState.world,
               ),
             ],
             select: (Rive rive) {},
