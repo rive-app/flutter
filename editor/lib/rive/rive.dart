@@ -5,6 +5,7 @@ import 'package:rive_api/files.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
@@ -239,6 +240,10 @@ class Rive with RiveFileDelegate {
 
         case ShortcutAction.ellipseTool:
           stage?.value?.tool = EllipseTool.instance;
+          break;
+        
+        case ShortcutAction.rectangleTool:
+          stage?.value?.tool = RectangleTool.instance;
           break;
 
         case ShortcutAction.undo:
