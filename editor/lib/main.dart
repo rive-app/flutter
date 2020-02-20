@@ -352,72 +352,13 @@ class Editor extends StatelessWidget {
               const Expanded(
                 child: StagePanel(),
               ),
-              ResizePanel(
+              const ResizePanel(
                 hitSize: resizeEdgeSize,
                 direction: ResizeDirection.horizontal,
                 side: ResizeSide.start,
                 min: 235,
                 max: 500,
-                child: Container(
-                  color: const Color.fromRGBO(50, 50, 50, 1.0),
-                  child: ListenableBuilder(
-                    listenable: rive.selection,
-                    builder: (context,
-                        SelectionContext<SelectableItem> selection, _) {
-                      var artboards = selection.items
-                          .whereType<StageArtboard>()
-                          .map((stageItem) => stageItem.component)
-                          .toList(growable: false);
-                      if (artboards.isEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                child: Text(
-                                  "No Selection",
-                                  style: TextStyle(
-                                    color: ThemeUtils.textWhite,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                              Container(height: 10.0),
-                              Container(
-                                child: Text(
-                                  "Select something to view its properties and options.",
-                                  style: TextStyle(
-                                    color: ThemeUtils.textGreyLight,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      return Column(
-                        children: [
-                          PropertyDual(
-                            name: 'Pos',
-                            objects: artboards,
-                            propertyKeyA: ArtboardBase.xPropertyKey,
-                            propertyKeyB: ArtboardBase.yPropertyKey,
-                          ),
-                          PropertyDual(
-                            name: 'Size',
-                            objects: artboards,
-                            propertyKeyA: ArtboardBase.widthPropertyKey,
-                            propertyKeyB: ArtboardBase.heightPropertyKey,
-                          ),
-                          // selection. PropertyDual()
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                child: InspectorPanel(),
               ),
               /*Expanded(
                 child: Column(
@@ -462,6 +403,76 @@ class Editor extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class InspectorPanel extends StatelessWidget {
+  const InspectorPanel({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final rive = RiveContext.of(context);
+    return Container(
+      color: const Color.fromRGBO(50, 50, 50, 1.0),
+      child: ListenableBuilder(
+        listenable: rive.selection,
+        builder: (context, SelectionContext<SelectableItem> selection, _) {
+          var artboards = selection.items
+              .whereType<StageArtboard>()
+              .map((stageItem) => stageItem.component)
+              .toList(growable: false);
+          if (artboards.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    child: Text(
+                      "No Selection",
+                      style: TextStyle(
+                        color: ThemeUtils.textWhite,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  Container(height: 10.0),
+                  Container(
+                    child: Text(
+                      "Select something to view its properties and options.",
+                      style: TextStyle(
+                        color: ThemeUtils.textGreyLight,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          return Column(
+            children: [
+              PropertyDual(
+                name: 'Pos',
+                objects: artboards,
+                propertyKeyA: ArtboardBase.xPropertyKey,
+                propertyKeyB: ArtboardBase.yPropertyKey,
+              ),
+              PropertyDual(
+                name: 'Size',
+                objects: artboards,
+                propertyKeyA: ArtboardBase.widthPropertyKey,
+                propertyKeyB: ArtboardBase.heightPropertyKey,
+              ),
+              // selection. PropertyDual()
+            ],
+          );
+        },
+      ),
     );
   }
 }
