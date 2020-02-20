@@ -31,7 +31,10 @@ import 'widgets/toolbar/scale_dropdown.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addPostFrameCallback(
-    (_) => WindowUtils.hideTitleBar(),
+    (_) {
+      WindowUtils.hideTitleBar();
+      WindowUtils.setSize(const Size(1366, 768));
+    },
   );
 
   var rive = Rive();
