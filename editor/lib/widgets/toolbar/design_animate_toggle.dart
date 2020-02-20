@@ -15,7 +15,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
 
   @override
   void initState() {
-    const _duration = Duration(milliseconds: 100);
+    const _duration = Duration(milliseconds: 400);
     controller = AnimationController(
       vsync: this,
       duration: _duration,
@@ -23,7 +23,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
     );
     final curve = CurvedAnimation(
       parent: controller,
-      curve: Curves.easeInOutCubic,
+      curve: const Cubic(0.8, 0, 0, 1),
     );
     animation = Tween<double>(
       begin: 0,
