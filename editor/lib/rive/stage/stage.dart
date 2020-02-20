@@ -10,6 +10,7 @@ import 'package:rive_core/node.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/ellipse.dart';
+import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
@@ -18,6 +19,7 @@ import 'package:core/debounce.dart';
 import '../rive.dart';
 import 'aabb_tree.dart';
 import 'items/stage_ellipse.dart';
+import 'items/stage_rectangle.dart';
 import 'items/stage_shape.dart';
 import 'stage_item.dart';
 import 'tools/stage_tool.dart';
@@ -390,6 +392,7 @@ class Stage extends Debouncer {
     NodeBase.typeKey: () => StageNode(),
     ShapeBase.typeKey: () => StageShape(),
     EllipseBase.typeKey: () => StageEllipse(),
+    RectangleBase.typeKey: () => StageRectangle(),
   };
 
   @override

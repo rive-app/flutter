@@ -7,6 +7,7 @@ import '../../artboard.dart';
 import '../../node.dart';
 import '../../shapes/cubic_vertex.dart';
 import '../../shapes/ellipse.dart';
+import '../../shapes/rectangle.dart';
 import '../../shapes/shape.dart';
 import '../../shapes/straight_vertex.dart';
 import 'artboard_base.dart';
@@ -17,6 +18,7 @@ import 'shapes/cubic_vertex_base.dart';
 import 'shapes/ellipse_base.dart';
 import 'shapes/parametric_path_base.dart';
 import 'shapes/path_vertex_base.dart';
+import 'shapes/rectangle_base.dart';
 import 'shapes/shape_base.dart';
 import 'shapes/straight_vertex_base.dart';
 
@@ -32,6 +34,8 @@ abstract class RiveCoreContext extends CoreContext {
         return Shape();
       case StraightVertexBase.typeKey:
         return StraightVertex();
+      case RectangleBase.typeKey:
+        return Rectangle();
       case CubicVertexBase.typeKey:
         return CubicVertex();
       case EllipseBase.typeKey:
@@ -109,12 +113,13 @@ abstract class RiveCoreContext extends CoreContext {
         case PathVertexBase.xPropertyKey:
         case PathVertexBase.yPropertyKey:
         case StraightVertexBase.radiusPropertyKey:
+        case ParametricPathBase.widthPropertyKey:
+        case ParametricPathBase.heightPropertyKey:
+        case RectangleBase.cornerRadiusPropertyKey:
         case CubicVertexBase.inXPropertyKey:
         case CubicVertexBase.inYPropertyKey:
         case CubicVertexBase.outXPropertyKey:
         case CubicVertexBase.outYPropertyKey:
-        case ParametricPathBase.widthPropertyKey:
-        case ParametricPathBase.heightPropertyKey:
         case ArtboardBase.widthPropertyKey:
         case ArtboardBase.heightPropertyKey:
         case ArtboardBase.xPropertyKey:
@@ -203,12 +208,13 @@ abstract class RiveCoreContext extends CoreContext {
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
       case StraightVertexBase.radiusPropertyKey:
+      case ParametricPathBase.widthPropertyKey:
+      case ParametricPathBase.heightPropertyKey:
+      case RectangleBase.cornerRadiusPropertyKey:
       case CubicVertexBase.inXPropertyKey:
       case CubicVertexBase.inYPropertyKey:
       case CubicVertexBase.outXPropertyKey:
       case CubicVertexBase.outYPropertyKey:
-      case ParametricPathBase.widthPropertyKey:
-      case ParametricPathBase.heightPropertyKey:
       case ArtboardBase.widthPropertyKey:
       case ArtboardBase.heightPropertyKey:
       case ArtboardBase.xPropertyKey:
@@ -330,6 +336,21 @@ abstract class RiveCoreContext extends CoreContext {
           object.radius = value;
         }
         break;
+      case ParametricPathBase.widthPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.width = value;
+        }
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.height = value;
+        }
+        break;
+      case RectangleBase.cornerRadiusPropertyKey:
+        if (object is RectangleBase && value is double) {
+          object.cornerRadius = value;
+        }
+        break;
       case CubicVertexBase.inXPropertyKey:
         if (object is CubicVertexBase && value is double) {
           object.inX = value;
@@ -348,16 +369,6 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicVertexBase.outYPropertyKey:
         if (object is CubicVertexBase && value is double) {
           object.outY = value;
-        }
-        break;
-      case ParametricPathBase.widthPropertyKey:
-        if (object is ParametricPathBase && value is double) {
-          object.width = value;
-        }
-        break;
-      case ParametricPathBase.heightPropertyKey:
-        if (object is ParametricPathBase && value is double) {
-          object.height = value;
         }
         break;
       case ArtboardBase.widthPropertyKey:
@@ -476,6 +487,21 @@ abstract class RiveCoreContext extends CoreContext {
           return object.radius;
         }
         break;
+      case ParametricPathBase.widthPropertyKey:
+        if (object is ParametricPathBase) {
+          return object.width;
+        }
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        if (object is ParametricPathBase) {
+          return object.height;
+        }
+        break;
+      case RectangleBase.cornerRadiusPropertyKey:
+        if (object is RectangleBase) {
+          return object.cornerRadius;
+        }
+        break;
       case CubicVertexBase.inXPropertyKey:
         if (object is CubicVertexBase) {
           return object.inX;
@@ -494,16 +520,6 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicVertexBase.outYPropertyKey:
         if (object is CubicVertexBase) {
           return object.outY;
-        }
-        break;
-      case ParametricPathBase.widthPropertyKey:
-        if (object is ParametricPathBase) {
-          return object.width;
-        }
-        break;
-      case ParametricPathBase.heightPropertyKey:
-        if (object is ParametricPathBase) {
-          return object.height;
         }
         break;
       case ArtboardBase.widthPropertyKey:
