@@ -7,13 +7,16 @@ import 'dart:io'
         WebSocketTransformer,
         stderr;
 
-import 'package:core/coop/protocol_version.dart';
+import 'package:logging/logging.dart';
 
-import 'coop_isolate.dart';
+import 'package:core/coop/protocol_version.dart';
+import 'package:core/coop/coop_isolate.dart';
 
 String _isolateKey(int ownerId, int fileId) => '$ownerId-$fileId';
 
 abstract class CoopServer {
+  final Logger log = Logger('CoopServer');
+
   final Map<String, CoopIsolate> _isolates = <String, CoopIsolate>{};
 
   CoopIsolateHandler get handler;
@@ -36,14 +39,14 @@ abstract class CoopServer {
   Future<bool> listen({int port = 8000, Map<String, String> options}) async {
     try {
       _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
-    } on Exception catch (ex) {
-      print('[!]Error -- ${ex.toString()}');
+    } on Exception catch (e) {
+      log.severe('Unable to bind port to http server: $e');
       return false;
     }
-    print('Listening ${InternetAddress.anyIPv4}:$port');
+    log.info('Listening on ${InternetAddress.anyIPv4}:$port');
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
-      print("SEG $segments");
+      log.finest('Receieved message ${_segmentsToString(segments)}');
       if (segments.isEmpty) {
         request.response.statusCode = 200;
         request.response.write('Healthy!');
@@ -62,10 +65,12 @@ abstract class CoopServer {
           try {
             clientId = int.parse(segments[4]);
           } on FormatException catch (_) {
+            log.info('Invalid clientid: ${segments[4]}');
             clientId = 0;
           }
-        } on FormatException catch (error) {
-          print('Invalid file id $error for ${request.requestedUri}.');
+        } on FormatException catch (e) {
+          log.info('Invalid message ${_segmentsToString(segments)}'
+              ' $e for ${request.requestedUri}.');
           request.response.statusCode = 422;
           await request.response.close();
           return;
@@ -77,8 +82,11 @@ abstract class CoopServer {
         }
 
         // TODO: Max fix user owner ids :)
+        // TODO: crashing bug where ownerId is null
         int userOwnerId = await validate(request, ownerId, fileId, token);
         if (userOwnerId == null) {
+          log.info('Authentication failure for message'
+              ' ${_segmentsToString(segments)}');
           request.response.statusCode = 403;
           await request.response.close();
           return;
@@ -99,16 +107,16 @@ abstract class CoopServer {
             }
           }
           if (!await isolate.addClient(userOwnerId, clientId, ws)) {
-            stderr.write('Unable to add client for file $key. '
-                'This could be due to a previous shutdown attempt, check logs for'
-                ' indication of shutdown prior to this.');
+            log.severe('Unable to add client for file $key. '
+                'This could be due to a previous shutdown attempt, check logs '
+                'for indication of shutdown prior to this.');
             await ws.close();
           }
         } on WebSocketException catch (error) {
           stderr.write(error.toString());
         }
       }
-    }, onError: (dynamic err) => stderr.write('[!]Error -- ${err.toString()}'));
+    }, onError: (dynamic e) => log.severe('Error listening: $e'));
     return true;
   }
 
@@ -128,4 +136,29 @@ abstract class CoopServer {
   // Also take this opportunity to check that the token matches a valid user.
   Future<int> validate(
       HttpRequest request, int ownerId, int fileId, String token);
+}
+
+// TODO: make a simple class for managing segments
+String _segmentsToString(List<String> segments) {
+  final str = StringBuffer('segment[');
+  for (var i = 0; i < segments.length; i++) {
+    if (i == 0) {
+      str.write('version: ${segments[0]}');
+    } else if (i == 1) {
+      str.write('ownerid: ${segments[1]}');
+    } else if (i == 2) {
+      str.write('fileid: ${segments[2]}');
+    } else if (i == 3) {
+      str.write('token: ${segments[3]}');
+    } else if (i == 4) {
+      str.write('clientid: ${segments[3]}');
+    } else {
+      str.write('$i: ${segments[i]}');
+    }
+    if (i < segments.length - 1) {
+      str.write(', ');
+    }
+  }
+  str.write(']');
+  return str.toString();
 }
