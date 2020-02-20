@@ -1,3 +1,10 @@
+// TODO: We're currently ignoring static analyzer errors that don't seem to be
+// real errors. Remove the ignore_for_file comments below to see the analyzer
+// errors. 
+
+// ignore_for_file: uri_does_not_exist, non_bool_negation_expression,
+// ignore_for_file: implicit_dynamic_variable, implicit_dynamic_parameter
+
 import 'dart:html';
 import 'dart:indexed_db' as idb;
 import 'dart:typed_data';
