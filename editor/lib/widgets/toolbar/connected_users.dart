@@ -9,13 +9,12 @@ class ConnectedUsers extends StatelessWidget {
     Key key,
     @required this.rive,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<ConnectedUser>>(
       valueListenable: rive.conntectedUsers.users,
       builder: (context, users, child) {
-        print("New Items... ${users.length}");
         return Row(
           children: [
             for (var connectedUser in users) ...[
