@@ -22,6 +22,8 @@ import 'items/stage_shape.dart';
 import 'stage_item.dart';
 import 'tools/stage_tool.dart';
 
+enum AxisCheckState { local, parent, world }
+
 typedef _ItemFactory = StageItem Function();
 
 abstract class StageDelegate {
@@ -62,6 +64,19 @@ class Stage extends Debouncer {
     if (value.activate(this)) {
       toolNotifier.value = value;
     }
+  }
+
+  // Axis check state
+  final ValueNotifier<AxisCheckState> axisCheckNotifier =
+      ValueNotifier<AxisCheckState>(AxisCheckState.local);
+
+  AxisCheckState get axisCheck => axisCheckNotifier.value;
+  set axisCheck(AxisCheckState value) {
+    print('Selecting axis $value');
+    if (axisCheckNotifier.value == value) {
+      return;
+    }
+    axisCheckNotifier.value = value;
   }
 
   void clearDelegate(StageDelegate value) {

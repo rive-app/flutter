@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
 
@@ -53,20 +55,20 @@ class TransformPopupButton extends StatelessWidget {
         PopupContextItem.separator(),
         PopupContextItem('Show Axis',
             popup: [
-              PopupContextItem(
+              CheckPopupItem(
                 'Local',
-                icon: 'popup-check',
-                select: (Rive rive) {},
+                rive: rive,
+                axisCheck: AxisCheckState.local,
               ),
-              PopupContextItem(
+              CheckPopupItem(
                 'Parent',
-                icon: 'popup-check',
-                select: (Rive rive) {},
+                rive: rive,
+                axisCheck: AxisCheckState.parent,
               ),
-              PopupContextItem(
+              CheckPopupItem(
                 'World',
-                icon: 'popup-check',
-                select: (Rive rive) {},
+                rive: rive,
+                axisCheck: AxisCheckState.world,
               ),
             ],
             select: (Rive rive) {},
