@@ -10,6 +10,7 @@ import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
+import 'package:rive_editor/widgets/inspector/controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
@@ -74,6 +75,7 @@ class Rive with RiveFileDelegate {
 
   Rive({this.iconCache});
   ValueListenable<RiveUser> get user => _user;
+  final inspectorController = InspectorController();
 
   final ValueNotifier<List<RiveTabItem>> tabs =
       ValueNotifier<List<RiveTabItem>>([]);
@@ -356,7 +358,9 @@ class Rive with RiveFileDelegate {
 
   bool select(SelectableItem item, {bool append}) {
     append ??= selectionMode.value == SelectionMode.multi;
-    return selection.select(item, append: append);
+    final success = selection.select(item, append: append);
+    inspectorController.updateSelection(selection.items);
+    return success;
   }
 
   void _changeFile(RiveFile nextFile) {
