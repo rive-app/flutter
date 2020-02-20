@@ -27,9 +27,6 @@ import 'widgets/login.dart';
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
-import 'widgets/toolbar/connected_users.dart';
-import 'widgets/toolbar/design_animate_toggle.dart';
-import 'widgets/toolbar/scale_dropdown.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
