@@ -441,8 +441,7 @@ class FilesView extends StatelessWidget {
                   ),
                 ),
                 Container(width: 10.0),
-                PopupButton<Rive, PopupContextItem<Rive>>(
-                  selectArg: RiveContext.of(context),
+                PopupButton<PopupContextItem>(
                   items: [
                     PopupContextItem(
                       "New File",

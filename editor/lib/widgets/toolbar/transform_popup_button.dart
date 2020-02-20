@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
@@ -16,7 +15,7 @@ class TransformPopupButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolPopupButton(
       defaultIcon: 'tool-auto',
-      makeItems: (rive) => <PopupContextItem<Rive>>[
+      makeItems: (rive) => <PopupContextItem>[
         PopupContextItem(
           'Select',
           icon: 'tool-auto',

@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,7 @@ import 'package:flutter/material.dart';
 /// Custom PopupContextItem that automatically wires itself up to respond to
 /// selected tool changes in the stage. Also automatically wires up the tool
 /// icon and selection states.
-class ToolPopupItem extends PopupContextItem<Rive> {
+class ToolPopupItem extends PopupContextItem {
   ToolPopupItem(
     String name, {
     String icon,

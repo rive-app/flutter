@@ -8,7 +8,7 @@ import 'list_popup.dart';
 typedef PopupItemWidgetBuilder = Widget Function(BuildContext, bool);
 typedef ColorBuilder = Color Function(bool);
 
-class PopupContextItem<T> extends PopupListItem<T> {
+class PopupContextItem extends PopupListItem {
   /// When provided this will be called to build a widget to be displayed at the
   /// start of the row, use this for custom (or changing) icons in the popup
   /// item. For example, the Avatar in the hamburger menu.
@@ -46,7 +46,7 @@ class PopupContextItem<T> extends PopupListItem<T> {
   final ChangeNotifier rebuildItem;
 
   @override
-  final List<PopupContextItem<T>> popup;
+  final List<PopupContextItem> popup;
 
   @override
   final SelectCallback select;
@@ -160,7 +160,7 @@ class PopupContextItem<T> extends PopupListItem<T> {
   @override
   double get height => isSeparator ? 20 : 40;
 
-  static bool hasIcon<T>(String icon, List<PopupContextItem<T>> list) {
+  static bool hasIcon(String icon, List<PopupContextItem> list) {
     for (final item in list) {
       if (item.icon == icon) {
         return true;

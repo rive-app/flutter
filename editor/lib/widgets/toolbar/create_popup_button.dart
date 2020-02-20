@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
@@ -15,7 +14,7 @@ class CreatePopupButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolPopupButton(
       defaultIcon: 'tool-create',
-      makeItems: (rive) => <PopupContextItem<Rive>>[
+      makeItems: (rive) => <PopupContextItem>[
         PopupContextItem(
           'Shape',
           icon: 'tool-shapes',
@@ -28,9 +27,11 @@ class CreatePopupButton extends StatelessWidget {
             ),
             ToolPopupItem(
               'Ellipse',
-              rive: rive,
-              tool: EllipseTool.instance,
+              icon: EllipseTool.instance.icon,
+              notifier: rive.stage.value.toolNotifier,
+              isSelected: () => rive.stage.value.tool == EllipseTool.instance,
               shortcut: ShortcutAction.ellipseTool,
+              select: () => rive.stage.value.tool = EllipseTool.instance,
             ),
             PopupContextItem(
               'Polygon',
@@ -59,9 +60,11 @@ class CreatePopupButton extends StatelessWidget {
         PopupContextItem.separator(),
         ToolPopupItem(
           'Artboard',
-          rive: rive,
-          tool: ArtboardTool.instance,
+          icon: ArtboardTool.instance.icon,
+          notifier: rive.stage.value.toolNotifier,
+          isSelected: () => rive.stage.value.tool == ArtboardTool.instance,
           shortcut: ShortcutAction.artboardTool,
+          select: () => rive.stage.value.tool = ArtboardTool.instance,
         ),
         PopupContextItem(
           'Bone',

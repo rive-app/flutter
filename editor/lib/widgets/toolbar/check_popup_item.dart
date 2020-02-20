@@ -7,7 +7,7 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 /// Custom PopupContextItem that automatically wires itself up to respond to
 /// selected state changes in the stage. Also automatically wires up the tool
 /// icon and selection states.
-class CheckPopupItem<T> extends PopupContextItem<T> {
+class CheckPopupItem extends PopupContextItem {
   CheckPopupItem(
     String name, {
     ShortcutAction shortcut,
