@@ -2,7 +2,9 @@ import 'dart:ui';
 
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/node.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/inspectable.dart';
 
 import '../stage.dart';
 import '../stage_item.dart';
@@ -59,4 +61,16 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
               ? const Color.fromRGBO(100, 100, 100, 1.0)
               : const Color.fromRGBO(200, 200, 200, 1.0));
   }
+
+  @override
+  Set<InspectorBase> get inspectorItems => {
+        InspectorItem(name: 'Pos', propertyKeys: [
+          NodeBase.xPropertyKey,
+          NodeBase.yPropertyKey,
+        ]),
+        InspectorItem(name: 'Size', propertyKeys: [
+          ArtboardBase.widthPropertyKey,
+          ArtboardBase.heightPropertyKey,
+        ])
+      };
 }

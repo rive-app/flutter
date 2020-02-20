@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/inspectable.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/widgets/common/custom_expansion_tile.dart';
@@ -8,7 +9,6 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
-import 'controller.dart';
 import 'properties/dual.dart';
 import 'properties/single.dart';
 
@@ -59,12 +59,12 @@ class InspectorPanel extends StatelessWidget {
               .whereType<StageArtboard>()
               .map((stageItem) => stageItem.component)
               .toList(growable: false);
-          return ValueListenableBuilder<List<InspectorBase>>(
+          return ValueListenableBuilder<Set<InspectorBase>>(
             valueListenable: rive.inspectorController.itemsListenable,
             builder: (_, items, __) => ListView.builder(
               itemCount: items.length,
               itemBuilder: (context, index) {
-                final item = items[index];
+                final item = items.toList()[index];
                 if (item is InspectorGroup) {
                   return CustomExpansionTile(
                     title: Text(item.name),
