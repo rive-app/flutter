@@ -6,9 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -19,21 +17,18 @@ import 'package:window_utils/window_utils.dart';
 
 import 'rive/hierarchy_tree_controller.dart';
 import 'rive/rive.dart';
-import 'rive/stage/items/stage_artboard.dart';
 import 'rive/stage/stage.dart';
 import 'rive/stage/stage_item.dart';
 import 'widgets/catastrophe.dart';
 import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
-import 'widgets/inspector/property_dual.dart';
-import 'widgets/listenable_builder.dart';
+import 'widgets/inspector/pannel.dart';
 import 'widgets/login.dart';
 
 import 'widgets/popup/popup.dart';
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
-import 'widgets/theme.dart';
 import 'widgets/toolbar/connected_users.dart';
 import 'widgets/toolbar/design_animate_toggle.dart';
 import 'widgets/toolbar/scale_dropdown.dart';
@@ -403,76 +398,6 @@ class Editor extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class InspectorPanel extends StatelessWidget {
-  const InspectorPanel({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final rive = RiveContext.of(context);
-    return Container(
-      color: const Color.fromRGBO(50, 50, 50, 1.0),
-      child: ListenableBuilder(
-        listenable: rive.selection,
-        builder: (context, SelectionContext<SelectableItem> selection, _) {
-          var artboards = selection.items
-              .whereType<StageArtboard>()
-              .map((stageItem) => stageItem.component)
-              .toList(growable: false);
-          if (artboards.isEmpty) {
-            return Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    child: Text(
-                      "No Selection",
-                      style: TextStyle(
-                        color: ThemeUtils.textWhite,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                  Container(height: 10.0),
-                  Container(
-                    child: Text(
-                      "Select something to view its properties and options.",
-                      style: TextStyle(
-                        color: ThemeUtils.textGreyLight,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-          return Column(
-            children: [
-              PropertyDual(
-                name: 'Pos',
-                objects: artboards,
-                propertyKeyA: ArtboardBase.xPropertyKey,
-                propertyKeyB: ArtboardBase.yPropertyKey,
-              ),
-              PropertyDual(
-                name: 'Size',
-                objects: artboards,
-                propertyKeyA: ArtboardBase.widthPropertyKey,
-                propertyKeyB: ArtboardBase.heightPropertyKey,
-              ),
-              // selection. PropertyDual()
-            ],
-          );
-        },
-      ),
     );
   }
 }
