@@ -1,7 +1,7 @@
 import 'src/deserialize_helper.dart';
 
 class RiveUser {
-  final int id;
+  final int ownerId;
   final String username;
   final String name;
   final String avatar;
@@ -11,7 +11,7 @@ class RiveUser {
   final bool isVerified;
 
   RiveUser({
-    this.id,
+    this.ownerId,
     this.username,
     this.name,
     this.avatar,
@@ -23,16 +23,17 @@ class RiveUser {
 
   @override
   String toString() {
-    return 'RiveUser($id, @$username, \'$name\')';
+    return 'RiveUser($ownerId, @$username, \'$name\')';
   }
 
-  factory RiveUser.fromData(Map<String, dynamic> data) {
-    if (!data.getBool('signedIn')) {
+  factory RiveUser.fromData(Map<String, dynamic> data,
+      {bool requireSignin = true}) {
+    if (requireSignin && !data.getBool('signedIn')) {
       return null;
     }
 
     return RiveUser(
-      id: data.getInt('id'),
+      ownerId: data.getInt('ownerId'),
       username: data.getString('username'),
       name: data.getString('name'),
       avatar: data.getString('avatar'),
