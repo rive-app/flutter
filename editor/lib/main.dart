@@ -321,8 +321,14 @@ class Editor extends StatelessWidget {
               CreatePopupButton(),
               const Spacer(),
               ConnectedUsers(),
-              ViewScaleDropdown(),
-              DesignAnimateToggle(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: ViewScaleDropdown(),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: DesignAnimateToggle(),
+              ),
             ],
           ),
         ),
