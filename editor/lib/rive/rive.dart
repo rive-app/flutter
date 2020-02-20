@@ -248,8 +248,8 @@ class Rive with RiveFileDelegate {
           file.value.redo();
           break;
         case ShortcutAction.delete:
-          // Need to make a new list because as we delete we also remove them from
-          // the selection. This avoids modifying the selection set while
+          // Need to make a new list because as we delete we also remove them
+          // from the selection. This avoids modifying the selection set while
           // iterating.
           var toRemove = selection.items.toList();
           for (final item in toRemove) {
@@ -259,6 +259,12 @@ class Rive with RiveFileDelegate {
           }
           selection.clear();
           file.value.captureJournalEntry();
+          break;
+        case ShortcutAction.freezeImagesToggle:
+          stage?.value?.freezeImages = !stage.value.freezeImages;
+          break;
+        case ShortcutAction.freezeJointsToggle:
+          stage?.value?.freezeJoints = !stage.value.freezeJoints;
           break;
         default:
           break;
