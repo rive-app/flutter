@@ -1,32 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/connected_users/user.dart';
+import 'package:rive_editor/rive/rive.dart';
 
-class ConnectedUsers extends StatefulWidget {
-  @override
-  _ConnectedUsersState createState() => _ConnectedUsersState();
-}
+class ConnectedUsers extends StatelessWidget {
+  final Rive rive;
 
-class _ConnectedUsersState extends State<ConnectedUsers> {
+  const ConnectedUsers({
+    Key key,
+    @required this.rive,
+  }) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: [
-          AvatarView(
-            color: Colors.red,
-            imageUrl: '',
-          ),
-          Container(width: 20.0),
-          AvatarView(
-            color: Colors.blue,
-            imageUrl: '',
-          ),
-          Container(width: 20.0),
-          AvatarView(
-            color: Colors.yellow,
-            imageUrl: '',
-          ),
-        ],
-      ),
+    return ValueListenableBuilder<List<ConnectedUser>>(
+      valueListenable: rive.connectedUserContext.users,
+      builder: (context, users, child) {
+        print("New Items... ${users.length}");
+        return Row(
+          children: [
+            for (var connectedUser in users) ...[
+              AvatarView(
+                color: Color(connectedUser.colorValue),
+                imageUrl: connectedUser.user.avatar,
+              ),
+              child,
+            ],
+          ],
+        );
+      },
+      child: Container(width: 20.0),
     );
   }
 }

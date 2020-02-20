@@ -298,7 +298,7 @@ class Editor extends StatelessWidget {
   Widget _buildBody(BuildContext context, int index) {
     switch (index) {
       case 0:
-        return FilesView();
+        return const FilesView();
       default:
         return _buildEditor(context);
     }
@@ -322,7 +322,7 @@ class Editor extends StatelessWidget {
               const Spacer(),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: ConnectedUsers(),
+                child: ConnectedUsers(rive: rive),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),

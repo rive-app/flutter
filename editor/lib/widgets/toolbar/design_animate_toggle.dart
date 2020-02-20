@@ -36,7 +36,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle> {
               width: kAnimateToggleWidth / 2,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                color: const Color.fromRGBO(136, 136, 136, 1.0),
+                color: const Color.fromRGBO(68, 68, 68, 1.0),
               ),
             ),
           ),

@@ -21,6 +21,7 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/user.dart';
 
+import 'connected_users/context.dart';
 import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
 import 'selection_context.dart';
@@ -66,6 +67,7 @@ class Rive with RiveFileDelegate {
   final FileBrowser fileBrowser = FileBrowser();
   final _user = ValueNotifier<RiveUser>(null);
   ValueListenable<RiveUser> get user => _user;
+  final connectedUserContext = ConntectedUsersContext();
 
   final ValueNotifier<List<RiveTabItem>> tabs =
       ValueNotifier<List<RiveTabItem>>([]);
@@ -186,6 +188,8 @@ class Rive with RiveFileDelegate {
       fileBrowser.load();
     }
     selectedTab.value = value;
+    connectedUserContext.currentFile.value = value;
+    connectedUserContext.init();
   }
 
   @override
