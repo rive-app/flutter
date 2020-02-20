@@ -9,6 +9,7 @@ import 'coop/connect_result.dart';
 import 'coop/coop_client.dart';
 import 'coop/coop_command.dart';
 import 'coop/local_settings.dart';
+import 'coop/player.dart';
 import 'core_property_changes.dart';
 
 export 'package:fractional/fractional.dart';
@@ -125,6 +126,12 @@ abstract class CoreContext implements LocalSettings {
   /// with sane/stable data.
   List<Core<CoreContext>> _delayAdd;
 
+  final Map<int, Player> _players = {};
+
+  Iterable<Player> get players => _players.values;
+
+  T player<T>(int id) => _players[id] as T;
+
   /// Get all objects
   Iterable<Core<CoreContext>> get objects => _objects.values;
   T add<T extends Core>(T object) {
@@ -209,7 +216,8 @@ abstract class CoreContext implements LocalSettings {
           }
         }
         return changes;
-      };
+      }
+      ..updatePlayers = _updatePlayers;
 
     var result = await _client.connect();
     if (result == ConnectResult.connected) {
@@ -224,6 +232,44 @@ abstract class CoreContext implements LocalSettings {
       _nextObjectId = Id(clientId, maxId + 1);
     }
     return result;
+  }
+
+  Player makeClientSidePlayer(Player serverPlayer);
+
+  void onPlayerAdded(covariant Player player);
+  void onPlayerRemoved(covariant Player player);
+  void onPlayersChanged();
+
+  void _updatePlayers(List<Player> players) {
+    // As we iterate players to build client side ones, also track their
+    // clientIds so we can later remove ones that are no longer connected.
+    Set<int> clientIds = {};
+    // Track whether our set of players has changed.
+    bool changed = false;
+    for (final player in players) {
+      clientIds.add(player.clientId);
+      if (_players.containsKey(player.clientId)) {
+        continue;
+      }
+      var clientPlayer = makeClientSidePlayer(player);
+      _players[player.clientId] = clientPlayer;
+      onPlayerAdded(clientPlayer);
+      changed = true;
+    }
+
+    _players.removeWhere((clientId, player) {
+      if (clientIds.contains(clientId)) {
+        // dont' remove it, player still active
+        return false;
+      }
+      // player gone
+      onPlayerRemoved(player);
+      changed = true;
+      return true;
+    });
+    if (changed) {
+      onPlayersChanged();
+    }
   }
 
   Future<bool> disconnect() async {

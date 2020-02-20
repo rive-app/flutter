@@ -5,6 +5,7 @@ import 'package:binary_buffer/binary_writer.dart';
 
 import 'change.dart';
 import 'coop_command.dart';
+import 'coop_server_client.dart';
 
 typedef Write = void Function(Uint8List buffer);
 
@@ -74,7 +75,6 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-
   void writeIds(int min, int max) {
     var writer = BinaryWriter(alignment: 8);
     writer.writeVarUint(CoopCommand.ids);
@@ -87,6 +87,17 @@ class CoopWriter {
     var writer = BinaryWriter(alignment: 8);
     writer.writeVarUint(CoopCommand.requestIds);
     writer.writeVarUint(amount);
+    write(writer.uint8Buffer);
+  }
+
+  void writePlayers(Iterable<CoopServerClient> clients) {
+    // TODO: nicer way to optimize alignment?
+    var writer = BinaryWriter(alignment: 4 + 8 * clients.length);
+    writer.writeVarUint(CoopCommand.players);
+    writer.writeVarUint(clients.length);
+    for (final client in clients) {
+      client.serialize(writer);
+    }
     write(writer.uint8Buffer);
   }
 }

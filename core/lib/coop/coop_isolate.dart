@@ -170,6 +170,15 @@ abstract class CoopIsolateProcess {
   Future<void> persist();
 
   void propagateChanges(CoopServerClient client, ChangeSet changes);
+
+  /// Send the list of players to all players.
+  void propagatePlayers() {
+    var players = _clients.values;
+    for (final client in players) {
+      client.writer.writePlayers(players);
+    }
+  }
+
   int nextClientId();
 
   Future<bool> shutdown();
@@ -190,10 +199,12 @@ abstract class CoopIsolateProcess {
       }
       _clients[data.id] =
           CoopServerClient(this, data.id, data.userOwnerId, actualClientId);
+      propagatePlayers();
     } else if (data is _CoopServerRemoveClient) {
       var client = _clients[data.id];
       if (client != null) {
-        _clients.remove(client);
+        _clients.remove(client.id);
+        propagatePlayers();
       }
     } else if (data is _CoopServerProcessData) {
       _clients[data.id]?.receiveData(data.data);

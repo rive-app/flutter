@@ -1,15 +1,15 @@
 import 'dart:typed_data';
+import 'package:core/coop/player.dart';
+
 import '../debounce.dart';
 import 'change.dart';
 import 'coop_isolate.dart';
 import 'coop_reader.dart';
 import 'coop_writer.dart';
 
-class CoopServerClient extends CoopReader {
+class CoopServerClient extends Player with CoopReader {
   CoopWriter _writer;
-  final int userOwnerId;
   final int id;
-  final int clientId;
   // final HttpRequest request;
   final CoopIsolateProcess context;
 
@@ -21,7 +21,8 @@ class CoopServerClient extends CoopReader {
     }
   }
 
-  CoopServerClient(this.context, this.id, this.userOwnerId, this.clientId) {
+  CoopServerClient(this.context, this.id, int ownerId, int clientId)
+      : super(clientId, ownerId) {
     _writer = CoopWriter(write);
 
     _writer.writeHello(clientId);
@@ -104,6 +105,11 @@ class CoopServerClient extends CoopReader {
   @override
   Future<void> recvReady() {
     throw UnsupportedError("Server should never receive ready.");
+  }
+
+  @override
+  Future<void> recvPlayers(List<Player> players) {
+    throw UnsupportedError("Server should never receive players.");
   }
 }
 

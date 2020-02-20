@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_server_client.dart';
+import 'package:core/coop/player.dart';
 import 'package:core/coop/protocol_version.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -16,6 +17,7 @@ typedef ChangeSetCallback = void Function(ChangeSet changeSet);
 typedef WipeCallback = void Function();
 typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
 typedef HelloCallback = void Function(int clientId);
+typedef PlayersCallback = void Function(List<Player>);
 
 enum ConnectionState { disconnected, connecting, handshaking, connected }
 
@@ -42,6 +44,7 @@ class CoopClient extends CoopReader {
   WipeCallback wipe;
   GetOfflineChangesCallback getOfflineChanges;
   HelloCallback gotClientId;
+  PlayersCallback updatePlayers;
 
   CoopClient(
     String host,
@@ -259,5 +262,10 @@ class CoopClient extends CoopReader {
   @override
   Future<void> recvRequestIds(int amount) {
     throw UnsupportedError("Client should never receive request for ids");
+  }
+
+  @override
+  Future<void> recvPlayers(List<Player> players) async {
+    updatePlayers?.call(players);
   }
 }
