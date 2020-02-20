@@ -5,9 +5,25 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Flutter",
+            "name": "Web",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": [
+                " --release",
+                "--dart-define=FLUTTER_WEB_USE_SKIA=true",
+                "-d",
+                "chrome"
+            ]
+        },
+        {
+            "name": "Desktop (MacOS)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                " --release",
+                "-d",
+                "macos"
+            ]
         }
     ]
 }
