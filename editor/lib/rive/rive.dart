@@ -64,11 +64,12 @@ class Rive with RiveFileDelegate {
       SelectionContext<SelectableItem>();
   final ValueNotifier<SelectionMode> selectionMode =
       ValueNotifier<SelectionMode>(SelectionMode.single);
+  final ValueNotifier<bool> isAnimateMode = ValueNotifier<bool>(false);
 
   final FileBrowser fileBrowser = FileBrowser();
   final _user = ValueNotifier<RiveUser>(null);
   ValueListenable<RiveUser> get user => _user;
-  final connectedUserContext = ConntectedUsersContext();
+  final conntectedUsers = ConntectedUsersContext();
 
   final ValueNotifier<List<RiveTabItem>> tabs =
       ValueNotifier<List<RiveTabItem>>([]);
@@ -189,8 +190,8 @@ class Rive with RiveFileDelegate {
       fileBrowser.load();
     }
     selectedTab.value = value;
-    connectedUserContext.currentFile.value = value;
-    connectedUserContext.init();
+    conntectedUsers.currentFile.value = value;
+    conntectedUsers.init();
   }
 
   @override
@@ -245,7 +246,7 @@ class Rive with RiveFileDelegate {
         case ShortcutAction.ellipseTool:
           stage?.value?.tool = EllipseTool.instance;
           break;
-        
+
         case ShortcutAction.rectangleTool:
           stage?.value?.tool = RectangleTool.instance;
           break;

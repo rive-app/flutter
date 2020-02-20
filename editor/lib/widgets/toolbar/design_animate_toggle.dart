@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 const kAnimateToggleWidth = 197.0;
 
@@ -9,7 +10,6 @@ class DesignAnimateToggle extends StatefulWidget {
 
 class _DesignAnimateToggleState extends State<DesignAnimateToggle>
     with SingleTickerProviderStateMixin {
-  bool isAnimate = false;
   AnimationController controller;
   Animation<double> animation;
 
@@ -29,12 +29,17 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
       begin: 0,
       end: kAnimateToggleWidth / 2,
     ).animate(curve)
-      ..addListener(() => setState(() {}));
+      ..addListener(_update);
     super.initState();
+  }
+
+  void _update() {
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    var rive = RiveContext.of(context);
     return Container(
       width: kAnimateToggleWidth,
       child: LayoutBuilder(
@@ -67,8 +72,8 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               height: dimens.maxHeight,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: () => _setAnimate(false),
-                child: _buildText('Design', !isAnimate),
+                onTap: () => _setAnimate(false, rive.isAnimateMode),
+                child: _buildText('Design'),
               ),
             ),
             Positioned(
@@ -77,8 +82,8 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               height: dimens.maxHeight,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: () => _setAnimate(true),
-                child: _buildText('Animate', isAnimate),
+                onTap: () => _setAnimate(true, rive.isAnimateMode),
+                child: _buildText('Animate'),
               ),
             ),
           ],
@@ -87,7 +92,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
     );
   }
 
-  Widget _buildText(String text, bool selected) {
+  Widget _buildText(String text) {
     return Center(
       child: Text(
         text,
@@ -96,13 +101,13 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
     );
   }
 
-  void _setAnimate(bool value) {
-    isAnimate = value;
+  void _setAnimate(bool value, ValueNotifier<bool> notifier) {
     // if (mounted) setState(() => isAnimate = value);
-    if (isAnimate) {
+    if (value) {
       controller.forward();
     } else {
       controller.reverse();
     }
+    notifier.value = value;
   }
 }
