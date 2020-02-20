@@ -22,13 +22,15 @@ enum ShortcutAction {
   nextFrame,
   nextKeyFrame,
   nodeTool,
+
   paintWeightTool,
-  vertexWeightTool,
   pan,
   paste,
+  poseTool,
   previous10Frames,
   previousFrame,
   previousKeyFrame,
+
   redo,
   rotateTool,
   scaleTool,
@@ -44,6 +46,7 @@ enum ShortcutAction {
   togglePlay,
   translateTool,
   undo,
+  vertexWeightTool,
   zoom100,
   zoomFit,
   zoomIn,
@@ -101,5 +104,8 @@ enum ShortcutAction {
   sendToFront,
 
   pickParent,
-  toggleEditMode
+  toggleEditMode,
+
+  freezeJointsToggle,
+  freezeImagesToggle,
 }

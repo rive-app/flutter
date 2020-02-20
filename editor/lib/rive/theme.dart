@@ -6,6 +6,11 @@ import 'package:flutter/widgets.dart';
 class RiveColors {
   const RiveColors();
 
+  // Toolbar
+  Color get toolbarBackground => const Color(0xFF3c3c3c);
+  Color get toolbarButton => const Color(0xFF8C8C8C);
+  Color get toolbarButtonBackGroundHover => const Color(0xFF444444);
+
   // Accents
   Color get accentBlue => const Color(0xFF57A5E0);
   Color get accentMagenta => const Color(0xFFFF5678);
@@ -14,12 +19,13 @@ class RiveColors {
   // Backgrounds
   Color get panelBackgroundLightGrey => const Color(0xFFF1F1F1);
   Color get panelBackgroundDarkGrey => const Color(0xFF323232);
-  Color get toolbarGray => const Color(0xFF3c3c3c);
   Color get popupBackground => const Color(0xFF111111);
 
   // Buttons
   Color get buttonLight => const Color(0xFFE3E3E3);
   Color get buttonDark => const Color(0xFF444444);
+  Color get buttonNoHover => const Color(0xFF707070);
+  Color get buttonHover => const Color(0xFFFFFFFF);
 }
 
 /// TextStyles used in the Rive Theme

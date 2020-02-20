@@ -24,6 +24,8 @@ import 'items/stage_shape.dart';
 import 'stage_item.dart';
 import 'tools/stage_tool.dart';
 
+enum AxisCheckState { local, parent, world }
+
 typedef _ItemFactory = StageItem Function();
 
 abstract class StageDelegate {
@@ -54,7 +56,6 @@ class Stage extends Debouncer {
 
   StageDelegate _delegate;
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
-
   StageTool _activeDragTool;
   StageTool get tool => toolNotifier.value;
   set tool(StageTool value) {
@@ -63,6 +64,34 @@ class Stage extends Debouncer {
     }
     if (value.activate(this)) {
       toolNotifier.value = value;
+    }
+  }
+
+  // Joints freezed flag
+  final ValueNotifier<bool> freezeJointsNotifier = ValueNotifier<bool>(false);
+  bool get freezeJoints => freezeJointsNotifier.value;
+  set freezeJoints(bool value) {
+    if (freezeJointsNotifier.value != value) {
+      freezeJointsNotifier.value = value;
+    }
+  }
+
+  // Images freezed flag
+  final ValueNotifier<bool> freezeImagesNotifier = ValueNotifier<bool>(false);
+  bool get freezeImages => freezeImagesNotifier.value;
+  set freezeImages(bool value) {
+    if (freezeImagesNotifier.value != value) {
+      freezeImagesNotifier.value = value;
+    }
+  }
+
+  // Axis check state
+  final ValueNotifier<AxisCheckState> axisCheckNotifier =
+      ValueNotifier<AxisCheckState>(AxisCheckState.local);
+  AxisCheckState get axisCheck => axisCheckNotifier.value;
+  set axisCheck(AxisCheckState value) {
+    if (axisCheckNotifier.value != value) {
+      axisCheckNotifier.value = value;
     }
   }
 

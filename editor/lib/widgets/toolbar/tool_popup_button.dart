@@ -10,7 +10,7 @@ import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// Callback used to build the list of tool popup items.
-typedef MakeToolPopupItems = List<PopupContextItem<Rive>> Function(Rive);
+typedef MakeToolPopupItems = List<PopupContextItem> Function(Rive);
 
 /// Widget shared by the create and transform popup buttons to display a list of
 /// stage tools and manage their selection. Abstracts some of the complexity
@@ -33,7 +33,7 @@ class ToolPopupButton extends StatefulWidget {
 
 class _ToolPopupButtonState extends State<ToolPopupButton> {
   // Timer to close the popup
-  ListPopup<Rive, PopupContextItem<Rive>> _popup;
+  ListPopup<PopupContextItem> _popup;
   Timer _closeTimer;
 
   @override
