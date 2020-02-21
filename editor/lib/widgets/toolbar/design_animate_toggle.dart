@@ -15,7 +15,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
 
   @override
   void initState() {
-    const _duration = Duration(milliseconds: 400);
+    const _duration = Duration(milliseconds: 300);
     controller = AnimationController(
       vsync: this,
       duration: _duration,
