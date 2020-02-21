@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/modal_popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -22,32 +23,32 @@ class SharePopupButton extends StatelessWidget {
         PopupContextItem(
           'Download for Runtime',
           icon: 'download',
-          select: () {
-            // TODO:
-          },
+          select: () => _showModal(context, (_) => Container()),
         ),
         PopupContextItem(
           'Publish to Community',
           icon: 'popup-community',
-          select: () {
-            // TODO:
-          },
+          select: () => _showModal(context, (_) => Container()),
         ),
         PopupContextItem(
           'Presentation Mode',
           icon: 'popup-presentation',
-          select: () {
-            // TODO:
-          },
+          select: () => _showModal(context, (_) => Container()),
         ),
         PopupContextItem(
           'Cloud Renderer',
           icon: 'popup-server',
-          select: () {
-            // TODO:
-          },
+          select: () => _showModal(context, (_) => Container()),
         ),
       ],
     );
+  }
+
+  void _showModal(BuildContext context, WidgetBuilder builder) {
+    ModalPopup(
+      builder: builder,
+      size: const Size(750, 629),
+      elevation: 20.0,
+    ).show(context);
   }
 }
