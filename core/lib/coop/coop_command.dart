@@ -9,5 +9,6 @@ class CoopCommand {
   static const int reject = 7;
   static const int requestIds = 8;
   static const int ids = 9;
-  static const int minChangeId = 10;
+  static const int players = 10;
+  static const int minChangeId = 11;
 }

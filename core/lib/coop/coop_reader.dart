@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:binary_buffer/binary_reader.dart';
+import 'package:core/coop/player.dart';
 
 import 'change.dart';
 import 'coop_command.dart';
@@ -50,6 +51,15 @@ abstract class CoopReader {
       case CoopCommand.ready:
         recvReady();
         break;
+      case CoopCommand.players:
+        int length = reader.readVarUint();
+        List<Player> players = List<Player>(length);
+        for (int i = 0; i < length; i++) {
+          players[i] = Player.deserialize(reader);
+        }
+        recvPlayers(players);
+
+        break;
       default:
         recvChange(ChangeSet()..deserialize(reader, command));
         break;
@@ -66,4 +76,5 @@ abstract class CoopReader {
   Future<void> recvWipe();
   Future<void> recvIds(int min, int max);
   Future<void> recvRequestIds(int amount);
+  Future<void> recvPlayers(List<Player> players);
 }
