@@ -21,7 +21,28 @@ class SharePopupButton extends StatelessWidget {
       contextItems: [
         PopupContextItem(
           'Download for Runtime',
-          icon: 'tool-rotate', // TODO: change icon.
+          icon: 'download',
+          select: () {
+            // TODO:
+          },
+        ),
+        PopupContextItem(
+          'Publish to Community',
+          icon: 'popup-community',
+          select: () {
+            // TODO:
+          },
+        ),
+        PopupContextItem(
+          'Presentation Mode',
+          icon: 'popup-presentation',
+          select: () {
+            // TODO:
+          },
+        ),
+        PopupContextItem(
+          'Cloud Renderer',
+          icon: 'popup-server',
           select: () {
             // TODO:
           },
