@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:rive_api/user.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
+
 import 'user.dart';
 
 const ASCII_START = 33;
