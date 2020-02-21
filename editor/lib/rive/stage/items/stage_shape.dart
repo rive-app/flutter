@@ -39,9 +39,9 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
           NodeBase.xPropertyKey,
           NodeBase.yPropertyKey,
         ]),
-        InspectorItem(name: 'Size', propertyKeys: [
-          ParametricPathBase.widthPropertyKey,
-          ParametricPathBase.heightPropertyKey,
+        InspectorItem(name: 'Scale', propertyKeys: [
+          NodeBase.scaleXPropertyKey,
+          NodeBase.scaleYPropertyKey,
         ])
       };
 }
