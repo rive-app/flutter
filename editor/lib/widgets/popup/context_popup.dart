@@ -85,12 +85,16 @@ class PopupContextItem extends PopupListItem {
 
   Widget itemBuilder(BuildContext context, bool isHovered) {
     if (isSeparator) {
+      // The edgeinset is there to push the horizontal line onto
+      // the full pixel line (rather than spanning two pixels at half opacity)
       return Center(
+          child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 1, 0, 0),
         child: Container(
           height: 1,
-          color: Colors.white.withOpacity(0.08),
+          color: RiveTheme.of(context).colors.separator,
         ),
-      );
+      ));
     }
     final children = <Widget>[const SizedBox(width: 20)];
 
