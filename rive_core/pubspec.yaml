@@ -13,7 +13,8 @@ dependencies:
     path: ../dependencies/core-dart/core
   local_data:
     path: ../dependencies/rive-api-flutter/dependencies/local-data-flutter
-    
+  rive_api:
+    path: ../dependencies/rive-api-flutter
   shared_preferences: ^0.5.6
   path_provider: 1.5.1
   graphs: ^0.2.0
