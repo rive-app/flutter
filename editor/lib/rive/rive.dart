@@ -24,7 +24,6 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
-import 'package:rive_editor/widgets/inspector/inspector_controller.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 
 import 'file_browser/file_browser.dart';
@@ -75,7 +74,6 @@ class Rive with RiveFileDelegate {
 
   Rive({this.iconCache});
   ValueListenable<RiveUser> get user => _user;
-  final inspectorController = InspectorController();
 
   final ValueNotifier<List<RiveTabItem>> tabs =
       ValueNotifier<List<RiveTabItem>>([]);
@@ -359,7 +357,6 @@ class Rive with RiveFileDelegate {
   bool select(SelectableItem item, {bool append}) {
     append ??= selectionMode.value == SelectionMode.multi;
     final success = selection.select(item, append: append);
-    inspectorController.updateSelection(selection.items);
     return success;
   }
 
