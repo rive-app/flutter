@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import 'package:rive_editor/widgets/multi_core_property_builder.dart';
 
+/// A text field that lives within the inspector.
+/// 
+/// The [propertyKey] is used to extract the associated field data to be 
+/// displayed within this text field.
 class InspectorTextField extends StatelessWidget {
   final List<Core> objects;
   final int propertyKey;

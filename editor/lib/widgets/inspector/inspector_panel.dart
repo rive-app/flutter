@@ -7,11 +7,10 @@ import 'package:rive_editor/widgets/common/color_picker.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/common/custom_expansion_tile.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
+import 'package:rive_editor/widgets/inspector/properties/property_single.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/theme.dart';
-
-import 'properties/dual.dart';
-import 'properties/single.dart';
 
 class InspectorPanel extends StatelessWidget {
   const InspectorPanel({

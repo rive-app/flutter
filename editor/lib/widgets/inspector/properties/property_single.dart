@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-
-import 'text_field.dart';
+import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 
 class PropertySingle extends StatelessWidget {
   final List<Core> objects;
