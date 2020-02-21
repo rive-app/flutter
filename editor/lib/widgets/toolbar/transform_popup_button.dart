@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
-import 'package:rive_editor/widgets/inherited_widgets.dart';
+
 import 'package:rive_editor/widgets/popup/context_popup.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
+
 import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
+import 'package:rive_editor/widgets/toolbar/multi_icon_popup_item.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
 
@@ -57,22 +58,18 @@ class TransformPopupButton extends StatelessWidget {
             select: () {},
           ),
           PopupContextItem.separator(),
-          PopupContextItem(
+          MultiIconPopupItem(
             'Show Axis',
-            select: () {},
-            iconBuilder: (context, hovered) {
-              String axisIcon = 'popup-local';
-              if (rive.stage.value.axisCheck == AxisCheckState.parent) {
-                axisIcon = 'popup-parent';
-              } else if (rive.stage.value.axisCheck == AxisCheckState.world) {
-                axisIcon = 'popup-world';
+            notifier: rive.stage.value.axisCheckNotifier,
+            iconSelector: () {
+              switch (rive.stage.value.axisCheck) {
+                case AxisCheckState.local:
+                  return 'popup-local';
+                case AxisCheckState.parent:
+                  return 'popup-parent';
+                default:
+                  return 'popup-world';
               }
-              return TintedIcon(
-                color: hovered
-                    ? RiveTheme.of(context).colors.buttonHover
-                    : RiveTheme.of(context).colors.buttonNoHover,
-                icon: axisIcon,
-              );
             },
             popup: [
               CheckPopupItem(
