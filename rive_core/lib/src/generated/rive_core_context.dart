@@ -10,6 +10,7 @@ import '../../shapes/ellipse.dart';
 import '../../shapes/rectangle.dart';
 import '../../shapes/shape.dart';
 import '../../shapes/straight_vertex.dart';
+import '../../shapes/triangle.dart';
 import 'artboard_base.dart';
 import 'component_base.dart';
 import 'drawable_base.dart';
@@ -21,6 +22,7 @@ import 'shapes/path_vertex_base.dart';
 import 'shapes/rectangle_base.dart';
 import 'shapes/shape_base.dart';
 import 'shapes/straight_vertex_base.dart';
+import 'shapes/triangle_base.dart';
 
 abstract class RiveCoreContext extends CoreContext {
   RiveCoreContext(String fileId) : super(fileId);
@@ -38,6 +40,8 @@ abstract class RiveCoreContext extends CoreContext {
         return Rectangle();
       case CubicVertexBase.typeKey:
         return CubicVertex();
+      case TriangleBase.typeKey:
+        return Triangle();
       case EllipseBase.typeKey:
         return Ellipse();
       case ArtboardBase.typeKey:

@@ -75,7 +75,7 @@ abstract class Path extends PathBase {
           {
             StraightVertex straightPoint = point as StraightVertex;
             double radius = straightPoint.radius;
-            if (radius > 0) {
+            if (radius != null && radius > 0) {
               if (!isClosed && (i == 0 || i == pl - 1)) {
                 renderPoints.add(point);
                 previous = point;
