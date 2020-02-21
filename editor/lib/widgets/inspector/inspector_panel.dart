@@ -71,18 +71,26 @@ class InspectorPanel extends StatelessWidget {
           var listItems = <Widget>[];
           for (final inspectorItem in inspectorItems) {
             if (inspectorItem is InspectorGroup) {
-              listItems.add(CustomExpansionTile(
-                title: Text(inspectorItem.name),
-                initiallyExpanded: inspectorItem.isExpanded.value,
-                expanded: inspectorItem.isExpanded,
-                children: <Widget>[
-                  for (final child in inspectorItem.children) ...[
-                    if (child is InspectorItem) ...[
-                      buildItem(child, componentItems)
+              if (inspectorItem.name == null) {
+                for (final child in inspectorItem.children) {
+                  listItems.add(buildItem(child, componentItems));
+                }
+                listItems.add(InspectorDivider());
+              } else {
+                listItems.add(CustomExpansionTile(
+                  title: Text(inspectorItem.name),
+                  initiallyExpanded: inspectorItem.isExpanded.value,
+                  expanded: inspectorItem.isExpanded,
+                  children: <Widget>[
+                    for (final child in inspectorItem.children) ...[
+                      if (child is InspectorItem) ...[
+                        buildItem(child, componentItems)
+                      ]
                     ]
-                  ]
-                ],
-              ));
+                  ],
+                ));
+                listItems.add(InspectorDivider());
+              }
             } else if (inspectorItem is InspectorItem) {
               listItems.add(buildItem(inspectorItem, componentItems));
             }
@@ -111,5 +119,17 @@ class InspectorPanel extends StatelessWidget {
       );
     }
     return Container();
+  }
+}
+
+class InspectorDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(left: 20),
+      child: const Divider(
+        color: Color(0xFF444444),
+      ),
+    );
   }
 }

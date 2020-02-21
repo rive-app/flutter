@@ -70,6 +70,10 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
         InspectorItem(name: 'Size', propertyKeys: [
           ArtboardBase.widthPropertyKey,
           ArtboardBase.heightPropertyKey,
-        ])
+        ]),
+        InspectorItem(name: 'Origin', propertyKeys: [
+          ArtboardBase.originXPropertyKey,
+          ArtboardBase.originYPropertyKey,
+        ]),
       };
 }
