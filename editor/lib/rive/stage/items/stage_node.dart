@@ -10,9 +10,23 @@ class StageNode extends StageItem<Node> {
 
   @override
   Set<InspectorBase> get inspectorItems => {
-        InspectorItem(name: 'Pos', propertyKeys: [
-          NodeBase.xPropertyKey,
-          NodeBase.yPropertyKey,
-        ]),
+        InspectorGroup(
+          name: null,
+          children: [
+            InspectorItem(name: 'Pos', properties: [
+              InspectorProperty(key: NodeBase.xPropertyKey, label: 'x'),
+              InspectorProperty(key: NodeBase.yPropertyKey, label: 'y'),
+            ]),
+            InspectorItem(name: 'Scale', properties: [
+              InspectorProperty(key: NodeBase.scaleXPropertyKey, label: 'x'),
+              InspectorProperty(key: NodeBase.scaleYPropertyKey, label: 'y'),
+            ]),
+            InspectorItem(name: 'Rotation', properties: [
+              InspectorProperty(
+                key: NodeBase.rotationPropertyKey,
+              ),
+            ]),
+          ],
+        ),
       };
 }

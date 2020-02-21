@@ -103,19 +103,19 @@ class InspectorPanel extends StatelessWidget {
   }
 
   Widget buildItem(InspectorItem item, List<Component> selectedComponents) {
-    if (item.propertyKeys.length == 2) {
+    if (item.properties.length == 2) {
       return PropertyDual(
         name: item.name,
         objects: selectedComponents,
-        propertyKeyA: item.propertyKeys[0],
-        propertyKeyB: item.propertyKeys[1],
+        propertyKeyA: item.properties[0].key,
+        propertyKeyB: item.properties[1].key,
       );
     }
-    if (item.propertyKeys.length == 1) {
+    if (item.properties.length == 1) {
       return PropertySingle(
         name: item.name,
         objects: selectedComponents,
-        propertyKey: item.propertyKeys[0],
+        propertyKey: item.properties[0].key,
       );
     }
     return Container();

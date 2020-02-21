@@ -37,16 +37,18 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
         InspectorGroup(
           name: null,
           children: [
-            InspectorItem(name: 'Pos', propertyKeys: [
-              NodeBase.xPropertyKey,
-              NodeBase.yPropertyKey,
+            InspectorItem(name: 'Pos', properties: [
+              InspectorProperty(key: NodeBase.xPropertyKey, label: 'x'),
+              InspectorProperty(key: NodeBase.yPropertyKey, label: 'y'),
             ]),
-            InspectorItem(name: 'Scale', propertyKeys: [
-              NodeBase.scaleXPropertyKey,
-              NodeBase.scaleYPropertyKey,
+            InspectorItem(name: 'Scale', properties: [
+              InspectorProperty(key: NodeBase.scaleXPropertyKey, label: 'x'),
+              InspectorProperty(key: NodeBase.scaleYPropertyKey, label: 'y'),
             ]),
-            InspectorItem(name: 'Rotation', propertyKeys: [
-              NodeBase.rotationPropertyKey,
+            InspectorItem(name: 'Rotation', properties: [
+              InspectorProperty(
+                key: NodeBase.rotationPropertyKey,
+              ),
             ]),
           ],
         ),
@@ -55,8 +57,10 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
           children: [
             InspectorItem(
               name: 'Opacity',
-              propertyKeys: [
-                NodeBase.opacityPropertyKey,
+              properties: [
+                InspectorProperty(
+                  key: NodeBase.opacityPropertyKey,
+                ),
               ],
             ),
           ],

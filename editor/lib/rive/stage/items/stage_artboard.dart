@@ -63,17 +63,26 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
 
   @override
   Set<InspectorBase> get inspectorItems => {
-        InspectorItem(name: 'Pos', propertyKeys: [
-          ArtboardBase.xPropertyKey,
-          ArtboardBase.yPropertyKey,
-        ]),
-        InspectorItem(name: 'Size', propertyKeys: [
-          ArtboardBase.widthPropertyKey,
-          ArtboardBase.heightPropertyKey,
-        ]),
-        InspectorItem(name: 'Origin', propertyKeys: [
-          ArtboardBase.originXPropertyKey,
-          ArtboardBase.originYPropertyKey,
-        ]),
+        InspectorGroup(
+          name: null,
+          children: [
+            InspectorItem(name: 'Pos', properties: [
+              InspectorProperty(key: ArtboardBase.xPropertyKey, label: 'x'),
+              InspectorProperty(key: ArtboardBase.yPropertyKey, label: 'y'),
+            ]),
+            InspectorItem(name: 'Size', properties: [
+              InspectorProperty(
+                  key: ArtboardBase.widthPropertyKey, label: 'width'),
+              InspectorProperty(
+                  key: ArtboardBase.heightPropertyKey, label: 'height'),
+            ]),
+            InspectorItem(name: 'Origin', properties: [
+              InspectorProperty(
+                  key: ArtboardBase.originXPropertyKey, label: 'x'),
+              InspectorProperty(
+                  key: ArtboardBase.originYPropertyKey, label: 'y'),
+            ]),
+          ],
+        ),
       };
 }

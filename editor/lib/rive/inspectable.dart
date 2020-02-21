@@ -41,11 +41,20 @@ class InspectorItem extends InspectorBase {
   @override
   String name;
 
-  final List<int> propertyKeys;
+  final List<InspectorProperty> properties;
 
   InspectorItem({
-    @required this.propertyKeys,
+    @required this.properties,
     @required this.name,
   });
 }
 
+class InspectorProperty {
+  final int key;
+  final String label;
+
+  InspectorProperty({
+    @required this.key,
+    this.label,
+  });
+}
