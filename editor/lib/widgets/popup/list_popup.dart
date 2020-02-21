@@ -100,7 +100,7 @@ class ListPopup<T extends PopupListItem> {
     BuildContext context, {
     @required ListPopupItemBuilder<T> itemBuilder,
     bool isChild = false,
-    double width = 177,
+    double width = 200,
     double margin = 10,
     // double arrow = 10,
     List<T> items = const [],
