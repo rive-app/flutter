@@ -1,5 +1,11 @@
 import 'package:core/coop/change.dart';
+import 'package:core/coop/player.dart';
 import 'package:core/core.dart';
+import 'package:core/debounce.dart';
+import 'package:flutter/material.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/artists.dart';
+import 'package:rive_core/client_side_player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'artboard.dart';
@@ -16,6 +22,11 @@ class RiveFile extends RiveCoreContext {
   final Set<RiveFileDelegate> delegates = {};
   int _dirt = 0;
   final IsolatedPersist _isolatedPersist;
+  final RiveApi api;
+  final Set<ClientSidePlayer> _dirtyPlayers = {};
+
+  final ValueNotifier<Iterable<ClientSidePlayer>> allPlayers =
+      ValueNotifier<Iterable<ClientSidePlayer>>([]);
 
   /// Set of components that need to be resorted after the current operation
   /// (undo/redo/capture) completes.
@@ -33,9 +44,13 @@ class RiveFile extends RiveCoreContext {
 
   SharedPreferences _prefs;
 
-  RiveFile(String fileId, this.name,
-      {this.overridePreferences, this.useSharedPreferences = true})
-      : _isolatedPersist = IsolatedPersist(fileId),
+  RiveFile(
+    String fileId,
+    this.name, {
+    this.api,
+    this.overridePreferences,
+    this.useSharedPreferences = true,
+  })  : _isolatedPersist = IsolatedPersist(fileId),
         super(fileId);
 
   @override
@@ -243,6 +258,58 @@ class RiveFile extends RiveCoreContext {
     }
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs.setString(key, value);
+  }
+
+  @override
+  Player makeClientSidePlayer(Player serverPlayer) =>
+      ClientSidePlayer(serverPlayer);
+
+  @override
+  void onPlayerAdded(ClientSidePlayer player) {
+    _dirtyPlayers.add(player);
+  }
+
+  Future<void> _loadDirtyPlayers() async {
+    if (_dirtyPlayers.isEmpty) {
+      return;
+    }
+    var artists = RiveArtists(api);
+
+    var loadingPlayers = _dirtyPlayers.toList(growable: false);
+    // make a unique set of owner ids (owners can have multiple players).
+    var loadList = Set<int>.from(
+        loadingPlayers.map((player) => player.ownerId).toList(growable: false));
+
+    // Make sure to clear dirty players before awaiting so no async op changes
+    // this list before we clear it.
+    _dirtyPlayers.clear();
+
+    var users = await artists.list(loadList);
+    if (users != null) {
+      for (final user in users) {
+        // Could build up a map above if this gets prohibitive.
+        for (final player in loadingPlayers) {
+          if (player.ownerId == user.ownerId) {
+            player.user.value = user;
+          }
+        }
+      }
+    }
+  }
+
+  @override
+  void onPlayerRemoved(ClientSidePlayer player) {
+    _dirtyPlayers.remove(player);
+  }
+
+  @override
+  void onPlayersChanged() {
+    allPlayers.value = players.cast<ClientSidePlayer>();
+
+    // Loading the active player list is low priority compared to other stuff
+    // happening (like loading assets or content for the file) so we debounce it
+    // pretty heavily.
+    debounce(_loadDirtyPlayers, duration: const Duration(milliseconds: 300));
   }
 }
 
