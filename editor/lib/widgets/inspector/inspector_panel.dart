@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:rive_core/artboard.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/inspectable.dart';
 import 'package:rive_editor/rive/selection_context.dart';
-import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/widgets/common/color_picker.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/common/custom_expansion_tile.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
@@ -56,9 +56,10 @@ class InspectorPanel extends StatelessWidget {
               ),
             );
           }
-          var artboards = selection.items
-              .whereType<StageArtboard>()
-              .map((stageItem) => stageItem.component)
+
+          var stageItems = selection.items
+              .whereType<StageItem>()
+              .map<Component>((stage_item) => stage_item.component as Component)
               .toList(growable: false);
           return ValueListenableBuilder<Set<InspectorBase>>(
             valueListenable: rive.inspectorController.itemsListenable,
@@ -93,14 +94,14 @@ class InspectorPanel extends StatelessWidget {
                           children: <Widget>[
                             for (var child in item.children) ...[
                               if (child is InspectorItem) ...[
-                                buildItem(child, artboards),
+                                buildItem(child, stageItems),
                               ],
                             ]
                           ],
                         );
                       }
                       if (item is InspectorItem) {
-                        return buildItem(item, artboards);
+                        return buildItem(item, stageItems);
                       }
                       return Container();
                     },
@@ -114,11 +115,11 @@ class InspectorPanel extends StatelessWidget {
     );
   }
 
-  Widget buildItem(InspectorItem item, List<Artboard> artboards) {
+  Widget buildItem(InspectorItem item, List<Component> selectedComponents) {
     if (item.propertyKeys.length == 2) {
       return PropertyDual(
         name: item.name,
-        objects: artboards,
+        objects: selectedComponents,
         propertyKeyA: item.propertyKeys[0],
         propertyKeyB: item.propertyKeys[1],
       );
@@ -126,7 +127,7 @@ class InspectorPanel extends StatelessWidget {
     if (item.propertyKeys.length == 1) {
       return PropertySingle(
         name: item.name,
-        objects: artboards,
+        objects: selectedComponents,
         propertyKey: item.propertyKeys[0],
       );
     }

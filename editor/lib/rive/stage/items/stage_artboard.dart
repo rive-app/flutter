@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/inspectable.dart';
 
@@ -65,8 +64,8 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   @override
   Set<InspectorBase> get inspectorItems => {
         InspectorItem(name: 'Pos', propertyKeys: [
-          NodeBase.xPropertyKey,
-          NodeBase.yPropertyKey,
+          ArtboardBase.xPropertyKey,
+          ArtboardBase.yPropertyKey,
         ]),
         InspectorItem(name: 'Size', propertyKeys: [
           ArtboardBase.widthPropertyKey,

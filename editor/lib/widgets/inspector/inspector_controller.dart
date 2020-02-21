@@ -32,7 +32,8 @@ class InspectorController extends ChangeNotifier {
     items.clear();
     if (selection.isEmpty) return;
     for (final item in selection.whereType<StageItem>()) {
-      items.addAll(item.inspectorItems);
+      var inspItems = item.inspectorItems;
+      items.addAll(inspItems);
     }
   }
 }

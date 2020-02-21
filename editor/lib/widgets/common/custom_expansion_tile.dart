@@ -1,15 +1,16 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
-///This is built off the Expansion tile
-///It has swapped trailing and leading icons and modified padding between title and leading icon
+/// This is built off the Expansion tile
+/// It has swapped trailing and leading icons and modified padding between 
+/// title and leading icon
 const Duration _kExpand = Duration(milliseconds: 200);
 
 class CustomExpansionTile extends StatefulWidget {
-  CustomExpansionTile({
+  const CustomExpansionTile({
+    @required this.title,
     Key key,
     this.leading,
-    @required this.title,
     this.subtitle,
     this.backgroundColor,
     this.onExpansionChanged,
@@ -53,7 +54,8 @@ class CustomExpansionTile extends StatefulWidget {
   /// A widget to display instead of a rotating arrow icon.
   final Widget trailing;
 
-  /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
+  /// Specifies if the list tile is initially expanded (true)
+  /// or collapsed (false, the default).
   final bool initiallyExpanded;
 
   final ValueNotifier<bool> expanded;
