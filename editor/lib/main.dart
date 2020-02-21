@@ -4,11 +4,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/user.dart';
-import 'package:rive_core/artboard.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/client_side_player.dart';
 
-import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
