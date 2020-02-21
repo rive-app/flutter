@@ -108,7 +108,7 @@ class _CoopIsolate extends CoopIsolateProcess {
       // now actually make changes to the object (if we have one).
       if (object != null) {
         object.serverChangeId = serverChangeId;
-        object.userId = client.userOwnerId;
+        object.userId = client.ownerId;
         for (final change in clientObjectChanges.changes) {
           switch (change.op) {
             case CoreContext.addKey:
@@ -127,7 +127,7 @@ class _CoopIsolate extends CoopIsolateProcess {
               var prop = object.properties[change.op] ??= ObjectProperty();
               prop.key = change.op;
               prop.serverChangeId = serverChangeId;
-              prop.userId = client.userOwnerId;
+              prop.userId = client.ownerId;
               prop.data = change.value;
               break;
           }
