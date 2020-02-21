@@ -11,6 +11,9 @@ class RiveColors {
   Color get toolbarButton => const Color(0xFF8C8C8C);
   Color get toolbarButtonBackGroundHover => const Color(0xFF444444);
 
+  // Popups
+  Color get separator => const Color(0xFF262626);
+
   // Accents
   Color get accentBlue => const Color(0xFF57A5E0);
   Color get accentMagenta => const Color(0xFFFF5678);

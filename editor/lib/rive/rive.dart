@@ -241,7 +241,7 @@ class Rive with RiveFileDelegate {
         case ShortcutAction.ellipseTool:
           stage?.value?.tool = EllipseTool.instance;
           break;
-        
+
         case ShortcutAction.rectangleTool:
           stage?.value?.tool = RectangleTool.instance;
           break;
@@ -304,7 +304,7 @@ class Rive with RiveFileDelegate {
     var urlEncodedSpectre = Uri.encodeComponent(api.cookies['spectre']);
     String filePath = '$ownerId/$fileId/$urlEncodedSpectre';
 
-    var opening = RiveFile(filePath, name);
+    var opening = RiveFile(filePath, name, api: api);
     var result = await opening.connect(connectionInfo.socketHost, filePath);
     if (result == ConnectResult.connected) {
       print("Connected");
@@ -321,6 +321,9 @@ class Rive with RiveFileDelegate {
   }
 
   void _changeFile(RiveFile nextFile) {
+    // TODO: files should live inside tab items and should disconnect when they
+    // are closed.
+    file.value?.disconnect();
     file.value = nextFile;
     selection.clear();
     _stage?.dispose();

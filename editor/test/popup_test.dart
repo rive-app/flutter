@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 
 class DummyItemBuilder extends StatelessWidget {
@@ -9,17 +10,21 @@ class DummyItemBuilder extends StatelessWidget {
   final PopupContextItem item;
   @override
   Widget build(BuildContext context) {
-    return item.itemBuilder(context, true);
+    return RiveTheme(
+      child: Builder(
+        builder: (context) => item.itemBuilder(context, true),
+      ),
+    );
   }
 }
 
 void main() {
-  testWidgets('Seperator Context item is a seperator', (tester) async {
+  testWidgets('Separator Context item is a separator', (tester) async {
     final contextItem = PopupContextItem.separator();
     expect(contextItem.isSeparator, true);
   });
 
-  testWidgets('Seperator Context item is a simple widget', (tester) async {
+  testWidgets('Separator Context item is a simple widget', (tester) async {
     final widget = DummyItemBuilder(PopupContextItem.separator());
 
     await tester.pumpWidget(widget);
