@@ -17,7 +17,7 @@ class RiveTheme extends InheritedWidget {
   })  : assert(child != null),
         super(key: key, child: child);
 
-  RiveThemeData get theme => const RiveThemeData();
+  RiveThemeData get theme => RiveThemeData();
 
   static RiveThemeData of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<RiveTheme>().theme;

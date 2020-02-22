@@ -7,6 +7,7 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+import 'package:rive_editor/rive/theme.dart';
 
 abstract class ShapeTool extends StageTool {
   Vec2D _startWorldMouse;
@@ -90,11 +91,16 @@ abstract class ShapeTool extends StageTool {
           ..style = PaintingStyle.stroke
           ..color = const Color(0xFF000000));
 
-    String text =
-        '${(_end[0] - _start[0]).round()}x${(_end[1] - _start[1]).round()}';
+    _paintToolTip(
+        canvas,
+        '${(_end[0] - _start[0]).round()}x${(_end[1] - _start[1]).round()}',
+        cursor);
+  }
 
+  /// Paints a tool tip; currently used for the dargging xy co-ords
+  void _paintToolTip(Canvas canvas, String text, Vec2D pos) {
     final style = ParagraphStyle(
-        textAlign: TextAlign.left, fontFamily: 'Roboto-Regular', fontSize: 13);
+        textAlign: TextAlign.left, fontFamily: 'Roboto-Light', fontSize: 11);
     ParagraphBuilder builder = ParagraphBuilder(style)
       ..pushStyle(
         TextStyle(foreground: Paint()..color = const Color(0xFFFFFFFF)),
@@ -109,18 +115,54 @@ abstract class ShapeTool extends StageTool {
             boxes.last.bottom - boxes.first.top);
 
     var offset = const Offset(10, 10);
-    var padding = const Size(10, 5);
-    canvas.drawRect(
-        Rect.fromLTWH(
-          cursor[0] + offset.dx,
-          cursor[1] + offset.dy,
+    var padding = const Size(10, 10);
+
+    // Draw the tooltip background
+    canvas.drawPath(
+        _roundedRectPath(
+          Vec2D.fromValues(
+            pos[0] + offset.dx,
+            pos[1] + offset.dy,
+          ),
           size.width + padding.width * 2,
           size.height + padding.height * 2,
+          5,
         ),
-        Paint()..color = const Color(0xFF000000));
+        Paint()..color = RiveThemeData().colors.toolTip);
+
+    // Draw the tooltip text
     canvas.drawParagraph(
         paragraph,
-        Offset(cursor[0] + offset.dx + padding.width,
-            cursor[1] + offset.dy + padding.height));
+        Offset(pos[0] + offset.dx + padding.width,
+            pos[1] + offset.dy + padding.height));
   }
 }
+
+/// Draws a rounded rectangle whose top left corner is pos, using
+/// the given width and height; radius defines the roundedness of each corner.
+Path _roundedRectPath(Vec2D pos, double width, double height, double radius) =>
+    Path()
+      ..moveTo(pos[0] + width - radius, pos[1])
+      ..arcTo(
+          Rect.fromLTWH(
+              pos[0] + width - (radius * 2), pos[1], radius * 2, radius * 2),
+          pi * 3 / 2,
+          pi / 2,
+          false)
+      ..lineTo(pos[0] + width, pos[1] + height - radius)
+      ..arcTo(
+          Rect.fromLTWH(pos[0] + width - (radius * 2),
+              pos[1] + height - (radius * 2), radius * 2, radius * 2),
+          0,
+          pi / 2,
+          false)
+      ..lineTo(pos[0] + radius, pos[1] + height)
+      ..arcTo(
+          Rect.fromLTWH(
+              pos[0], pos[1] + height - (radius * 2), radius * 2, radius * 2),
+          pi / 2,
+          pi / 2,
+          false)
+      ..lineTo(pos[0], pos[1] + radius)
+      ..arcTo(Rect.fromLTWH(pos[0], pos[1], radius * 2, radius * 2), pi, pi / 2,
+          false);
