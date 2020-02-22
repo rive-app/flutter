@@ -291,7 +291,6 @@ class FileBrowser extends FileBrowserController {
   }
 
   Future<void> _loadQueuedDetails() async {
-    print("QUEUE IS $_queuedFileDetails");
     _detailsTimer?.cancel();
     _detailsTimer = null;
     var files = _queuedFileDetails.toList(growable: false);

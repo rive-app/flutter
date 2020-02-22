@@ -3,14 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive_api/user.dart';
-import 'package:rive_core/artboard.dart';
-import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/client_side_player.dart';
 
-import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -20,25 +14,30 @@ import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:window_utils/window_utils.dart';
 
+import 'constants.dart';
 import 'rive/hierarchy_tree_controller.dart';
 import 'rive/rive.dart';
-import 'rive/stage/items/stage_artboard.dart';
 import 'rive/stage/stage.dart';
 import 'widgets/catastrophe.dart';
 import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
-import 'widgets/inspector/property_dual.dart';
-import 'widgets/listenable_builder.dart';
+import 'widgets/inspector/inspector_panel.dart';
 import 'widgets/login.dart';
 
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
+import 'widgets/toolbar/connected_users.dart';
+import 'widgets/toolbar/design_animate_toggle.dart';
+import 'widgets/toolbar/scale_dropdown.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addPostFrameCallback(
-    (_) => WindowUtils.hideTitleBar(),
+    (_) {
+      WindowUtils.hideTitleBar();
+      WindowUtils.setSize(kDefaultWIndowSize);
+    },
   );
 
   var rive = Rive();
@@ -172,42 +171,6 @@ class Editor extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // TODO: replace this with real styling for connected player. This
-              // is just an example for how to use the file.allPlayers property
-              // to build the player list.
-              ValueListenableBuilder(
-                valueListenable: rive.file,
-                builder: (context, RiveFile file, child) => file == null
-                    ? Container()
-                    : ValueListenableBuilder(
-                        valueListenable: file.allPlayers,
-                        builder: (context, Iterable<ClientSidePlayer> players,
-                                child) =>
-                            Row(
-                          children: players
-                              .map(
-                                (player) => ValueListenableBuilder(
-                                  valueListenable: player.user,
-                                  builder: (context, RiveUser user, child) =>
-                                      user == null
-                                          ? Container()
-                                          : Column(
-                                              children: [
-                                                Image.network(
-                                                  user.avatar,
-                                                  width: 20,
-                                                  height: 20,
-                                                ),
-                                                Text(user.name),
-                                              ],
-                                            ),
-                                ),
-                              )
-                              .toList(growable: false),
-                        ),
-                      ),
-              ),
               FlatButton(
                 child: const Text(
                   'Force Reconnect',
@@ -238,7 +201,7 @@ class Editor extends StatelessWidget {
   Widget _buildBody(BuildContext context, int index) {
     switch (index) {
       case 0:
-        return FilesView();
+        return const FilesView();
       default:
         return _buildEditor(context);
     }
@@ -251,7 +214,7 @@ class Editor extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(6),
           height: 42,
-          color: const Color.fromRGBO(60, 60, 60, 1.0),
+          color: const Color.fromRGBO(60, 60, 60, 1),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.max,
@@ -260,6 +223,19 @@ class Editor extends StatelessWidget {
               TransformPopupButton(),
               CreatePopupButton(),
               SharePopupButton(),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: ConnectedUsers(rive: rive),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: ViewScaleDropdown(),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: DesignAnimateToggle(),
+              ),
             ],
           ),
         ),
@@ -273,7 +249,7 @@ class Editor extends StatelessWidget {
                 min: 300,
                 max: 500,
                 child: Container(
-                  color: const Color.fromRGBO(50, 50, 50, 1.0),
+                  color: const Color(0xFF323232),
                   child: ValueListenableBuilder<HierarchyTreeController>(
                     valueListenable: rive.treeController,
                     builder: (context, controller, _) =>
@@ -284,47 +260,13 @@ class Editor extends StatelessWidget {
               const Expanded(
                 child: StagePanel(),
               ),
-              ResizePanel(
+              const ResizePanel(
                 hitSize: resizeEdgeSize,
                 direction: ResizeDirection.horizontal,
                 side: ResizeSide.start,
                 min: 235,
                 max: 500,
-                child: Container(
-                  color: const Color.fromRGBO(50, 50, 50, 1.0),
-                  child: ListenableBuilder(
-                    listenable: rive.selection,
-                    builder: (context,
-                        SelectionContext<SelectableItem> selection, _) {
-                      var artboards = selection.items
-                          .whereType<StageArtboard>()
-                          .map((stageItem) => stageItem.component)
-                          .toList(growable: false);
-
-                      return Column(
-                        children: [
-                          artboards.isEmpty
-                              ? Container()
-                              : PropertyDual(
-                                  name: 'Pos',
-                                  objects: artboards,
-                                  propertyKeyA: ArtboardBase.xPropertyKey,
-                                  propertyKeyB: ArtboardBase.yPropertyKey,
-                                ),
-                          artboards.isEmpty
-                              ? Container()
-                              : PropertyDual(
-                                  name: 'Size',
-                                  objects: artboards,
-                                  propertyKeyA: ArtboardBase.widthPropertyKey,
-                                  propertyKeyB: ArtboardBase.heightPropertyKey,
-                                ),
-                          // selection. PropertyDual()
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                child: InspectorPanel(),
               ),
               /*Expanded(
                 child: Column(
@@ -382,7 +324,7 @@ class StagePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
     return Container(
-      color: const Color.fromRGBO(29, 29, 29, 1.0),
+      color: const Color(0xFF333333),
       child: ValueListenableBuilder<Stage>(
         valueListenable: rive.stage,
         builder: (context, stage, _) => Stack(
