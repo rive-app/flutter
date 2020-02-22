@@ -28,7 +28,7 @@ class ConnectedUsers extends StatelessWidget {
               for (var connectedUser in users) ...[
                 ValueListenableBuilder<RiveUser>(
                   valueListenable: connectedUser.user,
-                  builder: (_, user, __) => AvatarView(
+                  builder: (context, user, chld) => AvatarView(
                     color: Color(_getRandomColor()),
                     imageUrl: user.avatar,
                   ),
