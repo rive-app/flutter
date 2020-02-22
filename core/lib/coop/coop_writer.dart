@@ -83,13 +83,6 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  void writeRequestIds(int amount) {
-    var writer = BinaryWriter(alignment: 8);
-    writer.writeVarUint(CoopCommand.requestIds);
-    writer.writeVarUint(amount);
-    write(writer.uint8Buffer);
-  }
-
   void writePlayers(Iterable<CoopServerClient> clients) {
     // TODO: nicer way to optimize alignment?
     var writer = BinaryWriter(alignment: 4 + 8 * clients.length);

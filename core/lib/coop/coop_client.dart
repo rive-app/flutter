@@ -58,12 +58,6 @@ class CoopClient extends CoopReader {
 
   Completer<IdRange> _allocateIdCompleter;
 
-  Future<IdRange> allocateIds(int count) {
-    _allocateIdCompleter = Completer<IdRange>();
-    _writer.writeRequestIds(count);
-    return _allocateIdCompleter.future;
-  }
-
   Future<void> _reconnect() async {
     _reconnectTimer?.cancel();
     if (_reconnectAttempt < 1) {
@@ -257,11 +251,6 @@ class CoopClient extends CoopReader {
     var completer = _allocateIdCompleter;
     _allocateIdCompleter = null;
     completer.complete(IdRange(min, max));
-  }
-
-  @override
-  Future<void> recvRequestIds(int amount) {
-    throw UnsupportedError("Client should never receive request for ids");
   }
 
   @override

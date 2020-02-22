@@ -149,7 +149,6 @@ abstract class CoopIsolateProcess {
   Iterable<CoopServerClient> get clients => _clients.values;
 
   bool attemptChange(CoopServerClient client, ChangeSet changes);
-  IdRange allocateIds(int amount);
   ChangeSet buildFileChangeSet();
 
   // bool remove(CoopServerClient client) => _clients.remove(client);
@@ -190,11 +189,18 @@ abstract class CoopIsolateProcess {
     print("RECEIVING DATA $data");
     if (data is _CoopServerAddClient) {
       int actualClientId = data.clientId;
-      for (final client in _clients.values) {
-        if (client.clientId == actualClientId) {
-          actualClientId = nextClientId();
-          debounce(persist, duration: const Duration(seconds: 1));
-          break;
+      // Check if the client id the connection wants to use is valid.
+      if (actualClientId == null || actualClientId < 1) {
+        actualClientId = nextClientId();
+        debounce(persist, duration: const Duration(seconds: 1));
+      } else {
+        // Check if that id is already in use by another connected client.
+        for (final client in _clients.values) {
+          if (client.clientId == actualClientId) {
+            actualClientId = nextClientId();
+            debounce(persist, duration: const Duration(seconds: 1));
+            break;
+          }
         }
       }
       _clients[data.id] =

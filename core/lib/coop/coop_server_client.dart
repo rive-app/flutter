@@ -96,13 +96,6 @@ class CoopServerClient extends Player with CoopReader {
   }
 
   @override
-  Future<void> recvRequestIds(int amount) async {
-    IdRange range = context.allocateIds(amount);
-    debounce(context.persist, duration: const Duration(seconds: 2));
-    writer.writeIds(range.min, range.max);
-  }
-
-  @override
   Future<void> recvReady() {
     throw UnsupportedError("Server should never receive ready.");
   }

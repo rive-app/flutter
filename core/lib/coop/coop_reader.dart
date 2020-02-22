@@ -44,10 +44,6 @@ abstract class CoopReader {
         var max = reader.readVarUint();
         recvIds(min, max);
         break;
-      case CoopCommand.requestIds:
-        var amount = reader.readVarUint();
-        recvRequestIds(amount);
-        break;
       case CoopCommand.ready:
         recvReady();
         break;
@@ -75,6 +71,5 @@ abstract class CoopReader {
   Future<void> recvSync(List<ChangeSet> changes);
   Future<void> recvWipe();
   Future<void> recvIds(int min, int max);
-  Future<void> recvRequestIds(int amount);
   Future<void> recvPlayers(List<Player> players);
 }
