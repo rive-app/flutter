@@ -73,7 +73,7 @@ class AvatarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const kRadius = 30.0;
+    const double kRadius = 30;
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
     return Center(
       child: SizedBox(
