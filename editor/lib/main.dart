@@ -212,7 +212,7 @@ class Editor extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(6),
           height: 42,
-          color: const Color.fromRGBO(60, 60, 60, 1.0),
+          color: const Color.fromRGBO(60, 60, 60, 1),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.max,
@@ -222,15 +222,15 @@ class Editor extends StatelessWidget {
               CreatePopupButton(),
               const Spacer(),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: ConnectedUsers(rive: rive),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: ViewScaleDropdown(),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: DesignAnimateToggle(),
               ),
             ],
@@ -246,7 +246,7 @@ class Editor extends StatelessWidget {
                 min: 300,
                 max: 500,
                 child: Container(
-                  color: const Color.fromRGBO(50, 50, 50, 1.0),
+                  color: const Color(0xFF323232),
                   child: ValueListenableBuilder<HierarchyTreeController>(
                     valueListenable: rive.treeController,
                     builder: (context, controller, _) =>
@@ -321,7 +321,7 @@ class StagePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
     return Container(
-      color: const Color.fromRGBO(29, 29, 29, 1.0),
+      color: const Color(0xFF333333),
       child: ValueListenableBuilder<Stage>(
         valueListenable: rive.stage,
         builder: (context, stage, _) => Stack(

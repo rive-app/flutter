@@ -18,7 +18,7 @@ class InspectorPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
     return Container(
-      color: const Color.fromRGBO(50, 50, 50, 1.0),
+      color: const Color(0xFF323232),
       child: ListenableBuilder(
         listenable: rive.selection,
         builder: (context, SelectionContext<SelectableItem> selection, _) {
@@ -42,7 +42,7 @@ class InspectorPanel extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Container(height: 10.0),
+                  Container(height: 10),
                   Container(
                     child: Text(
                       "Select something to view its properties and options.",
