@@ -15,7 +15,7 @@ class SharePopupButton extends StatelessWidget {
       showChevron: true,
       iconBuilder: (context, rive, isHovered) => TintedIcon(
         color:
-            isHovered ? Colors.white : const Color.fromRGBO(140, 140, 140, 1),
+            isHovered ? Colors.white : const Color(0xFF8C8C8C),
         icon: 'tool-export',
       ),
       width: 200,
