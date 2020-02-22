@@ -20,6 +20,9 @@ class StageCursor extends StageItem<ClientSidePlayer>
     Color(0xFF57A5E0),
   ];
 
+  static Color colorFromPalette(int index) =>
+      playerColors[index % playerColors.length];
+
   AABB _aabb;
   Color _color;
 
@@ -165,7 +168,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
 
   @override
   void userChanged(RiveUser user, int index) {
-    _color = playerColors[index % playerColors.length];
+    _color = colorFromPalette(index);
     _tintPaint.colorFilter = ColorFilter.mode(_color, BlendMode.srcIn);
 
     final style = ParagraphStyle(
