@@ -32,7 +32,7 @@ class TransformPopupButton extends StatelessWidget {
             notifier: rive.stage.value.toolNotifier,
             isSelected: () => rive.stage.value.tool == TranslateTool.instance,
             shortcut: ShortcutAction.translateTool,
-            select: () => rive.stage.value.tool = TranslateTool.instance,
+            select: () => rive.triggerAction(ShortcutAction.translateTool),
           ),
           PopupContextItem(
             'Rotate',
@@ -101,16 +101,14 @@ class TransformPopupButton extends StatelessWidget {
             notifier: rive.stage.value.freezeJointsNotifier,
             shortcut: ShortcutAction.freezeJointsToggle,
             isChecked: () => rive.stage.value.freezeJoints,
-            select: () =>
-                rive.stage.value.freezeJoints = !rive.stage.value.freezeJoints,
+            select: () => rive.triggerAction(ShortcutAction.freezeJointsToggle),
           ),
           CheckPopupItem(
             'Freeze Images',
             notifier: rive.stage.value.freezeImagesNotifier,
             shortcut: ShortcutAction.freezeImagesToggle,
             isChecked: () => rive.stage.value.freezeImages,
-            select: () =>
-                rive.stage.value.freezeImages = !rive.stage.value.freezeImages,
+            select: () => rive.triggerAction(ShortcutAction.freezeImagesToggle),
           ),
         ];
       },

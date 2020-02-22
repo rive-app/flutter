@@ -27,7 +27,7 @@ class CreatePopupButton extends StatelessWidget {
               notifier: rive.stage.value.toolNotifier,
               isSelected: () => rive.stage.value.tool == RectangleTool.instance,
               shortcut: ShortcutAction.rectangleTool,
-              select: () => rive.stage.value.tool = RectangleTool.instance,
+              select: () => rive.triggerAction(ShortcutAction.rectangleTool),
             ),
             ToolPopupItem(
               'Ellipse',
@@ -35,7 +35,7 @@ class CreatePopupButton extends StatelessWidget {
               notifier: rive.stage.value.toolNotifier,
               isSelected: () => rive.stage.value.tool == EllipseTool.instance,
               shortcut: ShortcutAction.ellipseTool,
-              select: () => rive.stage.value.tool = EllipseTool.instance,
+              select: () => rive.triggerAction(ShortcutAction.ellipseTool),
             ),
             PopupContextItem(
               'Polygon',
@@ -70,7 +70,7 @@ class CreatePopupButton extends StatelessWidget {
           notifier: rive.stage.value.toolNotifier,
           isSelected: () => rive.stage.value.tool == ArtboardTool.instance,
           shortcut: ShortcutAction.artboardTool,
-          select: () => rive.stage.value.tool = ArtboardTool.instance,
+          select: () => rive.triggerAction(ShortcutAction.artboardTool),
         ),
         PopupContextItem(
           'Bone',

@@ -224,56 +224,54 @@ class Rive with RiveFileDelegate {
     var actions = keyBinding.lookupAction(
         _pressed.map((key) => key.physical).toList(growable: false));
 
-    if (actions == null) {
-      return;
-    }
+    actions?.forEach(triggerAction);
+  }
 
-    for (final action in actions) {
-      switch (action) {
-        case ShortcutAction.translateTool:
-          stage?.value?.tool = TranslateTool.instance;
-          break;
+  void triggerAction(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.translateTool:
+        stage?.value?.tool = TranslateTool.instance;
+        break;
 
-        case ShortcutAction.artboardTool:
-          stage?.value?.tool = ArtboardTool.instance;
-          break;
+      case ShortcutAction.artboardTool:
+        stage?.value?.tool = ArtboardTool.instance;
+        break;
 
-        case ShortcutAction.ellipseTool:
-          stage?.value?.tool = EllipseTool.instance;
-          break;
+      case ShortcutAction.ellipseTool:
+        stage?.value?.tool = EllipseTool.instance;
+        break;
 
-        case ShortcutAction.rectangleTool:
-          stage?.value?.tool = RectangleTool.instance;
-          break;
+      case ShortcutAction.rectangleTool:
+        stage?.value?.tool = RectangleTool.instance;
+        break;
 
-        case ShortcutAction.undo:
-          file.value.undo();
-          break;
-        case ShortcutAction.redo:
-          file.value.redo();
-          break;
-        case ShortcutAction.delete:
-          // Need to make a new list because as we delete we also remove them
-          // from the selection. This avoids modifying the selection set while
-          // iterating.
-          var toRemove = selection.items.toList();
-          for (final item in toRemove) {
-            if (item is StageItem) {
-              file.value.remove(item.component as Core);
-            }
+      case ShortcutAction.undo:
+        file.value.undo();
+        break;
+      case ShortcutAction.redo:
+        file.value.redo();
+        break;
+      case ShortcutAction.delete:
+        // Need to make a new list because as we delete we also remove them
+        // from the selection. This avoids modifying the selection set while
+        // iterating.
+        var toRemove = selection.items.toList();
+        for (final item in toRemove) {
+          if (item is StageItem) {
+            file.value.remove(item.component as Core);
           }
-          selection.clear();
-          file.value.captureJournalEntry();
-          break;
-        case ShortcutAction.freezeImagesToggle:
-          stage?.value?.freezeImages = !stage.value.freezeImages;
-          break;
-        case ShortcutAction.freezeJointsToggle:
-          stage?.value?.freezeJoints = !stage.value.freezeJoints;
-          break;
-        default:
-          break;
-      }
+        }
+        selection.clear();
+        file.value.captureJournalEntry();
+        break;
+      case ShortcutAction.freezeImagesToggle:
+        stage?.value?.freezeImages = !stage.value.freezeImages;
+        break;
+      case ShortcutAction.freezeJointsToggle:
+        stage?.value?.freezeJoints = !stage.value.freezeJoints;
+        break;
+      default:
+        break;
     }
   }
 
