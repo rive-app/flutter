@@ -18,7 +18,7 @@ class SharePopupButton extends StatelessWidget {
             isHovered ? Colors.white : const Color(0xFF8C8C8C),
         icon: 'tool-export',
       ),
-      width: 200,
+      width: 206,
       contextItems: [
         PopupContextItem(
           'Download for Runtime',
