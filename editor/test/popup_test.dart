@@ -27,8 +27,7 @@ void main() {
 
   testWidgets('Separator Context item is a simple widget', (tester) async {
     final widget = DummyItemBuilder(PopupContextItem.separator());
-      await tester.pumpWidget(widget);
-      expect(find.byType(Container), findsOneWidget);
-    });
+    await tester.pumpWidget(widget);
+    expect(find.byType(Container), findsOneWidget);
   });
 }
