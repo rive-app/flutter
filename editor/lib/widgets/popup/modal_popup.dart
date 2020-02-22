@@ -10,7 +10,7 @@ class ModalPopup {
   const ModalPopup({
     this.builder,
     this.size,
-    this.elevation = 8.0,
+    this.elevation = 8,
   });
 
   Future<void> show(BuildContext context) async {
