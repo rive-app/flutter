@@ -54,7 +54,7 @@ int _getRandomColor() {
 /// Generates a random integer where [from] <= [to].
 int randomBetween(int from, int to) {
   final random = Random();
-  if (from > to) throw Exception('$from cannot be > $to');
+  assert(from > to);
   double randomDouble = random.nextDouble();
   if (randomDouble < 0) randomDouble *= -1;
   if (randomDouble > 1) randomDouble = 1 / randomDouble;
