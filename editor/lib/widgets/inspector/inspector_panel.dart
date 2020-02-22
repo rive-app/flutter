@@ -34,7 +34,7 @@ class InspectorPanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    child: Text(
+                    child: const Text(
                       "No Selection",
                       style: TextStyle(
                         color: ThemeUtils.textWhite,
@@ -44,7 +44,7 @@ class InspectorPanel extends StatelessWidget {
                   ),
                   Container(height: 10),
                   Container(
-                    child: Text(
+                    child: const Text(
                       "Select something to view its properties and options.",
                       style: TextStyle(
                         color: ThemeUtils.textGreyLight,
