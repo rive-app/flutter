@@ -10,27 +10,27 @@ class Entity {
   /// Represents the kind of entity this is.
   int key;
 
-  /// The client's session id.
-  int userId;
+  /// The client's owner id.
+  int ownerId;
 
   /// The serverside change id that created or changed this entity.
   int serverChangeId;
 
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(key);
-    writer.writeVarUint(userId);
+    writer.writeVarUint(ownerId);
     writer.writeVarUint(serverChangeId);
   }
 
   void deserialize(BinaryReader reader) {
     key = reader.readVarUint();
-    userId = reader.readVarUint();
+    ownerId = reader.readVarUint();
     serverChangeId = reader.readVarUint();
   }
 
   void copy(Entity other) {
     key = other.key;
-    userId = other.userId;
+    ownerId = other.ownerId;
     serverChangeId = other.serverChangeId;
   }
 }

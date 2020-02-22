@@ -3,7 +3,6 @@ import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
 import 'package:coop_server_library/src/coop_file.dart';
-import 'package:coop_server_library/src/session.dart';
 import 'package:core/core.dart';
 import "package:test/test.dart";
 
@@ -53,36 +52,6 @@ void main() {
     expect(file.objects[const Id(1, 31)].serverChangeId, 2);
     expect(file.objects[const Id(1, 31)].objectId, const Id(1, 31));
     expect(file.objects[const Id(1, 31)].properties.length, 0);
-  });
-
-  test('serialize server data', () {
-    var serverData = CoopFileServerData()
-      ..sessions = [
-        Session()
-          ..changeId = 30
-          ..id = 40
-          ..userId = 666,
-        Session()
-          ..changeId = 32
-          ..id = 42
-          ..userId = 669
-      ]
-      ..nextChangeId = 2221
-      ..nextObjectId = 1238293;
-    var writer = BinaryWriter();
-    serverData.serialize(writer);
-
-    var reader = BinaryReader(writer.buffer);
-    var check = CoopFileServerData()..deserialize(reader);
-    expect(check.nextChangeId, serverData.nextChangeId);
-    expect(check.nextObjectId, serverData.nextObjectId);
-    expect(check.sessions.length, 2);
-    expect(check.sessions[0].changeId, 30);
-    expect(check.sessions[0].id, 40);
-    expect(check.sessions[0].userId, 666);
-    expect(check.sessions[1].changeId, 32);
-    expect(check.sessions[1].id, 42);
-    expect(check.sessions[1].userId, 669);
   });
 
   test('perf test file serialize/deserialize', () {

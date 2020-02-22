@@ -42,15 +42,6 @@ class _CoopIsolate extends CoopIsolateProcess {
   final _privateApi = PrivateApi();
 
   @override
-  IdRange allocateIds(int amount) {
-    int min = file.nextClientId;
-    int max = file.nextClientId + amount - 1;
-    file.nextClientId += amount;
-
-    return IdRange(min, max);
-  }
-
-  @override
   bool attemptChange(CoopServerClient client, ChangeSet changeSet) {
     // Make the change on a clone.
     var modifiedFile = file.clone();
@@ -108,7 +99,7 @@ class _CoopIsolate extends CoopIsolateProcess {
       // now actually make changes to the object (if we have one).
       if (object != null) {
         object.serverChangeId = serverChangeId;
-        object.userId = client.ownerId;
+        object.ownerId = client.ownerId;
         for (final change in clientObjectChanges.changes) {
           switch (change.op) {
             case CoreContext.addKey:
@@ -127,7 +118,7 @@ class _CoopIsolate extends CoopIsolateProcess {
               var prop = object.properties[change.op] ??= ObjectProperty();
               prop.key = change.op;
               prop.serverChangeId = serverChangeId;
-              prop.userId = client.ownerId;
+              prop.ownerId = client.ownerId;
               prop.data = change.value;
               break;
           }
