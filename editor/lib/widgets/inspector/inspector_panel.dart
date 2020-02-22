@@ -7,7 +7,7 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
-import 'property_dual.dart';
+import 'properties/property_dual.dart';
 
 class InspectorPanel extends StatelessWidget {
   const InspectorPanel({

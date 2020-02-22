@@ -19,7 +19,7 @@ import 'rive/stage/stage.dart';
 import 'widgets/catastrophe.dart';
 import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
-import 'widgets/inspector/pannel.dart';
+import 'widgets/inspector/inspector_panel.dart';
 import 'widgets/login.dart';
 
 import 'widgets/resize_panel.dart';
