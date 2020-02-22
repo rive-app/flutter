@@ -261,12 +261,20 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  Player makeClientSidePlayer(Player serverPlayer) =>
-      ClientSidePlayer(serverPlayer);
+  Player makeClientSidePlayer(Player serverPlayer, bool isSelf) =>
+      ClientSidePlayer(serverPlayer, isSelf);
 
   @override
   void onPlayerAdded(ClientSidePlayer player) {
     _dirtyPlayers.add(player);
+
+    // TODO: find a nicer way to get the index, then clean any remaining vomit.
+    // we use this to pick a color from the palette, we could alternatively just
+    // use the ownerId or something, but this gives better pallette spread for
+    // the local session.
+    player.index = players.toList(growable: false).indexOf(player);
+
+    delegates.forEach((delegate) => delegate.onPlayerAdded(player));
   }
 
   Future<void> _loadDirtyPlayers() async {
@@ -290,7 +298,7 @@ class RiveFile extends RiveCoreContext {
         // Could build up a map above if this gets prohibitive.
         for (final player in loadingPlayers) {
           if (player.ownerId == user.ownerId) {
-            player.user.value = user;
+            player.user = user;
           }
         }
       }
@@ -300,6 +308,7 @@ class RiveFile extends RiveCoreContext {
   @override
   void onPlayerRemoved(ClientSidePlayer player) {
     _dirtyPlayers.remove(player);
+    delegates.forEach((delegate) => delegate.onPlayerRemoved(player));
   }
 
   @override
@@ -320,6 +329,8 @@ abstract class RiveFileDelegate {
   void onDirtCleaned();
   void onObjectAdded(Core object) {}
   void onObjectRemoved(Core object) {}
+  void onPlayerAdded(ClientSidePlayer player) {}
+  void onPlayerRemoved(ClientSidePlayer player) {}
 
   /// Called when the entire file is wiped as data is about to load/reload.
   void onWipe();

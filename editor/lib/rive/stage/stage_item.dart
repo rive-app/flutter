@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -31,6 +32,7 @@ abstract class StageItem<T> extends SelectableItem {
     return true;
   }
 
+  @mustCallSuper
   void addedToStage(Stage stage) {
     _stage = stage;
   }

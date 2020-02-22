@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:rive_api/files.dart';
+import 'package:rive_core/client_side_player.dart';
+import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
@@ -66,6 +69,8 @@ class Rive with RiveFileDelegate {
 
   final FileBrowser fileBrowser = FileBrowser();
   final _user = ValueNotifier<RiveUser>(null);
+
+  Rive({this.iconCache});
   ValueListenable<RiveUser> get user => _user;
 
   final ValueNotifier<List<RiveTabItem>> tabs =
@@ -74,6 +79,7 @@ class Rive with RiveFileDelegate {
       ValueNotifier<RiveTabItem>(null);
 
   final RiveApi api = RiveApi();
+  final RiveIconCache iconCache;
   SharedPreferences _prefs;
 
   Stage _stage;
@@ -198,8 +204,8 @@ class Rive with RiveFileDelegate {
 
   @override
   void onDirtCleaned() {
-    treeController.value.flatten();
-    _stage.markNeedsAdvance();
+    treeController.value?.flatten();
+    _stage?.markNeedsAdvance();
   }
 
   final Set<_Key> _pressed = {};
@@ -283,6 +289,27 @@ class Rive with RiveFileDelegate {
   }
 
   @override
+  void onPlayerAdded(ClientSidePlayer player) {
+    // only show cursor for other players
+    if (player.isSelf) {
+      return;
+    }
+    var stageCursor = StageCursor();
+    player.cursorDelegate = stageCursor;
+    if (stageCursor.initialize(player)) {
+      _stage.addItem(stageCursor);
+    }
+  }
+
+  @override
+  void onPlayerRemoved(ClientSidePlayer player) {
+    if (player.cursorDelegate == null) {
+      return;
+    }
+    _stage.removeItem(player.cursorDelegate as StageCursor);
+  }
+
+  @override
   void onObjectRemoved(covariant Component object) {
     if (object.stageItem != null) {
       selection.deselect(object.stageItem);
@@ -309,9 +336,11 @@ class Rive with RiveFileDelegate {
     if (result == ConnectResult.connected) {
       print("Connected");
     }
-    print("RIVE FILE OPEN RESUL $result");
+    // Need the delegate before connection completes as some events come in
+    // during connection.
     opening.addDelegate(this);
     _changeFile(opening);
+
     return opening;
   }
 

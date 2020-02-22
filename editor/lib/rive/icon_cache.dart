@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 /// An image stored in the cache with the resolution that was selected at load
 /// time to best fit the screen the app is currently running on.
 class CachedImage {
-  final Completer<void> completer = Completer<void>();
+  final Completer<CachedImage> completer = Completer<CachedImage>();
   int resolution;
   ui.Image image;
 }
@@ -63,7 +63,7 @@ class RiveIconCache {
     ui.FrameInfo frame = await codec.getNextFrame();
     cachedImage.resolution = foundResolution;
     cachedImage.image = frame.image;
-    cachedImage.completer.complete();
+    cachedImage.completer.complete(cachedImage);
     return cachedImage;
   }
 
