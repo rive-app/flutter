@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-
-import '../../multi_core_property_builder.dart';
+import 'package:rive_editor/widgets/multi_core_property_builder.dart';
 
 class PropertyDual extends StatelessWidget {
   final List<Core> objects;
