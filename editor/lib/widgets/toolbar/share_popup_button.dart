@@ -48,7 +48,7 @@ class SharePopupButton extends StatelessWidget {
     ModalPopup(
       builder: builder,
       size: const Size(750, 629),
-      elevation: 20.0,
+      elevation: 20,
     ).show(context);
   }
 }
