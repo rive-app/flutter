@@ -38,7 +38,7 @@ class ConnectedUsers extends StatelessWidget {
             ],
           );
         },
-        child: Container(width: 20.0),
+        child: Container(width: 20),
       ),
     );
   }
