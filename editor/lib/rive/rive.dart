@@ -63,6 +63,7 @@ class Rive with RiveFileDelegate {
       SelectionContext<SelectableItem>();
   final ValueNotifier<SelectionMode> selectionMode =
       ValueNotifier<SelectionMode>(SelectionMode.single);
+  final ValueNotifier<bool> isAnimateMode = ValueNotifier<bool>(false);
 
   final FileBrowser fileBrowser = FileBrowser();
   final _user = ValueNotifier<RiveUser>(null);
