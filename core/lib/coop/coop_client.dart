@@ -5,7 +5,9 @@ import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/player.dart';
+import 'package:core/coop/player_cursor.dart';
 import 'package:core/coop/protocol_version.dart';
+import 'package:core/debounce.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'connect_result.dart';
@@ -13,11 +15,12 @@ import 'coop_reader.dart';
 import 'coop_writer.dart';
 import 'local_settings.dart';
 
-typedef ChangeSetCallback = void Function(ChangeSet changeSet);
+typedef ChangeSetCallback = void Function(ChangeSet);
 typedef WipeCallback = void Function();
 typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
-typedef HelloCallback = void Function(int clientId);
+typedef HelloCallback = void Function(int);
 typedef PlayersCallback = void Function(List<Player>);
+typedef UpdateCursorCallback = void Function(int, PlayerCursor);
 
 enum ConnectionState { disconnected, connecting, handshaking, connected }
 
@@ -45,6 +48,7 @@ class CoopClient extends CoopReader {
   GetOfflineChangesCallback getOfflineChanges;
   HelloCallback gotClientId;
   PlayersCallback updatePlayers;
+  UpdateCursorCallback updateCursor;
 
   CoopClient(
     String host,
@@ -108,7 +112,6 @@ class CoopClient extends CoopReader {
     _connectionState = ConnectionState.connecting;
 
     _channel.stream.listen((dynamic data) {
-      print("socket message: $data ${data.runtimeType}");
       if (data is Uint8List) {
         read(data);
       }
@@ -255,6 +258,25 @@ class CoopClient extends CoopReader {
 
   @override
   Future<void> recvPlayers(List<Player> players) async {
-    updatePlayers?.call(players);
+    // TODO: Only reason we need to debounce the player change call is due to a
+    // race condition with connection completion. Dart completes the await on
+    // the connection completer on the next frame. A future fix to this would be
+    // to send the initial set of players with the Ready command.
+    debounce(() => updatePlayers?.call(players));
   }
+
+  @override
+  Future<void> recvCursor(double x, double y) {
+    throw UnsupportedError(
+        "Client should never receive cursor (gets sent only to server)");
+  }
+
+  @override
+  Future<void> recvCursors(Map<int, PlayerCursor> cursors) async {
+    for (final MapEntry<int, PlayerCursor> entry in cursors.entries) {
+      updateCursor.call(entry.key, entry.value);
+    }
+  }
+
+  void sendCursor(double x, double y) => _writer.writeCursor(x, y);
 }

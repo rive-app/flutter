@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:core/coop/player.dart';
+import 'package:core/coop/player_cursor.dart';
 
 import '../debounce.dart';
 import 'change.dart';
@@ -12,6 +13,8 @@ class CoopServerClient extends Player with CoopReader {
   final int id;
   // final HttpRequest request;
   final CoopIsolateProcess context;
+  bool _isReady = false;
+  bool get isReady => _isReady;
 
   CoopWriter get writer => _writer;
 
@@ -68,8 +71,15 @@ class CoopServerClient extends Player with CoopReader {
       _writer.writeChanges(initialChanges);
     }
     _writer.writeReady();
+    _isReady = true;
+    context.onClientReady(this);
   }
 
+  @override
+  void cursorChanged() {
+    context.cursorChanged(this);
+  }
+  
   @override
   Future<void> recvWipe() {
     throw UnsupportedError("Server should never receive wipe.");
@@ -103,6 +113,16 @@ class CoopServerClient extends Player with CoopReader {
   @override
   Future<void> recvPlayers(List<Player> players) {
     throw UnsupportedError("Server should never receive players.");
+  }
+
+  @override
+  Future<void> recvCursor(double x, double y) async {
+    cursor = PlayerCursor(x, y);
+  }
+
+  @override
+  Future<void> recvCursors(Map<int, PlayerCursor> cursors) {
+    throw UnsupportedError("Server should never receive cursors.");
   }
 }
 

@@ -10,7 +10,9 @@ import 'coop/coop_client.dart';
 import 'coop/coop_command.dart';
 import 'coop/local_settings.dart';
 import 'coop/player.dart';
+import 'coop/player_cursor.dart';
 import 'core_property_changes.dart';
+import 'debounce.dart';
 
 export 'package:fractional/fractional.dart';
 export 'package:core/id.dart';
@@ -217,7 +219,10 @@ abstract class CoreContext implements LocalSettings {
         }
         return changes;
       }
-      ..updatePlayers = _updatePlayers;
+      ..updatePlayers = _updatePlayers
+      ..updateCursor = (int clientId, PlayerCursor cursor) {
+        _players[clientId]?.cursor = cursor;
+      };
 
     var result = await _client.connect();
     if (result == ConnectResult.connected) {
@@ -234,7 +239,7 @@ abstract class CoreContext implements LocalSettings {
     return result;
   }
 
-  Player makeClientSidePlayer(Player serverPlayer);
+  Player makeClientSidePlayer(Player serverPlayer, bool isSelf);
 
   void onPlayerAdded(covariant Player player);
   void onPlayerRemoved(covariant Player player);
@@ -251,7 +256,8 @@ abstract class CoreContext implements LocalSettings {
       if (_players.containsKey(player.clientId)) {
         continue;
       }
-      var clientPlayer = makeClientSidePlayer(player);
+      var clientPlayer =
+          makeClientSidePlayer(player, _client.clientId == player.clientId);
       _players[player.clientId] = clientPlayer;
       onPlayerAdded(clientPlayer);
       changed = true;
@@ -567,6 +573,10 @@ abstract class CoreContext implements LocalSettings {
     // TODO: rethink this
     // _unsyncedChanges.clear();
   }
+
+  void cursorMoved(double x, double y) =>
+      debounce(() => _client?.sendCursor(x, y),
+          duration: const Duration(milliseconds: 33));
 }
 
 class FreshChange {
