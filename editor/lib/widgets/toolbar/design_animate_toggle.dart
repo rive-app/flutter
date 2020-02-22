@@ -49,7 +49,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: const Color.fromRGBO(47, 47, 47, 1.0),
+                  color: const Color(0xFF2F2F2F),
                 ),
               ),
             ),
@@ -59,10 +59,10 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               left: animation.value,
               width: kAnimateToggleWidth / 2,
               child: Container(
-                margin: const EdgeInsets.all(1.0),
+                margin: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: const Color.fromRGBO(68, 68, 68, 1.0),
+                  color: const Color(0xFF444444),
                 ),
               ),
             ),
