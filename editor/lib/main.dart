@@ -13,6 +13,7 @@ import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:window_utils/window_utils.dart';
 
+import 'constants.dart';
 import 'rive/hierarchy_tree_controller.dart';
 import 'rive/rive.dart';
 import 'rive/stage/stage.dart';
@@ -34,7 +35,7 @@ Future<void> main() async {
   WidgetsBinding.instance.addPostFrameCallback(
     (_) {
       WindowUtils.hideTitleBar();
-      WindowUtils.setSize(const Size(1366, 768));
+      WindowUtils.setSize(kDefaultWIndowSize);
     },
   );
 
