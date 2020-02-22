@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/theme.dart';
 
 class ViewScaleDropdown extends StatelessWidget {
   @override
@@ -10,7 +11,7 @@ class ViewScaleDropdown extends StatelessWidget {
           value: 1,
           child: Text(
             '100%',
-            style: TextStyle(color: Color(0xFF666666)),
+            style: TextStyle(color: ThemeUtils.textGreyLight),
           ),
         ),
       ],
