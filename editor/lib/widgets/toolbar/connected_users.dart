@@ -22,7 +22,7 @@ class ConnectedUsers extends StatelessWidget {
           ValueListenableBuilder<Iterable<ClientSidePlayer>>(
         valueListenable: file.allPlayers,
         builder: (context, users, child) {
-          print("Connected Users: ${users.length}");
+          // print("Connected Users: ${users.length}");
           return Row(
             children: [
               for (var connectedUser in users) ...[
