@@ -4,7 +4,11 @@ import 'package:flutter/widgets.dart';
 /// Colors used in the Rive Theme
 /// Define them as getters and keep them const
 class RiveColors {
-  const RiveColors();
+  factory RiveColors() {
+    return _instance;
+  }
+  const RiveColors._();
+  static const RiveColors _instance = RiveColors._();
 
   // Toolbar
   Color get toolbarBackground => const Color(0xFF3c3c3c);
@@ -13,6 +17,9 @@ class RiveColors {
 
   // Popups
   Color get separator => const Color(0xFF262626);
+
+  // Stage
+  Color get toolTip => const Color(0x7F000000);
 
   // Accents
   Color get accentBlue => const Color(0xFF57A5E0);
@@ -68,9 +75,13 @@ class Gradients {
 /// Holds instances of various sub theme classes
 /// This is used by the RiveTheme InheritedWidget
 class RiveThemeData {
-  const RiveThemeData();
+  factory RiveThemeData() {
+    return _instance;
+  }
+  const RiveThemeData._();
+  static const RiveThemeData _instance = RiveThemeData._();
 
-  RiveColors get colors => const RiveColors();
+  RiveColors get colors => RiveColors();
   Gradients get gradients => const Gradients();
   TextStyles get textStyles => const TextStyles();
 }

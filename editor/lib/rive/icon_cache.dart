@@ -54,7 +54,7 @@ class RiveIconCache {
       data = await assetBundle.load(filename);
     }
     if (data == null) {
-      return null;
+      throw FormatException('Unable to load icon asset $filename');
     }
 
     var byteBuffer = Uint8List.view(data.buffer);

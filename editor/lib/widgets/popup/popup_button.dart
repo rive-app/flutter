@@ -11,6 +11,7 @@ class PopupButton<T extends PopupListItem> extends StatelessWidget {
   final List<T> items;
   final ListPopupItemBuilder<T> itemBuilder;
   final PopupOpened<T> opened;
+  final double width;
 
   const PopupButton({
     Key key,
@@ -18,6 +19,7 @@ class PopupButton<T extends PopupListItem> extends StatelessWidget {
     this.items,
     this.itemBuilder,
     this.opened,
+    this.width = 177,
   }) : super(key: key);
 
   @override
@@ -28,6 +30,7 @@ class PopupButton<T extends PopupListItem> extends StatelessWidget {
           context,
           items: items,
           itemBuilder: itemBuilder,
+          width: width,
         );
         opened?.call(popup);
       },

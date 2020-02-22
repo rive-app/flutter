@@ -123,7 +123,7 @@ class PopupContextItem extends PopupListItem {
       Text(
         name,
         style: TextStyle(
-          fontFamily: 'Roboto-Regular',
+          fontFamily: 'Roboto-Light',
           fontSize: 13,
           color: isHovered ? Colors.white : const Color(0xFF8C8C8C),
         ),
@@ -136,7 +136,7 @@ class PopupContextItem extends PopupListItem {
                   ?.toUpperCase() ??
               "",
           style: const TextStyle(
-            fontFamily: 'Roboto-Regular',
+            fontFamily: 'Roboto-Light',
             fontSize: 13,
             color: Color(0xFF666666),
           ),

@@ -23,7 +23,7 @@ class FlatIconButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: color ?? ThemeUtils.buttonColor,
           borderRadius: BorderRadius.circular(20.0),
@@ -32,7 +32,7 @@ class FlatIconButton extends StatelessWidget {
                   BoxShadow(
                     color: ThemeUtils.textGrey.withOpacity(0.1),
                     blurRadius: 12,
-                    offset: Offset(0, 8),
+                    offset: const Offset(0, 8),
                   )
                 ]
               : null,

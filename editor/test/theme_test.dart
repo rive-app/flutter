@@ -7,7 +7,7 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 void main() {
   test('Theme data is available from RiveThemeData', () {
-    const theme = RiveThemeData();
+    final theme = RiveThemeData();
     expect(theme.colors.accentBlue, const Color(0xFF57A5E0));
   });
 
@@ -25,7 +25,7 @@ void main() {
 
     await tester.pumpWidget(myWidgetTree);
     final containerFinder =
-        byContainerColor(const RiveThemeData().colors.accentMagenta);
+        byContainerColor(RiveThemeData().colors.accentMagenta);
     expect(containerFinder, findsOneWidget);
   });
 }

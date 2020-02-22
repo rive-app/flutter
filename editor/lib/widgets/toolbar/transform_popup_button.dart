@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
+
 import 'package:rive_editor/widgets/popup/context_popup.dart';
+
 import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
+import 'package:rive_editor/widgets/toolbar/multi_icon_popup_item.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
 
@@ -15,46 +18,59 @@ class TransformPopupButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolPopupButton(
       defaultIcon: 'tool-auto',
-      makeItems: (rive) => <PopupContextItem>[
-        PopupContextItem(
-          'Select',
-          icon: 'tool-auto',
-          shortcut: ShortcutAction.autoTool,
-          select: () {},
-        ),
-        ToolPopupItem(
-          'Translate',
-          icon: TranslateTool.instance.icon,
-          notifier: rive.stage.value.toolNotifier,
-          isSelected: () => rive.stage.value.tool == TranslateTool.instance,
-          shortcut: ShortcutAction.translateTool,
-          select: () => rive.stage.value.tool = TranslateTool.instance,
-        ),
-        PopupContextItem(
-          'Rotate',
-          icon: 'tool-rotate',
-          shortcut: ShortcutAction.rotateTool,
-          select: () {},
-        ),
-        PopupContextItem(
-          'Scale',
-          icon: 'tool-scale',
-          shortcut: ShortcutAction.scaleTool,
-          select: () {},
-        ),
-        PopupContextItem(
-          'Pose',
-          icon: 'tool-pose',
-          shortcut: ShortcutAction.poseTool,
-          select: () {},
-        ),
-        PopupContextItem(
-          'Origin',
-          icon: 'tool-origin',
-          select: () {},
-        ),
-        PopupContextItem.separator(),
-        PopupContextItem('Show Axis',
+      makeItems: (rive) {
+        return <PopupContextItem>[
+          PopupContextItem(
+            'Select',
+            icon: 'tool-auto',
+            shortcut: ShortcutAction.autoTool,
+            select: () {},
+          ),
+          ToolPopupItem(
+            'Translate',
+            icon: TranslateTool.instance.icon,
+            notifier: rive.stage.value.toolNotifier,
+            isSelected: () => rive.stage.value.tool == TranslateTool.instance,
+            shortcut: ShortcutAction.translateTool,
+            select: () => rive.triggerAction(ShortcutAction.translateTool),
+          ),
+          PopupContextItem(
+            'Rotate',
+            icon: 'tool-rotate',
+            shortcut: ShortcutAction.rotateTool,
+            select: () {},
+          ),
+          PopupContextItem(
+            'Scale',
+            icon: 'tool-scale',
+            shortcut: ShortcutAction.scaleTool,
+            select: () {},
+          ),
+          PopupContextItem(
+            'Pose',
+            icon: 'tool-pose',
+            shortcut: ShortcutAction.poseTool,
+            select: () {},
+          ),
+          PopupContextItem(
+            'Origin',
+            icon: 'tool-origin',
+            select: () {},
+          ),
+          PopupContextItem.separator(),
+          MultiIconPopupItem(
+            'Show Axis',
+            notifier: rive.stage.value.axisCheckNotifier,
+            iconSelector: () {
+              switch (rive.stage.value.axisCheck) {
+                case AxisCheckState.local:
+                  return 'popup-local';
+                case AxisCheckState.parent:
+                  return 'popup-parent';
+                default:
+                  return 'popup-world';
+              }
+            },
             popup: [
               CheckPopupItem(
                 'Local',
@@ -79,25 +95,23 @@ class TransformPopupButton extends StatelessWidget {
                 select: () => rive.stage.value.axisCheck = AxisCheckState.world,
               ),
             ],
-            select: () {},
-            padIcon: true),
-        CheckPopupItem(
-          'Freeze Joints',
-          notifier: rive.stage.value.freezeJointsNotifier,
-          shortcut: ShortcutAction.freezeJointsToggle,
-          isChecked: () => rive.stage.value.freezeJoints,
-          select: () =>
-              rive.stage.value.freezeJoints = !rive.stage.value.freezeJoints,
-        ),
-        CheckPopupItem(
-          'Freeze Images',
-          notifier: rive.stage.value.freezeImagesNotifier,
-          shortcut: ShortcutAction.freezeImagesToggle,
-          isChecked: () => rive.stage.value.freezeImages,
-          select: () =>
-              rive.stage.value.freezeImages = !rive.stage.value.freezeImages,
-        ),
-      ],
+          ),
+          CheckPopupItem(
+            'Freeze Joints',
+            notifier: rive.stage.value.freezeJointsNotifier,
+            shortcut: ShortcutAction.freezeJointsToggle,
+            isChecked: () => rive.stage.value.freezeJoints,
+            select: () => rive.triggerAction(ShortcutAction.freezeJointsToggle),
+          ),
+          CheckPopupItem(
+            'Freeze Images',
+            notifier: rive.stage.value.freezeImagesNotifier,
+            shortcut: ShortcutAction.freezeImagesToggle,
+            isChecked: () => rive.stage.value.freezeImages,
+            select: () => rive.triggerAction(ShortcutAction.freezeImagesToggle),
+          ),
+        ];
+      },
     );
   }
 }
