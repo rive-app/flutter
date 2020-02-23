@@ -38,6 +38,15 @@ class StageCursor extends StageItem<ClientSidePlayer>
 
   double _x = 0, _y = 0;
 
+  /// Cursor is initially invisible until we receive the first move event.
+  bool _isVisible = false;
+
+  @override
+  bool get isVisible => _isVisible;
+
+  @override
+  bool get isSelectable => false;
+
   @override
   int get drawOrder => 2;
 
@@ -143,7 +152,15 @@ class StageCursor extends StageItem<ClientSidePlayer>
   }
 
   @override
-  void cursorChanged() => stage?.debounce(updateBounds);
+  void cursorChanged() {
+    stage?.debounce(updateBounds);
+    if (!_isVisible) {
+      var cursor = component.cursor;
+      _x = cursor.x;
+      _y = cursor.y;
+      _isVisible = true;
+    }
+  }
 
   @override
   bool advance(double elapsed) {

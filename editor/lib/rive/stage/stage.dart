@@ -35,6 +35,8 @@ abstract class StageDelegate {
   void stageNeedsAdvance();
 }
 
+/// Some notes about how the Stage works and future plans for it here:
+/// https://www.notion.so/Stage-65da45b819b249839e2ca0bb659c6a01
 class Stage extends Debouncer {
   static const double _minZoom = 0.1;
   static const double _maxZoom = 8.0;
@@ -169,7 +171,9 @@ class Stage extends Debouncer {
         _worldMouse[0] + 1.0, _worldMouse[1] + 1.0);
     StageItem hover;
     visTree.query(viewAABB, (int proxyId, StageItem item) {
-      hover = item;
+      if (item.isSelectable) {
+        hover = item;
+      }
       return true;
     });
     hover?.isHovered = true;
@@ -380,7 +384,9 @@ class Stage extends Debouncer {
 
     _visibleItems.clear();
     visTree.query(viewAABB, (int proxyId, StageItem item) {
-      _visibleItems.add(item);
+      if (item.isVisible) {
+        _visibleItems.add(item);
+      }
       return true;
     });
 
