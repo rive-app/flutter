@@ -32,7 +32,6 @@ class CoopServerClient extends Player with CoopReader {
   }
 
   void write(Uint8List buffer) {
-    print("WRITING COMMAND ${buffer[0]}");
     context.write(this, buffer);
   }
 
@@ -79,7 +78,7 @@ class CoopServerClient extends Player with CoopReader {
   void cursorChanged() {
     context.cursorChanged(this);
   }
-  
+
   @override
   Future<void> recvWipe() {
     throw UnsupportedError("Server should never receive wipe.");
@@ -101,11 +100,6 @@ class CoopServerClient extends Player with CoopReader {
   }
 
   @override
-  Future<void> recvIds(int min, int max) {
-    throw UnsupportedError("Server should never receive ids.");
-  }
-
-  @override
   Future<void> recvReady() {
     throw UnsupportedError("Server should never receive ready.");
   }
@@ -124,11 +118,4 @@ class CoopServerClient extends Player with CoopReader {
   Future<void> recvCursors(Map<int, PlayerCursor> cursors) {
     throw UnsupportedError("Server should never receive cursors.");
   }
-}
-
-class IdRange {
-  final int min;
-  final int max;
-
-  IdRange(this.min, this.max);
 }

@@ -112,7 +112,6 @@ class CoopIsolate {
         }
         _queuedSockets.clear();
       } else if (data is _CoopServerProcessData) {
-        print("ACTUALLY SENDING TO CLIENT ${data.data[0]}");
         _clients[data.id]?.add(data.data);
       } else if (data is _CoopServerShutdown && _shutdownCompleter != null) {
         _isolate?.kill();

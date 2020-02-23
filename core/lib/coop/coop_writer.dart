@@ -34,6 +34,12 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
+  void writePing() {
+    var writer = BinaryWriter();
+    writer.writeVarUint(CoopCommand.ping);
+    write(writer.uint8Buffer);
+  }
+
   void writeGoodbye() {
     var writer = BinaryWriter(alignment: 1);
     writer.writeVarUint(CoopCommand.goodbye);
@@ -72,14 +78,6 @@ class CoopWriter {
     var writer = BinaryWriter(alignment: 8);
     writer.writeVarUint(CoopCommand.reject);
     writer.writeVarUint(changeId);
-    write(writer.uint8Buffer);
-  }
-
-  void writeIds(int min, int max) {
-    var writer = BinaryWriter(alignment: 8);
-    writer.writeVarUint(CoopCommand.ids);
-    writer.writeVarUint(min);
-    writer.writeVarUint(max);
     write(writer.uint8Buffer);
   }
 

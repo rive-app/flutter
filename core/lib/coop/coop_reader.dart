@@ -8,37 +8,37 @@ import 'change.dart';
 import 'coop_command.dart';
 
 abstract class CoopReader {
-  void read(Uint8List data) {
+  Future<void> read(Uint8List data) async {
     var reader = BinaryReader(
         ByteData.view(data.buffer, data.offsetInBytes, data.length));
     int command = reader.readVarUint();
     switch (command) {
       case CoopCommand.hello:
-        recvHello(reader.readVarUint());
+        await recvHello(reader.readVarUint());
         break;
       case CoopCommand.accept:
         var changeId = reader.readVarUint();
-        recvAccept(changeId);
+        await recvAccept(changeId);
         break;
       case CoopCommand.reject:
         var changeId = reader.readVarUint();
-        recvReject(changeId);
+        await recvReject(changeId);
         break;
       case CoopCommand.wipe:
-        recvWipe();
+        await recvWipe();
         break;
       case CoopCommand.synchronize:
         var changes = <ChangeSet>[];
         while (!reader.isEOF) {
           changes.add(ChangeSet()..deserialize(reader));
         }
-        recvSync(changes);
+        await recvSync(changes);
         break;
       case CoopCommand.goodbye:
-        recvGoodbye();
+        await recvGoodbye();
         break;
       case CoopCommand.cursor:
-        recvCursor(reader.readFloat32(), reader.readFloat32());
+        await recvCursor(reader.readFloat32(), reader.readFloat32());
         break;
       case CoopCommand.cursors:
         int length = reader.readVarUint();
@@ -48,15 +48,10 @@ abstract class CoopReader {
           int clientId = reader.readVarUint();
           cursors[clientId] = PlayerCursor.deserialize(reader);
         }
-        recvCursors(cursors);
-        break;
-      case CoopCommand.ids:
-        var min = reader.readVarUint();
-        var max = reader.readVarUint();
-        recvIds(min, max);
+        await recvCursors(cursors);
         break;
       case CoopCommand.ready:
-        recvReady();
+        await recvReady();
         break;
       case CoopCommand.players:
         int length = reader.readVarUint();
@@ -64,8 +59,11 @@ abstract class CoopReader {
         for (int i = 0; i < length; i++) {
           players[i] = Player.deserialize(reader);
         }
-        recvPlayers(players);
+        await recvPlayers(players);
 
+        break;
+      case CoopCommand.ping:
+        // do nothing with ping...
         break;
       default:
         recvChange(ChangeSet()..deserialize(reader, command));
@@ -81,7 +79,6 @@ abstract class CoopReader {
   Future<void> recvGoodbye();
   Future<void> recvSync(List<ChangeSet> changes);
   Future<void> recvWipe();
-  Future<void> recvIds(int min, int max);
   Future<void> recvPlayers(List<Player> players);
   Future<void> recvCursor(double x, double y);
   Future<void> recvCursors(Map<int, PlayerCursor> cursors);
