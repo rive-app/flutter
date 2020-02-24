@@ -73,7 +73,7 @@ class RiveEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var focusScope = FocusScope.of(context);
+    final focusScope = FocusScope.of(context);
 
     return RiveTheme(
       child: ShortcutBindings(

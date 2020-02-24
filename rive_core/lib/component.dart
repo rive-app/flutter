@@ -5,6 +5,7 @@ import 'package:rive_core/rive_file.dart';
 import 'artboard.dart';
 import 'container_component.dart';
 import 'src/generated/component_base.dart';
+export 'src/generated/component_base.dart';
 
 abstract class Component extends ComponentBase<RiveFile> {
   Artboard _artboard;

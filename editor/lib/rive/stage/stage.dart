@@ -39,25 +39,25 @@ abstract class StageDelegate {
 /// https://www.notion.so/Stage-65da45b819b249839e2ca0bb659c6a01
 class Stage extends Debouncer {
   static const double _minZoom = 0.1;
-  static const double _maxZoom = 8.0;
+  static const double _maxZoom = 8;
 
   final Mat2D _viewTransform = Mat2D();
   final Mat2D _inverseViewTransform = Mat2D();
   final Vec2D _lastMousePosition = Vec2D();
   final Set<Advancer> _advancingItems = {};
   // bool _isRightMouseDown = false;
-  double _rightMouseMoveAccum = 0.0;
+  double _rightMouseMoveAccum = 0;
   Mat2D get inverseViewTransform => _inverseViewTransform;
-  double _viewportWidth = 0.0, _viewportHeight = 0.0;
+  double _viewportWidth = 0, _viewportHeight = 0;
   Mat2D get viewTransform => _viewTransform;
   double get viewportWidth => _viewportWidth;
   double get viewportHeight => _viewportHeight;
   final List<StageItem> _visibleItems = [];
   final Vec2D _viewTranslation = Vec2D();
-  double _viewZoom = 1.0;
+  double _viewZoom = 1;
   double get viewZoom => _viewZoom;
   final Vec2D _viewTranslationTarget = Vec2D();
-  double _viewZoomTarget = 1.0;
+  double _viewZoomTarget = 1;
   Vec2D _worldMouse = Vec2D();
   bool _mouseDownSelected = false;
 
@@ -141,7 +141,7 @@ class Stage extends Debouncer {
   void mouseWheel(double x, double y, double dx, double dy) {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
-    zoomTo(x, y, _viewZoomTarget - dy / 30.0);
+    zoomTo(x, y, _viewZoomTarget - dy / 30);
   }
 
   StageItem _hoverItem;
@@ -168,7 +168,7 @@ class Stage extends Debouncer {
     rive.file.value.cursorMoved(_worldMouse[0], _worldMouse[1]);
 
     AABB viewAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
-        _worldMouse[0] + 1.0, _worldMouse[1] + 1.0);
+        _worldMouse[0] + 1, _worldMouse[1] + 1);
     StageItem hover;
     visTree.query(viewAABB, (int proxyId, StageItem item) {
       if (item.isSelectable) {
@@ -350,7 +350,7 @@ class Stage extends Debouncer {
     double dx = _viewTranslationTarget[0] - _viewTranslation[0];
     double dy = _viewTranslationTarget[1] - _viewTranslation[1];
 
-    double factor = min(1.0, elapsed * 30.0);
+    double factor = min(1, elapsed * 30);
 
     if (ds.abs() > 0.00001) {
       _needsAdvance = true;
@@ -379,7 +379,7 @@ class Stage extends Debouncer {
   void paint(PaintingContext context, Offset offset, Size size) {
     Mat2D.invert(_inverseViewTransform, _viewTransform);
     var viewAABB = obbToAABB(
-        AABB.fromValues(0.0, 0.0, _viewportWidth, _viewportHeight),
+        AABB.fromValues(0, 0, _viewportWidth, _viewportHeight),
         _inverseViewTransform);
 
     _visibleItems.clear();

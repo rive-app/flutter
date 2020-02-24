@@ -4,11 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
+import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 import '../listenable_builder.dart';
 
+/// FileView is stateful so that it can track when it's added/removed from
+/// widget hierarchy to request batched network details for the file.
 class FileViewWidget extends StatefulWidget {
   final RiveFile file;
 
@@ -22,11 +25,9 @@ class FileViewWidget extends StatefulWidget {
 }
 
 class _FileViewWidgetState extends State<FileViewWidget> {
-  DateTime _firstClickTime;
-
   @override
   Widget build(BuildContext context) {
-    const kBottomHeight = 40.0;
+    const double kBottomHeight = 40;
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
     final _rive = RiveContext.of(context);
 
@@ -61,8 +62,8 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(5.0),
-                      topRight: Radius.circular(5.0),
+                      topLeft: Radius.circular(5),
+                      topRight: Radius.circular(5),
                     ),
                     color: ThemeUtils.backgroundDarkGrey,
                   ),
@@ -77,12 +78,12 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                 decoration: BoxDecoration(
                   color: ThemeUtils.backgroundLightGrey,
                   borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(5.0),
-                    bottomRight: Radius.circular(5.0),
+                    bottomLeft: Radius.circular(5),
+                    bottomRight: Radius.circular(5),
                   ),
                 ),
                 child: Container(
-                  padding: const EdgeInsets.only(left: 20.0),
+                  padding: const EdgeInsets.only(left: 20),
                   alignment: Alignment.centerLeft,
                   child: Text(
                     file.name ?? "",
@@ -114,49 +115,28 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                     color: Colors.transparent,
                     border: Border.all(
                       color: ThemeUtils.selectedBlue,
-                      width: 4.0,
+                      width: 4,
                     ),
-                    borderRadius: BorderRadius.circular(10.0),
+                    borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
                         color: ThemeUtils.selectedBlue.withOpacity(0.5),
-                        blurRadius: 50.0,
-                        offset: const Offset(0.0, 10.0),
+                        blurRadius: 50,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-            Listener(
-              // onTapDown: (e) {
-              //   print("TD");
-              // },
-              // onTap: () {
-              //   print("TAB");
-              //   _fileBrowser.selectItem(_rive, widget.file);
-              // },
-              // onDoubleTap: () {
-              //   final _rive = RiveContext.of(context);
-              //   _fileBrowser.openFile(_rive, widget.file);
-              // },
-              onPointerUp: (_) {
-                var time = DateTime.now();
-                if (_firstClickTime != null) {
-                  var diff = time.difference(_firstClickTime);
-                  _firstClickTime = time;
-                  if (diff > kDoubleTapMinTime && diff < kDoubleTapTimeout) {
-                    _fileBrowser.openFile(_rive, widget.file);
-                    return;
-                  }
-                } else {
-                  _firstClickTime = time;
-                }
-
+            ClickListener(
+              child: child,
+              onClick: () {
                 _fileBrowser.selectItem(_rive, widget.file);
               },
-
-              child: child,
+              onDoubleClick: () {
+                _fileBrowser.openFile(_rive, widget.file);
+              },
             ),
           ],
         );

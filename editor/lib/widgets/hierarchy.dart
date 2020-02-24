@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/widgets/common/renamable.dart';
+import 'package:rive_editor/widgets/core_property_builder.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
@@ -81,28 +84,36 @@ class HierarchyTreeView extends StatelessWidget {
       itemBuilder: (context, item) => ValueListenableBuilder<SelectionState>(
         builder: (context, state, _) => Expanded(
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: IgnorePointer(
-                  child: Text(
-                    item.data.name,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: state == SelectionState.selected
-                          ? Colors.white
-                          : Colors.grey.shade500,
-                    ),
+                // Use CorePropertyBuilder to get notified when the component's
+                // name changes.
+                child: CorePropertyBuilder<String>(
+                  object: item.data,
+                  propertyKey: ComponentBase.namePropertyKey,
+                  builder: (context, name, _) => Renamable(
+                    name: name,
+                    color: state == SelectionState.selected
+                        ? Colors.white
+                        : Colors.grey.shade500,
+                    onRename: (name) {
+                      item.data.name = name;
+                      RiveContext.of(context).file.value.captureJournalEntry();
+                    },
                   ),
                 ),
               ),
-              Text(
-                "lock",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: state == SelectionState.selected
-                      ? Colors.white
-                      : Colors.grey.shade500,
+              Align(
+                alignment: const Alignment(-1, 0),
+                child: Text(
+                  "lock",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: state == SelectionState.selected
+                        ? Colors.white
+                        : Colors.grey.shade500,
+                  ),
                 ),
               ),
               const SizedBox(width: 5)
