@@ -7,7 +7,6 @@ import 'package:core/coop/coop_command.dart';
 import 'package:core/core.dart';
 
 import 'entity.dart';
-import 'session.dart';
 
 const int _coopFileVersion = 3;
 
@@ -154,31 +153,6 @@ class CoopFileObject extends Entity {
       ..objectId = objectId
       ..properties = clonedProperties
       ..copy(this);
-  }
-}
-
-class CoopFileServerData {
-  List<Session> sessions;
-  int nextObjectId;
-  int nextChangeId;
-
-  void serialize(BinaryWriter writer) {
-    writer.writeVarUint(sessions.length);
-    for (final session in sessions) {
-      session.serialize(writer);
-    }
-    writer.writeVarUint(nextObjectId);
-    writer.writeVarUint(nextChangeId);
-  }
-
-  void deserialize(BinaryReader reader) {
-    int sessionsCount = reader.readVarUint();
-    sessions = List<Session>(sessionsCount);
-    for (int i = 0; i < sessionsCount; i++) {
-      sessions[i] = Session()..deserialize(reader);
-    }
-    nextObjectId = reader.readVarUint();
-    nextChangeId = reader.readVarUint();
   }
 }
 
