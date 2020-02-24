@@ -18,6 +18,14 @@ class HamburgerPopupButton extends StatelessWidget {
       contextItems: [
         PopupContextItem(
           "File Name",
+          widgetBuilder: (context) => SizedBox(
+            width: 125,
+            child: TextField(
+              decoration: InputDecoration(
+                border: InputBorder.none,
+              ),
+            ),
+          ),
         ),
         PopupContextItem(
           "Team Permissions",
