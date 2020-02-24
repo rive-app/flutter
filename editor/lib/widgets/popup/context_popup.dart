@@ -141,6 +141,9 @@ class PopupContextItem extends PopupListItem {
             color: Color(0xFF666666),
           ),
         ),
+      if (widgetBuilder != null) ...[
+        widgetBuilder(context),
+      ],
       if (popup != null && popup.isNotEmpty)
         ColorFiltered(
           colorFilter: ColorFilter.mode(
