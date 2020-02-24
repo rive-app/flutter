@@ -88,8 +88,6 @@ class _RenamableState extends State<Renamable> {
                   textAlign: TextAlign.left,
                   decoration: InputDecoration(
                     isDense: true,
-                    hintStyle: const TextStyle(),
-                    labelStyle: const TextStyle(),
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     border: InputBorder.none,
                     filled: false,
