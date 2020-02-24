@@ -105,7 +105,7 @@ class HierarchyTreeView extends StatelessWidget {
                 ),
               ),
               Align(
-                alignment: const Alignment(-1.0, 0.0),
+                alignment: const Alignment(-1, 0),
                 child: Text(
                   "lock",
                   style: TextStyle(
