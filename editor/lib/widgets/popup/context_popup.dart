@@ -128,7 +128,7 @@ class PopupContextItem extends PopupListItem {
           color: isHovered ? Colors.white : const Color(0xFF8C8C8C),
         ),
       ),
-      Expanded(child: Container()),
+      const Spacer(),
       if (shortcut != null)
         Text(
           ShortcutBindings.of(context)
