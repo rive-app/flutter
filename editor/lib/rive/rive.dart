@@ -228,6 +228,10 @@ class Rive with RiveFileDelegate {
     // multiple keys and cmd tabbing.
     _pressed.removeWhere((key) => !keyEvent.isKeyPressed(key.logical));
     // print("PRESSED IS $_pressed ${RawKeyboard.instance.keysPressed}");
+
+    // If something else has focus, don't process actions (usually when a text
+    // field is focused somewhere).
+    if(hasFocusObject) { return; }
     var actions = keyBinding.lookupAction(
         _pressed.map((key) => key.physical).toList(growable: false));
 

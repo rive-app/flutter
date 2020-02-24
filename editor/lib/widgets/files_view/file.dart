@@ -4,11 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
+import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 import '../listenable_builder.dart';
 
+/// FileView is stateful so that it can track when it's added/removed from
+/// widget hierarchy to request batched network details for the file.
 class FileViewWidget extends StatefulWidget {
   final RiveFile file;
 
@@ -22,8 +25,6 @@ class FileViewWidget extends StatefulWidget {
 }
 
 class _FileViewWidgetState extends State<FileViewWidget> {
-  DateTime _firstClickTime;
-
   @override
   Widget build(BuildContext context) {
     const kBottomHeight = 40.0;
@@ -128,35 +129,14 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                 ),
               ),
             ),
-            Listener(
-              // onTapDown: (e) {
-              //   print("TD");
-              // },
-              // onTap: () {
-              //   print("TAB");
-              //   _fileBrowser.selectItem(_rive, widget.file);
-              // },
-              // onDoubleTap: () {
-              //   final _rive = RiveContext.of(context);
-              //   _fileBrowser.openFile(_rive, widget.file);
-              // },
-              onPointerUp: (_) {
-                var time = DateTime.now();
-                if (_firstClickTime != null) {
-                  var diff = time.difference(_firstClickTime);
-                  _firstClickTime = time;
-                  if (diff > kDoubleTapMinTime && diff < kDoubleTapTimeout) {
-                    _fileBrowser.openFile(_rive, widget.file);
-                    return;
-                  }
-                } else {
-                  _firstClickTime = time;
-                }
-
+            ClickListener(
+              child: child,
+              onClick: () {
                 _fileBrowser.selectItem(_rive, widget.file);
               },
-
-              child: child,
+              onDoubleClick: () {
+                _fileBrowser.openFile(_rive, widget.file);
+              },
             ),
           ],
         );
