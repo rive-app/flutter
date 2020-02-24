@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/modal_popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
@@ -16,17 +17,23 @@ class HamburgerPopupButton extends StatelessWidget {
       ),
       width: 267,
       contextItems: [
-        PopupContextItem(
-          "File Name",
-          widgetBuilder: (context) => SizedBox(
-            width: 125,
-            child: TextField(
-              decoration: InputDecoration(
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-        ),
+        PopupContextItem("File Name",
+            widgetBuilder: (context) => Container(
+                  width: 125,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      border: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: RiveTheme.of(context).colors.separator)),
+                      hintText: 'yo hey yo dawg, i hear you like text input',
+                      hintStyle:
+                          RiveTheme.of(context).textStyles.popupShortcutText,
+                    ),
+                    style: RiveTheme.of(context).textStyles.popupShortcutText,
+                  ),
+                ),
+            select: () {},
+            dismissOnSelect: false),
         PopupContextItem(
           "Team Permissions",
           select: () => _showModal(context, (_) => Container()),
