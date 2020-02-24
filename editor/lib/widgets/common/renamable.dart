@@ -60,7 +60,7 @@ class _RenamableState extends State<Renamable> {
         });
       },
       child: Align(
-        alignment: const Alignment(-1.0, 0.0),
+        alignment: const Alignment(-1, 0),
         // color:Colors.green,
         child: _isEditing
             ? RawKeyboardListener(

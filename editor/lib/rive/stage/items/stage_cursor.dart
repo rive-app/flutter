@@ -6,6 +6,7 @@ import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
+import 'package:rive_editor/rive/theme.dart';
 
 import '../stage.dart';
 import '../stage_item.dart';
@@ -13,11 +14,11 @@ import '../stage_item.dart';
 class StageCursor extends StageItem<ClientSidePlayer>
     with ClientSidePlayerDelegate, Advancer {
   // TODO: pick the right color palette based on Guido's input
-  static const List<Color> playerColors = [
-    Color(0xFF16E6B3),
-    Color(0xFFFF929F),
-    Color(0xFFFFF1BE),
-    Color(0xFF57A5E0),
+  static List<Color> playerColors = [
+    RiveThemeData().colors.cursorGreen,
+    RiveThemeData().colors.cursorRed,
+    RiveThemeData().colors.cursoYellow,
+    RiveThemeData().colors.cursorBlue,
   ];
 
   static Color colorFromPalette(int index) =>
