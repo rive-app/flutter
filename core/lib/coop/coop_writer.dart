@@ -26,11 +26,17 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  void writeCursor(int x, int y) {
+  void writeCursor(double x, double y) {
     var writer = BinaryWriter();
     writer.writeVarUint(CoopCommand.cursor);
-    writer.writeVarInt(x);
-    writer.writeVarInt(y);
+    writer.writeFloat32(x);
+    writer.writeFloat32(y);
+    write(writer.uint8Buffer);
+  }
+
+  void writePing() {
+    var writer = BinaryWriter();
+    writer.writeVarUint(CoopCommand.ping);
     write(writer.uint8Buffer);
   }
 
@@ -75,14 +81,6 @@ class CoopWriter {
     write(writer.uint8Buffer);
   }
 
-  void writeIds(int min, int max) {
-    var writer = BinaryWriter(alignment: 8);
-    writer.writeVarUint(CoopCommand.ids);
-    writer.writeVarUint(min);
-    writer.writeVarUint(max);
-    write(writer.uint8Buffer);
-  }
-
   void writePlayers(Iterable<CoopServerClient> clients) {
     // TODO: nicer way to optimize alignment?
     var writer = BinaryWriter(alignment: 4 + 8 * clients.length);
@@ -90,6 +88,17 @@ class CoopWriter {
     writer.writeVarUint(clients.length);
     for (final client in clients) {
       client.serialize(writer);
+    }
+    write(writer.uint8Buffer);
+  }
+
+  void writeCursors(Iterable<CoopServerClient> clientCursors) {
+    var writer = BinaryWriter(alignment: 4 + 8 * clientCursors.length);
+    writer.writeVarUint(CoopCommand.cursors);
+    writer.writeVarUint(clientCursors.length);
+    for (final client in clientCursors) {
+      writer.writeVarUint(client.clientId);
+      client.cursor.serialize(writer);
     }
     write(writer.uint8Buffer);
   }

@@ -5,7 +5,9 @@ import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/player.dart';
+import 'package:core/coop/player_cursor.dart';
 import 'package:core/coop/protocol_version.dart';
+import 'package:core/debounce.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'connect_result.dart';
@@ -13,11 +15,12 @@ import 'coop_reader.dart';
 import 'coop_writer.dart';
 import 'local_settings.dart';
 
-typedef ChangeSetCallback = void Function(ChangeSet changeSet);
+typedef ChangeSetCallback = void Function(ChangeSet);
 typedef WipeCallback = void Function();
 typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
-typedef HelloCallback = void Function(int clientId);
+typedef HelloCallback = void Function(int);
 typedef PlayersCallback = void Function(List<Player>);
+typedef UpdateCursorCallback = void Function(int, PlayerCursor);
 
 enum ConnectionState { disconnected, connecting, handshaking, connected }
 
@@ -45,6 +48,7 @@ class CoopClient extends CoopReader {
   GetOfflineChangesCallback getOfflineChanges;
   HelloCallback gotClientId;
   PlayersCallback updatePlayers;
+  UpdateCursorCallback updateCursor;
 
   CoopClient(
     String host,
@@ -55,8 +59,6 @@ class CoopClient extends CoopReader {
   }) : url = '$host/v$protocolVersion/$path/$clientId' {
     _writer = CoopWriter(write);
   }
-
-  Completer<IdRange> _allocateIdCompleter;
 
   Future<void> _reconnect() async {
     _reconnectTimer?.cancel();
@@ -69,16 +71,19 @@ class CoopClient extends CoopReader {
         Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
   }
 
+  bool get isConnected => _connectionState == ConnectionState.connected;
+
   void _ping() {
-    if (_connectionState != ConnectionState.connected) {
+    if (!isConnected) {
       return;
     }
-    _writer.writeCursor(0, 0);
+    _writer.writePing();
     _pingTimer?.cancel();
     _pingTimer = Timer(const Duration(seconds: 30), _ping);
   }
 
   Future<bool> disconnect() async {
+    await _subscription?.cancel();
     _allowReconnect = false;
     _pingTimer?.cancel();
     await _channel.sink.close();
@@ -92,13 +97,20 @@ class CoopClient extends CoopReader {
     return true;
   }
 
-  // Future<int> handshake(int sessionId, String fileId, String token) async {
-  //   _writer.writeHello(sessionId, fileId, token);
-
-  //   return 0;
-  // }
-
   Completer<ConnectResult> _connectionCompleter;
+  StreamSubscription _subscription;
+
+  Future<void> _onStreamData(dynamic data) async {
+    if (data is Uint8List) {
+      // We pause and resume the stream once our read has fully completed. This
+      // allows us to avoid race conditions with processing events that are
+      // expected to happen in order.
+      _subscription.pause();
+      await read(data);
+      _subscription.resume();
+    }
+  }
+
   Future<ConnectResult> connect() async {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
@@ -107,20 +119,13 @@ class CoopClient extends CoopReader {
 
     _connectionState = ConnectionState.connecting;
 
-    _channel.stream.listen((dynamic data) {
-      print("socket message: $data ${data.runtimeType}");
-      if (data is Uint8List) {
-        read(data);
-      }
-    }, onError: (dynamic error) {
+    _subscription =
+        _channel.stream.listen(_onStreamData, onError: (dynamic error) {
       print("CONNECTION ERROR");
-      _connectionState = ConnectionState.disconnected;
-      _pingTimer?.cancel();
+      _disconnected();
     }, onDone: () {
       print("CONNECTION MURDERED");
-      _connectionState = ConnectionState.disconnected;
-      _pingTimer?.cancel();
-      _channel = null;
+      _disconnected();
       _connectionCompleter?.complete(ConnectResult.networkError);
       _connectionCompleter = null;
       if (_allowReconnect) {
@@ -128,6 +133,16 @@ class CoopClient extends CoopReader {
       }
     });
     return _connectionCompleter.future;
+  }
+
+  Future<void> _disconnected() async {
+    _connectionState = ConnectionState.disconnected;
+    _pingTimer?.cancel();
+    if (_channel != null && _channel.sink != null) {
+      await _channel.sink.close();
+    }
+
+    _channel = null;
   }
 
   void write(Uint8List buffer) {
@@ -146,10 +161,7 @@ class CoopClient extends CoopReader {
   Future<void> recvGoodbye() async {
     // Handle the server telling us to disconnect.
     _allowReconnect = false;
-    _connectionState = ConnectionState.disconnected;
-    _pingTimer?.cancel();
-    await _channel?.sink?.close();
-    _channel = null;
+    await _disconnected();
     print("GOT GOODBYE");
     _connectionCompleter?.complete(ConnectResult.notAuthorized);
     _connectionCompleter = null;
@@ -202,6 +214,7 @@ class CoopClient extends CoopReader {
 
   @override
   Future<void> recvReady() async {
+    _connectionState = ConnectionState.connected;
     _connectionCompleter?.complete(ConnectResult.connected);
     _connectionCompleter = null;
     _ping();
@@ -244,17 +257,25 @@ class CoopClient extends CoopReader {
   }
 
   @override
-  Future<void> recvIds(int min, int max) async {
-    if (_allocateIdCompleter == null) {
+  Future<void> recvPlayers(List<Player> players) async {
+    if (!isConnected) {
       return;
     }
-    var completer = _allocateIdCompleter;
-    _allocateIdCompleter = null;
-    completer.complete(IdRange(min, max));
+    updatePlayers?.call(players);
   }
 
   @override
-  Future<void> recvPlayers(List<Player> players) async {
-    updatePlayers?.call(players);
+  Future<void> recvCursor(double x, double y) {
+    throw UnsupportedError(
+        "Client should never receive cursor (gets sent only to server)");
   }
+
+  @override
+  Future<void> recvCursors(Map<int, PlayerCursor> cursors) async {
+    for (final MapEntry<int, PlayerCursor> entry in cursors.entries) {
+      updateCursor.call(entry.key, entry.value);
+    }
+  }
+
+  void sendCursor(double x, double y) => _writer.writeCursor(x, y);
 }

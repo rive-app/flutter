@@ -1,5 +1,7 @@
 import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
+import 'package:core/coop/player_cursor.dart';
+import 'package:meta/meta.dart';
 
 /// This is a server and client abstraction of a player. A player represents a
 /// client connected to the coop server which has been authenticated to
@@ -13,7 +15,22 @@ class Player {
   /// Id representing the owner in the Rive API.
   final int ownerId;
 
-  Player(this.clientId, this.ownerId);
+  /// The player's cursor in world space.
+  PlayerCursor _cursor;
+  PlayerCursor get cursor => _cursor;
+  set cursor(PlayerCursor value) {;
+    if (_cursor == value) {
+      return;
+    }
+    _cursor = value;
+    cursorChanged();
+  }
+
+  @protected
+  void cursorChanged() {}
+
+  Player(this.clientId, this.ownerId, {PlayerCursor cursor})
+      : _cursor = cursor ?? PlayerCursor(0, 0);
 
   void serialize(BinaryWriter writer) {
     writer.writeVarUint(clientId);

@@ -7,7 +7,8 @@ class CoopCommand {
   static const int wipe = 5;
   static const int accept = 6;
   static const int reject = 7;
-  static const int ids = 8;
-  static const int players = 9;
-  static const int minChangeId = 10;
+  static const int players = 8;
+  static const int cursors = 9;
+  static const int ping = 10;
+  static const int minChangeId = 11;
 }
