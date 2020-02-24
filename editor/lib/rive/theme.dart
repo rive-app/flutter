@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 /// Colors used in the Rive Theme
@@ -63,6 +64,16 @@ class TextStyles {
       const TextStyle(fontFamily: 'Roboto-Medium', fontSize: 11);
   TextStyle get inspectorButton =>
       const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
+
+  // Popup Menus
+  TextStyle get popupHovered => const TextStyle(
+      fontFamily: 'Roboto-Light', color: Colors.white, fontSize: 13);
+
+  TextStyle get popupText => const TextStyle(
+      fontFamily: 'Roboto-Light', color: Color(0xFF8C8C8C), fontSize: 13);
+
+  TextStyle get popupShortcutText => const TextStyle(
+      fontFamily: 'Roboto-Light', color: Color(0xFF666666), fontSize: 13);
 }
 
 /// Gradients used in the Rive Theme
