@@ -27,7 +27,7 @@ class FileViewWidget extends StatefulWidget {
 class _FileViewWidgetState extends State<FileViewWidget> {
   @override
   Widget build(BuildContext context) {
-    const kBottomHeight = 40.0;
+    const double kBottomHeight = 40;
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
     final _rive = RiveContext.of(context);
 
@@ -62,8 +62,8 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(5.0),
-                      topRight: Radius.circular(5.0),
+                      topLeft: Radius.circular(5),
+                      topRight: Radius.circular(5),
                     ),
                     color: ThemeUtils.backgroundDarkGrey,
                   ),
@@ -78,12 +78,12 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                 decoration: BoxDecoration(
                   color: ThemeUtils.backgroundLightGrey,
                   borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(5.0),
-                    bottomRight: Radius.circular(5.0),
+                    bottomLeft: Radius.circular(5),
+                    bottomRight: Radius.circular(5),
                   ),
                 ),
                 child: Container(
-                  padding: const EdgeInsets.only(left: 20.0),
+                  padding: const EdgeInsets.only(left: 20),
                   alignment: Alignment.centerLeft,
                   child: Text(
                     file.name ?? "",
@@ -115,14 +115,14 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                     color: Colors.transparent,
                     border: Border.all(
                       color: ThemeUtils.selectedBlue,
-                      width: 4.0,
+                      width: 4,
                     ),
-                    borderRadius: BorderRadius.circular(10.0),
+                    borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
                         color: ThemeUtils.selectedBlue.withOpacity(0.5),
-                        blurRadius: 50.0,
-                        offset: const Offset(0.0, 10.0),
+                        blurRadius: 50,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),

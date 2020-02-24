@@ -40,8 +40,8 @@ Future<void> main() async {
     },
   );
 
-  var iconCache = RiveIconCache(rootBundle);
-  var rive = Rive(iconCache: iconCache);
+  final iconCache = RiveIconCache(rootBundle);
+  final rive = Rive(iconCache: iconCache);
 
   if (await rive.initialize() != RiveState.catastrophe) {
     // this is just for the prototype...
@@ -73,7 +73,7 @@ class RiveEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var focusScope = FocusScope.of(context);
+    final focusScope = FocusScope.of(context);
 
     return RiveTheme(
       child: ShortcutBindings(
