@@ -58,11 +58,8 @@ class RiveIconCache {
     }
 
     var byteBuffer = Uint8List.view(data.buffer);
-
-    ui.Codec codec = await ui.instantiateImageCodec(byteBuffer);
-    ui.FrameInfo frame = await codec.getNextFrame();
+    ui.decodeImageFromList(byteBuffer, (image) => cachedImage.image = image);
     cachedImage.resolution = foundResolution;
-    cachedImage.image = frame.image;
     cachedImage.completer.complete(cachedImage);
     return cachedImage;
   }
