@@ -36,6 +36,11 @@ class RiveColors {
   Color get buttonDark => const Color(0xFF444444);
   Color get buttonNoHover => const Color(0xFF707070);
   Color get buttonHover => const Color(0xFFFFFFFF);
+
+  Color get cursorGreen => const Color(0xFF16E6B3);
+  Color get cursorRed => const Color(0xFFFF929F);
+  Color get cursoYellow => const Color(0xFFFFF1BE);
+  Color get cursorBlue => const Color(0xFF57A5E0);
 }
 
 /// TextStyles used in the Rive Theme

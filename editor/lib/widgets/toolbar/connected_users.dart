@@ -1,17 +1,16 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:rive_api/user.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 
 class ConnectedUsers extends StatelessWidget {
   final Rive rive;
 
   const ConnectedUsers({
-    Key key,
     @required this.rive,
+    Key key,
   }) : super(key: key);
 
   @override
@@ -27,10 +26,10 @@ class ConnectedUsers extends StatelessWidget {
             children: [
               for (var connectedUser in users) ...[
                 ValueListenableBuilder<RiveUser>(
-                  valueListenable: connectedUser.user,
+                  valueListenable: connectedUser.userNotifier,
                   builder: (context, user, chld) => AvatarView(
-                    color: Color(_getRandomColor()),
-                    imageUrl: user.avatar,
+                    color: StageCursor.colorFromPalette(connectedUser.index),
+                    imageUrl: user?.avatar,
                   ),
                 ),
                 child,
@@ -44,31 +43,14 @@ class ConnectedUsers extends StatelessWidget {
   }
 }
 
-int _getRandomColor() {
-  final random = Random();
-  final _lerp = random.nextDouble();
-  final _color = Color.lerp(Colors.red, Colors.blue, _lerp);
-  return _color.value;
-}
-
-/// Generates a random integer where [from] <= [to].
-int randomBetween(int from, int to) {
-  final random = Random();
-  assert(from > to);
-  double randomDouble = random.nextDouble();
-  if (randomDouble < 0) randomDouble *= -1;
-  if (randomDouble > 1) randomDouble = 1 / randomDouble;
-  return ((to - from) * random.nextDouble()).toInt() + from;
-}
-
 class AvatarView extends StatelessWidget {
   final String imageUrl;
   final Color color;
 
   const AvatarView({
-    Key key,
     @required this.imageUrl,
     @required this.color,
+    Key key,
   }) : super(key: key);
 
   @override

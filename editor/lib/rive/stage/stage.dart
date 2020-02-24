@@ -13,6 +13,7 @@ import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:core/debounce.dart';
@@ -34,6 +35,8 @@ abstract class StageDelegate {
   void stageNeedsAdvance();
 }
 
+/// Some notes about how the Stage works and future plans for it here:
+/// https://www.notion.so/Stage-65da45b819b249839e2ca0bb659c6a01
 class Stage extends Debouncer {
   static const double _minZoom = 0.1;
   static const double _maxZoom = 8.0;
@@ -41,6 +44,7 @@ class Stage extends Debouncer {
   final Mat2D _viewTransform = Mat2D();
   final Mat2D _inverseViewTransform = Mat2D();
   final Vec2D _lastMousePosition = Vec2D();
+  final Set<Advancer> _advancingItems = {};
   // bool _isRightMouseDown = false;
   double _rightMouseMoveAccum = 0.0;
   Mat2D get inverseViewTransform => _inverseViewTransform;
@@ -51,6 +55,7 @@ class Stage extends Debouncer {
   final List<StageItem> _visibleItems = [];
   final Vec2D _viewTranslation = Vec2D();
   double _viewZoom = 1.0;
+  double get viewZoom => _viewZoom;
   final Vec2D _viewTranslationTarget = Vec2D();
   double _viewZoomTarget = 1.0;
   Vec2D _worldMouse = Vec2D();
@@ -159,11 +164,16 @@ class Stage extends Debouncer {
 
   void mouseMove(int button, double x, double y) {
     _computeWorldMouse(x, y);
+
+    rive.file.value.cursorMoved(_worldMouse[0], _worldMouse[1]);
+
     AABB viewAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
         _worldMouse[0] + 1.0, _worldMouse[1] + 1.0);
     StageItem hover;
     visTree.query(viewAABB, (int proxyId, StageItem item) {
-      hover = item;
+      if (item.isSelectable) {
+        hover = item;
+      }
       return true;
     });
     hover?.isHovered = true;
@@ -190,7 +200,7 @@ class Stage extends Debouncer {
 
   void mouseDrag(int button, double x, double y) {
     _computeWorldMouse(x, y);
-
+    rive.file.value.cursorMoved(_worldMouse[0], _worldMouse[1]);
     switch (button) {
       case 2:
         double dx = x - _lastMousePosition[0];
@@ -290,6 +300,9 @@ class Stage extends Debouncer {
     item.visTreeProxy = visTree.createProxy(item.aabb, item);
     item.addedToStage(this);
     markNeedsAdvance();
+    if (item is Advancer) {
+      _advancingItems.add(item as Advancer);
+    }
     return true;
   }
 
@@ -303,6 +316,9 @@ class Stage extends Debouncer {
     item.visTreeProxy = nullNode;
     item.removedFromStage(this);
     markNeedsAdvance();
+    if (item is Advancer) {
+      _advancingItems.remove(item as Advancer);
+    }
     return true;
   }
 
@@ -323,13 +339,19 @@ class Stage extends Debouncer {
   void advance(double elapsed) {
     debounceAll();
 
+    _needsAdvance = false;
+    for (final advancers in _advancingItems) {
+      if (advancers.advance(elapsed)) {
+        _needsAdvance = true;
+      }
+    }
+
     double ds = _viewZoomTarget - _viewZoom;
     double dx = _viewTranslationTarget[0] - _viewTranslation[0];
     double dy = _viewTranslationTarget[1] - _viewTranslation[1];
 
     double factor = min(1.0, elapsed * 30.0);
 
-    _needsAdvance = false;
     if (ds.abs() > 0.00001) {
       _needsAdvance = true;
       ds *= factor;
@@ -362,7 +384,9 @@ class Stage extends Debouncer {
 
     _visibleItems.clear();
     visTree.query(viewAABB, (int proxyId, StageItem item) {
-      _visibleItems.add(item);
+      if (item.isVisible) {
+        _visibleItems.add(item);
+      }
       return true;
     });
 

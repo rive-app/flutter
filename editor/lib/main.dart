@@ -40,7 +40,9 @@ Future<void> main() async {
     },
   );
 
-  var rive = Rive();
+  final iconCache = RiveIconCache(rootBundle);
+  final rive = Rive(iconCache: iconCache);
+
   if (await rive.initialize() != RiveState.catastrophe) {
     // this is just for the prototype...
     // await rive.open('100/100');
@@ -48,6 +50,7 @@ Future<void> main() async {
   runApp(
     RiveEditorApp(
       rive: rive,
+      iconCache: iconCache,
       focusNode: FocusNode(),
     ),
   );
@@ -58,11 +61,13 @@ const double resizeEdgeSize = 10;
 
 class RiveEditorApp extends StatelessWidget {
   final Rive rive;
+  final RiveIconCache iconCache;
   final FocusNode focusNode;
 
   const RiveEditorApp({
     Key key,
     this.rive,
+    this.iconCache,
     this.focusNode,
   }) : super(key: key);
 
@@ -75,7 +80,7 @@ class RiveEditorApp extends StatelessWidget {
         child: RiveContext(
           rive: rive,
           child: IconCache(
-            cache: RiveIconCache(rootBundle),
+            cache: iconCache,
             child: Builder(
               builder: (context) => CursorView(
                 onPointerDown: (details) {

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -31,6 +32,15 @@ abstract class StageItem<T> extends SelectableItem {
     return true;
   }
 
+  /// Override this to temporarily hide items. This shouldn't be used to
+  /// permanently hide an item. If an item is no longer necessary it should be
+  /// removed from the stage. 
+  bool get isVisible => true;
+
+  /// Override this to prevent this item from being clicked on.
+  bool get isSelectable => isVisible;
+
+  @mustCallSuper
   void addedToStage(Stage stage) {
     _stage = stage;
   }
