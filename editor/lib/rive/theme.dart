@@ -18,6 +18,7 @@ class RiveColors {
 
   // Popups
   Color get separator => const Color(0xFF262626);
+  Color get separatorActive => const Color(0xFFAEAEAE);
 
   // Stage
   Color get toolTip => const Color(0x7F000000);

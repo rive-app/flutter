@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -20,16 +22,29 @@ class HamburgerPopupButton extends StatelessWidget {
         PopupContextItem("File Name",
             widgetBuilder: (context) => Container(
                   width: 125,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      border: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: RiveTheme.of(context).colors.separator)),
-                      hintText: 'yo hey yo dawg, i hear you like text input',
-                      hintStyle:
-                          RiveTheme.of(context).textStyles.popupShortcutText,
+                  child: Center(
+                    child: TextFormField(
+                      initialValue: RiveContext.of(context).file.value.name,
+                      textAlignVertical: TextAlignVertical.top,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.fromLTRB(0, 6, 0, 6),
+                        enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                width: 2,
+                                color: RiveTheme.of(context).colors.separator)),
+                        focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                width: 2,
+                                color: RiveTheme.of(context)
+                                    .colors
+                                    .separatorActive)),
+                        hintText: 'New File Name',
+                        hintStyle:
+                            RiveTheme.of(context).textStyles.popupShortcutText,
+                      ),
+                      style: RiveTheme.of(context).textStyles.popupShortcutText,
                     ),
-                    style: RiveTheme.of(context).textStyles.popupShortcutText,
                   ),
                 ),
             select: () {},
