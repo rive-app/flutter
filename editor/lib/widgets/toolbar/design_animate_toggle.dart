@@ -40,6 +40,8 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
   @override
   Widget build(BuildContext context) {
     var rive = RiveContext.of(context);
+    const _buttonColor = Color(0xFF444444);
+    const _inactiveText = Color(0xFF888888);
     return Container(
       width: kAnimateToggleWidth,
       child: LayoutBuilder(
@@ -62,7 +64,17 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                 margin: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: const Color(0xFF444444),
+                  color: _buttonColor,
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      Color.lerp(_buttonColor, const Color(0xFFFF5678),
+                          controller.value),
+                      Color.lerp(_buttonColor, const Color(0xFFD041AB),
+                          controller.value),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -73,7 +85,17 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () => _setAnimate(false, rive.isAnimateMode),
-                child: _buildText('Design'),
+                child: Center(
+                  child: Text(
+                    'Design',
+                    style: TextStyle(
+                      color: Color.lerp(
+                          Colors.white, _inactiveText, controller.value),
+                      fontFamily: 'Roboto-Light',
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
               ),
             ),
             Positioned(
@@ -83,23 +105,20 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () => _setAnimate(true, rive.isAnimateMode),
-                child: _buildText('Animate'),
+                child: Center(
+                  child: Text(
+                    'Animate',
+                    style: TextStyle(
+                      color: Color.lerp(
+                          _inactiveText, Colors.white, controller.value),
+                      fontFamily: 'Roboto-Light',
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildText(String text) {
-    return Center(
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.white,
-          fontFamily: 'Roboto-Light',
-          fontSize: 13,
         ),
       ),
     );
