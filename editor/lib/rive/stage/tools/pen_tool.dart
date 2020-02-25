@@ -4,10 +4,10 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/user_path.dart';
-import 'package:rive_editor/rive/stage/tools/moveable.dart';
+import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 
-class PenTool extends StageTool with Moveable {
+class PenTool extends StageTool with MoveableTool {
   static final PenTool instance = PenTool._();
 
   PenTool._();

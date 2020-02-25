@@ -4,10 +4,11 @@ import 'dart:ui';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
 import 'stage_tool.dart';
 
-class ArtboardTool extends StageTool {
+class ArtboardTool extends StageTool with DraggableTool {
   Vec2D _startWorldMouse;
   Artboard _artboard;
   @override
