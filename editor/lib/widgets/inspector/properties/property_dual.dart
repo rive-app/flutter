@@ -1,21 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-<<<<<<< HEAD
-=======
-<<<<<<<< HEAD:editor/lib/widgets/inspector/properties/property_dual.dart
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
-========
->>>>>>> Rename more files and adjust imports
-<<<<<<< HEAD:editor/lib/widgets/inspector/properties/property_dual.dart
-import 'package:rive_editor/widgets/multi_core_property_builder.dart';
-=======
-
-import 'text_field.dart';
->>>>>>> adding controller base:editor/lib/widgets/inspector/properties/dual.dart
-<<<<<<< HEAD
-=======
->>>>>>>> Rename more files and adjust imports:editor/lib/widgets/inspector/properties/dual.dart
->>>>>>> Rename more files and adjust imports
 
 class PropertyDual extends StatelessWidget {
   final List<Core> objects;
