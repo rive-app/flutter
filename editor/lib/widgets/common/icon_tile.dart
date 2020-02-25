@@ -3,10 +3,10 @@ import 'package:rive_editor/widgets/theme.dart';
 
 class IconTile extends StatelessWidget {
   const IconTile({
-    Key key,
     @required this.label,
     @required this.icon,
     this.onTap,
+    Key key,
   }) : super(key: key);
 
   final String label;

@@ -8,6 +8,7 @@ import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
@@ -231,7 +232,9 @@ class Rive with RiveFileDelegate {
 
     // If something else has focus, don't process actions (usually when a text
     // field is focused somewhere).
-    if(hasFocusObject) { return; }
+    if (hasFocusObject) {
+      return;
+    }
     var actions = keyBinding.lookupAction(
         _pressed.map((key) => key.physical).toList(growable: false));
 
@@ -250,6 +253,10 @@ class Rive with RiveFileDelegate {
 
       case ShortcutAction.ellipseTool:
         stage?.value?.tool = EllipseTool.instance;
+        break;
+
+      case ShortcutAction.penTool:
+        stage?.value?.tool = PenTool.instance;
         break;
 
       case ShortcutAction.rectangleTool:

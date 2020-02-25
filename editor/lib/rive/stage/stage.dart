@@ -17,6 +17,7 @@ import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:core/debounce.dart';
+import 'package:rive_editor/rive/stage/tools/moveable.dart';
 
 import '../rive.dart';
 import 'aabb_tree.dart';
@@ -72,6 +73,9 @@ class Stage extends Debouncer {
     if (value.activate(this)) {
       toolNotifier.value = value;
     }
+    // Tools that are Moveable (e.g. PenTool) are activated as soon as 
+    // they are set.
+    _activeDragTool = value is Moveable ? value : null;
   }
 
   // Joints freezed flag
@@ -183,6 +187,11 @@ class Stage extends Debouncer {
 
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
+
+    if (_activeDragTool is Moveable) {
+      (_activeDragTool as Moveable).updateMove(_worldMouse);
+      markNeedsAdvance();
+    }
   }
 
   void mouseDown(int button, double x, double y) {
