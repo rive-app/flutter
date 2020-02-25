@@ -3,11 +3,9 @@ import 'dart:typed_data';
 
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
-import 'package:core/coop/coop_server_client.dart';
 import 'package:core/coop/player.dart';
 import 'package:core/coop/player_cursor.dart';
 import 'package:core/coop/protocol_version.dart';
-import 'package:core/debounce.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'connect_result.dart';
