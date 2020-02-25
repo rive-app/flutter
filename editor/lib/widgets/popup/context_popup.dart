@@ -127,11 +127,9 @@ class PopupContextItem extends PopupListItem {
     children.addAll([
       Text(
         name,
-        style: TextStyle(
-          fontFamily: 'Roboto-Light',
-          fontSize: 13,
-          color: isHovered ? Colors.white : const Color(0xFF8C8C8C),
-        ),
+        style: isHovered
+            ? RiveTheme.of(context).textStyles.popupHovered
+            : RiveTheme.of(context).textStyles.popupText,
       ),
       const Spacer(),
       if (shortcut != null)
@@ -140,11 +138,7 @@ class PopupContextItem extends PopupListItem {
                   ?.lookupKeysLabel(shortcut)
                   ?.toUpperCase() ??
               "",
-          style: const TextStyle(
-            fontFamily: 'Roboto-Light',
-            fontSize: 13,
-            color: Color(0xFF666666),
-          ),
+          style: RiveTheme.of(context).textStyles.popupShortcutText,
         ),
       if (widgetBuilder != null) ...[
         widgetBuilder(context),

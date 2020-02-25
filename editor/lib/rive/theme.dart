@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 /// Colors used in the Rive Theme
@@ -11,14 +10,30 @@ class RiveColors {
   const RiveColors._();
   static const RiveColors _instance = RiveColors._();
 
+  // Tabs
+  Color get tabText => const Color(0xFF8b8b8b);
+  Color get tabBackground => const Color(0xFF323232);
+  Color get tabTextSelected => const Color(0xFFFDFDFD);
+  Color get tabBackgroundSelected => const Color(0xFF3c3c3c);
+
+  Color get tabRiveText => const Color(0xFF8c8c8c);
+  Color get tabRiveBackground => const Color(0xFF323232);
+  Color get tabRiveTextSelected => const Color(0xFF323232);
+  Color get tabRiveBackgroundSelected => const Color(0xFFF1F1F1);
+
   // Toolbar
   Color get toolbarBackground => const Color(0xFF3c3c3c);
   Color get toolbarButton => const Color(0xFF8C8C8C);
+  Color get toolbarButtonSelected => const Color(0xFF57A5E0);
+  Color get toolbarButtonHover => const Color(0xFFFFFFFF);
   Color get toolbarButtonBackGroundHover => const Color(0xFF444444);
 
   // Popups
   Color get separator => const Color(0xFF262626);
   Color get separatorActive => const Color(0xFFAEAEAE);
+  Color get popupIconSelected => const Color(0xFF57A5E0);
+  Color get popupIcon => const Color(0xFF707070);
+  Color get popupIconHover => const Color(0xFFFFFFFF);
 
   // Stage
   Color get toolTip => const Color(0x7F000000);
@@ -31,7 +46,8 @@ class RiveColors {
   // Backgrounds
   Color get panelBackgroundLightGrey => const Color(0xFFF1F1F1);
   Color get panelBackgroundDarkGrey => const Color(0xFF323232);
-  Color get popupBackground => const Color(0xFF111111);
+  Color get stageBackground => const Color(0xFF1d1d1d);
+  Color get popupBackground => const Color(0xFFF1F1F1);
 
   // Buttons
   Color get buttonLight => const Color(0xFFE3E3E3);
@@ -39,6 +55,7 @@ class RiveColors {
   Color get buttonNoHover => const Color(0xFF707070);
   Color get buttonHover => const Color(0xFFFFFFFF);
 
+  // Cursors
   Color get cursorGreen => const Color(0xFF16E6B3);
   Color get cursorRed => const Color(0xFFFF929F);
   Color get cursoYellow => const Color(0xFFFFF1BE);
@@ -68,7 +85,7 @@ class TextStyles {
 
   // Popup Menus
   TextStyle get popupHovered => const TextStyle(
-      fontFamily: 'Roboto-Light', color: Colors.white, fontSize: 13);
+      fontFamily: 'Roboto-Light', color: Color(0xFFFFFFFF), fontSize: 13);
 
   TextStyle get popupText => const TextStyle(
       fontFamily: 'Roboto-Light', color: Color(0xFF8C8C8C), fontSize: 13);

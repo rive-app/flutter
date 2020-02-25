@@ -329,7 +329,7 @@ class StagePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
     return Container(
-      color: const Color(0xFF333333),
+      color: RiveTheme.of(context).colors.stageBackground,
       child: ValueListenableBuilder<Stage>(
         valueListenable: rive.stage,
         builder: (context, stage, _) => Stack(

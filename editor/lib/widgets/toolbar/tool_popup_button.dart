@@ -61,10 +61,10 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
 
             return TintedIcon(
               color: hasActiveIcon
-                  ? const Color(0xFF57A5E0)
+                  ? RiveTheme.of(context).colors.toolbarButtonSelected
                   : isHovered
-                      ? Colors.white
-                      : const Color.fromRGBO(140, 140, 140, 1),
+                      ? RiveTheme.of(context).colors.toolbarButtonHover
+                      : RiveTheme.of(context).colors.toolbarButton,
               icon: PopupContextItem.hasIcon(tool.icon, items)
                   ? tool.icon
                   : widget.defaultIcon,

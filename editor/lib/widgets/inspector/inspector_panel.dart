@@ -18,7 +18,7 @@ class InspectorPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
     return Container(
-      color: const Color(0xFF323232),
+      color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
       child: ListenableBuilder(
         listenable: rive.selection,
         builder: (context, SelectionContext<SelectableItem> selection, _) {
