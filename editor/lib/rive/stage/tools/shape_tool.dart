@@ -5,11 +5,12 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/theme.dart';
 
-abstract class ShapeTool extends StageTool {
+abstract class ShapeTool extends StageTool with DraggableTool {
   Vec2D _startWorldMouse;
   Vec2D _start = Vec2D(), _end = Vec2D(), _cursor = Vec2D();
 

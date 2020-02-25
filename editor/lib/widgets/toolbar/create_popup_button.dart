@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/triangle_tool.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -57,11 +58,15 @@ class CreatePopupButton extends StatelessWidget {
           ],
           select: () {},
         ),
-        PopupContextItem(
+        ToolPopupItem(
           'Pen',
           icon: 'tool-pen',
+          notifier: rive.stage.value.toolNotifier,
+          isSelected: () => rive.stage.value.tool == PenTool.instance,
           shortcut: ShortcutAction.penTool,
-          select: () {},
+          select: () {
+            rive.stage.value.tool = PenTool.instance;
+          },
         ),
         PopupContextItem.separator(),
         ToolPopupItem(
