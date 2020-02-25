@@ -41,6 +41,15 @@ class RiveColors {
   Color get cursorRed => const Color(0xFFFF929F);
   Color get cursoYellow => const Color(0xFFFFF1BE);
   Color get cursorBlue => const Color(0xFF57A5E0);
+
+  List<Color> get magentaGradient => [
+        const Color(0xFFFF5678),
+        const Color(0xFFD041AB),
+      ];
+
+  Color get buttonToggle => const Color(0xFF444444);
+  Color get inactiveText => const Color(0xFF888888);
+  Color get activeText => const Color(0xFFFFFFFF);
 }
 
 /// TextStyles used in the Rive Theme

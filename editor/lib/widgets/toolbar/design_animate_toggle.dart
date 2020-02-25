@@ -40,8 +40,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
   @override
   Widget build(BuildContext context) {
     var rive = RiveContext.of(context);
-    const _buttonColor = Color(0xFF444444);
-    const _inactiveText = Color(0xFF888888);
+    final theme = RiveTheme.of(context);
     return Container(
       width: kAnimateToggleWidth,
       child: LayoutBuilder(
@@ -64,15 +63,18 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                 margin: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: _buttonColor,
+                  color: theme.colors.buttonToggle,
                   gradient: LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     colors: [
-                      Color.lerp(_buttonColor, const Color(0xFFFF5678),
-                          controller.value),
-                      Color.lerp(_buttonColor, const Color(0xFFD041AB),
-                          controller.value),
+                      for (final stop in theme.colors.magentaGradient) ...[
+                        Color.lerp(
+                          theme.colors.buttonToggle,
+                          stop,
+                          controller.value,
+                        ),
+                      ]
                     ],
                   ),
                 ),
@@ -90,7 +92,10 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                     'Design',
                     style: TextStyle(
                       color: Color.lerp(
-                          Colors.white, _inactiveText, controller.value),
+                        theme.colors.activeText,
+                        theme.colors.inactiveText,
+                        controller.value,
+                      ),
                       fontFamily: 'Roboto-Light',
                       fontSize: 13,
                     ),
@@ -110,7 +115,10 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                     'Animate',
                     style: TextStyle(
                       color: Color.lerp(
-                          _inactiveText, Colors.white, controller.value),
+                        theme.colors.inactiveText,
+                        theme.colors.activeText,
+                        controller.value,
+                      ),
                       fontFamily: 'Roboto-Light',
                       fontSize: 13,
                     ),
