@@ -68,10 +68,10 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     colors: [
-                      for (final stop in theme.colors.magentaGradient) ...[
+                      for (final color in theme.gradients.magenta.colors) ...[
                         Color.lerp(
                           theme.colors.buttonToggle,
-                          stop,
+                          color,
                           controller.value,
                         ),
                       ]
@@ -91,11 +91,9 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                   child: Text(
                     'Design',
                     style: TextStyle(
-                      color: Color.lerp(
-                        theme.colors.activeText,
-                        theme.colors.inactiveText,
-                        controller.value,
-                      ),
+                      color: controller.value <= 0.5
+                          ? theme.colors.activeText
+                          : theme.colors.inactiveText,
                       fontFamily: 'Roboto-Light',
                       fontSize: 13,
                     ),
@@ -114,11 +112,9 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                   child: Text(
                     'Animate',
                     style: TextStyle(
-                      color: Color.lerp(
-                        theme.colors.inactiveText,
-                        theme.colors.activeText,
-                        controller.value,
-                      ),
+                      color: controller.value >= 0.5
+                          ? theme.colors.activeText
+                          : theme.colors.inactiveText,
                       fontFamily: 'Roboto-Light',
                       fontSize: 13,
                     ),
