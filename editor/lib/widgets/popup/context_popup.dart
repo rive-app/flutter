@@ -51,6 +51,9 @@ class PopupContextItem extends PopupListItem {
   @override
   final SelectCallback select;
 
+  @override
+  final bool dismissOnSelect;
+
   PopupContextItem(this.name,
       {this.icon,
       this.iconColor,
@@ -61,7 +64,8 @@ class PopupContextItem extends PopupListItem {
       this.select,
       this.rebuildItem,
       this.iconColorBuilder,
-      this.padIcon = false});
+      this.padIcon = false,
+      this.dismissOnSelect = true});
 
   @override
   String toString() {
@@ -79,7 +83,8 @@ class PopupContextItem extends PopupListItem {
         popup = null,
         select = null,
         rebuildItem = null,
-        padIcon = null;
+        padIcon = null,
+        dismissOnSelect = true;
 
   bool get isSeparator => name == null;
 
@@ -122,25 +127,22 @@ class PopupContextItem extends PopupListItem {
     children.addAll([
       Text(
         name,
-        style: TextStyle(
-          fontFamily: 'Roboto-Light',
-          fontSize: 13,
-          color: isHovered ? Colors.white : const Color(0xFF8C8C8C),
-        ),
+        style: isHovered
+            ? RiveTheme.of(context).textStyles.popupHovered
+            : RiveTheme.of(context).textStyles.popupText,
       ),
-      Expanded(child: Container()),
+      const Spacer(),
       if (shortcut != null)
         Text(
           ShortcutBindings.of(context)
                   ?.lookupKeysLabel(shortcut)
                   ?.toUpperCase() ??
               "",
-          style: const TextStyle(
-            fontFamily: 'Roboto-Light',
-            fontSize: 13,
-            color: Color(0xFF666666),
-          ),
+          style: RiveTheme.of(context).textStyles.popupShortcutText,
         ),
+      if (widgetBuilder != null) ...[
+        widgetBuilder(context),
+      ],
       if (popup != null && popup.isNotEmpty)
         ColorFiltered(
           colorFilter: ColorFilter.mode(

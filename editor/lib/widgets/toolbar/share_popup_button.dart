@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/theme.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/modal_popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
@@ -14,8 +15,9 @@ class SharePopupButton extends StatelessWidget {
     return RivePopupButton(
       showChevron: true,
       iconBuilder: (context, rive, isHovered) => TintedIcon(
-        color:
-            isHovered ? Colors.white : const Color(0xFF8C8C8C),
+        color: isHovered
+            ? RiveThemeData().colors.toolbarButtonHover
+            : RiveThemeData().colors.toolbarButton,
         icon: 'tool-export',
       ),
       width: 206,

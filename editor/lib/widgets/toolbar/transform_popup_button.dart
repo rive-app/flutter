@@ -102,6 +102,7 @@ class TransformPopupButton extends StatelessWidget {
             shortcut: ShortcutAction.freezeJointsToggle,
             isChecked: () => rive.stage.value.freezeJoints,
             select: () => rive.triggerAction(ShortcutAction.freezeJointsToggle),
+            dismissOnSelect: false,
           ),
           CheckPopupItem(
             'Freeze Images',
@@ -109,6 +110,7 @@ class TransformPopupButton extends StatelessWidget {
             shortcut: ShortcutAction.freezeImagesToggle,
             isChecked: () => rive.stage.value.freezeImages,
             select: () => rive.triggerAction(ShortcutAction.freezeImagesToggle),
+            dismissOnSelect: false,
           ),
         ];
       },

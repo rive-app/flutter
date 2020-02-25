@@ -14,6 +14,7 @@ class CheckPopupItem extends PopupContextItem {
     ValueNotifier notifier,
     Function() select,
     bool Function() isChecked,
+    bool dismissOnSelect = true,
   }) : super(
           name,
           iconBuilder: (context, isHovered) => isChecked()
@@ -28,5 +29,6 @@ class CheckPopupItem extends PopupContextItem {
           rebuildItem: notifier,
           shortcut: shortcut,
           select: select,
+          dismissOnSelect: dismissOnSelect,
         );
 }
