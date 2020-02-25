@@ -10,6 +10,7 @@ import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/dialog/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
@@ -25,52 +26,13 @@ import 'folder_view_widget.dart';
 import 'item_view.dart';
 import 'profile_view.dart';
 
-const kFileAspectRatio = kGridWidth / kFileHeight;
-const kFileHeight = 190;
-const kFolderAspectRatio = kGridWidth / kFolderHeight;
-const kFolderHeight = 60;
-const kGridHeaderHeight = 50.0;
-const kGridSpacing = 30.0;
-const kGridWidth = 187.0;
-
-class DropDownSortButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    const dropDownStyle = TextStyle(
-      color: ThemeUtils.textGrey,
-      fontSize: 14.0,
-    );
-    final fileBrowser = RiveContext.of(context).fileBrowser;
-    var options = fileBrowser.sortOptions.value;
-
-    return ValueListenableBuilder<RiveFileSortOption>(
-      valueListenable: fileBrowser.selectedSortOption,
-      builder: (context, sortOption, _) => DropdownButton<RiveFileSortOption>(
-        value: sortOption,
-        isDense: true,
-        underline: Container(),
-        icon: Icon(
-          Icons.keyboard_arrow_down,
-          color: ThemeUtils.iconColor,
-        ),
-        itemHeight: 50.0,
-        items: [
-          for (int i = 0; i < options.length; i++)
-            DropdownMenuItem(
-              value: options[i],
-              child: Text(
-                options[i].name,
-                style: dropDownStyle,
-              ),
-            ),
-        ],
-        onChanged: (val) {
-          fileBrowser.loadFileList(sortOption: val);
-        },
-      ),
-    );
-  }
-}
+const double kFileAspectRatio = kGridWidth / kFileHeight;
+const double kFileHeight = 190;
+const double kFolderAspectRatio = kGridWidth / kFolderHeight;
+const double kFolderHeight = 60;
+const double kGridHeaderHeight = 50;
+const double kGridSpacing = 30;
+const double kGridWidth = 187;
 
 class FilesView extends StatelessWidget {
   const FilesView({
@@ -79,7 +41,7 @@ class FilesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const kProfileWidth = 215.0;
+    const double kProfileWidth = 215;
     final _rive = RiveContext.of(context);
     return ChangeNotifierProvider.value(
       value: _rive.fileBrowser,
@@ -559,9 +521,12 @@ class TitleSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fileBrowser = RiveContext.of(context).fileBrowser;
+    var options = fileBrowser.sortOptions.value;
+    var theme = RiveTheme.of(context);
     return Container(
       height: height,
-      padding: EdgeInsets.only(left: 30.0),
+      padding: const EdgeInsets.only(left: 30.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -574,7 +539,21 @@ class TitleSection extends StatelessWidget {
           if (showDropdown)
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
-              child: DropDownSortButton(),
+              child: ValueListenableBuilder<RiveFileSortOption>(
+                valueListenable: fileBrowser.selectedSortOption,
+                builder: (context, sortOption, _) =>
+                    ComboBox<RiveFileSortOption>(
+                  popupWidth: 100,
+                  expanded: false,
+                  underline: false,
+                  valueColor: theme.colors.toolbarButton,
+                  options: options,
+                  value: sortOption,
+                  toLabel: (option) => option.name,
+                  chooseOption: (option) =>
+                      fileBrowser.loadFileList(sortOption: option),
+                ),
+              ),
             ),
         ],
       ),

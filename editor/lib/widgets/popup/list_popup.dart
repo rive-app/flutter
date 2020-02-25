@@ -88,9 +88,11 @@ class ListPopup<T extends PopupListItem> {
     _subPopup = ListPopup.show(
       context,
       itemBuilder: itemBuilder,
-      isChild: true,
+      showArrow: false,
       width: width,
       margin: margin,
+      alignment: Alignment.topRight,
+      offset: Offset(0, -margin),
       // double arrow = 10,
       items: items,
       background: background,
@@ -102,21 +104,23 @@ class ListPopup<T extends PopupListItem> {
   factory ListPopup.show(
     BuildContext context, {
     @required ListPopupItemBuilder<T> itemBuilder,
-    bool isChild = false,
     double width = 177,
     double margin = 10,
-    // double arrow = 10,
+    Offset offset = const Offset(0, 10),
+    bool showArrow = true,
+    Alignment alignment = Alignment.bottomLeft,
     List<T> items = const [],
     Color background = const Color.fromRGBO(17, 17, 17, 1),
   }) {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
-    final offset = renderBox.localToGlobal(Offset.zero);
+    final boxOffset = renderBox.localToGlobal(Offset.zero);
 
     var media = MediaQuery.of(context);
-    var top = !isChild ? offset.dy + size.height + margin : offset.dy - margin;
-    var left = isChild ? offset.dx + size.width : offset.dx;
+    var position = boxOffset + alignment.alongSize(size);
 
+    var top = position.dy + offset.dy;
+    var left = position.dx + offset.dx;
     var height = min(media.size.height - top,
         items.fold<double>(0.0, (v, item) => v + item.height) + margin * 2);
 
@@ -136,7 +140,7 @@ class ListPopup<T extends PopupListItem> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  !isChild
+                  showArrow
                       ? PathWidget(
                           path: _pathArrow,
                           nudge: const Offset(10, 0),

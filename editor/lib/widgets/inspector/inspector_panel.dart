@@ -5,6 +5,7 @@ import 'package:rive_editor/rive/inspectable.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/common/custom_expansion_tile.dart';
+import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_single.dart';
@@ -51,6 +52,7 @@ class InspectorPanel extends StatelessWidget {
                       ),
                     ),
                   ),
+                  KILLME_ComboExamples()
                 ],
               ),
             );
@@ -164,6 +166,133 @@ class InspectorDivider extends StatelessWidget {
         height: 1,
         color: Color(0xFF444444),
       ),
+    );
+  }
+}
+
+enum _FakeBlendModes {
+  none,
+  srcIn,
+  srcOut,
+  additive,
+  multiply,
+  blah,
+  blahBlahBlah
+}
+
+class KILLME_ComboExamples extends StatefulWidget {
+  static const busters = [
+    'Spengler',
+    'Zeddemore',
+    'Stantz',
+    'Venkman',
+  ];
+
+  @override
+  _KILLME_ComboExamplesState createState() => _KILLME_ComboExamplesState();
+}
+
+class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
+  String _buster;
+  _FakeBlendModes _blendMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _blendMode = _FakeBlendModes.none;
+    _buster = KILLME_ComboExamples.busters.first;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            // Padding around text label to align baseline of combo box. This
+            // might need to be handled differently in production to assure rows
+            // are of the same heights.
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                'Hero',
+                style: RiveTheme.of(context)
+                    .textStyles
+                    .basic
+                    .copyWith(color: Colors.white),
+              ),
+            ),
+            const SizedBox(
+              width: 40,
+            ),
+            ComboBox(
+              expanded: true,
+              options: KILLME_ComboExamples.busters,
+              value: _buster,
+              chooseOption: (String buster) {
+                setState(() {
+                  _buster = buster;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            // Padding around text label to align baseline of combo box. This
+            // might need to be handled differently in production to assure rows
+            // are of the same heights.
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                'Blend Mode',
+                style: RiveTheme.of(context)
+                    .textStyles
+                    .basic
+                    .copyWith(color: Colors.white),
+              ),
+            ),
+            const SizedBox(
+              width: 40,
+            ),
+            ComboBox(
+              expanded: true,
+              options: _FakeBlendModes.values,
+              chooseOption: (_FakeBlendModes blendMode) {
+                setState(() {
+                  _blendMode = blendMode;
+                });
+              },
+              toLabel: (_FakeBlendModes blendMode) {
+                switch (blendMode) {
+                  case _FakeBlendModes.none:
+                    return "None";
+                  case _FakeBlendModes.additive:
+                    return "Additive";
+                  case _FakeBlendModes.blah:
+                    return "Blah";
+                  case _FakeBlendModes.blahBlahBlah:
+                    return "Blah blah blah";
+                  case _FakeBlendModes.multiply:
+                    return "Multiply";
+                  case _FakeBlendModes.srcIn:
+                    return "Source In";
+                  case _FakeBlendModes.srcOut:
+                    return "Source Out";
+                }
+                return "???";
+              },
+              value: _blendMode,
+            )
+          ],
+        ),
+      ],
     );
   }
 }
