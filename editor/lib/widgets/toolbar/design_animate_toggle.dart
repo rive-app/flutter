@@ -96,7 +96,11 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
     return Center(
       child: Text(
         text,
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: Colors.white,
+          fontFamily: 'Roboto-Light',
+          fontSize: 13,
+        ),
       ),
     );
   }

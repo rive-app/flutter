@@ -11,7 +11,11 @@ class ViewScaleDropdown extends StatelessWidget {
           value: 1,
           child: Text(
             '100%',
-            style: TextStyle(color: ThemeUtils.textGreyLight),
+            style: TextStyle(
+              color: ThemeUtils.textGreyLight,
+              fontFamily: 'Roboto-Light',
+              fontSize: 13,
+            ),
           ),
         ),
       ],
