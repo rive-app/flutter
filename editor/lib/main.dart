@@ -125,7 +125,6 @@ class RiveEditorApp extends StatelessWidget {
                                 }
                               },
                             ),
-                            // autofocus: true,
                             focusNode: focusNode),
                       ),
                     ),
