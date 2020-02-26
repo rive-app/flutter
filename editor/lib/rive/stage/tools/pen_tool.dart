@@ -1,38 +1,24 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/user_path.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 
-class PenTool extends StageTool with MoveableTool {
+class PenTool extends StageTool
+    with MoveableTool, ClickableTool, DraggableTool {
   static final PenTool instance = PenTool._();
 
   PenTool._();
 
-  Vec2D _mousePosition = Vec2D();
+  Shape _shape;
 
   @override
   String get icon => 'tool-pen';
-
-  Path get path => UserPath()
-    ..name = 'Path'
-    ..x = 0
-    ..y = 0
-    ..rotation = 0
-    ..scaleX = 1
-    ..scaleY = 1;
-
-  Shape shape(Vec2D worldMouse) => Shape()
-    ..name = 'New Shape'
-    ..x = worldMouse[0]
-    ..y = worldMouse[1]
-    ..rotation = 0
-    ..scaleX = 1
-    ..scaleY = 1
-    ..opacity = 1;
 
   @override
   void endDrag() {
@@ -40,14 +26,19 @@ class PenTool extends StageTool with MoveableTool {
   }
 
   @override
+  bool activate(Stage stage) {
+    super.activate(stage);
+    return true;
+  }
+
+  @override
   void paint(Canvas canvas) {
-    var mp = Vec2D();
-    Vec2D.transformMat2D(mp, _mousePosition, stage.viewTransform);
-    canvas.drawCircle(
-        Offset(mp[0], mp[1]),
-        5,
-        Paint()
-          ..color = const Color(0xFFFFFFFF));
+    if (mousePosition != null) {
+      var mp = Vec2D();
+      Vec2D.transformMat2D(mp, mousePosition, stage.viewTransform);
+      canvas.drawCircle(
+          Offset(mp[0], mp[1]), 5, Paint()..color = const Color(0xFFFFFFFF));
+    }
   }
 
   @override
@@ -56,7 +47,45 @@ class PenTool extends StageTool with MoveableTool {
   }
 
   @override
-  void updateMove(Vec2D worldMouse) {
-    _mousePosition = worldMouse;
+  void onClick(Vec2D worldMouse) {
+    var file = stage.riveFile;
+    var artboard = file.artboards.first;
+
+    if (_shape == null) {
+      _shape = Shape()
+        ..name = 'New Shape'
+        ..x = worldMouse[0]
+        ..y = worldMouse[1]
+        ..rotation = 0
+        ..scaleX = 1
+        ..scaleY = 1
+        ..opacity = 1;
+
+      var path = UserPath()
+        ..name = 'Pen Rect'
+        ..x = 0
+        ..y = 0
+        ..rotation = 0
+        ..scaleX = 1
+        ..scaleY = 1
+        ..opacity = 1;
+
+      // TODO: remove hardcoded vertices
+      path.addVertex(0, 0);
+      path.addVertex(100, 100);
+      path.addVertex(100, 200);
+      path.addVertex(0, 200);
+      path.isClosed = true;
+
+      file.startAdd();
+      file.add(_shape);
+      file.add(path);
+
+      _shape.appendChild(path);
+      artboard.appendChild(_shape);
+
+      file.cleanDirt();
+      file.completeAdd();
+    }
   }
 }

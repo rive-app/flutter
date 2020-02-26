@@ -1,6 +1,7 @@
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/straight_vertex.dart';
 
 class UserPath extends Path {
   bool _isClosed = false;
@@ -8,7 +9,7 @@ class UserPath extends Path {
 
   @override
   bool get isClosed => _isClosed;
-  set isClosed(bool val){
+  set isClosed(bool val) {
     if (val != _isClosed) {
       _isClosed = val;
       // TODO: Mark dirty?
@@ -21,8 +22,12 @@ class UserPath extends Path {
   @override
   List<PathVertex> get vertices => _vertices;
 
-  void addVertex(PathVertex v) {
-    _vertices.add(v);
+  // TODO: support Cubic Vertices on Drag
+  void addVertex(double x, double y) {
+    var vertex = StraightVertex()
+      ..x = x
+      ..y = y;
+    _vertices.add(vertex);
     // TODO: mark as dirty
   }
 
@@ -35,5 +40,4 @@ class UserPath extends Path {
       throw ArgumentError.value(v, "Value not in the collection");
     }
   }
-
 }
