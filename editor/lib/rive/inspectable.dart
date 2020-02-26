@@ -40,12 +40,14 @@ class InspectorGroup extends InspectorBase {
 class InspectorItem extends InspectorBase {
   @override
   String name;
+  final bool linkable;
 
   final List<InspectorProperty> properties;
 
   InspectorItem({
     @required this.properties,
     @required this.name,
+    this.linkable = false,
   });
 }
 
