@@ -63,14 +63,14 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                 margin: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: theme.colors.buttonToggle,
+                  color: theme.colors.animateToggleButton,
                   gradient: LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     colors: [
                       for (final color in theme.gradients.magenta.colors) ...[
                         Color.lerp(
-                          theme.colors.buttonToggle,
+                          theme.colors.animateToggleButton,
                           color,
                           controller.value,
                         ),

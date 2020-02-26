@@ -42,7 +42,7 @@ class RiveColors {
   Color get cursoYellow => const Color(0xFFFFF1BE);
   Color get cursorBlue => const Color(0xFF57A5E0);
 
-  Color get buttonToggle => const Color(0xFF444444);
+  Color get animateToggleButton => const Color(0xFF444444);
   Color get inactiveText => const Color(0xFF888888);
   Color get activeText => const Color(0xFFFFFFFF);
 }
