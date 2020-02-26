@@ -3,31 +3,54 @@ import 'package:flutter/material.dart';
 /// Manage a set of popup windows and close them when you click anywhere on the
 /// screen outside the popups.
 class Popup {
-  static final List<OverlayEntry> _entries = [];
-  static void closeAll() {
-    for (final entry in _entries) {
-      entry.remove();
+  OverlayEntry _entry;
+  VoidCallback _onClose;
+
+  @mustCallSuper
+  bool close() {
+    if (_entry == null) {
+      return false;
     }
-    _entries.clear();
+    _popups.remove(this);
+    _entry.remove();
+    _onClose?.call();
+    _entry = null;
+    return true;
   }
 
-  static bool isOpen(OverlayEntry entry) => _entries.contains(entry);
+  static final List<Popup> _popups = [];
 
-  static bool remove(OverlayEntry entry) {
-    if (_entries.remove(entry)) {
-      entry.remove();
+  Popup(OverlayEntry entry, {VoidCallback onClose})
+      : _entry = entry,
+        _onClose = onClose;
+
+  static void closeAll() {
+    // Copy the list so we don't modify it while closing.
+    var close = _popups.toList(growable: false);
+    _popups.clear();
+
+    for (final popup in close) {
+      popup.close();
+    }
+  }
+
+  static bool isOpen(Popup entry) => _popups.contains(entry);
+
+  static bool remove(Popup popup) {
+    if (_popups.remove(popup)) {
+      popup.close();
       return true;
     }
     return false;
   }
 
-  static OverlayEntry show(BuildContext context,
-      {@required WidgetBuilder builder, double width = 177}) {
+  factory Popup.show(BuildContext context,
+      {@required WidgetBuilder builder, VoidCallback onClose}) {
     OverlayState overlay = Overlay.of(context);
 
-    if (_entries.isEmpty) {
+    if (_popups.isEmpty) {
       // place our catcher
-      var entry = OverlayEntry(
+      var popup = Popup(OverlayEntry(
         builder: (context) {
           return Positioned(
             left: 0,
@@ -42,14 +65,14 @@ class Popup {
             ),
           );
         },
-      );
-      _entries.add(entry);
-      overlay.insert(entry);
+      ));
+      _popups.add(popup);
+      overlay.insert(popup._entry);
     }
 
-    var entry = OverlayEntry(builder: builder);
-    _entries.add(entry);
-    overlay.insert(entry);
-    return entry;
+    var popup = Popup(OverlayEntry(builder: builder), onClose: onClose);
+    _popups.add(popup);
+    overlay.insert(popup._entry);
+    return popup;
   }
 }

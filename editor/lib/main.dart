@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
+import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
@@ -54,7 +55,7 @@ Future<void> main() async {
     RiveEditorApp(
       rive: rive,
       iconCache: iconCache,
-      focusNode: FocusNode(),
+      focusNode: FocusNode(canRequestFocus: true, skipTraversal: true),
     ),
   );
 }
@@ -76,8 +77,6 @@ class RiveEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final focusScope = FocusScope.of(context);
-
     return RiveTheme(
       child: ShortcutBindings(
         child: RiveContext(
@@ -98,6 +97,7 @@ class RiveEditorApp extends StatelessWidget {
                       child: Scaffold(
                         body: RawKeyboardListener(
                             onKey: (event) {
+                              final focusScope = FocusScope.of(context);
                               var primary = FocusManager.instance.primaryFocus;
                               rive.onKeyEvent(
                                   defaultKeyBinding,
@@ -125,7 +125,6 @@ class RiveEditorApp extends StatelessWidget {
                                 }
                               },
                             ),
-                            autofocus: true,
                             focusNode: focusNode),
                       ),
                     ),
