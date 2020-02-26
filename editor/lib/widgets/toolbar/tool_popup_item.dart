@@ -1,6 +1,5 @@
-import 'dart:ui';
-
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/theme.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:flutter/material.dart';
 
@@ -20,8 +19,10 @@ class ToolPopupItem extends PopupContextItem {
           icon: icon,
           rebuildItem: notifier,
           iconColorBuilder: (isHovered) => isSelected()
-              ? const Color(0xFF57A5E0)
-              : isHovered ? Colors.white : const Color(0xFF707070),
+              ? RiveThemeData().colors.popupIconSelected
+              : isHovered
+                  ? RiveThemeData().colors.popupIconHover
+                  : RiveThemeData().colors.popupIcon,
           shortcut: shortcut,
           select: select,
         );

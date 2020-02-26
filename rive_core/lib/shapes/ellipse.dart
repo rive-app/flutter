@@ -1,6 +1,7 @@
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/shapes/ellipse_base.dart';
+
 export 'package:rive_core/src/generated/shapes/ellipse_base.dart';
 
 const double circleConstant = 0.55;

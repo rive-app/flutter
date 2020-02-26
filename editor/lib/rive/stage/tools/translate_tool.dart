@@ -1,11 +1,12 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/vec2d.dart';
-import '../items/stage_artboard.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
 import 'stage_tool.dart';
 
-class TranslateTool extends StageTool {
+class TranslateTool extends StageTool with DraggableTool {
   @override
   void endDrag() {
     stage.riveFile.captureJournalEntry();
@@ -14,7 +15,7 @@ class TranslateTool extends StageTool {
   @override
   void updateDrag(Vec2D worldMouse) {
     for (final stageItem in selection) {
-      if (stageItem is StageArtboard) {
+      if (stageItem is StageItem) {
         stageItem.component.x += worldMouseMove[0];
         stageItem.component.y += worldMouseMove[1];
       }

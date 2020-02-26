@@ -17,6 +17,8 @@ import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:core/debounce.dart';
+import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
 import '../rive.dart';
 import 'aabb_tree.dart';
@@ -63,7 +65,7 @@ class Stage extends Debouncer {
 
   StageDelegate _delegate;
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
-  StageTool _activeDragTool;
+  StageTool _activeTool;
   StageTool get tool => toolNotifier.value;
   set tool(StageTool value) {
     if (toolNotifier.value == value) {
@@ -72,6 +74,9 @@ class Stage extends Debouncer {
     if (value.activate(this)) {
       toolNotifier.value = value;
     }
+    // Tools that are Moveable (e.g. PenTool) are activated as soon as 
+    // they are set.
+    _activeTool = value is MoveableTool ? value : null;
   }
 
   // Joints freezed flag
@@ -183,6 +188,11 @@ class Stage extends Debouncer {
 
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
+
+    if (_activeTool is MoveableTool) {
+      (_activeTool as MoveableTool).updateMove(_worldMouse);
+      markNeedsAdvance();
+    }
   }
 
   void mouseDown(int button, double x, double y) {
@@ -215,12 +225,18 @@ class Stage extends Debouncer {
         markNeedsAdvance();
         break;
       case 1:
-        if (_activeDragTool == null) {
-          _activeDragTool = tool;
-          _activeDragTool?.startDrag(
-              rive.selection.items.whereType<StageItem>(), _worldMouse);
-        } else {
-          _activeDragTool?.drag(_worldMouse);
+        // [tool] is set to its value in the tool setter.
+        if (tool is DraggableTool) {
+          // [_activeTool] is [null] before dragging operation starts.
+          if (_activeTool == null) {
+            _activeTool = tool;
+            (_activeTool as DraggableTool).startDrag(
+                rive.selection.items.whereType<StageItem>(), _worldMouse);
+          } else {
+            // [_activeTool] dragging operation has already started, so we 
+            // need to progress.
+            (_activeTool as DraggableTool).drag(_worldMouse);
+          }
         }
         break;
     }
@@ -235,9 +251,9 @@ class Stage extends Debouncer {
       // show a popup.
     }
 
-    if (_activeDragTool != null) {
-      _activeDragTool.endDrag();
-      _activeDragTool = null;
+    if (_activeTool is DraggableTool && _activeTool != null) {
+      (_activeTool as DraggableTool).endDrag();
+      _activeTool = null;
       rive.file.value.captureJournalEntry();
     } else if (!_mouseDownSelected) {
       rive.selection.clear();
@@ -409,7 +425,7 @@ class Stage extends Debouncer {
     canvas.restore();
 
     // Widget space
-    _activeDragTool?.paint(canvas);
+    _activeTool?.paint(canvas);
     canvas.restore();
   }
 

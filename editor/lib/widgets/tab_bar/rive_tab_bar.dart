@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -40,7 +41,8 @@ class _TabBarItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => select?.call(tab),
       child: Container(
-        padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+        padding:
+            const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
         child: Row(
           children: [
             Text(
@@ -48,11 +50,11 @@ class _TabBarItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 color: isSelected
-                    ? Colors.white
-                    : Color.fromRGBO(140, 140, 140, 1.0),
+                    ? RiveTheme.of(context).colors.tabTextSelected
+                    : RiveTheme.of(context).colors.tabText,
               ),
             ),
-            if (tab.closeable) SizedBox(width: 10),
+            if (tab.closeable) const SizedBox(width: 10),
             if (tab.closeable)
               GestureDetector(
                 onTap: close == null ? null : () => close(tab),
@@ -61,7 +63,8 @@ class _TabBarItem extends StatelessWidget {
           ],
         ),
         decoration: isSelected
-            ? TabDecoration(color: Color.fromRGBO(60, 60, 60, 1.0))
+            ? TabDecoration(
+                color: RiveTheme.of(context).colors.tabBackgroundSelected)
             : null,
       ),
     );
@@ -97,8 +100,8 @@ class _UserTabBarItem extends StatelessWidget {
           children: [
             TintedIcon(
                 color: isSelected
-                    ? const Color(0xFF323232)
-                    : const Color(0xFF8C8C8C),
+                    ? RiveTheme.of(context).colors.tabRiveTextSelected
+                    : RiveTheme.of(context).colors.tabRiveText,
                 icon: 'rive'),
             if (tab.closeable) const SizedBox(width: 10),
             if (tab.closeable)
@@ -109,8 +112,10 @@ class _UserTabBarItem extends StatelessWidget {
               )
           ],
         ),
-        decoration:
-            isSelected ? const TabDecoration(color: Color(0xFFF1F1F1)) : null,
+        decoration: isSelected
+            ? TabDecoration(
+                color: RiveTheme.of(context).colors.tabRiveBackgroundSelected)
+            : null,
       ),
     );
   }
