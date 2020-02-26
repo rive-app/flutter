@@ -2,6 +2,11 @@ import 'package:core/core.dart';
 
 import 'package:flutter/material.dart';
 
+/// Stateful widget that manages a list of [Core] elements.
+/// 
+/// The list of elements will register listeners for the property with value
+/// [propertyKey], and it'll have a [builder] function which, upon change of 
+/// the State value, will be rebuilt.
 class MultiCorePropertyBuilder<T> extends StatefulWidget {
   final List<Core> objects;
 
@@ -53,24 +58,30 @@ class _MultiCorePropertyBuilderState<T>
     }
   }
 
+  /// Bind the [_valueChanged] function to each of the objects that are part
+  /// of this MultiCorePropertyBuilder. Then extract the value by validating
+  /// it.
   void _bindListener() {
     var propertyKey = widget.propertyKey;
     for (final object in widget.objects) {
       object.addListener(propertyKey, _valueChanged);
     }
 
-    value = validateValue(widget.objects);
+    value = _validateValue();
   }
 
-  T validateValue(List<Core> objects) {
+  /// Validates the values by this list of objects. 
+  /// Either all the values coincide, or we return [null].
+  T _validateValue() {
+    var objects = widget.objects;
     if (objects.isEmpty) {
       return null;
     }
     var propertyKey = widget.propertyKey;
     var value = objects.first.getProperty<T>(propertyKey);
 
-    for (int i = 1; i < widget.objects.length; i++) {
-      if (value != widget.objects[i].getProperty<T>(propertyKey)) {
+    for (int i = 1; i < objects.length; i++) {
+      if (value != objects[i].getProperty<T>(propertyKey)) {
         return null;
       }
     }
@@ -91,7 +102,7 @@ class _MultiCorePropertyBuilderState<T>
 
   void _valueChanged(dynamic from, dynamic to) {
     setState(() {
-      value = validateValue(widget.objects);
+      value = _validateValue();
     });
   }
 }

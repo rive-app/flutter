@@ -17,14 +17,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/auth.dart';
+import 'package:rive_api/user.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
-import 'package:rive_api/api.dart';
-import 'package:rive_api/auth.dart';
-import 'package:rive_api/user.dart';
 
 import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
@@ -362,7 +362,8 @@ class Rive with RiveFileDelegate {
 
   bool select(SelectableItem item, {bool append}) {
     append ??= selectionMode.value == SelectionMode.multi;
-    return selection.select(item, append: append);
+    final success = selection.select(item, append: append);
+    return success;
   }
 
   void _changeFile(RiveFile nextFile) {

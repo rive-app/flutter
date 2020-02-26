@@ -5,6 +5,7 @@ import 'package:rive_api/user.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/inspectable.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/theme.dart';
 
@@ -207,4 +208,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
             boxes.last.bottom - boxes.first.top);
     updateBounds();
   }
+
+  @override
+  Set<InspectorBase> get inspectorItems => {};
 }

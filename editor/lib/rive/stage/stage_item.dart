@@ -9,6 +9,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
 
+import '../inspectable.dart';
 import 'stage.dart';
 
 extension StageItemComponent on Component {
@@ -17,6 +18,8 @@ extension StageItemComponent on Component {
 }
 
 abstract class StageItem<T> extends SelectableItem {
+  Set<InspectorBase> get inspectorItems;
+
   T _component;
   T get component => _component;
 
