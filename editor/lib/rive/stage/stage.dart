@@ -17,6 +17,7 @@ import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:core/debounce.dart';
+import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
@@ -76,6 +77,12 @@ class Stage extends Debouncer {
     }
     // Tools that are Moveable (e.g. PenTool) are activated as soon as 
     // they are set.
+    if (value is MoveableTool) {
+      _activeTool = value;
+      (_activeTool as MoveableTool).mousePosition = _worldMouse;
+    } else {
+      _activeTool = null;
+    } 
     _activeTool = value is MoveableTool ? value : null;
   }
 
@@ -200,6 +207,10 @@ class Stage extends Debouncer {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
+    if (_activeTool is ClickableTool) {
+      (_activeTool as ClickableTool).onClick(_worldMouse);
+    }
+
     if (_hoverItem != null) {
       _mouseDownSelected = true;
       rive.select(_hoverItem);
@@ -262,7 +273,11 @@ class Stage extends Debouncer {
 
   void mouseExit(int button, double x, double y) {
     _computeWorldMouse(x, y);
+    _worldMouse = null;
     hoverItem = null;
+    if (_activeTool is MoveableTool) {
+      (_activeTool as MoveableTool).onExit();
+    }
   }
 
   final Rive rive;
