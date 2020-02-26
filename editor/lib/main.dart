@@ -14,7 +14,6 @@ import 'package:rive_editor/widgets/toolbar/design_animate_toggle.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
-import 'package:rive_editor/widgets/toolbar/view_scale_dropdown.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'constants.dart';
@@ -30,6 +29,8 @@ import 'widgets/login.dart';
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
+import 'widgets/toolbar/connected_users.dart';
+import 'widgets/toolbar/design_animate_toggle.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -229,16 +230,9 @@ class Editor extends StatelessWidget {
               CreatePopupButton(),
               SharePopupButton(),
               const Spacer(),
+              ConnectedUsers(rive: rive),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: ConnectedUsers(rive: rive),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: ViewScaleDropdown(),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: DesignAnimateToggle(),
               ),
             ],
