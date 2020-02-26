@@ -170,6 +170,10 @@ class InspectorDivider extends StatelessWidget {
   }
 }
 
+/// luigi: All of the code below here is just for example purposes to show how
+/// to interface with the new combo-boxes. Feel free to pour napalm all over
+/// this at any point. Maybe I should move it to Notion or a ReadMe or
+/// something.
 enum _FakeBlendModes {
   none,
   srcIn,
@@ -193,14 +197,16 @@ class KILLME_ComboExamples extends StatefulWidget {
 }
 
 class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
-  String _buster;
+  String _buster1;
+  String _buster2;
   _FakeBlendModes _blendMode;
 
   @override
   void initState() {
     super.initState();
     _blendMode = _FakeBlendModes.none;
-    _buster = KILLME_ComboExamples.busters.first;
+    _buster1 = KILLME_ComboExamples.busters.first;
+    _buster2 = KILLME_ComboExamples.busters.last;
   }
 
   @override
@@ -229,11 +235,46 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
             ),
             ComboBox(
               expanded: true,
+              typeahead: true,
               options: KILLME_ComboExamples.busters,
-              value: _buster,
+              value: _buster1,
               chooseOption: (String buster) {
                 setState(() {
-                  _buster = buster;
+                  _buster1 = buster;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            // Padding around text label to align baseline of combo box. This
+            // might need to be handled differently in production to assure rows
+            // are of the same heights.
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                'Hero',
+                style: RiveTheme.of(context)
+                    .textStyles
+                    .basic
+                    .copyWith(color: Colors.white),
+              ),
+            ),
+            const SizedBox(
+              width: 40,
+            ),
+            ComboBox(
+              expanded: true,
+              options: KILLME_ComboExamples.busters,
+              value: _buster2,
+              chooseOption: (String buster) {
+                setState(() {
+                  _buster2 = buster;
                 });
               },
             ),

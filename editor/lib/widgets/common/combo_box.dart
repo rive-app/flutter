@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_editor/rive/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
@@ -30,7 +31,12 @@ class _ComboOption<T> extends PopupListItem {
   final SelectCallback select;
 }
 
-class ComboBox<T> extends StatelessWidget {
+/// A multi-choice popup input widget. Has styling options for all the various
+/// Rive use cases (chevron and underline are toggleable and text color is
+/// configurable).) It can also optionally provide type-ahead logic and act as
+/// text inputfield that filters the list of available options. Arrow keys can
+/// be used to select items in the list. Enter to select, esc to cancel/exit.
+class ComboBox<T> extends StatefulWidget {
   final T value;
   final List<T> options;
   final bool chevron;
@@ -40,6 +46,10 @@ class ComboBox<T> extends StatelessWidget {
   final double popupWidth;
   final ChooseOption<T> chooseOption;
   final OptionToLabel<T> toLabel;
+  final bool typeahead;
+
+  static const double _chevronWidth = 5;
+  static const double _horizontalPadding = 15;
 
   const ComboBox({
     Key key,
@@ -52,10 +62,22 @@ class ComboBox<T> extends StatelessWidget {
     this.popupWidth,
     this.chooseOption,
     this.toLabel,
+    this.typeahead = false,
   }) : super(key: key);
 
+  @override
+  _ComboBoxState createState() => _ComboBoxState<T>();
+}
+
+class _ComboBoxState<T> extends State<ComboBox<T>> {
+  ListPopup<_ComboOption<T>> _popup;
+  TextEditingController _controller;
+  FocusNode _focusNode;
+
+  bool get isOpen => _popup?.isOpen ?? false;
+
   Widget _chevron(Widget child, {RiveThemeData theme}) {
-    if (chevron) {
+    if (widget.chevron) {
       return Row(
         children: [
           _expand(child),
@@ -70,10 +92,11 @@ class ComboBox<T> extends StatelessWidget {
     return child;
   }
 
-  Widget _expand(Widget child) => expanded ? Expanded(child: child) : child;
+  Widget _expand(Widget child) =>
+      widget.expanded ? Expanded(child: child) : child;
 
   Widget _underline(Widget child, {RiveThemeData theme}) {
-    if (underline) {
+    if (widget.underline) {
       return Container(
         padding: const EdgeInsets.only(bottom: 3),
         child: child,
@@ -90,8 +113,111 @@ class ComboBox<T> extends StatelessWidget {
     return child;
   }
 
-  static const double chevronWidth = 5;
-  static const double horizontalPadding = 15;
+  Widget _typeahead(Widget child, {RiveThemeData theme}) {
+    return widget.typeahead && isOpen
+        ? RawKeyboardListener(
+            focusNode: FocusNode(),
+            onKey: (event) {
+              if (event is RawKeyDownEvent) {
+                // Seems like the TextField doesn't internally lose focus when
+                // esc is pressed, so we handle this manually here.
+                if (event.physicalKey == PhysicalKeyboardKey.escape) {
+                  _close();
+                } else if (event.physicalKey == PhysicalKeyboardKey.arrowDown) {
+                  _popup?.focusDown();
+                } else if (event.physicalKey == PhysicalKeyboardKey.arrowUp) {
+                  _popup?.focusUp();
+                }
+              }
+            },
+            child: TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              onChanged: _textInputChanged,
+              onSubmitted: (text) {
+                widget.chooseOption(_popup.focus.option);
+              },
+              style: theme.textStyles.basic.copyWith(color: widget.valueColor),
+              textAlignVertical: TextAlignVertical.top,
+              textAlign: TextAlign.left,
+              decoration: InputDecoration(
+                hintText: label,
+                hintStyle:
+                    theme.textStyles.basic.copyWith(color: widget.valueColor),
+                isDense: true,
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                border: InputBorder.none,
+                filled: false,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          )
+        : child;
+  }
+
+  void _opened() {
+    _focusNode?.removeListener(_focusChange);
+    if (widget.typeahead) {
+      _focusNode = FocusNode(canRequestFocus: true);
+      _focusNode.addListener(_focusChange);
+      _controller = TextEditingController(text: '');
+      _focusNode.requestFocus();
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode?.removeListener(_focusChange);
+    super.dispose();
+  }
+
+  void _close() {
+    _focusNode?.removeListener(_focusChange);
+    _focusNode = null;
+    _popup?.close();
+    setState(() {
+      _popup = null;
+    });
+  }
+
+  void _focusChange() {
+    if (!_focusNode.hasPrimaryFocus) {
+      _close();
+    } else {
+      _controller?.selection =
+          TextSelection(baseOffset: 0, extentOffset: _controller.text.length);
+    }
+  }
+
+  Future<void> _textInputChanged(String value) async {
+    var list = await _filter(value);
+    // Wrap our items in PopupListItem.
+
+    var values = list
+        .map((option) => _ComboOption(option, widget.chooseOption))
+        .toList(growable: false);
+    _popup.values.value = values;
+    if (values.isNotEmpty) {
+      _popup.focus = values.first;
+    }
+  }
+
+  Future<List<T>> _filter(String value) async {
+    return widget.options
+        .where((item) =>
+            itemLabel(item).contains(RegExp(value, caseSensitive: false)))
+        .toList(growable: false);
+  }
+
+  String itemLabel(T item) => item == null
+      ? ''
+      : widget.toLabel == null ? item.toString() : widget.toLabel(item);
+
+  String get label => itemLabel(widget.value);
 
   @override
   Widget build(BuildContext context) {
@@ -100,55 +226,63 @@ class ComboBox<T> extends StatelessWidget {
       GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapDown: (_) {
-          var width = popupWidth;
+          var width = widget.popupWidth;
           if (width == null) {
             RenderBox renderBox = context.findRenderObject() as RenderBox;
             width = renderBox.size.width;
             // add chevron dimensions
-            if (chevron) {
+            if (widget.chevron) {
               // chevron is 5 pixels wide
-              width += horizontalPadding + chevronWidth;
+              width += ComboBox._horizontalPadding + ComboBox._chevronWidth;
             }
           }
 
           // Wrap our items in PopupListItem.
-          var items = options
-              .map((option) => _ComboOption(option, chooseOption))
+          var items = widget.options
+              .map((option) => _ComboOption(option, widget.chooseOption))
               .toList(growable: false);
 
-          ListPopup<_ComboOption<T>>.show(
-            context,
-            offset: const Offset(-horizontalPadding, -40),
-            margin: 5,
-            showArrow: false,
-            items: items,
-            itemBuilder: (context, item, isHovered) => Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    left: horizontalPadding, right: horizontalPadding),
-                child: Text(
-                  toLabel == null
-                      ? item.option.toString()
-                      : toLabel(item.option),
-                  style: TextStyle(
-                    fontFamily: 'Roboto-Light',
-                    fontSize: 13,
-                    color: isHovered || value == item.option
-                        ? Colors.white
-                        : const Color(0xFF8C8C8C),
+          setState(() {
+            _popup = ListPopup<_ComboOption<T>>.show(
+              context,
+              handleKeyPresses: !widget.typeahead,
+              offset: Offset(-ComboBox._horizontalPadding,
+                  widget.typeahead ? 0 : widget.underline ? -34 : -30),
+              margin: 5,
+              showArrow: false,
+              items: items,
+              itemBuilder: (context, item, isHovered) => Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: ComboBox._horizontalPadding,
+                      right: ComboBox._horizontalPadding),
+                  child: Text(
+                    widget.toLabel == null
+                        ? item.option.toString()
+                        : widget.toLabel(item.option),
+                    style: theme.textStyles.basic.copyWith(
+                      color: isHovered || widget.value == item.option
+                          ? Colors.white
+                          : const Color(0xFF8C8C8C),
+                    ),
                   ),
                 ),
               ),
-            ),
-            width: width,
-          );
+              width: width,
+            );
+            _opened();
+          });
         },
         child: _underline(
           _chevron(
-            Text(
-              toLabel == null ? value.toString() : toLabel(value),
-              style: theme.textStyles.basic.copyWith(color: valueColor),
+            _typeahead(
+              Text(
+                label,
+                style:
+                    theme.textStyles.basic.copyWith(color: widget.valueColor),
+              ),
+              theme: theme,
             ),
             theme: theme,
           ),

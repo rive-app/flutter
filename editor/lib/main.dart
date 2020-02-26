@@ -55,7 +55,7 @@ Future<void> main() async {
     RiveEditorApp(
       rive: rive,
       iconCache: iconCache,
-      focusNode: FocusNode(),
+      focusNode: FocusNode(canRequestFocus: true, skipTraversal: true),
     ),
   );
 }
@@ -77,8 +77,6 @@ class RiveEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final focusScope = FocusScope.of(context);
-
     return RiveTheme(
       child: ShortcutBindings(
         child: RiveContext(
@@ -99,6 +97,7 @@ class RiveEditorApp extends StatelessWidget {
                       child: Scaffold(
                         body: RawKeyboardListener(
                             onKey: (event) {
+                              final focusScope = FocusScope.of(context);
                               var primary = FocusManager.instance.primaryFocus;
                               rive.onKeyEvent(
                                   defaultKeyBinding,
@@ -126,7 +125,7 @@ class RiveEditorApp extends StatelessWidget {
                                 }
                               },
                             ),
-                            autofocus: true,
+                            // autofocus: true,
                             focusNode: focusNode),
                       ),
                     ),
@@ -180,7 +179,6 @@ class Editor extends StatelessWidget {
                   ],
                 ),
               ),
-              const ComboBox(options: ['one', 'two'], value: 'one'),
               FlatButton(
                 child: const Text(
                   'Force Reconnect',
