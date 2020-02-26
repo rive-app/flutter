@@ -17,8 +17,8 @@ abstract class PopupListItem {
   /// Height for the item in the popup list.
   double get height;
 
-  /// Wether selection of the item will result in dismissing the .
-  bool get dismissOnSelect;
+  /// Whether selection of the item will result in dismissing the .
+  bool get dismissOnSelect => true;
 
   /// Child popup displayed when this list item is hovered over.
   List<PopupListItem> get popup;
