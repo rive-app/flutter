@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
-import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
