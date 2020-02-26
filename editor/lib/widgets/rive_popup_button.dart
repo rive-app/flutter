@@ -25,7 +25,7 @@ class RivePopupButton extends StatefulWidget {
   final RiveHoverWidgetBuilder iconBuilder;
   final bool showChevron;
   final PopupOpened<PopupContextItem> opened;
-  final double width;
+  final double _width;
 
   const RivePopupButton({
     Key key,
@@ -33,8 +33,9 @@ class RivePopupButton extends StatefulWidget {
     this.iconBuilder,
     this.showChevron = true,
     this.opened,
-    this.width = 177,
-  }) : super(key: key);
+    double width,
+  })  : _width = width ?? 177,
+        super(key: key);
 
   @override
   _RivePopupButtonState createState() => _RivePopupButtonState();
@@ -48,18 +49,10 @@ class _RivePopupButtonState extends State<RivePopupButton> {
       builder: (context, rive) => PopupButton<PopupContextItem>(
         opened: widget.opened,
         items: widget.contextItems,
-        width: widget.width,
+        width: widget._width,
         builder: (context) => MouseRegion(
-          onEnter: (_) {
-            setState(() {
-              _isHovered = true;
-            });
-          },
-          onExit: (_) {
-            setState(() {
-              _isHovered = false;
-            });
-          },
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
           child: Container(
             padding:
                 EdgeInsets.only(left: 10, right: widget.showChevron ? 5 : 10),

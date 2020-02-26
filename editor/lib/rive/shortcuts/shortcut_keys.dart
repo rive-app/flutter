@@ -76,6 +76,7 @@ Map<ShortcutKey, List<PhysicalKeyboardKey>> keyToPhysical = {
   ShortcutKey.left: [PhysicalKeyboardKey.arrowLeft],
   ShortcutKey.up: [PhysicalKeyboardKey.arrowUp],
   ShortcutKey.down: [PhysicalKeyboardKey.arrowDown],
+  ShortcutKey.semiColon: [PhysicalKeyboardKey.semicolon],
   ShortcutKey.enter: [
     PhysicalKeyboardKey.enter,
     PhysicalKeyboardKey.numpadEnter
@@ -139,6 +140,7 @@ Map<ShortcutKey, String> _keyNames = {
   ShortcutKey.left: 'left',
   ShortcutKey.up: 'up',
   ShortcutKey.down: 'down',
+  ShortcutKey.semiColon: ';',
 };
 
 String keyname(ShortcutKey key) {
@@ -217,4 +219,5 @@ enum ShortcutKey {
   left,
   up,
   down,
+  semiColon,
 }

@@ -14,6 +14,8 @@ import 'package:rive_editor/widgets/toolbar/design_animate_toggle.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
+import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
+
 import 'package:window_utils/window_utils.dart';
 
 import 'constants.dart';
@@ -231,6 +233,7 @@ class Editor extends StatelessWidget {
               SharePopupButton(),
               const Spacer(),
               ConnectedUsers(rive: rive),
+              VisibilityPopupButton(),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: DesignAnimateToggle(),

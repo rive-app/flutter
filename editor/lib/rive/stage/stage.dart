@@ -74,7 +74,7 @@ class Stage extends Debouncer {
     if (value.activate(this)) {
       toolNotifier.value = value;
     }
-    // Tools that are Moveable (e.g. PenTool) are activated as soon as 
+    // Tools that are Moveable (e.g. PenTool) are activated as soon as
     // they are set.
     _activeTool = value is MoveableTool ? value : null;
   }
@@ -104,6 +104,89 @@ class Stage extends Debouncer {
   set axisCheck(AxisCheckState value) {
     if (axisCheckNotifier.value != value) {
       axisCheckNotifier.value = value;
+    }
+  }
+
+  // Zoom level notifier
+  final ValueNotifier<int> zoomLevelNotifier = ValueNotifier<int>(100);
+  int get zoomLevel => zoomLevelNotifier.value;
+  set zoomLevel(int value) {
+    if (zoomLevelNotifier.value != value) {
+      zoomLevelNotifier.value = value;
+      print('Setting zoom level to $value');
+    }
+  }
+
+  // Resolution notifier
+  final ValueNotifier<int> resolutionNotifier = ValueNotifier<int>(100);
+  int get resolution => resolutionNotifier.value;
+  set resolution(int value) {
+    if (resolutionNotifier.value != value) {
+      resolutionNotifier.value = value;
+      print('Setting resolution to $value');
+    }
+  }
+
+  // Show images flag
+  final ValueNotifier<bool> showImagesNotifier = ValueNotifier<bool>(false);
+  bool get showImages => showImagesNotifier.value;
+  set showImages(bool value) {
+    if (showImagesNotifier.value != value) {
+      showImagesNotifier.value = value;
+    }
+  }
+
+  // Show image contour flag
+  final ValueNotifier<bool> showContourNotifier = ValueNotifier<bool>(false);
+  bool get showContour => showContourNotifier.value;
+  set showContour(bool value) {
+    if (showContourNotifier.value != value) {
+      showContourNotifier.value = value;
+    }
+  }
+
+  // Show bones flag
+  final ValueNotifier<bool> showBonesNotifier = ValueNotifier<bool>(false);
+  bool get showBones => showBonesNotifier.value;
+  set showBones(bool value) {
+    if (showBonesNotifier.value != value) {
+      showBonesNotifier.value = value;
+    }
+  }
+
+  // Show effects flag
+  final ValueNotifier<bool> showEffectsNotifier = ValueNotifier<bool>(false);
+  bool get showEffects => showEffectsNotifier.value;
+  set showEffects(bool value) {
+    if (showEffectsNotifier.value != value) {
+      showEffectsNotifier.value = value;
+    }
+  }
+
+  // Show rulers flag
+  final ValueNotifier<bool> showRulersNotifier = ValueNotifier<bool>(false);
+  bool get showRulers => showRulersNotifier.value;
+  set showRulers(bool value) {
+    if (showRulersNotifier.value != value) {
+      showRulersNotifier.value = value;
+    }
+  }
+
+  // Show grid flag
+  final ValueNotifier<bool> showGridNotifier = ValueNotifier<bool>(false);
+  bool get showGrid => showGridNotifier.value;
+  set showGrid(bool value) {
+    if (showGridNotifier.value != value) {
+      showGridNotifier.value = value;
+    }
+  }
+
+  // Show Axis flag
+  final ValueNotifier<bool> showAxisNotifier = ValueNotifier<bool>(false);
+  bool get showAxis => showAxisNotifier.value;
+  set showAxis(bool value) {
+    if (showAxisNotifier.value != value) {
+      showAxisNotifier.value = value;
     }
   }
 
@@ -172,8 +255,8 @@ class Stage extends Debouncer {
 
     rive.file.value.cursorMoved(_worldMouse[0], _worldMouse[1]);
 
-    AABB viewAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
-        _worldMouse[0] + 1, _worldMouse[1] + 1);
+    AABB viewAABB = AABB.fromValues(
+        _worldMouse[0], _worldMouse[1], _worldMouse[0] + 1, _worldMouse[1] + 1);
     StageItem hover;
     visTree.query(viewAABB, (int proxyId, StageItem item) {
       if (item.isSelectable) {
@@ -233,7 +316,7 @@ class Stage extends Debouncer {
             (_activeTool as DraggableTool).startDrag(
                 rive.selection.items.whereType<StageItem>(), _worldMouse);
           } else {
-            // [_activeTool] dragging operation has already started, so we 
+            // [_activeTool] dragging operation has already started, so we
             // need to progress.
             (_activeTool as DraggableTool).drag(_worldMouse);
           }
