@@ -8,10 +8,13 @@ import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
+import 'package:rive_editor/widgets/toolbar/design_animate_toggle.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
+import 'package:rive_editor/widgets/toolbar/view_scale_dropdown.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'constants.dart';
@@ -27,9 +30,6 @@ import 'widgets/login.dart';
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
-import 'widgets/toolbar/connected_users.dart';
-import 'widgets/toolbar/design_animate_toggle.dart';
-import 'widgets/toolbar/scale_dropdown.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

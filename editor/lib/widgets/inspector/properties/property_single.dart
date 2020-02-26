@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 
-class PropertyDual extends StatelessWidget {
+class PropertySingle extends StatelessWidget {
   final List<Core> objects;
-  final int propertyKeyA;
-  final int propertyKeyB;
+  final int propertyKey;
   final String name;
 
-  const PropertyDual({
+  const PropertySingle({
     @required this.objects,
-    @required this.propertyKeyA,
-    @required this.propertyKeyB,
+    @required this.propertyKey,
     this.name,
     Key key,
   }) : super(key: key);
@@ -19,13 +17,13 @@ class PropertyDual extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(left: 20.0),
+        padding: const EdgeInsets.only(left: 20.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
           Text(
             name,
-            style: const TextStyle(color: Color(0xFF8C8C8C)),
+            style: const TextStyle(color:Color(0xFF8C8C8C)),
           ),
           const SizedBox(
             width: 10,
@@ -33,16 +31,7 @@ class PropertyDual extends StatelessWidget {
           Expanded(
             child: InspectorTextField(
               objects: objects,
-              propertyKey: propertyKeyA,
-            ),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-          Expanded(
-            child: InspectorTextField(
-              objects: objects,
-              propertyKey: propertyKeyB,
+              propertyKey: propertyKey,
             ),
           ),
         ],
