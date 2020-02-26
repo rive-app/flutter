@@ -10,6 +10,7 @@ import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_single.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class InspectorPanel extends StatelessWidget {
   const InspectorPanel({
@@ -64,17 +65,46 @@ class InspectorPanel extends StatelessWidget {
 
           Set<InspectorBase> inspectorItems = {};
           for (final item in stageItems) {
+            // Todo: ensure they do not overlap
             var inspItems = item.inspectorItems;
             inspectorItems.addAll(inspItems);
           }
 
           var listItems = <Widget>[];
+          listItems.add(Padding(
+            padding:
+                const EdgeInsets.only(top: 13, bottom: 11, left: 10, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                for (var i = 1; i <= 8; i++)
+                  Flexible(
+                    flex: 1,
+                    child: Container(
+                      child: Transform.scale(
+                        scale: 0.5,
+                        child: TintedIcon(
+                          color: RiveTheme.of(context)
+                              .textStyles
+                              .inspectorPropertyLabel
+                              .color,
+                          icon: 'align$i',
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ));
+          listItems.add(InspectorDivider());
+          listItems.add(const SizedBox(height: 14));
           for (final inspectorItem in inspectorItems) {
             if (inspectorItem is InspectorGroup) {
               if (inspectorItem.name == null) {
                 for (final child in inspectorItem.children) {
                   listItems.add(buildItem(child, componentItems));
                 }
+                listItems.add(const SizedBox(height: 14));
                 listItems.add(InspectorDivider());
               } else {
                 listItems.add(CustomExpansionTile(
@@ -89,6 +119,7 @@ class InspectorPanel extends StatelessWidget {
                     ]
                   ],
                 ));
+                listItems.add(const SizedBox(height: 14));
                 listItems.add(InspectorDivider());
               }
             } else if (inspectorItem is InspectorItem) {
@@ -105,11 +136,13 @@ class InspectorPanel extends StatelessWidget {
   Widget buildItem(InspectorItem item, List<Component> selectedComponents) {
     if (item.properties.length == 2) {
       return PropertyDual(
-        name: item.name,
-        objects: selectedComponents,
-        propertyKeyA: item.properties[0].key,
-        propertyKeyB: item.properties[1].key,
-      );
+          name: item.name,
+          objects: selectedComponents,
+          propertyKeyA: item.properties[0].key,
+          propertyKeyB: item.properties[1].key,
+          labelA: item.properties[0].label,
+          labelB: item.properties[1].label,
+          linkable: item.linkable);
     }
     if (item.properties.length == 1) {
       return PropertySingle(
@@ -128,6 +161,7 @@ class InspectorDivider extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(left: 20),
       child: const Divider(
+        height: 1,
         color: Color(0xFF444444),
       ),
     );

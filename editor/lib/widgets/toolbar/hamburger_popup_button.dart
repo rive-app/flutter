@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/common/rive_text_form_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/modal_popup.dart';
@@ -23,27 +24,10 @@ class HamburgerPopupButton extends StatelessWidget {
             widgetBuilder: (context) => Container(
                   width: 125,
                   child: Center(
-                    child: TextFormField(
+                    child: RiveTextFormField(
                       initialValue: RiveContext.of(context).file.value.name,
-                      textAlignVertical: TextAlignVertical.top,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: const EdgeInsets.fromLTRB(0, 6, 0, 6),
-                        enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                                width: 2,
-                                color: RiveTheme.of(context).colors.separator)),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                                width: 2,
-                                color: RiveTheme.of(context)
-                                    .colors
-                                    .separatorActive)),
-                        hintText: 'New File Name',
-                        hintStyle:
-                            RiveTheme.of(context).textStyles.popupShortcutText,
-                      ),
-                      style: RiveTheme.of(context).textStyles.popupShortcutText,
+                      hintText: 'File Name',
+                      edgeInsets: const EdgeInsets.symmetric(vertical: 6),
                     ),
                   ),
                 ),
