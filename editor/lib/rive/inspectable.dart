@@ -40,6 +40,8 @@ class InspectorGroup extends InspectorBase {
 class InspectorItem extends InspectorBase {
   @override
   String name;
+
+  /// Allow editing the List<InspectorProperty> together in a single operation
   final bool linkable;
 
   final List<InspectorProperty> properties;
