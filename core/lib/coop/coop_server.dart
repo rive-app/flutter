@@ -57,6 +57,12 @@ abstract class CoopServer {
         int version, ownerId, fileId, clientId;
         String token;
         try {
+          if (segments[0].length < 2) {
+            log.info('Invalid protocol version ${_segmentsToString(segments)}');
+            request.response.statusCode = 422;
+            await request.response.close();
+            return;
+          }
           // kill the v in v2
           version = int.parse(segments[0].substring(1));
           ownerId = int.parse(segments[1]);
