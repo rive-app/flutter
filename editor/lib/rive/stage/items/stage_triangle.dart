@@ -22,24 +22,24 @@ class StageTriangle extends StageItem<Triangle> with BoundsDelegate {
         InspectorGroup(
           name: null,
           children: [
-            InspectorItem(name: 'Pos', properties: [
-              InspectorProperty(key: NodeBase.xPropertyKey, label: 'x'),
-              InspectorProperty(key: NodeBase.yPropertyKey, label: 'y'),
+            InspectorItem(name: 'Position', properties: [
+              InspectorProperty(key: NodeBase.xPropertyKey, label: 'X'),
+              InspectorProperty(key: NodeBase.yPropertyKey, label: 'Y'),
             ]),
             InspectorItem(name: 'Scale', properties: [
-              InspectorProperty(key: NodeBase.scaleXPropertyKey, label: 'x'),
-              InspectorProperty(key: NodeBase.scaleYPropertyKey, label: 'y'),
+              InspectorProperty(key: NodeBase.scaleXPropertyKey, label: 'X'),
+              InspectorProperty(key: NodeBase.scaleYPropertyKey, label: 'Y'),
             ]),
-            InspectorItem(name: 'Rotation', properties: [
+            InspectorItem(name: 'Rotate', properties: [
               InspectorProperty(
                 key: NodeBase.rotationPropertyKey,
               ),
             ]),
             InspectorItem(name: 'Size', properties: [
               InspectorProperty(
-                  key: ParametricPathBase.widthPropertyKey, label: 'width'),
+                  key: ParametricPathBase.widthPropertyKey, label: 'Width'),
               InspectorProperty(
-                  key: ParametricPathBase.heightPropertyKey, label: 'height'),
+                  key: ParametricPathBase.heightPropertyKey, label: 'Height'),
             ]),
           ],
         ),

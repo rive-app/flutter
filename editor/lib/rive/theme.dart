@@ -60,6 +60,10 @@ class RiveColors {
   Color get cursorRed => const Color(0xFFFF929F);
   Color get cursoYellow => const Color(0xFFFFF1BE);
   Color get cursorBlue => const Color(0xFF57A5E0);
+
+  Color get animateToggleButton => const Color(0xFF444444);
+  Color get inactiveText => const Color(0xFF888888);
+  Color get activeText => const Color(0xFFFFFFFF);
 }
 
 /// TextStyles used in the Rive Theme
@@ -72,12 +76,15 @@ class TextStyles {
       const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
 
   // Inspector
-  TextStyle get inspectorPropertyLabel =>
-      const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
-  TextStyle get inspectorPropertySubLabel =>
-      const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 11);
-  TextStyle get inspectorPropertyValue =>
-      const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
+  TextStyle get inspectorPropertyLabel => const TextStyle(
+      fontFamily: 'Roboto-Light', color: Color(0xFF8C8C8C), fontSize: 13);
+
+  TextStyle get inspectorPropertySubLabel => const TextStyle(
+      fontFamily: 'Roboto-Light', color: Color(0xFF8C8C8C), fontSize: 11);
+
+  TextStyle get inspectorPropertyValue => const TextStyle(
+      fontFamily: 'Roboto-Light', color: Color(0xFFE3E3E3), fontSize: 12.5);
+
   TextStyle get inspectorSectionHeader =>
       const TextStyle(fontFamily: 'Roboto-Medium', fontSize: 11);
   TextStyle get inspectorButton =>

@@ -40,6 +40,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
   @override
   Widget build(BuildContext context) {
     var rive = RiveContext.of(context);
+    final theme = RiveTheme.of(context);
     return Container(
       width: kAnimateToggleWidth,
       child: LayoutBuilder(
@@ -62,7 +63,20 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                 margin: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: const Color(0xFF444444),
+                  color: theme.colors.animateToggleButton,
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      for (final color in theme.gradients.magenta.colors) ...[
+                        Color.lerp(
+                          theme.colors.animateToggleButton,
+                          color,
+                          controller.value,
+                        ),
+                      ]
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -73,7 +87,18 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () => _setAnimate(false, rive.isAnimateMode),
-                child: _buildText('Design'),
+                child: Center(
+                  child: Text(
+                    'Design',
+                    style: TextStyle(
+                      color: controller.value <= 0.5
+                          ? theme.colors.activeText
+                          : theme.colors.inactiveText,
+                      fontFamily: 'Roboto-Light',
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
               ),
             ),
             Positioned(
@@ -83,20 +108,22 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () => _setAnimate(true, rive.isAnimateMode),
-                child: _buildText('Animate'),
+                child: Center(
+                  child: Text(
+                    'Animate',
+                    style: TextStyle(
+                      color: controller.value >= 0.5
+                          ? theme.colors.activeText
+                          : theme.colors.inactiveText,
+                      fontFamily: 'Roboto-Light',
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildText(String text) {
-    return Center(
-      child: Text(
-        text,
-        style: TextStyle(color: Colors.white),
       ),
     );
   }
