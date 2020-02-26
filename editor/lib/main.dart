@@ -14,7 +14,6 @@ import 'package:rive_editor/widgets/toolbar/design_animate_toggle.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
-import 'package:rive_editor/widgets/toolbar/view_scale_dropdown.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'constants.dart';
