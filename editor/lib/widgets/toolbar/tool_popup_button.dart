@@ -20,10 +20,14 @@ typedef MakeToolPopupItems = List<PopupContextItem> Function(Rive);
 class ToolPopupButton extends StatefulWidget {
   final MakeToolPopupItems makeItems;
   final String defaultIcon;
+  final double width;
+  final Widget Function(BuildContext, Rive, bool) iconBuilder;
 
   const ToolPopupButton({
     @required this.makeItems,
-    @required this.defaultIcon,
+    this.defaultIcon,
+    this.iconBuilder,
+    this.width,
     Key key,
   }) : super(key: key);
 
@@ -52,24 +56,26 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
         }
         var items = widget.makeItems(rive);
         return RivePopupButton(
+          width: widget.width,
           opened: (popup) {
             _popup = popup;
           },
           contextItems: items,
-          iconBuilder: (context, rive, isHovered) {
-            bool hasActiveIcon = PopupContextItem.hasIcon(tool.icon, items);
+          iconBuilder: widget.iconBuilder ??
+              (context, rive, isHovered) {
+                bool hasActiveIcon = PopupContextItem.hasIcon(tool.icon, items);
 
-            return TintedIcon(
-              color: hasActiveIcon
-                  ? RiveTheme.of(context).colors.toolbarButtonSelected
-                  : isHovered
-                      ? RiveTheme.of(context).colors.toolbarButtonHover
-                      : RiveTheme.of(context).colors.toolbarButton,
-              icon: PopupContextItem.hasIcon(tool.icon, items)
-                  ? tool.icon
-                  : widget.defaultIcon,
-            );
-          },
+                return TintedIcon(
+                  color: hasActiveIcon
+                      ? RiveTheme.of(context).colors.toolbarButtonSelected
+                      : isHovered
+                          ? RiveTheme.of(context).colors.toolbarButtonHover
+                          : RiveTheme.of(context).colors.toolbarButton,
+                  icon: PopupContextItem.hasIcon(tool.icon, items)
+                      ? tool.icon
+                      : widget.defaultIcon,
+                );
+              },
         );
       },
     );

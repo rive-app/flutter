@@ -12,6 +12,7 @@ import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
+import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
 import 'package:window_utils/window_utils.dart';
 
 import 'constants.dart';
@@ -29,7 +30,6 @@ import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
 import 'widgets/toolbar/connected_users.dart';
 import 'widgets/toolbar/design_animate_toggle.dart';
-import 'widgets/toolbar/scale_dropdown.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -235,7 +235,7 @@ class Editor extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: ViewScaleDropdown(),
+                child: VisibilityPopupButton(),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),

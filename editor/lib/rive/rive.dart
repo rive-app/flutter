@@ -288,6 +288,12 @@ class Rive with RiveFileDelegate {
       case ShortcutAction.freezeJointsToggle:
         stage?.value?.freezeJoints = !stage.value.freezeJoints;
         break;
+      case ShortcutAction.resetRulers:
+        print('RESET RULERS HERE');
+        break;
+      case ShortcutAction.toggleRulers:
+        stage?.value?.showRulers = !stage.value.showRulers;
+        break;
       default:
         break;
     }

@@ -211,5 +211,18 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.j,
       ],
     ),
+    Shortcut(
+      ShortcutAction.resetRulers,
+      [
+        ShortcutKey.shift,
+        ShortcutKey.semiColon,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.toggleRulers,
+      [
+        ShortcutKey.semiColon,
+      ],
+    ),
   ],
 );
