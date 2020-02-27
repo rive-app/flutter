@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 const kAnimateToggleWidth = 197.0;
@@ -12,10 +13,12 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
     with SingleTickerProviderStateMixin {
   AnimationController controller;
   Animation<double> animation;
+  List<Animation<Color>> gradientColors;
 
   @override
   void initState() {
     const _duration = Duration(milliseconds: 300);
+    final theme = RiveThemeData();
     controller = AnimationController(
       vsync: this,
       duration: _duration,
@@ -30,6 +33,13 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
       end: kAnimateToggleWidth / 2,
     ).animate(curve)
       ..addListener(_update);
+    gradientColors = [];
+    for (final color in theme.gradients.magenta.colors) {
+      gradientColors.add(ColorTween(
+        begin: theme.colors.animateToggleButton,
+        end: color,
+      ).animate(curve));
+    }
     super.initState();
   }
 
@@ -68,12 +78,8 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     colors: [
-                      for (final color in theme.gradients.magenta.colors) ...[
-                        Color.lerp(
-                          theme.colors.animateToggleButton,
-                          color,
-                          controller.value,
-                        ),
+                      for (final color in gradientColors) ...[
+                        color.value,
                       ]
                     ],
                   ),
