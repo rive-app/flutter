@@ -1,3 +1,4 @@
+import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
@@ -12,7 +13,7 @@ class UserPath extends Path {
   set isClosed(bool val) {
     if (val != _isClosed) {
       _isClosed = val;
-      // TODO: Mark dirty?
+      addDirt(ComponentDirt.path);
     }
   }
 
@@ -28,14 +29,14 @@ class UserPath extends Path {
       ..x = x
       ..y = y;
     _vertices.add(vertex);
-    // TODO: mark as dirty
+    addDirt(ComponentDirt.path);
   }
 
   void removeVertex(PathVertex v) {
     int removeIdx = _vertices.indexOf(v);
     if (removeIdx != -1) {
       _vertices.removeAt(removeIdx);
-      // TODO: mark dirty.
+      addDirt(ComponentDirt.path);
     } else {
       throw ArgumentError.value(v, "Value not in the collection");
     }

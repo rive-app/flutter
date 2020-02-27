@@ -22,10 +22,10 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   PenTool._();
 
   // Open path used to create the shape
-  UserPath _openPath;
+  UserPath _path;
 
   // Shape in which the open payth exists
-  Shape _selectedShape;
+  Shape _shape;
 
   @override
   String get icon => 'tool-pen';
@@ -59,54 +59,59 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   @override
   void onClick(Vec2D worldMouse) {
     final rive = stage.rive;
-    _openPath = _createPath(worldMouse, rive, _openPath);
+    _modifyPath(worldMouse, rive);
+
+    for (final v in _path.vertices) {
+      print('PenTOOL V: $v');
+    }
   }
 
-  UserPath _createPath(Vec2D worldMouse, Rive rive, UserPath path) {
-    var activePath = path;
-    // Get the selected shape for the editor
-    final shape = _selectShape(rive, worldMouse);
+  void _modifyPath(Vec2D vertexPos, Rive rive) {
+    // Get the shape in which to the path lives
+    _selectShape(rive, vertexPos);
     // Determine the coordinates to create a vertex based on the shape's
     // position in world space
-    final localCoord = _coordinateMapper(shape, worldMouse);
-    // Create a new path is one isn't already open
-    if (activePath == null) {
-      // Create a new activePath
-      activePath = UserPath()
-        ..name = 'My crazy activePath'
+    final localCoord = _coordinateMapper(_shape, vertexPos);
+    // Create a new path if one isn't already being built
+    if (_path == null) {
+      _path = UserPath()
+        ..name = 'My crazy _openPath'
         ..x = localCoord[0]
         ..y = localCoord[1]
         ..rotation = 0
         ..scaleX = 1
         ..scaleY = 1
         ..opacity = 1;
-      shape.appendChild(activePath);
-      rive.file.value.add(activePath);
-      _addToFile(rive.file.value, activePath);
+      // Add the path to the file and the shape
+      _addToFile(rive.file.value, _path);
+      _shape.appendChild(_path);
     }
-    activePath.addVertex(localCoord[0], localCoord[1]);
-    return activePath;
+    // Create the vertex and add it to the path
+    _path.addVertex(localCoord[0], localCoord[1]);
+    // Mark the shape as dirty so the stage redraws
+    _shape.pathChanged(_path);
   }
 
   /// Returns the first selected shape from the current set of
   /// selected items in the editor. Returns null if no shape is
   /// selected.
-  Shape _selectShape(Rive rive, Vec2D coord) {
-    if (_selectedShape != null) {
-      return _selectedShape;
+  void _selectShape(Rive rive, Vec2D coord) {
+    // If there's already a selected shape, do nothing
+    if (_shape != null) {
+      return;
     }
+    // Otherwise, check if there's a selected shape in the stage
     final firstSelectedStageShape = rive.selection.items.firstWhere(
       (i) => i is StageShape,
       orElse: () => null,
     );
     if (firstSelectedStageShape != null &&
         firstSelectedStageShape is StageShape) {
-      final shape = firstSelectedStageShape.component;
-      return shape;
+      _shape = firstSelectedStageShape.component;
+      return;
     }
-    // No selected shape, create a new one, add it to the file
-    // and select it.
-    final shape = Shape()
+    // No selected shape, create a new one and add it to the file
+    _shape = Shape()
       ..name = 'New Shape'
       ..x = coord[0]
       ..y = coord[1]
@@ -114,15 +119,10 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
       ..scaleX = 1
       ..scaleY = 1
       ..opacity = 1;
-    // Add shape to the file; it's stage equivalent is also created
-    _addToFile(rive.file.value, shape);
+    // Add shape to the file; its stage equivalent is also created
+    _addToFile(rive.file.value, _shape);
     // Add shape to the artboard
-    _activeArtBoard(rive.file.value).appendChild(shape);
-    // Select the stage shape
-    // rive.select(shape.stageItem);
-    // Save the new shape
-    _selectedShape = shape;
-    return shape;
+    _activeArtBoard(rive.file.value).appendChild(_shape);
   }
 
   void _addToFile(RiveFile file, Node node) {
@@ -133,9 +133,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   }
 
   // TODO: need to track the active artboard
-  Artboard _activeArtBoard(RiveFile file) {
-    return file.artboards.first;
-  }
+  Artboard _activeArtBoard(RiveFile file) => file.artboards.first;
 
   /// TODO: needs to take into account rotation, scale, etc; use matrix math
   Vec2D _coordinateMapper(Shape shape, Vec2D worldSpaceCoord) {
