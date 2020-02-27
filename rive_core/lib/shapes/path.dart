@@ -61,6 +61,10 @@ abstract class Path extends PathBase {
     if (pts == null || pts.isEmpty) {
       return false;
     }
+    print('Building path for ${this.name}');
+    // for (final v in pts) {
+    //   print('Path V: $v');
+    // }
 
     List<PathVertex> renderPoints = [];
     int pl = pts.length;
@@ -129,7 +133,6 @@ abstract class Path extends PathBase {
           break;
       }
     }
-
     PathVertex firstPoint = renderPoints[0];
     _uiPath.moveTo(firstPoint.translation[0], firstPoint.translation[1]);
     for (int i = 0,

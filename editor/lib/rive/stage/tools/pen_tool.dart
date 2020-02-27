@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
@@ -90,6 +91,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
     _path.addVertex(localCoord[0], localCoord[1]);
     // Mark the shape as dirty so the stage redraws
     _shape.pathChanged(_path);
+    _path.addDirt(ComponentDirt.path);
   }
 
   /// Returns the first selected shape from the current set of
