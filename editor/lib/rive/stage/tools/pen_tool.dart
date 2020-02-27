@@ -1,21 +1,31 @@
 import 'dart:ui';
 
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/node.dart';
+import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/user_path.dart';
+
+import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
-import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+// This will import and extension that give shapes access to their stage shapes
+// import 'package:rive_editor/rive/stage/stage_item.dart' show StageItemComponent;
 
-class PenTool extends StageTool
-    with MoveableTool, ClickableTool, DraggableTool {
+class PenTool extends StageTool with MoveableTool, ClickableTool {
   static final PenTool instance = PenTool._();
 
   PenTool._();
 
-  Shape _shape;
+  // Open path used to create the shape
+  UserPath _openPath;
+
+  // Shape in which the open payth exists
+  Shape _selectedShape;
 
   @override
   String get icon => 'tool-pen';
@@ -48,44 +58,90 @@ class PenTool extends StageTool
 
   @override
   void onClick(Vec2D worldMouse) {
-    var file = stage.riveFile;
-    var artboard = file.artboards.first;
+    final rive = stage.rive;
+    _openPath = _createPath(worldMouse, rive, _openPath);
+  }
 
-    if (_shape == null) {
-      _shape = Shape()
-        ..name = 'New Shape'
-        ..x = worldMouse[0]
-        ..y = worldMouse[1]
+  UserPath _createPath(Vec2D worldMouse, Rive rive, UserPath path) {
+    var activePath = path;
+    // Get the selected shape for the editor
+    final shape = _selectShape(rive, worldMouse);
+    // Determine the coordinates to create a vertex based on the shape's
+    // position in world space
+    final localCoord = _coordinateMapper(shape, worldMouse);
+    // Create a new path is one isn't already open
+    if (activePath == null) {
+      // Create a new activePath
+      activePath = UserPath()
+        ..name = 'My crazy activePath'
+        ..x = localCoord[0]
+        ..y = localCoord[1]
         ..rotation = 0
         ..scaleX = 1
         ..scaleY = 1
         ..opacity = 1;
-
-      var path = UserPath()
-        ..name = 'Pen Rect'
-        ..x = 0
-        ..y = 0
-        ..rotation = 0
-        ..scaleX = 1
-        ..scaleY = 1
-        ..opacity = 1;
-
-      // TODO: remove hardcoded vertices
-      path.addVertex(0, 0);
-      path.addVertex(100, 100);
-      path.addVertex(100, 200);
-      path.addVertex(0, 200);
-      path.isClosed = true;
-
-      file.startAdd();
-      file.add(_shape);
-      file.add(path);
-
-      _shape.appendChild(path);
-      artboard.appendChild(_shape);
-
-      file.cleanDirt();
-      file.completeAdd();
+      shape.appendChild(activePath);
+      rive.file.value.add(activePath);
+      _addToFile(rive.file.value, activePath);
     }
+    activePath.addVertex(localCoord[0], localCoord[1]);
+    return activePath;
+  }
+
+  /// Returns the first selected shape from the current set of
+  /// selected items in the editor. Returns null if no shape is
+  /// selected.
+  Shape _selectShape(Rive rive, Vec2D coord) {
+    if (_selectedShape != null) {
+      return _selectedShape;
+    }
+    final firstSelectedStageShape = rive.selection.items.firstWhere(
+      (i) => i is StageShape,
+      orElse: () => null,
+    );
+    if (firstSelectedStageShape != null &&
+        firstSelectedStageShape is StageShape) {
+      final shape = firstSelectedStageShape.component;
+      return shape;
+    }
+    // No selected shape, create a new one, add it to the file
+    // and select it.
+    final shape = Shape()
+      ..name = 'New Shape'
+      ..x = coord[0]
+      ..y = coord[1]
+      ..rotation = 0
+      ..scaleX = 1
+      ..scaleY = 1
+      ..opacity = 1;
+    // Add shape to the file; it's stage equivalent is also created
+    _addToFile(rive.file.value, shape);
+    // Add shape to the artboard
+    _activeArtBoard(rive.file.value).appendChild(shape);
+    // Select the stage shape
+    // rive.select(shape.stageItem);
+    // Save the new shape
+    _selectedShape = shape;
+    return shape;
+  }
+
+  void _addToFile(RiveFile file, Node node) {
+    file.startAdd();
+    file.add(node);
+    file.cleanDirt();
+    file.completeAdd();
+  }
+
+  // TODO: need to track the active artboard
+  Artboard _activeArtBoard(RiveFile file) {
+    return file.artboards.first;
+  }
+
+  /// TODO: needs to take into account rotation, scale, etc; use matrix math
+  Vec2D _coordinateMapper(Shape shape, Vec2D worldSpaceCoord) {
+    // Do funky matrix math
+    final x = worldSpaceCoord[0] - shape.x;
+    final y = worldSpaceCoord[1] - shape.y;
+    return Vec2D.fromValues(x, y);
   }
 }
