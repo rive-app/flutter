@@ -5,7 +5,7 @@ import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 
 class UserPath extends Path {
-  bool _isClosed = true;
+  bool _isClosed = false;
   final List<PathVertex> _vertices = [];
 
   @override

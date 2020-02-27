@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_core/artboard.dart';
-import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
@@ -39,17 +39,69 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   @override
   bool activate(Stage stage) {
     super.activate(stage);
+    // Reset the current selection.
+    _path = null;
+    _shape = null;
     return true;
   }
 
   @override
   void paint(Canvas canvas) {
+    _paintMouse(canvas);
+    _paintVertices(canvas);
+    _paintEdges(canvas);
+  }
+
+  void _paintMouse(Canvas canvas) {
     if (mousePosition != null) {
       var mp = Vec2D();
       Vec2D.transformMat2D(mp, mousePosition, stage.viewTransform);
-      canvas.drawCircle(
-          Offset(mp[0], mp[1]), 5, Paint()..color = const Color(0xFFFFFFFF));
+      _paintVertex(canvas, mp);
     }
+  }
+
+  void _paintVertex(Canvas canvas, Vec2D position) {
+    // Draw twice: once for the background stroke, and a second time for 
+    // the foreground
+    canvas.drawCircle(Offset(position[0], position[1]), 4.5,
+        Paint()..color = const Color(0x19000000));
+    canvas.drawCircle(Offset(position[0], position[1]), 3.5,
+        Paint()..color = const Color(0xFFFFFFFF));
+  }
+
+  void _paintVertices(Canvas canvas) {
+    if (_path != null) {
+      final transform = Mat2D();
+      Mat2D.multiply(transform, stage.viewTransform, _path.pathTransform);
+      final pos = Vec2D();
+      for (final vertex in _path.vertices) {
+        Vec2D.transformMat2D(pos, vertex.translation, transform);
+        _paintVertex(canvas, pos);
+      }
+    }
+  }
+
+  void _paintEdges(Canvas canvas) {
+    if (_shape != null) {
+      final uiPath = _shape.uiPath;
+      canvas.save();
+      canvas.transform(stage.viewTransform.mat4);
+      // Once for the background.
+      canvas.drawPath(
+          uiPath,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 3
+            ..color = const Color(0x19000000));
+      // Once for the actual stroke.
+      canvas.drawPath(
+          uiPath,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1
+            ..color = const Color(0xFFFFFFFF));
+    }
+    canvas.restore();
   }
 
   @override
@@ -61,10 +113,6 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   void onClick(Vec2D worldMouse) {
     final rive = stage.rive;
     _modifyPath(worldMouse, rive);
-
-    for (final v in _path.vertices) {
-      print('PenTOOL V: $v');
-    }
   }
 
   void _modifyPath(Vec2D vertexPos, Rive rive) {
@@ -76,7 +124,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
     // Create a new path if one isn't already being built
     if (_path == null) {
       _path = UserPath()
-        ..name = 'My crazy _openPath'
+        ..name = 'Pen Path'
         ..x = localCoord[0]
         ..y = localCoord[1]
         ..rotation = 0
@@ -91,7 +139,6 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
     _path.addVertex(localCoord[0], localCoord[1]);
     // Mark the shape as dirty so the stage redraws
     _shape.pathChanged(_path);
-    _path.addDirt(ComponentDirt.path);
   }
 
   /// Returns the first selected shape from the current set of
