@@ -15,7 +15,14 @@ export 'package:rive_core/src/generated/shapes/path_base.dart';
 
 abstract class Path extends PathBase {
   final ui.Path _uiPath = ui.Path();
-  ui.Path get uiPath => _uiPath;
+  ui.Path get uiPath {
+    if (!_isValid) {
+      _buildPath();
+    }
+    return _uiPath;
+  }
+
+  bool _isValid = false;
 
   bool get isClosed;
 
@@ -53,9 +60,20 @@ abstract class Path extends PathBase {
     }
   }
 
+  void _invalidatePath() {
+    _isValid = false;
+  }
+
+  @override
+  bool addDirt(int value, {bool recurse = false}) {
+    _invalidatePath();
+    return super.addDirt(value, recurse: recurse);
+  }
+
   List<PathVertex> get vertices;
 
   bool _buildPath() {
+    _isValid = true;
     _uiPath.reset();
     List<PathVertex> pts = vertices;
     if (pts == null || pts.isEmpty) {
