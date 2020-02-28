@@ -23,11 +23,12 @@ jobs:
           chmod 600 ssh.key
           ssh-add ssh.key
           git submodule update --init --force --recursive
-      - uses: subosito/flutter-action@v1
-        with:
-          channel: 'dev' # or: 'dev' or 'beta'
+      - name: Checkout flutter and install it...
+        run: |
+          git clone https://github.com/flutter/flutter.git
+          ./flutter/bin/flutter doctor
       - name: Install editor dependencies
-        run: cd editor && flutter pub get
+        run: cd editor && ../flutter/bin/flutter pub get
 
       - name: Run editor tests
-        run: cd editor && flutter test
+        run: cd editor && ../flutter/bin/flutter test
