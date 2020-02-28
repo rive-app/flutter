@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 
-enum EditMode { normal, altMode1, altmode2 }
+enum EditMode { normal, altMode1, altMode2 }
 
 abstract class StageTool {
   Stage _stage;

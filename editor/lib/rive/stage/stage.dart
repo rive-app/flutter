@@ -332,7 +332,7 @@ class Stage extends Debouncer {
           // [_activeTool] is [null] before dragging operation starts.
           if (_activeTool == null) {
             _activeTool = tool;
-            tool.setEditMode(activeEditMode);
+            _activeTool.setEditMode(activeEditMode);
             (_activeTool as DraggableTool).startDrag(
                 rive.selection.items.whereType<StageItem>(), _worldMouse);
           } else {
