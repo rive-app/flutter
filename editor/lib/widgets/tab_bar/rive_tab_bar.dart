@@ -149,7 +149,7 @@ class _UserTabBarItemState extends State<_UserTabBarItem> {
                       ? null
                       : () => widget.close(widget.tab),
                   child: RiveIcons.close(
-                      const Color.fromRGBO(140, 140, 140, 1.0), 13),
+                      RiveTheme.of(context).colors.tabRiveText, 13),
                 )
             ],
           ),
