@@ -15,6 +15,7 @@ class RiveColors {
   Color get tabBackground => const Color(0xFF323232);
   Color get tabTextSelected => const Color(0xFFFDFDFD);
   Color get tabBackgroundSelected => const Color(0xFF3c3c3c);
+  Color get tabBackgroundHovered => const Color(0xFF363636);
 
   Color get tabRiveText => const Color(0xFF8c8c8c);
   Color get tabRiveBackground => const Color(0xFF323232);

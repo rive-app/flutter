@@ -9,23 +9,23 @@ import 'tab_decoration.dart';
 
 /// Describes a Rive tab item.
 class RiveTabItem {
-  final String name;
-  final Widget icon;
-  final bool closeable;
-
   RiveTabItem({
     this.name,
     this.icon,
     this.closeable = true,
   });
+  final String name;
+  final Widget icon;
+  final bool closeable;
 }
 
 typedef TabSelectedCallback = void Function(RiveTabItem item);
 
-class _TabBarItem extends StatelessWidget {
+class _TabBarItem extends StatefulWidget {
   final RiveTabItem tab;
   final bool isSelected;
   final TabSelectedCallback select, close;
+  final bool invertLeft, invertRight;
 
   const _TabBarItem({
     Key key,
@@ -33,48 +33,73 @@ class _TabBarItem extends StatelessWidget {
     this.isSelected,
     this.select,
     this.close,
+    this.invertLeft = false,
+    this.invertRight = false,
   }) : super(key: key);
 
   @override
+  _TabBarItemState createState() => _TabBarItemState();
+}
+
+class _TabBarItemState extends State<_TabBarItem> {
+  var _hover = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => select?.call(tab),
-      child: Container(
-        padding:
-            const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-        child: Row(
-          children: [
-            Text(
-              tab.name,
-              style: TextStyle(
-                fontSize: 13,
-                color: isSelected
-                    ? RiveTheme.of(context).colors.tabTextSelected
-                    : RiveTheme.of(context).colors.tabText,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => widget.select?.call(widget.tab),
+        child: Container(
+          padding:
+              const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+          child: Row(
+            children: [
+              Text(
+                widget.tab.name,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: widget.isSelected
+                      ? RiveTheme.of(context).colors.tabTextSelected
+                      : _hover
+                          ? RiveTheme.of(context).colors.tabTextSelected
+                          : RiveTheme.of(context).colors.tabText,
+                ),
               ),
-            ),
-            if (tab.closeable) const SizedBox(width: 10),
-            if (tab.closeable)
-              GestureDetector(
-                onTap: close == null ? null : () => close(tab),
-                child: RiveIcons.close(Color.fromRGBO(140, 140, 140, 1.0), 13),
-              )
-          ],
+              if (widget.tab.closeable) const SizedBox(width: 10),
+              if (widget.tab.closeable)
+                GestureDetector(
+                  onTap: widget.close == null
+                      ? null
+                      : () => widget.close(widget.tab),
+                  child:
+                      RiveIcons.close(RiveTheme.of(context).colors.tabText, 13),
+                )
+            ],
+          ),
+          decoration: widget.isSelected
+              ? TabDecoration(
+                  color: RiveTheme.of(context).colors.tabBackgroundSelected)
+              : _hover
+                  ? TabDecoration(
+                      color: RiveTheme.of(context).colors.tabBackgroundHovered,
+                      invertLeft: widget.invertLeft,
+                      invertRight: widget.invertRight,
+                    )
+                  : null,
         ),
-        decoration: isSelected
-            ? TabDecoration(
-                color: RiveTheme.of(context).colors.tabBackgroundSelected)
-            : null,
       ),
     );
   }
 }
 
-class _UserTabBarItem extends StatelessWidget {
+class _UserTabBarItem extends StatefulWidget {
   final RiveTabItem tab;
   final bool isSelected;
   final TabSelectedCallback select, close;
+  final bool invertLeft, invertRight;
 
   const _UserTabBarItem({
     Key key,
@@ -82,40 +107,63 @@ class _UserTabBarItem extends StatelessWidget {
     this.isSelected,
     this.select,
     this.close,
+    this.invertLeft = false,
+    this.invertRight = false,
   }) : super(key: key);
 
   @override
+  _UserTabBarItemState createState() => _UserTabBarItemState();
+}
+
+class _UserTabBarItemState extends State<_UserTabBarItem> {
+  var _hover = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => select?.call(tab),
-      child: Container(
-        padding: const EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 10,
-          bottom: 10,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => widget.select?.call(widget.tab),
+        child: Container(
+          padding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 10,
+            bottom: 10,
+          ),
+          child: Row(
+            children: [
+              TintedIcon(
+                  color: widget.isSelected
+                      ? RiveTheme.of(context).colors.tabRiveTextSelected
+                      : _hover
+                          ? RiveTheme.of(context).colors.tabTextSelected
+                          : RiveTheme.of(context).colors.tabRiveText,
+                  icon: 'rive'),
+              if (widget.tab.closeable) const SizedBox(width: 10),
+              if (widget.tab.closeable)
+                GestureDetector(
+                  onTap: widget.close == null
+                      ? null
+                      : () => widget.close(widget.tab),
+                  child: RiveIcons.close(
+                      RiveTheme.of(context).colors.tabRiveText, 13),
+                )
+            ],
+          ),
+          decoration: widget.isSelected
+              ? TabDecoration(
+                  color: RiveTheme.of(context).colors.tabRiveBackgroundSelected)
+              : _hover
+                  ? TabDecoration(
+                      color: RiveTheme.of(context).colors.tabBackgroundHovered,
+                      invertLeft: widget.invertLeft,
+                      invertRight: widget.invertRight,
+                    )
+                  : null,
         ),
-        child: Row(
-          children: [
-            TintedIcon(
-                color: isSelected
-                    ? RiveTheme.of(context).colors.tabRiveTextSelected
-                    : RiveTheme.of(context).colors.tabRiveText,
-                icon: 'rive'),
-            if (tab.closeable) const SizedBox(width: 10),
-            if (tab.closeable)
-              GestureDetector(
-                onTap: close == null ? null : () => close(tab),
-                child: RiveIcons.close(
-                    const Color.fromRGBO(140, 140, 140, 1.0), 13),
-              )
-          ],
-        ),
-        decoration: isSelected
-            ? TabDecoration(
-                color: RiveTheme.of(context).colors.tabRiveBackgroundSelected)
-            : null,
       ),
     );
   }
@@ -137,6 +185,15 @@ class RiveTabBar extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
+    // Work out the tabs to the left and right
+    // of the selected
+    var selectedIdx = -1;
+    for (var i = 0; i < tabs.length; i++) {
+      if (selected == tabs[i]) {
+        selectedIdx = i;
+      }
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -145,13 +202,15 @@ class RiveTabBar extends StatelessWidget {
           i == 0
               ? _UserTabBarItem(
                   tab: tabs[i],
-                  isSelected: selected == tabs[i],
+                  isSelected: selectedIdx == i,
                   select: select,
                   close: close,
                 )
               : _TabBarItem(
                   tab: tabs[i],
-                  isSelected: selected == tabs[i],
+                  isSelected: selectedIdx == i,
+                  // Invert the left curve if next to selected
+                  invertLeft: selectedIdx == i - 1,
                   select: select,
                   close: close,
                 ),

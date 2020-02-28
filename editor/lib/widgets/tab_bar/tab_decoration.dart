@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -7,14 +6,18 @@ import 'package:flutter/material.dart';
 class TabDecoration extends Decoration {
   const TabDecoration({
     this.color,
+    this.invertLeft = false,
+    this.invertRight = false,
   });
 
   final Color color;
+  // Invert te curve at te bottom of the tab
+  // Used to ensure that hovered tabs don't obscure selected tab curves
+  final bool invertLeft;
+  final bool invertRight;
 
   @override
-  Path getClipPath(Rect rect, TextDirection textDirection) {
-    return null;
-  }
+  Path getClipPath(Rect rect, TextDirection textDirection) => null;
 
   @override
   bool get isComplex => false;
@@ -38,16 +41,11 @@ class TabDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (runtimeType != other.runtimeType) return false;
-    return other is TabDecoration && other.color == color;
-  }
+  bool operator ==(dynamic other) =>
+      other is TabDecoration && color == other.color;
 
   @override
-  int get hashCode {
-    return color.hashCode;
-  }
+  int get hashCode => color.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -60,14 +58,14 @@ class TabDecoration extends Decoration {
   }
 
   @override
-  bool hitTest(Size size, Offset position, {TextDirection textDirection}) {
-    return true;
-  }
+  bool hitTest(Size size, Offset position, {TextDirection textDirection}) =>
+      true;
 
   @override
   _TabDecorationPainter createBoxPainter([VoidCallback onChanged]) {
     assert(onChanged != null);
-    return _TabDecorationPainter(this, onChanged);
+    return _TabDecorationPainter(this, onChanged,
+        invertLeft: invertLeft, invertRight: invertRight);
   }
 }
 
@@ -76,11 +74,17 @@ const double _iarcConstant = 1.0 - _arcConstant;
 
 /// An object that paints a [_TabDecorationPainter] into a canvas.
 class _TabDecorationPainter extends BoxPainter {
-  _TabDecorationPainter(this._decoration, VoidCallback onChanged)
-      : assert(_decoration != null),
+  _TabDecorationPainter(
+    this._decoration,
+    VoidCallback onChanged, {
+    this.invertLeft = false,
+    this.invertRight = false,
+  })  : assert(_decoration != null),
         super(onChanged);
 
   final TabDecoration _decoration;
+  final bool invertLeft;
+  final bool invertRight;
 
   Paint _cachedBackgroundPaint;
   Rect _rectForCachedBackgroundPaint;
@@ -103,14 +107,26 @@ class _TabDecorationPainter extends BoxPainter {
     const double cornerRadius = 6;
 
     Path path = Path();
-    path.moveTo(-cornerRadius, rect.height);
-    path.cubicTo(
-        -cornerRadius + cornerRadius * _arcConstant,
-        rect.height,
-        0,
-        rect.height - _iarcConstant * cornerRadius,
-        0,
-        rect.height - cornerRadius);
+
+    if (invertLeft) {
+      path.moveTo(cornerRadius, rect.height);
+      path.cubicTo(
+          cornerRadius + cornerRadius * _arcConstant,
+          rect.height,
+          0,
+          rect.height - cornerRadius * _iarcConstant,
+          0,
+          rect.height - cornerRadius);
+    } else {
+      path.moveTo(-cornerRadius, rect.height);
+      path.cubicTo(
+          -cornerRadius + cornerRadius * _arcConstant,
+          rect.height,
+          0,
+          rect.height - _iarcConstant * cornerRadius,
+          0,
+          rect.height - cornerRadius);
+    }
 
     path.lineTo(0, cornerRadius);
 
@@ -124,13 +140,23 @@ class _TabDecorationPainter extends BoxPainter {
 
     path.lineTo(rect.width, rect.height - cornerRadius);
 
-    path.cubicTo(
-        rect.width,
-        rect.height - cornerRadius * _iarcConstant,
-        rect.width + cornerRadius * _iarcConstant,
-        rect.height,
-        rect.width + cornerRadius,
-        rect.height);
+    if (invertRight) {
+      path.cubicTo(
+          rect.width,
+          rect.height - cornerRadius * _iarcConstant,
+          rect.width - cornerRadius * _iarcConstant,
+          rect.height,
+          rect.width - cornerRadius,
+          rect.height);
+    } else {
+      path.cubicTo(
+          rect.width,
+          rect.height - cornerRadius * _iarcConstant,
+          rect.width + cornerRadius * _iarcConstant,
+          rect.height,
+          rect.width + cornerRadius,
+          rect.height);
+    }
 
     path.close();
     canvas.save();
