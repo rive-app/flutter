@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
+import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -32,15 +33,16 @@ abstract class ShapeTool extends StageTool with DraggableTool {
     _shape = shape(worldMouse);
     _path = path;
 
-    file.startAdd();
-    file.add(_shape);
-    file.add(_path);
+    file.batchAdd(() {
+      var composer = PathComposer();
+      file.add(_shape);
+      file.add(composer);
+      file.add(_path);
 
-    _shape.appendChild(_path);
-    artboard.appendChild(_shape);
-
-    file.cleanDirt();
-    file.completeAdd();
+      _shape.appendChild(_path);
+      _shape.appendChild(composer);
+      artboard.appendChild(_shape);
+    });
   }
 
   @override

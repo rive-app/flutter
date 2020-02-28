@@ -7,6 +7,7 @@ import '../../artboard.dart';
 import '../../node.dart';
 import '../../shapes/cubic_vertex.dart';
 import '../../shapes/ellipse.dart';
+import '../../shapes/path_composer.dart';
 import '../../shapes/rectangle.dart';
 import '../../shapes/shape.dart';
 import '../../shapes/straight_vertex.dart';
@@ -18,6 +19,7 @@ import 'node_base.dart';
 import 'shapes/cubic_vertex_base.dart';
 import 'shapes/ellipse_base.dart';
 import 'shapes/parametric_path_base.dart';
+import 'shapes/path_composer_base.dart';
 import 'shapes/path_vertex_base.dart';
 import 'shapes/rectangle_base.dart';
 import 'shapes/shape_base.dart';
@@ -44,6 +46,8 @@ abstract class RiveCoreContext extends CoreContext {
         return Triangle();
       case EllipseBase.typeKey:
         return Ellipse();
+      case PathComposerBase.typeKey:
+        return PathComposer();
       case ArtboardBase.typeKey:
         return Artboard();
       default:

@@ -173,6 +173,8 @@ abstract class Component extends ComponentBase<RiveFile> {
   /// necessary).
   void onDependencyRemoved(Component dependent) {}
 
+  void onAdded() {}
+  
   void onRemoved() {
     for (final parentDep in _dependsOn) {
       parentDep._dependents.remove(this);

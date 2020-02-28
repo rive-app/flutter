@@ -2,7 +2,6 @@
 /// Do not modify manually.
 
 import 'package:flutter/material.dart';
-
 import '../../../drawable.dart';
 
 abstract class ShapeBase extends Drawable {

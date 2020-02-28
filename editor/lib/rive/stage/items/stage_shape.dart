@@ -21,11 +21,12 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
 
   @override
   void paint(Canvas canvas) {
+    assert(component.pathComposer != null);
     // Write now the StageShape draws the shape itself, this needs to be moved
     // to the drawable shape component. The only painting the StageShape will do
     // is when the item is selected.
     canvas.drawPath(
-        component.uiPath,
+        component.pathComposer.uiPath,
         Paint()
           ..color = selectionState.value == SelectionState.none
               ? const Color.fromRGBO(100, 100, 100, 1.0)

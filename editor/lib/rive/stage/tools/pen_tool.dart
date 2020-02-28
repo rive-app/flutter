@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/user_path.dart';
+import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -77,15 +78,16 @@ class PenTool extends StageTool
       path.addVertex(0, 200);
       path.isClosed = true;
 
-      file.startAdd();
-      file.add(_shape);
-      file.add(path);
+      file.batchAdd(() {
+        var composer = PathComposer();
+        file.add(_shape);
+        file.add(composer);
+        file.add(path);
 
-      _shape.appendChild(path);
-      artboard.appendChild(_shape);
-
-      file.cleanDirt();
-      file.completeAdd();
+        _shape.appendChild(path);
+        _shape.appendChild(composer);
+        artboard.appendChild(_shape);
+      });
     }
   }
 }

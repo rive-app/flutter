@@ -18,7 +18,11 @@ class HierarchyTreeController extends TreeController<Component> {
 
   @override
   List<Component> childrenOf(Component treeItem) =>
-      treeItem is ContainerComponent ? treeItem.children : null;
+      treeItem is ContainerComponent
+          ? treeItem.children
+              .where((item) => item.stageItem != null)
+              .toList(growable: false)
+          : null;
 
   @override
   bool allowDrop(FlatTreeItem<Component> target, DropState state,

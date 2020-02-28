@@ -387,10 +387,12 @@ class Stage extends Debouncer {
   /// Register a Core object with the stage.
   void initComponent(Component component) {
     var stageItemFactory = _factories[component.coreType];
-    assert(
-        stageItemFactory != null,
-        'Factory shouldn\'t be null for component $component '
-        'with type key ${component.coreType}');
+    // We used to assert here and not allow null stageItems for components. We
+    // used to do this because even though some components may not need a
+    // stageItem, we still wanted them to be selectable in the hierarchy.
+    // Hierarchy selections. However, there are cases where we'll want
+    // components to not have a stage presence and not be selectable at all
+    // (like the PathComposer).
     if (stageItemFactory != null) {
       var stageItem = stageItemFactory();
       if (stageItem != null && stageItem.initialize(component)) {
