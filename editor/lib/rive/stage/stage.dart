@@ -290,16 +290,23 @@ class Stage extends Debouncer {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
-    if (_activeTool is ClickableTool) {
-      (_activeTool as ClickableTool).onClick(_worldMouse);
+    switch (button) {
+      case 1:
+        if (_activeTool is ClickableTool) {
+          (_activeTool as ClickableTool).onClick(_worldMouse);
+        } else {
+          if (_hoverItem != null) {
+            _mouseDownSelected = true;
+            rive.select(_hoverItem);
+          } else {
+            _mouseDownSelected = false;
+          }
+        }
+
+        break;
+      default:
     }
 
-    if (_hoverItem != null) {
-      _mouseDownSelected = true;
-      rive.select(_hoverItem);
-    } else {
-      _mouseDownSelected = false;
-    }
   }
 
   void mouseDrag(int button, double x, double y) {
