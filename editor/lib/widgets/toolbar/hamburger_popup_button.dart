@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/theme.dart';
 import 'package:rive_editor/widgets/common/rive_text_form_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -14,8 +15,9 @@ class HamburgerPopupButton extends StatelessWidget {
     return RivePopupButton(
       showChevron: false,
       iconBuilder: (context, rive, isHovered) => TintedIcon(
-        color:
-            isHovered ? Colors.white : const Color.fromRGBO(140, 140, 140, 1),
+        color: isHovered
+            ? RiveThemeData().colors.popupIconHover
+            : RiveThemeData().colors.popupIcon,
         icon: 'tool-menu',
       ),
       width: 267,
@@ -27,7 +29,7 @@ class HamburgerPopupButton extends StatelessWidget {
                     child: RiveTextFormField(
                       initialValue: RiveContext.of(context).file.value.name,
                       hintText: 'File Name',
-                      edgeInsets: const EdgeInsets.symmetric(vertical: 6),
+                      edgeInsets: const EdgeInsets.symmetric(vertical: 5),
                     ),
                   ),
                 ),
