@@ -53,10 +53,10 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
           contentPadding: widget.edgeInsets,
           enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                  width: 2, color: RiveTheme.of(context).colors.separator)),
+                  width: 1, color: RiveTheme.of(context).colors.separator)),
           focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                  width: 2,
+                  width: 1,
                   color: RiveTheme.of(context).colors.separatorActive)),
           hintText: widget.hintText,
           hintStyle: RiveTheme.of(context).textStyles.inspectorPropertyValue,
