@@ -90,14 +90,17 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                 behavior: HitTestBehavior.translucent,
                 onTap: () => _setAnimate(false, rive.isAnimateMode),
                 child: Center(
-                  child: Text(
-                    'Design',
-                    style: TextStyle(
-                      color: controller.value <= 0.5
-                          ? theme.colors.activeText
-                          : theme.colors.inactiveText,
-                      fontFamily: 'Roboto-Light',
-                      fontSize: 13,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 1),
+                    child: Text(
+                      'Design',
+                      style: TextStyle(
+                        color: controller.value <= 0.5
+                            ? theme.colors.activeText
+                            : theme.colors.inactiveText,
+                        fontFamily: 'Roboto-Light',
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -111,14 +114,17 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                 behavior: HitTestBehavior.translucent,
                 onTap: () => _setAnimate(true, rive.isAnimateMode),
                 child: Center(
-                  child: Text(
-                    'Animate',
-                    style: TextStyle(
-                      color: controller.value >= 0.5
-                          ? theme.colors.activeText
-                          : theme.colors.inactiveText,
-                      fontFamily: 'Roboto-Light',
-                      fontSize: 13,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 1),
+                    child: Text(
+                      'Animate',
+                      style: TextStyle(
+                        color: controller.value >= 0.5
+                            ? theme.colors.activeText
+                            : theme.colors.inactiveText,
+                        fontFamily: 'Roboto-Light',
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
