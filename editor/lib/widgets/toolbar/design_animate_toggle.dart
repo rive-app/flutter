@@ -77,11 +77,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
                   gradient: LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
-                    colors: [
-                      for (final color in gradientColors) ...[
-                        color.value,
-                      ]
-                    ],
+                    colors: gradientColors.map((color) => color.value).toList(),
                   ),
                 ),
               ),
