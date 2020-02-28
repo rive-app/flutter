@@ -38,6 +38,8 @@ class RiveColors {
 
   // Stage
   Color get toolTip => const Color(0x7F000000);
+  Color get toolTipText => const Color(0xFFFFFFFF);
+  Color get shapeBounds => const Color(0xFF000000);
 
   // Accents
   Color get accentBlue => const Color(0xFF57A5E0);

@@ -90,7 +90,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
         Paint()
           ..strokeWidth = 1
           ..style = PaintingStyle.stroke
-          ..color = const Color(0xFF000000));
+          ..color = RiveThemeData().colors.shapeBounds);
 
     _paintToolTip(
         canvas,
@@ -105,7 +105,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
     ParagraphBuilder builder = ParagraphBuilder(style)
       ..pushStyle(
         TextStyle(
-          foreground: Paint()..color = const Color(0xFFFFFFFF),
+          foreground: Paint()..color = RiveThemeData().colors.toolTipText,
         ),
       );
     builder.addText(text);
@@ -122,8 +122,8 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
     // Fix the position to full pixels.
     // Which will line this up better with the paragraph
-    var topLeft = (pos[0] + offset.dx).floor().toDouble();
-    var topRight = (pos[1] + offset.dy).floor().toDouble();
+    var topLeft = (pos[0] + offset.dx).floorToDouble();
+    var topRight = (pos[1] + offset.dy).floorToDouble();
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(
