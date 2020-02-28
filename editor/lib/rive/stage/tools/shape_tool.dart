@@ -10,6 +10,12 @@ import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/theme.dart';
 
+enum DraggingMode { symmetric }
+
+const Map<EditMode, DraggingMode> editModeMap = {
+  EditMode.altMode1: DraggingMode.symmetric
+};
+
 abstract class ShapeTool extends StageTool with DraggableTool {
   Vec2D _startWorldMouse;
   Vec2D _start = Vec2D(), _end = Vec2D(), _cursor = Vec2D();
@@ -45,34 +51,36 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
-    if (draggingMode == DraggingMode.manual) {
-      _start = Vec2D.fromValues(
-        min(_startWorldMouse[0], worldMouse[0]),
-        min(_startWorldMouse[1], worldMouse[1]),
-      );
-      _end = Vec2D.fromValues(
-        max(_startWorldMouse[0], worldMouse[0]),
-        max(_startWorldMouse[1], worldMouse[1]),
-      );
-    } else if (draggingMode == DraggingMode.symmetric) {
-      final maxChange = max(
-        (_startWorldMouse[0] - worldMouse[0]).abs(),
-        (_startWorldMouse[1] - worldMouse[1]).abs(),
-      );
-      var x1 = (_startWorldMouse[0] < worldMouse[0])
-          ? _startWorldMouse[0]
-          : _startWorldMouse[0] - maxChange;
-      var y1 = (_startWorldMouse[1] < worldMouse[1])
-          ? _startWorldMouse[1]
-          : _startWorldMouse[1] - maxChange;
-      _start = Vec2D.fromValues(
-        x1,
-        y1,
-      );
-      _end = Vec2D.fromValues(
-        _start[0] + maxChange,
-        _start[1] + maxChange,
-      );
+    switch (editModeMap[editMode]) {
+      case DraggingMode.symmetric:
+        final maxChange = max(
+          (_startWorldMouse[0] - worldMouse[0]).abs(),
+          (_startWorldMouse[1] - worldMouse[1]).abs(),
+        );
+        var x1 = (_startWorldMouse[0] < worldMouse[0])
+            ? _startWorldMouse[0]
+            : _startWorldMouse[0] - maxChange;
+        var y1 = (_startWorldMouse[1] < worldMouse[1])
+            ? _startWorldMouse[1]
+            : _startWorldMouse[1] - maxChange;
+        _start = Vec2D.fromValues(
+          x1,
+          y1,
+        );
+        _end = Vec2D.fromValues(
+          _start[0] + maxChange,
+          _start[1] + maxChange,
+        );
+        break;
+      default:
+        _start = Vec2D.fromValues(
+          min(_startWorldMouse[0], worldMouse[0]),
+          min(_startWorldMouse[1], worldMouse[1]),
+        );
+        _end = Vec2D.fromValues(
+          max(_startWorldMouse[0], worldMouse[0]),
+          max(_startWorldMouse[1], worldMouse[1]),
+        );
     }
 
     _cursor = Vec2D.clone(worldMouse);
@@ -167,5 +175,13 @@ abstract class ShapeTool extends StageTool with DraggableTool {
       paragraph,
       Offset(topLeft + padding.width, topRight + padding.height),
     );
+  }
+
+  @override
+  void onEditModeChange() {
+    // if the edit mode is changed lets just treat it as a fake drag.
+    if (lastWorldMouse != null) {
+      updateDrag(lastWorldMouse);
+    }
   }
 }

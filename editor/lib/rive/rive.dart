@@ -7,10 +7,10 @@ import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
-import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
+import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
@@ -219,8 +219,8 @@ class Rive with RiveFileDelegate {
         ? SelectionMode.multi
         : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
 
-    _stage?.updateDraggingMode(
-        keyEvent.isShiftPressed ? DraggingMode.symmetric : DraggingMode.manual);
+    _stage?.updateEditMode(
+        keyEvent.isShiftPressed ? EditMode.altMode1 : EditMode.normal);
 
     if (keyEvent is RawKeyDownEvent) {
       _pressed.add(_Key(keyEvent.logicalKey, keyEvent.physicalKey));

@@ -63,7 +63,7 @@ class Stage extends Debouncer {
   double _viewZoomTarget = 1;
   Vec2D _worldMouse = Vec2D();
   bool _mouseDownSelected = false;
-  DraggingMode lastDraggingMode = DraggingMode.manual;
+  EditMode activeEditMode = EditMode.normal;
 
   StageDelegate _delegate;
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
@@ -332,7 +332,7 @@ class Stage extends Debouncer {
           // [_activeTool] is [null] before dragging operation starts.
           if (_activeTool == null) {
             _activeTool = tool;
-            (_activeTool as DraggableTool).draggingMode = lastDraggingMode;
+            tool.setEditMode(activeEditMode);
             (_activeTool as DraggableTool).startDrag(
                 rive.selection.items.whereType<StageItem>(), _worldMouse);
           } else {
@@ -548,13 +548,10 @@ class Stage extends Debouncer {
   @override
   void onNeedsDebounce() => markNeedsAdvance();
 
-  void updateDraggingMode(DraggingMode draggingMode) {
-    lastDraggingMode = draggingMode;
+  void updateEditMode(EditMode editMode) {
+    activeEditMode = editMode;
     if (_activeTool != null && _activeTool is DraggableTool) {
-      (_activeTool as DraggableTool).draggingMode = draggingMode;
-      // trigger a fake drag to make the tool re render.
-      (_activeTool as DraggableTool)
-          .updateDrag((_activeTool as DraggableTool).lastWorldMouse);
+      _activeTool.setEditMode(editMode);
     }
   }
 }
