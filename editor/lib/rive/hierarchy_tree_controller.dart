@@ -20,6 +20,8 @@ class HierarchyTreeController extends TreeController<Component> {
   List<Component> childrenOf(Component treeItem) =>
       treeItem is ContainerComponent
           ? treeItem.children
+              // We only want to show items in the tree which are selectable, in
+              // order to be selectable they must have a stageItem.
               .where((item) => item.stageItem != null)
               .toList(growable: false)
           : null;
