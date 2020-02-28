@@ -9,12 +9,14 @@ class RiveTextFormField extends StatefulWidget {
     this.onChanged,
     this.edgeInsets = EdgeInsets.zero,
     Key key,
+    this.borderWidth = 2,
   }) : super(key: key);
 
   final String hintText;
   final String initialValue;
   final ValueChanged<String> onComplete, onChanged;
   final EdgeInsets edgeInsets;
+  final double borderWidth;
 
   @override
   _RiveTextFormFieldState createState() => _RiveTextFormFieldState();
@@ -44,29 +46,36 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: TextFormField(
-        controller: _controller,
-        textAlignVertical: TextAlignVertical.top,
-        scrollPadding: EdgeInsets.zero,
-        decoration: InputDecoration(
-          isDense: true,
-          contentPadding: widget.edgeInsets,
-          enabledBorder: UnderlineInputBorder(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 1),
+        child: TextFormField(
+          controller: _controller,
+          textAlignVertical: TextAlignVertical.top,
+          scrollPadding: EdgeInsets.zero,
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: widget.edgeInsets,
+            enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                  width: 2, color: RiveTheme.of(context).colors.separator)),
-          focusedBorder: UnderlineInputBorder(
+                  width: widget.borderWidth,
+                  color: RiveTheme.of(context).colors.separator),
+            ),
+            focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                  width: 2,
-                  color: RiveTheme.of(context).colors.separatorActive)),
-          hintText: widget.hintText,
-          hintStyle: RiveTheme.of(context).textStyles.inspectorPropertyValue,
+                width: widget.borderWidth,
+                color: RiveTheme.of(context).colors.separatorActive,
+              ),
+            ),
+            hintText: widget.hintText,
+            hintStyle: RiveTheme.of(context).textStyles.inspectorPropertyValue,
+          ),
+          style: RiveTheme.of(context).textStyles.inspectorPropertyValue,
+          onChanged: widget.onChanged,
+          onSaved: widget.onComplete,
+          onEditingComplete: () {
+            _formKey.currentState.save();
+          },
         ),
-        style: RiveTheme.of(context).textStyles.inspectorPropertyValue,
-        onChanged: widget.onChanged,
-        onSaved: widget.onComplete,
-        onEditingComplete: () {
-          _formKey.currentState.save();
-        },
       ),
     );
   }
