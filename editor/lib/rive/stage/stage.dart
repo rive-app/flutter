@@ -82,7 +82,7 @@ class Stage extends Debouncer {
       (_activeTool as MoveableTool).mousePosition = _worldMouse;
     } else {
       _activeTool = null;
-    } 
+    }
     _activeTool = value is MoveableTool ? value : null;
   }
 
@@ -545,4 +545,12 @@ class Stage extends Debouncer {
 
   @override
   void onNeedsDebounce() => markNeedsAdvance();
+
+  void updateDraggingMode(DraggingMode draggingMode) {
+    if (_activeTool != null && _activeTool is DraggableTool) {
+      (_activeTool as DraggableTool).draggingMode = draggingMode;
+      (_activeTool as DraggableTool)
+          .updateDrag((_activeTool as DraggableTool).lastWorldMouse);
+    }
+  }
 }

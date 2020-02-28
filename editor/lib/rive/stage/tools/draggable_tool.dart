@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
+enum DraggingMode { manual, symmetric }
+
 mixin DraggableTool {
   Iterable<StageItem> _selection;
   Iterable<StageItem> get selection => _selection;
@@ -12,7 +14,12 @@ mixin DraggableTool {
   Vec2D _worldMouseMove = Vec2D();
   Vec2D get worldMouseMove => _worldMouseMove;
 
-  void startDrag(Iterable<StageItem> selection, Vec2D worldMouse) {
+  DraggingMode draggingMode = DraggingMode.manual;
+
+  void startDrag(
+    Iterable<StageItem> selection,
+    Vec2D worldMouse,
+  ) {
     _selection = selection;
     _lastWorldMouse = worldMouse;
   }

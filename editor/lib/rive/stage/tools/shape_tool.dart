@@ -45,10 +45,35 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
-    _start = Vec2D.fromValues(min(_startWorldMouse[0], worldMouse[0]),
-        min(_startWorldMouse[1], worldMouse[1]));
-    _end = Vec2D.fromValues(max(_startWorldMouse[0], worldMouse[0]),
-        max(_startWorldMouse[1], worldMouse[1]));
+    if (draggingMode == DraggingMode.manual) {
+      _start = Vec2D.fromValues(
+        min(_startWorldMouse[0], worldMouse[0]),
+        min(_startWorldMouse[1], worldMouse[1]),
+      );
+      _end = Vec2D.fromValues(
+        max(_startWorldMouse[0], worldMouse[0]),
+        max(_startWorldMouse[1], worldMouse[1]),
+      );
+    } else if (draggingMode == DraggingMode.symmetric) {
+      final maxChange = max(
+        (_startWorldMouse[0] - worldMouse[0]).abs(),
+        (_startWorldMouse[1] - worldMouse[1]).abs(),
+      );
+      var x1 = (_startWorldMouse[0] < worldMouse[0])
+          ? _startWorldMouse[0]
+          : _startWorldMouse[0] - maxChange;
+      var y1 = (_startWorldMouse[1] < worldMouse[1])
+          ? _startWorldMouse[1]
+          : _startWorldMouse[1] - maxChange;
+      _start = Vec2D.fromValues(
+        x1,
+        y1,
+      );
+      _end = Vec2D.fromValues(
+        _start[0] + maxChange,
+        _start[1] + maxChange,
+      );
+    }
 
     _cursor = Vec2D.clone(worldMouse);
 
