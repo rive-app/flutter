@@ -23,6 +23,7 @@ class InspectorTextField extends StatelessWidget {
       objects: objects,
       propertyKey: propertyKey,
       builder: (context, double value, _) => RiveTextFormField(
+        borderWidth: 2,
         edgeInsets: const EdgeInsets.symmetric(vertical: 3),
         initialValue: value?.toString() ?? '-',
         hintText: '',
