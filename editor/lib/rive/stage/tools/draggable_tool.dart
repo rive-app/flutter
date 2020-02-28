@@ -12,7 +12,10 @@ mixin DraggableTool {
   Vec2D _worldMouseMove = Vec2D();
   Vec2D get worldMouseMove => _worldMouseMove;
 
-  void startDrag(Iterable<StageItem> selection, Vec2D worldMouse) {
+  void startDrag(
+    Iterable<StageItem> selection,
+    Vec2D worldMouse,
+  ) {
     _selection = selection;
     _lastWorldMouse = worldMouse;
   }
