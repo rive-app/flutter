@@ -9,12 +9,14 @@ class RiveTextFormField extends StatefulWidget {
     this.onChanged,
     this.edgeInsets = EdgeInsets.zero,
     Key key,
+    this.borderWidth = 1,
   }) : super(key: key);
 
   final String hintText;
   final String initialValue;
   final ValueChanged<String> onComplete, onChanged;
   final EdgeInsets edgeInsets;
+  final double borderWidth;
 
   @override
   _RiveTextFormFieldState createState() => _RiveTextFormFieldState();
@@ -52,12 +54,16 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
           isDense: true,
           contentPadding: widget.edgeInsets,
           enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                  width: 1, color: RiveTheme.of(context).colors.separator)),
+            borderSide: BorderSide(
+                width: widget.borderWidth,
+                color: RiveTheme.of(context).colors.separator),
+          ),
           focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                  width: 1,
-                  color: RiveTheme.of(context).colors.separatorActive)),
+            borderSide: BorderSide(
+              width: widget.borderWidth,
+              color: RiveTheme.of(context).colors.separatorActive,
+            ),
+          ),
           hintText: widget.hintText,
           hintStyle: RiveTheme.of(context).textStyles.inspectorPropertyValue,
         ),
