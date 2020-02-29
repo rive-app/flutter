@@ -27,6 +27,7 @@ class ChangeEntry {
 }
 
 typedef PropertyChangeCallback = void Function(dynamic from, dynamic to);
+typedef BatchAddCallback = void Function();
 
 abstract class Core<T extends CoreContext> {
   Id id;
@@ -127,6 +128,12 @@ abstract class CoreContext implements LocalSettings {
   /// call onAdded when we're done making the changes and onAdded can be called
   /// with sane/stable data.
   List<Core<CoreContext>> _delayAdd;
+
+  /// Some components may try to alter the hierarchy (in a self-healing attempt)
+  /// during load. In these cases, batchAdd operations cannot be completed until
+  /// the file is fully loaded, so we use this set to track and defer those
+  /// operations.
+  Set<BatchAddCallback> _deferredBatchAdd;
 
   final Map<int, Player> _players = {};
 
@@ -235,6 +242,13 @@ abstract class CoreContext implements LocalSettings {
         }
       }
       _nextObjectId = Id(clientId, maxId + 1);
+
+      // Load is complete, we can now process any deferred batch add operations.
+      if (_deferredBatchAdd != null) {
+        var deferred = Set<BatchAddCallback>.from(_deferredBatchAdd);
+        _deferredBatchAdd = null;
+        deferred.forEach(batchAdd);
+      }
     }
     return result;
   }
@@ -525,14 +539,12 @@ abstract class CoreContext implements LocalSettings {
     if (_delayAdd == null) {
       return;
     }
-    for (final object in _delayAdd) {
-      onAddedDirty(object);
-    }
-    completeChanges();
-    for (final object in _delayAdd) {
-      onAddedClean(object);
-    }
+    var delayed = _delayAdd.toList(growable: false);
     _delayAdd = null;
+
+    delayed.forEach(onAddedDirty);
+    completeChanges();
+    delayed.forEach(onAddedClean);
   }
 
   void _receiveCoopChanges(ChangeSet changes) {
@@ -559,6 +571,28 @@ abstract class CoreContext implements LocalSettings {
     // completeChanges();
     // completeAddClean();
     print("ALL DONE!");
+  }
+
+  /// Add a set of components as a batched operation, cleaning dirt and
+  /// completing after all the components have been added and parented.
+  void batchAdd(BatchAddCallback addCallback) {
+    // Trying to batch add while connecting/loading. We need to defer to when
+    // the load is complete.
+    if (_nextObjectId == null) {
+      _deferredBatchAdd ??= {};
+      _deferredBatchAdd.add(addCallback);
+      return;
+    }
+    // When we're doing a batch add, we always want to be recording.
+    bool wasRecording = _isRecording;
+    _isRecording = true;
+    startAdd();
+
+    addCallback();
+
+    completeAdd();
+
+    _isRecording = wasRecording;
   }
 
   Future<List<ChangeSet>> getOfflineChanges();
