@@ -539,14 +539,12 @@ abstract class CoreContext implements LocalSettings {
     if (_delayAdd == null) {
       return;
     }
-    for (final object in _delayAdd) {
-      onAddedDirty(object);
-    }
-    completeChanges();
-    for (final object in _delayAdd) {
-      onAddedClean(object);
-    }
+    var delayed = _delayAdd.toList(growable: false);
     _delayAdd = null;
+
+    delayed.forEach(onAddedDirty);
+    completeChanges();
+    delayed.forEach(onAddedClean);
   }
 
   void _receiveCoopChanges(ChangeSet changes) {
@@ -592,7 +590,6 @@ abstract class CoreContext implements LocalSettings {
 
     addCallback();
 
-    completeChanges();
     completeAdd();
 
     _isRecording = wasRecording;
