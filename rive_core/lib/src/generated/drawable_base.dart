@@ -3,9 +3,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:fractional/fractional.dart';
-import '../../node.dart';
+import 'package:rive_core/node.dart';
+import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/src/generated/container_component_base.dart';
+import 'package:rive_core/src/generated/node_base.dart';
 
 abstract class DrawableBase extends Node {
+  static const int typeKey = 13;
+  @override
+  int get coreType => DrawableBase.typeKey;
+  @override
+  Set<int> get coreTypes => {
+        DrawableBase.typeKey,
+        NodeBase.typeKey,
+        ContainerComponentBase.typeKey,
+        ComponentBase.typeKey
+      };
+
   /// --------------------------------------------------------------------------
   /// DrawOrder field with key 22.
   FractionalIndex _drawOrder;

@@ -9,7 +9,6 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
 
-import '../inspectable.dart';
 import 'stage.dart';
 
 extension StageItemComponent on Component {
@@ -18,8 +17,6 @@ extension StageItemComponent on Component {
 }
 
 abstract class StageItem<T> extends SelectableItem {
-  Set<InspectorBase> get inspectorItems;
-
   T _component;
   T get component => _component;
 
@@ -37,7 +34,7 @@ abstract class StageItem<T> extends SelectableItem {
 
   /// Override this to temporarily hide items. This shouldn't be used to
   /// permanently hide an item. If an item is no longer necessary it should be
-  /// removed from the stage. 
+  /// removed from the stage.
   bool get isVisible => true;
 
   /// Override this to prevent this item from being clicked on.

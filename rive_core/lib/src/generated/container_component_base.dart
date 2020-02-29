@@ -2,6 +2,14 @@
 /// lib/src/generated/container_component_base.dart.
 /// Do not modify manually.
 
-import '../../component.dart';
+import 'package:rive_core/component.dart';
+import 'package:rive_core/src/generated/component_base.dart';
 
-abstract class ContainerComponentBase extends Component {}
+abstract class ContainerComponentBase extends Component {
+  static const int typeKey = 11;
+  @override
+  int get coreType => ContainerComponentBase.typeKey;
+  @override
+  Set<int> get coreTypes =>
+      {ContainerComponentBase.typeKey, ComponentBase.typeKey};
+}

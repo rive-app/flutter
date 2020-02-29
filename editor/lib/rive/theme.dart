@@ -80,16 +80,16 @@ class TextStyles {
 
   // Inspector
   TextStyle get inspectorPropertyLabel => const TextStyle(
-      fontFamily: 'Roboto-Light', color: Color(0xFF8C8C8C), fontSize: 13);
+      fontFamily: 'Roboto-Regular', color: Color(0xFF8C8C8C), fontSize: 13);
 
   TextStyle get inspectorPropertySubLabel => const TextStyle(
-      fontFamily: 'Roboto-Light', color: Color(0xFF8C8C8C), fontSize: 11);
+      fontFamily: 'Roboto-Regular', color: Color(0xFF8C8C8C), fontSize: 11);
 
   TextStyle get inspectorPropertyValue => const TextStyle(
       fontFamily: 'Roboto-Light', color: Color(0xFFE3E3E3), fontSize: 12.5);
 
-  TextStyle get inspectorSectionHeader =>
-      const TextStyle(fontFamily: 'Roboto-Medium', fontSize: 11);
+  TextStyle get inspectorSectionHeader => const TextStyle(
+      fontFamily: 'Roboto-Medium', fontSize: 11, color: Color(0xFF8C8C8C));
   TextStyle get inspectorButton =>
       const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
 

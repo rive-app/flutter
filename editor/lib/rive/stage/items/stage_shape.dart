@@ -2,10 +2,8 @@ import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/shapes/shape.dart';
-import 'package:rive_editor/rive/inspectable.dart';
 
 import '../stage_item.dart';
 
@@ -32,82 +30,4 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
               ? const Color.fromRGBO(100, 100, 100, 1.0)
               : const Color.fromRGBO(200, 200, 200, 1.0));
   }
-
-  @override
-  Set<InspectorBase> get inspectorItems => {
-        InspectorGroup(
-          name: null,
-          children: [
-            InspectorItem(name: 'Position', properties: [
-              InspectorProperty(key: NodeBase.xPropertyKey, label: 'X'),
-              InspectorProperty(key: NodeBase.yPropertyKey, label: 'Y'),
-            ]),
-            InspectorItem(
-              name: 'Scale',
-              properties: [
-                InspectorProperty(key: NodeBase.scaleXPropertyKey, label: 'X'),
-                InspectorProperty(key: NodeBase.scaleYPropertyKey, label: 'Y'),
-              ],
-              linkable: true,
-            ),
-            InspectorItem(
-              name: 'Rotate',
-              properties: [
-                InspectorProperty(
-                  key: NodeBase.rotationPropertyKey,
-                ),
-              ],
-              linkable: true,
-            ),
-          ],
-        ),
-        InspectorGroup(
-          name: null,
-          children: [
-            InspectorItem(
-              name: 'Opacity',
-              properties: [
-                InspectorProperty(
-                  key: NodeBase.opacityPropertyKey,
-                ),
-              ],
-            ),
-          ],
-        ),
-        InspectorGroup(
-          name: 'Bind Bones',
-          canAdd: true,
-          children: [],
-        ),
-        InspectorGroup(
-          name: 'Masks',
-          canAdd: true,
-          children: [],
-        ),
-        InspectorGroup(
-          name: 'Clipping Paths',
-          canAdd: true,
-          children: [],
-        ),
-        InspectorGroup(
-          name: 'Effects',
-          canAdd: true,
-          children: [],
-        ),
-        InspectorGroup(
-          name: 'Constraints',
-          canAdd: true,
-          children: [],
-        ),
-        InspectorGroup(
-          name: 'Events',
-          canAdd: true,
-          children: [],
-        ),
-        InspectorGroup(
-          name: 'Custom Properties',
-          canAdd: true,
-          children: [],
-        ),
-      };
 }

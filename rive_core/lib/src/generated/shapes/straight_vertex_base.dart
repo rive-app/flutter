@@ -3,12 +3,20 @@
 /// Do not modify manually.
 
 import 'package:flutter/material.dart';
-import '../../../shapes/path_vertex.dart';
+import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 
 abstract class StraightVertexBase extends PathVertex {
   static const int typeKey = 5;
   @override
   int get coreType => StraightVertexBase.typeKey;
+  @override
+  Set<int> get coreTypes => {
+        StraightVertexBase.typeKey,
+        PathVertexBase.typeKey,
+        ComponentBase.typeKey
+      };
 
   /// --------------------------------------------------------------------------
   /// Radius field with key 26.

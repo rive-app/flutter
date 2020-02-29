@@ -1,22 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:rive_core/component.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/rive/inspectable.dart';
 import 'package:rive_editor/rive/selection_context.dart';
-import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/widgets/common/custom_expansion_tile.dart';
-import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
-import 'package:rive_editor/widgets/inspector/properties/property_single.dart';
+import 'package:rive_editor/widgets/inspector/inspection_set.dart';
+import 'package:rive_editor/widgets/inspector/inspector_builders.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
 
-class InspectorPanel extends StatelessWidget {
+Widget _dividerBuilder(BuildContext context) => InspectorDivider();
+
+class InspectorPanel extends StatefulWidget {
   const InspectorPanel({
     Key key,
   }) : super(key: key);
+
+  @override
+  _InspectorPanelState createState() => _InspectorPanelState();
+}
+
+class _InspectorPanelState extends State<InspectorPanel> {
+  // Ugh. We could call setState, with no changes too...
+  void rebuild() => (context as Element).markNeedsBuild();
+
+  final Set<ChangeNotifier> _changeNotifiers = {};
+
+  void _removeListeners() {
+    for (final changeNotifier in _changeNotifiers) {
+      changeNotifier.removeListener(rebuild);
+    }
+  }
+
+  @override
+  void dispose() {
+    _removeListeners();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +44,64 @@ class InspectorPanel extends StatelessWidget {
       child: ListenableBuilder(
         listenable: rive.selection,
         builder: (context, SelectionContext<SelectableItem> selection, _) {
-          if (selection.isEmpty) {
+
+          // Let the inpsection set whittle down groupings and commonly selected
+          // coreTypes for the inspector builders to use to determine if there
+          // are things they can help inspect.
+          var inspectionSet = InspectionSet.fromSelection(selection);
+
+          // Remove previous listeners, these listen to inspector builders
+          // wanting to change the contents in the full inspection list item.
+          // Basically any one of them can request a rebuild of the inspection
+          // list.
+          _removeListeners();
+
+          // Expand the builders and interleave dividers.
+          List<WidgetBuilder> builders = [];
+          for (int i = 0, builderCount = inspectorBuilders.length;
+              i < builderCount;
+              i++) {
+            var builder = inspectorBuilders[i];
+
+            // Is the builder interested in the current inspection set?
+            if (!builder.validate(inspectionSet)) {
+              continue;
+            }
+
+            // Check if the builder can re-expand on demand (useful for
+            // InspectorGroups).
+            if (builder is ChangeNotifier) {
+              var notifier = builder as ChangeNotifier;
+              notifier.addListener(rebuild);
+              _changeNotifiers.add(notifier);
+            }
+
+            var expand = builder.expand(inspectionSet);
+            if (expand != null && expand.isNotEmpty) {
+              builders.addAll(expand);
+              if (i != builderCount - 1) {
+                builders.add(_dividerBuilder);
+              }
+            }
+          }
+          if (builders.isNotEmpty) {
+            // At this point we've built a list of builders (no real widgets
+            // yet). That's to allow the ListView to build them on demand
+            // depending on what's scrolled into view. We take care to make list
+            // items the same height (or as similar as possible) in order to
+            // gaurantee a smooth scrolling experience when virtualizing lots of
+            // items. This is why group expansion works by adding more items to
+            // the ListView instead of just creating one large item in the
+            // ListView.
+            return Scrollbar(
+              child: ListView.builder(
+                itemBuilder: (context, index) => builders[index](context),
+                itemCount: builders.length,
+              ),
+            );
+          } else {
+            // After all our work, no builders were available for this set. Let
+            // the user know to select something useful.
             return Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -35,7 +110,7 @@ class InspectorPanel extends StatelessWidget {
                 children: <Widget>[
                   Container(
                     child: const Text(
-                      "No Selection",
+                      'No Selection',
                       style: TextStyle(
                         color: ThemeUtils.textWhite,
                         fontSize: 13,
@@ -45,115 +120,20 @@ class InspectorPanel extends StatelessWidget {
                   Container(height: 10),
                   Container(
                     child: const Text(
-                      "Select something to view its properties and options.",
+                      'Select something to view its properties and options.',
                       style: TextStyle(
                         color: ThemeUtils.textGreyLight,
                         fontSize: 13,
                       ),
                     ),
                   ),
-                  KILLME_ComboExamples()
                 ],
               ),
             );
           }
-
-          var stageItems =
-              selection.items.whereType<StageItem>().toList(growable: false);
-
-          var componentItems = stageItems
-              .map<Component>((stageItem) => stageItem.component as Component)
-              .toList(growable: false);
-
-          Set<InspectorBase> inspectorItems = {};
-          for (final item in stageItems) {
-            // Todo: ensure they do not overlap
-            var inspItems = item.inspectorItems;
-            inspectorItems.addAll(inspItems);
-          }
-
-          var listItems = <Widget>[];
-          listItems.add(Padding(
-            padding:
-                const EdgeInsets.only(top: 13, bottom: 11, left: 10, right: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                for (var i = 1; i <= 8; i++)
-                  Flexible(
-                    flex: 1,
-                    child: Container(
-                      child: Transform.scale(
-                        scale: 0.5,
-                        child: TintedIcon(
-                          color: RiveTheme.of(context)
-                              .textStyles
-                              .inspectorPropertyLabel
-                              .color,
-                          icon: 'align$i',
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ));
-          listItems.add(InspectorDivider());
-          listItems.add(const SizedBox(height: 14));
-          for (final inspectorItem in inspectorItems) {
-            if (inspectorItem is InspectorGroup) {
-              if (inspectorItem.name == null) {
-                for (final child in inspectorItem.children) {
-                  listItems.add(buildItem(child, componentItems));
-                }
-                listItems.add(const SizedBox(height: 14));
-                listItems.add(InspectorDivider());
-              } else {
-                listItems.add(CustomExpansionTile(
-                  title: Text(inspectorItem.name),
-                  initiallyExpanded: inspectorItem.isExpanded.value,
-                  expanded: inspectorItem.isExpanded,
-                  children: <Widget>[
-                    for (final child in inspectorItem.children) ...[
-                      if (child is InspectorItem) ...[
-                        buildItem(child, componentItems)
-                      ]
-                    ]
-                  ],
-                ));
-                listItems.add(const SizedBox(height: 14));
-                listItems.add(InspectorDivider());
-              }
-            } else if (inspectorItem is InspectorItem) {
-              listItems.add(buildItem(inspectorItem, componentItems));
-            }
-          }
-
-          return ListView(children: listItems);
         },
       ),
     );
-  }
-
-  Widget buildItem(InspectorItem item, List<Component> selectedComponents) {
-    if (item.properties.length == 2) {
-      return PropertyDual(
-          name: item.name,
-          objects: selectedComponents,
-          propertyKeyA: item.properties[0].key,
-          propertyKeyB: item.properties[1].key,
-          labelA: item.properties[0].label,
-          labelB: item.properties[1].label,
-          linkable: item.linkable);
-    }
-    if (item.properties.length == 1) {
-      return PropertySingle(
-        name: item.name,
-        objects: selectedComponents,
-        propertyKey: item.properties[0].key,
-      );
-    }
-    return Container();
   }
 }
 
@@ -161,179 +141,15 @@ class InspectorDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.only(
+        left: 20,
+        top: 10,
+        bottom: 10,
+      ),
       child: const Divider(
         height: 1,
         color: Color(0xFF444444),
       ),
-    );
-  }
-}
-
-/// luigi: All of the code below here is just for example purposes to show how
-/// to interface with the new combo-boxes. Feel free to pour napalm all over
-/// this at any point. Maybe I should move it to Notion or a ReadMe or
-/// something.
-enum _FakeBlendModes {
-  none,
-  srcIn,
-  srcOut,
-  additive,
-  multiply,
-  blah,
-  blahBlahBlah
-}
-
-class KILLME_ComboExamples extends StatefulWidget {
-  static const busters = [
-    'Spengler',
-    'Zeddemore',
-    'Stantz',
-    'Venkman',
-  ];
-
-  @override
-  _KILLME_ComboExamplesState createState() => _KILLME_ComboExamplesState();
-}
-
-class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
-  String _buster1;
-  String _buster2;
-  _FakeBlendModes _blendMode;
-
-  @override
-  void initState() {
-    super.initState();
-    _blendMode = _FakeBlendModes.none;
-    _buster1 = KILLME_ComboExamples.busters.first;
-    _buster2 = KILLME_ComboExamples.busters.last;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 20),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            // Padding around text label to align baseline of combo box. This
-            // might need to be handled differently in production to assure rows
-            // are of the same heights.
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                'Hero',
-                style: RiveTheme.of(context)
-                    .textStyles
-                    .basic
-                    .copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(
-              width: 40,
-            ),
-            ComboBox(
-              expanded: true,
-              typeahead: true,
-              options: KILLME_ComboExamples.busters,
-              value: _buster1,
-              chooseOption: (String buster) {
-                setState(() {
-                  _buster1 = buster;
-                });
-              },
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            // Padding around text label to align baseline of combo box. This
-            // might need to be handled differently in production to assure rows
-            // are of the same heights.
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                'Hero',
-                style: RiveTheme.of(context)
-                    .textStyles
-                    .basic
-                    .copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(
-              width: 40,
-            ),
-            ComboBox(
-              expanded: true,
-              options: KILLME_ComboExamples.busters,
-              value: _buster2,
-              chooseOption: (String buster) {
-                setState(() {
-                  _buster2 = buster;
-                });
-              },
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            // Padding around text label to align baseline of combo box. This
-            // might need to be handled differently in production to assure rows
-            // are of the same heights.
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                'Blend Mode',
-                style: RiveTheme.of(context)
-                    .textStyles
-                    .basic
-                    .copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(
-              width: 40,
-            ),
-            ComboBox(
-              expanded: true,
-              options: _FakeBlendModes.values,
-              chooseOption: (_FakeBlendModes blendMode) {
-                setState(() {
-                  _blendMode = blendMode;
-                });
-              },
-              toLabel: (_FakeBlendModes blendMode) {
-                switch (blendMode) {
-                  case _FakeBlendModes.none:
-                    return "None";
-                  case _FakeBlendModes.additive:
-                    return "Additive";
-                  case _FakeBlendModes.blah:
-                    return "Blah";
-                  case _FakeBlendModes.blahBlahBlah:
-                    return "Blah blah blah";
-                  case _FakeBlendModes.multiply:
-                    return "Multiply";
-                  case _FakeBlendModes.srcIn:
-                    return "Source In";
-                  case _FakeBlendModes.srcOut:
-                    return "Source Out";
-                }
-                return "???";
-              },
-              value: _blendMode,
-            )
-          ],
-        ),
-      ],
     );
   }
 }

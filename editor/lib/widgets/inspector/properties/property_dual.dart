@@ -20,7 +20,7 @@ class PropertyDual extends StatelessWidget {
     @required this.propertyKeyB,
     this.name,
     this.iconName,
-    this.linkable,
+    this.linkable = false,
     this.labelA = '',
     this.labelB = '',
     Key key,

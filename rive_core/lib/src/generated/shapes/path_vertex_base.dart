@@ -2,9 +2,16 @@
 /// Do not modify manually.
 
 import 'package:flutter/material.dart';
-import '../../../component.dart';
+import 'package:rive_core/component.dart';
+import 'package:rive_core/src/generated/component_base.dart';
 
 abstract class PathVertexBase extends Component {
+  static const int typeKey = 14;
+  @override
+  int get coreType => PathVertexBase.typeKey;
+  @override
+  Set<int> get coreTypes => {PathVertexBase.typeKey, ComponentBase.typeKey};
+
   /// --------------------------------------------------------------------------
   /// X field with key 24.
   double _x;

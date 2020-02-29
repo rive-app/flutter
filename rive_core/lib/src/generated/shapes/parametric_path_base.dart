@@ -3,9 +3,25 @@
 /// Do not modify manually.
 
 import 'package:flutter/material.dart';
-import '../../../shapes/path.dart';
+import 'package:rive_core/shapes/path.dart';
+import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/src/generated/container_component_base.dart';
+import 'package:rive_core/src/generated/node_base.dart';
+import 'package:rive_core/src/generated/shapes/path_base.dart';
 
 abstract class ParametricPathBase extends Path {
+  static const int typeKey = 15;
+  @override
+  int get coreType => ParametricPathBase.typeKey;
+  @override
+  Set<int> get coreTypes => {
+        ParametricPathBase.typeKey,
+        PathBase.typeKey,
+        NodeBase.typeKey,
+        ContainerComponentBase.typeKey,
+        ComponentBase.typeKey
+      };
+
   /// --------------------------------------------------------------------------
   /// Width field with key 20.
   double _width;
