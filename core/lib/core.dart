@@ -245,10 +245,9 @@ abstract class CoreContext implements LocalSettings {
 
       // Load is complete, we can now process any deferred batch add operations.
       if (_deferredBatchAdd != null) {
-        for (final operation in _deferredBatchAdd) {
-          operation();
-        }
+        var deferred = Set<BatchAddCallback>.from(_deferredBatchAdd);
         _deferredBatchAdd = null;
+        deferred.forEach(batchAdd);
       }
     }
     return result;
