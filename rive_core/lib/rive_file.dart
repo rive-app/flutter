@@ -211,6 +211,7 @@ class RiveFile extends RiveCoreContext {
 
   @override
   void onAddedClean(Component object) {
+    object.onAdded();
     delegates.forEach((delegate) => delegate.onObjectAdded(object));
     if (object is Artboard) {
       artboards.add(object);

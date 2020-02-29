@@ -3,10 +3,10 @@ import 'dart:ui';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/user_path.dart';
+import 'package:rive_core/shapes/path_composer.dart';
 
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
@@ -61,7 +61,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   }
 
   void _paintVertex(Canvas canvas, Vec2D position) {
-    // Draw twice: once for the background stroke, and a second time for 
+    // Draw twice: once for the background stroke, and a second time for
     // the foreground
     canvas.drawCircle(Offset(position[0], position[1]), 4.5,
         Paint()..color = const Color(0x19000000));
@@ -82,8 +82,8 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   }
 
   void _paintEdges(Canvas canvas) {
-    if (_shape != null) {
-      final uiPath = _shape.uiPath;
+    if (_shape != null && _shape.pathComposer != null) {
+      final uiPath = _shape.pathComposer.uiPath;
       canvas.save();
       canvas.transform(stage.viewTransform.mat4);
       // Once for the background.
@@ -132,8 +132,11 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
         ..scaleY = 1
         ..opacity = 1;
       // Add the path to the file and the shape
-      _addToFile(rive.file.value, _path);
-      _shape.appendChild(_path);
+      var file = rive.file.value;
+      file.batchAdd(() {
+        file.add(_path);
+        _shape.appendChild(_path);
+      });
     }
     // Create the vertex and add it to the path
     _path.addVertex(localCoord[0], localCoord[1]);
@@ -168,17 +171,16 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
       ..scaleX = 1
       ..scaleY = 1
       ..opacity = 1;
+    var composer = PathComposer();
     // Add shape to the file; its stage equivalent is also created
-    _addToFile(rive.file.value, _shape);
-    // Add shape to the artboard
-    _activeArtBoard(rive.file.value).appendChild(_shape);
-  }
-
-  void _addToFile(RiveFile file, Node node) {
-    file.startAdd();
-    file.add(node);
-    file.cleanDirt();
-    file.completeAdd();
+    var file = rive.file.value;
+    file.batchAdd(() {
+      file.add(_shape);
+      file.add(composer);
+      _shape.appendChild(composer);
+      // Add shape to the artboard
+      _activeArtBoard(rive.file.value).appendChild(_shape);
+    });
   }
 
   // TODO: need to track the active artboard
