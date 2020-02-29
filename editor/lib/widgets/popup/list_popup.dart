@@ -213,6 +213,7 @@ class ListPopup<T extends PopupListItem> {
     double width = 177,
     double margin = 10,
     Offset offset = const Offset(0, 10),
+    // Flag to display the small arrow at the top of the popup
     bool showArrow = true,
     Alignment alignment = Alignment.bottomLeft,
     List<T> items = const [],
@@ -278,7 +279,7 @@ class ListPopup<T extends PopupListItem> {
                     showArrow
                         ? PathWidget(
                             path: _pathArrow,
-                            nudge: const Offset(10, 0),
+                            nudge: const Offset(15, 0),
                             paint: Paint()
                               ..color = background
                               ..style = PaintingStyle.fill

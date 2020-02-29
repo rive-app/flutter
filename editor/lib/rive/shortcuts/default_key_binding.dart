@@ -44,7 +44,8 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(
       ShortcutAction.pickParent,
       [
-        ShortcutKey.p,
+        ShortcutKey.shift,
+        ShortcutKey.c,
       ],
     ),
     Shortcut(
@@ -154,7 +155,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(
       ShortcutAction.paintWeightTool,
       [
-        ShortcutKey.p,
+        ShortcutKey.w,
       ],
     ),
     Shortcut(
@@ -172,7 +173,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(
       ShortcutAction.penTool,
       [
-        ShortcutKey.v,
+        ShortcutKey.p,
       ],
     ),
     Shortcut(

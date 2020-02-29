@@ -63,6 +63,7 @@ class Stage extends Debouncer {
   double _viewZoomTarget = 1;
   Vec2D _worldMouse = Vec2D();
   bool _mouseDownSelected = false;
+  EditMode activeEditMode = EditMode.normal;
 
   StageDelegate _delegate;
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
@@ -82,7 +83,7 @@ class Stage extends Debouncer {
       (_activeTool as MoveableTool).mousePosition = _worldMouse;
     } else {
       _activeTool = null;
-    } 
+    }
     _activeTool = value is MoveableTool ? value : null;
   }
 
@@ -290,16 +291,23 @@ class Stage extends Debouncer {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
-    if (_activeTool is ClickableTool) {
-      (_activeTool as ClickableTool).onClick(_worldMouse);
+    switch (button) {
+      case 1:
+        if (_activeTool is ClickableTool) {
+          (_activeTool as ClickableTool).onClick(_worldMouse);
+        } else {
+          if (_hoverItem != null) {
+            _mouseDownSelected = true;
+            rive.select(_hoverItem);
+          } else {
+            _mouseDownSelected = false;
+          }
+        }
+
+        break;
+      default:
     }
 
-    if (_hoverItem != null) {
-      _mouseDownSelected = true;
-      rive.select(_hoverItem);
-    } else {
-      _mouseDownSelected = false;
-    }
   }
 
   void mouseDrag(int button, double x, double y) {
@@ -324,6 +332,7 @@ class Stage extends Debouncer {
           // [_activeTool] is [null] before dragging operation starts.
           if (_activeTool == null) {
             _activeTool = tool;
+            _activeTool.setEditMode(activeEditMode);
             (_activeTool as DraggableTool).startDrag(
                 rive.selection.items.whereType<StageItem>(), _worldMouse);
           } else {
@@ -540,4 +549,11 @@ class Stage extends Debouncer {
 
   @override
   void onNeedsDebounce() => markNeedsAdvance();
+
+  void updateEditMode(EditMode editMode) {
+    activeEditMode = editMode;
+    if (_activeTool != null && _activeTool is DraggableTool) {
+      _activeTool.setEditMode(editMode);
+    }
+  }
 }

@@ -11,6 +11,12 @@ import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/theme.dart';
 
+enum DraggingMode { symmetric }
+
+const Map<EditMode, DraggingMode> editModeMap = {
+  EditMode.altMode1: DraggingMode.symmetric
+};
+
 abstract class ShapeTool extends StageTool with DraggableTool {
   Vec2D _startWorldMouse;
   Vec2D _start = Vec2D(), _end = Vec2D(), _cursor = Vec2D();
@@ -47,10 +53,37 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
-    _start = Vec2D.fromValues(min(_startWorldMouse[0], worldMouse[0]),
-        min(_startWorldMouse[1], worldMouse[1]));
-    _end = Vec2D.fromValues(max(_startWorldMouse[0], worldMouse[0]),
-        max(_startWorldMouse[1], worldMouse[1]));
+    switch (editModeMap[editMode]) {
+      case DraggingMode.symmetric:
+        final maxChange = max(
+          (_startWorldMouse[0] - worldMouse[0]).abs(),
+          (_startWorldMouse[1] - worldMouse[1]).abs(),
+        );
+        var x1 = (_startWorldMouse[0] < worldMouse[0])
+            ? _startWorldMouse[0]
+            : _startWorldMouse[0] - maxChange;
+        var y1 = (_startWorldMouse[1] < worldMouse[1])
+            ? _startWorldMouse[1]
+            : _startWorldMouse[1] - maxChange;
+        _start = Vec2D.fromValues(
+          x1,
+          y1,
+        );
+        _end = Vec2D.fromValues(
+          _start[0] + maxChange,
+          _start[1] + maxChange,
+        );
+        break;
+      default:
+        _start = Vec2D.fromValues(
+          min(_startWorldMouse[0], worldMouse[0]),
+          min(_startWorldMouse[1], worldMouse[1]),
+        );
+        _end = Vec2D.fromValues(
+          max(_startWorldMouse[0], worldMouse[0]),
+          max(_startWorldMouse[1], worldMouse[1]),
+        );
+    }
 
     _cursor = Vec2D.clone(worldMouse);
 
@@ -92,7 +125,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
         Paint()
           ..strokeWidth = 1
           ..style = PaintingStyle.stroke
-          ..color = const Color(0xFF000000));
+          ..color = RiveThemeData().colors.shapeBounds);
 
     _paintToolTip(
         canvas,
@@ -106,7 +139,9 @@ abstract class ShapeTool extends StageTool with DraggableTool {
         textAlign: TextAlign.left, fontFamily: 'Roboto-Light', fontSize: 11);
     ParagraphBuilder builder = ParagraphBuilder(style)
       ..pushStyle(
-        TextStyle(foreground: Paint()..color = const Color(0xFFFFFFFF)),
+        TextStyle(
+          foreground: Paint()..color = RiveThemeData().colors.toolTipText,
+        ),
       );
     builder.addText(text);
     Paragraph paragraph = builder.build();
@@ -114,58 +149,41 @@ abstract class ShapeTool extends StageTool with DraggableTool {
     List<TextBox> boxes = paragraph.getBoxesForRange(0, text.length);
     var size = boxes.isEmpty
         ? Size.zero
-        : Size(boxes.last.right - boxes.first.left,
-            boxes.last.bottom - boxes.first.top);
+        : Size(boxes.last.right - boxes.first.left + 1,
+            boxes.last.bottom - boxes.first.top + 1);
 
     var offset = const Offset(10, 10);
-    var padding = const Size(10, 10);
+    var padding = const Size(10, 6);
 
-    // Draw the tooltip background
-    canvas.drawPath(
-        _roundedRectPath(
-          Vec2D.fromValues(
-            pos[0] + offset.dx,
-            pos[1] + offset.dy,
-          ),
+    // Fix the position to full pixels.
+    // Which will line this up better with the paragraph
+    var topLeft = (pos[0] + offset.dx).floorToDouble();
+    var topRight = (pos[1] + offset.dy).floorToDouble();
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          topLeft,
+          topRight,
           size.width + padding.width * 2,
           size.height + padding.height * 2,
-          5,
         ),
-        Paint()..color = RiveThemeData().colors.toolTip);
+        const Radius.circular(5),
+      ),
+      Paint()..color = RiveThemeData().colors.toolTip,
+    );
 
     // Draw the tooltip text
     canvas.drawParagraph(
-        paragraph,
-        Offset(pos[0] + offset.dx + padding.width,
-            pos[1] + offset.dy + padding.height));
+      paragraph,
+      Offset(topLeft + padding.width, topRight + padding.height),
+    );
+  }
+
+  @override
+  void onEditModeChange() {
+    // if the edit mode is changed lets just treat it as a fake drag.
+    if (lastWorldMouse != null) {
+      updateDrag(lastWorldMouse);
+    }
   }
 }
-
-/// Draws a rounded rectangle whose top left corner is pos, using
-/// the given width and height; radius defines the roundedness of each corner.
-Path _roundedRectPath(Vec2D pos, double width, double height, double radius) =>
-    Path()
-      ..moveTo(pos[0] + width - radius, pos[1])
-      ..arcTo(
-          Rect.fromLTWH(
-              pos[0] + width - (radius * 2), pos[1], radius * 2, radius * 2),
-          pi * 3 / 2,
-          pi / 2,
-          false)
-      ..lineTo(pos[0] + width, pos[1] + height - radius)
-      ..arcTo(
-          Rect.fromLTWH(pos[0] + width - (radius * 2),
-              pos[1] + height - (radius * 2), radius * 2, radius * 2),
-          0,
-          pi / 2,
-          false)
-      ..lineTo(pos[0] + radius, pos[1] + height)
-      ..arcTo(
-          Rect.fromLTWH(
-              pos[0], pos[1] + height - (radius * 2), radius * 2, radius * 2),
-          pi / 2,
-          pi / 2,
-          false)
-      ..lineTo(pos[0], pos[1] + radius)
-      ..arcTo(Rect.fromLTWH(pos[0], pos[1], radius * 2, radius * 2), pi, pi / 2,
-          false);

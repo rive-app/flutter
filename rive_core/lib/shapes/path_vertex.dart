@@ -8,4 +8,9 @@ abstract class PathVertex extends PathVertexBase {
     x = value[0];
     y = value[1];
   }
+
+  @override
+  String toString() {
+    return translation.toString();
+  }
 }
