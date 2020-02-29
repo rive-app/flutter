@@ -35,6 +35,8 @@ abstract class Core<T extends CoreContext> {
   T context;
   int get coreType;
 
+  Set<int> get coreTypes => {};
+
   HashMap<int, Set<PropertyChangeCallback>> _changeListeners;
 
   @protected

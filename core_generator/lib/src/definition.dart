@@ -6,6 +6,7 @@ import 'package:core_generator/src/field_types/id_field_type.dart';
 import 'package:dart_style/dart_style.dart';
 
 import 'comment.dart';
+import 'configuration.dart';
 import 'key.dart';
 import 'property.dart';
 
@@ -22,18 +23,18 @@ class Definition {
 
   String _name;
 
-  String _basePath;
+  final Configuration config;
   final List<Property> _properties = [];
   Definition _extensionOf;
   Key _key;
   bool _isAbstract = false;
-  factory Definition(String basePath, String filename) {
+  factory Definition(Configuration config, String filename) {
     var definition = definitions[filename];
     if (definition != null) {
       return definition;
     }
 
-    var file = File(basePath + filename);
+    var file = File(config.path + filename);
     var contents = file.readAsStringSync();
     Map<String, dynamic> definitionData;
     try {
@@ -45,15 +46,15 @@ class Definition {
       color('Invalid json data in $filename: $error', front: Styles.RED);
       return null;
     }
-    definitions[filename] = definition =
-        Definition.fromFilename(basePath, filename, definitionData);
+    definitions[filename] =
+        definition = Definition.fromFilename(config, filename, definitionData);
     return definition;
   }
   Definition.fromFilename(
-      this._basePath, this._filename, Map<String, dynamic> data) {
+      this.config, this._filename, Map<String, dynamic> data) {
     dynamic extendsFilename = data['extends'];
     if (extendsFilename is String) {
-      _extensionOf = Definition(_basePath, extendsFilename);
+      _extensionOf = Definition(config, extendsFilename);
     }
     dynamic nameValue = data['name'];
     if (nameValue is String) {
@@ -63,9 +64,7 @@ class Definition {
     if (abstractValue is bool) {
       _isAbstract = abstractValue;
     }
-    _key = _isAbstract
-        ? null
-        : Key.fromJSON(data['key']) ?? Key.forDefinition(this);
+    _key = Key.fromJSON(data['key']) ?? Key.forDefinition(this);
 
     dynamic properties = data['properties'];
     if (properties is Map<String, dynamic>) {
@@ -77,8 +76,8 @@ class Definition {
       }
     }
   }
-  String get localFilename => _filename.indexOf(_basePath) == 0
-      ? _filename.substring(_basePath.length)
+  String get localFilename => _filename.indexOf(config.path) == 0
+      ? _filename.substring(config.path.length)
       : _filename;
 
   String get name => _name;
@@ -88,13 +87,23 @@ class Definition {
   String get codeFilename => 'lib/src/generated/$localCodeFilename';
 
   /// Generates Dart code based on the Definition
-  void generateCode(
-      String outputFolder, String coreContextName, String snakeContextName) {
+  void generateCode(String snakeContextName) {
     String filename = codeFilename;
     Set<String> imports = {};
     final code =
         StringBuffer(comment('Core automatically generated $filename.'));
     code.writeln(comment('Do not modify manually.'));
+
+    // Build list of classes we extend.
+    List<Definition> definitionHierarchy = [];
+    for (var d = this; d != null; d = d._extensionOf) {
+      definitionHierarchy.add(d);
+      // don't import self
+      if (d != this) {
+        imports.add(
+            'import \'package:${config.packageName}/src/generated/${d.localCodeFilename}\';');
+      }
+    }
     if (_extensionOf == null || _properties.isNotEmpty) {
       // We need core if we need PropertyChanger or Core to inherit from.
 
@@ -114,15 +123,10 @@ class Definition {
       imports.add('import \'${property.type.import}\';');
     }
 
+    // If we extend another class, we need the import for the concrete version.
     if (_extensionOf != null) {
-      int foldersUp = '/'.allMatches(_filename).length;
-      StringBuffer prefix = StringBuffer('../../');
-      while (foldersUp != 0) {
-        prefix.write('../');
-        foldersUp--;
-      }
       imports.add(
-          'import \'$prefix${stripExtension(_extensionOf._filename)}.dart\';');
+          'import \'package:${config.packageName}/${_extensionOf.concreteCodeFilename}\';');
     }
 
     bool defineContextExtension = _extensionOf?._name == null;
@@ -137,15 +141,16 @@ class Definition {
     code.writeAll(
         importList.where((item) => item.indexOf('import \'package:') != 0),
         '\n');
-    // code.writeAll(importList, '\n');
 
     code.write(
-        '''abstract class ${_name}Base${defineContextExtension ? '<T extends $coreContextName>' : ''} 
+        '''abstract class ${_name}Base${defineContextExtension ? '<T extends ${config.coreContextName}>' : ''} 
             extends ${_extensionOf?._name ?? 'Core<T>'} {''');
-    if (!_isAbstract) {
-      code.write('static const int typeKey = ${_key.intValue};');
-      code.write('@override int get coreType => ${_name}Base.typeKey;');
-    }
+    code.write('static const int typeKey = ${_key.intValue};');
+    code.write('@override int get coreType => ${_name}Base.typeKey;');
+
+    code.write('''@override 
+            Set<int> get coreTypes => 
+              {${definitionHierarchy.map((d) => '${d._name}Base.typeKey').join(',')}};''');
     for (final field in _properties) {
       code.write(field.generateCode());
     }
@@ -180,11 +185,11 @@ class Definition {
     }
     code.writeln('}');
 
-    var folder = outputFolder != null &&
-            outputFolder.isNotEmpty &&
-            outputFolder[outputFolder.length - 1] == '/'
-        ? outputFolder.substring(0, outputFolder.length - 1)
-        : outputFolder;
+    var output = config.output;
+    var folder =
+        output != null && output.isNotEmpty && output[output.length - 1] == '/'
+            ? output.substring(0, output.length - 1)
+            : output;
 
     var file = File('$folder/$filename');
     file.createSync(recursive: true);
@@ -195,7 +200,7 @@ class Definition {
   void save() {
     var data = serialize();
     var serialized = const JsonEncoder.withIndent('  ').convert(data);
-    var file = File(_basePath + _filename);
+    var file = File(config.path + _filename);
     file.writeAsStringSync(serialized);
   }
 
@@ -229,8 +234,7 @@ class Definition {
   }
 
   static const int minPropertyId = 3;
-  static bool generate(
-      String outputFolder, String coreContextName, bool regenerateKeys) {
+  static bool generate(Configuration config) {
     // Check dupe ids.
     bool runGenerator = true;
     Map<int, Definition> ids = {};
@@ -247,7 +251,7 @@ class Definition {
         }
       }
       for (final property in definition._properties) {
-        if (regenerateKeys) {
+        if (config.regenerateKeys) {
           property.key = property.key.withIntValue(null);
         }
         if (property.key.isMissing) {
@@ -322,12 +326,12 @@ class Definition {
     }
 
     // Generate core context.
-    var snakeContextName = coreContextName.replaceAllMapped(
+    var snakeContextName = config.coreContextName.replaceAllMapped(
         RegExp('(.+?)([A-Z])'),
         (Match m) => "${m[1].toLowerCase()}_${m[2].toLowerCase()}");
 
     for (final definition in definitions.values) {
-      definition.generateCode(outputFolder, coreContextName, snakeContextName);
+      definition.generateCode(snakeContextName);
     }
 
     StringBuffer ctxCode =
@@ -356,8 +360,10 @@ class Definition {
     imports.sort();
     ctxCode.writeAll(imports);
 
-    ctxCode.writeln('abstract class $coreContextName extends CoreContext {');
-    ctxCode.writeln('$coreContextName(String fileId) : super(fileId);\n');
+    ctxCode.writeln('''abstract class ${config.coreContextName}
+                        extends CoreContext {''');
+    ctxCode.writeln('''${config.coreContextName}(String fileId) 
+                        : super(fileId);\n''');
 
     ctxCode.writeln('''@override
     Core makeCoreInstance(int typeKey) {
@@ -523,11 +529,11 @@ class Definition {
     }
     ctxCode.writeln('}return null;}}');
 
-    var folder = outputFolder != null &&
-            outputFolder.isNotEmpty &&
-            outputFolder[outputFolder.length - 1] == '/'
-        ? outputFolder.substring(0, outputFolder.length - 1)
-        : outputFolder;
+    var output = config.output;
+    var folder =
+        output != null && output.isNotEmpty && output[output.length - 1] == '/'
+            ? output.substring(0, output.length - 1)
+            : output;
 
     var file = File('$folder/lib/src/generated/$snakeContextName.dart');
     file.createSync(recursive: true);
