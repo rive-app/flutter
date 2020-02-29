@@ -1,5 +1,9 @@
 {
   "name": "PathVertex",
+  "key": {
+    "int": 14,
+    "string": "pathvertex"
+  },
   "abstract": true,
   "extends": "component.json",
   "properties": {

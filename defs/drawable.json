@@ -1,5 +1,9 @@
 {
   "name": "Drawable",
+  "key": {
+    "int": 13,
+    "string": "drawable"
+  },
   "abstract": true,
   "extends": "node.json",
   "properties": {

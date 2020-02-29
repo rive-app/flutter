@@ -1,5 +1,9 @@
 {
   "name": "Component",
+  "key": {
+    "int": 10,
+    "string": "component"
+  },
   "abstract": true,
   "properties": {
     "dependentIds": {

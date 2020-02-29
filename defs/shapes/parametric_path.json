@@ -1,5 +1,9 @@
 {
   "name": "ParametricPath",
+  "key": {
+    "int": 15,
+    "string": "parametricpath"
+  },
   "abstract": true,
   "extends": "shapes/path.json",
   "properties": {
