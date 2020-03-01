@@ -8,6 +8,7 @@
   "properties": {
     "x": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 13,
         "string": "x"
@@ -15,6 +16,7 @@
     },
     "y": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 14,
         "string": "y"
@@ -22,6 +24,7 @@
     },
     "rotation": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 15,
         "string": "r"
@@ -29,6 +32,7 @@
     },
     "scaleX": {
       "type": "double",
+      "initialValue": "1",
       "key": {
         "int": 16,
         "string": "sx"
@@ -36,6 +40,7 @@
     },
     "scaleY": {
       "type": "double",
+      "initialValue": "1",
       "key": {
         "int": 17,
         "string": "sy"
@@ -43,6 +48,7 @@
     },
     "opacity": {
       "type": "double",
+      "initialValue": "1",
       "key": {
         "int": 18,
         "string": "opacity"
