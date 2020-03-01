@@ -24,7 +24,7 @@ abstract class ParametricPathBase extends Path {
 
   /// --------------------------------------------------------------------------
   /// Width field with key 20.
-  double _width;
+  double _width = 0;
   static const int widthPropertyKey = 20;
 
   /// Width of the parametric path.
@@ -48,7 +48,7 @@ abstract class ParametricPathBase extends Path {
 
   /// --------------------------------------------------------------------------
   /// Height field with key 21.
-  double _height;
+  double _height = 0;
   static const int heightPropertyKey = 21;
 
   /// Height of the parametric path.

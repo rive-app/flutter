@@ -13,24 +13,11 @@ class RectangleTool extends ShapeTool {
   Shape shape(Vec2D worldMouse) => Shape()
     ..name = 'Rectangle'
     ..x = worldMouse[0]
-    ..y = worldMouse[1]
-    ..rotation = 0
-    ..scaleX = 1
-    ..scaleY = 1
-    ..opacity = 1;
+    ..y = worldMouse[1];
 
   @override
   ParametricPath get path => Rectangle()
-    ..name = 'Rectangle Path'
-    ..x = 0
-    ..y = 0
-    ..rotation = 0
-    ..scaleX = 1
-    ..scaleY = 1
-    ..opacity = 1
-    ..width = 0
-    ..height = 0
-    ..cornerRadius = 0;
+    ..name = 'Rectangle Path';
 
   @override
   String get icon => 'tool-rectangle';

@@ -16,7 +16,7 @@ abstract class NodeBase extends ContainerComponent {
 
   /// --------------------------------------------------------------------------
   /// X field with key 13.
-  double _x;
+  double _x = 0;
   static const int xPropertyKey = 13;
   double get x => _x;
 
@@ -38,7 +38,7 @@ abstract class NodeBase extends ContainerComponent {
 
   /// --------------------------------------------------------------------------
   /// Y field with key 14.
-  double _y;
+  double _y = 0;
   static const int yPropertyKey = 14;
   double get y => _y;
 
@@ -60,7 +60,7 @@ abstract class NodeBase extends ContainerComponent {
 
   /// --------------------------------------------------------------------------
   /// Rotation field with key 15.
-  double _rotation;
+  double _rotation = 0;
   static const int rotationPropertyKey = 15;
   double get rotation => _rotation;
 
@@ -82,7 +82,7 @@ abstract class NodeBase extends ContainerComponent {
 
   /// --------------------------------------------------------------------------
   /// ScaleX field with key 16.
-  double _scaleX;
+  double _scaleX = 1;
   static const int scaleXPropertyKey = 16;
   double get scaleX => _scaleX;
 
@@ -104,7 +104,7 @@ abstract class NodeBase extends ContainerComponent {
 
   /// --------------------------------------------------------------------------
   /// ScaleY field with key 17.
-  double _scaleY;
+  double _scaleY = 1;
   static const int scaleYPropertyKey = 17;
   double get scaleY => _scaleY;
 
@@ -126,7 +126,7 @@ abstract class NodeBase extends ContainerComponent {
 
   /// --------------------------------------------------------------------------
   /// Opacity field with key 18.
-  double _opacity;
+  double _opacity = 1;
   static const int opacityPropertyKey = 18;
   double get opacity => _opacity;
 
