@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:encrypt/encrypt.dart';
 
 import 'package:local_data/local_data.dart';
+import 'package:rive_api/src/rive_http/http_interface.dart';
 
 import 'http_exception.dart';
 
@@ -122,7 +123,8 @@ class WebServiceClient {
 
   Future<http.Response> get(String url) async {
     try {
-      var response = await http.get(url, headers: headers);
+      final client = getClient();
+      final response = await client.get(url, headers: headers);
 
       _processResponse(response);
 
@@ -142,7 +144,8 @@ class WebServiceClient {
   Future<http.Response> post(String url,
       {dynamic body, Encoding encoding}) async {
     try {
-      var response = await http.post(url,
+      final client = getClient();
+      var response = await client.post(url,
           body: body, headers: headers, encoding: encoding);
 
       _processResponse(response);
@@ -180,8 +183,8 @@ class WebServiceClient {
 
   Future<void> persist() async {
     var data = _generateCookieHeader();
-    if(data.isEmpty) {
-      return localData.save('cookie', Uint8List(0));  
+    if (data.isEmpty) {
+      return localData.save('cookie', Uint8List(0));
     }
     var iv = IV.fromLength(16);
     var encrypted = _encrypter.encrypt(_generateCookieHeader(), iv: iv);
