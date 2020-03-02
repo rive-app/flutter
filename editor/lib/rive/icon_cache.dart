@@ -64,7 +64,7 @@ class RiveIconCache {
       cachedImage.completer.complete(cachedImage);
     });
 
-    return cachedImage;
+    return cachedImage.completer.future;
   }
 
   CachedImage image(String filename) => _cache[filename];
