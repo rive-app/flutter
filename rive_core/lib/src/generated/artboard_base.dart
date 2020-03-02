@@ -2,12 +2,20 @@
 /// Do not modify manually.
 
 import 'package:flutter/material.dart';
-import '../../container_component.dart';
+import 'package:rive_core/container_component.dart';
+import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/src/generated/container_component_base.dart';
 
 abstract class ArtboardBase extends ContainerComponent {
   static const int typeKey = 1;
   @override
   int get coreType => ArtboardBase.typeKey;
+  @override
+  Set<int> get coreTypes => {
+        ArtboardBase.typeKey,
+        ContainerComponentBase.typeKey,
+        ComponentBase.typeKey
+      };
 
   /// --------------------------------------------------------------------------
   /// Width field with key 7.

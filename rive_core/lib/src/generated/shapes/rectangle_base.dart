@@ -2,12 +2,26 @@
 /// Do not modify manually.
 
 import 'package:flutter/material.dart';
-import '../../../shapes/parametric_path.dart';
+import 'package:rive_core/shapes/parametric_path.dart';
+import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/src/generated/container_component_base.dart';
+import 'package:rive_core/src/generated/node_base.dart';
+import 'package:rive_core/src/generated/shapes/parametric_path_base.dart';
+import 'package:rive_core/src/generated/shapes/path_base.dart';
 
 abstract class RectangleBase extends ParametricPath {
   static const int typeKey = 7;
   @override
   int get coreType => RectangleBase.typeKey;
+  @override
+  Set<int> get coreTypes => {
+        RectangleBase.typeKey,
+        ParametricPathBase.typeKey,
+        PathBase.typeKey,
+        NodeBase.typeKey,
+        ContainerComponentBase.typeKey,
+        ComponentBase.typeKey
+      };
 
   /// --------------------------------------------------------------------------
   /// CornerRadius field with key 31.

@@ -8,6 +8,12 @@ import 'package:fractional/fractional.dart';
 import 'rive_core_context.dart';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
+  static const int typeKey = 10;
+  @override
+  int get coreType => ComponentBase.typeKey;
+  @override
+  Set<int> get coreTypes => {ComponentBase.typeKey};
+
   /// --------------------------------------------------------------------------
   /// DependentIds field with key 3.
   List<Id> _dependentIds;
