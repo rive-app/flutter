@@ -9,6 +9,7 @@ class Property {
   final String name;
   final FieldType type;
   final Definition definition;
+  String initialValue;
   Key key;
   String description;
   bool isNullable = false;
@@ -32,6 +33,10 @@ class Property {
     if (nullableValue is bool) {
       isNullable = nullableValue;
     }
+    dynamic init = data['initialValue'];
+    if (init is String) {
+      initialValue = init;
+    }
     key = Key.fromJSON(data["key"]) ?? Key.forProperty(this);
   }
 
@@ -40,7 +45,11 @@ class Property {
     var code = StringBuffer('  /// ${'-' * 74}\n');
     code.write(comment('${capitalize(name)} field with key ${key.intValue}.',
         indent: 1));
-    code.writeln('${type.dartName} _$name;');
+    if (initialValue != null) {
+      code.writeln('${type.dartName} _$name = $initialValue;');
+    } else {
+      code.writeln('${type.dartName} _$name;');
+    }
     code.writeln('static const int $propertyKey = ${key.intValue};');
 
     if (description != null) {
@@ -70,6 +79,9 @@ class Property {
   Map<String, dynamic> serialize() {
     Map<String, dynamic> data = <String, dynamic>{'type': type.name};
 
+    if (initialValue != null) {
+      data['initialValue'] = initialValue;
+    }
     data['key'] = key.serialize();
     if (description != null) {
       data['description'] = description;
