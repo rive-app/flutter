@@ -9,6 +9,7 @@
   "properties": {
     "width": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 20,
         "string": "width"
@@ -17,6 +18,7 @@
     },
     "height": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 21,
         "string": "height"
