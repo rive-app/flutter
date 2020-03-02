@@ -9,7 +9,20 @@ import 'package:rive_editor/widgets/popup/modal_popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
-class HamburgerPopupButton extends StatelessWidget {
+class HamburgerPopupButton extends StatefulWidget {
+  @override
+  _HamburgerPopupButtonState createState() => _HamburgerPopupButtonState();
+}
+
+class _HamburgerPopupButtonState extends State<HamburgerPopupButton> {
+  final _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return RivePopupButton(
@@ -27,6 +40,7 @@ class HamburgerPopupButton extends StatelessWidget {
                   width: 125,
                   child: Center(
                     child: RiveTextFormField(
+                      focusNode: _focusNode,
                       initialValue: RiveContext.of(context).file.value.name,
                       hintText: 'File Name',
                       edgeInsets: const EdgeInsets.symmetric(vertical: 5),
