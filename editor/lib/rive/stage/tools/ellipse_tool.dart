@@ -13,23 +13,11 @@ class EllipseTool extends ShapeTool {
   Shape shape(Vec2D worldMouse) => Shape()
     ..name = 'Ellipse'
     ..x = worldMouse[0]
-    ..y = worldMouse[1]
-    ..rotation = 0
-    ..scaleX = 1
-    ..scaleY = 1
-    ..opacity = 1;
+    ..y = worldMouse[1];
 
   @override
   ParametricPath get path => Ellipse()
-    ..name = 'Ellipse Path'
-    ..x = 0
-    ..y = 0
-    ..rotation = 0
-    ..scaleX = 1
-    ..scaleY = 1
-    ..opacity = 1
-    ..width = 0
-    ..height = 0;
+    ..name = 'Ellipse Path';
 
   @override
   String get icon => 'tool-ellipse';
