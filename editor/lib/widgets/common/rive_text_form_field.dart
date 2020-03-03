@@ -68,6 +68,7 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
           extentOffset: extentOffset,
         );
       } on Exception catch (e) {
+        // TODO: Handle errors and display message to user
         print('Error Updating Text Selection: $e');
       }
     }
