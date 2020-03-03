@@ -8,14 +8,15 @@ import 'package:window_utils/window_utils.dart';
 class RiveTextFormField extends StatefulWidget {
   const RiveTextFormField({
     @required this.initialValue,
-    @required this.focusNode,
+    @required this.onComplete,
+    this.focusNode,
     this.hintText = '',
-    this.onComplete,
     this.labelText,
     this.edgeInsets = EdgeInsets.zero,
     this.isNumeric = true,
     this.showDegree = false,
     this.canDrag = true,
+    this.controller,
     Key key,
   }) : super(key: key);
 
@@ -27,6 +28,7 @@ class RiveTextFormField extends StatefulWidget {
   final bool showDegree;
   final bool isNumeric;
   final bool canDrag;
+  final TextEditingController controller;
 
   @override
   _RiveTextFormFieldState createState() => _RiveTextFormFieldState();
@@ -34,22 +36,25 @@ class RiveTextFormField extends StatefulWidget {
 
 class _RiveTextFormFieldState extends State<RiveTextFormField> {
   final _formKey = GlobalKey<FormState>();
-  final _controller = TextEditingController();
+  TextEditingController _controller;
   String _cachedValue;
   bool _isEditing = false;
+  FocusNode _focusNode;
 
   @override
   void initState() {
+    _controller = widget?.controller ?? TextEditingController();
     _controller.text = widget.initialValue;
     if (widget.showDegree && widget.initialValue != '-') {
       _controller.text += '°';
     }
-    widget.focusNode.addListener(_updateFocusNode);
+    _focusNode = widget?.focusNode ?? FocusNode();
+    _focusNode.addListener(_updateFocusNode);
     super.initState();
   }
 
   void _updateFocusNode() {
-    if (!widget.focusNode.hasFocus) {
+    if (!_focusNode.hasFocus) {
       _formKey.currentState.save();
       if (widget.isNumeric && widget.canDrag) {
         WindowUtils.resetCursor();
@@ -76,6 +81,13 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
       }
     }
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    // _focusNode.dispose();
+    // _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -110,7 +122,7 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
           }
         },
         onTap: () {
-          widget.focusNode.requestFocus();
+          _focusNode.requestFocus();
           if (!_isEditing && widget.isNumeric) {
             _isEditing = true;
             WindowUtils.setCursor(CursorType.cross);
@@ -121,8 +133,9 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
           child: Padding(
             padding: const EdgeInsets.only(top: 1),
             child: TextFormField(
+              key: widget.key,
               onTap: () {},
-              focusNode: widget.focusNode,
+              focusNode: _focusNode,
               controller: _controller,
               inputFormatters: [
                 if (widget.isNumeric)
@@ -147,9 +160,7 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
                 hintStyle:
                     RiveTheme.of(context).textStyles.inspectorPropertyValue,
               ),
-
               style: RiveTheme.of(context).textStyles.inspectorPropertyValue,
-              // onChanged: widget.onChanged,
               onChanged: (val) {
                 // print('onChanged: $val');
               },
@@ -163,8 +174,7 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
                 }
                 if (_value.isNotEmpty) {
                   widget.onComplete(_value.replaceAll('°', ''), false);
-                  widget.focusNode
-                      .unfocus(disposition: UnfocusDisposition.scope);
+                  _focusNode.unfocus(disposition: UnfocusDisposition.scope);
                 }
               },
               onEditingComplete: () {
