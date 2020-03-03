@@ -9,7 +9,6 @@ class RiveTextFormField extends StatefulWidget {
   const RiveTextFormField({
     @required this.initialValue,
     @required this.onComplete,
-    this.focusNode,
     this.hintText = '',
     this.labelText,
     this.edgeInsets = EdgeInsets.zero,
@@ -17,6 +16,7 @@ class RiveTextFormField extends StatefulWidget {
     this.showDegree = false,
     this.canDrag = true,
     this.controller,
+    this.focusNode,
     Key key,
   }) : super(key: key);
 
