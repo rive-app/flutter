@@ -1,18 +1,13 @@
 import 'dart:io';
-import 'package:args/args.dart';
 import 'package:core_generator/src/configuration.dart';
 import 'package:core_generator/src/field_types/initialize.dart';
 
 import 'src/definition.dart';
 
-
-
 void main(List<String> arguments) {
   var config = Configuration.fromArguments(arguments);
-  
 
   initializeFields();
-
 
   Directory(config.path).list(recursive: true).listen((entity) {
     if (entity is File) {
