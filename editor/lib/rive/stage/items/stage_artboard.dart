@@ -23,6 +23,9 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   AABB get aabb => _aabb;
 
   @override
+  int get drawOrder => 0;
+
+  @override
   void markBoundsDirty() {
     stage?.debounce(updateBounds);
   }

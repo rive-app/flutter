@@ -13,6 +13,8 @@ class ContainerChildren extends FractionallyIndexedList<Component> {
   }
 }
 
+typedef bool DescentCallback(Component component);
+
 abstract class ContainerComponent extends ContainerComponentBase {
   final ContainerChildren children = ContainerChildren();
 
@@ -66,4 +68,30 @@ abstract class ContainerComponent extends ContainerComponentBase {
   // }
 
   void childRemoved(Component child) {}
+
+  // Make sure that the current function can be applied to the current 
+  // [Component], before descending onto all the children.
+  bool applyToAll(DescentCallback cb) {
+    if (cb(this) == false) {
+      return false;
+    }
+    applyToChildren(cb);
+    return true;
+  }
+
+  // Recursively descend onto all the children in the hierarchy tree.
+  // If the callback returns false, it won't recurse down a particular branch.
+  void applyToChildren(DescentCallback cb) {
+    for (final child in children) {
+      if (cb(child) == false) {
+        continue;
+      }
+
+      // TODO: replace with a more robust check.
+      if (child is ContainerComponent) {
+        child.applyToChildren(cb);
+      }
+    } 
+  }
+
 }

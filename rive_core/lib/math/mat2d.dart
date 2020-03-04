@@ -43,6 +43,11 @@ class Mat2D {
     _buffer = Float32List.fromList([1.0, 0.0, 0.0, 1.0, 0.0, 0.0]);
   }
 
+  Mat2D.fromTranslation(Vec2D translation) {
+    _buffer = Float32List.fromList(
+        [1.0, 0.0, 0.0, 1.0, translation[0], translation[1]]);
+  }
+
   Mat2D.clone(Mat2D copy) {
     _buffer = Float32List.fromList(copy.values);
   }
