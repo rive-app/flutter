@@ -564,19 +564,7 @@ class Stage extends Debouncer {
   }
 
   void toggleEditMode() {
-    // Try to get the StagePaths or the StageShapes from the current selection,
+    // TODO: Try to get the StagePaths or the StageShapes from the current selection,
     // and set it the current editing shape.
-    final currentSelection = rive?.selection?.items;
-    if (currentSelection != null && currentSelection.isNotEmpty) {
-      StageShape editShape;
-      for (final item in currentSelection) {
-        if (item is StagePath) {
-          rive?.editingShape = item;
-        } else if (item is StageShape) {
-          // this.convertToPath();
-
-        }
-      }
-    }
   }
 }

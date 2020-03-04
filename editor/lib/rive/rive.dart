@@ -1,20 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:rive_api/files.dart';
-import 'package:rive_core/client_side_player.dart';
-import 'package:rive_core/shapes/points_path.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
-import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
-import 'package:rive_editor/rive/stage/items/stage_path.dart';
-import 'package:rive_editor/rive/stage/items/stage_shape.dart';
-import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
-import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
-import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
-import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
-import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
@@ -23,12 +9,23 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
+import 'package:rive_api/files.dart';
 import 'package:rive_api/user.dart';
+import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
+import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
+import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
+import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
@@ -95,19 +92,6 @@ class Rive with RiveFileDelegate {
 
   final _state = ValueNotifier<RiveState>(RiveState.init);
   ValueListenable<RiveState> get state => _state;
-
-  final _editingShapePaths = <StagePath>[];
-
-  StageItem _editingShape;
-  StageItem get editingShape => _editingShape;
-  set editingShape(StageItem editable) {
-    if (_editingShape == editable) return;
-    final lastShape = _editingShape;
-    this._editingShape = editable;
-
-    _editShapeOff(lastShape);
-    // _editShapeOn(editable);
-  }
 
   /// Initial service client and determine what state the app should be in.
   Future<RiveState> initialize() async {
@@ -412,34 +396,6 @@ class Rive with RiveFileDelegate {
 
   void forceReconnect() {
     file.value.forceReconnect();
-  }
-
-  void _editShapeOff(StageItem stageItem) {
-    if (stageItem == null) return;
-    if (stageItem is StageShape) {
-      final stageShape = stageItem as StageShape;
-      // stageItem.isSelectable = true; ??
-      stageShape.showContour = false;
-      for (final path in _editingShapePaths) {
-        path.showContour = false;
-      }
-
-      // Item is still on the stage.
-      if (stageShape.stage != null) {
-        select(stageShape, append: false);
-      }
-
-      stageShape.component.applyToAll((component) {
-        switch (component.runtimeType) {
-          case PointsPath:
-            onObjectRemoved(component);
-            break;
-        }
-        return true;
-      });
-
-      _editingShapePaths.clear();
-    } else if (stageItem is StagePath) {}
   }
 }
 

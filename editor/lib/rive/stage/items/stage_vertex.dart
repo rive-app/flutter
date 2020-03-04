@@ -8,14 +8,14 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageVertex extends StageItem<PathVertex> {
-
+  static const double _vertexSize = 3;
   double radiusScale = 1;
 
   @override
   AABB get aabb {
     var x = _renderTransform[4];
     var y = _renderTransform[5];
-    return AABB.fromValues(x, y, x + 3, y + 3);
+    return AABB.fromValues(x, y, x + _vertexSize, y + _vertexSize);
   }
 
   Mat2D _renderTransform;
@@ -47,7 +47,8 @@ class StageVertex extends StageItem<PathVertex> {
     final vecScale = Vec2D.fromValues(scale, scale);
     final matScale = Mat2D.fromScaling(vecScale);
     canvas.transform(matScale.mat4);
-    canvas.drawCircle(Offset.zero, 3, Paint()..color = const Color(0xFFFFFFFF));
+    canvas.drawCircle(
+        Offset.zero, _vertexSize, Paint()..color = const Color(0xFFFFFFFF));
     canvas.restore();
   }
 }
