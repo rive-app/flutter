@@ -27,6 +27,10 @@ class RiveCoopServer extends CoopServer {
   @override
   Future<bool> deregister() async => PrivateApi().deregister();
 
+  /// Pings the 2D service heartbeat endpoint
+  @override
+  void heartbeat() => PrivateApi().heartbeat();
+
   @override
   Future<int> validate(
       HttpRequest request, int ownerId, int fileId, String token) async {

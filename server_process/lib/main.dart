@@ -1,4 +1,5 @@
 // import 'package:core/coop/coop_server.dart';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -34,7 +35,8 @@ Future<void> main(List<String> arguments) async {
   );
   log.info('Server has started: $result');
 
-  // Register with the 2D server
+  // Register with the 2D service. If this fails,
+  // shut down the co-op server
   final success = await server.register();
   if (!success) {
     log.severe('Unable to register with 2D service');
@@ -43,13 +45,21 @@ Future<void> main(List<String> arguments) async {
     log.info('Successfully registered with 2D service');
   }
 
-  // Try to intercept shutdown signals (e.g. CTRL-C) and
-  // deregister the server
+// Start a heartbeat check with the 2D service
+// Sends a heartbeat ping every 5 minutes
+  final heartbeatTimer = Timer.periodic(
+    const Duration(minutes: 5),
+    (_) => server.heartbeat(),
+  );
+
+  // Intercept shutdown signals (e.g. CTRL-C) and
+  // deregister the server before shutting down
   ProcessSignal.sigint.watch().listen((signal) async {
     log.info('SIGINT received');
     await server.deregister()
         ? log.info('Deregistered from 2D service')
         : log.severe('Error deregistering from 2D service');
+    heartbeatTimer.cancel();
     exit(1);
   });
 }

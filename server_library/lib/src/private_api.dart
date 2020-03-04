@@ -88,6 +88,16 @@ class PrivateApi {
     return true;
   }
 
+  /// Pings the 2D service heartbeat endpoint
+  void heartbeat() {
+    try {
+      http.get('$host/coop/heartbeat').timeout(const Duration(seconds: 5));
+    } on Exception catch (e) {
+      log.severe('Heartbeat ping to 2D service failed: $e');
+    }
+  }
+
+  /// Validates that a user owns a file with a valid access token
   Future<ValidationResult> validate(
       int ownerId, int fileId, String token) async {
     try {
