@@ -8,7 +8,7 @@ import 'package:window_utils/window_utils.dart';
 class RiveTextFormField extends StatefulWidget {
   const RiveTextFormField({
     @required this.initialValue,
-    @required this.onComplete,
+    this.onComplete,
     this.hintText = '',
     this.labelText,
     this.edgeInsets = EdgeInsets.zero,
@@ -23,7 +23,7 @@ class RiveTextFormField extends StatefulWidget {
   final String hintText, labelText;
   final String initialValue;
   final FocusNode focusNode;
-  final Function(String value, bool isDragging) onComplete;
+  final void Function(String value, bool isDragging) onComplete;
   final EdgeInsets edgeInsets;
   final bool showDegree;
   final bool isNumeric;
@@ -110,7 +110,7 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
         onVerticalDragEnd: (details) {
           if (!widget.canDrag) return;
           _cachedValue = null;
-          widget.onComplete(_controller.text, false);
+          widget?.onComplete(_controller.text, false);
         },
         onVerticalDragUpdate: (details) {
           if (!widget.canDrag) return;
@@ -119,7 +119,7 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
             final _newValue = _value + details.primaryDelta;
             _cachedValue = _newValue.toString();
             _controller.text = _cachedValue;
-            widget.onComplete(_controller.text, true);
+            widget?.onComplete(_controller.text, true);
           }
         },
         onTap: () {
@@ -174,7 +174,7 @@ class _RiveTextFormFieldState extends State<RiveTextFormField> {
                   _value = val;
                 }
                 if (_value.isNotEmpty) {
-                  widget.onComplete(_value.replaceAll('°', ''), false);
+                  widget?.onComplete(_value.replaceAll('°', ''), false);
                   _focusNode.unfocus(disposition: UnfocusDisposition.scope);
                 }
               },
