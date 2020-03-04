@@ -3,9 +3,12 @@ import 'dart:math';
 
 import 'package:rive_api/files.dart';
 import 'package:rive_core/client_side_player.dart';
+import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:rive_editor/rive/stage/items/stage_path.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
@@ -92,6 +95,19 @@ class Rive with RiveFileDelegate {
 
   final _state = ValueNotifier<RiveState>(RiveState.init);
   ValueListenable<RiveState> get state => _state;
+
+  final _editingShapePaths = <StagePath>[];
+
+  StageItem _editingShape;
+  StageItem get editingShape => _editingShape;
+  set editingShape(StageItem editable) {
+    if (_editingShape == editable) return;
+    final lastShape = _editingShape;
+    this._editingShape = editable;
+
+    _editShapeOff(lastShape);
+    // _editShapeOn(editable);
+  }
 
   /// Initial service client and determine what state the app should be in.
   Future<RiveState> initialize() async {
@@ -298,6 +314,9 @@ class Rive with RiveFileDelegate {
       case ShortcutAction.toggleRulers:
         stage?.value?.showRulers = !stage.value.showRulers;
         break;
+      case ShortcutAction.toggleEditMode:
+        stage?.value?.toggleEditMode();
+        break;
       default:
         break;
     }
@@ -393,6 +412,34 @@ class Rive with RiveFileDelegate {
 
   void forceReconnect() {
     file.value.forceReconnect();
+  }
+
+  void _editShapeOff(StageItem stageItem) {
+    if (stageItem == null) return;
+    if (stageItem is StageShape) {
+      final stageShape = stageItem as StageShape;
+      // stageItem.isSelectable = true; ??
+      stageShape.showContour = false;
+      for (final path in _editingShapePaths) {
+        path.showContour = false;
+      }
+
+      // Item is still on the stage.
+      if (stageShape.stage != null) {
+        select(stageShape, append: false);
+      }
+
+      stageShape.component.applyToAll((component) {
+        switch (component.runtimeType) {
+          case PointsPath:
+            onObjectRemoved(component);
+            break;
+        }
+        return true;
+      });
+
+      _editingShapePaths.clear();
+    } else if (stageItem is StagePath) {}
   }
 }
 

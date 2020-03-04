@@ -1,3 +1,4 @@
+import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 
 import 'math/mat2d.dart';
@@ -54,6 +55,23 @@ class Node extends NodeBase {
     }
 
     worldTransformed();
+  }
+
+  void calculateWorldTransform() {
+    var parent = this.parent;
+    final chain = <Node>[this];
+
+    while (parent != null) {
+      if (parent is Node) {
+        chain.insert(0, parent);
+      }
+      parent = parent.parent;
+    }
+
+    for (final item in chain) {
+      item.updateTransform();
+      item.updateWorldTransform();
+    }
   }
 
   @override
