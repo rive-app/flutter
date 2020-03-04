@@ -8,6 +8,9 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageVertex extends StageItem<PathVertex> {
+
+  double radiusScale = 1;
+
   @override
   AABB get aabb {
     var x = _renderTransform[4];
@@ -40,7 +43,10 @@ class StageVertex extends StageItem<PathVertex> {
 
     canvas.save();
     canvas.transform(rt.mat4);
-    // TODO: compute scale based on stage zoom.
+    final scale = 1 / stage.viewZoom * radiusScale;
+    final vecScale = Vec2D.fromValues(scale, scale);
+    final matScale = Mat2D.fromScaling(vecScale);
+    canvas.transform(matScale.mat4);
     canvas.drawCircle(Offset.zero, 3, Paint()..color = const Color(0xFFFFFFFF));
     canvas.restore();
   }
