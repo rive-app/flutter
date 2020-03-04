@@ -2,12 +2,24 @@
 /// Do not modify manually.
 
 import 'package:flutter/material.dart';
-import '../../../shapes/path.dart';
+import 'package:rive_core/shapes/path.dart';
+import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/src/generated/container_component_base.dart';
+import 'package:rive_core/src/generated/node_base.dart';
+import 'package:rive_core/src/generated/shapes/path_base.dart';
 
 abstract class PointsPathBase extends Path {
   static const int typeKey = 16;
   @override
   int get coreType => PointsPathBase.typeKey;
+  @override
+  Set<int> get coreTypes => {
+        PointsPathBase.typeKey,
+        PathBase.typeKey,
+        NodeBase.typeKey,
+        ContainerComponentBase.typeKey,
+        ComponentBase.typeKey
+      };
 
   /// --------------------------------------------------------------------------
   /// IsClosed field with key 32.
