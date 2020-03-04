@@ -1,8 +1,8 @@
-import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 
 import 'math/mat2d.dart';
 import 'src/generated/node_base.dart';
+
 export 'src/generated/node_base.dart';
 
 abstract class NodeDelegate {

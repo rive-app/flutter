@@ -31,8 +31,6 @@ class Shape extends ShapeBase {
     _delegate?.boundsChanged();
   }
 
-  bool showContour = false;
-
   bool addPath(Path path) {
     print("GOT PATH $path");
     _pathComposer?.addDirt(ComponentDirt.path);
