@@ -150,6 +150,8 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
     });
     // Mark the shape as dirty so the stage redraws
     _shape.pathChanged(_path);
+    // Propagate the changes here.
+    file.captureJournalEntry();
   }
 
   /// Returns the first selected shape from the current set of
