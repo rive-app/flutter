@@ -126,6 +126,16 @@ abstract class CoopServer {
     return true;
   }
 
+  /// Register the co-op server with the 2D service
+  /// Returns true if registration is successful
+  Future<bool> register();
+
+  /// Deregisters the co-op server from the 2D service
+  Future<bool> deregister();
+
+  /// Pings the 2D service heartbeat endpoint
+  void heartbeat();
+
   // Validate this instance is an expected server for ownerId/fileId. We need to
   // store a column with the assigned node for this file. Probably a
   // server_index column in the Files table that maps to:
