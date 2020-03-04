@@ -28,6 +28,8 @@ dependencies:
   flutter_widgets: ^0.1.9
 
 dev_dependencies:
+  test: any
+  mockito: ^4.1.1
   image_res: ^0.2.3
   flutter_test:
     sdk: flutter
