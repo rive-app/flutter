@@ -46,7 +46,7 @@ abstract class CoopServer {
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
       log.finest('Received message ${_segmentsToString(segments)}');
-      // If there's no URI segments, return health status
+      // If there are not 5 or 6 segments, return health status
       if (segments.length != 5 && segments.length != 6) {
         request.response.statusCode = 200;
         request.response.write('Healthy!');
