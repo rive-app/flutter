@@ -1,3 +1,5 @@
+import 'package:rive_core/math/vec2d.dart';
+
 import 'component.dart';
 import 'component_dirt.dart';
 import 'dependency_sorter.dart';
@@ -15,14 +17,19 @@ class Artboard extends ArtboardBase {
   @override
   Artboard get artboard => this;
 
+  Vec2D get originWorld {
+    // TODO: use originX & originY when it is hooked up.
+    // return Vec2D.fromValues(x + width * originX, y + height + originY);
+    return Vec2D.fromValues(x, y);
+  }
+
   /// Update any dirty components in this artboard.
   bool advance(double elapsedSeconds) {
     if ((_dirt & ComponentDirt.components) != 0) {
       const int maxSteps = 100;
       int step = 0;
       int count = _dependencyOrder.length;
-      while (
-          (_dirt & ComponentDirt.components) != 0 && step < maxSteps) {
+      while ((_dirt & ComponentDirt.components) != 0 && step < maxSteps) {
         _dirt &= ~ComponentDirt.components;
         // Track dirt depth here so that if something else marks
         // dirty, we restart.
@@ -116,6 +123,11 @@ class Artboard extends ArtboardBase {
   void yChanged(double from, double to) {
     super.yChanged(from, to);
     _delegate?.markBoundsDirty();
+  }
+
+  Vec2D renderTranslation(Vec2D worldTranslation) {
+    final wt = originWorld;
+    return Vec2D.add(Vec2D(), worldTranslation, wt);
   }
 }
 

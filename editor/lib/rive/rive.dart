@@ -1,17 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:rive_api/files.dart';
-import 'package:rive_core/client_side_player.dart';
-import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
-import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
-import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
-import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
-import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
-import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
-import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
@@ -20,12 +9,23 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
+import 'package:rive_api/files.dart';
 import 'package:rive_api/user.dart';
+import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
+import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
+import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
+import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'file_browser/file_browser.dart';
 import 'hierarchy_tree_controller.dart';
@@ -297,6 +297,9 @@ class Rive with RiveFileDelegate {
         break;
       case ShortcutAction.toggleRulers:
         stage?.value?.showRulers = !stage.value.showRulers;
+        break;
+      case ShortcutAction.toggleEditMode:
+        stage?.value?.toggleEditMode();
         break;
       default:
         break;

@@ -1,26 +1,18 @@
 import 'dart:ui';
 
-import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_editor/rive/stage/stage_contour_item.dart';
 
-import '../stage_item.dart';
-
-class StageShape extends StageItem<Shape> with BoundsDelegate {
+class StageShape extends StageContourItem<Shape> {
   @override
   AABB get aabb => component.bounds;
 
   @override
-  void boundsChanged() {
-    assert(stage != null);
-    stage.updateBounds(this);
-  }
-
-  @override
   void paint(Canvas canvas) {
     assert(component.pathComposer != null);
-    // Write now the StageShape draws the shape itself, this needs to be moved
+    // Right now the StageShape draws the shape itself, this needs to be moved
     // to the drawable shape component. The only painting the StageShape will do
     // is when the item is selected.
     canvas.drawPath(
