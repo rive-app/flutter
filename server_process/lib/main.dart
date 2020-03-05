@@ -52,8 +52,8 @@ Future<void> main(List<String> arguments) async {
       log.info('Successfully registered with 2D service');
     }
 
-// Start a heartbeat check with the 2D service
-// Sends a heartbeat ping every 5 minutes
+    // Start a heartbeat check with the 2D service
+    // Sends a heartbeat ping every 5 minutes
     final heartbeatTimer = Timer.periodic(
       const Duration(minutes: 5),
       (_) => server.heartbeat(),
