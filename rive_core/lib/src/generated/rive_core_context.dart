@@ -8,6 +8,7 @@ import '../../node.dart';
 import '../../shapes/cubic_vertex.dart';
 import '../../shapes/ellipse.dart';
 import '../../shapes/path_composer.dart';
+import '../../shapes/points_path.dart';
 import '../../shapes/rectangle.dart';
 import '../../shapes/shape.dart';
 import '../../shapes/straight_vertex.dart';
@@ -21,6 +22,7 @@ import 'shapes/ellipse_base.dart';
 import 'shapes/parametric_path_base.dart';
 import 'shapes/path_composer_base.dart';
 import 'shapes/path_vertex_base.dart';
+import 'shapes/points_path_base.dart';
 import 'shapes/rectangle_base.dart';
 import 'shapes/shape_base.dart';
 import 'shapes/straight_vertex_base.dart';
@@ -38,6 +40,8 @@ abstract class RiveCoreContext extends CoreContext {
         return Shape();
       case StraightVertexBase.typeKey:
         return StraightVertex();
+      case PointsPathBase.typeKey:
+        return PointsPath();
       case RectangleBase.typeKey:
         return Rectangle();
       case CubicVertexBase.typeKey:
@@ -142,6 +146,7 @@ abstract class RiveCoreContext extends CoreContext {
           setObjectProperty(object, change.op, value);
           break;
         case ShapeBase.transformAffectsStrokePropertyKey:
+        case PointsPathBase.isClosedPropertyKey:
           var value = reader.readInt8() == 1;
           setObjectProperty(object, change.op, value);
           break;
@@ -247,6 +252,7 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ShapeBase.transformAffectsStrokePropertyKey:
+      case PointsPathBase.isClosedPropertyKey:
         if (value != null && value is bool) {
           var writer = BinaryWriter(alignment: 1);
           writer.writeInt8(value ? 1 : 0);
@@ -342,6 +348,11 @@ abstract class RiveCoreContext extends CoreContext {
       case StraightVertexBase.radiusPropertyKey:
         if (object is StraightVertexBase && value is double) {
           object.radius = value;
+        }
+        break;
+      case PointsPathBase.isClosedPropertyKey:
+        if (object is PointsPathBase && value is bool) {
+          object.isClosed = value;
         }
         break;
       case ParametricPathBase.widthPropertyKey:
@@ -493,6 +504,11 @@ abstract class RiveCoreContext extends CoreContext {
       case StraightVertexBase.radiusPropertyKey:
         if (object is StraightVertexBase) {
           return object.radius;
+        }
+        break;
+      case PointsPathBase.isClosedPropertyKey:
+        if (object is PointsPathBase) {
+          return object.isClosed;
         }
         break;
       case ParametricPathBase.widthPropertyKey:

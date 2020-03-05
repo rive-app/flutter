@@ -6,6 +6,12 @@ import 'shortcut_keys.dart';
 final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
   [
     Shortcut(
+      ShortcutAction.toggleEditMode,
+      [
+        ShortcutKey.enter
+      ]
+    ),
+    Shortcut(
       ShortcutAction.copy,
       [
         ShortcutKey.systemCmd,

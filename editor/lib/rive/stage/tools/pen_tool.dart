@@ -4,10 +4,10 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/shapes/shape.dart';
-import 'package:rive_core/shapes/user_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
-
+import 'package:rive_core/shapes/points_path.dart';
+import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -23,7 +23,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   PenTool._();
 
   // Open path used to create the shape
-  UserPath _path;
+  PointsPath _path;
 
   // Shape in which the open payth exists
   Shape _shape;
@@ -48,8 +48,8 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   @override
   void paint(Canvas canvas) {
     _paintMouse(canvas);
-    _paintVertices(canvas);
-    _paintEdges(canvas);
+    // _paintVertices(canvas);
+    // _paintEdges(canvas);
   }
 
   void _paintMouse(Canvas canvas) {
@@ -116,6 +116,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   }
 
   void _modifyPath(Vec2D vertexPos, Rive rive) {
+    var file = rive.file.value;
     // Get the shape in which to the path lives
     _selectShape(rive, vertexPos);
     // Determine the coordinates to create a vertex based on the shape's
@@ -123,7 +124,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
     final localCoord = _coordinateMapper(_shape, vertexPos);
     // Create a new path if one isn't already being built
     if (_path == null) {
-      _path = UserPath()
+      _path = PointsPath()
         ..name = 'Pen Path'
         ..x = localCoord[0]
         ..y = localCoord[1]
@@ -132,16 +133,25 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
         ..scaleY = 1
         ..opacity = 1;
       // Add the path to the file and the shape
-      var file = rive.file.value;
       file.batchAdd(() {
         file.add(_path);
         _shape.appendChild(_path);
+        _shape.addPath(_path);
       });
+      _path.calculateWorldTransform();
     }
-    // Create the vertex and add it to the path
-    _path.addVertex(localCoord[0], localCoord[1]);
+    final v = StraightVertex()
+      ..name = 'Pen Vertex'
+      ..x = localCoord[0]
+      ..y = localCoord[1];
+    file.batchAdd(() {
+      file.add(v);
+      _path.addVertex(v);
+    });
     // Mark the shape as dirty so the stage redraws
     _shape.pathChanged(_path);
+    // Propagate the changes here.
+    file.captureJournalEntry();
   }
 
   /// Returns the first selected shape from the current set of
