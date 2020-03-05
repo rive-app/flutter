@@ -15,7 +15,8 @@ class StageVertex extends StageItem<PathVertex> {
   AABB get aabb {
     var x = _renderTransform[4];
     var y = _renderTransform[5];
-    return AABB.fromValues(x, y, x + _vertexSize, y + _vertexSize);
+    return AABB.fromValues(
+        x - _vertexSize, y - _vertexSize, x + _vertexSize, y + _vertexSize);
   }
 
   Mat2D _renderTransform;
