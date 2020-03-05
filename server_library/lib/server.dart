@@ -18,6 +18,19 @@ class RiveCoopServer extends CoopServer {
   @override
   CoopIsolateHandler get handler => makeProcess;
 
+  /// Registers the co-op server with the 2D service
+  /// Returns true if it successfully registers
+  @override
+  Future<bool> register() async => PrivateApi().register();
+
+  /// Deregisteres the co-op server from the 2D service
+  @override
+  Future<bool> deregister() async => PrivateApi().deregister();
+
+  /// Pings the 2D service heartbeat endpoint
+  @override
+  void heartbeat() => PrivateApi().heartbeat();
+
   @override
   Future<int> validate(
       HttpRequest request, int ownerId, int fileId, String token) async {
