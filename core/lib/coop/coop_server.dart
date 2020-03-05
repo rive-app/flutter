@@ -58,6 +58,7 @@ abstract class CoopServer {
       // connection with full user validation. This is going to be deprecated
       // in favour of the 4 segment unvalidated call once the coop server
       // moves into the internal network
+      // /v<version>/<ownerId>/<fileId>/<token>/<clientId>
       int version, ownerId, fileId, clientId, userOwnerId;
       String token;
       if (segments.length == 5) {
@@ -105,6 +106,8 @@ abstract class CoopServer {
       // Web socket request from the 2D service
       // This replaces the code for parsing segments of length 5
       // when the co-op server moves inside the VPC
+      // The format expected is:
+      // 'v<version>/<ownerId>/<fileId>/<userOwnerId>/<clientId>
       else if (segments.length == 6) {
         try {
           log.finest('Proxy web socket request');
