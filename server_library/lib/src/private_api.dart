@@ -7,6 +7,9 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:retry/retry.dart';
 
+/// Timeout value for communication to the 2D service
+const timeout = Duration(seconds: 5);
+
 class ValidationResult {
   final int userId;
   final int ownerId;
@@ -41,8 +44,7 @@ class PrivateApi {
   Future<bool> register() async {
     try {
       final res = await retry(
-        () =>
-            http.get('$host/coop/register').timeout(const Duration(seconds: 5)),
+        () => http.get('$host/coop/register').timeout(timeout),
         retryIf: (e) => e is SocketException || e is TimeoutException,
         onRetry: (e) =>
             log.info('Unable to connect to 2D service @ $host due to $e'),
@@ -69,9 +71,7 @@ class PrivateApi {
   /// it through.
   Future<bool> deregister() async {
     try {
-      final res = await http
-          .get('$host/coop/deregister')
-          .timeout(const Duration(seconds: 5));
+      final res = await http.get('$host/coop/deregister').timeout(timeout);
       if (res.statusCode != 200) {
         // Problem deregistering coop server; it's now orphaned
         // What to do?
@@ -91,7 +91,7 @@ class PrivateApi {
   /// Pings the 2D service heartbeat endpoint
   void heartbeat() {
     try {
-      http.get('$host/coop/heartbeat').timeout(const Duration(seconds: 5));
+      http.get('$host/coop/heartbeat').timeout(timeout);
     } on Exception catch (e) {
       log.severe('Heartbeat ping to 2D service failed: $e');
     }
