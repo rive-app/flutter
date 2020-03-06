@@ -59,6 +59,7 @@ class _CoopIsolate extends CoopIsolateProcess {
     // Make the change on a clone.
     var modifiedFile = file.clone();
     var serverChangeId = _nextChangeId++;
+    modifiedFile.serverChangeId = serverChangeId;
     var serverChangeSet = ChangeSet()
       ..id = serverChangeId
       ..objects = [];
@@ -111,8 +112,6 @@ class _CoopIsolate extends CoopIsolateProcess {
 
       // now actually make changes to the object (if we have one).
       if (object != null) {
-        object.serverChangeId = serverChangeId;
-        object.ownerId = client.ownerId;
         for (final change in clientObjectChanges.changes) {
           switch (change.op) {
             case CoreContext.addKey:
@@ -130,8 +129,6 @@ class _CoopIsolate extends CoopIsolateProcess {
             default:
               var prop = object.properties[change.op] ??= ObjectProperty();
               prop.key = change.op;
-              prop.serverChangeId = serverChangeId;
-              prop.ownerId = client.ownerId;
               prop.data = change.value;
               break;
           }
@@ -176,6 +173,7 @@ class _CoopIsolate extends CoopIsolateProcess {
         ..ownerId = ownerId
         ..fileId = fileId
         ..nextClientId = 1
+        ..serverChangeId = _nextChangeId
         ..objects = {};
     } else {
       file = CoopFile();
@@ -192,12 +190,11 @@ class _CoopIsolate extends CoopIsolateProcess {
           ..ownerId = ownerId
           ..fileId = fileId
           ..nextClientId = 1
+          ..serverChangeId = _nextChangeId
           ..objects = {};
       }
 
-      _nextChangeId = file.objects.values.fold<int>(CoopCommand.minChangeId,
-              (curr, object) => max(curr, object.serverChangeId)) +
-          1;
+      _nextChangeId = max(file.serverChangeId, CoopCommand.minChangeId) + 1;
     }
     return true;
   }

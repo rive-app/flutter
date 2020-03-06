@@ -8,12 +8,13 @@ import 'package:core/core.dart';
 
 import 'entity.dart';
 
-const int _coopFileVersion = 3;
+const int _coopFileVersion = 4;
 
 class CoopFile {
   int ownerId;
   int fileId;
   int nextClientId = 1;
+  int serverChangeId;
 
   Map<Id, CoopFileObject> objects;
 
@@ -24,6 +25,7 @@ class CoopFile {
     nextClientId = reader.readVarUint();
     ownerId = reader.readVarUint();
     fileId = reader.readVarUint();
+    serverChangeId = reader.readVarUint();
 
     objects = {};
     int objectLength = reader.readVarUint();
@@ -39,6 +41,7 @@ class CoopFile {
     writer.writeVarUint(nextClientId);
     writer.writeVarUint(ownerId);
     writer.writeVarUint(fileId);
+    writer.writeVarUint(serverChangeId);
 
     writer.writeVarUint(objects.length);
     for (final object in objects.values) {
@@ -57,16 +60,17 @@ class CoopFile {
       ..ownerId = ownerId
       ..fileId = fileId
       ..nextClientId = nextClientId
+      ..serverChangeId = serverChangeId
       ..objects = cloneObjects;
   }
 
   ChangeSet toChangeSet() {
     var changedObjects = <ObjectChanges>[];
     var id = CoopCommand.minChangeId;
+    if (serverChangeId > id) {
+      id = serverChangeId;
+    }
     for (final object in objects.values) {
-      if (object.serverChangeId > id) {
-        id = object.serverChangeId;
-      }
       changedObjects.add(object.toObjectCreationChanges());
     }
     for (final object in objects.values) {
