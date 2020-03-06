@@ -59,15 +59,41 @@ Future<void> main(List<String> arguments) async {
       (_) => server.heartbeat(),
     );
 
-    // Intercept shutdown signals (e.g. CTRL-C) and
-    // deregister the server before shutting down
-    ProcessSignal.sigint.watch().listen((signal) async {
-      log.info('SIGINT received');
+    // Shutdown function: called when some sort
+    // of shutdown signal is received. Will
+    // attempt to deregister before dying.
+
+    Future shutdown(ProcessSignal signal) async {
+      log.info('$signal received');
       await server.deregister()
           ? log.info('Deregistered from 2D service')
           : log.severe('Error deregistering from 2D service');
       heartbeatTimer.cancel();
       exit(1);
-    });
+    }
+
+    // Intercept shutdown signals (e.g. CTRL-C) and
+    // deregister the server before shutting down
+    try {
+      ProcessSignal.sigint.watch().listen((signal) async {
+        await shutdown(signal);
+      });
+    } on SignalException catch (_) {
+      log.info('Signal SIGINT is not supported by this service');
+    }
+    try {
+      ProcessSignal.sigterm.watch().listen((signal) async {
+        await shutdown(signal);
+      });
+    } on SignalException catch (_) {
+      log.info('Signal SIGTERM is not supported by this service');
+    }
+    try {
+      ProcessSignal.sigkill.watch().listen((signal) async {
+        await shutdown(signal);
+      });
+    } on SignalException catch (_) {
+      log.info('Signal SIGKILL is not supported by this service');
+    }
   }
 }
