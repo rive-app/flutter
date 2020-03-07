@@ -58,6 +58,11 @@ class _CoopIsolate extends CoopIsolateProcess {
   bool attemptChange(CoopServerClient client, ChangeSet changeSet) {
     // Make the change on a clone.
     var modifiedFile = file.clone();
+    // One thing to note is that the following will increment
+    /// even if the change is rejected. That's probably ok for now.
+    /// We need to evaluate at some point if we even need this
+    /// serverChangeId at all (got to check what we're doing with it
+    /// on the client).
     var serverChangeId = _nextChangeId++;
     modifiedFile.serverChangeId = serverChangeId;
     var serverChangeSet = ChangeSet()
