@@ -1,36 +1,14 @@
-
 import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
-
 /// An item in the file that has a pre-known (on client) key to resolve it.
-/// Entities are stored with the session id that owns it and the server change
-/// id associated with creation/change.
 class Entity {
   /// Represents the kind of entity this is.
   int key;
 
-  /// The client's owner id.
-  int ownerId;
+  void serialize(BinaryWriter writer) => writer.writeVarUint(key);
 
-  /// The serverside change id that created or changed this entity.
-  int serverChangeId;
+  void deserialize(BinaryReader reader) => key = reader.readVarUint();
 
-  void serialize(BinaryWriter writer) {
-    writer.writeVarUint(key);
-    writer.writeVarUint(ownerId);
-    writer.writeVarUint(serverChangeId);
-  }
-
-  void deserialize(BinaryReader reader) {
-    key = reader.readVarUint();
-    ownerId = reader.readVarUint();
-    serverChangeId = reader.readVarUint();
-  }
-
-  void copy(Entity other) {
-    key = other.key;
-    ownerId = other.ownerId;
-    serverChangeId = other.serverChangeId;
-  }
+  void copy(Entity other) => key = other.key;
 }
