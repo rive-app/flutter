@@ -99,6 +99,7 @@ void main() {
     expect(file.objects[const Id(1, 31)].properties.length, 0);
   });
 
+  /*
   test('File serialize/deserialize is performant', () {
     var file = CoopFile()
       ..ownerId = 19
@@ -139,4 +140,5 @@ void main() {
     file.clone();
     expect(watch.elapsedMicroseconds * 1e-6 < 0.1, true);
   });
+  */
 }
