@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive_editor/logger.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
@@ -18,6 +17,7 @@ import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
 import 'package:window_utils/window_utils.dart';
+import 'package:core/error_logger.dart';
 
 import 'constants.dart';
 import 'rive/hierarchy_tree_controller.dart';
