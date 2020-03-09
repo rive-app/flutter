@@ -42,3 +42,9 @@ jobs:
         run: cd packages/coop_server && pub get
       - name: Run coop server tests
         run: cd packages/coop_server && pub run test
+
+        # Run the core tests
+      - name: Install core dependencies
+        run: cd packages/core && pub get
+      - name: Run core tests
+        run: cd packages/core && pub run test
