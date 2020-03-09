@@ -23,7 +23,7 @@ dependencies:
     path: ../
   dotted_border: ^1.0.4
   fractional:
-    path: ../dependencies/fractional-dart
+    path: ../../fractional
 
 
   # The following adds the Cupertino Icons font to your application.
