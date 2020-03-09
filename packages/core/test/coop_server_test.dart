@@ -13,7 +13,7 @@ void _configureLogging() {
 }
 
 void main() {
-  final segments = ['proxy', 'v$protocolVersion', '2', '3', '4', '5'];
+  final segments = ['v$protocolVersion', '2', '3', '4', '5'];
 
   setUp(_configureLogging);
   group('WebSocketData', () {
@@ -29,32 +29,26 @@ void main() {
     test('WebSocketData throws format exception if "v" ommitted from version',
         () {
       final testSegments = List<String>.from(segments);
-      testSegments[1] = '3';
+      testSegments[0] = '3';
       expect(() => WebSocketData.fromSegments(testSegments),
           throwsA(const TypeMatcher<FormatException>()));
     });
     test('WebSocketData throws format exception for incorrect version', () {
       final testSegments = List<String>.from(segments);
-      testSegments[1] = 'v1';
-      expect(() => WebSocketData.fromSegments(testSegments),
-          throwsA(const TypeMatcher<FormatException>()));
-    });
-    test('WebSocketData throws format exception for incorrect version', () {
-      final testSegments = List<String>.from(segments);
-      testSegments[1] = 'v1';
+      testSegments[0] = 'v3'; // Current version is 4 03/09/20
       expect(() => WebSocketData.fromSegments(testSegments),
           throwsA(const TypeMatcher<FormatException>()));
     });
     test('WebSocketData throws format exception for non int ids', () {
       final testSegments = List<String>.from(segments);
-      testSegments[2] = 'bob';
+      testSegments[1] = 'bob';
       expect(() => WebSocketData.fromSegments(testSegments),
           throwsFormatException);
     });
     test('WebSocketData does not throw an exception for an invalid client id',
         () {
       final testSegments = List<String>.from(segments);
-      testSegments[5] = 'bob';
+      testSegments[4] = 'bob';
       final data = WebSocketData.fromSegments(testSegments);
       expect(data.clientId, 0);
     });

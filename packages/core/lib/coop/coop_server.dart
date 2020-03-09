@@ -35,6 +35,9 @@ abstract class CoopServer {
     return true;
   }
 
+  /// Listen for incoming connections and upgrade them to web sockets if valid
+  /// This is assumed to be coming from a trusted source and so no user permissions
+  /// will be checked here. This should only be called inside a private network.
   Future<bool> listen({int port = 8000, Map<String, String> options}) async {
     try {
       _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
@@ -46,61 +49,12 @@ abstract class CoopServer {
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
       log.finest('Received message ${_segmentsToString(segments)}');
-      // If there are not 5 or 6 segments, return health status
-      if (segments.length != 5 && segments.length != 6) {
+      // If there are not 5 segments, return health status
+      if (segments.length != 5) {
         request.response.statusCode = 200;
-        request.response.write('Healthy!');
+        request.response.write('Healthy');
         await request.response.close();
         return;
-      }
-
-      // If there are 5 segments, this is a request to start a web socket
-      // connection with full user validation. This is going to be deprecated
-      // in favour of the 4 segment unvalidated call once the coop server
-      // moves into the internal network
-      // /v<version>/<ownerId>/<fileId>/<token>/<clientId>
-      int version, ownerId, fileId, clientId, userOwnerId;
-      String token;
-      if (segments.length == 5) {
-        try {
-          if (segments[0].length < 2) {
-            log.info('Invalid protocol version ${_segmentsToString(segments)}');
-            request.response.statusCode = 422;
-            await request.response.close();
-            return;
-          }
-          // kill the v in v2
-          version = int.parse(segments[0].substring(1));
-          ownerId = int.parse(segments[1]);
-          fileId = int.parse(segments[2]);
-          token = segments[3];
-          try {
-            clientId = int.parse(segments[4]);
-          } on FormatException catch (_) {
-            log.info('Invalid clientid: ${segments[4]}');
-            clientId = 0;
-          }
-        } on FormatException catch (e) {
-          log.info('Invalid message ${_segmentsToString(segments)}'
-              ' $e for ${request.requestedUri}.');
-          request.response.statusCode = 422;
-          await request.response.close();
-          return;
-        }
-        if (version != protocolVersion) {
-          request.response.statusCode = 418;
-          await request.response.close();
-          return;
-        }
-
-        userOwnerId = await validate(request, ownerId, fileId, token);
-        if (userOwnerId == null) {
-          log.info('Authentication failure for message'
-              ' ${_segmentsToString(segments)}');
-          request.response.statusCode = 403;
-          await request.response.close();
-          return;
-        }
       }
 
       // Web socket request from the 2D service
@@ -108,32 +62,17 @@ abstract class CoopServer {
       // when the co-op server moves inside the VPC
       // The format expected is:
       // 'v<version>/<ownerId>/<fileId>/<userOwnerId>/<clientId>
-      else if (segments.length == 6) {
-        try {
-          log.finest('Proxy web socket request');
-          final data = WebSocketData.fromSegments(segments);
-          // Remove this unnecessary business when validating
-          // called are no more
-          version = data.version;
-          ownerId = data.ownerId;
-          fileId = data.fileId;
-          userOwnerId = data.userOwnerId;
-          clientId = data.clientId;
-        } on FormatException catch (_) {
-          request.response.statusCode = 422;
-          await request.response.close();
-          return;
-        }
-      }
-
-      // Attempt to upgrade the HTTP connection to a web socket
       try {
+        log.finest('Web socket request');
+        final data = WebSocketData.fromSegments(segments);
+
+        // Attempt to upgrade the HTTP connection to a web socket
         var ws = await WebSocketTransformer.upgrade(request);
 
-        String key = _isolateKey(ownerId, fileId);
+        String key = _isolateKey(data.ownerId, data.fileId);
         var isolate = _isolates[key];
         if (isolate == null) {
-          isolate = CoopIsolate(this, ownerId, fileId);
+          isolate = CoopIsolate(this, data.ownerId, data.fileId);
           // Immediately make it available...
           _isolates[key] = isolate;
           if (!await isolate.spawn(handler, options)) {
@@ -142,14 +81,18 @@ abstract class CoopServer {
             return;
           }
         }
-        if (!await isolate.addClient(userOwnerId, clientId, ws)) {
+        if (!await isolate.addClient(data.userOwnerId, data.clientId, ws)) {
           log.severe('Unable to add client for file $key. '
               'This could be due to a previous shutdown attempt, check logs '
               'for indication of shutdown prior to this.');
           await ws.close();
         }
       } on WebSocketException catch (e) {
-        log.severe('$e');
+        log.severe('Failed to upgrade to web socket: $e');
+      } on FormatException catch (e) {
+        log.severe('Error parsing web socket request $e');
+        request.response.statusCode = 422;
+        await request.response.close();
       }
     }, onError: (dynamic e) => log.severe('Error listening: $e'));
     return true;
@@ -164,23 +107,6 @@ abstract class CoopServer {
 
   /// Pings the 2D service heartbeat endpoint
   void heartbeat();
-
-  /// Validate this instance is an expected server for ownerId/fileId. We need to
-  /// store a column with the assigned node for this file. Probably a
-  /// server_index column in the Files table that maps to:
-  ///
-  /// wss://coop{server_index}.rive.app/{ownerId}/{fileId}
-  /// wss://coop1.rive.app/34/10
-  /// wss://coop2.rive.app/34/11
-  ///
-  /// There'll be a row locking stored procedure that'll grab a valid
-  /// server_index for a file when it is first opened. This only runs if the
-  /// server_index is currently null. server_index is reset to null when all
-  /// clients have disconnected and some timeout elapses.
-  ///
-  /// Also take this opportunity to check that the token matches a valid user.
-  Future<int> validate(
-      HttpRequest request, int ownerId, int fileId, String token);
 }
 
 /// Wraps the data coming from the 2D service to initiate a web socket
@@ -193,28 +119,27 @@ class WebSocketData {
   int clientId;
 
   WebSocketData.fromSegments(List<String> segments)
-      : assert(segments.length == 6),
-        assert(segments.first == 'proxy') {
+      : assert(segments.length == 5) {
     try {
       // Parse the version nr
-      if (segments[1].length < 2) {
-        log.severe('Invalid protocol version ${segments[1]}');
+      if (segments[0].length < 2) {
+        log.severe('Invalid protocol version ${segments[0]}');
         throw const FormatException();
       }
       // Remove 'v' in 'v2'
-      version = int.parse(segments[1].substring(1));
+      version = int.parse(segments[0].substring(1));
       if (version != protocolVersion) {
         log.severe('Client requests older protocal version nr: $version');
         throw const FormatException();
       }
       // Parse all the other segments, which should be ints
-      ownerId = int.parse(segments[2]);
-      fileId = int.parse(segments[3]);
-      userOwnerId = int.parse(segments[4]);
+      ownerId = int.parse(segments[1]);
+      fileId = int.parse(segments[2]);
+      userOwnerId = int.parse(segments[3]);
       try {
-        clientId = int.parse(segments[5]);
+        clientId = int.parse(segments[4]);
       } on FormatException catch (_) {
-        log.severe('Invalid clientid: ${segments[5]}');
+        log.severe('Invalid clientid: ${segments[4]}');
         // Don't rethrow, just give a default client id
         clientId = 0;
       }
