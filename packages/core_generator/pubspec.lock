@@ -7,21 +7,21 @@ packages:
       name: _fe_analyzer_shared
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.3"
   analyzer:
     dependency: transitive
     description:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.39.2+1"
+    version: "0.39.4"
   args:
     dependency: "direct main"
     description:
       name: args
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.2"
+    version: "1.5.3"
   async:
     dependency: transitive
     description:
@@ -35,7 +35,7 @@ packages:
       name: charcode
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.3"
   collection:
     dependency: transitive
     description:
@@ -112,10 +112,6 @@ packages:
       name: node_interop
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD:packages/window_utils/example/pubspec.lock
-    version: "1.6.4"
-  petitparser:
-=======
     version: "1.0.3"
   node_io:
     dependency: transitive
@@ -125,13 +121,12 @@ packages:
     source: hosted
     version: "1.0.1+2"
   package_config:
->>>>>>> f00627642d77a062912dba04b184b900a44fabf6:packages/core_generator/pubspec.lock
     dependency: transitive
     description:
       name: package_config
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0"
+    version: "1.9.1"
   path:
     dependency: transitive
     description:
@@ -152,14 +147,14 @@ packages:
       name: pub_semver
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.2"
+    version: "1.4.3"
   source_span:
     dependency: transitive
     description:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.5"
+    version: "1.6.0"
   string_scanner:
     dependency: transitive
     description:
@@ -174,16 +169,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
-<<<<<<< HEAD:packages/window_utils/example/pubspec.lock
-  test_api:
-    dependency: transitive
-    description:
-      name: test_api
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.15"
-=======
->>>>>>> f00627642d77a062912dba04b184b900a44fabf6:packages/core_generator/pubspec.lock
   typed_data:
     dependency: transitive
     description:
@@ -197,20 +182,8 @@ packages:
       name: watcher
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD:packages/window_utils/example/pubspec.lock
-    version: "2.0.8"
-  window_utils:
-    dependency: "direct dev"
-    description:
-      path: ".."
-      relative: true
-    source: path
-    version: "1.0.2"
-  xml:
-=======
-    version: "0.9.7+13"
+    version: "0.9.7+14"
   yaml:
->>>>>>> f00627642d77a062912dba04b184b900a44fabf6:packages/core_generator/pubspec.lock
     dependency: transitive
     description:
       name: yaml
@@ -218,9 +191,4 @@ packages:
     source: hosted
     version: "2.2.0"
 sdks:
-<<<<<<< HEAD:packages/window_utils/example/pubspec.lock
-  dart: ">=2.4.0 <3.0.0"
-  flutter: ">=1.12.8 <2.0.0"
-=======
-  dart: ">=2.6.0 <3.0.0"
->>>>>>> f00627642d77a062912dba04b184b900a44fabf6:packages/core_generator/pubspec.lock
+  dart: ">=2.7.0 <3.0.0"

@@ -70,7 +70,7 @@ packages:
       name: dotted_border
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -84,7 +84,7 @@ packages:
   fractional:
     dependency: "direct main"
     description:
-      path: "../dependencies/fractional-dart"
+      path: "../../fractional"
       relative: true
     source: path
     version: "0.0.2"
@@ -137,13 +137,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.4"
-  pedantic:
-    dependency: transitive
-    description:
-      name: pedantic
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.8.0+1"
   petitparser:
     dependency: transitive
     description:
@@ -157,7 +150,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.1"
+    version: "4.0.4"
   quiver:
     dependency: transitive
     description:
@@ -211,7 +204,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.11"
+    version: "0.2.15"
   tree_widget:
     dependency: "direct main"
     description:
