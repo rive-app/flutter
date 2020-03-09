@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+// import 'package:flutter_test/flutter_test.dart';
 
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_server_client.dart';
@@ -12,6 +12,7 @@ class _TestCoopIsolate extends CoopIsolateProcess {
   Directory _dataDir;
   int ownerId;
   int fileId;
+  int _nextClientId = 0;
 
   @override
   Future<bool> initialize(int ownerId, int fileId,
@@ -33,32 +34,26 @@ class _TestCoopIsolate extends CoopIsolateProcess {
   }
 
   @override
-  Future<bool> shutdown() async {
-    return true;
-  }
+  Future<bool> shutdown() async => true;
 
   @override
-  int attemptChange(CoopServerClient client, ChangeSet changes) {
-    // return server change id
-    return 1;
-  }
+  bool attemptChange(CoopServerClient client, ChangeSet changes) => true;
 
   @override
-  void propagateChanges(CoopServerClient client, ChangeSet changes) {
-    // TODO: implement
-  }
+  void propagateChanges(CoopServerClient client, ChangeSet changes) {}
 
   @override
   ChangeSet buildFileChangeSet() {
-    // TODO: implement initialChanges
     return null;
   }
 
   @override
   Future<void> persist() {
-    // TODO: implement persist
     return Future<void>.value();
   }
+
+  @override
+  int nextClientId() => _nextClientId++;
 }
 
 class TestCoopServer extends CoopServer {
@@ -74,7 +69,26 @@ class TestCoopServer extends CoopServer {
   @override
   Future<int> validate(
       HttpRequest request, int ownerId, int fileId, String token) {
-    // TODO: implement validate
     return Future.value(1);
   }
+
+  @override
+  Future<bool> deregister() {
+    throw UnimplementedError();
+  }
+
+  @override
+  void heartbeat() {}
+
+  @override
+  Future<bool> register() {
+    throw UnimplementedError();
+  }
+}
+
+/// Manually test that the test server can be started
+Future main() async {
+  final server = TestCoopServer();
+  print('Listening on port 8124');
+  await server.listen(port: 8124);
 }

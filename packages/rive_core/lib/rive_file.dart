@@ -279,7 +279,7 @@ class RiveFile extends RiveCoreContext {
   }
 
   Future<void> _loadDirtyPlayers() async {
-    if (_dirtyPlayers.isEmpty) {
+    if (_dirtyPlayers.isEmpty || api == null) {
       return;
     }
     var artists = RiveArtists(api);
