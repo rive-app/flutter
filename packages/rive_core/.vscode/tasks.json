@@ -1,0 +1,25 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "gen core",
+            "type": "shell",
+            "command": "dart ../dependencies/core-dart/core_generator/lib/main.dart --definitions-folder=rive-core-defs/defs/ --core-context=RiveCoreContext",
+            "problemMatcher": [
+                "$dart-pub-build_runner"
+            ],
+            "isBackground": true
+        },
+        {
+            "label": "gen core --regen-keys",
+            "type": "shell",
+            "command": "dart ../dependencies/core-dart/core_generator/lib/main.dart --definitions-folder=rive-core-defs/defs/ --core-context=RiveCoreContext --regen-keys",
+            "problemMatcher": [
+                "$dart-pub-build_runner"
+            ],
+            "isBackground": true
+        }
+    ]
+}

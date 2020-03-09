@@ -1,0 +1,22 @@
+name: Run Tests
+
+on:
+    pull_request:
+    push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Checkout flutter and install it...
+        run: |
+          git clone https://github.com/flutter/flutter.git
+          ./flutter/bin/flutter doctor
+      - name: Install editor dependencies
+        run: cd packages/editor && ../../flutter/bin/flutter pub get
+
+      - name: Run editor tests
+        run: cd packages/editor && ../../flutter/bin/flutter test
+    

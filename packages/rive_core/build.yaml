@@ -1,0 +1,14 @@
+# Read about `build.yaml` at https://pub.dev/packages/build_config
+targets:
+  $default:
+    builders:
+      # Configure the builder `pkg_name|builder_name`
+      # In this case, the member_count builder defined in `../example`
+      core_builder|metadata:
+        # Only run this builder on the specified input.
+        generate_for:
+          - lib/src/metadata.dart
+      core_builder|coretype:
+        generate_for:
+          exclude:
+            - lib/src/metadata.dart

@@ -1,0 +1,46 @@
+name: rive_editor
+description: The Rive editor written in Flutter.
+version: 0.0.9
+
+environment:
+  sdk: ">=2.6.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  rive_core:
+    path: ../rive_core
+  tree_widget:
+    path: ../tree_widget
+  cursor:
+    path: ../cursor
+  window_utils:
+    path: ../window_utils
+  rive_api:
+    path: ../rive_api
+  trotter: ^1.1.0
+  
+  # core depends on this already, do we care?
+  # fractional:
+  #   path: ../rive_coredependencies/fractional-dart
+  path_drawing: ^0.4.1
+  dotted_border: ^1.0.4
+  flutter_widgets: ^0.1.9
+
+dev_dependencies:
+  test: any
+  mockito: ^4.1.1
+  image_res: ^0.2.3
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  assets:
+    - assets/images/
+    - assets/images/icons/
+    
+  uses-material-design: true
+  fonts:
+    - family: Roboto-Regular
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf

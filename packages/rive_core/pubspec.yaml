@@ -1,0 +1,26 @@
+name: rive_core
+description: Core framework for Rive.
+version: 0.0.1
+homepage: https://rive.app/
+
+environment:
+  sdk: ">=2.6.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  core:
+    path: ../core
+  local_data:
+    path: ../local_data
+  rive_api:
+    path: ../rive_api
+  shared_preferences: ^0.5.6
+  path_provider: 1.5.1
+  graphs: ^0.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
