@@ -1,0 +1,13 @@
+name: coop_server_process
+
+environment:
+  sdk: '>=2.6.0 <3.0.0'
+
+dependencies:
+  args: ^1.5.2
+  colorize: ^2.0.0
+  logging: ^0.11.4
+  sentry: ">=3.0.0 <4.0.0"
+
+  coop_server_library:
+    path: ../coop_server

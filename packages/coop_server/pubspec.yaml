@@ -1,0 +1,18 @@
+name: coop_server_library
+
+environment:
+  sdk: ">=2.6.0 <3.0.0"
+
+dependencies:
+  http: ^0.12.0
+  logging: ^0.11.4
+  retry: ^3.0.0+1
+  core:
+    path: ../core
+
+# dependency_overrides:
+#   core:
+#     path: ../../rive-editor/dependencies/core-dart/core
+
+dev_dependencies:
+  test: ^1.14.1
