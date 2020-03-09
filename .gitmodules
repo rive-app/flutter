@@ -1,6 +1,0 @@
-[submodule "dependencies/binary-buffer-dart"]
-	path = dependencies/binary-buffer-dart
-	url = git@github.com:rive-app/binary-buffer-dart.git
-[submodule "dependencies/fractional-dart"]
-	path = dependencies/fractional-dart
-	url = git@github.com:rive-app/fractional-dart.git

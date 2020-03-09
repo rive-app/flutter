@@ -10,9 +10,9 @@ dependencies:
   meta: ^1.1.8
   logging: ^0.11.4
   binary_buffer:
-    path: ../dependencies/binary-buffer-dart
+    path: ../binary_buffer
   fractional:
-    path: ../dependencies/fractional-dart
+    path: ../fractional
   sentry: ">=3.0.0 <4.0.0"
 
 dev_dependencies:
