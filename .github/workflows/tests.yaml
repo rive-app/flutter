@@ -37,3 +37,8 @@ jobs:
       - name: Run editor tests
         run: cd packages/editor && flutter test
     
+      # Run the co-op server tests
+      - name: Install coop server dependencies
+        run: cd packages/coop_server && pub get
+      - name: Run coop server tests
+        run: cd packages/coop_server && pub run test
