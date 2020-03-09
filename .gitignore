@@ -1,3 +1,8 @@
+# Rive
+packages/core/pubspec.lock
+packages/rive_api/example/pubspec.lock
+packages/rive_api/pubspec.lock
+
 # Miscellaneous
 *.class
 *.log
@@ -22,13 +27,14 @@
 
 # Flutter/Dart/Pub related
 **/doc/api/
-.dart_tool/
+**/.dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
 build/
+
 
 # Android related
 **/android/**/gradle-wrapper.jar
