@@ -1,4 +1,4 @@
-name: Run Tests
+name: Tests
 
 on:
     pull_request:
@@ -10,13 +10,30 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Checkout flutter and install it...
+
+      # Install Flutter and Dart
+      - name: Checkout and install flutter and dart
         run: |
           git clone https://github.com/flutter/flutter.git
-          ./flutter/bin/flutter doctor
-      - name: Install editor dependencies
-        run: cd packages/editor && ../../flutter/bin/flutter pub get
 
+      - name: Add the flutter commmand path
+        run: echo "::add-path::$GITHUB_WORKSPACE/flutter/bin"
+
+      - name: Add the dart command path
+        run: echo "::add-path::$GITHUB_WORKSPACE/flutter/bin/cache/dart-sdk/bin"
+
+      - name: Setup flutter
+        run: flutter doctor
+
+      # Run the binary buffer tests
+      - name: Install binary buffer dependencies
+        run: cd packages/binary_buffer && pub get
+      - name: Run binary buffer tests
+        run: cd packages/binary_buffer && pub run test
+
+      # Run the editor tests
+      - name: Install editor dependencies
+        run: cd packages/editor && flutter pub get
       - name: Run editor tests
-        run: cd packages/editor && ../../flutter/bin/flutter test
+        run: cd packages/editor && flutter test
     
