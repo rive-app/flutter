@@ -48,3 +48,9 @@ jobs:
         run: cd packages/core && pub get
       - name: Run core tests
         run: cd packages/core && pub run test
+
+        # Run the fractional tests
+      - name: Install fractional dependencies
+        run: cd packages/fractional && pub get
+      - name: Run fractional tests
+        run: cd packages/fractional && pub run test
