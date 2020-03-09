@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
@@ -15,8 +16,8 @@ import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
-
 import 'package:window_utils/window_utils.dart';
+import 'package:core/error_logger.dart';
 
 import 'constants.dart';
 import 'rive/hierarchy_tree_controller.dart';
@@ -27,7 +28,6 @@ import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
 import 'widgets/inspector/inspector_panel.dart';
 import 'widgets/login.dart';
-
 import 'widgets/resize_panel.dart';
 import 'widgets/stage_view.dart';
 import 'widgets/tab_bar/rive_tab_bar.dart';
@@ -35,6 +35,10 @@ import 'widgets/toolbar/connected_users.dart';
 import 'widgets/toolbar/design_animate_toggle.dart';
 
 Future<void> main() async {
+  FlutterError.onError = (FlutterErrorDetails details) {
+    ErrorLogger.instance.onError(details.exception, details.stack);
+  };
+
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addPostFrameCallback(
     (_) {
@@ -50,12 +54,26 @@ Future<void> main() async {
     // this is just for the prototype...
     // await rive.open('100/100');
   }
-  runApp(
-    RiveEditorApp(
-      rive: rive,
-      iconCache: iconCache,
-      focusNode: FocusNode(canRequestFocus: true, skipTraversal: true),
+
+  // Runs the app in a custom [Zone] (i.e. an execution context).
+  // Provides a convenient way to capture all errors, so they can be reported
+  // to our logger service.
+  runZoned(
+    () => runApp(
+      RiveEditorApp(
+        rive: rive,
+        iconCache: iconCache,
+        focusNode: FocusNode(canRequestFocus: true, skipTraversal: true),
+      ),
     ),
+    onError: (Object error, StackTrace stackTrace) {
+      try {
+        ErrorLogger.instance.onError(error, stackTrace);
+      } on Exception catch (e) {
+        debugPrint('Failed to report: $e');
+        debugPrint('Error was: $error, $stackTrace');
+      }
+    },
   );
 }
 
