@@ -54,3 +54,9 @@ jobs:
         run: cd packages/fractional && pub get
       - name: Run fractional tests
         run: cd packages/fractional && pub run test
+
+        # Run the tree widget tests
+      - name: Install tree widget dependencies
+        run: cd packages/tree_widget && flutter pub get
+      - name: Run tree widget tests
+        run: cd packages/tree_widget && flutter test
