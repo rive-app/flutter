@@ -10,11 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   core:
-    path: ../dependencies/core-dart/core
+    path: ../core
   local_data:
-    path: ../dependencies/rive-api-flutter/dependencies/local-data-flutter
+    path: ../local_data
   rive_api:
-    path: ../dependencies/rive-api-flutter
+    path: ../rive_api
   shared_preferences: ^0.5.6
   path_provider: 1.5.1
   graphs: ^0.2.0

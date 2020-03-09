@@ -9,20 +9,20 @@ dependencies:
   flutter:
     sdk: flutter
   rive_core:
-    path: ../rive_core/
+    path: ../rive_core
   tree_widget:
-    path: ../dependencies/tree-widget-flutter
+    path: ../tree_widget
   cursor:
-    path: ../dependencies/cursor-flutter
+    path: ../cursor
   window_utils:
-    path: ../dependencies/rive-api-flutter/dependencies/window-utils
+    path: ../window_utils
   rive_api:
-    path: ../dependencies/rive-api-flutter
+    path: ../rive_api
   trotter: ^1.1.0
   
   # core depends on this already, do we care?
   # fractional:
-  #   path: ../rive_core/dependencies/fractional-dart
+  #   path: ../rive_coredependencies/fractional-dart
   path_drawing: ^0.4.1
   dotted_border: ^1.0.4
   flutter_widgets: ^0.1.9
