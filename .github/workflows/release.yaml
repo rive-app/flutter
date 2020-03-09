@@ -1,5 +1,10 @@
+# NOTE: this action is currently disabled (ignoring all branches)
+
 on:
     push:
+      # disabling this action for the time being
+      branches-ignore:
+        - '**'
       # branches:
       #   - master
       #   - 'releases/**'
@@ -7,7 +12,7 @@ on:
       # paths:
       #     - '**.dart'
       tags:
-      - 'v*'
+        - 'v*'
 
 name: Release
 
