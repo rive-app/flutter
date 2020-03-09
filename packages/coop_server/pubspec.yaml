@@ -8,7 +8,7 @@ dependencies:
   logging: ^0.11.4
   retry: ^3.0.0+1
   core:
-    path: ../dependencies/rive-editor-flutter/dependencies/core-dart/core
+    path: ../core
 
 # dependency_overrides:
 #   core:

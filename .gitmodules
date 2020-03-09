@@ -1,3 +1,0 @@
-[submodule "dependencies/rive-editor-flutter"]
-	path = dependencies/rive-editor-flutter
-	url = git@github.com:rive-app/rive-editor-flutter.git
