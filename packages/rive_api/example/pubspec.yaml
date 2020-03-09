@@ -22,7 +22,7 @@ dependencies:
   rive_api:
     path: ../
   local_data:
-    path: ../dependencies/local-data-flutter
+    path: ../../local_data
 
 
   # The following adds the Cupertino Icons font to your application.
