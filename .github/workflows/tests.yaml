@@ -60,3 +60,9 @@ jobs:
         run: cd packages/tree_widget && flutter pub get
       - name: Run tree widget tests
         run: cd packages/tree_widget && flutter test
+
+        # Run the rive core tests
+      - name: Install rive core dependencies
+        run: cd packages/rive_core && flutter pub get
+      - name: Run rive core tests
+        run: cd packages/rive_core && flutter test
