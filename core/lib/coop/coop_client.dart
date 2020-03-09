@@ -6,6 +6,7 @@ import 'package:core/coop/change.dart';
 import 'package:core/coop/player.dart';
 import 'package:core/coop/player_cursor.dart';
 import 'package:core/coop/protocol_version.dart';
+import 'package:core/error_logger.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'connect_result.dart';
@@ -105,6 +106,7 @@ class CoopClient extends CoopReader {
       // expected to happen in order.
       _subscription.pause();
       await read(data);
+
       _subscription.resume();
     }
   }
@@ -117,19 +119,29 @@ class CoopClient extends CoopReader {
 
     _connectionState = ConnectionState.connecting;
 
-    _subscription =
-        _channel.stream.listen(_onStreamData, onError: (dynamic error) {
-      print("CONNECTION ERROR");
-      _disconnected();
-    }, onDone: () {
-      print("CONNECTION MURDERED");
-      _disconnected();
-      _connectionCompleter?.complete(ConnectResult.networkError);
-      _connectionCompleter = null;
-      if (_allowReconnect) {
-        _reconnect();
+    runZoned(() {
+      _subscription =
+          _channel.stream.listen(_onStreamData, onError: (dynamic error) {
+        print("CONNECTION ERROR");
+        _disconnected();
+      }, onDone: () {
+        print("CONNECTION MURDERED");
+        _disconnected();
+        _connectionCompleter?.complete(ConnectResult.networkError);
+        _connectionCompleter = null;
+        if (_allowReconnect) {
+          _reconnect();
+        }
+      });
+    }, onError: (Object error, StackTrace stackTrace) {
+      try {
+        ErrorLogger.instance.onError(error, stackTrace);
+      } on Exception catch (e) {
+        print('Failed to report: $e');
+        print('Error was: $error, $stackTrace');
       }
     });
+
     return _connectionCompleter.future;
   }
 
