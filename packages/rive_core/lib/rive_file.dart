@@ -279,6 +279,7 @@ class RiveFile extends RiveCoreContext {
   }
 
   Future<void> _loadDirtyPlayers() async {
+    // TODO: make the api non-nullable, which means mocking it out for tests
     if (_dirtyPlayers.isEmpty || api == null) {
       return;
     }

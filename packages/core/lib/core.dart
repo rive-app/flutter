@@ -108,7 +108,7 @@ abstract class CoreContext implements LocalSettings {
   final String fileId;
   CoopClient _client;
   int _lastChangeId;
-  // _nextObjectId has a defulat value that will be
+  // _nextObjectId has a default value that will be
   // overridden when a client is connected
   Id _nextObjectId = const Id(0, 0);
   // Map<int, Core> get objects => _objects;
