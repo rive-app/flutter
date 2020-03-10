@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:core/debounce.dart';
 import 'package:core/coop/connect_result.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
@@ -199,15 +200,8 @@ class Rive with RiveFileDelegate {
   }
 
   @override
-  void onArtboardsChanged() {
-    treeController.value.flatten();
-    // TODO: this will get handled by dependency manager.
-    // _stage.markNeedsAdvance();
-  }
-
-  @override
   void onDirtCleaned() {
-    treeController.value?.flatten();
+    debounce(treeController.value.flatten);
     _stage?.markNeedsAdvance();
   }
 
@@ -309,6 +303,7 @@ class Rive with RiveFileDelegate {
   @override
   void onObjectAdded(Core object) {
     _stage.initComponent(object as Component);
+    debounce(treeController.value.flatten);
   }
 
   @override
