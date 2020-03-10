@@ -82,7 +82,7 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
               width: 40,
             ),
             ComboBox(
-              expanded: true,
+              sizing: ComboSizing.expanded,
               typeahead: true,
               options: KILLME_ComboExamples.busters,
               value: _buster1,
@@ -117,7 +117,7 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
               width: 40,
             ),
             ComboBox(
-              expanded: true,
+              sizing: ComboSizing.expanded,
               options: KILLME_ComboExamples.busters,
               value: _buster2,
               chooseOption: (String buster) {
@@ -151,7 +151,7 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
               width: 40,
             ),
             ComboBox(
-              expanded: true,
+              sizing: ComboSizing.expanded,
               options: _FakeBlendModes.values,
               chooseOption: (_FakeBlendModes blendMode) {
                 setState(() {

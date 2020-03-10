@@ -95,11 +95,9 @@ class _IsolatedPersistBackground {
   void _save() {
     var writer = BinaryWriter();
     for (final persistable in _persistables.values) {
-      log.finest("PERSIST ID ${persistable.id}");
       persistable.serialize(writer);
     }
     _localData.save(_changesDataName, writer.uint8Buffer);
-    log.finest("SAVED ${_persistables.length} PERSISTABLES!");
   }
 }
 

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -19,6 +21,9 @@ class _ComboOption<T> extends PopupListItem {
   bool get canSelect => true;
 
   @override
+  bool get dismissAll => false;
+
+  @override
   double get height => 35;
 
   @override
@@ -31,6 +36,8 @@ class _ComboOption<T> extends PopupListItem {
   final SelectCallback select;
 }
 
+enum ComboSizing { expanded, collapsed, content }
+
 /// A multi-choice popup input widget. Has styling options for all the various
 /// Rive use cases (chevron and underline are toggleable and text color is
 /// configurable).) It can also optionally provide type-ahead logic and act as
@@ -42,7 +49,7 @@ class ComboBox<T> extends StatefulWidget {
   final bool chevron;
   final bool underline;
   final Color valueColor;
-  final bool expanded;
+  final ComboSizing sizing;
   final double popupWidth;
   final ChooseOption<T> chooseOption;
   final OptionToLabel<T> toLabel;
@@ -58,7 +65,7 @@ class ComboBox<T> extends StatefulWidget {
     this.chevron = true,
     this.underline = true,
     this.valueColor = Colors.white,
-    this.expanded = true,
+    this.sizing = ComboSizing.expanded,
     this.popupWidth,
     this.chooseOption,
     this.toLabel,
@@ -73,14 +80,54 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
   ListPopup<_ComboOption<T>> _popup;
   TextEditingController _controller;
   FocusNode _focusNode;
+  double _contentWidth;
+
+  double get contentWidth {
+    if (_contentWidth != null) {
+      return _contentWidth;
+    }
+    double width = 0;
+
+    // Compute widest of all text labels.
+    var textStyle = RiveThemeData().textStyles.basic;
+    for (final option in widget.options) {
+      final style = ui.ParagraphStyle(
+          textAlign: TextAlign.left,
+          fontFamily: textStyle.fontFamily,
+          fontSize: textStyle.fontSize);
+      ui.ParagraphBuilder builder = ui.ParagraphBuilder(style)
+        ..pushStyle(textStyle.getTextStyle());
+      var text = itemLabel(option);
+      builder.addText(text);
+      ui.Paragraph paragraph = builder.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 2048));
+      List<TextBox> boxes = paragraph.getBoxesForRange(0, text.length);
+      var optionWidth = boxes.last.right - boxes.first.left + 1;
+      if (optionWidth > width) {
+        width = optionWidth;
+      }
+    }
+    _contentWidth = width;
+    return width;
+  }
 
   bool get isOpen => _popup?.isOpen ?? false;
+
+  @override
+  void didUpdateWidget(ComboBox<T> oldWidget) {
+    if (oldWidget.options != widget.options) {
+      // Reset content size so it'll be re-computed.
+      _contentWidth = null;
+    }
+    super.didUpdateWidget(oldWidget);
+  }
 
   Widget _chevron(Widget child, {RiveThemeData theme}) {
     if (widget.chevron) {
       return Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _expand(child),
+          _size(child),
           const SizedBox(width: 8),
           TintedIcon(
             color: theme.colors.toolbarButton,
@@ -92,8 +139,29 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     return child;
   }
 
-  Widget _expand(Widget child) =>
-      widget.expanded ? Expanded(child: child) : child;
+  Widget _size(Widget child) {
+    switch (widget.sizing) {
+      case ComboSizing.collapsed:
+        return child;
+      case ComboSizing.expanded:
+        return Expanded(child: child);
+      case ComboSizing.content:
+        return Container(width: contentWidth, child:child);
+    }
+    return child;
+  }
+
+  Widget _expand(Widget child) {
+    switch (widget.sizing) {
+      case ComboSizing.collapsed:
+        return child;
+      case ComboSizing.expanded:
+        return Expanded(child: child);
+      case ComboSizing.content:
+        return child;
+    }
+    return child;
+  }
 
   Widget _underline(Widget child, {RiveThemeData theme}) {
     if (widget.underline) {
@@ -249,6 +317,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
               offset: Offset(-ComboBox._horizontalPadding,
                   widget.typeahead ? 0 : widget.underline ? -34 : -30),
               margin: 5,
+              includeCloseGuard: true,
               showArrow: false,
               items: items,
               itemBuilder: (context, item, isHovered) => Align(

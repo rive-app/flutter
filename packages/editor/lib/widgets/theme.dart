@@ -32,6 +32,7 @@ class RiveColors {
   Color get toolbarButtonSelected => const Color(0xFF57A5E0);
   Color get toolbarButtonHover => white;
   Color get toolbarButtonBackGroundHover => const Color(0xFF444444);
+  Color get toolbarButtonBackGroundPressed => const Color(0xFF262626);
 
   // Popups
   Color get separator => const Color(0xFF262626);
@@ -89,6 +90,9 @@ class RiveColors {
   Color get commonDarkGrey => const Color(0xFF333333);
   Color get commonButtonColor => const Color(0x19000000);
   Color get commonButtonTextColor => const Color(0xFF888888);
+
+  // Inspector
+  Color get inspectorTextColor => const Color(0xFF8C8C8C);
 }
 
 /// TextStyles used in the Rive Theme

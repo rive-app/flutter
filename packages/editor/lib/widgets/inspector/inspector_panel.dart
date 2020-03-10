@@ -62,6 +62,8 @@ class _InspectorPanelState extends State<InspectorPanel> {
               i < builderCount;
               i++) {
             var builder = inspectorBuilders[i];
+            
+            builder.clean();
 
             // Is the builder interested in the current inspection set?
             if (!builder.validate(inspectionSet)) {

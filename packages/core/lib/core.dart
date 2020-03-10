@@ -577,14 +577,12 @@ abstract class CoreContext implements LocalSettings {
       // changes from this set to avoid the flickering issue.
       applyCoopChanges(objectChanges);
     }
-    log.finest("COMPLETING ADD");
     completeAdd();
     // completeAddDirty();
     _isRecording = wasRecording;
-    log.finest("COMPLETE CHANGES");
+
     // completeChanges();
     // completeAddClean();
-    log.finest("ALL DONE!");
   }
 
   /// Add a set of components as a batched operation, cleaning dirt and
