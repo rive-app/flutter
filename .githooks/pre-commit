@@ -41,11 +41,11 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# echo Testing Rive core
-# cd $RIVE_ROOT/packages/rive_core && flutter test && cd -
-# if [ $? -ne 0 ]; then
-#   exit 1
-# fi
+echo Testing Rive core
+cd $RIVE_ROOT/packages/rive_core && flutter test && cd -
+if [ $? -ne 0 ]; then
+  exit 1
+fi
 
 echo Testing tree widget
 cd $RIVE_ROOT/packages/tree_widget && flutter test && cd -
