@@ -1,8 +1,10 @@
-import 'package:core/coop/connect_result.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:core/coop/connect_result.dart';
+import 'package:core/coop/coop_isolate.dart';
+
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:core/coop/coop_isolate.dart';
 
 import 'src/test_server.dart';
 
@@ -38,12 +40,11 @@ void main() {
       file.captureJournalEntry();
       node.name = 'name change2';
       file.captureJournalEntry();
-      // Give opportunity to save...
-      await Future.delayed(const Duration(milliseconds: 1000), () {});
-
+      // // Give opportunity to save...
+      await Future.delayed(const Duration(milliseconds: 500), () {});
       expect(await file.disconnect(), true);
 
-      // give server opportunity to catch up...
+      // // give server opportunity to catch up...
       await Future.delayed(CoopIsolate.killTimeout, () {});
       await Future.delayed(const Duration(milliseconds: 100), () {});
 

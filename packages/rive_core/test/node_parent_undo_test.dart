@@ -9,7 +9,7 @@ import 'package:rive_core/rive_file.dart';
 /// https://www.notion.so/Hierarchy-Undo-9781b750356943c49818d71d5c53562e
 void main() {
   test('re-parent node', () {
-    final file = RiveFile("fake", "no name");
+    final file = RiveFile('fake', 'no name');
 
     // Create the node with some name set to it.
     var node1 = file.add(Node()..name = 'Node 1');
@@ -149,7 +149,7 @@ void main() {
 
     // Move a under b between e and f
     a.parent = b;
-    b.children.move(a, after: e, before:f);
+    b.children.move(a, after: e, before: f);
 
     file.captureJournalEntry();
 
