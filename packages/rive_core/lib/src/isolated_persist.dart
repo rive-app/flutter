@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:logging/logging.dart';
+
 import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/debounce.dart';
 import 'package:local_data/local_data.dart';
+
+final log = Logger('rive_core');
 
 const String _changesDataName = 'changes';
 
@@ -48,14 +52,14 @@ class _IsolatedPersistBackground {
         while (!reader.isEOF) {
           var change = ChangeSet()..deserialize(reader);
           _persistables[change.id] = change;
-          print("READ ID ${change.id}");
+          log.finest("READ ID ${change.id}");
         }
       } on Exception catch (_) {
         _persistables.clear();
         // TODO: let user this happened (data was corrupt)
       }
     }
-    print("GOT ${_persistables.length} PERSISTABLES!");
+    log.finest("GOT ${_persistables.length} PERSISTABLES!");
 
     _sendToMain = arg.sendPort;
     _receiveOnIsolate = ReceivePort();
@@ -65,16 +69,15 @@ class _IsolatedPersistBackground {
       bool save = true;
       switch (op.action) {
         case _PersistableAction.add:
-        print("ADDING ${op.persistable.id}");
+          log.finest("ADDING ${op.persistable.id}");
           _persistables[op.persistable.id] = op.persistable;
           break;
         case _PersistableAction.remove:
-        
           var removed = _persistables.remove(op.persistable.id);
-          print("REMOVING ${op.persistable.id} $removed");
+          log.finest("REMOVING ${op.persistable.id} $removed");
           break;
         case _PersistableAction.fetch:
-          print("GOT FETCH FROM API");
+          log.finest("GOT FETCH FROM API");
           save = false;
           _sendToMain.send(_persistables.values.toList(growable: false));
           break;
@@ -92,11 +95,11 @@ class _IsolatedPersistBackground {
   void _save() {
     var writer = BinaryWriter();
     for (final persistable in _persistables.values) {
-      print("PERSIST ID ${persistable.id}");
+      log.finest("PERSIST ID ${persistable.id}");
       persistable.serialize(writer);
     }
     _localData.save(_changesDataName, writer.uint8Buffer);
-    print("SAVED ${_persistables.length} PERSISTABLES!");
+    log.finest("SAVED ${_persistables.length} PERSISTABLES!");
   }
 }
 

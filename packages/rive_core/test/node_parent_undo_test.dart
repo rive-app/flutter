@@ -1,5 +1,7 @@
-import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:core/core.dart';
+
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
