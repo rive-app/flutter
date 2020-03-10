@@ -1,18 +1,24 @@
+import 'package:flutter/material.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logging/logging.dart';
+
 import 'package:core/coop/change.dart';
 import 'package:core/coop/player.dart';
 import 'package:core/core.dart';
 import 'package:core/debounce.dart';
-import 'package:flutter/material.dart';
+
 import 'package:rive_api/api.dart';
 import 'package:rive_api/artists.dart';
 import 'package:rive_core/client_side_player.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'artboard.dart';
-import 'component.dart';
-import 'container_component.dart';
+import 'package:rive_core/artboard.dart';
+import 'package:rive_core/component.dart';
+import 'package:rive_core/container_component.dart';
 import 'src/generated/rive_core_context.dart';
 import 'src/isolated_persist.dart';
+
+final log = Logger('rive_core');
 
 class RiveFile extends RiveCoreContext {
   final String name;
@@ -77,7 +83,7 @@ class RiveFile extends RiveCoreContext {
     if (_dirt == 0) {
       return false;
     }
-    print("CLEAN!");
+    log.finest("CLEAN!");
     _dirt = 0;
 
     // Copy it in case it is changed during the building (meaning this process
@@ -95,9 +101,9 @@ class RiveFile extends RiveCoreContext {
     for (final component in needDependenciesBuilt) {
       if (component.artboard != null) {
         _needDependenciesOrdered.add(component.artboard);
-        print("Component with good artboard ${component.name}");
+        log.finest("Component with good artboard ${component.name}");
       } else {
-        print("WHY IS THE ARTBOARD NULL $component ${component.name}??");
+        log.finest("WHY IS THE ARTBOARD NULL $component ${component.name}??");
       }
       component.buildDependencies();
     }
@@ -198,11 +204,11 @@ class RiveFile extends RiveCoreContext {
 
   @override
   void onAddedDirty(Component object) {
-    print("ADDING ${object.name} ${object.id} ${object.parentId}");
+    log.finest("ADDING ${object.name} ${object.id} ${object.parentId}");
     if (object.parentId != null) {
       object.parent = object.context?.resolve(object.parentId);
       if (object.parent == null) {
-        print("Failed to resolve parent with id ${object.parentId}");
+        log.finest("Failed to resolve parent with id ${object.parentId}");
       } else {
         object.parent.childAdded(object);
       }

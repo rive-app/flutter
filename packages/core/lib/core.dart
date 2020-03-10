@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:core/id.dart';
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
+import 'package:core/id.dart';
 import 'coop/change.dart';
 import 'coop/connect_result.dart';
 import 'coop/coop_client.dart';
@@ -16,8 +17,9 @@ import 'debounce.dart';
 
 export 'package:fractional/fractional.dart';
 export 'package:core/id.dart';
-
 export 'src/list_equality.dart';
+
+final log = Logger('Core');
 
 class ChangeEntry {
   Object from;
@@ -462,7 +464,7 @@ abstract class CoreContext implements LocalSettings {
 
   @mustCallSuper
   void _changesAccepted(ChangeSet changes) {
-    print("ACCEPTING ${changes.id}.");
+    log.finest("ACCEPTING ${changes.id}.");
     _freshChanges.remove(changes);
     abandonChanges(changes);
   }
@@ -506,13 +508,13 @@ abstract class CoreContext implements LocalSettings {
         if (key == hydrateKey) {
           //changeProperty(object, addKey, removeKey, object.coreType);
           //changeProperty(object, removeKey, addKey, object.coreType);
-          print("GOT HYDRATION! $objectId ${entry.from} ${entry.to}");
+          log.finest("GOT HYDRATION! $objectId ${entry.from} ${entry.to}");
           var change = makeCoopChange(addKey, entry.to);
           if (change != null) {
             objectChanges.changes.add(change);
           }
         } else if (key == dehydrateKey) {
-          print("DEHYDRATE THIS THING.");
+          log.finest("DEHYDRATE THIS THING.");
           var change = makeCoopChange(removeKey, objectId);
           if (change != null) {
             objectChanges.changes.add(change);
@@ -555,7 +557,7 @@ abstract class CoreContext implements LocalSettings {
     // We've received changes from Coop. Initialize the delayAdd list so that
     // onAdded doesn't get called as objects are created. We'll manually call it
     // at the end of this method once all the changes have been made.
-    print("STARTING ADD");
+    log.finest("STARTING ADD");
     startAdd();
 
     // Track whether recording was on/off, definitely turn it off during these
@@ -567,14 +569,14 @@ abstract class CoreContext implements LocalSettings {
       // changes from this set to avoid the flickering issue.
       applyCoopChanges(objectChanges);
     }
-    print("COMPLETING ADD");
+    log.finest("COMPLETING ADD");
     completeAdd();
     // completeAddDirty();
     _isRecording = wasRecording;
-    print("COMPLETE CHANGES");
+    log.finest("COMPLETE CHANGES");
     // completeChanges();
     // completeAddClean();
-    print("ALL DONE!");
+    log.finest("ALL DONE!");
   }
 
   /// Add a set of components as a batched operation, cleaning dirt and

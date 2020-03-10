@@ -1,11 +1,17 @@
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:rive_core/rive_file.dart';
 
-import 'artboard.dart';
-import 'container_component.dart';
+import 'package:logging/logging.dart';
+
+import 'package:core/core.dart';
+
+import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/artboard.dart';
+import 'package:rive_core/container_component.dart';
 import 'src/generated/component_base.dart';
+
 export 'src/generated/component_base.dart';
+
+final log = Logger('rive_core');
 
 abstract class Component extends ComponentBase<RiveFile> {
   Artboard _artboard;
@@ -51,7 +57,7 @@ abstract class Component extends ComponentBase<RiveFile> {
 
   /// Find the artboard in the hierarchy.
   bool resolveArtboard() {
-    print("RESOLVING ARTBOARD FOR $name");
+    log.finest("RESOLVING ARTBOARD FOR $name");
     for (Component curr = this; curr != null; curr = curr.parent) {
       visitAncestor(curr);
       if (curr is Artboard) {
@@ -174,7 +180,7 @@ abstract class Component extends ComponentBase<RiveFile> {
   void onDependencyRemoved(Component dependent) {}
 
   void onAdded() {}
-  
+
   void onRemoved() {
     for (final parentDep in _dependsOn) {
       parentDep._dependents.remove(this);

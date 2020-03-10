@@ -1,12 +1,17 @@
 import 'dart:typed_data';
+
+import 'package:logging/logging.dart';
+
+import 'package:core/debounce.dart';
+
 import 'package:core/coop/player.dart';
 import 'package:core/coop/player_cursor.dart';
+import 'package:core/coop/change.dart';
+import 'package:core/coop/coop_isolate.dart';
+import 'package:core/coop/coop_reader.dart';
+import 'package:core/coop/coop_writer.dart';
 
-import '../debounce.dart';
-import 'change.dart';
-import 'coop_isolate.dart';
-import 'coop_reader.dart';
-import 'coop_writer.dart';
+final log = Logger('core_coop');
 
 class CoopServerClient extends Player with CoopReader {
   CoopWriter _writer;
@@ -52,16 +57,16 @@ class CoopServerClient extends Player with CoopReader {
 
   @override
   Future<void> recvSync(List<ChangeSet> changes) async {
-    print("got sync!");
+    log.finest("got sync!");
     // Apply offline changes.
     if (changes.isNotEmpty) {
       for (final change in changes) {
-        print("sync attempt change!");
+        log.finest("sync attempt change!");
         context.attemptChange(this, change);
       }
       debounce(context.persist, duration: const Duration(seconds: 2));
     }
-    print("start the wipe!");
+    log.finest("start the wipe!");
 
     _writer.writeWipe();
 
