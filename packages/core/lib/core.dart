@@ -162,7 +162,7 @@ abstract class CoreContext implements LocalSettings {
     } else {
       onAddedDirty(object);
       // Does this ever happen anymore? Shouldn't all our object creations get
-      // wrapped in a startAdd?
+      // wrapped in a batchAdd?
       onAddedClean(object);
     }
     if (_isRecording) {
