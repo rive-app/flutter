@@ -1,13 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
+
 import 'package:rive_core/selectable_item.dart';
+
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/icons.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
+
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
@@ -33,7 +38,7 @@ class FolderTreeView extends StatelessWidget {
         style: TreeStyle(
           showFirstLine: false,
           padding: padding,
-          lineColor: ThemeUtils.lineGrey,
+          lineColor: RiveTheme.of(context).colors.fileLineGrey,
           itemHeight: itemHeight,
         ),
         separatorBuilder: (_, index) => Center(
@@ -54,7 +59,7 @@ class FolderTreeView extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             border: Border.all(
-              color: ThemeUtils.lineGrey,
+              color: RiveTheme.of(context).colors.fileLineGrey,
               width: 1.0,
               style: BorderStyle.solid,
             ),
@@ -68,11 +73,10 @@ class FolderTreeView extends StatelessWidget {
             width: 15,
             height: 15,
             child: Center(
-              child: RiveIcons.folder(
-                browser.selectedFolder == item.data
-                    ? Colors.white
-                    : ThemeUtils.iconColor,
-                15.0,
+              child: FolderIcon(
+                color: browser.selectedFolder == item.data
+                    ? RiveTheme.of(context).colors.fileSelectedFolderIcon
+                    : RiveTheme.of(context).colors.fileUnselectedFolderIcon,
               ),
             ),
           ),
@@ -98,7 +102,7 @@ class FolderTreeView extends StatelessWidget {
                     // fontWeight: FontWeight.w100,
                     color: browser.selectedFolder.key == item.data.key
                         ? Colors.white
-                        : ThemeUtils.textLightGrey,
+                        : RiveTheme.of(context).colors.fileTextLightGrey,
                   ),
                 ),
               ),

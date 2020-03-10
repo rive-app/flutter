@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'package:rive_core/selectable_item.dart';
+
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/inspector_view.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ItemView extends StatelessWidget {
   final SelectableItem item;
@@ -17,7 +19,7 @@ class ItemView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InspectorView(
-      header: _buildHeader(),
+      header: _buildHeader(context),
       actions: <Widget>[
         const FlatIconButton(
           label: "Export for Runtime",
@@ -39,7 +41,7 @@ class ItemView extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     if (item is RiveFile) {
       final _file = item as RiveFile;
       return Column(
@@ -47,18 +49,12 @@ class ItemView extends StatelessWidget {
         children: <Widget>[
           Text(
             _file.name,
-            style: TextStyle(
-              fontSize: 16,
-              color: ThemeUtils.textGrey,
-            ),
+            style: RiveTheme.of(context).textStyles.fileGreyTextLarge,
           ),
           Container(height: 10.0),
           Text(
             'Type a description...',
-            style: TextStyle(
-              fontSize: 13,
-              color: ThemeUtils.backgroundDarkGrey,
-            ),
+            style: RiveTheme.of(context).textStyles.fileLightGreyText,
           ),
         ],
       );
@@ -70,18 +66,12 @@ class ItemView extends StatelessWidget {
         children: <Widget>[
           Text(
             _folder.name,
-            style: TextStyle(
-              fontSize: 16,
-              color: ThemeUtils.textGrey,
-            ),
+            style: RiveTheme.of(context).textStyles.fileGreyTextLarge,
           ),
           Container(height: 10.0),
           Text(
             'Type a description...',
-            style: TextStyle(
-              fontSize: 13,
-              color: ThemeUtils.backgroundDarkGrey,
-            ),
+            style: RiveTheme.of(context).textStyles.fileLightGreyText,
           ),
         ],
       );

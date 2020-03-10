@@ -1,14 +1,16 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
+
 import 'package:rive_core/selectable_item.dart';
+
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
+
 import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/theme.dart';
-
-import '../listenable_builder.dart';
+import 'package:rive_editor/widgets/listenable_builder.dart';
 
 /// FileView is stateful so that it can track when it's added/removed from
 /// widget hierarchy to request batched network details for the file.
@@ -65,7 +67,7 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                       topLeft: Radius.circular(5),
                       topRight: Radius.circular(5),
                     ),
-                    color: ThemeUtils.backgroundDarkGrey,
+                    color: RiveTheme.of(context).colors.fileBackgroundDarkGrey,
                   ),
                   child: Container(
                     constraints: const BoxConstraints.expand(),
@@ -76,7 +78,7 @@ class _FileViewWidgetState extends State<FileViewWidget> {
               Container(
                 height: kBottomHeight,
                 decoration: BoxDecoration(
-                  color: ThemeUtils.backgroundLightGrey,
+                  color: RiveTheme.of(context).colors.fileBackgroundLightGrey,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(5),
                     bottomRight: Radius.circular(5),
@@ -89,7 +91,7 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                     file.name ?? "",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: ThemeUtils.textGrey),
+                    style: RiveTheme.of(context).textStyles.greyText,
                   ),
                 ),
               ),
@@ -114,13 +116,16 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     border: Border.all(
-                      color: ThemeUtils.selectedBlue,
+                      color: RiveTheme.of(context).colors.fileSelectedBlue,
                       width: 4,
                     ),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: ThemeUtils.selectedBlue.withOpacity(0.5),
+                        color: RiveTheme.of(context)
+                            .colors
+                            .fileSelectedBlue
+                            .withOpacity(0.5),
                         blurRadius: 50,
                         offset: const Offset(0, 10),
                       ),

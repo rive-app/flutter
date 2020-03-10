@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
+
 import 'package:rive_core/selectable_item.dart';
+
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
+import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/theme.dart';
 
 class FolderViewWidget extends StatelessWidget {
   final RiveFolder folder;
@@ -38,15 +41,18 @@ class FolderViewWidget extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: Colors.transparent,
                       border: Border.all(
-                        color: ThemeUtils.selectedBlue,
-                        width: 4.0,
+                        color: RiveTheme.of(context).colors.fileSelectedBlue,
+                        width: 4,
                       ),
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: ThemeUtils.selectedBlue.withOpacity(0.5),
-                          blurRadius: 50.0,
-                          offset: const Offset(0.0, 10.0),
+                          color: RiveTheme.of(context)
+                              .colors
+                              .fileSelectedBlue
+                              .withOpacity(0.5),
+                          blurRadius: 50,
+                          offset: const Offset(0, 10),
                         ),
                       ]),
                 ),
@@ -62,27 +68,29 @@ class FolderViewWidget extends StatelessWidget {
               child: Container(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: ThemeUtils.backgroundLightGrey,
-                    borderRadius: BorderRadius.circular(10.0),
+                    color: RiveTheme.of(context).colors.fileBackgroundLightGrey,
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Row(
                       children: <Widget>[
-                        RiveIcons.folder(_isSelected
-                            ? ThemeUtils.selectedBlue
-                            : ThemeUtils.iconColor),
-                        Container(width: 8.0),
+                        FolderIcon(
+                            color: _isSelected
+                                ? RiveTheme.of(context).colors.fileSelectedBlue
+                                : RiveTheme.of(context)
+                                    .colors
+                                    .fileUnselectedFolderIcon),
+                        Container(width: 8),
                         Expanded(
                           child: Text(
                             folder.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                color: _isSelected
-                                    ? ThemeUtils.selectedBlue
-                                    : ThemeUtils.textGrey),
+                            style: _isSelected
+                                ? RiveTheme.of(context).textStyles.fileBlueText
+                                : RiveTheme.of(context).textStyles.greyText,
                           ),
                         ),
                       ],

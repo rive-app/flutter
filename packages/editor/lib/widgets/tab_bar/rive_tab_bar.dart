@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 import 'tab_decoration.dart';
@@ -74,8 +75,7 @@ class _TabBarItemState extends State<_TabBarItem> {
                   onTap: widget.close == null
                       ? null
                       : () => widget.close(widget.tab),
-                  child:
-                      RiveIcons.close(RiveTheme.of(context).colors.tabText, 13),
+                  child: const CloseIcon(),
                 )
             ],
           ),
@@ -148,8 +148,7 @@ class _UserTabBarItemState extends State<_UserTabBarItem> {
                   onTap: widget.close == null
                       ? null
                       : () => widget.close(widget.tab),
-                  child: RiveIcons.close(
-                      RiveTheme.of(context).colors.tabRiveText, 13),
+                  child: const CloseIcon(),
                 )
             ],
           ),
