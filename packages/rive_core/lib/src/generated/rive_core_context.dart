@@ -102,8 +102,7 @@ abstract class RiveCoreContext extends CoreContext {
           // clients, so we'll receive our own adds which will result in
           // duplicates if we don't check here).
           if (object == null) {
-            var type = reader.readVarInt();
-            object = makeCoreInstance(type);
+            object = makeCoreInstance(reader.readVarInt());
             if (object != null) {
               object.id = objectChanges.objectId;
               justAdded = true;
