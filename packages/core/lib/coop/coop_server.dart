@@ -11,7 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:core/coop/protocol_version.dart';
 import 'package:core/coop/coop_isolate.dart';
 
-final Logger log = Logger('CoopServer');
+final _log = Logger('coop_server');
 
 String _isolateKey(int ownerId, int fileId) => '$ownerId-$fileId';
 
@@ -42,13 +42,13 @@ abstract class CoopServer {
     try {
       _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
     } on Exception catch (e) {
-      log.severe('Unable to bind port to http server: $e');
+      _log.severe('Unable to bind port to http server', e);
       return false;
     }
-    log.info('Listening on ${InternetAddress.anyIPv4}:$port');
+    _log.info('Listening on ${InternetAddress.anyIPv4}:$port');
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
-      log.finest('Received message ${_segmentsToString(segments)}');
+      _log.finest('Received message ${_segmentsToString(segments)}');
       // If there are not 5 segments, return health status
       if (segments.length != 5) {
         request.response.statusCode = 200;
@@ -63,7 +63,7 @@ abstract class CoopServer {
       // The format expected is:
       // 'v<version>/<ownerId>/<fileId>/<userOwnerId>/<clientId>
       try {
-        log.finest('Web socket request');
+        _log.finest('Web socket request');
         final data = WebSocketData.fromSegments(segments);
 
         // Attempt to upgrade the HTTP connection to a web socket
@@ -76,25 +76,25 @@ abstract class CoopServer {
           // Immediately make it available...
           _isolates[key] = isolate;
           if (!await isolate.spawn(handler, options)) {
-            log.severe('Unable to spawn isolate for file $key');
+            _log.severe('Unable to spawn isolate for file $key');
             await ws.close();
             return;
           }
         }
         if (!await isolate.addClient(data.userOwnerId, data.clientId, ws)) {
-          log.severe('Unable to add client for file $key. '
+          _log.severe('Unable to add client for file $key. '
               'This could be due to a previous shutdown attempt, check logs '
               'for indication of shutdown prior to this.');
           await ws.close();
         }
       } on WebSocketException catch (e) {
-        log.severe('Failed to upgrade to web socket: $e');
+        _log.severe('Failed to upgrade to web socket', e);
       } on FormatException catch (e) {
-        log.severe('Error parsing web socket request $e');
+        _log.severe('Error parsing web socket request', e);
         request.response.statusCode = 422;
         await request.response.close();
       }
-    }, onError: (dynamic e) => log.severe('Error listening: $e'));
+    }, onError: (dynamic e) => _log.severe('Error listening', e));
     return true;
   }
 
@@ -123,13 +123,13 @@ class WebSocketData {
     try {
       // Parse the version nr
       if (segments[0].length < 2) {
-        log.severe('Invalid protocol version ${segments[0]}');
+        _log.severe('Invalid protocol version ${segments[0]}');
         throw const FormatException();
       }
       // Remove 'v' in 'v2'
       version = int.parse(segments[0].substring(1));
       if (version != protocolVersion) {
-        log.severe('Client requests older protocal version nr: $version');
+        _log.severe('Client requests older protocal version nr: $version');
         throw const FormatException();
       }
       // Parse all the other segments, which should be ints
@@ -138,13 +138,13 @@ class WebSocketData {
       userOwnerId = int.parse(segments[3]);
       try {
         clientId = int.parse(segments[4]);
-      } on FormatException catch (_) {
-        log.severe('Invalid clientid: ${segments[4]}');
+      } on FormatException catch (e) {
+        _log.severe('Invalid clientid: ${segments[4]}', e);
         // Don't rethrow, just give a default client id
         clientId = 0;
       }
     } on FormatException catch (e) {
-      log.severe('Invalid message ${_segmentsToString(segments)}: $e');
+      _log.severe('Invalid message ${_segmentsToString(segments)}', e);
       rethrow;
     }
   }
