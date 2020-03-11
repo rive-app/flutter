@@ -14,7 +14,9 @@ class CoopFile {
   int ownerId;
   int fileId;
   int nextClientId = 1;
-  int serverChangeId;
+  /// Monotonically increasing change id tracked on the server with the coop
+  /// file. Initialize it to the minimum valid value.
+  int serverChangeId = CoopCommand.minChangeId;
 
   Map<Id, CoopFileObject> objects;
 
