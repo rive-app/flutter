@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:path_drawing/path_drawing.dart';
 
-import 'package:rive_editor/rive/theme.dart' show lightGrey;
+import 'package:rive_editor/widgets/theme.dart' show lightGrey;
 import 'package:rive_editor/widgets/path_widget.dart';
 
 /// Rive custom icon widgets

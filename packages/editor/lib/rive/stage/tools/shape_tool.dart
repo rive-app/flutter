@@ -9,7 +9,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
-import 'package:rive_editor/rive/theme.dart';
+import 'package:rive_editor/widgets/theme.dart';
 
 enum DraggingMode { symmetric }
 

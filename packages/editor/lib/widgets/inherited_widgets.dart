@@ -3,7 +3,7 @@ import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
-import 'package:rive_editor/rive/theme.dart';
+import 'package:rive_editor/widgets/theme.dart';
 
 /// Inherited widget that will pass the theme down the tree
 /// To access the theme data anywhere in a Flutter context, use:

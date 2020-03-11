@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive_editor/rive/theme.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
