@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/widgets/theme.dart';
+
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class FlatIconButton extends StatelessWidget {
   const FlatIconButton({
@@ -25,12 +26,15 @@ class FlatIconButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: color ?? ThemeUtils.buttonColor,
+          color: color ?? RiveTheme.of(context).colors.commonButtonColor,
           borderRadius: BorderRadius.circular(20.0),
           boxShadow: elevated
               ? [
                   BoxShadow(
-                    color: ThemeUtils.textGrey.withOpacity(0.1),
+                    color: RiveTheme.of(context)
+                        .colors
+                        .commonDarkGrey
+                        .withOpacity(0.1),
                     blurRadius: 12,
                     offset: const Offset(0, 8),
                   )
@@ -44,7 +48,8 @@ class FlatIconButton extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: textColor ?? ThemeUtils.buttonTextColor,
+                color: textColor ??
+                    RiveTheme.of(context).colors.commonButtonTextColor,
                 fontSize: 13,
               ),
             ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:rive_api/user.dart';
+
+import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/inspector_view.dart';
-import 'package:rive_editor/widgets/theme.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({
@@ -21,35 +23,29 @@ class ProfileView extends StatelessWidget {
           CircleAvatar(
             child: Icon(Icons.person),
           ),
-          Container(height: 10.0),
+          Container(height: 10),
           ValueListenableBuilder<RiveUser>(
             valueListenable: rive.user,
             builder: (context, user, _) => Text(
               user.name ?? user.username,
-              style: TextStyle(
-                fontSize: 16,
-                color: ThemeUtils.textGrey,
-              ),
+              style: RiveTheme.of(context).textStyles.fileGreyTextLarge,
             ),
           ),
-          Container(height: 10.0),
+          Container(height: 10),
           Text(
             "This is where your personal files live.",
-            style: TextStyle(
-              fontSize: 13,
-              color: ThemeUtils.backgroundDarkGrey,
-            ),
+            style: RiveTheme.of(context).textStyles.fileLightGreyText,
           ),
         ],
       ),
-      actions: <Widget>[
+      actions: const <Widget>[
         FlatIconButton(
-          icon: RiveIcons.profile(ThemeUtils.iconColor),
-          label: "Your Profile",
+          icon: ProfileIcon(),
+          label: 'Your Profile',
         ),
         FlatIconButton(
-          icon: RiveIcons.settings(ThemeUtils.iconColor),
-          label: "Settings",
+          icon: SettingsIcon(),
+          label: 'Settings',
         ),
       ],
     );

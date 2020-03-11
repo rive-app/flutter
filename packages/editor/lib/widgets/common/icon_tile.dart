@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/widgets/theme.dart';
+
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class IconTile extends StatelessWidget {
   const IconTile({
@@ -19,8 +20,8 @@ class IconTile extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.only(
-          right: 20.0,
-          top: 20.0,
+          right: 20,
+          top: 20,
         ),
         child: Row(
           children: <Widget>[
@@ -29,13 +30,10 @@ class IconTile extends StatelessWidget {
               height: 15,
               child: Center(child: icon),
             ),
-            Container(width: 5.0),
+            Container(width: 5),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
-                color: ThemeUtils.textGrey,
-              ),
+              style: RiveTheme.of(context).textStyles.greyText,
             ),
           ],
         ),

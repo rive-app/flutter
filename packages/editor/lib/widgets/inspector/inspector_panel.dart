@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'package:rive_core/selectable_item.dart';
+
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builders.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
-import 'package:rive_editor/widgets/theme.dart';
 
 Widget _dividerBuilder(BuildContext context) => InspectorDivider();
 
@@ -44,7 +45,6 @@ class _InspectorPanelState extends State<InspectorPanel> {
       child: ListenableBuilder(
         listenable: rive.selection,
         builder: (context, SelectionContext<SelectableItem> selection, _) {
-
           // Let the inpsection set whittle down groupings and commonly selected
           // coreTypes for the inspector builders to use to determine if there
           // are things they can help inspect.
@@ -109,22 +109,19 @@ class _InspectorPanelState extends State<InspectorPanel> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    child: const Text(
+                    child: Text(
                       'No Selection',
-                      style: TextStyle(
-                        color: ThemeUtils.textWhite,
-                        fontSize: 13,
-                      ),
+                      style:
+                          RiveTheme.of(context).textStyles.inspectorWhiteLabel,
                     ),
                   ),
                   Container(height: 10),
                   Container(
-                    child: const Text(
+                    child: Text(
                       'Select something to view its properties and options.',
-                      style: TextStyle(
-                        color: ThemeUtils.textGreyLight,
-                        fontSize: 13,
-                      ),
+                      style: RiveTheme.of(context)
+                          .textStyles
+                          .inspectorPropertyLabel,
                     ),
                   ),
                 ],
