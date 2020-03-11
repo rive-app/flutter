@@ -5,10 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive_core/component.dart';
+import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
+import 'package:rive_editor/widgets/draw_order.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
@@ -402,39 +403,16 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
               ),
             if (!hierarchySelected)
               Expanded(
-                child: DrawOrder(),
+                // child: DrawOrder(),
+                child: ValueListenableBuilder<DrawOrderTreeController>(
+                  valueListenable: rive.drawOrderTreeController,
+                  builder: (context, controller, _) =>
+                      DrawOrderTreeView(controller: controller),
+                ),
               ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class DrawOrder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final rive = RiveContext.of(context);
-    final artboards = rive.file.value.artboards;
-    final items = <Component>[];
-    for (var a in artboards) {
-      items.addAll(a.children);
-    }
-
-    return ListView(
-      children: <Widget>[for (var c in items) DrawOrderElement(c.name)],
-    );
-  }
-}
-
-class DrawOrderElement extends StatelessWidget {
-  const DrawOrderElement(this.name);
-  final String name;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Container(height: 20, color: Colors.red, child: Text(name)),
     );
   }
 }
