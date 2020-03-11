@@ -217,6 +217,11 @@ class RiveFile extends RiveCoreContext {
 
   @override
   void onAddedClean(Component object) {
+    // Remove corrupt objects immediately.
+    if(!object.validate()) {
+      remove(object);
+      return;
+    }
     object.onAdded();
     delegates.forEach((delegate) => delegate.onObjectAdded(object));
     if (object is Artboard) {

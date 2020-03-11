@@ -1,7 +1,7 @@
 /// Core automatically generated lib/src/generated/shapes/path_vertex_base.dart.
 /// Do not modify manually.
 
-import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 

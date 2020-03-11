@@ -3,8 +3,8 @@
 
 import 'package:core/core.dart';
 import 'package:core/id.dart';
-import 'package:flutter/material.dart';
 import 'package:fractional/fractional.dart';
+import 'package:meta/meta.dart';
 import 'rive_core_context.dart';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
@@ -79,6 +79,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     if (_parentId == value) {
       return;
     }
+    print("PARENT ID $value $this $value");
     Id from = _parentId;
     _parentId = value;
     parentIdChanged(from, value);

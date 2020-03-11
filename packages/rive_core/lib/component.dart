@@ -204,15 +204,12 @@ abstract class Component extends ComponentBase<RiveFile> {
     if (artboard != null) {
       context?.markDependencyOrderDirty(artboard);
     }
-    // _dirt |= ComponentDirt.dependents;
-    // parent?.children?.remove(this);
-    // parent.childRemoved(this);
-    // parentId = null;
-    // var c = context;
-    // context = null;
-    // parentId = null;
-    // context = c;
   }
+
+  /// Override this to ascertain whether or not this object is in a valid state.
+  /// If an object is in a corrupt state, it will be removed from core prior to
+  /// calling onAdded for the object.
+  bool validate() => true;
 
   @override
   String toString() {

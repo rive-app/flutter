@@ -113,7 +113,7 @@ class Definition {
       }
     }
     if (_properties.isNotEmpty) {
-      imports.add('import \'package:flutter/material.dart\';');
+      imports.add('import \'package:meta/meta.dart\';');
     }
 
     for (final property in _properties) {
@@ -426,9 +426,11 @@ class Definition {
           // clients, so we'll receive our own adds which will result in
           // duplicates if we don't check here).
           if (object == null) {
-            object = makeCoreInstance(reader.readVarInt())
-              ..id = objectChanges.objectId;
-            justAdded = true;
+            object = makeCoreInstance(reader.readVarInt());
+            if(object != null) {
+              object.id = objectChanges.objectId;
+              justAdded = true;
+            }
           }
           break;
         case CoreContext.removeKey:           

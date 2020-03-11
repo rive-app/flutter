@@ -10,7 +10,7 @@ void main(List<String> arguments) {
   initializeFields();
 
   Directory(config.path).list(recursive: true).listen((entity) {
-    if (entity is File) {
+    if (entity is File && entity.path.toLowerCase().endsWith('.json')) {
       Definition(config, entity.path.substring(config.path.length));
     }
   }, onDone: () {

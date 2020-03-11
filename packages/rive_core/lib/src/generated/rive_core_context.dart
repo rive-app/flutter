@@ -1,7 +1,7 @@
-import 'package:binary_buffer/binary_reader.dart';
-import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/core.dart';
+import 'package:binary_buffer/binary_reader.dart';
+import 'package:binary_buffer/binary_writer.dart';
 
 import '../../artboard.dart';
 import '../../node.dart';
@@ -81,9 +81,12 @@ abstract class RiveCoreContext extends CoreContext {
           // clients, so we'll receive our own adds which will result in
           // duplicates if we don't check here).
           if (object == null) {
-            object = makeCoreInstance(reader.readVarInt())
-              ..id = objectChanges.objectId;
-            justAdded = true;
+            var type = reader.readVarInt();
+            object = makeCoreInstance(type);
+            if (object != null) {
+              object.id = objectChanges.objectId;
+              justAdded = true;
+            }
           }
           break;
         case CoreContext.removeKey:

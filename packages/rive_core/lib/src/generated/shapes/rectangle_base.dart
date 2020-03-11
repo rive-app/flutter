@@ -1,7 +1,7 @@
 /// Core automatically generated lib/src/generated/shapes/rectangle_base.dart.
 /// Do not modify manually.
 
-import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
