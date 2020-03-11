@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
@@ -9,7 +11,6 @@ import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/src/generated/shapes/shape_base.dart';
 
 export 'package:rive_core/src/generated/shapes/shape_base.dart';
-
 
 class Shape extends ShapeBase {
   final Set<Fill> fills = {};
@@ -92,6 +93,16 @@ class Shape extends ShapeBase {
       _delegate = to;
     } else {
       _delegate = null;
+    }
+  }
+
+  @override
+  void paint(Canvas canvas) {
+    assert(_pathComposer != null);
+
+    for (final fill in fills) {
+      // _pathComposer.uiPath.fillType = fill.fillRule;
+      canvas.drawPath(_pathComposer.uiPath, fill.paint);
     }
   }
 }

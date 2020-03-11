@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_editor/widgets/inspector/color/color_popout.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
-
 
 /// A color swatch button that shows the current color value (solid or gradient)
 /// and also triggers a [ColorPopout] when pressed.
@@ -12,10 +12,12 @@ import 'package:rive_editor/widgets/popup/base_popup.dart';
 /// ![](https://assets.rvcd.in/inspector/color/color_swatch.png)
 class InspectorColorSwatch extends StatefulWidget {
   final BuildContext inspectorContext;
+  final Iterable<ShapePaint> shapePaints;
 
   const InspectorColorSwatch({
     Key key,
     this.inspectorContext,
+    this.shapePaints,
   }) : super(key: key);
 
   @override
@@ -37,8 +39,7 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) {
-        // TODO: make real InspectingColor
-        var inspecting = InspectingColor();
+        var inspecting = InspectingColor(widget.shapePaints);
         _popup = InspectorPopout.popout(
           widget.inspectorContext,
           width: 206,
@@ -59,8 +60,3 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
     );
   }
 }
-
-
-
-
-

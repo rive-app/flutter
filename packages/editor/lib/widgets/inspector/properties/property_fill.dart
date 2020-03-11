@@ -20,6 +20,7 @@ class PropertyFill extends StatelessWidget {
         padding: const EdgeInsets.only(right: 10),
         child: InspectorColorSwatch(
           inspectorContext: context,
+          shapePaints: fills,
         ),
       ),
       isVisiblePropertyKey: ShapePaintBase.isVisiblePropertyKey,

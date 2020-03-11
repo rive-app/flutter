@@ -81,7 +81,7 @@ class FillsInspectorBuilder extends ListenableInspectorBuilder {
       for (final component in inspecting.components) {
         var shape = component as Shape;
         var fill = Fill()..name = 'Fill ${shape.fills.length + 1}';
-        var solidColor = SolidColor();
+        var solidColor = SolidColor()..color = const Color(0xFFFF5678);
 
         file.add(fill);
         file.add(solidColor);

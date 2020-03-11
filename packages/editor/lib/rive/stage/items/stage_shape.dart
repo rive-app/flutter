@@ -18,6 +18,8 @@ class StageShape extends StageContourItem<Shape> {
     canvas.drawPath(
         component.pathComposer.uiPath,
         Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
           ..color = selectionState.value == SelectionState.none
               ? const Color.fromRGBO(100, 100, 100, 1.0)
               : const Color.fromRGBO(200, 200, 200, 1.0));

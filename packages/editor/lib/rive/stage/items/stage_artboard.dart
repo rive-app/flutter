@@ -61,5 +61,8 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
           ..color = selectionState.value == SelectionState.none
               ? const Color.fromRGBO(100, 100, 100, 1.0)
               : const Color.fromRGBO(200, 200, 200, 1.0));
+
+    // Now draw the actual drawables.
+    component.paint(canvas);
   }
 }

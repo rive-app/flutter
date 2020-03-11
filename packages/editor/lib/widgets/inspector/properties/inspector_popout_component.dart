@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_editor/rive/theme.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
@@ -52,7 +53,7 @@ class InspectorPopoutComponent extends StatelessWidget {
               propertyKey: ComponentBase.namePropertyKey,
               builder: (context, String name, _) {
                 return Renamable(
-                  color: theme.colors.inspectorTextColor,
+                  color: lightGrey,
                   editingColor: theme.colors.activeText,
                   name: name,
                   onRename: _rename,

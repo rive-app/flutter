@@ -60,9 +60,8 @@ class ColorPopout extends StatelessWidget {
                 height: 153,
                 child: SaturationBrightnessPicker(
                   hsv: hsv,
-                  change: (value) {
-                    inspecting.editingColor.value = value;
-                  },
+                  change: inspecting.changeColor,
+                  complete: inspecting.completeChange,
                 ),
               ),
               Padding(
@@ -85,11 +84,13 @@ class ColorPopout extends StatelessWidget {
                                 HSVColor.fromAHSV(1, hsv.hue, 1, 1).toColor(),
                             value: hsv.hue / 360,
                             changeValue: (value) {
-                              inspecting.editingColor.value = HSVColor.fromAHSV(
-                                hsv.alpha,
-                                value * 360,
-                                hsv.saturation,
-                                hsv.value,
+                              inspecting.changeColor(
+                                HSVColor.fromAHSV(
+                                  hsv.alpha,
+                                  value * 360,
+                                  hsv.saturation,
+                                  hsv.value,
+                                ),
                               );
                             },
                             background: (context) => Container(
@@ -103,11 +104,13 @@ class ColorPopout extends StatelessWidget {
                             color: hsv.toColor(),
                             value: hsv.alpha,
                             changeValue: (value) {
-                              inspecting.editingColor.value = HSVColor.fromAHSV(
-                                value,
-                                hsv.hue,
-                                hsv.saturation,
-                                hsv.value,
+                              inspecting.changeColor(
+                                HSVColor.fromAHSV(
+                                  value,
+                                  hsv.hue,
+                                  hsv.saturation,
+                                  hsv.value,
+                                ),
                               );
                             },
                             background: (context) => Container(

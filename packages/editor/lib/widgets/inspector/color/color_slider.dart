@@ -9,15 +9,16 @@ typedef ChangeValueCallback = void Function(double);
 /// different background which varies depending on type of slider. Provides a
 /// changeValue callback invoked when the grabber is dragged or the
 /// track/background is pressed on.
-/// 
+///
 /// Two example [ColorSlider]s with different background builders:
-/// 
+///
 /// ![](https://assets.rvcd.in/inspector/color/color_sliders.png)
 class ColorSlider extends StatelessWidget {
   final Color color;
   final WidgetBuilder background;
   final double value;
   final ChangeValueCallback changeValue;
+  final VoidCallback completeChange;
 
   const ColorSlider({
     Key key,
@@ -25,6 +26,7 @@ class ColorSlider extends StatelessWidget {
     this.background,
     this.value,
     this.changeValue,
+    this.completeChange,
   }) : super(key: key);
 
   static const double height = 10;
@@ -50,6 +52,7 @@ class ColorSlider extends StatelessWidget {
                   context.size.width,
                 ),
               ),
+          onTapUp: (_) => completeChange?.call(),
           child: child);
 
   @override

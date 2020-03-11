@@ -11,10 +11,12 @@ import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 class SaturationBrightnessPicker extends StatelessWidget {
   final HSVColor hsv;
   final ChangeColor change;
+  final VoidCallback complete;
 
   const SaturationBrightnessPicker({
     @required this.hsv,
     @required this.change,
+    @required this.complete,
     Key key,
   }) : super(key: key);
 
@@ -46,6 +48,7 @@ class SaturationBrightnessPicker extends StatelessWidget {
           context.size,
         ),
       ),
+      onTapUp: (_) => complete?.call(),
       child: Stack(
         children: [
           Positioned.fill(
