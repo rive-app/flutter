@@ -2,7 +2,7 @@
 /// lib/src/generated/shapes/parametric_path_base.dart.
 /// Do not modify manually.
 
-import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';

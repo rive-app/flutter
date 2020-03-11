@@ -19,6 +19,7 @@ import 'package:rive_api/user.dart';
 
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/artboard.dart';
@@ -282,11 +283,20 @@ class Rive with RiveFileDelegate {
         // from the selection. This avoids modifying the selection set while
         // iterating.
         var toRemove = selection.items.toList();
+        var core = file.value;
+        // Build up the entire set of items to remove.
+        Set<Component> deathRow = {};
         for (final item in toRemove) {
           if (item is StageItem) {
-            file.value.remove(item.component as Core);
+            var component = item.component as Component;
+            deathRow.add(component);
+            // We need to recursively remove children too.
+            if(component is ContainerComponent) {
+              component.applyToChildren((child) => deathRow.add(child));
+            }
           }
         }
+        deathRow.forEach(core.remove);
         selection.clear();
         file.value.captureJournalEntry();
         break;

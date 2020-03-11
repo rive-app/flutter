@@ -1,8 +1,8 @@
 /// Core automatically generated lib/src/generated/drawable_base.dart.
 /// Do not modify manually.
 
-import 'package:flutter/material.dart';
 import 'package:fractional/fractional.dart';
+import 'package:meta/meta.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
