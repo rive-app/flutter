@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
+import 'package:rive_editor/widgets/draw_order.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
@@ -260,21 +262,7 @@ class Editor extends StatelessWidget {
         Expanded(
           child: Row(
             children: [
-              ResizePanel(
-                hitSize: resizeEdgeSize,
-                direction: ResizeDirection.horizontal,
-                side: ResizeSide.end,
-                min: 300,
-                max: 500,
-                child: Container(
-                  color: const Color(0xFF323232),
-                  child: ValueListenableBuilder<HierarchyTreeController>(
-                    valueListenable: rive.treeController,
-                    builder: (context, controller, _) =>
-                        HierarchyTreeView(controller: controller),
-                  ),
-                ),
-              ),
+              HierarchyPanel(),
               const Expanded(
                 child: StagePanel(),
               ),
@@ -333,6 +321,103 @@ class Editor extends StatelessWidget {
   }
 }
 
+/// Left hand panel contains the hierarchy and draw order widgets
+class HierarchyPanel extends StatefulWidget {
+  @override
+  _HierarchyPanelState createState() => _HierarchyPanelState();
+}
+
+class _HierarchyPanelState extends State<HierarchyPanel> {
+  bool hierarchySelected = true;
+  bool hierarchyHovered = false;
+  bool drawOrderHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final rive = RiveContext.of(context);
+    return ResizePanel(
+      hitSize: resizeEdgeSize,
+      direction: ResizeDirection.horizontal,
+      side: ResizeSide.end,
+      min: 300,
+      max: 500,
+      child: Container(
+        color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
+        child: Column(
+          children: <Widget>[
+            Row(children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(left: 20, top: 20),
+                child: MouseRegion(
+                  onEnter: (_) => setState(() => hierarchyHovered = true),
+                  onExit: (_) => setState(() => hierarchyHovered = false),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() => hierarchySelected = true);
+                    },
+                    child: Text('HIERARCHY',
+                        style: hierarchySelected
+                            ? RiveTheme.of(context)
+                                .textStyles
+                                .hierarchyTabActive
+                            : hierarchyHovered
+                                ? RiveTheme.of(context)
+                                    .textStyles
+                                    .hierarchyTabHovered
+                                : RiveTheme.of(context)
+                                    .textStyles
+                                    .hierarchyTabInactive),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20, top: 20),
+                child: MouseRegion(
+                  onEnter: (_) => setState(() => drawOrderHovered = true),
+                  onExit: (_) => setState(() => drawOrderHovered = false),
+                  child: GestureDetector(
+                    onTap: () => setState(() => hierarchySelected = false),
+                    child: Text('DRAW ORDER',
+                        style: hierarchySelected
+                            ? drawOrderHovered
+                                ? RiveTheme.of(context)
+                                    .textStyles
+                                    .hierarchyTabHovered
+                                : RiveTheme.of(context)
+                                    .textStyles
+                                    .hierarchyTabInactive
+                            : RiveTheme.of(context)
+                                .textStyles
+                                .hierarchyTabActive),
+                  ),
+                ),
+              ),
+            ]),
+            if (hierarchySelected)
+              Expanded(
+                child: ValueListenableBuilder<HierarchyTreeController>(
+                  valueListenable: rive.treeController,
+                  builder: (context, controller, _) =>
+                      HierarchyTreeView(controller: controller),
+                ),
+              ),
+            if (!hierarchySelected)
+              Expanded(
+                // child: DrawOrder(),
+                child: ValueListenableBuilder<DrawOrderTreeController>(
+                  valueListenable: rive.drawOrderTreeController,
+                  builder: (context, controller, _) =>
+                      DrawOrderTreeView(controller: controller),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The central stage panel, where drawing/composing takes place
 class StagePanel extends StatelessWidget {
   const StagePanel({
     Key key,

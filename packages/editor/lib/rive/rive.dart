@@ -8,14 +8,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_core/shapes/shape.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_api/user.dart';
+
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_core/artboard.dart';
+
+import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
+
+import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
@@ -25,15 +35,12 @@ import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
-import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'file_browser/file_browser.dart';
-import 'hierarchy_tree_controller.dart';
-import 'selection_context.dart';
-import 'shortcuts/shortcut_actions.dart';
-import 'stage/stage.dart';
-import 'stage/stage_item.dart';
+import 'package:rive_editor/rive/file_browser/file_browser.dart';
+import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
+import 'package:rive_editor/rive/selection_context.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
@@ -65,6 +72,8 @@ class Rive with RiveFileDelegate {
   final ValueNotifier<RiveFile> file = ValueNotifier<RiveFile>(null);
   final ValueNotifier<HierarchyTreeController> treeController =
       ValueNotifier<HierarchyTreeController>(null);
+  final ValueNotifier<DrawOrderTreeController> drawOrderTreeController =
+      ValueNotifier<DrawOrderTreeController>(null);
   final SelectionContext<SelectableItem> selection =
       SelectionContext<SelectableItem>();
   final ValueNotifier<SelectionMode> selectionMode =
@@ -202,6 +211,7 @@ class Rive with RiveFileDelegate {
   @override
   void onDirtCleaned() {
     debounce(treeController.value.flatten);
+    debounce(drawOrderTreeController.value.flatten);
     _stage?.markNeedsAdvance();
   }
 
@@ -304,6 +314,7 @@ class Rive with RiveFileDelegate {
   void onObjectAdded(Core object) {
     _stage.initComponent(object as Component);
     debounce(treeController.value.flatten);
+    debounce(drawOrderTreeController.value.flatten);
   }
 
   @override
@@ -341,6 +352,9 @@ class Rive with RiveFileDelegate {
     _stage?.wipe();
     treeController.value =
         HierarchyTreeController(file.value.artboards, rive: this);
+    drawOrderTreeController.value = DrawOrderTreeController(
+        DrawOrderManager(file.value.artboards).drawableComponentsInOrder,
+        rive: this);
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
@@ -387,6 +401,9 @@ class Rive with RiveFileDelegate {
     // Tree controller is based off of stage items.
     treeController.value =
         HierarchyTreeController(nextFile.artboards, rive: this);
+    drawOrderTreeController.value = DrawOrderTreeController(
+        DrawOrderManager(nextFile.artboards).drawableComponentsInOrder,
+        rive: this);
   }
 
   void forceReconnect() {
@@ -395,3 +412,28 @@ class Rive with RiveFileDelegate {
 }
 
 enum SelectionMode { single, multi, range }
+
+/// A manager for creating the draw order hierarchy
+/// This is a temporary hack until we get the draw
+/// order implementation completed. Keeping most of
+/// the code in here so it's easy to parse and undo
+///
+/// TODO: LIST
+/// Use the selected artboard to show the items
+/// Create a custom icon from the path of the shape
+class DrawOrderManager {
+  const DrawOrderManager(this.artboards);
+  final List<Artboard> artboards;
+
+  List<Component> get drawableComponentsInOrder {
+    final components = <Component>[];
+    for (final artboard in artboards) {
+      for (final component in artboard.children) {
+        if (component is Shape) {
+          components.add(component);
+        }
+      }
+    }
+    return components;
+  }
+}

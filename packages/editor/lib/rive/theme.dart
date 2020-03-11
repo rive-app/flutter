@@ -100,7 +100,17 @@ class TextStyles {
   TextStyle get basic =>
       const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
 
-  // Inspector
+  // Hierarchy panel
+  TextStyle get hierarchyTabActive => const TextStyle(
+      fontFamily: 'Roboto-Regular', color: Color(0xFFAAAAAA), fontSize: 11);
+
+  TextStyle get hierarchyTabInactive => const TextStyle(
+      fontFamily: 'Roboto-Regular', color: Color(0xFF656565), fontSize: 11);
+
+  TextStyle get hierarchyTabHovered => const TextStyle(
+      fontFamily: 'Roboto-Regular', color: Color(0xFF888888), fontSize: 11);
+
+  // Inspector panel
   TextStyle get inspectorPropertyLabel => const TextStyle(
       fontFamily: 'Roboto-Regular', color: lightGrey, fontSize: 13);
 
