@@ -7,6 +7,7 @@ import 'package:core/coop/player.dart';
 import 'package:core/coop/player_cursor.dart';
 import 'package:core/coop/protocol_version.dart';
 import 'package:core/error_logger.dart';
+import 'package:core/web_socket/web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'connect_result.dart';
@@ -40,6 +41,9 @@ class CoopClient extends CoopReader {
   int get clientId => _clientId;
   bool _allowReconnect = true;
 
+  /// Authentication token, as used in the cookie
+  final String _token;
+
   ChangeSetCallback changesAccepted;
   ChangeSetCallback changesRejected;
   ChangeSetCallback makeChanges;
@@ -55,7 +59,9 @@ class CoopClient extends CoopReader {
     this.fileId,
     this.localSettings,
     int clientId,
-  }) : url = '$host/v$protocolVersion/$path/$clientId' {
+    String token,
+  })  : url = '$host/v$protocolVersion/$path/$clientId',
+        _token = token {
     _writer = CoopWriter(write);
   }
 
@@ -114,7 +120,7 @@ class CoopClient extends CoopReader {
   Future<ConnectResult> connect() async {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
-    _channel = WebSocketChannel.connect(Uri.parse(url));
+    _channel = RiveWebSocketChannel.connect(Uri.parse(url), _token);
     _connectionCompleter = Completer<ConnectResult>();
 
     _connectionState = ConnectionState.connecting;

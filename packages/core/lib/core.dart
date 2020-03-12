@@ -210,10 +210,18 @@ abstract class CoreContext implements LocalSettings {
   @protected
   void completeChanges();
 
-  Future<ConnectResult> connect(String host, String path) async {
+  /// Creates a connection to the co-op web socket server
+  Future<ConnectResult> connect(String host, String path,
+      [String token]) async {
     int clientId = await getIntSetting('clientId');
-    _client = CoopClient(host, path,
-        fileId: fileId, clientId: clientId, localSettings: this)
+    _client = CoopClient(
+      host,
+      path,
+      fileId: fileId,
+      clientId: clientId,
+      localSettings: this,
+      token: token,
+    )
       ..changesAccepted = _changesAccepted
       ..changesRejected = _changesRejected
       ..makeChanges = _receiveCoopChanges
