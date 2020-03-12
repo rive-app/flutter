@@ -172,13 +172,9 @@ class _CoopIsolate extends CoopIsolateProcess {
 
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
         (data == null || data.isEmpty)) {
-      _nextChangeId = CoopCommand.minChangeId;
-
       file = CoopFile()
         ..ownerId = ownerId
         ..fileId = fileId
-        ..nextClientId = 1
-        ..serverChangeId = _nextChangeId
         ..objects = {};
     } else {
       file = CoopFile();
@@ -194,8 +190,6 @@ class _CoopIsolate extends CoopIsolateProcess {
         file = CoopFile()
           ..ownerId = ownerId
           ..fileId = fileId
-          ..nextClientId = 1
-          ..serverChangeId = _nextChangeId
           ..objects = {};
       }
 
