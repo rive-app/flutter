@@ -23,7 +23,7 @@ abstract class Component extends ComponentBase<RiveFile> {
   int graphOrder = 0;
   int dirt = 0;
 
-  // Contains the Set of valid types for inherited classes.
+  // Contains the Mapping of valid types for the component classes.
   static final Map<Type, Set<Type>> validParents = {
     Node: {Artboard, Node, Shape},
     Path: {Shape, Node},

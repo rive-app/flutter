@@ -6,14 +6,13 @@ import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageNode extends StageItem<Node> with NodeDelegate {
-  static const _nodeSize = 18;
-
   @override
   AABB get aabb {
+    // TODO: properly evaluate.
     var x = _renderTransform[4];
     var y = _renderTransform[5];
-    return AABB.fromValues(
-        x - _nodeSize, y - _nodeSize, x + _nodeSize, y + _nodeSize);
+    return AABB.fromValues(x - _halfNodeSize, y - _halfNodeSize,
+        x + _halfNodeSize, y + _halfNodeSize);
   }
 
   Mat2D _renderTransform = Mat2D();
@@ -32,8 +31,8 @@ class StageNode extends StageItem<Node> with NodeDelegate {
   void paint(Canvas canvas) {
     canvas.save();
     canvas.transform(_renderTransform.mat4);
-    canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: 10, height: 10),
-        Paint()..color = const Color(0xFFFFFFFF));
+    canvas.drawPath(_nodeEdgePath, _nodeStroke);
+    canvas.drawPath(_insidePath, _nodeFill);
     canvas.restore();
   }
 
@@ -43,7 +42,71 @@ class StageNode extends StageItem<Node> with NodeDelegate {
   }
 
   @override
-  void boundsChanged() {
-    /** NOP */
-  }
+  void boundsChanged() {/** NOP */}
+
+  static const _nodeSize = 18;
+  static const _halfNodeSize = _nodeSize / 2;
+  static const _edgeSize = 6;
+  static const _edgeThickness = 1.5;
+  static const _halfEdgeThickness = _edgeThickness / 2;
+  static const _pathColor = Color.fromRGBO(255, 255, 255, 0.5);
+  static final Paint _nodeStroke = Paint()
+    ..isAntiAlias = false
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.0
+    ..blendMode = BlendMode.srcOver
+    ..color = _pathColor;
+
+  static final Paint _nodeFill = Paint()
+    ..isAntiAlias = false
+    ..style = PaintingStyle.fill
+    ..blendMode = BlendMode.srcOver
+    ..color = _pathColor;
+
+  // Lazily build the Canvas paths by using a closure that is evaulauted
+  // in-place.
+  // The following static fields are for when the node needs to be drawn
+  // 'empty' (as opposed to 'target').
+  static final Path _nodeEdgePath = () {
+    final path = Path();
+    path.moveTo(-_halfNodeSize + _halfEdgeThickness,
+        -_halfNodeSize + _edgeSize - _halfEdgeThickness);
+    path.lineTo(-_halfNodeSize + _halfEdgeThickness,
+        -_halfNodeSize + _halfEdgeThickness);
+    path.lineTo(-_halfNodeSize + _edgeSize - _halfEdgeThickness,
+        -_halfNodeSize + _halfEdgeThickness);
+
+    path.moveTo(_halfNodeSize - _edgeSize + _halfEdgeThickness,
+        -_halfNodeSize + _halfEdgeThickness);
+    path.lineTo(_halfNodeSize - _halfEdgeThickness,
+        -_halfNodeSize + _halfEdgeThickness);
+    path.lineTo(_halfNodeSize - _halfEdgeThickness,
+        -_halfNodeSize + _edgeSize - _halfEdgeThickness);
+
+    path.moveTo(_halfNodeSize - _halfEdgeThickness,
+        _halfNodeSize - _edgeSize + _halfEdgeThickness);
+    path.lineTo(
+        _halfNodeSize - _halfEdgeThickness, _halfNodeSize - _halfEdgeThickness);
+    path.lineTo(_halfNodeSize - _edgeSize + _halfEdgeThickness,
+        _halfNodeSize - _halfEdgeThickness);
+
+    path.moveTo(-_halfNodeSize + _edgeSize - _halfEdgeThickness,
+        _halfNodeSize - _halfEdgeThickness);
+    path.lineTo(-_halfNodeSize + _halfEdgeThickness,
+        _halfNodeSize - _halfEdgeThickness);
+    path.lineTo(-_halfNodeSize + _halfEdgeThickness,
+        _halfNodeSize - _edgeSize + _halfEdgeThickness);
+    return path;
+  }();
+
+  static final Path _insidePath = () {
+    final insidePath = Path();
+    insidePath.moveTo(-_edgeThickness, -_edgeThickness);
+    insidePath.lineTo(_edgeThickness, -_edgeThickness);
+    insidePath.lineTo(_edgeThickness, _edgeThickness);
+    insidePath.lineTo(-_edgeThickness, _edgeThickness);
+    insidePath.close();
+
+    return insidePath;
+  }();
 }

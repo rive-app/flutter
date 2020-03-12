@@ -51,12 +51,10 @@ class NodeTool extends StageTool with ClickableTool {
 
   // If StageItems are selected, validate if the first of them can be used
   // as a valid parent for newly created node.
-  //
   // Returns a valid parent, or null.
   ContainerComponent _getParentFrom(Set<SelectableItem> selection) {
     ContainerComponent parent;
 
-    // This sucks.
     if (selection.isNotEmpty) {
       final first = selection.first;
       if (first is StageItem) {
