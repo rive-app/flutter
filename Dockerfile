@@ -1,6 +1,6 @@
 FROM google/dart
 
-WORKDIR /app/server_process
+WORKDIR /app/packages/coop_server_process
 ADD . /app
 RUN pub get
 
