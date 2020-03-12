@@ -190,6 +190,7 @@ class RiveFile extends RiveCoreContext {
 
   /// Mark an artboard as needing its dependencies sorted.
   void markDependencyOrderDirty(Artboard artboard) {
+    assert(artboard != null);
     _dirt |= _RiveDirt.dependencyOrder;
     _needDependenciesOrdered.add(artboard);
   }

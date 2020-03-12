@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -110,15 +109,15 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   }
 
   @override
-  void onClick(Vec2D worldMouse) {
+  void onClick(Artboard activeArtboard, Vec2D worldMouse) {
     final rive = stage.rive;
-    _modifyPath(worldMouse, rive);
+    _modifyPath(activeArtboard, worldMouse, rive);
   }
 
-  void _modifyPath(Vec2D vertexPos, Rive rive) {
+  void _modifyPath(Artboard activeArtboard, Vec2D vertexPos, Rive rive) {
     var file = rive.file.value;
     // Get the shape in which to the path lives
-    _selectShape(rive, vertexPos);
+    _selectShape(activeArtboard, rive, vertexPos);
     // Determine the coordinates to create a vertex based on the shape's
     // position in world space
     final localCoord = _coordinateMapper(_shape, vertexPos);
@@ -157,7 +156,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   /// Returns the first selected shape from the current set of
   /// selected items in the editor. Returns null if no shape is
   /// selected.
-  void _selectShape(Rive rive, Vec2D coord) {
+  void _selectShape(Artboard activeArtboard, Rive rive, Vec2D coord) {
     // If there's already a selected shape, do nothing
     if (_shape != null) {
       return;
@@ -189,12 +188,9 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
       file.add(composer);
       _shape.appendChild(composer);
       // Add shape to the artboard
-      _activeArtBoard(rive.file.value).appendChild(_shape);
+      activeArtboard.appendChild(_shape);
     });
   }
-
-  // TODO: need to track the active artboard
-  Artboard _activeArtBoard(RiveFile file) => file.artboards.first;
 
   /// TODO: needs to take into account rotation, scale, etc; use matrix math
   Vec2D _coordinateMapper(Shape shape, Vec2D worldSpaceCoord) {

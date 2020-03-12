@@ -213,8 +213,8 @@ abstract class Component extends ComponentBase<RiveFile> {
     // The artboard containing this component will need it's dependencies
     // re-sorted.
     if (artboard != null) {
-      _changeArtboard(null);
       context?.markDependencyOrderDirty(artboard);
+      _changeArtboard(null);
     }
   }
 

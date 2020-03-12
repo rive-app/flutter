@@ -15,7 +15,7 @@ abstract class SolidColorBase extends Component {
 
   /// --------------------------------------------------------------------------
   /// ColorValue field with key 37.
-  int _colorValue = 0xFFFFFFFF;
+  int _colorValue = 0xFF747474;
   static const int colorValuePropertyKey = 37;
   int get colorValue => _colorValue;
 

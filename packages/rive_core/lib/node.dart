@@ -1,3 +1,4 @@
+import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
 
 import 'math/mat2d.dart';
@@ -5,9 +6,8 @@ import 'src/generated/node_base.dart';
 
 export 'src/generated/node_base.dart';
 
-abstract class NodeDelegate {
+abstract class NodeDelegate extends BoundsDelegate {
   void nodeTransformed();
-  void nodeBoundsChanged();
 }
 
 class Node extends NodeBase {

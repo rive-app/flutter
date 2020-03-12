@@ -14,6 +14,10 @@ class Artboard extends ArtboardBase {
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
   final List<Drawable> _drawables = [];
+  final Set<Component> _components = {};
+
+  void forEachComponent(void Function(Component) callback) =>
+      _components.forEach(callback);
 
   int _dirtDepth = 0;
   int _dirt = 255;
@@ -138,6 +142,9 @@ class Artboard extends ArtboardBase {
   /// components it'll later need to do stuff with (like draw them or sort them
   /// when the draw order changes).
   void addComponent(Component component) {
+    if(!_components.add(component)) {
+      return;
+    }
     if (component is Drawable) {
       assert(!_drawables.contains(component));
       _drawables.add(component);

@@ -298,7 +298,10 @@ class Stage extends Debouncer {
     switch (button) {
       case 1:
         if (_activeTool is ClickableTool) {
-          (_activeTool as ClickableTool).onClick(_worldMouse);
+          var artboard = activeArtboard;
+
+          (_activeTool as ClickableTool)
+              .onClick(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
         } else {
           if (_hoverItem != null) {
             _mouseDownSelected = true;
@@ -311,7 +314,6 @@ class Stage extends Debouncer {
         break;
       default:
     }
-
   }
 
   void mouseDrag(int button, double x, double y) {
@@ -333,16 +335,21 @@ class Stage extends Debouncer {
       case 1:
         // [tool] is set to its value in the tool setter.
         if (tool is DraggableTool) {
+          var artboard = activeArtboard;
+          var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
+
           // [_activeTool] is [null] before dragging operation starts.
           if (_activeTool == null) {
             _activeTool = tool;
             _activeTool.setEditMode(activeEditMode);
             (_activeTool as DraggableTool).startDrag(
-                rive.selection.items.whereType<StageItem>(), _worldMouse);
+                rive.selection.items.whereType<StageItem>(),
+                artboard,
+                worldMouse);
           } else {
             // [_activeTool] dragging operation has already started, so we
             // need to progress.
-            (_activeTool as DraggableTool).drag(_worldMouse);
+            (_activeTool as DraggableTool).drag(worldMouse);
           }
         }
         break;
@@ -378,7 +385,10 @@ class Stage extends Debouncer {
 
   final Rive rive;
   final RiveFile riveFile;
-  // final Set<StageItem> items = {};
+
+  // TODO: Get actual active artboard, not just the first one.
+  Artboard get activeArtboard => riveFile.artboards.first;
+
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 
   Stage(this.rive, this.riveFile) {

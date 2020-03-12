@@ -8,7 +8,7 @@
   "properties": {
     "colorValue": {
       "type": "int",
-      "initialValue": "0xFFFFFFFF",
+      "initialValue": "0xFF747474",
       "key": {
         "int": 37,
         "string": "color"

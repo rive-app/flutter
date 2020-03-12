@@ -17,6 +17,11 @@ extension StageItemComponent on Component {
 }
 
 abstract class StageItem<T> extends SelectableItem {
+  static Paint selectedPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2
+    ..color = const Color(0xFF57A5E0);
+
   T _component;
   T get component => _component;
 
