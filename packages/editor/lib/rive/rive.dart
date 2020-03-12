@@ -291,7 +291,7 @@ class Rive with RiveFileDelegate {
             var component = item.component as Component;
             deathRow.add(component);
             // We need to recursively remove children too.
-            if(component is ContainerComponent) {
+            if (component is ContainerComponent) {
               component.applyToChildren((child) => deathRow.add(child));
             }
           }
@@ -374,7 +374,12 @@ class Rive with RiveFileDelegate {
     String filePath = '$ownerId/$fileId/$urlEncodedSpectre';
 
     var opening = RiveFile(filePath, name, api: api);
-    var result = await opening.connect(connectionInfo.socketHost, filePath);
+    var result = await opening.connect(
+      connectionInfo.socketHost,
+      filePath,
+      // TODO: Should this by url encoded?
+      urlEncodedSpectre,
+    );
     if (result == ConnectResult.connected) {
       print("Connected");
     }
