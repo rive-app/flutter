@@ -17,7 +17,11 @@ class RiveWebSocketChannel extends WebSocketChannel {
   /// For non browser based connections, this will be manually placed
   /// into the headers as a cookie
   static WebSocketChannel connect(Uri uri, [String token]) {
-    final cookieHeader = token != null ? {'Cookie': token} : null;
+    final cookieHeader = token != null ? createCookieHeader(token) : null;
     return platform.connect(uri, cookieHeader);
   }
 }
+
+/// Creates a valid cooke header
+Map<String, String> createCookieHeader(String token) =>
+    {'Cookie': 'spectre=$token'};
