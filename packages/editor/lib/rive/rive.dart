@@ -33,6 +33,7 @@ import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/node_tool.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
@@ -273,6 +274,10 @@ class Rive with RiveFileDelegate {
 
       case ShortcutAction.rectangleTool:
         stage?.value?.tool = RectangleTool.instance;
+        break;
+
+      case ShortcutAction.nodeTool:
+        stage?.value?.tool = NodeTool.instance;
         break;
 
       case ShortcutAction.undo:
