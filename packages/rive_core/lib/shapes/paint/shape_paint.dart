@@ -14,6 +14,8 @@ abstract class ShapePaint extends ShapePaintBase {
   ShapePaintMutator _paintMutator;
   Shape _shape;
 
+  ShapePaintMutator get paintMutator => _paintMutator;
+
   @override
   void childAdded(Component child) {
     super.childAdded(child);

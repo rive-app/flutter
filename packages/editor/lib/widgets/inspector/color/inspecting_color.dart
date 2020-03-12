@@ -8,9 +8,9 @@ import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 class InspectingColor {
   Iterable<ShapePaint> shapePaints;
   InspectingColor(this.shapePaints) {
-    var first = shapePaints.first;
+    var first = shapePaints.first.paintMutator;
     if (first is SolidColor) {
-      editingColor.value = HSVColor.fromColor((first as SolidColor).color);
+      editingColor.value = HSVColor.fromColor(first.color);
     }
   }
 
@@ -33,7 +33,8 @@ class InspectingColor {
   }
 
   void _changeSolidColor(Color color) {
-    var solidColors = shapePaints.whereType<SolidColor>();
+    var solidColors =
+        shapePaints.map((paint) => paint.paintMutator).whereType<SolidColor>();
     for (final solidColor in solidColors) {
       solidColor.color = color;
     }
