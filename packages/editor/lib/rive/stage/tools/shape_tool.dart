@@ -33,14 +33,14 @@ abstract class ShapeTool extends StageTool with DraggableTool {
     // Create a Shape and place it at the world location.
     _startWorldMouse = Vec2D.clone(worldMouse);
 
-    var file = stage.riveFile;
-    var artboard = file.artboards.first;
+    final file = stage.riveFile;
+    final artboard = file.artboards.first;
 
     _shape = shape(worldMouse);
     _path = path;
 
     file.batchAdd(() {
-      var composer = PathComposer();
+      final composer = PathComposer();
       file.add(_shape);
       file.add(composer);
       file.add(_path);
@@ -59,10 +59,10 @@ abstract class ShapeTool extends StageTool with DraggableTool {
           (_startWorldMouse[0] - worldMouse[0]).abs(),
           (_startWorldMouse[1] - worldMouse[1]).abs(),
         );
-        var x1 = (_startWorldMouse[0] < worldMouse[0])
+        final x1 = (_startWorldMouse[0] < worldMouse[0])
             ? _startWorldMouse[0]
             : _startWorldMouse[0] - maxChange;
-        var y1 = (_startWorldMouse[1] < worldMouse[1])
+        final y1 = (_startWorldMouse[1] < worldMouse[1])
             ? _startWorldMouse[1]
             : _startWorldMouse[1] - maxChange;
         _start = Vec2D.fromValues(
@@ -108,9 +108,9 @@ abstract class ShapeTool extends StageTool with DraggableTool {
       return;
     }
     // Get in screen space.
-    var start = Vec2D.clone(_start);
-    var end = Vec2D.clone(_end);
-    var cursor = Vec2D.clone(_cursor);
+    final start = Vec2D.clone(_start);
+    final end = Vec2D.clone(_end);
+    final cursor = Vec2D.clone(_cursor);
     Vec2D.transformMat2D(start, start, stage.viewTransform);
     Vec2D.transformMat2D(end, end, stage.viewTransform);
     Vec2D.transformMat2D(cursor, cursor, stage.viewTransform);
@@ -147,7 +147,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
     Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 400));
     List<TextBox> boxes = paragraph.getBoxesForRange(0, text.length);
-    var size = boxes.isEmpty
+    final size = boxes.isEmpty
         ? Size.zero
         : Size(boxes.last.right - boxes.first.left + 1,
             boxes.last.bottom - boxes.first.top + 1);
@@ -157,8 +157,8 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
     // Fix the position to full pixels.
     // Which will line this up better with the paragraph
-    var topLeft = (pos[0] + offset.dx).floorToDouble();
-    var topRight = (pos[1] + offset.dy).floorToDouble();
+    final topLeft = (pos[0] + offset.dx).floorToDouble();
+    final topRight = (pos[1] + offset.dy).floorToDouble();
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(

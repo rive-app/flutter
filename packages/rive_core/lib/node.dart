@@ -1,21 +1,33 @@
+import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/transform_delegate.dart';
 
 import 'math/mat2d.dart';
 import 'src/generated/node_base.dart';
 
 export 'src/generated/node_base.dart';
 
-abstract class NodeDelegate {
-  void nodeTransformed();
-  void nodeBoundsChanged();
-}
+abstract class NodeDelegate implements TransformDelegate, BoundsDelegate {}
 
 class Node extends NodeBase {
   final Mat2D transform = Mat2D();
   final Mat2D worldTransform = Mat2D();
+  TransformDelegate delegate;
 
   double _renderOpacity = 0;
   double get renderOpacity => _renderOpacity;
+
+  Mat2D get renderTransform {
+    if (artboard == null) {
+      return worldTransform;
+    }
+
+    final result = Mat2D();
+    final rootTranslation = artboard.originWorld;
+    final rootWorldTransform = Mat2D.fromTranslation(rootTranslation);
+    Mat2D.multiply(result, rootWorldTransform, worldTransform);
+    return result;
+  }
 
   @override
   void update(int dirt) {
@@ -54,6 +66,7 @@ class Node extends NodeBase {
       Mat2D.copy(worldTransform, transform);
     }
 
+    delegate?.transformChanged();
     worldTransformed();
   }
 

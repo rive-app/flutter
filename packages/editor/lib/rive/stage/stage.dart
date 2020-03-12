@@ -297,8 +297,8 @@ class Stage extends Debouncer {
 
     switch (button) {
       case 1:
-        if (_activeTool is ClickableTool) {
-          (_activeTool as ClickableTool).onClick(_worldMouse);
+        if (tool is ClickableTool) {
+          (tool as ClickableTool).onClick(_worldMouse);
         } else {
           if (_hoverItem != null) {
             _mouseDownSelected = true;

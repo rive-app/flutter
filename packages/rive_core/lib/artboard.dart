@@ -3,6 +3,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'component.dart';
 import 'component_dirt.dart';
 import 'dependency_sorter.dart';
+import 'math/mat2d.dart';
 import 'src/generated/artboard_base.dart';
 
 export 'src/generated/artboard_base.dart';
@@ -17,10 +18,12 @@ class Artboard extends ArtboardBase {
   @override
   Artboard get artboard => this;
 
+  @override
+  Mat2D get renderTransform => Mat2D.fromTranslation(originWorld);
+
   Vec2D get originWorld {
-    // TODO: use originX & originY when it is hooked up.
-    // return Vec2D.fromValues(x + width * originX, y + height + originY);
-    return Vec2D.fromValues(x, y);
+    return Vec2D.fromValues(
+        x + width * (originX ?? 0), y + height * (originY ?? 0));
   }
 
   /// Update any dirty components in this artboard.

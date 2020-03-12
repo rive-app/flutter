@@ -1,12 +1,10 @@
-import 'package:flutter/foundation.dart';
-
-import 'package:logging/logging.dart';
-
 import 'package:core/core.dart';
-
-import 'package:rive_core/rive_file.dart';
+import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/rive_file.dart';
+
 import 'src/generated/component_base.dart';
 
 export 'src/generated/component_base.dart';

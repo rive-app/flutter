@@ -20,6 +20,8 @@ class ArtboardTool extends StageTool with DraggableTool {
       ..name = 'New Artboard'
       ..x = worldMouse[0]
       ..y = worldMouse[1]
+      ..originX = 0
+      ..originY = 0
       ..width = 1
       ..height = 1;
     stage.riveFile.add(_artboard);

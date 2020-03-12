@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/node_tool.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/triangle_tool.dart';
@@ -83,11 +84,15 @@ class CreatePopupButton extends StatelessWidget {
           shortcut: ShortcutAction.boneTool,
           select: () {},
         ),
-        PopupContextItem(
+        ToolPopupItem(
           'Node',
           icon: 'tool-node',
+          notifier: rive.stage.value.toolNotifier,
+          isSelected: () => rive.stage.value.tool == NodeTool.instance,
           shortcut: ShortcutAction.nodeTool,
-          select: () {},
+          select: () {
+            rive.stage.value.tool = NodeTool.instance;
+          },
         ),
         PopupContextItem(
           'Solo',
