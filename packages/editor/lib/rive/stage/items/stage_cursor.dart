@@ -196,7 +196,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
         TextStyle(foreground: Paint()..color = const Color(0xFFFFFFFF)),
       );
 
-    var text = user.name;
+    final text = user.name ?? user.username;
     builder.addText(text);
     _nameParagraph = builder.build();
     _nameParagraph.layout(const ParagraphConstraints(width: 400));
