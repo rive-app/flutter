@@ -37,28 +37,6 @@ class FillsInspectorBuilder extends ListenableInspectorBuilder {
         // allow the user to set them all to the same fill).
         for (final fills in shapes.transpose((shape) => shape.fills))
           (context) => PropertyFill(fills: fills)
-        // (context) => PropertyDual(
-        //       name: 'Position',
-        //       objects: inspecting.components,
-        //       propertyKeyA: NodeBase.xPropertyKey,
-        //       propertyKeyB: NodeBase.yPropertyKey,
-        //       labelA: 'X',
-        //       labelB: 'Y',
-        //     ),
-        // (context) => PropertyDual(
-        //       name: 'Scale',
-        //       linkable: true,
-        //       objects: inspecting.components,
-        //       propertyKeyA: NodeBase.scaleXPropertyKey,
-        //       propertyKeyB: NodeBase.scaleYPropertyKey,
-        //       labelA: 'X',
-        //       labelB: 'Y',
-        //     ),
-        // (context) => PropertySingle(
-        //       name: 'Rotate',
-        //       objects: inspecting.components,
-        //       propertyKey: NodeBase.rotationPropertyKey,
-        //     ),
       ]
     ];
   }

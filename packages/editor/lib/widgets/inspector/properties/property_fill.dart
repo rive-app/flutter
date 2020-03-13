@@ -4,6 +4,8 @@ import 'package:rive_editor/widgets/inspector/properties/inspector_popout_compon
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 
+/// Uses the InspectorPopoutComponent to build a row in the inspector for
+/// editing a color fill on a shape.
 class PropertyFill extends StatelessWidget {
   final Iterable<Fill> fills;
 
