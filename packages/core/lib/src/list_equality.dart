@@ -20,11 +20,12 @@ bool iterableEquals<T>(Iterable<T> list1, Iterable<T> list2) {
 
   var a = list1.iterator;
   var b = list2.iterator;
-  do {
+  // Iterator starts at null current value, must be moved to first value.
+  while (a.moveNext() && b.moveNext()) {
     if (a.current != b.current) {
       return false;
     }
-  } while (a.moveNext() && b.moveNext());
+  }
 
   return true;
 }
@@ -36,10 +37,13 @@ K equalValue<T, K>(Iterable<T> items, K Function(T a) getValue) {
     return null;
   }
 
-  K value = getValue(items.first);
+  var iterator = items.iterator;
+  // Move to first value.
+  iterator.moveNext();
+  K value = getValue(iterator.current);
 
-  for (final item in items.skip(1)) {
-    if (value != getValue(item)) {
+  while (iterator.moveNext()) {
+    if (value != getValue(iterator.current)) {
       return null;
     }
   }
