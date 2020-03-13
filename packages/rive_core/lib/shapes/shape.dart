@@ -101,7 +101,7 @@ class Shape extends ShapeBase {
     assert(_pathComposer != null);
 
     for (final fill in fills) {
-      // _pathComposer.uiPath.fillType = fill.fillRule;
+      // TODO: _pathComposer.uiPath.fillType = fill.fillRule;
       if (!fill.isVisible) {
         continue;
       }
