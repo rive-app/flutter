@@ -7,7 +7,7 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/stage_contour_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-class StageShape extends StageContourItem<Shape> {
+class StageShape extends StageContourItem<Shape> {  
   // We could make an artboardBounds getter on the component, but we should try
   // to keep the component's logic to what will actually be necessary in a
   // runtime (this may not be entirely possible, but this one is definitely not

@@ -2,6 +2,7 @@ import 'package:core/debounce.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/component.dart';
+import 'package:core/core.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint.dart';
@@ -15,7 +16,7 @@ typedef ChangeColor = void Function(HSVColor);
 class InspectingColor {
   static const Color defaultSolidColor = Color(0xFF747474);
   ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
-  ValueNotifier<List<HSVColor>> colors = ValueNotifier<List<HSVColor>>([]);
+  ValueNotifier<List<Color>> preview = ValueNotifier<List<Color>>([]);
   ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
   ValueNotifier<HSVColor> editingColor =
       ValueNotifier<HSVColor>(HSVColor.fromColor(const Color(0xFFFF0000)));
@@ -86,6 +87,8 @@ class InspectingColor {
       // Re-build the listeners if we added objects.
       _updatePaints(forceRelisten: true);
     }
+    // Force update the preview.
+    preview.value = [editingColor.value.toColor()];
 
     // });
   }
@@ -124,10 +127,16 @@ class InspectingColor {
         } else {
           editingColor.value = HSVColor.fromColor(defaultSolidColor);
         }
+        if (preview.value.length != 1 ||
+            preview.value.first != editingColor.value.toColor()) {
+          // check all colors are the same
+          Color color = equalValue<ShapePaint, Color>(shapePaints,
+              (shapePaint) => (shapePaint.paintMutator as SolidColor).color);
+          preview.value = color == null ? [] : [color];
+        }
 
         if (relisten) {
           for (final shapePaint in shapePaints) {
-            print("WHAT IS WE ${shapePaint.paintMutator}");
             _listenTo(shapePaint.paintMutator as Component,
                 SolidColorBase.colorValuePropertyKey);
           }

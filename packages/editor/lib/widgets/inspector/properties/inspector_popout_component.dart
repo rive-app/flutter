@@ -66,8 +66,8 @@ class InspectorPopoutComponent extends StatelessWidget {
               objects: components,
               propertyKey: isVisiblePropertyKey,
               builder: (context, bool isVisible, _) => TintedIconButton(
-                onPress: () => _toggleVisibility(!isVisible),
-                icon: isVisible ? 'visibility' : 'hidden',
+                onPress: () => _toggleVisibility(!(isVisible ?? true)),
+                icon: isVisible ?? true ? 'visibility' : 'hidden',
               ),
             ),
           TintedIconButton(

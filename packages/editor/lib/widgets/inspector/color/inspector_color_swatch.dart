@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_editor/widgets/inspector/color/color_popout.dart';
+import 'package:rive_editor/widgets/inspector/color/color_preview.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
@@ -26,6 +27,13 @@ class InspectorColorSwatch extends StatefulWidget {
 
 class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
   Popup _popup;
+  InspectingColor _inspectingColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _inspectingColor = InspectingColor(widget.shapePaints);
+  }
 
   // TODO: might need to set a key so this recycles when we select another
   // component with the swatch in the same place.
@@ -33,30 +41,33 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
   void dispose() {
     super.dispose();
     _popup?.close();
+    _inspectingColor?.dispose();
+    _inspectingColor = null;
+  }
+
+  @override
+  void didUpdateWidget(InspectorColorSwatch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shapePaints != widget.shapePaints) {
+      _inspectingColor?.dispose();
+      _inspectingColor = InspectingColor(widget.shapePaints);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) {
-        var inspecting = InspectingColor(widget.shapePaints);
         _popup = InspectorPopout.popout(
           widget.inspectorContext,
           width: 206,
-          builder: (context) => ColorPopout(inspecting: inspecting),
-          onClose: () => inspecting.dispose()
+          builder: (context) => ColorPopout(inspecting: _inspectingColor),
         );
       },
-      child: Container(
-        width: 30,
-        height: 20,
-        decoration: BoxDecoration(
-          border: Border.all(
-            width: 1,
-            color: Colors.white,
-          ),
-          borderRadius: BorderRadius.circular(2),
-        ),
+      child: ValueListenableBuilder(
+        valueListenable: _inspectingColor.preview,
+        builder: (context, List<Color> colors, child) =>
+            ColorPreview(colors: colors),
       ),
     );
   }

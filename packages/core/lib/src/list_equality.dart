@@ -28,3 +28,20 @@ bool iterableEquals<T>(Iterable<T> list1, Iterable<T> list2) {
 
   return true;
 }
+
+/// Checks that all the retrieved values for an item are the same. If they're
+/// the same, it returns the equal value, otherwise it'll return null.
+K equalValue<T, K>(Iterable<T> items, K Function(T a) getValue) {
+  if (items.isEmpty) {
+    return null;
+  }
+
+  K value = getValue(items.first);
+
+  for (final item in items.skip(1)) {
+    if (value != getValue(item)) {
+      return null;
+    }
+  }
+  return value;
+}
