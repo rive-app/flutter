@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/shapes/paint/solid_color_base.dart';
+export 'package:rive_core/src/generated/shapes/paint/solid_color_base.dart';
 
 /// A solid color painter for a shape. Works for both Fill and Stroke.
 class SolidColor extends SolidColorBase with ShapePaintMutator {

@@ -142,6 +142,14 @@ class RiveFile extends RiveCoreContext {
     cleanDirt();
   }
 
+  /// We override the changeProperty to mark the stage for redraw whenever a
+  /// core property changes.
+  @override
+  void changeProperty<T>(Core object, int propertyKey, T from, T to) {
+    super.changeProperty<T>(object, propertyKey, from, to);
+    markNeedsRedraw();
+  }
+
   @override
   Future<int> getIntSetting(String key) async {
     if (overridePreferences != null) {
@@ -203,6 +211,9 @@ class RiveFile extends RiveCoreContext {
   void markNeedsAdvance() =>
       delegates.forEach((delegate) => delegate.markNeedsAdvance());
 
+  void markNeedsRedraw() =>
+      delegates.forEach((delegate) => delegate.markNeedsRedraw());
+
   @override
   void onAddedDirty(Component object) {
     log.finest("ADDING ${object.name} ${object.id} ${object.parentId}");
@@ -219,7 +230,7 @@ class RiveFile extends RiveCoreContext {
   @override
   void onAddedClean(Component object) {
     // Remove corrupt objects immediately.
-    if(!object.validate()) {
+    if (!object.validate()) {
       remove(object);
       return;
     }
@@ -339,6 +350,7 @@ class RiveFile extends RiveCoreContext {
 /// Delegate type that can be passed to [RiveFile] to listen to events.
 abstract class RiveFileDelegate {
   void markNeedsAdvance();
+  void markNeedsRedraw();
   void onArtboardsChanged() {}
   void onDirtCleaned();
   void onObjectAdded(Core object) {}

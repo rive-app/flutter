@@ -40,6 +40,7 @@ typedef _ItemFactory = StageItem Function();
 
 abstract class StageDelegate {
   void stageNeedsAdvance();
+  void stageNeedsRedraw();
 }
 
 /// Some notes about how the Stage works and future plans for it here:
@@ -212,6 +213,8 @@ class Stage extends Debouncer {
     _delegate = value;
   }
 
+  void markNeedsRedraw() => _delegate?.stageNeedsRedraw?.call();
+
   bool setViewport(double width, double height) {
     if (width == _viewportWidth && height == _viewportHeight) {
       return false;
@@ -271,7 +274,9 @@ class Stage extends Debouncer {
         _worldMouse[0], _worldMouse[1], _worldMouse[0] + 1, _worldMouse[1] + 1);
     StageItem hover;
     visTree.query(viewAABB, (int proxyId, StageItem item) {
-      if (item.isSelectable) {
+      if (item.isSelectable &&
+          item.drawOrder >= (hover?.drawOrder ?? 0) &&
+          item.hitHiFi(_worldMouse)) {
         hover = item;
       }
       return true;
@@ -513,6 +518,10 @@ class Stage extends Debouncer {
     view[3] = _viewZoom;
     view[4] = _viewTranslation[0];
     view[5] = _viewTranslation[1];
+
+    // Take this opportunity to update any stageItem paints that rely on the
+    // zoom level.
+    StageItem.selectedPaint.strokeWidth = StageItem.strokeWidth / _viewZoom;
   }
 
   void paint(PaintingContext context, Offset offset, Size size) {

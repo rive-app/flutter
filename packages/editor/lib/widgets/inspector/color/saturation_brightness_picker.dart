@@ -42,13 +42,14 @@ class SaturationBrightnessPicker extends StatelessWidget {
           context.size,
         ),
       ),
-      onHorizontalDragUpdate: (details) => change?.call(
+      onPanUpdate: (details) => change?.call(
         _localPositionToValue(
           details.localPosition,
           context.size,
         ),
       ),
       onTapUp: (_) => complete?.call(),
+      onPanEnd: (_) => complete?.call(),
       child: Stack(
         children: [
           Positioned.fill(
@@ -80,6 +81,7 @@ class SaturationBrightnessPicker extends StatelessWidget {
                   ),
                 );
               },
+              endDrag: complete,
               child: ColorGrabber(
                 color: HSVColor.fromAHSV(
                   1,

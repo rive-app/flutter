@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/stage_contour_item.dart';
@@ -13,6 +14,14 @@ class StageShape extends StageContourItem<Shape> {
   // necessary at runtime).
   @override
   AABB get aabb => component.bounds.translate(component.artboard.originWorld);
+
+  /// Do a high fidelity hover hit check against the actual path geometry.
+  @override
+  bool hitHiFi(Vec2D worldMouse) {
+    var origin = component.artboard.originWorld;
+    return component.pathComposer.uiPath
+        .contains(Offset(worldMouse[0] - origin[0], worldMouse[1] - origin[1]));
+  }
 
   @override
   void paint(Canvas canvas) {

@@ -93,6 +93,7 @@ class ColorPopout extends StatelessWidget {
                                 ),
                               );
                             },
+                            completeChange: inspecting.completeChange,
                             background: (context) => Container(
                               child: const CustomPaint(
                                 painter: HueSliderBackground(),
@@ -113,6 +114,7 @@ class ColorPopout extends StatelessWidget {
                                 ),
                               );
                             },
+                            completeChange: inspecting.completeChange,
                             background: (context) => Container(
                               child: CustomPaint(
                                 painter: OpacitySliderBackground(

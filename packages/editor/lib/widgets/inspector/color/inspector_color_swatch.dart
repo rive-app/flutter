@@ -44,6 +44,7 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
           widget.inspectorContext,
           width: 206,
           builder: (context) => ColorPopout(inspecting: inspecting),
+          onClose: () => inspecting.dispose()
         );
       },
       child: Container(

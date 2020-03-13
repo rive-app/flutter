@@ -78,7 +78,7 @@ abstract class Path extends PathBase {
     if (pts == null || pts.isEmpty) {
       return false;
     }
-    print('Building path for ${this.name}');
+    // print('Building path for ${this.name}');
     // for (final v in pts) {
     //   print('Path V: $v');
     // }

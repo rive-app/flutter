@@ -13,12 +13,14 @@ class OverlayHitDetect extends StatefulWidget {
   final Widget child;
   final BuildContext dragContext;
   final DragProxy drag;
+  final VoidCallback endDrag;
 
   const OverlayHitDetect({
     Key key,
     this.child,
     this.dragContext,
     this.drag,
+    this.endDrag,
   }) : super(key: key);
 
   @override
@@ -67,6 +69,7 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
               _resizeOverlay?.remove();
               _resizeOverlay = null;
               _prepHitArea(details.position);
+              widget.endDrag?.call();
             },
             child: Container(color: Colors.transparent),
           ),

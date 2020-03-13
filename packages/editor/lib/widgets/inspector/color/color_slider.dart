@@ -53,6 +53,7 @@ class ColorSlider extends StatelessWidget {
                 ),
               ),
           onTapUp: (_) => completeChange?.call(),
+          onHorizontalDragEnd: (_) => completeChange?.call(),
           child: child);
 
   @override
@@ -76,6 +77,7 @@ class ColorSlider extends StatelessWidget {
                     context.size.width,
                   ),
                 ),
+                endDrag: completeChange,
                 child: ColorGrabber(
                   color: color,
                   size: const Size(
