@@ -36,6 +36,11 @@ class _ComboOption<T> extends PopupListItem {
   final SelectCallback select;
 }
 
+/// Sizing options for the combobox. [expanded] means to expand this combobox to
+/// take up the maximum available space in the parent. [collapsed] means to take
+/// up the minimum horizontal space required to let the current selection
+/// display without wrapping. [content] means to use the length of the widest
+/// label in the list of options.
 enum ComboSizing { expanded, collapsed, content }
 
 /// A multi-choice popup input widget. Has styling options for all the various
@@ -82,6 +87,8 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
   FocusNode _focusNode;
   double _contentWidth;
 
+  /// Get the width of this combobox used for the [ComboSizing.content] option.
+  /// This computes the widest label width in the list of options.
   double get contentWidth {
     if (_contentWidth != null) {
       return _contentWidth;
@@ -146,7 +153,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
       case ComboSizing.expanded:
         return Expanded(child: child);
       case ComboSizing.content:
-        return Container(width: contentWidth, child:child);
+        return Container(width: contentWidth, child: child);
     }
     return child;
   }
