@@ -49,6 +49,12 @@ class Stage extends Debouncer {
   static const double _minZoom = 0.1;
   static const double _maxZoom = 8;
 
+  /// Reference to the Rive context for the app.
+  final Rive rive;
+
+  /// Reference to the current riveFile this stage represents.
+  final RiveFile riveFile;
+
   final Mat2D _viewTransform = Mat2D();
   final Mat2D _inverseViewTransform = Mat2D();
   final Vec2D _lastMousePosition = Vec2D();
@@ -387,9 +393,6 @@ class Stage extends Debouncer {
       (_activeTool as MoveableTool).onExit();
     }
   }
-
-  final Rive rive;
-  final RiveFile riveFile;
 
   // TODO: Get actual active artboard, not just the first one.
   Artboard get activeArtboard => riveFile.artboards.first;
