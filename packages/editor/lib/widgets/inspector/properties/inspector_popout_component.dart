@@ -7,6 +7,10 @@ import 'package:rive_editor/widgets/core_properties_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout.dart';
 
+/// A row in the inspector representing some Core [Component]. It presents an
+/// options popout that can be customized by the implementation (currently not
+/// implemented). Also has the option of renaming, removing, and toggling the
+/// visibility of the component.
 class InspectorPopoutComponent extends StatelessWidget {
   final Iterable<Component> components;
   final int isVisiblePropertyKey;
