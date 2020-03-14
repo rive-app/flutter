@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/rive_text_form_field.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
 
@@ -8,12 +9,14 @@ import 'package:rive_editor/widgets/core_properties_builder.dart';
 /// The [propertyKey] is hander over to [CorePropertiesBuilder] to extract the
 /// associated field data to be displayed within this text field.
 class InspectorTextField extends StatefulWidget {
-  final List<Core> objects;
+  final Iterable<Core> objects;
   final int propertyKey;
+  final InputValueConverter converter;
 
   const InspectorTextField({
     @required this.objects,
     @required this.propertyKey,
+    this.converter,
     Key key,
   }) : super(key: key);
 
@@ -43,7 +46,9 @@ class _InspectorTextFieldState extends State<InspectorTextField> {
         hintText: '',
         // controller: TextEditingController(text: ),
         onComplete: (stringValue, isDragging) {
-          var value = double.parse(stringValue);
+          dynamic value = widget.converter == null
+              ? double.parse(stringValue)
+              : widget.converter.fromEditingValue(stringValue);
           if (widget.objects.isEmpty) {
             return;
           }

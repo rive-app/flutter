@@ -5,7 +5,7 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 
 class PropertySingle extends StatelessWidget {
-  final List<Core> objects;
+  final Iterable<Core> objects;
   final int propertyKey;
   final String name;
 
