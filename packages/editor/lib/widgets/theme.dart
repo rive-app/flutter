@@ -93,6 +93,9 @@ class RiveColors {
 
   // Inspector
   Color get inspectorTextColor => const Color(0xFF8C8C8C);
+
+  // TextField
+  Color get textSelection => lightGrey;
 }
 
 /// TextStyles used in the Rive Theme
