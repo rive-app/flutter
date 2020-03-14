@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/selectable_item.dart';
@@ -28,6 +29,13 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   @override
   void markBoundsDirty() {
     stage?.debounce(updateBounds);
+    // Mark bounds dirty of other stageItems within the artboard.
+    component.forEachComponent((component) {
+      var stageItem = component.stageItem;
+      if (stageItem is BoundsDelegate) {
+        (stageItem as BoundsDelegate).boundsChanged();
+      }
+    });
   }
 
   void updateBounds() {
@@ -61,5 +69,26 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
           ..color = selectionState.value == SelectionState.none
               ? const Color.fromRGBO(100, 100, 100, 1.0)
               : const Color.fromRGBO(200, 200, 200, 1.0));
+
+    // Get into artboard's world space. This is because the artboard draws
+    // components in the artboard's space (in component lingo we call this world
+    // space). The artboards themselves are drawn in the editor's world space,
+    // which is the world space that is used by stageItems. This is a little
+    // confusing and perhaps we should find a better wording for the transform
+    // spaces. We used "world space" in components as that's the game engine
+    // ratified way of naming the top-most transformation. Perhaps we should
+    // rename those to artboardTransform and worldTransform is only reserved for
+    // stageItems? The other option is to stick with 'worldTransform' in
+    // components and use 'editor or stageTransform' for stageItems.
+
+    canvas.save();
+    var originWorld = component.originWorld;
+    canvas.translate(originWorld[0], originWorld[1]);
+
+    // Now draw the actual drawables.
+    component.paint(canvas);
+
+    // Get back into stage space.
+    canvas.restore();
   }
 }

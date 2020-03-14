@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import 'package:rive_editor/widgets/common/rive_text_form_field.dart';
-import 'package:rive_editor/widgets/multi_core_property_builder.dart';
+import 'package:rive_editor/widgets/core_properties_builder.dart';
 
 /// A text field in the Inspector panel.
 ///
-/// The [propertyKey] is hander over to [MultiCorePropertyBuilder] to extract
-/// the associated field data to be displayed within this text field.
+/// The [propertyKey] is hander over to [CorePropertiesBuilder] to extract the
+/// associated field data to be displayed within this text field.
 class InspectorTextField extends StatefulWidget {
   final List<Core> objects;
   final int propertyKey;
@@ -32,7 +32,7 @@ class _InspectorTextFieldState extends State<InspectorTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiCorePropertyBuilder(
+    return CorePropertiesBuilder(
       objects: widget.objects,
       propertyKey: widget.propertyKey,
       builder: (context, double value, _) => RiveTextFormField(

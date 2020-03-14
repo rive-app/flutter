@@ -138,6 +138,9 @@ class Rive with RiveFileDelegate {
     SchedulerBinding.instance.scheduleFrame();
   }
 
+  @override
+  void markNeedsRedraw() => _stage?.markNeedsRedraw();
+
   Timer _reconnectTimer;
   int _reconnectAttempt = 0;
 

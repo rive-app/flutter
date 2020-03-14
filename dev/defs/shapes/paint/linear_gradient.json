@@ -1,0 +1,42 @@
+{
+  "name": "LinearGradient",
+  "key": {
+    "int": 22,
+    "string": "lineargradient"
+  },
+  "extends": "container_component.json",
+  "properties": {
+    "startX": {
+      "type": "double",
+      "initialValue": "0",
+      "key": {
+        "int": 42,
+        "string": "startx"
+      }
+    },
+    "startY": {
+      "type": "double",
+      "initialValue": "0",
+      "key": {
+        "int": 33,
+        "string": "starty"
+      }
+    },
+    "endX": {
+      "type": "double",
+      "initialValue": "0",
+      "key": {
+        "int": 34,
+        "string": "endx"
+      }
+    },
+    "endY": {
+      "type": "double",
+      "initialValue": "0",
+      "key": {
+        "int": 35,
+        "string": "endy"
+      }
+    }
+  }
+}

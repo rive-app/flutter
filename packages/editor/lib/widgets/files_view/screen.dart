@@ -551,7 +551,7 @@ class TitleSection extends StatelessWidget {
                 builder: (context, sortOption, _) =>
                     ComboBox<RiveFileSortOption>(
                   popupWidth: 100,
-                  expanded: false,
+                  sizing: ComboSizing.collapsed,
                   underline: false,
                   valueColor: theme.colors.toolbarButton,
                   options: options,

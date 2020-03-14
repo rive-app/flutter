@@ -9,11 +9,14 @@ typedef RenameCallback = void Function(String);
 class Renamable extends StatefulWidget {
   final String name;
   final Color color;
+  final Color editingColor;
+
   final RenameCallback onRename;
   const Renamable({
     Key key,
     this.name,
     this.color,
+    this.editingColor,
     this.onRename,
   }) : super(key: key);
 
@@ -53,8 +56,12 @@ class _RenamableState extends State<Renamable> {
   Widget build(BuildContext context) {
     return ClickListener(
       onDoubleClick: () {
+        if(widget.onRename == null ) {
+          // If the rename function isn't handled, don't start editing.
+          return;
+        }
         setState(() {
-          _controller = TextEditingController(text: widget.name);
+          _controller = TextEditingController(text: widget.name ?? '');
           _isEditing = true;
           _focusNode.requestFocus();
         });
@@ -82,7 +89,7 @@ class _RenamableState extends State<Renamable> {
                   },
                   style: TextStyle(
                     fontSize: 13,
-                    color: widget.color,
+                    color: widget.editingColor ?? widget.color,
                   ),
                   textAlignVertical: TextAlignVertical.top,
                   textAlign: TextAlign.left,
@@ -100,7 +107,7 @@ class _RenamableState extends State<Renamable> {
                 ),
               )
             : Text(
-                widget.name,
+                widget.name ?? '-',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,

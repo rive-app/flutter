@@ -3,19 +3,19 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Stateful widget that manages a list of [Core] elements.
-/// 
+///
 /// The list of elements will register listeners for the property with value
-/// [propertyKey], and it'll have a [builder] function which, upon change of 
+/// [propertyKey], and it'll have a [builder] function which, upon change of
 /// the State value, will be rebuilt.
-class MultiCorePropertyBuilder<T> extends StatefulWidget {
-  final List<Core> objects;
+class CorePropertiesBuilder<T, K extends Core> extends StatefulWidget {
+  final Iterable<K> objects;
 
   final int propertyKey;
   final ValueWidgetBuilder<T> builder;
 
   final Widget child;
 
-  const MultiCorePropertyBuilder({
+  const CorePropertiesBuilder({
     @required this.objects,
     @required this.propertyKey,
     @required this.builder,
@@ -27,11 +27,11 @@ class MultiCorePropertyBuilder<T> extends StatefulWidget {
         super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _MultiCorePropertyBuilderState<T>();
+  State<StatefulWidget> createState() => _CorePropertiesBuilderState<T, K>();
 }
 
-class _MultiCorePropertyBuilderState<T>
-    extends State<MultiCorePropertyBuilder<T>> {
+class _CorePropertiesBuilderState<T, K extends Core>
+    extends State<CorePropertiesBuilder<T, K>> {
   T previous;
   T value;
 
@@ -41,9 +41,9 @@ class _MultiCorePropertyBuilderState<T>
   }
 
   @override
-  void didUpdateWidget(MultiCorePropertyBuilder<T> oldWidget) {
+  void didUpdateWidget(CorePropertiesBuilder<T, K> oldWidget) {
     if (oldWidget.propertyKey != widget.propertyKey ||
-        !listEquals(oldWidget.objects, widget.objects)) {
+        !iterableEquals(oldWidget.objects, widget.objects)) {
       _unbindListener(oldWidget.objects);
 
       _bindListener();
@@ -51,7 +51,7 @@ class _MultiCorePropertyBuilderState<T>
     super.didUpdateWidget(oldWidget);
   }
 
-  void _unbindListener(List<Core> objects) {
+  void _unbindListener(Iterable<K> objects) {
     var propertyKey = widget.propertyKey;
     for (final object in objects) {
       object.removeListener(propertyKey, _valueChanged);
@@ -59,7 +59,7 @@ class _MultiCorePropertyBuilderState<T>
   }
 
   /// Bind the [_valueChanged] function to each of the objects that are part
-  /// of this MultiCorePropertyBuilder. Then extract the value by validating
+  /// of this CorePropertiesBuilder. Then extract the value by validating
   /// it.
   void _bindListener() {
     var propertyKey = widget.propertyKey;
@@ -70,7 +70,7 @@ class _MultiCorePropertyBuilderState<T>
     value = _validateValue();
   }
 
-  /// Validates the values by this list of objects. 
+  /// Validates the values by this list of objects.
   /// Either all the values coincide, or we return [null].
   T _validateValue() {
     var objects = widget.objects;
@@ -80,8 +80,8 @@ class _MultiCorePropertyBuilderState<T>
     var propertyKey = widget.propertyKey;
     var value = objects.first.getProperty<T>(propertyKey);
 
-    for (int i = 1; i < objects.length; i++) {
-      if (value != objects[i].getProperty<T>(propertyKey)) {
+    for (final object in objects.skip(1)) {
+      if (value != object.getProperty<T>(propertyKey)) {
         return null;
       }
     }

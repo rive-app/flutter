@@ -7,6 +7,11 @@ import '../../artboard.dart';
 import '../../node.dart';
 import '../../shapes/cubic_vertex.dart';
 import '../../shapes/ellipse.dart';
+import '../../shapes/paint/fill.dart';
+import '../../shapes/paint/gradient_stop.dart';
+import '../../shapes/paint/linear_gradient.dart';
+import '../../shapes/paint/radial_gradient.dart';
+import '../../shapes/paint/solid_color.dart';
 import '../../shapes/path_composer.dart';
 import '../../shapes/points_path.dart';
 import '../../shapes/rectangle.dart';
@@ -19,6 +24,12 @@ import 'drawable_base.dart';
 import 'node_base.dart';
 import 'shapes/cubic_vertex_base.dart';
 import 'shapes/ellipse_base.dart';
+import 'shapes/paint/fill_base.dart';
+import 'shapes/paint/gradient_stop_base.dart';
+import 'shapes/paint/linear_gradient_base.dart';
+import 'shapes/paint/radial_gradient_base.dart';
+import 'shapes/paint/shape_paint_base.dart';
+import 'shapes/paint/solid_color_base.dart';
 import 'shapes/parametric_path_base.dart';
 import 'shapes/path_composer_base.dart';
 import 'shapes/path_vertex_base.dart';
@@ -34,6 +45,16 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   Core makeCoreInstance(int typeKey) {
     switch (typeKey) {
+      case LinearGradientBase.typeKey:
+        return LinearGradient();
+      case RadialGradientBase.typeKey:
+        return RadialGradient();
+      case SolidColorBase.typeKey:
+        return SolidColor();
+      case GradientStopBase.typeKey:
+        return GradientStop();
+      case FillBase.typeKey:
+        return Fill();
       case NodeBase.typeKey:
         return Node();
       case ShapeBase.typeKey:
@@ -118,6 +139,18 @@ abstract class RiveCoreContext extends CoreContext {
           var value = FractionalIndex(numerator, denominator);
           setObjectProperty(object, change.op, value);
           break;
+        case ShapePaintBase.isVisiblePropertyKey:
+        case ShapeBase.transformAffectsStrokePropertyKey:
+        case PointsPathBase.isClosedPropertyKey:
+          var value = reader.readInt8() == 1;
+          setObjectProperty(object, change.op, value);
+          break;
+        case LinearGradientBase.startXPropertyKey:
+        case LinearGradientBase.startYPropertyKey:
+        case LinearGradientBase.endXPropertyKey:
+        case LinearGradientBase.endYPropertyKey:
+        case RadialGradientBase.radiusPropertyKey:
+        case GradientStopBase.positionPropertyKey:
         case NodeBase.xPropertyKey:
         case NodeBase.yPropertyKey:
         case NodeBase.rotationPropertyKey:
@@ -143,13 +176,11 @@ abstract class RiveCoreContext extends CoreContext {
           var value = reader.readFloat64();
           setObjectProperty(object, change.op, value);
           break;
+        case SolidColorBase.colorValuePropertyKey:
+        case GradientStopBase.colorValuePropertyKey:
+        case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModePropertyKey:
           var value = reader.readVarInt();
-          setObjectProperty(object, change.op, value);
-          break;
-        case ShapeBase.transformAffectsStrokePropertyKey:
-        case PointsPathBase.isClosedPropertyKey:
-          var value = reader.readInt8() == 1;
           setObjectProperty(object, change.op, value);
           break;
         default:
@@ -214,6 +245,23 @@ abstract class RiveCoreContext extends CoreContext {
           return null;
         }
         break;
+      case ShapePaintBase.isVisiblePropertyKey:
+      case ShapeBase.transformAffectsStrokePropertyKey:
+      case PointsPathBase.isClosedPropertyKey:
+        if (value != null && value is bool) {
+          var writer = BinaryWriter(alignment: 1);
+          writer.writeInt8(value ? 1 : 0);
+          change.value = writer.uint8Buffer;
+        } else {
+          return null;
+        }
+        break;
+      case LinearGradientBase.startXPropertyKey:
+      case LinearGradientBase.startYPropertyKey:
+      case LinearGradientBase.endXPropertyKey:
+      case LinearGradientBase.endYPropertyKey:
+      case RadialGradientBase.radiusPropertyKey:
+      case GradientStopBase.positionPropertyKey:
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
       case NodeBase.rotationPropertyKey:
@@ -244,20 +292,13 @@ abstract class RiveCoreContext extends CoreContext {
           return null;
         }
         break;
+      case SolidColorBase.colorValuePropertyKey:
+      case GradientStopBase.colorValuePropertyKey:
+      case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
         if (value != null && value is int) {
           var writer = BinaryWriter(alignment: 4);
           writer.writeVarInt(value);
-          change.value = writer.uint8Buffer;
-        } else {
-          return null;
-        }
-        break;
-      case ShapeBase.transformAffectsStrokePropertyKey:
-      case PointsPathBase.isClosedPropertyKey:
-        if (value != null && value is bool) {
-          var writer = BinaryWriter(alignment: 1);
-          writer.writeInt8(value ? 1 : 0);
           change.value = writer.uint8Buffer;
         } else {
           return null;
@@ -290,6 +331,56 @@ abstract class RiveCoreContext extends CoreContext {
       case ComponentBase.childOrderPropertyKey:
         if (object is ComponentBase && value is FractionalIndex) {
           object.childOrder = value;
+        }
+        break;
+      case ShapePaintBase.isVisiblePropertyKey:
+        if (object is ShapePaintBase && value is bool) {
+          object.isVisible = value;
+        }
+        break;
+      case LinearGradientBase.startXPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.startX = value;
+        }
+        break;
+      case LinearGradientBase.startYPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.startY = value;
+        }
+        break;
+      case LinearGradientBase.endXPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.endX = value;
+        }
+        break;
+      case LinearGradientBase.endYPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.endY = value;
+        }
+        break;
+      case RadialGradientBase.radiusPropertyKey:
+        if (object is RadialGradientBase && value is double) {
+          object.radius = value;
+        }
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        if (object is SolidColorBase && value is int) {
+          object.colorValue = value;
+        }
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        if (object is GradientStopBase && value is int) {
+          object.colorValue = value;
+        }
+        break;
+      case GradientStopBase.positionPropertyKey:
+        if (object is GradientStopBase && value is double) {
+          object.position = value;
+        }
+        break;
+      case FillBase.fillRulePropertyKey:
+        if (object is FillBase && value is int) {
+          object.fillRule = value;
         }
         break;
       case NodeBase.xPropertyKey:
@@ -446,6 +537,56 @@ abstract class RiveCoreContext extends CoreContext {
       case ComponentBase.childOrderPropertyKey:
         if (object is ComponentBase) {
           return object.childOrder;
+        }
+        break;
+      case ShapePaintBase.isVisiblePropertyKey:
+        if (object is ShapePaintBase) {
+          return object.isVisible;
+        }
+        break;
+      case LinearGradientBase.startXPropertyKey:
+        if (object is LinearGradientBase) {
+          return object.startX;
+        }
+        break;
+      case LinearGradientBase.startYPropertyKey:
+        if (object is LinearGradientBase) {
+          return object.startY;
+        }
+        break;
+      case LinearGradientBase.endXPropertyKey:
+        if (object is LinearGradientBase) {
+          return object.endX;
+        }
+        break;
+      case LinearGradientBase.endYPropertyKey:
+        if (object is LinearGradientBase) {
+          return object.endY;
+        }
+        break;
+      case RadialGradientBase.radiusPropertyKey:
+        if (object is RadialGradientBase) {
+          return object.radius;
+        }
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        if (object is SolidColorBase) {
+          return object.colorValue;
+        }
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        if (object is GradientStopBase) {
+          return object.colorValue;
+        }
+        break;
+      case GradientStopBase.positionPropertyKey:
+        if (object is GradientStopBase) {
+          return object.position;
+        }
+        break;
+      case FillBase.fillRulePropertyKey:
+        if (object is FillBase) {
+          return object.fillRule;
         }
         break;
       case NodeBase.xPropertyKey:
