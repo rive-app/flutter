@@ -150,7 +150,7 @@ class PopupContextItem extends PopupListItem {
             BlendMode.srcIn,
           ),
           child: const Image(
-            image: AssetImage('assets/images/icons/tool-chevron.png'),
+            image: AssetImage('assets/images/icons/chevron.png'),
           ),
         ),
       const SizedBox(width: 20),
