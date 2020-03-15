@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
+import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-// import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 
-class PropertySingle extends StatelessWidget {
+class PropertySingle<T> extends StatelessWidget {
   final Iterable<Core> objects;
   final int propertyKey;
   final String name;
+  final InputValueConverter<T> converter;
 
   const PropertySingle({
     @required this.objects,
     @required this.propertyKey,
+    this.converter,
     this.name,
     Key key,
   }) : super(key: key);
@@ -47,9 +49,10 @@ class PropertySingle extends StatelessWidget {
           Flexible(
             flex: 2,
             child: Container(
-              child: InspectorTextField(
+              child: CoreTextField<T>(
                 objects: objects,
                 propertyKey: propertyKey,
+                converter: converter,
               ),
             ),
           ),

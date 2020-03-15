@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
+import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
-class PropertyDual extends StatelessWidget {
+class PropertyDual<T> extends StatelessWidget {
   final List<Core> objects;
   final int propertyKeyA;
   final int propertyKeyB;
@@ -13,6 +14,7 @@ class PropertyDual extends StatelessWidget {
   final String labelB;
   final String name;
   final bool linkable;
+  final InputValueConverter<T> converter;
 
   const PropertyDual({
     @required this.objects,
@@ -23,6 +25,7 @@ class PropertyDual extends StatelessWidget {
     this.linkable = false,
     this.labelA = '',
     this.labelB = '',
+    this.converter,
     Key key,
   }) : super(key: key);
 
@@ -76,9 +79,10 @@ class PropertyDual extends StatelessWidget {
               children: <Widget>[
                 Flexible(
                   flex: 1,
-                  child: InspectorTextField(
+                  child: CoreTextField(
                     objects: objects,
                     propertyKey: propertyKeyA,
+                    converter: converter,
                   ),
                 ),
                 Flexible(
@@ -101,9 +105,10 @@ class PropertyDual extends StatelessWidget {
               children: <Widget>[
                 Flexible(
                   flex: 1,
-                  child: InspectorTextField(
+                  child: CoreTextField<T>(
                     objects: objects,
                     propertyKey: propertyKeyB,
+                    converter: converter,
                   ),
                 ),
                 Flexible(

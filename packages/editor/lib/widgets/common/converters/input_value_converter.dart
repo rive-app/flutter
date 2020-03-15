@@ -1,3 +1,5 @@
+import 'dart:math';
+
 /// An abstraction of a value converter which can be used with text input fields
 /// that accept value converters to display a more legible/easier to understand
 /// version of the raw values. For example, an AngleConverter could show degrees
@@ -19,4 +21,21 @@ abstract class InputValueConverter<T> {
   /// Convert the user provided string input value to an actual value of the
   /// correct type.
   T fromEditingValue(String value);
+}
+
+class DoubleFormatter {
+  final double _decimalDivider;
+
+  DoubleFormatter(int decimalPlaces)
+      : _decimalDivider = pow(10, decimalPlaces).toDouble();
+
+  String format(double value) {
+    double closestDecimal =
+        (value * _decimalDivider).roundToDouble() / _decimalDivider;
+    int whole = closestDecimal.ceil();
+    if (closestDecimal == whole) {
+      return whole.toString();
+    }
+    return closestDecimal.toString();
+  }
 }

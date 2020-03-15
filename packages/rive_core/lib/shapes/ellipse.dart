@@ -7,9 +7,6 @@ export 'package:rive_core/src/generated/shapes/ellipse_base.dart';
 const double circleConstant = 0.55;
 
 class Ellipse extends EllipseBase {
-  Ellipse() {
-    print("GOT ELLIPSE!");
-  }
   @override
   List<PathVertex> get vertices => [
         CubicVertex()

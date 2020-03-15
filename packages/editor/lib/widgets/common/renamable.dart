@@ -1,8 +1,8 @@
 import 'dart:ui';
-import 'package:cursor/propagating_listener.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_editor/widgets/common/editor_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 import 'click_listener.dart';
@@ -73,7 +73,6 @@ class _RenamableState extends State<Renamable> {
       },
       child: Align(
         alignment: const Alignment(-1, 0),
-        // color:Colors.green,
         child: _isEditing
             ? RawKeyboardListener(
                 focusNode: FocusNode(),
@@ -86,35 +85,40 @@ class _RenamableState extends State<Renamable> {
                     });
                   }
                 },
-                child: PropagatingListener(
-                  behavior: HitTestBehavior.deferToChild,
-                  onPointerDown: (event) {
-                    // We only want to stop propagation when we know the
-                    // editable text will handle this click, which happens to be
-                    // the case if we're editing.
-                    event.stopPropagation();
+                child: EditorTextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  color: widget.color,
+                  editingColor: widget.editingColor,
+                  onSubmitted: (text) {
+                    widget.onRename?.call(text);
                   },
-                  child: EditableText(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    cursorColor: widget.editingColor ?? widget.color,
-                    backgroundCursorColor: widget.editingColor ?? widget.color,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: widget.editingColor ?? widget.color,
+
+                  /*RepaintBoundary(
+                    child: EditableText(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      cursorColor: widget.editingColor ?? widget.color,
+                      backgroundCursorColor:
+                          widget.editingColor ?? widget.color,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: widget.editingColor ?? widget.color,
+                      ),
+                      selectionControls: materialTextSelectionControls,
+                      enableInteractiveSelection: true,
+                      rendererIgnoresPointer: false,
+                      showCursor: true,
+                      selectionHeightStyle: BoxHeightStyle.tight,
+                      selectionWidthStyle: BoxWidthStyle.tight,
+                      keyboardType: TextInputType.multiline,
+                      selectionColor:
+                          RiveTheme.of(context).colors.textSelection,
+                      onSubmitted: (text) {
+                        widget.onRename?.call(text);
+                      },
                     ),
-                    selectionControls: materialTextSelectionControls,
-                    enableInteractiveSelection: true,
-                    rendererIgnoresPointer: false,
-                    showCursor: true,
-                    selectionHeightStyle: BoxHeightStyle.tight,
-                    selectionWidthStyle: BoxWidthStyle.tight,
-                    keyboardType: TextInputType.multiline,
-                    selectionColor: RiveTheme.of(context).colors.textSelection,
-                    onSubmitted: (text) {
-                      widget.onRename?.call(text);
-                    },
-                  ),
+                  ),*/
                 ),
               )
             : Text(

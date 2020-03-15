@@ -1,7 +1,7 @@
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 
 /// Value converter for translation values (x and y).
-class TranslationValueConverter extends InputValueConverter<double> {
+class ScaleValueConverter extends InputValueConverter<double> {
   static final DoubleFormatter displayFormatter = DoubleFormatter(2);
   static final DoubleFormatter editFormatter = DoubleFormatter(4);
 
@@ -14,5 +14,5 @@ class TranslationValueConverter extends InputValueConverter<double> {
   @override
   String toEditingValue(double value) => editFormatter.format(value);
 
-  static final TranslationValueConverter instance = TranslationValueConverter();
+  static final ScaleValueConverter instance = ScaleValueConverter();
 }

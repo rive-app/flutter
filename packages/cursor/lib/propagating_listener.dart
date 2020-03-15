@@ -110,7 +110,7 @@ class PropagatingListener extends StatelessWidget {
   final PropagatingPointerMoveEventListener onPointerMove;
   final PropagatingPointerCancelEventListener onPointerCancel;
   final PropagatingPointerSignalEventListener onPointerSignal;
-
+  final bool isListening;
   const PropagatingListener({
     Key key,
     this.child,
@@ -120,6 +120,7 @@ class PropagatingListener extends StatelessWidget {
     this.onPointerMove,
     this.onPointerCancel,
     this.onPointerSignal,
+    this.isListening = true,
   }) : super(key: key);
 
   PropagatingEvent<T> _prepEvent<T extends PointerEvent>(
@@ -139,39 +140,52 @@ class PropagatingListener extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!isListening) {
+      return child;
+    }
     var events = _InheritedPropagatingEvents.of(context);
     return Listener(
       behavior: behavior,
-      onPointerDown: (details) {
-        var event = _prepEvent(events, details);
-        if (!event.isHandled) {
-          onPointerDown?.call(event);
-        }
-      },
-      onPointerMove: (details) {
-        var event = _prepEvent(events, details);
-        if (!event.isHandled) {
-          onPointerMove?.call(event);
-        }
-      },
-      onPointerUp: (details) {
-        var event = _prepEvent(events, details);
-        if (!event.isHandled) {
-          onPointerUp?.call(event);
-        }
-      },
-      onPointerCancel: (details) {
-        var event = _prepEvent(events, details);
-        if (!event.isHandled) {
-          onPointerCancel?.call(event);
-        }
-      },
-      onPointerSignal: (details) {
-        var event = _prepEvent(events, details);
-        if (!event.isHandled) {
-          onPointerSignal?.call(event);
-        }
-      },
+      onPointerDown: onPointerDown == null
+          ? null
+          : (details) {
+              var event = _prepEvent(events, details);
+              if (!event.isHandled) {
+                onPointerDown?.call(event);
+              }
+            },
+      onPointerMove: onPointerMove == null
+          ? null
+          : (details) {
+              var event = _prepEvent(events, details);
+              if (!event.isHandled) {
+                onPointerMove?.call(event);
+              }
+            },
+      onPointerUp: onPointerUp == null
+          ? null
+          : (details) {
+              var event = _prepEvent(events, details);
+              if (!event.isHandled) {
+                onPointerUp?.call(event);
+              }
+            },
+      onPointerCancel: onPointerCancel == null
+          ? null
+          : (details) {
+              var event = _prepEvent(events, details);
+              if (!event.isHandled) {
+                onPointerCancel?.call(event);
+              }
+            },
+      onPointerSignal: onPointerSignal == null
+          ? null
+          : (details) {
+              var event = _prepEvent(events, details);
+              if (!event.isHandled) {
+                onPointerSignal?.call(event);
+              }
+            },
       child: child,
     );
   }
