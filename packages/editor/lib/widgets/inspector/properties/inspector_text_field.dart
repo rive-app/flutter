@@ -65,13 +65,30 @@ class _ConvertingTextEditingController<T> extends TextEditingController {
   }
 }
 
+/// A TextField whose value can be of any type [T]. It automatically hanldes
+/// changes to the value based on the provided converter.
 class InspectorTextField<T> extends StatefulWidget {
+  /// The raw value to be displayed and edited.
   final T value;
+
+  /// The converter which interprets the provided value as an editable string
+  /// and is also able to convert it back to the raw value of type [T].
   final InputValueConverter<T> converter;
+
+  /// Callback invoked whenever the value changes. Can be called before the
+  /// editing operation is fully complete in order to allow the user to preview
+  /// the changes as they are made.
+  final void Function(T value) change;
+
+  /// Callback for when the editing operation is fully complete. This is when
+  /// you want to save the changed value (or track the change for undo/redo).
+  final void Function() completeChange;
 
   const InspectorTextField({
     @required this.value,
-    this.converter,
+    @required this.converter,
+    this.change,
+    this.completeChange,
     Key key,
   }) : super(key: key);
 
@@ -126,6 +143,10 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
       focusNode: _focusNode,
       color: theme.colors.inspectorTextColor,
       editingColor: theme.colors.activeText,
+      onSubmitted: (string) {
+        widget.change?.call(widget.converter.fromEditingValue(string));
+        widget.completeChange?.call();
+      },
     );
   }
 }

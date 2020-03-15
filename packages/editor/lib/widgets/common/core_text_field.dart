@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 
 /// A text field that manipulates core properties.
@@ -25,7 +26,6 @@ class CoreTextField<T> extends StatefulWidget {
 }
 
 class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
-
   @override
   Widget build(BuildContext context) {
     return CorePropertiesBuilder(
@@ -37,21 +37,21 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
         // initialValue: widget.converter.toDisplayValue(value),
         value: value,
         converter: widget.converter,
-        // onComplete: (stringValue, isDragging) {
-        //   dynamic value = widget.converter == null
-        //       ? double.parse(stringValue)
-        //       : widget.converter.fromEditingValue(stringValue);
-        //   if (widget.objects.isEmpty) {
-        //     return;
-        //   }
-        //   for (final object in widget.objects) {
-        //     object.context.setObjectProperty(object, widget.propertyKey, value);
-        //   }
-        //   // TODO: Help me obi-wan
-        //   if (!isDragging) {
-        //     widget.objects.first.context.captureJournalEntry();
-        //   }
-        // },
+        change: (T value) {
+          for (final object in widget.objects) {
+            object.context.setObjectProperty(object, widget.propertyKey, value);
+          }
+        },
+        completeChange: () {
+          if (widget.objects.isEmpty) {
+            return;
+          }
+          widget.objects.first.context.captureJournalEntry();
+
+          // Force focus back to the main context so that we can immediately
+          // undo this change if we want to by hitting ctrl/comamnd z.
+          RiveContext.of(context).focus();
+        },
       ),
     );
   }
