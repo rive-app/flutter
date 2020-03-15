@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:rive_core/component.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_component.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.dart';
-import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
-import 'package:rive_editor/widgets/inspector/properties/property_single.dart';
 
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a color fill on a shape.

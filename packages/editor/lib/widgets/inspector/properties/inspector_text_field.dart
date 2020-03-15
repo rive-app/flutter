@@ -87,15 +87,25 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() { 
-      print("FOCUSED ? ${_focusNode.hasFocus}");
-    });
+    _focusNode.addListener(_focusChange);
     _controller.rawValue = widget.value;
     _controller.converter = widget.converter;
   }
 
+  void _focusChange() {
+    if (!_focusNode.hasFocus) {
+      return;
+    }
+    // Select all.
+    _controller.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: _controller.text.length,
+    );
+  }
+
   @override
   void dispose() {
+    _focusNode.removeListener(_focusChange);
     _focusNode.dispose();
     _controller.dispose();
     super.dispose();
@@ -112,7 +122,6 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return EditorTextField(
-      
       controller: _controller,
       focusNode: _focusNode,
       color: theme.colors.inspectorTextColor,

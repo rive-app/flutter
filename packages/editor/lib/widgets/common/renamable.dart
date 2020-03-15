@@ -2,10 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/common/editor_text_field.dart';
-import 'package:rive_editor/widgets/inherited_widgets.dart';
-
-import 'click_listener.dart';
 
 typedef RenameCallback = void Function(String);
 
