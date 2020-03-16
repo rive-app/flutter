@@ -34,9 +34,6 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
       objects: widget.objects,
       propertyKey: widget.propertyKey,
       builder: (context, T value, _) => InspectorTextField(
-        // edgeInsets: const EdgeInsets.only(bottom: 3),
-        // isNumeric: true,
-        // initialValue: widget.converter.toDisplayValue(value),
         value: value,
         converter: widget.converter,
         change: (T value) {

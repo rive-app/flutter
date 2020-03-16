@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/component.dart';
+import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
+import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_component.dart';
@@ -32,30 +35,24 @@ class PropertyFill extends StatelessWidget {
       isVisiblePropertyKey: ShapePaintBase.isVisiblePropertyKey,
       popoutBuilder: (context) => Column(
         // mainAxisSize: MainAxisSize.max,
-        // crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const InspectorPopoutTitle(title: 'FILL OPTIONS'),
           const SizedBox(height: 20),
           Row(
             // crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
             children: [
               Text(
                 'Name',
                 style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
               ),
+              const SizedBox(width: 20),
               Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    color: Colors.green,
-
-                    width: inputWidth,
-                    height: 3,
-                    // child: InspectorTextField(
-                    //   objects: fills,
-                    //   propertyKey: ComponentBase.namePropertyKey,
-                    // ),
-                  ),
+                child: CoreTextField(
+                  objects: fills,
+                  propertyKey: ComponentBase.namePropertyKey,
+                  converter: StringValueConverter.instance,
                 ),
               ),
             ],

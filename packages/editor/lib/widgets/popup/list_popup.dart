@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -40,6 +39,12 @@ abstract class PopupListItem {
   // Check if this item is currently focused (hovered or highlighted via arrow
   // key selection).
   bool get isFocused => _isFocused.value;
+
+  /// Overridable child widget.
+  Widget get child => null;
+
+  /// The context of the shell widget item.
+  BuildContext shellContext;
 }
 
 typedef ListPopupItemBuilder<T> = Widget Function(
@@ -172,12 +177,12 @@ class ListPopup<T extends PopupListItem> {
     }
   }
 
-  void focusRight(BuildContext context) {
+  void focusRight() {
     if (_focus == null) {
       return;
     }
     if (_focus.popup != null) {
-      showChildPopup(context, child: _focus);
+      showChildPopup(_focus.shellContext, child: _focus);
       // Grab first focus.
       _subPopup.focusDown();
     }
@@ -210,19 +215,21 @@ class ListPopup<T extends PopupListItem> {
     return true;
   }
 
-  factory ListPopup.show(BuildContext context,
-      {@required ListPopupItemBuilder<T> itemBuilder,
-      double width = 177,
-      double margin = 10,
-      Offset offset = const Offset(0, 10),
-      // Flag to display the small arrow at the top of the popup
-      bool showArrow = true,
-      Alignment alignment = Alignment.bottomLeft,
-      List<T> items = const [],
-      Color background = const Color.fromRGBO(17, 17, 17, 1),
-      ListPopup<T> parent,
-      bool handleKeyPresses = true,
-      bool includeCloseGuard = false}) {
+  factory ListPopup.show(
+    BuildContext context, {
+    @required ListPopupItemBuilder<T> itemBuilder,
+    double width = 177,
+    double margin = 10,
+    Offset offset = const Offset(0, 10),
+    // Flag to display the small arrow at the top of the popup
+    bool showArrow = true,
+    Alignment alignment = Alignment.bottomLeft,
+    List<T> items = const [],
+    Color background = const Color.fromRGBO(17, 17, 17, 1),
+    ListPopup<T> parent,
+    bool handleKeyPresses = true,
+    bool includeCloseGuard = false,
+  }) {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final boxOffset = renderBox.localToGlobal(Offset.zero);
@@ -233,15 +240,57 @@ class ListPopup<T extends PopupListItem> {
     var top = position.dy + offset.dy;
     var left = position.dx + offset.dx;
 
-    // bool useList = media.size.height > height;
-    var list = ListPopup<T>(
+    ListPopup<T> list;
+
+    var focusNode = FocusNode(
+      debugLabel: 'List Popup Focus',
+      skipTraversal: true,
+      onKey: (node, event) {
+        if (event is RawKeyDownEvent) {
+          if (event.physicalKey == PhysicalKeyboardKey.escape) {
+            list.close();
+          } else if (event.physicalKey == PhysicalKeyboardKey.enter ||
+              event.physicalKey == PhysicalKeyboardKey.numpadEnter) {
+            if (list.focus == null || !list.focus.canSelect) {
+              return true;
+            }
+            list.focus.select?.call();
+            if (list.focus.dismissAll) {
+              Popup.closeAll();
+            } else {
+              list.close();
+            }
+            return true;
+          } else if (event.physicalKey == PhysicalKeyboardKey.arrowUp) {
+            list.focusUp();
+            return true;
+          } else if (event.physicalKey == PhysicalKeyboardKey.arrowDown) {
+            list.focusDown();
+            return true;
+          } else if (event.physicalKey == PhysicalKeyboardKey.arrowLeft) {
+            list.focusLeft();
+            return true;
+          } else if (event.physicalKey == PhysicalKeyboardKey.arrowRight) {
+            // Focus right needs context as it can open a new popup.
+            list.focusRight();
+            return true;
+          }
+        }
+        return false;
+      },
+    );
+
+    // Request focus as soon as we attach.
+    focusNode.requestFocus();
+
+    list = ListPopup<T>(
       items,
       itemBuilder: itemBuilder,
       parent: parent,
       handleKeyPresses: handleKeyPresses,
     );
 
-    var listFocusNode = FocusNode(canRequestFocus: true, skipTraversal: true);
+    //var listFocusNode = FocusNode(canRequestFocus: true, skipTraversal: true);
     list._popup = Popup.show(
       context,
       onClose: list.close,
@@ -251,29 +300,9 @@ class ListPopup<T extends PopupListItem> {
           left: left,
           top: top,
           width: width,
-          child: RawKeyboardListener(
-            focusNode: listFocusNode,
-            onKey: (event) {
-              return;
-              if (event is RawKeyDownEvent) {
-                // Ugh can't switch on these :(
-                if (event.physicalKey == PhysicalKeyboardKey.arrowUp) {
-                  list.focusUp();
-                } else if (event.physicalKey == PhysicalKeyboardKey.arrowDown) {
-                  list.focusDown();
-                } else if (event.physicalKey == PhysicalKeyboardKey.arrowLeft) {
-                  list.focusLeft();
-                }
-              }
-
-              // TODO: figure out why we can't keep focus without this. If we
-              // comment this out, we'll lose focus after first press. Needs to
-              // be debounced as it seems like something else is attempting to
-              // grab focus.
-              Timer(const Duration(milliseconds: 1),
-                  () => listFocusNode.requestFocus());
-            },
-            child: MouseRegion(
+          child: MouseRegion(
+            child: Focus(
+              focusNode: focusNode,
               child: Material(
                 type: MaterialType.transparency,
                 child: Column(
@@ -343,7 +372,7 @@ class ListPopup<T extends PopupListItem> {
       },
     );
 
-    listFocusNode.requestFocus();
+    //listFocusNode.requestFocus();
 
     return list;
   }
@@ -367,6 +396,12 @@ class _PopupListItemShell<T extends PopupListItem> extends StatefulWidget {
 
 class __PopupListItemShellState<T extends PopupListItem>
     extends State<_PopupListItemShell<T>> {
+  @override
+  void initState() {
+    widget.item.shellContext = context;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -418,85 +453,17 @@ class __PopupListItemShellState<T extends PopupListItem>
         child: ValueListenableBuilder<bool>(
           valueListenable: widget.item._isFocused,
           builder: (context, isFocused, _) {
-            // We want this item to handle keypresses if it's focused or if our
-            // list has no focus and this happens to be the first item in it. We
-            // also want to make sure we don't hanlde focus if the popup opener
-            // explicitly asked us not to. Usually this means they'll handle key
-            // presses themselves or/and they rely on focus for context (like a
-            // type-ahead combobox).
-            var hasKeyboardFocus = widget.listPopup.handleKeyPresses &&
-                (isFocused ||
-                    (widget.listPopup.focus == null &&
-                        widget.listPopup.values.value.first == widget.item));
-
             return Container(
               color: isFocused ? const Color.fromRGBO(26, 26, 26, 1) : null,
-              child: _keyboardListener(
-                hasKeyboardFocus,
-                context: context,
-                child: NullableListenableBuilder(
-                  listenable: widget.item.rebuildItem,
-                  builder: (context, ChangeNotifier value, _) =>
-                      widget.itemBuilder(context, widget.item, isFocused),
-                ),
+              child: NullableListenableBuilder(
+                listenable: widget.item.rebuildItem,
+                builder: (context, ChangeNotifier value, _) =>
+                    widget.itemBuilder(context, widget.item, isFocused),
               ),
             );
           },
         ),
       ),
     );
-  }
-
-  // Luigi: We register a keyboard listener on the focused item. I'd previously
-  // implemented this as a listener for the whole list, but in some cases we
-  // need the build context of the item that's focused, so this allows us to get
-  // that without needing to pass contexts around with item data.
-  Widget _keyboardListener(bool isFocused,
-      {Widget child, BuildContext context}) {
-    if (isFocused) {
-      var focus = FocusNode();
-      focus.requestFocus();
-      return RawKeyboardListener(
-        focusNode: focus,
-        onKey: (event) {
-          if (event is RawKeyDownEvent) {
-            // Ugh can't switch on these :(
-            if (event.physicalKey == PhysicalKeyboardKey.escape) {
-              widget.listPopup.close();
-            } else if (event.physicalKey == PhysicalKeyboardKey.enter ||
-                event.physicalKey == PhysicalKeyboardKey.numpadEnter) {
-              if (!widget.item.canSelect) {
-                return;
-              }
-              widget.item.select?.call();
-              if (widget.item.dismissAll) {
-                Popup.closeAll();
-              } else {
-                widget.listPopup.close();
-              }
-            } else if (event.physicalKey == PhysicalKeyboardKey.arrowUp) {
-              widget.listPopup.focusUp();
-            } else if (event.physicalKey == PhysicalKeyboardKey.arrowDown) {
-              widget.listPopup.focusDown();
-            } else if (event.physicalKey == PhysicalKeyboardKey.arrowLeft) {
-              widget.listPopup.focusLeft();
-            } else if (event.physicalKey == PhysicalKeyboardKey.arrowRight) {
-              // Focus right needs context as it can open a new popup.
-              widget.listPopup.focusRight(context);
-            } else {
-              // TODO: Leaving this commented in as a reminder that we need to
-              // do something about preventing default Flutter widgets from
-              // grabbing focus. The DropDownButton ViewScaleDropdown was
-              // stealing focus after every key press. I fixed this by giving it
-              // a skipTraversal: true in a custom FocusNode passed to it. See
-              // scale_dropdown.dart Timer(const Duration(milliseconds: 1), ()
-              // => focus.requestFocus());
-            }
-          }
-        },
-        child: child,
-      );
-    }
-    return child;
   }
 }
