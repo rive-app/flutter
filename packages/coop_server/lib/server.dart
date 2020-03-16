@@ -183,8 +183,8 @@ class _CoopIsolate extends CoopIsolateProcess {
           ..fileId = fileId
           ..objects = {};
       }
-      _nextChangeId = max(file.serverChangeId, CoopCommand.minChangeId) + 1;
     }
+    _nextChangeId = max(file.serverChangeId, CoopCommand.minChangeId) + 1;
     return true;
   }
 
