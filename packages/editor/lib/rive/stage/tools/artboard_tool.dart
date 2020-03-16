@@ -9,10 +9,6 @@ import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
 import 'stage_tool.dart';
 
-const Map<EditMode, DraggingMode> artboardModeMap = {
-  EditMode.altMode1: DraggingMode.symmetric
-};
-
 class ArtboardTool extends StageTool with DraggableTool {
   Vec2D _startWorldMouse;
   Artboard _artboard;
@@ -43,7 +39,7 @@ class ArtboardTool extends StageTool with DraggableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
-    switch (artboardModeMap[editMode]) {
+    switch (editModeMap[editMode]) {
       case DraggingMode.symmetric:
         final maxChange = max(
           (_startWorldMouse[0] - worldMouse[0]).abs(),

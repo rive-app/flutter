@@ -1,11 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_editor/rive/stage/stage.dart';
 
-enum EditMode { normal, altMode1, altMode2 }
+import 'package:rive_editor/constants.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 
 abstract class StageTool {
   Stage _stage;
@@ -28,7 +29,7 @@ abstract class StageTool {
           ? Vec2D.subtract(Vec2D(), worldMouse, activeArtboard.originWorld)
           : worldMouse;
 
-Vec2D stageWorldSpace(Artboard activeArtboard, Vec2D worldMouse) =>
+  Vec2D stageWorldSpace(Artboard activeArtboard, Vec2D worldMouse) =>
       inArtboardSpace
           ? Vec2D.add(Vec2D(), worldMouse, activeArtboard.originWorld)
           : worldMouse;
