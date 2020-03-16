@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -30,14 +29,6 @@ class RiveCoopServer extends CoopServer {
   /// Pings the 2D service heartbeat endpoint
   @override
   void heartbeat() => PrivateApi().heartbeat();
-
-  @override
-  Future<int> validate(
-      HttpRequest request, int ownerId, int fileId, String token) async {
-    var api = PrivateApi();
-    var validationResult = await api.validate(ownerId, fileId, token);
-    return validationResult?.ownerId;
-  }
 
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
     var process = _CoopIsolate();

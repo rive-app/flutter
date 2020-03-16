@@ -395,7 +395,12 @@ class Stage extends Debouncer {
   }
 
   // TODO: Get actual active artboard, not just the first one.
-  Artboard get activeArtboard => riveFile.artboards.first;
+  Artboard get activeArtboard {
+    if (riveFile.artboards.isEmpty) {
+      return null;
+    }
+    return riveFile.artboards.first;
+  }
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 

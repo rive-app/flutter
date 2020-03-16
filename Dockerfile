@@ -5,4 +5,4 @@ ADD . /app
 RUN pub get
 
 CMD []
-ENTRYPOINT ["/usr/bin/dart", "lib/main.dart", "--data-folder=./data", "-p"]
+ENTRYPOINT ["/usr/bin/dart", "lib/main.dart", "--data-folder=./data"]

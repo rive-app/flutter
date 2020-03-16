@@ -380,8 +380,7 @@ class Rive with RiveFileDelegate {
     var result = await opening.connect(
       connectionInfo.socketHost,
       filePath,
-      // TODO: Should this by url encoded?
-      urlEncodedSpectre,
+      api.cookies['spectre'],
     );
     if (result == ConnectResult.connected) {
       print("Connected");
