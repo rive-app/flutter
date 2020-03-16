@@ -1,48 +1,28 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/aabb.dart';
-import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-class StageNode extends StageItem<Node> with NodeDelegate {
+/// A Node component as it's drawn on the stage.
+class StageNode extends StageItem<Node> {
   @override
-  AABB get aabb {
-    // TODO: properly evaluate.
-    var x = _renderTransform[4];
-    var y = _renderTransform[5];
-    return AABB.fromValues(x - _halfNodeSize, y - _halfNodeSize,
-        x + _halfNodeSize, y + _halfNodeSize);
-  }
-
-  Mat2D _renderTransform = Mat2D();
-
-  @override
-  bool initialize(Node component) {
-    super.initialize(component);
-    // Register this StageItem with its Node to receive update events.
-    component.delegate = this;
-    _renderTransform = component.renderTransform;
-
-    return true;
-  }
+  AABB get aabb => AABB
+      .fromValues(component.x - _halfNodeSize, component.y - _halfNodeSize,
+          component.x + _halfNodeSize, component.y + _halfNodeSize)
+      .translate(component.artboard.originWorld);
 
   @override
   void paint(Canvas canvas) {
+    final origin = component.artboard.originWorld;
+    final x = component.x;
+    final y = component.y;
     canvas.save();
-    canvas.transform(_renderTransform.mat4);
+    canvas.translate(origin[0] + x, origin[1] + y);
     canvas.drawPath(_nodeEdgePath, _nodeStroke);
     canvas.drawPath(_insidePath, _nodeFill);
     canvas.restore();
   }
-
-  @override
-  void transformChanged() {
-    _renderTransform = component.renderTransform;
-  }
-
-  @override
-  void boundsChanged() {/** NOP */}
 
   static const _nodeSize = 18;
   static const _halfNodeSize = _nodeSize / 2;
