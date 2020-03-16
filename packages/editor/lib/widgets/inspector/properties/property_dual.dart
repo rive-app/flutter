@@ -7,6 +7,8 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
+/// An inspector row with two input fields of the same core property type.
+/// Optional linking such that when one changes the other does too.
 class PropertyDual<T> extends StatelessWidget {
   final List<Core> objects;
   final int propertyKeyA;
@@ -56,6 +58,8 @@ class PropertyDual<T> extends StatelessWidget {
         : child;
   }
 
+  /// Build the [CoreTextField] and setups up the property and linked property
+  /// keys up so that they get mirrored when one changes (if linking is on).
   Widget _buildCoreTextField(int propertyKey, int linkedKey) => CoreTextField(
         objects: objects,
         propertyKey: propertyKey,

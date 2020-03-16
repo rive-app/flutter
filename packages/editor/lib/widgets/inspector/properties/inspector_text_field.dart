@@ -101,6 +101,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   final _ConvertingTextEditingController<T> _controller =
       _ConvertingTextEditingController<T>();
   final FocusNode _focusNode = FocusNode(canRequestFocus: true);
+  bool _hasFocus = false;
 
   @override
   void initState() {
@@ -111,6 +112,9 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   }
 
   void _focusChange() {
+    setState(() {
+      _hasFocus = _focusNode.hasFocus;
+    });
     if (!_focusNode.hasFocus) {
       return;
     }
@@ -140,7 +144,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return Underline(
-      color: theme.colors.separator,
+      color: _hasFocus ? theme.colors.separatorActive : theme.colors.separator,
       child: EditorTextField(
         controller: _controller,
         focusNode: _focusNode,
