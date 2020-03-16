@@ -34,13 +34,11 @@ class PropertyFill extends StatelessWidget {
       ),
       isVisiblePropertyKey: ShapePaintBase.isVisiblePropertyKey,
       popoutBuilder: (context) => Column(
-        // mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const InspectorPopoutTitle(title: 'FILL OPTIONS'),
           const SizedBox(height: 20),
           Row(
-            // crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
             children: [
               Text(
