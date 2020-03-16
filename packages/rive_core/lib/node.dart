@@ -17,18 +17,6 @@ class Node extends NodeBase {
   double _renderOpacity = 0;
   double get renderOpacity => _renderOpacity;
 
-  Mat2D get renderTransform {
-    if (artboard == null) {
-      return worldTransform;
-    }
-
-    final result = Mat2D();
-    final rootTranslation = artboard.originWorld;
-    final rootWorldTransform = Mat2D.fromTranslation(rootTranslation);
-    Mat2D.multiply(result, rootWorldTransform, worldTransform);
-    return result;
-  }
-
   @override
   void update(int dirt) {
     if (dirt & ComponentDirt.transform != 0) {

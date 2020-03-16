@@ -6,28 +6,26 @@ import 'package:rive_core/math/vec2d.dart';
 import 'component.dart';
 import 'component_dirt.dart';
 import 'dependency_sorter.dart';
-import 'math/mat2d.dart';
 import 'src/generated/artboard_base.dart';
 
 export 'src/generated/artboard_base.dart';
 
+abstract class ArtboardDelegate {
+  void markBoundsDirty();
+}
 class Artboard extends ArtboardBase {
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
   final List<Drawable> _drawables = [];
   final Set<Component> _components = {};
+  int _dirtDepth = 0;
+  int _dirt = 255;
 
   void forEachComponent(void Function(Component) callback) =>
       _components.forEach(callback);
 
-  int _dirtDepth = 0;
-  int _dirt = 255;
-
   @override
   Artboard get artboard => this;
-
-  @override
-  Mat2D get renderTransform => Mat2D.fromTranslation(originWorld);
 
   Vec2D get originWorld {
     return Vec2D.fromValues(
@@ -168,8 +166,4 @@ class Artboard extends ArtboardBase {
       drawable.paint(canvas);
     }
   }
-}
-
-abstract class ArtboardDelegate {
-  void markBoundsDirty();
 }

@@ -3,11 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/shapes/ellipse.dart';
-import 'package:rive_core/shapes/path.dart';
-import 'package:rive_core/shapes/shape.dart';
 
 import 'src/generated/component_base.dart';
 
@@ -22,13 +18,6 @@ abstract class Component extends ComponentBase<RiveFile> {
   // Used during update process.
   int graphOrder = 0;
   int dirt = 0;
-
-  // Contains the Mapping of valid types for the component classes.
-  static final Map<Type, Set<Type>> validParents = {
-    Node: {Artboard, Node, Shape},
-    Path: {Shape, Node},
-    Ellipse: {Shape, Node},
-  };
 
   bool addDirt(int value, {bool recurse = false}) {
     if ((dirt & value) == value) {
