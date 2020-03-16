@@ -91,32 +91,6 @@ class _RenamableState extends State<Renamable> {
                   onSubmitted: (text) {
                     widget.onRename?.call(text);
                   },
-
-                  /*RepaintBoundary(
-                    child: EditableText(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      cursorColor: widget.editingColor ?? widget.color,
-                      backgroundCursorColor:
-                          widget.editingColor ?? widget.color,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: widget.editingColor ?? widget.color,
-                      ),
-                      selectionControls: materialTextSelectionControls,
-                      enableInteractiveSelection: true,
-                      rendererIgnoresPointer: false,
-                      showCursor: true,
-                      selectionHeightStyle: BoxHeightStyle.tight,
-                      selectionWidthStyle: BoxWidthStyle.tight,
-                      keyboardType: TextInputType.multiline,
-                      selectionColor:
-                          RiveTheme.of(context).colors.textSelection,
-                      onSubmitted: (text) {
-                        widget.onRename?.call(text);
-                      },
-                    ),
-                  ),*/
                 ),
               )
             : Text(
