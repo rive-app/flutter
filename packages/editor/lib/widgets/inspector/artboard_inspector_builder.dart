@@ -6,7 +6,10 @@ import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
 
 /// Returns the inspector for Artboard selections.
-class ArtboardInspectorBuilder extends InspectorBuilder {
+class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
+  bool _isSizeLinked = false;
+  bool _isOriginLinked = false;
+
   @override
   bool validate(InspectionSet inspecting) =>
       inspecting.intersectingCoreTypes.contains(ArtboardBase.typeKey);
@@ -24,6 +27,11 @@ class ArtboardInspectorBuilder extends InspectorBuilder {
         (context) => PropertyDual(
             name: 'Size',
             linkable: true,
+            isLinked: _isSizeLinked,
+            toggleLink: (value) {
+              _isSizeLinked = value;
+              notifyListeners();
+            },
             objects: inspecting.components,
             propertyKeyA: ArtboardBase.widthPropertyKey,
             propertyKeyB: ArtboardBase.heightPropertyKey,
@@ -33,6 +41,11 @@ class ArtboardInspectorBuilder extends InspectorBuilder {
         (context) => PropertyDual(
             name: 'Origin',
             linkable: true,
+            isLinked: _isOriginLinked,
+            toggleLink: (value) {
+              _isOriginLinked = value;
+              notifyListeners();
+            },
             objects: inspecting.components,
             propertyKeyA: ArtboardBase.originXPropertyKey,
             propertyKeyB: ArtboardBase.originYPropertyKey,

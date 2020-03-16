@@ -13,11 +13,13 @@ class CoreTextField<T> extends StatefulWidget {
   final Iterable<Core> objects;
   final int propertyKey;
   final InputValueConverter<T> converter;
+  final void Function(T value) change;
 
   const CoreTextField({
     @required this.objects,
     @required this.propertyKey,
     this.converter,
+    this.change,
     Key key,
   }) : super(key: key);
 
@@ -41,6 +43,7 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
           for (final object in widget.objects) {
             object.context.setObjectProperty(object, widget.propertyKey, value);
           }
+          widget.change?.call(value);
         },
         completeChange: () {
           if (widget.objects.isEmpty) {

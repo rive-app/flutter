@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
@@ -172,17 +173,9 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
 
   Widget _underline(Widget child, {RiveThemeData theme}) {
     if (widget.underline) {
-      return Container(
-        padding: const EdgeInsets.only(bottom: 3),
+      return Underline(
         child: child,
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: theme.colors.separator,
-              width: 1,
-            ),
-          ),
-        ),
+        color: theme.colors.separator,
       );
     }
     return child;

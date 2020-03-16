@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/editor_text_field.dart';
+import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class _ConvertingTextEditingController<T> extends TextEditingController {
@@ -138,15 +139,18 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
-    return EditorTextField(
-      controller: _controller,
-      focusNode: _focusNode,
-      color: theme.colors.inspectorTextColor,
-      editingColor: theme.colors.activeText,
-      onSubmitted: (string) {
-        widget.change?.call(widget.converter.fromEditingValue(string));
-        widget.completeChange?.call();
-      },
+    return Underline(
+      color: theme.colors.separator,
+      child: EditorTextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        color: theme.colors.inspectorTextColor,
+        editingColor: theme.colors.activeText,
+        onSubmitted: (string) {
+          widget.change?.call(widget.converter.fromEditingValue(string));
+          widget.completeChange?.call();
+        },
+      ),
     );
   }
 }

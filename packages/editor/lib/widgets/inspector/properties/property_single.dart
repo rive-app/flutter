@@ -20,42 +20,36 @@ class PropertySingle<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 5, bottom: 5),
-      padding: const EdgeInsets.only(left: 20, right: 20),
-      height: 35,
+    var theme = RiveTheme.of(context);
+    var textStyles = theme.textStyles;
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 7,
+        bottom: 10,
+      ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Expanded(
+            child: Text(
+              name,
+              style: textStyles.inspectorPropertyLabel,
+            ),
+          ),
+          const SizedBox(width: 20),
           Flexible(
             flex: 1,
-            child: Container(
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      name,
-                      style: RiveTheme.of(context)
-                          .textStyles
-                          .inspectorPropertyLabel,
-                    ),
-                  ),
-                ],
-              ),
+            child: CoreTextField(
+              objects: objects,
+              propertyKey: propertyKey,
+              converter: converter,
             ),
           ),
-          const SizedBox(
-            width: 10,
-          ),
-          Flexible(
-            flex: 2,
-            child: Container(
-              child: CoreTextField<T>(
-                objects: objects,
-                propertyKey: propertyKey,
-                converter: converter,
-              ),
-            ),
-          ),
+          const SizedBox(width: 20),
+          Flexible(flex: 1, child: Container()),
         ],
       ),
     );
