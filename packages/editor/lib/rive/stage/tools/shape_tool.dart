@@ -180,8 +180,8 @@ abstract class ShapeTool extends StageTool with DraggableTool {
         : Size(boxes.last.right - boxes.first.left + 1,
             boxes.last.bottom - boxes.first.top + 1);
 
-    var offset = const Offset(10, 10);
-    var padding = const Size(10, 6);
+    const offset = Offset(10, 10);
+    const padding = Size(10, 6);
 
     // Fix the position to full pixels.
     // Which will line this up better with the paragraph
