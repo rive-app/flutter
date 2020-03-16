@@ -11,9 +11,15 @@ import 'stage_tool.dart';
 class ArtboardTool extends StageTool with DraggableTool {
   Vec2D _startWorldMouse;
   Artboard _artboard;
+
+  /// The artboard tool operates in stage world space.
   @override
-  void startDrag(Iterable<StageItem> selection, Vec2D worldMouse) {
-    super.startDrag(selection, worldMouse);
+  bool get inArtboardSpace => false;
+
+  @override
+  void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
+      Vec2D worldMouse) {
+    super.startDrag(selection, activeArtboard, worldMouse);
     // Create an artboard and place it at the world location.
     _startWorldMouse = Vec2D.clone(worldMouse);
     _artboard = Artboard()
@@ -42,7 +48,7 @@ class ArtboardTool extends StageTool with DraggableTool {
 
   @override
   void paint(Canvas canvas) {}
-  
+
   @override
   String get icon => 'tool-artboard';
 

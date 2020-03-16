@@ -25,7 +25,7 @@ class InspectorGroup extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 20,
-        vertical: 5,
+        vertical: 2,
       ),
       child: Row(
         children: [

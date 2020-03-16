@@ -210,10 +210,18 @@ abstract class CoreContext implements LocalSettings {
   @protected
   void completeChanges();
 
-  Future<ConnectResult> connect(String host, String path) async {
+  /// Creates a connection to the co-op web socket server
+  Future<ConnectResult> connect(String host, String path,
+      [String token]) async {
     int clientId = await getIntSetting('clientId');
-    _client = CoopClient(host, path,
-        fileId: fileId, clientId: clientId, localSettings: this)
+    _client = CoopClient(
+      host,
+      path,
+      fileId: fileId,
+      clientId: clientId,
+      localSettings: this,
+      token: token,
+    )
       ..changesAccepted = _changesAccepted
       ..changesRejected = _changesRejected
       ..makeChanges = _receiveCoopChanges
@@ -569,14 +577,12 @@ abstract class CoreContext implements LocalSettings {
       // changes from this set to avoid the flickering issue.
       applyCoopChanges(objectChanges);
     }
-    log.finest("COMPLETING ADD");
     completeAdd();
     // completeAddDirty();
     _isRecording = wasRecording;
-    log.finest("COMPLETE CHANGES");
+
     // completeChanges();
     // completeAddClean();
-    log.finest("ALL DONE!");
   }
 
   /// Add a set of components as a batched operation, cleaning dirt and

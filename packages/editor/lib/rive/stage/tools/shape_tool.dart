@@ -1,7 +1,10 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/shapes/paint/fill.dart';
+import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -9,7 +12,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
-import 'package:rive_editor/rive/theme.dart';
+import 'package:rive_editor/widgets/theme.dart';
 
 enum DraggingMode { symmetric }
 
@@ -26,28 +29,54 @@ abstract class ShapeTool extends StageTool with DraggableTool {
   Shape _shape;
   ParametricPath _path;
 
+  Artboard _currentArtboard;
+
   @override
-  void startDrag(Iterable<StageItem> selection, Vec2D worldMouse) {
-    super.startDrag(selection, worldMouse);
+  void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
+      Vec2D worldMouse) {
+    super.startDrag(selection, activeArtboard, worldMouse);
+    assert(activeArtboard != null, 'Shape tool must have an active artboard.');
     _end = _start = null;
     // Create a Shape and place it at the world location.
     _startWorldMouse = Vec2D.clone(worldMouse);
 
-    final file = stage.riveFile;
-    final artboard = file.artboards.first;
+    final file = activeArtboard.context;
+
+    // Track the artboard we're using for this operation (in case it changes via
+    // a shortcut or something while the drag operation is continuing).
+    _currentArtboard = activeArtboard;
 
     _shape = shape(worldMouse);
     _path = path;
 
     file.batchAdd(() {
       final composer = PathComposer();
+      final solidColor = SolidColor();
+      final fill = Fill();
+
       file.add(_shape);
+      file.add(fill);
+      file.add(solidColor);
       file.add(composer);
       file.add(_path);
 
+      // Let's build up the shape hierarchy:
+      // Artboard
+      // │
+      // └─▶ Shape
+      //       │
+      //       ├─▶ Fill
+      //       │     │
+      //       │     └─▶ SolidColor
+      //       │
+      //       ├─▶ PathComposer
+      //       │
+      //       └─▶ Path
       _shape.appendChild(_path);
       _shape.appendChild(composer);
-      artboard.appendChild(_shape);
+      _shape.appendChild(fill);
+      fill.appendChild(solidColor);
+      activeArtboard.appendChild(_shape);
     });
   }
 
@@ -108,9 +137,9 @@ abstract class ShapeTool extends StageTool with DraggableTool {
       return;
     }
     // Get in screen space.
-    final start = Vec2D.clone(_start);
-    final end = Vec2D.clone(_end);
-    final cursor = Vec2D.clone(_cursor);
+    final start = Vec2D.clone(stageWorldSpace(_currentArtboard, _start));
+    final end = Vec2D.clone(stageWorldSpace(_currentArtboard, _end));
+    final cursor = Vec2D.clone(stageWorldSpace(_currentArtboard, _cursor));
     Vec2D.transformMat2D(start, start, stage.viewTransform);
     Vec2D.transformMat2D(end, end, stage.viewTransform);
     Vec2D.transformMat2D(cursor, cursor, stage.viewTransform);
@@ -152,8 +181,8 @@ abstract class ShapeTool extends StageTool with DraggableTool {
         : Size(boxes.last.right - boxes.first.left + 1,
             boxes.last.bottom - boxes.first.top + 1);
 
-    var offset = const Offset(10, 10);
-    var padding = const Size(10, 6);
+    const offset = Offset(10, 10);
+    const padding = Size(10, 6);
 
     // Fix the position to full pixels.
     // Which will line this up better with the paragraph

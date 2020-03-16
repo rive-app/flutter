@@ -114,6 +114,9 @@ class AABB {
     return true;
   }
 
+  AABB translate(Vec2D vec) => AABB.fromValues(_buffer[0] + vec[0],
+      _buffer[1] + vec[1], _buffer[2] + vec[0], _buffer[3] + vec[1]);
+
   @override
   String toString() {
     return _buffer.toString();

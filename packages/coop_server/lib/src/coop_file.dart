@@ -5,21 +5,22 @@ import 'package:binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_command.dart';
 import 'package:core/core.dart';
+import 'package:core/coop/protocol_version.dart' show protocolVersion;
 
 import 'entity.dart';
-
-const int _coopFileVersion = 4;
 
 class CoopFile {
   int ownerId;
   int fileId;
   int nextClientId = 1;
-  int serverChangeId;
+  /// Monotonically increasing change id tracked on the server with the coop
+  /// file. Initialize it to the minimum valid value.
+  int serverChangeId = CoopCommand.minChangeId;
 
   Map<Id, CoopFileObject> objects;
 
   bool deserialize(BinaryReader reader) {
-    if (reader.readVarUint() != _coopFileVersion) {
+    if (reader.readVarUint() != protocolVersion) {
       return false;
     }
     nextClientId = reader.readVarUint();
@@ -37,7 +38,7 @@ class CoopFile {
   }
 
   void serialize(BinaryWriter writer) {
-    writer.writeVarUint(_coopFileVersion);
+    writer.writeVarUint(protocolVersion);
     writer.writeVarUint(nextClientId);
     writer.writeVarUint(ownerId);
     writer.writeVarUint(fileId);

@@ -17,8 +17,11 @@ abstract class PopupListItem {
   /// Height for the item in the popup list.
   double get height;
 
-  /// Whether selection of the item will result in dismissing the .
+  /// Whether selection of the item will result in dismissing the popup.
   bool get dismissOnSelect => true;
+
+  /// Whether all items get dismissed when ths one does.
+  bool get dismissAll => true;
 
   /// Child popup displayed when this list item is hovered over.
   List<PopupListItem> get popup;
@@ -207,20 +210,19 @@ class ListPopup<T extends PopupListItem> {
     return true;
   }
 
-  factory ListPopup.show(
-    BuildContext context, {
-    @required ListPopupItemBuilder<T> itemBuilder,
-    double width = 177,
-    double margin = 10,
-    Offset offset = const Offset(0, 10),
-    // Flag to display the small arrow at the top of the popup
-    bool showArrow = true,
-    Alignment alignment = Alignment.bottomLeft,
-    List<T> items = const [],
-    Color background = const Color.fromRGBO(17, 17, 17, 1),
-    ListPopup<T> parent,
-    bool handleKeyPresses = true,
-  }) {
+  factory ListPopup.show(BuildContext context,
+      {@required ListPopupItemBuilder<T> itemBuilder,
+      double width = 177,
+      double margin = 10,
+      Offset offset = const Offset(0, 10),
+      // Flag to display the small arrow at the top of the popup
+      bool showArrow = true,
+      Alignment alignment = Alignment.bottomLeft,
+      List<T> items = const [],
+      Color background = const Color.fromRGBO(17, 17, 17, 1),
+      ListPopup<T> parent,
+      bool handleKeyPresses = true,
+      bool includeCloseGuard = false}) {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final boxOffset = renderBox.localToGlobal(Offset.zero);
@@ -243,6 +245,7 @@ class ListPopup<T extends PopupListItem> {
     list._popup = Popup.show(
       context,
       onClose: list.close,
+      includeCloseGuard: includeCloseGuard,
       builder: (context) {
         return Positioned(
           left: left,
@@ -373,7 +376,11 @@ class __PopupListItemShellState<T extends PopupListItem>
         }
         widget.item.select?.call();
         if (widget.item.dismissOnSelect) {
-          Popup.closeAll();
+          if (widget.item.dismissAll) {
+            Popup.closeAll();
+          } else {
+            widget.listPopup.close();
+          }
         }
       },
       child: MouseRegion(
@@ -462,7 +469,11 @@ class __PopupListItemShellState<T extends PopupListItem>
                 return;
               }
               widget.item.select?.call();
-              Popup.closeAll();
+              if (widget.item.dismissAll) {
+                Popup.closeAll();
+              } else {
+                widget.listPopup.close();
+              }
             } else if (event.physicalKey == PhysicalKeyboardKey.arrowUp) {
               widget.listPopup.focusUp();
             } else if (event.physicalKey == PhysicalKeyboardKey.arrowDown) {

@@ -58,6 +58,17 @@ abstract class Component extends ComponentBase<RiveFile> {
   /// The artboard this component belongs to.
   Artboard get artboard => _artboard;
 
+  // Note that this isn't a setter as we don't want anything externally changing
+  // the artboard.
+  void _changeArtboard(Artboard value) {
+    if (_artboard == value) {
+      return;
+    }
+    _artboard?.removeComponent(this);
+    _artboard = value;
+    _artboard?.addComponent(this);
+  }
+
   /// Called whenever we're resolving the artboard, we piggy back on that
   /// process to visit ancestors in the tree. This is a good opportunity to
   /// check if we have an ancestor of a specific type. For example, a Path needs
@@ -70,11 +81,11 @@ abstract class Component extends ComponentBase<RiveFile> {
     for (Component curr = this; curr != null; curr = curr.parent) {
       visitAncestor(curr);
       if (curr is Artboard) {
-        _artboard = curr;
+        _changeArtboard(curr);
         return true;
       }
     }
-    _artboard = null;
+    _changeArtboard(null);
     return false;
   }
 
@@ -212,6 +223,7 @@ abstract class Component extends ComponentBase<RiveFile> {
     // re-sorted.
     if (artboard != null) {
       context?.markDependencyOrderDirty(artboard);
+      _changeArtboard(null);
     }
   }
 

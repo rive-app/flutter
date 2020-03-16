@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/theme.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/common/rive_text_form_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';

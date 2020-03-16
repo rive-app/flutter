@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:rive_core/drawable.dart';
 import 'package:rive_core/math/vec2d.dart';
 
 import 'component.dart';
@@ -11,6 +14,11 @@ export 'src/generated/artboard_base.dart';
 class Artboard extends ArtboardBase {
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
+  final List<Drawable> _drawables = [];
+  final Set<Component> _components = {};
+
+  void forEachComponent(void Function(Component) callback) =>
+      _components.forEach(callback);
 
   int _dirtDepth = 0;
   int _dirt = 255;
@@ -131,6 +139,34 @@ class Artboard extends ArtboardBase {
   Vec2D renderTranslation(Vec2D worldTranslation) {
     final wt = originWorld;
     return Vec2D.add(Vec2D(), worldTranslation, wt);
+  }
+
+  /// Adds a component to the artboard. Good place for the artboard to check for
+  /// components it'll later need to do stuff with (like draw them or sort them
+  /// when the draw order changes).
+  void addComponent(Component component) {
+    if(!_components.add(component)) {
+      return;
+    }
+    if (component is Drawable) {
+      assert(!_drawables.contains(component));
+      _drawables.add(component);
+    }
+  }
+
+  /// Remove a component from the artboard and its various tracked lists of
+  /// components.
+  void removeComponent(Component component) {
+    if (component is Drawable) {
+      _drawables.remove(component);
+    }
+  }
+
+  /// Paint the drawable components in this artboard.
+  void paint(Canvas canvas) {
+    for (final drawable in _drawables) {
+      drawable.paint(canvas);
+    }
   }
 }
 

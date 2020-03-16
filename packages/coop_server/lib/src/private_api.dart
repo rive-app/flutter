@@ -46,8 +46,7 @@ class PrivateApi {
       final res = await retry(
         () => http.get('$host/coop/register').timeout(timeout),
         retryIf: (e) => e is SocketException || e is TimeoutException,
-        onRetry: (e) =>
-            log.info('Unable to connect to 2D service @ $host due to $e'),
+        onRetry: (e) => log.info('Unable to connect to 2D service @ $host', e),
       );
       if (res.statusCode != 200) {
         // Problem registering coop server; it's now orphaned
@@ -59,7 +58,7 @@ class PrivateApi {
         return false;
       }
     } on Exception catch (e) {
-      log.severe('Error registering co-op server with 2D service: $e');
+      log.severe('Exception registering co-op server with 2D service', e);
       return false;
     }
     return true;

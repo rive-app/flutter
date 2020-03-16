@@ -17,6 +17,12 @@ extension StageItemComponent on Component {
 }
 
 abstract class StageItem<T> extends SelectableItem {
+  static const double strokeWidth = 2;
+  static Paint selectedPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = strokeWidth
+    ..color = const Color(0xFF57A5E0);
+
   T _component;
   T get component => _component;
 
@@ -31,6 +37,10 @@ abstract class StageItem<T> extends SelectableItem {
     _component = component;
     return true;
   }
+
+  /// Perform a higher fidelity check for worldMouse hit. If this object doesn't
+  /// have a narrow-phase hit detection, just return true to use the AABB.
+  bool hitHiFi(Vec2D worldMouse) => true;
 
   /// Override this to temporarily hide items. This shouldn't be used to
   /// permanently hide an item. If an item is no longer necessary it should be

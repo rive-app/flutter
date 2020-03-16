@@ -131,4 +131,7 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
   void stageNeedsAdvance() {
     updatePlayState();
   }
+
+  @override
+  void stageNeedsRedraw() => markNeedsPaint();
 }

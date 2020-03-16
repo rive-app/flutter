@@ -14,4 +14,33 @@ abstract class InspectorBuilder {
 
   /// Gauranteed to be called only when sensible data is available.
   List<WidgetBuilder> expand(InspectionSet inspecting);
+
+  /// Reset any listeners that may have gotten previously subscribed.
+  void clean() {}
 }
+
+
+/// A listening ispector builder which will rebuild when any of the items it's
+/// listening to notify.
+abstract class ListenableInspectorBuilder extends InspectorBuilder
+    with ChangeNotifier {
+  final Set<Listenable> _notifiers = {};
+
+  @override
+  void clean() {
+    for (final notifier in _notifiers) {
+      notifier.removeListener(notifyListeners);
+    }
+    _notifiers.clear();
+  }
+
+  /// Propagate changes from one set of notifiers to this inspector.
+  void changeWhen(Iterable<Listenable> notifiers) {
+    for (final notifier in notifiers) {
+      if (_notifiers.add(notifier)) {
+        notifier.addListener(notifyListeners);
+      }
+    }
+  }
+}
+

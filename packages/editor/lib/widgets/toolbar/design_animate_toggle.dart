@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/theme.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 const kAnimateToggleWidth = 197.0;

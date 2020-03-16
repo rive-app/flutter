@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:rive_core/artboard.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 
 enum EditMode { normal, altMode1, altMode2 }
@@ -13,6 +15,23 @@ abstract class StageTool {
 
   EditMode _editMode;
   EditMode get editMode => _editMode;
+
+  /// Most tools will want their transforms in artboard world space.
+  bool get inArtboardSpace => true;
+
+  /// Gets the correct mouse world space depending on whether this tool operates
+  /// in stage world or artboard world. Because the artboards don't rotate or
+  /// scale (at least not on the stage), this is just a simple translation
+  /// operation.
+  Vec2D mouseWorldSpace(Artboard activeArtboard, Vec2D worldMouse) =>
+      inArtboardSpace
+          ? Vec2D.subtract(Vec2D(), worldMouse, activeArtboard.originWorld)
+          : worldMouse;
+
+Vec2D stageWorldSpace(Artboard activeArtboard, Vec2D worldMouse) =>
+      inArtboardSpace
+          ? Vec2D.add(Vec2D(), worldMouse, activeArtboard.originWorld)
+          : worldMouse;
 
   /// Override this to check if this tool is valid.
   bool activate(Stage stage) {

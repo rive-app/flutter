@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -30,14 +29,6 @@ class RiveCoopServer extends CoopServer {
   /// Pings the 2D service heartbeat endpoint
   @override
   void heartbeat() => PrivateApi().heartbeat();
-
-  @override
-  Future<int> validate(
-      HttpRequest request, int ownerId, int fileId, String token) async {
-    var api = PrivateApi();
-    var validationResult = await api.validate(ownerId, fileId, token);
-    return validationResult?.ownerId;
-  }
 
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
     var process = _CoopIsolate();
@@ -172,13 +163,9 @@ class _CoopIsolate extends CoopIsolateProcess {
 
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
         (data == null || data.isEmpty)) {
-      _nextChangeId = CoopCommand.minChangeId;
-
       file = CoopFile()
         ..ownerId = ownerId
         ..fileId = fileId
-        ..nextClientId = 1
-        ..serverChangeId = _nextChangeId
         ..objects = {};
     } else {
       file = CoopFile();
@@ -194,11 +181,8 @@ class _CoopIsolate extends CoopIsolateProcess {
         file = CoopFile()
           ..ownerId = ownerId
           ..fileId = fileId
-          ..nextClientId = 1
-          ..serverChangeId = _nextChangeId
           ..objects = {};
       }
-
       _nextChangeId = max(file.serverChangeId, CoopCommand.minChangeId) + 1;
     }
     return true;

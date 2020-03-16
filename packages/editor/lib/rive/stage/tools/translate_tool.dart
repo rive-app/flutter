@@ -12,6 +12,11 @@ class TranslateTool extends StageTool with DraggableTool {
     stage.riveFile.captureJournalEntry();
   }
 
+  // We want transforms in stage world space (not artboard space). This may
+  // change later when we introduce transformers.
+  @override
+  bool get inArtboardSpace => false;
+
   @override
   void updateDrag(Vec2D worldMouse) {
     for (final stageItem in selection) {

@@ -6,7 +6,7 @@ import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
-import 'package:rive_editor/rive/theme.dart';
+import 'package:rive_editor/widgets/theme.dart';
 
 import '../stage.dart';
 import '../stage_item.dart';

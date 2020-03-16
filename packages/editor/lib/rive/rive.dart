@@ -139,6 +139,9 @@ class Rive with RiveFileDelegate {
     SchedulerBinding.instance.scheduleFrame();
   }
 
+  @override
+  void markNeedsRedraw() => _stage?.markNeedsRedraw();
+
   Timer _reconnectTimer;
   int _reconnectAttempt = 0;
 
@@ -296,7 +299,7 @@ class Rive with RiveFileDelegate {
             var component = item.component as Component;
             deathRow.add(component);
             // We need to recursively remove children too.
-            if(component is ContainerComponent) {
+            if (component is ContainerComponent) {
               component.applyToChildren((child) => deathRow.add(child));
             }
           }
@@ -379,7 +382,11 @@ class Rive with RiveFileDelegate {
     String filePath = '$ownerId/$fileId/$urlEncodedSpectre';
 
     var opening = RiveFile(filePath, name, api: api);
-    var result = await opening.connect(connectionInfo.socketHost, filePath);
+    var result = await opening.connect(
+      connectionInfo.socketHost,
+      filePath,
+      api.cookies['spectre'],
+    );
     if (result == ConnectResult.connected) {
       print("Connected");
     }
