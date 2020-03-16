@@ -8,13 +8,12 @@ import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/widgets/theme.dart';
-
-enum DraggingMode { symmetric }
 
 const Map<EditMode, DraggingMode> editModeMap = {
   EditMode.altMode1: DraggingMode.symmetric
