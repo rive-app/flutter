@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:cursor/propagating_listener.dart';
 
@@ -12,6 +13,9 @@ class EditorTextField extends StatefulWidget {
   final Color color;
   final Color editingColor;
   final ValueChanged<String> onSubmitted;
+  final bool allowDrag;
+  final void Function(double) drag;
+  final void Function() completeDrag;
 
   const EditorTextField({
     @required this.controller,
@@ -19,6 +23,9 @@ class EditorTextField extends StatefulWidget {
     this.color,
     this.editingColor,
     this.onSubmitted,
+    this.allowDrag = true,
+    this.drag,
+    this.completeDrag,
     Key key,
   }) : super(key: key);
 
@@ -35,8 +42,65 @@ class _EditorTextFieldState extends State<EditorTextField>
 
   @override
   void initState() {
+    widget.focusNode?.addListener(_focusChanged);
     _selectionGestureDetectorBuilder = _EditorFieldGestureBuilder(state: this);
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(EditorTextField oldWidget) {
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode?.removeListener(_focusChanged);
+      widget.focusNode?.addListener(_focusChanged);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode?.removeListener(_focusChanged);
+    super.dispose();
+  }
+
+  void _focusChanged() {
+    if (widget.focusNode.hasFocus) {
+      CursorIcon.reset(context);
+    }
+  }
+
+  bool get _isFocused => widget.focusNode.hasFocus;
+
+  Widget _handleVerticalDrag(Widget child) {
+    var rive = RiveContext.of(context);
+    return _isFocused || !widget.allowDrag
+        ? child
+        : MouseRegion(
+            onEnter: (data) {
+              if (!rive.isDragging) {
+                CursorIcon.show(context, 'cursor-resize-vertical');
+              }
+            },
+            onExit: (data) {
+              CursorIcon.reset(context);
+            },
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragStart: (data) {
+                rive.startDragOperation();
+              },
+              onVerticalDragUpdate: (data) {
+                widget.drag?.call(data.delta.dy);
+              },
+              onVerticalDragEnd: (details) {
+                widget.completeDrag?.call();
+                rive.endDragOperation();
+              },
+              onTapUp: (data) {
+                widget.focusNode.requestFocus();
+              },
+              child: IgnorePointer(child: child),
+            ),
+          );
   }
 
   Widget _listen(Widget child) {
@@ -48,9 +112,13 @@ class _EditorTextFieldState extends State<EditorTextField>
         // the case if we're editing.
         event.stopPropagation();
       },
-      child: _selectionGestureDetectorBuilder.buildGestureDetector(
-        behavior: HitTestBehavior.translucent,
-        child: child,
+      child: _handleVerticalDrag(
+        _selectionGestureDetectorBuilder.buildGestureDetector(
+          behavior: HitTestBehavior.translucent,
+          child: GestureDetector(
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -145,7 +213,6 @@ class _EditorFieldGestureBuilder extends TextSelectionGestureDetectorBuilder {
     // internally, so we're going to mimic that here.
     renderEditable?.onSelectionChanged(
         selection, renderEditable, SelectionChangedCause.drag);
-
 
     // keep focus (not sure if this is necessary)
     _state._requestKeyboard();

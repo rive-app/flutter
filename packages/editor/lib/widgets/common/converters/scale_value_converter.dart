@@ -15,4 +15,7 @@ class ScaleValueConverter extends InputValueConverter<double> {
   String toEditingValue(double value) => editFormatter.format(value);
 
   static final ScaleValueConverter instance = ScaleValueConverter();
+
+  @override
+  double drag(double value, double amount) => value - amount;
 }

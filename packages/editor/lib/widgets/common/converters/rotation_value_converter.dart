@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -16,7 +14,10 @@ class RotationValueConverter extends InputValueConverter<double> {
       displayFormatter.format(degrees(value)) + '°';
 
   @override
-  String toEditingValue(double value) => editFormatter.format(value / pi * 180);
+  String toEditingValue(double value) => editFormatter.format(degrees(value));
 
   static final RotationValueConverter instance = RotationValueConverter();
+
+  @override
+  double drag(double value, double amount) => value - radians(amount);
 }

@@ -15,4 +15,7 @@ class TranslationValueConverter extends InputValueConverter<double> {
   String toEditingValue(double value) => editFormatter.format(value);
 
   static final TranslationValueConverter instance = TranslationValueConverter();
+
+  @override
+  double drag(double value, double amount) => value - amount;
 }
