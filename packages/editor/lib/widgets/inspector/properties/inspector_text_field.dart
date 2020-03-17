@@ -151,6 +151,10 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
         focusNode: _focusNode,
         color: theme.colors.inspectorTextColor,
         editingColor: theme.colors.activeText,
+        allowDrag: widget.converter.allowDrag,
+        drag: (amount) =>
+            widget.change(widget.converter.drag(widget.value, amount)),
+        completeDrag: () => widget.completeChange?.call(),
         onSubmitted: (string) {
           widget.change?.call(widget.converter.fromEditingValue(string));
           widget.completeChange?.call();

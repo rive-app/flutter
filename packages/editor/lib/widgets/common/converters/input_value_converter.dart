@@ -21,6 +21,12 @@ abstract class InputValueConverter<T> {
   /// Convert the user provided string input value to an actual value of the
   /// correct type.
   T fromEditingValue(String value);
+
+  /// Whether this converter can respond to drag events.
+  bool get allowDrag => true;
+
+  /// Mutate the value when amount is dragged.
+  T drag(T value, double amount) => value;
 }
 
 class DoubleFormatter {

@@ -14,4 +14,7 @@ class ZoomInputConverter extends InputValueConverter<double> {
   String toEditingValue(double value) => editFormatter.format(value*100);
 
   static final ZoomInputConverter instance = ZoomInputConverter();
+  
+  @override
+  double drag(double value, double amount) => value - amount;
 }
