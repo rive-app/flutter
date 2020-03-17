@@ -15,11 +15,13 @@ class InspectorPopoutComponent extends StatelessWidget {
   final Iterable<Component> components;
   final int isVisiblePropertyKey;
   final WidgetBuilder prefix;
+  final WidgetBuilder popoutBuilder;
 
   const InspectorPopoutComponent({
     @required this.components,
     this.isVisiblePropertyKey,
     this.prefix,
+    this.popoutBuilder,
     Key key,
   }) : super(key: key);
 
@@ -80,9 +82,9 @@ class InspectorPopoutComponent extends StatelessWidget {
           ),
         ],
       ),
-      popupBuilder: (context) => Container(
-        height: 100,
-        child: const Text('Popup Builder'),
+      popupBuilder: (context) => SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: popoutBuilder(context),
       ),
     );
   }

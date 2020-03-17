@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -47,7 +49,7 @@ class _PopupPositionerDelegate extends SingleChildLayoutDelegate {
     return BoxConstraints(
       maxWidth: width,
       minWidth: width,
-      maxHeight: constraints.maxHeight,
+      maxHeight: constraints.maxHeight - _screenEdgeMargin * 2,
       minHeight: 0,
     );
   }
@@ -60,6 +62,6 @@ class _PopupPositionerDelegate extends SingleChildLayoutDelegate {
       y -= y + childSize.height - size.height + _screenEdgeMargin;
     }
 
-    return Offset(x, y);
+    return Offset(x, max(_screenEdgeMargin, y));
   }
 }

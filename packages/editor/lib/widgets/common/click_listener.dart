@@ -7,12 +7,14 @@ class ClickListener extends StatefulWidget {
   final VoidCallback onDoubleClick;
   final VoidCallback onClick;
   final Widget child;
+  final bool isListening;
 
   const ClickListener({
     Key key,
     this.onDoubleClick,
     this.onClick,
     this.child,
+    this.isListening = true,
   }) : super(key: key);
 
   @override
@@ -24,24 +26,26 @@ class _ClickListenerState extends State<ClickListener> {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerUp: (_) {
-        var time = DateTime.now();
-        if (_firstClickTime != null) {
-          var diff = time.difference(_firstClickTime);
-          _firstClickTime = time;
-          if (diff > kDoubleTapMinTime && diff < kDoubleTapTimeout) {
-            widget.onDoubleClick?.call();
-            return;
-          }
-        } else {
-          _firstClickTime = time;
-        }
+    return widget.isListening
+        ? Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerUp: (_) {
+              var time = DateTime.now();
+              if (_firstClickTime != null) {
+                var diff = time.difference(_firstClickTime);
+                _firstClickTime = time;
+                if (diff > kDoubleTapMinTime && diff < kDoubleTapTimeout) {
+                  widget.onDoubleClick?.call();
+                  return;
+                }
+              } else {
+                _firstClickTime = time;
+              }
 
-        widget.onClick?.call();
-      },
-      child: IgnorePointer(child: widget.child),
-    );
+              widget.onClick?.call();
+            },
+            child: IgnorePointer(child: widget.child),
+          )
+        : widget.child;
   }
 }

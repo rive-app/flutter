@@ -50,7 +50,10 @@ Future<void> main() async {
   );
 
   final iconCache = RiveIconCache(rootBundle);
-  final rive = Rive(iconCache: iconCache);
+  final rive = Rive(
+    iconCache: iconCache,
+    focusNode: FocusNode(canRequestFocus: true, skipTraversal: true),
+  );
 
   if (await rive.initialize() != RiveState.catastrophe) {
     // this is just for the prototype...
@@ -65,7 +68,6 @@ Future<void> main() async {
       RiveEditorApp(
         rive: rive,
         iconCache: iconCache,
-        focusNode: FocusNode(canRequestFocus: true, skipTraversal: true),
       ),
     ),
     onError: (Object error, StackTrace stackTrace) {
@@ -85,13 +87,11 @@ const double resizeEdgeSize = 10;
 class RiveEditorApp extends StatelessWidget {
   final Rive rive;
   final RiveIconCache iconCache;
-  final FocusNode focusNode;
 
   const RiveEditorApp({
     Key key,
     this.rive,
     this.iconCache,
-    this.focusNode,
   }) : super(key: key);
 
   @override
@@ -105,7 +105,7 @@ class RiveEditorApp extends StatelessWidget {
             child: Builder(
               builder: (context) => CursorView(
                 onPointerDown: (details) {
-                  focusNode.requestFocus();
+                  rive.focusNode.requestFocus();
                 },
                 child: MaterialApp(
                   debugShowCheckedModeBanner: false,
@@ -115,36 +115,37 @@ class RiveEditorApp extends StatelessWidget {
                     child: Container(
                       child: Scaffold(
                         body: RawKeyboardListener(
-                            onKey: (event) {
-                              final focusScope = FocusScope.of(context);
-                              var primary = FocusManager.instance.primaryFocus;
-                              rive.onKeyEvent(
-                                  defaultKeyBinding,
-                                  event,
-                                  primary != focusNode &&
-                                      focusScope.nearestScope != primary);
+                          onKey: (event) {
+                            final focusScope = FocusScope.of(context);
+                            var primary = FocusManager.instance.primaryFocus;
+                            rive.onKeyEvent(
+                                defaultKeyBinding,
+                                event,
+                                primary != rive.focusNode &&
+                                    focusScope.nearestScope != primary);
+                          },
+                          child: ValueListenableBuilder<RiveState>(
+                            valueListenable: rive.state,
+                            builder: (context, state, _) {
+                              switch (state) {
+                                case RiveState.login:
+                                  return Login();
+
+                                case RiveState.editor:
+                                  return Editor();
+
+                                case RiveState.disconnected:
+                                  return DisconnectedScreen();
+                                  break;
+
+                                case RiveState.catastrophe:
+                                default:
+                                  return Catastrophe();
+                              }
                             },
-                            child: ValueListenableBuilder<RiveState>(
-                              valueListenable: rive.state,
-                              builder: (context, state, _) {
-                                switch (state) {
-                                  case RiveState.login:
-                                    return Login();
-
-                                  case RiveState.editor:
-                                    return Editor();
-
-                                  case RiveState.disconnected:
-                                    return DisconnectedScreen();
-                                    break;
-
-                                  case RiveState.catastrophe:
-                                  default:
-                                    return Catastrophe();
-                                }
-                              },
-                            ),
-                            focusNode: focusNode),
+                          ),
+                          focusNode: rive.focusNode,
+                        ),
                       ),
                     ),
                   ),
