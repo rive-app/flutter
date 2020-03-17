@@ -2,7 +2,9 @@ import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
+/// Helper to use Rive Icons as cursors on the CursorView.
 class CursorIcon {
+  /// Show a cursor icon.
   static void show(BuildContext context, String icon) {
     Cursor.change(
       context,
@@ -16,9 +18,11 @@ class CursorIcon {
     );
   }
 
+  /// Back to default cursor.
   static void reset(BuildContext context) => Cursor.reset(context);
 }
 
+/// Custom positioner that places the cursor icon centered on its origin.
 class _CursorPositionDelegate extends SingleChildLayoutDelegate {
   const _CursorPositionDelegate();
 
