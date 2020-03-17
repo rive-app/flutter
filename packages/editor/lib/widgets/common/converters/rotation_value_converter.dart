@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:vector_math/vector_math.dart';
 
