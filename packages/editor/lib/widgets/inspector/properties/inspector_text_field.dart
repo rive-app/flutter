@@ -100,7 +100,8 @@ class InspectorTextField<T> extends StatefulWidget {
 class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   final _ConvertingTextEditingController<T> _controller =
       _ConvertingTextEditingController<T>();
-  final FocusNode _focusNode = FocusNode(canRequestFocus: true, skipTraversal: true);
+  final FocusNode _focusNode =
+      FocusNode(canRequestFocus: true, skipTraversal: true);
   bool _hasFocus = false;
 
   @override
