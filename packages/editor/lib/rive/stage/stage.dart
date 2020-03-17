@@ -133,14 +133,14 @@ class Stage extends Debouncer {
   double get zoomLevel => zoomLevelNotifier.value;
   set zoomLevel(double value) {
     if (zoomLevelNotifier.value != value) {
-      zoomTo(_viewportWidth/2, _viewportHeight/2, value);
+      zoomTo(_viewportWidth / 2, _viewportHeight / 2, value);
     }
   }
 
   // Resolution notifier
-  final ValueNotifier<int> resolutionNotifier = ValueNotifier<int>(100);
-  int get resolution => resolutionNotifier.value;
-  set resolution(int value) {
+  final ValueNotifier<double> resolutionNotifier = ValueNotifier<double>(1);
+  double get resolution => resolutionNotifier.value;
+  set resolution(double value) {
     if (resolutionNotifier.value != value) {
       resolutionNotifier.value = value;
       print('Setting resolution to $value');

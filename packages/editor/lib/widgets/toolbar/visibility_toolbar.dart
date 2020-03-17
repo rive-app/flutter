@@ -56,6 +56,7 @@ class VisibilityPopupButton extends StatelessWidget {
                 child: ValueNotifierTextField(
                   key: resKey,
                   notifier: rive.stage.value.resolutionNotifier,
+                  converter: ZoomInputConverter.instance,
                 ),
                 select: () {},
                 dismissOnSelect: false),

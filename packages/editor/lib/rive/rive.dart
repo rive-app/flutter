@@ -80,6 +80,11 @@ class Rive with RiveFileDelegate {
   final ValueNotifier<SelectionMode> selectionMode =
       ValueNotifier<SelectionMode>(SelectionMode.single);
   final ValueNotifier<bool> isAnimateMode = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isDragOperationActive = ValueNotifier<bool>(false);
+
+  bool get isDragging => isDragOperationActive.value;
+  void startDragOperation() => isDragOperationActive.value = true;
+  void endDragOperation() => isDragOperationActive.value = false;
 
   final FileBrowser fileBrowser = FileBrowser();
   final _user = ValueNotifier<RiveUser>(null);

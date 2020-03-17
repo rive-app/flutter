@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 import 'common/cursor_icon.dart';
 import 'ignore_mouse.dart';
@@ -61,6 +62,9 @@ class _ResizePanelState extends State<ResizePanel> {
   /// When we show the resize cursor, we also create an overlay that allows us
   /// to detect drag operations on the edge of resize panel.
   void _showResizeCursor(BuildContext context, Duration delay) {
+    if (RiveContext.of(context).isDragging) {
+      return;
+    }
     if (_resizeOverlay != null) {
       return;
     }

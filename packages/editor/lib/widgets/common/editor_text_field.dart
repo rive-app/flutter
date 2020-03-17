@@ -71,21 +71,30 @@ class _EditorTextFieldState extends State<EditorTextField>
   bool get _isFocused => widget.focusNode.hasFocus;
 
   Widget _handleVerticalDrag(Widget child) {
+    var rive = RiveContext.of(context);
     return _isFocused || !widget.allowDrag
         ? child
         : MouseRegion(
             onEnter: (data) {
-              CursorIcon.show(context, 'cursor-resize-vertical');
+              if (!rive.isDragging) {
+                CursorIcon.show(context, 'cursor-resize-vertical');
+              }
             },
             onExit: (data) {
               CursorIcon.reset(context);
             },
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
+              onVerticalDragStart: (data) {
+                rive.startDragOperation();
+              },
               onVerticalDragUpdate: (data) {
                 widget.drag?.call(data.delta.dy);
               },
-              onVerticalDragEnd: (details) => widget.completeDrag?.call(),
+              onVerticalDragEnd: (details) {
+                widget.completeDrag?.call();
+                rive.endDragOperation();
+              },
               onTapUp: (data) {
                 widget.focusNode.requestFocus();
               },

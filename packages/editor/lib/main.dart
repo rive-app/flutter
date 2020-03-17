@@ -479,12 +479,14 @@ class StagePanel extends StatelessWidget {
                               context.findRenderObject() as RenderBox;
                           var local = getBox.globalToLocal(details.position);
                           stage.mouseDown(details.buttons, local.dx, local.dy);
+                          rive.startDragOperation();
                         },
                         onPointerUp: (details) {
                           RenderBox getBox =
                               context.findRenderObject() as RenderBox;
                           var local = getBox.globalToLocal(details.position);
                           stage.mouseUp(details.buttons, local.dx, local.dy);
+                          rive.endDragOperation();
                         },
                         onPointerMove: (details) {
                           RenderBox getBox =
