@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_editor/constants.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,7 +36,6 @@ import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/node_tool.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
-import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';

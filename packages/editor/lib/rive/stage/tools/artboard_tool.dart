@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 
@@ -40,10 +41,29 @@ class ArtboardTool extends StageTool with DraggableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
-    _artboard.x = min(_startWorldMouse[0], worldMouse[0]);
-    _artboard.y = min(_startWorldMouse[1], worldMouse[1]);
-    _artboard.width = (_startWorldMouse[0] - worldMouse[0]).abs();
-    _artboard.height = (_startWorldMouse[1] - worldMouse[1]).abs();
+    switch (editModeMap[editMode]) {
+      case DraggingMode.symmetric:
+        final maxChange = max(
+          (_startWorldMouse[0] - worldMouse[0]).abs(),
+          (_startWorldMouse[1] - worldMouse[1]).abs(),
+        );
+        var x1 = (_startWorldMouse[0] < worldMouse[0])
+            ? _startWorldMouse[0]
+            : _startWorldMouse[0] - maxChange;
+        var y1 = (_startWorldMouse[1] < worldMouse[1])
+            ? _startWorldMouse[1]
+            : _startWorldMouse[1] - maxChange;
+        _artboard.x = x1;
+        _artboard.y = y1;
+        _artboard.width = maxChange;
+        _artboard.height = maxChange;
+        break;
+      default:
+        _artboard.x = min(_startWorldMouse[0], worldMouse[0]);
+        _artboard.y = min(_startWorldMouse[1], worldMouse[1]);
+        _artboard.width = (_startWorldMouse[0] - worldMouse[0]).abs();
+        _artboard.height = (_startWorldMouse[1] - worldMouse[1]).abs();
+    }
   }
 
   @override
@@ -51,6 +71,14 @@ class ArtboardTool extends StageTool with DraggableTool {
 
   @override
   String get icon => 'tool-artboard';
+
+  @override
+  void onEditModeChange() {
+    // if the edit mode is changed lets just treat it as a fake drag.
+    if (lastWorldMouse != null) {
+      updateDrag(lastWorldMouse);
+    }
+  }
 
   static final ArtboardTool instance = ArtboardTool();
 }

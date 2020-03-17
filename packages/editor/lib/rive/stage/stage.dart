@@ -16,23 +16,23 @@ import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
+import 'package:rive_editor/constants.dart';
+import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/stage/aabb_tree.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
+import 'package:rive_editor/rive/stage/items/stage_ellipse.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
+import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
+import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
-
-import '../rive.dart';
-import 'aabb_tree.dart';
-import 'items/stage_ellipse.dart';
-import 'items/stage_rectangle.dart';
-import 'items/stage_shape.dart';
-import 'items/stage_triangle.dart';
-import 'stage_item.dart';
-import 'tools/stage_tool.dart';
+import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 
 enum AxisCheckState { local, parent, world }
 
