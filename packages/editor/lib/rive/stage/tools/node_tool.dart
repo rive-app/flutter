@@ -4,7 +4,6 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 

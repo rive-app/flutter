@@ -309,7 +309,7 @@ class Stage extends Debouncer {
     switch (button) {
       case 1:
         if (tool is ClickableTool) {
-          var artboard = activeArtboard;
+          final artboard = activeArtboard;
           (tool as ClickableTool)
               .onClick(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
         } else {

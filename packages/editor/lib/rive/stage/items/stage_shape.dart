@@ -18,7 +18,7 @@ class StageShape extends StageContourItem<Shape> {
   /// Do a high fidelity hover hit check against the actual path geometry.
   @override
   bool hitHiFi(Vec2D worldMouse) {
-    var origin = component.artboard.originWorld;
+    final origin = component.artboard.originWorld;
     return component.pathComposer.uiPath
         .contains(Offset(worldMouse[0] - origin[0], worldMouse[1] - origin[1]));
   }
@@ -33,7 +33,7 @@ class StageShape extends StageContourItem<Shape> {
     // to the drawable shape component. The only painting the StageShape will do
     // is when the item is selected.
     canvas.save();
-    var origin = component.artboard.originWorld;
+    final origin = component.artboard.originWorld;
     canvas.translate(origin[0], origin[1]);
     canvas.drawPath(component.pathComposer.uiPath, StageItem.selectedPaint);
     canvas.restore();

@@ -13,6 +13,7 @@ mixin MoveableTool {
   void updateMove(Vec2D worldMouse) {
     _mousePosition = worldMouse;
   }
+
   void onExit() {
     _mousePosition = null;
   }
