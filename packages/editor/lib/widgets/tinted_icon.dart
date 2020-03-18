@@ -83,8 +83,8 @@ class _TintedIconRendererObject extends RenderBox {
       return;
     }
     _color = value;
-    // Don't use a filter if the color is white.
-    _paint.colorFilter = value == const Color(0xFFFFFFFF)
+    // Don't use a filter if the color is black.
+    _paint.colorFilter = value == const Color(0xFF000000)
         ? null
         : ColorFilter.mode(value, BlendMode.srcIn);
     markNeedsPaint();
