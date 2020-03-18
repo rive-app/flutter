@@ -1,0 +1,3 @@
+mixin TransformDelegate {
+  void transformChanged();
+}

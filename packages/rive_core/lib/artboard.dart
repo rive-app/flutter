@@ -10,25 +10,26 @@ import 'src/generated/artboard_base.dart';
 
 export 'src/generated/artboard_base.dart';
 
+abstract class ArtboardDelegate {
+  void markBoundsDirty();
+}
 class Artboard extends ArtboardBase {
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
   final List<Drawable> _drawables = [];
   final Set<Component> _components = {};
+  int _dirtDepth = 0;
+  int _dirt = 255;
 
   void forEachComponent(void Function(Component) callback) =>
       _components.forEach(callback);
-
-  int _dirtDepth = 0;
-  int _dirt = 255;
 
   @override
   Artboard get artboard => this;
 
   Vec2D get originWorld {
-    // TODO: use originX & originY when it is hooked up.
-    // return Vec2D.fromValues(x + width * originX, y + height + originY);
-    return Vec2D.fromValues(x, y);
+    return Vec2D.fromValues(
+        x + width * (originX ?? 0), y + height * (originY ?? 0));
   }
 
   /// Update any dirty components in this artboard.
@@ -165,8 +166,4 @@ class Artboard extends ArtboardBase {
       drawable.paint(canvas);
     }
   }
-}
-
-abstract class ArtboardDelegate {
-  void markBoundsDirty();
 }

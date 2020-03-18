@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:rive_core/artboard.dart';
-import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/points_path.dart';
@@ -31,11 +30,6 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   String get icon => 'tool-pen';
 
   @override
-  void endDrag() {
-    // TODO: implement mirrored vertex here.
-  }
-
-  @override
   bool activate(Stage stage) {
     super.activate(stage);
     // Reset the current selection.
@@ -46,14 +40,9 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
 
   @override
   void paint(Canvas canvas) {
-    _paintMouse(canvas);
-    // _paintVertices(canvas);
-    // _paintEdges(canvas);
-  }
-
-  void _paintMouse(Canvas canvas) {
+    // Paint dot under the mouse cursor.
     if (mousePosition != null) {
-      var mp = Vec2D();
+      final mp = Vec2D();
       Vec2D.transformMat2D(mp, mousePosition, stage.viewTransform);
       _paintVertex(canvas, mp);
     }
@@ -68,65 +57,23 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
         Paint()..color = const Color(0xFFFFFFFF));
   }
 
-  void _paintVertices(Canvas canvas) {
-    if (_path != null) {
-      final transform = Mat2D();
-      Mat2D.multiply(transform, stage.viewTransform, _path.pathTransform);
-      final pos = Vec2D();
-      for (final vertex in _path.vertices) {
-        Vec2D.transformMat2D(pos, vertex.translation, transform);
-        _paintVertex(canvas, pos);
-      }
-    }
-  }
-
-  void _paintEdges(Canvas canvas) {
-    if (_shape != null && _shape.pathComposer != null) {
-      final uiPath = _shape.pathComposer.uiPath;
-      canvas.save();
-      canvas.transform(stage.viewTransform.mat4);
-      // Once for the background.
-      canvas.drawPath(
-          uiPath,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 3
-            ..color = const Color(0x19000000));
-      // Once for the actual stroke.
-      canvas.drawPath(
-          uiPath,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1
-            ..color = const Color(0xFFFFFFFF));
-    }
-    canvas.restore();
-  }
-
-  @override
-  void updateDrag(Vec2D worldMouse) {
-    // TODO: implement mirrored vertex here.
-  }
-
   @override
   void onClick(Artboard activeArtboard, Vec2D worldMouse) {
     final rive = stage.rive;
     _modifyPath(activeArtboard, worldMouse, rive);
   }
 
-  void _modifyPath(Artboard activeArtboard, Vec2D vertexPos, Rive rive) {
-    var file = rive.file.value;
+  void _modifyPath(Artboard activeArtboard, Vec2D worldMouse, Rive rive) {
+    final file = rive.file.value;
     // Get the shape in which to the path lives
-    _selectShape(activeArtboard, rive, vertexPos);
-    // Determine the coordinates to create a vertex based on the shape's
-    // position in world space
-    final localCoord = _coordinateMapper(_shape, vertexPos);
+    _selectShape(activeArtboard, rive, worldMouse);
+
     // Create a new path if one isn't already being built
     if (_path == null) {
       _path = PointsPath()
         ..name = 'Pen Path'
-        ..x = localCoord[0]
-        ..y = localCoord[1]
+        ..x = worldMouse[0]
+        ..y = worldMouse[1]
         ..rotation = 0
         ..scaleX = 1
         ..scaleY = 1
@@ -141,8 +88,8 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
     }
     final v = StraightVertex()
       ..name = 'Pen Vertex'
-      ..x = localCoord[0]
-      ..y = localCoord[1];
+      ..x = worldMouse[0]
+      ..y = worldMouse[1];
     file.batchAdd(() {
       file.add(v);
       _path.addVertex(v);
@@ -180,9 +127,9 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
       ..scaleX = 1
       ..scaleY = 1
       ..opacity = 1;
-    var composer = PathComposer();
+    final composer = PathComposer();
     // Add shape to the file; its stage equivalent is also created
-    var file = rive.file.value;
+    final file = rive.file.value;
     file.batchAdd(() {
       file.add(_shape);
       file.add(composer);
@@ -190,13 +137,5 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
       // Add shape to the artboard
       activeArtboard.appendChild(_shape);
     });
-  }
-
-  /// TODO: needs to take into account rotation, scale, etc; use matrix math
-  Vec2D _coordinateMapper(Shape shape, Vec2D worldSpaceCoord) {
-    // Do funky matrix math
-    final x = worldSpaceCoord[0] - shape.x;
-    final y = worldSpaceCoord[1] - shape.y;
-    return Vec2D.fromValues(x, y);
   }
 }
