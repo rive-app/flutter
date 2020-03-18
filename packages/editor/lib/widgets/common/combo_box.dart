@@ -57,7 +57,7 @@ class ComboBox<T> extends StatefulWidget {
   final Color valueColor;
   final ComboSizing sizing;
   final double popupWidth;
-  final ChooseOption<T> chooseOption;
+  final ChooseOption<T> change;
   final OptionToLabel<T> toLabel;
   final bool typeahead;
 
@@ -73,7 +73,7 @@ class ComboBox<T> extends StatefulWidget {
     this.valueColor = Colors.white,
     this.sizing = ComboSizing.expanded,
     this.popupWidth,
-    this.chooseOption,
+    this.change,
     this.toLabel,
     this.typeahead = false,
   }) : super(key: key);
@@ -203,7 +203,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
               focusNode: _focusNode,
               onChanged: _textInputChanged,
               onSubmitted: (text) {
-                widget.chooseOption(_popup.focus.option);
+                widget.change(_popup.focus.option);
               },
               style: theme.textStyles.basic.copyWith(color: widget.valueColor),
               textAlignVertical: TextAlignVertical.top,
@@ -266,7 +266,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     // Wrap our items in PopupListItem.
 
     var values = list
-        .map((option) => _ComboOption(option, widget.chooseOption))
+        .map((option) => _ComboOption(option, widget.change))
         .toList(growable: false);
     _popup.values.value = values;
     if (values.isNotEmpty) {
@@ -307,7 +307,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
 
           // Wrap our items in PopupListItem.
           var items = widget.options
-              .map((option) => _ComboOption(option, widget.chooseOption))
+              .map((option) => _ComboOption(option, widget.change))
               .toList(growable: false);
 
           setState(() {

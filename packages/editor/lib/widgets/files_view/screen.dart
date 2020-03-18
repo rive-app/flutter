@@ -557,7 +557,7 @@ class TitleSection extends StatelessWidget {
                   options: options,
                   value: sortOption,
                   toLabel: (option) => option.name,
-                  chooseOption: (option) =>
+                  change: (option) =>
                       fileBrowser.loadFileList(sortOption: option),
                 ),
               ),

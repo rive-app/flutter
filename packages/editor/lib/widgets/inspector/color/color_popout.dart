@@ -44,7 +44,7 @@ class ColorPopout extends StatelessWidget {
                   }
                   return '';
                 },
-                chooseOption: (ColorType type) {},
+                change: (ColorType type) {},
               ),
             ),
           ],

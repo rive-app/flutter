@@ -83,10 +83,9 @@ class _TintedIconRendererObject extends RenderBox {
       return;
     }
     _color = value;
-    // Don't use a filter if the color is white.
-    _paint.colorFilter = value == const Color(0xFFFFFFFF)
-        ? null
-        : ColorFilter.mode(value, BlendMode.srcIn);
+    // Don't use a filter if the color is intentionally null.
+    _paint.colorFilter =
+        value == null ? null : ColorFilter.mode(value, BlendMode.srcIn);
     markNeedsPaint();
   }
 

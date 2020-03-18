@@ -12,7 +12,8 @@ class CursorIcon {
         delegate: const _CursorPositionDelegate(),
         child: TintedIcon(
           icon: icon,
-          color: Colors.white,
+          // intentionally null so that the icon is 'au naturel'
+          color: null,
         ),
       ),
     );
