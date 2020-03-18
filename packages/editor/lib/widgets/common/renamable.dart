@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/common/editor_text_field.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 typedef RenameCallback = void Function(String);
 
@@ -90,6 +91,11 @@ class _RenamableState extends State<Renamable> {
                   editingColor: widget.editingColor,
                   onSubmitted: (text) {
                     widget.onRename?.call(text);
+
+                    // Force focus back to the main context so that we can
+                    // immediately undo this change if we want to by hitting
+                    // ctrl/comamnd z.
+                    RiveContext.of(context).focus();
                   },
                 ),
               )

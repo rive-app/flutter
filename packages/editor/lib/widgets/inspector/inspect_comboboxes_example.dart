@@ -86,7 +86,7 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
               typeahead: true,
               options: KILLME_ComboExamples.busters,
               value: _buster1,
-              chooseOption: (String buster) {
+              change: (String buster) {
                 setState(() {
                   _buster1 = buster;
                 });
@@ -120,7 +120,7 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
               sizing: ComboSizing.expanded,
               options: KILLME_ComboExamples.busters,
               value: _buster2,
-              chooseOption: (String buster) {
+              change: (String buster) {
                 setState(() {
                   _buster2 = buster;
                 });
@@ -153,7 +153,7 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
             ComboBox(
               sizing: ComboSizing.expanded,
               options: _FakeBlendModes.values,
-              chooseOption: (_FakeBlendModes blendMode) {
+              change: (_FakeBlendModes blendMode) {
                 setState(() {
                   _blendMode = blendMode;
                 });
