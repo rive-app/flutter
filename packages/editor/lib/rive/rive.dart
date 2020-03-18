@@ -81,11 +81,16 @@ class Rive with RiveFileDelegate {
   final ValueNotifier<SelectionMode> selectionMode =
       ValueNotifier<SelectionMode>(SelectionMode.single);
   final ValueNotifier<bool> isAnimateMode = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isDragOperationActive = ValueNotifier<bool>(false);
+
+  bool get isDragging => isDragOperationActive.value;
+  void startDragOperation() => isDragOperationActive.value = true;
+  void endDragOperation() => isDragOperationActive.value = false;
 
   final FileBrowser fileBrowser = FileBrowser();
   final _user = ValueNotifier<RiveUser>(null);
 
-  Rive({this.iconCache});
+  Rive({this.iconCache, this.focusNode});
   ValueListenable<RiveUser> get user => _user;
 
   final ValueNotifier<List<RiveTabItem>> tabs =
@@ -95,7 +100,10 @@ class Rive with RiveFileDelegate {
 
   final RiveApi api = RiveApi();
   final RiveIconCache iconCache;
+  final FocusNode focusNode;
   SharedPreferences _prefs;
+
+  void focus() => focusNode.requestFocus();
 
   Stage _stage;
   // Stage get stage => _stage;

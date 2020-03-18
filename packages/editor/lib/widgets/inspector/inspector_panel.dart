@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+
+import 'package:cursor/propagating_listener.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:rive_core/selectable_item.dart';
@@ -20,6 +24,8 @@ class InspectorPanel extends StatefulWidget {
 }
 
 class _InspectorPanelState extends State<InspectorPanel> {
+  final _scrollController = ScrollController();
+
   // Ugh. We could call setState, with no changes too...
   void rebuild() => (context as Element).markNeedsBuild();
 
@@ -62,7 +68,7 @@ class _InspectorPanelState extends State<InspectorPanel> {
               i < builderCount;
               i++) {
             var builder = inspectorBuilders[i];
-            
+
             builder.clean();
 
             // Is the builder interested in the current inspection set?
@@ -95,10 +101,27 @@ class _InspectorPanelState extends State<InspectorPanel> {
             // items. This is why group expansion works by adding more items to
             // the ListView instead of just creating one large item in the
             // ListView.
-            return Scrollbar(
-              child: ListView.builder(
-                itemBuilder: (context, index) => builders[index](context),
-                itemCount: builders.length,
+            return PropagatingListener(
+              behavior: HitTestBehavior.translucent,
+              onPointerSignal: (data) {
+                var event = data.pointerEvent as PointerScrollEvent;
+                double delta = event.scrollDelta.dy;
+                var position = _scrollController.position;
+                var newPosition = math.min(
+                    math.max(position.pixels + delta, position.minScrollExtent),
+                    position.maxScrollExtent);
+
+                print("NEW $newPosition");
+                _scrollController.jumpTo(newPosition);
+              },
+              child: Scrollbar(
+                controller: _scrollController,
+                child: ListView.builder(
+                  controller: _scrollController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) => builders[index](context),
+                  itemCount: builders.length,
+                ),
               ),
             );
           } else {

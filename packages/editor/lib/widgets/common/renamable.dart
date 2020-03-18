@@ -1,7 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'click_listener.dart';
+import 'package:rive_editor/widgets/common/click_listener.dart';
+import 'package:rive_editor/widgets/common/editor_text_field.dart';
 
 typedef RenameCallback = void Function(String);
 
@@ -55,8 +57,9 @@ class _RenamableState extends State<Renamable> {
   @override
   Widget build(BuildContext context) {
     return ClickListener(
+      isListening: !_isEditing,
       onDoubleClick: () {
-        if(widget.onRename == null ) {
+        if (widget.onRename == null) {
           // If the rename function isn't handled, don't start editing.
           return;
         }
@@ -68,42 +71,26 @@ class _RenamableState extends State<Renamable> {
       },
       child: Align(
         alignment: const Alignment(-1, 0),
-        // color:Colors.green,
         child: _isEditing
             ? RawKeyboardListener(
                 focusNode: FocusNode(),
                 onKey: (event) {
-                  // Seems like the TextField doesn't internally lose focus when
-                  // esc is pressed, so we handle this manually here.
+                  // Seems like the EditableText doesn't internally lose focus
+                  // when esc is pressed, so we handle this manually here.
                   if (event.physicalKey == PhysicalKeyboardKey.escape) {
                     setState(() {
                       _isEditing = false;
                     });
                   }
                 },
-                child: TextField(
+                child: EditorTextField(
                   controller: _controller,
                   focusNode: _focusNode,
+                  color: widget.color,
+                  editingColor: widget.editingColor,
                   onSubmitted: (text) {
                     widget.onRename?.call(text);
                   },
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: widget.editingColor ?? widget.color,
-                  ),
-                  textAlignVertical: TextAlignVertical.top,
-                  textAlign: TextAlign.left,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    border: InputBorder.none,
-                    filled: false,
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
                 ),
               )
             : Text(

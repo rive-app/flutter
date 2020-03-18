@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -135,8 +136,8 @@ class Cursor extends ChangeNotifier {
 
 class CursorView extends StatefulWidget {
   final Widget child;
-  final PointerDownEventListener onPointerDown;
-  final PointerUpEventListener onPointerUp;
+  final PropagatingPointerDownEventListener onPointerDown;
+  final PropagatingPointerUpEventListener onPointerUp;
 
   const CursorView({
     Key key,
@@ -151,7 +152,8 @@ class CursorView extends StatefulWidget {
 
 class _CursorViewState extends State<CursorView> {
   Offset _position = Offset.zero;
-  Cursor _cursor = Cursor();
+  final Cursor _cursor = Cursor();
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<Cursor>.value(
@@ -163,37 +165,39 @@ class _CursorViewState extends State<CursorView> {
             _position = details.position;
           });
         },
-        child: Listener(
-          behavior: HitTestBehavior.deferToChild,
-          onPointerMove: (details) {
-            setState(() {
-              // print("POS $_position");
-              _position = details.position;
-            });
-          },
-          onPointerDown: widget.onPointerDown,
-          onPointerUp: widget.onPointerUp,
-          child: Stack(
-            textDirection: TextDirection.ltr,
-            children: [
-              Positioned.fill(
-                child: widget.child,
-              ),
-              Consumer<Cursor>(
-                builder: (context, state, widget) {
-                  var child = state?._builder?.call(context);
-                  if (child != null) {
-                    return Positioned(
-                      left: _position.dx,
-                      top: _position.dy,
-                      child: IgnorePointer(child: child),
-                    );
-                  } else {
-                    return nullCursor;
-                  }
-                },
-              ),
-            ].where((item) => item != nullCursor).toList(growable: false),
+        child: PropagatingListenerRoot(
+          child: PropagatingListener(
+            behavior: HitTestBehavior.deferToChild,
+            onPointerMove: (details) {
+              setState(() {
+                // print("POS $_position");
+                _position = details.pointerEvent.position;
+              });
+            },
+            onPointerDown: widget.onPointerDown,
+            onPointerUp: widget.onPointerUp,
+            child: Stack(
+              textDirection: TextDirection.ltr,
+              children: [
+                Positioned.fill(
+                  child: widget.child,
+                ),
+                Consumer<Cursor>(
+                  builder: (context, state, widget) {
+                    var child = state?._builder?.call(context);
+                    if (child != null) {
+                      return Positioned(
+                        left: _position.dx,
+                        top: _position.dy,
+                        child: IgnorePointer(child: child),
+                      );
+                    } else {
+                      return nullCursor;
+                    }
+                  },
+                ),
+              ].where((item) => item != nullCursor).toList(growable: false),
+            ),
           ),
         ),
       ),

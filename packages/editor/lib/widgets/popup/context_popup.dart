@@ -34,10 +34,10 @@ class PopupContextItem extends PopupListItem {
   /// shortcut.
   final ShortcutAction shortcut;
 
-  /// TODO: implement this. Builder to build a special control widget (like the
-  /// TextField for the file name in the hamburger menu). Currenlty not
-  /// implemented!
-  final WidgetBuilder widgetBuilder;
+  /// Special widget (like the TextField for the file name in the hamburger
+  /// menu).
+  @override
+  final Widget child;
 
   /// When set to true this will add padding when no icons option is selected.
   final bool padIcon;
@@ -59,7 +59,7 @@ class PopupContextItem extends PopupListItem {
       this.iconColor,
       this.iconBuilder,
       this.shortcut,
-      this.widgetBuilder,
+      this.child,
       this.popup,
       this.select,
       this.rebuildItem,
@@ -79,7 +79,7 @@ class PopupContextItem extends PopupListItem {
         iconColorBuilder = null,
         name = null,
         shortcut = null,
-        widgetBuilder = null,
+        child = null,
         popup = null,
         select = null,
         rebuildItem = null,
@@ -140,8 +140,8 @@ class PopupContextItem extends PopupListItem {
               "",
           style: RiveTheme.of(context).textStyles.popupShortcutText,
         ),
-      if (widgetBuilder != null) ...[
-        widgetBuilder(context),
+      if (child != null) ...[
+        child,
       ],
       if (popup != null && popup.isNotEmpty)
         ColorFiltered(

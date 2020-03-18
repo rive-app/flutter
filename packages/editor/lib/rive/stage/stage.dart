@@ -127,19 +127,18 @@ class Stage extends Debouncer {
   }
 
   // Zoom level notifier
-  final ValueNotifier<int> zoomLevelNotifier = ValueNotifier<int>(100);
-  int get zoomLevel => zoomLevelNotifier.value;
-  set zoomLevel(int value) {
+  final ValueNotifier<double> zoomLevelNotifier = ValueNotifier<double>(1);
+  double get zoomLevel => zoomLevelNotifier.value;
+  set zoomLevel(double value) {
     if (zoomLevelNotifier.value != value) {
-      zoomLevelNotifier.value = value;
-      print('Setting zoom level to $value');
+      zoomTo(_viewportWidth / 2, _viewportHeight / 2, value);
     }
   }
 
   // Resolution notifier
-  final ValueNotifier<int> resolutionNotifier = ValueNotifier<int>(100);
-  int get resolution => resolutionNotifier.value;
-  set resolution(int value) {
+  final ValueNotifier<double> resolutionNotifier = ValueNotifier<double>(1);
+  double get resolution => resolutionNotifier.value;
+  set resolution(double value) {
     if (resolutionNotifier.value != value) {
       resolutionNotifier.value = value;
       print('Setting resolution to $value');
@@ -235,6 +234,7 @@ class Stage extends Debouncer {
     double zoom = scale.clamp(_minZoom, _maxZoom).toDouble();
     double zoomDelta = zoom / _viewZoomTarget;
     _viewZoomTarget = zoom;
+    zoomLevelNotifier.value = zoom;
 
     double ox = x - _viewTranslationTarget[0];
     double oy = y - _viewTranslationTarget[1];

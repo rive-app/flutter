@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
+import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'package:rive_editor/widgets/common/rive_text_form_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/modal_popup.dart';
@@ -36,17 +37,15 @@ class _HamburgerPopupButtonState extends State<HamburgerPopupButton> {
       width: 267,
       contextItems: [
         PopupContextItem("File Name",
-            widgetBuilder: (context) => Container(
-                  width: 125,
-                  child: Center(
-                    child: RiveTextFormField(
-                      focusNode: _focusNode,
-                      initialValue: RiveContext.of(context).file.value.name,
-                      hintText: 'File Name',
-                      edgeInsets: const EdgeInsets.symmetric(vertical: 5),
-                    ),
-                  ),
+            child: Container(
+              width: 125,
+              child: Center(
+                child: InspectorTextField(
+                  value: RiveContext.of(context).file.value.name,
+                  converter: StringValueConverter.instance,
                 ),
+              ),
+            ),
             select: () {},
             dismissOnSelect: false),
         PopupContextItem(
