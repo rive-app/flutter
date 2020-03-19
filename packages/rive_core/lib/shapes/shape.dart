@@ -89,6 +89,15 @@ class Shape extends ShapeBase {
     return paths.remove(path);
   }
 
+  @override
+  void transformAffectsStrokeChanged(bool from, bool to) {
+    super.transformAffectsStrokeChanged(from, to);
+    // TODO: when we have strokes, we need to tell them their LinearGradients
+    // that they paint in world space via LinearGradient.paintsInWorldSpace. We
+    // also need to re-evaluate this based on the answer to:
+    // https://2dimensions.slack.com/archives/CHTMQJAJZ/p1584584763000700
+  }
+
   /// Compute the bounds of this shape in the requested [space].
   Rect computeBounds(TransformSpace space) {
     switch (space) {

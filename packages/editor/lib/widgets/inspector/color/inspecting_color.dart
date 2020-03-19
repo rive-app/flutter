@@ -39,6 +39,9 @@ class InspectingColor {
 
   Iterable<ShapePaint> shapePaints;
   InspectingColor(this.shapePaints) {
+    for (final paint in shapePaints) {
+      paint.paintMutatorChanged.addListener(_mutatorChanged);
+    }
     _updatePaints();
   }
 
@@ -152,7 +155,21 @@ class InspectingColor {
     context?.captureJournalEntry();
   }
 
-  void dispose() {}
+  void dispose() {
+    for (final paint in shapePaints) {
+      paint.paintMutatorChanged.removeListener(_mutatorChanged);
+    }
+    _clearListeners();
+  }
+
+  void _clearListeners() {
+    // clear out old listeners
+    _listeningTo.forEach((component, value) {
+      for (final propertyKey in value) {
+        component.removeListener(propertyKey, _valueChanged);
+      }
+    });
+  }
 
   void _changeSolidColor(Color color) {
     _suppressUpdating = true;
@@ -226,12 +243,7 @@ class InspectingColor {
     var colorType = _determineColorType();
     var relisten = type.value != colorType || forceRelisten;
     if (relisten) {
-      // clear out old listeners
-      _listeningTo.forEach((component, value) {
-        for (final propertyKey in value) {
-          component.removeListener(propertyKey, _valueChanged);
-        }
-      });
+      _clearListeners();
     }
 
     var first = shapePaints.first.paintMutator;
@@ -259,7 +271,6 @@ class InspectingColor {
         }
         break;
       case ColorType.linear:
-        break;
       case ColorType.radial:
         break;
     }
@@ -267,6 +278,13 @@ class InspectingColor {
   }
 
   void _valueChanged(dynamic from, dynamic to) {
+    if (_suppressUpdating) {
+      return;
+    }
+    debounce(_updatePaints);
+  }
+
+  void _mutatorChanged() {
     if (_suppressUpdating) {
       return;
     }

@@ -5,9 +5,8 @@ export 'package:rive_core/src/generated/shapes/paint/fill_base.dart';
 
 /// A fill Shape painter.
 class Fill extends FillBase {
-  Fill() {
-    paint.style = PaintingStyle.fill;
-  }
+  @override
+  Paint makePaint() => Paint()..style = PaintingStyle.fill;
 
   PathFillType get fillType => PathFillType.values[fillRule];
   set fillType(PathFillType type) => fillRule = type.index;

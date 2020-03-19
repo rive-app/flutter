@@ -7,6 +7,7 @@ import 'package:rive_core/event.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
+import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/shapes/paint/linear_gradient_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/linear_gradient_base.dart';
 
@@ -22,8 +23,15 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   /// Event triggered whenever a stops property changes.
   final Event stopsChanged = Event();
 
-  static const int _worldSpace = 1 << 0;
-  static const int _shapeSpace = 1 << 1;
+  bool _paintsInWorldSpace = true;
+  bool get paintsInWorldSpace => _paintsInWorldSpace;
+  set paintsInWorldSpace(bool value) {
+    if (_paintsInWorldSpace == value) {
+      return;
+    }
+    _paintsInWorldSpace = value;
+    addDirt(ComponentDirt.gradient);
+  }
 
   Vec2D get start => Vec2D.fromValues(startX, startY);
   Vec2D get end => Vec2D.fromValues(endX, endY);
@@ -31,44 +39,11 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   ui.Offset get startOffset => ui.Offset(startX, startY);
   ui.Offset get endOffset => ui.Offset(endX, endY);
 
-  /// Tracks the spaces this gradient paints in. Because Shapes can have
-  /// multiple paints and paint options, the gradient may need to paint in
-  /// multiple spaces at the same time which is why we track this as a bit
-  /// field. It also optimizes the update process such that we only build the
-  /// transform spaces we want.
-  int _transformSpace = 0;
-  bool get paintsInWorldSpace => _transformSpace & _worldSpace != 0;
-  bool get paintsInShapeSpace => _transformSpace & _shapeSpace != 0;
-
-  void _changeTransformFlag(bool add, int flag) {
-    var transformSpace = _transformSpace;
-    if (add) {
-      transformSpace |= flag;
-    } else {
-      transformSpace &= ~flag;
-    }
-    if (_transformSpace != transformSpace) {
-      _transformSpace = transformSpace;
-      addDirt(ComponentDirt.gradient);
-    }
-  }
-
-  set paintsInWorldSpace(bool value) =>
-      _changeTransformFlag(value, _worldSpace);
-
-  set paintsInShapeSpace(bool value) =>
-      _changeTransformFlag(value, _shapeSpace);
-
-  /// Gradients depends on their shape's path composer. The reason for this is
-  /// that the path composer knows what the sum of the shape's paths want (for
-  /// example if they want strokes in world space or shape space). We also
-  /// inherently depend on the shape as we may need its world transform.
-  /// Depending on just the path composer solves both of these conditions for us
-  /// as the path composer also depends on the shape.
+  /// Gradients depends on their shape.
   @override
   void buildDependencies() {
     super.buildDependencies();
-    shape?.pathComposer?.addDependent(this);
+    shape?.addDependent(this);
   }
 
   @override
@@ -107,14 +82,12 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
       gradientStops.sort((a, b) => a.position.compareTo(b.position));
     }
 
-    // Check if either of the gradients need to be rebuilt.
-    var gradientDirty = dirt & ComponentDirt.gradient != 0;
+    // We rebuild the gradient if the gradient is dirty or we paint in world
+    // space and the world space transform has changed.
+    var rebuildGradient = dirt & ComponentDirt.gradient != 0 ||
+        (paintsInWorldSpace && dirt & ComponentDirt.worldTransform != 0);
 
-    bool buildWorldSpaceGradient = paintsInWorldSpace &&
-        (gradientDirty || (dirt & ComponentDirt.worldTransform) != 0);
-    bool buildShapeSpaceGradient = paintsInShapeSpace && gradientDirty;
-
-    if (buildWorldSpaceGradient || buildShapeSpaceGradient) {
+    if (rebuildGradient) {
       // If either of our gradients update, build up the color and positions
       // lists as we need them for both.
       var colors = <ui.Color>[];
@@ -124,7 +97,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
         colorPositions.add(stop.position);
       }
       // Chek if we need to update the world space gradient.
-      if (buildWorldSpaceGradient) {
+      if (paintsInWorldSpace) {
         // Get the start and end of the gradient in world coordinates (world
         // transform of the shape).
         var world = shape.worldTransform;
@@ -132,8 +105,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
         var worldEnd = Vec2D.transformMat2D(Vec2D(), end, world);
         paint.shader = makeGradient(ui.Offset(worldStart[0], worldStart[1]),
             ui.Offset(worldEnd[0], worldEnd[1]), colors, colorPositions);
-      }
-      if (buildShapeSpaceGradient) {
+      } else {
         paint.shader =
             makeGradient(startOffset, endOffset, colors, colorPositions);
       }
@@ -142,8 +114,6 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
 
   @protected
   ui.Gradient makeGradient(ui.Offset start, ui.Offset end,
-      List<ui.Color> colors, List<double> colorPositions) {
-    print("MAKING G ${start} ${end} ${colors} ${colorPositions}");
-    return ui.Gradient.linear(start, end, colors, colorPositions);
-  }
+          List<ui.Color> colors, List<double> colorPositions) =>
+      ui.Gradient.linear(start, end, colors, colorPositions);
 }
