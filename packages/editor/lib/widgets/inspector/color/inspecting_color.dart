@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:rive_core/component.dart';
 import 'package:core/core.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/transform_space.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
@@ -11,6 +12,8 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 
 /// Color change callback used by the various color picker components.
@@ -45,6 +48,35 @@ class InspectingColor {
     _updatePaints();
   }
 
+  /// Because radial gradients inherit from linear ones, we can share some of
+  /// the common aspects of creating one here.
+  core.LinearGradient _initGradient(Shape shape, core.LinearGradient gradient) {
+    var file = shape.context;
+    var bounds = shape.computeBounds(TransformSpace.local);
+    gradient
+      ..startX = bounds.left
+      ..startY = bounds.centerLeft.dy
+      ..endX = bounds.right
+      ..endY = bounds.centerLeft.dy;
+
+    // Add two stops.
+    var gradientStopA = GradientStop()
+      ..color = defaultGradientColorA
+      ..position = 0;
+    var gradientStopB = GradientStop()
+      ..color = defaultGradientColorB
+      ..position = 1;
+
+    file.add(gradient);
+    file.add(gradientStopA);
+    file.add(gradientStopB);
+    gradient.appendChild(gradientStopA);
+    gradient.appendChild(gradientStopB);
+
+    editingIndex.value = 0;
+    return gradient;
+  }
+
   void changeType(ColorType colorType) {
     if (type.value == colorType) {
       return;
@@ -57,74 +89,33 @@ class InspectingColor {
     file.batchAdd(() {
       for (final paint in shapePaints) {
         var mutator = paint.paintMutator as Component;
-        var shape = paint.paintMutator.shape;
+
+        var shape =
+            mutator == null ? paint.parent as Shape : paint.paintMutator.shape;
         // Remove the old paint mutator (this is what a color component is
         // referenced as in the fill/stroke).
         if (mutator is ContainerComponent) {
           // If it's a container (like a gradient which contains color stops)
           // make sure to remove everything.
           mutator.removeRecursive();
-        } else {
+        } else if (mutator != null) {
           mutator.remove();
         }
+        Component colorComponent;
         switch (colorType) {
           case ColorType.solid:
-            var solidColor = SolidColor();
-            file.add(solidColor);
-            paint.appendChild(solidColor);
+            colorComponent = SolidColor();
+            file.add(colorComponent);
             break;
           case ColorType.linear:
-            // Compute the shapes bounds to place the gradient start/end in.
-            var bounds = shape.computeBounds(TransformSpace.local);
-            var linearGradient = core.LinearGradient()
-              ..startX = bounds.left
-              ..startY = bounds.centerLeft.dy
-              ..endX = bounds.right
-              ..endY = bounds.centerLeft.dy;
-
-            // Add two stops.
-            var gradientStopA = GradientStop()
-              ..color = defaultGradientColorA
-              ..position = 0;
-            var gradientStopB = GradientStop()
-              ..color = defaultGradientColorB
-              ..position = 1;
-
-            file.add(linearGradient);
-            file.add(gradientStopA);
-            file.add(gradientStopB);
-            paint.appendChild(linearGradient);
-            linearGradient.appendChild(gradientStopA);
-            linearGradient.appendChild(gradientStopB);
-
-            editingIndex.value = 0;
+            colorComponent = _initGradient(shape, core.LinearGradient());
             break;
           case ColorType.radial:
-            // Compute the shapes bounds to place the gradient start/end in.
-            var bounds = shape.computeBounds(TransformSpace.local);
-            var radialGradient = core.RadialGradient()
-              ..startX = bounds.left
-              ..startY = bounds.centerLeft.dy
-              ..endX = bounds.right
-              ..endY = bounds.centerLeft.dy;
-
-            // Add two stops.
-            var gradientStopA = GradientStop()
-              ..color = defaultGradientColorA
-              ..position = 0;
-            var gradientStopB = GradientStop()
-              ..color = defaultGradientColorB
-              ..position = 1;
-
-            file.add(radialGradient);
-            file.add(gradientStopA);
-            file.add(gradientStopB);
-            paint.appendChild(radialGradient);
-            radialGradient.appendChild(gradientStopA);
-            radialGradient.appendChild(gradientStopB);
-
-            editingIndex.value = 0;
+            colorComponent = _initGradient(shape, core.RadialGradient());
             break;
+        }
+        if (colorComponent != null) {
+          paint.appendChild(colorComponent);
         }
       }
     });

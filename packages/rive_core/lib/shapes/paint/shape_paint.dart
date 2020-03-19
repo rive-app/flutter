@@ -18,6 +18,10 @@ abstract class ShapePaint extends ShapePaintBase {
   ShapePaintMutator _paintMutator;
   Shape _shape;
 
+  ShapePaint() {
+    _paint = makePaint();
+  }
+
   ShapePaintMutator get paintMutator => _paintMutator;
   final Event paintMutatorChanged = Event();
 
