@@ -221,8 +221,6 @@ class RiveFile extends RiveCoreContext {
       object.parent = object.context?.resolve(object.parentId);
       if (object.parent == null) {
         log.finest("Failed to resolve parent with id ${object.parentId}");
-      } else {
-        object.parent.childAdded(object);
       }
     }
   }

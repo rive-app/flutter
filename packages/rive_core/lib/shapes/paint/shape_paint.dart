@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
+import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/shapes/paint/shape_paint_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/shape_paint_base.dart';
@@ -27,7 +28,7 @@ abstract class ShapePaint extends ShapePaintBase {
 
   @override
   void childRemoved(Component child) {
-    super.childAdded(child);
+    super.childRemoved(child);
     // Make sure to clean up any references so that they can be garbage
     // collected.
     if (child is ShapePaintMutator &&
@@ -54,5 +55,5 @@ abstract class ShapePaint extends ShapePaintBase {
     }
   }
 
-  void draw(Canvas canvas, Path path);
+  void draw(Canvas canvas, PathComposer pathComposer);
 }

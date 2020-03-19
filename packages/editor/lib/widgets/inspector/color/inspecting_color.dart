@@ -4,12 +4,12 @@ import 'package:flutter/rendering.dart';
 import 'package:rive_core/component.dart';
 import 'package:core/core.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/transform_space.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint.dart';
-import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 
@@ -54,6 +54,7 @@ class InspectingColor {
     file.batchAdd(() {
       for (final paint in shapePaints) {
         var mutator = paint.paintMutator as Component;
+        var shape = paint.paintMutator.shape;
         // Remove the old paint mutator (this is what a color component is
         // referenced as in the fill/stroke).
         if (mutator is ContainerComponent) {
@@ -70,7 +71,14 @@ class InspectingColor {
             paint.appendChild(solidColor);
             break;
           case ColorType.linear:
-            var linearGradient = core.LinearGradient();
+            // Compute the shapes bounds to place the gradient start/end in.
+            var bounds = shape.computeBounds(TransformSpace.local);
+            var linearGradient = core.LinearGradient()
+              ..startX = bounds.left
+              ..startY = bounds.centerLeft.dy
+              ..endX = bounds.right
+              ..endY = bounds.centerLeft.dy;
+
             // Add two stops.
             var gradientStopA = GradientStop()
               ..color = defaultGradientColorA
@@ -89,7 +97,14 @@ class InspectingColor {
             editingIndex.value = 0;
             break;
           case ColorType.radial:
-            var radialGradient = core.RadialGradient();
+            // Compute the shapes bounds to place the gradient start/end in.
+            var bounds = shape.computeBounds(TransformSpace.local);
+            var radialGradient = core.RadialGradient()
+              ..startX = bounds.left
+              ..startY = bounds.centerLeft.dy
+              ..endX = bounds.right
+              ..endY = bounds.centerLeft.dy;
+
             // Add two stops.
             var gradientStopA = GradientStop()
               ..color = defaultGradientColorA
@@ -115,6 +130,8 @@ class InspectingColor {
     // (fills/strokes).
 
     _updatePaints();
+
+    completeChange();
   }
 
   /// Change the currently editing color

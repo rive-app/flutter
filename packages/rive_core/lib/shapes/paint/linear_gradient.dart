@@ -59,6 +59,18 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   set paintsInShapeSpace(bool value) =>
       _changeTransformFlag(value, _shapeSpace);
 
+  /// Gradients depends on their shape's path composer. The reason for this is
+  /// that the path composer knows what the sum of the shape's paths want (for
+  /// example if they want strokes in world space or shape space). We also
+  /// inherently depend on the shape as we may need its world transform.
+  /// Depending on just the path composer solves both of these conditions for us
+  /// as the path composer also depends on the shape.
+  @override
+  void buildDependencies() {
+    super.buildDependencies();
+    shape?.pathComposer?.addDependent(this);
+  }
+
   @override
   void childAdded(Component child) {
     super.childAdded(child);
@@ -130,6 +142,8 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
 
   @protected
   ui.Gradient makeGradient(ui.Offset start, ui.Offset end,
-          List<ui.Color> colors, List<double> colorPositions) =>
-      ui.Gradient.linear(start, end, colors, colorPositions);
+      List<ui.Color> colors, List<double> colorPositions) {
+    print("MAKING G ${start} ${end} ${colors} ${colorPositions}");
+    return ui.Gradient.linear(start, end, colors, colorPositions);
+  }
 }

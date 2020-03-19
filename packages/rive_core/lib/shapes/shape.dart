@@ -5,10 +5,12 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/src/generated/shapes/shape_base.dart';
+import 'package:rive_core/transform_space.dart';
 
 export 'package:rive_core/src/generated/shapes/shape_base.dart';
 
@@ -87,6 +89,23 @@ class Shape extends ShapeBase {
     return paths.remove(path);
   }
 
+  /// Compute the bounds of this shape in the requested [space].
+  Rect computeBounds(TransformSpace space) {
+    switch (space) {
+      case TransformSpace.local:
+        var inverseShapeWorld = Mat2D();
+        if (Mat2D.invert(inverseShapeWorld, worldTransform)) {
+          return _pathComposer.uiPath
+              .transform(inverseShapeWorld.mat4)
+              .getBounds();
+        }
+        break;
+      case TransformSpace.world:
+        return _pathComposer.uiPath.getBounds();
+    }
+    return Rect.zero;
+  }
+
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is BoundsDelegate) {
@@ -101,7 +120,7 @@ class Shape extends ShapeBase {
     assert(_pathComposer != null);
 
     for (final fill in fills) {
-      fill.draw(canvas, _pathComposer.uiPath);
+      fill.draw(canvas, _pathComposer);
     }
   }
 }

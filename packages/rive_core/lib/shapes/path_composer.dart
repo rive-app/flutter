@@ -43,7 +43,7 @@ class PathComposer extends PathComposerBase {
   @override
   void buildDependencies() {
     super.buildDependencies();
-
+    
     // We depend on the shape and all of its paths so that we can update after
     // all of them.
     if (_shape != null) {
