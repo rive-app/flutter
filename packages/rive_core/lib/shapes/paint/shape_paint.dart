@@ -53,4 +53,6 @@ abstract class ShapePaint extends ShapePaintBase {
       _paintMutator.initializePaintMutator(_shape, paint);
     }
   }
+
+  void draw(Canvas canvas, Path path);
 }

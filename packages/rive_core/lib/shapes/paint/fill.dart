@@ -16,4 +16,13 @@ class Fill extends FillBase {
     // Intentionally empty, fill doesn't update.
     // Because Fill never adds dependencies, it'll also never get called.
   }
+
+  @override
+  void draw(Canvas canvas, Path path) {
+    if (!isVisible) {
+      return;
+    }
+    path.fillType = fillType;
+    canvas.drawPath(path, paint);
+  }
 }

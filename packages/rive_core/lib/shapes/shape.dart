@@ -101,11 +101,7 @@ class Shape extends ShapeBase {
     assert(_pathComposer != null);
 
     for (final fill in fills) {
-      _pathComposer.uiPath.fillType = fill.fillType;
-      if (!fill.isVisible) {
-        continue;
-      }
-      canvas.drawPath(_pathComposer.uiPath, fill.paint);
+      fill.draw(canvas, _pathComposer.uiPath);
     }
   }
 }
