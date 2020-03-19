@@ -5,6 +5,17 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 
 import 'inspector_builder.dart';
 
+const iconList = [
+  'distribute-horizontal',
+  'distribute-vertical',
+  'align-left',
+  'align-center',
+  'align-right',
+  'align-top',
+  'distribute-mid',
+  'align-bot',
+];
+
 /// Expander for the alignment inspector.
 class AlignmentInspectorBuilder extends InspectorBuilder {
   @override
@@ -21,18 +32,12 @@ class AlignmentInspectorBuilder extends InspectorBuilder {
                   for (var i = 1; i <= 8; i++)
                     Flexible(
                       flex: 1,
-                      child: Container(
-                        child: Transform.scale(
-                          scale: 0.5,
-                          child: TintedIcon(
-                            color: RiveTheme.of(context)
-                                .textStyles
-                                .inspectorPropertyLabel
-                                .color,
-                            // TODO: add the correct alignment icons
-                            icon: 'align-bot',
-                          ),
-                        ),
+                      child: TintedIcon(
+                        color: RiveTheme.of(context)
+                            .textStyles
+                            .inspectorPropertyLabel
+                            .color,
+                        icon: iconList[i - 1],
                       ),
                     ),
                 ],
