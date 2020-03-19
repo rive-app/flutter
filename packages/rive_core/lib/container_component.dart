@@ -69,7 +69,7 @@ abstract class ContainerComponent extends ContainerComponentBase {
 
   void childRemoved(Component child) {}
 
-  // Make sure that the current function can be applied to the current 
+  // Make sure that the current function can be applied to the current
   // [Component], before descending onto all the children.
   bool applyToAll(DescentCallback cb) {
     if (cb(this) == false) {
@@ -91,7 +91,20 @@ abstract class ContainerComponent extends ContainerComponentBase {
       if (child is ContainerComponent) {
         child.applyToChildren(cb);
       }
-    } 
+    }
   }
 
+  /// Recursive version of [Component.remove]. This should only be called when
+  /// you know this is the only part of the branch you are removing in your
+  /// operation. If your operation could remove items from the same branch
+  /// multiple times, you should consider building up a list of the individual
+  /// items to remove and then remove them individually to avoid calling remove
+  /// multiple times on children.
+  void removeRecursive() {
+    assert(context != null);
+    
+    Set<Component> deathRow = {this};
+    applyToChildren((child) => deathRow.add(child));
+    deathRow.forEach(context.remove);
+  }
 }

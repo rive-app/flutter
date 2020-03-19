@@ -5,10 +5,12 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/src/generated/shapes/shape_base.dart';
+import 'package:rive_core/transform_space.dart';
 
 export 'package:rive_core/src/generated/shapes/shape_base.dart';
 
@@ -88,6 +90,32 @@ class Shape extends ShapeBase {
   }
 
   @override
+  void transformAffectsStrokeChanged(bool from, bool to) {
+    super.transformAffectsStrokeChanged(from, to);
+    // TODO: when we have strokes, we need to tell them their LinearGradients
+    // that they paint in world space via LinearGradient.paintsInWorldSpace. We
+    // also need to re-evaluate this based on the answer to:
+    // https://2dimensions.slack.com/archives/CHTMQJAJZ/p1584584763000700
+  }
+
+  /// Compute the bounds of this shape in the requested [space].
+  Rect computeBounds(TransformSpace space) {
+    switch (space) {
+      case TransformSpace.local:
+        var inverseShapeWorld = Mat2D();
+        if (Mat2D.invert(inverseShapeWorld, worldTransform)) {
+          return _pathComposer.uiPath
+              .transform(inverseShapeWorld.mat4)
+              .getBounds();
+        }
+        break;
+      case TransformSpace.world:
+        return _pathComposer.uiPath.getBounds();
+    }
+    return Rect.zero;
+  }
+
+  @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is BoundsDelegate) {
       _delegate = to;
@@ -101,11 +129,7 @@ class Shape extends ShapeBase {
     assert(_pathComposer != null);
 
     for (final fill in fills) {
-      _pathComposer.uiPath.fillType = fill.fillType;
-      if (!fill.isVisible) {
-        continue;
-      }
-      canvas.drawPath(_pathComposer.uiPath, fill.paint);
+      fill.draw(canvas, _pathComposer);
     }
   }
 }

@@ -190,6 +190,12 @@ abstract class Component extends ComponentBase<RiveFile> {
 
   void onAdded() {}
 
+  /// When a component has been removed from the Core Context, we clean up any
+  /// dangling references left on the parent and on any other dependent
+  /// component. It's important for specialization of Component to respond to
+  /// override [onDependencyRemoved] and clean up any further stored references
+  /// to that component (for example the target of a Constraint).
+  @mustCallSuper
   void onRemoved() {
     for (final parentDep in _dependsOn) {
       parentDep._dependents.remove(this);
@@ -225,4 +231,11 @@ abstract class Component extends ComponentBase<RiveFile> {
   String toString() {
     return '${super.toString()} ($id)';
   }
+
+  /// Remove this component from the core system. This will unregister the
+  /// component with the core context which does the work of synchronizing the
+  /// removal from the system and then calling [onRemoved] on the Component when
+  /// it's safe to clean up references to parents and anything that depends on
+  /// this component.
+  void remove() => context?.remove(this);
 }

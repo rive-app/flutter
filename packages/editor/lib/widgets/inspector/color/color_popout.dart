@@ -9,6 +9,7 @@ import 'package:rive_editor/widgets/inspector/color/opacity_slider_background.da
 import 'package:rive_editor/widgets/inspector/color/saturation_brightness_picker.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
+/// The contents of the color picker shown in a popout.
 class ColorPopout extends StatelessWidget {
   final InspectingColor inspecting;
 
@@ -29,22 +30,26 @@ class ColorPopout extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ComboBox<ColorType>(
-                sizing: ComboSizing.content,
-                options: ColorType.values,
-                value: ColorType.values[0],
-                toLabel: (colorType) {
-                  switch (colorType) {
-                    case ColorType.solid:
-                      return 'Solid';
-                    case ColorType.linear:
-                      return 'Linear';
-                    case ColorType.radial:
-                      return 'Radial';
-                  }
-                  return '';
-                },
-                change: (ColorType type) {},
+              child: ValueListenableBuilder(
+                valueListenable: inspecting.type,
+                builder: (context, ColorType type, child) =>
+                    ComboBox<ColorType>(
+                  sizing: ComboSizing.content,
+                  options: ColorType.values,
+                  value: type,
+                  toLabel: (colorType) {
+                    switch (colorType) {
+                      case ColorType.solid:
+                        return 'Solid';
+                      case ColorType.linear:
+                        return 'Linear';
+                      case ColorType.radial:
+                        return 'Radial';
+                    }
+                    return '';
+                  },
+                  change: inspecting.changeType,
+                ),
               ),
             ),
           ],

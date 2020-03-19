@@ -5,4 +5,6 @@ class ComponentDirt {
   static const int path = 1 << 3;
   static const int transform = 1 << 4;
   static const int worldTransform = 1 << 5;
+  static const int gradient = 1 << 6;
+  static const int stops = 1 << 7;
 }

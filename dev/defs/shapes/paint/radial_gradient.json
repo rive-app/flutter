@@ -4,15 +4,5 @@
     "int": 17,
     "string": "radialgradient"
   },
-  "extends": "shapes/paint/linear_gradient.json",
-  "properties": {
-    "radius": {
-      "type": "double",
-      "initialValue": "0",
-      "key": {
-        "int": 36,
-        "string": "radius"
-      }
-    }
-  }
+  "extends": "shapes/paint/linear_gradient.json"
 }

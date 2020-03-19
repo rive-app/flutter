@@ -3,10 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/component.dart';
 import 'package:core/core.dart';
+import 'package:rive_core/container_component.dart';
+import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_core/transform_space.dart';
+import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 
 /// Color change callback used by the various color picker components.
@@ -15,6 +22,9 @@ typedef ChangeColor = void Function(HSVColor);
 /// Abstraction of the currently inspected color.
 class InspectingColor {
   static const Color defaultSolidColor = Color(0xFF747474);
+  static const Color defaultGradientColorA = Color(0xFFFF5678);
+  static const Color defaultGradientColorB = Color(0xFFD041AB);
+
   ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
   ValueNotifier<List<Color>> preview = ValueNotifier<List<Color>>([]);
   ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
@@ -32,7 +42,90 @@ class InspectingColor {
 
   Iterable<ShapePaint> shapePaints;
   InspectingColor(this.shapePaints) {
+    for (final paint in shapePaints) {
+      paint.paintMutatorChanged.addListener(_mutatorChanged);
+    }
     _updatePaints();
+  }
+
+  /// Because radial gradients inherit from linear ones, we can share some of
+  /// the common aspects of creating one here.
+  core.LinearGradient _initGradient(Shape shape, core.LinearGradient gradient) {
+    var file = shape.context;
+    var bounds = shape.computeBounds(TransformSpace.local);
+    gradient
+      ..startX = bounds.left
+      ..startY = bounds.centerLeft.dy
+      ..endX = bounds.right
+      ..endY = bounds.centerLeft.dy;
+
+    // Add two stops.
+    var gradientStopA = GradientStop()
+      ..color = defaultGradientColorA
+      ..position = 0;
+    var gradientStopB = GradientStop()
+      ..color = defaultGradientColorB
+      ..position = 1;
+
+    file.add(gradient);
+    file.add(gradientStopA);
+    file.add(gradientStopB);
+    gradient.appendChild(gradientStopA);
+    gradient.appendChild(gradientStopB);
+
+    editingIndex.value = 0;
+    return gradient;
+  }
+
+  void changeType(ColorType colorType) {
+    if (type.value == colorType) {
+      return;
+    }
+
+    var file = context;
+
+    // Batch the operation so that we can pick apart the hierarchy and then
+    // resolve once we're done changing everything.
+    file.batchAdd(() {
+      for (final paint in shapePaints) {
+        var mutator = paint.paintMutator as Component;
+
+        var shape =
+            mutator == null ? paint.parent as Shape : paint.paintMutator.shape;
+        // Remove the old paint mutator (this is what a color component is
+        // referenced as in the fill/stroke).
+        if (mutator is ContainerComponent) {
+          // If it's a container (like a gradient which contains color stops)
+          // make sure to remove everything.
+          mutator.removeRecursive();
+        } else if (mutator != null) {
+          mutator.remove();
+        }
+        Component colorComponent;
+        switch (colorType) {
+          case ColorType.solid:
+            colorComponent = SolidColor();
+            file.add(colorComponent);
+            break;
+          case ColorType.linear:
+            colorComponent = _initGradient(shape, core.LinearGradient());
+            break;
+          case ColorType.radial:
+            colorComponent = _initGradient(shape, core.RadialGradient());
+            break;
+        }
+        if (colorComponent != null) {
+          paint.appendChild(colorComponent);
+        }
+      }
+    });
+
+    // Hierarchy has now resolved, new mutators have been assined to shapePaints
+    // (fills/strokes).
+
+    _updatePaints();
+
+    completeChange();
   }
 
   /// Change the currently editing color
@@ -47,11 +140,27 @@ class InspectingColor {
     }
   }
 
+  RiveFile get context => shapePaints.first.context;
+
   void completeChange() {
-    shapePaints.first.context?.captureJournalEntry();
+    context?.captureJournalEntry();
   }
 
-  void dispose() {}
+  void dispose() {
+    for (final paint in shapePaints) {
+      paint.paintMutatorChanged.removeListener(_mutatorChanged);
+    }
+    _clearListeners();
+  }
+
+  void _clearListeners() {
+    // clear out old listeners
+    _listeningTo.forEach((component, value) {
+      for (final propertyKey in value) {
+        component.removeListener(propertyKey, _valueChanged);
+      }
+    });
+  }
 
   void _changeSolidColor(Color color) {
     _suppressUpdating = true;
@@ -100,33 +209,41 @@ class InspectingColor {
     }
   }
 
+  ColorType _determineColorType() =>
+      equalValue<ShapePaint, ColorType>(shapePaints, (shapePaint) {
+        // determine which concrete color type this shapePaint is using.
+        var colorComponent = shapePaint.paintMutator as Component;
+        if (colorComponent == null) {
+          return null;
+        }
+        switch (colorComponent.coreType) {
+          case SolidColorBase.typeKey:
+            return ColorType.solid;
+          case core.LinearGradientBase.typeKey:
+            return ColorType.linear;
+          case core.RadialGradientBase.typeKey:
+            return ColorType.radial;
+        }
+        return null;
+      });
+
   /// Update current color type and state, also register (and cleanup) listeners
   /// for changes due to undo/redo.
   void _updatePaints({bool forceRelisten = false}) {
-    var first = shapePaints.first.paintMutator;
-
-    ColorType colorType = first is core.LinearGradient
-        ? ColorType.linear
-        : first is core.RadialGradient ? ColorType.radial : ColorType.solid;
-
+    // Are we all the same type?
+    var colorType = _determineColorType();
     var relisten = type.value != colorType || forceRelisten;
     if (relisten) {
-      // clear out old listeners
-      _listeningTo.forEach((component, value) {
-        for (final propertyKey in value) {
-          component.removeListener(propertyKey, _valueChanged);
-        }
-      });
+      _clearListeners();
     }
 
+    var first = shapePaints.first.paintMutator;
     switch (colorType) {
       case ColorType.solid:
-        // Cold still be null...
-        if (first is SolidColor) {
-          editingColor.value = HSVColor.fromColor(first.color);
-        } else {
-          editingColor.value = HSVColor.fromColor(defaultSolidColor);
-        }
+        // If the full list is solid then we definitely have a SolidColor
+        // mutator.
+        editingColor.value = HSVColor.fromColor((first as SolidColor).color);
+
         if (preview.value.length != 1 ||
             preview.value.first != editingColor.value.toColor()) {
           // check all colors are the same
@@ -136,6 +253,8 @@ class InspectingColor {
         }
 
         if (relisten) {
+          // Since they're all solid, we know they'll all have a Core colorValue
+          // that change that we want to listen to.
           for (final shapePaint in shapePaints) {
             _listenTo(shapePaint.paintMutator as Component,
                 SolidColorBase.colorValuePropertyKey);
@@ -143,7 +262,6 @@ class InspectingColor {
         }
         break;
       case ColorType.linear:
-        break;
       case ColorType.radial:
         break;
     }
@@ -151,6 +269,13 @@ class InspectingColor {
   }
 
   void _valueChanged(dynamic from, dynamic to) {
+    if (_suppressUpdating) {
+      return;
+    }
+    debounce(_updatePaints);
+  }
+
+  void _mutatorChanged() {
     if (_suppressUpdating) {
       return;
     }
