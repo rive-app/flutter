@@ -88,8 +88,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
         (paintsInWorldSpace && dirt & ComponentDirt.worldTransform != 0);
 
     if (rebuildGradient) {
-      // If either of our gradients update, build up the color and positions
-      // lists as we need them for both.
+      // build up the color and positions lists
       var colors = <ui.Color>[];
       var colorPositions = <double>[];
       for (final stop in gradientStops) {
