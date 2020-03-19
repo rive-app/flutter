@@ -12,8 +12,6 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
-import 'package:rive_editor/rive/stage/stage.dart';
-import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 
 /// Color change callback used by the various color picker components.
