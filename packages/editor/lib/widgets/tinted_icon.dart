@@ -104,18 +104,16 @@ class _TintedIconRendererObject extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_cachedImage == null) {
+    if (_cachedImage?.image == null) {
       return;
     }
     var canvas = context.canvas;
     var image = _cachedImage.image;
-    canvas.save();
     canvas.drawImageRect(
         image,
         Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
         offset & size,
         _paint);
-    canvas.restore();
   }
 
   @override
