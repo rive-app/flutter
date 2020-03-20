@@ -1,3 +1,4 @@
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -49,8 +50,11 @@ class FilesView extends StatelessWidget {
     final _rive = RiveContext.of(context);
     return ChangeNotifierProvider.value(
       value: _rive.fileBrowser,
-      child: GestureDetector(
-        onTap: _rive.fileBrowser.deselectAll,
+      child: PropagatingListener(
+        behavior: HitTestBehavior.deferToChild,
+        onPointerUp: (_) {
+          _rive.fileBrowser.deselectAll();
+        },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -201,6 +205,7 @@ class FilesView extends StatelessWidget {
 
   Widget _buildFeedback(
       BuildContext context, RiveFile file, FileBrowser _fileBrowser) {
+    final selectedCount = _fileBrowser.selectedItems.length;
     return SizedBox(
       width: 187,
       height: 50,
@@ -224,7 +229,7 @@ class FilesView extends StatelessWidget {
               ),
             ),
           ),
-          if (_fileBrowser.selectedCount > 1)
+          if (selectedCount > 1)
             Positioned(
               right: -5,
               top: -5,
@@ -234,7 +239,7 @@ class FilesView extends StatelessWidget {
                 child: CircleAvatar(
                   backgroundColor: Colors.red,
                   child: Text(
-                    _fileBrowser.selectedCount.toString(),
+                    selectedCount.toString(),
                     style: TextStyle(
                       color: Colors.white,
                     ),
@@ -267,9 +272,14 @@ class FilesView extends StatelessWidget {
               child: ValueListenableBuilder<bool>(
                 valueListenable: _file.draggingState,
                 builder: (context, fileDragging, child) {
-                  return Draggable<RiveFile>(
+                  return FileViewWidget(
+                            // key: _file.key,
+                            file: _file,
+                          );
+                  /** Draggable<RiveFile>(
                     dragAnchor: DragAnchor.pointer,
                     onDragStarted: () {
+                      print("Start drag!");
                       if (!_file.isSelected) {
                         browser.selectItem(_rive, _file);
                       }
@@ -293,6 +303,7 @@ class FilesView extends StatelessWidget {
                             file: _file,
                           ),
                   );
+                    */
                 },
               ),
             );
