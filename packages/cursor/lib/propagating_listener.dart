@@ -101,7 +101,7 @@ class _InheritedPropagatingEvents extends InheritedWidget {
 }
 
 /// A listener that'll only continue propagating the event if some other
-/// Propagating listener doesn't hanlde it.
+/// Propagating listener doesn't handle it.
 class PropagatingListener extends StatelessWidget {
   final Widget child;
   final HitTestBehavior behavior;

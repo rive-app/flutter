@@ -29,6 +29,8 @@ class FileBrowser extends FileBrowserController {
   /// Currently selected item.
   final ValueNotifier<SelectableItem> selectedItem =
       ValueNotifier<SelectableItem>(null);
+  // Collection for the currently selected items.
+  final Set<SelectableItem> _selectedItems = {};
 
   /// Scroll offset of the files view.
   final ValueNotifier<double> scrollOffset = ValueNotifier<double>(0);
@@ -68,14 +70,13 @@ class FileBrowser extends FileBrowserController {
       _draggingState.value; //[..._current.folders, ..._current.files];
   set isDragging(bool val) => _draggingState.value = val;
 
+  // TODO: revisit this.
   List<SelectableItem> get selectableItems => [];
-
-  int get selectedCount => selectedItems.length;
 
   @override
   RiveFolder get selectedFolder => _current;
 
-  List<SelectableItem> get selectedItems => [];
+  Set<SelectableItem> get selectedItems => _selectedItems;
 
   List<FlatTreeItem<RiveFolder>> get teams =>
       treeController.value.flat.skip(1).toList();
@@ -94,7 +95,7 @@ class FileBrowser extends FileBrowserController {
 
   void endDrag() {
     isDragging = false;
-    for (final item in selectedItems) {
+    for (final item in _selectedItems) {
       if (item is RiveFolder) {
         item.isDragging = false;
       }
@@ -194,11 +195,11 @@ class FileBrowser extends FileBrowserController {
   @override
   Future<bool> openFolder(RiveFolder value, bool jumpTo) async {
     _current = value;
-    if (selectedCount != 0) {
-      for (final item in selectedItems) {
-        item.isSelected = false;
-      }
+
+    for (final item in _selectedItems) {
+      item.isSelected = false;
     }
+
     _lastSelectedIndex = null;
     notifyListeners();
     if (value == null) {
@@ -241,7 +242,6 @@ class FileBrowser extends FileBrowserController {
   void selectItem(Rive rive, SelectableItem value) {
     switch (rive.selectionMode.value) {
       case SelectionMode.single:
-        _resetSelection();
         _selectItem(value, false);
         _lastSelectedIndex = selectableItems.indexOf(value);
         break;
@@ -266,20 +266,20 @@ class FileBrowser extends FileBrowserController {
                 .toList();
           }
           _resetSelection(true);
-          for (var item in _items) {
+          for (final item in _items) {
             _selectItem(item, true);
           }
         }
         break;
     }
-    selectedItem.value = value;
+    // selectedItem.value = value;
     notifyListeners();
   }
 
   void sizeChanged(BoxConstraints constraints) => _constraints = constraints;
   void startDrag() {
     isDragging = true;
-    for (final item in selectedItems.toList()) {
+    for (final item in _selectedItems) {
       if (item is RiveFolder) {
         item.isDragging = true;
       }
@@ -346,20 +346,24 @@ class FileBrowser extends FileBrowserController {
   }
 
   void _resetSelection([bool force = false]) {
-    for (final item in selectedItems) {
-      item.isSelected = false;
-    }
-    selectedItem.value = null;
+    _selectedItems
+      ..forEach((element) {
+        element.isSelected = false;
+      })
+      ..clear();
+    // selectedItem.value = null;
   }
 
-  void _selectItem(SelectableItem value, bool append) {
+  void _selectItem(SelectableItem item, bool append) {
     if (!append) {
       _resetSelection();
     }
-    if (value.isSelected) {
-      value.isSelected = false;
+    if (item.isSelected) {
+      item.isSelected = false;
+      _selectedItems.remove(item);
     } else {
-      value.isSelected = true;
+      item.isSelected = true;
+      _selectedItems.add(item);
     }
   }
 }
