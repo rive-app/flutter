@@ -2,7 +2,7 @@ import 'package:core/debounce.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/component.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/transform_space.dart';
@@ -23,11 +23,22 @@ class InspectingColor {
   static const Color defaultGradientColorA = Color(0xFFFF5678);
   static const Color defaultGradientColorB = Color(0xFFD041AB);
 
-  ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
-  ValueNotifier<List<Color>> preview = ValueNotifier<List<Color>>([]);
-  ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
-  ValueNotifier<HSVColor> editingColor =
+  /// Whether the inspecting color is a solid or a linear/radial gradient.
+  final ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
+
+  /// The colors to show in the preview swatch.
+  final ValueNotifier<List<Color>> preview = ValueNotifier<List<Color>>([]);
+
+  /// The editing index in the list of color stops.
+  final ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
+
+  /// The value of the currently editing color.
+  final ValueNotifier<HSVColor> editingColor =
       ValueNotifier<HSVColor>(HSVColor.fromColor(const Color(0xFFFF0000)));
+
+  /// The list of color stops used if the current type is a gradient.
+  final ValueNotifier<List<InspectingColorStop>> stops =
+      ValueNotifier<List<InspectingColorStop>>(null);
 
   /// Track which properties we're listening to on each component. This varies
   /// depending on whether it's a solid color, gradient, etc.
@@ -208,7 +219,7 @@ class InspectingColor {
   }
 
   ColorType _determineColorType() =>
-      equalValue<ShapePaint, ColorType>(shapePaints, (shapePaint) {
+      core.equalValue<ShapePaint, ColorType>(shapePaints, (shapePaint) {
         // determine which concrete color type this shapePaint is using.
         var colorComponent = shapePaint.paintMutator as Component;
         if (colorComponent == null) {
@@ -245,7 +256,7 @@ class InspectingColor {
         if (preview.value.length != 1 ||
             preview.value.first != editingColor.value.toColor()) {
           // check all colors are the same
-          Color color = equalValue<ShapePaint, Color>(shapePaints,
+          Color color = core.equalValue<ShapePaint, Color>(shapePaints,
               (shapePaint) => (shapePaint.paintMutator as SolidColor).color);
           preview.value = color == null ? [] : [color];
         }
@@ -261,6 +272,39 @@ class InspectingColor {
         break;
       case ColorType.linear:
       case ColorType.radial:
+        // Check if all the colorStops are the same across the selected
+        // shapePaints. This is pretty verbose, but what it boils down to is
+        // needing a custom equality check for GradientStops as we didn't want
+        // to override the equality check on the core values as their default
+        // equality should be based on exact reference. Since the GradienStops
+        // are stored in Lists, we need a custom equality check for the
+        // equalValue call too.
+        List<GradientStop> colorStops =
+            core.equalValue<ShapePaint, List<GradientStop>>(
+          shapePaints,
+          (shapePaint) =>
+              (shapePaint.paintMutator as core.LinearGradient).gradientStops,
+          // Override the equality check for the equalValue as we want it to use
+          // listEquals
+          equalityCheck: (a, b) => core.listEquals(
+            a,
+            b,
+            // Override the listEquals equality as in this case we consider
+            // GradientStops equal if they have the same value and color.
+            equalityCheck: (GradientStop a, GradientStop b) =>
+                a.colorValue == b.colorValue && a.position == b.position,
+          ),
+        );
+        if (colorStops == null) {
+          preview.value = [];
+          stops.value = [];
+        } else {
+          preview.value =
+              colorStops.map((stop) => stop.color).toList(growable: true);
+          stops.value = colorStops
+              .map((stop) => InspectingColorStop(stop))
+              .toList(growable: true);
+        }
         break;
     }
     type.value = colorType;
@@ -279,4 +323,17 @@ class InspectingColor {
     }
     debounce(_updatePaints);
   }
+}
+
+
+/// Inspector specific data for the color stop. We need the common gradient
+/// properties across the full selection set. This is a simplified data
+/// representation just for the purposes of the inspector.
+class InspectingColorStop {
+  final double position;
+  final Color color;
+
+  InspectingColorStop(GradientStop stop)
+      : position = stop.position,
+        color = stop.color;
 }

@@ -7,12 +7,20 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
 
 import 'package:rive_editor/rive/selection_context.dart';
+import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builders.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
 
-Widget _dividerBuilder(BuildContext context) => InspectorDivider();
+Widget _dividerBuilder(BuildContext context) => Separator(
+      padding: const EdgeInsets.only(
+        left: 20,
+        top: 10,
+        bottom: 10,
+      ),
+      color: RiveTheme.of(context).colors.inspectorSeparator,
+    );
 
 class InspectorPanel extends StatefulWidget {
   const InspectorPanel({
@@ -154,23 +162,6 @@ class _InspectorPanelState extends State<InspectorPanel> {
             );
           }
         },
-      ),
-    );
-  }
-}
-
-class InspectorDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(
-        left: 20,
-        top: 10,
-        bottom: 10,
-      ),
-      child: const Divider(
-        height: 1,
-        color: Color(0xFF444444),
       ),
     );
   }

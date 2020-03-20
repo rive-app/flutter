@@ -93,6 +93,7 @@ class RiveColors {
 
   // Inspector
   Color get inspectorTextColor => const Color(0xFF8C8C8C);
+  Color get inspectorSeparator => const Color(0xFF444444);
 
   // TextField
   Color get textSelection => lightGrey;

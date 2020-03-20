@@ -6,32 +6,37 @@ import 'package:flutter/material.dart';
 class ColorGrabber extends StatelessWidget {
   final Color color;
   final Size size;
+  final bool isActive;
 
   const ColorGrabber({
     Key key,
     this.color,
     this.size,
+    this.isActive = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: size.width,
       height: size.height,
       child: CustomPaint(
-        painter: _ColorGrabberPainter(
-          color: color,
-        ),
+        painter: isActive
+            ? _ColorGrabberPainter(
+                color: color,
+              )
+            : _InactiveColorGrabberPainter(),
       ),
     );
   }
 }
 
-
 /// Custom painter for the [ColorGrabber].
 class _ColorGrabberPainter extends CustomPainter {
   final Color color;
-  const _ColorGrabberPainter({this.color});
+  const _ColorGrabberPainter({
+    this.color,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -60,4 +65,24 @@ class _ColorGrabberPainter extends CustomPainter {
   @override
   bool shouldRepaint(_ColorGrabberPainter oldDelegate) =>
       oldDelegate.color != color;
+}
+
+class _InactiveColorGrabberPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawOval(
+      Offset.zero & size,
+      Paint()..color = Colors.white,
+    );
+    canvas.drawOval(
+      Offset.zero & size,
+      Paint()
+        ..strokeWidth = 1
+        ..color = const Color(0xFF323232)
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_InactiveColorGrabberPainter oldDelegate) => false;
 }

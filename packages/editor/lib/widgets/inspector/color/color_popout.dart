@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/color_slider.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
+import 'package:rive_editor/widgets/inspector/color/gradient_slider_background.dart';
 import 'package:rive_editor/widgets/inspector/color/hue_slider_background.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/inspector/color/opacity_slider_background.dart';
 import 'package:rive_editor/widgets/inspector/color/saturation_brightness_picker.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// The contents of the color picker shown in a popout.
@@ -18,43 +21,82 @@ class ColorPopout extends StatelessWidget {
     this.inspecting,
   }) : super(key: key);
 
+  Widget _stopEditor(ColorType type, Widget combo, RiveThemeData theme) {
+    if (type == ColorType.solid) {
+      return combo;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        combo,
+        Separator(
+          padding: const EdgeInsets.only(
+            bottom: 20,
+          ),
+          color: theme.colors.inspectorSeparator,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ValueListenableBuilder(
+            valueListenable: inspecting.stops,
+            builder: (context, List<InspectingColorStop> stops, child) =>
+                MultiColorSlider(
+              color: Colors.red,
+              values:
+                  stops.map((stop) => stop.position).toList(growable: false),
+              changeValue: (value) {},
+              completeChange: inspecting.completeChange,
+              background: (context) => Container(
+                child: CustomPaint(
+                  painter: GradientSliderBackground(stops),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const SizedBox(height: 20),
-        Row(
-          children: [
+        ValueListenableBuilder(
+          valueListenable: inspecting.type,
+          builder: (context, ColorType type, child) => _stopEditor(
+            type,
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ValueListenableBuilder(
-                valueListenable: inspecting.type,
-                builder: (context, ColorType type, child) =>
-                    ComboBox<ColorType>(
-                  sizing: ComboSizing.content,
-                  options: ColorType.values,
-                  value: type,
-                  toLabel: (colorType) {
-                    switch (colorType) {
-                      case ColorType.solid:
-                        return 'Solid';
-                      case ColorType.linear:
-                        return 'Linear';
-                      case ColorType.radial:
-                        return 'Radial';
-                    }
-                    return '';
-                  },
-                  change: inspecting.changeType,
-                ),
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
+              child: ComboBox<ColorType>(
+                sizing: ComboSizing.content,
+                options: ColorType.values,
+                value: type,
+                toLabel: (colorType) {
+                  switch (colorType) {
+                    case ColorType.solid:
+                      return 'Solid';
+                    case ColorType.linear:
+                      return 'Linear';
+                    case ColorType.radial:
+                      return 'Radial';
+                  }
+                  return '';
+                },
+                change: inspecting.changeType,
               ),
             ),
-          ],
+            theme,
+          ),
         ),
-        const SizedBox(height: 12),
         ValueListenableBuilder(
           valueListenable: inspecting.editingColor,
           builder: (context, HSVColor hsv, child) => Column(
