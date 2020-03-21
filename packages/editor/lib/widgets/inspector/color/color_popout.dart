@@ -22,7 +22,7 @@ class ColorPopout extends StatelessWidget {
   }) : super(key: key);
 
   Widget _stopEditor(ColorType type, Widget combo, RiveThemeData theme) {
-    if (type == ColorType.solid) {
+    if (type == ColorType.solid || type == null) {
       return combo;
     }
     return Column(
@@ -70,15 +70,15 @@ class ColorPopout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        const SizedBox(height: 20),
-        ValueListenableBuilder(
-          valueListenable: inspecting.type,
-          builder: (context, ColorType type, child) => _stopEditor(
+    return ValueListenableBuilder(
+      valueListenable: inspecting.type,
+      builder: (context, ColorType type, child) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          _stopEditor(
             type,
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
@@ -102,97 +102,97 @@ class ColorPopout extends StatelessWidget {
             ),
             theme,
           ),
-        ),
-        ValueListenableBuilder(
-          valueListenable: inspecting.editingColor,
-          builder: (context, HSVColor hsv, child) => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 153,
-                child: SaturationBrightnessPicker(
-                  hsv: hsv,
-                  change: inspecting.changeColor,
-                  complete: inspecting.completeChange,
+          ValueListenableBuilder(
+            valueListenable: inspecting.editingColor,
+            builder: (context, HSVColor hsv, child) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 153,
+                  child: SaturationBrightnessPicker(
+                    hsv: hsv,
+                    change: type == null ? null : inspecting.changeColor,
+                    complete: inspecting.completeChange,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(
-                  20,
-                ),
-                child: Row(
-                  children: [
-                    TintedIcon(
-                      icon: 'eyedropper',
-                      color: theme.colors.popupIcon,
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          ColorSlider(
-                            color:
-                                HSVColor.fromAHSV(1, hsv.hue, 1, 1).toColor(),
-                            value: hsv.hue / 360,
-                            changeValue: (value) {
-                              inspecting.changeColor(
-                                HSVColor.fromAHSV(
-                                  hsv.alpha,
-                                  value * 360,
-                                  hsv.saturation,
-                                  hsv.value,
+                Padding(
+                  padding: const EdgeInsets.all(
+                    20,
+                  ),
+                  child: Row(
+                    children: [
+                      TintedIcon(
+                        icon: 'eyedropper',
+                        color: theme.colors.popupIcon,
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ColorSlider(
+                              color:
+                                  HSVColor.fromAHSV(1, hsv.hue, 1, 1).toColor(),
+                              value: hsv.hue / 360,
+                              changeValue: type == null ? null : (value) {
+                                inspecting.changeColor(
+                                  HSVColor.fromAHSV(
+                                    hsv.alpha,
+                                    value * 360,
+                                    hsv.saturation,
+                                    hsv.value,
+                                  ),
+                                );
+                              },
+                              completeChange: inspecting.completeChange,
+                              background: (context) => Container(
+                                child: const CustomPaint(
+                                  painter: HueSliderBackground(),
                                 ),
-                              );
-                            },
-                            completeChange: inspecting.completeChange,
-                            background: (context) => Container(
-                              child: const CustomPaint(
-                                painter: HueSliderBackground(),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                          ColorSlider(
-                            color: hsv.toColor(),
-                            value: hsv.alpha,
-                            changeValue: (value) {
-                              inspecting.changeColor(
-                                HSVColor.fromAHSV(
-                                  value,
-                                  hsv.hue,
-                                  hsv.saturation,
-                                  hsv.value,
-                                ),
-                              );
-                            },
-                            completeChange: inspecting.completeChange,
-                            background: (context) => Container(
-                              child: CustomPaint(
-                                painter: OpacitySliderBackground(
-                                  color: HSVColor.fromAHSV(
-                                    1,
+                            const SizedBox(height: 20),
+                            ColorSlider(
+                              color: hsv.toColor(),
+                              value: hsv.alpha,
+                              changeValue: type == null ? null : (value) {
+                                inspecting.changeColor(
+                                  HSVColor.fromAHSV(
+                                    value,
                                     hsv.hue,
                                     hsv.saturation,
                                     hsv.value,
-                                  ).toColor(),
-                                  background:
-                                      RiveTheme.of(context).colors.popupIcon,
+                                  ),
+                                );
+                              },
+                              completeChange: inspecting.completeChange,
+                              background: (context) => Container(
+                                child: CustomPaint(
+                                  painter: OpacitySliderBackground(
+                                    color: HSVColor.fromAHSV(
+                                      1,
+                                      hsv.hue,
+                                      hsv.saturation,
+                                      hsv.value,
+                                    ).toColor(),
+                                    background:
+                                        RiveTheme.of(context).colors.popupIcon,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -20,6 +20,7 @@ typedef ChangeColor = void Function(HSVColor);
 
 /// Abstraction of the currently inspected color.
 class InspectingColor {
+  static const HSVColor defaultEditingColor = HSVColor.fromAHSV(1, 0, 0, 0);
   static const Color defaultSolidColor = Color(0xFF747474);
   static const Color defaultGradientColorA =
       Color(0xFFFFFFFF); //Color(0xFFFF5678);
@@ -37,7 +38,7 @@ class InspectingColor {
 
   /// The value of the currently editing color.
   final ValueNotifier<HSVColor> editingColor =
-      ValueNotifier<HSVColor>(HSVColor.fromColor(const Color(0xFFFF0000)));
+      ValueNotifier<HSVColor>(defaultEditingColor);
 
   /// The list of color stops used if the current type is a gradient.
   final ValueNotifier<List<InspectingColorStop>> stops =
@@ -440,6 +441,10 @@ class InspectingColor {
         break;
     }
     type.value = colorType;
+    if (colorType == null) {
+      editingColor.value = defaultEditingColor;
+      preview.value = [];
+    }
   }
 
   void _notified() {

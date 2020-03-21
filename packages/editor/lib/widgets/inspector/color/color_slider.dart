@@ -79,13 +79,15 @@ class ColorSlider extends StatelessWidget {
                   ),
                 ),
                 endDrag: completeChange,
-                child: ColorGrabber(
-                  color: color,
-                  size: const Size(
-                    grabberSize,
-                    grabberSize,
-                  ),
-                ),
+                child: changeValue == null
+                    ? const SizedBox()
+                    : ColorGrabber(
+                        color: color,
+                        size: const Size(
+                          grabberSize,
+                          grabberSize,
+                        ),
+                      ),
               ),
               delegate: _ColorSliderPositionerDelegate(value),
             ),
