@@ -171,6 +171,15 @@ class InspectingColor {
     _updatePaints();
   }
 
+  /// Change the editing color stop index.
+  void changeStopIndex(int index) {
+    editingIndex.value = index;
+    _updatePaints();
+  }
+
+  /// Change the color type. This will clear out the existing paint mutators
+  /// from all the shapePaints (fills/strokes) and create new one matching the
+  /// desired type.
   void changeType(ColorType colorType) {
     if (type.value == colorType) {
       return;
@@ -230,6 +239,7 @@ class InspectingColor {
         _changeSolidColor(color.toColor());
         break;
       default:
+        _changeGradientColor(color.toColor());
         break;
     }
   }
@@ -259,6 +269,16 @@ class InspectingColor {
       notifier.removeListener(_notified);
     }
     _listeningTo.clear();
+  }
+
+  void _changeGradientColor(Color color) {
+    var index = editingIndex.value;
+    for (final paint in shapePaints) {
+      // This works because radial are also linear gradients.
+      var gradient = paint.paintMutator as core.LinearGradient;
+      gradient.gradientStops[index].color = color;
+    }
+    _updatePaints();
   }
 
   void _changeSolidColor(Color color) {
@@ -396,14 +416,16 @@ class InspectingColor {
           stops.value = [];
         } else {
           preview.value =
-              colorStops.map((stop) => stop.color).toList(growable: true);
+              colorStops.map((stop) => stop.color).toList(growable: false);
           stops.value = colorStops
               .map((stop) => InspectingColorStop(stop))
-              .toList(growable: true);
+              .toList(growable: false);
         }
         if (editingIndex.value >= stops.value.length) {
           editingIndex.value = stops.value.length - 1;
         }
+        editingColor.value =
+            HSVColor.fromColor(stops.value[editingIndex.value].color);
 
         // Listen to events we are interested in. These will trigger another
         // _updatePaints call.
@@ -412,6 +434,7 @@ class InspectingColor {
           _listenTo(gradient.stopsChanged);
           for (final stop in gradient.gradientStops) {
             _listenToCoreProperty(stop, GradientStopBase.positionPropertyKey);
+            _listenToCoreProperty(stop, GradientStopBase.colorValuePropertyKey);
           }
         }
         break;

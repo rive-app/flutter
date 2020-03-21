@@ -51,9 +51,7 @@ class ColorPopout extends StatelessWidget {
                     stops.map((stop) => stop.position).toList(growable: false),
                 hitTrack: inspecting.addStop,
                 changeValue: inspecting.changeStopPosition,
-                changeIndex: (index) {
-                  inspecting.editingIndex.value = index;
-                },
+                changeIndex: inspecting.changeStopIndex,
                 completeChange: inspecting.completeChange,
                 background: (context) => Container(
                   child: CustomPaint(
