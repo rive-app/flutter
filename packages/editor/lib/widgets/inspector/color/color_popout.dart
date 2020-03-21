@@ -42,15 +42,23 @@ class ColorPopout extends StatelessWidget {
           child: ValueListenableBuilder(
             valueListenable: inspecting.stops,
             builder: (context, List<InspectingColorStop> stops, child) =>
-                MultiColorSlider(
-              color: Colors.red,
-              values:
-                  stops.map((stop) => stop.position).toList(growable: false),
-              changeValue: (value) {},
-              completeChange: inspecting.completeChange,
-              background: (context) => Container(
-                child: CustomPaint(
-                  painter: GradientSliderBackground(stops),
+                ValueListenableBuilder(
+              valueListenable: inspecting.editingIndex,
+              builder: (context, int editingIndex, child) => MultiColorSlider(
+                color: stops[editingIndex].color,
+                activeIndex: editingIndex,
+                values:
+                    stops.map((stop) => stop.position).toList(growable: false),
+                hitTrack: inspecting.addStop,
+                changeValue: inspecting.changeStopPosition,
+                changeIndex: (index) {
+                  inspecting.editingIndex.value = index;
+                },
+                completeChange: inspecting.completeChange,
+                background: (context) => Container(
+                  child: CustomPaint(
+                    painter: GradientSliderBackground(stops),
+                  ),
                 ),
               ),
             ),

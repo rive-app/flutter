@@ -106,6 +106,7 @@ class MultiColorSlider extends StatelessWidget {
   final WidgetBuilder background;
   final List<double> values;
   final ChangeValueCallback changeValue;
+  final ChangeValueCallback hitTrack;
   final int activeIndex;
   final VoidCallback completeChange;
   final ChangeIndexCallback changeIndex;
@@ -118,6 +119,7 @@ class MultiColorSlider extends StatelessWidget {
     this.values,
     this.activeIndex,
     this.changeValue,
+    this.hitTrack,
     this.completeChange,
     this.changeIndex,
   }) : super(key: key);
@@ -131,7 +133,7 @@ class MultiColorSlider extends StatelessWidget {
       GestureDetector(
           behavior: HitTestBehavior.opaque,
           dragStartBehavior: DragStartBehavior.start,
-          onTapDown: (details) => changeValue?.call(
+          onTapDown: (details) => hitTrack?.call(
                 _localPositionToValue(
                   details.localPosition.dx,
                   context.size.width,
@@ -163,6 +165,7 @@ class MultiColorSlider extends StatelessWidget {
               CustomSingleChildLayout(
                 child: OverlayHitDetect(
                   dragContext: context,
+                  press: () => changeIndex(i),
                   drag: (position, _) => changeValue?.call(
                     _localPositionToValue(
                       position.dx,
