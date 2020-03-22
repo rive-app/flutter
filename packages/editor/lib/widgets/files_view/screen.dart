@@ -1,14 +1,11 @@
 import 'package:cursor/propagating_listener.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:dotted_border/dotted_border.dart';
-
 import 'package:rive_api/files.dart';
-
 import 'package:rive_core/selectable_item.dart';
-
 import 'package:rive_editor/main.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
@@ -17,21 +14,19 @@ import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
-import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
-import 'package:rive_editor/widgets/icons.dart';
-import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/marquee_selection.dart';
-import 'package:rive_editor/widgets/popup/list_popup.dart';
-import 'package:rive_editor/widgets/popup/popup.dart';
-import 'package:rive_editor/widgets/resize_panel.dart';
-
 import 'package:rive_editor/widgets/files_view/file.dart';
 import 'package:rive_editor/widgets/files_view/folder_tree.dart';
 import 'package:rive_editor/widgets/files_view/folder_view_widget.dart';
 import 'package:rive_editor/widgets/files_view/item_view.dart';
 import 'package:rive_editor/widgets/files_view/profile_view.dart';
+import 'package:rive_editor/widgets/files_view/top_nav.dart';
+import 'package:rive_editor/widgets/icons.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/marquee_selection.dart';
+import 'package:rive_editor/widgets/popup/popup.dart';
+import 'package:rive_editor/widgets/resize_panel.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
 const double kFileHeight = 190;
@@ -90,97 +85,13 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildCenter(Rive _rive) {
-    final fileBrowser = _rive.fileBrowser;
-    return LayoutBuilder(builder: (context, constraints) {
-      // _rive.fileBrowser.sizeChanged(constraints);
-      final riveColors = RiveTheme.of(context).colors;
-      return Padding(
-        padding: const EdgeInsets.only(top: 15, left: 30, right: 30),
-        child: Column(children: [
-          Row(children: [
-            PopupButton<PopupContextItem>(
-              builder: (context) {
-                return Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(51, 51, 51, 1),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: const AddIcon(color: Colors.white, size: 20),
-                );
-              },
-              itemBuilder: (context, item, isHovered) =>
-                  item.itemBuilder(context, isHovered),
-              items: [
-                PopupContextItem('New File', select: fileBrowser.createFile),
-                PopupContextItem('New Folder', select: () {
-                  print('Create Folder!');
-                })
-              ],
-            ),
-            Container(
-              // Buttons padding.
-              width: 10,
-            ),
-            // Wrap in LayoutBuilder to provide the child context for the 
-            // ListPopup to show up.
-            LayoutBuilder(builder: (userContext, constraints) {
-              return TintedIconButton(
-                onPress: () {
-                  ListPopup<PopupContextItem>.show(userContext,
-                      itemBuilder: (userContext, item, isHovered) =>
-                          item.itemBuilder(userContext, isHovered),
-                      items: [
-                        PopupContextItem('Your Profile', select: () {
-                          print('Profile?');
-                        })
-                      ],
-                      width: 177);
-                },
-                icon: 'user',
-                backgroundHover: const Color(0xFFF1F1F1),
-                iconHover: const Color(0xFF666666),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-              );
-            }),
-            // Wrap in LayoutBuilder to provide the child context for the 
-            // ListPopup to show up.
-            LayoutBuilder(builder: (settingsContext, constraints) {
-              return TintedIconButton(
-                onPress: () {
-                  ListPopup<PopupContextItem>.show(settingsContext,
-                      itemBuilder: (settingsContext, item, isHovered) =>
-                          item.itemBuilder(settingsContext, isHovered),
-                      items: [
-                        PopupContextItem('Settings', select: () {
-                          print('Settings?');
-                        })
-                      ],
-                      width: 177);
-                },
-                icon: 'settings',
-                backgroundHover: const Color(0xFFF1F1F1),
-                iconHover: const Color(0xFF666666),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-              );
-            }),
-          ]),
-          Padding(
-            padding: const EdgeInsets.only(top: 18.0, bottom: 30),
-            child: _buildDivider(riveColors.fileLineGrey),
-          )
-        ]),
-      );
-    });
+  Widget _buildCenter(Rive rive) {
+    final fileBrowser = rive.fileBrowser;
+    final scrollController = ScrollController();
 
-    final _scrollController = ScrollController();
     return LayoutBuilder(
       builder: (context, dimens) {
-        _rive.fileBrowser.sizeChanged(dimens);
+        fileBrowser.sizeChanged(dimens);
 
         return Consumer<FileBrowser>(
           builder: (context, browser, child) {
@@ -199,21 +110,28 @@ class FilesView extends StatelessWidget {
                   : ValueListenableBuilder<bool>(
                       valueListenable: browser.draggingState,
                       builder: (context, dragging, child) => MarqueeScrollView(
-                        rive: _rive,
+                        rive: rive,
                         enable: !dragging,
                         child: child,
-                        controller: _scrollController,
+                        controller: scrollController,
                       ),
                       child: CustomScrollView(
-                        controller: _scrollController,
+                        controller: scrollController,
                         physics: const NeverScrollableScrollPhysics(),
                         slivers: <Widget>[
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 30, vertical: 15),
+                              child: TopNav(fileBrowser),
+                            ),
+                          ),
                           if (folders != null && folders.isNotEmpty) ...[
                             const SliverToBoxAdapter(
                               child: TitleSection(
                                 name: 'Folders',
                                 height: kGridHeaderHeight,
-                                showDropdown: true,
+                                showDropdown: false,
                               ),
                             ),
                             _buildFolders(folders, browser),
@@ -227,7 +145,7 @@ class FilesView extends StatelessWidget {
                                     folders == null || folders.isEmpty,
                               ),
                             ),
-                            _buildFiles(context, files, browser, _rive),
+                            _buildFiles(context, files, browser, rive),
                           ],
                         ],
                       ),
@@ -270,6 +188,7 @@ class FilesView extends StatelessWidget {
   }
 
   Widget _buildEmpty(BuildContext context) {
+    return Container();
     return Column(
       children: [
         const TitleSection(
@@ -340,6 +259,8 @@ class FilesView extends StatelessWidget {
 
   Widget _buildFiles(BuildContext context, List<RiveFile> files,
       FileBrowser browser, Rive _rive) {
+    if (files == null || files.isEmpty) return null;
+
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: kGridSpacing),
       sliver: SliverGrid(
@@ -409,6 +330,8 @@ class FilesView extends StatelessWidget {
   }
 
   Widget _buildFolders(List<RiveFolder> folders, FileBrowser browser) {
+    if (folders == null || folders.isEmpty) return null;
+
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: kGridSpacing),
       sliver: SliverGrid(
@@ -620,9 +543,9 @@ class TitleSection extends StatelessWidget {
   final bool showDropdown;
   final double height;
   const TitleSection({
-    Key key,
     @required this.name,
     @required this.height,
+    Key key,
     this.showDropdown = false,
   }) : super(key: key);
 

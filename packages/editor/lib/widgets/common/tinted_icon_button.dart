@@ -45,7 +45,7 @@ class _TintedIconButtonState extends State<TintedIconButton> {
   @override
   Widget build(BuildContext context) {
     final themeColors = RiveTheme.of(context).colors;
-    // Override hover color if needed.
+
     final backgroundHover = _isHovered
         ? widget.backgroundHover ?? themeColors.toolbarButtonBackGroundHover
         : Colors.transparent;

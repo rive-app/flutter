@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
+import 'package:rive_editor/rive/file_browser/controller.dart';
+import 'package:rive_editor/rive/file_browser/rive_file.dart';
+import 'package:rive_editor/rive/file_browser/rive_folder.dart';
+import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/files_view/screen.dart';
 import 'package:tree_widget/flat_tree_item.dart';
-
-import '../../widgets/files_view/screen.dart';
-import '../rive.dart';
-import 'browser_tree_controller.dart';
-import 'controller.dart';
-import 'rive_file.dart';
-import 'rive_folder.dart';
 
 const kTreeItemHeight = 35.0;
 
