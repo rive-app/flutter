@@ -5,9 +5,9 @@ import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
+import 'package:rive_editor/widgets/popup/tooltip_item.dart';
 
 class TopNav extends StatelessWidget {
   final FileBrowser fileBrowser;
@@ -49,17 +49,9 @@ class TopNav extends StatelessWidget {
         // ListPopup to show up.
         LayoutBuilder(builder: (userContext, constraints) {
           return TintedIconButton(
-            onPress: () {
-              ListPopup<PopupContextItem>.show(userContext,
-                  itemBuilder: (userContext, item, isHovered) =>
-                      item.itemBuilder(userContext, isHovered),
-                  items: [
-                    PopupContextItem('Your Profile', select: () {
-                      print('Profile?');
-                    })
-                  ],
-                  width: 115);
-            },
+            onPress: () {/** TODO: */},
+            tooltipItems: [TooltipItem('Your Profile')],
+            tooltipWidth: 96,
             icon: 'user',
             backgroundHover: const Color(0xFFF1F1F1),
             iconHover: const Color(0xFF666666),
@@ -70,17 +62,9 @@ class TopNav extends StatelessWidget {
         // ListPopup to show up.
         LayoutBuilder(builder: (settingsContext, constraints) {
           return TintedIconButton(
-            onPress: () {
-              ListPopup<PopupContextItem>.show(settingsContext,
-                  itemBuilder: (settingsContext, item, isHovered) =>
-                      item.itemBuilder(settingsContext, isHovered),
-                  items: [
-                    PopupContextItem('Settings', select: () {
-                      print('Settings?');
-                    })
-                  ],
-                  width: 95);
-            },
+            onPress: () {/** TODO: */},
+            tooltipItems: [TooltipItem('Settings')],
+            tooltipWidth: 76,
             icon: 'settings',
             backgroundHover: const Color(0xFFF1F1F1),
             iconHover: const Color(0xFF666666),
@@ -91,7 +75,7 @@ class TopNav extends StatelessWidget {
         ValueListenableBuilder<RiveFileSortOption>(
           valueListenable: fileBrowser.selectedSortOption,
           builder: (sortBoxContext, sortOption, _) =>
-                  ComboBox<RiveFileSortOption>(
+              ComboBox<RiveFileSortOption>(
             popupWidth: 100,
             sizing: ComboSizing.collapsed,
             underline: false,
