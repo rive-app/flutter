@@ -19,7 +19,7 @@ abstract class PopupListItem {
   /// Whether selection of the item will result in dismissing the popup.
   bool get dismissOnSelect => true;
 
-  /// Whether all items get dismissed when ths one does.
+  /// Whether all items get dismissed when this one does.
   bool get dismissAll => true;
 
   /// Child popup displayed when this list item is hovered over.

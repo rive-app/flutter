@@ -145,6 +145,9 @@ class TextStyles {
 
   TextStyle get popupShortcutText => const TextStyle(
       fontFamily: 'Roboto-Light', color: Color(0xFF666666), fontSize: 13);
+  
+  TextStyle get tooltipText => const TextStyle(
+      fontFamily: 'Roboto-Light', color: Color(0xFFCCCCCC), fontSize: 13);
 
   // Files
   TextStyle get fileBlueText => const TextStyle(
