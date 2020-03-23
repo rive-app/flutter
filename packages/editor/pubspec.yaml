@@ -19,6 +19,7 @@ dependencies:
   rive_api:
     path: ../rive_api
 
+  http: ^0.12.0+4
   trotter: ^1.1.0
   path_drawing: ^0.4.1
   dotted_border: ^1.0.4
@@ -38,8 +39,6 @@ flutter:
   assets:
     - assets/images/
     - assets/images/icons/
-    # Changelog markdown and images
-    - assets/changelog/
     
   uses-material-design: true
   fonts:

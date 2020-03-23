@@ -189,7 +189,7 @@ class Rive with RiveFileDelegate {
       _user.value = me;
       tabs.value = [
         RiveTabItem(name: me.name, closeable: false),
-        RiveTabItem(name: 'Changelog'),
+        const RiveTabItem(name: 'Changelog', closeable: false),
       ];
       _state.value = RiveState.editor;
       // Save token in localSettings

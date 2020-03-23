@@ -10,7 +10,7 @@ import 'tab_decoration.dart';
 
 /// Describes a Rive tab item.
 class RiveTabItem {
-  RiveTabItem({
+  const RiveTabItem({
     this.name,
     this.icon,
     this.closeable = true,
