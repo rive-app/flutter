@@ -4,10 +4,10 @@ import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/path_widget.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'package:rive_editor/widgets/popup/tooltip_item.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class TopNav extends StatelessWidget {
   final FileBrowser fileBrowser;
@@ -22,10 +22,6 @@ class TopNav extends StatelessWidget {
       Row(children: [
         PopupButton<PopupContextItem>(
           builder: (context) {
-            final plusPath = Path()
-              ..addRect(const Rect.fromLTWH(13 / 2 - 1.37 / 2, -13, 1.37, 13))
-              ..addRect(const Rect.fromLTWH(0, -13 / 2 - 1.37 / 2, 13, 1.37));
-
             return Container(
                 width: 29,
                 height: 29,
@@ -34,13 +30,8 @@ class TopNav extends StatelessWidget {
                     shape: BoxShape.circle),
                 child: Center(
                   child: Container(
-                      child: PathWidget(
-                          path: plusPath,
-                          paint: Paint()
-                            ..color = Colors.white
-                            ..style = PaintingStyle.fill
-                            ..isAntiAlias = true)),
-                ));
+                    child: TintedIcon(color: Colors.white, icon: 'add')
+                )));
           },
           itemBuilder: (context, item, isHovered) =>
               item.itemBuilder(context, isHovered),
