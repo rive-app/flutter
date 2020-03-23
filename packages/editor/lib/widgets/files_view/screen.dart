@@ -15,6 +15,7 @@ import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/dialog/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
@@ -172,6 +173,7 @@ class FilesView extends StatelessWidget {
     return Row(children: <Widget>[
       Expanded(
         child: Container(
+          margin: EdgeInsets.only(left: left),
           color: RiveTheme.of(context).colors.fileLineGrey,
           height: 1,
         ),
@@ -487,7 +489,25 @@ class FilesView extends StatelessWidget {
                 itemHeight: kTreeItemHeight,
               ),
             ),
-          )
+          ),
+          Container(
+            height: kTreeItemHeight,
+            margin: const EdgeInsets.only(top: 0, bottom: 3),
+            child: _buildDivider(context, 20),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 0.5),
+            child: DashedFlatButton(
+              label: 'New Team',
+              icon: 'teams-button',
+              onTap: () {
+                showRiveSettings<void>(
+                  context: context,
+                  screens: teamSettingsScreens,
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
