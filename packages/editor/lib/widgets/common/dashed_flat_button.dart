@@ -55,6 +55,7 @@ class DashedFlatButton extends StatelessWidget {
       color: Colors.transparent,
       onTap: onTap,
     );
+    // TODO: change tooltip for the tooltip widget that we're building
     return Stack(
       children: <Widget>[
         Positioned.fill(
@@ -62,7 +63,9 @@ class DashedFlatButton extends StatelessWidget {
             painter: DashedPainter(radius: button.radius),
           ),
         ),
-        button
+        Tooltip(
+            message: 'Create a space where you and\nyour team can share files.',
+            child: button)
       ],
     );
   }
