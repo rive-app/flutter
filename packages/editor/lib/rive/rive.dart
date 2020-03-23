@@ -93,8 +93,11 @@ class Rive with RiveFileDelegate {
   Rive({this.iconCache, this.focusNode});
   ValueListenable<RiveUser> get user => _user;
 
+  /// Available tabs in the editor
   final ValueNotifier<List<RiveTabItem>> tabs =
       ValueNotifier<List<RiveTabItem>>([]);
+
+  /// Currently selected tab
   final ValueNotifier<RiveTabItem> selectedTab =
       ValueNotifier<RiveTabItem>(null);
 
@@ -186,6 +189,7 @@ class Rive with RiveFileDelegate {
       _user.value = me;
       tabs.value = [
         RiveTabItem(name: me.name, closeable: false),
+        RiveTabItem(name: 'Changelog'),
       ];
       _state.value = RiveState.editor;
       // Save token in localSettings
@@ -215,6 +219,8 @@ class Rive with RiveFileDelegate {
       // hackity hack hack, this is the files tab.
       fileBrowser.load();
     }
+    if (value.name == 'Changelog') {}
+
     selectedTab.value = value;
   }
 
