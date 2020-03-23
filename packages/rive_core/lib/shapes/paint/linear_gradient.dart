@@ -30,7 +30,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
       return;
     }
     _paintsInWorldSpace = value;
-    addDirt(ComponentDirt.gradient);
+    addDirt(ComponentDirt.paint);
   }
 
   Vec2D get start => Vec2D.fromValues(startX, startY);
@@ -69,11 +69,11 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   /// Mark the gradient stops as changed. This will re-sort the stops and
   /// rebuild the necessary gradients in the next update cycle.
   void markStopsDirty() =>
-      addDirt(ComponentDirt.stops | ComponentDirt.gradient);
+      addDirt(ComponentDirt.stops | ComponentDirt.paint);
 
   /// Mark the gradient as needing to be rebuilt. This is a more efficient
   /// version of markStopsDirty as it won't re-sort the stops.
-  void markGradientDirty() => addDirt(ComponentDirt.gradient);
+  void markGradientDirty() => addDirt(ComponentDirt.paint);
 
   @override
   void update(int dirt) {
@@ -84,7 +84,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
 
     // We rebuild the gradient if the gradient is dirty or we paint in world
     // space and the world space transform has changed.
-    var rebuildGradient = dirt & ComponentDirt.gradient != 0 ||
+    var rebuildGradient = dirt & ComponentDirt.paint != 0 ||
         (paintsInWorldSpace && dirt & ComponentDirt.worldTransform != 0);
 
     if (rebuildGradient) {

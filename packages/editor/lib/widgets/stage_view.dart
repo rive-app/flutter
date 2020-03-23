@@ -80,7 +80,6 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
       _frameCallbackID =
           SchedulerBinding.instance.scheduleFrameCallback(_beginFrame);
     }
-
     _stage.paint(context, offset, size);
   }
 

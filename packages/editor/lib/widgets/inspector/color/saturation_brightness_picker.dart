@@ -72,7 +72,7 @@ class SaturationBrightnessPicker extends StatelessWidget {
             child: OverlayHitDetect(
               dragContext: context,
               drag: (_, normalizedPosition) {
-                change(
+                change?.call(
                   HSVColor.fromAHSV(
                     hsv.alpha,
                     hsv.hue,
@@ -82,7 +82,7 @@ class SaturationBrightnessPicker extends StatelessWidget {
                 );
               },
               endDrag: complete,
-              child: ColorGrabber(
+              child: change == null ? const SizedBox() : ColorGrabber(
                 color: HSVColor.fromAHSV(
                   1,
                   hsv.hue,

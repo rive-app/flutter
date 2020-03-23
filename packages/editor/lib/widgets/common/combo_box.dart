@@ -60,6 +60,7 @@ class ComboBox<T> extends StatefulWidget {
   final ChooseOption<T> change;
   final OptionToLabel<T> toLabel;
   final bool typeahead;
+  final Alignment alignment;
 
   static const double _chevronWidth = 5;
   static const double _horizontalPadding = 15;
@@ -76,6 +77,7 @@ class ComboBox<T> extends StatefulWidget {
     this.change,
     this.toLabel,
     this.typeahead = false,
+    this.alignment = Alignment.topLeft,
   }) : super(key: key);
 
   @override
@@ -154,19 +156,21 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
       case ComboSizing.expanded:
         return Expanded(child: child);
       case ComboSizing.content:
-        return Container(width: contentWidth, child: child);
+        return SizedBox(width: contentWidth, child: child);
     }
     return child;
   }
 
   Widget _expand(Widget child) {
     switch (widget.sizing) {
-      case ComboSizing.collapsed:
-        return child;
       case ComboSizing.expanded:
         return Expanded(child: child);
+      case ComboSizing.collapsed:
       case ComboSizing.content:
-        return child;
+        return UnconstrainedBox(
+          child: child,
+          alignment: widget.alignment,
+        );
     }
     return child;
   }
@@ -291,19 +295,13 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return _expand(
-      GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) {
-          var width = widget.popupWidth;
-          if (width == null) {
-            RenderBox renderBox = context.findRenderObject() as RenderBox;
-            width = renderBox.size.width;
-            // add chevron dimensions
-            if (widget.chevron) {
-              // chevron is 5 pixels wide
-              width += ComboBox._horizontalPadding + ComboBox._chevronWidth;
-            }
-          }
+      _ComboGestureDetector(
+        open: (offset, size) {
+          var width = widget.popupWidth ??
+              size.width +
+                  (widget.chevron
+                      ? ComboBox._horizontalPadding + ComboBox._chevronWidth
+                      : 0);
 
           // Wrap our items in PopupListItem.
           var items = widget.options
@@ -314,8 +312,9 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
             _popup = ListPopup<_ComboOption<T>>.show(
               context,
               handleKeyPresses: !widget.typeahead,
-              offset: Offset(-ComboBox._horizontalPadding,
-                  widget.typeahead ? 0 : widget.underline ? -34 : -30),
+              offset: offset +
+                  Offset(-ComboBox._horizontalPadding,
+                      widget.typeahead ? 0 : widget.underline ? -34 : -30),
               margin: 5,
               includeCloseGuard: true,
               showArrow: false,
@@ -360,4 +359,34 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
       ),
     );
   }
+}
+
+/// We break the detector in its own widget so we can properly calculate the
+/// relative offset and size of just the content that can be tapped on to report
+/// back to the combo box widget itself. It uses those dimensions and positions
+/// to open a popup in the correct location and of the correct size.
+class _ComboGestureDetector extends StatelessWidget {
+  final void Function(Offset, Size) open;
+  final Widget child;
+
+  const _ComboGestureDetector({
+    @required this.open,
+    @required this.child,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) {
+          RenderBox renderBox = context.findRenderObject() as RenderBox;
+          Offset offset = renderBox.parent is RenderBox
+              ? renderBox.localToGlobal(Offset.zero,
+                  ancestor: renderBox.parent as RenderBox)
+              : Offset.zero;
+
+          open(offset, renderBox.size);
+        },
+        child: child,
+      );
 }

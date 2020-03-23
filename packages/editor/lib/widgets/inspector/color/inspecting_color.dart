@@ -2,7 +2,8 @@ import 'package:core/debounce.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/component.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' as core;
+import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/transform_space.dart';
@@ -19,19 +20,34 @@ typedef ChangeColor = void Function(HSVColor);
 
 /// Abstraction of the currently inspected color.
 class InspectingColor {
+  static const HSVColor defaultEditingColor = HSVColor.fromAHSV(1, 0, 0, 0);
   static const Color defaultSolidColor = Color(0xFF747474);
-  static const Color defaultGradientColorA = Color(0xFFFF5678);
-  static const Color defaultGradientColorB = Color(0xFFD041AB);
+  static const Color defaultGradientColorA =
+      Color(0xFFFFFFFF); //Color(0xFFFF5678);
+  static const Color defaultGradientColorB =
+      Color(0xFF000000); //Color(0xFFD041AB);
 
-  ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
-  ValueNotifier<List<Color>> preview = ValueNotifier<List<Color>>([]);
-  ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
-  ValueNotifier<HSVColor> editingColor =
-      ValueNotifier<HSVColor>(HSVColor.fromColor(const Color(0xFFFF0000)));
+  /// Whether the inspecting color is a solid or a linear/radial gradient.
+  final ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
+
+  /// The colors to show in the preview swatch.
+  final ValueNotifier<List<Color>> preview = ValueNotifier<List<Color>>([]);
+
+  /// The editing index in the list of color stops.
+  final ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
+
+  /// The value of the currently editing color.
+  final ValueNotifier<HSVColor> editingColor =
+      ValueNotifier<HSVColor>(defaultEditingColor);
+
+  /// The list of color stops used if the current type is a gradient.
+  final ValueNotifier<List<InspectingColorStop>> stops =
+      ValueNotifier<List<InspectingColorStop>>(null);
 
   /// Track which properties we're listening to on each component. This varies
   /// depending on whether it's a solid color, gradient, etc.
-  final Map<Component, Set<int>> _listeningTo = {};
+  final Map<Component, Set<int>> _listeningToCoreProperties = {};
+  final Set<ChangeNotifier> _listeningTo = {};
 
   /// Whether we should perform an update in response to a core value change.
   /// This allows us to not re-process updates as we're interactively changing
@@ -75,6 +91,96 @@ class InspectingColor {
     return gradient;
   }
 
+  /// Add a gradient stop at [position].
+  void addStop(double position) {
+    assert(position >= 0 && position <= 1);
+    assert(type.value == ColorType.linear || type.value == ColorType.radial);
+
+    var file = context;
+
+    // Find the interpolated color value that's at the position.
+    var gradientStops = stops.value;
+    Color colorAtPosition;
+    int index =
+        gradientStops.indexWhere((element) => element.position >= position);
+    int newIndex;
+    if (index == -1) {
+      // All stops are less than the currently supplied position.
+      colorAtPosition = gradientStops.last.color;
+      // At end.
+      newIndex = gradientStops.length;
+    } else if (index == 0) {
+      // All stops are greater than the currently supplied position.
+      colorAtPosition = gradientStops.first.color;
+      // At start.
+      newIndex = 0;
+    } else {
+      // Interpolate between index and index+1
+      var from = gradientStops[index - 1];
+      var to = gradientStops[index];
+      colorAtPosition = Color.lerp(from.color, to.color,
+          (position - from.position) / (to.position - from.position));
+      newIndex = index;
+    }
+
+    // Batch the operation so that we can pick apart the hierarchy and then
+    // resolve once we're done changing everything.
+    file.batchAdd(() {
+      for (final paint in shapePaints) {
+        // This works because radial are also linear gradients.
+        var gradient = paint.paintMutator as core.LinearGradient;
+        var gradientStop = GradientStop()
+          ..color = colorAtPosition
+          ..position = position;
+        file.add(gradientStop);
+        gradient.appendChild(gradientStop);
+        gradient.update(ComponentDirt.stops);
+      }
+    });
+    editingIndex.value = newIndex;
+    _updatePaints();
+
+    completeChange();
+  }
+
+  /// Change the position of the currently selected (determined by
+  /// [editingIndex]) gradient stop.
+  void changeStopPosition(double position) {
+    assert(type.value == ColorType.linear || type.value == ColorType.radial);
+    int index = editingIndex.value;
+    int newStopIndex = -1;
+    for (final paint in shapePaints) {
+      var gradient = paint.paintMutator as core.LinearGradient;
+      var stop = gradient.gradientStops[index];
+      stop.position = position;
+      // Force update the stops as we change them. This is pretty hideous but we
+      // don't want to bloat LinearGradient to handle this differently as at
+      // runtime most people will just be setting the position on a
+      // GradientStop. We need to immediately know the correct order of the
+      // stops, this forces the re-sort.
+      gradient.update(ComponentDirt.stops);
+      // Find where the index ended up. We can assume if one stop changes all of
+      // them do.
+      if (newStopIndex == -1) {
+        newStopIndex = gradient.gradientStops.indexOf(stop);
+      }
+    }
+    if (newStopIndex != index) {
+      editingIndex.value = newStopIndex;
+    }
+
+    _updatePaints();
+  }
+
+  /// Change the editing color stop index.
+  void changeStopIndex(int index) {
+    editingIndex.value = index;
+    _updatePaints();
+  }
+
+  /// Change the color type. This will clear out the existing paint mutators
+  /// from all the shapePaints (fills/strokes) and create new one matching the
+  /// desired type.
   void changeType(ColorType colorType) {
     if (type.value == colorType) {
       return;
@@ -134,6 +240,7 @@ class InspectingColor {
         _changeSolidColor(color.toColor());
         break;
       default:
+        _changeGradientColor(color.toColor());
         break;
     }
   }
@@ -153,11 +260,26 @@ class InspectingColor {
 
   void _clearListeners() {
     // clear out old listeners
-    _listeningTo.forEach((component, value) {
+    _listeningToCoreProperties.forEach((component, value) {
       for (final propertyKey in value) {
         component.removeListener(propertyKey, _valueChanged);
       }
     });
+    _listeningToCoreProperties.clear();
+    for (final notifier in _listeningTo) {
+      notifier.removeListener(_notified);
+    }
+    _listeningTo.clear();
+  }
+
+  void _changeGradientColor(Color color) {
+    var index = editingIndex.value;
+    for (final paint in shapePaints) {
+      // This works because radial are also linear gradients.
+      var gradient = paint.paintMutator as core.LinearGradient;
+      gradient.gradientStops[index].color = color;
+    }
+    _updatePaints();
   }
 
   void _changeSolidColor(Color color) {
@@ -192,7 +314,7 @@ class InspectingColor {
 
     if (added) {
       // Re-build the listeners if we added objects.
-      _updatePaints(forceRelisten: true);
+      _updatePaints();
     }
     // Force update the preview.
     preview.value = [editingColor.value.toColor()];
@@ -200,15 +322,21 @@ class InspectingColor {
     // });
   }
 
-  void _listenTo(Component component, int propertyKey) {
+  void _listenToCoreProperty(Component component, int propertyKey) {
     if (component.addListener(propertyKey, _valueChanged)) {
-      var keySet = _listeningTo[component] ??= {};
+      var keySet = _listeningToCoreProperties[component] ??= {};
       keySet.add(propertyKey);
     }
   }
 
+  void _listenTo(ChangeNotifier notifier) {
+    if (_listeningTo.add(notifier)) {
+      notifier.addListener(_notified);
+    }
+  }
+
   ColorType _determineColorType() =>
-      equalValue<ShapePaint, ColorType>(shapePaints, (shapePaint) {
+      core.equalValue<ShapePaint, ColorType>(shapePaints, (shapePaint) {
         // determine which concrete color type this shapePaint is using.
         var colorComponent = shapePaint.paintMutator as Component;
         if (colorComponent == null) {
@@ -227,13 +355,11 @@ class InspectingColor {
 
   /// Update current color type and state, also register (and cleanup) listeners
   /// for changes due to undo/redo.
-  void _updatePaints({bool forceRelisten = false}) {
+  void _updatePaints() {
     // Are we all the same type?
     var colorType = _determineColorType();
-    var relisten = type.value != colorType || forceRelisten;
-    if (relisten) {
-      _clearListeners();
-    }
+
+    _clearListeners();
 
     var first = shapePaints.first.paintMutator;
     switch (colorType) {
@@ -245,25 +371,87 @@ class InspectingColor {
         if (preview.value.length != 1 ||
             preview.value.first != editingColor.value.toColor()) {
           // check all colors are the same
-          Color color = equalValue<ShapePaint, Color>(shapePaints,
+          Color color = core.equalValue<ShapePaint, Color>(shapePaints,
               (shapePaint) => (shapePaint.paintMutator as SolidColor).color);
           preview.value = color == null ? [] : [color];
         }
 
-        if (relisten) {
-          // Since they're all solid, we know they'll all have a Core colorValue
-          // that change that we want to listen to.
-          for (final shapePaint in shapePaints) {
-            _listenTo(shapePaint.paintMutator as Component,
-                SolidColorBase.colorValuePropertyKey);
-          }
+        // Since they're all solid, we know they'll all have a Core colorValue
+        // that change that we want to listen to.
+        for (final shapePaint in shapePaints) {
+          _listenToCoreProperty(shapePaint.paintMutator as Component,
+              SolidColorBase.colorValuePropertyKey);
         }
+
         break;
       case ColorType.linear:
       case ColorType.radial:
+        // Check if all the colorStops are the same across the selected
+        // shapePaints. This is pretty verbose, but what it boils down to is
+        // needing a custom equality check for GradientStops as we didn't want
+        // to override the equality check on the core values as their default
+        // equality should be based on exact reference. Since the GradienStops
+        // are stored in Lists, we need a custom equality check for the
+        // equalValue call too.
+        List<GradientStop> colorStops =
+            core.equalValue<ShapePaint, List<GradientStop>>(
+          shapePaints,
+          (shapePaint) =>
+              (shapePaint.paintMutator as core.LinearGradient).gradientStops,
+          // Override the equality check for the equalValue as we want it to use
+          // listEquals
+          equalityCheck: (a, b) => core.listEquals(
+            a,
+            b,
+            // Override the listEquals equality as in this case we consider
+            // GradientStops equal if they have the same value and color.
+            equalityCheck: (GradientStop a, GradientStop b) =>
+                a.colorValue == b.colorValue && a.position == b.position,
+          ),
+        );
+
+        // Set the preview swatch color and the stops abstraction for the whole
+        // selected set.
+        if (colorStops == null) {
+          preview.value = [];
+          stops.value = [];
+        } else {
+          preview.value =
+              colorStops.map((stop) => stop.color).toList(growable: false);
+          stops.value = colorStops
+              .map((stop) => InspectingColorStop(stop))
+              .toList(growable: false);
+        }
+        if (editingIndex.value >= stops.value.length) {
+          editingIndex.value = stops.value.length - 1;
+        }
+        editingColor.value =
+            HSVColor.fromColor(stops.value[editingIndex.value].color);
+
+        // Listen to events we are interested in. These will trigger another
+        // _updatePaints call.
+        for (final shapePaint in shapePaints) {
+          var gradient = shapePaint.paintMutator as core.LinearGradient;
+          _listenTo(gradient.stopsChanged);
+          for (final stop in gradient.gradientStops) {
+            _listenToCoreProperty(stop, GradientStopBase.positionPropertyKey);
+            _listenToCoreProperty(stop, GradientStopBase.colorValuePropertyKey);
+          }
+        }
         break;
     }
     type.value = colorType;
+    if (colorType == null) {
+      editingColor.value = defaultEditingColor;
+      preview.value = [];
+    }
+  }
+
+  void _notified() {
+    if (_suppressUpdating) {
+      return;
+    }
+    debounce(_updatePaints);
   }
 
   void _valueChanged(dynamic from, dynamic to) {
@@ -279,4 +467,18 @@ class InspectingColor {
     }
     debounce(_updatePaints);
   }
+}
+
+/// Inspector specific data for the color stop. We need the common gradient
+/// properties across the full selection set. This is a simplified data
+/// representation just for the purposes of the inspector.
+class InspectingColorStop {
+  final double position;
+  final Color color;
+
+  InspectingColorStop(GradientStop stop)
+      : position = stop.position,
+        color = stop.color;
+
+  InspectingColorStop.fromValues(this.position, this.color);
 }

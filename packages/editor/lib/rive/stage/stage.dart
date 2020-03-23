@@ -489,6 +489,7 @@ class Stage extends Debouncer {
 
   void advance(double elapsed) {
     debounceAll();
+    markNeedsRedraw();
 
     _needsAdvance = false;
     for (final advancers in _advancingItems) {

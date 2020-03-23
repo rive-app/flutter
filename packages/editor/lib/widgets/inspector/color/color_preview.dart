@@ -57,12 +57,12 @@ class _ColorPreviewRenderObject extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     var canvas = context.canvas;
-    if (colors.length > 2) {
+    if (colors.length > 1) {
       _fillPaint
         ..shader = LinearGradient(
           colors: colors,
         ).createShader(offset & size)
-        ..color = null;
+        ..color = const Color(0xFFFFFFFF);
     } else if (colors.length == 1) {
       _fillPaint
         ..shader = null

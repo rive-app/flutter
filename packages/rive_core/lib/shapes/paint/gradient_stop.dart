@@ -4,6 +4,8 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/shapes/paint/gradient_stop_base.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 
+export 'package:rive_core/src/generated/shapes/paint/gradient_stop_base.dart';
+
 class GradientStop extends GradientStopBase {
   LinearGradient _gradient;
   ui.Color get color => ui.Color(colorValue);

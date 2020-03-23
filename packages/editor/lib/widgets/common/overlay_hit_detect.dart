@@ -14,6 +14,7 @@ class OverlayHitDetect extends StatefulWidget {
   final BuildContext dragContext;
   final DragProxy drag;
   final VoidCallback endDrag;
+  final VoidCallback press;
 
   const OverlayHitDetect({
     Key key,
@@ -21,6 +22,7 @@ class OverlayHitDetect extends StatefulWidget {
     this.dragContext,
     this.drag,
     this.endDrag,
+    this.press,
   }) : super(key: key);
 
   @override
@@ -52,6 +54,9 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
           width: size.width,
           height: size.height,
           child: Listener(
+            onPointerDown: (details) {
+              widget.press?.call();
+            },
             onPointerMove: (details) {
               var pos = dragRenderBox.globalToLocal(details.position);
 
