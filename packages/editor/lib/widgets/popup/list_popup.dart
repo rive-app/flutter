@@ -290,6 +290,9 @@ class ListPopup<T extends PopupListItem> {
       handleKeyPresses: handleKeyPresses,
     );
 
+    // Compensate alignment for smaller widgets.
+    final nudgeX = min<double>(15, size.width / 2 - 6);
+
     //var listFocusNode = FocusNode(canRequestFocus: true, skipTraversal: true);
     list._popup = Popup.show(
       context,
@@ -311,7 +314,7 @@ class ListPopup<T extends PopupListItem> {
                     showArrow
                         ? PathWidget(
                             path: _pathArrow,
-                            nudge: const Offset(15, 0),
+                            nudge: Offset(nudgeX, 0),
                             paint: Paint()
                               ..color = background
                               ..style = PaintingStyle.fill
