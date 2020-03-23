@@ -6,6 +6,7 @@ import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
+import 'package:rive_editor/widgets/popup/tooltip_button.dart';
 import 'package:rive_editor/widgets/popup/tooltip_item.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -21,20 +22,18 @@ class TopNav extends StatelessWidget {
     return Column(children: [
       Row(children: [
         PopupButton<PopupContextItem>(
-          builder: (context) {
+          builder: (popupContext) {
             return Container(
                 width: 29,
                 height: 29,
                 decoration: BoxDecoration(
-                    color: riveColors.commonDarkGrey,
-                    shape: BoxShape.circle),
+                    color: riveColors.commonDarkGrey, shape: BoxShape.circle),
                 child: Center(
-                  child: Container(
-                    child: TintedIcon(color: Colors.white, icon: 'add')
-                )));
+                    child: Container(
+                        child: TintedIcon(color: Colors.white, icon: 'add'))));
           },
-          itemBuilder: (context, item, isHovered) =>
-              item.itemBuilder(context, isHovered),
+          itemBuilder: (popupContext, item, isHovered) =>
+              item.itemBuilder(popupContext, isHovered),
           items: [
             PopupContextItem('New File', select: fileBrowser.createFile),
             PopupContextItem('New Folder', select: () {
@@ -42,36 +41,42 @@ class TopNav extends StatelessWidget {
             })
           ],
         ),
-        const SizedBox(
-          // Buttons padding.
-          width: 10,
+        // Buttons padding.
+        const SizedBox(width: 10),
+        TooltipButton(
+          builder: (tooltipContext) {
+            return TintedIconButton(
+              onPress: () {/** TODO: */},
+              icon: 'user',
+              backgroundHover: riveColors.fileBackgroundLightGrey,
+              iconHover: riveColors.fileBackgroundDarkGrey,
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            );
+          },
+          itemBuilder: (tooltipContext, item) =>
+              item.itemBuilder(tooltipContext),
+          items: [
+            TooltipItem('Your Profile')
+          ],
+          width: 96,
         ),
-        // Wrap in LayoutBuilder to provide the child context for the
-        // ListPopup to show up.
-        LayoutBuilder(builder: (userContext, constraints) {
-          return TintedIconButton(
-            onPress: () {/** TODO: */},
-            tooltipItems: [TooltipItem('Your Profile')],
-            tooltipWidth: 96,
-            icon: 'user',
-            backgroundHover: riveColors.fileBackgroundLightGrey,
-            iconHover: riveColors.fileBackgroundDarkGrey,
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          );
-        }),
-        // Wrap in LayoutBuilder to provide the child context for the
-        // ListPopup to show up.
-        LayoutBuilder(builder: (settingsContext, constraints) {
-          return TintedIconButton(
-            onPress: () {/** TODO: */},
-            tooltipItems: [TooltipItem('Settings')],
-            tooltipWidth: 76,
-            icon: 'settings',
-            backgroundHover: riveColors.fileBackgroundLightGrey,
-            iconHover: riveColors.fileBackgroundDarkGrey,
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          );
-        }),
+        TooltipButton(
+          builder: (tooltipContext) {
+            return TintedIconButton(
+              onPress: () {/** TODO: */},
+              icon: 'settings',
+              backgroundHover: riveColors.fileBackgroundLightGrey,
+              iconHover: riveColors.fileBackgroundDarkGrey,
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            );
+          },
+          itemBuilder: (tooltipContext, item) =>
+              item.itemBuilder(tooltipContext),
+          items: [
+            TooltipItem('Settings')
+          ],
+          width: 76,
+        ),
         const Spacer(), // Fill up the row to show ComboBox at the end.
         ValueListenableBuilder<RiveFileSortOption>(
           valueListenable: fileBrowser.selectedSortOption,

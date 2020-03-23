@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/path_widget.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
-import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/popup/tooltip_item.dart';
+
+typedef TooltipItemBuilder = Widget Function(BuildContext, TooltipItem);
 
 final _pathArrow = Path()
   ..lineTo(6, -6)
@@ -20,7 +21,7 @@ class TooltipPopup {
   factory TooltipPopup.show(
     BuildContext context, {
     @required List<TooltipItem> items,
-    @required ListPopupItemBuilder<TooltipItem> itemBuilder,
+    @required TooltipItemBuilder itemBuilder,
     double width = 177,
     double margin = 10,
     Offset offset = const Offset(0, 10),
@@ -97,8 +98,7 @@ class TooltipPopup {
                                   final item = items[index];
                                   return Container(
                                       height: item.height,
-                                      child: itemBuilder(
-                                          listContext, item, false));
+                                      child: itemBuilder(listContext, item));
                                 })));
                   }),
                 ],

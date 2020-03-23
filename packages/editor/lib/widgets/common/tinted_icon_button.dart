@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/popup/popup_tooltip.dart';
-import 'package:rive_editor/widgets/popup/tooltip_item.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// A tinted icon button following Rive design guidelines with background
@@ -9,11 +7,6 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 class TintedIconButton extends StatefulWidget {
   /// Callback for when the button is pressed.
   final VoidCallback onPress;
-
-  /// Widget to be displayed as a tooltip when hovering this button.
-  final List<TooltipItem> tooltipItems;
-
-  final double tooltipWidth;
 
   /// Override background color of icon, defaults to Rive theme values.
   final Color background;
@@ -36,8 +29,6 @@ class TintedIconButton extends StatefulWidget {
   const TintedIconButton({
     @required this.onPress,
     @required this.icon,
-    this.tooltipItems,
-    this.tooltipWidth = 177,
     this.background,
     this.color,
     this.backgroundHover,
@@ -50,7 +41,6 @@ class TintedIconButton extends StatefulWidget {
 }
 
 class _TintedIconButtonState extends State<TintedIconButton> {
-  TooltipPopup _tooltip;
   bool _isHovered = false;
   @override
   Widget build(BuildContext context) {
@@ -68,22 +58,9 @@ class _TintedIconButtonState extends State<TintedIconButton> {
       child: MouseRegion(
         onEnter: (_) {
           setState(() => _isHovered = true);
-          final tooltips = widget.tooltipItems;
-          _tooltip?.close();
-          if (tooltips != null && tooltips.isNotEmpty) {
-            _tooltip = TooltipPopup.show(context,
-                items: tooltips,
-                width: widget.tooltipWidth,
-                itemBuilder: (tooltipContext, item, _) {
-                  final value = item.itemBuilder(context);
-                  return value;
-                }
-            );
-          }
         },
         onExit: (_) {
           setState(() => _isHovered = false);
-          _tooltip?.close();
         },
         child: Container(
           padding: widget.padding ?? const EdgeInsets.all(5),
