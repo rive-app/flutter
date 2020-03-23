@@ -25,8 +25,8 @@ class TopNav extends StatelessWidget {
             return Container(
                 width: 29,
                 height: 29,
-                decoration: const BoxDecoration(
-                    color: Color.fromRGBO(51, 51, 51, 1),
+                decoration: BoxDecoration(
+                    color: riveColors.commonDarkGrey,
                     shape: BoxShape.circle),
                 child: Center(
                   child: Container(
@@ -42,7 +42,7 @@ class TopNav extends StatelessWidget {
             })
           ],
         ),
-        Container(
+        const SizedBox(
           // Buttons padding.
           width: 10,
         ),
@@ -54,8 +54,8 @@ class TopNav extends StatelessWidget {
             tooltipItems: [TooltipItem('Your Profile')],
             tooltipWidth: 96,
             icon: 'user',
-            backgroundHover: const Color(0xFFF1F1F1),
-            iconHover: const Color(0xFF666666),
+            backgroundHover: riveColors.fileBackgroundLightGrey,
+            iconHover: riveColors.fileBackgroundDarkGrey,
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           );
         }),
@@ -67,8 +67,8 @@ class TopNav extends StatelessWidget {
             tooltipItems: [TooltipItem('Settings')],
             tooltipWidth: 76,
             icon: 'settings',
-            backgroundHover: const Color(0xFFF1F1F1),
-            iconHover: const Color(0xFF666666),
+            backgroundHover: riveColors.fileBackgroundLightGrey,
+            iconHover: riveColors.fileBackgroundDarkGrey,
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           );
         }),
