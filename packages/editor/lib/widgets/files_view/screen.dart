@@ -487,26 +487,28 @@ class FilesView extends StatelessWidget {
                     RiveContext.of(context).fileBrowser.treeScrollController,
                 controller: controller,
                 itemHeight: kTreeItemHeight,
+                trailingWidgets: <Widget>[
+                  Container(
+                    height: kTreeItemHeight,
+                    margin: const EdgeInsets.only(top: 0, bottom: 3),
+                    child: _buildDivider(context, 20),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 21, right: 21, top: 0.5, bottom: 20),
+                    child: DashedFlatButton(
+                      label: 'New Team',
+                      icon: 'teams-button',
+                      onTap: () {
+                        showRiveSettings<void>(
+                          context: context,
+                          screens: teamSettingsScreens,
+                        );
+                      },
+                    ),
+                  )
+                ],
               ),
-            ),
-          ),
-          Container(
-            height: kTreeItemHeight,
-            margin: const EdgeInsets.only(top: 0, bottom: 3),
-            child: _buildDivider(context, 20),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 21, right: 21, top: 0.5, bottom: 20),
-            child: DashedFlatButton(
-              label: 'New Team',
-              icon: 'teams-button',
-              onTap: () {
-                showRiveSettings<void>(
-                  context: context,
-                  screens: teamSettingsScreens,
-                );
-              },
             ),
           ),
         ],
