@@ -26,7 +26,6 @@ import 'package:rive_editor/widgets/files_view/top_nav.dart';
 import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
-import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
@@ -365,82 +364,44 @@ class FilesView extends StatelessWidget {
               right: 20,
               left: 20,
             ),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    height: 35,
-                    padding: const EdgeInsets.only(left: 10, right: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: riveColors.fileSearchBorder,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        SearchIcon(
-                          color: riveColors.fileSearchIcon,
-                          size: 16,
-                        ),
-                        Container(width: 10),
-                        Expanded(
-                          child: Container(
-                            height: 35,
-                            alignment: Alignment.centerLeft,
-                            child: TextField(
-                              textAlign: TextAlign.left,
-                              textAlignVertical: TextAlignVertical.center,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                border: InputBorder.none,
-                                hintText: 'Search',
-                                contentPadding: EdgeInsets.zero,
-                                filled: true,
-                                hoverColor: Colors.transparent,
-                                fillColor: Colors.transparent,
-                              ),
-                              style: RiveTheme.of(context)
-                                  .textStyles
-                                  .fileSearchText,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+            child: Container(
+              height: 35,
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                color: riveColors.fileSearchBorder,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  SearchIcon(
+                    color: riveColors.fileSearchIcon,
+                    size: 16,
                   ),
-                ),
-                Container(width: 10.0),
-                PopupButton<PopupContextItem>(
-                  items: [
-                    PopupContextItem(
-                      'New File',
-                      select: rive.fileBrowser.createFile,
-                    ),
-                    PopupContextItem('New Folder', select: () {}),
-                    PopupContextItem.separator(),
-                    PopupContextItem(
-                      "New Team",
-                      select: () => showTeamWizard<void>(context: context),
-                    ),
-                  ],
-                  builder: (context) {
-                    return Container(
-                      width: 29,
-                      height: 29,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(15),
+                  Container(width: 10),
+                  Expanded(
+                    child: Container(
+                      height: 35,
+                      alignment: Alignment.centerLeft,
+                      child: TextField(
+                        textAlign: TextAlign.left,
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          border: InputBorder.none,
+                          hintText: 'Search',
+                          contentPadding: EdgeInsets.zero,
+                          filled: true,
+                          hoverColor: Colors.transparent,
+                          fillColor: Colors.transparent,
+                        ),
+                        style: RiveTheme.of(context).textStyles.fileSearchText,
                       ),
-                      child: const AddIcon(color: Colors.white, size: 13),
-                    );
-                  },
-                  itemBuilder: (context, item, isHovered) => item.itemBuilder(
-                    context,
-                    isHovered,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Padding(
