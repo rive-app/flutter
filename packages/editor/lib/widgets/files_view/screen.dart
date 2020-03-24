@@ -16,8 +16,7 @@ import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
-import 'package:rive_editor/widgets/dialog/settings_panel.dart';
-import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard.dart';
 import 'package:rive_editor/widgets/files_view/file.dart';
 import 'package:rive_editor/widgets/files_view/folder_tree.dart';
 import 'package:rive_editor/widgets/files_view/folder_view_widget.dart';
@@ -422,10 +421,7 @@ class FilesView extends StatelessWidget {
                     PopupContextItem.separator(),
                     PopupContextItem(
                       "New Team",
-                      select: () => showRiveSettings<void>(
-                        context: context,
-                        screens: teamSettingsScreens,
-                      ),
+                      select: () => showTeamWizard<void>(context: context),
                     ),
                   ],
                   builder: (context) {
@@ -496,9 +492,8 @@ class FilesView extends StatelessWidget {
                       label: 'New Team',
                       icon: 'teams-button',
                       onTap: () {
-                        showRiveSettings<void>(
+                        showTeamWizard<void>(
                           context: context,
-                          screens: teamSettingsScreens,
                         );
                       },
                     ),
