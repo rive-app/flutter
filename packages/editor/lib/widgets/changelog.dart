@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ChangeLog extends StatefulWidget {
   const ChangeLog({Key key}) : super(key: key);
@@ -32,24 +33,27 @@ class _ChangeLogState extends State<ChangeLog> {
   @override
   void didUpdateWidget(ChangeLog oldWidget) {
     // Update the changelog
-    _fetchChangelog();
+    // _fetchChangelog();
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 600,
-        child: FutureBuilder(
-          future: _markdown,
-          builder: (context, AsyncSnapshot<String> snapshot) {
-            if (snapshot.hasData) {
-              return Markdown(data: snapshot.data);
-            } else {
-              return const Center(child: CircularProgressIndicator());
-            }
-          },
+    return Container(
+      color: RiveTheme.of(context).colors.fileBackgroundLightGrey,
+      child: Center(
+        child: Container(
+          width: 600,
+          child: FutureBuilder(
+            future: _markdown,
+            builder: (context, AsyncSnapshot<String> snapshot) {
+              if (snapshot.hasData) {
+                return Markdown(data: snapshot.data);
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
         ),
       ),
     );
