@@ -14,9 +14,9 @@ class PopupButton<T extends PopupListItem> extends StatelessWidget {
   final double width;
 
   const PopupButton({
+    @required this.builder,
+    @required this.items,
     Key key,
-    this.builder,
-    this.items,
     this.itemBuilder,
     this.opened,
     this.width = 177,
@@ -26,7 +26,7 @@ class PopupButton<T extends PopupListItem> extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (details) {
-        var popup = ListPopup<T>.show(
+        final popup = ListPopup<T>.show(
           context,
           items: items,
           itemBuilder: itemBuilder,
