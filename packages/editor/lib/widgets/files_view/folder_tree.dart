@@ -22,19 +22,22 @@ class FolderTreeView extends StatelessWidget {
   final double itemHeight;
   final ScrollController scrollController;
   final EdgeInsets padding;
+  final List<Widget> trailingWidgets;
 
-  const FolderTreeView({
-    @required this.controller,
-    @required this.itemHeight,
-    this.padding = const EdgeInsets.all(5),
-    Key key,
-    this.scrollController,
-  }) : super(key: key);
+  const FolderTreeView(
+      {@required this.controller,
+      @required this.itemHeight,
+      this.padding = const EdgeInsets.all(5),
+      Key key,
+      this.scrollController,
+      this.trailingWidgets = const []})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) => TreeView<RiveFolder>(
         scrollController: scrollController,
         shrinkWrap: false,
+        trailingWidgets: trailingWidgets,
         style: TreeStyle(
           showFirstLine: false,
           padding: padding,

@@ -58,18 +58,20 @@ class TreeView<T> extends StatelessWidget {
 
   final TreeViewIndexBuilder separatorBuilder;
 
-  const TreeView({
-    @required this.controller,
-    @required this.expanderBuilder,
-    @required this.iconBuilder,
-    @required this.itemBuilder,
-    this.separatorBuilder,
-    this.extraBuilder,
-    this.backgroundBuilder,
-    this.style = defaultTreeStyle,
-    this.scrollController,
-    this.shrinkWrap = false,
-  });
+  final List<Widget> trailingWidgets;
+
+  const TreeView(
+      {@required this.controller,
+      @required this.expanderBuilder,
+      @required this.iconBuilder,
+      @required this.itemBuilder,
+      this.separatorBuilder,
+      this.extraBuilder,
+      this.backgroundBuilder,
+      this.style = defaultTreeStyle,
+      this.scrollController,
+      this.shrinkWrap = false,
+      this.trailingWidgets = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +97,9 @@ class TreeView<T> extends StatelessWidget {
             padding: style.padding,
             // itemExtent: style.itemHeight,
             itemBuilder: (context, index) {
+              if (index >= controller.flat.length) {
+                return trailingWidgets[index - controller.flat.length];
+              }
               var item = controller.flat[index];
               if (item == null) {
                 if (separatorBuilder != null) {
@@ -336,7 +341,7 @@ class TreeView<T> extends StatelessWidget {
               if (backgroundBuilder != null) {
                 lines.add(
                   Positioned(
-                    left: indent + spaceLeft - iconMargin/2,
+                    left: indent + spaceLeft - iconMargin / 2,
                     top: 0,
                     bottom: 0,
                     right: 0,
@@ -425,7 +430,8 @@ class TreeView<T> extends StatelessWidget {
                 ),
               );
             },
-            itemCount: controller?.flat?.length ?? 0,
+            itemCount: controller?.flat?.length + trailingWidgets.length ??
+                trailingWidgets.length,
             // findChildIndexCallback: (Key key) {
             //   return controller.indexLookup[key];
             // },

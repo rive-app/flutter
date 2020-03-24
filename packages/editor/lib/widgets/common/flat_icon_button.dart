@@ -3,21 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class FlatIconButton extends StatelessWidget {
-  const FlatIconButton({
-    Key key,
-    @required this.label,
-    this.icon,
-    this.color,
-    this.textColor,
-    this.onTap,
-    this.elevated = false,
-  }) : super(key: key);
+  const FlatIconButton(
+      {Key key,
+      @required this.label,
+      this.icon,
+      this.color,
+      this.textColor,
+      this.onTap,
+      this.elevated = false,
+      this.radius = 15,
+      this.height = 30})
+      : super(key: key);
 
   final String label;
   final Widget icon;
   final VoidCallback onTap;
   final Color color, textColor;
   final bool elevated;
+  final double radius;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +31,7 @@ class FlatIconButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: color ?? RiveTheme.of(context).colors.commonButtonColor,
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(radius),
           boxShadow: elevated
               ? [
                   BoxShadow(
@@ -41,7 +45,7 @@ class FlatIconButton extends StatelessWidget {
                 ]
               : null,
         ),
-        height: 30,
+        height: height,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
