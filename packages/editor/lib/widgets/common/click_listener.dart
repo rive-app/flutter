@@ -1,11 +1,14 @@
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+typedef EventCallback = void Function(PropagatingEvent);
 
 /// Helper class to detect clicks and double clicks while stile propagating
 /// events up the widget hierarchy (doesn't capture like GestureDetector).
 class ClickListener extends StatefulWidget {
-  final VoidCallback onDoubleClick;
-  final VoidCallback onClick;
+  final EventCallback onDoubleClick;
+  final EventCallback onClick;
   final Widget child;
   final bool isListening;
 
@@ -27,22 +30,22 @@ class _ClickListenerState extends State<ClickListener> {
   @override
   Widget build(BuildContext context) {
     return widget.isListening
-        ? Listener(
+        ? PropagatingListener(
             behavior: HitTestBehavior.translucent,
-            onPointerUp: (_) {
+            onPointerUp: (event) {
               var time = DateTime.now();
               if (_firstClickTime != null) {
                 var diff = time.difference(_firstClickTime);
                 _firstClickTime = time;
                 if (diff > kDoubleTapMinTime && diff < kDoubleTapTimeout) {
-                  widget.onDoubleClick?.call();
+                  widget.onDoubleClick?.call(event);
                   return;
                 }
               } else {
                 _firstClickTime = time;
               }
 
-              widget.onClick?.call();
+              widget.onClick?.call(event);
             },
             child: IgnorePointer(child: widget.child),
           )

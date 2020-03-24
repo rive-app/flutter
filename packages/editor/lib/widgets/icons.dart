@@ -48,7 +48,7 @@ class SettingsIcon extends BaseIcon {
 
 class SearchIcon extends BaseIcon {
   const SearchIcon({Color color = lightGrey, double size = 13})
-      : super(Icons.settings, color: color, size: size);
+      : super(Icons.search, color: color, size: size);
 }
 
 class AddIcon extends BaseIcon {

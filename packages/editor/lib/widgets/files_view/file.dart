@@ -7,8 +7,8 @@ import 'package:rive_core/selectable_item.dart';
 
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
-
 import 'package:rive_editor/widgets/common/click_listener.dart';
+
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
 
@@ -32,7 +32,6 @@ class _FileViewWidgetState extends State<FileViewWidget> {
     const double kBottomHeight = 40;
     final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
     final _rive = RiveContext.of(context);
-
     return ValueListenableBuilder<SelectionState>(
       valueListenable: widget.file.selectionState,
       child: ListenableBuilder<RiveFile>(
@@ -136,10 +135,12 @@ class _FileViewWidgetState extends State<FileViewWidget> {
             ),
             ClickListener(
               child: child,
-              onClick: () {
+              onClick: (event) {
+                event.stopPropagation();
                 _fileBrowser.selectItem(_rive, widget.file);
               },
-              onDoubleClick: () {
+              onDoubleClick: (event) {
+                event.stopPropagation();
                 _fileBrowser.openFile(_rive, widget.file);
               },
             ),

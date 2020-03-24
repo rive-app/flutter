@@ -97,6 +97,8 @@ class RiveColors {
 
   // TextField
   Color get textSelection => lightGrey;
+  Color get inputUnderline => const Color(0xFFCCCCCC);
+  Color get input => const Color(0xFFBBBBBB);
 }
 
 /// TextStyles used in the Rive Theme
@@ -147,19 +149,54 @@ class TextStyles {
   TextStyle get popupShortcutText => const TextStyle(
       fontFamily: 'Roboto-Light', color: Color(0xFF666666), fontSize: 13);
 
+  TextStyle get tooltipText => const TextStyle(
+      fontFamily: 'Roboto-Light', color: Color(0xFFCCCCCC), fontSize: 13);
+
+  TextStyle get tooltipDisclaimer => const TextStyle(
+      fontFamily: 'Roboto-Light',
+      color: Color(0xFF888888),
+      fontSize: 13,
+      fontWeight: FontWeight.w100);
+
+  TextStyle get tooltipHyperlink => const TextStyle(
+      fontFamily: 'Roboto-Light',
+      color: Color(0xFF333333),
+      fontSize: 13,
+      fontWeight: FontWeight.w300,
+      decoration: TextDecoration.underline);
+
   // Files
   TextStyle get fileBlueText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF57A5E0), fontSize: 13);
+  TextStyle get fileGreyTextSmall => const TextStyle(
+        fontFamily: 'Roboto-Medium',
+        color: Color(0xFF333333),
+        fontSize: 11,
+        fontWeight: FontWeight.w300,
+      );
   TextStyle get fileGreyTextLarge => const TextStyle(
-      fontFamily: 'Roboto-Medium', color: Color(0xFF333333), fontSize: 16);
+        fontFamily: 'Roboto-Medium',
+        color: Color(0xFF333333),
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      );
   TextStyle get fileLightGreyText => const TextStyle(
-      fontFamily: 'Roboto-Medium', color: Color(0xFF666666), fontSize: 13);
+      fontFamily: 'Roboto-Medium',
+      color: Color(0xFF666666),
+      fontSize: 13,
+      fontWeight: FontWeight.w300);
+
   TextStyle get fileSearchText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF999999), fontSize: 13);
 
   // Common
   TextStyle get greyText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF333333), fontSize: 13);
+
+  // Wizard TextField
+  // Common
+  TextStyle get textFieldInputHint => const TextStyle(
+      fontFamily: 'Roboto-Medium', color: Color(0xFFBBBBBB), fontSize: 16);
 }
 
 /// Gradients used in the Rive Theme

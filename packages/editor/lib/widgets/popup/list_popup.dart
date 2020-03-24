@@ -18,7 +18,7 @@ abstract class PopupListItem {
   /// Whether selection of the item will result in dismissing the popup.
   bool get dismissOnSelect => true;
 
-  /// Whether all items get dismissed when ths one does.
+  /// Whether all items get dismissed when this one does.
   bool get dismissAll => true;
 
   /// Child popup displayed when this list item is hovered over.
@@ -476,6 +476,11 @@ class __PopupListItemShellState<T extends PopupListItem>
 // Helper IDs used in the layout delegate to determine which child is which.
 enum _ListPopupLayoutElement { arrow, body }
 
+// Make sure to use floor here instead of round or it'll work in unexpected ways
+// when the direction is negative on one axis.
+Offset _wholePixels(Offset offset) =>
+    Offset(offset.dx.floorToDouble(), offset.dy.floorToDouble());
+
 /// A custom layout module for list popup which handles aligning the arrow and
 /// content to the desired region of interest and expansion direction.
 class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
@@ -535,7 +540,7 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
     if (hasArrow) {
       positionChild(
           _ListPopupLayoutElement.arrow,
-          from.topLeft +
+          _wholePixels(from.topLeft +
               // Align to center of the area of interest
               Alignment.center.alongSize(from.size) +
               // Apply any implementation specific offset (we need to do this
@@ -555,14 +560,14 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
               //
               // https://assets.rvcd.in/popup/arrow_tweak.png
               Offset(arrowTweak.dx * vector.dy.abs(),
-                  arrowTweak.dy * vector.dx.abs()));
+                  arrowTweak.dy * vector.dx.abs())));
 
       // Move the body over by whatever space the arrow takes up.
       bodyPosition +=
           Offset(vector.dx * arrowSize.width, vector.dy * arrowSize.height);
     }
 
-    positionChild(_ListPopupLayoutElement.body, bodyPosition);
+    positionChild(_ListPopupLayoutElement.body, _wholePixels(bodyPosition));
   }
 }
 
