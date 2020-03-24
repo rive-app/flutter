@@ -54,6 +54,7 @@ class ComboBox<T> extends StatefulWidget {
   final List<T> options;
   final bool chevron;
   final bool underline;
+  final Color underlineColor;
   final Color valueColor;
   final ComboSizing sizing;
   final double popupWidth;
@@ -61,6 +62,7 @@ class ComboBox<T> extends StatefulWidget {
   final OptionToLabel<T> toLabel;
   final bool typeahead;
   final Alignment alignment;
+  final EdgeInsetsGeometry contentPadding;
 
   static const double _chevronWidth = 5;
   static const double _horizontalPadding = 15;
@@ -76,6 +78,8 @@ class ComboBox<T> extends StatefulWidget {
     this.popupWidth,
     this.change,
     this.toLabel,
+    this.underlineColor,
+    this.contentPadding,
     this.typeahead = false,
     this.alignment = Alignment.topLeft,
   }) : super(key: key);
@@ -179,7 +183,19 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     if (widget.underline) {
       return Underline(
         child: child,
-        color: theme.colors.separator,
+        color: (widget.underlineColor != null)
+            ? widget.underlineColor
+            : theme.colors.separator,
+      );
+    }
+    return child;
+  }
+
+  Widget _padding(Widget child) {
+    if (widget.contentPadding != null) {
+      return Padding(
+        padding: widget.contentPadding,
+        child: child,
       );
     }
     return child;
@@ -344,13 +360,15 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         },
         child: _underline(
           _chevron(
-            _typeahead(
-              Text(
-                label,
-                style:
-                    theme.textStyles.basic.copyWith(color: widget.valueColor),
+            _padding(
+              _typeahead(
+                Text(
+                  label,
+                  style:
+                      theme.textStyles.basic.copyWith(color: widget.valueColor),
+                ),
+                theme: theme,
               ),
-              theme: theme,
             ),
             theme: theme,
           ),
