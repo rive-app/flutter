@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 
@@ -8,7 +11,7 @@ import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/gradient_border.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
-// import 'package:url_launcher/url_launcher.dart';
+const billingPolicyUrl = 'http://bitly.com/98K8eH';
 
 Future<T> showTeamWizard<T>({BuildContext context}) {
   return showRiveDialog(
@@ -127,10 +130,14 @@ class _WizardPanelState extends State<WizardPanel> {
                     text: "fair billing policy",
                     style: textStyles.tooltipHyperlink,
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () {
+                      ..onTap = () async {
                         print('Should launch: could use url_launcher'
                             ' for this. its by the flutter team....');
-                        // launch('http://bitly.com/98K8eH');
+                        //WindowUtils.openWebView(
+                        //    'billing_policy', 'https://rive.app');
+                        if (await canLaunch(billingPolicyUrl)) {
+                          await launch(billingPolicyUrl);
+                        }
                       }),
                 const TextSpan(text: "."),
               ],
