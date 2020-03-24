@@ -3,8 +3,6 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
 
 class TooltipItem extends PopupListItem {
-  static void _nop() {}
-
   /// Text label to show in the row for this tooltip item.
   final String name;
 
@@ -21,7 +19,7 @@ class TooltipItem extends PopupListItem {
   ChangeNotifier get rebuildItem => null;
 
   @override
-  final SelectCallback select = _nop;
+  final SelectCallback select = null;
 
   TooltipItem(this.name);
 

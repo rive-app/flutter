@@ -29,7 +29,7 @@ class TopNav extends StatelessWidget {
                 decoration: BoxDecoration(
                     color: riveColors.commonDarkGrey, shape: BoxShape.circle),
                 child: Center(
-                    child: Container(
+                    child: SizedBox(
                         child: TintedIcon(color: Colors.white, icon: 'add'))));
           },
           itemBuilder: (popupContext, item, isHovered) =>
@@ -92,7 +92,7 @@ class TopNav extends StatelessWidget {
             change: (option) => fileBrowser.loadFileList(sortOption: option),
           ),
         ),
-        Container(width: 5), // Small padding before the end.
+        const SizedBox(width: 5), // Small padding before the end.
       ]),
       Padding(
           padding: const EdgeInsets.only(top: 18.0),

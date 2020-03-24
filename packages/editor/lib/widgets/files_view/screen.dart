@@ -15,6 +15,7 @@ import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
+import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
 import 'package:rive_editor/widgets/files_view/file.dart';
@@ -180,17 +181,19 @@ class FilesView extends StatelessWidget {
   Widget _buildDivider(Color color, {double left = 0}) {
     return Row(children: <Widget>[
       Expanded(
-        child: Container(
-          margin: EdgeInsets.only(left: left),
+        child: Separator(
           color: color,
-          height: 1,
+          padding: EdgeInsets.only(left: left),
         ),
+        // child: Container(
+        //   margin: EdgeInsets.only(left: left),
+        //   color: color,
+        //   height: 1,
       )
     ]);
   }
 
   Widget _buildEmpty(BuildContext context) {
-    return Container();
     return Column(
       children: [
         const TitleSection(
