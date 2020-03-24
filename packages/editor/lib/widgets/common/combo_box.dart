@@ -183,9 +183,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     if (widget.underline) {
       return Underline(
         child: child,
-        color: (widget.underlineColor != null)
-            ? widget.underlineColor
-            : theme.colors.separator,
+        color: widget.underlineColor ?? theme.colors.separator,
       );
     }
     return child;
