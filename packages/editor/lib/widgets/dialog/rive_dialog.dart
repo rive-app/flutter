@@ -31,30 +31,36 @@ Future<T> showRiveDialog<T>({
         child: Center(
           child: Material(
             type: MaterialType.transparency,
-            child: Container(
-              constraints: const BoxConstraints(
-                // TODO: what should be the scale behavior? Talk to Guido
-                minWidth: 800,
-                maxWidth: 800,
-                minHeight: double.infinity,
-                maxHeight: double.infinity,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Builder(builder: builder),
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.4),
-                    blurRadius: 100,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 50),
-                  )
-                ],
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.only(top: 60),
+                  constraints: const BoxConstraints(
+                    // TODO: what should be the scale behavior? Talk to Guido
+                    minWidth: 300,
+                    maxWidth: 800,
+                    minHeight: 300,
+                    maxHeight: double.infinity,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Builder(builder: builder),
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.4),
+                        blurRadius: 100,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 50),
+                      )
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
