@@ -488,11 +488,10 @@ class FilesView extends StatelessWidget {
                   Container(
                     height: kTreeItemHeight,
                     margin: const EdgeInsets.only(top: 0, bottom: 3),
-                    child: _buildDivider(riveColors.fileLineGrey, left: 20),
+                    child: _buildDivider(riveColors.fileLineGrey),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 21, right: 21, top: 0.5, bottom: 20),
+                    padding: const EdgeInsets.only(top: 0.5, bottom: 20),
                     child: DashedFlatButton(
                       label: 'New Team',
                       icon: 'teams-button',
