@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 // General colors
 const lightGrey = Color(0xFF8C8C8C);
 const white = Color(0xFFFFFFFF);
+const red = Color(0xFFFF5678);
+const purple = Color(0xFFD041AB);
 
 /// Colors used in the Rive Theme
 /// Define them as getters and keep them const
@@ -90,6 +92,7 @@ class RiveColors {
   Color get commonDarkGrey => const Color(0xFF333333);
   Color get commonButtonColor => const Color(0x19000000);
   Color get commonButtonTextColor => const Color(0xFF888888);
+  Color get commonButtonTextColorDark => const Color(0xFF666666);
 
   // Inspector
   Color get inspectorTextColor => const Color(0xFF8C8C8C);
@@ -207,7 +210,19 @@ class Gradients {
   Gradient get magenta => const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFFFF5678), Color(0xFFD041AB)],
+        colors: [
+          red,
+          purple,
+        ],
+      );
+
+  Gradient get redPurpleBottomCenter => const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomCenter,
+        colors: [
+          red,
+          purple,
+        ],
       );
 }
 

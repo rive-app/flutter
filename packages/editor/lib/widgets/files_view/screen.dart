@@ -345,7 +345,6 @@ class FilesView extends StatelessWidget {
   }
 
   Widget _buildLeftSide(BuildContext context) {
-    final rive = RiveContext.of(context);
     final theme = RiveTheme.of(context);
     final riveColors = theme.colors;
     return Container(

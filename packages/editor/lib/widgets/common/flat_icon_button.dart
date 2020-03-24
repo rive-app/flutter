@@ -4,8 +4,8 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class FlatIconButton extends StatelessWidget {
   const FlatIconButton(
-      {Key key,
-      @required this.label,
+      {@required this.label,
+      Key key,
       this.icon,
       this.color,
       this.textColor,
@@ -50,13 +50,18 @@ class FlatIconButton extends StatelessWidget {
         height: height,
         child: Row(
           mainAxisAlignment: mainAxisAlignment,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Text(
-              label,
-              style: TextStyle(
-                color: textColor ??
-                    RiveTheme.of(context).colors.commonButtonTextColor,
-                fontSize: 13,
+            Padding(
+              // This correctly aligned the text vertically
+              padding: const EdgeInsets.only(bottom: 1),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: textColor ??
+                      RiveTheme.of(context).colors.commonButtonTextColor,
+                  fontSize: 13,
+                ),
               ),
             ),
             if (icon != null) ...[icon],

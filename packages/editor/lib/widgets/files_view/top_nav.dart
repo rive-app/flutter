@@ -3,6 +3,7 @@ import 'package:rive_api/files.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
@@ -40,9 +41,12 @@ class TopNav extends StatelessWidget {
                   item.itemBuilder(popupContext, isHovered),
               items: [
                 PopupContextItem('New File', select: fileBrowser.createFile),
-                PopupContextItem('New Folder', select: () {
-                  print('Create Folder!');
-                })
+                PopupContextItem('New Folder', select: () {}),
+                PopupContextItem.separator(),
+                PopupContextItem(
+                  'New Team',
+                  select: () => showTeamWizard<void>(context: context),
+                ),
               ],
             ),
             // Buttons padding.
