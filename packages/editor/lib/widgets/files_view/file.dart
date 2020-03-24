@@ -1,4 +1,3 @@
-import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +7,7 @@ import 'package:rive_core/selectable_item.dart';
 
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
+import 'package:rive_editor/widgets/common/click_listener.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/listenable_builder.dart';
@@ -27,8 +27,6 @@ class FileViewWidget extends StatefulWidget {
 }
 
 class _FileViewWidgetState extends State<FileViewWidget> {
-  var _lastClickTime = DateTime.now();
-
   @override
   Widget build(BuildContext context) {
     const double kBottomHeight = 40;
@@ -135,24 +133,16 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                 ),
               ),
             ),
-            PropagatingListener(
-              behavior: HitTestBehavior.opaque,
+            ClickListener(
               child: child,
-              onPointerUp: (event) {
+              onClick: (event) {
                 event.stopPropagation();
-
-                var time = DateTime.now();
-                var diff = time.difference(_lastClickTime);
-                _lastClickTime = time;
-                if (diff > kDoubleTapMinTime && diff < kDoubleTapTimeout) {
-                  _fileBrowser.openFile(_rive, widget.file);
-                } else {
-                  _fileBrowser.selectItem(_rive, widget.file);
-                }
+                _fileBrowser.selectItem(_rive, widget.file);
               },
-              // onDoubleClick: () {
-              //   _fileBrowser.openFile(_rive, widget.file);
-              // },
+              onDoubleClick: (event) {
+                event.stopPropagation();
+                _fileBrowser.openFile(_rive, widget.file);
+              },
             ),
           ],
         );
