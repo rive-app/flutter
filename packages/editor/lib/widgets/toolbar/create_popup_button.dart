@@ -7,6 +7,7 @@ import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/triangle_tool.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/tooltip_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
 
@@ -17,6 +18,7 @@ class CreatePopupButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ToolPopupButton(
+      tip: const Tip(label: 'Create Tools'),
       defaultIcon: 'tool-create',
       makeItems: (rive) => <PopupContextItem>[
         PopupContextItem(

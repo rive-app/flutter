@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
+import 'package:rive_editor/widgets/popup/tooltip_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 typedef RiveWidgetBuilder = Widget Function(BuildContext, Rive);
@@ -26,6 +27,7 @@ class RivePopupButton extends StatefulWidget {
   final bool showChevron;
   final PopupOpened<PopupContextItem> opened;
   final double _width;
+  final Tip tip;
 
   const RivePopupButton({
     Key key,
@@ -34,6 +36,7 @@ class RivePopupButton extends StatefulWidget {
     this.showChevron = true,
     this.opened,
     double width,
+    this.tip,
   })  : _width = width ?? 177,
         super(key: key);
 
@@ -51,6 +54,7 @@ class _RivePopupButtonState extends State<RivePopupButton> {
         items: widget.contextItems,
         width: widget._width,
         arrowTweak: widget.showChevron ? const Offset(-5, 0) : Offset.zero,
+        tip: widget.tip,
         builder: (context) => MouseRegion(
           onEnter: (_) => setState(() => _isHovered = true),
           onExit: (_) => setState(() => _isHovered = false),

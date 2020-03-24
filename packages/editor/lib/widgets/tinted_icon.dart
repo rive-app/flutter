@@ -16,12 +16,10 @@ class TintedIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var cache = IconCache.of(context);
-    return Container(
-      child: TintedIconRenderer(
-        cache: cache,
-        filename: 'assets/images/icons/$icon.png',
-        color: color,
-      ),
+    return TintedIconRenderer(
+      cache: cache,
+      filename: 'assets/images/icons/$icon.png',
+      color: color,
     );
   }
 }

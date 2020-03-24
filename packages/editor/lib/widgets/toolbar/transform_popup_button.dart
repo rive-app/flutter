@@ -4,6 +4,7 @@ import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 
 import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/tooltip_button.dart';
 
 import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
 import 'package:rive_editor/widgets/toolbar/multi_icon_popup_item.dart';
@@ -17,6 +18,7 @@ class TransformPopupButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ToolPopupButton(
+      tip: const Tip(label: 'Transform Tools'),
       defaultIcon: 'tool-auto',
       makeItems: (rive) {
         return <PopupContextItem>[

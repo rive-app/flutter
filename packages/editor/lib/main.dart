@@ -12,6 +12,7 @@ import 'package:rive_editor/widgets/changelog.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/draw_order.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/popup/tooltip_button.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/design_animate_toggle.dart';
@@ -101,51 +102,54 @@ class RiveEditorApp extends StatelessWidget {
       child: ShortcutBindings(
         child: RiveContext(
           rive: rive,
-          child: IconCache(
-            cache: iconCache,
-            child: Builder(
-              builder: (context) => CursorView(
-                onPointerDown: (details) {
-                  rive.focusNode.requestFocus();
-                },
-                child: MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  theme: ThemeData.light(),
-                  home: DefaultTextStyle(
-                    style: RiveTheme.of(context).textStyles.basic,
-                    child: Container(
-                      child: Scaffold(
-                        body: RawKeyboardListener(
-                          onKey: (event) {
-                            final focusScope = FocusScope.of(context);
-                            var primary = FocusManager.instance.primaryFocus;
-                            rive.onKeyEvent(
-                                defaultKeyBinding,
-                                event,
-                                primary != rive.focusNode &&
-                                    focusScope.nearestScope != primary);
-                          },
-                          child: ValueListenableBuilder<RiveState>(
-                            valueListenable: rive.state,
-                            builder: (context, state, _) {
-                              switch (state) {
-                                case RiveState.login:
-                                  return Login();
-
-                                case RiveState.editor:
-                                  return Editor();
-
-                                case RiveState.disconnected:
-                                  return DisconnectedScreen();
-                                  break;
-
-                                case RiveState.catastrophe:
-                                default:
-                                  return Catastrophe();
-                              }
+          child: TipRoot(
+            context: TipContext(),
+            child: IconCache(
+              cache: iconCache,
+              child: Builder(
+                builder: (context) => CursorView(
+                  onPointerDown: (details) {
+                    rive.focusNode.requestFocus();
+                  },
+                  child: MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    theme: ThemeData.light(),
+                    home: DefaultTextStyle(
+                      style: RiveTheme.of(context).textStyles.basic,
+                      child: Container(
+                        child: Scaffold(
+                          body: RawKeyboardListener(
+                            onKey: (event) {
+                              final focusScope = FocusScope.of(context);
+                              var primary = FocusManager.instance.primaryFocus;
+                              rive.onKeyEvent(
+                                  defaultKeyBinding,
+                                  event,
+                                  primary != rive.focusNode &&
+                                      focusScope.nearestScope != primary);
                             },
+                            child: ValueListenableBuilder<RiveState>(
+                              valueListenable: rive.state,
+                              builder: (context, state, _) {
+                                switch (state) {
+                                  case RiveState.login:
+                                    return Login();
+
+                                  case RiveState.editor:
+                                    return Editor();
+
+                                  case RiveState.disconnected:
+                                    return DisconnectedScreen();
+                                    break;
+
+                                  case RiveState.catastrophe:
+                                  default:
+                                    return Catastrophe();
+                                }
+                              },
+                            ),
+                            focusNode: rive.focusNode,
                           ),
-                          focusNode: rive.focusNode,
                         ),
                       ),
                     ),

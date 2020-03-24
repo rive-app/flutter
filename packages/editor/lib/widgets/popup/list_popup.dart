@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_editor/widgets/nullable_listenable_builder.dart';
-import 'package:rive_editor/widgets/path_widget.dart';
+import 'package:rive_editor/widgets/popup/arrow_popup.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'base_popup.dart';
 
@@ -210,24 +210,13 @@ class ListPopup<T extends PopupListItem> {
     return true;
   }
 
-  static Path _arrowFromDirection(PopupDirection direction) {
-    if (direction.offsetVector.dx == 1) {
-      return _pathArrowLeft;
-    } else if (direction.offsetVector.dx == -1) {
-      return _pathArrowRight;
-    } else if (direction.offsetVector.dy == 1) {
-      return _pathArrowUp;
-    }
-    return _pathArrowDown;
-  }
-
   factory ListPopup.show(
     BuildContext context, {
     @required ListPopupItemBuilder<T> itemBuilder,
     double width = 177,
     double margin = 10,
     Offset offset = Offset.zero,
-    double directionPadding = 10,
+    double directionPadding = 16,
     // Flag to display the small arrow at the top of the popup
     bool showArrow = true,
     Offset arrowTweak = Offset.zero,
@@ -237,16 +226,12 @@ class ListPopup<T extends PopupListItem> {
     ListPopup<T> parent,
     bool handleKeyPresses = true,
     bool includeCloseGuard = false,
+    VoidCallback onClose,
   }) {
-    RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-    final boxOffset = renderBox.localToGlobal(Offset.zero);
-
-    var position = boxOffset;
-
     ListPopup<T> list;
 
     var focusNode = FocusNode(
+      canRequestFocus: true,
       debugLabel: 'List Popup Focus',
       skipTraversal: true,
       onKey: (node, event) {
@@ -294,87 +279,59 @@ class ListPopup<T extends PopupListItem> {
       handleKeyPresses: handleKeyPresses,
     );
 
-    list._popup = Popup.show(
+    list._popup = ArrowPopup.show(
       context,
-      onClose: list.close,
+      width: width,
+      offset: offset,
+      directionPadding: directionPadding,
+      direction: direction,
+      showArrow: showArrow,
+      arrowTweak: arrowTweak,
+      background: background,
+      onClose: onClose == null
+          ? list.close
+          : () {
+              onClose();
+              list.close();
+            },
       includeCloseGuard: includeCloseGuard,
       builder: (context) {
-        return CustomMultiChildLayout(
-          delegate: _ListPopupMultiLayoutDelegate(
-            from: position & size,
-            direction: direction,
-            width: width,
-            offset: offset,
-            directionPadding: directionPadding,
-            arrowTweak: arrowTweak,
-          ),
-          children: [
-            if (showArrow)
-              LayoutId(
-                id: _ListPopupLayoutElement.arrow,
-                child: CustomPaint(
-                  painter: _ArrowPathPainter(
-                    background,
-                    _arrowFromDirection(direction),
-                  ),
-                ),
-              ),
-            LayoutId(
-              id: _ListPopupLayoutElement.body,
-              child: Focus(
-                focusNode: focusNode,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: ValueListenableBuilder<List<T>>(
-                    valueListenable: list.values,
-                    builder: (context, values, _) {
-                      // The desired full height, the ListPopupLayoutDelegate
-                      // won't let us exceed our constraints if these are too
-                      // tall.
-                      var height = values.fold<double>(
-                              0.0, (v, item) => v + item.height) +
-                          margin * 2;
-                      return values.isEmpty
-                          ? Container()
-                          : Container(
-                              decoration: BoxDecoration(
-                                color: background,
-                                borderRadius: BorderRadius.circular(5.0),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3473),
-                                    offset: const Offset(0.0, 30.0),
-                                    blurRadius: 30,
-                                  )
-                                ],
-                              ),
-                              height: height,
-                              child: Scrollbar(
-                                child: ListView.builder(
-                                  physics: const ClampingScrollPhysics(),
-                                  padding: EdgeInsets.only(
-                                      top: margin, bottom: margin),
-                                  itemCount: values.length,
-                                  itemBuilder: (context, index) {
-                                    var item = values[index];
-                                    return Container(
-                                      height: item.height,
-                                      child: _PopupListItemShell<T>(
-                                        list,
-                                        itemBuilder: itemBuilder,
-                                        item: item,
-                                      ),
-                                    );
-                                  },
-                                ),
+        return Focus(
+          focusNode: focusNode,
+          child: ValueListenableBuilder<List<T>>(
+            valueListenable: list.values,
+            builder: (context, values, _) {
+              // The desired full height, the ListPopupLayoutDelegate
+              // won't let us exceed our constraints if these are too
+              // tall.
+              var height =
+                  values.fold<double>(0, (v, item) => v + item.height) +
+                      margin * 2;
+              return values.isEmpty
+                  ? const SizedBox()
+                  : SizedBox(
+                      height: height,
+                      child: Scrollbar(
+                        child: ListView.builder(
+                          physics: const ClampingScrollPhysics(),
+                          padding: EdgeInsets.only(top: margin, bottom: margin),
+                          itemCount: values.length,
+                          itemBuilder: (context, index) {
+                            var item = values[index];
+                            return Container(
+                              height: item.height,
+                              child: _PopupListItemShell<T>(
+                                list,
+                                itemBuilder: itemBuilder,
+                                item: item,
                               ),
                             );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ],
+                          },
+                        ),
+                      ),
+                    );
+            },
+          ),
         );
       },
     );
@@ -469,151 +426,6 @@ class __PopupListItemShellState<T extends PopupListItem>
           },
         ),
       ),
-    );
-  }
-}
-
-// Helper IDs used in the layout delegate to determine which child is which.
-enum _ListPopupLayoutElement { arrow, body }
-
-// Make sure to use floor here instead of round or it'll work in unexpected ways
-// when the direction is negative on one axis.
-Offset _wholePixels(Offset offset) =>
-    Offset(offset.dx.floorToDouble(), offset.dy.floorToDouble());
-
-/// A custom layout module for list popup which handles aligning the arrow and
-/// content to the desired region of interest and expansion direction.
-class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
-  final Rect from;
-  final PopupDirection direction;
-  final double directionPadding;
-  final double width;
-  final Offset offset;
-  final Offset arrowTweak;
-
-  _ListPopupMultiLayoutDelegate({
-    this.from,
-    this.direction,
-    this.directionPadding,
-    this.width,
-    this.offset,
-    this.arrowTweak,
-  });
-
-  @override
-  bool shouldRelayout(_ListPopupMultiLayoutDelegate oldDelegate) {
-    return oldDelegate.from != from ||
-        oldDelegate.direction != direction ||
-        oldDelegate.width != width ||
-        oldDelegate.offset != offset ||
-        oldDelegate.arrowTweak != arrowTweak;
-  }
-
-  @override
-  void performLayout(Size size) {
-    bool hasArrow = hasChild(_ListPopupLayoutElement.arrow);
-    Size arrowSize = Size.zero;
-    if (hasArrow) {
-      arrowSize = layoutChild(
-        _ListPopupLayoutElement.arrow,
-        BoxConstraints.loose(size),
-      );
-    }
-
-    Size bodySize = layoutChild(
-      _ListPopupLayoutElement.body,
-      BoxConstraints.tightFor(width: width),
-    );
-
-    var vector = direction.offsetVector;
-
-    var bodyPosition = from.topLeft +
-        // Align to target of interest/dock position (from)
-        direction.from.alongSize(from.size) -
-        // Align the list relative to that position (to)
-        direction.to.alongSize(bodySize) +
-        // Offset by whatever list position tweak was passed in.
-        offset +
-        // Apply any directionaly padding
-        (vector * directionPadding);
-
-    if (hasArrow) {
-      positionChild(
-          _ListPopupLayoutElement.arrow,
-          _wholePixels(from.topLeft +
-              // Align to center of the area of interest
-              Alignment.center.alongSize(from.size) +
-              // Apply any implementation specific offset (we need to do this
-              // both for the arrow and the body so the arrow lines up with the
-              // body if it is shifted).
-              offset +
-              // Apply any directional padding.
-              (vector * directionPadding) +
-              // Center the arrow on the arrow of interest.
-              Offset(
-                  vector.dx * 0.5 * from.width, vector.dy * 0.5 * from.height) +
-              // Apply any tweak to the centered arrow. For example, we need the
-              // create popout to align to the icon in the entire popup button
-              // but we use the whole popup button as the area of interest. So
-              // here we can pass a simple offset to get the arrow to line up
-              // with the icon.
-              //
-              // https://assets.rvcd.in/popup/arrow_tweak.png
-              Offset(arrowTweak.dx * vector.dy.abs(),
-                  arrowTweak.dy * vector.dx.abs())));
-
-      // Move the body over by whatever space the arrow takes up.
-      bodyPosition +=
-          Offset(vector.dx * arrowSize.width, vector.dy * arrowSize.height);
-    }
-
-    positionChild(_ListPopupLayoutElement.body, _wholePixels(bodyPosition));
-  }
-}
-
-final _pathArrowUp = Path()
-  ..moveTo(-_arrowRadius, 0)
-  ..lineTo(0, -_arrowRadius)
-  ..lineTo(_arrowRadius, 0)
-  ..close();
-
-final _pathArrowDown = Path()
-  ..moveTo(-_arrowRadius, 0)
-  ..lineTo(0, _arrowRadius)
-  ..lineTo(_arrowRadius, 0)
-  ..close();
-
-final _pathArrowLeft = Path()
-  ..moveTo(0, -_arrowRadius)
-  ..lineTo(-_arrowRadius, 0)
-  ..lineTo(0, _arrowRadius)
-  ..close();
-
-final _pathArrowRight = Path()
-  ..moveTo(0, -_arrowRadius)
-  ..lineTo(_arrowRadius, 0)
-  ..lineTo(0, _arrowRadius)
-  ..close();
-
-const double _arrowRadius = 6;
-
-class _ArrowPathPainter extends CustomPainter {
-  final Color color;
-  final Path path;
-
-  _ArrowPathPainter(this.color, this.path);
-
-  @override
-  bool shouldRepaint(_ArrowPathPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.path != path;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = color
-        ..style = PaintingStyle.fill,
     );
   }
 }

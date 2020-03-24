@@ -6,6 +6,7 @@ import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
+import 'package:rive_editor/widgets/popup/tooltip_button.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -21,6 +22,7 @@ class ToolPopupButton extends StatefulWidget {
   final MakeToolPopupItems makeItems;
   final String defaultIcon;
   final double width;
+  final Tip tip;
   final Widget Function(BuildContext, Rive, bool) iconBuilder;
 
   const ToolPopupButton({
@@ -28,6 +30,7 @@ class ToolPopupButton extends StatefulWidget {
     this.defaultIcon,
     this.iconBuilder,
     this.width,
+    this.tip,
     Key key,
   }) : super(key: key);
 
@@ -56,6 +59,7 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
         }
         var items = widget.makeItems(rive);
         return RivePopupButton(
+          tip: widget.tip,
           width: widget.width,
           opened: (popup) {
             _popup = popup;
@@ -63,18 +67,29 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
           contextItems: items,
           iconBuilder: widget.iconBuilder ??
               (context, rive, isHovered) {
-                bool hasActiveIcon = PopupContextItem.hasIcon(tool.icon, items);
+                var item = PopupContextItem.withIcon(tool.icon, items);
 
-                return TintedIcon(
-                  color: hasActiveIcon
+                var icon = TintedIcon(
+                  color: item != null
                       ? RiveTheme.of(context).colors.toolbarButtonSelected
                       : isHovered
                           ? RiveTheme.of(context).colors.toolbarButtonHover
                           : RiveTheme.of(context).colors.toolbarButton,
-                  icon: PopupContextItem.hasIcon(tool.icon, items)
-                      ? tool.icon
-                      : widget.defaultIcon,
+                  icon: item != null ? tool.icon : widget.defaultIcon,
                 );
+
+                if (item != null) {
+                  // if we have an active icon, let's show the tooltip with the
+                  // info about the active icon.
+                  return TipRegion(
+                      tip: Tip(
+                        label: item.name,
+                        shortcut: item.shortcut,
+                      ),
+                      child: icon);
+                } else {
+                  return icon;
+                }
               },
         );
       },

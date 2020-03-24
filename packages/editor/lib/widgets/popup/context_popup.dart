@@ -166,17 +166,19 @@ class PopupContextItem extends PopupListItem {
   @override
   double get height => isSeparator ? 20 : 40;
 
-  static bool hasIcon(String icon, List<PopupContextItem> list) {
+  /// Find the context item with the specified icon (if one exists).
+  static PopupContextItem withIcon(String icon, List<PopupContextItem> list) {
     for (final item in list) {
       if (item.icon == icon) {
-        return true;
+        return item;
       }
       if (item.popup != null) {
-        if (hasIcon(icon, item.popup)) {
-          return true;
+        var found = withIcon(icon, item.popup);
+        if (found != null) {
+          return found;
         }
       }
     }
-    return false;
+    return null;
   }
 }
