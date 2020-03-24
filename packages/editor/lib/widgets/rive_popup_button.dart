@@ -50,6 +50,7 @@ class _RivePopupButtonState extends State<RivePopupButton> {
         opened: widget.opened,
         items: widget.contextItems,
         width: widget._width,
+        arrowTweak: widget.showChevron ? const Offset(-5, 0) : Offset.zero,
         builder: (context) => MouseRegion(
           onEnter: (_) => setState(() => _isHovered = true),
           onExit: (_) => setState(() => _isHovered = false),
