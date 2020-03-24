@@ -15,7 +15,6 @@ class _ChangeLogState extends State<ChangeLog> {
 
   @override
   void initState() {
-    // markdown = rootBundle.loadString('assets/changelog/changelog.md');
     _markdown = _fetchChangelog();
     super.initState();
   }
@@ -31,17 +30,27 @@ class _ChangeLogState extends State<ChangeLog> {
   }
 
   @override
+  void didUpdateWidget(ChangeLog oldWidget) {
+    // Update the changelog
+    _fetchChangelog();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Center(
-      child: FutureBuilder(
-        future: _markdown,
-        builder: (context, AsyncSnapshot<String> snapshot) {
-          if (snapshot.hasData) {
-            return Markdown(data: snapshot.data);
-          } else {
-            return const CircularProgressIndicator();
-          }
-        },
+      child: Container(
+        width: 600,
+        child: FutureBuilder(
+          future: _markdown,
+          builder: (context, AsyncSnapshot<String> snapshot) {
+            if (snapshot.hasData) {
+              return Markdown(data: snapshot.data);
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
       ),
     );
   }
