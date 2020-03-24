@@ -10,6 +10,7 @@ class FlatIconButton extends StatelessWidget {
       this.color,
       this.textColor,
       this.onTap,
+      this.mainAxisAlignment = MainAxisAlignment.spaceBetween,
       this.elevated = false,
       this.radius = 15,
       this.height = 30})
@@ -22,6 +23,7 @@ class FlatIconButton extends StatelessWidget {
   final bool elevated;
   final double radius;
   final double height;
+  final MainAxisAlignment mainAxisAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +49,7 @@ class FlatIconButton extends StatelessWidget {
         ),
         height: height,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: mainAxisAlignment,
           children: <Widget>[
             Text(
               label,

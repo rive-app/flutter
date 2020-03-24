@@ -16,8 +16,7 @@ import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
-import 'package:rive_editor/widgets/dialog/settings_panel.dart';
-import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard.dart';
 import 'package:rive_editor/widgets/files_view/file.dart';
 import 'package:rive_editor/widgets/files_view/folder_tree.dart';
 import 'package:rive_editor/widgets/files_view/folder_view_widget.dart';
@@ -422,10 +421,7 @@ class FilesView extends StatelessWidget {
                     PopupContextItem.separator(),
                     PopupContextItem(
                       "New Team",
-                      select: () => showRiveSettings<void>(
-                        context: context,
-                        screens: teamSettingsScreens,
-                      ),
+                      select: () => showTeamWizard<void>(context: context),
                     ),
                   ],
                   builder: (context) {
@@ -488,18 +484,16 @@ class FilesView extends StatelessWidget {
                   Container(
                     height: kTreeItemHeight,
                     margin: const EdgeInsets.only(top: 0, bottom: 3),
-                    child: _buildDivider(riveColors.fileLineGrey, left: 20),
+                    child: _buildDivider(riveColors.fileLineGrey),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 21, right: 21, top: 0.5, bottom: 20),
+                    padding: const EdgeInsets.only(top: 0.5, bottom: 20),
                     child: DashedFlatButton(
                       label: 'New Team',
                       icon: 'teams-button',
                       onTap: () {
-                        showRiveSettings<void>(
+                        showTeamWizard<void>(
                           context: context,
-                          screens: teamSettingsScreens,
                         );
                       },
                     ),
