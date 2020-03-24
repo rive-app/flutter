@@ -288,35 +288,6 @@ class FilesView extends StatelessWidget {
                     // key: _file.key,
                     file: _file,
                   );
-                  /** 
-                  Draggable<RiveFile>(
-                    dragAnchor: DragAnchor.pointer,
-                    onDragStarted: () {
-                      print("Start drag!");
-                      if (!_file.isSelected) {
-                        browser.selectItem(_rive, _file);
-                      }
-                      browser.startDrag();
-                    },
-                    onDragCompleted: () {
-                      browser.endDrag();
-                    },
-                    onDragEnd: (_) {
-                      browser.endDrag();
-                    },
-                    onDraggableCanceled: (_, __) {
-                      browser.endDrag();
-                    },
-                    feedback: _buildFeedback(context, _file, browser),
-                    childWhenDragging: _buildChildWhenDragging(context),
-                    child: fileDragging
-                        ? _buildChildWhenDragging(context)
-                        : FileViewWidget(
-                            // key: _file.key,
-                            file: _file,
-                          ),
-                  );
-                    */
                 },
               ),
             );

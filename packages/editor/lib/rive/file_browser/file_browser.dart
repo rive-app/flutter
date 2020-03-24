@@ -271,7 +271,7 @@ class FileBrowser extends FileBrowserController {
         }
         break;
     }
-    // selectedItem.value = value;
+
     notifyListeners();
   }
 
@@ -350,7 +350,6 @@ class FileBrowser extends FileBrowserController {
         element.isSelected = false;
       })
       ..clear();
-    // selectedItem.value = null;
   }
 
   void _selectItem(SelectableItem item, bool append) {
