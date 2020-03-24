@@ -59,7 +59,7 @@ class _RenamableState extends State<Renamable> {
   Widget build(BuildContext context) {
     return ClickListener(
       isListening: !_isEditing,
-      onDoubleClick: () {
+      onDoubleClick: (event) {
         if (widget.onRename == null) {
           // If the rename function isn't handled, don't start editing.
           return;
