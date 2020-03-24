@@ -29,7 +29,7 @@ class TopNav extends StatelessWidget {
                   height: 29,
                   decoration: BoxDecoration(
                       color: riveColors.commonDarkGrey, shape: BoxShape.circle),
-                  child: Center(
+                  child: const Center(
                     child: SizedBox(
                       child: TintedIcon(color: Colors.white, icon: 'add'),
                     ),
