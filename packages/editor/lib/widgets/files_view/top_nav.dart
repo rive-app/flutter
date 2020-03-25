@@ -67,8 +67,8 @@ class TopNav extends StatelessWidget {
                 showRiveDialog<void>(
                     context: context,
                     builder: (context) => SettingsPanel(screens: [
-                      SettingsScreen('Team Settings', TeamSettings()),
-                    ]));
+                          SettingsScreen('Team Settings', TeamSettings()),
+                        ]));
               },
               icon: 'settings',
               backgroundHover: riveColors.fileBackgroundLightGrey,
