@@ -3,6 +3,8 @@ import 'dart:ui';
 
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/shapes/paint/fill.dart';
+import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -23,15 +25,24 @@ class ArtboardTool extends StageTool with DraggableTool {
     super.startDrag(selection, activeArtboard, worldMouse);
     // Create an artboard and place it at the world location.
     _startWorldMouse = Vec2D.clone(worldMouse);
-    _artboard = Artboard()
-      ..name = 'New Artboard'
-      ..x = worldMouse[0]
-      ..y = worldMouse[1]
-      ..originX = 0
-      ..originY = 0
-      ..width = 1
-      ..height = 1;
-    stage.riveFile.add(_artboard);
+    var file = stage.riveFile;
+    file.batchAdd(() {
+      var solidColor = SolidColor()..colorValue = 0xFF313131;
+      var fill = Fill();
+      _artboard = Artboard()
+        ..name = 'New Artboard'
+        ..x = worldMouse[0]
+        ..y = worldMouse[1]
+        ..originX = 0
+        ..originY = 0
+        ..width = 1
+        ..height = 1;
+      file.add(_artboard);
+      file.add(fill);
+      file.add(solidColor);
+      _artboard.appendChild(fill);
+      fill.appendChild(solidColor);
+    });
   }
 
   @override
