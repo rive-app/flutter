@@ -69,7 +69,7 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
               (context, rive, isHovered) {
                 var item = PopupContextItem.withIcon(tool.icon, items);
 
-                var icon = TintedIcon(
+                return TintedIcon(
                   color: item != null
                       ? RiveTheme.of(context).colors.toolbarButtonSelected
                       : isHovered
@@ -77,19 +77,6 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
                           : RiveTheme.of(context).colors.toolbarButton,
                   icon: item != null ? tool.icon : widget.defaultIcon,
                 );
-
-                if (item != null) {
-                  // if we have an active icon, let's show the tooltip with the
-                  // info about the active icon.
-                  return TipRegion(
-                      tip: Tip(
-                        label: item.name,
-                        shortcut: item.shortcut,
-                      ),
-                      child: icon);
-                } else {
-                  return icon;
-                }
               },
         );
       },
