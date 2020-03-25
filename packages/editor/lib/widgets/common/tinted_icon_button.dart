@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/popup/tooltip_button.dart';
+import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// A tinted icon button following Rive design guidelines with background

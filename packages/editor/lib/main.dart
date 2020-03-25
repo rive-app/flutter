@@ -12,7 +12,7 @@ import 'package:rive_editor/widgets/changelog.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/draw_order.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/popup/tooltip_button.dart';
+import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/design_animate_toggle.dart';

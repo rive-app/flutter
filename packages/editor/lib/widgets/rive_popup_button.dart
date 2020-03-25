@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
-import 'package:rive_editor/widgets/popup/tooltip_button.dart';
+import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 typedef RiveWidgetBuilder = Widget Function(BuildContext, Rive);

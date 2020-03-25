@@ -6,7 +6,7 @@ import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
-import 'package:rive_editor/widgets/popup/tooltip_button.dart';
+import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
