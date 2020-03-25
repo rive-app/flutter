@@ -203,15 +203,6 @@ class Editor extends StatelessWidget {
                   ],
                 ),
               ),
-              FlatButton(
-                child: const Text(
-                  'Force Reconnect',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onPressed: () {
-                  rive.forceReconnect();
-                },
-              )
             ],
           ),
         ),

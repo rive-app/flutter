@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:path_drawing/path_drawing.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -39,10 +40,17 @@ class DashedPainter extends CustomPainter {
 }
 
 class DashedFlatButton extends StatelessWidget {
+  const DashedFlatButton({
+    this.label,
+    this.icon,
+    this.onTap,
+    this.tip,
+  });
+
   final String label;
   final String icon;
   final VoidCallback onTap;
-  const DashedFlatButton({this.label, this.icon, this.onTap});
+  final Tip tip;
 
   @override
   Widget build(BuildContext context) {
@@ -54,19 +62,11 @@ class DashedFlatButton extends StatelessWidget {
       label: label,
       color: Colors.transparent,
       onTap: onTap,
+      tip: tip,
     );
-    // TODO: change tooltip for the tooltip widget that we're building
-    return Stack(
-      children: <Widget>[
-        Positioned.fill(
-          child: CustomPaint(
-            painter: DashedPainter(radius: button.radius),
-          ),
-        ),
-        Tooltip(
-            message: 'Create a space where you and\nyour team can share files.',
-            child: button)
-      ],
+    return CustomPaint(
+      painter: DashedPainter(radius: button.radius),
+      child: button,
     );
   }
 }

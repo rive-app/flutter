@@ -156,22 +156,18 @@ class _WizardPanelState extends State<WizardPanel> {
                 text: TextSpan(
               children: [
                 const TextSpan(
-                    text: "You'll only be billed for useres as"
-                        " you add them. Read more about our "),
+                    text: 'You\'ll only be billed for users as'
+                        ' you add them. Read more about our '),
                 TextSpan(
-                    text: "fair billing policy",
+                    text: 'fair billing policy',
                     style: textStyles.tooltipHyperlink,
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
-                        print('Should launch: could use url_launcher'
-                            ' for this. its by the flutter team....');
-                        //WindowUtils.openWebView(
-                        //    'billing_policy', 'https://rive.app');
                         if (await canLaunch(billingPolicyUrl)) {
                           await launch(billingPolicyUrl);
                         }
                       }),
-                const TextSpan(text: "."),
+                const TextSpan(text: '.'),
               ],
               style: textStyles.tooltipDisclaimer,
             ))
