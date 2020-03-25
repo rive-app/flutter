@@ -22,7 +22,10 @@ Future<T> showTeamWizard<T>({BuildContext context}) {
 }
 
 /// The subscription frequency options
-enum TeamSubscriptionOption { yearly, monthly }
+enum BillingFrequency { yearly, monthly }
+
+/// The subscription team option
+enum TeamsOption { basic, premium }
 
 /// Data class for tracking data in the team subscription widget
 class TeamSubscriptionPackage {
@@ -30,7 +33,19 @@ class TeamSubscriptionPackage {
   String name;
 
   /// The team subscription option
-  TeamSubscriptionOption option = TeamSubscriptionOption.yearly;
+  BillingFrequency billingFrequency = BillingFrequency.yearly;
+
+  /// The teams option
+  TeamsOption option;
+
+  /// Validates the team name
+  bool get validateName => name != null && name != '';
+
+  /// Validatwe the team options
+  bool get validateOption => option != null;
+
+  /// Step 1 is valida; safe to proceed to step 2
+  bool get validateStep1 => validateName && validateOption;
 }
 
 /// The main panel for holding the team wizard views
@@ -47,8 +62,8 @@ class _WizardPanelState extends State<WizardPanel> {
     final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
     final options = [
-      TeamSubscriptionOption.yearly,
-      TeamSubscriptionOption.monthly,
+      BillingFrequency.yearly,
+      BillingFrequency.monthly,
     ];
 
     return SizedBox(
@@ -83,17 +98,18 @@ class _WizardPanelState extends State<WizardPanel> {
                   padding: const EdgeInsets.only(left: 32),
                   child: SizedBox(
                     width: 71,
-                    child: ComboBox<TeamSubscriptionOption>(
+                    child: ComboBox<BillingFrequency>(
                       popupWidth: 100,
                       sizing: ComboSizing.content,
                       underline: true,
                       underlineColor: colors.inputUnderline,
                       valueColor: textStyles.fileGreyTextLarge.color,
                       options: options,
-                      value: _sub.option,
+                      value: _sub.billingFrequency,
                       toLabel: describeEnum,
                       contentPadding: const EdgeInsets.only(bottom: 4),
-                      change: (option) => setState(() => _sub.option = option),
+                      change: (option) =>
+                          setState(() => _sub.billingFrequency = option),
                     ),
                   ),
                 ),
@@ -102,19 +118,35 @@ class _WizardPanelState extends State<WizardPanel> {
             Padding(
               padding: const EdgeInsets.only(top: 31, bottom: 31),
               child: Row(
-                children: const <Widget>[
+                children: <Widget>[
                   TeamSubscriptionChoiceWidget(
                     label: 'Team',
                     costLabel: '\$14',
                     explanation:
                         'A space where you and your team can share files.',
+                    onTap: () {
+                      _sub.option = TeamsOption.basic;
+                      if (_sub.validateStep1) {
+                        print('Safe to move onto step 2');
+                      } else {
+                        print('Oops! Point out what the user needs to fix!');
+                      }
+                    },
                   ),
                   Padding(
-                    padding: EdgeInsets.only(left: 30),
+                    padding: const EdgeInsets.only(left: 30),
                     child: TeamSubscriptionChoiceWidget(
                       label: 'Premium Team',
                       costLabel: '\$45',
                       explanation: '1 day support.',
+                      onTap: () {
+                        _sub.option = TeamsOption.premium;
+                        if (_sub.validateStep1) {
+                          print('Safe to move onto step 2');
+                        } else {
+                          print('Oops! Point out what the user needs to fix!');
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -156,10 +188,15 @@ class TeamSubscriptionChoiceWidget extends StatefulWidget {
   final String label;
   final String costLabel;
   final String explanation;
+  final VoidCallback onTap;
 
-  const TeamSubscriptionChoiceWidget(
-      {Key key, this.label, this.costLabel, this.explanation})
-      : super(key: key);
+  const TeamSubscriptionChoiceWidget({
+    Key key,
+    this.label,
+    this.costLabel,
+    this.explanation,
+    this.onTap,
+  }) : super(key: key);
 
   @override
   _TeamSubscriptionChoiceWidgetState createState() =>
@@ -182,100 +219,103 @@ class _TeamSubscriptionChoiceWidgetState
     final buttonTextColor =
         _hover ? Colors.white : colors.commonButtonTextColorDark;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GradientBorder(
-        strokeWidth: 3,
-        radius: 10,
-        shouldPaint: _hover,
-        gradient: gradient,
-        child: Container(
-          height: 193,
-          width: 175,
-          margin: const EdgeInsets.all(3),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: backgroundColor,
-            boxShadow: _hover
-                ? [
-                    BoxShadow(
-                      color: RiveTheme.of(context)
-                          .colors
-                          .commonDarkGrey
-                          .withOpacity(0.1),
-                      blurRadius: 12,
-                      offset: const Offset(0, 8),
-                    )
-                  ]
-                : null,
-          ),
-          child: Column(
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                      child: Text(
-                    widget.label,
-                    style: textStyles.fileGreyTextLarge,
-                  )),
-                  RichText(
-                      textAlign: TextAlign.right,
-                      text: TextSpan(children: [
-                        TextSpan(
-                          text: widget.costLabel,
-                          style: textStyles.fileGreyTextLarge,
-                        ),
-                        TextSpan(
-                          text: '/mo\n per user',
-                          style: textStyles.fileGreyTextSmall,
-                        )
-                      ])),
-                ],
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 18),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(right: 9),
-                        child: Text(
-                          '+',
-                          style: textStyles.fileLightGreyText
-                              .copyWith(height: 1.6),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          widget.explanation,
-                          overflow: TextOverflow.visible,
-                          softWrap: true,
-                          style: textStyles.fileLightGreyText
-                              .copyWith(height: 1.6),
-                        ),
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GradientBorder(
+          strokeWidth: 3,
+          radius: 10,
+          shouldPaint: _hover,
+          gradient: gradient,
+          child: Container(
+            height: 193,
+            width: 175,
+            margin: const EdgeInsets.all(3),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: backgroundColor,
+              boxShadow: _hover
+                  ? [
+                      BoxShadow(
+                        color: RiveTheme.of(context)
+                            .colors
+                            .commonDarkGrey
+                            .withOpacity(0.1),
+                        blurRadius: 12,
+                        offset: const Offset(0, 8),
                       )
-                    ],
-                  ),
+                    ]
+                  : null,
+            ),
+            child: Column(
+              children: <Widget>[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                        child: Text(
+                      widget.label,
+                      style: textStyles.fileGreyTextLarge,
+                    )),
+                    RichText(
+                        textAlign: TextAlign.right,
+                        text: TextSpan(children: [
+                          TextSpan(
+                            text: widget.costLabel,
+                            style: textStyles.fileGreyTextLarge,
+                          ),
+                          TextSpan(
+                            text: '/mo\n per user',
+                            style: textStyles.fileGreyTextSmall,
+                          )
+                        ])),
+                  ],
                 ),
-              ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: FlatIconButton(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      label: 'Choose',
-                      color: buttonColor,
-                      textColor: buttonTextColor,
-                      elevated: _hover,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 18),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(right: 9),
+                          child: Text(
+                            '+',
+                            style: textStyles.fileLightGreyText
+                                .copyWith(height: 1.6),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            widget.explanation,
+                            overflow: TextOverflow.visible,
+                            softWrap: true,
+                            style: textStyles.fileLightGreyText
+                                .copyWith(height: 1.6),
+                          ),
+                        )
+                      ],
                     ),
                   ),
-                ],
-              )
-            ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: FlatIconButton(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        label: 'Choose',
+                        color: buttonColor,
+                        textColor: buttonTextColor,
+                        elevated: _hover,
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),

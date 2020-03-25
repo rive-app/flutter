@@ -168,9 +168,19 @@ class TextStyles {
       fontWeight: FontWeight.w300,
       decoration: TextDecoration.underline);
 
+  TextStyle get tooltipHyperlinkHovered => const TextStyle(
+      fontFamily: 'Roboto-Light',
+      color: Color(0xFF57A5E0),
+      fontSize: 13,
+      fontWeight: FontWeight.w300,
+      decoration: TextDecoration.underline);
+
   // Files
   TextStyle get fileBlueText => const TextStyle(
-      fontFamily: 'Roboto-Medium', color: Color(0xFF57A5E0), fontSize: 13);
+        fontFamily: 'Roboto-Medium',
+        color: Color(0xFF57A5E0),
+        fontSize: 13,
+      );
   TextStyle get fileGreyTextSmall => const TextStyle(
         fontFamily: 'Roboto-Medium',
         color: Color(0xFF333333),
