@@ -185,10 +185,6 @@ class FilesView extends StatelessWidget {
           color: color,
           padding: EdgeInsets.only(left: left),
         ),
-        // child: Container(
-        //   margin: EdgeInsets.only(left: left),
-        //   color: color,
-        //   height: 1,
       )
     ]);
   }
