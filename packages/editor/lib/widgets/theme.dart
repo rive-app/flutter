@@ -210,6 +210,9 @@ class TextStyles {
   // Common
   TextStyle get textFieldInputHint => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFFBBBBBB), fontSize: 16);
+
+  TextStyle get textFieldInputValidationError =>
+      const TextStyle(fontFamily: 'Roboto-Medium', color: red, fontSize: 13);
 }
 
 /// Gradients used in the Rive Theme

@@ -21,6 +21,10 @@ Future<T> showTeamWizard<T>({BuildContext context}) {
       });
 }
 
+String capsFirst(String input) {
+  return input[0].toUpperCase() + input.substring(1);
+}
+
 /// The subscription frequency options
 enum BillingFrequency { yearly, monthly }
 
@@ -38,14 +42,37 @@ class TeamSubscriptionPackage {
   /// The teams option
   TeamsOption option;
 
+  String nameValidationError;
+
+  /// Minimum length for a valid team name.
+  final int minTeamNameLength = 4;
+  final RegExp legalMatch = RegExp(r'^[A-Za-z0-9]+$');
+
   /// Validates the team name
-  bool get validateName => name != null && name != '';
+  bool validateName() {
+    if (name == null || name == '') {
+      nameValidationError = 'Please enter a valid team name.';
+      return false;
+    }
+
+    if (name.length < minTeamNameLength) {
+      nameValidationError = 'At least $minTeamNameLength characters';
+      return false;
+    }
+
+    if (!legalMatch.hasMatch(name)) {
+      nameValidationError = 'No spaces or symbols';
+      return false;
+    }
+    nameValidationError = null;
+    return true;
+  }
 
   /// Validatwe the team options
   bool get validateOption => option != null;
 
   /// Step 1 is valida; safe to proceed to step 2
-  bool get validateStep1 => validateName && validateOption;
+  bool get validateStep1 => validateName() && validateOption;
 }
 
 /// The main panel for holding the team wizard views
@@ -56,6 +83,26 @@ class WizardPanel extends StatefulWidget {
 
 class _WizardPanelState extends State<WizardPanel> {
   final _sub = TeamSubscriptionPackage();
+
+  var validTeamName = true;
+
+  @override
+  void setState(fn) {
+    super.setState(fn);
+
+    validTeamName = _sub.validateName();
+  }
+
+  void selectOption(TeamsOption option) {
+    setState(() {
+      _sub.option = option;
+      if (_sub.validateStep1) {
+        print('Safe to move onto step 2');
+      } else {
+        print('Oops! Point out what the user needs to fix!');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,9 +119,10 @@ class _WizardPanelState extends State<WizardPanel> {
         child: Column(
           children: <Widget>[
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Expanded(
-                  child: TextField(
+                  child: TextFormField(
                     textAlign: TextAlign.left,
                     textAlignVertical: TextAlignVertical.center,
                     style: textStyles.fileGreyTextLarge,
@@ -84,14 +132,16 @@ class _WizardPanelState extends State<WizardPanel> {
                           borderSide: BorderSide(
                               color: colors.inputUnderline, width: 2)),
                       hintText: 'Team name',
+                      errorText:
+                          validTeamName ? null : _sub.nameValidationError,
                       hintStyle: textStyles.textFieldInputHint,
+                      errorStyle: textStyles.textFieldInputValidationError,
                       contentPadding: const EdgeInsets.only(bottom: 3),
                       filled: true,
                       hoverColor: Colors.transparent,
                       fillColor: Colors.transparent,
                     ),
-                    // TODO: validate name
-                    onChanged: (name) => _sub.name = name,
+                    onChanged: (name) => setState(() => _sub.name = name),
                   ),
                 ),
                 Padding(
@@ -106,8 +156,8 @@ class _WizardPanelState extends State<WizardPanel> {
                       valueColor: textStyles.fileGreyTextLarge.color,
                       options: options,
                       value: _sub.billingFrequency,
-                      toLabel: describeEnum,
-                      contentPadding: const EdgeInsets.only(bottom: 4),
+                      toLabel: (option) => capsFirst(describeEnum(option)),
+                      contentPadding: const EdgeInsets.only(bottom: 3),
                       change: (option) =>
                           setState(() => _sub.billingFrequency = option),
                     ),
@@ -116,37 +166,24 @@ class _WizardPanelState extends State<WizardPanel> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 31, bottom: 31),
+              padding: validTeamName
+                  ? const EdgeInsets.only(top: 31, bottom: 31)
+                  : const EdgeInsets.only(top: 10, bottom: 31),
               child: Row(
                 children: <Widget>[
                   TeamSubscriptionChoiceWidget(
-                    label: 'Team',
-                    costLabel: '\$14',
-                    explanation:
-                        'A space where you and your team can share files.',
-                    onTap: () {
-                      _sub.option = TeamsOption.basic;
-                      if (_sub.validateStep1) {
-                        print('Safe to move onto step 2');
-                      } else {
-                        print('Oops! Point out what the user needs to fix!');
-                      }
-                    },
-                  ),
+                      label: 'Team',
+                      costLabel: '\$14',
+                      explanation:
+                          'A space where you and your team can share files.',
+                      onTap: () => selectOption(TeamsOption.basic)),
                   Padding(
                     padding: const EdgeInsets.only(left: 30),
                     child: TeamSubscriptionChoiceWidget(
                       label: 'Premium Team',
                       costLabel: '\$45',
                       explanation: '1 day support.',
-                      onTap: () {
-                        _sub.option = TeamsOption.premium;
-                        if (_sub.validateStep1) {
-                          print('Safe to move onto step 2');
-                        } else {
-                          print('Oops! Point out what the user needs to fix!');
-                        }
-                      },
+                      onTap: () => selectOption(TeamsOption.premium),
                     ),
                   ),
                 ],
