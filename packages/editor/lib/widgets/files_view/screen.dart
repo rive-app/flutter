@@ -26,6 +26,7 @@ import 'package:rive_editor/widgets/files_view/top_nav.dart';
 import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/marquee_selection.dart';
+import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 
@@ -452,7 +453,9 @@ class FilesView extends StatelessWidget {
                     child: DashedFlatButton(
                       label: 'New Team',
                       icon: 'teams-button',
-                      tip: const Tip(label: 'Create a new team'),
+                      tip: const Tip(
+                          label: 'Create a new team',
+                          direction: PopupDirection.topToCenter),
                       onTap: () => showTeamWizard<void>(
                         context: context,
                       ),
