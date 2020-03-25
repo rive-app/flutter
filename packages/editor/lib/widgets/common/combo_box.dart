@@ -327,8 +327,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
                 widget.typeahead ? 0 : widget.underline ? -34 : -30);
             if (widget.contentPadding is EdgeInsets) {
               var p = widget.contentPadding as EdgeInsets;
-              offset -= Offset(-p.left,
-                  p.bottom);
+              offset += Offset(p.left, -p.bottom);
             }
 
             _popup = ListPopup<_ComboOption<T>>.show(
