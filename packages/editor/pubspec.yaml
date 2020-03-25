@@ -24,6 +24,7 @@ dependencies:
   path_drawing: ^0.4.1
   dotted_border: ^1.0.4
   flutter_widgets: ^0.1.9
+  url_launcher: ^5.4.2
 
   # Used for the changelog
   flutter_markdown: ^0.3.4
