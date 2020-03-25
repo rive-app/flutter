@@ -87,6 +87,13 @@ abstract class InspectingColor {
   /// Change the currently editing color
   void changeColor(HSVColor color);
 
+  void _changeEditingColor(HSVColor color, {bool force = false}) {
+    if (!force && color.toColor() == editingColor.value.toColor()) {
+      return;
+    }
+    editingColor.value = color;
+  }
+
   /// Complete the set of changes performed thus far.
   void completeChange() {
     context?.captureJournalEntry();
@@ -288,7 +295,7 @@ class _ShapesInspectingColor extends InspectingColor {
 
   @override
   void changeColor(HSVColor color) {
-    editingColor.value = color;
+    _changeEditingColor(color, force: true);
     switch (type.value) {
       case ColorType.solid:
         _changeSolidColor(color.toColor());
@@ -418,7 +425,7 @@ class _ShapesInspectingColor extends InspectingColor {
       case ColorType.solid:
         // If the full list is solid then we definitely have a SolidColor
         // mutator.
-        editingColor.value = HSVColor.fromColor((first as SolidColor).color);
+        _changeEditingColor(HSVColor.fromColor((first as SolidColor).color));
 
         if (preview.value.length != 1 ||
             preview.value.first != editingColor.value.toColor()) {
@@ -477,8 +484,8 @@ class _ShapesInspectingColor extends InspectingColor {
         if (editingIndex.value >= stops.value.length) {
           editingIndex.value = stops.value.length - 1;
         }
-        editingColor.value =
-            HSVColor.fromColor(stops.value[editingIndex.value].color);
+        _changeEditingColor(
+            HSVColor.fromColor(stops.value[editingIndex.value].color));
 
         // Listen to events we are interested in. These will trigger another
         // _updatePaints call.
@@ -494,7 +501,7 @@ class _ShapesInspectingColor extends InspectingColor {
     }
     type.value = colorType;
     if (colorType == null) {
-      editingColor.value = InspectingColor.defaultEditingColor;
+      _changeEditingColor(InspectingColor.defaultEditingColor);
       preview.value = [];
     }
   }
