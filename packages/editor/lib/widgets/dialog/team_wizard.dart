@@ -13,7 +13,8 @@ import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/gradient_border.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
-const billingPolicyUrl = 'http://bitly.com/98K8eH';
+const billingPolicyUrl =
+    'https://docs.2dimensions.com/rive-help-center/get-started/fair-billing-policy';
 
 Future<T> showTeamWizard<T>({BuildContext context}) {
   return showRiveDialog(
@@ -23,9 +24,7 @@ Future<T> showTeamWizard<T>({BuildContext context}) {
       });
 }
 
-String capsFirst(String input) {
-  return input[0].toUpperCase() + input.substring(1);
-}
+String capsFirst(String input) => input[0].toUpperCase() + input.substring(1);
 
 /// The subscription frequency options
 enum BillingFrequency { yearly, monthly }
@@ -37,17 +36,36 @@ enum TeamsOption { basic, premium }
 enum WizardPanel { one, two }
 
 /// Data class for tracking data in the team subscription widget
-class TeamSubscriptionPackage {
-  /// The team name
-  String name;
+class TeamSubscriptionPackage with ChangeNotifier {
+  /// Team name
+  String _name;
+  String get name => _name;
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
 
-  /// The team subscription option
-  BillingFrequency billingFrequency = BillingFrequency.yearly;
+  /// Team subscription freuqency
+  BillingFrequency _billing = BillingFrequency.yearly;
+  BillingFrequency get billing => _billing;
+  set billing(BillingFrequency value) {
+    _billing = value;
+    notifyListeners();
+  }
 
   /// The teams option
-  TeamsOption option;
+  TeamsOption _option;
+  TeamsOption get option => _option;
+  set option(TeamsOption value) {
+    if (isNameValid) {
+      _option = value;
+    }
+    notifyListeners();
+  }
 
+  // User friendly Name validation error messages
   String nameValidationError;
+
   String cardNumber;
   String ccv;
   String expiration;
@@ -60,7 +78,7 @@ class TeamSubscriptionPackage {
   bool ignoreNullName = true;
 
   /// Validates the team name
-  bool validateName() {
+  bool get isNameValid {
     if (ignoreNullName && name == null) {
       return true;
     }
@@ -91,7 +109,7 @@ class TeamSubscriptionPackage {
   bool get validateOption => option != null;
 
   /// Step 1 is valida; safe to proceed to step 2
-  bool get validateStep1 => validateName() && validateOption;
+  bool get validateStep1 => isNameValid && validateOption;
 }
 
 /// The main panel for holding the team wizard views
@@ -101,44 +119,40 @@ class Wizard extends StatefulWidget {
 }
 
 class _WizardState extends State<Wizard> {
-  final _sub = TeamSubscriptionPackage();
+  TeamSubscriptionPackage _sub;
   WizardPanel activePanel = WizardPanel.one;
-  void setPanel(WizardPanel panel) {
-    setState(() {
-      activePanel = panel;
+
+  @override
+  void initState() {
+    _sub = TeamSubscriptionPackage();
+    // Listen for changes to the package and handle appropriately
+    _sub.addListener(() {
+      _sub.attemptProgress();
+      // Show the appropriate panel depending on the sub state
+      setState(() =>
+          activePanel = _sub.validateStep1 ? WizardPanel.two : WizardPanel.one);
     });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _sub.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    switch (activePanel) {
-      case WizardPanel.one:
-        return TeamWizardPanelOne(
-            sub: _sub, setState: setState, setPanel: setPanel);
-      case WizardPanel.two:
-        return TeamWizardPanelTwo(
-            sub: _sub, setState: setState, setPanel: setPanel);
-    }
+    return activePanel == WizardPanel.one
+        ? TeamWizardPanelOne(_sub)
+        : TeamWizardPanelTwo(_sub);
   }
 }
 
+/// The first panel in the teams sign-up wizard
 class TeamWizardPanelOne extends StatelessWidget {
+  const TeamWizardPanelOne(this.sub, {Key key}) : super(key: key);
   final TeamSubscriptionPackage sub;
-  final void Function(WizardPanel) setPanel;
-  final void Function(void Function()) setState;
-
-  void selectOption(TeamsOption option) {
-    setState(() {
-      sub.option = option;
-      sub.attemptProgress();
-      if (sub.validateStep1) {
-        setPanel(WizardPanel.two);
-      }
-    });
-  }
-
-  const TeamWizardPanelOne({Key key, this.sub, this.setState, this.setPanel})
-      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -167,11 +181,11 @@ class TeamWizardPanelOne extends StatelessWidget {
                     decoration: InputDecoration(
                       isDense: true,
                       enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: colors.inputUnderline, width: 2)),
+                        borderSide:
+                            BorderSide(color: colors.inputUnderline, width: 2),
+                      ),
                       hintText: 'Team name',
-                      errorText:
-                          sub.validateName() ? null : sub.nameValidationError,
+                      errorText: sub.nameValidationError,
                       hintStyle: textStyles.textFieldInputHint,
                       errorStyle: textStyles.textFieldInputValidationError,
                       contentPadding: const EdgeInsets.only(bottom: 3),
@@ -179,7 +193,7 @@ class TeamWizardPanelOne extends StatelessWidget {
                       hoverColor: Colors.transparent,
                       fillColor: Colors.transparent,
                     ),
-                    onChanged: (name) => setState(() => sub.name = name),
+                    onChanged: (name) => sub.name = name,
                   ),
                 ),
                 Padding(
@@ -193,35 +207,35 @@ class TeamWizardPanelOne extends StatelessWidget {
                       underlineColor: colors.inputUnderline,
                       valueColor: textStyles.fileGreyTextLarge.color,
                       options: options,
-                      value: sub.billingFrequency,
+                      value: sub.billing,
                       toLabel: (option) => capsFirst(describeEnum(option)),
                       contentPadding: const EdgeInsets.only(bottom: 3),
-                      change: (option) =>
-                          setState(() => sub.billingFrequency = option),
+                      change: (billing) => sub.billing = billing,
                     ),
                   ),
                 ),
               ],
             ),
             Padding(
-              padding: sub.validateName()
+              padding: sub.isNameValid
                   ? const EdgeInsets.only(top: 31, bottom: 31)
                   : const EdgeInsets.only(top: 9, bottom: 31),
               child: Row(
                 children: <Widget>[
                   TeamSubscriptionChoiceWidget(
-                      label: 'Team',
-                      costLabel: '\$14',
-                      explanation:
-                          'A space where you and your team can share files.',
-                      onTap: () => selectOption(TeamsOption.basic)),
+                    label: 'Team',
+                    costLabel: '\$14',
+                    explanation:
+                        'A space where you and your team can share files.',
+                    onTap: () => sub.option = TeamsOption.basic,
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(left: 30),
                     child: TeamSubscriptionChoiceWidget(
                       label: 'Premium Team',
                       costLabel: '\$45',
                       explanation: '1 day support.',
-                      onTap: () => selectOption(TeamsOption.premium),
+                      onTap: () => sub.option = TeamsOption.premium,
                     ),
                   ),
                 ],
@@ -394,21 +408,8 @@ class _TeamSubscriptionChoiceWidgetState
 
 class TeamWizardPanelTwo extends StatelessWidget {
   final TeamSubscriptionPackage sub;
-  final void Function(WizardPanel) setPanel;
-  final void Function(void Function()) setState;
 
-  void selectOption(TeamsOption option) {
-    setState(() {
-      sub.option = option;
-      sub.attemptProgress();
-      if (sub.validateStep1) {
-        setPanel(WizardPanel.two);
-      }
-    });
-  }
-
-  const TeamWizardPanelTwo({Key key, this.sub, this.setState, this.setPanel})
-      : super(key: key);
+  const TeamWizardPanelTwo(this.sub, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -432,16 +433,17 @@ class TeamWizardPanelTwo extends StatelessWidget {
             Row(
               children: <Widget>[
                 GestureDetector(
-                    child: Padding(
-                        padding: const EdgeInsets.only(bottom: 4, right: 20),
-                        child: SizedBox(
-                          width: 7,
-                          height: 14,
-                          child: CustomPaint(painter: LeftArrow()),
-                        )),
-                    onTap: () {
-                      setPanel(WizardPanel.one);
-                    }),
+                  child: Padding(
+                      padding: const EdgeInsets.only(bottom: 4, right: 20),
+                      child: SizedBox(
+                        width: 7,
+                        height: 14,
+                        child: CustomPaint(painter: LeftArrow()),
+                      )),
+                  // Little hacky, but nulling the option will cause the wizard
+                  // to jump back to the first step
+                  onTap: () => sub.option = null,
+                ),
                 Expanded(
                     child: Padding(
                   padding: const EdgeInsets.only(bottom: 4),
@@ -466,7 +468,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                       value: sub.option,
                       toLabel: (option) => capsFirst(describeEnum(option)),
                       contentPadding: const EdgeInsets.only(bottom: 3),
-                      change: (option) => setState(() => sub.option = option),
+                      change: (option) => sub.option = option,
                     ),
                   ),
                 ),
@@ -481,24 +483,23 @@ class TeamWizardPanelTwo extends StatelessWidget {
                       underlineColor: colors.inputUnderline,
                       valueColor: textStyles.fileGreyTextLarge.color,
                       options: billingOptions,
-                      value: sub.billingFrequency,
+                      value: sub.billing,
                       toLabel: (option) => capsFirst(describeEnum(option)),
                       contentPadding: const EdgeInsets.only(bottom: 3),
-                      change: (option) =>
-                          setState(() => sub.billingFrequency = option),
+                      change: (billing) => sub.billing = billing,
                     ),
                   ),
                 ),
               ],
             ),
             Container(
-              margin: EdgeInsets.only(top: 30, bottom: 15),
-              padding: EdgeInsets.all(31),
+              margin: const EdgeInsets.only(top: 30, bottom: 15),
+              padding: const EdgeInsets.all(31),
               width: 392,
               height: 250,
               decoration: BoxDecoration(
                 border: Border.all(width: 1.0, color: const Color(0xFFE3E3E3)),
-                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                borderRadius: const BorderRadius.all(Radius.circular(10.0)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -544,7 +545,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                               color: colors.inputUnderline, width: 2)),
                       hintText: '0000 0000 0000 0000',
                       errorText:
-                          sub.validateName() ? null : sub.nameValidationError,
+                          sub.isNameValid ? null : sub.nameValidationError,
                       hintStyle:
                           textStyles.textFieldInputHint.copyWith(fontSize: 13),
                       errorStyle: textStyles.textFieldInputValidationError,
@@ -553,8 +554,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                       hoverColor: Colors.transparent,
                       fillColor: Colors.transparent,
                     ),
-                    onChanged: (cardNumber) =>
-                        setState(() => sub.cardNumber = cardNumber),
+                    onChanged: (cardNumber) => sub.cardNumber = cardNumber,
                   ),
                   Padding(
                       padding: const EdgeInsets.only(top: 27),
@@ -612,7 +612,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                               hoverColor: Colors.transparent,
                               fillColor: Colors.transparent,
                             ),
-                            onChanged: (ccv) => setState(() => sub.ccv = ccv),
+                            onChanged: (ccv) => sub.ccv = ccv,
                           ),
                         ),
                         Padding(
@@ -642,7 +642,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                                   fillColor: Colors.transparent,
                                 ),
                                 onChanged: (expiration) =>
-                                    setState(() => sub.expiration = expiration),
+                                    sub.expiration = expiration,
                               )),
                         ),
                         SizedBox(
@@ -669,7 +669,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                                 hoverColor: Colors.transparent,
                                 fillColor: Colors.transparent,
                               ),
-                              onChanged: (zip) => setState(() => sub.zip = zip),
+                              onChanged: (zip) => sub.zip = zip,
                             )),
                       ],
                     ),
@@ -782,7 +782,8 @@ class Chip extends CustomPainter {
       ..isAntiAlias = true;
     Path path = Path();
     path.addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height), Radius.circular(5)));
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(5)));
     path.moveTo(0, size.height / 3);
     path.lineTo(size.width / 3, size.height / 3);
     path.moveTo(0, size.height * 2 / 3);
