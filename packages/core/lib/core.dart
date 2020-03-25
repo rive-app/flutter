@@ -34,7 +34,7 @@ typedef BatchAddCallback = void Function();
 abstract class Core<T extends CoreContext> {
   Id id;
 
-  T context;
+  covariant T context;
   int get coreType;
 
   Set<int> get coreTypes => {};

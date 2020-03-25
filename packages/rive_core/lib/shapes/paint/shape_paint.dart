@@ -5,8 +5,8 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
-import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/src/generated/shapes/paint/shape_paint_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/shape_paint_base.dart';
 
@@ -16,7 +16,7 @@ abstract class ShapePaint extends ShapePaintBase {
   Paint _paint;
   Paint get paint => _paint;
   ShapePaintMutator _paintMutator;
-  Shape _shape;
+  ShapePaintContainer _shapePaintContainer;
 
   ShapePaint() {
     _paint = makePaint();
@@ -61,20 +61,20 @@ abstract class ShapePaint extends ShapePaintBase {
   @override
   void parentChanged(ContainerComponent from, ContainerComponent to) {
     super.parentChanged(from, to);
-    if (parent is Shape) {
-      _shape = parent as Shape;
+    if (parent is ShapePaintContainer) {
+      _shapePaintContainer = parent as ShapePaintContainer;
       _initMutator();
     } else {
       // Important to clear old references so they can be garbage collected.
-      _shape = null;
+      _shapePaintContainer = null;
     }
   }
 
   void _initMutator() {
-    if (_shape != null && _paintMutator != null) {
-      _paintMutator.initializePaintMutator(_shape, paint);
+    if (_shapePaintContainer != null && _paintMutator != null) {
+      _paintMutator.initializePaintMutator(_shapePaintContainer, paint);
     }
   }
 
-  void draw(Canvas canvas, PathComposer pathComposer);
+  void draw(Canvas canvas, Path path);
 }

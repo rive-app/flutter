@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
@@ -16,7 +17,7 @@ class FillsInspectorBuilder extends ListenableInspectorBuilder {
 
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) {
-    var shapes = inspecting.components.whereType<Shape>();
+    var shapes = inspecting.components.whereType<ShapePaintContainer>();
 
     // Rebuild whenever the fills are changed on any of our shapes.
     changeWhen(shapes.map((shape) => shape.fillsChanged));
@@ -43,12 +44,11 @@ class FillsInspectorBuilder extends ListenableInspectorBuilder {
 
   @override
   bool validate(InspectionSet inspecting) =>
-      // Only interested in Shapes...
-      inspecting.intersectingCoreTypes.contains(ShapeBase.typeKey) &&
+      // Only interested in ShapeContainers...
       // ...with the same number of fills.
       inspecting.components
-          .whereType<Shape>()
-          .allSame((component) => component.fills.length);
+          .whereType<ShapePaintContainer>()
+          .allSame((component) => component.fills.length, isEmptySame: false);
 
   void _createFill(Rive rive, InspectionSet inspecting) {
     // We know these are all shapes, so we can iterate them and add a new fill
@@ -57,7 +57,7 @@ class FillsInspectorBuilder extends ListenableInspectorBuilder {
 
     file.batchAdd(() {
       for (final component in inspecting.components) {
-        var shape = component as Shape;
+        var shape = component as ShapePaintContainer;
         var fill = Fill()..name = 'Fill ${shape.fills.length + 1}';
         var solidColor = SolidColor()..color = const Color(0xFFFF5678);
 

@@ -179,7 +179,6 @@ abstract class RiveCoreContext extends CoreContext {
         case GradientStopBase.colorValuePropertyKey:
         case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModePropertyKey:
-        case ArtboardBase.colorValuePropertyKey:
           var value = reader.readVarInt();
           setObjectProperty(object, change.op, value);
           break;
@@ -295,7 +294,6 @@ abstract class RiveCoreContext extends CoreContext {
       case GradientStopBase.colorValuePropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
-      case ArtboardBase.colorValuePropertyKey:
         if (value != null && value is int) {
           var writer = BinaryWriter(alignment: 4);
           writer.writeVarInt(value);
@@ -508,11 +506,6 @@ abstract class RiveCoreContext extends CoreContext {
           object.originY = value;
         }
         break;
-      case ArtboardBase.colorValuePropertyKey:
-        if (object is ArtboardBase && value is int) {
-          object.colorValue = value;
-        }
-        break;
     }
   }
 
@@ -712,11 +705,6 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originYPropertyKey:
         if (object is ArtboardBase) {
           return object.originY;
-        }
-        break;
-      case ArtboardBase.colorValuePropertyKey:
-        if (object is ArtboardBase) {
-          return object.colorValue;
         }
         break;
     }

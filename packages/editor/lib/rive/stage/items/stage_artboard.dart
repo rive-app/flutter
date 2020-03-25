@@ -58,15 +58,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
 
   @override
   void draw(Canvas canvas) {
-    canvas.drawRect(
-      Rect.fromLTWH(
-        component.x,
-        component.y,
-        component.width,
-        component.height,
-      ),
-      component.paint,
-    );
+    // Draw artboard name.
     if (selectionState.value != SelectionState.none) {
       canvas.drawRect(
         Rect.fromLTWH(

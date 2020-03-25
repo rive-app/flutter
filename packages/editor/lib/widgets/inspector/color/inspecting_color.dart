@@ -8,6 +8,7 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/transform_space.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
@@ -125,7 +126,8 @@ class _ShapesInspectingColor extends InspectingColor {
 
   /// Because radial gradients inherit from linear ones, we can share some of
   /// the common aspects of creating one here.
-  core.LinearGradient _initGradient(Shape shape, core.LinearGradient gradient) {
+  core.LinearGradient _initGradient(
+      ShapePaintContainer shape, core.LinearGradient gradient) {
     var file = shape.context;
     var bounds = shape.computeBounds(TransformSpace.local);
     gradient
@@ -255,8 +257,9 @@ class _ShapesInspectingColor extends InspectingColor {
       for (final paint in shapePaints) {
         var mutator = paint.paintMutator as Component;
 
-        var shape =
-            mutator == null ? paint.parent as Shape : paint.paintMutator.shape;
+        var paintContainer = mutator == null
+            ? paint.parent as Shape
+            : paint.paintMutator.shapePaintContainer;
         // Remove the old paint mutator (this is what a color component is
         // referenced as in the fill/stroke).
         if (mutator is ContainerComponent) {
@@ -273,10 +276,12 @@ class _ShapesInspectingColor extends InspectingColor {
             file.add(colorComponent);
             break;
           case ColorType.linear:
-            colorComponent = _initGradient(shape, core.LinearGradient());
+            colorComponent =
+                _initGradient(paintContainer, core.LinearGradient());
             break;
           case ColorType.radial:
-            colorComponent = _initGradient(shape, core.RadialGradient());
+            colorComponent =
+                _initGradient(paintContainer, core.RadialGradient());
             break;
         }
         if (colorComponent != null) {

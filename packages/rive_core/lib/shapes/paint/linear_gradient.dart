@@ -43,7 +43,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   @override
   void buildDependencies() {
     super.buildDependencies();
-    shape?.addDependent(this);
+    shapePaintContainer?.addDependent(this);
   }
 
   @override
@@ -99,7 +99,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
       if (paintsInWorldSpace) {
         // Get the start and end of the gradient in world coordinates (world
         // transform of the shape).
-        var world = shape.worldTransform;
+        var world = shapePaintContainer.worldTransform;
         var worldStart = Vec2D.transformMat2D(Vec2D(), start, world);
         var worldEnd = Vec2D.transformMat2D(Vec2D(), end, world);
         paint.shader = makeGradient(ui.Offset(worldStart[0], worldStart[1]),
