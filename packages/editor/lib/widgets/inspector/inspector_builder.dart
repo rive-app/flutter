@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 
 /// An editor building function which is expected to return a list of builders
@@ -17,8 +19,17 @@ abstract class InspectorBuilder {
 
   /// Reset any listeners that may have gotten previously subscribed.
   void clean() {}
-}
 
+  /// Builder for the divider.
+  static Widget divider(BuildContext context) => Separator(
+        padding: const EdgeInsets.only(
+          left: 20,
+          top: 10,
+          bottom: 10,
+        ),
+        color: RiveTheme.of(context).colors.inspectorSeparator,
+      );
+}
 
 /// A listening ispector builder which will rebuild when any of the items it's
 /// listening to notify.
@@ -43,4 +54,3 @@ abstract class ListenableInspectorBuilder extends InspectorBuilder
     }
   }
 }
-

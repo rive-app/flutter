@@ -13,6 +13,7 @@ export 'src/generated/artboard_base.dart';
 abstract class ArtboardDelegate {
   void markBoundsDirty();
 }
+
 class Artboard extends ArtboardBase {
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
@@ -23,6 +24,11 @@ class Artboard extends ArtboardBase {
 
   void forEachComponent(void Function(Component) callback) =>
       _components.forEach(callback);
+
+  Color get color => Color(colorValue);
+  set color(Color c) {
+    colorValue = c.value;
+  }
 
   @override
   Artboard get artboard => this;
@@ -143,7 +149,7 @@ class Artboard extends ArtboardBase {
   /// components it'll later need to do stuff with (like draw them or sort them
   /// when the draw order changes).
   void addComponent(Component component) {
-    if(!_components.add(component)) {
+    if (!_components.add(component)) {
       return;
     }
     if (component is Drawable) {

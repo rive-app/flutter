@@ -17,40 +17,59 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) => [
         (context) => PropertyDual(
-            name: 'Position',
-            objects: inspecting.components,
-            propertyKeyA: ArtboardBase.xPropertyKey,
-            propertyKeyB: ArtboardBase.yPropertyKey,
-            labelA: 'X',
-            labelB: 'Y',
-            converter: TranslationValueConverter.instance),
+              name: 'Position',
+              objects: inspecting.components,
+              propertyKeyA: ArtboardBase.xPropertyKey,
+              propertyKeyB: ArtboardBase.yPropertyKey,
+              labelA: 'X',
+              labelB: 'Y',
+              converter: TranslationValueConverter.instance,
+            ),
         (context) => PropertyDual(
-            name: 'Size',
-            linkable: true,
-            isLinked: _isSizeLinked,
-            toggleLink: (value) {
-              _isSizeLinked = value;
-              notifyListeners();
-            },
-            objects: inspecting.components,
-            propertyKeyA: ArtboardBase.widthPropertyKey,
-            propertyKeyB: ArtboardBase.heightPropertyKey,
-            labelA: 'Width',
-            labelB: 'Height',
-            converter: TranslationValueConverter.instance),
+              name: 'Size',
+              linkable: true,
+              isLinked: _isSizeLinked,
+              toggleLink: (value) {
+                _isSizeLinked = value;
+                notifyListeners();
+              },
+              objects: inspecting.components,
+              propertyKeyA: ArtboardBase.widthPropertyKey,
+              propertyKeyB: ArtboardBase.heightPropertyKey,
+              labelA: 'Width',
+              labelB: 'Height',
+              converter: TranslationValueConverter.instance,
+            ),
         (context) => PropertyDual(
-            name: 'Origin',
-            linkable: true,
-            isLinked: _isOriginLinked,
-            toggleLink: (value) {
-              _isOriginLinked = value;
-              notifyListeners();
-            },
-            objects: inspecting.components,
-            propertyKeyA: ArtboardBase.originXPropertyKey,
-            propertyKeyB: ArtboardBase.originYPropertyKey,
-            labelA: 'X',
-            labelB: 'Y',
-            converter: TranslationValueConverter.instance)
+              name: 'Origin',
+              linkable: true,
+              isLinked: _isOriginLinked,
+              toggleLink: (value) {
+                _isOriginLinked = value;
+                notifyListeners();
+              },
+              objects: inspecting.components,
+              propertyKeyA: ArtboardBase.originXPropertyKey,
+              propertyKeyB: ArtboardBase.originYPropertyKey,
+              labelA: 'X',
+              labelB: 'Y',
+              converter: TranslationValueConverter.instance,
+            ),
+        InspectorBuilder.divider,
+        (context) => PropertyDual(
+              name: 'Origin',
+              linkable: true,
+              isLinked: _isOriginLinked,
+              toggleLink: (value) {
+                _isOriginLinked = value;
+                notifyListeners();
+              },
+              objects: inspecting.components,
+              propertyKeyA: ArtboardBase.originXPropertyKey,
+              propertyKeyB: ArtboardBase.originYPropertyKey,
+              labelA: 'X',
+              labelB: 'Y',
+              converter: TranslationValueConverter.instance,
+            ),
       ];
 }

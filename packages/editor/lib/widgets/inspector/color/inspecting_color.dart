@@ -18,14 +18,26 @@ import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 /// Color change callback used by the various color picker components.
 typedef ChangeColor = void Function(HSVColor);
 
+/// Inspector specific data for the color stop. We need the common gradient
+/// properties across the full selection set. This is a simplified data
+/// representation just for the purposes of the inspector.
+class InspectingColorStop {
+  final double position;
+  final Color color;
+
+  InspectingColorStop(GradientStop stop)
+      : position = stop.position,
+        color = stop.color;
+
+  InspectingColorStop.fromValues(this.position, this.color);
+}
+
 /// Abstraction of the currently inspected color.
-class InspectingColor {
+abstract class InspectingColor {
   static const HSVColor defaultEditingColor = HSVColor.fromAHSV(1, 0, 0, 0);
   static const Color defaultSolidColor = Color(0xFF747474);
-  static const Color defaultGradientColorA =
-      Color(0xFFFFFFFF); //Color(0xFFFF5678);
-  static const Color defaultGradientColorB =
-      Color(0xFF000000); //Color(0xFFD041AB);
+  static const Color defaultGradientColorA = Color(0xFFFFFFFF);
+  static const Color defaultGradientColorB = Color(0xFF000000);
 
   /// Whether the inspecting color is a solid or a linear/radial gradient.
   final ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
@@ -44,6 +56,39 @@ class InspectingColor {
   final ValueNotifier<List<InspectingColorStop>> stops =
       ValueNotifier<List<InspectingColorStop>>(null);
 
+  InspectingColor();
+
+  factory InspectingColor.forShapes(Iterable<ShapePaint> paints) =>
+      _ShapesInspectingColor(paints);
+
+  RiveFile get context;
+
+  void dispose();
+
+  /// Change the color type.
+  void changeType(ColorType colorType);
+
+  /// Add a gradient stop at [position].
+  void addStop(double position);
+
+  /// Change the position of the currently selected (determined by
+  /// [editingIndex]) gradient stop.
+  void changeStopPosition(double position);
+
+  /// Change the editing color stop index.
+  void changeStopIndex(int index);
+
+  /// Change the currently editing color
+  void changeColor(HSVColor color);
+
+  /// Complete the set of changes performed thus far.
+  void completeChange() {
+    context?.captureJournalEntry();
+  }
+}
+
+/// Concrete implementation of InspectingColor for [ShapePaint]s.
+class _ShapesInspectingColor extends InspectingColor {
   /// Track which properties we're listening to on each component. This varies
   /// depending on whether it's a solid color, gradient, etc.
   final Map<Component, Set<int>> _listeningToCoreProperties = {};
@@ -55,7 +100,7 @@ class InspectingColor {
   bool _suppressUpdating = false;
 
   Iterable<ShapePaint> shapePaints;
-  InspectingColor(this.shapePaints) {
+  _ShapesInspectingColor(this.shapePaints) {
     for (final paint in shapePaints) {
       paint.paintMutatorChanged.addListener(_mutatorChanged);
     }
@@ -75,10 +120,10 @@ class InspectingColor {
 
     // Add two stops.
     var gradientStopA = GradientStop()
-      ..color = defaultGradientColorA
+      ..color = InspectingColor.defaultGradientColorA
       ..position = 0;
     var gradientStopB = GradientStop()
-      ..color = defaultGradientColorB
+      ..color = InspectingColor.defaultGradientColorB
       ..position = 1;
 
     file.add(gradient);
@@ -91,7 +136,7 @@ class InspectingColor {
     return gradient;
   }
 
-  /// Add a gradient stop at [position].
+  @override
   void addStop(double position) {
     assert(position >= 0 && position <= 1);
     assert(type.value == ColorType.linear || type.value == ColorType.radial);
@@ -143,8 +188,7 @@ class InspectingColor {
     completeChange();
   }
 
-  /// Change the position of the currently selected (determined by
-  /// [editingIndex]) gradient stop.
+  @override
   void changeStopPosition(double position) {
     assert(type.value == ColorType.linear || type.value == ColorType.radial);
     int index = editingIndex.value;
@@ -172,7 +216,7 @@ class InspectingColor {
     _updatePaints();
   }
 
-  /// Change the editing color stop index.
+  @override
   void changeStopIndex(int index) {
     editingIndex.value = index;
     _updatePaints();
@@ -181,6 +225,7 @@ class InspectingColor {
   /// Change the color type. This will clear out the existing paint mutators
   /// from all the shapePaints (fills/strokes) and create new one matching the
   /// desired type.
+  @override
   void changeType(ColorType colorType) {
     if (type.value == colorType) {
       return;
@@ -232,7 +277,7 @@ class InspectingColor {
     completeChange();
   }
 
-  /// Change the currently editing color
+  @override
   void changeColor(HSVColor color) {
     editingColor.value = color;
     switch (type.value) {
@@ -245,12 +290,10 @@ class InspectingColor {
     }
   }
 
+  @override
   RiveFile get context => shapePaints.first.context;
 
-  void completeChange() {
-    context?.captureJournalEntry();
-  }
-
+  @override
   void dispose() {
     for (final paint in shapePaints) {
       paint.paintMutatorChanged.removeListener(_mutatorChanged);
@@ -442,7 +485,7 @@ class InspectingColor {
     }
     type.value = colorType;
     if (colorType == null) {
-      editingColor.value = defaultEditingColor;
+      editingColor.value = InspectingColor.defaultEditingColor;
       preview.value = [];
     }
   }
@@ -467,18 +510,4 @@ class InspectingColor {
     }
     debounce(_updatePaints);
   }
-}
-
-/// Inspector specific data for the color stop. We need the common gradient
-/// properties across the full selection set. This is a simplified data
-/// representation just for the purposes of the inspector.
-class InspectingColorStop {
-  final double position;
-  final Color color;
-
-  InspectingColorStop(GradientStop stop)
-      : position = stop.position,
-        color = stop.color;
-
-  InspectingColorStop.fromValues(this.position, this.color);
 }

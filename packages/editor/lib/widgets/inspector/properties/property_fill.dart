@@ -5,6 +5,7 @@ import 'package:rive_editor/widgets/common/converters/string_value_converter.dar
 import 'package:rive_editor/widgets/common/core_combo_box.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_component.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
@@ -13,7 +14,7 @@ import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.
 
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a color fill on a shape.
-class PropertyFill extends StatelessWidget {
+class PropertyFill extends StatefulWidget {
   final Iterable<Fill> fills;
 
   const PropertyFill({
@@ -24,14 +25,33 @@ class PropertyFill extends StatelessWidget {
   static const double inputWidth = 70;
 
   @override
+  _PropertyFillState createState() => _PropertyFillState();
+}
+
+class _PropertyFillState extends State<PropertyFill> {
+  InspectingColor _inspectingColor;
+  @override
+  void initState() {
+    _inspectingColor = InspectingColor.forShapes(widget.fills);
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(PropertyFill oldWidget) {
+    _inspectingColor?.dispose();
+    _inspectingColor = InspectingColor.forShapes(widget.fills);
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InspectorPopoutComponent(
-      components: fills,
+      components: widget.fills,
       prefix: (context) => Padding(
         padding: const EdgeInsets.only(right: 10),
         child: InspectorColorSwatch(
           inspectorContext: context,
-          shapePaints: fills,
+          inspectingColor: _inspectingColor,
         ),
       ),
       isVisiblePropertyKey: ShapePaintBase.isVisiblePropertyKey,
@@ -50,7 +70,7 @@ class PropertyFill extends StatelessWidget {
               const SizedBox(width: 20),
               Expanded(
                 child: CoreTextField(
-                  objects: fills,
+                  objects: widget.fills,
                   propertyKey: ComponentBase.namePropertyKey,
                   converter: StringValueConverter.instance,
                 ),
@@ -68,7 +88,7 @@ class PropertyFill extends StatelessWidget {
               const SizedBox(width: 20),
               CoreComboBox(
                 sizing: ComboSizing.expanded,
-                objects: fills,
+                objects: widget.fills,
                 propertyKey: FillBase.fillRulePropertyKey,
                 options: PathFillType.values,
                 toLabel: (PathFillType fillType) {
