@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
@@ -45,6 +46,12 @@ abstract class ShapePaint extends ShapePaintBase {
       _changeMutator(child as ShapePaintMutator);
       _initMutator();
     }
+  }
+
+  @override
+  void isVisibleChanged(bool from, bool to) {
+    super.isVisibleChanged(from, to);
+    _shapePaintContainer?.addDirt(ComponentDirt.paint);
   }
 
   @override

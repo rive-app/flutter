@@ -142,6 +142,7 @@ class Rive with RiveFileDelegate {
     if ((file.value?.advance(elapsedSeconds) ?? false) ||
         (_stage?.shouldAdvance ?? false)) {
       _stage.advance(elapsedSeconds);
+      SchedulerBinding.instance.scheduleFrame();
     }
   }
 

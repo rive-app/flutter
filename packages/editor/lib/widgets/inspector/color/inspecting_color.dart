@@ -61,7 +61,7 @@ abstract class InspectingColor {
 
   InspectingColor();
 
-  factory InspectingColor.forShapes(Iterable<ShapePaint> paints) =>
+  factory InspectingColor.forShapePaints(Iterable<ShapePaint> paints) =>
       _ShapesInspectingColor(paints);
 
   factory InspectingColor.forSolidProperty(

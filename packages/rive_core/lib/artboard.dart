@@ -16,6 +16,7 @@ export 'src/generated/artboard_base.dart';
 
 abstract class ArtboardDelegate {
   void markBoundsDirty();
+  void markNameDirty();
 }
 
 class Artboard extends ArtboardBase with ShapePaintContainer {
@@ -74,6 +75,12 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     if (child is Fill) {
       addFill(child);
     }
+  }
+
+  @override
+  void nameChanged(String from, String to) {
+    super.nameChanged(from, to);
+    _delegate?.markNameDirty();
   }
 
   @override
