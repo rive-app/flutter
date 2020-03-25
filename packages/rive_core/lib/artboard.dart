@@ -15,6 +15,7 @@ abstract class ArtboardDelegate {
 }
 
 class Artboard extends ArtboardBase {
+  final Paint paint = Paint()..style = PaintingStyle.fill;
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
   final List<Drawable> _drawables = [];
@@ -36,6 +37,15 @@ class Artboard extends ArtboardBase {
   Vec2D get originWorld {
     return Vec2D.fromValues(
         x + width * (originX ?? 0), y + height * (originY ?? 0));
+  }
+
+  @override
+  void colorValueChanged(int from, int to) {
+    super.colorValueChanged(from, to);
+    paint?.color = color;
+
+    // Force an update.
+    _dirt |= ComponentDirt.components;
   }
 
   /// Update any dirty components in this artboard.
@@ -166,10 +176,10 @@ class Artboard extends ArtboardBase {
     }
   }
 
-  /// Paint the drawable components in this artboard.
-  void paint(Canvas canvas) {
+  /// Draw the drawable components in this artboard.
+  void draw(Canvas canvas) {
     for (final drawable in _drawables) {
-      drawable.paint(canvas);
+      drawable.draw(canvas);
     }
   }
 }

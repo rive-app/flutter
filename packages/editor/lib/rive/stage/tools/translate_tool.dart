@@ -28,7 +28,7 @@ class TranslateTool extends StageTool with DraggableTool {
   }
 
   @override
-  void paint(Canvas canvas) {}
+  void draw(Canvas canvas) {}
 
   @override
   String get icon => 'tool-translate';

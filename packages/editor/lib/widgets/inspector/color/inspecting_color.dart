@@ -48,6 +48,8 @@ abstract class InspectingColor {
   /// The editing index in the list of color stops.
   final ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
 
+  bool get canChangeType;
+
   /// The value of the currently editing color.
   final ValueNotifier<HSVColor> editingColor =
       ValueNotifier<HSVColor>(defaultEditingColor);
@@ -60,6 +62,10 @@ abstract class InspectingColor {
 
   factory InspectingColor.forShapes(Iterable<ShapePaint> paints) =>
       _ShapesInspectingColor(paints);
+
+  factory InspectingColor.forSolidProperty(
+          Iterable<core.Core> objects, int propertyKey) =>
+      _CorePropertyInspectingColor(objects, propertyKey);
 
   RiveFile get context;
 
@@ -89,6 +95,9 @@ abstract class InspectingColor {
 
 /// Concrete implementation of InspectingColor for [ShapePaint]s.
 class _ShapesInspectingColor extends InspectingColor {
+  @override
+  bool get canChangeType => true;
+
   /// Track which properties we're listening to on each component. This varies
   /// depending on whether it's a solid color, gradient, etc.
   final Map<Component, Set<int>> _listeningToCoreProperties = {};
@@ -509,5 +518,97 @@ class _ShapesInspectingColor extends InspectingColor {
       return;
     }
     debounce(_updatePaints);
+  }
+}
+
+/// Concrete implementation of InspectingColor for any core property that
+/// exposes a solid color as an integer. Doesn't allow changing types from solid
+/// color.
+class _CorePropertyInspectingColor extends InspectingColor {
+  @override
+  bool get canChangeType => false;
+
+  /// Whether we should perform an update in response to a core value change.
+  /// This allows us to not re-process updates as we're interactively changing
+  /// values from this inspector.
+  bool _suppressUpdating = false;
+
+  final Iterable<core.Core> objects;
+  final int propertyKey;
+
+  _CorePropertyInspectingColor(this.objects, this.propertyKey) {
+    type.value = ColorType.solid;
+    for (final object in objects) {
+      object.addListener(propertyKey, _propertyKeyChange);
+    }
+    _updatePaints();
+  }
+
+  void _propertyKeyChange(dynamic from, dynamic to) {
+    if (_suppressUpdating) {
+      return;
+    }
+    debounce(_updatePaints);
+  }
+
+  @override
+  void dispose() {
+    for (final object in objects) {
+      object.removeListener(propertyKey, _propertyKeyChange);
+    }
+  }
+
+  Color _colorValue(core.Core object) =>
+      Color(object.getProperty<int>(propertyKey));
+
+  void _updatePaints() {
+    var first = _colorValue(objects.first);
+    editingColor.value = HSVColor.fromColor(first);
+
+    if (preview.value.length != 1 ||
+        preview.value.first != editingColor.value.toColor()) {
+      // check all colors are the same
+      Color color = core.equalValue<core.Core, Color>(objects, _colorValue);
+      preview.value = color == null ? [] : [color];
+    }
+  }
+
+  @override
+  RiveFile get context => objects.first.context as RiveFile;
+
+  @override
+  void changeColor(HSVColor color) {
+    editingColor.value = color;
+    _suppressUpdating = true;
+
+    var value = color.toColor().value;
+    for (final object in objects) {
+      object.context.setObjectProperty(object, propertyKey, value);
+    }
+
+    _suppressUpdating = false;
+
+    preview.value = [editingColor.value.toColor()];
+  }
+
+  @override
+  void addStop(double position) {
+    throw UnsupportedError('Cannot add color stop to a solid core color.');
+  }
+
+  @override
+  void changeStopIndex(int index) {
+    throw UnsupportedError('Cannot change stop index for a solid core color.');
+  }
+
+  @override
+  void changeStopPosition(double position) {
+    throw UnsupportedError(
+        'Cannot change stop position for a solid core color.');
+  }
+
+  @override
+  void changeType(ColorType type) {
+    throw UnsupportedError('Cannot change type for a solid core color.');
   }
 }
