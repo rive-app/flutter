@@ -323,12 +323,18 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
               .toList(growable: false);
 
           setState(() {
+            var offset = Offset(-ComboBox._horizontalPadding,
+                widget.typeahead ? 0 : widget.underline ? -34 : -30);
+            if (widget.contentPadding is EdgeInsets) {
+              var p = widget.contentPadding as EdgeInsets;
+              offset -= Offset(-p.left,
+                  p.bottom);
+            }
+
             _popup = ListPopup<_ComboOption<T>>.show(
               context,
               handleKeyPresses: !widget.typeahead,
-              offset: 
-                  Offset(-ComboBox._horizontalPadding,
-                      widget.typeahead ? 0 : widget.underline ? -34 : -30),
+              offset: offset,
               margin: 5,
               includeCloseGuard: true,
               showArrow: false,
@@ -397,6 +403,7 @@ class _ComboGestureDetector extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTapDown: (_) {
           RenderBox renderBox = context.findRenderObject() as RenderBox;
+
           open(renderBox.size);
         },
         child: child,
