@@ -24,7 +24,7 @@ class StageShape extends StageContourItem<Shape> {
   }
 
   @override
-  void paint(Canvas canvas) {
+  void draw(Canvas canvas) {
     if (selectionState.value == SelectionState.none) {
       return;
     }

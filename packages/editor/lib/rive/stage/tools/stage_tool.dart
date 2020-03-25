@@ -46,5 +46,5 @@ abstract class StageTool {
   }
 
   void onEditModeChange() {}
-  void paint(Canvas canvas);
+  void draw(Canvas canvas);
 }

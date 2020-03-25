@@ -22,7 +22,7 @@ class StageVertex extends StageItem<PathVertex> {
   }
 
   @override
-  void paint(Canvas canvas) {
+  void draw(Canvas canvas) {
     final origin = component.artboard.originWorld;
     final scale = 1 / stage.viewZoom * radiusScale;
 

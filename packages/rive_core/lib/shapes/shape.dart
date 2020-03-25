@@ -125,7 +125,7 @@ class Shape extends ShapeBase {
   }
 
   @override
-  void paint(Canvas canvas) {
+  void draw(Canvas canvas) {
     assert(_pathComposer != null);
 
     for (final fill in fills) {

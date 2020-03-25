@@ -109,7 +109,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
   }
 
   @override
-  void paint(Canvas canvas) {
+  void draw(Canvas canvas) {
     if (_cursorImage == null) {
       return;
     }

@@ -79,7 +79,7 @@ abstract class StageItem<T> extends SelectableItem {
   /// Provide an aabb for this stage item.
   AABB get aabb;
 
-  void paint(Canvas canvas) {}
+  void draw(Canvas canvas) {}
 }
 
 AABB obbToAABB(AABB obb, Mat2D world) {

@@ -129,7 +129,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
   }
 
   @override
-  void paint(Canvas canvas) {
+  void draw(Canvas canvas) {
     // happens when we first start dragging.
     if (_start == null) {
       return;

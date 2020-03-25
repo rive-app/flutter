@@ -161,6 +161,28 @@ abstract class ArtboardBase extends ContainerComponent {
     onPropertyChanged(originYPropertyKey, from, to);
   }
 
+  /// --------------------------------------------------------------------------
+  /// ColorValue field with key 43.
+  int _colorValue = 0xFF313131;
+  static const int colorValuePropertyKey = 43;
+  int get colorValue => _colorValue;
+
+  /// Change the [_colorValue] field value.
+  /// [colorValueChanged] will be invoked only if the field's value has changed.
+  set colorValue(int value) {
+    if (_colorValue == value) {
+      return;
+    }
+    int from = _colorValue;
+    _colorValue = value;
+    colorValueChanged(from, value);
+  }
+
+  @mustCallSuper
+  void colorValueChanged(int from, int to) {
+    onPropertyChanged(colorValuePropertyKey, from, to);
+  }
+
   @override
   void changeNonNull() {
     super.changeNonNull();
@@ -182,6 +204,9 @@ abstract class ArtboardBase extends ContainerComponent {
     if (originY != null) {
       onPropertyChanged(originYPropertyKey, originY, originY);
     }
+    if (colorValue != null) {
+      onPropertyChanged(colorValuePropertyKey, colorValue, colorValue);
+    }
   }
 
   @override
@@ -199,6 +224,8 @@ abstract class ArtboardBase extends ContainerComponent {
         return originX as K;
       case originYPropertyKey:
         return originY as K;
+      case colorValuePropertyKey:
+        return colorValue as K;
       default:
         return super.getProperty<K>(propertyKey);
     }

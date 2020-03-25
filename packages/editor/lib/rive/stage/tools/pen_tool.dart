@@ -39,7 +39,7 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
   }
 
   @override
-  void paint(Canvas canvas) {
+  void draw(Canvas canvas) {
     // Paint dot under the mouse cursor.
     if (mousePosition != null) {
       final mp = Vec2D();

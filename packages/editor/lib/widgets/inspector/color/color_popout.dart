@@ -77,31 +77,33 @@ class ColorPopout extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
-          _stopEditor(
-            type,
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
-              child: ComboBox<ColorType>(
-                sizing: ComboSizing.content,
-                options: ColorType.values,
-                value: type,
-                toLabel: (colorType) {
-                  switch (colorType) {
-                    case ColorType.solid:
-                      return 'Solid';
-                    case ColorType.linear:
-                      return 'Linear';
-                    case ColorType.radial:
-                      return 'Radial';
-                  }
-                  return '';
-                },
-                change: inspecting.changeType,
+          if (inspecting.canChangeType) ...[
+            const SizedBox(height: 20),
+            _stopEditor(
+              type,
+              Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
+                child: ComboBox<ColorType>(
+                  sizing: ComboSizing.content,
+                  options: ColorType.values,
+                  value: type,
+                  toLabel: (colorType) {
+                    switch (colorType) {
+                      case ColorType.solid:
+                        return 'Solid';
+                      case ColorType.linear:
+                        return 'Linear';
+                      case ColorType.radial:
+                        return 'Radial';
+                    }
+                    return '';
+                  },
+                  change: inspecting.changeType,
+                ),
               ),
+              theme,
             ),
-            theme,
-          ),
+          ],
           ValueListenableBuilder(
             valueListenable: inspecting.editingColor,
             builder: (context, HSVColor hsv, child) => Column(
@@ -135,16 +137,18 @@ class ColorPopout extends StatelessWidget {
                               color:
                                   HSVColor.fromAHSV(1, hsv.hue, 1, 1).toColor(),
                               value: hsv.hue / 360,
-                              changeValue: type == null ? null : (value) {
-                                inspecting.changeColor(
-                                  HSVColor.fromAHSV(
-                                    hsv.alpha,
-                                    value * 360,
-                                    hsv.saturation,
-                                    hsv.value,
-                                  ),
-                                );
-                              },
+                              changeValue: type == null
+                                  ? null
+                                  : (value) {
+                                      inspecting.changeColor(
+                                        HSVColor.fromAHSV(
+                                          hsv.alpha,
+                                          value * 360,
+                                          hsv.saturation,
+                                          hsv.value,
+                                        ),
+                                      );
+                                    },
                               completeChange: inspecting.completeChange,
                               background: (context) => Container(
                                 child: const CustomPaint(
@@ -156,16 +160,18 @@ class ColorPopout extends StatelessWidget {
                             ColorSlider(
                               color: hsv.toColor(),
                               value: hsv.alpha,
-                              changeValue: type == null ? null : (value) {
-                                inspecting.changeColor(
-                                  HSVColor.fromAHSV(
-                                    value,
-                                    hsv.hue,
-                                    hsv.saturation,
-                                    hsv.value,
-                                  ),
-                                );
-                              },
+                              changeValue: type == null
+                                  ? null
+                                  : (value) {
+                                      inspecting.changeColor(
+                                        HSVColor.fromAHSV(
+                                          value,
+                                          hsv.hue,
+                                          hsv.saturation,
+                                          hsv.value,
+                                        ),
+                                      );
+                                    },
                               completeChange: inspecting.completeChange,
                               background: (context) => Container(
                                 child: CustomPaint(

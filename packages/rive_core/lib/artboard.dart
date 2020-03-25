@@ -13,7 +13,9 @@ export 'src/generated/artboard_base.dart';
 abstract class ArtboardDelegate {
   void markBoundsDirty();
 }
+
 class Artboard extends ArtboardBase {
+  final Paint paint = Paint()..style = PaintingStyle.fill;
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
   final List<Drawable> _drawables = [];
@@ -24,12 +26,26 @@ class Artboard extends ArtboardBase {
   void forEachComponent(void Function(Component) callback) =>
       _components.forEach(callback);
 
+  Color get color => Color(colorValue);
+  set color(Color c) {
+    colorValue = c.value;
+  }
+
   @override
   Artboard get artboard => this;
 
   Vec2D get originWorld {
     return Vec2D.fromValues(
         x + width * (originX ?? 0), y + height * (originY ?? 0));
+  }
+
+  @override
+  void colorValueChanged(int from, int to) {
+    super.colorValueChanged(from, to);
+    paint?.color = color;
+
+    // Force an update.
+    _dirt |= ComponentDirt.components;
   }
 
   /// Update any dirty components in this artboard.
@@ -143,7 +159,7 @@ class Artboard extends ArtboardBase {
   /// components it'll later need to do stuff with (like draw them or sort them
   /// when the draw order changes).
   void addComponent(Component component) {
-    if(!_components.add(component)) {
+    if (!_components.add(component)) {
       return;
     }
     if (component is Drawable) {
@@ -160,10 +176,10 @@ class Artboard extends ArtboardBase {
     }
   }
 
-  /// Paint the drawable components in this artboard.
-  void paint(Canvas canvas) {
+  /// Draw the drawable components in this artboard.
+  void draw(Canvas canvas) {
     for (final drawable in _drawables) {
-      drawable.paint(canvas);
+      drawable.draw(canvas);
     }
   }
 }

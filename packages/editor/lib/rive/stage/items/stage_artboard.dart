@@ -57,18 +57,27 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   }
 
   @override
-  void paint(Canvas canvas) {
+  void draw(Canvas canvas) {
     canvas.drawRect(
+      Rect.fromLTWH(
+        component.x,
+        component.y,
+        component.width,
+        component.height,
+      ),
+      component.paint,
+    );
+    if (selectionState.value != SelectionState.none) {
+      canvas.drawRect(
         Rect.fromLTWH(
           component.x,
           component.y,
           component.width,
           component.height,
         ),
-        Paint()
-          ..color = selectionState.value == SelectionState.none
-              ? const Color.fromRGBO(100, 100, 100, 1.0)
-              : const Color.fromRGBO(200, 200, 200, 1.0));
+        StageItem.selectedPaint,
+      );
+    }
 
     // Get into artboard's world space. This is because the artboard draws
     // components in the artboard's space (in component lingo we call this world
@@ -86,7 +95,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
     canvas.translate(originWorld[0], originWorld[1]);
 
     // Now draw the actual drawables.
-    component.paint(canvas);
+    component.draw(canvas);
 
     // Get back into stage space.
     canvas.restore();

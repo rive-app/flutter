@@ -532,7 +532,7 @@ class Stage extends Debouncer {
     StageItem.selectedPaint.strokeWidth = StageItem.strokeWidth / _viewZoom;
   }
 
-  void paint(PaintingContext context, Offset offset, Size size) {
+  void draw(PaintingContext context, Offset offset, Size size) {
     Mat2D.invert(_inverseViewTransform, _viewTransform);
     var viewAABB = obbToAABB(
         AABB.fromValues(0, 0, _viewportWidth, _viewportHeight),
@@ -559,13 +559,13 @@ class Stage extends Debouncer {
     _visibleItems.sort((StageItem a, StageItem b) => a.drawOrder - b.drawOrder);
 
     for (final StageItem item in _visibleItems) {
-      item.paint(canvas);
+      item.draw(canvas);
     }
 
     canvas.restore();
 
     // Widget space
-    _activeTool?.paint(canvas);
+    _activeTool?.draw(canvas);
     canvas.restore();
   }
 

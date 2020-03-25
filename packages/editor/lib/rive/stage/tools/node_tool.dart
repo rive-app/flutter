@@ -35,5 +35,5 @@ class NodeTool extends StageTool with ClickableTool {
   String get icon => 'tool-node';
 
   @override
-  void paint(Canvas canvas) {}
+  void draw(Canvas canvas) {}
 }

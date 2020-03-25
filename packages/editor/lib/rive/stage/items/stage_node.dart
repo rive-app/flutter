@@ -13,7 +13,7 @@ class StageNode extends StageItem<Node> {
       .translate(component.artboard.originWorld);
 
   @override
-  void paint(Canvas canvas) {
+  void draw(Canvas canvas) {
     final origin = component.artboard.originWorld;
     final x = component.x;
     final y = component.y;

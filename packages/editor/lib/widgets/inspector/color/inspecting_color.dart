@@ -18,14 +18,26 @@ import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 /// Color change callback used by the various color picker components.
 typedef ChangeColor = void Function(HSVColor);
 
+/// Inspector specific data for the color stop. We need the common gradient
+/// properties across the full selection set. This is a simplified data
+/// representation just for the purposes of the inspector.
+class InspectingColorStop {
+  final double position;
+  final Color color;
+
+  InspectingColorStop(GradientStop stop)
+      : position = stop.position,
+        color = stop.color;
+
+  InspectingColorStop.fromValues(this.position, this.color);
+}
+
 /// Abstraction of the currently inspected color.
-class InspectingColor {
+abstract class InspectingColor {
   static const HSVColor defaultEditingColor = HSVColor.fromAHSV(1, 0, 0, 0);
   static const Color defaultSolidColor = Color(0xFF747474);
-  static const Color defaultGradientColorA =
-      Color(0xFFFFFFFF); //Color(0xFFFF5678);
-  static const Color defaultGradientColorB =
-      Color(0xFF000000); //Color(0xFFD041AB);
+  static const Color defaultGradientColorA = Color(0xFFFFFFFF);
+  static const Color defaultGradientColorB = Color(0xFF000000);
 
   /// Whether the inspecting color is a solid or a linear/radial gradient.
   final ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
@@ -36,6 +48,8 @@ class InspectingColor {
   /// The editing index in the list of color stops.
   final ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
 
+  bool get canChangeType;
+
   /// The value of the currently editing color.
   final ValueNotifier<HSVColor> editingColor =
       ValueNotifier<HSVColor>(defaultEditingColor);
@@ -43,6 +57,53 @@ class InspectingColor {
   /// The list of color stops used if the current type is a gradient.
   final ValueNotifier<List<InspectingColorStop>> stops =
       ValueNotifier<List<InspectingColorStop>>(null);
+
+  InspectingColor();
+
+  factory InspectingColor.forShapes(Iterable<ShapePaint> paints) =>
+      _ShapesInspectingColor(paints);
+
+  factory InspectingColor.forSolidProperty(
+          Iterable<core.Core> objects, int propertyKey) =>
+      _CorePropertyInspectingColor(objects, propertyKey);
+
+  RiveFile get context;
+
+  void dispose();
+
+  /// Change the color type.
+  void changeType(ColorType colorType);
+
+  /// Add a gradient stop at [position].
+  void addStop(double position);
+
+  /// Change the position of the currently selected (determined by
+  /// [editingIndex]) gradient stop.
+  void changeStopPosition(double position);
+
+  /// Change the editing color stop index.
+  void changeStopIndex(int index);
+
+  /// Change the currently editing color
+  void changeColor(HSVColor color);
+
+  void _changeEditingColor(HSVColor color, {bool force = false}) {
+    if (!force && color.toColor() == editingColor.value.toColor()) {
+      return;
+    }
+    editingColor.value = color;
+  }
+
+  /// Complete the set of changes performed thus far.
+  void completeChange() {
+    context?.captureJournalEntry();
+  }
+}
+
+/// Concrete implementation of InspectingColor for [ShapePaint]s.
+class _ShapesInspectingColor extends InspectingColor {
+  @override
+  bool get canChangeType => true;
 
   /// Track which properties we're listening to on each component. This varies
   /// depending on whether it's a solid color, gradient, etc.
@@ -55,7 +116,7 @@ class InspectingColor {
   bool _suppressUpdating = false;
 
   Iterable<ShapePaint> shapePaints;
-  InspectingColor(this.shapePaints) {
+  _ShapesInspectingColor(this.shapePaints) {
     for (final paint in shapePaints) {
       paint.paintMutatorChanged.addListener(_mutatorChanged);
     }
@@ -75,10 +136,10 @@ class InspectingColor {
 
     // Add two stops.
     var gradientStopA = GradientStop()
-      ..color = defaultGradientColorA
+      ..color = InspectingColor.defaultGradientColorA
       ..position = 0;
     var gradientStopB = GradientStop()
-      ..color = defaultGradientColorB
+      ..color = InspectingColor.defaultGradientColorB
       ..position = 1;
 
     file.add(gradient);
@@ -91,7 +152,7 @@ class InspectingColor {
     return gradient;
   }
 
-  /// Add a gradient stop at [position].
+  @override
   void addStop(double position) {
     assert(position >= 0 && position <= 1);
     assert(type.value == ColorType.linear || type.value == ColorType.radial);
@@ -143,8 +204,7 @@ class InspectingColor {
     completeChange();
   }
 
-  /// Change the position of the currently selected (determined by
-  /// [editingIndex]) gradient stop.
+  @override
   void changeStopPosition(double position) {
     assert(type.value == ColorType.linear || type.value == ColorType.radial);
     int index = editingIndex.value;
@@ -172,7 +232,7 @@ class InspectingColor {
     _updatePaints();
   }
 
-  /// Change the editing color stop index.
+  @override
   void changeStopIndex(int index) {
     editingIndex.value = index;
     _updatePaints();
@@ -181,6 +241,7 @@ class InspectingColor {
   /// Change the color type. This will clear out the existing paint mutators
   /// from all the shapePaints (fills/strokes) and create new one matching the
   /// desired type.
+  @override
   void changeType(ColorType colorType) {
     if (type.value == colorType) {
       return;
@@ -232,9 +293,9 @@ class InspectingColor {
     completeChange();
   }
 
-  /// Change the currently editing color
+  @override
   void changeColor(HSVColor color) {
-    editingColor.value = color;
+    _changeEditingColor(color, force: true);
     switch (type.value) {
       case ColorType.solid:
         _changeSolidColor(color.toColor());
@@ -245,12 +306,10 @@ class InspectingColor {
     }
   }
 
+  @override
   RiveFile get context => shapePaints.first.context;
 
-  void completeChange() {
-    context?.captureJournalEntry();
-  }
-
+  @override
   void dispose() {
     for (final paint in shapePaints) {
       paint.paintMutatorChanged.removeListener(_mutatorChanged);
@@ -366,7 +425,7 @@ class InspectingColor {
       case ColorType.solid:
         // If the full list is solid then we definitely have a SolidColor
         // mutator.
-        editingColor.value = HSVColor.fromColor((first as SolidColor).color);
+        _changeEditingColor(HSVColor.fromColor((first as SolidColor).color));
 
         if (preview.value.length != 1 ||
             preview.value.first != editingColor.value.toColor()) {
@@ -425,8 +484,8 @@ class InspectingColor {
         if (editingIndex.value >= stops.value.length) {
           editingIndex.value = stops.value.length - 1;
         }
-        editingColor.value =
-            HSVColor.fromColor(stops.value[editingIndex.value].color);
+        _changeEditingColor(
+            HSVColor.fromColor(stops.value[editingIndex.value].color));
 
         // Listen to events we are interested in. These will trigger another
         // _updatePaints call.
@@ -442,7 +501,7 @@ class InspectingColor {
     }
     type.value = colorType;
     if (colorType == null) {
-      editingColor.value = defaultEditingColor;
+      _changeEditingColor(InspectingColor.defaultEditingColor);
       preview.value = [];
     }
   }
@@ -469,16 +528,94 @@ class InspectingColor {
   }
 }
 
-/// Inspector specific data for the color stop. We need the common gradient
-/// properties across the full selection set. This is a simplified data
-/// representation just for the purposes of the inspector.
-class InspectingColorStop {
-  final double position;
-  final Color color;
+/// Concrete implementation of InspectingColor for any core property that
+/// exposes a solid color as an integer. Doesn't allow changing types from solid
+/// color.
+class _CorePropertyInspectingColor extends InspectingColor {
+  @override
+  bool get canChangeType => false;
 
-  InspectingColorStop(GradientStop stop)
-      : position = stop.position,
-        color = stop.color;
+  /// Whether we should perform an update in response to a core value change.
+  /// This allows us to not re-process updates as we're interactively changing
+  /// values from this inspector.
+  bool _suppressUpdating = false;
 
-  InspectingColorStop.fromValues(this.position, this.color);
+  final Iterable<core.Core> objects;
+  final int propertyKey;
+
+  _CorePropertyInspectingColor(this.objects, this.propertyKey) {
+    type.value = ColorType.solid;
+    for (final object in objects) {
+      object.addListener(propertyKey, _propertyKeyChange);
+    }
+    _updatePaints();
+  }
+
+  void _propertyKeyChange(dynamic from, dynamic to) {
+    if (_suppressUpdating) {
+      return;
+    }
+    debounce(_updatePaints);
+  }
+
+  @override
+  void dispose() {
+    for (final object in objects) {
+      object.removeListener(propertyKey, _propertyKeyChange);
+    }
+  }
+
+  Color _colorValue(core.Core object) =>
+      Color(object.getProperty<int>(propertyKey));
+
+  void _updatePaints() {
+    var first = _colorValue(objects.first);
+    editingColor.value = HSVColor.fromColor(first);
+
+    if (preview.value.length != 1 ||
+        preview.value.first != editingColor.value.toColor()) {
+      // check all colors are the same
+      Color color = core.equalValue<core.Core, Color>(objects, _colorValue);
+      preview.value = color == null ? [] : [color];
+    }
+  }
+
+  @override
+  RiveFile get context => objects.first.context as RiveFile;
+
+  @override
+  void changeColor(HSVColor color) {
+    editingColor.value = color;
+    _suppressUpdating = true;
+
+    var value = color.toColor().value;
+    for (final object in objects) {
+      object.context.setObjectProperty(object, propertyKey, value);
+    }
+
+    _suppressUpdating = false;
+
+    preview.value = [editingColor.value.toColor()];
+  }
+
+  @override
+  void addStop(double position) {
+    throw UnsupportedError('Cannot add color stop to a solid core color.');
+  }
+
+  @override
+  void changeStopIndex(int index) {
+    throw UnsupportedError('Cannot change stop index for a solid core color.');
+  }
+
+  @override
+  void changeStopPosition(double position) {
+    throw UnsupportedError(
+        'Cannot change stop position for a solid core color.');
+  }
+
+  @override
+  void changeType(ColorType type) {
+    throw UnsupportedError('Cannot change type for a solid core color.');
+  }
 }
