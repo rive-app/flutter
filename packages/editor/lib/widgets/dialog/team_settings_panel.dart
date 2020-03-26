@@ -16,10 +16,90 @@ class _TeamSettingsState extends State<TeamSettings> {
   String _twitter;
   String _instagram;
 
-  Widget _textFieldRow(List<SettingsTextField> textFields) {
-    if (textFields.isEmpty) {
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveThemeData();
+    final colors = theme.colors;
+
+    return SingleChildScrollView(
+        child: Padding(
+      padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            FormSection(label: 'Account', rows: [
+              [
+                TextFieldData()
+                  ..label = 'Team Name'
+                  ..callback = (value) => _name = value,
+                TextFieldData()
+                  ..label = 'Team Username'
+                  ..callback = (value) => _username = value
+              ],
+              [
+                TextFieldData()
+                  ..label = 'Location'
+                  ..hint = 'Where is your team based?'
+                  ..callback = (value) => _location = value,
+                TextFieldData()
+                  ..label = 'Website'
+                  ..hint = 'Website'
+                  ..callback = (value) => _website = value
+              ],
+              [
+                TextFieldData()
+                  ..label = 'Bio'
+                  ..hint = 'Tell users a bit about your team'
+                  ..callback = (value) => _bio = value
+              ]
+            ]),
+            const SizedBox(height: 30),
+            Separator(color: colors.fileLineGrey),
+            const SizedBox(height: 30),
+            const FormSection(label: 'For Hire', rows: []),
+            const SizedBox(height: 30),
+            Separator(color: colors.fileLineGrey),
+            const SizedBox(height: 30),
+            FormSection(label: 'Social', rows: [
+              [
+                TextFieldData()
+                  ..label = 'Twitter'
+                  ..hint = 'Link'
+                  ..callback = (value) => _twitter = value,
+                TextFieldData()
+                  ..label = 'Instagram'
+                  ..hint = 'Link'
+                  ..callback = (value) => _instagram = value,
+              ]
+            ])
+          ]),
+    ));
+  }
+}
+
+class TextFieldData {
+  String label;
+  String hint;
+  ValueChanged<String> callback;
+}
+
+class FormSection extends StatelessWidget {
+  final String label;
+  final List<List<TextFieldData>> rows;
+
+  const FormSection({@required this.label, @required this.rows});
+
+  Widget _textFieldRow(List<TextFieldData> textFieldData) {
+    if (textFieldData.isEmpty) {
       return const SizedBox();
     }
+
+    final textFields = textFieldData
+        .map((data) => SettingsTextField(
+            label: data.label, onChanged: data.callback, hint: data.hint))
+        .toList();
 
     return Row(
       children: <Widget>[
@@ -36,116 +116,35 @@ class _TeamSettingsState extends State<TeamSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = RiveThemeData();
-    final colors = theme.colors;
-    final textStyles = theme.textStyles;
-    return SingleChildScrollView(
-        child: Padding(
-      padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Account',
-                  style: textStyles.fileGreyTextLarge,
-                ),
-                const Spacer(),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: 75,
-                    maxWidth: 390,
-                  ),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _textFieldRow([
-                          SettingsTextField(
-                            label: 'Team Name',
-                            onChanged: (value) => _name = value,
-                          ),
-                          SettingsTextField(
-                              label: 'Team Username',
-                              onChanged: (value) => _username = value)
-                        ]),
-                        const SizedBox(height: 30),
-                        _textFieldRow([
-                          SettingsTextField(
-                              label: 'Location',
-                              hint: 'Where is your team based?',
-                              onChanged: (value) => _location = value),
-                          SettingsTextField(
-                              label: 'Website',
-                              hint: 'www.myteam.com',
-                              onChanged: (value) => _website = value),
-                        ]),
-                        const SizedBox(height: 30),
-                        _textFieldRow([
-                          SettingsTextField(
-                              label: 'Bio',
-                              hint: 'Tell users a bit about your team',
-                              onChanged: (value) => _bio = value),
-                        ])
-                      ]),
-                )
-              ],
-            ),
-            const SizedBox(height: 30),
-            Separator(color: colors.fileLineGrey),
-            const SizedBox(height: 30),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'For Hire',
-                  style: textStyles.fileGreyTextLarge,
-                ),
-                Column(children: [
-                  Row(
-                    children: [],
-                  )
-                ])
-              ],
-            ),
-            Separator(color: colors.fileLineGrey),
-            const SizedBox(height: 30),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Social',
-                  style: textStyles.fileGreyTextLarge,
-                ),
-                const Spacer(),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: 75,
-                    maxWidth: 390,
-                  ),
-                  child: _textFieldRow(
-                    [
-                      SettingsTextField(
-                        label: 'Twitter',
-                        hint: 'Link',
-                        onChanged: (value) => _twitter = value,
-                      ),
-                      SettingsTextField(
-                        label: 'Instagram',
-                        hint: 'Link',
-                        onChanged: (value) => _instagram = value,
-                      )
-                    ],
-                  ),
-                )
-              ],
-            )
-          ]),
-    ));
+    const textStyles = TextStyles();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          label,
+          style: textStyles.fileGreyTextLarge,
+        ),
+        const Spacer(),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 75,
+            maxWidth: 390,
+          ),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (rows.isNotEmpty) ...[
+                  _textFieldRow(rows.first),
+                  for (final row in rows.sublist(1)) ...[
+                    const SizedBox(height: 30),
+                    _textFieldRow(row)
+                  ]
+                ]
+              ]),
+        )
+      ],
+    );
   }
 }
 
