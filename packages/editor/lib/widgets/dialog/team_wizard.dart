@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_api/api.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -13,6 +14,9 @@ import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/gradient_border.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+
+import 'package:rive_api/teams.dart';
+import 'package:rive_api/models/team.dart';
 
 const billingPolicyUrl =
     'https://docs.2dimensions.com/rive-help-center/get-started/fair-billing-policy';
@@ -146,17 +150,29 @@ class TeamSubscriptionPackage with ChangeNotifier {
 
   /// Step 2 is valid; safe to attempt team creation
   bool get isStep2Valid => isNameValid && isOptionValid && isCardNrValid;
+
+  void submit(BuildContext context, RiveApi api) async {
+    await _RiveTeamApi(api).createTeam(name);
+    Navigator.of(context, rootNavigator: true).pop(null);
+  }
 }
 
 /// The main panel for holding the team wizard views
 class Wizard extends StatefulWidget {
+  const Wizard({Key key}) : super(key: key);
   @override
   _WizardState createState() => _WizardState();
+}
+
+class _RiveTeamApi extends RiveTeamsApi<RiveTeam> {
+  _RiveTeamApi(RiveApi api) : super(api);
 }
 
 class _WizardState extends State<Wizard> {
   TeamSubscriptionPackage _sub;
   WizardPanel activePanel = WizardPanel.one;
+
+  _WizardState();
 
   @override
   void initState() {
@@ -782,6 +798,9 @@ class TeamWizardPanelTwo extends StatelessWidget {
                     label: 'Create Team & Pay',
                     color: colors.buttonDark,
                     textColor: Colors.white,
+                    onTap: () async {
+                      await sub.submit(context, RiveContext.of(context).api);
+                    },
                     // elevated: _hover,
                   ),
                 ),
