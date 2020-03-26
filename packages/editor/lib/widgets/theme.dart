@@ -159,7 +159,13 @@ class TextStyles {
       fontFamily: 'Roboto-Light',
       color: Color(0xFF888888),
       fontSize: 13,
-      fontWeight: FontWeight.w100);
+      fontWeight: FontWeight.w200);
+
+  TextStyle get tooltipBold => const TextStyle(
+      fontFamily: 'Roboto-Light',
+      color: Color(0xFF333333),
+      fontSize: 13,
+      fontWeight: FontWeight.bold);
 
   TextStyle get tooltipHyperlink => const TextStyle(
       fontFamily: 'Roboto-Light',
@@ -210,6 +216,9 @@ class TextStyles {
   // Common
   TextStyle get textFieldInputHint => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFFBBBBBB), fontSize: 16);
+
+  TextStyle get textFieldInputValidationError =>
+      const TextStyle(fontFamily: 'Roboto-Medium', color: red, fontSize: 13);
 }
 
 /// Gradients used in the Rive Theme
