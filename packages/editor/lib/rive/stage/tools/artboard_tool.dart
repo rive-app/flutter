@@ -28,7 +28,7 @@ class ArtboardTool extends StageTool with DraggableTool {
     var file = stage.riveFile;
     file.batchAdd(() {
       var solidColor = SolidColor()..colorValue = 0xFF313131;
-      var fill = Fill();
+      var fill = Fill()..name = 'Background';
       _artboard = Artboard()
         ..name = 'New Artboard'
         ..x = worldMouse[0]

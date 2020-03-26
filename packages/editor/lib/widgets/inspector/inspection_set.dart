@@ -1,3 +1,4 @@
+import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/selection_context.dart';
@@ -10,11 +11,17 @@ class InspectionSet {
   final Set<int> intersectingCoreTypes;
   final List<StageItem> stageItems;
   final List<Component> components;
+  final Backboard backboard;
 
-  InspectionSet(this.intersectingCoreTypes, this.stageItems, this.components);
+  InspectionSet(
+    this.intersectingCoreTypes,
+    this.stageItems,
+    this.components,
+    this.backboard,
+  );
 
   factory InspectionSet.fromSelection(
-      SelectionContext<SelectableItem> selection) {
+      Backboard backboard, SelectionContext<SelectableItem> selection) {
     // Get stageItems from selections.
     var stageItems =
         selection.items.whereType<StageItem>().toList(growable: false);
@@ -32,9 +39,9 @@ class InspectionSet {
       for (int i = 1; i < components.length; i++) {
         coreTypes = coreTypes.intersection(components[i].coreTypes);
       }
-      return InspectionSet(coreTypes, stageItems, components);
+      return InspectionSet(coreTypes, stageItems, components, backboard);
     }
 
-    return InspectionSet({}, stageItems, components);
+    return InspectionSet({}, stageItems, components, backboard);
   }
 }

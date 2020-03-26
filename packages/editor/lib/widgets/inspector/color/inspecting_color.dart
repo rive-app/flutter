@@ -574,6 +574,11 @@ class _CorePropertyInspectingColor extends InspectingColor {
       Color(object.getProperty<int>(propertyKey));
 
   void _updatePaints() {
+    if(objects.isEmpty) {
+      preview.value = [];
+      return;
+    }
+
     var first = _colorValue(objects.first);
     editingColor.value = HSVColor.fromColor(first);
 

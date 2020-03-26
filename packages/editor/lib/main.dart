@@ -425,78 +425,75 @@ class StagePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
-    return Container(
-      color: RiveTheme.of(context).colors.stageBackground,
-      child: ValueListenableBuilder<Stage>(
-        valueListenable: rive.stage,
-        builder: (context, stage, _) => Stack(
-          children: [
-            Positioned.fill(
-              child: stage == null
-                  ? Container()
-                  : StageView(
-                      rive: rive,
-                      stage: stage,
-                    ),
-            ),
-            Positioned(
-              left: resizeEdgeSize,
-              top: resizeEdgeSize,
-              bottom: resizeEdgeSize,
-              right: resizeEdgeSize,
-              child: stage == null
-                  ? Container()
-                  : MouseRegion(
-                      opaque: true,
-                      onExit: (details) {
+    return ValueListenableBuilder<Stage>(
+      valueListenable: rive.stage,
+      builder: (context, stage, _) => Stack(
+        children: [
+          Positioned.fill(
+            child: stage == null
+                ? Container()
+                : StageView(
+                    rive: rive,
+                    stage: stage,
+                  ),
+          ),
+          Positioned(
+            left: resizeEdgeSize,
+            top: resizeEdgeSize,
+            bottom: resizeEdgeSize,
+            right: resizeEdgeSize,
+            child: stage == null
+                ? Container()
+                : MouseRegion(
+                    opaque: true,
+                    onExit: (details) {
+                      RenderBox getBox =
+                          context.findRenderObject() as RenderBox;
+                      var local = getBox.globalToLocal(details.position);
+                      stage.mouseExit(details.buttons, local.dx, local.dy);
+                    },
+                    onHover: (details) {
+                      RenderBox getBox =
+                          context.findRenderObject() as RenderBox;
+                      var local = getBox.globalToLocal(details.position);
+                      stage.mouseMove(details.buttons, local.dx, local.dy);
+                      // print('MOVE $local');
+                    },
+                    child: Listener(
+                      behavior: HitTestBehavior.opaque,
+                      onPointerSignal: (details) {
+                        if (details is PointerScrollEvent) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseWheel(local.dx, local.dy,
+                              details.scrollDelta.dx, details.scrollDelta.dy);
+                        }
+                      },
+                      onPointerDown: (details) {
                         RenderBox getBox =
                             context.findRenderObject() as RenderBox;
                         var local = getBox.globalToLocal(details.position);
-                        stage.mouseExit(details.buttons, local.dx, local.dy);
+                        stage.mouseDown(details.buttons, local.dx, local.dy);
+                        rive.startDragOperation();
                       },
-                      onHover: (details) {
+                      onPointerUp: (details) {
                         RenderBox getBox =
                             context.findRenderObject() as RenderBox;
                         var local = getBox.globalToLocal(details.position);
-                        stage.mouseMove(details.buttons, local.dx, local.dy);
-                        // print('MOVE $local');
+                        stage.mouseUp(details.buttons, local.dx, local.dy);
+                        rive.endDragOperation();
                       },
-                      child: Listener(
-                        behavior: HitTestBehavior.opaque,
-                        onPointerSignal: (details) {
-                          if (details is PointerScrollEvent) {
-                            RenderBox getBox =
-                                context.findRenderObject() as RenderBox;
-                            var local = getBox.globalToLocal(details.position);
-                            stage.mouseWheel(local.dx, local.dy,
-                                details.scrollDelta.dx, details.scrollDelta.dy);
-                          }
-                        },
-                        onPointerDown: (details) {
-                          RenderBox getBox =
-                              context.findRenderObject() as RenderBox;
-                          var local = getBox.globalToLocal(details.position);
-                          stage.mouseDown(details.buttons, local.dx, local.dy);
-                          rive.startDragOperation();
-                        },
-                        onPointerUp: (details) {
-                          RenderBox getBox =
-                              context.findRenderObject() as RenderBox;
-                          var local = getBox.globalToLocal(details.position);
-                          stage.mouseUp(details.buttons, local.dx, local.dy);
-                          rive.endDragOperation();
-                        },
-                        onPointerMove: (details) {
-                          RenderBox getBox =
-                              context.findRenderObject() as RenderBox;
-                          var local = getBox.globalToLocal(details.position);
-                          stage.mouseDrag(details.buttons, local.dx, local.dy);
-                        },
-                      ),
+                      onPointerMove: (details) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var local = getBox.globalToLocal(details.position);
+                        stage.mouseDrag(details.buttons, local.dx, local.dy);
+                      },
                     ),
-            ),
-          ],
-        ),
+                  ),
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:rive_editor/widgets/inspector/backboard_inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/fills_inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/alignment_inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/artboard_inspector_builder.dart';
@@ -11,6 +12,7 @@ import 'inspect_transform.dart';
 /// expanded when the inspector is built from the selection set.
 final List<InspectorBuilder> inspectorBuilders = [
   AlignmentInspectorBuilder(),
+  BackboardInspectorBuilder(),
   ArtboardInspectorBuilder(),
   TransformInspectorBuilder(),
   FillsInspectorBuilder(),

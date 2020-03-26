@@ -547,6 +547,13 @@ class Stage extends Debouncer {
     });
 
     var canvas = context.canvas;
+    // Clear bg.
+    canvas.drawRect(
+        offset & size,
+        Paint()
+          ..isAntiAlias = false
+          ..color = riveFile.backboard.color);
+
     canvas.save();
     // Translate to widget space
     canvas.clipRect(offset & size);

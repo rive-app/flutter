@@ -4,6 +4,7 @@ import 'package:binary_buffer/binary_reader.dart';
 import 'package:binary_buffer/binary_writer.dart';
 
 import '../../artboard.dart';
+import '../../backboard.dart';
 import '../../node.dart';
 import '../../shapes/cubic_vertex.dart';
 import '../../shapes/ellipse.dart';
@@ -19,6 +20,7 @@ import '../../shapes/shape.dart';
 import '../../shapes/straight_vertex.dart';
 import '../../shapes/triangle.dart';
 import 'artboard_base.dart';
+import 'backboard_base.dart';
 import 'component_base.dart';
 import 'drawable_base.dart';
 import 'node_base.dart';
@@ -75,6 +77,8 @@ abstract class RiveCoreContext extends CoreContext {
         return PathComposer();
       case ArtboardBase.typeKey:
         return Artboard();
+      case BackboardBase.typeKey:
+        return Backboard();
       default:
         return null;
     }
@@ -84,6 +88,10 @@ abstract class RiveCoreContext extends CoreContext {
   bool isPropertyId(int propertyKey) {
     switch (propertyKey) {
       case ComponentBase.parentIdPropertyKey:
+        return true;
+      case BackboardBase.activeArtboardIdPropertyKey:
+        return true;
+      case BackboardBase.mainArtboardIdPropertyKey:
         return true;
       default:
         return false;
@@ -129,6 +137,8 @@ abstract class RiveCoreContext extends CoreContext {
           setObjectProperty(object, change.op, value);
           break;
         case ComponentBase.parentIdPropertyKey:
+        case BackboardBase.activeArtboardIdPropertyKey:
+        case BackboardBase.mainArtboardIdPropertyKey:
           var value = Id.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
@@ -179,6 +189,7 @@ abstract class RiveCoreContext extends CoreContext {
         case GradientStopBase.colorValuePropertyKey:
         case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModePropertyKey:
+        case BackboardBase.colorValuePropertyKey:
           var value = reader.readVarInt();
           setObjectProperty(object, change.op, value);
           break;
@@ -225,6 +236,8 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ComponentBase.parentIdPropertyKey:
+      case BackboardBase.activeArtboardIdPropertyKey:
+      case BackboardBase.mainArtboardIdPropertyKey:
         if (value != null && value is Id) {
           var writer = BinaryWriter(alignment: 4);
           value.serialize(writer);
@@ -294,6 +307,7 @@ abstract class RiveCoreContext extends CoreContext {
       case GradientStopBase.colorValuePropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
+      case BackboardBase.colorValuePropertyKey:
         if (value != null && value is int) {
           var writer = BinaryWriter(alignment: 4);
           writer.writeVarInt(value);
@@ -506,6 +520,21 @@ abstract class RiveCoreContext extends CoreContext {
           object.originY = value;
         }
         break;
+      case BackboardBase.activeArtboardIdPropertyKey:
+        if (object is BackboardBase && value is Id) {
+          object.activeArtboardId = value;
+        }
+        break;
+      case BackboardBase.mainArtboardIdPropertyKey:
+        if (object is BackboardBase && value is Id) {
+          object.mainArtboardId = value;
+        }
+        break;
+      case BackboardBase.colorValuePropertyKey:
+        if (object is BackboardBase && value is int) {
+          object.colorValue = value;
+        }
+        break;
     }
   }
 
@@ -705,6 +734,21 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originYPropertyKey:
         if (object is ArtboardBase) {
           return object.originY;
+        }
+        break;
+      case BackboardBase.activeArtboardIdPropertyKey:
+        if (object is BackboardBase) {
+          return object.activeArtboardId;
+        }
+        break;
+      case BackboardBase.mainArtboardIdPropertyKey:
+        if (object is BackboardBase) {
+          return object.mainArtboardId;
+        }
+        break;
+      case BackboardBase.colorValuePropertyKey:
+        if (object is BackboardBase) {
+          return object.colorValue;
         }
         break;
     }

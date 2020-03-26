@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
-import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';

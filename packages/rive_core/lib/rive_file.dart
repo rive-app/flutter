@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/backboard.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
@@ -30,6 +31,12 @@ class RiveFile extends RiveCoreContext {
   final IsolatedPersist _isolatedPersist;
   final RiveApi api;
   final Set<ClientSidePlayer> _dirtyPlayers = {};
+  Backboard _backboard;
+  Backboard get backboard => _backboard;
+
+  // Track if a property has changed since last advance, force an advance (and
+  // redraw) if any have.
+  bool _propertyChanged = false;
 
   final ValueNotifier<Iterable<ClientSidePlayer>> allPlayers =
       ValueNotifier<Iterable<ClientSidePlayer>>([]);
@@ -68,13 +75,20 @@ class RiveFile extends RiveCoreContext {
 
   bool advance(double elapsed) {
     cleanDirt();
-    bool advanced = false;
+    bool advanced = _propertyChanged;
     for (final artboard in artboards) {
       if (artboard.advance(elapsed)) {
         advanced = true;
       }
     }
+    _propertyChanged = false;
     return advanced;
+  }
+
+  @override
+  void changeProperty<T>(Core object, int propertyKey, T from, T to) {
+    super.changeProperty<T>(object, propertyKey, from, to);
+    _propertyChanged = true;
   }
 
   /// Perform any cleanup required due to properties being marked dirty.
@@ -202,20 +216,14 @@ class RiveFile extends RiveCoreContext {
 
   void markNeedsAdvance() =>
       delegates.forEach((delegate) => delegate.markNeedsAdvance());
-      
+
   @override
-  void onAddedDirty(Component object) {
-    log.finest("ADDING ${object.name} ${object.id} ${object.parentId}");
-    if (object.parentId != null) {
-      object.parent = object.context?.resolve(object.parentId);
-      if (object.parent == null) {
-        log.finest("Failed to resolve parent with id ${object.parentId}");
-      }
-    }
+  void onAddedDirty(Core object) {
+    object.onAddedDirty();
   }
 
   @override
-  void onAddedClean(Component object) {
+  void onAddedClean(Core object) {
     // Remove corrupt objects immediately.
     if (!object.validate()) {
       remove(object);
@@ -230,7 +238,7 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void onRemoved(Component object) {
+  void onRemoved(Core object) {
     object.onRemoved();
     delegates.forEach((delegate) => delegate.onObjectRemoved(object));
     if (object is Artboard) {
@@ -331,6 +339,28 @@ class RiveFile extends RiveCoreContext {
     // happening (like loading assets or content for the file) so we debounce it
     // pretty heavily.
     debounce(_loadDirtyPlayers, duration: const Duration(milliseconds: 300));
+  }
+
+  @override
+  void onConnected() {
+    // Find backboard.
+    var backboards = objects.whereType<Backboard>();
+    if (backboards.isEmpty) {
+      // Don't have one? Patch up the file and make one...
+      batchAdd(() {
+        _backboard = Backboard();
+        add(_backboard);
+      });
+      // Save the creation of the backboard.
+      captureJournalEntry();
+      // Don't allow undoing it.
+      clearJournal();
+    } else {
+      _backboard = backboards.first;
+    }
+    
+    assert(objects.whereType<Backboard>().length == 1,
+        'File should contain exactly one backboard.');
   }
 }
 
