@@ -8,6 +8,9 @@ import 'package:rive_api/teams.dart';
 const billingPolicyUrl =
     'https://docs.2dimensions.com/rive-help-center/get-started/fair-billing-policy';
 
+const premiumMonthlyCost = 45;
+const basicMonthlyCost = 14;
+
 /// The subscription frequency options
 enum BillingFrequency { yearly, monthly }
 
@@ -128,9 +131,16 @@ class TeamSubscriptionPackage with ChangeNotifier {
   /// Step 2 is valid; safe to attempt team creation
   bool get isStep2Valid => isNameValid && isOptionValid && isCardNrValid;
 
-  void submit(BuildContext context, RiveApi api) async {
+  Future submit(BuildContext context, RiveApi api) async {
     await _RiveTeamApi(api).createTeam(name);
     Navigator.of(context, rootNavigator: true).pop(null);
+  }
+
+  /// Returns the initial billing cost for the selected options
+  int get calculatedCost {
+    final monthlyCost =
+        _option == TeamsOption.premium ? premiumMonthlyCost : basicMonthlyCost;
+    return monthlyCost * (_billing == BillingFrequency.yearly ? 12 : 1);
   }
 }
 

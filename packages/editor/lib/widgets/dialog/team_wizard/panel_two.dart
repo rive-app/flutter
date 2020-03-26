@@ -358,7 +358,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(left: 8),
-          child: Text('\$168', style: textStyles.tooltipBold),
+          child: Text('\$${sub.calculatedCost}', style: textStyles.tooltipBold),
         )
       ]),
     );
