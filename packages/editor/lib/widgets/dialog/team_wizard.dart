@@ -576,6 +576,11 @@ class TeamWizardPanelTwo extends StatelessWidget {
                     textAlignVertical: TextAlignVertical.center,
                     style: textStyles.inspectorPropertyLabel,
                     initialValue: sub.cardNumber,
+                    inputFormatters: <TextInputFormatter>[
+                      LengthLimitingTextInputFormatter(19),
+                      WhitelistingTextInputFormatter.digitsOnly,
+                      CardNumberFormatter()
+                    ],
                     decoration: InputDecoration(
                       isDense: true,
                       enabledBorder: UnderlineInputBorder(
@@ -868,4 +873,38 @@ class Chip extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class CardNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final int newTextLength = newValue.text.length;
+    int selectionIndex = newValue.selection.end;
+    final StringBuffer newText = StringBuffer();
+    int writeIndex = 0;
+    if (newTextLength > 4) {
+      newText.write(newValue.text.substring(0, 4));
+      newText.write(' ');
+      writeIndex += 4;
+      selectionIndex += 1;
+    }
+    if (newTextLength > 8) {
+      newText.write(newValue.text.substring(4, 8));
+      newText.write(' ');
+      writeIndex += 4;
+      selectionIndex += 1;
+    }
+    if (newTextLength > 12) {
+      newText.write(newValue.text.substring(8, 12));
+      newText.write(' ');
+      writeIndex += 4;
+      selectionIndex += 1;
+    }
+    newText.write(newValue.text.substring(writeIndex));
+    return TextEditingValue(
+      text: newText.toString(),
+      selection: TextSelection.collapsed(offset: selectionIndex),
+    );
+  }
 }
