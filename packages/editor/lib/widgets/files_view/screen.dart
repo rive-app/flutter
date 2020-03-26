@@ -16,7 +16,7 @@ import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
 import 'package:rive_editor/widgets/files_view/file.dart';
 import 'package:rive_editor/widgets/files_view/folder_tree.dart';
 import 'package:rive_editor/widgets/files_view/folder_view_widget.dart';
