@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -636,6 +637,10 @@ class TeamWizardPanelTwo extends StatelessWidget {
                             textAlignVertical: TextAlignVertical.center,
                             style: textStyles.inspectorPropertyLabel,
                             initialValue: sub.ccv,
+                            inputFormatters: <TextInputFormatter>[
+                              WhitelistingTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(4),
+                            ],
                             decoration: InputDecoration(
                               isDense: true,
                               enabledBorder: UnderlineInputBorder(
@@ -693,6 +698,10 @@ class TeamWizardPanelTwo extends StatelessWidget {
                               textAlignVertical: TextAlignVertical.center,
                               style: textStyles.inspectorPropertyLabel,
                               initialValue: sub.zip,
+                              inputFormatters: <TextInputFormatter>[
+                                WhitelistingTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(5),
+                              ],
                               decoration: InputDecoration(
                                 isDense: true,
                                 enabledBorder: UnderlineInputBorder(
