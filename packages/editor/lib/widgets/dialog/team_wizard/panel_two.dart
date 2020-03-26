@@ -1,5 +1,3 @@
-import 'dart:math' show pi;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -133,27 +131,21 @@ class TeamWizardPanelTwo extends StatelessWidget {
   }
 
   Widget _cardGfx(BuildContext context) {
-    return Row(children: [
-      Container(
-        width: 46,
-        height: 34,
-        child: CustomPaint(
-          painter: Chip(),
+    final colors = RiveTheme.of(context).colors;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        TintedIcon(
+          icon: 'card_chip',
+          color: colors.buttonLight,
         ),
-      ),
-      Expanded(
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: Container(
-            width: 58,
-            height: 34,
-            child: CustomPaint(
-              painter: MasterCard(),
-            ),
-          ),
+        TintedIcon(
+          icon: 'card_logo',
+          color: colors.buttonLight,
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   Widget _creditCardNumber(BuildContext context) {
@@ -416,74 +408,6 @@ class TeamWizardPanelTwo extends StatelessWidget {
       ),
     );
   }
-}
-
-class MasterCard extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..color = const Color(0xFFE3E3E3)
-      ..isAntiAlias = true;
-
-    Rect rect = Rect.fromLTWH(0, 0, size.height, size.height);
-    Rect rect2 =
-        Rect.fromLTWH(size.width - size.height, 0, size.height, size.height);
-    // canvas.drawOval(rect, paint);
-    canvas.drawArc(rect, pi / 4, pi * 3 / 2, false, paint);
-    canvas.drawOval(rect2, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class Chip extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..color = const Color(0xFFE3E3E3)
-      ..isAntiAlias = true;
-    Path path = Path();
-    path.addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        const Radius.circular(5)));
-    path.moveTo(0, size.height / 3);
-    path.lineTo(size.width / 3, size.height / 3);
-    path.moveTo(0, size.height * 2 / 3);
-    path.lineTo(size.width / 3, size.height * 2 / 3);
-    path.moveTo(size.width * 2 / 3, size.height / 3);
-    path.lineTo(size.width, size.height / 3);
-    path.moveTo(size.width * 2 / 3, size.height * 2 / 3);
-    path.lineTo(size.width, size.height * 2 / 3);
-
-    path.moveTo(size.width * 4 / 12, 0);
-    path.lineTo(size.width * 5 / 12, size.height * 1 / 6);
-    path.lineTo(size.width * 4 / 12, size.height * 2 / 6);
-    path.lineTo(size.width * 5 / 12, size.height * 3 / 6);
-    path.lineTo(size.width * 4 / 12, size.height * 4 / 6);
-    path.lineTo(size.width * 5 / 12, size.height * 5 / 6);
-    path.lineTo(size.width * 4 / 12, size.height * 6 / 6);
-
-    path.moveTo(size.width * 8 / 12, 0);
-    path.lineTo(size.width * 7 / 12, size.height * 1 / 6);
-    path.lineTo(size.width * 8 / 12, size.height * 2 / 6);
-    path.lineTo(size.width * 7 / 12, size.height * 3 / 6);
-    path.lineTo(size.width * 8 / 12, size.height * 4 / 6);
-    path.lineTo(size.width * 7 / 12, size.height * 5 / 6);
-    path.lineTo(size.width * 8 / 12, size.height * 6 / 6);
-
-    path.moveTo(size.width * 5 / 12, size.height * 1 / 12);
-    path.lineTo(size.width * 7 / 12, size.height * 1 / 12);
-
-    path.moveTo(size.width * 5 / 12, size.height * 11 / 12);
-    path.lineTo(size.width * 7 / 12, size.height * 11 / 12);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class CardNumberFormatter extends TextInputFormatter {
