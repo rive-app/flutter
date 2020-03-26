@@ -121,20 +121,19 @@ class _SettingsPanelState extends State<SettingsPanel> {
                 Expanded(child: screens[_selectedIndex].screen),
                 Separator(color: colors.fileLineGrey),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      FlatIconButton(
-                        label: 'Save Changes',
-                        color: colors.commonDarkGrey,
-                        textColor: Colors.white,
-                        onTap: () {/* TODO: */},
-                      )
-                    ],
-                  )
-                ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FlatIconButton(
+                          label: 'Save Changes',
+                          color: colors.commonDarkGrey,
+                          textColor: Colors.white,
+                          onTap: () {/* TODO: */},
+                        )
+                      ],
+                    )),
               ],
             ))
       ],
