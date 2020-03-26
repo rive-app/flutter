@@ -8,25 +8,13 @@ class TeamSettings extends StatefulWidget {
 }
 
 class _TeamSettingsState extends State<TeamSettings> {
-  final _nameController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _websiteController = TextEditingController();
-  final _bioController = TextEditingController();
-  final _twitterController = TextEditingController();
-  final _instagramController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _usernameController.dispose();
-    _locationController.dispose();
-    _websiteController.dispose();
-    _bioController.dispose();
-    _twitterController.dispose();
-    _instagramController.dispose();
-    super.dispose();
-  }
+  String _name;
+  String _username;
+  String _location;
+  String _website;
+  String _bio;
+  String _twitter;
+  String _instagram;
 
   Widget _textFieldRow(List<SettingsTextField> textFields) {
     if (textFields.isEmpty) {
@@ -78,28 +66,30 @@ class _TeamSettingsState extends State<TeamSettings> {
                       children: [
                         _textFieldRow([
                           SettingsTextField(
-                              label: 'Team Name', controller: _nameController),
+                            label: 'Team Name',
+                            onChanged: (value) => _name = value,
+                          ),
                           SettingsTextField(
                               label: 'Team Username',
-                              controller: _usernameController),
+                              onChanged: (value) => _username = value)
                         ]),
                         const SizedBox(height: 30),
                         _textFieldRow([
                           SettingsTextField(
                               label: 'Location',
                               hint: 'Where is your team based?',
-                              controller: _locationController),
+                              onChanged: (value) => _location = value),
                           SettingsTextField(
                               label: 'Website',
                               hint: 'www.myteam.com',
-                              controller: _websiteController),
+                              onChanged: (value) => _website = value),
                         ]),
                         const SizedBox(height: 30),
                         _textFieldRow([
                           SettingsTextField(
                               label: 'Bio',
                               hint: 'Tell users a bit about your team',
-                              controller: _bioController),
+                              onChanged: (value) => _bio = value),
                         ])
                       ]),
                 )
@@ -142,12 +132,12 @@ class _TeamSettingsState extends State<TeamSettings> {
                       SettingsTextField(
                         label: 'Twitter',
                         hint: 'Link',
-                        controller: _twitterController,
+                        onChanged: (value) => _twitter = value,
                       ),
                       SettingsTextField(
                         label: 'Instagram',
                         hint: 'Link',
-                        controller: _instagramController,
+                        onChanged: (value) => _instagram = value,
                       )
                     ],
                   ),
@@ -160,12 +150,11 @@ class _TeamSettingsState extends State<TeamSettings> {
 }
 
 class SettingsTextField extends StatelessWidget {
-  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
   final String label;
   final String hint;
 
-  const SettingsTextField(
-      {@required this.controller, @required this.label, this.hint});
+  const SettingsTextField({@required this.label, this.hint, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -180,9 +169,9 @@ class SettingsTextField extends StatelessWidget {
             style: textStyles.hierarchyTabInactive.copyWith(fontSize: 13)),
         const SizedBox(height: 11),
         TextFormField(
+            onChanged: onChanged,
             cursorColor: colors.commonDarkGrey,
             textAlign: TextAlign.left,
-            controller: controller,
             decoration: InputDecoration(
               isDense: true,
               hintText: hint,
