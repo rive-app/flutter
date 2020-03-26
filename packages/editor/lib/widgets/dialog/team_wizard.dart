@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -171,8 +172,6 @@ class _RiveTeamApi extends RiveTeamsApi<RiveTeam> {
 class _WizardState extends State<Wizard> {
   TeamSubscriptionPackage _sub;
   WizardPanel activePanel = WizardPanel.one;
-
-  _WizardState();
 
   @override
   void initState() {
@@ -463,148 +462,273 @@ class TeamWizardPanelTwo extends StatelessWidget {
 
   const TeamWizardPanelTwo(this.sub, {Key key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _header(BuildContext context) {
+    // final colors = RiveTheme.of(context).colors;
+    final textStyles = RiveTheme.of(context).textStyles;
+    return Row(
+      children: <Widget>[
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: const Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: TintedIcon(
+              icon: 'back',
+              color: Colors.black,
+            ),
+          ),
+          // Little hacky, but nulling the option will cause the wizard
+          // to jump back to the first step
+          onTap: () => sub.option = null,
+        ),
+        Expanded(
+            child: Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Text(
+            sub.name,
+            textAlign: TextAlign.left,
+            // textAlignVertical: TextAlignVertical.center,
+            style: textStyles.fileGreyTextLarge,
+          ),
+        )),
+        Padding(
+          padding: const EdgeInsets.only(left: 32),
+          child: SizedBox(
+            width: 71,
+            child: _optionsComboBox(context),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 32),
+          child: SizedBox(
+            width: 71,
+            child: _billingComboBox(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _optionsComboBox(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
-    final billingOptions = [
-      BillingFrequency.yearly,
-      BillingFrequency.monthly,
-    ];
-    final teamOptions = [
-      TeamsOption.basic,
-      TeamsOption.premium,
-    ];
+    final teamOptions = [TeamsOption.basic, TeamsOption.premium];
 
-    return SizedBox(
-      width: 452,
-      height: 505,
-      child: Padding(
-          padding: const EdgeInsets.all(30),
-          child: Column(children: [
-            Row(
-              children: <Widget>[
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    padding: const EdgeInsets.only(bottom: 4, right: 20),
-                    child: SizedBox(
-                      width: 7,
-                      height: 14,
-                      child: CustomPaint(painter: LeftArrow()),
-                    ),
-                  ),
-                  // Little hacky, but nulling the option will cause the wizard
-                  // to jump back to the first step
-                  onTap: () => sub.option = null,
-                ),
-                Expanded(
-                    child: Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    sub.name,
-                    textAlign: TextAlign.left,
-                    // textAlignVertical: TextAlignVertical.center,
-                    style: textStyles.fileGreyTextLarge,
-                  ),
-                )),
-                Padding(
-                  padding: const EdgeInsets.only(left: 32),
-                  child: SizedBox(
-                    width: 71,
-                    child: ComboBox<TeamsOption>(
-                      popupWidth: 100,
-                      sizing: ComboSizing.content,
-                      underline: true,
-                      underlineColor: colors.inputUnderline,
-                      valueColor: textStyles.fileGreyTextLarge.color,
-                      options: teamOptions,
-                      value: sub.option,
-                      toLabel: (option) => capsFirst(describeEnum(option)),
-                      contentPadding: const EdgeInsets.only(bottom: 3),
-                      change: (option) => sub.option = option,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 32),
-                  child: SizedBox(
-                    width: 71,
-                    child: ComboBox<BillingFrequency>(
-                      popupWidth: 100,
-                      sizing: ComboSizing.content,
-                      underline: true,
-                      underlineColor: colors.inputUnderline,
-                      valueColor: textStyles.fileGreyTextLarge.color,
-                      options: billingOptions,
-                      value: sub.billing,
-                      toLabel: (option) => capsFirst(describeEnum(option)),
-                      contentPadding: const EdgeInsets.only(bottom: 3),
-                      change: (billing) => sub.billing = billing,
-                    ),
-                  ),
-                ),
-              ],
+    return ComboBox<TeamsOption>(
+      popupWidth: 100,
+      sizing: ComboSizing.content,
+      underline: true,
+      underlineColor: colors.inputUnderline,
+      valueColor: textStyles.fileGreyTextLarge.color,
+      options: teamOptions,
+      value: sub.option,
+      toLabel: (option) => capsFirst(describeEnum(option)),
+      contentPadding: const EdgeInsets.only(bottom: 3),
+      change: (option) => sub.option = option,
+    );
+  }
+
+  Widget _billingComboBox(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
+    final textStyles = RiveTheme.of(context).textStyles;
+    final billingOptions = [BillingFrequency.yearly, BillingFrequency.monthly];
+
+    return ComboBox<BillingFrequency>(
+      popupWidth: 100,
+      sizing: ComboSizing.content,
+      underline: true,
+      underlineColor: colors.inputUnderline,
+      valueColor: textStyles.fileGreyTextLarge.color,
+      options: billingOptions,
+      value: sub.billing,
+      toLabel: (option) => capsFirst(describeEnum(option)),
+      contentPadding: const EdgeInsets.only(bottom: 3),
+      change: (billing) => sub.billing = billing,
+    );
+  }
+
+  Widget _creditCard(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 30, bottom: 15),
+      padding: const EdgeInsets.all(31),
+      width: 392,
+      height: 250,
+      decoration: BoxDecoration(
+        border: Border.all(width: 1.0, color: const Color(0xFFE3E3E3)),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        // mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          // Chip and Mastercard gfx
+          _cardGfx(context),
+          // Credit card number
+          _creditCardNumber(context),
+          // Credit card details
+          Padding(
+            padding: const EdgeInsets.only(top: 28),
+            child: _cardDetails(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _cardGfx(BuildContext context) {
+    return Row(children: [
+      Container(
+        width: 46,
+        height: 34,
+        child: CustomPaint(
+          painter: Chip(),
+        ),
+      ),
+      Expanded(
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Container(
+            width: 58,
+            height: 34,
+            child: CustomPaint(
+              painter: MasterCard(),
             ),
-            Container(
-              margin: const EdgeInsets.only(top: 30, bottom: 15),
-              padding: const EdgeInsets.all(31),
-              width: 392,
-              height: 250,
-              decoration: BoxDecoration(
-                border: Border.all(width: 1.0, color: const Color(0xFFE3E3E3)),
-                borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+          ),
+        ),
+      ),
+    ]);
+  }
+
+  Widget _creditCardNumber(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
+    final textStyles = RiveTheme.of(context).textStyles;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 34, bottom: 12),
+          child: Text(
+            'Card Number',
+            style: textStyles.inspectorPropertyLabel,
+          ),
+        ),
+        TextFormField(
+          textAlign: TextAlign.left,
+          textAlignVertical: TextAlignVertical.center,
+          style: textStyles.inspectorPropertyLabel,
+          initialValue: sub.cardNumber,
+          inputFormatters: <TextInputFormatter>[
+            WhitelistingTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(19),
+            CardNumberFormatter()
+          ],
+          decoration: InputDecoration(
+            isDense: true,
+            enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: colors.inputUnderline, width: 2)),
+            hintText: '0000 0000 0000 0000',
+            //errorText:
+            //    sub.isCardNrValid ? null : 'Invalid card number',
+            hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
+            errorStyle: textStyles.textFieldInputValidationError,
+            contentPadding: const EdgeInsets.only(bottom: 3),
+            filled: true,
+            hoverColor: Colors.transparent,
+            fillColor: Colors.transparent,
+          ),
+          onChanged: (cardNumber) => sub.cardNumber = cardNumber,
+        ),
+      ],
+    );
+  }
+
+  // TODO: DEPRECATED: DELETE
+  List<Widget> __cardDetails(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
+    final textStyles = RiveTheme.of(context).textStyles;
+
+    return <Widget>[
+      Padding(
+          padding: const EdgeInsets.only(top: 27),
+          child: Row(mainAxisSize: MainAxisSize.max, children: <Widget>[
+            SizedBox(
+              width: 90,
+              child: Text(
+                'CVC/CVV',
+                style: textStyles.inspectorPropertyLabel,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                // mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Row(children: [
-                    Container(
-                      width: 46,
-                      height: 34,
-                      child: CustomPaint(
-                        painter: Chip(),
-                      ),
-                    ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          width: 58,
-                          height: 34,
-                          child: CustomPaint(
-                            painter: MasterCard(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ]),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 34, bottom: 12),
-                    child: Text(
-                      'Card Number',
-                      style: textStyles.inspectorPropertyLabel,
-                    ),
-                  ),
-                  TextFormField(
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 30, right: 30),
+              child: SizedBox(
+                  width: 90,
+                  child: Text(
+                    'Expiration',
+                    style: textStyles.inspectorPropertyLabel,
+                  )),
+            ),
+            SizedBox(
+                width: 88,
+                child: Text(
+                  'Zip',
+                  style: textStyles.inspectorPropertyLabel,
+                )),
+          ])),
+      Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            SizedBox(
+              width: 90,
+              child: TextFormField(
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.center,
+                style: textStyles.inspectorPropertyLabel,
+                initialValue: sub.ccv,
+                inputFormatters: <TextInputFormatter>[
+                  WhitelistingTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+                decoration: InputDecoration(
+                  isDense: true,
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.inputUnderline, width: 2)),
+                  hintText: '3-4 digits',
+                  hintStyle:
+                      textStyles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorStyle: textStyles.textFieldInputValidationError,
+                  contentPadding: const EdgeInsets.only(bottom: 3),
+                  filled: true,
+                  hoverColor: Colors.transparent,
+                  fillColor: Colors.transparent,
+                ),
+                onChanged: (ccv) => sub.ccv = ccv,
+              ),
+            ),
+            // Expiry date
+            Padding(
+              padding: const EdgeInsets.only(left: 30, right: 30),
+              child: SizedBox(
+                  width: 90,
+                  child: TextFormField(
                     textAlign: TextAlign.left,
                     textAlignVertical: TextAlignVertical.center,
                     style: textStyles.inspectorPropertyLabel,
-                    initialValue: sub.cardNumber,
+                    initialValue: sub.expiration,
                     inputFormatters: <TextInputFormatter>[
                       WhitelistingTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(19),
-                      CardNumberFormatter()
+                      LengthLimitingTextInputFormatter(4),
+                      DateTextInputFormatter(),
+                      DateTextRegexCheck()
                     ],
                     decoration: InputDecoration(
                       isDense: true,
                       enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
                               color: colors.inputUnderline, width: 2)),
-                      hintText: '0000 0000 0000 0000',
-                      //errorText:
-                      //    sub.isCardNrValid ? null : 'Invalid card number',
+                      hintText: 'MM/YY',
                       hintStyle:
                           textStyles.textFieldInputHint.copyWith(fontSize: 13),
                       errorStyle: textStyles.textFieldInputValidationError,
@@ -613,223 +737,262 @@ class TeamWizardPanelTwo extends StatelessWidget {
                       hoverColor: Colors.transparent,
                       fillColor: Colors.transparent,
                     ),
-                    onChanged: (cardNumber) => sub.cardNumber = cardNumber,
+                    onChanged: (expiration) => sub.expiration = expiration,
+                  )),
+            ),
+            // ZIP code
+            SizedBox(
+                width: 88,
+                child: TextFormField(
+                  textAlign: TextAlign.left,
+                  textAlignVertical: TextAlignVertical.center,
+                  style: textStyles.inspectorPropertyLabel,
+                  initialValue: sub.zip,
+                  inputFormatters: <TextInputFormatter>[
+                    WhitelistingTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(5),
+                  ],
+                  decoration: InputDecoration(
+                    isDense: true,
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide:
+                            BorderSide(color: colors.inputUnderline, width: 2)),
+                    hintText: '90210',
+                    hintStyle:
+                        textStyles.textFieldInputHint.copyWith(fontSize: 13),
+                    errorStyle: textStyles.textFieldInputValidationError,
+                    contentPadding: const EdgeInsets.only(bottom: 3),
+                    filled: true,
+                    hoverColor: Colors.transparent,
+                    fillColor: Colors.transparent,
                   ),
-                  // CVV
-                  Padding(
-                      padding: const EdgeInsets.only(top: 27),
-                      child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: <Widget>[
-                            SizedBox(
-                              width: 90,
-                              child: Text(
-                                'CVC/CVV',
-                                style: textStyles.inspectorPropertyLabel,
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 30, right: 30),
-                              child: SizedBox(
-                                  width: 90,
-                                  child: Text(
-                                    'Expiration',
-                                    style: textStyles.inspectorPropertyLabel,
-                                  )),
-                            ),
-                            SizedBox(
-                                width: 88,
-                                child: Text(
-                                  'Zip',
-                                  style: textStyles.inspectorPropertyLabel,
-                                )),
-                          ])),
+                  onChanged: (zip) => sub.zip = zip,
+                )),
+          ],
+        ),
+      ),
+    ];
+  }
 
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        SizedBox(
-                          width: 90,
-                          child: TextFormField(
-                            textAlign: TextAlign.left,
-                            textAlignVertical: TextAlignVertical.center,
-                            style: textStyles.inspectorPropertyLabel,
-                            initialValue: sub.ccv,
-                            inputFormatters: <TextInputFormatter>[
-                              WhitelistingTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(4),
-                            ],
-                            decoration: InputDecoration(
-                              isDense: true,
-                              enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: colors.inputUnderline, width: 2)),
-                              hintText: '3-4 digits',
-                              hintStyle: textStyles.textFieldInputHint
-                                  .copyWith(fontSize: 13),
-                              errorStyle:
-                                  textStyles.textFieldInputValidationError,
-                              contentPadding: const EdgeInsets.only(bottom: 3),
-                              filled: true,
-                              hoverColor: Colors.transparent,
-                              fillColor: Colors.transparent,
-                            ),
-                            onChanged: (ccv) => sub.ccv = ccv,
-                          ),
-                        ),
-                        // Expiry date
-                        Padding(
-                          padding: const EdgeInsets.only(left: 30, right: 30),
-                          child: SizedBox(
-                              width: 90,
-                              child: TextFormField(
-                                textAlign: TextAlign.left,
-                                textAlignVertical: TextAlignVertical.center,
-                                style: textStyles.inspectorPropertyLabel,
-                                initialValue: sub.expiration,
-                                inputFormatters: <TextInputFormatter>[
-                                  WhitelistingTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(4),
-                                  DateTextInputFormatter(),
-                                  DateTextRegexCheck()
-                                ],
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                          color: colors.inputUnderline,
-                                          width: 2)),
-                                  hintText: 'MM/YY',
-                                  hintStyle: textStyles.textFieldInputHint
-                                      .copyWith(fontSize: 13),
-                                  errorStyle:
-                                      textStyles.textFieldInputValidationError,
-                                  contentPadding:
-                                      const EdgeInsets.only(bottom: 3),
-                                  filled: true,
-                                  hoverColor: Colors.transparent,
-                                  fillColor: Colors.transparent,
-                                ),
-                                onChanged: (expiration) =>
-                                    sub.expiration = expiration,
-                              )),
-                        ),
-                        // ZIP code
-                        SizedBox(
-                            width: 88,
-                            child: TextFormField(
-                              textAlign: TextAlign.left,
-                              textAlignVertical: TextAlignVertical.center,
-                              style: textStyles.inspectorPropertyLabel,
-                              initialValue: sub.zip,
-                              inputFormatters: <TextInputFormatter>[
-                                WhitelistingTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(5),
-                              ],
-                              decoration: InputDecoration(
-                                isDense: true,
-                                enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: colors.inputUnderline,
-                                        width: 2)),
-                                hintText: '90210',
-                                hintStyle: textStyles.textFieldInputHint
-                                    .copyWith(fontSize: 13),
-                                errorStyle:
-                                    textStyles.textFieldInputValidationError,
-                                contentPadding:
-                                    const EdgeInsets.only(bottom: 3),
-                                filled: true,
-                                hoverColor: Colors.transparent,
-                                fillColor: Colors.transparent,
-                              ),
-                              onChanged: (zip) => sub.zip = zip,
-                            )),
-                      ],
-                    ),
-                  )
+  Widget _cardDetails(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
+    final textStyles = RiveTheme.of(context).textStyles;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // CVV
+        SizedBox(
+          width: 90,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'CVC/CVV',
+                style: textStyles.inspectorPropertyLabel,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.center,
+                style: textStyles.inspectorPropertyLabel,
+                initialValue: sub.ccv,
+                inputFormatters: <TextInputFormatter>[
+                  WhitelistingTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
                 ],
-              ),
-            ),
-            RichText(
-                text: TextSpan(
-              children: [
-                const TextSpan(
-                    text: 'You\'ll only be billed for users as'
-                        ' you add them. Read more about our '),
-                TextSpan(
-                    text: 'fair billing policy',
-                    style: textStyles.tooltipHyperlink,
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () async {
-                        if (await canLaunch(billingPolicyUrl)) {
-                          await launch(billingPolicyUrl);
-                        }
-                      }),
-                const TextSpan(text: '.'),
-              ],
-              style: textStyles.tooltipDisclaimer,
-            )),
-            Padding(
-              padding: const EdgeInsets.only(top: 11),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Text(
-                  'Due now (1 user)',
-                  style: textStyles.tooltipDisclaimer,
+                decoration: InputDecoration(
+                  isDense: true,
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.inputUnderline, width: 2)),
+                  hintText: '3-4 digits',
+                  hintStyle:
+                      textStyles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorStyle: textStyles.textFieldInputValidationError,
+                  contentPadding: const EdgeInsets.only(bottom: 3),
+                  filled: true,
+                  hoverColor: Colors.transparent,
+                  fillColor: Colors.transparent,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Text('\$168', style: textStyles.tooltipBold),
-                )
-              ]),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 24),
-                // child: FlatButton(child: Text('stff'), onPressed: () {}),
-                child: Container(
-                  width: 181,
-                  child: FlatIconButton(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    label: 'Create Team & Pay',
-                    color: colors.buttonDark,
-                    textColor: Colors.white,
-                    onTap: () async {
-                      await sub.submit(context, RiveContext.of(context).api);
-                    },
-                    // elevated: _hover,
-                  ),
-                ),
+                onChanged: (ccv) => sub.ccv = ccv,
               ),
-            )
-          ])),
+            ],
+          ),
+        ),
+        // Expiration
+        SizedBox(
+          width: 90,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Expiration',
+                style: textStyles.inspectorPropertyLabel,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.center,
+                style: textStyles.inspectorPropertyLabel,
+                initialValue: sub.expiration,
+                inputFormatters: <TextInputFormatter>[
+                  WhitelistingTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                  DateTextInputFormatter(),
+                  DateTextRegexCheck()
+                ],
+                decoration: InputDecoration(
+                  isDense: true,
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.inputUnderline, width: 2)),
+                  hintText: 'MM/YY',
+                  hintStyle:
+                      textStyles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorStyle: textStyles.textFieldInputValidationError,
+                  contentPadding: const EdgeInsets.only(bottom: 3),
+                  filled: true,
+                  hoverColor: Colors.transparent,
+                  fillColor: Colors.transparent,
+                ),
+                onChanged: (expiration) => sub.expiration = expiration,
+              ),
+            ],
+          ),
+        ),
+        // Zip
+        SizedBox(
+          width: 88,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Zip',
+                style: textStyles.inspectorPropertyLabel,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.center,
+                style: textStyles.inspectorPropertyLabel,
+                initialValue: sub.zip,
+                inputFormatters: <TextInputFormatter>[
+                  WhitelistingTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(5),
+                ],
+                decoration: InputDecoration(
+                  isDense: true,
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.inputUnderline, width: 2)),
+                  hintText: '90210',
+                  hintStyle:
+                      textStyles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorStyle: textStyles.textFieldInputValidationError,
+                  contentPadding: const EdgeInsets.only(bottom: 3),
+                  filled: true,
+                  hoverColor: Colors.transparent,
+                  fillColor: Colors.transparent,
+                ),
+                onChanged: (zip) => sub.zip = zip,
+              )
+            ],
+          ),
+        ),
+      ],
     );
   }
-}
 
-class LeftArrow extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..color = Colors.black
-      ..isAntiAlias = true;
-    var path = Path();
-    canvas.save();
-    path.moveTo(size.width, 0);
-    path.lineTo(0, size.height / 2);
-    path.lineTo(size.width, size.height);
+  Widget _billingPolicy(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
+    final textStyles = RiveTheme.of(context).textStyles;
+    return RichText(
+      text: TextSpan(
+        children: [
+          const TextSpan(
+              text: 'You\'ll only be billed for users as'
+                  ' you add them. Read more about our '),
+          TextSpan(
+              text: 'fair billing policy',
+              style: textStyles.tooltipHyperlink,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () async {
+                  if (await canLaunch(billingPolicyUrl)) {
+                    await launch(billingPolicyUrl);
+                  }
+                }),
+          const TextSpan(text: '.'),
+        ],
+        style: textStyles.tooltipDisclaimer,
+      ),
+    );
+  }
 
-    canvas.drawPath(path, paint);
-    canvas.restore();
+  Widget _cost(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
+    final textStyles = RiveTheme.of(context).textStyles;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 11),
+      child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+        Text(
+          'Due now (1 user)',
+          style: textStyles.tooltipDisclaimer,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Text('\$168', style: textStyles.tooltipBold),
+        )
+      ]),
+    );
+  }
+
+  Widget _createTeamButton(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
+    final textStyles = RiveTheme.of(context).textStyles;
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 24),
+        // child: FlatButton(child: Text('stff'), onPressed: () {}),
+        child: Container(
+          width: 181,
+          child: FlatIconButton(
+            mainAxisAlignment: MainAxisAlignment.center,
+            label: 'Create Team & Pay',
+            color: colors.buttonDark,
+            textColor: Colors.white,
+            onTap: () {
+              sub.submit(context, RiveContext.of(context).api);
+            },
+            // elevated: _hover,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 452,
+      height: 505,
+      child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          children: [
+            _header(context),
+            _creditCard(context),
+            _billingPolicy(context),
+            _cost(context),
+            _createTeamButton(context),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class MasterCard extends CustomPainter {
