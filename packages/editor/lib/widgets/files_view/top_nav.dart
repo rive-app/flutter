@@ -3,6 +3,9 @@ import 'package:rive_api/files.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
+import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
+import 'package:rive_editor/widgets/dialog/settings_panel.dart';
+import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
@@ -60,7 +63,13 @@ class TopNav extends StatelessWidget {
               tip: const Tip(label: 'Your Profile'),
             ),
             TintedIconButton(
-              onPress: () {/** TODO: */},
+              onPress: () {
+                showRiveDialog<void>(
+                    context: context,
+                    builder: (context) => SettingsPanel(screens: [
+                          SettingsScreen('Team Settings', TeamSettings()),
+                        ]));
+              },
               icon: 'settings',
               backgroundHover: riveColors.fileBackgroundLightGrey,
               iconHover: riveColors.fileBackgroundDarkGrey,
