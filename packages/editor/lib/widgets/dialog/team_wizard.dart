@@ -63,53 +63,88 @@ class TeamSubscriptionPackage with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Credit card number
+  String _cardNumber;
+  String get cardNumber => _cardNumber;
+  set cardNumber(String value) {
+    _cardNumber = value;
+    notifyListeners();
+  }
+
+  /// Credit card security number
+  String _ccv;
+  String get ccv => _ccv;
+  set ccv(String value) {
+    _ccv = value;
+    notifyListeners();
+  }
+
+  /// Credt card expiration date
+  String _expiration;
+  String get expiration => _expiration;
+  set expiration(String value) {
+    _expiration = value;
+    notifyListeners();
+  }
+
+  /// Credit card billing zip code
+  String _zip;
+  String get zip => _zip;
+  set zip(String value) {
+    _zip = value;
+    notifyListeners();
+  }
+
   // User friendly Name validation error messages
-  String nameValidationError;
-
-  String cardNumber;
-  String ccv;
-  String expiration;
-  String zip;
-
-  /// Minimum length for a valid team name.
-  final int minTeamNameLength = 4;
-  final RegExp legalMatch = RegExp(r'^[A-Za-z0-9]+$');
-
-  bool ignoreNullName = true;
+  String _nameValidationError;
+  String get nameValidationError => _nameValidationError;
 
   /// Validates the team name
   bool get isNameValid {
-    if (ignoreNullName && name == null) {
-      return true;
-    }
+    /// Minimum length for a valid team name.
+    const _minTeamNameLength = 4;
+
+    /// Regex for valid team names
+    final _legalNameMatch = RegExp(r'^[A-Za-z0-9]+$');
 
     if (name == null || name == '') {
-      nameValidationError = 'Please enter a valid team name.';
+      _nameValidationError = 'Please enter a valid team name.';
       return false;
     }
 
-    if (name.length < minTeamNameLength) {
-      nameValidationError = 'At least $minTeamNameLength characters';
+    if (name.length < _minTeamNameLength) {
+      _nameValidationError = 'At least $_minTeamNameLength characters';
       return false;
     }
 
-    if (!legalMatch.hasMatch(name)) {
-      nameValidationError = 'No spaces or symbols';
+    if (!_legalNameMatch.hasMatch(name)) {
+      _nameValidationError = 'No spaces or symbols';
       return false;
     }
-    nameValidationError = null;
+    _nameValidationError = null;
     return true;
   }
 
-  void attemptProgress() {
-    ignoreNullName = false;
+  /// Validate the team options
+  bool get isOptionValid => _option != null;
+
+  /// Validate the credit card
+  bool get isCardNrValid {
+    if (_cardNumber == null) {
+      return false;
+    }
+
+    if (!RegExp(r'^[0-9]{16}$').hasMatch(_cardNumber)) {
+      return false;
+    }
+    return true;
   }
 
-  /// Validatwe the team options
-  bool get validateOption => option != null;
+  /// Step 1 is valid; safe to proceed to step 2
+  bool get isStep1Valid => isNameValid && isOptionValid;
 
-  /// Step 1 is valida; safe to proceed to step 2
-  bool get validateStep1 => isNameValid && validateOption;
+  /// Step 2 is valid; safe to attempt team creation
+  bool get isStep2Valid => isNameValid && isOptionValid && isCardNrValid;
 }
 
 /// The main panel for holding the team wizard views
@@ -127,10 +162,10 @@ class _WizardState extends State<Wizard> {
     _sub = TeamSubscriptionPackage();
     // Listen for changes to the package and handle appropriately
     _sub.addListener(() {
-      _sub.attemptProgress();
+      // _sub.attemptProgress();
       // Show the appropriate panel depending on the sub state
       setState(() =>
-          activePanel = _sub.validateStep1 ? WizardPanel.two : WizardPanel.one);
+          activePanel = _sub.isStep1Valid ? WizardPanel.two : WizardPanel.one);
     });
     super.initState();
   }
@@ -433,13 +468,15 @@ class TeamWizardPanelTwo extends StatelessWidget {
             Row(
               children: <Widget>[
                 GestureDetector(
-                  child: Padding(
-                      padding: const EdgeInsets.only(bottom: 4, right: 20),
-                      child: SizedBox(
-                        width: 7,
-                        height: 14,
-                        child: CustomPaint(painter: LeftArrow()),
-                      )),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: const EdgeInsets.only(bottom: 4, right: 20),
+                    child: SizedBox(
+                      width: 7,
+                      height: 14,
+                      child: CustomPaint(painter: LeftArrow()),
+                    ),
+                  ),
                   // Little hacky, but nulling the option will cause the wizard
                   // to jump back to the first step
                   onTap: () => sub.option = null,
@@ -544,8 +581,8 @@ class TeamWizardPanelTwo extends StatelessWidget {
                           borderSide: BorderSide(
                               color: colors.inputUnderline, width: 2)),
                       hintText: '0000 0000 0000 0000',
-                      errorText:
-                          sub.isNameValid ? null : sub.nameValidationError,
+                      //errorText:
+                      //    sub.isCardNrValid ? null : 'Invalid card number',
                       hintStyle:
                           textStyles.textFieldInputHint.copyWith(fontSize: 13),
                       errorStyle: textStyles.textFieldInputValidationError,
@@ -556,6 +593,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                     ),
                     onChanged: (cardNumber) => sub.cardNumber = cardNumber,
                   ),
+                  // CVV
                   Padding(
                       padding: const EdgeInsets.only(top: 27),
                       child: Row(
@@ -585,6 +623,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                                   style: textStyles.inspectorPropertyLabel,
                                 )),
                           ])),
+
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Row(
@@ -615,6 +654,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                             onChanged: (ccv) => sub.ccv = ccv,
                           ),
                         ),
+                        // Expiry date
                         Padding(
                           padding: const EdgeInsets.only(left: 30, right: 30),
                           child: SizedBox(
@@ -645,6 +685,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                                     sub.expiration = expiration,
                               )),
                         ),
+                        // ZIP code
                         SizedBox(
                             width: 88,
                             child: TextFormField(
@@ -766,7 +807,6 @@ class MasterCard extends CustomPainter {
     // canvas.drawOval(rect, paint);
     canvas.drawArc(rect, pi / 4, pi * 3 / 2, false, paint);
     canvas.drawOval(rect2, paint);
-    canvas.restore();
   }
 
   @override
@@ -815,7 +855,6 @@ class Chip extends CustomPainter {
     path.moveTo(size.width * 5 / 12, size.height * 11 / 12);
     path.lineTo(size.width * 7 / 12, size.height * 11 / 12);
     canvas.drawPath(path, paint);
-    canvas.restore();
   }
 
   @override
