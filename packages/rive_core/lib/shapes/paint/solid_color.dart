@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
-import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/src/generated/shapes/paint/solid_color_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/solid_color_base.dart';
 
@@ -26,7 +26,7 @@ class SolidColor extends SolidColorBase with ShapePaintMutator {
     // Since we're not in the dependency tray, chuck dirt onto the shape, which
     // is. This just ensures we'll paint as soon as possible to show the updated
     // color.
-    shape?.addDirt(ComponentDirt.paint);
+    shapePaintContainer?.addDirt(ComponentDirt.paint);
   }
 
   @override
@@ -36,8 +36,8 @@ class SolidColor extends SolidColorBase with ShapePaintMutator {
   }
 
   @override
-  void initializePaintMutator(Shape shape, Paint paint) {
-    super.initializePaintMutator(shape, paint);
+  void initializePaintMutator(ShapePaintContainer paintContainer, Paint paint) {
+    super.initializePaintMutator(paintContainer, paint);
     paint?.color = color;
   }
 }

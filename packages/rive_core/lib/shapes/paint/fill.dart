@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/src/generated/shapes/paint/fill_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/fill_base.dart';
 
@@ -18,12 +17,10 @@ class Fill extends FillBase {
   }
 
   @override
-  void draw(Canvas canvas, PathComposer pathComposer) {
+  void draw(Canvas canvas, Path path) {
     if (!isVisible) {
       return;
     }
-
-    var path = pathComposer.uiPath;
     path.fillType = fillType;
     canvas.drawPath(path, paint);
   }

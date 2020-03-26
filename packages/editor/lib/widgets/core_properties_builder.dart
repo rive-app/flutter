@@ -44,15 +44,14 @@ class _CorePropertiesBuilderState<T, K extends Core>
   void didUpdateWidget(CorePropertiesBuilder<T, K> oldWidget) {
     if (oldWidget.propertyKey != widget.propertyKey ||
         !iterableEquals(oldWidget.objects, widget.objects)) {
-      _unbindListener(oldWidget.objects);
+      _unbindListener(oldWidget.objects, oldWidget.propertyKey);
 
       _bindListener();
     }
     super.didUpdateWidget(oldWidget);
   }
 
-  void _unbindListener(Iterable<K> objects) {
-    var propertyKey = widget.propertyKey;
+  void _unbindListener(Iterable<K> objects, int propertyKey) {
     for (final object in objects) {
       object.removeListener(propertyKey, _valueChanged);
     }
@@ -90,7 +89,7 @@ class _CorePropertiesBuilderState<T, K extends Core>
 
   @override
   void dispose() {
-    _unbindListener(widget.objects);
+    _unbindListener(widget.objects, widget.propertyKey);
     super.dispose();
   }
 

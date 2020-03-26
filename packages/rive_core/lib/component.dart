@@ -188,7 +188,19 @@ abstract class Component extends ComponentBase<RiveFile> {
   /// necessary).
   void onDependencyRemoved(Component dependent) {}
 
+  @override
   void onAdded() {}
+
+  @override
+  void onAddedDirty() {
+    log.finest("ADDING $name $id $parentId");
+    if (parentId != null) {
+      parent = context?.resolve(parentId);
+      if (parent == null) {
+        log.finest("Failed to resolve parent with id $parentId");
+      }
+    }
+  }
 
   /// When a component has been removed from the Core Context, we clean up any
   /// dangling references left on the parent and on any other dependent
@@ -221,11 +233,6 @@ abstract class Component extends ComponentBase<RiveFile> {
       _changeArtboard(null);
     }
   }
-
-  /// Override this to ascertain whether or not this object is in a valid state.
-  /// If an object is in a corrupt state, it will be removed from core prior to
-  /// calling onAdded for the object.
-  bool validate() => true;
 
   @override
   String toString() {

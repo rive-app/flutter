@@ -1,9 +1,11 @@
 /// Extension methods to help filtering in the inspector.
 extension InspectorFilters<T> on Iterable<T> {
   /// Checks if all the items in the iterable have the same value for [test].
-  bool allSame<K>(K Function(T) test) {
+  /// You can override whether an empty sets means they are all the same or not.
+  /// By default they are considered the same.
+  bool allSame<K>(K Function(T) test, {bool isEmptySame = true}) {
     if (isEmpty) {
-      return true;
+      return isEmptySame;
     }
 
     K value = test(first);
