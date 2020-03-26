@@ -17,6 +17,19 @@ class _TeamSettingsState extends State<TeamSettings> {
   String _instagram;
 
   @override
+  void initState() {
+    super.initState();
+    _name = 'Rive';
+    _username = 'RiveApp';
+    _location = 'Moon';
+    _website = 'rive.app';
+    _bio =
+        'Empower creatives through technology that is widely accessible to all.';
+    _twitter = 'rive_app';
+    _instagram = 'rive.app';
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = RiveThemeData();
     final colors = theme.colors;
@@ -28,28 +41,38 @@ class _TeamSettingsState extends State<TeamSettings> {
         children: [
           FormSection(label: 'Account', rows: [
             [
-              TextFieldData()
-                ..label = 'Team Name'
-                ..callback = (value) => _name = value,
-              TextFieldData()
-                ..label = 'Team Username'
-                ..callback = (value) => _username = value
+              SettingsTextField(
+                label: 'Team Name',
+                onChanged: (value) => _name = value,
+                initialValue: _name,
+              ),
+              SettingsTextField(
+                label: 'Team Username',
+                onChanged: (value) => _username = value,
+                initialValue: _username,
+              )
             ],
             [
-              TextFieldData()
-                ..label = 'Location'
-                ..hint = 'Where is your team based?'
-                ..callback = (value) => _location = value,
-              TextFieldData()
-                ..label = 'Website'
-                ..hint = 'Website'
-                ..callback = (value) => _website = value
+              SettingsTextField(
+                label: 'Location',
+                hint: 'Where is your team based?',
+                onChanged: (value) => _location = value,
+                initialValue: _location,
+              ),
+              SettingsTextField(
+                label: 'Website',
+                hint: 'Website',
+                onChanged: (value) => _website = value,
+                initialValue: _website,
+              )
             ],
             [
-              TextFieldData()
-                ..label = 'Bio'
-                ..hint = 'Tell users a bit about your team'
-                ..callback = (value) => _bio = value
+              SettingsTextField(
+                label: 'Bio',
+                hint: 'Tell users a bit about your team',
+                onChanged: (value) => _bio = value,
+                initialValue: _bio,
+              )
             ]
           ]),
           const SizedBox(height: 30),
@@ -61,41 +84,34 @@ class _TeamSettingsState extends State<TeamSettings> {
           const SizedBox(height: 30),
           FormSection(label: 'Social', rows: [
             [
-              TextFieldData()
-                ..label = 'Twitter'
-                ..hint = 'Link'
-                ..callback = (value) => _twitter = value,
-              TextFieldData()
-                ..label = 'Instagram'
-                ..hint = 'Link'
-                ..callback = (value) => _instagram = value,
+              SettingsTextField(
+                label: 'Twitter',
+                hint: 'Link',
+                onChanged: (value) => _twitter = value,
+                initialValue: _twitter,
+              ),
+              SettingsTextField(
+                label: 'Instagram',
+                hint: 'Link',
+                onChanged: (value) => _instagram = value,
+                initialValue: _instagram,
+              )
             ]
           ]),
         ]);
   }
 }
 
-class TextFieldData {
-  String label;
-  String hint;
-  ValueChanged<String> callback;
-}
-
 class FormSection extends StatelessWidget {
   final String label;
-  final List<List<TextFieldData>> rows;
+  final List<List<SettingsTextField>> rows;
 
   const FormSection({@required this.label, @required this.rows});
 
-  Widget _textFieldRow(List<TextFieldData> textFieldData) {
-    if (textFieldData.isEmpty) {
+  Widget _textFieldRow(List<SettingsTextField> textFields) {
+    if (textFields.isEmpty) {
       return const SizedBox();
     }
-
-    final textFields = textFieldData
-        .map((data) => SettingsTextField(
-            label: data.label, onChanged: data.callback, hint: data.hint))
-        .toList();
 
     return Row(
       children: <Widget>[
@@ -148,8 +164,10 @@ class SettingsTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final String label;
   final String hint;
+  final String initialValue;
 
-  const SettingsTextField({@required this.label, this.hint, this.onChanged});
+  const SettingsTextField(
+      {@required this.label, this.hint, this.onChanged, this.initialValue});
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +185,10 @@ class SettingsTextField extends StatelessWidget {
             onChanged: onChanged,
             cursorColor: colors.commonDarkGrey,
             textAlign: TextAlign.left,
+            initialValue: initialValue,
+            keyboardType: TextInputType.multiline,
+            minLines: 1,
+            maxLines: 5,
             decoration: InputDecoration(
               isDense: true,
               hintText: hint,
