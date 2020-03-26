@@ -6,7 +6,7 @@ import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_panel.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';

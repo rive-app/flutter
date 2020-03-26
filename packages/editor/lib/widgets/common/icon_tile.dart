@@ -33,7 +33,7 @@ class IconTile extends StatelessWidget {
             Container(width: 5),
             Text(
               label,
-              style: RiveTheme.of(context).textStyles.greyText,
+              style: RiveTheme.of(context).textStyles.fileLightGreyText,
             ),
           ],
         ),
