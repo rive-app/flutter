@@ -6,7 +6,7 @@ import 'package:rive_editor/widgets/theme.dart';
 import 'settings_panel.dart';
 
 class TeamSettings extends SettingsScreen {
-  TeamSettings() : super('Team Settings');
+  TeamSettings() : super(label: 'Team Settings');
 
   @override
   Widget screenBuilder(BuildContext context) {
