@@ -67,7 +67,7 @@ class TopNav extends StatelessWidget {
                 showRiveDialog<void>(
                     context: context,
                     builder: (context) => SettingsPanel(screens: [
-                      SettingsScreen('TeamSettings', TeamSettings()),
+                      SettingsScreen('Team Settings', TeamSettings()),
                     ]));
               },
               icon: 'settings',

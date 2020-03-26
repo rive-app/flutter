@@ -106,6 +106,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
             constraints: const BoxConstraints(
               minWidth: 85,
               maxWidth: 585,
+              // maxHeight: 300,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -116,7 +117,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
                   child: TeamSettingsHeader(),
                 ),
                 Separator(color: colors.fileLineGrey),
-                screens[_selectedIndex].screen,
+                Expanded(child: screens[_selectedIndex].screen),
               ],
             ))
       ],

@@ -21,61 +21,57 @@ class _TeamSettingsState extends State<TeamSettings> {
     final theme = RiveThemeData();
     final colors = theme.colors;
 
-    return SingleChildScrollView(
-        child: Padding(
-      padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            FormSection(label: 'Account', rows: [
-              [
-                TextFieldData()
-                  ..label = 'Team Name'
-                  ..callback = (value) => _name = value,
-                TextFieldData()
-                  ..label = 'Team Username'
-                  ..callback = (value) => _username = value
-              ],
-              [
-                TextFieldData()
-                  ..label = 'Location'
-                  ..hint = 'Where is your team based?'
-                  ..callback = (value) => _location = value,
-                TextFieldData()
-                  ..label = 'Website'
-                  ..hint = 'Website'
-                  ..callback = (value) => _website = value
-              ],
-              [
-                TextFieldData()
-                  ..label = 'Bio'
-                  ..hint = 'Tell users a bit about your team'
-                  ..callback = (value) => _bio = value
-              ]
-            ]),
-            const SizedBox(height: 30),
-            Separator(color: colors.fileLineGrey),
-            const SizedBox(height: 30),
-            const FormSection(label: 'For Hire', rows: []),
-            const SizedBox(height: 30),
-            Separator(color: colors.fileLineGrey),
-            const SizedBox(height: 30),
-            FormSection(label: 'Social', rows: [
-              [
-                TextFieldData()
-                  ..label = 'Twitter'
-                  ..hint = 'Link'
-                  ..callback = (value) => _twitter = value,
-                TextFieldData()
-                  ..label = 'Instagram'
-                  ..hint = 'Link'
-                  ..callback = (value) => _instagram = value,
-              ]
-            ])
+    return ListView(
+        shrinkWrap: true,
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
+        children: [
+          FormSection(label: 'Account', rows: [
+            [
+              TextFieldData()
+                ..label = 'Team Name'
+                ..callback = (value) => _name = value,
+              TextFieldData()
+                ..label = 'Team Username'
+                ..callback = (value) => _username = value
+            ],
+            [
+              TextFieldData()
+                ..label = 'Location'
+                ..hint = 'Where is your team based?'
+                ..callback = (value) => _location = value,
+              TextFieldData()
+                ..label = 'Website'
+                ..hint = 'Website'
+                ..callback = (value) => _website = value
+            ],
+            [
+              TextFieldData()
+                ..label = 'Bio'
+                ..hint = 'Tell users a bit about your team'
+                ..callback = (value) => _bio = value
+            ]
           ]),
-    ));
+          const SizedBox(height: 30),
+          Separator(color: colors.fileLineGrey),
+          const SizedBox(height: 30),
+          const FormSection(label: 'For Hire', rows: []),
+          const SizedBox(height: 30),
+          Separator(color: colors.fileLineGrey),
+          const SizedBox(height: 30),
+          FormSection(label: 'Social', rows: [
+            [
+              TextFieldData()
+                ..label = 'Twitter'
+                ..hint = 'Link'
+                ..callback = (value) => _twitter = value,
+              TextFieldData()
+                ..label = 'Instagram'
+                ..hint = 'Link'
+                ..callback = (value) => _instagram = value,
+            ]
+          ]),
+        ]);
   }
 }
 

@@ -4,10 +4,9 @@ import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class TeamSettingsHeader extends StatelessWidget {
-  final TextStyles textStyles = RiveThemeData().textStyles;
-
   @override
   Widget build(BuildContext context) {
+    final TextStyles textStyles = RiveThemeData().textStyles;
     final riveColors = RiveThemeData().colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
