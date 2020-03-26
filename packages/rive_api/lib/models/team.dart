@@ -7,15 +7,18 @@ class RiveTeam {
 
   RiveTeam({this.id, this.ownerId, this.name});
 
-  @override
-  String toString() {
-    return 'RiveTeam($ownerId, @$name)';
-  }
+  factory RiveTeam.fromData(Map<String, dynamic> data) => RiveTeam(
+      id: data.getInt('id'),
+      ownerId: data.getInt('ownerId'),
+      name: data.getString('name'));
 
-  factory RiveTeam.fromData(Map<String, dynamic> data) {
-    return RiveTeam(
-        id: data.getInt('id'),
-        ownerId: data.getInt('ownerId'),
-        name: data.getString('name'));
-  }
+  /// Returns a list of teams from a JSON document
+  static List<RiveTeam> fromDataList(List<dynamic> dataList) => dataList
+      .map<RiveTeam>(
+        (data) => RiveTeam.fromData(data),
+      )
+      .toList(growable: false);
+
+  @override
+  String toString() => 'RiveTeam($ownerId, @$name)';
 }

@@ -12,7 +12,7 @@ abstract class RiveTeamsApi<T extends RiveTeam> {
   final Logger log = Logger('Rive API');
   RiveTeamsApi(this.api);
 
-  // /api/teams
+  /// POST /api/teams
   Future<T> createTeam(teamName) async {
     String payload = jsonEncode({
       "data": {"teamName": teamName}
@@ -28,9 +28,30 @@ abstract class RiveTeamsApi<T extends RiveTeam> {
     Map<String, dynamic> data;
     try {
       data = json.decode(response.body) as Map<String, dynamic>;
-    } on FormatException catch (_) {
-      return null;
+    } on FormatException catch (e) {
+      log.severe('Unable to parse response from server: $e');
     }
     return RiveTeam.fromData(data);
+  }
+
+  /// GET /api/teams
+  /// Returns the teams for the current user
+  Future<List<T>> get teams async {
+    var response = await api.get(api.host + '/api/teams');
+    if (response.statusCode != 200) {
+      // Todo: some form of error handling? also whats wrong with our error logging :D
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      print(message);
+      return null;
+    }
+    List<dynamic> data;
+    try {
+      data = json.decode(response.body);
+    } on FormatException catch (e) {
+      log.severe('Unable to parse response from server: $e');
+    }
+    print('TEAMS SERVER BODY: ${response.body}');
+    return RiveTeam.fromDataList(data);
   }
 }
