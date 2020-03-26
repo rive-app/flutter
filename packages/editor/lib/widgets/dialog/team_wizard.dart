@@ -252,7 +252,7 @@ class TeamWizardPanelOne extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: sub.isNameValid
+              padding: sub.nameValidationError == null
                   ? const EdgeInsets.only(top: 31, bottom: 31)
                   : const EdgeInsets.only(top: 9, bottom: 31),
               child: Row(
