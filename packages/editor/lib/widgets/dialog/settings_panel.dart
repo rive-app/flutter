@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings_header.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -118,6 +119,22 @@ class _SettingsPanelState extends State<SettingsPanel> {
                 ),
                 Separator(color: colors.fileLineGrey),
                 Expanded(child: screens[_selectedIndex].screen),
+                Separator(color: colors.fileLineGrey),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FlatIconButton(
+                        label: 'Save Changes',
+                        color: colors.commonDarkGrey,
+                        textColor: Colors.white,
+                        onTap: () {/* TODO: */},
+                      )
+                    ],
+                  )
+                ),
               ],
             ))
       ],

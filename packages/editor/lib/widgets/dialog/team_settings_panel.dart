@@ -15,6 +15,7 @@ class _TeamSettingsState extends State<TeamSettings> {
   String _bio;
   String _twitter;
   String _instagram;
+  bool _isForHire;
 
   @override
   void initState() {
@@ -27,12 +28,21 @@ class _TeamSettingsState extends State<TeamSettings> {
         'Empower creatives through technology that is widely accessible to all.';
     _twitter = 'rive_app';
     _instagram = 'rive.app';
+    _isForHire = false;
+  }
+
+  void _updateForHire(bool newValue) {
+    if (_isForHire == newValue) return;
+    setState(() {
+      _isForHire = newValue;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = RiveThemeData();
     final colors = theme.colors;
+    const textStyles = TextStyles();
 
     return ListView(
         shrinkWrap: true,
@@ -78,7 +88,44 @@ class _TeamSettingsState extends State<TeamSettings> {
           const SizedBox(height: 30),
           Separator(color: colors.fileLineGrey),
           const SizedBox(height: 30),
-          const FormSection(label: 'For Hire', rows: []),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'For Hire',
+                style: textStyles.fileGreyTextLarge,
+              ),
+              const Spacer(),
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minWidth: 75,
+                  maxWidth: 390,
+                ),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      LabeledRadio(
+                          label: 'Available For Hire',
+                          subtext:
+                              'Allow other users to message you about work opportunities. You will also show up in our list of artists for hire.',
+                          groupValue: _isForHire,
+                          value: true,
+                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                          onChanged: _updateForHire),
+                      LabeledRadio(
+                          label: 'Not Available For Hire',
+                          subtext:
+                              """Don't allow other users to contact you about 
+                          work opportunities.""",
+                          groupValue: _isForHire,
+                          value: false,
+                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                          onChanged: _updateForHire),
+                    ]),
+              )
+            ],
+          ),
           const SizedBox(height: 30),
           Separator(color: colors.fileLineGrey),
           const SizedBox(height: 30),
@@ -99,6 +146,63 @@ class _TeamSettingsState extends State<TeamSettings> {
             ]
           ]),
         ]);
+  }
+}
+
+class LabeledRadio extends StatelessWidget {
+  const LabeledRadio({
+    this.label,
+    this.subtext,
+    this.padding,
+    this.groupValue,
+    this.value,
+    this.onChanged,
+  });
+
+  final String label;
+  final String subtext;
+  final EdgeInsets padding;
+  final bool groupValue;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = RiveColors();
+    const styles = TextStyles();
+    return GestureDetector(
+      onTap: () {
+        if (value != groupValue) onChanged(value);
+      },
+      child: Padding(
+        padding: padding,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Radio<bool>(
+                    groupValue: groupValue,
+                    value: value,
+                    onChanged: onChanged,
+                    hoverColor: Colors.transparent,
+                    activeColor: colors.commonDarkGrey,
+                  ),
+                  Text(label, style: styles.greyText),
+                ],
+              ),
+              if (subtext != null)
+                Text(
+                  subtext,
+                  style: styles.tooltipDisclaimer,
+                  textAlign: TextAlign.left,
+                ),
+            ]),
+      ),
+    );
   }
 }
 
