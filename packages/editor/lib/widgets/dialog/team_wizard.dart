@@ -577,8 +577,8 @@ class TeamWizardPanelTwo extends StatelessWidget {
                     style: textStyles.inspectorPropertyLabel,
                     initialValue: sub.cardNumber,
                     inputFormatters: <TextInputFormatter>[
-                      LengthLimitingTextInputFormatter(19),
                       WhitelistingTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(19),
                       CardNumberFormatter()
                     ],
                     decoration: InputDecoration(
@@ -676,7 +676,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                                 initialValue: sub.expiration,
                                 inputFormatters: <TextInputFormatter>[
                                   WhitelistingTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(5),
+                                  LengthLimitingTextInputFormatter(4),
                                   DateTextInputFormatter(),
                                   DateTextRegexCheck()
                                 ],
