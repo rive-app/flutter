@@ -17,40 +17,20 @@ import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
+/// Builds a TreeView styled for folders.
 class FolderTreeView extends StatelessWidget {
   final FolderTreeController controller;
-  final double itemHeight;
-  final ScrollController scrollController;
-  final EdgeInsets padding;
-  final List<Widget> trailingWidgets;
+  final TreeStyle style;
 
-  const FolderTreeView(
-      {@required this.controller,
-      @required this.itemHeight,
-      this.padding = const EdgeInsets.all(5),
-      Key key,
-      this.scrollController,
-      this.trailingWidgets = const []})
-      : super(key: key);
+  const FolderTreeView({
+    @required this.controller,
+    this.style,
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => TreeView<RiveFolder>(
-        scrollController: scrollController,
-        shrinkWrap: false,
-        trailingWidgets: trailingWidgets,
-        style: TreeStyle(
-          showFirstLine: false,
-          padding: padding,
-          lineColor: RiveTheme.of(context).colors.fileLineGrey,
-          itemHeight: itemHeight,
-        ),
-        separatorBuilder: (_, index) => Center(
-          child: Container(
-            height: 1,
-            padding: const EdgeInsets.only(left: 20.0),
-            color: const Color.fromRGBO(227, 227, 227, 1),
-          ),
-        ),
+        style: style,
         controller: controller,
         expanderBuilder: (context, item) => Container(
           child: Center(

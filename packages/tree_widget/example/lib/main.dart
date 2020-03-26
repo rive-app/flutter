@@ -9,6 +9,7 @@ import 'package:tree_widget/tree_arrow_icon.dart';
 import 'package:tree_widget/tree_line.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
+import 'package:tree_widget/tree_scroll_view.dart';
 
 import 'my_tree_controller.dart';
 import 'tree_item.dart';
@@ -36,9 +37,9 @@ class ExampleTreeView extends StatefulWidget {
 }
 
 class _ExampleTreeViewState extends State<ExampleTreeView> {
-  /// TreeView controller which handles things like expanding items, responding
-  /// to whether drag/drop is allowed for a specific item, etc.
-  MyTreeController _controller;
+  /// List of TreeView controllers which handle things like expanding items,
+  /// responding to whether drag/drop is allowed for a specific item, etc.
+  List<MyTreeController> _trees;
 
   /// Callback for creating the background of a tree row. This has some special
   /// state management for conditions like allowing dropping above/below/into an
@@ -128,33 +129,10 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
     return Container(color: Colors.transparent);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var treeStyle = TreeStyle(
-        padding: const EdgeInsets.all(20),
-        lineColor: Colors.grey.shade700,
-        showFirstLine: false);
+  Widget _buildTree(TreeStyle treeStyle, MyTreeController controller) {
     return TreeView<TreeItem>(
       style: treeStyle,
-      controller: _controller,
-      separatorBuilder: (context, index) => Stack(
-        children: [
-          Positioned(
-            left: 0,
-            top: treeStyle.itemHeight/2-1,
-            bottom: treeStyle.itemHeight/2,
-            right: 0,
-            child: Container(
-              child: CustomPaint(
-                painter: TreeLine(
-                  color: treeStyle.lineColor,
-                  strokeCap: StrokeCap.butt,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      controller: controller,
       expanderBuilder: (context, item) => Container(
         child: Center(
           child: TreeExpander(
@@ -241,13 +219,64 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context) {
+    var treeStyle = TreeStyle(
+        padding: const EdgeInsets.all(20),
+        lineColor: Colors.grey.shade700,
+        showFirstLine: false);
 
+    var slivers = <Widget>[];
+    // Build sliver list and pass to tree scroll view.
+    for (int i = 0; i < _trees.length; i++) {
+      // Push the tree widget into the slivers list.
+      slivers.add(_buildTree(treeStyle, _trees[i]));
+      // Add a separator between items.
+      if (i != _trees.length - 1) {
+        // In Rive we should use our nice Separator and not
+        // this hideous thing.
+        slivers.add(
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: treeStyle.itemHeight,
+              child: UnconstrainedBox(
+                constrainedAxis: Axis.horizontal,
+                child: SizedBox(
+                  height: 1,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 20),
+                    child: CustomPaint(
+                      painter: TreeLine(
+                        color: treeStyle.lineColor,
+                        strokeCap: StrokeCap.butt,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    slivers.add(SliverToBoxAdapter(
+        child: FlatButton(
+      onPressed: () {
+        print('clickity click');
+      },
+      child: Text("Click me"),
+    )));
+    return TreeScrollView(
+      style: treeStyle,
+      slivers: slivers,
+    );
+  }
+
+  MyTreeController _buildExampleDataSet(String firstName) {
     // Just some test data...
     var data = [
       TreeItem(
-        "Artboard 1",
+        firstName,
         children: [
           TreeItem(
             "Group Test",
@@ -258,68 +287,53 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
               TreeItem("head"),
             ],
           ),
-        ],
-      ),
-      TreeItem(
-        "Artboard2",
-      ),
-      TreeItem(
-        "Artboard",
-        children: [
           TreeItem(
-            "Group",
+            "Artboard2",
+          ),
+          TreeItem(
+            "Artboard",
             children: [
-              TreeItem("body"),
-              TreeItem("neck"),
-              TreeItem("leg_right"),
-              TreeItem("head"),
-              TreeItem("leg_left", children: [
-                TreeItem("one", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                ]),
-                TreeItem("ik_head", children: [
-                  PropertyTreeItem("Translation Constraint"),
+              TreeItem(
+                "Group",
+                children: [
+                  TreeItem("body"),
                   TreeItem("neck"),
+                  TreeItem("leg_right"),
+                  TreeItem("head"),
                   TreeItem("leg_left", children: [
-                    TreeItem("one"),
+                    TreeItem("one", children: [
+                      PropertyTreeItem("Translation Constraint"),
+                    ]),
                     TreeItem("ik_head", children: [
                       PropertyTreeItem("Translation Constraint"),
                       TreeItem("neck"),
+                      TreeItem("leg_left", children: [
+                        TreeItem("one"),
+                        TreeItem("ik_head", children: [
+                          PropertyTreeItem("Translation Constraint"),
+                          TreeItem("neck"),
+                        ]),
+                        TreeItem("two"),
+                        TreeItem("three"),
+                      ]),
                     ]),
                     TreeItem("two"),
                     TreeItem("three"),
                   ]),
-                ]),
-                TreeItem("two"),
-                TreeItem("three"),
-              ]),
-              TreeItem("root", children: [
-                TreeItem("ik_head", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                  TreeItem("neck"),
-                ]),
-                TreeItem("ctrl_foot_left"),
-                TreeItem("ctrl_foot_right"),
-              ]),
-              TreeItem("leg_left"),
-              SoloTreeItem("eyes", children: [
-                TreeItem("eye_normal"),
-                TreeItem("eye_angry"),
-                TreeItem("eye_happy", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                  TreeItem("something"),
-                  TreeItem("something2"),
-                ]),
-                TreeItem("eye_other", children: [
-                  PropertyTreeItem("Translation Constraint"),
-                  TreeItem("something"),
-                  TreeItem("something2"),
-                  SoloTreeItem("sub_eyes", children: [
+                  TreeItem("root", children: [
+                    TreeItem("ik_head", children: [
+                      PropertyTreeItem("Translation Constraint"),
+                      TreeItem("neck"),
+                    ]),
+                    TreeItem("ctrl_foot_left"),
+                    TreeItem("ctrl_foot_right"),
+                  ]),
+                  TreeItem("leg_left"),
+                  SoloTreeItem("eyes", children: [
                     TreeItem("eye_normal"),
                     TreeItem("eye_angry"),
                     TreeItem("eye_happy", children: [
                       PropertyTreeItem("Translation Constraint"),
-                      PropertyTreeItem("Rotation Constraint"),
                       TreeItem("something"),
                       TreeItem("something2"),
                     ]),
@@ -327,27 +341,53 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
                       PropertyTreeItem("Translation Constraint"),
                       TreeItem("something"),
                       TreeItem("something2"),
+                      SoloTreeItem("sub_eyes", children: [
+                        TreeItem("eye_normal"),
+                        TreeItem("eye_angry"),
+                        TreeItem("eye_happy", children: [
+                          PropertyTreeItem("Translation Constraint"),
+                          PropertyTreeItem("Rotation Constraint"),
+                          TreeItem("something"),
+                          TreeItem("something2"),
+                        ]),
+                        TreeItem("eye_other", children: [
+                          PropertyTreeItem("Translation Constraint"),
+                          TreeItem("something"),
+                          TreeItem("something2"),
+                        ]),
+                        TreeItem("ctrl_foot_left"),
+                        TreeItem("ctrl_foot_right"),
+                      ]),
                     ]),
                     TreeItem("ctrl_foot_left"),
                     TreeItem("ctrl_foot_right"),
                   ]),
-                ]),
-                TreeItem("ctrl_foot_left"),
-                TreeItem("ctrl_foot_right"),
-              ]),
-              TreeItem("leg_right"),
+                  TreeItem("leg_right"),
+                ],
+              ),
             ],
-          ),
+          )
         ],
-      )
+      ),
     ];
-    _controller = MyTreeController(data);
-    _controller.flatten();
+    var controller = MyTreeController(data);
+    controller.flatten();
+    return controller;
     // Programmatically expand some items in the tree
-    _controller.expand(data[0]);
-    _controller.expand(data[1]);
+    // _controller.expand(data[0]);
+    // _controller.expand(data[1]);
     // _controller.expand(data[0].children[0]);
     // _controller.expand(data[0].children[0].children[5]);
+  }
+
+  @override
+  void initState() {
+    _trees = [
+      _buildExampleDataSet('Team A'),
+      _buildExampleDataSet('Team B'),
+      _buildExampleDataSet('Team C'),
+    ];
+    super.initState();
   }
 }
 

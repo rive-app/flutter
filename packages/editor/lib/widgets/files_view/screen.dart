@@ -29,6 +29,8 @@ import 'package:rive_editor/widgets/marquee_selection.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
+import 'package:tree_widget/tree_scroll_view.dart';
+import 'package:tree_widget/tree_style.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
 const double kFileHeight = 190;
@@ -349,6 +351,18 @@ class FilesView extends StatelessWidget {
   Widget _buildLeftSide(BuildContext context) {
     final theme = RiveTheme.of(context);
     final riveColors = theme.colors;
+    final treeStyle = TreeStyle(
+      showFirstLine: false,
+      padding: const EdgeInsets.only(
+        left: 20.0,
+        right: 10.0,
+        bottom: 5,
+        top: 5,
+      ),
+      lineColor: RiveTheme.of(context).colors.fileLineGrey,
+      itemHeight: kTreeItemHeight,
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: riveColors.fileBackgroundLightGrey,
@@ -430,38 +444,77 @@ class FilesView extends StatelessWidget {
           Expanded(
             child: ValueListenableBuilder<FolderTreeController>(
               valueListenable:
-                  RiveContext.of(context).fileBrowser.treeController,
-              builder: (context, controller, _) => FolderTreeView(
-                padding: const EdgeInsets.only(
-                  left: 20.0,
-                  right: 10.0,
-                  bottom: 5,
-                  top: 5,
-                ),
-                scrollController:
-                    RiveContext.of(context).fileBrowser.treeScrollController,
-                controller: controller,
-                itemHeight: kTreeItemHeight,
-                trailingWidgets: <Widget>[
-                  Container(
-                    height: kTreeItemHeight,
-                    margin: const EdgeInsets.only(top: 0, bottom: 3),
-                    child: _buildDivider(riveColors.fileLineGrey),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 0.5, bottom: 20),
-                    child: DashedFlatButton(
-                      label: 'New Team',
-                      icon: 'teams-button',
-                      tip: const Tip(
-                          label: 'Create a new team',
-                          direction: PopupDirection.topToCenter),
-                      onTap: () => showTeamWizard<void>(
-                        context: context,
+                  RiveContext.of(context).fileBrowser.myTreeController,
+              builder: (context, myTreeController, _) =>
+                  ValueListenableBuilder<List<FolderTreeController>>(
+                valueListenable:
+                    RiveContext.of(context).fileBrowser.teamsTreeControllers,
+                builder: (context, teamControllers, _) {
+                  var separatorPadding = EdgeInsets.only(
+                    left: treeStyle.padding.left,
+                    top: 12,
+                    bottom: 12,
+                  );
+                  var slivers = <Widget>[
+                    FolderTreeView(
+                      style: treeStyle,
+                      controller: myTreeController,
+                    ),
+                    SliverToBoxAdapter(
+                      child: Separator(
+                        color: riveColors.fileLineGrey,
+                        padding: separatorPadding,
                       ),
                     ),
-                  )
-                ],
+                  ];
+                  for (int i = 0; i < teamControllers.length; i++) {
+                    slivers.add(
+                      FolderTreeView(
+                        style: treeStyle,
+                        controller: teamControllers[i],
+                      ),
+                    );
+                    slivers.add(
+                      SliverToBoxAdapter(
+                        child: Separator(
+                          color: riveColors.fileLineGrey,
+                          padding: separatorPadding,
+                        ),
+                      ),
+                    );
+                  }
+
+                  slivers.add(
+                    SliverPadding(
+                      padding: EdgeInsets.only(
+                        left: treeStyle.padding.left,
+                        right: treeStyle.padding.right,
+                        top: 8,
+                        bottom: 20,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: DashedFlatButton(
+                          label: 'New Team',
+                          icon: 'teams-button',
+                          tip: const Tip(
+                              label: 'Create a new team',
+                              direction: PopupDirection.topToCenter),
+                          onTap: () => showTeamWizard<void>(
+                            context: context,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+
+                  return TreeScrollView(
+                    scrollController: RiveContext.of(context)
+                        .fileBrowser
+                        .treeScrollController,
+                    style: treeStyle,
+                    slivers: slivers,
+                  );
+                },
               ),
             ),
           ),

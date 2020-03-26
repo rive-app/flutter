@@ -7,7 +7,7 @@ import 'tree_item.dart';
 
 class MyTreeController extends TreeController<TreeItem> {
   MyTreeController(List<TreeItem> data)
-      : super(data, showTopLevelSeparator: true);
+      : super(data);
 
   /// Our data set will store properties, so we opt-in to having them computed a
   /// flattening time.

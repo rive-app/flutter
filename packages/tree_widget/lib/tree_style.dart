@@ -40,7 +40,7 @@ class TreeStyle {
   final double iconMargin;
 
   /// Internal padding for the ListView in this TreeView.
-  final EdgeInsetsGeometry padding;
+  final EdgeInsets padding;
 
   const TreeStyle({
     this.showFirstLine = false,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Draws a thin separating line of [color] width [padding].
 class Separator extends LeafRenderObjectWidget {
+  static const double lineHeight = 1;
   final Color color;
   final EdgeInsets padding;
 
@@ -27,8 +28,6 @@ class Separator extends LeafRenderObjectWidget {
 }
 
 class SeparatorRenderObject extends RenderBox {
-  static const double lineHeight = 1;
-
   EdgeInsets _padding;
   Color _color;
   final Paint _paint = Paint()..isAntiAlias = false;
@@ -67,18 +66,18 @@ class SeparatorRenderObject extends RenderBox {
 
   @override
   double computeMinIntrinsicHeight(double width) =>
-      _padding.top + lineHeight + _padding.bottom;
+      _padding.top + Separator.lineHeight + _padding.bottom;
 
   @override
   double computeMaxIntrinsicHeight(double width) =>
-      _padding.top + lineHeight + _padding.bottom;
+      _padding.top + Separator.lineHeight + _padding.bottom;
 
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     size = constraints.constrain(Size(
       _padding.left + _padding.right,
-      _padding.top + lineHeight + _padding.bottom,
+      _padding.top + Separator.lineHeight + _padding.bottom,
     ));
   }
 
@@ -87,7 +86,7 @@ class SeparatorRenderObject extends RenderBox {
     super.paint(context, offset);
     context.canvas.drawRect(
         Rect.fromLTWH(offset.dx + _padding.left, offset.dy + _padding.top,
-            size.width - padding.horizontal, lineHeight),
+            size.width - padding.horizontal, Separator.lineHeight),
         _paint);
   }
 }
