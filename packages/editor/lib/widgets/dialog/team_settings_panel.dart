@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/dialog/settings_text_field.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 class TeamSettings extends StatefulWidget {
@@ -26,8 +27,6 @@ class _TeamSettingsState extends State<TeamSettings> {
     _username = 'RiveApp';
     _location = 'Moon';
     _website = 'rive.app';
-    _bio =
-        'Empower creatives through technology that is widely accessible to all.';
     _twitter = 'rive_app';
     _instagram = 'rive.app';
     _isForHire = false;
@@ -38,6 +37,57 @@ class _TeamSettingsState extends State<TeamSettings> {
     setState(() {
       _isForHire = newValue;
     });
+  }
+
+  Widget _textFieldRow(List<SettingsTextField> textFields) {
+    if (textFields.isEmpty) {
+      return const SizedBox();
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(child: textFields.first),
+        // Use 'collection-for' in tandem with the spread operator
+        // to add multiple widgets at once.
+        for (final textField in textFields.sublist(1)) ...[
+          const SizedBox(width: 30),
+          Expanded(child: textField)
+        ]
+      ],
+    );
+  }
+
+  Widget _formSection(String label, List<List<SettingsTextField>> rows) {
+    const textStyles = TextStyles();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          label,
+          style: textStyles.fileGreyTextLarge,
+        ),
+        const Spacer(),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 75,
+            maxWidth: 390,
+          ),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (rows.isNotEmpty) ...[
+                  _textFieldRow(rows.first),
+                  for (final row in rows.sublist(1)) ...[
+                    const SizedBox(height: 30),
+                    _textFieldRow(row)
+                  ]
+                ]
+              ]),
+        )
+      ],
+    );
   }
 
   @override
@@ -51,7 +101,7 @@ class _TeamSettingsState extends State<TeamSettings> {
         physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.all(30),
         children: [
-          FormSection(label: 'Account', rows: [
+          _formSection('Account', [
             [
               SettingsTextField(
                 label: 'Team Name',
@@ -146,7 +196,7 @@ class _TeamSettingsState extends State<TeamSettings> {
           const SizedBox(height: 30),
           Separator(color: colors.fileLineGrey),
           const SizedBox(height: 30),
-          FormSection(label: 'Social', rows: [
+          _formSection('Social', [
             [
               SettingsTextField(
                 label: 'Twitter',
@@ -173,10 +223,10 @@ class LabeledRadio extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   const LabeledRadio({
-    this.label,
-    this.groupValue,
+    @required this.label,
+    @required this.groupValue,
+    @required this.onChanged,
     this.value,
-    this.onChanged,
   });
 
   @override
@@ -201,110 +251,6 @@ class LabeledRadio extends StatelessWidget {
           Text(label, style: styles.greyText),
         ],
       ),
-    );
-  }
-}
-
-class FormSection extends StatelessWidget {
-  final String label;
-  final List<List<SettingsTextField>> rows;
-
-  const FormSection({@required this.label, @required this.rows});
-
-  Widget _textFieldRow(List<SettingsTextField> textFields) {
-    if (textFields.isEmpty) {
-      return const SizedBox();
-    }
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Expanded(child: textFields.first),
-        // Use 'collection-for' in tandem with the spread operator
-        // to add multiple widgets at once.
-        for (final textField in textFields.sublist(1)) ...[
-          const SizedBox(width: 30),
-          Expanded(child: textField)
-        ]
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const textStyles = TextStyles();
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          label,
-          style: textStyles.fileGreyTextLarge,
-        ),
-        const Spacer(),
-        ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 75,
-            maxWidth: 390,
-          ),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (rows.isNotEmpty) ...[
-                  _textFieldRow(rows.first),
-                  for (final row in rows.sublist(1)) ...[
-                    const SizedBox(height: 30),
-                    _textFieldRow(row)
-                  ]
-                ]
-              ]),
-        )
-      ],
-    );
-  }
-}
-
-class SettingsTextField extends StatelessWidget {
-  final ValueChanged<String> onChanged;
-  final String label;
-  final String hint;
-  final String initialValue;
-
-  const SettingsTextField(
-      {@required this.label, this.hint, this.onChanged, this.initialValue});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = RiveColors();
-    const textStyles = TextStyles();
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(label,
-            style: textStyles.hierarchyTabHovered
-                .copyWith(fontSize: 13, letterSpacing: 0)),
-        const SizedBox(height: 11),
-        TextFormField(
-            onChanged: onChanged,
-            cursorColor: colors.commonDarkGrey,
-            textAlign: TextAlign.left,
-            initialValue: initialValue,
-            keyboardType: TextInputType.multiline,
-            minLines: 1,
-            maxLines: 5,
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: hint,
-              hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
-              contentPadding: const EdgeInsets.only(bottom: 2),
-              focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: colors.commonDarkGrey)),
-            ),
-            style: textStyles.fileGreyTextLarge
-                .copyWith(fontSize: 13, letterSpacing: 0)),
-      ],
     );
   }
 }

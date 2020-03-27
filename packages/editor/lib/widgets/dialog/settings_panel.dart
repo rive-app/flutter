@@ -130,7 +130,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
                           label: 'Save Changes',
                           color: colors.commonDarkGrey,
                           textColor: Colors.white,
-                          onTap: () {/* TODO: */},
+                          onTap: () {/* TODO: make sure team info is valid! */},
                         )
                       ],
                     )),
