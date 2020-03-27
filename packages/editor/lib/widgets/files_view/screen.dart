@@ -72,7 +72,7 @@ class FilesView extends StatelessWidget {
                     side: ResizeSide.end,
                     min: 252,
                     max: 500,
-                    child: _buildLeftSide(context),
+                    child: _buildLeftSide(context, _rive),
                   ),
                   Expanded(
                     child: _buildCenter(_rive),
@@ -110,51 +110,51 @@ class FilesView extends StatelessWidget {
             var files = browser.selectedFolder.files;
             return ValueListenableBuilder<List<RiveFile>>(
               valueListenable: files,
-              builder: (context, files, _) => files.isEmpty && folders.isEmpty
-                  ? _buildEmpty(context)
-                  : ValueListenableBuilder<bool>(
-                      valueListenable: browser.draggingState,
-                      builder: (context, dragging, child) => MarqueeScrollView(
-                        rive: rive,
-                        enable: !dragging,
-                        child: child,
-                        controller: scrollController,
-                      ),
-                      child: CustomScrollView(
-                        controller: scrollController,
-                        physics: const NeverScrollableScrollPhysics(),
-                        slivers: <Widget>[
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                              child: TopNav(fileBrowser),
-                            ),
-                          ),
-                          if (folders != null && folders.isNotEmpty) ...[
-                            const SliverToBoxAdapter(
-                              child: TitleSection(
-                                name: 'Folders',
-                                height: kGridHeaderHeight,
-                                showDropdown: false,
-                              ),
-                            ),
-                            _buildFolders(folders, browser),
-                          ],
-                          if (files != null && files.isNotEmpty) ...[
-                            SliverToBoxAdapter(
-                              child: TitleSection(
-                                name: 'Files',
-                                height: kGridHeaderHeight,
-                                showDropdown:
-                                    folders == null || folders.isEmpty,
-                              ),
-                            ),
-                            _buildFiles(context, files, browser, rive),
-                          ],
-                        ],
+              builder: (context, files, _) => ValueListenableBuilder<bool>(
+                valueListenable: browser.draggingState,
+                builder: (context, dragging, child) => MarqueeScrollView(
+                  rive: rive,
+                  enable: !dragging,
+                  child: child,
+                  controller: scrollController,
+                ),
+                child: CustomScrollView(
+                  controller: scrollController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 15),
+                        child: TopNav(fileBrowser),
                       ),
                     ),
+                    if (folders != null && folders.isNotEmpty) ...[
+                      const SliverToBoxAdapter(
+                        child: TitleSection(
+                          name: 'Folders',
+                          height: kGridHeaderHeight,
+                          showDropdown: false,
+                        ),
+                      ),
+                      _buildFolders(folders, browser),
+                    ],
+                    if (files != null && files.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: TitleSection(
+                          name: 'Files',
+                          height: kGridHeaderHeight,
+                          showDropdown: folders == null || folders.isEmpty,
+                        ),
+                      ),
+                      _buildFiles(context, files, browser, rive),
+                    ],
+                    if (files.isEmpty && folders.isEmpty) ...[
+                      SliverFillRemaining(child: _buildEmpty(context))
+                    ]
+                  ],
+                ),
+              ),
             );
           },
         );
@@ -182,22 +182,13 @@ class FilesView extends StatelessWidget {
   }
 
   Widget _buildEmpty(BuildContext context) {
-    return Column(
-      children: [
-        const TitleSection(
-          name: 'Files',
-          showDropdown: true,
-          height: kGridHeaderHeight,
-        ),
-        Expanded(
-          child: Center(
-            child: Text(
-              'This View is empty.',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-        ),
-      ],
+    return Center(
+      child: Text(
+        'Hey, it looks like you don\'t have any files here '
+        'yet!\nHit the plus button to create a new file!',
+        style: TextStyle(color: Colors.grey),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
@@ -334,7 +325,7 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftSide(BuildContext context) {
+  Widget _buildLeftSide(BuildContext context, Rive rive) {
     final theme = RiveTheme.of(context);
     final riveColors = theme.colors;
     final treeStyle = TreeStyle(
@@ -553,7 +544,7 @@ class FilesView extends StatelessWidget {
     );
   }
 
-  Widget _buildRightSide(Rive _rive) {
+  Widget _buildRightSide(Rive rive) {
     return Container(
       decoration: const BoxDecoration(
         border: Border(
@@ -563,7 +554,7 @@ class FilesView extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(20),
       child: ValueListenableBuilder<SelectableItem>(
-          valueListenable: _rive.fileBrowser.selectedItem,
+          valueListenable: rive.fileBrowser.selectedItem,
           builder: (context, selection, child) {
             if (selection != null) {
               return ItemView(item: selection);
