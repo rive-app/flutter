@@ -46,8 +46,8 @@ abstract class StageDelegate {
 /// Some notes about how the Stage works and future plans for it here:
 /// https://www.notion.so/Stage-65da45b819b249839e2ca0bb659c6a01
 class Stage extends Debouncer {
-  static const double _minZoom = 0.1;
-  static const double _maxZoom = 8;
+  static const double minZoom = 0.1;
+  static const double maxZoom = 8;
 
   /// Reference to the Rive context for the app.
   final Rive rive;
@@ -231,7 +231,7 @@ class Stage extends Debouncer {
   }
 
   void zoomTo(double x, double y, double scale) {
-    double zoom = scale.clamp(_minZoom, _maxZoom).toDouble();
+    double zoom = scale.clamp(minZoom, maxZoom).toDouble();
     double zoomDelta = zoom / _viewZoomTarget;
     _viewZoomTarget = zoom;
     zoomLevelNotifier.value = zoom;
@@ -283,7 +283,7 @@ class Stage extends Debouncer {
       if (item.isSelectable &&
           item.drawOrder >= (hover?.drawOrder ?? 0) &&
           item.hitHiFi(_worldMouse)) {
-        hover = item;
+        hover = item.hoverTarget;
       }
       return true;
     });
@@ -547,12 +547,29 @@ class Stage extends Debouncer {
     });
 
     var canvas = context.canvas;
+
     // Clear bg.
+    var backboardColor = riveFile.backboard.color;
     canvas.drawRect(
         offset & size,
         Paint()
           ..isAntiAlias = false
-          ..color = riveFile.backboard.color);
+          ..color = backboardColor);
+
+    // Compute backboard contrast to help us calculate a color that'll look
+    // contrasty on top of it.
+    var contrast = ((backboardColor.red * 299 +
+                backboardColor.green * 587 +
+                backboardColor.blue * 114) /
+            1000)
+        .round();
+
+    // Help the contrast not be too stark.
+    StageItem.backboardContrastPaint.color = contrast > 128
+        // If the value is bright, darken as brightness goes up.
+        ? Colors.black.withOpacity((1 - (contrast - 128) / 128) * 0.3 + 0.6)
+        // If the value is dark, darken as darkness decreases.
+        : Colors.white.withOpacity(contrast / 128 * 0.3 + 0.5);
 
     canvas.save();
     // Translate to widget space

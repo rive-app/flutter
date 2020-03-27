@@ -353,7 +353,9 @@ class Rive with RiveFileDelegate {
 
   @override
   void onObjectAdded(Core object) {
-    _stage.initComponent(object as Component);
+    if (object is Component) {
+      _stage.initComponent(object);
+    }
     debounce(treeController.value.flatten);
     debounce(drawOrderTreeController.value.flatten);
   }
