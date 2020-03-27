@@ -51,7 +51,8 @@ class TeamSettingsHeader extends StatelessWidget {
           children: [
             Text(
               '2 members',
-              style: textStyles.fileGreyTextLarge,
+              style: textStyles.fileGreyTextLarge
+                  .copyWith(fontSize: 13, height: 1.3),
             ),
             const SizedBox(height: 2),
             Text(

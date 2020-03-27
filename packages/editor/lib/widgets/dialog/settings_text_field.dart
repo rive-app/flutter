@@ -1,0 +1,48 @@
+
+import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/theme.dart';
+
+class SettingsTextField extends StatelessWidget {
+  final ValueChanged<String> onChanged;
+  final String label;
+  final String hint;
+  final String initialValue;
+
+  const SettingsTextField(
+      {@required this.label, this.hint, this.onChanged, this.initialValue});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = RiveColors();
+    const textStyles = TextStyles();
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Text(label,
+            style: textStyles.hierarchyTabHovered
+                .copyWith(fontSize: 13, letterSpacing: 0)),
+        const SizedBox(height: 11),
+        TextFormField(
+            onChanged: onChanged,
+            cursorColor: colors.commonDarkGrey,
+            textAlign: TextAlign.left,
+            initialValue: initialValue,
+            keyboardType: TextInputType.multiline,
+            minLines: 1,
+            maxLines: 5,
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: hint,
+              hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
+              contentPadding: const EdgeInsets.only(bottom: 2),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: colors.commonDarkGrey)),
+            ),
+            style: textStyles.fileGreyTextLarge
+                .copyWith(fontSize: 13, letterSpacing: 0)),
+      ],
+    );
+  }
+}
