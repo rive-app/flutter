@@ -57,7 +57,7 @@ class TreeStyle {
     this.padIndent = 5,
     this.iconMargin = 5,
     this.inactiveOpacity = 0.28,
-    this.padding,
+    this.padding = const EdgeInsets.all(0),
     this.expanderMargin = 10,
   });
 }

@@ -121,7 +121,9 @@ void main() {
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: treeWidget,
+          child: CustomScrollView(
+            slivers: [treeWidget],
+          ),
         ),
       );
 
@@ -146,7 +148,9 @@ void main() {
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: treeWidget,
+          child: CustomScrollView(
+            slivers: [treeWidget],
+          ),
         ),
       );
 
@@ -179,7 +183,9 @@ void main() {
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: treeWidget,
+          child: CustomScrollView(
+            slivers: [treeWidget],
+          ),
         ),
       );
 
