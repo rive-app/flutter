@@ -210,8 +210,7 @@ class TextStyles {
       fontFamily: 'Roboto-Medium',
       color: Color(0xFF333333),
       fontSize: 16,
-      fontWeight: FontWeight.w400,
-      height: 1.3);
+      fontWeight: FontWeight.w400);
   TextStyle get fileLightGreyText => const TextStyle(
       fontFamily: 'Roboto-Medium',
       color: Color(0xFF666666),

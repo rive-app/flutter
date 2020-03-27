@@ -47,7 +47,7 @@ class _TeamSettingsState extends State<TeamSettings> {
     return ListView(
         shrinkWrap: true,
         physics: const ClampingScrollPhysics(),
-        padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
+        padding: const EdgeInsets.all(30),
         children: [
           FormSection(label: 'Account', rows: [
             [
@@ -144,7 +144,7 @@ class _TeamSettingsState extends State<TeamSettings> {
                 initialValue: _instagram,
               )
             ]
-          ]),
+          ])
         ]);
   }
 }
@@ -188,7 +188,6 @@ class LabeledRadio extends StatelessWidget {
                     groupValue: groupValue,
                     value: value,
                     onChanged: onChanged,
-                    hoverColor: Colors.transparent,
                     activeColor: colors.commonDarkGrey,
                   ),
                   Text(label, style: styles.greyText),
@@ -218,6 +217,7 @@ class FormSection extends StatelessWidget {
     }
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Expanded(child: textFields.first),
         // Use 'collection-for' in tandem with the spread operator
@@ -283,7 +283,8 @@ class SettingsTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(label,
-            style: textStyles.hierarchyTabInactive.copyWith(fontSize: 13)),
+            style: textStyles.hierarchyTabHovered
+                .copyWith(fontSize: 13, letterSpacing: 0)),
         const SizedBox(height: 11),
         TextFormField(
             onChanged: onChanged,
@@ -301,7 +302,8 @@ class SettingsTextField extends StatelessWidget {
               focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: colors.commonDarkGrey)),
             ),
-            style: textStyles.fileGreyTextLarge),
+            style: textStyles.fileGreyTextLarge
+                .copyWith(fontSize: 13, letterSpacing: 0)),
       ],
     );
   }
