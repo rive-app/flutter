@@ -67,7 +67,7 @@ abstract class TreeController<T> extends ChangeNotifier {
   TreeController(this._data) {
     flatten();
   }
-
+  
   /// The flattened data structure representing the hierarchical tree data that
   /// is currently expanded. This will be used by the TreeView to build a
   /// ListView with individual list items that connect via lines.

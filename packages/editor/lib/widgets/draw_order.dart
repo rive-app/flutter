@@ -32,10 +32,10 @@ class DrawOrderTreeView extends StatelessWidget {
       style: TreeStyle(
         showFirstLine: true,
         padding: const EdgeInsets.all(10),
-        lineColor: Colors.grey.shade700,
+        lineColor: RiveTheme.of(context).colors.darkTreeLines,
       ),
       controller: controller,
-      expanderBuilder: (context, item) => Container(
+      expanderBuilder: (context, item, style) => Container(
         child: Center(
           child: TreeExpander(
             key: item.key,
@@ -45,7 +45,7 @@ class DrawOrderTreeView extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade700,
+            color: style.lineColor,
             width: 1.0,
             style: BorderStyle.solid,
           ),
@@ -54,7 +54,7 @@ class DrawOrderTreeView extends StatelessWidget {
           ),
         ),
       ),
-      iconBuilder: (context, item) => Container(
+      iconBuilder: (context, item, style) => Container(
         decoration: BoxDecoration(
           color: Colors.grey,
           borderRadius: const BorderRadius.all(
@@ -74,7 +74,8 @@ class DrawOrderTreeView extends StatelessWidget {
           ),
         ),
       ),
-      backgroundBuilder: (context, item) => ValueListenableBuilder<DropState>(
+      backgroundBuilder: (context, item, style) =>
+          ValueListenableBuilder<DropState>(
         valueListenable: item.dropState,
         builder: (context, dropState, _) =>
             ValueListenableBuilder<SelectionState>(
@@ -84,7 +85,8 @@ class DrawOrderTreeView extends StatelessWidget {
           valueListenable: item.data.stageItem?.selectionState,
         ),
       ),
-      itemBuilder: (context, item) => ValueListenableBuilder<SelectionState>(
+      itemBuilder: (context, item, style) =>
+          ValueListenableBuilder<SelectionState>(
         builder: (context, state, _) => Expanded(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,

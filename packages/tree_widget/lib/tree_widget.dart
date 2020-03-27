@@ -19,7 +19,7 @@ typedef SpacingFunction = int Function(Object treeItem);
 typedef TreeViewExtraPartBuilder<T> = Widget Function(
     BuildContext context, FlatTreeItem<T> item, int spaceIndex);
 typedef TreeViewPartBuilder<T> = Widget Function(
-    BuildContext context, FlatTreeItem<T> item);
+    BuildContext context, FlatTreeItem<T> item, TreeStyle style);
 typedef TreeViewIndexBuilder<T> = Widget Function(
     BuildContext context, int index);
 
@@ -103,7 +103,8 @@ class TreeView<T> extends StatelessWidget {
                 bool shortLastLine = !hasChildren && item.isLastChild;
                 numberOfLines--;
                 double toLineCenter = iconWidth / 2;
-                double offset = toLineCenter; // 20 + toLineCenter;
+                double offset =
+                    style.expanderMargin + toLineCenter; // 20 + toLineCenter;
                 double indent = iconWidth + style.padIndent;
                 bool showLines = !style.hideLines;
                 int dragDepth = item.dragDepth ?? 255;
@@ -120,17 +121,16 @@ class TreeView<T> extends StatelessWidget {
 
                     lines.add(
                       Positioned(
-                        top: -0.5,
-                        bottom: -0.5,
+                        // top: -0.5,
+                        // bottom: -0.5,
+                        top: 0.0,
+                        bottom: 0.0,
                         left: offset,
                         child: SizedBox(
                           width: 1,
-                          child: CustomPaint(
-                            painter: TreeLine(
-                              color: lineColor
-                                  .withOpacity(lineColor.opacity * opacity),
-                              strokeCap: StrokeCap.butt,
-                            ),
+                          child: TreeLine(
+                            color: lineColor
+                                .withOpacity(lineColor.opacity * opacity),
                           ),
                         ),
                       ),
@@ -169,19 +169,18 @@ class TreeView<T> extends StatelessWidget {
                   lines.add(
                     Positioned(
                       left: offset,
-                      top: top - 0.5,
-                      bottom: bottom - 0.5,
+                      // top: top - 0.5,
+                      // bottom: bottom - 0.5,
+                      top: top,
+                      bottom: bottom,
                       child: SizedBox(
                         width: 1,
-                        child: CustomPaint(
-                          painter: TreeLine(
-                            dashPattern: !item.hasChildren && item.isProperty
-                                ? propertyDashPattern
-                                : null,
-                            color: lineColor
-                                .withOpacity(lineColor.opacity * opacity),
-                            strokeCap: StrokeCap.butt,
-                          ),
+                        child: TreeLine(
+                          dashPattern: !item.hasChildren && item.isProperty
+                              ? propertyDashPattern
+                              : null,
+                          color: lineColor
+                              .withOpacity(lineColor.opacity * opacity),
                         ),
                       ),
                     ),
@@ -192,7 +191,7 @@ class TreeView<T> extends StatelessWidget {
                 for (final s in depth) {
                   spaces += s.abs();
                 }
-                double spaceLeft = spaces * indent;
+                double spaceLeft = style.expanderMargin + spaces * indent;
 
                 var dashing = item.isProperty ? propertyDashPattern : null;
 
@@ -230,16 +229,13 @@ class TreeView<T> extends StatelessWidget {
                       0,
                       Positioned(
                         left: spaceLeft + iconWidth / 2,
-                        top: 0.5,
+                        top: 0.0,
                         child: SizedBox(
                           width: 1,
                           height: (itemHeight - iconHeight) / 2,
-                          child: CustomPaint(
-                            painter: TreeLine(
-                              color: lineColor.withOpacity(
-                                  lineColor.opacity * aboveDragOpacity),
-                              strokeCap: StrokeCap.butt,
-                            ),
+                          child: TreeLine(
+                            color: lineColor.withOpacity(
+                                lineColor.opacity * aboveDragOpacity),
                           ),
                         ),
                       ),
@@ -251,18 +247,15 @@ class TreeView<T> extends StatelessWidget {
                       0,
                       Positioned(
                         left: spaceLeft + iconWidth / 2,
-                        top: itemHeight / 2 + iconHeight / 2 + 0.5,
+                        top: itemHeight / 2 + iconHeight / 2,
                         child: SizedBox(
                           width: 1,
                           // extra 0.5 here to avoid precision errors leaving a
                           // gap
-                          height: (itemHeight - iconHeight) / 2 + 1.5,
-                          child: CustomPaint(
-                            painter: TreeLine(
-                              color: lineColor.withOpacity(
-                                  lineColor.opacity * belowDragOpacity),
-                              strokeCap: StrokeCap.butt,
-                            ),
+                          height: (itemHeight - iconHeight) / 2,
+                          child: TreeLine(
+                            color: lineColor.withOpacity(
+                                lineColor.opacity * belowDragOpacity),
                           ),
                         ),
                       ),
@@ -278,13 +271,10 @@ class TreeView<T> extends StatelessWidget {
                       child: SizedBox(
                         width: iconWidth / 2 + padIndent - iconMargin,
                         height: 1,
-                        child: CustomPaint(
-                          painter: TreeLine(
-                            dashPattern: dashing,
-                            color: lineColor
-                                .withOpacity(lineColor.opacity * dragOpacity),
-                            strokeCap: StrokeCap.butt,
-                          ),
+                        child: TreeLine(
+                          dashPattern: dashing,
+                          color: lineColor
+                              .withOpacity(lineColor.opacity * dragOpacity),
                         ),
                       ),
                     ),
@@ -299,39 +289,17 @@ class TreeView<T> extends StatelessWidget {
                     0,
                     Positioned(
                       left: spaceLeft + (item.spacing * indent) + iconWidth / 2,
-                      top: itemHeight / 2 + iconHeight / 2 + 0.5,
+                      top: itemHeight / 2 + iconHeight / 2,
                       child: SizedBox(
                         width: 1,
-                        height: (itemHeight - iconHeight) / 2 + 1.5,
-                        child: CustomPaint(
-                          painter: TreeLine(
-                            color: lineColor
-                                .withOpacity(lineColor.opacity * dragOpacity),
-                            strokeCap: StrokeCap.butt,
-                          ),
+                        height: (itemHeight - iconHeight) / 2,
+                        child: TreeLine(
+                          color: lineColor
+                              .withOpacity(lineColor.opacity * dragOpacity),
                         ),
                       ),
                     ),
                   );
-                }
-
-                if (backgroundBuilder != null) {
-                  lines.add(
-                    Positioned(
-                      left: indent + spaceLeft - iconMargin / 2,
-                      top: 0,
-                      bottom: 0,
-                      right: 0,
-                      child: _InputHelper<T>(
-                        style: style,
-                        isDragging: dragging,
-                        item: item,
-                        child: backgroundBuilder(context, item),
-                      ),
-                    ),
-                  );
-                  // Draw background before lines?
-                  //lines.insert(0, value);
                 }
 
                 return KeepAlive(
@@ -344,13 +312,27 @@ class TreeView<T> extends StatelessWidget {
                     child: Stack(
                       overflow: Overflow.visible,
                       children: <Widget>[
-                        Positioned.fill(
-                          top: 0,
-                          child: Stack(
-                            children: lines,
-                            overflow: Overflow.visible,
+                        // Positioned.fill(
+                        //   top: 0,
+                        //   child: Stack(
+                        //     children: lines,
+                        //     overflow: Overflow.visible,
+                        //   ),
+                        // ),
+                        if (backgroundBuilder != null)
+                          Positioned(
+                            left: 0, //indent + spaceLeft - iconMargin / 2,
+                            top: 0,
+                            bottom: 0,
+                            right: 0,
+                            child: _InputHelper<T>(
+                              style: style,
+                              isDragging: dragging,
+                              item: item,
+                              child: backgroundBuilder(context, item, style),
+                            ),
                           ),
-                        ),
+
                         Positioned(
                           left: spaceLeft,
                           right: 0,
@@ -380,7 +362,10 @@ class TreeView<T> extends StatelessWidget {
                                                 }
                                               },
                                               child: expanderBuilder(
-                                                  context, item),
+                                                context,
+                                                item,
+                                                style,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -402,15 +387,24 @@ class TreeView<T> extends StatelessWidget {
                                     width: iconWidth,
                                     height: iconHeight,
                                     child: IgnorePointer(
-                                      child: iconBuilder(context, item),
+                                      child: iconBuilder(
+                                        context,
+                                        item,
+                                        style,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                itemBuilder(context, item),
+                                itemBuilder(
+                                  context,
+                                  item,
+                                  style,
+                                ),
                               ],
                             ),
                           ),
                         ),
+                        ...lines
                       ],
                     ),
                   ),
@@ -465,6 +459,7 @@ class _InputHelper<T> extends StatelessWidget {
             // print("MOVE ${event.localPosition}");
           },
           child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => controller.onTap(item),
             onVerticalDragStart: (details) {
               var toDrag = controller.onDragStart(details, item);

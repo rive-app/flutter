@@ -29,20 +29,27 @@ class FolderTreeView extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => TreeView<RiveFolder>(
-        style: style,
-        controller: controller,
-        expanderBuilder: (context, item) => Container(
+  Widget build(BuildContext context) {
+    var colors = RiveTheme.of(context).colors;
+    return TreeView<RiveFolder>(
+      style: style,
+      controller: controller,
+      expanderBuilder: (context, item, style) => Consumer<FileBrowser>(
+        builder: (context, browser, child) => Container(
           child: Center(
             child: TreeExpander(
               key: item.key,
-              iconColor: Colors.grey,
+              iconColor: browser.selectedFolder == item.data
+                  ? Colors.white
+                  : colors.fileUnselectedFolderIcon,
               isExpanded: item.isExpanded,
             ),
           ),
           decoration: BoxDecoration(
             border: Border.all(
-              color: RiveTheme.of(context).colors.fileLineGrey,
+              color: browser.selectedFolder == item.data
+                  ? colors.selectedTreeLines
+                  : style.lineColor,
               width: 1.0,
               style: BorderStyle.solid,
             ),
@@ -51,46 +58,48 @@ class FolderTreeView extends StatelessWidget {
             ),
           ),
         ),
-        iconBuilder: (context, item) => Consumer<FileBrowser>(
-          builder: (context, browser, child) => Container(
-            width: 15,
-            height: 15,
-            child: Center(
-              child: FolderIcon(
-                color: browser.selectedFolder == item.data
-                    ? RiveTheme.of(context).colors.fileSelectedFolderIcon
-                    : RiveTheme.of(context).colors.fileUnselectedFolderIcon,
-              ),
+      ),
+      iconBuilder: (context, item, style) => Consumer<FileBrowser>(
+        builder: (context, browser, child) => Container(
+          width: 15,
+          height: 15,
+          child: Center(
+            child: FolderIcon(
+              color: browser.selectedFolder == item.data
+                  ? colors.fileSelectedFolderIcon
+                  : colors.fileUnselectedFolderIcon,
             ),
           ),
         ),
-        extraBuilder: (context, item, index) => Container(),
-        backgroundBuilder: (context, item) => Consumer<FileBrowser>(
-          builder: (context, browser, child) => DropItemBackground(
-            DropState.none,
-            browser.selectedFolder.key == item.data.key
-                ? SelectionState.selected
-                : SelectionState.none,
-          ),
+      ),
+      extraBuilder: (context, item, index) => Container(),
+      backgroundBuilder: (context, item, style) =>
+          ValueListenableBuilder<SelectionState>(
+        valueListenable: item.data.selectionState,
+        builder: (context, selectionState, _) => DropItemBackground(
+          DropState.none,
+          selectionState,
         ),
-        itemBuilder: (context, item) => Consumer<FileBrowser>(
-          builder: (context, browser, child) => Expanded(
-            child: Container(
-              child: IgnorePointer(
-                child: Text(
-                  item.data.name,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    // fontWeight: FontWeight.w100,
-                    color: browser.selectedFolder.key == item.data.key
-                        ? Colors.white
-                        : RiveTheme.of(context).colors.fileTextLightGrey,
-                  ),
+      ),
+      itemBuilder: (context, item, style) => Consumer<FileBrowser>(
+        builder: (context, browser, child) => Expanded(
+          child: Container(
+            child: IgnorePointer(
+              child: Text(
+                item.data.name,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  // fontWeight: FontWeight.w100,
+                  color: browser.selectedFolder.key == item.data.key
+                      ? Colors.white
+                      : colors.fileTextLightGrey,
                 ),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }

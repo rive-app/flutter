@@ -42,6 +42,11 @@ class TreeStyle {
   /// Internal padding for the ListView in this TreeView.
   final EdgeInsets padding;
 
+  /// The margin added to the left of the expande relative to the start of the
+  /// indented row. Usually 10 pixels to allow the selection background to stick
+  /// out to the left.
+  final double expanderMargin;
+
   const TreeStyle({
     this.showFirstLine = false,
     this.hideLines = false,
@@ -53,6 +58,7 @@ class TreeStyle {
     this.iconMargin = 5,
     this.inactiveOpacity = 0.28,
     this.padding,
+    this.expanderMargin = 10,
   });
 }
 

@@ -112,9 +112,9 @@ void main() {
 
       final treeWidget = TreeView<TreeItem>(
         controller: controller,
-        expanderBuilder: (context, item) => Container(),
-        itemBuilder: (context, item) => Text(item.data.name),
-        iconBuilder: (context, item) => Container(),
+        expanderBuilder: (context, item, style) => Container(),
+        itemBuilder: (context, item, style) => Text(item.data.name),
+        iconBuilder: (context, item, style) => Container(),
       );
 
       final wrappedWidget = MediaQuery(
@@ -137,9 +137,9 @@ void main() {
 
       final treeWidget = TreeView<TreeItem>(
         controller: controller,
-        expanderBuilder: (context, item) => Container(),
-        itemBuilder: (context, item) => Text(item.data.name),
-        iconBuilder: (context, item) => iconWidget,
+        expanderBuilder: (context, item, style) => Container(),
+        itemBuilder: (context, item, style) => Text(item.data.name),
+        iconBuilder: (context, item, style) => iconWidget,
       );
 
       final wrappedWidget = MediaQuery(
@@ -170,9 +170,9 @@ void main() {
 
       final treeWidget = TreeView<TreeItem>(
         controller: controller,
-        expanderBuilder: (context, item) => Container(),
-        itemBuilder: (context, item) => Text(item.data.name),
-        iconBuilder: (context, item) => Container(),
+        expanderBuilder: (context, item, style) => Container(),
+        itemBuilder: (context, item, style) => Text(item.data.name),
+        iconBuilder: (context, item, style) => Container(),
       );
 
       final wrappedWidget = MediaQuery(

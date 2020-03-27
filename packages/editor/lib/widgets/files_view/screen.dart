@@ -356,7 +356,7 @@ class FilesView extends StatelessWidget {
         bottom: 5,
         top: 5,
       ),
-      lineColor: RiveTheme.of(context).colors.fileLineGrey,
+      lineColor: RiveTheme.of(context).colors.lightTreeLines,
       itemHeight: kTreeItemHeight,
     );
 

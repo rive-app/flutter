@@ -208,7 +208,9 @@ class FileBrowser extends FileBrowserController {
 
   @override
   Future<bool> openFolder(RiveFolder value, bool jumpTo) async {
+    _current?.isSelected = false;
     _current = value;
+    _current?.isSelected = true;
 
     for (final item in _selectedItems) {
       item.isSelected = false;

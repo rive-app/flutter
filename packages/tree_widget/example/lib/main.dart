@@ -133,7 +133,7 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
     return TreeView<TreeItem>(
       style: treeStyle,
       controller: controller,
-      expanderBuilder: (context, item) => Container(
+      expanderBuilder: (context, item, style) => Container(
         child: Center(
           child: TreeExpander(
             key: item.key,
@@ -142,7 +142,7 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade700,
+            color: style.lineColor,
             width: 1.0,
             style: BorderStyle.solid,
           ),
@@ -151,7 +151,7 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
           ),
         ),
       ),
-      iconBuilder: (context, item) => Container(
+      iconBuilder: (context, item, style) => Container(
         decoration: BoxDecoration(
           color: Colors.grey,
           borderRadius: const BorderRadius.all(
@@ -171,7 +171,8 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
           ),
         ),
       ),
-      backgroundBuilder: (context, item) => ValueListenableBuilder<DropState>(
+      backgroundBuilder: (context, item, style) =>
+          ValueListenableBuilder<DropState>(
         valueListenable: item.dropState,
         builder: (context, dropState, _) =>
             ValueListenableBuilder<SelectionState>(
@@ -181,7 +182,8 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
           valueListenable: item.data.selectionState,
         ),
       ),
-      itemBuilder: (context, item) => ValueListenableBuilder<SelectionState>(
+      itemBuilder: (context, item, style) =>
+          ValueListenableBuilder<SelectionState>(
         builder: (context, state, _) => Expanded(
           child: Row(
             children: [
@@ -221,9 +223,10 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
   @override
   Widget build(BuildContext context) {
     var treeStyle = TreeStyle(
-        padding: const EdgeInsets.all(20),
-        lineColor: Colors.grey.shade700,
-        showFirstLine: false);
+      padding: const EdgeInsets.all(20),
+      lineColor: Color(0xFFFFFFFF).withOpacity(0.2),
+      showFirstLine: false,
+    );
 
     var slivers = <Widget>[];
     // Build sliver list and pass to tree scroll view.
@@ -244,11 +247,8 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
                   height: 1,
                   child: Padding(
                     padding: EdgeInsets.only(left: 20),
-                    child: CustomPaint(
-                      painter: TreeLine(
-                        color: treeStyle.lineColor,
-                        strokeCap: StrokeCap.butt,
-                      ),
+                    child: TreeLine(
+                      color: treeStyle.lineColor,
                     ),
                   ),
                 ),

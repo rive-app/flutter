@@ -1,5 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
@@ -73,31 +74,11 @@ class DropItemBackground extends StatelessWidget {
       case DropState.none:
         switch (selectionState) {
           case SelectionState.hovered:
-            return Container(
-              child: child,
-              decoration: const BoxDecoration(
-                color: Color.fromRGBO(87, 165, 224, 0.3),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(5.0),
-                ),
-              ),
-            );
+            return SelectionBorder(child: child, isSelected: false);
           case SelectionState.selected:
-            return Container(
+            return SelectionBorder(
               child: child,
-              decoration: const BoxDecoration(
-                color: Color.fromRGBO(87, 165, 224, 1.0),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(5.0),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromARGB(71, 0, 88, 166),
-                    offset: Offset(0.0, 6),
-                    blurRadius: 10.0,
-                  ),
-                ],
-              ),
+              isSelected: true,
             );
           case SelectionState.none:
             break;
@@ -105,6 +86,81 @@ class DropItemBackground extends StatelessWidget {
         break;
     }
 
-    return Container(color: Colors.transparent, child: child);
+    return SizedBox(child: child);
+  }
+}
+
+/// Custom selection border to attempt using custom blend modes for the
+/// selection state. We didn't end up using the custom blend modes as they cause
+/// visual glitches. There must be some widget in the scrollview that saves a
+/// layer and breaks the blend modes...haven't found it yet. Keeping this widget
+/// as it's still lighter weight at runtime than a Container.
+class SelectionBorder extends SingleChildRenderObjectWidget {
+  final bool isSelected;
+
+  const SelectionBorder({
+    Key key,
+    this.isSelected = false,
+    Widget child,
+  }) : super(
+          key: key,
+          child: child,
+        );
+
+  @override
+  _RenderSelectionBorder createRenderObject(BuildContext context) {
+    return _RenderSelectionBorder(isSelected: isSelected);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, _RenderSelectionBorder renderObject) {
+    renderObject.isSelected = isSelected;
+  }
+}
+
+class _RenderSelectionBorder extends RenderProxyBox {
+  final Paint shadowPaint = Paint()
+    ..color = const Color(0x440058A6)
+    ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+
+  final Paint selectedPaint = Paint()..color = const Color(0xFF57A5E0);
+
+  final Paint hoverPaint = Paint()
+    ..color = const Color.fromRGBO(87, 165, 224, 0.3);
+
+  bool _isSelected;
+
+  _RenderSelectionBorder({RenderBox child, bool isSelected})
+      : _isSelected = isSelected,
+        super(child);
+
+  bool get isSelected => _isSelected;
+  set isSelected(bool value) {
+    if (_isSelected == value) {
+      return;
+    }
+    _isSelected = value;
+    markNeedsPaint();
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    var canvas = context.canvas;
+
+    var path = Path()
+      ..addRRect(
+          RRect.fromRectAndRadius(offset & size, const Radius.circular(5)));
+    if (isSelected) {
+      canvas.translate(0, 6);
+      canvas.drawPath(path, shadowPaint);
+      canvas.translate(0, -6);
+    }
+    canvas.drawPath(path, isSelected ? selectedPaint : hoverPaint);
+
+    super.paint(context, offset);
   }
 }

@@ -6,6 +6,7 @@ import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:tree_widget/flat_tree_item.dart';
+import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
@@ -13,7 +14,6 @@ import '../rive/hierarchy_tree_controller.dart';
 import '../rive/stage/stage_item.dart';
 import 'tree_view/drop_item_background.dart';
 import 'tree_view/tree_expander.dart';
-import 'package:tree_widget/tree_scroll_view.dart';
 
 /// An example tree view, shows how to implement TreeView widget and style it.
 class HierarchyTreeView extends StatelessWidget {
@@ -29,7 +29,7 @@ class HierarchyTreeView extends StatelessWidget {
     var style = TreeStyle(
       showFirstLine: true,
       padding: const EdgeInsets.all(10),
-      lineColor: Colors.grey.shade700,
+      lineColor: RiveTheme.of(context).colors.darkTreeLines,
     );
     return TreeScrollView(
       style: style,
@@ -37,7 +37,7 @@ class HierarchyTreeView extends StatelessWidget {
         TreeView<Component>(
           style: style,
           controller: controller,
-          expanderBuilder: (context, item) => Container(
+          expanderBuilder: (context, item, style) => Container(
             child: Center(
               child: TreeExpander(
                 key: item.key,
@@ -47,7 +47,7 @@ class HierarchyTreeView extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               border: Border.all(
-                color: Colors.grey.shade700,
+                color: style.lineColor,
                 width: 1.0,
                 style: BorderStyle.solid,
               ),
@@ -56,7 +56,7 @@ class HierarchyTreeView extends StatelessWidget {
               ),
             ),
           ),
-          iconBuilder: (context, item) => Container(
+          iconBuilder: (context, item, style) => Container(
             decoration: BoxDecoration(
               color: Colors.grey,
               borderRadius: const BorderRadius.all(
@@ -76,7 +76,7 @@ class HierarchyTreeView extends StatelessWidget {
               ),
             ),
           ),
-          backgroundBuilder: (context, item) =>
+          backgroundBuilder: (context, item, style) =>
               ValueListenableBuilder<DropState>(
             valueListenable: item.dropState,
             builder: (context, dropState, _) =>
@@ -87,15 +87,15 @@ class HierarchyTreeView extends StatelessWidget {
               valueListenable: item.data.stageItem?.selectionState,
             ),
           ),
-          itemBuilder: (context, item) =>
+          itemBuilder: (context, item, style) =>
               ValueListenableBuilder<SelectionState>(
             builder: (context, state, _) => Expanded(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    // Use CorePropertyBuilder to get notified when the component's
-                    // name changes.
+                    // Use CorePropertyBuilder to get notified when the
+                    // component's name changes.
                     child: CorePropertyBuilder<String>(
                       object: item.data,
                       propertyKey: ComponentBase.namePropertyKey,
