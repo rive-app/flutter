@@ -2,14 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:rive_api/models/team.dart';
 
 import 'package:rive_core/selectable_item.dart';
 
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
-import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
 
@@ -64,7 +65,10 @@ class FolderTreeView extends StatelessWidget {
           width: 15,
           height: 15,
           child: Center(
-            child: FolderIcon(
+            child: TintedIcon(
+              icon: (item.data.owner == null)
+                  ? 'folder'
+                  : (item.data.owner is RiveTeam) ? 'teams' : 'user',
               color: browser.selectedFolder == item.data
                   ? colors.fileSelectedFolderIcon
                   : colors.fileUnselectedFolderIcon,
@@ -86,12 +90,14 @@ class FolderTreeView extends StatelessWidget {
           child: Container(
             child: IgnorePointer(
               child: Text(
-                item.data.name,
+                (item.data.owner == null)
+                    ? item.data.name
+                    : item.data.owner.name,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,
                   // fontWeight: FontWeight.w100,
-                  color: browser.selectedFolder.key == item.data.key
+                  color: browser.selectedFolder == item.data
                       ? Colors.white
                       : colors.fileTextLightGrey,
                 ),
