@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
