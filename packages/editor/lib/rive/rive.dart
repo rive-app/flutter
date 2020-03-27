@@ -210,8 +210,7 @@ class Rive with RiveFileDelegate {
 
       openTab(tabs.value.first);
 
-      // Load the teams to which the user belongs
-      teams.value = await _RiveTeamApi(api).teams;
+      await reloadTeams();
 
       // TODO: load last opened file list (from localdata)
       return me;
@@ -219,6 +218,12 @@ class Rive with RiveFileDelegate {
       _state.value = RiveState.login;
     }
     return null;
+  }
+
+  Future<void> reloadTeams() async {
+    // Load the teams to which the user belongs
+    teams.value = await _RiveTeamApi(api).teams;
+    fileBrowser.updateTeamList(this);
   }
 
   void closeTab(RiveTabItem value) {

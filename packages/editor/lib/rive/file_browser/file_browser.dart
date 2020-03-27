@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/files.dart';
+import 'package:rive_api/models/team.dart';
+import 'package:rive_api/user.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/controller.dart';
@@ -108,6 +110,15 @@ class FileBrowser extends FileBrowserController {
     notifyListeners();
   }
 
+  void updateTeamList(Rive rive) {
+    if (rive.teams.value != null) {
+      teamsTreeControllers.value = rive.teams.value
+          .map((RiveTeam team) => convertTeamToFolder(team, rive))
+          .toList();
+      teamsTreeControllers.notifyListeners();
+    }
+  }
+
   void initialize(Rive rive) {
     _filesApi = _EditorRiveFilesApi(rive.api, this);
     myTreeController.value = FolderTreeController([], rive: rive);
@@ -155,13 +166,12 @@ class FileBrowser extends FileBrowserController {
 
     // TODO: real teams....here hack up some teams with the same data as our
     // main account, just to show how the tree building works.
-    var rive = myTreeController.value.rive;
+    // var rive = myTreeController.value.rive;
 
-    teamsTreeControllers.value = [
-      FolderTreeController(result.root, rive: rive),
-      FolderTreeController(result.root, rive: rive),
-      FolderTreeController(result.root, rive: rive)
-    ];
+    // teamsTreeControllers.value = [
+    //   FolderTreeController(result.root, rive: rive),
+    //   FolderTreeController(result.root, rive: rive)
+    // ];
 
     await openFolder(result.root.isEmpty ? null : result.root.first, false);
     onFoldersChanged();
