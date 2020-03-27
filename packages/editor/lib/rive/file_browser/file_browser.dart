@@ -20,10 +20,13 @@ class FileBrowser extends FileBrowserController {
   Set<RiveFile> _queuedFileDetails = {};
   Timer _detailsTimer;
 
-  /// Controller for the folder tree. Allows expanding, selecting, bringing
-  /// folders into view.
-  final ValueNotifier<FolderTreeController> treeController =
+  /// Controller for our files in the folder tree.
+  final ValueNotifier<FolderTreeController> myTreeController =
       ValueNotifier<FolderTreeController>(null);
+
+  /// Controllers for teams that are associated with our account.
+  final ValueNotifier<List<FolderTreeController>> teamsTreeControllers =
+      ValueNotifier<List<FolderTreeController>>(null);
 
   /// Currently selected item.
   final ValueNotifier<SelectableItem> selectedItem =
@@ -77,8 +80,8 @@ class FileBrowser extends FileBrowserController {
 
   Set<SelectableItem> get selectedItems => _selectedItems;
 
-  List<FlatTreeItem<RiveFolder>> get teams =>
-      treeController.value.flat.skip(1).toList();
+  // List<FlatTreeItem<RiveFolder>> get teams =>
+  //     treeController.value.flat.skip(1).toList();
   bool dequeueLoadDetails(RiveFile file) {
     if (_queuedFileDetails.remove(file)) {
       _detailsTimer ??=
@@ -107,7 +110,8 @@ class FileBrowser extends FileBrowserController {
 
   void initialize(Rive rive) {
     _filesApi = _EditorRiveFilesApi(rive.api, this);
-    treeController.value = FolderTreeController([], rive: rive);
+    myTreeController.value = FolderTreeController([], rive: rive);
+    teamsTreeControllers.value = [];
   }
 
   Future<bool> load() async {
@@ -122,16 +126,27 @@ class FileBrowser extends FileBrowserController {
       selectedSortOption.value = result.sortOptions[0];
     }
 
-    var data = treeController.value.data;
+    var data = myTreeController.value.data;
     data.clear();
     data.addAll(result.root);
+
+    // TODO: real teams....here hack up some teams with the same data as our
+    // main account, just to show how the tree building works.
+    var rive = myTreeController.value.rive;
+
+    teamsTreeControllers.value = [
+      FolderTreeController(result.root, rive: rive),
+      FolderTreeController(result.root, rive: rive),
+      FolderTreeController(result.root, rive: rive)
+    ];
+
     await openFolder(result.root.isEmpty ? null : result.root.first, false);
     onFoldersChanged();
     return true;
   }
 
   void onFoldersChanged() {
-    treeController.value.flatten();
+    myTreeController.value.flatten();
   }
 
   @override
@@ -193,7 +208,9 @@ class FileBrowser extends FileBrowserController {
 
   @override
   Future<bool> openFolder(RiveFolder value, bool jumpTo) async {
+    _current?.isSelected = false;
     _current = value;
+    _current?.isSelected = true;
 
     for (final item in _selectedItems) {
       item.isSelected = false;
@@ -204,9 +221,9 @@ class FileBrowser extends FileBrowserController {
     if (value == null) {
       return false;
     }
-    treeController.value.expand(value);
+    myTreeController.value.expand(value);
     if (jumpTo) {
-      List<FlatTreeItem<RiveFolder>> _all = treeController.value.flat;
+      List<FlatTreeItem<RiveFolder>> _all = myTreeController.value.flat;
       int _index = _all.indexWhere((f) => f?.data?.key == value.key);
       double _offset = _index * kTreeItemHeight;
       treeScrollController.jumpTo(_offset

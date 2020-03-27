@@ -64,12 +64,10 @@ abstract class TreeController<T> extends ChangeNotifier {
   bool get isDragging => _dragOperation != null;
   _TreeDragOperation get dragOperation => _dragOperation;
 
-  final bool showTopLevelSeparator;
-
-  TreeController(this._data, {this.showTopLevelSeparator = false}) {
+  TreeController(this._data) {
     flatten();
   }
-
+  
   /// The flattened data structure representing the hierarchical tree data that
   /// is currently expanded. This will be used by the TreeView to build a
   /// ListView with individual list items that connect via lines.
@@ -368,9 +366,6 @@ abstract class TreeController<T> extends ChangeNotifier {
         itemDepth[d] = spacing < 0 || isLast ? -1 : 1;
         _flatten(
             context, children, flat, lookup, List<int>.from(itemDepth), meta);
-      }
-      if (depth.isEmpty && showTopLevelSeparator && !isLast) {
-        flat.add(null);
       }
     }
   }

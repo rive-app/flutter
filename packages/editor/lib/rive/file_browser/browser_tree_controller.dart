@@ -11,7 +11,7 @@ class FolderTreeController extends TreeController<RiveFolder> {
   final Rive rive;
   final List<RiveFolder> data;
   FolderTreeController(this.data, {this.rive})
-      : super(data, showTopLevelSeparator: true);
+      : super(data);
 
   @override
   List<RiveFolder> childrenOf(RiveFolder treeItem) =>

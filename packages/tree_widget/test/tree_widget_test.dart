@@ -112,16 +112,18 @@ void main() {
 
       final treeWidget = TreeView<TreeItem>(
         controller: controller,
-        expanderBuilder: (context, item) => Container(),
-        itemBuilder: (context, item) => Text(item.data.name),
-        iconBuilder: (context, item) => Container(),
+        expanderBuilder: (context, item, style) => Container(),
+        itemBuilder: (context, item, style) => Text(item.data.name),
+        iconBuilder: (context, item, style) => Container(),
       );
 
       final wrappedWidget = MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: treeWidget,
+          child: CustomScrollView(
+            slivers: [treeWidget],
+          ),
         ),
       );
 
@@ -137,16 +139,18 @@ void main() {
 
       final treeWidget = TreeView<TreeItem>(
         controller: controller,
-        expanderBuilder: (context, item) => Container(),
-        itemBuilder: (context, item) => Text(item.data.name),
-        iconBuilder: (context, item) => iconWidget,
+        expanderBuilder: (context, item, style) => Container(),
+        itemBuilder: (context, item, style) => Text(item.data.name),
+        iconBuilder: (context, item, style) => iconWidget,
       );
 
       final wrappedWidget = MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: treeWidget,
+          child: CustomScrollView(
+            slivers: [treeWidget],
+          ),
         ),
       );
 
@@ -170,16 +174,18 @@ void main() {
 
       final treeWidget = TreeView<TreeItem>(
         controller: controller,
-        expanderBuilder: (context, item) => Container(),
-        itemBuilder: (context, item) => Text(item.data.name),
-        iconBuilder: (context, item) => Container(),
+        expanderBuilder: (context, item, style) => Container(),
+        itemBuilder: (context, item, style) => Text(item.data.name),
+        iconBuilder: (context, item, style) => Container(),
       );
 
       final wrappedWidget = MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: treeWidget,
+          child: CustomScrollView(
+            slivers: [treeWidget],
+          ),
         ),
       );
 

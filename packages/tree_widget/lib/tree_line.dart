@@ -1,55 +1,93 @@
 import 'package:flutter/material.dart';
 
 /// Paints a crisp non anti-aliased line with optional dashing.
-class TreeLine extends CustomPainter {
+class TreeLine extends LeafRenderObjectWidget {
   final List<double> dashPattern;
   final Color color;
-  final StrokeCap strokeCap;
 
-  TreeLine(
-      {this.dashPattern,
-      this.color = Colors.black,
-      this.strokeCap = StrokeCap.square});
+  TreeLine({
+    this.dashPattern,
+    this.color = Colors.black,
+  });
 
   @override
-  void paint(Canvas canvas, Size size) {
+  RenderObject createRenderObject(BuildContext context) {
+    return _TreeLineRenderer()
+      ..dashPattern = dashPattern
+      ..color = color;
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, covariant _TreeLineRenderer renderObject) {
+    renderObject
+      ..dashPattern = dashPattern
+      ..color = color;
+  }
+}
+
+class _TreeLineRenderer extends RenderBox {
+  final Paint _paint = Paint()
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = false;
+
+  List<double> _dashPattern;
+  List<double> get dashPattern => _dashPattern;
+  set dashPattern(List<double> value) {
+    if (_dashPattern == value) {
+      return;
+    }
+    _dashPattern = value;
+    markNeedsPaint();
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  Color _color;
+  Color get color => _color;
+  set color(Color value) {
+    if (_color == value) {
+      return;
+    }
+    _color = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    var canvas = context.canvas;
     bool isHorizontal = size.width > size.height;
     double thickness = isHorizontal ? size.height : size.width;
     double maxOffset = isHorizontal ? size.width : size.height;
-    var paint = Paint()
+    _paint
       ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = thickness
-      ..isAntiAlias = false;
+      ..strokeWidth = thickness;
 
-    double offset = 0;
-    var last = Offset.zero;
+    double dashOffset = 0;
+    var last = offset;
     if (dashPattern == null) {
       canvas.drawLine(
           last,
-          Offset(isHorizontal ? maxOffset : 0, isHorizontal ? 0 : maxOffset),
-          paint);
+          offset +
+              Offset(
+                  isHorizontal ? maxOffset : 0, isHorizontal ? 0 : maxOffset),
+          _paint);
       return;
     }
     int index = 0;
-    while (offset < maxOffset) {
-      offset += dashPattern[index];
-      if (offset > maxOffset) {
-        offset = maxOffset;
+    while (dashOffset < maxOffset) {
+      dashOffset += dashPattern[index];
+      if (dashOffset > maxOffset) {
+        dashOffset = maxOffset;
       }
-      var next = Offset(isHorizontal ? offset : 0, isHorizontal ? 0 : offset);
+      var next =
+          Offset(isHorizontal ? dashOffset : 0, isHorizontal ? 0 : dashOffset);
       if (index % 2 == 0) {
-        canvas.drawLine(last, next, paint);
+        canvas.drawLine(last, next, _paint);
       }
       index = (index + 1) % dashPattern.length;
       last = next;
     }
-  }
-
-  @override
-  bool shouldRepaint(TreeLine oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.dashPattern != dashPattern ||
-        oldDelegate.strokeCap != strokeCap;
   }
 }

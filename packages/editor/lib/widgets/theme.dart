@@ -102,6 +102,12 @@ class RiveColors {
   Color get textSelection => lightGrey;
   Color get inputUnderline => const Color(0xFFCCCCCC);
   Color get input => const Color(0xFFBBBBBB);
+
+  // Tree
+  Color get darkTreeLines => const Color(0x33FFFFFF);
+
+  Color get lightTreeLines => const Color(0x27666666);
+  Color get selectedTreeLines => const Color(0xFF79B7E6);
 }
 
 /// TextStyles used in the Rive Theme
@@ -201,12 +207,11 @@ class TextStyles {
         fontWeight: FontWeight.w300,
       );
   TextStyle get fileGreyTextLarge => const TextStyle(
-        fontFamily: 'Roboto-Medium',
-        color: Color(0xFF333333),
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-        height: 1.3
-      );
+      fontFamily: 'Roboto-Medium',
+      color: Color(0xFF333333),
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.3);
   TextStyle get fileLightGreyText => const TextStyle(
       fontFamily: 'Roboto-Medium',
       color: Color(0xFF666666),
