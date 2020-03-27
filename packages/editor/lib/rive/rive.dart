@@ -229,7 +229,7 @@ class Rive with RiveFileDelegate {
   void openTab(RiveTabItem value) {
     if (!value.closeable) {
       // hackity hack hack, this is the files tab.
-      fileBrowser.load();
+      fileBrowser.load(this);
     }
     if (value.name == 'Changelog') {}
 

@@ -114,7 +114,24 @@ class FileBrowser extends FileBrowserController {
     teamsTreeControllers.value = [];
   }
 
-  Future<bool> load() async {
+  FolderTreeController convertTeamToFolder(RiveTeam team, Rive rive) {
+    // id = data.getString('id'),
+    //     _parentId = data.getString('parent'),
+    //     name = data.getString('name'),
+    //     order = data.getInt('order');
+    var teamRoot = [
+      RiveFolder(<String, dynamic>{
+        'id': '1',
+        'parent': null,
+        'name': team.name,
+        'order': 0,
+        'team': team
+      })
+    ];
+    return FolderTreeController(teamRoot, rive: rive);
+  }
+
+  Future<bool> load(Rive rive) async {
     var result = await _filesApi.myFolders();
     sortOptions.value = result.sortOptions;
     if (selectedSortOption.value != null) {
@@ -128,6 +145,12 @@ class FileBrowser extends FileBrowserController {
 
     var data = myTreeController.value.data;
     data.clear();
+
+    // HACK
+    if (result.root.length > 0) {
+      result.root.first.owner = rive.user.value;
+    }
+
     data.addAll(result.root);
 
     // TODO: real teams....here hack up some teams with the same data as our
@@ -188,21 +211,30 @@ class FileBrowser extends FileBrowserController {
       selectedSortOption.value = sortOption;
     }
 
-    var folderFiles = await _filesApi.folderFiles(
-        sortOption ?? selectedSortOption.value ?? sortOptions.value[0],
-        folder: _current, cacheLocator: (id) {
-      var previous = lookup[id];
-      // Make sure to allow it to re-load so it gets the data again when it's
-      // first scrolled into view. Most of the time this will just get the same
-      // data, but in case the user has updated the file in a different view
-      // (page/website) or a team-member has done it, we aggressively reload
-      // data. We eventually can look into using a socket server to notify when
-      // files need to be removed from cache.
-      previous?.allowReloadDetails();
-      return previous;
-    });
+    // TODO: OK gotta do a little thinking here clearly. but i wasnted to talk about this.
+    // pretty sure our loadFileList should be giving us an owner.
+    // or maybe we stick selected owner into the filebrowser
+    // somehwere so we track who we're loading stuff for?
+    if (_current.owner == null || _current.owner is RiveUser) {
+      var folderFiles = await _filesApi.folderFiles(
+          sortOption ?? selectedSortOption.value ?? sortOptions.value[0],
+          folder: _current, cacheLocator: (id) {
+        var previous = lookup[id];
+        // Make sure to allow it to re-load so it gets the data again when it's
+        // first scrolled into view. Most of the time this will just get the same
+        // data, but in case the user has updated the file in a different view
+        // (page/website) or a team-member has done it, we aggressively reload
+        // data. We eventually can look into using a socket server to notify when
+        // files need to be removed from cache.
+        previous?.allowReloadDetails();
+        return previous;
+      });
+      _current.files.value = folderFiles;
+    } else {
+      // dont have an api for this just yet.
+      _current.files.value = [];
+    }
 
-    _current.files.value = folderFiles;
     return true;
   }
 
