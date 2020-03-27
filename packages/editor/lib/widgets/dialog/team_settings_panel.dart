@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
@@ -184,11 +186,11 @@ class LabeledRadio extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  Radio<bool>(
+                  RiveRadio<bool>(
                     groupValue: groupValue,
                     value: value,
                     onChanged: onChanged,
-                    activeColor: colors.commonDarkGrey,
+                    selectedColor: colors.commonDarkGrey,
                   ),
                   Text(label, style: styles.greyText),
                 ],
