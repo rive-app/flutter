@@ -34,7 +34,7 @@ typedef BatchAddCallback = void Function();
 abstract class Core<T extends CoreContext> {
   Id id;
 
-  T context;
+  covariant T context;
   int get coreType;
 
   Set<int> get coreTypes => {};
@@ -100,6 +100,22 @@ abstract class Core<T extends CoreContext> {
       }
     }
   }
+
+  /// Called when the object is first added to the context, no validation has
+  /// occurred yet.
+  void onAddedDirty();
+
+  /// Called once the object has been validated and is cleanly added to the
+  /// context.
+  void onAdded();
+
+  /// Called when objet is removed from the context.
+  void onRemoved();
+
+  /// Override this to ascertain whether or not this object is in a valid state.
+  /// If an object is in a corrupt state, it will be removed from core prior to
+  /// calling onAdded for the object.
+  bool validate() => true;
 }
 
 abstract class CoreContext implements LocalSettings {
@@ -263,9 +279,13 @@ abstract class CoreContext implements LocalSettings {
         _deferredBatchAdd = null;
         deferred.forEach(batchAdd);
       }
+
+      onConnected();
     }
     return result;
   }
+
+  void onConnected();
 
   Player makeClientSidePlayer(Player serverPlayer, bool isSelf);
 
@@ -331,10 +351,10 @@ abstract class CoreContext implements LocalSettings {
   /// Find Core objects of type [T].
   Iterable<T> objectsOfType<T>() => _objects.values.whereType<T>();
 
-  void onAddedDirty(covariant Core object);
-  void onAddedClean(covariant Core object);
+  void onAddedDirty(Core object);
+  void onAddedClean(Core object);
 
-  void onRemoved(covariant Core object);
+  void onRemoved(Core object);
 
   void onWipe();
 
@@ -618,6 +638,12 @@ abstract class CoreContext implements LocalSettings {
 
     // TODO: rethink this
     // _unsyncedChanges.clear();
+  }
+
+  /// Clear the undo stack.
+  clearJournal() {
+    _journalIndex = 0;
+    journal.clear();
   }
 
   void cursorMoved(double x, double y) =>

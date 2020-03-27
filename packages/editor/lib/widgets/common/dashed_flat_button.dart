@@ -41,8 +41,8 @@ class DashedPainter extends CustomPainter {
 
 class DashedFlatButton extends StatelessWidget {
   const DashedFlatButton({
-    this.label,
-    this.icon,
+    @required this.label,
+    @required this.icon,
     this.onTap,
     this.tip,
   });

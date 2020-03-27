@@ -3,7 +3,6 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
-import 'package:rive_editor/widgets/inspector/properties/property_color.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
 
 /// Returns the inspector for Artboard selections.
@@ -55,12 +54,6 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
               labelA: 'X',
               labelB: 'Y',
               converter: TranslationValueConverter.instance,
-            ),
-        InspectorBuilder.divider,
-        (context) => PropertyColor(
-              name: 'Background',
-              objects: inspecting.components,
-              propertyKey: ArtboardBase.colorValuePropertyKey,
             ),
       ];
 }

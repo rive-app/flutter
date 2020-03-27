@@ -16,7 +16,7 @@ import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
 import 'package:rive_editor/widgets/files_view/file.dart';
 import 'package:rive_editor/widgets/files_view/folder_tree.dart';
 import 'package:rive_editor/widgets/files_view/folder_view_widget.dart';
@@ -31,6 +31,7 @@ import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
 const double kFileHeight = 190;
@@ -187,10 +188,6 @@ class FilesView extends StatelessWidget {
           color: color,
           padding: EdgeInsets.only(left: left),
         ),
-        // child: Container(
-        //   margin: EdgeInsets.only(left: left),
-        //   color: color,
-        //   height: 1,
       )
     ]);
   }
@@ -424,13 +421,35 @@ class FilesView extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 IconTile(
-                  label: 'Recents',
-                  icon: const ClockIcon(size: 15),
+                  label: 'Get Started',
+                  icon: TintedIcon(
+                    color: RiveTheme.of(context).colors.fileIconColor,
+                    icon: 'rocket',
+                  ),
                   onTap: () {},
                 ),
                 IconTile(
-                  icon: const TrashIcon(size: 15),
-                  label: 'Deleted Files',
+                  icon: TintedIcon(
+                    color: RiveTheme.of(context).colors.fileIconColor,
+                    icon: 'notification',
+                  ),
+                  label: 'Notifications',
+                  onTap: () {},
+                ),
+                IconTile(
+                  icon: TintedIcon(
+                    color: RiveTheme.of(context).colors.fileIconColor,
+                    icon: 'recents',
+                  ),
+                  label: 'Recents',
+                  onTap: () {},
+                ),
+                IconTile(
+                  icon: TintedIcon(
+                    color: RiveTheme.of(context).colors.fileIconColor,
+                    icon: 'popup-community',
+                  ),
+                  label: 'Community',
                   onTap: () {},
                 ),
               ],

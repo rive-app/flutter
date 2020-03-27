@@ -10,6 +10,8 @@ import '../stage_item.dart';
 
 class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   AABB _aabb;
+  Paragraph _nameParagraph;
+  Size _nameSize;
 
   @override
   bool initialize(Artboard object) {
@@ -17,6 +19,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
       return false;
     }
     updateBounds();
+    _updateName();
     return true;
   }
 
@@ -58,15 +61,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
 
   @override
   void draw(Canvas canvas) {
-    canvas.drawRect(
-      Rect.fromLTWH(
-        component.x,
-        component.y,
-        component.width,
-        component.height,
-      ),
-      component.paint,
-    );
+    // Draw artboard name.
     if (selectionState.value != SelectionState.none) {
       canvas.drawRect(
         Rect.fromLTWH(
@@ -89,9 +84,18 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
     // rename those to artboardTransform and worldTransform is only reserved for
     // stageItems? The other option is to stick with 'worldTransform' in
     // components and use 'editor or stageTransform' for stageItems.
+    var originWorld = component.originWorld;
 
     canvas.save();
-    var originWorld = component.originWorld;
+    canvas.translate(originWorld[0], originWorld[1]);
+    canvas.scale(1 / stage.viewZoom);
+    canvas.drawParagraph(
+      _nameParagraph,
+      Offset(0, -7 - _nameSize.height),
+    );
+    canvas.restore();
+    canvas.save();
+
     canvas.translate(originWorld[0], originWorld[1]);
 
     // Now draw the actual drawables.
@@ -99,5 +103,35 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
 
     // Get back into stage space.
     canvas.restore();
+  }
+
+  @override
+  void markNameDirty() {
+    stage?.debounce(_updateName);
+  }
+
+  void _updateName() {
+    final style = ParagraphStyle(
+        textAlign: TextAlign.left, fontFamily: 'Roboto-Regular', fontSize: 11);
+    ParagraphBuilder builder = ParagraphBuilder(style)
+      ..pushStyle(
+        TextStyle(
+          foreground: Paint()..color = const Color(0xFF7A7A7A),
+        ),
+      );
+
+    var name = component.name;
+    if (name == null || name.isEmpty) {
+      name = 'Untitled Artboard';
+    }
+    builder.addText(name);
+    _nameParagraph = builder.build();
+    _nameParagraph.layout(const ParagraphConstraints(width: 400));
+    List<TextBox> boxes = _nameParagraph.getBoxesForRange(0, name.length);
+
+    _nameSize = boxes.isEmpty
+        ? Size.zero
+        : Size(boxes.last.right - boxes.first.left + 1,
+            boxes.last.bottom - boxes.first.top + 1);
   }
 }

@@ -53,7 +53,8 @@ class _InspectorPanelState extends State<InspectorPanel> {
           // Let the inpsection set whittle down groupings and commonly selected
           // coreTypes for the inspector builders to use to determine if there
           // are things they can help inspect.
-          var inspectionSet = InspectionSet.fromSelection(selection);
+          var inspectionSet =
+              InspectionSet.fromSelection(rive.file.value.backboard, selection);
 
           // Remove previous listeners, these listen to inspector builders
           // wanting to change the contents in the full inspection list item.

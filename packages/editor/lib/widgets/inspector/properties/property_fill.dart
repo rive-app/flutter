@@ -32,14 +32,14 @@ class _PropertyFillState extends State<PropertyFill> {
   InspectingColor _inspectingColor;
   @override
   void initState() {
-    _inspectingColor = InspectingColor.forShapes(widget.fills);
+    _inspectingColor = InspectingColor.forShapePaints(widget.fills);
     super.initState();
   }
 
   @override
   void didUpdateWidget(PropertyFill oldWidget) {
     _inspectingColor?.dispose();
-    _inspectingColor = InspectingColor.forShapes(widget.fills);
+    _inspectingColor = InspectingColor.forShapePaints(widget.fills);
     super.didUpdateWidget(oldWidget);
   }
 

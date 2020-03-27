@@ -181,6 +181,13 @@ class TextStyles {
       fontWeight: FontWeight.w300,
       decoration: TextDecoration.underline);
 
+  TextStyle get hyperLinkSubtext => const TextStyle(
+      fontFamily: 'Roboto-Regular',
+      color: Color(0xFF888888),
+      fontSize: 13,
+      letterSpacing: 0,
+      decoration: TextDecoration.underline);
+
   // Files
   TextStyle get fileBlueText => const TextStyle(
         fontFamily: 'Roboto-Medium',
@@ -198,6 +205,7 @@ class TextStyles {
         color: Color(0xFF333333),
         fontSize: 16,
         fontWeight: FontWeight.w400,
+        height: 1.3
       );
   TextStyle get fileLightGreyText => const TextStyle(
       fontFamily: 'Roboto-Medium',

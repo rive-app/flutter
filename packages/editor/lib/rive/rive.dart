@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:rive_core/shapes/shape.dart';
-import 'package:rive_editor/constants.dart';
+import 'package:rive_api/teams.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,6 +16,7 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_api/user.dart';
+import 'package:rive_api/models/team.dart';
 
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
@@ -24,9 +24,10 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/shapes/shape.dart';
 
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
-
+import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
@@ -69,9 +70,16 @@ class _Key {
   }
 }
 
+class _RiveTeamApi extends RiveTeamsApi<RiveTeam> {
+  _RiveTeamApi(RiveApi api) : super(api);
+}
+
 /// Main context for Rive editor.
 class Rive with RiveFileDelegate {
   final ValueNotifier<RiveFile> file = ValueNotifier<RiveFile>(null);
+  final ValueNotifier<List<RiveTeam>> teams =
+      ValueNotifier<List<RiveTeam>>(null);
+
   final ValueNotifier<HierarchyTreeController> treeController =
       ValueNotifier<HierarchyTreeController>(null);
   final ValueNotifier<DrawOrderTreeController> drawOrderTreeController =
@@ -142,6 +150,7 @@ class Rive with RiveFileDelegate {
     if ((file.value?.advance(elapsedSeconds) ?? false) ||
         (_stage?.shouldAdvance ?? false)) {
       _stage.advance(elapsedSeconds);
+      SchedulerBinding.instance.scheduleFrame();
     }
   }
 
@@ -200,6 +209,9 @@ class Rive with RiveFileDelegate {
       await _prefs.setString('token', _spectreToken);
 
       openTab(tabs.value.first);
+
+      // Load the teams to which the user belongs
+      teams.value = await _RiveTeamApi(api).teams;
 
       // TODO: load last opened file list (from localdata)
       return me;
