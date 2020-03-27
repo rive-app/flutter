@@ -24,47 +24,65 @@ class RiveRadio<T> extends StatefulWidget {
 }
 
 class _RiveRadioState<T> extends State<RiveRadio<T>> {
-  final _focusNode = FocusNode(canRequestFocus: true, skipTraversal: true);
+  Map<LocalKey, ActionFactory> _actionMap;
+  bool _hasFocus = false;
   bool _isHovered = false;
-  bool _hasFocus = false; // TODO:
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_focusChange);
+    final activateActionKey = ActivateAction.key;
+    final callbackAction =
+        () => CallbackAction(activateActionKey, onInvoke: _activate);
+    _actionMap = {activateActionKey: callbackAction};
   }
 
-  @override
-  void dispose() {
-    _focusNode.removeListener(_focusChange);
-    super.dispose();
+  void _activate(FocusNode node, Intent intent) {
+    if (widget.onChanged != null) {
+      widget.onChanged(widget.value);
+    }
+    final renderObject = node.context.findRenderObject();
+    renderObject.sendSemanticsEvent(const TapSemanticEvent());
   }
 
-  void _focusChange() {
-    setState(() {
-      _hasFocus = _focusNode.hasFocus;
-    });
+  void _onFocusChanged(bool hasFocus) {
+    if (_hasFocus != hasFocus) {
+      setState(() {
+        _hasFocus = hasFocus;
+      });
+    }
+  }
+
+  void _onHoverChanged(bool isHovered) {
+    if (_isHovered != isHovered) {
+      setState(() {
+        _isHovered = isHovered;
+      });
+    }
+  }
+
+  Color get _selectedColor => widget.selectedColor ?? const Color(0xFF333333);
+
+  Color get _backgroundColor {
+    final bgColor = widget.backgroundColor ?? const Color(0xFFF1F1F1);
+    if (_hasFocus || _isHovered) {
+      return Color.lerp(bgColor, _selectedColor, 0.15);
+    }
+    return bgColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = _isHovered
-        ? widget.hoverColor ??
-            Color.lerp(const Color(0xFFF1F1F1), const Color(0xFF333333), 0.15)
-        : widget.backgroundColor ?? const Color(0xFFF1F1F1);
     return RepaintBoundary(
-      child: MouseRegion(
-        onEnter: (event) => setState(() {
-          _isHovered = true;
-        }),
-        onExit: (event) => setState(() {
-          _isHovered = false;
-        }),
+      child: FocusableActionDetector(
+        actions: _actionMap,
+        onShowFocusHighlight: _onFocusChanged,
+        onShowHoverHighlight: _onHoverChanged,
         child: _RiveRadioRenderer(
           isSelected: widget.value == widget.groupValue,
           isFocused: _hasFocus,
           selectedColor: widget.selectedColor ?? const Color(0xFF333333),
-          backgroundColor: backgroundColor,
+          backgroundColor: _backgroundColor,
         ),
       ),
     );
