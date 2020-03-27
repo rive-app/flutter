@@ -109,21 +109,36 @@ class _TeamSettingsState extends State<TeamSettings> {
                     children: [
                       LabeledRadio(
                           label: 'Available For Hire',
-                          subtext:
-                              'Allow other users to message you about work opportunities. You will also show up in our list of artists for hire.',
                           groupValue: _isForHire,
                           value: true,
-                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
                           onChanged: _updateForHire),
+                      Padding(
+                        // Padding: 20 (radio button) + 10 text padding
+                        padding: const EdgeInsets.only(left: 30.0),
+                        // TODO: add link to the "artists for hire".
+                        child: Text(
+                            'Allow other users to message you about work'
+                            ' opportunities. You will also show up in our list'
+                            ' of artists for hire.',
+                            style: textStyles.hierarchyTabHovered
+                                .copyWith(fontSize: 13, height: 1.6)),
+                      ),
+                      const SizedBox(height: 24),
                       LabeledRadio(
                           label: 'Not Available For Hire',
-                          subtext:
-                              """Don't allow other users to contact you about 
-                          work opportunities.""",
                           groupValue: _isForHire,
                           value: false,
-                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
                           onChanged: _updateForHire),
+                      const SizedBox(width: 30),
+                      Padding(
+                        // Padding: 20 (radio button) + 10 text padding
+                        padding: const EdgeInsets.only(left: 30.0),
+                        child: Text(
+                            "Don't allow other users to contact you about"
+                            ' work opportunities.',
+                            style: textStyles.hierarchyTabHovered
+                                .copyWith(fontSize: 13, height: 1.6)),
+                      )
                     ]),
               )
             ],
@@ -152,21 +167,17 @@ class _TeamSettingsState extends State<TeamSettings> {
 }
 
 class LabeledRadio extends StatelessWidget {
+  final String label;
+  final bool groupValue;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
   const LabeledRadio({
     this.label,
-    this.subtext,
-    this.padding,
     this.groupValue,
     this.value,
     this.onChanged,
   });
-
-  final String label;
-  final String subtext;
-  final EdgeInsets padding;
-  final bool groupValue;
-  final bool value;
-  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -176,32 +187,19 @@ class LabeledRadio extends StatelessWidget {
       onTap: () {
         if (value != groupValue) onChanged(value);
       },
-      child: Padding(
-        padding: padding,
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  RiveRadio<bool>(
-                    groupValue: groupValue,
-                    value: value,
-                    onChanged: onChanged,
-                    selectedColor: colors.commonDarkGrey,
-                  ),
-                  Text(label, style: styles.greyText),
-                ],
-              ),
-              if (subtext != null)
-                Text(
-                  subtext,
-                  style: styles.tooltipDisclaimer,
-                  textAlign: TextAlign.left,
-                ),
-            ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          RiveRadio<bool>(
+            groupValue: groupValue,
+            value: value,
+            onChanged: onChanged,
+            selectedColor: colors.commonDarkGrey,
+          ),
+          const SizedBox(width: 10),
+          Text(label, style: styles.greyText),
+        ],
       ),
     );
   }
