@@ -23,6 +23,9 @@ abstract class StageItem<T> extends SelectableItem {
     ..strokeWidth = strokeWidth
     ..color = const Color(0xFF57A5E0);
 
+  static Paint backboardContrastPaint = Paint()
+    ..color = const Color(0xFF57A5E0);
+
   T _component;
   T get component => _component;
 
@@ -37,6 +40,12 @@ abstract class StageItem<T> extends SelectableItem {
     _component = component;
     return true;
   }
+
+  /// Usually an item's hover target is itself, sometimes some items want to
+  /// re-direct selection so we use this indirection to allow for that.
+  ///
+  /// ignore: avoid_returning_this
+  StageItem get hoverTarget => this;
 
   /// Perform a higher fidelity check for worldMouse hit. If this object doesn't
   /// have a narrow-phase hit detection, just return true to use the AABB.

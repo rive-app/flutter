@@ -4,14 +4,14 @@ import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/stage/items/stage_artboard_title.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 
-import '../stage.dart';
-import '../stage_item.dart';
 
 class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   AABB _aabb;
-  Paragraph _nameParagraph;
-  Size _nameSize;
+  StageArtboardTitle _title;
 
   @override
   bool initialize(Artboard object) {
@@ -19,7 +19,6 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
       return false;
     }
     updateBounds();
-    _updateName();
     return true;
   }
 
@@ -47,21 +46,26 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
     stage?.updateBounds(this);
   }
 
-  // @override
-  // void addedToStage(Stage stage) {
-  //   super.addedToStage(stage);
-  //   updateBounds();
-  // }
+  @override
+  void addedToStage(Stage stage) {
+    super.addedToStage(stage);
+    var title = StageArtboardTitle(this);
+    if (title.initialize(component)) {
+      _title = title;
+      stage.addItem(title);
+    }
+  }
 
   @override
   void removedFromStage(Stage stage) {
     super.removedFromStage(stage);
     stage.cancelDebounce(updateBounds);
+    _title?.removedFromStage(stage);
+    _title = null;
   }
 
   @override
   void draw(Canvas canvas) {
-    // Draw artboard name.
     if (selectionState.value != SelectionState.none) {
       canvas.drawRect(
         Rect.fromLTWH(
@@ -87,14 +91,6 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
     var originWorld = component.originWorld;
 
     canvas.save();
-    canvas.translate(originWorld[0], originWorld[1]);
-    canvas.scale(1 / stage.viewZoom);
-    canvas.drawParagraph(
-      _nameParagraph,
-      Offset(0, -7 - _nameSize.height),
-    );
-    canvas.restore();
-    canvas.save();
 
     canvas.translate(originWorld[0], originWorld[1]);
 
@@ -106,32 +102,5 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   }
 
   @override
-  void markNameDirty() {
-    stage?.debounce(_updateName);
-  }
-
-  void _updateName() {
-    final style = ParagraphStyle(
-        textAlign: TextAlign.left, fontFamily: 'Roboto-Regular', fontSize: 11);
-    ParagraphBuilder builder = ParagraphBuilder(style)
-      ..pushStyle(
-        TextStyle(
-          foreground: Paint()..color = const Color(0xFF7A7A7A),
-        ),
-      );
-
-    var name = component.name;
-    if (name == null || name.isEmpty) {
-      name = 'Untitled Artboard';
-    }
-    builder.addText(name);
-    _nameParagraph = builder.build();
-    _nameParagraph.layout(const ParagraphConstraints(width: 400));
-    List<TextBox> boxes = _nameParagraph.getBoxesForRange(0, name.length);
-
-    _nameSize = boxes.isEmpty
-        ? Size.zero
-        : Size(boxes.last.right - boxes.first.left + 1,
-            boxes.last.bottom - boxes.first.top + 1);
-  }
+  void markNameDirty() => _title?.markNameDirty();
 }
