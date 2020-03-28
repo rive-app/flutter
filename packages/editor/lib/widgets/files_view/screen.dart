@@ -70,7 +70,7 @@ class FilesView extends StatelessWidget {
                     hitSize: resizeEdgeSize,
                     direction: ResizeDirection.horizontal,
                     side: ResizeSide.end,
-                    min: 252.0,
+                    min: 252,
                     max: 500,
                     child: _buildLeftSide(context),
                   ),
@@ -340,8 +340,8 @@ class FilesView extends StatelessWidget {
     final treeStyle = TreeStyle(
       showFirstLine: false,
       padding: const EdgeInsets.only(
-        left: 10.0,
-        right: 10.0,
+        left: 10,
+        right: 10,
         bottom: 5,
         top: 5,
       ),
@@ -407,7 +407,7 @@ class FilesView extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 20.0),
+            padding: const EdgeInsets.only(left: 20),
             child: Column(
               children: <Widget>[
                 IconTile(
@@ -561,7 +561,7 @@ class FilesView extends StatelessWidget {
           color: Color.fromARGB(255, 216, 216, 216),
         )),
       ),
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(20),
       child: ValueListenableBuilder<SelectableItem>(
           valueListenable: _rive.fileBrowser.selectedItem,
           builder: (context, selection, child) {
@@ -593,7 +593,7 @@ class TitleSection extends StatelessWidget {
     var theme = RiveTheme.of(context);
     return Container(
       height: height,
-      padding: const EdgeInsets.only(left: 30.0),
+      padding: const EdgeInsets.only(left: 30),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -605,7 +605,7 @@ class TitleSection extends StatelessWidget {
           ),
           if (showDropdown)
             Padding(
-              padding: const EdgeInsets.only(right: 20.0),
+              padding: const EdgeInsets.only(right: 20),
               child: ValueListenableBuilder<RiveFileSortOption>(
                 valueListenable: fileBrowser.selectedSortOption,
                 builder: (context, sortOption, _) =>
