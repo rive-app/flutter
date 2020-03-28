@@ -66,6 +66,8 @@ class FolderTreeView extends StatelessWidget {
           height: 15,
           child: Center(
             child: TintedIcon(
+              // TODO: tree should not need to know about teams, users, etc
+              // REnder this elsewhere
               icon: (item.data.owner == null)
                   ? 'folder'
                   : (item.data.owner is RiveTeam) ? 'teams' : 'user',

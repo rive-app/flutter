@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_api/models/team.dart';
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/controller.dart';

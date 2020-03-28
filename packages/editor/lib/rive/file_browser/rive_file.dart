@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_api/cdn.dart';
-import 'package:rive_api/file.dart';
+import 'package:rive_api/models/cdn.dart';
+import 'package:rive_api/models/file.dart';
 import 'package:rive_core/selectable_item.dart';
 
 import 'file_browser.dart';

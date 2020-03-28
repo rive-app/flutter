@@ -1,6 +1,6 @@
 import 'package:rive_api/owner.dart';
 
-import 'src/deserialize_helper.dart';
+import 'package:rive_api/src/deserialize_helper.dart';
 
 class RiveUser extends RiveOwner {
   final int ownerId;
@@ -23,11 +23,6 @@ class RiveUser extends RiveOwner {
     this.isVerified = false,
   });
 
-  @override
-  String toString() {
-    return 'RiveUser($ownerId, @$username, \'$name\')';
-  }
-
   factory RiveUser.fromData(Map<String, dynamic> data,
       {bool requireSignin = true}) {
     if (requireSignin && !data.getBool('signedIn')) {
@@ -45,4 +40,7 @@ class RiveUser extends RiveOwner {
       isVerified: data.getBool('verified'),
     );
   }
+
+  @override
+  String toString() => 'RiveUser($ownerId, @$username, \'$name\')';
 }

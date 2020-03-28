@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:core';
 
-import 'api.dart';
-import 'cdn.dart';
-import 'file.dart';
-import 'folder.dart';
-import 'src/deserialize_helper.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/models/cdn.dart';
+import 'package:rive_api/models/file.dart';
+import 'package:rive_api/folder.dart';
+import 'package:rive_api/src/deserialize_helper.dart';
 
 /// Result returned by getting a list of folders and the sort options for the
 /// file contents.
@@ -50,7 +50,7 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
       RiveCDN cdn;
       dynamic cdnData = data["cdn"];
       if (cdnData is Map<String, dynamic>) {
-        cdn = RiveCDN(cdnData);
+        cdn = RiveCDN.fromData(cdnData);
       }
       dynamic filesData = data["files"];
       if (filesData is List) {

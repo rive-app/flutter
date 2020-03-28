@@ -443,6 +443,7 @@ class FilesView extends StatelessWidget {
             ),
           ),
           Expanded(
+            // TODO: Handle all the tree controller logic up the responsibilty hierarchy
             child: ValueListenableBuilder<FolderTreeController>(
               valueListenable:
                   RiveContext.of(context).fileBrowser.myTreeController,

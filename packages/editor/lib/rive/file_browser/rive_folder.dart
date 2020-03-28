@@ -10,6 +10,7 @@ import 'rive_file.dart';
 /// Represents a folder in the Rive cloud, owned by a user or a team.
 class RiveFolder extends RiveApiFolder with SelectableItem {
   ValueKey<String> _key;
+  // TODO: Move this owner up responsibility stack
   RiveOwner owner;
   final _draggingState = ValueNotifier<bool>(false);
   final files = ValueNotifier<List<RiveFile>>([]);

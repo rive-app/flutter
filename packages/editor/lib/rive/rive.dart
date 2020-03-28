@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 import 'package:rive_api/models/team.dart';
 
 import 'package:rive_core/client_side_player.dart';
