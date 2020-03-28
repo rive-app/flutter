@@ -31,6 +31,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   @override
   void markBoundsDirty() {
     stage?.debounce(updateBounds);
+    _title?.markBoundsDirty();
     // Mark bounds dirty of other stageItems within the artboard.
     component.forEachComponent((component) {
       var stageItem = component.stageItem;

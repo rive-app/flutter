@@ -112,7 +112,6 @@ class _InspectorPanelState extends State<InspectorPanel> {
                     math.max(position.pixels + delta, position.minScrollExtent),
                     position.maxScrollExtent);
 
-                print("NEW $newPosition");
                 _scrollController.jumpTo(newPosition);
               },
               child: Scrollbar(

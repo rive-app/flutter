@@ -41,16 +41,7 @@ class StageArtboardTitle extends StageItem<Artboard>
   int get drawOrder => 0;
 
   @override
-  void markBoundsDirty() {
-    stage?.debounce(updateBounds);
-    // Mark bounds dirty of other stageItems within the artboard.
-    component.forEachComponent((component) {
-      var stageItem = component.stageItem;
-      if (stageItem is BoundsDelegate) {
-        (stageItem as BoundsDelegate).boundsChanged();
-      }
-    });
-  }
+  void markBoundsDirty() => stage?.debounce(updateBounds);
 
   void updateBounds() {
     // Compute max bounds based on stage's min zoom (really broad broad-phase).
@@ -124,7 +115,6 @@ class StageArtboardTitle extends StageItem<Artboard>
       );
     }
     canvas.restore();
-    canvas.save();
   }
 
   @override

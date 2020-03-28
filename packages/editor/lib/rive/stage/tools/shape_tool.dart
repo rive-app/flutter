@@ -125,7 +125,8 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
   @override
   void endDrag() {
-    stage.riveFile.captureJournalEntry();
+    // Intentionally empty, Stage captures journal entries for us when a drag
+    // operation ends.
   }
 
   @override

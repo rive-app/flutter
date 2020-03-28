@@ -379,6 +379,7 @@ class Stage extends Debouncer {
       (_activeTool as DraggableTool).endDrag();
       _activeTool = null;
       rive.file.value.captureJournalEntry();
+      markNeedsAdvance();
     } else if (!_mouseDownSelected) {
       rive.selection.clear();
     }
