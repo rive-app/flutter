@@ -120,10 +120,6 @@ class SelectionBorder extends SingleChildRenderObjectWidget {
 }
 
 class _RenderSelectionBorder extends RenderProxyBox {
-  final Paint shadowPaint = Paint()
-    ..color = const Color(0x440058A6)
-    ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
-
   final Paint selectedPaint = Paint()..color = const Color(0xFF57A5E0);
 
   final Paint hoverPaint = Paint()
@@ -154,11 +150,7 @@ class _RenderSelectionBorder extends RenderProxyBox {
     var path = Path()
       ..addRRect(
           RRect.fromRectAndRadius(offset & size, const Radius.circular(5)));
-    if (isSelected) {
-      canvas.translate(0, 6);
-      canvas.drawPath(path, shadowPaint);
-      canvas.translate(0, -6);
-    }
+
     canvas.drawPath(path, isSelected ? selectedPaint : hoverPaint);
 
     super.paint(context, offset);
