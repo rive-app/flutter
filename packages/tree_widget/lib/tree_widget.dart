@@ -312,13 +312,13 @@ class TreeView<T> extends StatelessWidget {
                     child: Stack(
                       overflow: Overflow.visible,
                       children: <Widget>[
-                        // Positioned.fill(
-                        //   top: 0,
-                        //   child: Stack(
-                        //     children: lines,
-                        //     overflow: Overflow.visible,
-                        //   ),
-                        // ),
+                        Positioned.fill(
+                          top: 0,
+                          child: Stack(
+                            children: lines,
+                            overflow: Overflow.visible,
+                          ),
+                        ),
                         if (backgroundBuilder != null)
                           Positioned(
                             left: 0, //indent + spaceLeft - iconMargin / 2,
@@ -404,7 +404,6 @@ class TreeView<T> extends StatelessWidget {
                             ),
                           ),
                         ),
-                        ...lines
                       ],
                     ),
                   ),
