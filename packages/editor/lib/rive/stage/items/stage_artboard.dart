@@ -8,7 +8,6 @@ import 'package:rive_editor/rive/stage/items/stage_artboard_title.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-
 class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   AABB _aabb;
   StageArtboardTitle _title;
@@ -61,7 +60,9 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   void removedFromStage(Stage stage) {
     super.removedFromStage(stage);
     stage.cancelDebounce(updateBounds);
-    _title?.removedFromStage(stage);
+    if (_title != null) {
+      stage.removeItem(_title);
+    }
     _title = null;
   }
 

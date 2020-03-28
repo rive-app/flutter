@@ -6,7 +6,7 @@ abstract class StageContourItem<T> extends StageItem<T> with BoundsDelegate {
 
   @override
   void boundsChanged() {
-    assert(stage != null);
+    assert(stage != null, '$this cannot have null stage');
     stage.updateBounds(this);
   }
 }

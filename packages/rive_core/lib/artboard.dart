@@ -193,6 +193,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   /// Remove a component from the artboard and its various tracked lists of
   /// components.
   void removeComponent(Component component) {
+    _components.remove(component);
     if (component is Drawable) {
       _drawables.remove(component);
     }
