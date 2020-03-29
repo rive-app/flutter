@@ -444,7 +444,11 @@ class Stage extends Debouncer {
       var stageItem = stageItemFactory();
       if (stageItem != null && stageItem.initialize(component)) {
         component.stageItem = stageItem;
-        addItem(stageItem);
+
+        // Only automatically add items that are marked automatic.
+        if (stageItem.isAutomatic) {
+          addItem(stageItem);
+        }
       }
     }
   }

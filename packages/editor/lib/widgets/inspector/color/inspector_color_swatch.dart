@@ -37,11 +37,14 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) {
-        _popup = InspectorPopout.popout(
-          widget.inspectorContext,
-          width: 206,
-          builder: (context) => ColorPopout(inspecting: widget.inspectingColor),
-        );
+        widget.inspectingColor.isEditing = true;
+        _popup = InspectorPopout.popout(widget.inspectorContext,
+            width: 206,
+            builder: (context) =>
+                ColorPopout(inspecting: widget.inspectingColor),
+            onClose: () {
+              widget.inspectingColor.isEditing = false;
+            });
       },
       child: ValueListenableBuilder(
         valueListenable: widget.inspectingColor.preview,

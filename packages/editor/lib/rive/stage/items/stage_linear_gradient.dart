@@ -23,6 +23,12 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
   AABB get aabb => _aabb;
 
   @override
+  bool get isSelectable => false;
+
+  @override
+  bool get isAutomatic => false;
+
+  @override
   bool initialize(core.LinearGradient object) {
     if (!super.initialize(object)) {
       return false;

@@ -14,6 +14,8 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 
 /// Color change callback used by the various color picker components.
@@ -39,6 +41,27 @@ abstract class InspectingColor {
   static const Color defaultSolidColor = Color(0xFF747474);
   static const Color defaultGradientColorA = Color(0xFFFFFFFF);
   static const Color defaultGradientColorB = Color(0xFF000000);
+
+  bool _isEditing = false;
+  bool get isEditing => _isEditing;
+  set isEditing(bool value) {
+    if (_isEditing == value) {
+      return;
+    }
+    _isEditing = value;
+    if(value) {
+      editorOpened();
+    }
+    else {
+      editorClosed();
+    }
+  }
+
+  @protected
+  void editorOpened();
+
+  @protected
+  void editorClosed();
 
   /// Whether the inspecting color is a solid or a linear/radial gradient.
   final ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
@@ -103,6 +126,9 @@ abstract class InspectingColor {
 
 /// Concrete implementation of InspectingColor for [ShapePaint]s.
 class _ShapesInspectingColor extends InspectingColor {
+  // Keep track of what we've added to the stage so far.
+  final Set<StageItem> _addedToStage = {};
+
   @override
   bool get canChangeType => true;
 
@@ -316,9 +342,14 @@ class _ShapesInspectingColor extends InspectingColor {
 
   @override
   void dispose() {
+    var stage = findStage();
+    _addedToStage.forEach(stage.removeItem);
+    _addedToStage.clear();
+
     for (final paint in shapePaints) {
       paint.paintMutatorChanged.removeListener(_mutatorChanged);
     }
+
     _clearListeners();
   }
 
@@ -425,6 +456,8 @@ class _ShapesInspectingColor extends InspectingColor {
 
     _clearListeners();
 
+    Set<StageItem> wantOnStage = {};
+
     var first = shapePaints.first.paintMutator;
     switch (colorType) {
       case ColorType.solid:
@@ -496,6 +529,9 @@ class _ShapesInspectingColor extends InspectingColor {
         // _updatePaints call.
         for (final shapePaint in shapePaints) {
           var gradient = shapePaint.paintMutator as core.LinearGradient;
+          if (gradient.stageItem != null) {
+            wantOnStage.add(gradient.stageItem);
+          }
           _listenTo(gradient.stopsChanged);
           for (final stop in gradient.gradientStops) {
             _listenToCoreProperty(stop, GradientStopBase.positionPropertyKey);
@@ -509,6 +545,37 @@ class _ShapesInspectingColor extends InspectingColor {
       _changeEditingColor(InspectingColor.defaultEditingColor);
       preview.value = [];
     }
+
+    var stage = findStage();
+
+    // Determine what we want on stage vs what we've already added to remove the
+    // old ones. Even if some get removed via deletion outside of this
+    // inspector, the leak is short lived (as soon as the inspector is closed it
+    // is cleared), and we check for stage before removing from it, so we won't
+    // have contention with null stage values.
+
+    if (!isEditing) {
+      // We don't want anything on the stage if the editor isn't open yet.
+      wantOnStage.clear();
+    }
+
+    var removeFromStage = _addedToStage.difference(wantOnStage);
+    removeFromStage.forEach(stage.removeItem);
+    wantOnStage.forEach(stage.addItem);
+    _addedToStage.clear();
+    _addedToStage.addAll(wantOnStage);
+  }
+
+  Stage findStage() {
+    // Lots of work to find the stage...is there any case where this isn't
+    // valid? The Mutator will always have a shape paint container, which is
+    // currently either an artboard or a shape (both components) which always
+    // have stageItems. We should be ok here, even though it looks like a
+    // disaster. Later we could simplify this by grabbing the stage from the
+    // file (when stage is created with a file).
+    var firstShapeContainer =
+        shapePaints.first.paintMutator.shapePaintContainer as Component;
+    return firstShapeContainer.stageItem.stage;
   }
 
   void _notified() {
@@ -531,6 +598,12 @@ class _ShapesInspectingColor extends InspectingColor {
     }
     debounce(_updatePaints);
   }
+
+  @override
+  void editorClosed() => _updatePaints();
+
+  @override
+  void editorOpened() => _updatePaints();
 }
 
 /// Concrete implementation of InspectingColor for any core property that
@@ -574,7 +647,7 @@ class _CorePropertyInspectingColor extends InspectingColor {
       Color(object.getProperty<int>(propertyKey));
 
   void _updatePaints() {
-    if(objects.isEmpty) {
+    if (objects.isEmpty) {
       preview.value = [];
       return;
     }
@@ -628,4 +701,10 @@ class _CorePropertyInspectingColor extends InspectingColor {
   void changeType(ColorType type) {
     throw UnsupportedError('Cannot change type for a solid core color.');
   }
+
+  @override
+  void editorClosed() {}
+
+  @override
+  void editorOpened() {}
 }
