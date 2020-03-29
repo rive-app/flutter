@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:meta/meta.dart';
+import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/event.dart';
@@ -19,6 +20,8 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   /// Stored list of core gradient stops are in the hierarchy as children of
   /// this container.
   final List<GradientStop> gradientStops = [];
+
+  BoundsDelegate _delegate;
 
   /// Event triggered whenever a stops property changes.
   final Event stopsChanged = Event();
@@ -68,8 +71,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
 
   /// Mark the gradient stops as changed. This will re-sort the stops and
   /// rebuild the necessary gradients in the next update cycle.
-  void markStopsDirty() =>
-      addDirt(ComponentDirt.stops | ComponentDirt.paint);
+  void markStopsDirty() => addDirt(ComponentDirt.stops | ComponentDirt.paint);
 
   /// Mark the gradient as needing to be rebuilt. This is a more efficient
   /// version of markStopsDirty as it won't re-sort the stops.
@@ -82,10 +84,11 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
       gradientStops.sort((a, b) => a.position.compareTo(b.position));
     }
 
+    bool worldTransformed = dirt & ComponentDirt.worldTransform != 0;
     // We rebuild the gradient if the gradient is dirty or we paint in world
     // space and the world space transform has changed.
     var rebuildGradient = dirt & ComponentDirt.paint != 0 ||
-        (paintsInWorldSpace && dirt & ComponentDirt.worldTransform != 0);
+        (paintsInWorldSpace && worldTransformed);
 
     if (rebuildGradient) {
       // build up the color and positions lists
@@ -95,7 +98,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
         colors.add(stop.color);
         colorPositions.add(stop.position);
       }
-      // Chek if we need to update the world space gradient.
+      // Check if we need to update the world space gradient.
       if (paintsInWorldSpace) {
         // Get the start and end of the gradient in world coordinates (world
         // transform of the shape).
@@ -109,10 +112,25 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
             makeGradient(startOffset, endOffset, colors, colorPositions);
       }
     }
+
+    // Regardless of rebuild, if the world transformed, let's notify the
+    // delegate.
+    if (worldTransformed) {
+      _delegate?.boundsChanged();
+    }
   }
 
   @protected
   ui.Gradient makeGradient(ui.Offset start, ui.Offset end,
           List<ui.Color> colors, List<double> colorPositions) =>
       ui.Gradient.linear(start, end, colors, colorPositions);
+
+  @override
+  void userDataChanged(dynamic from, dynamic to) {
+    if (to is BoundsDelegate) {
+      _delegate = to;
+    } else {
+      _delegate = null;
+    }
+  }
 }

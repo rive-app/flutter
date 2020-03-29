@@ -49,8 +49,7 @@ class Mat2D {
   }
 
   Mat2D.fromScaling(Vec2D scaling) {
-    _buffer = Float32List.fromList(
-        [scaling[0], 0, 0, scaling[1], 0, 0]);
+    _buffer = Float32List.fromList([scaling[0], 0, 0, scaling[1], 0, 0]);
   }
 
   Mat2D.clone(Mat2D copy) {
@@ -138,6 +137,16 @@ class Mat2D {
     o[3] = a[3];
     o[4] = a[4];
     o[5] = a[5];
+  }
+
+  static Mat2D translate(Mat2D o, Mat2D a, Vec2D b) {
+    o[0] = a[0];
+    o[1] = a[1];
+    o[2] = a[2];
+    o[3] = a[3];
+    o[4] = a[4] + b[0];
+    o[5] = a[5] + b[1];
+    return o;
   }
 
   static bool invert(Mat2D o, Mat2D a) {

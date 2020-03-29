@@ -1,5 +1,7 @@
 import 'dart:math';
 import "dart:typed_data";
+import 'package:rive_core/math/mat2d.dart';
+
 import "vec2d.dart";
 
 class AABB {
@@ -120,5 +122,61 @@ class AABB {
   @override
   String toString() {
     return _buffer.toString();
+  }
+
+  /// Compute an AABB from a set of points with an optional [transform] to apply
+  /// before computing.
+  AABB.fromPoints(
+    Iterable<Vec2D> points, {
+    Mat2D transform,
+    double expand = 0,
+  }) {
+    double minX = double.maxFinite;
+    double minY = double.maxFinite;
+    double maxX = -double.maxFinite;
+    double maxY = -double.maxFinite;
+
+    for (final point in points) {
+      var p = transform == null
+          ? point
+          : Vec2D.transformMat2D(Vec2D(), point, transform);
+
+      double x = p[0];
+      double y = p[1];
+      if (x < minX) {
+        minX = x;
+      }
+      if (y < minY) {
+        minY = y;
+      }
+
+      if (x > maxX) {
+        maxX = x;
+      }
+      if (y > maxY) {
+        maxY = y;
+      }
+    }
+
+    // Make sure the box is at least this wide/high
+    if (expand != 0) {
+      double width = maxX - minX;
+      double diff = expand - width;
+      if (diff > 0) {
+        diff /= 2;
+        minX -= diff;
+        maxX += diff;
+      }
+      double height = maxY - minY;
+      diff = expand - height;
+
+      if (diff > 0) {
+        diff /= 2;
+        minY -= diff;
+        maxY += diff;
+      }
+    }
+
+    _buffer = Float32List.fromList([minX, minY, maxX, maxY]);
   }
 }
