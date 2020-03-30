@@ -23,39 +23,41 @@ Future<T> showRiveDialog<T>({
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation,
         Animation<double> secondaryAnimation) {
-      final Widget pageChild = Container(
-        margin: const EdgeInsets.all(20),
+      final Widget pageChild = Padding(
+        padding: const EdgeInsets.all(20),
         // TODO: material is too heavy to use here, replace with something
         // lighterweight that keeps text styled properly.
         // Look at wrapping in Theme/TextTheme
         child: Align(
           alignment: Alignment.topCenter,
-          child: Material(
-            type: MaterialType.transparency,
-            child: Container(
-              margin: const EdgeInsets.only(top: 60),
-              constraints: const BoxConstraints(
-                // TODO: what should be the scale behavior? Talk to Guido
-                minWidth: 300,
-                maxWidth: 800,
-                minHeight: 300,
-                maxHeight: double.infinity,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Builder(builder: builder),
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.4),
-                    blurRadius: 100,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 50),
-                  )
-                ],
+          child: Padding(
+            padding: const EdgeInsets.only(top: 60.0),
+            child: Material(
+              type: MaterialType.transparency,
+              child: Container(
+                constraints: const BoxConstraints(
+                  // TODO: what should be the scale behavior? Talk to Guido
+                  minWidth: 300,
+                  maxWidth: 800,
+                  minHeight: 300,
+                  maxHeight: double.infinity,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Builder(builder: builder),
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.4),
+                      blurRadius: 100,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 50),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
