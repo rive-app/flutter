@@ -48,8 +48,13 @@ class _ContainerColorFinder extends MatchFinder {
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
 
-    if (widget is Container) {
-      return widget.color == color;
+    // if (widget is Container) {
+    //   return widget.color == color;
+    // }
+    if (widget is Container &&
+        widget.decoration != null &&
+        widget.decoration is BoxDecoration) {
+      return (widget.decoration as BoxDecoration).color == color;
     }
 
     return false;
