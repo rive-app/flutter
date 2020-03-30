@@ -6,6 +6,7 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
+import 'package:rive_api/owner.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/controller.dart';
@@ -18,17 +19,12 @@ import 'package:tree_widget/flat_tree_item.dart';
 const kTreeItemHeight = 35.0;
 
 class FileBrowser extends FileBrowserController {
-  final treeScrollController = ScrollController();
   Set<RiveFile> _queuedFileDetails = {};
   Timer _detailsTimer;
 
   /// Controller for our files in the folder tree.
   final ValueNotifier<FolderTreeController> myTreeController =
       ValueNotifier<FolderTreeController>(null);
-
-  /// Controllers for teams that are associated with our account.
-  final ValueNotifier<List<FolderTreeController>> teamsTreeControllers =
-      ValueNotifier<List<FolderTreeController>>(null);
 
   /// Currently selected item.
   final ValueNotifier<SelectableItem> selectedItem =
@@ -49,25 +45,24 @@ class FileBrowser extends FileBrowserController {
   /// The currently selected sort option.
   final ValueNotifier<RiveFileSortOption> selectedSortOption =
       ValueNotifier<RiveFileSortOption>(null);
-  /*{
-    final _selectedFolders =
-        _current.folders.where((f) => f.isSelected).toList();
-    final _selectedFiles = _current.files.where((f) => f.isSelected).toList();
-    return [..._selectedFolders, ..._selectedFiles];
-  }*/
 
+  final RiveOwner _owner;
   RiveFolder _current;
   int _lastSelectedIndex;
   _EditorRiveFilesApi _filesApi;
   BoxConstraints _constraints;
 
   final _draggingState = ValueNotifier<bool>(false);
+
+  FileBrowser(this._owner);
+
   int get crossAxisCount {
     final w = _constraints.maxWidth;
     final _count = (w / kGridWidth).floor();
     return _count == 0 ? 1 : _count;
   }
 
+  RiveOwner get owener => _owner;
   RiveFolder get currentFolder => _current;
   ValueListenable<bool> get draggingState => _draggingState;
   bool get isDragging =>
@@ -82,8 +77,6 @@ class FileBrowser extends FileBrowserController {
 
   Set<SelectableItem> get selectedItems => _selectedItems;
 
-  // List<FlatTreeItem<RiveFolder>> get teams =>
-  //     treeController.value.flat.skip(1).toList();
   bool dequeueLoadDetails(RiveFile file) {
     if (_queuedFileDetails.remove(file)) {
       _detailsTimer ??=
@@ -110,40 +103,31 @@ class FileBrowser extends FileBrowserController {
     notifyListeners();
   }
 
-  void updateTeamList(Rive rive) {
-    if (rive.teams.value != null) {
-      teamsTreeControllers.value = rive.teams.value
-          .map((RiveTeam team) => convertTeamToFolder(team, rive))
-          .toList();
-      teamsTreeControllers.notifyListeners();
-    }
-  }
-
   void initialize(Rive rive) {
     _filesApi = _EditorRiveFilesApi(rive.api, this);
-    myTreeController.value = FolderTreeController([], rive: rive);
-    teamsTreeControllers.value = [];
-  }
-
-  FolderTreeController convertTeamToFolder(RiveTeam team, Rive rive) {
-    // id = data.getString('id'),
-    //     _parentId = data.getString('parent'),
-    //     name = data.getString('name'),
-    //     order = data.getInt('order');
-    var teamRoot = [
-      RiveFolder(<String, dynamic>{
-        'id': '1',
-        'parent': null,
-        'name': team.name,
-        'order': 0,
-        'team': team
-      })
-    ];
-    return FolderTreeController(teamRoot, rive: rive);
+    myTreeController.value =
+        FolderTreeController([], fileBrowser: this, rive: rive);
   }
 
   Future<bool> load(Rive rive) async {
-    var result = await _filesApi.myFolders();
+    FoldersResult<RiveFolder> result;
+    if (_owner is RiveTeam) {
+      var dummyFolder = RiveFolder(<String, dynamic>{
+        'id': '1',
+        'parent': null,
+        'name': _owner.name,
+        'order': 0,
+        'team': _owner
+      });
+      List<RiveFolder> root = [dummyFolder];
+      List<RiveFolder> folders = [dummyFolder];
+
+      result = FoldersResult<RiveFolder>(
+          folders: folders, root: root, sortOptions: []);
+    } else {
+      result = await _filesApi.myFolders();
+    }
+
     sortOptions.value = result.sortOptions;
     if (selectedSortOption.value != null) {
       selectedSortOption.value = result.sortOptions.firstWhere(
@@ -159,27 +143,19 @@ class FileBrowser extends FileBrowserController {
 
     // HACK
     if (result.root.length > 0) {
-      result.root.first.owner = rive.user.value;
+      result.root.first.owner = _owner;
     }
 
     data.addAll(result.root);
 
-    // TODO: real teams....here hack up some teams with the same data as our
-    // main account, just to show how the tree building works.
-    // var rive = myTreeController.value.rive;
-
-    // teamsTreeControllers.value = [
-    //   FolderTreeController(result.root, rive: rive),
-    //   FolderTreeController(result.root, rive: rive)
-    // ];
-
-    await openFolder(result.root.isEmpty ? null : result.root.first, false);
+    // await openFolder(result.root.isEmpty ? null : result.root.first, false);
     onFoldersChanged();
     return true;
   }
 
   void onFoldersChanged() {
     myTreeController.value.flatten();
+    myTreeController.notifyListeners();
   }
 
   @override
@@ -265,13 +241,14 @@ class FileBrowser extends FileBrowserController {
     }
     myTreeController.value.expand(value);
     if (jumpTo) {
-      List<FlatTreeItem<RiveFolder>> _all = myTreeController.value.flat;
-      int _index = _all.indexWhere((f) => f?.data?.key == value.key);
-      double _offset = _index * kTreeItemHeight;
-      treeScrollController.jumpTo(_offset
-          .clamp(treeScrollController.position.minScrollExtent,
-              treeScrollController.position.maxScrollExtent)
-          .toDouble());
+      // TODO: get rive's scrollcontroller? should this live in some kinda selected/userstat context?
+      // List<FlatTreeItem<RiveFolder>> _all = myTreeController.value.flat;
+      // int _index = _all.indexWhere((f) => f?.data?.key == value.key);
+      // double _offset = _index * kTreeItemHeight;
+      // rive.treeScrollController.jumpTo(_offset
+      //     .clamp(treeScrollController.position.minScrollExtent,
+      //         treeScrollController.position.maxScrollExtent)
+      //     .toDouble());
     }
     return loadFileList();
   }

@@ -52,47 +52,50 @@ class FilesView extends StatelessWidget {
     const double kProfileWidth = 215;
     final _rive = RiveContext.of(context);
     final riveColors = RiveTheme.of(context).colors;
-    return ChangeNotifierProvider.value(
-      value: _rive.fileBrowser,
-      child: PropagatingListener(
-        behavior: HitTestBehavior.deferToChild,
-        onPointerUp: (_) {
-          _rive.fileBrowser.deselectAll();
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  ResizePanel(
-                    hitSize: resizeEdgeSize,
-                    direction: ResizeDirection.horizontal,
-                    side: ResizeSide.end,
-                    min: 252,
-                    max: 500,
-                    child: _buildLeftSide(context, _rive),
-                  ),
-                  Expanded(
-                    child: _buildCenter(_rive),
-                  ),
-                ],
+    return ValueListenableProvider.value(
+      value: _rive.activeFileBrowser,
+      child: ChangeNotifierProvider.value(
+        value: _rive.activeFileBrowser.value,
+        child: PropagatingListener(
+          behavior: HitTestBehavior.deferToChild,
+          onPointerUp: (_) {
+            _rive.activeFileBrowser.value.deselectAll();
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    ResizePanel(
+                      hitSize: resizeEdgeSize,
+                      direction: ResizeDirection.horizontal,
+                      side: ResizeSide.end,
+                      min: 252,
+                      max: 500,
+                      child: _buildLeftSide(context, _rive),
+                    ),
+                    Expanded(
+                      child: _buildCenter(_rive),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Container(
-              width: kProfileWidth,
-              color: riveColors.fileBackgroundLightGrey,
-              child: _buildRightSide(_rive),
-            ),
-          ],
+              Container(
+                width: kProfileWidth,
+                color: riveColors.fileBackgroundLightGrey,
+                child: _buildRightSide(_rive),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildCenter(Rive rive) {
-    final fileBrowser = rive.fileBrowser;
+    final fileBrowser = rive.activeFileBrowser.value;
     final scrollController = ScrollController();
 
     return LayoutBuilder(
@@ -443,101 +446,77 @@ class FilesView extends StatelessWidget {
             ),
           ),
           Expanded(
-            // TODO: Handle all the tree controller logic up the responsibilty hierarchy
-            child: ValueListenableBuilder<FolderTreeController>(
-              valueListenable:
-                  RiveContext.of(context).fileBrowser.myTreeController,
-              builder: (context, myTreeController, _) =>
-                  ValueListenableBuilder<List<FolderTreeController>>(
-                valueListenable:
-                    RiveContext.of(context).fileBrowser.teamsTreeControllers,
-                builder: (context, teamControllers, _) {
-                  var separatorPadding = EdgeInsets.only(
-                    left: treeStyle.padding.left,
-                    top: 12,
-                    bottom: 12,
-                  );
-                  var slivers = <Widget>[
+            child: ValueListenableBuilder<List<FolderTreeController>>(
+              valueListenable: RiveContext.of(context).folderTreeControllers,
+              builder: (context, folderTreeControllers, _) {
+                var slivers = <Widget>[];
+                for (int i = 0; i < folderTreeControllers.length; i++) {
+                  slivers.add(
                     FolderTreeView(
                       style: treeStyle,
-                      controller: myTreeController,
+                      controller: folderTreeControllers[i],
                     ),
-                    SliverToBoxAdapter(
-                      child: Separator(
-                        color: riveColors.fileLineGrey,
-                        padding: separatorPadding,
-                      ),
-                    ),
-                  ];
-                  for (int i = 0; i < teamControllers.length; i++) {
+                  );
+                  if (i != folderTreeControllers.length - 1) {
                     slivers.add(
-                      FolderTreeView(
-                        style: treeStyle,
-                        controller: teamControllers[i],
+                      SliverToBoxAdapter(
+                        child: Separator(
+                          color: riveColors.fileLineGrey,
+                          padding: EdgeInsets.only(
+                            left: treeStyle.padding.left,
+                            right: 0,
+                            top: 12,
+                            bottom: 12,
+                          ),
+                        ),
                       ),
                     );
-                    if (i != teamControllers.length - 1) {
-                      slivers.add(
-                        SliverToBoxAdapter(
-                          child: Separator(
-                            color: riveColors.fileLineGrey,
-                            padding: EdgeInsets.only(
-                              left: treeStyle.padding.left,
-                              right: 0,
-                              top: 12,
-                              bottom: 0,
+                  }
+                }
+
+                slivers.add(
+                  SliverInlineFooter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Separator(
+                          color: riveColors.fileLineGrey,
+                          padding: EdgeInsets.only(
+                            left: treeStyle.padding.left,
+                            top: 12,
+                            bottom: 0,
+                          ),
+                        ),
+                        Container(
+                          color: riveColors.fileBackgroundLightGrey,
+                          padding: const EdgeInsets.only(
+                            left: 20,
+                            right: 10,
+                            bottom: 20,
+                            top: 20,
+                          ),
+                          child: DashedFlatButton(
+                            label: 'New Team',
+                            icon: 'teams-button',
+                            tip: const Tip(
+                                label: 'Create a new team',
+                                direction: PopupDirection.topToCenter),
+                            onTap: () => showTeamWizard<void>(
+                              context: context,
                             ),
                           ),
                         ),
-                      );
-                    }
-                  }
-
-                  slivers.add(
-                    SliverInlineFooter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Separator(
-                            color: riveColors.fileLineGrey,
-                            padding: EdgeInsets.only(
-                              left: treeStyle.padding.left,
-                              top: 12,
-                              bottom: 0,
-                            ),
-                          ),
-                          Container(
-                            color: riveColors.fileBackgroundLightGrey,
-                            padding: const EdgeInsets.only(
-                              left: 20,
-                              right: 10,
-                              bottom: 20,
-                              top: 20,
-                            ),
-                            child: DashedFlatButton(
-                              label: 'New Team',
-                              icon: 'teams-button',
-                              tip: const Tip(
-                                  label: 'Create a new team',
-                                  direction: PopupDirection.topToCenter),
-                              onTap: () => showTeamWizard<void>(
-                                context: context,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      ],
                     ),
-                  );
-                  return TreeScrollView(
-                    scrollController: RiveContext.of(context)
-                        .fileBrowser
-                        .treeScrollController,
-                    style: treeStyle,
-                    slivers: slivers,
-                  );
-                },
-              ),
+                  ),
+                );
+                return TreeScrollView(
+                  scrollController:
+                      RiveContext.of(context).treeScrollController,
+                  style: treeStyle,
+                  slivers: slivers,
+                );
+              },
             ),
           ),
         ],
@@ -555,7 +534,7 @@ class FilesView extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(20),
       child: ValueListenableBuilder<SelectableItem>(
-          valueListenable: rive.fileBrowser.selectedItem,
+          valueListenable: rive.activeFileBrowser.value.selectedItem,
           builder: (context, selection, child) {
             if (selection != null) {
               return ItemView(item: selection);
@@ -580,7 +559,7 @@ class TitleSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fileBrowser = RiveContext.of(context).fileBrowser;
+    final fileBrowser = RiveContext.of(context).activeFileBrowser.value;
     var options = fileBrowser.sortOptions.value;
     var theme = RiveTheme.of(context);
     return Container(

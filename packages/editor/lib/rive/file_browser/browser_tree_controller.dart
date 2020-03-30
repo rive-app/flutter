@@ -1,17 +1,18 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/file_browser/file_browser.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 
-import '../rive.dart';
 import 'rive_folder.dart';
 
 /// TreeController for the Rive folders displayed in the FileBrowser screen.
 class FolderTreeController extends TreeController<RiveFolder> {
-  final Rive rive;
   final List<RiveFolder> data;
-  FolderTreeController(this.data, {this.rive})
-      : super(data);
+  final Rive rive;
+  final FileBrowser fileBrowser;
+  FolderTreeController(this.data, {this.fileBrowser, this.rive}) : super(data);
 
   @override
   List<RiveFolder> childrenOf(RiveFolder treeItem) =>
@@ -50,7 +51,13 @@ class FolderTreeController extends TreeController<RiveFolder> {
   @override
   void onTap(FlatTreeItem<RiveFolder> item) {
     if (item.data != null) {
-      rive.fileBrowser.openFolder(item.data, false);
+      if (rive.activeFileBrowser.value != fileBrowser) {
+        // deselect current selection
+        rive.activeFileBrowser.value.openFolder(null, false);
+        rive.activeFileBrowser.value = fileBrowser;
+      }
+
+      fileBrowser.openFolder(item.data, false);
     }
   }
 
