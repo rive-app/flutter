@@ -22,7 +22,6 @@ import 'src/isolated_persist.dart';
 final log = Logger('rive_core');
 
 class RiveFile extends RiveCoreContext {
-  final String name;
   final Map<String, dynamic> overridePreferences;
   final bool useSharedPreferences;
   final List<Artboard> artboards = [];
@@ -58,8 +57,7 @@ class RiveFile extends RiveCoreContext {
   SharedPreferences _prefs;
 
   RiveFile(
-    String fileId,
-    this.name, {
+    String fileId, {
     this.api,
     this.overridePreferences,
     this.useSharedPreferences = true,
@@ -358,7 +356,7 @@ class RiveFile extends RiveCoreContext {
     } else {
       _backboard = backboards.first;
     }
-    
+
     assert(objects.whereType<Backboard>().length == 1,
         'File should contain exactly one backboard.');
   }

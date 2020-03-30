@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/teams.dart';
+import 'package:rive_core/event.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -104,6 +106,10 @@ class Rive with RiveFileDelegate {
   /// Available tabs in the editor
   final ValueNotifier<List<RiveTabItem>> tabs =
       ValueNotifier<List<RiveTabItem>>([]);
+
+  List<OpenFileContext> _openFiles = [];
+  final Event openFilesChanged = Event();
+  List<OpenFileContext> get openFiles => _openFiles;
 
   /// Currently selected tab
   final ValueNotifier<RiveTabItem> selectedTab =
@@ -391,7 +397,6 @@ class Rive with RiveFileDelegate {
 
   @override
   void onWipe() {
-    print("WIPED! --- 2");
     _stage?.wipe();
     treeController.value =
         HierarchyTreeController(file.value.artboards, rive: this);
@@ -400,11 +405,35 @@ class Rive with RiveFileDelegate {
         rive: this);
   }
 
+  void _serializeTabs() {
+    // TODO: save open tabs
+  }
+
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
-  Future<RiveFile> open(CoopConnectionInfo connectionInfo, int ownerId,
-      int fileId, String name) async {
-    var urlEncodedSpectre = Uri.encodeComponent(api.cookies['spectre']);
-    String filePath = '$ownerId/$fileId/$urlEncodedSpectre';
+  Future<RiveFile> open(
+      CoopConnectionInfo connectionInfo, int ownerId, int fileId, String name,
+      {bool focus = true}) async {
+// see if it's already open
+    var file = _openFiles
+        .firstWhere((file) => file.ownerId == ownerId && file.fileId == fileId);
+
+    if (file == null) {
+      file = OpenFileContext(ownerId, fileId, name);
+      _openFiles.add(file);
+      _serializeTabs();
+    }
+
+    if (focus) {
+      if (file.coreContext == null) {
+        // File hasn't connected yet.
+        var urlEncodedSpectre = Uri.encodeComponent(api.cookies['spectre']);
+        
+        await file.connect(connectionInfo, api.cookies['spectre']);
+        
+      } else {
+        // Make sure it's still connected?
+      }
+    }
 
     var opening = RiveFile(filePath, name, api: api);
     var result = await opening.connect(
