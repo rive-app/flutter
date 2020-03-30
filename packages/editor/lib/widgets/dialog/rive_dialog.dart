@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+const double riveDialogMinWidth = 300;
+const double riveDialogMaxWidth = 800;
+const double riveDialogMinHeight = 300;
+
 Widget _riveDialogTransition(BuildContext context, Animation<double> animation,
     Animation<double> secondaryAnimation, Widget child) {
   return FadeTransition(
@@ -37,9 +41,9 @@ Future<T> showRiveDialog<T>({
               child: Container(
                 constraints: const BoxConstraints(
                   // TODO: what should be the scale behavior? Talk to Guido
-                  minWidth: 300,
-                  maxWidth: 800,
-                  minHeight: 300,
+                  minWidth: riveDialogMinWidth,
+                  maxWidth: riveDialogMaxWidth,
+                  minHeight: riveDialogMinHeight,
                   maxHeight: double.infinity,
                 ),
                 child: ClipRRect(

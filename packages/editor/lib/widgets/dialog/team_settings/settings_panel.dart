@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/team_settings_header.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:tree_widget/flat_tree_item.dart';
+
+const double settingsTabNavWidth = 215;
 
 class _SettingsTabItem extends StatelessWidget {
   final String label;
@@ -93,7 +96,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
       children: [
         Container(
           padding: const EdgeInsets.all(20),
-          width: 215,
+          width: settingsTabNavWidth,
           color: colors.fileBackgroundLightGrey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,8 +108,8 @@ class _SettingsPanelState extends State<SettingsPanel> {
         ),
         ConstrainedBox(
             constraints: const BoxConstraints(
-              minWidth: 85,
-              maxWidth: 585,
+              minWidth: riveDialogMinWidth - settingsTabNavWidth, //85,
+              maxWidth: riveDialogMaxWidth - settingsTabNavWidth, //585,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
