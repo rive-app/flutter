@@ -54,40 +54,42 @@ class FilesView extends StatelessWidget {
     final riveColors = RiveTheme.of(context).colors;
     return ValueListenableProvider.value(
       value: _rive.activeFileBrowser,
-      child: ChangeNotifierProvider.value(
-        value: _rive.activeFileBrowser.value,
-        child: PropagatingListener(
-          behavior: HitTestBehavior.deferToChild,
-          onPointerUp: (_) {
-            _rive.activeFileBrowser.value.deselectAll();
-          },
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    ResizePanel(
-                      hitSize: resizeEdgeSize,
-                      direction: ResizeDirection.horizontal,
-                      side: ResizeSide.end,
-                      min: 252,
-                      max: 500,
-                      child: _buildLeftSide(context, _rive),
-                    ),
-                    Expanded(
-                      child: _buildCenter(_rive),
-                    ),
-                  ],
+      child: Consumer<FileBrowser>(
+        builder: (context, fileBrowser, child) => ChangeNotifierProvider.value(
+          value: fileBrowser,
+          child: PropagatingListener(
+            behavior: HitTestBehavior.deferToChild,
+            onPointerUp: (_) {
+              fileBrowser.deselectAll();
+            },
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      ResizePanel(
+                        hitSize: resizeEdgeSize,
+                        direction: ResizeDirection.horizontal,
+                        side: ResizeSide.end,
+                        min: 252,
+                        max: 500,
+                        child: _buildLeftSide(context, _rive),
+                      ),
+                      Expanded(
+                        child: _buildCenter(_rive),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                width: kProfileWidth,
-                color: riveColors.fileBackgroundLightGrey,
-                child: _buildRightSide(_rive),
-              ),
-            ],
+                Container(
+                  width: kProfileWidth,
+                  color: riveColors.fileBackgroundLightGrey,
+                  child: _buildRightSide(_rive),
+                ),
+              ],
+            ),
           ),
         ),
       ),

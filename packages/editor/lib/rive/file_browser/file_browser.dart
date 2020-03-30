@@ -14,7 +14,6 @@ import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/files_view/screen.dart';
-import 'package:tree_widget/flat_tree_item.dart';
 
 const kTreeItemHeight = 35.0;
 
