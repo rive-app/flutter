@@ -2,15 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
-import 'package:rive_editor/utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Second and final panel in the teams wizard
 class TeamWizardPanelTwo extends StatelessWidget {
