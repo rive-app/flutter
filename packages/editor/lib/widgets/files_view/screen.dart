@@ -333,7 +333,7 @@ class FilesView extends StatelessWidget {
       padding: const EdgeInsets.only(
         left: 10,
         right: 10,
-        bottom: 5,
+        bottom: 0,
         top: 5,
       ),
       lineColor: RiveTheme.of(context).colors.lightTreeLines,
