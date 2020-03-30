@@ -11,6 +11,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/ellipse.dart';
+import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -22,6 +23,8 @@ import 'package:rive_editor/rive/stage/aabb_tree.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_ellipse.dart';
+import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
+import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
@@ -33,6 +36,7 @@ import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+import 'package:rive_core/shapes/paint/linear_gradient.dart';
 
 enum AxisCheckState { local, parent, world }
 
@@ -41,6 +45,15 @@ typedef _ItemFactory = StageItem Function();
 abstract class StageDelegate {
   void stageNeedsAdvance();
   void stageNeedsRedraw();
+}
+
+/// Hacky way to do friend class access in Dart by using an interface with
+/// private fields the Stage can write to. This is for storing and handling
+/// object specific fields that should not be exposed to the system and are
+/// really only for the Stage to handle. Removing them from the StageItem helps
+/// avoid confusion for people implementing custom StageItems.
+class StageItemFriend {
+  int _visTreeProxy = nullNode;
 }
 
 /// Some notes about how the Stage works and future plans for it here:
@@ -433,23 +446,27 @@ class Stage extends Debouncer {
       var stageItem = stageItemFactory();
       if (stageItem != null && stageItem.initialize(component)) {
         component.stageItem = stageItem;
-        addItem(stageItem);
+
+        // Only automatically add items that are marked automatic.
+        if (stageItem.isAutomatic) {
+          addItem(stageItem);
+        }
       }
     }
   }
 
   void updateBounds(StageItem item) {
-    visTree.placeProxy(item.visTreeProxy, item.aabb);
+    visTree.placeProxy(item._visTreeProxy, item.aabb);
     markNeedsAdvance();
   }
 
   bool addItem(StageItem item) {
     assert(item != null);
-    if (item.visTreeProxy != nullNode) {
+    if (item._visTreeProxy != nullNode) {
       return false;
     }
 
-    item.visTreeProxy = visTree.createProxy(item.aabb, item);
+    item._visTreeProxy = visTree.createProxy(item.aabb, item);
     item.addedToStage(this);
     markNeedsAdvance();
     if (item is Advancer) {
@@ -460,12 +477,12 @@ class Stage extends Debouncer {
 
   bool removeItem(StageItem item) {
     assert(item != null);
-    if (item.visTreeProxy == nullNode) {
+    if (item._visTreeProxy == nullNode) {
       return false;
     }
 
-    visTree.destroyProxy(item.visTreeProxy);
-    item.visTreeProxy = nullNode;
+    visTree.destroyProxy(item._visTreeProxy);
+    item._visTreeProxy = nullNode;
     item.removedFromStage(this);
     markNeedsAdvance();
     if (item is Advancer) {
@@ -603,6 +620,8 @@ class Stage extends Debouncer {
     TriangleBase.typeKey: () => StageTriangle(),
     PointsPathBase.typeKey: () => StagePath(),
     StraightVertexBase.typeKey: () => StageVertex(),
+    LinearGradientBase.typeKey: () => StageLinearGradient(),
+    GradientStopBase.typeKey: () => StageGradientStop(),
   };
 
   @override
@@ -616,7 +635,7 @@ class Stage extends Debouncer {
   }
 
   void toggleEditMode() {
-    // TODO: Try to get the StagePaths or the StageShapes from the current selection,
-    // and set it the current editing shape.
+    // TODO: Try to get the StagePaths or the StageShapes from the current
+    // selection, and set it the current editing shape.
   }
 }

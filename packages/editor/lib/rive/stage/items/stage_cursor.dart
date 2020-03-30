@@ -24,7 +24,6 @@ class StageCursor extends StageItem<ClientSidePlayer>
   static Color colorFromPalette(int index) =>
       playerColors[index % playerColors.length];
 
-  AABB _aabb;
   Color _color;
 
   CachedImage _cursorImage;
@@ -92,14 +91,10 @@ class StageCursor extends StageItem<ClientSidePlayer>
     }
   }
 
-  @override
-  AABB get aabb => _aabb;
-
   void updateBounds() {
     var cursor = component.cursor;
-    _aabb =
+    aabb =
         AABB.fromValues(_x, _y, cursor.x + size.width, cursor.y + size.height);
-    stage?.updateBounds(this);
   }
 
   @override

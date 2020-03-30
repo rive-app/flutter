@@ -44,6 +44,12 @@ class _PropertyFillState extends State<PropertyFill> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _inspectingColor?.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InspectorPopoutComponent(
       components: widget.fills,

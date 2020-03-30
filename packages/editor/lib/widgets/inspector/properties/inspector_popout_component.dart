@@ -16,12 +16,16 @@ class InspectorPopoutComponent extends StatelessWidget {
   final int isVisiblePropertyKey;
   final WidgetBuilder prefix;
   final WidgetBuilder popoutBuilder;
+  final PopupCallback opened;
+  final PopupCallback closed;
 
   const InspectorPopoutComponent({
     @required this.components,
     this.isVisiblePropertyKey,
     this.prefix,
     this.popoutBuilder,
+    this.opened,
+    this.closed,
     Key key,
   }) : super(key: key);
 
@@ -50,6 +54,8 @@ class InspectorPopoutComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return InspectorPopout(
+      opened: opened,
+      closed: closed,
       contentBuilder: (context) => Row(
         children: [
           if (prefix != null) prefix(context),

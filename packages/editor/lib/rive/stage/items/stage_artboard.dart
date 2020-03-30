@@ -9,7 +9,6 @@ import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
-  AABB _aabb;
   StageArtboardTitle _title;
 
   @override
@@ -17,20 +16,20 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
     if (!super.initialize(object)) {
       return false;
     }
-    updateBounds();
+    _updateBounds();
     return true;
   }
-
-  @override
-  AABB get aabb => _aabb;
 
   @override
   int get drawOrder => 0;
 
   @override
-  void markBoundsDirty() {
-    stage?.debounce(updateBounds);
-    _title?.markBoundsDirty();
+  void boundsChanged() => _updateBounds();
+
+  void _updateBounds() {
+    aabb = AABB.fromValues(component.x, component.y,
+        component.x + component.width, component.y + component.height);
+    _title?.boundsChanged();
     // Mark bounds dirty of other stageItems within the artboard.
     component.forEachComponent((component) {
       var stageItem = component.stageItem;
@@ -38,12 +37,6 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
         (stageItem as BoundsDelegate).boundsChanged();
       }
     });
-  }
-
-  void updateBounds() {
-    _aabb = AABB.fromValues(component.x, component.y,
-        component.x + component.width, component.y + component.height);
-    stage?.updateBounds(this);
   }
 
   @override
@@ -59,7 +52,6 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   @override
   void removedFromStage(Stage stage) {
     super.removedFromStage(stage);
-    stage.cancelDebounce(updateBounds);
     if (_title != null) {
       stage.removeItem(_title);
     }

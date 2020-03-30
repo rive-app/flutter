@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -9,10 +8,8 @@ import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-class StageArtboardTitle extends StageItem<Artboard>
-    implements ArtboardDelegate {
+class StageArtboardTitle extends StageItem<Artboard> {
   final StageArtboard stageArtboard;
-  AABB _aabb;
   Paragraph _nameParagraph;
   Size _nameSize;
   Color _lastTextColor;
@@ -29,35 +26,30 @@ class StageArtboardTitle extends StageItem<Artboard>
     if (!super.initialize(object)) {
       return false;
     }
-    updateBounds();
+    _updateBounds();
     _updateName();
     return true;
   }
 
-  @override
-  AABB get aabb => _aabb;
+  void boundsChanged() => _updateBounds();
 
   @override
   int get drawOrder => 0;
 
-  @override
-  void markBoundsDirty() => stage?.debounce(updateBounds);
-
-  void updateBounds() {
+  void _updateBounds() {
     // Compute max bounds based on stage's min zoom (really broad broad-phase).
     var textHeight = (_nameSize?.height ?? 11) + namePadding;
     var textWidth = _nameSize?.width ?? component.width;
     var maxWorldTextHeight = textHeight / Stage.minZoom;
     var maxWorldTextWidth = textWidth / Stage.minZoom;
-    _aabb = AABB.fromValues(component.x, component.y - maxWorldTextHeight,
+    aabb = AABB.fromValues(component.x, component.y - maxWorldTextHeight,
         component.x + maxWorldTextWidth, component.y);
-    stage?.updateBounds(this);
   }
 
   @override
   void removedFromStage(Stage stage) {
     super.removedFromStage(stage);
-    stage.cancelDebounce(updateBounds);
+    stage?.cancelDebounce(_updateName);
   }
 
   @override
@@ -78,13 +70,13 @@ class StageArtboardTitle extends StageItem<Artboard>
   @override
   void draw(Canvas canvas) {
     // If you want to see the broadphase, comment this back in.
-    // if (selectionState.value != SelectionState.none) {
+    // if (component.stageItem.selectionState.value != SelectionState.none) {
     //   canvas.drawRect(
     //     Rect.fromLTRB(
-    //       _aabb[0],
-    //       _aabb[1],
-    //       _aabb[2],
-    //       _aabb[3],
+    //       aabb[0],
+    //       aabb[1],
+    //       aabb[2],
+    //       aabb[3],
     //     ),
     //     StageItem.selectedPaint,
     //   );
@@ -117,7 +109,6 @@ class StageArtboardTitle extends StageItem<Artboard>
     canvas.restore();
   }
 
-  @override
   void markNameDirty() {
     stage?.debounce(_updateName);
   }
@@ -144,6 +135,6 @@ class StageArtboardTitle extends StageItem<Artboard>
         ? Size.zero
         : Size(boxes.last.right - boxes.first.left + 1,
             boxes.last.bottom - boxes.first.top + 1);
-    updateBounds();
+    _updateBounds();
   }
 }

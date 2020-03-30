@@ -26,9 +26,7 @@ class GradientStop extends GradientStopBase {
   }
 
   @override
-  void update(int dirt) {
-    // TODO: implement update
-  }
+  void update(int dirt) {}
 
   @override
   void parentChanged(ContainerComponent from, ContainerComponent to) {

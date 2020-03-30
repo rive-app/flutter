@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -14,8 +15,7 @@ import 'src/generated/artboard_base.dart';
 
 export 'src/generated/artboard_base.dart';
 
-abstract class ArtboardDelegate {
-  void markBoundsDirty();
+abstract class ArtboardDelegate extends BoundsDelegate {
   void markNameDirty();
 }
 
@@ -94,7 +94,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   void heightChanged(double from, double to) {
     super.heightChanged(from, to);
-    _delegate?.markBoundsDirty();
+
     addDirt(ComponentDirt.worldTransform);
   }
 
@@ -139,6 +139,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     if (dirt & ComponentDirt.worldTransform != 0) {
       path.reset();
       path.addRect(computeBounds(TransformSpace.world));
+      _delegate?.boundsChanged();
     }
   }
 
@@ -154,21 +155,21 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   void widthChanged(double from, double to) {
     super.widthChanged(from, to);
-    _delegate?.markBoundsDirty();
+
     addDirt(ComponentDirt.worldTransform);
   }
 
   @override
   void xChanged(double from, double to) {
     super.xChanged(from, to);
-    _delegate?.markBoundsDirty();
+
     addDirt(ComponentDirt.worldTransform);
   }
 
   @override
   void yChanged(double from, double to) {
     super.yChanged(from, to);
-    _delegate?.markBoundsDirty();
+
     addDirt(ComponentDirt.worldTransform);
   }
 

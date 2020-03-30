@@ -8,6 +8,8 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 /// panel row.
 const double _popoutToPanelOffset = 10;
 
+typedef PopupCallback = void Function(Popup);
+
 /// A wrapper widget for an inspector row that contains a popout/overflow menu
 /// triggered by clicking on the options icon. The [contentBuilder] builds the
 /// rest of the inspector row while the popup builder gets called to populate
@@ -23,9 +25,17 @@ class InspectorPopout extends StatefulWidget {
   /// pressed.
   final WidgetBuilder popupBuilder;
 
+  /// Called when the popup is opened.
+  final PopupCallback opened;
+
+  /// Called when the popup is closed.
+  final PopupCallback closed;
+
   const InspectorPopout({
     @required this.contentBuilder,
     @required this.popupBuilder,
+    this.opened,
+    this.closed,
     Key key,
   }) : super(key: key);
   @override
@@ -89,11 +99,13 @@ class _InspectorPopoutState extends State<InspectorPopout> {
       context,
       onClose: () {
         setState(() {
+          widget.closed?.call(_popup);
           _popup = null;
         });
       },
       builder: widget.popupBuilder,
     );
+    widget.opened?.call(popup);
 
     setState(() {
       _popup = popup;
