@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'package:rive_api/owner.dart';
+import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
 class RiveTeam extends RiveOwner {
