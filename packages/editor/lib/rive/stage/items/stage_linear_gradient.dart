@@ -1,14 +1,38 @@
 import 'dart:ui';
 
-import 'package:rive_core/bounds_delegate.dart';
+import 'package:meta/meta.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
+import 'package:rive_core/shapes/paint/linear_gradient.dart';
+import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
+abstract class StageGradientInterface {
+  final Set<StageGradientStop> stops = {};
+
+  void addStop(StageGradientStop stop) {
+    if (stops.add(stop)) {
+      stopsChanged();
+    }
+  }
+
+  void removeStop(StageGradientStop stop) {
+    if (stops.remove(stop)) {
+      stopsChanged();
+    }
+  }
+
+  @protected
+  void stopsChanged();
+
+  core.LinearGradient get component;
+}
+
 class StageLinearGradient extends StageItem<core.LinearGradient>
-    with BoundsDelegate {
+    with StageGradientInterface
+    implements GradientDelegate {
   static Paint border = Paint()
     ..style = PaintingStyle.stroke
     ..color = const Color(0x40000000);
@@ -17,16 +41,14 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
     ..style = PaintingStyle.stroke
     ..color = const Color(0xFFFFFFFF);
 
-  AABB _aabb;
-
-  @override
-  AABB get aabb => _aabb;
-
   @override
   bool get isSelectable => false;
 
   @override
   bool get isAutomatic => false;
+
+  @override
+  int get drawOrder => 2;
 
   @override
   bool initialize(core.LinearGradient object) {
@@ -37,8 +59,11 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
     return true;
   }
 
-  Offset _start;
-  Offset _end;
+  Offset _startOffset;
+  Offset _endOffset;
+
+  Vec2D _start;
+  Vec2D _end;
 
   void _update() {
     // We want the start and end in world transform space, regardless of how the
@@ -48,16 +73,40 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
         component.shapePaintContainer.worldTransform,
         component.artboard.originWorld);
 
-    var start = Vec2D.transformMat2D(Vec2D(), component.start, world);
-    var end = Vec2D.transformMat2D(Vec2D(), component.end, world);
+    _start = Vec2D.transformMat2D(Vec2D(), component.start, world);
+    _end = Vec2D.transformMat2D(Vec2D(), component.end, world);
 
     // Compute world transform of start/end points expand by our stroke
     // dimensions (make sure the bounding box is at least that wide/high).
-    _aabb = AABB.fromPoints([start, end], expand: 2);
-    _start = Offset(start[0], start[1]);
-    _end = Offset(end[0], end[1]);
+    aabb = AABB.fromPoints([_start, _end], expand: 2);
+    _startOffset = Offset(_start[0], _start[1]);
+    _endOffset = Offset(_end[0], _end[1]);
+  }
 
-    stage?.updateBounds(this);
+  @override
+  void stopsChanged() {
+    // We're guaranteed that the bounds will already have updated by now so we
+    // can safely just position the stops.
+    var diff = Vec2D.subtract(Vec2D(), _end, _start);
+
+    var first = component.gradientStops.first;
+    var last = component.gradientStops.last;
+
+    for (final stop in stops) {
+      // Place first and last at the start and end positions respectively
+      // (regardless of what their gradient position actually is within the
+      // range). Note that stops are not ordered but component.gradientStops
+      // are.
+      if (stop.component == first) {
+        stop.update(_start);
+      } else if (stop.component == last) {
+        stop.update(_end);
+      } else {
+        var pos = Vec2D.scale(Vec2D(), diff, stop.component.position);
+        Vec2D.add(pos, _start, pos);
+        stop.update(pos);
+      }
+    }
   }
 
   @override
@@ -68,7 +117,7 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
     border.strokeWidth = 3 / stage.viewZoom;
     line.strokeWidth = 1 / stage.viewZoom;
 
-    canvas.drawLine(_start, _end, border);
-    canvas.drawLine(_start, _end, line);
+    canvas.drawLine(_startOffset, _endOffset, border);
+    canvas.drawLine(_startOffset, _endOffset, line);
   }
 }

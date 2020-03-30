@@ -10,7 +10,6 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageArtboardTitle extends StageItem<Artboard> {
   final StageArtboard stageArtboard;
-  AABB _aabb;
   Paragraph _nameParagraph;
   Size _nameSize;
   Color _lastTextColor;
@@ -35,9 +34,6 @@ class StageArtboardTitle extends StageItem<Artboard> {
   void boundsChanged() => _updateBounds();
 
   @override
-  AABB get aabb => _aabb;
-
-  @override
   int get drawOrder => 0;
 
   void _updateBounds() {
@@ -46,9 +42,8 @@ class StageArtboardTitle extends StageItem<Artboard> {
     var textWidth = _nameSize?.width ?? component.width;
     var maxWorldTextHeight = textHeight / Stage.minZoom;
     var maxWorldTextWidth = textWidth / Stage.minZoom;
-    _aabb = AABB.fromValues(component.x, component.y - maxWorldTextHeight,
+    aabb = AABB.fromValues(component.x, component.y - maxWorldTextHeight,
         component.x + maxWorldTextWidth, component.y);
-    stage?.updateBounds(this);
   }
 
   @override
@@ -75,17 +70,17 @@ class StageArtboardTitle extends StageItem<Artboard> {
   @override
   void draw(Canvas canvas) {
     // If you want to see the broadphase, comment this back in.
-    if (selectionState.value != SelectionState.none) {
-      canvas.drawRect(
-        Rect.fromLTRB(
-          _aabb[0],
-          _aabb[1],
-          _aabb[2],
-          _aabb[3],
-        ),
-        StageItem.selectedPaint,
-      );
-    }
+    // if (component.stageItem.selectionState.value != SelectionState.none) {
+    //   canvas.drawRect(
+    //     Rect.fromLTRB(
+    //       aabb[0],
+    //       aabb[1],
+    //       aabb[2],
+    //       aabb[3],
+    //     ),
+    //     StageItem.selectedPaint,
+    //   );
+    // }
 
     var originWorld = component.originWorld;
 

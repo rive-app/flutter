@@ -9,7 +9,6 @@ import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
-  AABB _aabb;
   StageArtboardTitle _title;
 
   @override
@@ -22,18 +21,14 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   }
 
   @override
-  AABB get aabb => _aabb;
-
-  @override
   int get drawOrder => 0;
 
   @override
   void boundsChanged() => _updateBounds();
 
   void _updateBounds() {
-    _aabb = AABB.fromValues(component.x, component.y,
+    aabb = AABB.fromValues(component.x, component.y,
         component.x + component.width, component.y + component.height);
-    stage?.updateBounds(this);
     _title?.boundsChanged();
     // Mark bounds dirty of other stageItems within the artboard.
     component.forEachComponent((component) {

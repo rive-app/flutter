@@ -12,6 +12,10 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/shapes/paint/linear_gradient_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/linear_gradient_base.dart';
 
+abstract class GradientDelegate extends BoundsDelegate {
+  void stopsChanged();
+}
+
 /// A core linear gradient. Can be added as a child to a [Shape]'s [Fill] or
 /// [Stroke] to paint that Fill or Stroke with a gradient. This is the
 /// foundation for the RadialGradient which is very similar but also has a
@@ -21,7 +25,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   /// this container.
   final List<GradientStop> gradientStops = [];
 
-  BoundsDelegate _delegate;
+  GradientDelegate _delegate;
 
   /// Event triggered whenever a stops property changes.
   final Event stopsChanged = Event();
@@ -80,7 +84,8 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   @override
   void update(int dirt) {
     // Do the stops need to be re-ordered?
-    if (dirt & ComponentDirt.stops != 0) {
+    bool stopsChanged = dirt & ComponentDirt.stops != 0;
+    if (stopsChanged) {
       gradientStops.sort((a, b) => a.position.compareTo(b.position));
     }
 
@@ -118,6 +123,9 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     if (worldTransformed) {
       _delegate?.boundsChanged();
     }
+    if (stopsChanged) {
+      _delegate?.stopsChanged();
+    }
   }
 
   @protected
@@ -127,7 +135,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
 
   @override
   void userDataChanged(dynamic from, dynamic to) {
-    if (to is BoundsDelegate) {
+    if (to is GradientDelegate) {
       _delegate = to;
     } else {
       _delegate = null;

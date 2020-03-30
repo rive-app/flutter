@@ -127,8 +127,16 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
     _stage?.markNeedsAdvance();
   }
 
-  /// Provide an aabb for this stage item.
-  AABB get aabb;
+  AABB _aabb = AABB();
+  
+  AABB get aabb => _aabb;
+  set aabb(AABB value) {
+    if (AABB.areEqual(value, _aabb)) {
+      return;
+    }
+    _aabb = value;
+    stage?.updateBounds(this);
+  }
 
   void draw(Canvas canvas) {}
 }

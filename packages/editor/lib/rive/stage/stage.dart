@@ -11,6 +11,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/ellipse.dart';
+import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -22,6 +23,7 @@ import 'package:rive_editor/rive/stage/aabb_tree.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_ellipse.dart';
+import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
@@ -619,6 +621,7 @@ class Stage extends Debouncer {
     PointsPathBase.typeKey: () => StagePath(),
     StraightVertexBase.typeKey: () => StageVertex(),
     LinearGradientBase.typeKey: () => StageLinearGradient(),
+    GradientStopBase.typeKey: () => StageGradientStop(),
   };
 
   @override

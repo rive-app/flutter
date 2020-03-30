@@ -49,10 +49,9 @@ abstract class InspectingColor {
       return;
     }
     _isEditing = value;
-    if(value) {
+    if (value) {
       editorOpened();
-    }
-    else {
+    } else {
       editorClosed();
     }
   }
@@ -534,6 +533,9 @@ class _ShapesInspectingColor extends InspectingColor {
           }
           _listenTo(gradient.stopsChanged);
           for (final stop in gradient.gradientStops) {
+            if (stop.stageItem != null) {
+              wantOnStage.add(stop.stageItem);
+            }
             _listenToCoreProperty(stop, GradientStopBase.positionPropertyKey);
             _listenToCoreProperty(stop, GradientStopBase.colorValuePropertyKey);
           }
