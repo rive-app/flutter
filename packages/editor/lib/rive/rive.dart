@@ -270,11 +270,9 @@ class Rive with RiveFileDelegate {
   void openTab(RiveTabItem value) {
     if (!value.closeable) {
       // hackity hack hack, this is the files tab.
-      fileBrowsers?.forEach((FileBrowser fileBrowser) {
-        fileBrowser.load(this);
-      });
+      fileBrowsers?.forEach((fileBrowser) => fileBrowser.load(this));
     }
-    if (value.name == 'Changelog') {}
+    // if (value.name == 'Changelog') {}
 
     selectedTab.value = value;
   }

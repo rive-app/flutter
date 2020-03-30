@@ -18,7 +18,7 @@ import 'package:rive_editor/widgets/files_view/screen.dart';
 const kTreeItemHeight = 35.0;
 
 class FileBrowser extends FileBrowserController {
-  Set<RiveFile> _queuedFileDetails = {};
+  final Set<RiveFile> _queuedFileDetails = {};
   Timer _detailsTimer;
 
   /// Controller for our files in the folder tree.
@@ -61,7 +61,7 @@ class FileBrowser extends FileBrowserController {
     return _count == 0 ? 1 : _count;
   }
 
-  RiveOwner get owener => _owner;
+  RiveOwner get owner => _owner;
   RiveFolder get currentFolder => _current;
   ValueListenable<bool> get draggingState => _draggingState;
   bool get isDragging =>

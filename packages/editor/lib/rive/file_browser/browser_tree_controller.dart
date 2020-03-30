@@ -1,11 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/file_browser/file_browser.dart';
-import 'package:rive_editor/rive/rive.dart';
+
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 
-import 'rive_folder.dart';
+import 'package:rive_editor/rive/file_browser/file_browser.dart';
+import 'package:rive_editor/rive/file_browser/rive_folder.dart';
+import 'package:rive_editor/rive/rive.dart';
 
 /// TreeController for the Rive folders displayed in the FileBrowser screen.
 class FolderTreeController extends TreeController<RiveFolder> {

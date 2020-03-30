@@ -67,7 +67,7 @@ class FolderTreeView extends StatelessWidget {
           child: Center(
             child: TintedIcon(
               // TODO: tree should not need to know about teams users
-              // this shoudl be done some other way.
+              // this should be done some other way.
               // maybe folder tree's have a 'special' header node
               // maybe we just have a different sliver at the screen layer
               // for it
