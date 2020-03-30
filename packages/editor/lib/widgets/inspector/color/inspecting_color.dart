@@ -127,6 +127,7 @@ abstract class InspectingColor {
 class _ShapesInspectingColor extends InspectingColor {
   // Keep track of what we've added to the stage so far.
   final Set<StageItem> _addedToStage = {};
+  Stage _stage;
 
   @override
   bool get canChangeType => true;
@@ -569,6 +570,9 @@ class _ShapesInspectingColor extends InspectingColor {
   }
 
   Stage findStage() {
+    if (_stage != null) {
+      return _stage;
+    }
     // Lots of work to find the stage...is there any case where this isn't
     // valid? The Mutator will always have a shape paint container, which is
     // currently either an artboard or a shape (both components) which always
@@ -577,7 +581,7 @@ class _ShapesInspectingColor extends InspectingColor {
     // file (when stage is created with a file).
     var firstShapeContainer =
         shapePaints.first.paintMutator.shapePaintContainer as Component;
-    return firstShapeContainer.stageItem.stage;
+    return _stage = firstShapeContainer.stageItem.stage;
   }
 
   void _notified() {

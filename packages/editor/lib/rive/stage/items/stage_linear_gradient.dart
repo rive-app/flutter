@@ -88,6 +88,14 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
     // We're guaranteed that the bounds will already have updated by now so we
     // can safely just position the stops.
     var diff = Vec2D.subtract(Vec2D(), _end, _start);
+    var gradientStops = component.gradientStops;
+
+    // This only works if we have at least two gradient stops. When we implement
+    // deleting the stops, we need to make sure to not allow deleting the final
+    // last two stops (which is common in most editors).
+    if (gradientStops.length < 2) {
+      return;
+    }
 
     var first = component.gradientStops.first;
     var last = component.gradientStops.last;
