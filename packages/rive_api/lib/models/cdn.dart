@@ -4,7 +4,7 @@ class RiveCDN {
   final String base;
   final String params;
 
-  RiveCDN({this.base, this.params});
+  const RiveCDN({this.base, this.params});
 
   factory RiveCDN.fromData(Map<String, dynamic> data) => RiveCDN(
         base: data.getString('base'),

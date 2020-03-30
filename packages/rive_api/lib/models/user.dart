@@ -1,27 +1,26 @@
-import 'package:rive_api/owner.dart';
+import 'package:meta/meta.dart';
 
+import 'package:rive_api/owner.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
 class RiveUser extends RiveOwner {
-  final int ownerId;
   final String username;
-  final String name;
   final String avatar;
   final bool isAdmin;
   final bool isPaid;
   final int notificationCount;
   final bool isVerified;
 
-  RiveUser({
-    this.ownerId,
-    this.username,
-    this.name,
+  const RiveUser({
+    @required int ownerId,
+    @required String name,
+    @required this.username,
     this.avatar,
     this.isAdmin = false,
     this.isPaid = false,
     this.notificationCount = 0,
     this.isVerified = false,
-  });
+  }) : super(id: ownerId, name: name);
 
   factory RiveUser.fromData(Map<String, dynamic> data,
       {bool requireSignin = true}) {
