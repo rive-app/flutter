@@ -36,9 +36,8 @@ class TreeScrollView extends StatelessWidget {
 
             ...slivers,
 
-            // Add top padding (can't use Sliver padding, as using one with empty
-            // sliver causes bugs with virtualization).
-            SliverToBoxAdapter(child: SizedBox(height: style.padding.top)),
+            // Add bottom padding
+            SliverToBoxAdapter(child: SizedBox(height: style.padding.bottom)),
           ]),
     );
   }

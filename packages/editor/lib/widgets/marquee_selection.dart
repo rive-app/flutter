@@ -29,7 +29,8 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
   @override
   void initState() {
     widget.controller.addListener(() {
-      widget.rive.fileBrowser.scrollOffset.value = widget.controller.offset;
+      widget.rive.activeFileBrowser.value.scrollOffset.value =
+          widget.controller.offset;
     });
     super.initState();
   }
@@ -48,6 +49,7 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
   @override
   Widget build(BuildContext context) {
     final _rive = RiveContext.of(context);
+    final _fileBrowser = _rive.activeFileBrowser.value;
     return LayoutBuilder(
       builder: (_, dimens) => Listener(
         onPointerDown: (event) {
@@ -59,13 +61,13 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
           _end = event.localPosition;
           if (mounted) setState(() {});
           final _rect = Rect.fromPoints(_start, _end);
-          _rive.fileBrowser.rectChanged(_rect, _rive);
+          _fileBrowser.rectChanged(_rect, _rive);
         },
         onPointerUp: (event) {
           _start = null;
           _end = null;
           _drag(false);
-          _rive.fileBrowser.rectChanged(null, _rive);
+          _fileBrowser.rectChanged(null, _rive);
         },
         behavior: HitTestBehavior.opaque,
         onPointerSignal: (details) {
@@ -80,7 +82,7 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
             } else {
               final _newOffset = _offset + details.scrollDelta.dy;
               _controller.jumpTo(_newOffset);
-              widget.rive.fileBrowser.scrollOffset.value = _newOffset;
+              _fileBrowser.scrollOffset.value = _newOffset;
             }
           }
         },
@@ -92,7 +94,7 @@ class _MarqueeScrollViewState extends State<MarqueeScrollView> {
             ),
             if (_enable && _dragging) ...[
               ValueListenableBuilder<double>(
-                valueListenable: widget.rive.fileBrowser.scrollOffset,
+                valueListenable: _fileBrowser.scrollOffset,
                 builder: (context, offset, child) {
                   // if (_start.dy < _end.dy) {
                   //   _start = Offset(_start.dx, _start.dy - offset);

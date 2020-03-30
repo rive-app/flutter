@@ -23,7 +23,7 @@ class RiveTestApi extends Mock implements RiveApi {
 class EditorRiveFilesTestApi extends Mock
     implements RiveFilesApi<RiveFolder, RiveFile> {
   FileBrowser get browser => _fileBrowser;
-  final _fileBrowser = FileBrowser();
+  final _fileBrowser = FileBrowser(null);
 
   @override
   RiveApi get api => RiveTestApi();

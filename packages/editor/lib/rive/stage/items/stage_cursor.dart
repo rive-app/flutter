@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/icon_cache.dart';

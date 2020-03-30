@@ -9,13 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/teams.dart';
+import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 import 'package:rive_api/models/team.dart';
 
 import 'package:rive_core/client_side_player.dart';
@@ -95,7 +96,15 @@ class Rive with RiveFileDelegate {
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
 
-  final FileBrowser fileBrowser = FileBrowser();
+  final ValueNotifier<FileBrowser> activeFileBrowser =
+      ValueNotifier<FileBrowser>(null);
+  final List<FileBrowser> fileBrowsers = [];
+
+  /// Controllers for teams that are associated with our account.
+  final ValueNotifier<List<FolderTreeController>> folderTreeControllers =
+      ValueNotifier<List<FolderTreeController>>(null);
+  final ScrollController treeScrollController = ScrollController();
+
   final _user = ValueNotifier<RiveUser>(null);
 
   Rive({this.iconCache, this.focusNode});
@@ -128,10 +137,10 @@ class Rive with RiveFileDelegate {
   Future<RiveState> initialize() async {
     assert(state.value == RiveState.init);
     bool ready = await api.initialize();
-    fileBrowser.initialize(this);
     if (!ready) {
       return _state.value = RiveState.catastrophe;
     }
+
     await _updateUserWithRetry();
 
     // Start the frame callback loop.
@@ -210,8 +219,7 @@ class Rive with RiveFileDelegate {
 
       openTab(tabs.value.first);
 
-      // Load the teams to which the user belongs
-      teams.value = await _RiveTeamApi(api).teams;
+      await reloadTeams();
 
       // TODO: load last opened file list (from localdata)
       return me;
@@ -219,6 +227,39 @@ class Rive with RiveFileDelegate {
       _state.value = RiveState.login;
     }
     return null;
+  }
+
+  Future<void> reloadTeams() async {
+    // Load the teams to which the user belongs
+    fileBrowsers.clear();
+    teams.value = await _RiveTeamApi(api).teams;
+
+    final fileBrowser = FileBrowser(user.value);
+    fileBrowser.initialize(this);
+    await fileBrowser.load(this);
+    fileBrowsers.add(fileBrowser);
+
+    teams.value.forEach((RiveTeam team) {
+      var _tmp = FileBrowser(team);
+      _tmp.initialize(this);
+      _tmp.load(this);
+      fileBrowsers.add(_tmp);
+    });
+
+    activeFileBrowser.value = fileBrowser;
+    folderTreeControllers.value = fileBrowsers
+        .map((FileBrowser fileBrowser) => fileBrowser.myTreeController.value)
+        .toList();
+
+    openActiveFileBrowser();
+  }
+
+  void openActiveFileBrowser() {
+    activeFileBrowser.value.openFolder(
+        activeFileBrowser.value.myTreeController.value.data.isEmpty
+            ? null
+            : activeFileBrowser.value.myTreeController.value.data.first,
+        false);
   }
 
   void closeTab(RiveTabItem value) {
@@ -229,9 +270,9 @@ class Rive with RiveFileDelegate {
   void openTab(RiveTabItem value) {
     if (!value.closeable) {
       // hackity hack hack, this is the files tab.
-      fileBrowser.load();
+      fileBrowsers?.forEach((fileBrowser) => fileBrowser.load(this));
     }
-    if (value.name == 'Changelog') {}
+    // if (value.name == 'Changelog') {}
 
     selectedTab.value = value;
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 
 import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';

@@ -1,6 +1,6 @@
 import 'package:core/coop/player.dart';
 import 'package:flutter/foundation.dart';
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 
 abstract class ClientSidePlayerDelegate {
   void cursorChanged();

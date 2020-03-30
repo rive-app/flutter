@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/rive.dart';

@@ -169,7 +169,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
           initialValue: sub.cardNumber,
           inputFormatters: <TextInputFormatter>[
             WhitelistingTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(19),
+            LengthLimitingTextInputFormatter(16),
             CardNumberFormatter()
           ],
           decoration: InputDecoration(
