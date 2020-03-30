@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
-import 'package:rive_editor/widgets/dialog/team_settings_header.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/team_settings_header.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:tree_widget/flat_tree_item.dart';
@@ -107,7 +107,6 @@ class _SettingsPanelState extends State<SettingsPanel> {
             constraints: const BoxConstraints(
               minWidth: 85,
               maxWidth: 585,
-              // maxHeight: 300,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
