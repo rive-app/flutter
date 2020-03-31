@@ -202,12 +202,18 @@ class ScrollingTabList extends StatefulWidget {
 class _ScrollingTabListState extends State<ScrollingTabList> {
   final ScrollController _controller = ScrollController();
 
+  static const double fadeWidth = 10;
+  double _fadeOpacity;
+
   bool _showFade = false;
   void _scrolled() {
     var show = _controller.offset > 0;
-    if (show != _showFade) {
+
+    double opacity = (_controller.offset / fadeWidth).clamp(0, 1).toDouble();
+    if (show != _showFade || opacity != _fadeOpacity) {
       setState(() {
         _showFade = show;
+        _fadeOpacity = opacity;
       });
     }
   }
@@ -226,6 +232,8 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = RiveTheme.of(context);
+
     return Stack(
       children: [
         Positioned.fill(
@@ -260,12 +268,10 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
                             style: TextStyle(
                               fontSize: 13,
                               color: selected
-                                  ? RiveTheme.of(context).colors.tabTextSelected
+                                  ? theme.colors.tabTextSelected
                                   : hovered
-                                      ? RiveTheme.of(context)
-                                          .colors
-                                          .tabTextSelected
-                                      : RiveTheme.of(context).colors.tabText,
+                                      ? theme.colors.tabTextSelected
+                                      : theme.colors.tabText,
                             ),
                           ),
                         ),
@@ -287,12 +293,16 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
         ),
         Positioned(
           left: 0,
-          width: 10,
+          width: fadeWidth,
           top: 0,
           bottom: 0,
           child: _showFade
-              ? const CustomPaint(
-                  painter: LeftFade(),
+              ? CustomPaint(
+                  painter: LeftFade(
+                    from: theme.colors.tabRiveBackground
+                        .withOpacity(_fadeOpacity),
+                    to: theme.colors.tabRiveBackground.withOpacity(0),
+                  ),
                 )
               : const SizedBox(),
         ),
@@ -305,7 +315,9 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
 /// side of the tab list to make the file tabs look like they're fading out as
 /// they approach the static ones.
 class LeftFade extends CustomPainter {
-  const LeftFade();
+  final Color from;
+  final Color to;
+  const LeftFade({this.from, this.to});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -314,15 +326,16 @@ class LeftFade extends CustomPainter {
     canvas.drawRect(
       rect,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           colors: [
-            Color(0xFF323232),
-            Color(0x00323232),
+            from,
+            to,
           ],
         ).createShader(rect),
     );
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(LeftFade oldDelegate) =>
+      oldDelegate.from != from || oldDelegate.to != to;
 }
