@@ -70,18 +70,23 @@ class _TeamMembersState extends State<TeamMembers> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                ComboBox<InviteType>(
-                  value: _selectedInviteType,
-                  change: (type) => setState(() {
-                    _selectedInviteType = type;
-                  }),
-                  alignment: Alignment.topRight,
-                  options: InviteType.values,
-                  toLabel: (option) => describeEnum(option).capsFirst,
-                  popupWidth: 116,
-                  underline: false,
-                  valueColor: colors.fileBackgroundDarkGrey,
-                  sizing: ComboSizing.content,
+                SizedBox(
+                  height: 30,
+                  child: Center(
+                    child: ComboBox<InviteType>(
+                      value: _selectedInviteType,
+                      change: (type) => setState(() {
+                        _selectedInviteType = type;
+                      }),
+                      alignment: Alignment.topRight,
+                      options: InviteType.values,
+                      toLabel: (option) => describeEnum(option).capsFirst,
+                      popupWidth: 116,
+                      underline: false,
+                      valueColor: colors.fileBackgroundDarkGrey,
+                      sizing: ComboSizing.content,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 20),
                 FlatIconButton(
