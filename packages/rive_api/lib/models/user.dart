@@ -41,5 +41,8 @@ class RiveUser extends RiveOwner {
   }
 
   @override
+  String get displayName => name ?? username;
+
+  @override
   String toString() => 'RiveUser($ownerId, @$username, \'$name\')';
 }
