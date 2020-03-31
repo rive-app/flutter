@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 const double riveDialogMinWidth = 300;
-const double riveDialogMaxWidth = 800;
+const double riveDialogMaxWidth = 880;
 const double riveDialogMinHeight = 300;
 
 Widget _riveDialogTransition(BuildContext context, Animation<double> animation,
@@ -28,40 +28,37 @@ Future<T> showRiveDialog<T>({
     pageBuilder: (BuildContext buildContext, Animation<double> animation,
         Animation<double> secondaryAnimation) {
       final Widget pageChild = Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(30),
         // TODO: material is too heavy to use here, replace with something
         // lighterweight that keeps text styled properly.
         // Look at wrapping in Theme/TextTheme
         child: Align(
           alignment: Alignment.topCenter,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 60.0),
-            child: Material(
-              type: MaterialType.transparency,
-              child: Container(
-                constraints: const BoxConstraints(
-                  // TODO: what should be the scale behavior? Talk to Guido
-                  minWidth: riveDialogMinWidth,
-                  maxWidth: riveDialogMaxWidth,
-                  minHeight: riveDialogMinHeight,
-                  maxHeight: double.infinity,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Builder(builder: builder),
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.4),
-                      blurRadius: 100,
-                      spreadRadius: 0,
-                      offset: const Offset(0, 50),
-                    )
-                  ],
-                ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              constraints: const BoxConstraints(
+                // TODO: what should be the scale behavior? Talk to Guido
+                minWidth: riveDialogMinWidth,
+                maxWidth: riveDialogMaxWidth,
+                minHeight: riveDialogMinHeight,
+                maxHeight: double.infinity,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Builder(builder: builder),
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.4),
+                    blurRadius: 100,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 50),
+                  )
+                ],
               ),
             ),
           ),
