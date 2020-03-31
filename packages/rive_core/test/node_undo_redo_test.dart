@@ -4,7 +4,7 @@ import 'package:rive_core/rive_file.dart';
 
 void main() {
   test('undo/redo node name', () {
-    final file = RiveFile('fake', 'fake');
+    final file = RiveFile('fake');
 
     const String name1 = 'First Name';
     const String name2 = 'Second Name';

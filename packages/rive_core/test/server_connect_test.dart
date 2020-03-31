@@ -18,7 +18,7 @@ void main() {
       expect(await server.listen(port: 8124), true);
 
       // Create fake server file.
-      final file = RiveFile('fake', 'fake',
+      final file = RiveFile('fake',
           overridePreferences: <String, dynamic>{
             "session": 22,
             "token": "fake",

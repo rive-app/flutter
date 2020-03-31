@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 
 /// Draws a path with custom paint and a nudge property.
 class StageView extends LeafRenderObjectWidget {
   /// The Rive context.
-  final Rive rive;
+  final OpenFileContext file;
   final Stage stage;
 
-  const StageView({this.rive, this.stage});
+  const StageView({this.file, this.stage});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _StageViewRenderObject()
-      ..rive = rive
+      ..file = file
       ..stage = stage;
   }
 
@@ -22,7 +22,7 @@ class StageView extends LeafRenderObjectWidget {
   void updateRenderObject(
       BuildContext context, covariant _StageViewRenderObject renderObject) {
     renderObject
-      ..rive = rive
+      ..file = file
       ..stage = stage;
   }
 
@@ -33,15 +33,15 @@ class StageView extends LeafRenderObjectWidget {
 }
 
 class _StageViewRenderObject extends RenderBox implements StageDelegate {
-  Rive _rive;
+  OpenFileContext _file;
 
-  Rive get rive => _rive;
-  set rive(Rive value) {
-    if (_rive == value) {
+  OpenFileContext get file => _file;
+  set file(OpenFileContext value) {
+    if (_file == value) {
       return;
     }
-    _rive = value;
-    _rive?.stage?.value?.delegate(this);
+    _file = value;
+    _file?.stage?.delegate(this);
     markNeedsPaint();
   }
 
@@ -71,11 +71,11 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
 
   @override
   void paint(PaintingContext context, Offset offset) =>
-    _stage.draw(context, offset, size);
+      _stage.draw(context, offset, size);
 
   void dispose() {
     _stage?.clearDelegate(this);
-    rive = null;
+    file = null;
   }
 
   @override

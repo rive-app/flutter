@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
+
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
-typedef RiveWidgetBuilder = Widget Function(BuildContext, Rive);
-typedef RiveHoverWidgetBuilder = Widget Function(BuildContext, Rive, bool);
+typedef OpenFileWidgetBuilder = Widget Function(BuildContext, OpenFileContext);
+typedef OpenFileHoverWidgetBuilder = Widget Function(
+    BuildContext, OpenFileContext, bool);
 
 /// Create a widget builder that grabs the Rive context from Provider.
 class RiveBuilder extends StatelessWidget {
-  final RiveWidgetBuilder builder;
+  final OpenFileWidgetBuilder builder;
 
   const RiveBuilder({Key key, this.builder}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return builder(context, RiveContext.of(context));
+    return builder(context, ActiveFile.of(context));
   }
 }
 
-/// A button that triggers a popup and gets the current Rive context.
+/// A button that triggers a popup and gets the current OpenFile context.
 class RivePopupButton extends StatefulWidget {
   final List<PopupContextItem> contextItems;
-  final RiveHoverWidgetBuilder iconBuilder;
+  final OpenFileHoverWidgetBuilder iconBuilder;
   final bool showChevron;
   final PopupOpened<PopupContextItem> opened;
   final double _width;

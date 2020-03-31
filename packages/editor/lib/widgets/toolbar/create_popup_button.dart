@@ -20,7 +20,7 @@ class CreatePopupButton extends StatelessWidget {
     return ToolPopupButton(
       tip: const Tip(label: 'Create Tools'),
       defaultIcon: 'tool-create',
-      makeItems: (rive) => <PopupContextItem>[
+      makeItems: (file) => <PopupContextItem>[
         PopupContextItem(
           'Shape',
           icon: 'tool-shapes',
@@ -28,18 +28,19 @@ class CreatePopupButton extends StatelessWidget {
             ToolPopupItem(
               'Rectangle',
               icon: RectangleTool.instance.icon,
-              notifier: rive.stage.value.toolNotifier,
-              isSelected: () => rive.stage.value.tool == RectangleTool.instance,
+              notifier: file.stage.toolNotifier,
+              isSelected: () => file.stage.tool == RectangleTool.instance,
               shortcut: ShortcutAction.rectangleTool,
-              select: () => rive.triggerAction(ShortcutAction.rectangleTool),
+              select: () =>
+                  file.rive.triggerAction(ShortcutAction.rectangleTool),
             ),
             ToolPopupItem(
               'Ellipse',
               icon: EllipseTool.instance.icon,
-              notifier: rive.stage.value.toolNotifier,
-              isSelected: () => rive.stage.value.tool == EllipseTool.instance,
+              notifier: file.stage.toolNotifier,
+              isSelected: () => file.stage.tool == EllipseTool.instance,
               shortcut: ShortcutAction.ellipseTool,
-              select: () => rive.triggerAction(ShortcutAction.ellipseTool),
+              select: () => file.rive.triggerAction(ShortcutAction.ellipseTool),
             ),
             PopupContextItem(
               'Polygon',
@@ -54,9 +55,9 @@ class CreatePopupButton extends StatelessWidget {
             ToolPopupItem(
               'Triangle',
               icon: TriangleTool.instance.icon,
-              notifier: rive.stage.value.toolNotifier,
-              isSelected: () => rive.stage.value.tool == TriangleTool.instance,
-              select: () => rive.stage.value.tool = TriangleTool.instance,
+              notifier: file.stage.toolNotifier,
+              isSelected: () => file.stage.tool == TriangleTool.instance,
+              select: () => file.stage.tool = TriangleTool.instance,
             ),
           ],
           select: () {},
@@ -64,21 +65,21 @@ class CreatePopupButton extends StatelessWidget {
         ToolPopupItem(
           'Pen',
           icon: 'tool-pen',
-          notifier: rive.stage.value.toolNotifier,
-          isSelected: () => rive.stage.value.tool == PenTool.instance,
+          notifier: file.stage.toolNotifier,
+          isSelected: () => file.stage.tool == PenTool.instance,
           shortcut: ShortcutAction.penTool,
           select: () {
-            rive.stage.value.tool = PenTool.instance;
+            file.stage.tool = PenTool.instance;
           },
         ),
         PopupContextItem.separator(),
         ToolPopupItem(
           'Artboard',
           icon: ArtboardTool.instance.icon,
-          notifier: rive.stage.value.toolNotifier,
-          isSelected: () => rive.stage.value.tool == ArtboardTool.instance,
+          notifier: file.stage.toolNotifier,
+          isSelected: () => file.stage.tool == ArtboardTool.instance,
           shortcut: ShortcutAction.artboardTool,
-          select: () => rive.triggerAction(ShortcutAction.artboardTool),
+          select: () => file.rive.triggerAction(ShortcutAction.artboardTool),
         ),
         PopupContextItem(
           'Bone',
@@ -89,11 +90,11 @@ class CreatePopupButton extends StatelessWidget {
         ToolPopupItem(
           'Node',
           icon: 'tool-node',
-          notifier: rive.stage.value.toolNotifier,
-          isSelected: () => rive.stage.value.tool == NodeTool.instance,
+          notifier: file.stage.toolNotifier,
+          isSelected: () => file.stage.tool == NodeTool.instance,
           shortcut: ShortcutAction.nodeTool,
           select: () {
-            rive.stage.value.tool = NodeTool.instance;
+            file.stage.tool = NodeTool.instance;
           },
         ),
         PopupContextItem(

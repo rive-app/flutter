@@ -9,7 +9,6 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/points_path.dart';
@@ -18,7 +17,7 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_editor/constants.dart';
-import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
@@ -62,11 +61,8 @@ class Stage extends Debouncer {
   static const double minZoom = 0.1;
   static const double maxZoom = 8;
 
-  /// Reference to the Rive context for the app.
-  final Rive rive;
-
-  /// Reference to the current riveFile this stage represents.
-  final RiveFile riveFile;
+  /// Reference to the file that owns this stage.
+  final OpenFileContext file;
 
   final Mat2D _viewTransform = Mat2D();
   final Mat2D _inverseViewTransform = Mat2D();
@@ -287,7 +283,7 @@ class Stage extends Debouncer {
   void mouseMove(int button, double x, double y) {
     _computeWorldMouse(x, y);
 
-    rive.file.value.cursorMoved(_worldMouse[0], _worldMouse[1]);
+    file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
 
     AABB viewAABB = AABB.fromValues(
         _worldMouse[0], _worldMouse[1], _worldMouse[0] + 1, _worldMouse[1] + 1);
@@ -328,7 +324,7 @@ class Stage extends Debouncer {
         } else {
           if (_hoverItem != null) {
             _mouseDownSelected = true;
-            rive.select(_hoverItem);
+            file.select(_hoverItem);
           } else {
             _mouseDownSelected = false;
           }
@@ -341,7 +337,7 @@ class Stage extends Debouncer {
 
   void mouseDrag(int button, double x, double y) {
     _computeWorldMouse(x, y);
-    rive.file.value.cursorMoved(_worldMouse[0], _worldMouse[1]);
+    file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
     switch (button) {
       case 2:
         double dx = x - _lastMousePosition[0];
@@ -366,7 +362,7 @@ class Stage extends Debouncer {
             _activeTool = tool;
             _activeTool.setEditMode(activeEditMode);
             (_activeTool as DraggableTool).startDrag(
-                rive.selection.items.whereType<StageItem>(),
+                file.selection.items.whereType<StageItem>(),
                 artboard,
                 worldMouse);
           } else {
@@ -391,10 +387,10 @@ class Stage extends Debouncer {
     if (_activeTool is DraggableTool && _activeTool != null) {
       (_activeTool as DraggableTool).endDrag();
       _activeTool = null;
-      rive.file.value.captureJournalEntry();
+      file.core.captureJournalEntry();
       markNeedsAdvance();
     } else if (!_mouseDownSelected) {
-      rive.selection.clear();
+      file.selection.clear();
     }
   }
 
@@ -409,16 +405,16 @@ class Stage extends Debouncer {
 
   // TODO: Get actual active artboard, not just the first one.
   Artboard get activeArtboard {
-    if (riveFile.artboards.isEmpty) {
+    if (file.core.artboards.isEmpty) {
       return null;
     }
-    return riveFile.artboards.first;
+    return file.core.artboards.first;
   }
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 
-  Stage(this.rive, this.riveFile) {
-    for (final object in riveFile.objects) {
+  Stage(this.file) {
+    for (final object in file.core.objects) {
       if (object is Component) {
         initComponent(object);
       }
@@ -428,7 +424,7 @@ class Stage extends Debouncer {
   void markNeedsAdvance() {
     if (!_needsAdvance) {
       _needsAdvance = true;
-      rive.markNeedsAdvance();
+      file.markNeedsAdvance();
       _delegate?.stageNeedsAdvance();
     }
   }
@@ -567,7 +563,7 @@ class Stage extends Debouncer {
     var canvas = context.canvas;
 
     // Clear bg.
-    var backboardColor = riveFile.backboard.color;
+    var backboardColor = file.core.backboard.color;
     canvas.drawRect(
         offset & size,
         Paint()

@@ -78,7 +78,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
   }
 
   Future<CachedImage> _fromCache(String filename) async {
-    var cache = stage.rive.iconCache;
+    var cache = stage.file.rive.iconCache;
     var cachedImage = cache.image(filename);
     if (cachedImage == null) {
       return cache.load(filename);
