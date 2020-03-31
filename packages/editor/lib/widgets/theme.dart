@@ -73,6 +73,7 @@ class RiveColors {
 
   Color get animateToggleButton => const Color(0xFF444444);
   Color get inactiveText => const Color(0xFF888888);
+  Color get inactiveButtonText => const Color(0xFFB3B3B3);
   Color get activeText => white;
 
   // Files
@@ -93,6 +94,7 @@ class RiveColors {
   Color get commonButtonColor => const Color(0x19000000);
   Color get commonButtonTextColor => const Color(0xFF888888);
   Color get commonButtonTextColorDark => const Color(0xFF666666);
+  Color get commonButtonInactiveGrey => const Color(0xFFE7E7E7);
 
   // Inspector
   Color get inspectorTextColor => const Color(0xFF8C8C8C);

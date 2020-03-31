@@ -12,4 +12,6 @@ abstract class RiveOwner {
   /// Helper getter for subclasses of RiveOwner
   /// who might have multiple types of ids
   int get ownerId => _id;
+
+  String get displayName;
 }
