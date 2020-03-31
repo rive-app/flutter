@@ -1,12 +1,14 @@
-import 'package:rive_api/owner.dart';
+import 'package:meta/meta.dart';
+
+import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
 class RiveTeam extends RiveOwner {
   final int id;
-  final int ownerId;
-  final String name;
 
-  RiveTeam({this.id, this.ownerId, this.name});
+  const RiveTeam(
+      {@required this.id, @required int ownerId, @required String name})
+      : super(id: ownerId, name: name);
 
   factory RiveTeam.fromData(Map<String, dynamic> data) => RiveTeam(
       id: data.getInt('id'),

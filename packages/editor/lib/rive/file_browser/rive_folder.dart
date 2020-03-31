@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/folder.dart';
 import 'package:rive_api/models/team.dart';
-import 'package:rive_api/owner.dart';
+import 'package:rive_api/models/owner.dart';
 import 'package:rive_core/selectable_item.dart';
 
 import 'rive_file.dart';
