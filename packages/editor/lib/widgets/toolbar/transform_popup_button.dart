@@ -20,7 +20,7 @@ class TransformPopupButton extends StatelessWidget {
     return ToolPopupButton(
       tip: const Tip(label: 'Transform Tools'),
       defaultIcon: 'tool-auto',
-      makeItems: (rive) {
+      makeItems: (file) {
         return <PopupContextItem>[
           PopupContextItem(
             'Select',
@@ -31,10 +31,10 @@ class TransformPopupButton extends StatelessWidget {
           ToolPopupItem(
             'Translate',
             icon: TranslateTool.instance.icon,
-            notifier: rive.stage.value.toolNotifier,
-            isSelected: () => rive.stage.value.tool == TranslateTool.instance,
+            notifier: file.stage.toolNotifier,
+            isSelected: () => file.stage.tool == TranslateTool.instance,
             shortcut: ShortcutAction.translateTool,
-            select: () => rive.triggerAction(ShortcutAction.translateTool),
+            select: () => file.rive.triggerAction(ShortcutAction.translateTool),
           ),
           PopupContextItem(
             'Rotate',
@@ -62,9 +62,9 @@ class TransformPopupButton extends StatelessWidget {
           PopupContextItem.separator(),
           MultiIconPopupItem(
             'Show Axis',
-            notifier: rive.stage.value.axisCheckNotifier,
+            notifier: file.stage.axisCheckNotifier,
             iconSelector: () {
-              switch (rive.stage.value.axisCheck) {
+              switch (file.stage.axisCheck) {
                 case AxisCheckState.local:
                   return 'popup-local';
                 case AxisCheckState.parent:
@@ -76,42 +76,40 @@ class TransformPopupButton extends StatelessWidget {
             popup: [
               CheckPopupItem(
                 'Local',
-                notifier: rive.stage.value.axisCheckNotifier,
-                isChecked: () =>
-                    rive.stage.value.axisCheck == AxisCheckState.local,
-                select: () => rive.stage.value.axisCheck = AxisCheckState.local,
+                notifier: file.stage.axisCheckNotifier,
+                isChecked: () => file.stage.axisCheck == AxisCheckState.local,
+                select: () => file.stage.axisCheck = AxisCheckState.local,
               ),
               CheckPopupItem(
                 'Parent',
-                notifier: rive.stage.value.axisCheckNotifier,
-                isChecked: () =>
-                    rive.stage.value.axisCheck == AxisCheckState.parent,
-                select: () =>
-                    rive.stage.value.axisCheck = AxisCheckState.parent,
+                notifier: file.stage.axisCheckNotifier,
+                isChecked: () => file.stage.axisCheck == AxisCheckState.parent,
+                select: () => file.stage.axisCheck = AxisCheckState.parent,
               ),
               CheckPopupItem(
                 'World',
-                notifier: rive.stage.value.axisCheckNotifier,
-                isChecked: () =>
-                    rive.stage.value.axisCheck == AxisCheckState.world,
-                select: () => rive.stage.value.axisCheck = AxisCheckState.world,
+                notifier: file.stage.axisCheckNotifier,
+                isChecked: () => file.stage.axisCheck == AxisCheckState.world,
+                select: () => file.stage.axisCheck = AxisCheckState.world,
               ),
             ],
           ),
           CheckPopupItem(
             'Freeze Joints',
-            notifier: rive.stage.value.freezeJointsNotifier,
+            notifier: file.stage.freezeJointsNotifier,
             shortcut: ShortcutAction.freezeJointsToggle,
-            isChecked: () => rive.stage.value.freezeJoints,
-            select: () => rive.triggerAction(ShortcutAction.freezeJointsToggle),
+            isChecked: () => file.stage.freezeJoints,
+            select: () =>
+                file.rive.triggerAction(ShortcutAction.freezeJointsToggle),
             dismissOnSelect: false,
           ),
           CheckPopupItem(
             'Freeze Images',
-            notifier: rive.stage.value.freezeImagesNotifier,
+            notifier: file.stage.freezeImagesNotifier,
             shortcut: ShortcutAction.freezeImagesToggle,
-            isChecked: () => rive.stage.value.freezeImages,
-            select: () => rive.triggerAction(ShortcutAction.freezeImagesToggle),
+            isChecked: () => file.stage.freezeImages,
+            select: () =>
+                file.rive.triggerAction(ShortcutAction.freezeImagesToggle),
             dismissOnSelect: false,
           ),
         ];

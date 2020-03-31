@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -11,7 +11,7 @@ import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// Callback used to build the list of tool popup items.
-typedef MakeToolPopupItems = List<PopupContextItem> Function(Rive);
+typedef MakeToolPopupItems = List<PopupContextItem> Function(OpenFileContext);
 
 /// Widget shared by the create and transform popup buttons to display a list of
 /// stage tools and manage their selection. Abstracts some of the complexity
@@ -23,7 +23,7 @@ class ToolPopupButton extends StatefulWidget {
   final String defaultIcon;
   final double width;
   final Tip tip;
-  final Widget Function(BuildContext, Rive, bool) iconBuilder;
+  final Widget Function(BuildContext, OpenFileContext, bool) iconBuilder;
 
   const ToolPopupButton({
     @required this.makeItems,
@@ -45,9 +45,9 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
 
   @override
   Widget build(BuildContext context) {
-    var rive = RiveContext.of(context);
+    var file = ActiveFile.of(context);
     return ValueListenableBuilder<StageTool>(
-      valueListenable: rive.stage.value.toolNotifier,
+      valueListenable: file.stage.toolNotifier,
       builder: (context, tool, _) {
         // If the popup is open during a selection, close it, but debounce it so
         // the user has the opportunity to catch a flash of the change.
@@ -57,7 +57,7 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
             _popup?.close();
           });
         }
-        var items = widget.makeItems(rive);
+        var items = widget.makeItems(file);
         return RivePopupButton(
           tip: widget.tip,
           width: widget.width,
@@ -66,7 +66,7 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
           },
           contextItems: items,
           iconBuilder: widget.iconBuilder ??
-              (context, rive, isHovered) {
+              (context, file, isHovered) {
                 var item = PopupContextItem.withIcon(tool.icon, items);
 
                 return TintedIcon(

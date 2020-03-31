@@ -25,7 +25,6 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/shapes/shape.dart';
 
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
-import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
@@ -36,7 +35,6 @@ import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/rive/stage/stage.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
@@ -86,6 +84,10 @@ class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
 
 /// Main context for Rive editor.
 class Rive {
+  /// The system tab for your files and settings.
+  static const systemTab = RiveTabItem(icon: 'rive', closeable: false);
+  static const changeLogTab = RiveTabItem(icon: 'changelog', closeable: false);
+
   final ValueNotifier<List<RiveTeam>> teams =
       ValueNotifier<List<RiveTeam>>(null);
 
@@ -116,12 +118,9 @@ class Rive {
   ValueListenable<RiveUser> get user => _user;
 
   /// Available tabs in the editor
-  final ValueNotifier<List<RiveTabItem>> tabs =
-      ValueNotifier<List<RiveTabItem>>([]);
+  final List<RiveTabItem> fileTabs = [];
+  final Event fileTabsChanged = Event();
 
-  List<OpenFileContext> _openFiles = [];
-  final Event openFilesChanged = Event();
-  List<OpenFileContext> get openFiles => _openFiles;
   final ValueNotifier<OpenFileContext> file =
       ValueNotifier<OpenFileContext>(null);
 
@@ -137,11 +136,6 @@ class Rive {
   SharedPreferences _prefs;
 
   void focus() => focusNode.requestFocus();
-
-  Stage _stage;
-  // Stage get stage => _stage;
-
-  final ValueNotifier<Stage> stage = ValueNotifier<Stage>(null);
 
   final _state = ValueNotifier<RiveState>(RiveState.init);
   ValueListenable<RiveState> get state => _state;
@@ -169,9 +163,7 @@ class Rive {
     double elapsedSeconds = (elapsedMicroseconds - _lastFrameTime) * 1e-6;
     _lastFrameTime = elapsedMicroseconds;
 
-    if ((file.value?.advance(elapsedSeconds) ?? false) ||
-        (_stage?.shouldAdvance ?? false)) {
-      _stage.advance(elapsedSeconds);
+    if (file.value?.advance(elapsedSeconds) ?? false) {
       SchedulerBinding.instance.scheduleFrame();
     }
   }
@@ -213,10 +205,6 @@ class Rive {
 
     if (me != null) {
       _user.value = me;
-      tabs.value = [
-        RiveTabItem(name: me.name, closeable: false),
-        const RiveTabItem(name: 'Changelog', closeable: false),
-      ];
       _state.value = RiveState.editor;
       // Save token in localSettings
       _prefs ??= await SharedPreferences.getInstance();
@@ -225,7 +213,7 @@ class Rive {
       final _spectreToken = api.cookies['spectre'];
       await _prefs.setString('token', _spectreToken);
 
-      openTab(tabs.value.first);
+      selectTab(systemTab);
 
       await reloadTeams();
 
@@ -271,16 +259,22 @@ class Rive {
   }
 
   void closeTab(RiveTabItem value) {
-    tabs.value.remove(value);
-    selectedTab.value = tabs.value.last;
+    fileTabs.remove(value);
+    fileTabsChanged.notify();
+    if (value == selectedTab.value) {
+      // TODO: make this nicer, maybe select the closest tab...
+      selectedTab.value = fileTabs.isEmpty ? systemTab : fileTabs.last;
+    }
+    value.file?.dispose();
   }
 
-  void openTab(RiveTabItem value) {
-    if (!value.closeable) {
-      // hackity hack hack, this is the files tab.
+  void selectTab(RiveTabItem value) {
+    if (value == systemTab) {
       fileBrowsers?.forEach((fileBrowser) => fileBrowser.load(this));
+    } else if (value.file != null) {
+      // Seriously, https://media.giphy.com/media/aZ3LDBs1ExsE8/giphy.gif
+      file.value = value.file;
     }
-    // if (value.name == 'Changelog') {}
 
     selectedTab.value = value;
   }
@@ -293,8 +287,9 @@ class Rive {
         ? SelectionMode.multi
         : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
 
-    _stage?.updateEditMode(
-        keyEvent.isShiftPressed ? EditMode.altMode1 : EditMode.normal);
+    // TODO: fix this (should be tracked on rive not stage).
+    // _stage?.updateEditMode(
+    //     keyEvent.isShiftPressed ? EditMode.altMode1 : EditMode.normal);
 
     if (keyEvent is RawKeyDownEvent) {
       _pressed.add(_Key(keyEvent.logicalKey, keyEvent.physicalKey));
@@ -320,29 +315,30 @@ class Rive {
   }
 
   void triggerAction(ShortcutAction action) {
+    var stage = file.value?.stage;
     switch (action) {
       case ShortcutAction.translateTool:
-        stage?.value?.tool = TranslateTool.instance;
+        stage?.tool = TranslateTool.instance;
         break;
 
       case ShortcutAction.artboardTool:
-        stage?.value?.tool = ArtboardTool.instance;
+        stage?.tool = ArtboardTool.instance;
         break;
 
       case ShortcutAction.ellipseTool:
-        stage?.value?.tool = EllipseTool.instance;
+        stage?.tool = EllipseTool.instance;
         break;
 
       case ShortcutAction.penTool:
-        stage?.value?.tool = PenTool.instance;
+        stage?.tool = PenTool.instance;
         break;
 
       case ShortcutAction.rectangleTool:
-        stage?.value?.tool = RectangleTool.instance;
+        stage?.tool = RectangleTool.instance;
         break;
 
       case ShortcutAction.nodeTool:
-        stage?.value?.tool = NodeTool.instance;
+        stage?.tool = NodeTool.instance;
         break;
 
       case ShortcutAction.undo:
@@ -358,25 +354,24 @@ class Rive {
         file.value?.deleteSelection();
         break;
       case ShortcutAction.freezeImagesToggle:
-        stage?.value?.freezeImages = !stage.value.freezeImages;
+        stage?.freezeImages = !stage.freezeImages;
         break;
       case ShortcutAction.freezeJointsToggle:
-        stage?.value?.freezeJoints = !stage.value.freezeJoints;
+        stage?.freezeJoints = !stage.freezeJoints;
         break;
       case ShortcutAction.resetRulers:
         print('RESET RULERS HERE');
         break;
       case ShortcutAction.toggleRulers:
-        stage?.value?.showRulers = !stage.value.showRulers;
+        stage?.showRulers = !stage.showRulers;
         break;
       case ShortcutAction.toggleEditMode:
-        stage?.value?.toggleEditMode();
+        stage?.toggleEditMode();
         break;
       default:
         break;
     }
   }
-
 
   void _serializeTabs() {
     // TODO: save open tabs
@@ -385,9 +380,15 @@ class Rive {
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
   Future<OpenFileContext> open(int ownerId, int fileId, String name,
       {bool makeActive = true}) async {
-// see if it's already open
-    var openFile = _openFiles
-        .firstWhere((file) => file.ownerId == ownerId && file.fileId == fileId);
+    // see if it's already open
+    var openFile = fileTabs
+        .firstWhere(
+            (tab) =>
+                tab.file != null &&
+                tab.file.ownerId == ownerId &&
+                tab.file.fileId == fileId,
+            orElse: () => null)
+        ?.file;
 
     if (openFile == null) {
       openFile = OpenFileContext(
@@ -398,7 +399,10 @@ class Rive {
         api: api,
         filesApi: _filesApi,
       );
-      _openFiles.add(openFile);
+      var tab = RiveTabItem(file: openFile);
+      fileTabs.add(tab);
+      fileTabsChanged.notify();
+      selectTab(tab);
       _serializeTabs();
     }
 
@@ -406,51 +410,8 @@ class Rive {
       file.value = openFile;
       await openFile.connect();
     }
-
-    // var opening = RiveFile(filePath, name, api: api);
-    // var result = await opening.connect(
-    //   connectionInfo.socketHost,
-    //   filePath,
-    //   api.cookies['spectre'],
-    // );
-    // if (result == ConnectResult.connected) {
-    //   print("Connected");
-    // }
-    // // Need the delegate before connection completes as some events come in
-    // // during connection.
-    // opening.addDelegate(this);
-    // _changeFile(opening);
-
     return openFile;
   }
-
-  // void _changeFile(RiveFile nextFile) {
-  //   // TODO: files should live inside tab items and should disconnect when they
-  //   // are closed.
-  //   file.value?.disconnect();
-  //   file.value = nextFile;
-  //   selection.clear();
-  //   _stage?.dispose();
-  //   nextFile.advance(0);
-  //   _stage = Stage(this, file.value);
-  //   _stage.tool = TranslateTool();
-  //   stage.value = _stage;
-  //   final _tab = RiveTabItem(name: nextFile.name);
-  //   if (!tabs.value.map((t) => t.name).contains(nextFile.name)) {
-  //     tabs.value.add(_tab);
-  //   }
-  //   openTab(_tab);
-  //   // Tree controller is based off of stage items.
-  //   treeController.value =
-  //       HierarchyTreeController(nextFile.artboards, rive: this);
-  //   drawOrderTreeController.value = DrawOrderTreeController(
-  //       DrawOrderManager(nextFile.artboards).drawableComponentsInOrder,
-  //       rive: this);
-  // }
-
-  // void forceReconnect() {
-  //   file.value.forceReconnect();
-  // }
 }
 
 enum SelectionMode { single, multi, range }

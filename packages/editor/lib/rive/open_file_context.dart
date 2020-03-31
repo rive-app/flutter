@@ -8,6 +8,7 @@ import 'package:rive_api/files.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
@@ -17,6 +18,9 @@ import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
+
+enum OpenFileState { loading, error, open }
 
 /// Helper for state managed by a single open file. The file may be open (in a
 /// tab) but it is not guaranteed to be in memory.
@@ -42,6 +46,8 @@ class OpenFileContext with RiveFileDelegate {
 
   /// The Stage data for this file.
   Stage _stage;
+
+  OpenFileState _state = OpenFileState.loading;
 
   /// Controller for the hierarchy of this file.
   final ValueNotifier<HierarchyTreeController> treeController =
@@ -69,13 +75,15 @@ class OpenFileContext with RiveFileDelegate {
 
   Stage get stage => _stage;
 
+  OpenFileState get state => _state;
+  final Event stateChanged = Event();
+
   Future<bool> connect() async {
     if (core == null) {
       var spectre = api.cookies['spectre'];
       var urlEncodedSpectre = Uri.encodeComponent(spectre);
       var filePath = '$ownerId/$fileId/$urlEncodedSpectre';
       core = RiveFile(filePath, api: api);
-      _stage = Stage(this);
 
       var connectionInfo = await filesApi.establishCoop(ownerId, fileId);
       if (connectionInfo == null) {
@@ -86,12 +94,27 @@ class OpenFileContext with RiveFileDelegate {
         filePath,
         spectre,
       );
-      if (result == ConnectResult.connected) {}
+      if (result == ConnectResult.connected) {
+        _state = OpenFileState.open;
+      } else {
+        _state = OpenFileState.error;
+      }
       core.addDelegate(this);
-
       selection.clear();
+
+      core.advance(0);
+      var stage = Stage(this);
+      _stage = stage;
+      _stage.tool = TranslateTool();
+      _resetTreeControllers();
+      stateChanged.notify();
     }
     return true;
+  }
+
+  void dispose() {
+    core?.disconnect();
+    _stage?.dispose();
   }
 
   /// Whether this file is the currently active file.
@@ -104,7 +127,13 @@ class OpenFileContext with RiveFileDelegate {
     }
   }
 
-  bool advance(double elapsed) => core?.advance(elapsed) ?? false;
+  bool advance(double elapsed) {
+    if (_stage != null && (core.advance(elapsed) || _stage.shouldAdvance)) {
+      _stage.advance(elapsed);
+      return true;
+    }
+    return false;
+  }
 
   @override
   void onDirtCleaned() {
@@ -154,6 +183,10 @@ class OpenFileContext with RiveFileDelegate {
   @override
   void onWipe() {
     _stage?.wipe();
+    _resetTreeControllers();
+  }
+
+  void _resetTreeControllers() {
     treeController.value = HierarchyTreeController(core.artboards, file: this);
     drawOrderTreeController.value = DrawOrderTreeController(
       DrawOrderManager(core.artboards).drawableComponentsInOrder,

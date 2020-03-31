@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -13,6 +14,7 @@ import 'package:rive_editor/widgets/changelog.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/draw_order.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
@@ -27,7 +29,6 @@ import 'package:core/error_logger.dart';
 import 'constants.dart';
 import 'rive/hierarchy_tree_controller.dart';
 import 'rive/rive.dart';
-import 'rive/stage/stage.dart';
 import 'widgets/catastrophe.dart';
 import 'widgets/files_view/screen.dart';
 import 'widgets/hierarchy.dart';
@@ -187,20 +188,7 @@ class Editor extends StatelessWidget {
                             WindowUtils.startDrag();
                           }),
                     ),
-                    ValueListenableBuilder<List<RiveTabItem>>(
-                      valueListenable: rive.tabs,
-                      builder: (context, tabs, child) =>
-                          ValueListenableBuilder<RiveTabItem>(
-                        valueListenable: rive.selectedTab,
-                        builder: (context, selectedTab, child) => RiveTabBar(
-                          offset: 95,
-                          tabs: tabs,
-                          selected: selectedTab,
-                          select: rive.openTab,
-                          close: rive.closeTab,
-                        ),
-                      ),
-                    ),
+                    _TabBar(rive: rive),
                   ],
                 ),
               ),
@@ -208,28 +196,22 @@ class Editor extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: ValueListenableBuilder<List<RiveTabItem>>(
-            valueListenable: rive.tabs,
-            builder: (context, tabs, child) =>
-                ValueListenableBuilder<RiveTabItem>(
-              valueListenable: rive.selectedTab,
-              builder: (context, tab, child) =>
-                  _buildBody(context, tabs.indexOf(tab)),
-            ),
+          child: ValueListenableBuilder<RiveTabItem>(
+            valueListenable: rive.selectedTab,
+            builder: (context, tab, child) => _buildBody(context, tab),
           ),
-        )
+        ),
       ],
     );
   }
 
-  Widget _buildBody(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        return const FilesView();
-      case 1:
-        return const ChangeLog();
-      default:
-        return _buildEditor(context);
+  Widget _buildBody(BuildContext context, RiveTabItem tab) {
+    if (tab == Rive.systemTab) {
+      return const FilesView();
+    } else if (tab == Rive.changeLogTab) {
+      return const ChangeLog();
+    } else {
+      return _buildEditor(context);
     }
   }
 
@@ -238,90 +220,104 @@ class Editor extends StatelessWidget {
 
     return ValueListenableBuilder<OpenFileContext>(
       valueListenable: rive.file,
-      builder: (context, file, child) => ActiveFile(
+      builder: (context, file, child) =>
+          // Propagate down the active file so other widgets can determine it
+          // without looking for the rive context.
+          ActiveFile(
         file: file,
-        child: Column(
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.all(6),
-              height: 42,
-              color: const Color.fromRGBO(60, 60, 60, 1),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  HamburgerPopupButton(),
-                  TransformPopupButton(),
-                  CreatePopupButton(),
-                  SharePopupButton(),
-                  const Spacer(),
-                  ConnectedUsers(rive: rive),
-                  VisibilityPopupButton(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: DesignAnimateToggle(),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Row(
-                children: [
-                  HierarchyPanel(),
-                  const Expanded(
-                    child: StagePanel(),
-                  ),
-                  const ResizePanel(
-                    hitSize: resizeEdgeSize,
-                    direction: ResizeDirection.horizontal,
-                    side: ResizeSide.start,
-                    min: 235,
-                    max: 500,
-                    child: InspectorPanel(),
-                  ),
-                  /*Expanded(
-                child: Column(
+        child: ListenableBuilder<Event>(
+          listenable: file.stateChanged,
+          builder: (context, _, child) {
+            switch (file.state) {
+              case OpenFileState.loading:
+                // TODO: loading animation?
+                return Container(child: const Text('Loading...'));
+              case OpenFileState.error:
+                // TODO: show some eror state...
+                return Container(child: const Text('An error occurred...'));
+              case OpenFileState.open:
+                return Column(
                   children: [
-                    ResizePanel(
-                      hitSize: resizeEdgeSize,
-                      direction: ResizeDirection.vertical,
-                      side: ResizeSide.end,
-                      min: 100,
-                      max: 500,
-                      child: Container(
-                        color: Color.fromRGBO(40, 40, 40, 1.0),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      height: 42,
+                      color: const Color.fromRGBO(60, 60, 60, 1),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          HamburgerPopupButton(),
+                          TransformPopupButton(),
+                          CreatePopupButton(),
+                          SharePopupButton(),
+                          const Spacer(),
+                          ConnectedUsers(rive: rive),
+                          VisibilityPopupButton(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: DesignAnimateToggle(),
+                          ),
+                        ],
                       ),
                     ),
                     Expanded(
-                      child: StagePanel(),
-                    ),
-                    ResizePanel(
-                      hitSize: resizeEdgeSize,
-                      direction: ResizeDirection.vertical,
-                      side: ResizeSide.start,
-                      min: 100,
-                      max: 500,
-                      child: Container(
-                        color: Color.fromRGBO(40, 40, 40, 1.0),
+                      child: Row(
+                        children: [
+                          HierarchyPanel(),
+                          const Expanded(
+                            child: StagePanel(),
+                          ),
+                          const ResizePanel(
+                            hitSize: resizeEdgeSize,
+                            direction: ResizeDirection.horizontal,
+                            side: ResizeSide.start,
+                            min: 235,
+                            max: 500,
+                            child: InspectorPanel(),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                ),
-              ),
-              ResizePanel(
-                hitSize: resizeEdgeSize,
-                direction: ResizeDirection.horizontal,
-                side: ResizeSide.start,
-                min: 300,
-                max: 500,
-                child: Container(
-                  color: Color.fromRGBO(50, 50, 50, 1.0),
-                ),
-              ),*/
-                ],
-              ),
-            ),
-          ],
+                );
+                break;
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _TabBar extends StatelessWidget {
+  const _TabBar({
+    @required this.rive,
+    Key key,
+  }) : super(key: key);
+
+  final Rive rive;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: 95,
+      top: 0,
+      bottom: 0,
+      right: 0,
+      child: ListenableBuilder<Event>(
+        listenable: rive.fileTabsChanged,
+        builder: (context, _, child) => ValueListenableBuilder<RiveTabItem>(
+          valueListenable: rive.selectedTab,
+          builder: (context, tab, child) => DockingTabBar(
+            selectedTab: tab,
+            dockedTabs: [
+              Rive.systemTab,
+              Rive.changeLogTab,
+            ],
+            dynamicTabs: rive.fileTabs,
+            select: rive.selectTab,
+            close: rive.closeTab,
+          ),
         ),
       ),
     );
@@ -423,77 +419,74 @@ class StagePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rive = RiveContext.of(context);
-    return ValueListenableBuilder<Stage>(
-      valueListenable: rive.stage,
-      builder: (context, stage, _) => Stack(
-        children: [
-          Positioned.fill(
-            child: stage == null
-                ? Container()
-                : StageView(
-                    rive: rive,
-                    stage: stage,
-                  ),
-          ),
-          Positioned(
-            left: resizeEdgeSize,
-            top: resizeEdgeSize,
-            bottom: resizeEdgeSize,
-            right: resizeEdgeSize,
-            child: stage == null
-                ? Container()
-                : MouseRegion(
-                    opaque: true,
-                    onExit: (details) {
+    final file = ActiveFile.of(context);
+    var stage = file.stage;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: stage == null
+              ? Container()
+              : StageView(
+                  file: file,
+                  stage: stage,
+                ),
+        ),
+        Positioned(
+          left: resizeEdgeSize,
+          top: resizeEdgeSize,
+          bottom: resizeEdgeSize,
+          right: resizeEdgeSize,
+          child: stage == null
+              ? Container()
+              : MouseRegion(
+                  opaque: true,
+                  onExit: (details) {
+                    RenderBox getBox = context.findRenderObject() as RenderBox;
+                    var local = getBox.globalToLocal(details.position);
+                    stage.mouseExit(details.buttons, local.dx, local.dy);
+                  },
+                  onHover: (details) {
+                    RenderBox getBox = context.findRenderObject() as RenderBox;
+                    var local = getBox.globalToLocal(details.position);
+                    stage.mouseMove(details.buttons, local.dx, local.dy);
+                    // print('MOVE $local');
+                  },
+                  child: Listener(
+                    behavior: HitTestBehavior.opaque,
+                    onPointerSignal: (details) {
+                      if (details is PointerScrollEvent) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var local = getBox.globalToLocal(details.position);
+                        stage.mouseWheel(local.dx, local.dy,
+                            details.scrollDelta.dx, details.scrollDelta.dy);
+                      }
+                    },
+                    onPointerDown: (details) {
                       RenderBox getBox =
                           context.findRenderObject() as RenderBox;
                       var local = getBox.globalToLocal(details.position);
-                      stage.mouseExit(details.buttons, local.dx, local.dy);
+                      stage.mouseDown(details.buttons, local.dx, local.dy);
+                      file.rive.startDragOperation();
                     },
-                    onHover: (details) {
+                    onPointerUp: (details) {
                       RenderBox getBox =
                           context.findRenderObject() as RenderBox;
                       var local = getBox.globalToLocal(details.position);
-                      stage.mouseMove(details.buttons, local.dx, local.dy);
-                      // print('MOVE $local');
+                      stage.mouseUp(details.buttons, local.dx, local.dy);
+                      file.rive.endDragOperation();
                     },
-                    child: Listener(
-                      behavior: HitTestBehavior.opaque,
-                      onPointerSignal: (details) {
-                        if (details is PointerScrollEvent) {
-                          RenderBox getBox =
-                              context.findRenderObject() as RenderBox;
-                          var local = getBox.globalToLocal(details.position);
-                          stage.mouseWheel(local.dx, local.dy,
-                              details.scrollDelta.dx, details.scrollDelta.dy);
-                        }
-                      },
-                      onPointerDown: (details) {
-                        RenderBox getBox =
-                            context.findRenderObject() as RenderBox;
-                        var local = getBox.globalToLocal(details.position);
-                        stage.mouseDown(details.buttons, local.dx, local.dy);
-                        rive.startDragOperation();
-                      },
-                      onPointerUp: (details) {
-                        RenderBox getBox =
-                            context.findRenderObject() as RenderBox;
-                        var local = getBox.globalToLocal(details.position);
-                        stage.mouseUp(details.buttons, local.dx, local.dy);
-                        rive.endDragOperation();
-                      },
-                      onPointerMove: (details) {
-                        RenderBox getBox =
-                            context.findRenderObject() as RenderBox;
-                        var local = getBox.globalToLocal(details.position);
-                        stage.mouseDrag(details.buttons, local.dx, local.dy);
-                      },
-                    ),
+                    onPointerMove: (details) {
+                      RenderBox getBox =
+                          context.findRenderObject() as RenderBox;
+                      var local = getBox.globalToLocal(details.position);
+                      stage.mouseDrag(details.buttons, local.dx, local.dy);
+                    },
                   ),
-          ),
-        ],
-      ),
+                ),
+        ),
+      ],
     );
   }
 }
