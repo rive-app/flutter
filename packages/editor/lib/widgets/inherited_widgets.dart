@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -20,9 +21,8 @@ class RiveTheme extends InheritedWidget {
 
   RiveThemeData get theme => RiveThemeData();
 
-  static RiveThemeData of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<RiveTheme>().theme;
-  }
+  static RiveThemeData of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<RiveTheme>().theme;
 
   @override
   bool updateShouldNotify(RiveTheme old) => theme != old.theme;
@@ -43,18 +43,17 @@ class IconCache extends InheritedWidget {
 
   final RiveIconCache cache;
 
-  static RiveIconCache of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<IconCache>().cache;
-  }
+  static RiveIconCache of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<IconCache>().cache;
 
   @override
   bool updateShouldNotify(IconCache old) => cache != old.cache;
 }
 
 /// Inherited widget that will pass the shortcut key bindings down the tree
-/// To access the theme data anywhere in a Flutter context, use:
+/// To access the bindings anywhere in a Flutter context, use:
 ///
-/// RiveTheme.of(context).colors.buttonLight
+/// ShortcutBindings.of(context)
 ///
 class ShortcutBindings extends InheritedWidget {
   const ShortcutBindings({
@@ -65,11 +64,8 @@ class ShortcutBindings extends InheritedWidget {
 
   ShortcutKeyBinding get bindings => defaultKeyBinding;
 
-  static ShortcutKeyBinding of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<ShortcutBindings>()
-        .bindings;
-  }
+  static ShortcutKeyBinding of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<ShortcutBindings>().bindings;
 
   @override
   bool updateShouldNotify(ShortcutBindings old) => bindings != old.bindings;
@@ -109,9 +105,8 @@ class ActiveFile extends InheritedWidget {
 
   final OpenFileContext file;
 
-  static OpenFileContext of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ActiveFile>().file;
-  }
+  static OpenFileContext of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<ActiveFile>().file;
 
   @override
   bool updateShouldNotify(ActiveFile old) => file != old.file;

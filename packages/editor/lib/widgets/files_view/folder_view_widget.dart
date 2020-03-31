@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:provider/provider.dart';
-
 import 'package:rive_core/selectable_item.dart';
 
-import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -19,9 +16,9 @@ class FolderViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _fileBrowser = Provider.of<FileBrowser>(context, listen: false);
-    final _rive = RiveContext.of(context);
-    ;
+    final rive = RiveContext.of(context);
+    final fileBrowser = rive.activeFileBrowser.value;
+
     return ValueListenableBuilder<SelectionState>(
       valueListenable: folder.selectionState,
       builder: (context, state, child) {
@@ -60,10 +57,10 @@ class FolderViewWidget extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                _fileBrowser.selectItem(_rive, folder);
+                fileBrowser.selectItem(rive, folder);
               },
               onDoubleTap: () {
-                _fileBrowser.openFolder(folder, true);
+                fileBrowser.openFolder(folder, true);
               },
               child: Container(
                 child: Container(
