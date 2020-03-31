@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/widgets/common/hit_deny.dart';
 
 import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -55,46 +56,57 @@ class _TabItemState extends State<TabItem> {
   bool _hover = false;
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
+    return HitAllow(
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => widget.select?.call(),
-        child: Container(
-          padding: const EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 10,
-            bottom: 10,
+        behavior: HitTestBehavior.deferToChild,
+        onTapDown: (_) => widget.select?.call(),
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          // Can't use gesture detector as we're IgnorePointering the scrolling
+          // list that contains this. I thought IgnorePointer would only ignore
+          // hit testing on that one item, but it seems to propgate down to
+          // children like AbsorbPointer does.
+          child: Container(
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 10,
+              bottom: 10,
+            ),
+            child: Row(
+              children: [
+                widget.builder(context, _hover, widget.isSelected),
+                if (widget.canClose) const SizedBox(width: 10),
+                if (widget.canClose)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapDown: widget.close == null
+                        ? null
+                        : (_) => widget.close?.call(),
+                    child: const CloseIcon(),
+                  )
+              ],
+            ),
+            decoration: widget.isSelected
+                ? TabDecoration(
+                    color: widget.canClose
+                        ? RiveTheme.of(context).colors.tabBackgroundSelected
+                        : RiveTheme.of(context)
+                            .colors
+                            .tabRiveBackgroundSelected,
+                    invertLeft: widget.invertLeft,
+                    invertRight: widget.invertRight,
+                  )
+                : _hover
+                    ? TabDecoration(
+                        color:
+                            RiveTheme.of(context).colors.tabBackgroundHovered,
+                        invertLeft: widget.invertLeft,
+                        invertRight: widget.invertRight,
+                      )
+                    : null,
           ),
-          child: Row(
-            children: [
-              widget.builder(context, _hover, widget.isSelected),
-              if (widget.canClose) const SizedBox(width: 10),
-              if (widget.canClose)
-                GestureDetector(
-                  onTap:
-                      widget.close == null ? null : () => widget.close?.call(),
-                  child: const CloseIcon(),
-                )
-            ],
-          ),
-          decoration: widget.isSelected
-              ? TabDecoration(
-                  color: widget.canClose
-                      ? RiveTheme.of(context).colors.tabBackgroundSelected
-                      : RiveTheme.of(context).colors.tabRiveBackgroundSelected,
-                  invertLeft: widget.invertLeft,
-                  invertRight: widget.invertRight,
-                )
-              : _hover
-                  ? TabDecoration(
-                      color: RiveTheme.of(context).colors.tabBackgroundHovered,
-                      invertLeft: widget.invertLeft,
-                      invertRight: widget.invertRight,
-                    )
-                  : null,
         ),
       ),
     );
@@ -217,45 +229,60 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
     return Stack(
       children: [
         Positioned.fill(
-          child: CustomScrollView(
-            controller: _controller,
-            scrollDirection: Axis.horizontal,
-            slivers: [
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => TabItem(
-                    isSelected:
-                        widget.selectedIndex == widget.firstTabIndex + index,
-                    canClose: true,
-                    close: () => widget.close(widget.tabs[index]),
-                    select: () => widget.select(widget.tabs[index]),
-                    builder: (context, hovered, selected) =>
-                        ValueListenableBuilder<String>(
-                      valueListenable: widget.tabs[index].file.name,
-                      builder: (context, name, child) => Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: selected
-                              ? RiveTheme.of(context).colors.tabTextSelected
-                              : hovered
+          child: Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerSignal: (details) {
+              if (details is PointerScrollEvent) {
+                // TODO: trackpad should use dx instead of dy, but how do we
+                // disambiguate when details.kind is always mouse?
+                _controller.position
+                    .moveTo(_controller.offset + details.scrollDelta.dy);
+              }
+            },
+            child: HitDeny(
+              child: CustomScrollView(
+                controller: _controller,
+                scrollDirection: Axis.horizontal,
+                slivers: [
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => TabItem(
+                        isSelected: widget.selectedIndex ==
+                            widget.firstTabIndex + index,
+                        canClose: true,
+                        close: () => widget.close(widget.tabs[index]),
+                        select: () => widget.select(widget.tabs[index]),
+                        builder: (context, hovered, selected) =>
+                            ValueListenableBuilder<String>(
+                          valueListenable: widget.tabs[index].file.name,
+                          builder: (context, name, child) => Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: selected
                                   ? RiveTheme.of(context).colors.tabTextSelected
-                                  : RiveTheme.of(context).colors.tabText,
+                                  : hovered
+                                      ? RiveTheme.of(context)
+                                          .colors
+                                          .tabTextSelected
+                                      : RiveTheme.of(context).colors.tabText,
+                            ),
+                          ),
                         ),
+                        invertLeft: widget.selectedIndex ==
+                            index + widget.firstTabIndex - 1,
+                        invertRight: widget.selectedIndex ==
+                            index + widget.firstTabIndex + 1,
                       ),
+                      childCount: widget.tabs.length,
+                      addAutomaticKeepAlives: false,
+                      addRepaintBoundaries: false,
+                      addSemanticIndexes: false,
                     ),
-                    invertLeft: widget.selectedIndex ==
-                        index + widget.firstTabIndex - 1,
-                    invertRight: widget.selectedIndex ==
-                        index + widget.firstTabIndex + 1,
                   ),
-                  childCount: widget.tabs.length,
-                  addAutomaticKeepAlives: false,
-                  addRepaintBoundaries: false,
-                  addSemanticIndexes: false,
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
         Positioned(

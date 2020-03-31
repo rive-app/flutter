@@ -79,7 +79,10 @@ class OpenFileContext with RiveFileDelegate {
   final Event stateChanged = Event();
 
   Future<bool> connect() async {
-    if (core == null) {
+    if (core != null) {
+      // TODO: We're already connected, the user re-clicked on this tab.
+      print('TODO: make sure Core connection is still open, maybe ping it?');
+    } else {
       var spectre = api.cookies['spectre'];
       var urlEncodedSpectre = Uri.encodeComponent(spectre);
       var filePath = '$ownerId/$fileId/$urlEncodedSpectre';

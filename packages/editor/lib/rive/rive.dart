@@ -274,6 +274,7 @@ class Rive {
     } else if (value.file != null) {
       // Seriously, https://media.giphy.com/media/aZ3LDBs1ExsE8/giphy.gif
       file.value = value.file;
+      file.value.connect();
     }
 
     selectedTab.value = value;
@@ -381,17 +382,15 @@ class Rive {
   Future<OpenFileContext> open(int ownerId, int fileId, String name,
       {bool makeActive = true}) async {
     // see if it's already open
-    var openFile = fileTabs
-        .firstWhere(
-            (tab) =>
-                tab.file != null &&
-                tab.file.ownerId == ownerId &&
-                tab.file.fileId == fileId,
-            orElse: () => null)
-        ?.file;
+    var openFileTab = fileTabs.firstWhere(
+        (tab) =>
+            tab.file != null &&
+            tab.file.ownerId == ownerId &&
+            tab.file.fileId == fileId,
+        orElse: () => null);
 
-    if (openFile == null) {
-      openFile = OpenFileContext(
+    if (openFileTab == null) {
+      var openFile = OpenFileContext(
         ownerId,
         fileId,
         rive: this,
@@ -399,18 +398,18 @@ class Rive {
         api: api,
         filesApi: _filesApi,
       );
-      var tab = RiveTabItem(file: openFile);
-      fileTabs.add(tab);
+      openFileTab = RiveTabItem(file: openFile);
+      fileTabs.add(openFileTab);
       fileTabsChanged.notify();
-      selectTab(tab);
       _serializeTabs();
     }
 
     if (makeActive) {
-      file.value = openFile;
-      await openFile.connect();
+      selectedTab.value = openFileTab;
+      file.value = openFileTab.file;
+      await openFileTab.file.connect();
     }
-    return openFile;
+    return openFileTab.file;
   }
 }
 
