@@ -25,8 +25,9 @@ class ArtboardTool extends StageTool with DraggableTool {
     super.startDrag(selection, activeArtboard, worldMouse);
     // Create an artboard and place it at the world location.
     _startWorldMouse = Vec2D.clone(worldMouse);
-    var file = stage.riveFile;
-    file.batchAdd(() {
+    var file = stage.file;
+    var core = file.core;
+    core.batchAdd(() {
       var solidColor = SolidColor()..colorValue = 0xFF313131;
       var fill = Fill()..name = 'Background';
       _artboard = Artboard()
@@ -37,9 +38,9 @@ class ArtboardTool extends StageTool with DraggableTool {
         ..originY = 0
         ..width = 1
         ..height = 1;
-      file.add(_artboard);
-      file.add(fill);
-      file.add(solidColor);
+      core.add(_artboard);
+      core.add(fill);
+      core.add(solidColor);
       _artboard.appendChild(fill);
       fill.appendChild(solidColor);
     });
@@ -47,7 +48,7 @@ class ArtboardTool extends StageTool with DraggableTool {
 
   @override
   void endDrag() {
-    stage.riveFile.captureJournalEntry();
+    stage.file.core.captureJournalEntry();
   }
 
   @override

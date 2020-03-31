@@ -104,7 +104,11 @@ class DrawOrderTreeView extends StatelessWidget {
                         : Colors.grey.shade500,
                     onRename: (name) {
                       item.data.name = name;
-                      RiveContext.of(context).file.value.captureJournalEntry();
+                      RiveContext.of(context)
+                          .file
+                          .value
+                          .core
+                          .captureJournalEntry();
                     },
                   ),
                 ),

@@ -1,39 +1,33 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:core/debounce.dart';
-import 'package:core/coop/connect_result.dart';
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_api/models/file.dart';
+import 'package:rive_api/folder.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 import 'package:rive_api/models/team.dart';
 
-import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/container_component.dart';
-import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/shapes/shape.dart';
 
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_editor/constants.dart';
-import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
-import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/node_tool.dart';
@@ -41,11 +35,8 @@ import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
-import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
-import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
-import 'package:rive_editor/rive/stage/stage_item.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
@@ -76,31 +67,52 @@ class _RiveTeamApi extends RiveTeamsApi<RiveTeam> {
   _RiveTeamApi(RiveApi api) : super(api);
 }
 
+/// TODO: clean this up, probably want to rework the files api.
+class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
+  _NonUiRiveFilesApi(RiveApi api) : super(api);
+
+  @override
+  RiveApiFile makeFile(int id) {
+    throw UnsupportedError(
+        '_NonUiRiveFilesApi shouldn\'t be used to load file lists.');
+  }
+
+  @override
+  RiveApiFolder makeFolder(Map<String, dynamic> data) {
+    throw UnsupportedError(
+        '_NonUiRiveFilesApi shouldn\'t be used to load folder lists.');
+  }
+}
+
 /// Main context for Rive editor.
-class Rive with RiveFileDelegate {
-  final ValueNotifier<RiveFile> file = ValueNotifier<RiveFile>(null);
+class Rive {
   final ValueNotifier<List<RiveTeam>> teams =
       ValueNotifier<List<RiveTeam>>(null);
 
-  final ValueNotifier<HierarchyTreeController> treeController =
-      ValueNotifier<HierarchyTreeController>(null);
-  final ValueNotifier<DrawOrderTreeController> drawOrderTreeController =
-      ValueNotifier<DrawOrderTreeController>(null);
-  final SelectionContext<SelectableItem> selection =
-      SelectionContext<SelectableItem>();
   final ValueNotifier<SelectionMode> selectionMode =
       ValueNotifier<SelectionMode>(SelectionMode.single);
-  final ValueNotifier<bool> isAnimateMode = ValueNotifier<bool>(false);
+
   final ValueNotifier<bool> isDragOperationActive = ValueNotifier<bool>(false);
 
   bool get isDragging => isDragOperationActive.value;
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
 
-  final FileBrowser fileBrowser = FileBrowser();
+  final ValueNotifier<FileBrowser> activeFileBrowser =
+      ValueNotifier<FileBrowser>(null);
+  final List<FileBrowser> fileBrowsers = [];
+
+  /// Controllers for teams that are associated with our account.
+  final ValueNotifier<List<FolderTreeController>> folderTreeControllers =
+      ValueNotifier<List<FolderTreeController>>(null);
+  final ScrollController treeScrollController = ScrollController();
+
   final _user = ValueNotifier<RiveUser>(null);
 
-  Rive({this.iconCache, this.focusNode});
+  Rive({this.iconCache, this.focusNode}) : api = RiveApi() {
+    _filesApi = _NonUiRiveFilesApi(api);
+  }
+
   ValueListenable<RiveUser> get user => _user;
 
   /// Available tabs in the editor
@@ -110,12 +122,16 @@ class Rive with RiveFileDelegate {
   List<OpenFileContext> _openFiles = [];
   final Event openFilesChanged = Event();
   List<OpenFileContext> get openFiles => _openFiles;
+  final ValueNotifier<OpenFileContext> file =
+      ValueNotifier<OpenFileContext>(null);
 
   /// Currently selected tab
   final ValueNotifier<RiveTabItem> selectedTab =
       ValueNotifier<RiveTabItem>(null);
 
-  final RiveApi api = RiveApi();
+  final RiveApi api;
+  _NonUiRiveFilesApi _filesApi;
+
   final RiveIconCache iconCache;
   final FocusNode focusNode;
   SharedPreferences _prefs;
@@ -134,10 +150,10 @@ class Rive with RiveFileDelegate {
   Future<RiveState> initialize() async {
     assert(state.value == RiveState.init);
     bool ready = await api.initialize();
-    fileBrowser.initialize(this);
     if (!ready) {
       return _state.value = RiveState.catastrophe;
     }
+
     await _updateUserWithRetry();
 
     // Start the frame callback loop.
@@ -158,11 +174,6 @@ class Rive with RiveFileDelegate {
       _stage.advance(elapsedSeconds);
       SchedulerBinding.instance.scheduleFrame();
     }
-  }
-
-  @override
-  void markNeedsAdvance() {
-    SchedulerBinding.instance.scheduleFrame();
   }
 
   Timer _reconnectTimer;
@@ -216,8 +227,7 @@ class Rive with RiveFileDelegate {
 
       openTab(tabs.value.first);
 
-      // Load the teams to which the user belongs
-      teams.value = await _RiveTeamApi(api).teams;
+      await reloadTeams();
 
       // TODO: load last opened file list (from localdata)
       return me;
@@ -225,6 +235,39 @@ class Rive with RiveFileDelegate {
       _state.value = RiveState.login;
     }
     return null;
+  }
+
+  Future<void> reloadTeams() async {
+    // Load the teams to which the user belongs
+    fileBrowsers.clear();
+    teams.value = await _RiveTeamApi(api).teams;
+
+    final fileBrowser = FileBrowser(user.value);
+    fileBrowser.initialize(this);
+    await fileBrowser.load(this);
+    fileBrowsers.add(fileBrowser);
+
+    teams.value.forEach((RiveTeam team) {
+      var _tmp = FileBrowser(team);
+      _tmp.initialize(this);
+      _tmp.load(this);
+      fileBrowsers.add(_tmp);
+    });
+
+    activeFileBrowser.value = fileBrowser;
+    folderTreeControllers.value = fileBrowsers
+        .map((FileBrowser fileBrowser) => fileBrowser.myTreeController.value)
+        .toList();
+
+    openActiveFileBrowser();
+  }
+
+  void openActiveFileBrowser() {
+    activeFileBrowser.value.openFolder(
+        activeFileBrowser.value.myTreeController.value.data.isEmpty
+            ? null
+            : activeFileBrowser.value.myTreeController.value.data.first,
+        false);
   }
 
   void closeTab(RiveTabItem value) {
@@ -235,18 +278,11 @@ class Rive with RiveFileDelegate {
   void openTab(RiveTabItem value) {
     if (!value.closeable) {
       // hackity hack hack, this is the files tab.
-      fileBrowser.load();
+      fileBrowsers?.forEach((fileBrowser) => fileBrowser.load(this));
     }
-    if (value.name == 'Changelog') {}
+    // if (value.name == 'Changelog') {}
 
     selectedTab.value = value;
-  }
-
-  @override
-  void onDirtCleaned() {
-    debounce(treeController.value.flatten);
-    debounce(drawOrderTreeController.value.flatten);
-    _stage?.markNeedsAdvance();
   }
 
   final Set<_Key> _pressed = {};
@@ -319,23 +355,7 @@ class Rive with RiveFileDelegate {
         // Need to make a new list because as we delete we also remove them
         // from the selection. This avoids modifying the selection set while
         // iterating.
-        var toRemove = selection.items.toList();
-        var core = file.value;
-        // Build up the entire set of items to remove.
-        Set<Component> deathRow = {};
-        for (final item in toRemove) {
-          if (item is StageItem) {
-            var component = item.component as Component;
-            deathRow.add(component);
-            // We need to recursively remove children too.
-            if (component is ContainerComponent) {
-              component.applyToChildren((child) => deathRow.add(child));
-            }
-          }
-        }
-        deathRow.forEach(core.remove);
-        selection.clear();
-        file.value.captureJournalEntry();
+        file.value?.deleteSelection();
         break;
       case ShortcutAction.freezeImagesToggle:
         stage?.value?.freezeImages = !stage.value.freezeImages;
@@ -357,134 +377,80 @@ class Rive with RiveFileDelegate {
     }
   }
 
-  @override
-  void onObjectAdded(Core object) {
-    if (object is Component) {
-      _stage.initComponent(object);
-    }
-    debounce(treeController.value.flatten);
-    debounce(drawOrderTreeController.value.flatten);
-  }
-
-  @override
-  void onPlayerAdded(ClientSidePlayer player) {
-    // only show cursor for other players
-    if (player.isSelf) {
-      return;
-    }
-    var stageCursor = StageCursor();
-    player.cursorDelegate = stageCursor;
-    if (stageCursor.initialize(player)) {
-      _stage.addItem(stageCursor);
-    }
-  }
-
-  @override
-  void onPlayerRemoved(ClientSidePlayer player) {
-    if (player.cursorDelegate == null) {
-      return;
-    }
-    _stage.removeItem(player.cursorDelegate as StageCursor);
-  }
-
-  @override
-  void onObjectRemoved(covariant Component object) {
-    if (object.stageItem != null) {
-      selection.deselect(object.stageItem);
-      _stage.removeItem(object.stageItem);
-    }
-  }
-
-  @override
-  void onWipe() {
-    _stage?.wipe();
-    treeController.value =
-        HierarchyTreeController(file.value.artboards, rive: this);
-    drawOrderTreeController.value = DrawOrderTreeController(
-        DrawOrderManager(file.value.artboards).drawableComponentsInOrder,
-        rive: this);
-  }
 
   void _serializeTabs() {
     // TODO: save open tabs
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
-  Future<RiveFile> open(
-      CoopConnectionInfo connectionInfo, int ownerId, int fileId, String name,
-      {bool focus = true}) async {
+  Future<OpenFileContext> open(int ownerId, int fileId, String name,
+      {bool makeActive = true}) async {
 // see if it's already open
-    var file = _openFiles
+    var openFile = _openFiles
         .firstWhere((file) => file.ownerId == ownerId && file.fileId == fileId);
 
-    if (file == null) {
-      file = OpenFileContext(ownerId, fileId, name);
-      _openFiles.add(file);
+    if (openFile == null) {
+      openFile = OpenFileContext(
+        ownerId,
+        fileId,
+        rive: this,
+        fileName: name,
+        api: api,
+        filesApi: _filesApi,
+      );
+      _openFiles.add(openFile);
       _serializeTabs();
     }
 
-    if (focus) {
-      if (file.coreContext == null) {
-        // File hasn't connected yet.
-        var urlEncodedSpectre = Uri.encodeComponent(api.cookies['spectre']);
-        
-        await file.connect(connectionInfo, api.cookies['spectre']);
-        
-      } else {
-        // Make sure it's still connected?
-      }
+    if (makeActive) {
+      file.value = openFile;
+      await openFile.connect();
     }
 
-    var opening = RiveFile(filePath, name, api: api);
-    var result = await opening.connect(
-      connectionInfo.socketHost,
-      filePath,
-      api.cookies['spectre'],
-    );
-    if (result == ConnectResult.connected) {
-      print("Connected");
-    }
-    // Need the delegate before connection completes as some events come in
-    // during connection.
-    opening.addDelegate(this);
-    _changeFile(opening);
+    // var opening = RiveFile(filePath, name, api: api);
+    // var result = await opening.connect(
+    //   connectionInfo.socketHost,
+    //   filePath,
+    //   api.cookies['spectre'],
+    // );
+    // if (result == ConnectResult.connected) {
+    //   print("Connected");
+    // }
+    // // Need the delegate before connection completes as some events come in
+    // // during connection.
+    // opening.addDelegate(this);
+    // _changeFile(opening);
 
-    return opening;
+    return openFile;
   }
 
-  bool select(SelectableItem item, {bool append}) {
-    append ??= selectionMode.value == SelectionMode.multi;
-    final success = selection.select(item, append: append);
-    return success;
-  }
+  // void _changeFile(RiveFile nextFile) {
+  //   // TODO: files should live inside tab items and should disconnect when they
+  //   // are closed.
+  //   file.value?.disconnect();
+  //   file.value = nextFile;
+  //   selection.clear();
+  //   _stage?.dispose();
+  //   nextFile.advance(0);
+  //   _stage = Stage(this, file.value);
+  //   _stage.tool = TranslateTool();
+  //   stage.value = _stage;
+  //   final _tab = RiveTabItem(name: nextFile.name);
+  //   if (!tabs.value.map((t) => t.name).contains(nextFile.name)) {
+  //     tabs.value.add(_tab);
+  //   }
+  //   openTab(_tab);
+  //   // Tree controller is based off of stage items.
+  //   treeController.value =
+  //       HierarchyTreeController(nextFile.artboards, rive: this);
+  //   drawOrderTreeController.value = DrawOrderTreeController(
+  //       DrawOrderManager(nextFile.artboards).drawableComponentsInOrder,
+  //       rive: this);
+  // }
 
-  void _changeFile(RiveFile nextFile) {
-    // TODO: files should live inside tab items and should disconnect when they
-    // are closed.
-    file.value?.disconnect();
-    file.value = nextFile;
-    selection.clear();
-    _stage?.dispose();
-    nextFile.advance(0);
-    _stage = Stage(this, file.value);
-    _stage.tool = TranslateTool();
-    stage.value = _stage;
-    final _tab = RiveTabItem(name: nextFile.name);
-    if (!tabs.value.map((t) => t.name).contains(nextFile.name)) {
-      tabs.value.add(_tab);
-    }
-    openTab(_tab);
-    // Tree controller is based off of stage items.
-    treeController.value =
-        HierarchyTreeController(nextFile.artboards, rive: this);
-    drawOrderTreeController.value = DrawOrderTreeController(
-        DrawOrderManager(nextFile.artboards).drawableComponentsInOrder,
-        rive: this);
-  }
-
-  void forceReconnect() {
-    file.value.forceReconnect();
-  }
+  // void forceReconnect() {
+  //   file.value.forceReconnect();
+  // }
 }
 
 enum SelectionMode { single, multi, range }

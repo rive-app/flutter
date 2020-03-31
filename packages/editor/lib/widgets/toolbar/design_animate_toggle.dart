@@ -49,7 +49,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
 
   @override
   Widget build(BuildContext context) {
-    var rive = RiveContext.of(context);
+    var file = ActiveFile.of(context);
     final theme = RiveTheme.of(context);
     return Container(
       width: kAnimateToggleWidth,
@@ -88,7 +88,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               height: dimens.maxHeight,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: () => _setAnimate(false, rive.isAnimateMode),
+                onTap: () => _setAnimate(false, file.isAnimateMode),
                 child: Center(
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 1),
@@ -112,7 +112,7 @@ class _DesignAnimateToggleState extends State<DesignAnimateToggle>
               height: dimens.maxHeight,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: () => _setAnimate(true, rive.isAnimateMode),
+                onTap: () => _setAnimate(true, file.isAnimateMode),
                 child: Center(
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 1),

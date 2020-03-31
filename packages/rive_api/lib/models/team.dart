@@ -1,6 +1,7 @@
+import 'package:rive_api/owner.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
-class RiveTeam {
+class RiveTeam extends RiveOwner {
   final int id;
   final int ownerId;
   final String name;

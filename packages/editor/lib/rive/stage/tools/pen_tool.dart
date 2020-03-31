@@ -6,7 +6,7 @@ import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
-import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
@@ -59,14 +59,14 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
 
   @override
   void onClick(Artboard activeArtboard, Vec2D worldMouse) {
-    final rive = stage.rive;
-    _modifyPath(activeArtboard, worldMouse, rive);
+    _modifyPath(activeArtboard, worldMouse, stage.file);
   }
 
-  void _modifyPath(Artboard activeArtboard, Vec2D worldMouse, Rive rive) {
-    final file = rive.file.value;
+  void _modifyPath(
+      Artboard activeArtboard, Vec2D worldMouse, OpenFileContext file) {
+    var core = file.core;
     // Get the shape in which to the path lives
-    _selectShape(activeArtboard, rive, worldMouse);
+    _selectShape(activeArtboard, file, worldMouse);
 
     // Create a new path if one isn't already being built
     if (_path == null) {
@@ -79,8 +79,8 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
         ..scaleY = 1
         ..opacity = 1;
       // Add the path to the file and the shape
-      file.batchAdd(() {
-        file.add(_path);
+      core.batchAdd(() {
+        core.add(_path);
         _shape.appendChild(_path);
         _shape.addPath(_path);
       });
@@ -90,26 +90,27 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
       ..name = 'Pen Vertex'
       ..x = worldMouse[0]
       ..y = worldMouse[1];
-    file.batchAdd(() {
-      file.add(v);
+    core.batchAdd(() {
+      core.add(v);
       _path.addVertex(v);
     });
     // Mark the shape as dirty so the stage redraws
     _shape.pathChanged(_path);
     // Propagate the changes here.
-    file.captureJournalEntry();
+    core.captureJournalEntry();
   }
 
   /// Returns the first selected shape from the current set of
   /// selected items in the editor. Returns null if no shape is
   /// selected.
-  void _selectShape(Artboard activeArtboard, Rive rive, Vec2D coord) {
+  void _selectShape(
+      Artboard activeArtboard, OpenFileContext file, Vec2D coord) {
     // If there's already a selected shape, do nothing
     if (_shape != null) {
       return;
     }
     // Otherwise, check if there's a selected shape in the stage
-    final firstSelectedStageShape = rive.selection.items.firstWhere(
+    final firstSelectedStageShape = file.selection.items.firstWhere(
       (i) => i is StageShape,
       orElse: () => null,
     );
@@ -129,10 +130,10 @@ class PenTool extends StageTool with MoveableTool, ClickableTool {
       ..opacity = 1;
     final composer = PathComposer();
     // Add shape to the file; its stage equivalent is also created
-    final file = rive.file.value;
-    file.batchAdd(() {
-      file.add(_shape);
-      file.add(composer);
+    final core = file.core;
+    core.batchAdd(() {
+      core.add(_shape);
+      core.add(composer);
       _shape.appendChild(composer);
       // Add shape to the artboard
       activeArtboard.appendChild(_shape);

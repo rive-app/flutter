@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:rive_api/user.dart';
+import 'package:rive_api/models/user.dart';
 import 'package:rive_core/client_side_player.dart';
-import 'package:rive_core/rive_file.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 
@@ -15,11 +15,11 @@ class ConnectedUsers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<RiveFile>(
+    return ValueListenableBuilder<OpenFileContext>(
       valueListenable: rive.file,
       builder: (_, file, __) =>
           ValueListenableBuilder<Iterable<ClientSidePlayer>>(
-        valueListenable: file.allPlayers,
+        valueListenable: file.core.allPlayers,
         builder: (context, users, child) {
           // print("Connected Users: ${users.length}");
           return Row(

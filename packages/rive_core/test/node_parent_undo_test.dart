@@ -11,7 +11,7 @@ import 'package:rive_core/rive_file.dart';
 /// https://www.notion.so/Hierarchy-Undo-9781b750356943c49818d71d5c53562e
 void main() {
   test('re-parent node', () {
-    final file = RiveFile('fake', 'no name');
+    final file = RiveFile('fake');
 
     // Create the node with some name set to it.
     var node1 = file.add(Node()..name = 'Node 1');
@@ -101,7 +101,7 @@ void main() {
   //                                  └────│ f │
   //                                       └───┘
   test('re-parent complex', () {
-    final file = RiveFile("fake", "noname");
+    final file = RiveFile("fake");
 
     var artboard = file.add(Artboard()..name = 'Artboard');
     // Create the node with some name set to it.

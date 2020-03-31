@@ -5,8 +5,8 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:window_utils/window_utils.dart';
 
-import 'api.dart';
-import 'user.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/models/user.dart';
 
 class RiveAuth {
   final RiveApi api;

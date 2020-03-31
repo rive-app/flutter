@@ -2,18 +2,18 @@ import 'package:flutter/gestures.dart';
 
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 
-import 'rive.dart';
 import 'stage/stage_item.dart';
 
 /// Tree Controller for the draw order, requires rive context in order to
 /// propagate selections.
 class DrawOrderTreeController extends TreeController<Component> {
-  final Rive rive;
-  DrawOrderTreeController(List<Component> components, {this.rive})
+  final OpenFileContext file;
+  DrawOrderTreeController(List<Component> components, {this.file})
       : super(components);
 
   @override
@@ -42,7 +42,7 @@ class DrawOrderTreeController extends TreeController<Component> {
   @override
   void onTap(FlatTreeItem<Component> item) {
     if (item.data.stageItem != null) {
-      rive.select(item.data.stageItem);
+      file.select(item.data.stageItem);
     }
   }
 

@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 
-import 'rive.dart';
 import 'stage/stage_item.dart';
 
 /// Tree Controller for the hierarchy, requires rive context in order to
 /// propagate selections.
 class HierarchyTreeController extends TreeController<Component> {
-  final Rive rive;
-  HierarchyTreeController(List<Artboard> artboards, {this.rive})
+  final OpenFileContext file;
+  HierarchyTreeController(List<Artboard> artboards, {this.file})
       : super(artboards);
 
   @override
@@ -102,7 +102,7 @@ class HierarchyTreeController extends TreeController<Component> {
       default:
         break;
     }
-    rive.file.value.captureJournalEntry();
+    file.core.captureJournalEntry();
   }
 
   @override
@@ -134,7 +134,7 @@ class HierarchyTreeController extends TreeController<Component> {
   @override
   void onTap(FlatTreeItem<Component> item) {
     if (item.data.stageItem != null) {
-      rive.select(item.data.stageItem);
+      file.select(item.data.stageItem);
     }
   }
 

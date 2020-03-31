@@ -106,10 +106,7 @@ class HierarchyTreeView extends StatelessWidget {
                             : Colors.grey.shade500,
                         onRename: (name) {
                           item.data.name = name;
-                          RiveContext.of(context)
-                              .file
-                              .value
-                              .captureJournalEntry();
+                          controller.file.core.captureJournalEntry();
                         },
                       ),
                     ),

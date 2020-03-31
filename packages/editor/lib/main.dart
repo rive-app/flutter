@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/changelog.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
@@ -234,46 +235,51 @@ class Editor extends StatelessWidget {
 
   Widget _buildEditor(BuildContext context) {
     final rive = RiveContext.of(context);
-    return Column(
-      children: <Widget>[
-        Container(
-          padding: const EdgeInsets.all(6),
-          height: 42,
-          color: const Color.fromRGBO(60, 60, 60, 1),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              HamburgerPopupButton(),
-              TransformPopupButton(),
-              CreatePopupButton(),
-              SharePopupButton(),
-              const Spacer(),
-              ConnectedUsers(rive: rive),
-              VisibilityPopupButton(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: DesignAnimateToggle(),
+
+    return ValueListenableBuilder<OpenFileContext>(
+      valueListenable: rive.file,
+      builder: (context, file, child) => ActiveFile(
+        file: file,
+        child: Column(
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.all(6),
+              height: 42,
+              color: const Color.fromRGBO(60, 60, 60, 1),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  HamburgerPopupButton(),
+                  TransformPopupButton(),
+                  CreatePopupButton(),
+                  SharePopupButton(),
+                  const Spacer(),
+                  ConnectedUsers(rive: rive),
+                  VisibilityPopupButton(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: DesignAnimateToggle(),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: [
-              HierarchyPanel(),
-              const Expanded(
-                child: StagePanel(),
-              ),
-              const ResizePanel(
-                hitSize: resizeEdgeSize,
-                direction: ResizeDirection.horizontal,
-                side: ResizeSide.start,
-                min: 235,
-                max: 500,
-                child: InspectorPanel(),
-              ),
-              /*Expanded(
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  HierarchyPanel(),
+                  const Expanded(
+                    child: StagePanel(),
+                  ),
+                  const ResizePanel(
+                    hitSize: resizeEdgeSize,
+                    direction: ResizeDirection.horizontal,
+                    side: ResizeSide.start,
+                    min: 235,
+                    max: 500,
+                    child: InspectorPanel(),
+                  ),
+                  /*Expanded(
                 child: Column(
                   children: [
                     ResizePanel(
@@ -312,10 +318,12 @@ class Editor extends StatelessWidget {
                   color: Color.fromRGBO(50, 50, 50, 1.0),
                 ),
               ),*/
-            ],
-          ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -333,7 +341,8 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final rive = RiveContext.of(context);
+    final file = ActiveFile.of(context);
+    var theme = RiveTheme.of(context);
     return ResizePanel(
       hitSize: resizeEdgeSize,
       direction: ResizeDirection.horizontal,
@@ -344,58 +353,48 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
         color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
         child: Column(
           children: <Widget>[
-            Row(children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 20),
-                child: MouseRegion(
-                  onEnter: (_) => setState(() => hierarchyHovered = true),
-                  onExit: (_) => setState(() => hierarchyHovered = false),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() => hierarchySelected = true);
-                    },
-                    child: Text('HIERARCHY',
-                        style: hierarchySelected
-                            ? RiveTheme.of(context)
-                                .textStyles
-                                .hierarchyTabActive
-                            : hierarchyHovered
-                                ? RiveTheme.of(context)
-                                    .textStyles
-                                    .hierarchyTabHovered
-                                : RiveTheme.of(context)
-                                    .textStyles
-                                    .hierarchyTabInactive),
+            Row(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, top: 20),
+                  child: MouseRegion(
+                    onEnter: (_) => setState(() => hierarchyHovered = true),
+                    onExit: (_) => setState(() => hierarchyHovered = false),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() => hierarchySelected = true);
+                      },
+                      child: Text('HIERARCHY',
+                          style: hierarchySelected
+                              ? theme.textStyles.hierarchyTabActive
+                              : hierarchyHovered
+                                  ? theme.textStyles.hierarchyTabHovered
+                                  : theme.textStyles.hierarchyTabInactive),
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 20),
-                child: MouseRegion(
-                  onEnter: (_) => setState(() => drawOrderHovered = true),
-                  onExit: (_) => setState(() => drawOrderHovered = false),
-                  child: GestureDetector(
-                    onTap: () => setState(() => hierarchySelected = false),
-                    child: Text('DRAW ORDER',
-                        style: hierarchySelected
-                            ? drawOrderHovered
-                                ? RiveTheme.of(context)
-                                    .textStyles
-                                    .hierarchyTabHovered
-                                : RiveTheme.of(context)
-                                    .textStyles
-                                    .hierarchyTabInactive
-                            : RiveTheme.of(context)
-                                .textStyles
-                                .hierarchyTabActive),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, top: 20),
+                  child: MouseRegion(
+                    onEnter: (_) => setState(() => drawOrderHovered = true),
+                    onExit: (_) => setState(() => drawOrderHovered = false),
+                    child: GestureDetector(
+                      onTap: () => setState(() => hierarchySelected = false),
+                      child: Text('DRAW ORDER',
+                          style: hierarchySelected
+                              ? drawOrderHovered
+                                  ? theme.textStyles.hierarchyTabHovered
+                                  : theme.textStyles.hierarchyTabInactive
+                              : theme.textStyles.hierarchyTabActive),
+                    ),
                   ),
                 ),
-              ),
-            ]),
+              ],
+            ),
             if (hierarchySelected)
               Expanded(
                 child: ValueListenableBuilder<HierarchyTreeController>(
-                  valueListenable: rive.treeController,
+                  valueListenable: file.treeController,
                   builder: (context, controller, _) =>
                       HierarchyTreeView(controller: controller),
                 ),
@@ -404,7 +403,7 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
               Expanded(
                 // child: DrawOrder(),
                 child: ValueListenableBuilder<DrawOrderTreeController>(
-                  valueListenable: rive.drawOrderTreeController,
+                  valueListenable: file.drawOrderTreeController,
                   builder: (context, controller, _) =>
                       DrawOrderTreeView(controller: controller),
                 ),

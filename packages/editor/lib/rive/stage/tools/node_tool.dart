@@ -14,8 +14,8 @@ class NodeTool extends StageTool with ClickableTool {
 
   @override
   void onClick(Artboard artboard, Vec2D worldMouse) {
-    final rive = stage.rive;
-    final file = rive.file.value;
+    final file = stage.file;
+    var core = file.core;
 
     // final selection = rive.selection.items;
     final ContainerComponent parent = artboard;
@@ -25,8 +25,8 @@ class NodeTool extends StageTool with ClickableTool {
       ..x = worldMouse[0]
       ..y = worldMouse[1];
 
-    file.batchAdd(() {
-      file.add(node);
+    core.batchAdd(() {
+      core.add(node);
       parent.appendChild(node);
     });
   }

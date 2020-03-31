@@ -44,17 +44,17 @@ class _InspectorPanelState extends State<InspectorPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final rive = RiveContext.of(context);
+    final file = ActiveFile.of(context);
     return Container(
       color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
       child: ListenableBuilder(
-        listenable: rive.selection,
+        listenable: file.selection,
         builder: (context, SelectionContext<SelectableItem> selection, _) {
           // Let the inpsection set whittle down groupings and commonly selected
           // coreTypes for the inspector builders to use to determine if there
           // are things they can help inspect.
           var inspectionSet =
-              InspectionSet.fromSelection(rive.file.value.backboard, selection);
+              InspectionSet.fromSelection(file.core.backboard, selection);
 
           // Remove previous listeners, these listen to inspector builders
           // wanting to change the contents in the full inspection list item.

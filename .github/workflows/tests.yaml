@@ -23,7 +23,9 @@ jobs:
         run: echo "::add-path::$GITHUB_WORKSPACE/flutter/bin/cache/dart-sdk/bin"
 
       - name: Setup flutter
-        run: flutter doctor
+        run: |
+          flutter channel dev
+          flutter doctor
 
       # Run the binary buffer tests
       - name: Install binary buffer dependencies

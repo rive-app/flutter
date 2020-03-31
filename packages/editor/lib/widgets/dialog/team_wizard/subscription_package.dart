@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 /// Billing policy URL
 const billingPolicyUrl =
@@ -133,6 +134,7 @@ class TeamSubscriptionPackage with ChangeNotifier {
 
   Future submit(BuildContext context, RiveApi api) async {
     await _RiveTeamApi(api).createTeam(name);
+    await RiveContext.of(context).reloadTeams();
     Navigator.of(context, rootNavigator: true).pop(null);
   }
 

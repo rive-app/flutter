@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
@@ -95,4 +96,23 @@ class RiveContext extends InheritedWidget {
 
   @override
   bool updateShouldNotify(RiveContext old) => rive != old.rive;
+}
+
+/// Easy way to grab the active file from the context.
+class ActiveFile extends InheritedWidget {
+  const ActiveFile({
+    @required this.file,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final OpenFileContext file;
+
+  static OpenFileContext of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<ActiveFile>().file;
+  }
+
+  @override
+  bool updateShouldNotify(ActiveFile old) => file != old.file;
 }

@@ -9,7 +9,7 @@ import 'stage_tool.dart';
 class TranslateTool extends StageTool with DraggableTool {
   @override
   void endDrag() {
-    stage.riveFile.captureJournalEntry();
+    // Intentionally empty, stage calls capture.
   }
 
   // We want transforms in stage world space (not artboard space). This may
