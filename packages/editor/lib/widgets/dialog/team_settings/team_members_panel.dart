@@ -15,6 +15,21 @@ class TeamMembers extends StatefulWidget {
 
 class _TeamMembersState extends State<TeamMembers> {
   InviteType _selectedInviteType = InviteType.member;
+  final _invitees = <String>[
+    "email@domain.com",
+    "example@domain.com",
+    "Max Talbot",
+    "Umberto Sonnino",
+    "Cruz Santana",
+    "Robert Haynie",
+    "Luigi Green"
+  ];
+
+  void _removeInvitee(int index) {
+    setState(() {
+      _invitees.removeAt(index);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,29 +62,9 @@ class _TeamMembersState extends State<TeamMembers> {
                           spacing: 10,
                           runSpacing: 10,
                           children: [
-                            _Invitee("email@domain.com", onRemove: () {
-                              // TODO:
-                            }),
-                            _Invitee(
-                                "example@domain.com",
-                                onRemove: () {
-                              // TODO:
-                            }),
-                            _Invitee("Max Talbot", onRemove: () {
-                              // TODO:
-                            }),
-                            _Invitee("Umberto Sonnino", onRemove: () {
-                              // TODO:
-                            }),
-                            _Invitee("Juan Carlos Cruz Santana", onRemove: () {
-                              // TODO:
-                            }),
-                            _Invitee("Robert Haynie", onRemove: () {
-                              // TODO:
-                            }),
-                            _Invitee("Luigi Green", onRemove: () {
-                              // TODO:
-                            }),
+                            for (int i = 0; i < _invitees.length; i++)
+                              _Invitee(_invitees[i],
+                                  onRemove: () => _removeInvitee(i))
                           ]),
                     ],
                   ),
