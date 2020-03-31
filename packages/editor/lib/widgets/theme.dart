@@ -73,7 +73,7 @@ class RiveColors {
 
   Color get animateToggleButton => const Color(0xFF444444);
   Color get inactiveText => const Color(0xFF888888);
-  Color get inactiveButtonText => const Color(0xFFF5F5F5);
+  Color get inactiveButtonText => const Color(0xFFB3B3B3);
   Color get activeText => white;
 
   // Files
