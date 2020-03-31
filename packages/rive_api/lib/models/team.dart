@@ -23,5 +23,8 @@ class RiveTeam extends RiveOwner {
       .toList(growable: false);
 
   @override
+  String get displayName => name;
+
+  @override
   String toString() => 'RiveTeam($ownerId, @$name)';
 }

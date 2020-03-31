@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
-import 'package:rive_editor/widgets/dialog/settings_text_field.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/settings_text_field.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 class TeamSettings extends StatefulWidget {

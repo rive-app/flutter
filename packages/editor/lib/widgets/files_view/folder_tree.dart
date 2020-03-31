@@ -97,7 +97,7 @@ class FolderTreeView extends StatelessWidget {
               child: Text(
                 (item.data.owner == null)
                     ? item.data.name
-                    : item.data.owner.name,
+                    : item.data.owner.displayName,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,

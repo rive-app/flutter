@@ -114,7 +114,7 @@ class FileBrowser extends FileBrowserController {
       var dummyFolder = RiveFolder(<String, dynamic>{
         'id': '1',
         'parent': null,
-        'name': _owner.name,
+        'name': _owner.displayName,
         'order': 0,
         'team': _owner
       });
