@@ -263,7 +263,7 @@ class Rive {
     fileTabsChanged.notify();
     if (value == selectedTab.value) {
       // TODO: make this nicer, maybe select the closest tab...
-      selectedTab.value = fileTabs.isEmpty ? systemTab : fileTabs.last;
+      selectTab(fileTabs.isEmpty ? systemTab : fileTabs.last);
     }
     value.file?.dispose();
   }

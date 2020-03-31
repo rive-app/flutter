@@ -126,7 +126,6 @@ class DockingTabBar extends StatelessWidget {
     var dockedTabWidgets = <Widget>[];
     for (int i = 0; i < dockedTabs.length; i++) {
       var tab = dockedTabs[i];
-
       dockedTabWidgets.add(
         TabItem(
           isSelected: tab == selectedTab,
@@ -149,23 +148,7 @@ class DockingTabBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.max,
       children: [
-        ...dockedTabs
-            .map(
-              (tab) => TabItem(
-                isSelected: tab == selectedTab,
-                canClose: false,
-                select: () => select(tab),
-                builder: (context, hovered, selected) => TintedIcon(
-                  color: selected
-                      ? RiveTheme.of(context).colors.tabRiveTextSelected
-                      : hovered
-                          ? RiveTheme.of(context).colors.tabTextSelected
-                          : RiveTheme.of(context).colors.tabRiveText,
-                  icon: tab.icon,
-                ),
-              ),
-            )
-            .toList(growable: false),
+        ...dockedTabWidgets,
         Expanded(
           child: ScrollingTabList(
             tabs: dynamicTabs,

@@ -11,7 +11,7 @@ class TabDecoration extends Decoration {
   });
 
   final Color color;
-  // Invert te curve at te bottom of the tab
+  // Invert the curve at te bottom of the tab
   // Used to ensure that hovered tabs don't obscure selected tab curves
   final bool invertLeft;
   final bool invertRight;
@@ -111,7 +111,7 @@ class _TabDecorationPainter extends BoxPainter {
     if (invertLeft) {
       path.moveTo(cornerRadius, rect.height);
       path.cubicTo(
-          cornerRadius + cornerRadius * _arcConstant,
+          cornerRadius - cornerRadius * _arcConstant,
           rect.height,
           0,
           rect.height - cornerRadius * _iarcConstant,
