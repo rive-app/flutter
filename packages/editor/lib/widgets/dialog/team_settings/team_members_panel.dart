@@ -13,31 +13,45 @@ class TeamMembers extends StatefulWidget {
   _TeamMembersState createState() => _TeamMembersState();
 }
 
+class _Invite {
+  final String _name;
+  final String _username;
+  final String email;
+
+  const _Invite(this._name, this._username, this.email);
+
+  String get name => _name ?? _username;
+}
+
 class _TeamMembersState extends State<TeamMembers> {
-  InviteType _selectedInviteType = InviteType.member;
-  final _invitees = <String>[
-    "email@domain.com",
-    "example@domain.com",
-    "Max Talbot",
-    "Umberto Sonnino",
-    "Cruz Santana",
-    "Robert Haynie",
-    "Luigi Green"
+  final _inviteQueue = <_Invite>[
+    _Invite('Luigi Rosso', 'castor', 'luigi@rosso.com'),
+    _Invite('Matt Sullivan', 'wolfgang', 'matt@sullivan.com'),
+    _Invite(null, null, 'test@email.com'),
   ];
+  // final _inviteSuggestions = <String>["Umberto", "Bertoldo", "Zi'mberto"];
+  InviteType _selectedInviteType = InviteType.member;
 
   void _removeInvitee(int index) {
     setState(() {
-      _invitees.removeAt(index);
+      _inviteQueue.removeAt(index);
     });
+  }
+
+  void _sendInvites() {
+    // TODO:
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = RiveColors();
 
+    final addedSeats = _inviteQueue.length;
     // TODO:
-    // final canInvite = occupiedSeats + addedSeats < teamSize;
-    final canInvite = false;
+    const occupiedSeats = 1; // widget.team.members.length;
+    const teamAvailableSeats = 2; // widget.team.seats;
+    final hasRoom = occupiedSeats + addedSeats < teamAvailableSeats;
+    final canInvite = _inviteQueue.isNotEmpty && hasRoom;
 
     return ListView(padding: const EdgeInsets.all(30), children: [
       DecoratedBox(
@@ -62,9 +76,26 @@ class _TeamMembersState extends State<TeamMembers> {
                           spacing: 10,
                           runSpacing: 10,
                           children: [
-                            for (int i = 0; i < _invitees.length; i++)
-                              _Invitee(_invitees[i],
-                                  onRemove: () => _removeInvitee(i))
+                            for (int i = 0; i < _inviteQueue.length; i++)
+                              _UserInvite(
+                                  _inviteQueue[i].name ?? _inviteQueue[i].email,
+                                  onRemove: () => _removeInvitee(i)),
+                            /** ComboBox<String>(
+                              value: _inputVal,
+                              sizing: ComboSizing.collapsed,
+                              typeahead: true,
+                              options: _inviteSuggestions,
+                              underline: false,
+                              valueColor: colors.commonButtonTextColorDark,
+                              onInputChanged: _findUserSuggestions,
+                              change: (val) {
+                                print('Selected $val');
+                                setState(() {
+                                  _inviteQueue.add()
+                                });
+                              },
+                            ), 
+                            */
                           ]),
                     ],
                   ),
@@ -96,7 +127,7 @@ class _TeamMembersState extends State<TeamMembers> {
                       : colors.commonButtonInactiveGrey,
                   textColor:
                       canInvite ? Colors.white : colors.inactiveButtonText,
-                  onTap: canInvite ? () {/* TODO: send team invites. */} : null,
+                  onTap: canInvite ? _sendInvites : null,
                   radius: 20,
                 )
               ],
@@ -106,11 +137,11 @@ class _TeamMembersState extends State<TeamMembers> {
   }
 }
 
-class _Invitee extends StatelessWidget {
+class _UserInvite extends StatelessWidget {
   final String name;
   final VoidCallback onRemove;
 
-  const _Invitee(this.name, {@required this.onRemove});
+  const _UserInvite(this.name, {@required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -132,10 +163,11 @@ class _Invitee extends StatelessWidget {
                       style: styles.popupShortcutText,
                       overflow: TextOverflow.ellipsis)),
               const SizedBox(width: 10),
-              Listener(
-                  onPointerDown: (_) => onRemove(),
-                  child: Container(
-                    color: Colors.transparent,
+              GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapDown: (_) => onRemove(),
+                  child: SizedBox(
+                    // color: Colors.transparent,
                     child: Center(
                       child: TintedIcon(
                           color: colors.commonButtonTextColor, icon: 'delete'),
