@@ -14,10 +14,14 @@ import 'package:flutter/rendering.dart';
 /// widget.
 class Underline extends SingleChildRenderObjectWidget {
   final Color color;
+  final double offset;
+  final double thickness;
 
   const Underline({
     Key key,
     this.color = const Color(0xFFFFFFFF),
+    this.offset = 3,
+    this.thickness = 2,
     Widget child,
   }) : super(
           key: key,
@@ -26,7 +30,7 @@ class Underline extends SingleChildRenderObjectWidget {
 
   @override
   _RenderUnderline createRenderObject(BuildContext context) {
-    return _RenderUnderline(color: color);
+    return _RenderUnderline(color: color, offset: offset, thickness: thickness);
   }
 
   @override
@@ -39,18 +43,20 @@ class _RenderUnderline extends RenderShiftedBox {
   _RenderUnderline({
     RenderBox child,
     Color color,
+    this.offset,
+    this.thickness,
   })  : _color = color,
         super(child) {
     _paint.color = color;
   }
 
-  static const double lineHeight = 2;
-  static const double offset = 3;
-  static const double totalOffset = offset + lineHeight;
+  final Paint _paint = Paint()..style = PaintingStyle.fill;
+  final double thickness;
+
+  final double offset;
+  double get totalOffset => offset + thickness;
 
   Color _color;
-  final Paint _paint = Paint()..style = PaintingStyle.fill;
-
   Color get color => _color;
   set color(Color value) {
     if (_color == value) {
@@ -81,7 +87,7 @@ class _RenderUnderline extends RenderShiftedBox {
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child == null) {
-      size = constraints.constrain(const Size(
+      size = constraints.constrain(Size(
         0,
         totalOffset,
       ));
@@ -111,8 +117,8 @@ class _RenderUnderline extends RenderShiftedBox {
   void paint(PaintingContext context, Offset offset) {
     super.paint(context, offset);
     context.canvas.drawRect(
-        Rect.fromLTWH(offset.dx, offset.dy + size.height - lineHeight,
-            size.width, lineHeight),
+        Rect.fromLTWH(offset.dx, offset.dy + size.height - thickness,
+            size.width, thickness),
         _paint);
   }
 }
