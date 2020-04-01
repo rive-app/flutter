@@ -31,7 +31,6 @@ import 'package:rive_editor/widgets/files_view/sliver_inline_footer.dart';
 import 'package:rive_editor/widgets/files_view/top_nav.dart';
 import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/marquee_selection.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';

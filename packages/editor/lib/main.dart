@@ -100,6 +100,74 @@ class RiveEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return InsertInheritedWidgets(
+      rive: rive,
+      iconCache: iconCache,
+      child: Builder(
+        builder: (context) {
+          return CursorView(
+            onPointerDown: (details) => rive.focusNode.requestFocus(),
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData.light(),
+              home: DefaultTextStyle(
+                style: RiveTheme.of(context).textStyles.basic,
+                child: Container(
+                  child: Scaffold(
+                    body: RawKeyboardListener(
+                      focusNode: rive.focusNode,
+                      onKey: (event) {
+                        final focusScope = FocusScope.of(context);
+                        var primary = FocusManager.instance.primaryFocus;
+                        rive.onKeyEvent(
+                            defaultKeyBinding,
+                            event,
+                            primary != rive.focusNode &&
+                                focusScope.nearestScope != primary);
+                      },
+                      child: ValueListenableBuilder<RiveState>(
+                        valueListenable: rive.state,
+                        builder: (context, state, _) {
+                          switch (state) {
+                            case RiveState.login:
+                              return Login();
+
+                            case RiveState.editor:
+                              return EditorScaffold();
+
+                            case RiveState.disconnected:
+                              return DisconnectedScreen();
+                              break;
+
+                            case RiveState.catastrophe:
+                            default:
+                              return Catastrophe();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Wrapper widget if inserting inherited widgets into the
+/// top of the widget tree. Any new inherited widgets should go
+/// in here.
+class InsertInheritedWidgets extends StatelessWidget {
+  const InsertInheritedWidgets({this.rive, this.iconCache, this.child});
+  final Rive rive;
+  final RiveIconCache iconCache;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     return RiveTheme(
       child: ShortcutBindings(
         child: RiveContext(
@@ -108,56 +176,7 @@ class RiveEditorApp extends StatelessWidget {
             context: TipContext(),
             child: IconCache(
               cache: iconCache,
-              child: Builder(
-                builder: (context) => CursorView(
-                  onPointerDown: (details) {
-                    rive.focusNode.requestFocus();
-                  },
-                  child: MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    theme: ThemeData.light(),
-                    home: DefaultTextStyle(
-                      style: RiveTheme.of(context).textStyles.basic,
-                      child: Container(
-                        child: Scaffold(
-                          body: RawKeyboardListener(
-                            onKey: (event) {
-                              final focusScope = FocusScope.of(context);
-                              var primary = FocusManager.instance.primaryFocus;
-                              rive.onKeyEvent(
-                                  defaultKeyBinding,
-                                  event,
-                                  primary != rive.focusNode &&
-                                      focusScope.nearestScope != primary);
-                            },
-                            child: ValueListenableBuilder<RiveState>(
-                              valueListenable: rive.state,
-                              builder: (context, state, _) {
-                                switch (state) {
-                                  case RiveState.login:
-                                    return Login();
-
-                                  case RiveState.editor:
-                                    return Editor();
-
-                                  case RiveState.disconnected:
-                                    return DisconnectedScreen();
-                                    break;
-
-                                  case RiveState.catastrophe:
-                                  default:
-                                    return Catastrophe();
-                                }
-                              },
-                            ),
-                            focusNode: rive.focusNode,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              child: child,
             ),
           ),
         ),
@@ -166,58 +185,12 @@ class RiveEditorApp extends StatelessWidget {
   }
 }
 
-// Testing context menu items.
 class Editor extends StatelessWidget {
+  const Editor();
+
   @override
   Widget build(BuildContext context) {
-    var rive = RiveContext.of(context);
-    return Column(
-      children: [
-        Container(
-          height: 39,
-          color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Stack(
-                  children: <Widget>[
-                    Positioned.fill(
-                      child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTapDown: (_) {
-                            WindowUtils.startDrag();
-                          }),
-                    ),
-                    _TabBar(rive: rive),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ValueListenableBuilder<RiveTabItem>(
-            valueListenable: rive.selectedTab,
-            builder: (context, tab, child) => _buildBody(context, tab),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBody(BuildContext context, RiveTabItem tab) {
-    if (tab == Rive.systemTab) {
-      return const Home();
-    } else if (tab == Rive.changeLogTab) {
-      return const ChangeLog();
-    } else {
-      return _buildEditor(context);
-    }
-  }
-
-  Widget _buildEditor(BuildContext context) {
     final rive = RiveContext.of(context);
-
     return ValueListenableBuilder<OpenFileContext>(
       valueListenable: rive.file,
       builder: (context, file, child) =>
@@ -227,15 +200,18 @@ class Editor extends StatelessWidget {
         file: file,
         child: ListenableBuilder<Event>(
           listenable: file.stateChanged,
-          builder: (context, _, child) {
+          builder: (context, event, _) {
             switch (file.state) {
               case OpenFileState.loading:
-                // TODO: loading animation?
-                return Container(child: const Text('Loading...'));
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               case OpenFileState.error:
-                // TODO: show some eror state...
-                return Container(child: const Text('An error occurred...'));
+                return const Center(
+                  child: Text('An error occurred...'),
+                );
               case OpenFileState.open:
+              default:
                 return Column(
                   children: [
                     Container(
@@ -285,6 +261,56 @@ class Editor extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+/// Window chrome and tab bar for the editor.
+class EditorScaffold extends StatelessWidget {
+  const EditorScaffold({this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    var rive = RiveContext.of(context);
+    return Column(
+      children: [
+        Container(
+          height: 39,
+          color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTapDown: (_) => WindowUtils.startDrag(),
+                      ),
+                    ),
+                    _TabBar(rive: rive),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ValueListenableBuilder<RiveTabItem>(
+              valueListenable: rive.selectedTab,
+              builder: (context, tab, _) {
+                switch (tab) {
+                  case Rive.systemTab:
+                    return const Home();
+                  case Rive.changeLogTab:
+                    return const ChangeLog();
+                  default:
+                    return const Editor();
+                }
+              }),
+        ),
+      ],
     );
   }
 }
