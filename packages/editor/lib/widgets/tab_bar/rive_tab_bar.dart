@@ -445,8 +445,8 @@ class _RenderTabFader extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     final fadeRect =
-        Rect.fromLTWH(offset.dx, offset.dy, _fadeWidth, size.height);
-    final clipRect = Rect.fromLTWH(0, 0, size.width, size.height);
+        Rect.fromLTWH(offset.dx+1, offset.dy, _fadeWidth-1, size.height);
+    final clipRect = Rect.fromLTWH(1, 0, size.width-1, size.height);
 
     final rect = offset & size; //Rect.lerp(offset & size, fadeRect, opacity);
 

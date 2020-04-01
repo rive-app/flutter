@@ -131,8 +131,8 @@ class _TabDecorationPainter extends BoxPainter {
     switch (style) {
       case TabDecorationStyle.separator:
         canvas.drawLine(
-          rect.topRight.translate(0, _cornerRadius + 1),
-          rect.bottomRight.translate(0, -_cornerRadius - 1),
+          rect.topRight.translate(1, _cornerRadius + 1),
+          rect.bottomRight.translate(1, -_cornerRadius - 1),
           paint,
         );
         break;
