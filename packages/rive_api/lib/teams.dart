@@ -54,4 +54,38 @@ abstract class RiveTeamsApi<T extends RiveTeam> {
     print('TEAMS SERVER BODY: ${response.body}');
     return RiveTeam.fromDataList(data);
   }
+
+  // PUT /api/teams/teamId
+  Future<void> updateTeamInfo(
+    teamId, {
+    String name,
+    String username,
+    String location,
+    String website,
+    String bio,
+    String twitter,
+    String instagram,
+    bool isForHire,
+  }) async {
+    String payload = jsonEncode({
+      'data': {
+        'teamName': name,
+        'teamUsername': username,
+        'location': location,
+        'website': website,
+        'blurb': bio,
+        'twitter': twitter,
+        'instagram': instagram,
+      }
+    });
+    var response =
+        await api.put(api.host + '/api/teams/$teamId', body: payload);
+    if (response.statusCode != 200) {
+      // Todo: some form of error handling? also whats wrong with our error logging :D
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      print(message);
+      return null;
+    }
+  }
 }

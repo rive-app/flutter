@@ -162,6 +162,27 @@ class WebServiceClient {
     }
   }
 
+  Future<http.Response> put(String url,
+      {dynamic body, Encoding encoding}) async {
+    try {
+      final client = getClient();
+      var response = await client.put(url,
+          body: body, headers: headers, encoding: encoding);
+
+      _processResponse(response);
+      return response;
+    } on Exception catch (error) {
+      //SocketException
+      var errorString = error.toString();
+      if (errorString.startsWith('XMLHttpRequest') ||
+          errorString.startsWith('SocketException')) {
+        throw HttpException(errorString, error);
+      } else {
+        rethrow;
+      }
+    }
+  }
+
   Future<bool> initialize() async {
     await localData.initialize();
     var contents = await localData.load('cookie');
