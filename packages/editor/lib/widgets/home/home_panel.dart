@@ -12,23 +12,25 @@ import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 
 import 'package:rive_editor/main.dart';
+
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
+
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
-import 'package:rive_editor/widgets/files_view/file.dart';
-import 'package:rive_editor/widgets/files_view/folder_tree.dart';
-import 'package:rive_editor/widgets/files_view/folder_view_widget.dart';
-import 'package:rive_editor/widgets/files_view/item_view.dart';
-import 'package:rive_editor/widgets/files_view/profile_view.dart';
-import 'package:rive_editor/widgets/files_view/sliver_inline_footer.dart';
-import 'package:rive_editor/widgets/files_view/top_nav.dart';
+import 'package:rive_editor/widgets/home/file.dart';
+import 'package:rive_editor/widgets/home/folder_tree.dart';
+import 'package:rive_editor/widgets/home/folder_view_widget.dart';
+import 'package:rive_editor/widgets/home/item_view.dart';
+import 'package:rive_editor/widgets/home/profile_view.dart';
+import 'package:rive_editor/widgets/home/sliver_inline_footer.dart';
+import 'package:rive_editor/widgets/home/top_nav.dart';
 import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
