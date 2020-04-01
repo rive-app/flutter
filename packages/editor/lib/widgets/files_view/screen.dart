@@ -206,15 +206,8 @@ class FilesPanel extends StatelessWidget {
           valueListenable: files,
           builder: (context, files, _) => ValueListenableBuilder<bool>(
             valueListenable: fileBrowser.draggingState,
-            builder: (context, dragging, child) => MarqueeScrollView(
-              rive: rive,
-              enable: !dragging,
-              child: child,
+            builder: (context, dragging, child) => CustomScrollView(
               controller: ScrollController(),
-            ),
-            child: CustomScrollView(
-              controller: ScrollController(),
-              physics: const NeverScrollableScrollPhysics(),
               slivers: <Widget>[
                 SliverToBoxAdapter(
                   child: Padding(
