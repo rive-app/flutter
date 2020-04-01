@@ -5,6 +5,7 @@ import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/invites.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -16,21 +17,13 @@ class TeamMembers extends StatefulWidget {
   _TeamMembersState createState() => _TeamMembersState();
 }
 
-class _Invite {
-  final String _name;
-  final String _username;
-  final String email;
-
-  const _Invite(this._name, this._username, this.email);
-
-  String get name => _name ?? _username;
-}
-
 class _TeamMembersState extends State<TeamMembers> {
-  final _inviteQueue = <_Invite>[
-    const _Invite('Luigi Rosso', 'castor', 'luigi@rosso.com'),
-    const _Invite('Matt Sullivan', 'wolfgang', 'matt@sullivan.com'),
-    const _Invite(null, null, 'test@email.com'),
+  final _inviteQueue = <Invite>[
+    const UserInvite(
+        RiveUser(ownerId: 0, name: 'Luigi Rosso', username: 'castor')),
+    const UserInvite(
+        RiveUser(ownerId: 0, name: 'Matt Sullivan', username: 'wolfgang')),
+    const EmailInvite('test@email.com'),
   ];
 
   final _teamMembers = [
@@ -90,9 +83,7 @@ class _TeamMembersState extends State<TeamMembers> {
                             runSpacing: 10,
                             children: [
                               for (int i = 0; i < _inviteQueue.length; i++)
-                                _UserInvite(
-                                    _inviteQueue[i].name ??
-                                        _inviteQueue[i].email,
+                                UserInviteBox(_inviteQueue[i].name,
                                     onRemove: () => _removeInvitee(i)),
                               /** TODO:
                               ComboBox<String>(
@@ -148,7 +139,7 @@ class _TeamMembersState extends State<TeamMembers> {
                   )
                 ],
               )),
-      const SizedBox(height: 20), // Padding
+      const SizedBox(height: 20), 
       // Team Members Section.
       Column(children: [
         for (final teamMember in teamMembers)
@@ -161,53 +152,6 @@ class _TeamMembersState extends State<TeamMembers> {
               hasAccepted: false),
       ]),
     ]);
-  }
-}
-
-class _UserInvite extends StatelessWidget {
-  final String name;
-  final VoidCallback onRemove;
-
-  const _UserInvite(this.name, {@required this.onRemove});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = RiveColors();
-    const styles = TextStyles();
-    return DecoratedBox(
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: colors.commonButtonTextColor)),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Center(
-                child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 315),
-                    child: Text(name,
-                        style: styles.popupShortcutText,
-                        overflow: TextOverflow.ellipsis)),
-              ),
-              const SizedBox(width: 10),
-              Center(
-                child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (_) => onRemove(),
-                    child: SizedBox(
-                      // color: Colors.transparent,
-                      child: Center(
-                        child: TintedIcon(
-                            color: colors.commonButtonTextColor,
-                            icon: 'delete'),
-                      ),
-                    )),
-              )
-            ]),
-      ),
-    );
   }
 }
 
