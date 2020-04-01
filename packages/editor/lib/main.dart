@@ -207,7 +207,7 @@ class Editor extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, RiveTabItem tab) {
     if (tab == Rive.systemTab) {
-      return const FilesView();
+      return const Home();
     } else if (tab == Rive.changeLogTab) {
       return const ChangeLog();
     } else {
