@@ -3,6 +3,6 @@ export 'src/http_exception.dart';
 
 class RiveApi extends WebServiceClient {
   // final String host = 'http://localhost:3000';
-  final String host = 'https://arkham.rive.app';
+  final String host = 'https://stryker.rive.app';
   RiveApi() : super('rive-api');
 }
