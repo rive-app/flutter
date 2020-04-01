@@ -1,15 +1,26 @@
 import 'dart:async';
 
-import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:cursor/cursor_view.dart';
+
+import 'package:window_utils/window_utils.dart';
+
+import 'package:core/error_logger.dart';
 import 'package:rive_core/event.dart';
+
+import 'package:rive_editor/constants.dart';
+
+import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
+
 import 'package:rive_editor/widgets/changelog.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/draw_order.dart';
@@ -23,22 +34,14 @@ import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
-import 'package:window_utils/window_utils.dart';
-import 'package:core/error_logger.dart';
-
-import 'constants.dart';
-import 'rive/hierarchy_tree_controller.dart';
-import 'rive/rive.dart';
-import 'widgets/catastrophe.dart';
-import 'widgets/files_view/screen.dart';
-import 'widgets/hierarchy.dart';
-import 'widgets/inspector/inspector_panel.dart';
-import 'widgets/login.dart';
-import 'widgets/resize_panel.dart';
-import 'widgets/stage_view.dart';
-import 'widgets/tab_bar/rive_tab_bar.dart';
-import 'widgets/toolbar/connected_users.dart';
-import 'widgets/toolbar/design_animate_toggle.dart';
+import 'package:rive_editor/widgets/catastrophe.dart';
+import 'package:rive_editor/widgets/home/home_panel.dart';
+import 'package:rive_editor/widgets/hierarchy.dart';
+import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
+import 'package:rive_editor/widgets/login.dart';
+import 'package:rive_editor/widgets/resize_panel.dart';
+import 'package:rive_editor/widgets/stage_view.dart';
+import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
