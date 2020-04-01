@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/team_settings_header.dart';
@@ -50,9 +49,9 @@ class _SettingsTabItem extends StatelessWidget {
 
 class SettingsScreen {
   final String label;
-  final Widget screen;
+  final Widget contents;
 
-  const SettingsScreen(this.label, this.screen);
+  const SettingsScreen(this.label, this.contents);
 }
 
 class SettingsPanel extends StatefulWidget {
@@ -90,6 +89,8 @@ class _SettingsPanelState extends State<SettingsPanel> {
   Widget build(BuildContext context) {
     final screens = widget.screens;
     final colors = RiveColors();
+    final currentScreen = screens[_selectedIndex];
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,34 +109,15 @@ class _SettingsPanelState extends State<SettingsPanel> {
         ),
         ConstrainedBox(
             constraints: const BoxConstraints(
-              minWidth: riveDialogMinWidth - settingsTabNavWidth, //85,
-              maxWidth: riveDialogMaxWidth - settingsTabNavWidth, //585,
+              minWidth: riveDialogMinWidth - settingsTabNavWidth, // 85.
+              maxWidth: riveDialogMaxWidth - settingsTabNavWidth, // 665.
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                  child: TeamSettingsHeader(),
-                ),
+              children: <Widget>[
+                TeamSettingsHeader(),
                 Separator(color: colors.fileLineGrey),
-                Expanded(child: screens[_selectedIndex].screen),
-                Separator(color: colors.fileLineGrey),
-                Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FlatIconButton(
-                          label: 'Save Changes',
-                          color: colors.commonDarkGrey,
-                          textColor: Colors.white,
-                          onTap: () {/* TODO: make sure team info is valid! */},
-                        )
-                      ],
-                    )),
+                Expanded(child: currentScreen.contents),
               ],
             ))
       ],

@@ -8,61 +8,63 @@ class TeamSettingsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextStyles textStyles = RiveThemeData().textStyles;
     final riveColors = RiveThemeData().colors;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 50,
-          height: 50,
-          child: Stack(
-            children: [
-              const Positioned.fill(
-                  child: CustomPaint(
-                      painter: _DashedCirclePainter(
-                radius: 25,
-              ))),
-              Center(
-                  child: TintedIcon(
-                      color: riveColors.fileIconColor, icon: 'image'))
-            ],
-          ),
-        ),
-        const SizedBox(width: 10),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Rive',
-              style: textStyles.fileGreyTextLarge,
+            SizedBox(
+              width: 50,
+              height: 50,
+              child: Stack(
+                children: [
+                  const Positioned.fill(
+                      child: CustomPaint(
+                          painter: _DashedCirclePainter(
+                    radius: 25,
+                  ))),
+                  Center(
+                      child: TintedIcon(
+                          color: riveColors.fileIconColor, icon: 'image'))
+                ],
+              ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              'Team Plan',
-              style: textStyles.hyperLinkSubtext,
-            )
-          ],
-        ),
-        const Spacer(),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              '2 members',
-              style: textStyles.fileGreyTextLarge
-                  .copyWith(fontSize: 13, height: 1.3),
+            const SizedBox(width: 10),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Rive',
+                  style: textStyles.fileGreyTextLarge,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Team Plan',
+                  style: textStyles.hyperLinkSubtext,
+                )
+              ],
             ),
-            const SizedBox(height: 2),
-            Text(
-              'Add More',
-              style: textStyles.hyperLinkSubtext,
-            )
+            const Spacer(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '2 members',
+                  style: textStyles.fileGreyTextLarge
+                      .copyWith(fontSize: 13, height: 1.3),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Add More',
+                  style: textStyles.hyperLinkSubtext,
+                )
+              ],
+            ),
           ],
-        ),
-      ],
-    );
+        ));
   }
 }
 
