@@ -27,6 +27,7 @@ class RiveColors {
   Color get tabRiveBackground => const Color(0xFF323232);
   Color get tabRiveTextSelected => const Color(0xFF323232);
   Color get tabRiveBackgroundSelected => const Color(0xFFF1F1F1);
+  Color get tabRiveSeparator => const Color(0xFF555555);
 
   // Toolbar
   Color get toolbarBackground => const Color(0xFF3c3c3c);

@@ -1,13 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+const double _tabOverlap = 1;
+
 /// Background of a tab item with rounded corners on the top and rounded flaps
 /// on the bottom.
 class TabDecoration extends Decoration {
+  static const double cornerRadius = 6;
   const TabDecoration({
     this.color,
     this.invertLeft = false,
     this.invertRight = false,
+    this.fill = true,
+    this.separator = true,
   });
 
   final Color color;
@@ -15,6 +20,12 @@ class TabDecoration extends Decoration {
   // Used to ensure that hovered tabs don't obscure selected tab curves
   final bool invertLeft;
   final bool invertRight;
+
+  /// Whether we're drawing the curved fill of the tab or not.
+  final bool fill;
+
+  /// Whether or not we're drawing the separator.
+  final bool separator;
 
   @override
   Path getClipPath(Rect rect, TextDirection textDirection) => null;
@@ -64,13 +75,19 @@ class TabDecoration extends Decoration {
   @override
   _TabDecorationPainter createBoxPainter([VoidCallback onChanged]) {
     assert(onChanged != null);
-    return _TabDecorationPainter(this, onChanged,
-        invertLeft: invertLeft, invertRight: invertRight);
+    return _TabDecorationPainter(
+      this,
+      onChanged,
+      invertLeft: invertLeft,
+      invertRight: invertRight,
+      fill: fill,
+    );
   }
 }
 
 const double _arcConstant = 0.55;
 const double _iarcConstant = 1.0 - _arcConstant;
+const double _cornerRadius = TabDecoration.cornerRadius;
 
 /// An object that paints a [_TabDecorationPainter] into a canvas.
 class _TabDecorationPainter extends BoxPainter {
@@ -79,12 +96,16 @@ class _TabDecorationPainter extends BoxPainter {
     VoidCallback onChanged, {
     this.invertLeft = false,
     this.invertRight = false,
+    this.fill = true,
+    this.separator = true,
   })  : assert(_decoration != null),
         super(onChanged);
 
   final TabDecoration _decoration;
   final bool invertLeft;
   final bool invertRight;
+  final bool fill;
+  final bool separator;
 
   Paint _cachedBackgroundPaint;
   Rect _rectForCachedBackgroundPaint;
@@ -104,57 +125,65 @@ class _TabDecorationPainter extends BoxPainter {
 
   void _paintBox(
       Canvas canvas, Rect rect, Paint paint, TextDirection textDirection) {
-    const double cornerRadius = 6;
-
+    if (separator) {
+      canvas.drawLine(
+        rect.topRight.translate(-_tabOverlap, _cornerRadius + 1),
+        rect.bottomRight.translate(-_tabOverlap, -_cornerRadius - 1),
+        paint,
+      );
+    }
+    if (!fill) {
+      return;
+    }
     Path path = Path();
 
     if (invertLeft) {
-      path.moveTo(cornerRadius, rect.height);
+      path.moveTo(_cornerRadius, rect.height);
       path.cubicTo(
-          cornerRadius - cornerRadius * _arcConstant,
+          _cornerRadius - _cornerRadius * _arcConstant,
           rect.height,
           0,
-          rect.height - cornerRadius * _iarcConstant,
+          rect.height - _cornerRadius * _iarcConstant,
           0,
-          rect.height - cornerRadius);
+          rect.height - _cornerRadius);
     } else {
-      path.moveTo(-cornerRadius, rect.height);
+      path.moveTo(-_cornerRadius, rect.height);
       path.cubicTo(
-          -cornerRadius + cornerRadius * _arcConstant,
+          -_cornerRadius + _cornerRadius * _arcConstant,
           rect.height,
           0,
-          rect.height - _iarcConstant * cornerRadius,
+          rect.height - _iarcConstant * _cornerRadius,
           0,
-          rect.height - cornerRadius);
+          rect.height - _cornerRadius);
     }
 
-    path.lineTo(0, cornerRadius);
+    path.lineTo(0, _cornerRadius);
 
-    path.cubicTo(0, cornerRadius * _iarcConstant, cornerRadius * _iarcConstant,
-        0, cornerRadius, 0);
+    path.cubicTo(0, _cornerRadius * _iarcConstant,
+        _cornerRadius * _iarcConstant, 0, _cornerRadius, 0);
 
-    path.lineTo(rect.width - cornerRadius, 0);
+    path.lineTo(rect.width - _cornerRadius, 0);
 
-    path.cubicTo(rect.width - cornerRadius * _iarcConstant, 0, rect.width,
-        cornerRadius * _iarcConstant, rect.width, cornerRadius);
+    path.cubicTo(rect.width - _cornerRadius * _iarcConstant, 0, rect.width,
+        _cornerRadius * _iarcConstant, rect.width, _cornerRadius);
 
-    path.lineTo(rect.width, rect.height - cornerRadius);
+    path.lineTo(rect.width, rect.height - _cornerRadius);
 
     if (invertRight) {
       path.cubicTo(
           rect.width,
-          rect.height - cornerRadius * _iarcConstant,
-          rect.width - cornerRadius * _iarcConstant,
+          rect.height - _cornerRadius * _iarcConstant,
+          rect.width - _cornerRadius * _iarcConstant,
           rect.height,
-          rect.width - cornerRadius,
+          rect.width - _cornerRadius,
           rect.height);
     } else {
       path.cubicTo(
           rect.width,
-          rect.height - cornerRadius * _iarcConstant,
-          rect.width + cornerRadius * _iarcConstant,
+          rect.height - _cornerRadius * _iarcConstant,
+          rect.width + _cornerRadius * _iarcConstant,
           rect.height,
-          rect.width + cornerRadius,
+          rect.width + _cornerRadius,
           rect.height);
     }
 
@@ -167,9 +196,18 @@ class _TabDecorationPainter extends BoxPainter {
 
   void _paintBackgroundColor(
       Canvas canvas, Rect rect, TextDirection textDirection) {
-    if (_decoration.color != null)
-      _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection),
+    if (_decoration.color != null) {
+      _paintBox(
+          canvas,
+          Rect.fromLTRB(
+            rect.left - _tabOverlap,
+            rect.top,
+            rect.right + _tabOverlap,
+            rect.bottom,
+          ),
+          _getBackgroundPaint(rect, textDirection),
           textDirection);
+    }
   }
 
   /// Paint the box decoration into the given location on the given canvas
