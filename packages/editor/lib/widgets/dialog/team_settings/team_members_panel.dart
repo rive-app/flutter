@@ -5,6 +5,7 @@ import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -55,7 +56,9 @@ class _TeamMembersState extends State<TeamMembers> {
     // TODO:
   }
 
-  void _onRoleChanged(TeamRole role) {}
+  void _onRoleChanged(TeamRole role) {
+    // TODO:
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,35 +70,31 @@ class _TeamMembersState extends State<TeamMembers> {
     final canInvite = _inviteQueue.isNotEmpty;
 
     return ListView(padding: const EdgeInsets.all(30), children: [
-      DecoratedBox(
-          decoration: BoxDecoration(
-              color: colors.fileBackgroundLightGrey,
-              borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      // Collection of invites to send that wraps when the max
-                      // width has been filled.
-                      Wrap(
-                          alignment: WrapAlignment.start,
-                          crossAxisAlignment: WrapCrossAlignment.start,
-                          direction: Axis.horizontal,
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            for (int i = 0; i < _inviteQueue.length; i++)
-                              _UserInvite(
-                                  _inviteQueue[i].name ?? _inviteQueue[i].email,
-                                  onRemove: () => _removeInvitee(i)),
-                            /** TODO:
+      RoundedSection(
+          contentBuilder: (sectionContext) => Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 360),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        // Collection of invites to send that wraps when the max
+                        // width has been filled.
+                        Wrap(
+                            alignment: WrapAlignment.start,
+                            crossAxisAlignment: WrapCrossAlignment.start,
+                            direction: Axis.horizontal,
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              for (int i = 0; i < _inviteQueue.length; i++)
+                                _UserInvite(
+                                    _inviteQueue[i].name ??
+                                        _inviteQueue[i].email,
+                                    onRemove: () => _removeInvitee(i)),
+                              /** TODO:
                               ComboBox<String>(
                               value: _inputVal,
                               sizing: ComboSizing.collapsed,
@@ -112,44 +111,43 @@ class _TeamMembersState extends State<TeamMembers> {
                               },
                             ), 
                             */
-                          ]),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 20),
-                // Team Role selection.
-                SizedBox(
-                  height: 30,
-                  child: Center(
-                    child: ComboBox<TeamRole>(
-                      value: _selectedInviteType,
-                      change: (type) => setState(() {
-                        _selectedInviteType = type;
-                      }),
-                      alignment: Alignment.topRight,
-                      options: TeamRole.values.sublist(0, 2),
-                      toLabel: (option) => describeEnum(option).capsFirst,
-                      popupWidth: 116,
-                      underline: false,
-                      valueColor: colors.fileBackgroundDarkGrey,
-                      sizing: ComboSizing.content,
+                            ]),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 20),
-                FlatIconButton(
-                  label: 'Send Invite',
-                  color: canInvite
-                      ? colors.commonDarkGrey
-                      : colors.commonButtonInactiveGrey,
-                  textColor:
-                      canInvite ? Colors.white : colors.inactiveButtonText,
-                  onTap: canInvite ? _sendInvites : null,
-                  radius: 20,
-                )
-              ],
-            ),
-          )),
+                  const SizedBox(width: 20),
+                  // Team Role selection.
+                  SizedBox(
+                    height: 30,
+                    child: Center(
+                      child: ComboBox<TeamRole>(
+                        value: _selectedInviteType,
+                        change: (type) => setState(() {
+                          _selectedInviteType = type;
+                        }),
+                        alignment: Alignment.topRight,
+                        options: TeamRole.values.sublist(0, 2),
+                        toLabel: (option) => describeEnum(option).capsFirst,
+                        popupWidth: 116,
+                        underline: false,
+                        valueColor: colors.fileBackgroundDarkGrey,
+                        sizing: ComboSizing.content,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  FlatIconButton(
+                    label: 'Send Invite',
+                    color: canInvite
+                        ? colors.commonDarkGrey
+                        : colors.commonButtonInactiveGrey,
+                    textColor:
+                        canInvite ? Colors.white : colors.inactiveButtonText,
+                    onTap: canInvite ? _sendInvites : null,
+                    radius: 20,
+                  )
+                ],
+              )),
       const SizedBox(height: 20), // Padding
       // Team Members Section.
       Column(children: [
@@ -161,7 +159,7 @@ class _TeamMembersState extends State<TeamMembers> {
               role: teamMember.isAdmin ? TeamRole.admin : TeamRole.member,
               onRoleChanged: _onRoleChanged,
               hasAccepted: false),
-      ])
+      ]),
     ]);
   }
 }
