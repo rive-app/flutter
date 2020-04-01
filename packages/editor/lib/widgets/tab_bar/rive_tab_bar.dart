@@ -108,8 +108,7 @@ class _TabItemState extends State<TabItem> {
                             .tabRiveBackgroundSelected,
                     invertLeft: widget.invertLeft,
                     invertRight: widget.invertRight,
-                    fill: true,
-                    separator: widget.separator,
+                    style: TabDecorationStyle.fill,
                   )
                 : _hover
                     ? TabDecoration(
@@ -117,15 +116,13 @@ class _TabItemState extends State<TabItem> {
                             RiveTheme.of(context).colors.tabBackgroundHovered,
                         invertLeft: widget.invertLeft,
                         invertRight: widget.invertRight,
-                        fill: true,
-                        separator: widget.separator,
+                        style: TabDecorationStyle.fill,
                       )
                     : widget.separator
                         ? TabDecoration(
                             color:
                                 RiveTheme.of(context).colors.tabRiveSeparator,
-                            fill: false,
-                            separator: true,
+                            style: TabDecorationStyle.separator,
                           )
                         : null,
           ),
@@ -312,7 +309,7 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
         child: _TabFader(
           opacity: _fadeOpacity,
           color: theme.colors.tabRiveBackground,
-          separator: theme.colors.tabRiveSeparator,
+          separator: widget.tabs.isEmpty ? null : theme.colors.tabRiveSeparator,
           child: RiveScrollView(
             controller: _controller,
             scrollDirection: Axis.horizontal,
@@ -447,31 +444,26 @@ class _RenderTabFader extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final fadeRect = Rect.fromLTWH(
-        offset.dx, offset.dy, _fadeWidth, size.height);
-    final clipRect =
-        Rect.fromLTWH(0, 0, size.width, size.height);
+    final fadeRect =
+        Rect.fromLTWH(offset.dx+1, offset.dy, _fadeWidth-1, size.height);
+    final clipRect = Rect.fromLTWH(1, 0, size.width-1, size.height);
 
+    final rect = offset & size; //Rect.lerp(offset & size, fadeRect, opacity);
 
-    final rect = offset & size;//Rect.lerp(offset & size, fadeRect, opacity);
-    
-    context.canvas.drawLine(
-      rect.topLeft.translate(0, TabDecoration.cornerRadius + 1),
-      rect.bottomLeft.translate(0, -TabDecoration.cornerRadius - 1),
-      Paint()..color = separator,
-    );
-
-    if(opacity > 0.1) {
-    layer = context.pushClipRect(
-      needsCompositing,
-      offset,
-      clipRect,
-      _paintChild,
-      oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null,
-      clipBehavior: Clip.hardEdge
-    );
+    if (_separator != null) {
+      context.canvas.drawLine(
+        rect.topLeft.translate(0, TabDecoration.cornerRadius + 1),
+        rect.bottomLeft.translate(0, -TabDecoration.cornerRadius - 1),
+        Paint()..color = _separator..isAntiAlias = false,
+      );
     }
-    else {
+
+    if (opacity > 0.1) {
+      layer = context.pushClipRect(
+          needsCompositing, offset, clipRect, _paintChild,
+          oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null,
+          clipBehavior: Clip.hardEdge);
+    } else {
       _paintChild(context, offset);
     }
 
@@ -513,6 +505,6 @@ class _TabLayoutDelegate extends MultiChildLayoutDelegate {
     layoutChild(_Tabs.scrolling,
         BoxConstraints.tight(Size(size.width - dockedSize.width, size.height)));
     positionChild(_Tabs.docked, Offset.zero);
-    positionChild(_Tabs.scrolling, Offset(dockedSize.width, 0));
+    positionChild(_Tabs.scrolling, Offset(dockedSize.width-1, 0));
   }
 }

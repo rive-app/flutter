@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
+// TODO: I think the intention of this was to handle the rendering of the
+// marquee over the main scroll view, but I this needs to be re-evalatued as the
+// person who wrote this no longer works at Rive.
 class MarqueeScrollView extends StatefulWidget {
   final Widget child;
   final bool enable;
