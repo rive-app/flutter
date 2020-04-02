@@ -102,8 +102,16 @@ class Rive {
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
 
+  /// Tracking the home screen state
+  final ValueNotifier<HomeSection> sectionListener =
+      ValueNotifier(HomeSection.files);
+
+  // HomeSection get section => sectionListener.value;
+  // set section(HomeSection value) => sectionListener.value = value;
+
   final ValueNotifier<FileBrowser> activeFileBrowser =
       ValueNotifier<FileBrowser>(null);
+
   final List<FileBrowser> fileBrowsers = [];
 
   /// Controllers for teams that are associated with our account.
@@ -115,6 +123,16 @@ class Rive {
 
   Rive({this.iconCache, this.focusNode}) : api = RiveApi() {
     _filesApi = _NonUiRiveFilesApi(api);
+    // Add the home screen listener for browser changes
+    activeFileBrowser.addListener(() {
+      print('Active File browser changed');
+      if (activeFileBrowser.value != null) {
+        sectionListener.value = HomeSection.files;
+        // This hack is here as we need to notify even
+        // if sectionListener's value is already files ...
+        sectionListener.notifyListeners();
+      }
+    });
   }
 
   ValueListenable<RiveUser> get user => _user;
@@ -129,12 +147,6 @@ class Rive {
   /// Currently selected tab
   final ValueNotifier<RiveTabItem> selectedTab =
       ValueNotifier<RiveTabItem>(null);
-
-  /// Tracking the home screen state
-  final ValueNotifier<HomeSection> sectionListener =
-      ValueNotifier(HomeSection.files);
-  // HomeSection get section => sectionListener.value;
-  // set section(HomeSection value) => sectionListener.value = value;
 
   final RiveApi api;
   _NonUiRiveFilesApi _filesApi;
