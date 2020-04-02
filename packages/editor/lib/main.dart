@@ -316,8 +316,6 @@ class EditorScaffold extends StatelessWidget {
                 switch (tab) {
                   case Rive.systemTab:
                     return const Home();
-                  case Rive.changeLogTab:
-                    return const ChangeLog();
                   default:
                     return const Editor();
                 }
@@ -351,7 +349,6 @@ class _TabBar extends StatelessWidget {
             selectedTab: tab,
             dockedTabs: [
               Rive.systemTab,
-              Rive.changeLogTab,
             ],
             dynamicTabs: rive.fileTabs,
             select: rive.selectTab,
@@ -624,6 +621,7 @@ class _InvitePanelState extends State<InvitePanel> {
               cursorColor: Colors.black,
               valueColor: Colors.black,
               sizing: ComboSizing.collapsed,
+
               /// If sizing is set to content, the popup will resize
               /// horizontally to fit the text label (TODO: add option for
               /// avatar/leading widget).
@@ -631,11 +629,14 @@ class _InvitePanelState extends State<InvitePanel> {
               underline: false,
               chevron: false,
               typeahead: true,
+
               /// A friendly dog, I mean callback, to go retrieve your results
               /// to show in the dropdown. Passes in the typed text.
               retriever: _autocomplete,
+
               /// No value to start with, this combo is a ghost town.
               value: null,
+
               /// User selected a value.
               change: (RiveUser selectedUser) {
                 setState(() {
@@ -647,6 +648,7 @@ class _InvitePanelState extends State<InvitePanel> {
                   debounce(_startTypeAhead);
                 });
               },
+
               /// Maybe make a version of this that is toWidget? or toLeading if
               /// we want to provide the leading and text separately
               toLabel: (RiveUser user) =>
