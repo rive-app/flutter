@@ -3,7 +3,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/team_settings_header.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
@@ -88,7 +88,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
   @override
   Widget build(BuildContext context) {
     final screens = widget.screens;
-    final colors = RiveColors();
+    final colors = RiveTheme.of(context).colors;
     final currentScreen = screens[_selectedIndex];
 
     return Row(

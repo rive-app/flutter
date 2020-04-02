@@ -1,6 +1,5 @@
-
 import 'package:flutter/material.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class SettingsTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
@@ -13,8 +12,9 @@ class SettingsTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = RiveColors();
-    const textStyles = TextStyles();
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final textStyles = theme.textStyles;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
