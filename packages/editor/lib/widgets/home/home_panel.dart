@@ -60,25 +60,23 @@ class Home extends StatelessWidget {
     return PropagatingListener(
       behavior: HitTestBehavior.deferToChild,
       onPointerUp: (_) => fileBrowser.deselectAll(),
-      child: ChangeNotifierProvider.value(
-        value: fileBrowser,
-        child: Consumer<FileBrowser>(
-          builder: (context, fileBrowser, child) => Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ResizePanel(
-                hitSize: resizeEdgeSize,
-                direction: ResizeDirection.horizontal,
-                side: ResizeSide.end,
-                min: 252,
-                max: 500,
-                child: NavigationPanel(),
-              ),
-              Expanded(
-                child: MainPanel(),
-              ),
-            ],
-          ),
+      child: ValueListenableBuilder<FileBrowser>(
+        valueListenable: rive.activeFileBrowser,
+        builder: (context, browser, _) => Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            ResizePanel(
+              hitSize: resizeEdgeSize,
+              direction: ResizeDirection.horizontal,
+              side: ResizeSide.end,
+              min: 252,
+              max: 500,
+              child: NavigationPanel(),
+            ),
+            Expanded(
+              child: MainPanel(),
+            ),
+          ],
         ),
       ),
     );
