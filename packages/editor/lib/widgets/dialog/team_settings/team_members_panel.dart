@@ -4,9 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/artists.dart';
+import 'package:rive_api/models/owner.dart';
+import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
+import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
@@ -18,8 +21,9 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class TeamMembers extends StatefulWidget {
   final RiveApi api;
+  final RiveTeam owner;
 
-  const TeamMembers({@required this.api, Key key})
+  const TeamMembers({@required this.api, @required this.owner, Key key})
       : assert(api != null),
         super(key: key);
 
@@ -28,15 +32,16 @@ class TeamMembers extends StatefulWidget {
 }
 
 class _TeamMemberState extends State<TeamMembers> {
-  final _teamMembers = [
-    const RiveUser(ownerId: 0, name: null, username: 'nullname'),
-    const RiveUser(ownerId: 1, name: 'Null Username', username: null),
-    const RiveUser(
-        ownerId: 2,
-        name: 'Arnold Schwarzenegger',
-        username: 'ArnoldSchnitzel',
-        avatar: 'https://avatarfiles.alphacoders.com/178/178485.jpg',
-        isAdmin: true),
+  final _teamMembers = <RiveUser>[
+    // Test data.
+    // const RiveUser(ownerId: 0, name: null, username: 'nullname'),
+    // const RiveUser(ownerId: 1, name: 'Null Username', username: null),
+    // const RiveUser(
+    //     ownerId: 2,
+    //     name: 'Arnold Schwarzenegger',
+    //     username: 'ArnoldSchnitzel',
+    //     avatar: 'https://avatarfiles.alphacoders.com/178/178485.jpg',
+    //     isAdmin: true),
   ];
   RiveTeamsApi _api;
 
@@ -44,6 +49,15 @@ class _TeamMemberState extends State<TeamMembers> {
   void initState() {
     super.initState();
     _api = RiveTeamsApi(widget.api);
+    final teamId = widget.owner.ownerId;
+
+    _api.getAffiliates(teamId).then((users) {
+      setState(() {
+        _teamMembers
+          ..clear()
+          ..addAll(users);
+      });
+    });
   }
 
   void _onRoleChanged(RiveUser user, String role) {
@@ -184,6 +198,7 @@ class _InvitePanelState extends State<InvitePanel> {
                   ),
                 ),
                 const SizedBox(width: 20),
+                const Spacer(),
                 // Team Role selection.
                 SizedBox(
                   height: 30,
@@ -194,8 +209,8 @@ class _InvitePanelState extends State<InvitePanel> {
                         _selectedInviteType = type;
                       }),
                       alignment: Alignment.topRight,
-                      options: TeamRole.values.sublist(0, 2),
-                      toLabel: (option) => describeEnum(option).capsFirst,
+                      options: TeamRole.values,
+                      toLabel: (option) => option.name,
                       popupWidth: 116,
                       underline: false,
                       valueColor: colors.fileBackgroundDarkGrey,
@@ -219,10 +234,12 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 }
 
-final _teamRoleDescriptions = TeamRole.values
-    .map((e) => describeEnum(e).capsFirst)
-    .toList()
-      ..add('Delete');
+extension TeamRoleOptions on TeamRole {
+  static List<String> get names =>
+      TeamRole.values.map((e) => describeEnum(e).capsFirst).toList();
+
+  String get name => describeEnum(this).capsFirst;
+}
 
 class _TeamMember extends StatelessWidget {
   final RiveUser user;
@@ -300,7 +317,7 @@ class _TeamMember extends StatelessWidget {
                   value: _getRole(),
                   change: onRoleChanged,
                   alignment: Alignment.topRight,
-                  options: _teamRoleDescriptions,
+                  options: TeamRoleOptions.names..add('Delete'),
                   popupWidth: 116,
                   underline: false,
                   valueColor: colors.fileBackgroundDarkGrey,

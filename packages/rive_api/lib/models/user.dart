@@ -27,7 +27,9 @@ class RiveUser extends RiveOwner {
     this.isVerified = false,
     this.status,
     this.role,
-  }) : super(id: ownerId, name: name);
+  })  : assert(ownerId != null),
+        assert(name != null || username != null),
+        super(id: ownerId, name: name);
 
   factory RiveUser.fromData(Map<String, dynamic> data,
       {bool requireSignin = true}) {
@@ -55,17 +57,13 @@ class RiveUser extends RiveOwner {
     );
   }
 
-  factory RiveUser.fromTeamData(Map<String, dynamic> data) {
+  factory RiveUser.asTeamMember(Map<String, dynamic> data) {
     return RiveUser(
       ownerId: data.getInt('ownerId'),
       name: data.getString('name'),
       username: data.getString('username'),
-      status: data.getString('status') == 'pending'
-          ? TeamInviteStatus.pending
-          : TeamInviteStatus.accepted,
-      role: data.getString('permission') == 'admin'
-          ? TeamRole.admin
-          : TeamRole.member,
+      status: data.getInvitationStatus(),
+      role: data.getTeamRole(),
     );
   }
 
@@ -74,4 +72,30 @@ class RiveUser extends RiveOwner {
 
   @override
   String toString() => 'RiveUser($ownerId, @$username, \'$name\')';
+}
+
+extension DeserializeHelper on Map<String, dynamic> {
+  TeamInviteStatus getInvitationStatus() {
+    dynamic value = this['status'];
+    switch (value) {
+      case 'pending':
+        return TeamInviteStatus.pending;
+      case 'complete':
+        return TeamInviteStatus.accepted;
+      default:
+        return TeamInviteStatus.pending;
+    }
+  }
+
+  TeamRole getTeamRole() {
+    dynamic value = this['permission'];
+    switch (value) {
+      case 'admin':
+        return TeamRole.admin;
+      case 'member':
+        return TeamRole.member;
+      default:
+        return TeamRole.member;
+    }
+  }
 }
