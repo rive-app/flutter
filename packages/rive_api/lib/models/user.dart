@@ -40,6 +40,14 @@ class RiveUser extends RiveOwner {
     );
   }
 
+  factory RiveUser.fromAutoCompleteData(Map<String, dynamic> data) {
+    return RiveUser(
+      ownerId: data.getInt('i'),
+      username: data.getString('n'),
+      name: data.getString('l'),
+    );
+  }
+
   @override
   String get displayName => name ?? username;
 

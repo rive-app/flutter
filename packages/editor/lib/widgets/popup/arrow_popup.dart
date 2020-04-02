@@ -163,10 +163,12 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
         BoxConstraints.loose(size),
       );
     }
-
+    
     Size bodySize = layoutChild(
       _ListPopupLayoutElement.body,
-      BoxConstraints.tightFor(width: width),
+      width == null
+          ? const BoxConstraints()
+          : BoxConstraints.tightFor(width: width),
     );
 
     var vector = direction.offsetVector;

@@ -1,11 +1,16 @@
 import 'dart:async';
 
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:core/debounce.dart';
 
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_api/artists.dart';
+import 'package:rive_api/models/user.dart';
+import 'package:rive_editor/widgets/common/combo_box.dart';
 
 import 'package:window_utils/window_utils.dart';
 
@@ -303,6 +308,11 @@ class EditorScaffold extends StatelessWidget {
           child: ValueListenableBuilder<RiveTabItem>(
               valueListenable: rive.selectedTab,
               builder: (context, tab, _) {
+                // Unleash this demon if you want to invite your friends to play
+                // with comboboxes.
+                // return Center(
+                //   child: InvitePanel(rive: rive),
+                // );
                 switch (tab) {
                   case Rive.systemTab:
                     return const Home();
@@ -516,6 +526,135 @@ class StagePanel extends StatelessWidget {
                 ),
         ),
       ],
+    );
+  }
+}
+
+class InvitePanel extends StatefulWidget {
+  final Rive rive;
+
+  const InvitePanel({Key key, this.rive}) : super(key: key);
+  @override
+  _InvitePanelState createState() => _InvitePanelState();
+}
+
+class _InvitePanelState extends State<InvitePanel> {
+  final _invites = [
+    const RiveUser(
+      ownerId: 1,
+      username: '@spengler',
+      name: 'Egon Spengler',
+    ),
+    const RiveUser(
+      ownerId: 2,
+      username: '@venkman',
+      name: 'Peter Venkman',
+    ),
+    const RiveUser(
+      ownerId: 3,
+      username: '@zeddemore',
+      name: 'Winston Zeddemore',
+    ),
+    const RiveUser(
+      ownerId: 4,
+      username: '@stantz',
+      name: 'Ray Stantz',
+    ),
+    const RiveUser(
+      ownerId: 5,
+      username: '@melnitz',
+      name: 'Janine Melnitz',
+    ),
+  ];
+
+  RiveArtists _api;
+  final Event _openCombo = Event();
+
+  @override
+  void initState() {
+    super.initState();
+    _api = RiveArtists(widget.rive.api);
+  }
+
+  Future<List<RiveUser>> _autocomplete(String input) =>
+      _api.autocomplete(input);
+
+  void _startTypeAhead() {
+    _openCombo.notify();
+  }
+
+  @override
+  void dispose() {
+    cancelDebounce(_startTypeAhead);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PropagatingListener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _startTypeAhead(),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 30),
+        color: Colors.grey,
+        width: 488,
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ..._invites
+                .map(
+                  (user) => Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFF262626),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.all(5),
+                    child: Text(user.displayName),
+                  ),
+                )
+                .toList(growable: false),
+            ComboBox<RiveUser>(
+              /// Event to trigger (open or typeahead depending on config) the
+              /// combobox.
+              trigger: _openCombo,
+              cursorColor: Colors.black,
+              valueColor: Colors.black,
+              sizing: ComboSizing.collapsed,
+              /// If sizing is set to content, the popup will resize
+              /// horizontally to fit the text label (TODO: add option for
+              /// avatar/leading widget).
+              popupSizing: ComboPopupSizing.content,
+              underline: false,
+              chevron: false,
+              typeahead: true,
+              /// A friendly dog, I mean callback, to go retrieve your results
+              /// to show in the dropdown. Passes in the typed text.
+              retriever: _autocomplete,
+              /// No value to start with, this combo is a ghost town.
+              value: null,
+              /// User selected a value.
+              change: (RiveUser selectedUser) {
+                setState(() {
+                  _invites.add(selectedUser);
+                  // TODO: is there a way to call _open only after the next
+                  // update? gotta debounce otherwise the context doesn't update
+                  // fast enough in the combobox and the popup opens in the
+                  // wrong spot.
+                  debounce(_startTypeAhead);
+                });
+              },
+              /// Maybe make a version of this that is toWidget? or toLeading if
+              /// we want to provide the leading and text separately
+              toLabel: (RiveUser user) =>
+                  '@${user.username} ${user.displayName}',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
