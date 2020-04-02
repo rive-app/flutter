@@ -37,7 +37,6 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:provider/provider.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
@@ -353,49 +352,53 @@ class NavigationPanel extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20),
-            child: Column(
-              children: <Widget>[
-                IconTile(
-                  label: 'Get Started',
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'rocket',
+          ValueListenableBuilder<HomeSection>(
+            valueListenable: rive.sectionListener,
+            builder: (context, section, _) => Padding(
+              padding: const EdgeInsets.only(top: 10, left: 20),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      label: 'Get Started',
+                      iconName: 'rocket',
+                      onTap: () {},
+                    ),
                   ),
-                  onTap: () {},
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'notification',
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      iconName: 'notification',
+                      label: 'Notifications',
+                      highlight: section == HomeSection.notifications,
+                      onTap: () {
+                        // File browsers track their own selected states.
+                        // so you have to tell them specifically that stuff not selected
+                        rive.activeFileBrowser.value?.openFolder(null, false);
+                        rive.activeFileBrowser.value = null;
+                        rive.sectionListener.value = HomeSection.notifications;
+                      },
+                    ),
                   ),
-                  label: 'Notifications',
-                  onTap: () {
-                    // File browsers track their own selected states.
-                    // so you have to tell them specifically that stuff not selected
-                    rive.activeFileBrowser.value?.openFolder(null, false);
-                    rive.activeFileBrowser.value = null;
-                    rive.sectionListener.value = HomeSection.notifications;
-                  },
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'recents',
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      iconName: 'recents',
+                      label: 'Recents',
+                      onTap: () {},
+                    ),
                   ),
-                  label: 'Recents',
-                  onTap: () {},
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'popup-community',
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      iconName: 'popup-community',
+                      label: 'Community',
+                      onTap: () {},
+                    ),
                   ),
-                  label: 'Community',
-                  onTap: () {},
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Separator(
