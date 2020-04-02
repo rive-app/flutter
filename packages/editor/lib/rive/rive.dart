@@ -124,8 +124,8 @@ class Rive {
     _filesApi = _NonUiRiveFilesApi(api);
     // Add the home screen listener for browser changes
     activeFileBrowser.addListener(() {
-      print('Active File browser changed');
-      if (activeFileBrowser.value != null) {
+      if (activeFileBrowser.value != null &&
+          sectionListener.value != HomeSection.files) {
         sectionListener.value = HomeSection.files;
         // This hack is here as we need to notify even
         // if sectionListener's value is already files ...
