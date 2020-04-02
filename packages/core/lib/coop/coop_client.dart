@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/player.dart';
 import 'package:core/coop/player_cursor.dart';

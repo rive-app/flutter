@@ -1,7 +1,7 @@
 import 'package:core/coop/change.dart';
 import 'package:core/core.dart';
-import 'package:binary_buffer/binary_reader.dart';
-import 'package:binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 import '../../artboard.dart';
 import '../../backboard.dart';

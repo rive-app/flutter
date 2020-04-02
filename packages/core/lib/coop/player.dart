@@ -1,5 +1,5 @@
-import 'package:binary_buffer/binary_reader.dart';
-import 'package:binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:core/coop/player_cursor.dart';
 import 'package:meta/meta.dart';
 
@@ -18,7 +18,8 @@ class Player {
   /// The player's cursor in world space.
   PlayerCursor _cursor;
   PlayerCursor get cursor => _cursor;
-  set cursor(PlayerCursor value) {;
+  set cursor(PlayerCursor value) {
+    ;
     if (_cursor == value) {
       return;
     }

@@ -43,13 +43,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.1"
-  binary_buffer:
-    dependency: transitive
-    description:
-      path: "../binary_buffer"
-      relative: true
-    source: path
-    version: "0.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -630,6 +623,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.4.1"
+  utilities:
+    dependency: transitive
+    description:
+      path: "../utilities"
+      relative: true
+    source: path
+    version: "0.0.0"
   vector_math:
     dependency: transitive
     description:

@@ -1,5 +1,5 @@
-import 'package:binary_buffer/binary_reader.dart';
-import 'package:binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 /// A client specific object id.
 class Id {

@@ -1,5 +1,5 @@
-import 'package:binary_buffer/binary_reader.dart';
-import 'package:binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 /// An item in the file that has a pre-known (on client) key to resolve it.
 class Entity {

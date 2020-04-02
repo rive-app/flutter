@@ -1,7 +1,6 @@
 // Mostly copied from Flutter's value_listenable_builder.dart
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Builds a [Widget] when given a concrete value of a [Listenable].
 ///

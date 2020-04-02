@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 import 'change.dart';
 import 'coop_command.dart';

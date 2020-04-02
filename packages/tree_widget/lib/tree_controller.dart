@@ -52,7 +52,7 @@ class _TreeDragOperation<T> {
 /// This helper lets the implementation specify how items relate to each other
 /// hierarchically without needing each item to implement any specific
 /// interfaces.
-abstract class TreeController<T> extends ChangeNotifier {
+abstract class TreeController<T> with ChangeNotifier {
   final HashSet<T> _expanded = HashSet<T>();
   List<FlatTreeItem<T>> _flat;
   HashMap<Key, int> _indexLookup = HashMap<Key, int>();
@@ -67,7 +67,7 @@ abstract class TreeController<T> extends ChangeNotifier {
   TreeController(this._data) {
     flatten();
   }
-  
+
   /// The flattened data structure representing the hierarchical tree data that
   /// is currently expanded. This will be used by the TreeView to build a
   /// ListView with individual list items that connect via lines.
