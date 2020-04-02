@@ -38,6 +38,7 @@ import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:provider/provider.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
 const double kFileHeight = 190;
@@ -60,21 +61,26 @@ class Home extends StatelessWidget {
     return PropagatingListener(
       behavior: HitTestBehavior.deferToChild,
       onPointerUp: (_) => fileBrowser.deselectAll(),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          ResizePanel(
-            hitSize: resizeEdgeSize,
-            direction: ResizeDirection.horizontal,
-            side: ResizeSide.end,
-            min: 252,
-            max: 500,
-            child: NavigationPanel(),
+      child: ChangeNotifierProvider.value(
+        value: fileBrowser,
+        child: Consumer<FileBrowser>(
+          builder: (context, fileBrowser, child) => Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              ResizePanel(
+                hitSize: resizeEdgeSize,
+                direction: ResizeDirection.horizontal,
+                side: ResizeSide.end,
+                min: 252,
+                max: 500,
+                child: NavigationPanel(),
+              ),
+              Expanded(
+                child: MainPanel(),
+              ),
+            ],
           ),
-          Expanded(
-            child: MainPanel(),
-          ),
-        ],
+        ),
       ),
     );
   }
