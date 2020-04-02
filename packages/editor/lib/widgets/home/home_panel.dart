@@ -37,7 +37,6 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
-import 'package:provider/provider.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
 const double kFileHeight = 190;
