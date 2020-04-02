@@ -370,7 +370,7 @@ class NavigationPanel extends StatelessWidget {
                     // so you have to tell them specifically that stuff not selected
                     rive.activeFileBrowser.value?.openFolder(null, false);
                     rive.activeFileBrowser.value = null;
-                    print('Notifications selected');
+                    rive.sectionListener.value = HomeSection.notifications;
                   },
                 ),
                 IconTile(
