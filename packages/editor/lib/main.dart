@@ -640,10 +640,10 @@ class _InvitePanelState extends State<InvitePanel> {
               change: (RiveUser selectedUser) {
                 setState(() {
                   _invites.add(selectedUser);
-                  // TODO: is there a way to call _open only after the next
-                  // update? gotta debounce otherwise the context doesn't update
-                  // fast enough in the combobox and the popup opens in the
-                  // wrong spot.
+                  // TODO: is there a way to call _startTypeahead only after the
+                  // next update? gotta debounce otherwise the context doesn't
+                  // update fast enough in the combobox and the popup opens in
+                  // the wrong spot.
                   debounce(_startTypeAhead);
                 });
               },
