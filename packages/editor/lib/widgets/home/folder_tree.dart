@@ -38,7 +38,7 @@ class FolderTreeView extends StatelessWidget {
         child: Center(
           child: TreeExpander(
             key: item.key,
-            iconColor: fileBrowser.selectedFolder == item.data
+            iconColor: fileBrowser?.selectedFolder == item.data
                 ? Colors.white
                 : colors.fileUnselectedFolderIcon,
             isExpanded: item.isExpanded,
@@ -46,7 +46,7 @@ class FolderTreeView extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            color: fileBrowser.selectedFolder == item.data
+            color: fileBrowser?.selectedFolder == item.data
                 ? colors.selectedTreeLines
                 : style.lineColor,
             width: 1.0,
@@ -70,7 +70,7 @@ class FolderTreeView extends StatelessWidget {
             icon: (item.data.owner == null)
                 ? 'folder'
                 : (item.data.owner is RiveTeam) ? 'teams' : 'user',
-            color: fileBrowser.selectedFolder == item.data
+            color: fileBrowser?.selectedFolder == item.data
                 ? colors.fileSelectedFolderIcon
                 : colors.fileUnselectedFolderIcon,
           ),
@@ -96,7 +96,7 @@ class FolderTreeView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 // fontWeight: FontWeight.w100,
-                color: fileBrowser.selectedFolder == item.data
+                color: fileBrowser?.selectedFolder == item.data
                     ? Colors.white
                     : colors.fileTextLightGrey,
               ),

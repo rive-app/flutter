@@ -7,6 +7,7 @@ import 'package:cursor/propagating_listener.dart';
 import 'package:rive_api/files.dart';
 
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/widgets/notifications.dart';
 
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
@@ -36,7 +37,6 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
 const double kFileHeight = 190;
@@ -53,37 +53,55 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fileBrowser = RiveContext.of(context).activeFileBrowser.value;
+    final rive = RiveContext.of(context);
+    final fileBrowser = rive.activeFileBrowser.value;
 
     return PropagatingListener(
       behavior: HitTestBehavior.deferToChild,
-      onPointerUp: (_) {
-        fileBrowser.deselectAll();
-      },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                ResizePanel(
-                  hitSize: resizeEdgeSize,
-                  direction: ResizeDirection.horizontal,
-                  side: ResizeSide.end,
-                  min: 252,
-                  max: 500,
-                  child: NavigationPanel(),
-                ),
-                Expanded(
-                  child: FilesPanel(),
-                ),
-              ],
+      onPointerUp: (_) => fileBrowser.deselectAll(),
+      child: ValueListenableBuilder<FileBrowser>(
+        valueListenable: rive.activeFileBrowser,
+        builder: (context, browser, _) => Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            ResizePanel(
+              hitSize: resizeEdgeSize,
+              direction: ResizeDirection.horizontal,
+              side: ResizeSide.end,
+              min: 252,
+              max: 500,
+              child: NavigationPanel(),
             ),
-          ),
-        ],
+            Expanded(
+              child: MainPanel(),
+            ),
+          ],
+        ),
       ),
     );
+  }
+}
+
+/// Displays the appropriate content/widgets in the main
+/// display of the Home panel
+class MainPanel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final sectionListener = RiveContext.of(context).sectionListener;
+    return ValueListenableBuilder<HomeSection>(
+        valueListenable: sectionListener,
+        builder: (context, section, _) {
+          switch (section) {
+            case HomeSection.notifications:
+              return Notifications();
+            case HomeSection.community:
+            case HomeSection.getStarted:
+            case HomeSection.recents:
+            case HomeSection.files:
+            default:
+              return FilesPanel();
+          }
+        });
   }
 }
 
@@ -190,7 +208,7 @@ class FilesPanel extends StatelessWidget {
     final rive = RiveContext.of(context);
     final fileBrowser = rive.activeFileBrowser.value;
 
-    if (fileBrowser.selectedFolder == null) {
+    if (fileBrowser?.selectedFolder == null) {
       return _buildEmpty(context);
     }
     return LayoutBuilder(
@@ -255,6 +273,7 @@ class NavigationPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
+    final rive = RiveContext.of(context);
     final riveColors = theme.colors;
     final treeStyle = TreeStyle(
       showFirstLine: false,
@@ -268,6 +287,11 @@ class NavigationPanel extends StatelessWidget {
       itemHeight: kTreeItemHeight,
     );
 
+    // this listener is in place to force everything to redraw once the
+    // activeFileBrowser chagnes.
+    // without this, if you change between teams, only one half of the
+    // state changes... (the color of the text, the
+    // background comes from within the browser..)
     return Container(
       decoration: BoxDecoration(
         color: riveColors.fileBackgroundLightGrey,
@@ -325,45 +349,53 @@ class NavigationPanel extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20),
-            child: Column(
-              children: <Widget>[
-                IconTile(
-                  label: 'Get Started',
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'rocket',
+          ValueListenableBuilder<HomeSection>(
+            valueListenable: rive.sectionListener,
+            builder: (context, section, _) => Padding(
+              padding: const EdgeInsets.only(top: 10, left: 20),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      label: 'Get Started',
+                      iconName: 'rocket',
+                      onTap: () {},
+                    ),
                   ),
-                  onTap: () {},
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'notification',
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      iconName: 'notification',
+                      label: 'Notifications',
+                      highlight: section == HomeSection.notifications,
+                      onTap: () {
+                        // File browsers track their own selected states.
+                        // so you have to tell them specifically that stuff not selected
+                        rive.activeFileBrowser.value?.openFolder(null, false);
+                        rive.activeFileBrowser.value = null;
+                        rive.sectionListener.value = HomeSection.notifications;
+                      },
+                    ),
                   ),
-                  label: 'Notifications',
-                  onTap: () {
-                    print('Notifications selected');
-                  },
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'recents',
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      iconName: 'recents',
+                      label: 'Recents',
+                      onTap: () {},
+                    ),
                   ),
-                  label: 'Recents',
-                  onTap: () {},
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'popup-community',
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      iconName: 'popup-community',
+                      label: 'Community',
+                      onTap: () {},
+                    ),
                   ),
-                  label: 'Community',
-                  onTap: () {},
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Separator(

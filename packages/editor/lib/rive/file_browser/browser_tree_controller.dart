@@ -53,8 +53,9 @@ class FolderTreeController extends TreeController<RiveFolder> {
   void onTap(FlatTreeItem<RiveFolder> item) {
     if (item.data != null) {
       if (rive.activeFileBrowser.value != fileBrowser) {
-        // deselect current selection
-        rive.activeFileBrowser.value.openFolder(null, false);
+        // File browsers track their own selected states.
+        // so you have to tell them specifically that stuff not selected
+        rive.activeFileBrowser.value?.openFolder(null, false);
         rive.activeFileBrowser.value = fileBrowser;
       }
 

@@ -38,6 +38,8 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
+enum HomeSection { files, notifications, community, recents, getStarted }
+
 class _Key {
   final LogicalKeyboardKey logical;
   final PhysicalKeyboardKey physical;
@@ -86,7 +88,6 @@ class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
 class Rive {
   /// The system tab for your files and settings.
   static const systemTab = RiveTabItem(icon: 'rive', closeable: false);
-  static const changeLogTab = RiveTabItem(icon: 'changelog', closeable: false);
 
   final ValueNotifier<List<RiveTeam>> teams =
       ValueNotifier<List<RiveTeam>>(null);
@@ -100,8 +101,16 @@ class Rive {
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
 
+  /// Tracking the home screen state
+  final ValueNotifier<HomeSection> sectionListener =
+      ValueNotifier(HomeSection.files);
+
+  // HomeSection get section => sectionListener.value;
+  // set section(HomeSection value) => sectionListener.value = value;
+
   final ValueNotifier<FileBrowser> activeFileBrowser =
       ValueNotifier<FileBrowser>(null);
+
   final List<FileBrowser> fileBrowsers = [];
 
   /// Controllers for teams that are associated with our account.
@@ -113,6 +122,16 @@ class Rive {
 
   Rive({this.iconCache, this.focusNode}) : api = RiveApi() {
     _filesApi = _NonUiRiveFilesApi(api);
+    // Add the home screen listener for browser changes
+    activeFileBrowser.addListener(() {
+      if (activeFileBrowser.value != null &&
+          sectionListener.value != HomeSection.files) {
+        sectionListener.value = HomeSection.files;
+        // This hack is here as we need to notify even
+        // if sectionListener's value is already files ...
+        sectionListener.notifyListeners();
+      }
+    });
   }
 
   ValueListenable<RiveUser> get user => _user;
