@@ -512,18 +512,24 @@ class _ShapesInspectingColor extends InspectingColor {
         if (colorStops == null) {
           preview.value = [];
           stops.value = [];
+          // Set the color type to null as they are different, we need to change
+          // the type in the dropdown to get to something common.
+          colorType = null;
         } else {
           preview.value =
               colorStops.map((stop) => stop.color).toList(growable: false);
           stops.value = colorStops
               .map((stop) => InspectingColorStop(stop))
               .toList(growable: false);
+
+          if (editingIndex.value >= stops.value.length) {
+            editingIndex.value = stops.value.length - 1;
+          }
+          if (editingIndex.value >= 0) {
+            _changeEditingColor(
+                HSVColor.fromColor(stops.value[editingIndex.value].color));
+          }
         }
-        if (editingIndex.value >= stops.value.length) {
-          editingIndex.value = stops.value.length - 1;
-        }
-        _changeEditingColor(
-            HSVColor.fromColor(stops.value[editingIndex.value].color));
 
         // Listen to events we are interested in. These will trigger another
         // _updatePaints call.

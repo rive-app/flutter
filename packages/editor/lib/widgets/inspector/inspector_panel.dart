@@ -45,7 +45,7 @@ class _InspectorPanelState extends State<InspectorPanel> {
   @override
   Widget build(BuildContext context) {
     final file = ActiveFile.of(context);
-    return Container(
+    return ColoredBox(
       color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
       child: ListenableBuilder(
         listenable: file.selection,
