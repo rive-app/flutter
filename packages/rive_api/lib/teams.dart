@@ -1,21 +1,26 @@
 import 'dart:convert';
 import 'dart:core';
 
-import 'package:rive_api/models/team.dart';
 import 'package:logging/logging.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/models/team.dart';
+import 'package:rive_api/models/user.dart';
 
-import 'api.dart';
 
 /// Api for accessing the signed in users folders and files.
-abstract class RiveTeamsApi<T extends RiveTeam> {
+class RiveTeamsApi<T extends RiveTeam> {
   final RiveApi api;
   final Logger log = Logger('Rive API');
   RiveTeamsApi(this.api);
 
   /// POST /api/teams
   Future<T> createTeam(teamName) async {
+    print("What is my team name? $teamName");
     String payload = jsonEncode({
-      "data": {"teamName": teamName}
+      "data": {
+        "name": teamName,
+        "username": teamName
+      }
     });
     var response = await api.post(api.host + '/api/teams', body: payload);
     if (response.statusCode != 200) {
@@ -40,7 +45,7 @@ abstract class RiveTeamsApi<T extends RiveTeam> {
     var response = await api.get(api.host + '/api/teams');
     if (response.statusCode != 200) {
       // Todo: some form of error handling? also whats wrong with our error logging :D
-      var message = 'Could not create new team ${response.body}';
+      var message = 'Could not get teams ${response.body}';
       log.severe(message);
       print(message);
       return null;
@@ -55,7 +60,7 @@ abstract class RiveTeamsApi<T extends RiveTeam> {
     return RiveTeam.fromDataList(data);
   }
 
-  // PUT /api/teams/teamId
+  // PUT /api/teams/<teamId>
   Future<void> updateTeamInfo(
     teamId, {
     String name,
@@ -87,5 +92,30 @@ abstract class RiveTeamsApi<T extends RiveTeam> {
       print(message);
       return null;
     }
+  }
+
+  /// GET /api/teams/<team_id>/affiliates
+  /// Returns the teams for the current user
+  Future<List<RiveUser>> getAffiliates(int teamId) async {
+    var response = await api.get(api.host + '/api/teams/$teamId/affiliates');
+    if (response.statusCode != 200) {
+      // Todo: some form of error handling? also whats wrong with our error logging :D
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      print(message);
+      return null;
+    }
+    List<dynamic> data;
+    try {
+      data = json.decode(response.body);
+    } on FormatException catch (e) {
+      log.severe('Unable to parse response from server: $e');
+    }
+    print('Affiliates: ${response.body}');
+    var teamUsers = data
+        .map((userData) => RiveUser.asTeamMember(userData))
+        .toList(growable: false);
+
+    return teamUsers;
   }
 }

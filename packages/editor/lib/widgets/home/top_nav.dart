@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/files.dart';
+import 'package:rive_api/models/owner.dart';
+import 'package:rive_api/models/team.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
@@ -21,8 +24,23 @@ class TopNav extends StatelessWidget {
 
   const TopNav(this.fileBrowser, {Key key}) : super(key: key);
 
+  List<SettingsScreen> _getScreens(
+      bool isTeam, RiveApi api, RiveOwner currentOwner) {
+    if (isTeam) {
+      return [
+        SettingsScreen('Team Settings', TeamSettings()),
+        SettingsScreen(
+            'Members', TeamMembers(api: api, owner: currentOwner as RiveTeam)),
+      ];
+    } else {
+      return [SettingsScreen('Profile', Container())];
+    }
+  }
+
   Widget _navControls(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
+    final api = RiveContext.of(context).api;
+
     return Row(
       children: [
         const Spacer(),
@@ -51,12 +69,14 @@ class TopNav extends StatelessWidget {
         const SizedBox(width: 12),
         TintedIconButton(
           onPress: () {
+            // Be sure to fetch the current selection.
+            final currentOwner = RiveContext.of(context).currentOwner;
+            final isTeam = currentOwner is RiveTeam;
             showRiveDialog<void>(
                 context: context,
-                builder: (context) => SettingsPanel(screens: [
-                      SettingsScreen('Team Settings', TeamSettings()),
-                      SettingsScreen('Members', TeamMembers()),
-                    ]));
+                builder: (context) => SettingsPanel(
+                    isTeam: isTeam,
+                    screens: _getScreens(isTeam, api, currentOwner)));
           },
           icon: 'settings',
           backgroundHover: riveColors.fileBackgroundLightGrey,

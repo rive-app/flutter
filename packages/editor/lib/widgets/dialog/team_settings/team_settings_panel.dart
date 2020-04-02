@@ -4,6 +4,7 @@ import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_text_field.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 class TeamSettings extends StatefulWidget {
@@ -34,7 +35,7 @@ class _TeamSettingsState extends State<TeamSettings> {
   }
 
   void _submitChanges() {
-    // TODO: 
+    // TODO:
   }
 
   void _updateForHire(bool newValue) {
@@ -61,14 +62,16 @@ class _TeamSettingsState extends State<TeamSettings> {
     );
   }
 
-  Widget _formSection(String label, List<List<SettingsTextField>> rows) {
-    const textStyles = TextStyles();
+  Widget _formSection(
+      {String label,
+      TextStyle labelStyle,
+      List<List<SettingsTextField>> rows}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           label,
-          style: textStyles.fileGreyTextLarge,
+          style: labelStyle,
         ),
         const Spacer(),
         ConstrainedBox(
@@ -97,7 +100,7 @@ class _TeamSettingsState extends State<TeamSettings> {
   Widget build(BuildContext context) {
     final theme = RiveThemeData();
     final colors = theme.colors;
-    const textStyles = TextStyles();
+    final textStyles = theme.textStyles;
 
     return Column(
       // Stretches the two separators
@@ -109,42 +112,45 @@ class _TeamSettingsState extends State<TeamSettings> {
               physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.all(30),
               children: [
-                _formSection('Account', [
-                  [
-                    SettingsTextField(
-                      label: 'Team Name',
-                      onChanged: (value) => _name = value,
-                      initialValue: _name,
-                    ),
-                    SettingsTextField(
-                      label: 'Team Username',
-                      onChanged: (value) => _username = value,
-                      initialValue: _username,
-                    )
-                  ],
-                  [
-                    SettingsTextField(
-                      label: 'Location',
-                      hint: 'Where is your team based?',
-                      onChanged: (value) => _location = value,
-                      initialValue: _location,
-                    ),
-                    SettingsTextField(
-                      label: 'Website',
-                      hint: 'Website',
-                      onChanged: (value) => _website = value,
-                      initialValue: _website,
-                    )
-                  ],
-                  [
-                    SettingsTextField(
-                      label: 'Bio',
-                      hint: 'Tell users a bit about your team',
-                      onChanged: (value) => _bio = value,
-                      initialValue: _bio,
-                    )
-                  ]
-                ]),
+                _formSection(
+                    label: 'Account',
+                    labelStyle: textStyles.fileGreyTextLarge,
+                    rows: [
+                      [
+                        SettingsTextField(
+                          label: 'Team Name',
+                          onChanged: (value) => _name = value,
+                          initialValue: _name,
+                        ),
+                        SettingsTextField(
+                          label: 'Team Username',
+                          onChanged: (value) => _username = value,
+                          initialValue: _username,
+                        )
+                      ],
+                      [
+                        SettingsTextField(
+                          label: 'Location',
+                          hint: 'Where is your team based?',
+                          onChanged: (value) => _location = value,
+                          initialValue: _location,
+                        ),
+                        SettingsTextField(
+                          label: 'Website',
+                          hint: 'Website',
+                          onChanged: (value) => _website = value,
+                          initialValue: _website,
+                        )
+                      ],
+                      [
+                        SettingsTextField(
+                          label: 'Bio',
+                          hint: 'Tell users a bit about your team',
+                          onChanged: (value) => _bio = value,
+                          initialValue: _bio,
+                        )
+                      ]
+                    ]),
                 const SizedBox(height: 30),
                 Separator(color: colors.fileLineGrey),
                 const SizedBox(height: 30),
@@ -173,7 +179,7 @@ class _TeamSettingsState extends State<TeamSettings> {
                             Padding(
                               // Padding: 20 (radio button) + 10 text padding
                               padding: const EdgeInsets.only(left: 30.0),
-                              // TODO: add link to the "artists for hire". 
+                              // TODO: add link to the "artists for hire".
                               // What will it link to?
                               child: Text(
                                   'Allow other users to message you about work'
@@ -205,22 +211,25 @@ class _TeamSettingsState extends State<TeamSettings> {
                 const SizedBox(height: 30),
                 Separator(color: colors.fileLineGrey),
                 const SizedBox(height: 30),
-                _formSection('Social', [
-                  [
-                    SettingsTextField(
-                      label: 'Twitter',
-                      hint: 'Link',
-                      onChanged: (value) => _twitter = value,
-                      initialValue: _twitter,
-                    ),
-                    SettingsTextField(
-                      label: 'Instagram',
-                      hint: 'Link',
-                      onChanged: (value) => _instagram = value,
-                      initialValue: _instagram,
-                    )
-                  ]
-                ])
+                _formSection(
+                    label: 'Social',
+                    labelStyle: textStyles.fileGreyTextLarge,
+                    rows: [
+                      [
+                        SettingsTextField(
+                          label: 'Twitter',
+                          hint: 'Link',
+                          onChanged: (value) => _twitter = value,
+                          initialValue: _twitter,
+                        ),
+                        SettingsTextField(
+                          label: 'Instagram',
+                          hint: 'Link',
+                          onChanged: (value) => _instagram = value,
+                          initialValue: _instagram,
+                        )
+                      ]
+                    ])
               ]),
         ),
         Separator(color: colors.fileLineGrey),
@@ -257,8 +266,10 @@ class LabeledRadio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = RiveColors();
-    const styles = TextStyles();
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
+
     return GestureDetector(
       onTap: () {
         if (value != groupValue) onChanged(value);

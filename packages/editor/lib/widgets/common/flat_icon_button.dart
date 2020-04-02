@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 import 'package:rive_editor/widgets/popup/tip.dart';
-import 'package:rive_editor/widgets/theme.dart';
 
 class FlatIconButton extends StatelessWidget {
   const FlatIconButton({
@@ -39,7 +39,7 @@ class FlatIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final riveColors = RiveColors();
+    final riveColors = RiveTheme.of(context).colors;
     return _tip(
       InkWell(
         onTap: onTap,

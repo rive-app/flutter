@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_api/models/user.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 abstract class Invite {
@@ -34,8 +34,10 @@ class UserInviteBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = RiveColors();
-    const styles = TextStyles();
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
+
     return DecoratedBox(
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5),

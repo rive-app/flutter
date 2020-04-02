@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class RoundedSection extends StatelessWidget {
   final WidgetBuilder contentBuilder;
@@ -10,7 +10,7 @@ class RoundedSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = RiveColors();
+    final colors = RiveTheme.of(context).colors;
     return DecoratedBox(
         decoration: BoxDecoration(
             color: colors.fileBackgroundLightGrey,

@@ -446,8 +446,7 @@ class NavigationPanel extends StatelessWidget {
                             bottom: 0,
                           ),
                         ),
-                        Container(
-                          color: riveColors.fileBackgroundLightGrey,
+                        Padding(
                           padding: const EdgeInsets.only(
                             left: 20,
                             right: 10,

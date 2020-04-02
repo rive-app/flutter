@@ -127,8 +127,10 @@ class _LoginState extends State<Login> {
     )) {
       await rive.updateUser();
     }
-    setState(() {
-      _isLoggingIn = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoggingIn = false;
+      });
+    }
   }
 }

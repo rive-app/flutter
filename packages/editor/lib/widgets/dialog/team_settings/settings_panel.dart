@@ -3,7 +3,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/team_settings_header.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
@@ -55,9 +55,10 @@ class SettingsScreen {
 }
 
 class SettingsPanel extends StatefulWidget {
-  const SettingsPanel({@required this.screens});
-
+  final bool isTeam;
   final List<SettingsScreen> screens;
+
+  const SettingsPanel({@required this.screens, @required this.isTeam});
 
   @override
   _SettingsPanelState createState() => _SettingsPanelState();
@@ -85,41 +86,55 @@ class _SettingsPanelState extends State<SettingsPanel> {
         ),
       );
 
+  Widget _nav(List<SettingsScreen> screens, Color background) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      width: settingsTabNavWidth,
+      color: background,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          for (int i = 0; i < screens.length; i++) _label(screens[i], i)
+        ],
+      ),
+    );
+  }
+
+  Widget _contents(Color separator, Widget contents) {
+    var minWidth = riveDialogMinWidth;
+    var maxWidth = riveDialogMaxWidth;
+    if (widget.isTeam) {
+      minWidth -= settingsTabNavWidth; // 85.
+      maxWidth -= settingsTabNavWidth; // 665.
+    }
+    return ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: minWidth,
+          maxWidth: maxWidth,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            TeamSettingsHeader(),
+            Separator(color: separator),
+            Expanded(child: contents),
+          ],
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = widget.screens;
-    final colors = RiveColors();
+    final colors = RiveTheme.of(context).colors;
     final currentScreen = screens[_selectedIndex];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          width: settingsTabNavWidth,
-          color: colors.fileBackgroundLightGrey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              for (int i = 0; i < screens.length; i++) _label(screens[i], i)
-            ],
-          ),
-        ),
-        ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: riveDialogMinWidth - settingsTabNavWidth, // 85.
-              maxWidth: riveDialogMaxWidth - settingsTabNavWidth, // 665.
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                TeamSettingsHeader(),
-                Separator(color: colors.fileLineGrey),
-                Expanded(child: currentScreen.contents),
-              ],
-            ))
+        if (widget.isTeam) _nav(screens, colors.fileBackgroundLightGrey),
+        _contents(colors.fileLineGrey, currentScreen.contents),
       ],
     );
   }
