@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 
 import 'package:cursor/propagating_listener.dart';
 
@@ -190,7 +191,7 @@ class FilesPanel extends StatelessWidget {
     final rive = RiveContext.of(context);
     final fileBrowser = rive.activeFileBrowser.value;
 
-    if (fileBrowser.selectedFolder == null) {
+    if (fileBrowser?.selectedFolder == null) {
       return _buildEmpty(context);
     }
     return LayoutBuilder(
@@ -255,6 +256,7 @@ class NavigationPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
+    final rive = RiveContext.of(context);
     final riveColors = theme.colors;
     final treeStyle = TreeStyle(
       showFirstLine: false,
@@ -268,185 +270,201 @@ class NavigationPanel extends StatelessWidget {
       itemHeight: kTreeItemHeight,
     );
 
-    return Container(
-      decoration: BoxDecoration(
-        color: riveColors.fileBackgroundLightGrey,
-        border: Border(
-            right: BorderSide(
-          color: riveColors.fileBorder,
-        )),
-      ),
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(
-              right: 20,
-              left: 20,
-            ),
-            child: Container(
-              height: 35,
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                color: riveColors.fileSearchBorder,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  SearchIcon(
-                    color: riveColors.fileSearchIcon,
-                    size: 16,
+    // this listener is in place to force everything to redraw once the
+    // activeFileBrowser chagnes.
+    // without this, if you change between teams, only one half of the
+    // state changes... (the color of the text, the
+    // background comes from within the browser..)
+    return ValueListenableProvider.value(
+      value: rive.activeFileBrowser,
+      child: Consumer<FileBrowser>(
+        builder: (context, fileBrowser, child) => Container(
+          decoration: BoxDecoration(
+            color: riveColors.fileBackgroundLightGrey,
+            border: Border(
+                right: BorderSide(
+              color: riveColors.fileBorder,
+            )),
+          ),
+          padding: const EdgeInsets.only(top: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(
+                  right: 20,
+                  left: 20,
+                ),
+                child: Container(
+                  height: 35,
+                  padding: const EdgeInsets.only(left: 10, right: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: riveColors.fileSearchBorder,
                   ),
-                  Container(width: 10),
-                  Expanded(
-                    child: Container(
-                      height: 35,
-                      alignment: Alignment.centerLeft,
-                      child: TextField(
-                        textAlign: TextAlign.left,
-                        textAlignVertical: TextAlignVertical.center,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          hintText: 'Search',
-                          contentPadding: EdgeInsets.zero,
-                          filled: true,
-                          hoverColor: Colors.transparent,
-                          fillColor: Colors.transparent,
-                        ),
-                        style: RiveTheme.of(context).textStyles.fileSearchText,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      SearchIcon(
+                        color: riveColors.fileSearchIcon,
+                        size: 16,
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20),
-            child: Column(
-              children: <Widget>[
-                IconTile(
-                  label: 'Get Started',
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'rocket',
-                  ),
-                  onTap: () {},
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'notification',
-                  ),
-                  label: 'Notifications',
-                  onTap: () {
-                    print('Notifications selected');
-                  },
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'recents',
-                  ),
-                  label: 'Recents',
-                  onTap: () {},
-                ),
-                IconTile(
-                  icon: TintedIcon(
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                    icon: 'popup-community',
-                  ),
-                  label: 'Community',
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-          Separator(
-            color: riveColors.fileLineGrey,
-            padding: const EdgeInsets.only(
-              top: 20,
-            ),
-          ),
-          Expanded(
-            child: ValueListenableBuilder<List<FolderTreeController>>(
-              valueListenable: RiveContext.of(context).folderTreeControllers,
-              builder: (context, folderTreeControllers, _) {
-                var slivers = <Widget>[];
-                for (int i = 0; i < folderTreeControllers.length; i++) {
-                  slivers.add(
-                    FolderTreeView(
-                      style: treeStyle,
-                      controller: folderTreeControllers[i],
-                    ),
-                  );
-                  if (i != folderTreeControllers.length - 1) {
-                    slivers.add(
-                      SliverToBoxAdapter(
-                        child: Separator(
-                          color: riveColors.fileLineGrey,
-                          padding: EdgeInsets.only(
-                            left: treeStyle.padding.left,
-                            right: 0,
-                            top: 12,
-                            bottom: 12,
+                      Container(width: 10),
+                      Expanded(
+                        child: Container(
+                          height: 35,
+                          alignment: Alignment.centerLeft,
+                          child: TextField(
+                            textAlign: TextAlign.left,
+                            textAlignVertical: TextAlignVertical.center,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              border: InputBorder.none,
+                              hintText: 'Search',
+                              contentPadding: EdgeInsets.zero,
+                              filled: true,
+                              hoverColor: Colors.transparent,
+                              fillColor: Colors.transparent,
+                            ),
+                            style:
+                                RiveTheme.of(context).textStyles.fileSearchText,
                           ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Column(
+                  children: <Widget>[
+                    IconTile(
+                      label: 'Get Started',
+                      icon: TintedIcon(
+                        color: RiveTheme.of(context).colors.fileIconColor,
+                        icon: 'rocket',
+                      ),
+                      onTap: () {},
+                    ),
+                    IconTile(
+                      icon: TintedIcon(
+                        color: RiveTheme.of(context).colors.fileIconColor,
+                        icon: 'notification',
+                      ),
+                      label: 'Notifications',
+                      onTap: () {
+                        // File browsers track their own selected states.
+                        // so you have to tell them specifically that stuff not selected
+                        rive.activeFileBrowser.value?.openFolder(null, false);
+                        rive.activeFileBrowser.value = null;
+                        print('Notifications selected');
+                      },
+                    ),
+                    IconTile(
+                      icon: TintedIcon(
+                        color: RiveTheme.of(context).colors.fileIconColor,
+                        icon: 'recents',
+                      ),
+                      label: 'Recents',
+                      onTap: () {},
+                    ),
+                    IconTile(
+                      icon: TintedIcon(
+                        color: RiveTheme.of(context).colors.fileIconColor,
+                        icon: 'popup-community',
+                      ),
+                      label: 'Community',
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+              Separator(
+                color: riveColors.fileLineGrey,
+                padding: const EdgeInsets.only(
+                  top: 20,
+                ),
+              ),
+              Expanded(
+                child: ValueListenableBuilder<List<FolderTreeController>>(
+                  valueListenable:
+                      RiveContext.of(context).folderTreeControllers,
+                  builder: (context, folderTreeControllers, _) {
+                    var slivers = <Widget>[];
+                    for (int i = 0; i < folderTreeControllers.length; i++) {
+                      slivers.add(
+                        FolderTreeView(
+                          style: treeStyle,
+                          controller: folderTreeControllers[i],
+                        ),
+                      );
+                      if (i != folderTreeControllers.length - 1) {
+                        slivers.add(
+                          SliverToBoxAdapter(
+                            child: Separator(
+                              color: riveColors.fileLineGrey,
+                              padding: EdgeInsets.only(
+                                left: treeStyle.padding.left,
+                                right: 0,
+                                top: 12,
+                                bottom: 12,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                    }
+
+                    slivers.add(
+                      SliverInlineFooter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Separator(
+                              color: riveColors.fileLineGrey,
+                              padding: EdgeInsets.only(
+                                left: treeStyle.padding.left,
+                                top: 12,
+                                bottom: 0,
+                              ),
+                            ),
+                            Container(
+                              color: riveColors.fileBackgroundLightGrey,
+                              padding: const EdgeInsets.only(
+                                left: 20,
+                                right: 10,
+                                bottom: 20,
+                                top: 20,
+                              ),
+                              child: DashedFlatButton(
+                                label: 'New Team',
+                                icon: 'teams-button',
+                                tip: const Tip(
+                                    label: 'Create a new team',
+                                    direction: PopupDirection.topToCenter),
+                                onTap: () => showTeamWizard<void>(
+                                  context: context,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );
-                  }
-                }
-
-                slivers.add(
-                  SliverInlineFooter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Separator(
-                          color: riveColors.fileLineGrey,
-                          padding: EdgeInsets.only(
-                            left: treeStyle.padding.left,
-                            top: 12,
-                            bottom: 0,
-                          ),
-                        ),
-                        Container(
-                          color: riveColors.fileBackgroundLightGrey,
-                          padding: const EdgeInsets.only(
-                            left: 20,
-                            right: 10,
-                            bottom: 20,
-                            top: 20,
-                          ),
-                          child: DashedFlatButton(
-                            label: 'New Team',
-                            icon: 'teams-button',
-                            tip: const Tip(
-                                label: 'Create a new team',
-                                direction: PopupDirection.topToCenter),
-                            onTap: () => showTeamWizard<void>(
-                              context: context,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-                return TreeScrollView(
-                  scrollController:
-                      RiveContext.of(context).treeScrollController,
-                  style: treeStyle,
-                  slivers: slivers,
-                );
-              },
-            ),
+                    return TreeScrollView(
+                      scrollController:
+                          RiveContext.of(context).treeScrollController,
+                      style: treeStyle,
+                      slivers: slivers,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
