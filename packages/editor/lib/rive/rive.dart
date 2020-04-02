@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/models/file.dart';
 import 'package:rive_api/folder.dart';
+import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -136,6 +137,8 @@ class Rive {
 
   ValueListenable<RiveUser> get user => _user;
 
+  RiveOwner get currentOwner => activeFileBrowser.value.owner;
+
   /// Available tabs in the editor
   final List<RiveTabItem> fileTabs = [];
   final Event fileTabsChanged = Event();
@@ -251,13 +254,13 @@ class Rive {
 
     final fileBrowser = FileBrowser(user.value);
     fileBrowser.initialize(this);
-    await fileBrowser.load(this);
+    await fileBrowser.load();
     fileBrowsers.add(fileBrowser);
 
-    teams.value.forEach((RiveTeam team) {
+    teams.value?.forEach((RiveTeam team) {
       var _tmp = FileBrowser(team);
       _tmp.initialize(this);
-      _tmp.load(this);
+      _tmp.load();
       fileBrowsers.add(_tmp);
     });
 
@@ -289,7 +292,7 @@ class Rive {
 
   void selectTab(RiveTabItem value) {
     if (value == systemTab) {
-      fileBrowsers?.forEach((fileBrowser) => fileBrowser.load(this));
+      fileBrowsers?.forEach((fileBrowser) => fileBrowser.load());
     } else if (value.file != null) {
       // Seriously, https://media.giphy.com/media/aZ3LDBs1ExsE8/giphy.gif
       file.value = value.file;

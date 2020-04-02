@@ -111,7 +111,7 @@ class FileBrowser extends FileBrowserController {
         FolderTreeController([], fileBrowser: this, rive: rive);
   }
 
-  Future<bool> load(Rive rive) async {
+  Future<bool> load() async {
     FoldersResult<RiveFolder> result;
     if (_owner is RiveTeam) {
       var dummyFolder = RiveFolder(<String, dynamic>{
