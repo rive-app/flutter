@@ -5,8 +5,8 @@
 #   exit 1
 # fi
 
-echo Testing binary buffer
-cd $RIVE_ROOT/packages/binary_buffer && pub run test && cd -
+echo Testing utilities
+cd $RIVE_ROOT/packages/utilities && pub run test && cd -
 if [ $? -ne 0 ]; then
   exit 1
 fi

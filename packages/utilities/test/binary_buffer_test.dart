@@ -1,8 +1,8 @@
 import 'dart:typed_data';
+import 'package:test/test.dart';
 
-import 'package:binary_buffer/binary_reader.dart';
-import 'package:binary_buffer/binary_writer.dart';
-import "package:test/test.dart";
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 void main() {
   test('float32', () {

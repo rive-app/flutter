@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:binary_buffer/binary_reader.dart';
-import 'package:binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_command.dart';
 import 'package:core/core.dart';
@@ -13,6 +13,7 @@ class CoopFile {
   int ownerId;
   int fileId;
   int nextClientId = 1;
+
   /// Monotonically increasing change id tracked on the server with the coop
   /// file. Initialize it to the minimum valid value.
   int serverChangeId = CoopCommand.minChangeId;

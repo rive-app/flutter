@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:core/coop/player.dart';
 import 'package:core/coop/player_cursor.dart';
 

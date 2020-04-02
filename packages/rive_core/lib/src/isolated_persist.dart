@@ -4,8 +4,8 @@ import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
 
-import 'package:binary_buffer/binary_reader.dart';
-import 'package:binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/debounce.dart';
 import 'package:local_data/local_data.dart';

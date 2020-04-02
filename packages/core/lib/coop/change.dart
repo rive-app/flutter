@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:binary_buffer/binary_writer.dart';
-import 'package:binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:core/id.dart';
 
 import 'coop_command.dart';
