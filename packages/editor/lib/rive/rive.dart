@@ -38,6 +38,8 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
+enum HomeSection { files, notifications, community, recents, getStarted }
+
 class _Key {
   final LogicalKeyboardKey logical;
   final PhysicalKeyboardKey physical;
@@ -127,6 +129,12 @@ class Rive {
   /// Currently selected tab
   final ValueNotifier<RiveTabItem> selectedTab =
       ValueNotifier<RiveTabItem>(null);
+
+  /// Tracking the home screen state
+  final ValueNotifier<HomeSection> sectionListener =
+      ValueNotifier(HomeSection.files);
+  // HomeSection get section => sectionListener.value;
+  // set section(HomeSection value) => sectionListener.value = value;
 
   final RiveApi api;
   _NonUiRiveFilesApi _filesApi;
