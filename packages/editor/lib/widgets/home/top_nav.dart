@@ -55,7 +55,11 @@ class TopNav extends StatelessWidget {
                 context: context,
                 builder: (context) => SettingsPanel(screens: [
                       SettingsScreen('Team Settings', TeamSettings()),
-                      SettingsScreen('Members', TeamMembers()),
+                      SettingsScreen(
+                          'Members',
+                          TeamMembers(
+                            api: RiveContext.of(context).api,
+                          )),
                     ]));
           },
           icon: 'settings',

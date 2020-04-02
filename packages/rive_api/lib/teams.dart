@@ -7,7 +7,7 @@ import 'package:logging/logging.dart';
 import 'api.dart';
 
 /// Api for accessing the signed in users folders and files.
-abstract class RiveTeamsApi<T extends RiveTeam> {
+class RiveTeamsApi<T extends RiveTeam> {
   final RiveApi api;
   final Logger log = Logger('Rive API');
   RiveTeamsApi(this.api);

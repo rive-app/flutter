@@ -1,31 +1,33 @@
+import 'package:core/debounce.dart';
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/artists.dart';
 import 'package:rive_api/models/user.dart';
+import 'package:rive_api/teams.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/invites.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
-enum TeamRole { member, admin, delete }
-
 class TeamMembers extends StatefulWidget {
+  final RiveApi api;
+
+  const TeamMembers({@required this.api, Key key})
+      : assert(api != null),
+        super(key: key);
+
   @override
-  _TeamMembersState createState() => _TeamMembersState();
+  _TeamMemberState createState() => _TeamMemberState();
 }
 
-class _TeamMembersState extends State<TeamMembers> {
-  final _inviteQueue = <Invite>[
-    const UserInvite(
-        RiveUser(ownerId: 0, name: 'Luigi Rosso', username: 'castor')),
-    const UserInvite(
-        RiveUser(ownerId: 0, name: 'Matt Sullivan', username: 'wolfgang')),
-    const EmailInvite('test@email.com'),
-  ];
-
+class _TeamMemberState extends State<TeamMembers> {
   final _teamMembers = [
     const RiveUser(ownerId: 0, name: null, username: 'nullname'),
     const RiveUser(ownerId: 1, name: 'Null Username', username: null),
@@ -36,149 +38,213 @@ class _TeamMembersState extends State<TeamMembers> {
         avatar: 'https://avatarfiles.alphacoders.com/178/178485.jpg',
         isAdmin: true),
   ];
+  RiveTeamsApi _api;
+
+  @override
+  void initState() {
+    super.initState();
+    _api = RiveTeamsApi(widget.api);
+  }
+
+  void _onRoleChanged(RiveUser user, String role) {
+    // TODO:
+    // _teamsApi.roleChanged(user.ownerId).then();
+    print('Role changed $user, $role');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(padding: const EdgeInsets.all(30), children: [
+      InvitePanel(api: widget.api),
+      const SizedBox(height: 20),
+      // Team Members Section.
+      Column(children: [
+        for (final teamMember in _teamMembers)
+          _TeamMember(
+            user: teamMember,
+            onRoleChanged: (role) => _onRoleChanged(teamMember, role),
+          ),
+      ]),
+    ]);
+  }
+}
+
+class InvitePanel extends StatefulWidget {
+  final RiveApi api;
+
+  const InvitePanel({@required this.api, Key key}) : super(key: key);
+  @override
+  _InvitePanelState createState() => _InvitePanelState();
+}
+
+class _InvitePanelState extends State<InvitePanel> {
+  final _inviteQueue = <Invite>[
+    const UserInvite(
+        RiveUser(ownerId: 0, name: 'Luigi Rosso', username: 'castor')),
+    const UserInvite(
+        RiveUser(ownerId: 0, name: 'Matt Sullivan', username: 'wolfgang')),
+    const EmailInvite('test@email.com'),
+  ];
+
   // final _inviteSuggestions = <String>["Umberto", "Bertoldo", "Zi'mberto"];
   TeamRole _selectedInviteType = TeamRole.member;
+  RiveArtists _api;
+  final _openCombo = Event();
 
-  void _removeInvitee(int index) {
-    setState(() {
-      _inviteQueue.removeAt(index);
-    });
+  @override
+  void initState() {
+    super.initState();
+    _api = RiveArtists(widget.api);
   }
 
   void _sendInvites() {
     // TODO:
   }
 
-  void _onRoleChanged(TeamRole role) {
-    // TODO:
+  void _startTypeahead() {
+    _openCombo.notify();
+  }
+
+  Future<List<RiveUser>> _autocomplete(String input) =>
+      _api.autocomplete(input);
+
+  @override
+  void dispose() {
+    cancelDebounce(_startTypeahead);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = RiveColors();
+    final colors = RiveTheme.of(context).colors;
 
-    // TODO: hook up to real data.
-    // final team = widget.team;
-    final teamMembers = _teamMembers; // team.members;
     final canInvite = _inviteQueue.isNotEmpty;
 
-    return ListView(padding: const EdgeInsets.all(30), children: [
-      RoundedSection(
-          contentBuilder: (sectionContext) => Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 360),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        // Collection of invites to send that wraps when the max
-                        // width has been filled.
-                        Wrap(
+    return RoundedSection(
+        contentBuilder: (sectionContext) => Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      // Collection of invites to send that wraps when the max
+                      // width has been filled.
+                      PropagatingListener(
+                        behavior: HitTestBehavior.translucent,
+                        onPointerDown: (_) => _startTypeahead(),
+                        child: Wrap(
                             alignment: WrapAlignment.start,
-                            crossAxisAlignment: WrapCrossAlignment.start,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             direction: Axis.horizontal,
                             spacing: 10,
                             runSpacing: 10,
                             children: [
-                              for (int i = 0; i < _inviteQueue.length; i++)
-                                UserInviteBox(_inviteQueue[i].name,
-                                    onRemove: () => _removeInvitee(i)),
-                              /** TODO:
-                              ComboBox<String>(
-                              value: _inputVal,
-                              sizing: ComboSizing.collapsed,
-                              typeahead: true,
-                              options: _inviteSuggestions,
-                              underline: false,
-                              valueColor: colors.commonButtonTextColorDark,
-                              onInputChanged: _findUserSuggestions,
-                              change: (val) {
-                                print('Selected $val');
-                                setState(() {
-                                  _inviteQueue.add()
-                                });
-                              },
-                            ), 
-                            */
+                              ..._inviteQueue.map(
+                                  (e) => UserInviteBox(e.name, onRemove: () {
+                                        setState(() {
+                                          _inviteQueue.remove(e);
+                                        });
+                                      })),
+                              ComboBox<RiveUser>(
+                                trigger: _openCombo,
+                                // Start with an empty value.
+                                value: null,
+                                sizing: ComboSizing.collapsed,
+                                popupSizing: ComboPopupSizing.content,
+                                typeahead: true,
+                                underline: false,
+                                chevron: false,
+                                valueColor: colors.commonButtonTextColorDark,
+                                cursorColor: colors.commonButtonTextColorDark,
+                                retriever: _autocomplete,
+                                change: (val) {
+                                  print("Change $val");
+                                  setState(() {
+                                    _inviteQueue.add(UserInvite(val));
+                                    debounce(_startTypeahead);
+                                  });
+                                },
+                                toLabel: (user) {
+                                  var label = '';
+                                  if (user.name != null) {
+                                    label = '${user.name} ';
+                                  }
+                                  if (user.username != null) {
+                                    label += '@${user.username}';
+                                  }
+                                  return label;
+                                },
+                              ),
                             ]),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  // Team Role selection.
-                  SizedBox(
-                    height: 30,
-                    child: Center(
-                      child: ComboBox<TeamRole>(
-                        value: _selectedInviteType,
-                        change: (type) => setState(() {
-                          _selectedInviteType = type;
-                        }),
-                        alignment: Alignment.topRight,
-                        options: TeamRole.values.sublist(0, 2),
-                        toLabel: (option) => describeEnum(option).capsFirst,
-                        popupWidth: 116,
-                        underline: false,
-                        valueColor: colors.fileBackgroundDarkGrey,
-                        sizing: ComboSizing.content,
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                // Team Role selection.
+                SizedBox(
+                  height: 30,
+                  child: Center(
+                    child: ComboBox<TeamRole>(
+                      value: _selectedInviteType,
+                      change: (type) => setState(() {
+                        _selectedInviteType = type;
+                      }),
+                      alignment: Alignment.topRight,
+                      options: TeamRole.values.sublist(0, 2),
+                      toLabel: (option) => describeEnum(option).capsFirst,
+                      popupWidth: 116,
+                      underline: false,
+                      valueColor: colors.fileBackgroundDarkGrey,
+                      sizing: ComboSizing.content,
                     ),
                   ),
-                  const SizedBox(width: 20),
-                  FlatIconButton(
-                    label: 'Send Invite',
-                    color: canInvite
-                        ? colors.commonDarkGrey
-                        : colors.commonButtonInactiveGrey,
-                    textColor:
-                        canInvite ? Colors.white : colors.inactiveButtonText,
-                    onTap: canInvite ? _sendInvites : null,
-                    radius: 20,
-                  )
-                ],
-              )),
-      const SizedBox(height: 20), 
-      // Team Members Section.
-      Column(children: [
-        for (final teamMember in teamMembers)
-          _TeamMember(
-              name: teamMember.name,
-              username: teamMember.username,
-              avatarUrl: teamMember.avatar,
-              role: teamMember.isAdmin ? TeamRole.admin : TeamRole.member,
-              onRoleChanged: _onRoleChanged,
-              hasAccepted: false),
-      ]),
-    ]);
+                ),
+                const SizedBox(width: 20),
+                FlatIconButton(
+                  label: 'Send Invite',
+                  color: canInvite
+                      ? colors.commonDarkGrey
+                      : colors.commonButtonInactiveGrey,
+                  textColor:
+                      canInvite ? Colors.white : colors.inactiveButtonText,
+                  onTap: canInvite ? _sendInvites : null,
+                  radius: 20,
+                )
+              ],
+            ));
   }
 }
 
-class _TeamMember extends StatelessWidget {
-  final String name;
-  final String username;
-  final String avatarUrl;
-  final TeamRole role;
-  final bool hasAccepted;
-  final ValueChanged<TeamRole> onRoleChanged;
+final _teamRoleDescriptions = TeamRole.values
+    .map((e) => describeEnum(e).capsFirst)
+    .toList()
+      ..add('Delete');
 
-  const _TeamMember(
-      {this.name,
-      this.username,
-      this.role,
-      this.hasAccepted,
-      this.onRoleChanged,
-      this.avatarUrl,
-      Key key})
-      : assert(name != null || username != null,
-            'Name AND Username for this user are both null'),
-        super(key: key);
+class _TeamMember extends StatelessWidget {
+  final RiveUser user;
+  final ValueChanged<String> onRoleChanged;
+
+  const _TeamMember({@required this.user, this.onRoleChanged, Key key})
+      : super(key: key);
+
+  String _getRole() {
+    switch (user.role) {
+      case TeamRole.admin:
+        return describeEnum(TeamRole.admin).capsFirst;
+      default:
+        return describeEnum(TeamRole.member).capsFirst;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colors = RiveColors();
-    const styles = TextStyles();
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
@@ -191,8 +257,8 @@ class _TeamMember extends StatelessWidget {
             SizedBox(
               child: Avatar(
                 iconBuilder: (context) {
-                  if (avatarUrl != null) {
-                    return Image.network(avatarUrl);
+                  if (user.avatar != null) {
+                    return Image.network(user.avatar);
                   }
                   return TintedIcon(color: colors.commonDarkGrey, icon: 'user');
                 },
@@ -200,27 +266,27 @@ class _TeamMember extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 5),
-            if (name != null) ...[
+            if (user.name != null) ...[
               ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 180),
                   child: Text(
-                    name,
+                    user.name,
                     overflow: TextOverflow.ellipsis,
                     style: styles.fileSearchText.copyWith(
                         color: Colors.black, fontWeight: FontWeight.w500),
                   )),
               const SizedBox(width: 10)
             ],
-            if (username != null)
+            if (user.username != null)
               ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 180),
                   child: Text(
-                    '@$username',
+                    '@${user.username}',
                     overflow: TextOverflow.ellipsis,
                     style: styles.basic.copyWith(color: colors.inactiveText),
                   )),
             const Spacer(),
-            if (!hasAccepted)
+            if (user.status == TeamInviteStatus.pending)
               Text(
                 "Hasn't accepted invite",
                 style: styles.tooltipDisclaimer.copyWith(
@@ -230,12 +296,11 @@ class _TeamMember extends StatelessWidget {
             SizedBox(
               height: 30,
               child: Center(
-                child: ComboBox<TeamRole>(
-                  value: role,
+                child: ComboBox<String>(
+                  value: _getRole(),
                   change: onRoleChanged,
                   alignment: Alignment.topRight,
-                  options: TeamRole.values,
-                  toLabel: (option) => describeEnum(option).capsFirst,
+                  options: _teamRoleDescriptions,
                   popupWidth: 116,
                   underline: false,
                   valueColor: colors.fileBackgroundDarkGrey,

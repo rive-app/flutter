@@ -3,6 +3,9 @@ import 'package:meta/meta.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
+enum TeamInviteStatus { accepted, pending }
+enum TeamRole { member, admin }
+
 class RiveUser extends RiveOwner {
   final String username;
   final String avatar;
@@ -10,6 +13,8 @@ class RiveUser extends RiveOwner {
   final bool isPaid;
   final int notificationCount;
   final bool isVerified;
+  final TeamInviteStatus status;
+  final TeamRole role;
 
   const RiveUser({
     @required int ownerId,
@@ -20,6 +25,8 @@ class RiveUser extends RiveOwner {
     this.isPaid = false,
     this.notificationCount = 0,
     this.isVerified = false,
+    this.status,
+    this.role,
   }) : super(id: ownerId, name: name);
 
   factory RiveUser.fromData(Map<String, dynamic> data,
@@ -45,6 +52,20 @@ class RiveUser extends RiveOwner {
       ownerId: data.getInt('i'),
       username: data.getString('n'),
       name: data.getString('l'),
+    );
+  }
+
+  factory RiveUser.fromTeamData(Map<String, dynamic> data) {
+    return RiveUser(
+      ownerId: data.getInt('ownerId'),
+      name: data.getString('name'),
+      username: data.getString('username'),
+      status: data.getString('status') == 'pending'
+          ? TeamInviteStatus.pending
+          : TeamInviteStatus.accepted,
+      role: data.getString('permission') == 'admin'
+          ? TeamRole.admin
+          : TeamRole.member,
     );
   }
 
