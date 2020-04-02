@@ -8,6 +8,7 @@ import 'package:cursor/propagating_listener.dart';
 import 'package:rive_api/files.dart';
 
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/widgets/notifications.dart';
 
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
@@ -58,33 +59,47 @@ class Home extends StatelessWidget {
 
     return PropagatingListener(
       behavior: HitTestBehavior.deferToChild,
-      onPointerUp: (_) {
-        fileBrowser.deselectAll();
-      },
+      onPointerUp: (_) => fileBrowser.deselectAll(),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          ResizePanel(
+            hitSize: 10,
+            direction: ResizeDirection.horizontal,
+            side: ResizeSide.end,
+            min: 252,
+            max: 500,
+            child: NavigationPanel(),
+          ),
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                ResizePanel(
-                  hitSize: resizeEdgeSize,
-                  direction: ResizeDirection.horizontal,
-                  side: ResizeSide.end,
-                  min: 252,
-                  max: 500,
-                  child: NavigationPanel(),
-                ),
-                Expanded(
-                  child: FilesPanel(),
-                ),
-              ],
-            ),
+            child: MainPanel(),
           ),
         ],
       ),
     );
+  }
+}
+
+/// Displays the appropriate content/widgets in the main
+/// display of the Home panel
+class MainPanel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final sectionListener = RiveContext.of(context).sectionListener;
+    return ValueListenableBuilder<HomeSection>(
+        valueListenable: sectionListener,
+        builder: (context, section, _) {
+          switch (section) {
+            case HomeSection.notifications:
+              return Notifications();
+            case HomeSection.community:
+            case HomeSection.getStarted:
+            case HomeSection.recents:
+            case HomeSection.files:
+            default:
+              return FilesPanel();
+          }
+        });
   }
 }
 
