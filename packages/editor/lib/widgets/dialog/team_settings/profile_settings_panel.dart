@@ -31,7 +31,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   @override
   void initState() {
     super.initState();
-    _name = 'Rive';
+    final owner = widget.owner;
+    _name = owner.name;
     _username = 'RiveApp';
     _location = 'Moon';
     _website = 'rive.app';

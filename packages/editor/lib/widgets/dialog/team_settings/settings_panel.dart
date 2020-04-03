@@ -2,42 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/team.dart';
+import 'package:rive_api/teams.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/profile_settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_header.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/team_members_panel.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/profile_settings_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
 const double settingsTabNavWidth = 215;
 
+// Helper functions.
+RiveOwner _getOwner(BuildContext ctx) => RiveContext.of(ctx).currentOwner;
+
+RiveApi _getApi(BuildContext ctx) => RiveContext.of(ctx).api;
+
 Future showSettings({BuildContext context}) {
   return showRiveDialog<void>(
-    context: context,
-    builder: (context) => const Settings(),
-  );
+      context: context,
+      builder: (ctx) {
+        final owner = _getOwner(ctx);
+        final api = _getApi(ctx);
+        if (owner is RiveTeam) {
+          RiveTeamsApi(api).getAffiliates(owner.ownerId);
+        }
+        return Settings(owner: owner);
+      });
 }
 
 class Settings extends StatefulWidget {
-  const Settings({Key key}) : super(key: key);
+  final RiveOwner owner;
+  const Settings({@required this.owner, Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _SettingsState();
 }
 
 class _SettingsState extends State<Settings> {
-  int _selectedIndex;
+  int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedIndex = 0;
-  }
+  bool get isTeam => widget.owner is RiveTeam;
+  RiveTeam get team => isTeam ? widget.owner as RiveTeam : null;
 
-  Widget _panel(bool isTeam, Widget child) {
+  Widget _panel(Widget child) {
     var maxWidth = riveDialogMaxWidth;
 
     if (!isTeam) {
@@ -88,27 +98,24 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    final rive = RiveContext.of(context);
-    final currentOwner = rive.currentOwner;
-    final isTeam = currentOwner is RiveTeam;
     final colors = RiveTheme.of(context).colors;
     final screens = SettingsScreen.getScreens(isTeam);
 
-    return _panel(
-        isTeam,
-        Row(
-          children: [
-            if (isTeam) _nav(screens, colors.fileBackgroundLightGrey),
-            _contents(Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                SettingsHeader(currentOwner),
-                Separator(color: colors.fileLineGrey),
-                Expanded(child: screens[_selectedIndex].builder(context)),
-              ],
-            )),
+    return _panel(Row(
+      children: [
+        if (isTeam) _nav(screens, colors.fileBackgroundLightGrey),
+        _contents(Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            SettingsHeader(
+                name: widget.owner.displayName,
+                teamSize: team?.size ?? -1),
+            Separator(color: colors.fileLineGrey),
+            Expanded(child: screens[_selectedIndex].builder(context)),
           ],
-        ));
+        )),
+      ],
+    ));
   }
 }
 
@@ -156,10 +163,6 @@ class SettingsScreen {
 
   const SettingsScreen(this.label, this.builder);
 
-  static RiveOwner _getOwner(BuildContext ctx) =>
-      RiveContext.of(ctx).currentOwner;
-  static RiveApi _getApi(BuildContext ctx) => RiveContext.of(ctx).api;
-
   static List<SettingsScreen> getScreens(bool isTeam) {
     if (isTeam) {
       return [
@@ -167,7 +170,7 @@ class SettingsScreen {
             (ctx) => ProfileSettings(_getOwner(ctx), _getApi(ctx))),
         SettingsScreen('Members',
             (ctx) => TeamMembers(_getOwner(ctx) as RiveTeam, _getApi(ctx))),
-        SettingsScreen('Groups', (ctx) => Container()),
+        SettingsScreen('Groups', (ctx) => const SizedBox()),
         SettingsScreen('Purchase Permissions', (ctx) => const SizedBox()),
         SettingsScreen('Plan', (ctx) => const SizedBox()),
         SettingsScreen('Billing History', (ctx) => const SizedBox()),

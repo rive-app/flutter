@@ -91,9 +91,9 @@ class InvitePanel extends StatefulWidget {
 
 class _InvitePanelState extends State<InvitePanel> {
   final _inviteQueue = <Invite>[
-    const UserInvite(
+    UserInvite(
         RiveUser(ownerId: 0, name: 'Luigi Rosso', username: 'castor')),
-    const UserInvite(
+    UserInvite(
         RiveUser(ownerId: 0, name: 'Matt Sullivan', username: 'wolfgang')),
     const EmailInvite('test@email.com'),
   ];

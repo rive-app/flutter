@@ -36,7 +36,10 @@ class RiveTeamsApi<T extends RiveTeam> {
     } on FormatException catch (e) {
       log.severe('Unable to parse response from server: $e');
     }
-    return RiveTeam.fromData(data);
+    final team = RiveTeam.fromData(data);
+    team.teamMembers = await getAffiliates(team.ownerId);
+
+    return team;
   }
 
   /// GET /api/teams
@@ -57,7 +60,11 @@ class RiveTeamsApi<T extends RiveTeam> {
       log.severe('Unable to parse response from server: $e');
     }
     print('TEAMS SERVER BODY: ${response.body}');
-    return RiveTeam.fromDataList(data);
+    var teams = RiveTeam.fromDataList(data);
+    for (final team in teams) {
+      team.teamMembers = await getAffiliates(team.ownerId);
+    }
+    return teams;
   }
 
   // PUT /api/teams/<teamId>
