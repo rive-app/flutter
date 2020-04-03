@@ -24,9 +24,11 @@ class _PersistableOperation {
 
 class _IsolatedPersistInitArgument {
   final SendPort sendPort;
+  final LocalDataPlatform localDataPlatform;
   final String localDataName;
 
-  _IsolatedPersistInitArgument(this.sendPort, this.localDataName);
+  _IsolatedPersistInitArgument(
+      this.sendPort, this.localDataPlatform, this.localDataName);
 }
 
 class _IsolatedPersistBackground {
@@ -37,7 +39,7 @@ class _IsolatedPersistBackground {
   Map<int, ChangeSet> _persistables;
 
   _IsolatedPersistBackground(_IsolatedPersistInitArgument arg)
-      : _localData = LocalData.make(arg.localDataName) {
+      : _localData = LocalData.make(arg.localDataPlatform, arg.localDataName) {
     _init(arg);
   }
 
@@ -111,7 +113,8 @@ class IsolatedPersist {
 
   Completer<List<ChangeSet>> _fetchCompleter;
 
-  IsolatedPersist(String name) : _initCompleter = Completer() {
+  IsolatedPersist(LocalDataPlatform localDataPlatform, String name)
+      : _initCompleter = Completer() {
     _receiveOnMain.listen((dynamic data) {
       if (data is SendPort) {
         _sendToIsolate = data;
@@ -120,8 +123,10 @@ class IsolatedPersist {
         _fetchCompleter?.complete(data);
       }
     });
-    Isolate.spawn(_isolateEntry,
-        _IsolatedPersistInitArgument(_receiveOnMain.sendPort, name));
+    Isolate.spawn(
+        _isolateEntry,
+        _IsolatedPersistInitArgument(
+            _receiveOnMain.sendPort, localDataPlatform, name));
   }
 
   Future<List<ChangeSet>> changes() {

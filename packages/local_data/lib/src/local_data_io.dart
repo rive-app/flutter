@@ -6,11 +6,16 @@ import 'data_directory.dart';
 
 class LocalDataIO extends LocalData {
   Directory _dataDirectory;
-  LocalDataIO(String context) : super(context);
+  final LocalDataIOPlatform platform;
+  LocalDataIO(this.platform, String context) : super(context);
 
   @override
   Future<bool> initialize() async {
-    _dataDirectory = await dataDirectory(context);
+    var dir = Directory('${platform.path}/$context');
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    _dataDirectory = dir;
     return true;
   }
 
@@ -32,4 +37,18 @@ class LocalDataIO extends LocalData {
   }
 }
 
-LocalData makeLocalData(String context) => LocalDataIO(context);
+LocalData makeLocalData(LocalDataPlatform platform, String context) =>
+    LocalDataIO(platform, context);
+
+class LocalDataIOPlatform extends LocalDataPlatform {
+  String _path;
+  String get path => _path;
+
+  Future<bool> initialize() async {
+    var dir = await dataDirectory('');
+    _path = dir?.path;
+    return _path != null;
+  }
+}
+
+LocalDataPlatform makeLocalDataPlatform() => LocalDataIOPlatform();

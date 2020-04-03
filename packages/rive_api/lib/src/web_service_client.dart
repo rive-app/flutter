@@ -24,12 +24,14 @@ class WebServiceClient {
 
   /// Encrypter we use to read/write the local session storage.
   final Encrypter _encrypter;
-  final LocalData localData;
+  final LocalDataPlatform localDataPlatform;
+  final String context;
+  LocalData localData;
 
-  WebServiceClient(String context,
+  WebServiceClient(this.context,
       [String key = '}Mk#33zm^PiiP9C2riMozVynojddVc6/'])
       : _encrypter = Encrypter(AES(Key.fromUtf8(key))),
-        localData = LocalData.make(context);
+        localDataPlatform = LocalDataPlatform.make();
 
   void addStatusCodeHandler(int code, StatusCodeHandler handler) {
     List<StatusCodeHandler> handlers = statusCodeHandlers[code];
@@ -184,7 +186,10 @@ class WebServiceClient {
   }
 
   Future<bool> initialize() async {
+    await localDataPlatform.initialize();
+    localData = LocalData.make(localDataPlatform, context);
     await localData.initialize();
+    
     var contents = await localData.load('cookie');
     if (contents == null || contents.isEmpty) {
       return true;
