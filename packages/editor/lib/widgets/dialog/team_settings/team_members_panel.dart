@@ -30,18 +30,9 @@ class TeamMembers extends StatefulWidget {
 }
 
 class _TeamMemberState extends State<TeamMembers> {
-  final _teamMembers = <RiveUser>[
-    // Test data.
-    // const RiveUser(ownerId: 0, name: null, username: 'nullname'),
-    // const RiveUser(ownerId: 1, name: 'Null Username', username: null),
-    // const RiveUser(
-    //     ownerId: 2,
-    //     name: 'Arnold Schwarzenegger',
-    //     username: 'ArnoldSchnitzel',
-    //     avatar: 'https://avatarfiles.alphacoders.com/178/178485.jpg',
-    //     isAdmin: true),
-  ];
   RiveTeamsApi _api;
+
+  List<RiveUser> get _teamMembers => widget.owner.teamMembers;
 
   @override
   void initState() {
@@ -50,11 +41,11 @@ class _TeamMemberState extends State<TeamMembers> {
     final teamId = widget.owner.ownerId;
 
     _api.getAffiliates(teamId).then((users) {
-      setState(() {
-        _teamMembers
-          ..clear()
-          ..addAll(users);
-      });
+      if (mounted) {
+        setState(() {
+          widget.owner.teamMembers = users;
+        });
+      }
     });
   }
 
@@ -91,8 +82,7 @@ class InvitePanel extends StatefulWidget {
 
 class _InvitePanelState extends State<InvitePanel> {
   final _inviteQueue = <Invite>[
-    UserInvite(
-        RiveUser(ownerId: 0, name: 'Luigi Rosso', username: 'castor')),
+    UserInvite(RiveUser(ownerId: 0, name: 'Luigi Rosso', username: 'castor')),
     UserInvite(
         RiveUser(ownerId: 0, name: 'Matt Sullivan', username: 'wolfgang')),
     const EmailInvite('test@email.com'),
