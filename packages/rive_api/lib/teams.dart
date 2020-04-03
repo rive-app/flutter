@@ -88,7 +88,6 @@ class RiveTeamsApi<T extends RiveTeam> {
     } on FormatException catch (e) {
       log.severe('Unable to parse response from server: $e');
     }
-    print('Affiliates: ${response.body}');
     var teamUsers = data
         .map((userData) => RiveUser.asTeamMember(userData))
         .toList(growable: false);

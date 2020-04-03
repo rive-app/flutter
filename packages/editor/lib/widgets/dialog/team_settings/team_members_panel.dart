@@ -12,10 +12,17 @@ import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/invites.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/user_invite_box.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+
+extension TeamRoleOptions on TeamRole {
+  static List<String> get names =>
+      TeamRole.values.map((e) => describeEnum(e).capsFirst).toList();
+
+  String get name => describeEnum(this).capsFirst;
+}
 
 class TeamMembers extends StatefulWidget {
   final RiveApi api;
@@ -38,8 +45,11 @@ class _TeamMemberState extends State<TeamMembers> {
   void initState() {
     super.initState();
     _api = RiveTeamsApi(widget.api);
-    final teamId = widget.owner.ownerId;
+    _updateAffiliates();
+  }
 
+  void _updateAffiliates() {
+    final teamId = widget.owner.ownerId;
     _api.getAffiliates(teamId).then((users) {
       if (mounted) {
         setState(() {
@@ -58,7 +68,11 @@ class _TeamMemberState extends State<TeamMembers> {
   @override
   Widget build(BuildContext context) {
     return ListView(padding: const EdgeInsets.all(30), children: [
-      InvitePanel(api: widget.api),
+      InvitePanel(
+        api: widget.api,
+        teamId: widget.owner.ownerId,
+        teamUpdated: _updateAffiliates,
+      ),
       const SizedBox(height: 20),
       // Team Members Section.
       Column(children: [
@@ -74,21 +88,22 @@ class _TeamMemberState extends State<TeamMembers> {
 
 class InvitePanel extends StatefulWidget {
   final RiveApi api;
+  final int teamId;
+  final VoidCallback teamUpdated;
 
-  const InvitePanel({@required this.api, Key key}) : super(key: key);
+  const InvitePanel(
+      {@required this.api,
+      @required this.teamId,
+      @required this.teamUpdated,
+      Key key})
+      : super(key: key);
   @override
   _InvitePanelState createState() => _InvitePanelState();
 }
 
 class _InvitePanelState extends State<InvitePanel> {
-  final _inviteQueue = <Invite>[
-    UserInvite(RiveUser(ownerId: 0, name: 'Luigi Rosso', username: 'castor')),
-    UserInvite(
-        RiveUser(ownerId: 0, name: 'Matt Sullivan', username: 'wolfgang')),
-    const EmailInvite('test@email.com'),
-  ];
+  final _inviteQueue = <Invite>[];
 
-  // final _inviteSuggestions = <String>["Umberto", "Bertoldo", "Zi'mberto"];
   TeamRole _selectedInviteType = TeamRole.member;
   RiveArtists _api;
   final _openCombo = Event();
@@ -100,7 +115,25 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 
   void _sendInvites() {
-    // TODO:
+    var ids = <int>[];
+    // TODO: add support for email invites too.
+    _inviteQueue.forEach((invite) {
+      if (invite is UserInvite) {
+        ids.add(invite.ownerId);
+      }
+    });
+    _api
+        .sendInvites(widget.teamId, ids, _selectedInviteType.name)
+        .then((value) {
+      if (value.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _inviteQueue.clear();
+            widget.teamUpdated();
+          });
+        }
+      }
+    });
   }
 
   void _startTypeahead() {
@@ -163,9 +196,9 @@ class _InvitePanelState extends State<InvitePanel> {
                                 cursorColor: colors.commonButtonTextColorDark,
                                 retriever: _autocomplete,
                                 change: (val) {
-                                  print("Change $val");
                                   setState(() {
-                                    _inviteQueue.add(UserInvite(val));
+                                    _inviteQueue.add(UserInvite(
+                                        val.ownerId, val.displayName));
                                     debounce(_startTypeahead);
                                   });
                                 },
@@ -220,13 +253,6 @@ class _InvitePanelState extends State<InvitePanel> {
               ],
             ));
   }
-}
-
-extension TeamRoleOptions on TeamRole {
-  static List<String> get names =>
-      TeamRole.values.map((e) => describeEnum(e).capsFirst).toList();
-
-  String get name => describeEnum(this).capsFirst;
 }
 
 class _TeamMember extends StatelessWidget {

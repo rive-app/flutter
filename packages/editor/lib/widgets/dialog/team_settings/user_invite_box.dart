@@ -1,30 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rive_api/models/user.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
-
-abstract class Invite {
-  const Invite();
-  String get name;
-}
-
-class UserInvite extends Invite {
-  final RiveUser user;
-
-  const UserInvite(this.user);
-
-  @override
-  String get name => user.displayName;
-}
-
-class EmailInvite extends Invite {
-  final String email;
-
-  const EmailInvite(this.email);
-
-  @override
-  String get name => email;
-}
 
 class UserInviteBox extends StatelessWidget {
   final String name;
@@ -74,4 +50,26 @@ class UserInviteBox extends StatelessWidget {
       ),
     );
   }
+}
+
+abstract class Invite {
+  const Invite();
+  String get name;
+}
+
+class UserInvite extends Invite {
+  final int ownerId;
+  @override
+  final String name;
+
+  const UserInvite(this.ownerId, this.name);
+}
+
+class EmailInvite extends Invite {
+  final String email;
+
+  const EmailInvite(this.email);
+
+  @override
+  String get name => email;
 }
