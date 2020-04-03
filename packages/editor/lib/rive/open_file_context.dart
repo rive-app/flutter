@@ -19,6 +19,7 @@ import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
+import 'package:local_data/local_data.dart';
 
 enum OpenFileState { loading, error, open }
 
@@ -86,7 +87,9 @@ class OpenFileContext with RiveFileDelegate {
       var spectre = api.cookies['spectre'];
       var urlEncodedSpectre = Uri.encodeComponent(spectre);
       var filePath = '$ownerId/$fileId/$urlEncodedSpectre';
-      core = RiveFile(filePath, api: api);
+      LocalDataPlatform dataPlatform = LocalDataPlatform.make();
+      await dataPlatform.initialize();
+      core = RiveFile(filePath, api: api, localDataPlatform: dataPlatform);
 
       var connectionInfo = await filesApi.establishCoop(ownerId, fileId);
       if (connectionInfo == null) {

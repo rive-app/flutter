@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:local_data/local_data.dart';
 import 'package:rive_core/backboard.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,10 +59,11 @@ class RiveFile extends RiveCoreContext {
 
   RiveFile(
     String fileId, {
+    @required LocalDataPlatform localDataPlatform,
     this.api,
     this.overridePreferences,
     this.useSharedPreferences = true,
-  })  : _isolatedPersist = IsolatedPersist(fileId),
+  })  : _isolatedPersist = IsolatedPersist(localDataPlatform, fileId),
         super(fileId);
 
   @override
