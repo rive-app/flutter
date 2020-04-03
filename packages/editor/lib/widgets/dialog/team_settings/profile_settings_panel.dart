@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/owner.dart';
+import 'package:rive_api/models/team.dart';
+import 'package:rive_api/profiles.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
@@ -19,6 +21,7 @@ class ProfileSettings extends StatefulWidget {
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
+  bool _isLoading = true;
   String _name;
   String _username;
   String _location;
@@ -27,22 +30,42 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   String _twitter;
   String _instagram;
   bool _isForHire;
+  RiveProfilesApi _profilesApi;
 
   @override
   void initState() {
     super.initState();
+
     final owner = widget.owner;
-    _name = owner.name;
-    _username = 'RiveApp';
-    _location = 'Moon';
-    _website = 'rive.app';
-    _twitter = 'rive_app';
-    _instagram = 'rive.app';
-    _isForHire = false;
+
+    _profilesApi = RiveProfilesApi(widget.api);
+    _profilesApi.getInfo(owner).then((profile) {
+      // TODO: use a more robust check for setState.
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _name = owner.name;
+          _username = owner.username;
+          _location = profile.location;
+          _website = profile.website;
+          _twitter = profile.twitter;
+          _instagram = profile.instagram;
+          _isForHire = profile.isForHire;
+        });
+      }
+    });
   }
 
   void _submitChanges() {
-    // TODO:
+    _profilesApi.updateInfo(widget.owner,
+        name: _name,
+        username: _username,
+        location: _location,
+        website: _website,
+        bio: _bio,
+        twitter: _twitter,
+        instagram: _instagram,
+        isForHire: _isForHire);
   }
 
   void _updateForHire(bool newValue) {
@@ -105,9 +128,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const SizedBox();
+    }
     final theme = RiveThemeData();
     final colors = theme.colors;
     final textStyles = theme.textStyles;
+    var labelPrefix = widget.owner is RiveTeam ? 'Team ' : '';
 
     return Column(
       // Stretches the two separators
@@ -125,12 +152,12 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                     rows: [
                       [
                         SettingsTextField(
-                          label: 'Team Name',
+                          label: '${labelPrefix}Name',
                           onChanged: (value) => _name = value,
                           initialValue: _name,
                         ),
                         SettingsTextField(
-                          label: 'Team Username',
+                          label: '${labelPrefix}Username',
                           onChanged: (value) => _username = value,
                           initialValue: _username,
                         )

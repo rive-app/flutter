@@ -18,6 +18,32 @@ enum BillingFrequency { yearly, monthly }
 /// The subscription team option
 enum TeamsOption { basic, premium }
 
+extension PlanExtension on TeamsOption {
+  String get name {
+    switch (this) {
+      case TeamsOption.basic:
+        return 'normal';
+      case TeamsOption.premium:
+        return 'premium';
+      default:
+        return 'normal';
+    }
+  }
+}
+
+extension FrequencyExtension on BillingFrequency {
+  String get name {
+    switch (this) {
+      case BillingFrequency.yearly:
+        return 'yearly';
+      case BillingFrequency.monthly:
+        return 'monthly';
+      default:
+        return 'monthly';
+    }
+  }
+}
+
 /// The active wizard panel
 enum WizardPanel { one, two }
 
@@ -133,7 +159,8 @@ class TeamSubscriptionPackage with ChangeNotifier {
   bool get isStep2Valid => isNameValid && isOptionValid && isCardNrValid;
 
   Future submit(BuildContext context, RiveApi api) async {
-    await _RiveTeamApi(api).createTeam(name);
+    await _RiveTeamApi(api).createTeam(
+        teamName: name, plan: _option.name, frequency: _billing.name);
     await RiveContext.of(context).reloadTeams();
     Navigator.of(context, rootNavigator: true).pop(null);
   }
