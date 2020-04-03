@@ -93,7 +93,7 @@ class MainPanel extends StatelessWidget {
         builder: (context, section, _) {
           switch (section) {
             case HomeSection.notifications:
-              return Notifications();
+              return NotificationsPanel();
             case HomeSection.community:
             case HomeSection.getStarted:
             case HomeSection.recents:
