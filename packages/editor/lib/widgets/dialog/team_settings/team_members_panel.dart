@@ -21,7 +21,7 @@ class TeamMembers extends StatefulWidget {
   final RiveApi api;
   final RiveTeam owner;
 
-  const TeamMembers({@required this.api, @required this.owner, Key key})
+  const TeamMembers(this.owner, this.api, {Key key})
       : assert(api != null),
         super(key: key);
 

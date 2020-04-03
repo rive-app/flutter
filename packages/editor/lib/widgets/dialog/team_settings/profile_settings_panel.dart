@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/models/owner.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
@@ -7,12 +9,16 @@ import 'package:rive_editor/widgets/dialog/team_settings/settings_text_field.dar
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
-class TeamSettings extends StatefulWidget {
+class ProfileSettings extends StatefulWidget {
+  final RiveOwner owner;
+  final RiveApi api;
+  const ProfileSettings(this.owner, this.api);
+
   @override
-  State<StatefulWidget> createState() => _TeamSettingsState();
+  State<StatefulWidget> createState() => _ProfileSettingsState();
 }
 
-class _TeamSettingsState extends State<TeamSettings> {
+class _ProfileSettingsState extends State<ProfileSettings> {
   String _name;
   String _username;
   String _location;
