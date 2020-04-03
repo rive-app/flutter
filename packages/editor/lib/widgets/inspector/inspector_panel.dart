@@ -158,3 +158,8 @@ class _InspectorPanelState extends State<InspectorPanel> {
     );
   }
 }
+
+class Inspector {
+  /// Whether the inspecting set is currently frozen or not.
+  ValueNotifier<bool> isFrozen = ValueNotifier<bool>(true);
+}
