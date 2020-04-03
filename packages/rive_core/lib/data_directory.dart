@@ -3,11 +3,13 @@ import 'package:path_provider/path_provider.dart';
 
 /// Get a local data directory where we can read/write files.
 Future<Directory> dataDirectory(String dirName) async {
+  print('Getting directory');
   Directory dir;
   if (Platform.isMacOS || Platform.isLinux) {
     // path = '${Platform.environment['HOME']}/.config/$dirName';
     // We can assume that the directory exists? Assume Apple
     // creates this for us, otherwise security hole?
+    print('Getting Mac directory: ${await getApplicationSupportDirectory()}');
     return getApplicationSupportDirectory();
   } else if (Platform.isWindows) {
     dir =
