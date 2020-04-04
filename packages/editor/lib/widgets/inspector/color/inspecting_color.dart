@@ -5,7 +5,6 @@ import 'package:rive_core/component.dart';
 import 'package:core/core.dart' as core;
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
-import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/transform_space.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
@@ -57,7 +56,6 @@ abstract class InspectingColor {
   }
 
   void stopEditing() {
-    assert(_context != null);
     _context = null;
     debounce(editorClosed);
   }
@@ -100,6 +98,7 @@ abstract class InspectingColor {
 
   @mustCallSuper
   void dispose() {
+    stopEditing();
     cancelDebounce(editorOpened);
     cancelDebounce(editorClosed);
   }
@@ -662,8 +661,9 @@ class _ShapesInspectingColor extends InspectingColor {
 
   @override
   void stopEditing() {
+    context?.stage?.clearSelectionHandler(_stageSelected);
+
     super.stopEditing();
-    context.stage.clearSelectionHandler(_stageSelected);
   }
 
   @override
@@ -673,13 +673,15 @@ class _ShapesInspectingColor extends InspectingColor {
   void editorOpened() => _updatePaints();
 
   bool _stageSelected(StageItem item) {
-    if(item is StageGradientStop) {
+    if (item is StageGradientStop) {
       var gradient = item.component.parent as core.LinearGradient;
       var stopIndex = gradient.gradientStops.indexOf(item.component);
       changeStopIndex(stopIndex, updatePaints: false);
+      _changeEditingColor(
+          HSVColor.fromColor(stops.value[editingIndex.value].color));
       return false;
     }
-    
+
     return true;
   }
 }

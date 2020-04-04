@@ -76,7 +76,6 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
           autoClose: false,
           onClose: () {
             _popup = null;
-            widget.inspectingColor.stopEditing();
           },
         );
       },
@@ -89,37 +88,3 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
     );
   }
 }
-
-// /// Helper created when the user starts editing the InspectingColor. Marshalls
-// /// state between the inspectingColor, inspector, and the stage.
-// class InspectingColorEditor {
-//   final InspectingColor color;
-//   final OpenFileContext file;
-//   final InspectorContext inspector;
-
-//   final Set<StageItem> _validSelections = {};
-
-//   InspectingColorEditor({
-//     this.color,
-//     this.file,
-//     this.inspector,
-//   }) {
-//     // inspector.isFrozen = true;
-//     color.isEditing = true;
-
-//     // Let's get notified whenever a change to the selection occurs.
-//     file.selection.addListener(_selectionChanged);
-
-//     // Valid selections include any of our shapes and any of their stops.
-//   }
-
-//   void _selectionChanged() {
-//     for (final item in file.selection.items) {}
-//   }
-
-//   void stopEditing() {
-//     // inspector.isFrozen = false;
-//     color.isEditing = false;
-//     file.selection.removeListener(_selectionChanged);
-//   }
-// }

@@ -15,15 +15,10 @@ import 'package:flutter/widgets.dart';
 typedef ListenableWidgetBuilder<T> = Widget Function(
     BuildContext context, T value, Widget child);
 
-/// Check to determine if the widget should rebuild. Use this to early out a
-/// rebuild.
-typedef ListenableWigetBuildCheck<T> = bool Function(T value);
-
 class ListenableBuilder<T extends Listenable> extends StatefulWidget {
   const ListenableBuilder({
     @required this.listenable,
     @required this.builder,
-    this.condition,
     Key key,
     this.child,
   })  : assert(listenable != null),
@@ -43,11 +38,6 @@ class ListenableBuilder<T extends Listenable> extends StatefulWidget {
   ///
   /// Must not be null.
   final ListenableWidgetBuilder<T> builder;
-
-  /// Called whenever the listenable value changes to determine whether this
-  /// builder should actually rebuild. Return false to prevent rebuilding.
-  /// Return true to rebuild.
-  final ListenableWigetBuildCheck<T> condition;
 
   /// A [listenable]-independent widget which is passed back to the [builder].
   ///
@@ -87,9 +77,6 @@ class _ListenableBuilderState<T extends Listenable>
   }
 
   void _valueChanged() {
-    if(widget.condition != null && !widget.condition(widget.listenable)) {
-      return;
-    }
     setState(() {
       value = widget.listenable;
     });
