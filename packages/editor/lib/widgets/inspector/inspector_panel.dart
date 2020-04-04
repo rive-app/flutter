@@ -50,16 +50,16 @@ class _InspectorPanelState extends State<InspectorPanel> {
       child: ListenableBuilder<SelectionContext<SelectableItem>>(
         listenable: file.selection,
         builder: (context, selection, _) {
-          // Let the inpsection set whittle down groupings and commonly
-          // selected coreTypes for the inspector builders to use to
-          // determine if there are things they can help inspect.
+          // Let the inpsection set whittle down groupings and commonly selected
+          // coreTypes for the inspector builders to use to determine if there
+          // are things they can help inspect.
           var inspectionSet =
               InspectionSet.fromSelection(file.core.backboard, selection);
 
           // Remove previous listeners, these listen to inspector builders
-          // wanting to change the contents in the full inspection list
-          // item. Basically any one of them can request a rebuild of the
-          // inspection list.
+          // wanting to change the contents in the full inspection list item.
+          // Basically any one of them can request a rebuild of the inspection
+          // list.
           _removeListeners();
 
           // Expand the builders and interleave dividers.
@@ -96,12 +96,12 @@ class _InspectorPanelState extends State<InspectorPanel> {
           if (builders.isNotEmpty) {
             // At this point we've built a list of builders (no real widgets
             // yet). That's to allow the ListView to build them on demand
-            // depending on what's scrolled into view. We take care to make
-            // list items the same height (or as similar as possible) in
-            // order to gaurantee a smooth scrolling experience when
-            // virtualizing lots of items. This is why group expansion works
-            // by adding more items to the ListView instead of just creating
-            // one large item in the ListView.
+            // depending on what's scrolled into view. We take care to make list
+            // items the same height (or as similar as possible) in order to
+            // gaurantee a smooth scrolling experience when virtualizing lots of
+            // items. This is why group expansion works by adding more items to
+            // the ListView instead of just creating one large item in the
+            // ListView.
             return PropagatingListener(
               behavior: HitTestBehavior.translucent,
               onPointerSignal: (data) {
@@ -125,8 +125,8 @@ class _InspectorPanelState extends State<InspectorPanel> {
               ),
             );
           } else {
-            // After all our work, no builders were available for this set.
-            // Let the user know to select something useful.
+            // After all our work, no builders were available for this set. Let
+            // the user know to select something useful.
             return Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
