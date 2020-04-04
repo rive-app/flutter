@@ -37,15 +37,10 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
   @override
   void didUpdateWidget(InspectorColorSwatch oldWidget) {
     if (oldWidget.inspectingColor != widget.inspectingColor) {
-      // Can't call markNeedsBuild on the popup during the build phase, so we
-      // have to debounce here.
-      // debounce(_rebuildPopup);
       _popup?.markNeedsBuild();
     }
     super.didUpdateWidget(oldWidget);
   }
-
-  // void _rebuildPopup() => _popup?.markNeedsBuild();
 
   @override
   Widget build(BuildContext context) {
@@ -55,14 +50,6 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
           // already open.
           return;
         }
-        // var color = widget.inspectingColor;
-        // color.startEditing(ActiveFile.of(context));
-        // var editor = InspectingColorEditor(
-        //   color: color,
-        //   inspector: Inspector.of(context),
-        //   file: ActiveFile.of(context),
-        // );
-
         _popup = InspectorPopout.popout(
           widget.inspectorContext,
           width: 206,
