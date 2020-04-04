@@ -37,6 +37,8 @@ import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 
+typedef CustomSelectionHandler = bool Function(StageItem);
+
 enum AxisCheckState { local, parent, world }
 
 typedef _ItemFactory = StageItem Function();
@@ -84,6 +86,17 @@ class Stage extends Debouncer {
   Vec2D _worldMouse = Vec2D();
   bool _mouseDownSelected = false;
   EditMode activeEditMode = EditMode.normal;
+
+  CustomSelectionHandler customSelectionHandler;
+
+  // Clear the selection handler only if it was a previously set one.
+  bool clearSelectionHandler(CustomSelectionHandler handler) {
+    if (customSelectionHandler == handler) {
+      customSelectionHandler = null;
+      return true;
+    }
+    return false;
+  }
 
   StageDelegate _delegate;
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
@@ -324,7 +337,13 @@ class Stage extends Debouncer {
         } else {
           if (_hoverItem != null) {
             _mouseDownSelected = true;
-            file.select(_hoverItem);
+            if (customSelectionHandler != null) {
+              if (customSelectionHandler(_hoverItem)) {
+                file.select(_hoverItem);
+              }
+            } else {
+              file.select(_hoverItem);
+            }
           } else {
             _mouseDownSelected = false;
           }

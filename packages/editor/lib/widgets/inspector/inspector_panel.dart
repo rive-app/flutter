@@ -45,11 +45,11 @@ class _InspectorPanelState extends State<InspectorPanel> {
   @override
   Widget build(BuildContext context) {
     final file = ActiveFile.of(context);
-    return Container(
+    return ColoredBox(
       color: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
-      child: ListenableBuilder(
+      child: ListenableBuilder<SelectionContext<SelectableItem>>(
         listenable: file.selection,
-        builder: (context, SelectionContext<SelectableItem> selection, _) {
+        builder: (context, selection, _) {
           // Let the inpsection set whittle down groupings and commonly selected
           // coreTypes for the inspector builders to use to determine if there
           // are things they can help inspect.

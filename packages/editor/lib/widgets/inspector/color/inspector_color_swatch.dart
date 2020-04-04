@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/color_popout.dart';
 import 'package:rive_editor/widgets/inspector/color/color_preview.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
@@ -34,22 +35,42 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
   }
 
   @override
+  void didUpdateWidget(InspectorColorSwatch oldWidget) {
+    if (oldWidget.inspectingColor != widget.inspectingColor) {
+      _popup?.markNeedsBuild();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) {
-        widget.inspectingColor.isEditing = true;
-        _popup = InspectorPopout.popout(widget.inspectorContext,
-            width: 206,
-            builder: (context) =>
-                ColorPopout(inspecting: widget.inspectingColor),
-            onClose: () {
-              widget.inspectingColor.isEditing = false;
-            });
+        if (_popup != null) {
+          // already open.
+          return;
+        }
+        _popup = InspectorPopout.popout(
+          widget.inspectorContext,
+          width: 206,
+          builder: (popupContext) {
+            var color = widget.inspectingColor;
+            color.startEditing(ActiveFile.of(context));
+            return ColorPopout(
+              inspecting: color,
+            );
+          },
+          autoClose: false,
+          onClose: () {
+            _popup = null;
+          },
+        );
       },
       child: ValueListenableBuilder(
         valueListenable: widget.inspectingColor.preview,
-        builder: (context, List<Color> colors, child) =>
-            ColorPreview(colors: colors),
+        builder: (context, List<Color> colors, child) => ColorPreview(
+          colors: colors,
+        ),
       ),
     );
   }

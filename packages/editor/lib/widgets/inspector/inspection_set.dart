@@ -9,7 +9,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 /// to act on/modify if they are interested.
 class InspectionSet {
   final Set<int> intersectingCoreTypes;
-  final List<StageItem> stageItems;
+  final Set<StageItem> stageItems;
   final List<Component> components;
   final Backboard backboard;
 
@@ -23,8 +23,13 @@ class InspectionSet {
   factory InspectionSet.fromSelection(
       Backboard backboard, SelectionContext<SelectableItem> selection) {
     // Get stageItems from selections.
-    var stageItems =
-        selection.items.whereType<StageItem>().toList(growable: false);
+    final stageItems = <StageItem>{};
+    for (final item in selection.items) {
+      if (item is StageItem) {
+        stageItems.add(item.inspectorItem);
+      }
+    }
+    selection.items.whereType<StageItem>().toList(growable: false);
 
     // Get all components from stageItems.
     var components = Set<Component>.from(stageItems

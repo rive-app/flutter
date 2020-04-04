@@ -11,6 +11,7 @@ import 'package:rive_editor/widgets/inspector/properties/inspector_popout_compon
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.dart';
+import 'package:core/core.dart';
 
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a color fill on a shape.
@@ -38,8 +39,17 @@ class _PropertyFillState extends State<PropertyFill> {
 
   @override
   void didUpdateWidget(PropertyFill oldWidget) {
-    _inspectingColor?.dispose();
-    _inspectingColor = InspectingColor.forShapePaints(widget.fills);
+    if (!iterableEquals(widget.fills, oldWidget.fills)) {
+      setState(() {
+        _inspectingColor?.dispose();
+        var color = InspectingColor.forShapePaints(widget.fills);
+        if(_inspectingColor.isEditing) {
+          // Propagate the context.
+          color.startEditing(_inspectingColor.context);
+        }
+        _inspectingColor = color;
+      });
+    }
     super.didUpdateWidget(oldWidget);
   }
 
