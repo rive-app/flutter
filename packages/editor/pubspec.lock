@@ -429,6 +429,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  rive_widgets:
+    dependency: "direct main"
+    description:
+      path: "../rive_widgets"
+      relative: true
+    source: path
+    version: "0.0.1"
   sentry:
     dependency: transitive
     description:

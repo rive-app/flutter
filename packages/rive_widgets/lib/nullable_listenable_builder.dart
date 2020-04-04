@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_editor/widgets/listenable_builder.dart';
+import 'package:rive_widgets/listenable_builder.dart';
 
 /// Convenience ValueListeneableBuilder for use when valueListenable can be
 /// null.

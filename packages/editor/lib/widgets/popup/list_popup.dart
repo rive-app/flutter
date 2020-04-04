@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive_editor/widgets/nullable_listenable_builder.dart';
+import 'package:rive_widgets/nullable_listenable_builder.dart';
 import 'package:rive_editor/widgets/popup/arrow_popup.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'base_popup.dart';
