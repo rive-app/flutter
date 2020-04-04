@@ -1,5 +1,5 @@
-name: tree_widget
-description: General tree widget
+name: rive_widgets
+description: Rive utility widgets shared by multiple packages.
 version: 0.0.1
 author:
 
@@ -9,9 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  rive_widgets:
-    path: ../rive_widgets
-    
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

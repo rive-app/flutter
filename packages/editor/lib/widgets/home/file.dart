@@ -6,7 +6,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/listenable_builder.dart';
+import 'package:rive_widgets/listenable_builder.dart';
 
 /// FileView is stateful so that it can track when it's added/removed from
 /// widget hierarchy to request batched network details for the file.

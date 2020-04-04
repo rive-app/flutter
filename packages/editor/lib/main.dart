@@ -21,7 +21,7 @@ import 'package:rive_editor/widgets/hierarchy.dart';
 import 'package:rive_editor/widgets/home/home_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
-import 'package:rive_editor/widgets/listenable_builder.dart';
+import 'package:rive_widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';

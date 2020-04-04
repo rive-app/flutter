@@ -11,7 +11,7 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builders.dart';
-import 'package:rive_editor/widgets/listenable_builder.dart';
+import 'package:rive_widgets/listenable_builder.dart';
 
 class InspectorPanel extends StatefulWidget {
   const InspectorPanel({
