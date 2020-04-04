@@ -1,12 +1,16 @@
 import 'dart:ui';
 
 import 'package:meta/meta.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
+import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 abstract class StageGradientInterface {
@@ -49,6 +53,23 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
 
   @override
   int get drawOrder => 2;
+
+  // @override
+  // void addedToStage(Stage stage) {
+  //   super.addedToStage(stage);
+  //   // Whenever the gradient stops are on stage, the shape that owns this
+  //   // shouldn't be selectable.
+  //   stageShape.preventSelection();
+  // }
+
+  // @override
+  // void removedFromStage(Stage stage) {
+  //   super.removedFromStage(stage);
+  //   stageShape.allowSelection();
+  // }
+
+  StageShape get stageShape =>
+      (component.shapePaintContainer as Component).stageItem as StageShape;
 
   @override
   bool initialize(core.LinearGradient object) {

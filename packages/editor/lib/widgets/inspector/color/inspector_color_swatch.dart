@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/color_popout.dart';
 import 'package:rive_editor/widgets/inspector/color/color_preview.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
@@ -34,23 +35,91 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
   }
 
   @override
+  void didUpdateWidget(InspectorColorSwatch oldWidget) {
+    if (oldWidget.inspectingColor != widget.inspectingColor) {
+      // Can't call markNeedsBuild on the popup during the build phase, so we
+      // have to debounce here.
+      // debounce(_rebuildPopup);
+      _popup?.markNeedsBuild();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  // void _rebuildPopup() => _popup?.markNeedsBuild();
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) {
-        widget.inspectingColor.isEditing = true;
-        _popup = InspectorPopout.popout(widget.inspectorContext,
-            width: 206,
-            builder: (context) =>
-                ColorPopout(inspecting: widget.inspectingColor),
-            onClose: () {
-              widget.inspectingColor.isEditing = false;
-            });
+        if (_popup != null) {
+          // already open.
+          return;
+        }
+        // var color = widget.inspectingColor;
+        // color.startEditing(ActiveFile.of(context));
+        // var editor = InspectingColorEditor(
+        //   color: color,
+        //   inspector: Inspector.of(context),
+        //   file: ActiveFile.of(context),
+        // );
+
+        _popup = InspectorPopout.popout(
+          widget.inspectorContext,
+          width: 206,
+          builder: (popupContext) {
+            var color = widget.inspectingColor;
+            color.startEditing(ActiveFile.of(context));
+            return ColorPopout(
+              inspecting: color,
+            );
+          },
+          autoClose: false,
+          onClose: () {
+            _popup = null;
+            widget.inspectingColor.stopEditing();
+          },
+        );
       },
       child: ValueListenableBuilder(
         valueListenable: widget.inspectingColor.preview,
-        builder: (context, List<Color> colors, child) =>
-            ColorPreview(colors: colors),
+        builder: (context, List<Color> colors, child) => ColorPreview(
+          colors: colors,
+        ),
       ),
     );
   }
 }
+
+// /// Helper created when the user starts editing the InspectingColor. Marshalls
+// /// state between the inspectingColor, inspector, and the stage.
+// class InspectingColorEditor {
+//   final InspectingColor color;
+//   final OpenFileContext file;
+//   final InspectorContext inspector;
+
+//   final Set<StageItem> _validSelections = {};
+
+//   InspectingColorEditor({
+//     this.color,
+//     this.file,
+//     this.inspector,
+//   }) {
+//     // inspector.isFrozen = true;
+//     color.isEditing = true;
+
+//     // Let's get notified whenever a change to the selection occurs.
+//     file.selection.addListener(_selectionChanged);
+
+//     // Valid selections include any of our shapes and any of their stops.
+//   }
+
+//   void _selectionChanged() {
+//     for (final item in file.selection.items) {}
+//   }
+
+//   void stopEditing() {
+//     // inspector.isFrozen = false;
+//     color.isEditing = false;
+//     file.selection.removeListener(_selectionChanged);
+//   }
+// }

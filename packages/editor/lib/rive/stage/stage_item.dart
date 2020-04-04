@@ -79,6 +79,12 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   /// ignore: avoid_returning_this
   StageItem get hoverTarget => this;
 
+  /// Usually an item's inspector target is itself, sometimes some items want to
+  /// re-direct the inspector so we use this indirection to allow for that.
+  ///
+  /// ignore: avoid_returning_this
+  StageItem get inspectorItem => this;
+
   /// Perform a higher fidelity check for worldMouse hit. If this object doesn't
   /// have a narrow-phase hit detection, just return true to use the AABB.
   bool hitHiFi(Vec2D worldMouse) => true;

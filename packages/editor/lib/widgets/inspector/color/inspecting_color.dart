@@ -5,15 +5,17 @@ import 'package:rive_core/component.dart';
 import 'package:core/core.dart' as core;
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/transform_space.dart';
-import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
@@ -42,19 +44,25 @@ abstract class InspectingColor {
   static const Color defaultGradientColorA = Color(0xFFFFFFFF);
   static const Color defaultGradientColorB = Color(0xFF000000);
 
-  bool _isEditing = false;
-  bool get isEditing => _isEditing;
-  set isEditing(bool value) {
-    if (_isEditing == value) {
+  OpenFileContext _context;
+  OpenFileContext get context => _context;
+
+  void startEditing(OpenFileContext context) {
+    assert(context != null);
+    if (_context == context) {
       return;
     }
-    _isEditing = value;
-    if (value) {
-      editorOpened();
-    } else {
-      editorClosed();
-    }
+    _context = context;
+    debounce(editorOpened);
   }
+
+  void stopEditing() {
+    assert(_context != null);
+    _context = null;
+    debounce(editorClosed);
+  }
+
+  bool get isEditing => _context != null;
 
   @protected
   void editorOpened();
@@ -90,9 +98,11 @@ abstract class InspectingColor {
           Iterable<core.Core> objects, int propertyKey) =>
       _CorePropertyInspectingColor(objects, propertyKey);
 
-  RiveFile get context;
-
-  void dispose();
+  @mustCallSuper
+  void dispose() {
+    cancelDebounce(editorOpened);
+    cancelDebounce(editorClosed);
+  }
 
   /// Change the color type.
   void changeType(ColorType colorType);
@@ -119,7 +129,7 @@ abstract class InspectingColor {
 
   /// Complete the set of changes performed thus far.
   void completeChange() {
-    context?.captureJournalEntry();
+    context?.core?.captureJournalEntry();
   }
 }
 
@@ -176,7 +186,7 @@ class _ShapesInspectingColor extends InspectingColor {
     gradient.appendChild(gradientStopA);
     gradient.appendChild(gradientStopB);
 
-    editingIndex.value = 0;
+    changeStopIndex(0, updatePaints: false);
     return gradient;
   }
 
@@ -185,7 +195,7 @@ class _ShapesInspectingColor extends InspectingColor {
     assert(position >= 0 && position <= 1);
     assert(type.value == ColorType.linear || type.value == ColorType.radial);
 
-    var file = context;
+    var file = context.core;
 
     // Find the interpolated color value that's at the position.
     var gradientStops = stops.value;
@@ -226,9 +236,7 @@ class _ShapesInspectingColor extends InspectingColor {
         gradient.update(ComponentDirt.stops);
       }
     });
-    editingIndex.value = newIndex;
-    _updatePaints();
-
+    changeStopIndex(newIndex, updatePaints: true);
     completeChange();
   }
 
@@ -254,16 +262,34 @@ class _ShapesInspectingColor extends InspectingColor {
       }
     }
     if (newStopIndex != index) {
-      editingIndex.value = newStopIndex;
+      changeStopIndex(newStopIndex, updatePaints: false);
     }
 
     _updatePaints();
   }
 
   @override
-  void changeStopIndex(int index) {
+  void changeStopIndex(int index, {bool updatePaints = true}) {
     editingIndex.value = index;
-    _updatePaints();
+    if (shapePaints.length == 1 && isEditing) {
+      // Find the gradient stop.
+      var gradient = shapePaints.first.paintMutator as core.LinearGradient;
+      if (gradient != null) {
+        var stop = gradient.gradientStops[index];
+        if (stop.stageItem != null) {
+          // Select all shapes and the stop.
+          _context.selection.selectMultiple(shapePaints
+              .map((shapePaint) =>
+                  (shapePaint.paintMutator.shapePaintContainer as Component)
+                      .stageItem)
+              .toList()
+                ..add(stop.stageItem));
+        }
+      }
+    }
+    if (updatePaints) {
+      _updatePaints();
+    }
   }
 
   /// Change the color type. This will clear out the existing paint mutators
@@ -275,7 +301,7 @@ class _ShapesInspectingColor extends InspectingColor {
       return;
     }
 
-    var file = context;
+    var file = context.core;
 
     // Batch the operation so that we can pick apart the hierarchy and then
     // resolve once we're done changing everything.
@@ -338,10 +364,8 @@ class _ShapesInspectingColor extends InspectingColor {
   }
 
   @override
-  RiveFile get context => shapePaints.first.context;
-
-  @override
   void dispose() {
+    super.dispose();
     var stage = findStage();
     _addedToStage.forEach(stage.removeItem);
     _addedToStage.clear();
@@ -476,6 +500,17 @@ class _ShapesInspectingColor extends InspectingColor {
         // Since they're all solid, we know they'll all have a Core colorValue
         // that change that we want to listen to.
         for (final shapePaint in shapePaints) {
+          // Make sure solid colors are selected on stage.
+          if (context != null &&
+              !(shapePaint.paintMutator.shapePaintContainer as Component)
+                  .stageItem
+                  .isSelected) {
+            context.select(
+              (shapePaint.paintMutator.shapePaintContainer as Component)
+                  .stageItem,
+              append: true,
+            );
+          }
           _listenToCoreProperty(shapePaint.paintMutator as Component,
               SolidColorBase.colorValuePropertyKey);
         }
@@ -483,6 +518,9 @@ class _ShapesInspectingColor extends InspectingColor {
         break;
       case ColorType.linear:
       case ColorType.radial:
+        // Only show the stage color stops if we only have one shape selected.
+        bool showStageStops = shapePaints.length == 1;
+
         // Check if all the colorStops are the same across the selected
         // shapePaints. This is pretty verbose, but what it boils down to is
         // needing a custom equality check for GradientStops as we didn't want
@@ -523,7 +561,11 @@ class _ShapesInspectingColor extends InspectingColor {
               .toList(growable: false);
 
           if (editingIndex.value >= stops.value.length) {
-            editingIndex.value = stops.value.length - 1;
+            changeStopIndex(stops.value.length - 1, updatePaints: false);
+          } else if (editingIndex.value != null) {
+            // re-update the stop index so it selects the stage item (if we want
+            // it).
+            changeStopIndex(editingIndex.value, updatePaints: false);
           }
           if (editingIndex.value >= 0) {
             _changeEditingColor(
@@ -535,12 +577,12 @@ class _ShapesInspectingColor extends InspectingColor {
         // _updatePaints call.
         for (final shapePaint in shapePaints) {
           var gradient = shapePaint.paintMutator as core.LinearGradient;
-          if (gradient.stageItem != null) {
+          if (gradient.stageItem != null && showStageStops) {
             wantOnStage.add(gradient.stageItem);
           }
           _listenTo(gradient.stopsChanged);
           for (final stop in gradient.gradientStops) {
-            if (stop.stageItem != null) {
+            if (showStageStops && stop.stageItem != null) {
               wantOnStage.add(stop.stageItem);
             }
             _listenToCoreProperty(stop, GradientStopBase.positionPropertyKey);
@@ -569,6 +611,7 @@ class _ShapesInspectingColor extends InspectingColor {
     }
 
     var removeFromStage = _addedToStage.difference(wantOnStage);
+
     removeFromStage.forEach(stage.removeItem);
     wantOnStage.forEach(stage.addItem);
     _addedToStage.clear();
@@ -612,10 +655,33 @@ class _ShapesInspectingColor extends InspectingColor {
   }
 
   @override
+  void startEditing(OpenFileContext context) {
+    super.startEditing(context);
+    context.stage.customSelectionHandler = _stageSelected;
+  }
+
+  @override
+  void stopEditing() {
+    super.stopEditing();
+    context.stage.clearSelectionHandler(_stageSelected);
+  }
+
+  @override
   void editorClosed() => _updatePaints();
 
   @override
   void editorOpened() => _updatePaints();
+
+  bool _stageSelected(StageItem item) {
+    if(item is StageGradientStop) {
+      var gradient = item.component.parent as core.LinearGradient;
+      var stopIndex = gradient.gradientStops.indexOf(item.component);
+      changeStopIndex(stopIndex, updatePaints: false);
+      return false;
+    }
+    
+    return true;
+  }
 }
 
 /// Concrete implementation of InspectingColor for any core property that
@@ -650,6 +716,7 @@ class _CorePropertyInspectingColor extends InspectingColor {
 
   @override
   void dispose() {
+    super.dispose();
     for (final object in objects) {
       object.removeListener(propertyKey, _propertyKeyChange);
     }
@@ -674,9 +741,6 @@ class _CorePropertyInspectingColor extends InspectingColor {
       preview.value = color == null ? [] : [color];
     }
   }
-
-  @override
-  RiveFile get context => objects.first.context as RiveFile;
 
   @override
   void changeColor(HSVColor color) {
