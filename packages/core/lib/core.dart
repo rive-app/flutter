@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -490,15 +491,37 @@ abstract class CoreContext implements LocalSettings {
     }
   }
 
+  /// Map of _inflight[objectId][propertyKey][changeCount] to track whether
+  /// there are still in-flight changes for an object. We need a changeCount as
+  /// the property can be changed multiple times and shouldn't be removed from
+  /// the set until it returns to 0.
+  final HashMap<Id, HashMap<int, int>> _inflight =
+      HashMap<Id, HashMap<int, int>>();
+
   @mustCallSuper
   void _changesAccepted(ChangeSet changes) {
     log.finest("ACCEPTING ${changes.id}.");
     _freshChanges.remove(changes);
+
+    // Update the inflight counters for the properties.
+    for (final objectChanges in changes.objects) {
+      var objectInflightChanges =
+          _inflight[objectChanges.objectId] ??= HashMap<int, int>();
+      for (final change in objectChanges.changes) {
+        var value = objectInflightChanges[change.op];
+        if (value != null) {
+          objectInflightChanges[change.op] = max(0, value - 1);
+        }
+      }
+    }
+    // var objectInflightChanges = _inflight[objectId] ??= HashMap<int, int>();
+    //   objectInflightChanges[key] = (objectInflightChanges[key] ??= 0) + 1;
     abandonChanges(changes);
   }
 
   @mustCallSuper
   void _changesRejected(ChangeSet changes) {
+    // TODO: We should actually just reconnect here.
     abandonChanges(changes);
     // Re-apply the original value if the changed value matches the current one.
     var fresh = _freshChanges[changes];
@@ -532,7 +555,10 @@ abstract class CoreContext implements LocalSettings {
 
       var hydrateKey = useFrom ? removeKey : addKey;
       var dehydrateKey = useFrom ? addKey : removeKey;
+
+      var objectInflightChanges = _inflight[objectId] ??= HashMap<int, int>();
       changes.forEach((key, entry) {
+        objectInflightChanges[key] = (objectInflightChanges[key] ??= 0) + 1;
         if (key == hydrateKey) {
           //changeProperty(object, addKey, removeKey, object.coreType);
           //changeProperty(object, removeKey, addKey, object.coreType);
@@ -592,9 +618,25 @@ abstract class CoreContext implements LocalSettings {
     // changes.
     var wasRecording = _isRecording;
     _isRecording = false;
+
     for (final objectChanges in changes.objects) {
       // TODO: (maybe) This would be the moment to strip out in-flight (fresh)
       // changes from this set to avoid the flickering issue.
+
+      // Check if this object has changes already in-flight.
+      var objectInflight = _inflight[objectChanges.objectId];
+      if(objectInflight != null) {
+        // prune out changes that are still waiting for acknowledge.
+        List<Change> changesToApply = [];
+        for(final change in objectChanges.changes) {
+          var flightValue = objectInflight[change.op];
+          // Only approve a change that doesn't have an inflight change.
+          if(flightValue == null || flightValue == 0) {
+            changesToApply.add(change);
+          }
+        }
+        objectChanges.changes = changesToApply;
+      }
       applyCoopChanges(objectChanges);
     }
     completeAdd();
@@ -635,6 +677,7 @@ abstract class CoreContext implements LocalSettings {
     _journalIndex = 0;
     journal.clear();
     _freshChanges.clear();
+    _inflight.clear();
 
     // TODO: rethink this
     // _unsyncedChanges.clear();

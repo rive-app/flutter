@@ -345,6 +345,7 @@ class RiveFile extends RiveCoreContext {
   void onConnected() {
     // Find backboard.
     var backboards = objects.whereType<Backboard>();
+
     if (backboards.isEmpty) {
       // Don't have one? Patch up the file and make one...
       batchAdd(() {
@@ -356,9 +357,17 @@ class RiveFile extends RiveCoreContext {
       // Don't allow undoing it.
       clearJournal();
     } else {
+      if (backboards.length > 1) {
+        do {
+          remove(backboards.last);
+        } while (backboards.length > 1);
+        // Save the creation of the backboard.
+        captureJournalEntry();
+        // Don't allow undoing it.
+        clearJournal();
+      }
       _backboard = backboards.first;
     }
-
     assert(objects.whereType<Backboard>().length == 1,
         'File should contain exactly one backboard.');
   }
