@@ -54,20 +54,6 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
   @override
   int get drawOrder => 2;
 
-  // @override
-  // void addedToStage(Stage stage) {
-  //   super.addedToStage(stage);
-  //   // Whenever the gradient stops are on stage, the shape that owns this
-  //   // shouldn't be selectable.
-  //   stageShape.preventSelection();
-  // }
-
-  // @override
-  // void removedFromStage(Stage stage) {
-  //   super.removedFromStage(stage);
-  //   stageShape.allowSelection();
-  // }
-
   StageShape get stageShape =>
       (component.shapePaintContainer as Component).stageItem as StageShape;
 
