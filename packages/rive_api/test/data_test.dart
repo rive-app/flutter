@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:rive_api/apis/changelog.dart';
 import 'package:test/test.dart';
 
 import 'package:rive_api/models/team.dart';
@@ -58,34 +59,75 @@ void main() {
       expect(user.notificationCount, 0);
       expect(user.isVerified, false);
     });
+
+    test('User objects are constructed from JSON correctly', () {
+      final data = {
+        'ownerId': 1,
+        'name': 'User Awesome',
+        'username': 'user_awesome',
+        'isAdmin': true,
+        'isPaid': true,
+        'notificationCount': 1,
+      };
+      final jsonData = jsonEncode(data);
+
+      var user = RiveUser.fromData(jsonDecode(jsonData), requireSignin: false);
+      expect(user.ownerId, 1);
+      expect(user.name, 'User Awesome');
+      expect(user.username, 'user_awesome');
+      expect(user.avatar, null);
+      expect(user.isAdmin, true);
+      expect(user.isPaid, true);
+      expect(user.notificationCount, 1);
+      expect(user.isVerified, false);
+
+      user = RiveUser.fromData(jsonDecode(jsonData), requireSignin: true);
+      expect(user, null);
+
+      data['signedIn'] = true;
+      user = RiveUser.fromData(data, requireSignin: true);
+      expect(user.ownerId, 1);
+    });
   });
 
-  test('User objects are constructed from JSON correctly', () {
-    final data = {
-      'ownerId': 1,
-      'name': 'User Awesome',
-      'username': 'user_awesome',
-      'isAdmin': true,
-      'isPaid': true,
-      'notificationCount': 1,
-    };
-    final jsonData = jsonEncode(data);
+  group('Changelog', () {
+    test('Changelog objects are constructed from JSON correctly', () {
+      final data = [
+        {
+          'version': '0.0.2',
+          'items': [
+            {
+              'title': 'Test Title',
+              'description': 'Test description',
+            },
+          ]
+        },
+        {
+          'version': '0.0.1',
+          'items': [
+            {
+              'title': 'Test Title',
+              'description': 'Test description',
+            },
+            {
+              'title': 'Test Title 2',
+              'description': 'Test description 2',
+            },
+          ]
+        },
+      ];
+      final jsonData = jsonEncode(data);
 
-    var user = RiveUser.fromData(jsonDecode(jsonData), requireSignin: false);
-    expect(user.ownerId, 1);
-    expect(user.name, 'User Awesome');
-    expect(user.username, 'user_awesome');
-    expect(user.avatar, null);
-    expect(user.isAdmin, true);
-    expect(user.isPaid, true);
-    expect(user.notificationCount, 1);
-    expect(user.isVerified, false);
-
-    user = RiveUser.fromData(jsonDecode(jsonData), requireSignin: true);
-    expect(user, null);
-
-    data['signedIn'] = true;
-    user = RiveUser.fromData(data, requireSignin: true);
-    expect(user.ownerId, 1);
+      var changelogs = Changelog.fromDataList(jsonDecode(jsonData));
+      expect(changelogs.length, 2);
+      expect(changelogs.first.version, '0.0.2');
+      expect(changelogs.first.items.length, 1);
+      expect(changelogs.first.items.first.title, 'Test Title');
+      expect(changelogs.first.items.first.description, 'Test description');
+      expect(changelogs.last.version, '0.0.1');
+      expect(changelogs.last.items.length, 2);
+      expect(changelogs.last.items.last.title, 'Test Title 2');
+      expect(changelogs.last.items.last.description, 'Test description 2');
+    });
   });
 }

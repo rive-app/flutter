@@ -197,6 +197,33 @@ class TextStyles {
       letterSpacing: 0,
       decoration: TextDecoration.underline);
 
+  // Notifications
+  TextStyle get notificationTitle => const TextStyle(
+        fontFamily: 'Roboto-Medium',
+        color: Color(0xFF333333),
+        fontWeight: FontWeight.w600,
+        fontSize: 13,
+      );
+
+  TextStyle get notificationText => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: Color(0xFF666666),
+        height: 1.6,
+        fontSize: 13,
+      );
+
+  TextStyle get notificationHeader => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: Color(0xFF888888),
+        fontSize: 16,
+      );
+
+  TextStyle get notificationHeaderSelected => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: Color(0xFF333333),
+        fontSize: 16,
+      );
+
   // Files
   TextStyle get fileBlueText => const TextStyle(
         fontFamily: 'Roboto-Medium',
