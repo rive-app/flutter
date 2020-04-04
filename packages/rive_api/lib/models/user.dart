@@ -7,7 +7,6 @@ enum TeamInviteStatus { accepted, pending }
 enum TeamRole { member, admin }
 
 class RiveUser extends RiveOwner {
-  final String username;
   final String avatar;
   final bool isAdmin;
   final bool isPaid;
@@ -16,10 +15,10 @@ class RiveUser extends RiveOwner {
   final TeamInviteStatus status;
   final TeamRole role;
 
-  const RiveUser({
+  RiveUser({
     @required int ownerId,
     @required String name,
-    @required this.username,
+    @required String username,
     this.avatar,
     this.isAdmin = false,
     this.isPaid = false,
@@ -29,7 +28,7 @@ class RiveUser extends RiveOwner {
     this.role,
   })  : assert(ownerId != null),
         assert(name != null || username != null),
-        super(id: ownerId, name: name);
+        super(id: ownerId, name: name, username: username);
 
   factory RiveUser.fromData(Map<String, dynamic> data,
       {bool requireSignin = true}) {
@@ -66,9 +65,6 @@ class RiveUser extends RiveOwner {
       role: data.getTeamRole(),
     );
   }
-
-  @override
-  String get displayName => name ?? username;
 
   @override
   String toString() => 'RiveUser($ownerId, @$username, \'$name\')';

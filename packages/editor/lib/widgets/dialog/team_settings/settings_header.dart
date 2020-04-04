@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
-class TeamSettingsHeader extends StatelessWidget {
+class SettingsHeader extends StatelessWidget {
+  final String name;
+  final int teamSize;
+
+  const SettingsHeader({@required this.name, this.teamSize});
+
+  bool get isTeam => teamSize > 0;
+
   @override
   Widget build(BuildContext context) {
-    final TextStyles textStyles = RiveThemeData().textStyles;
-    final riveColors = RiveThemeData().colors;
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final riveColors = theme.colors;
+    
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
         child: Row(
@@ -36,33 +46,36 @@ class TeamSettingsHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Rive',
+                  name,
                   style: textStyles.fileGreyTextLarge,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  'Team Plan',
-                  style: textStyles.hyperLinkSubtext,
-                )
+                if (isTeam) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Team Plan',
+                    style: textStyles.hyperLinkSubtext,
+                  )
+                ]
               ],
             ),
             const Spacer(),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '2 members',
-                  style: textStyles.fileGreyTextLarge
-                      .copyWith(fontSize: 13, height: 1.3),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Add More',
-                  style: textStyles.hyperLinkSubtext,
-                )
-              ],
-            ),
+            if (isTeam)
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$teamSize members',
+                    style: textStyles.fileGreyTextLarge
+                        .copyWith(fontSize: 13, height: 1.3),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Add More',
+                    style: textStyles.hyperLinkSubtext,
+                  )
+                ],
+              ),
           ],
         ));
   }

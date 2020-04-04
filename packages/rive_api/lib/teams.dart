@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
-
 
 /// Api for accessing the signed in users folders and files.
 class RiveTeamsApi<T extends RiveTeam> {
@@ -14,12 +14,16 @@ class RiveTeamsApi<T extends RiveTeam> {
   RiveTeamsApi(this.api);
 
   /// POST /api/teams
-  Future<T> createTeam(teamName) async {
-    print("What is my team name? $teamName");
+  Future<T> createTeam(
+      {@required String teamName,
+      @required String plan,
+      @required String frequency}) async {
     String payload = jsonEncode({
       "data": {
         "name": teamName,
-        "username": teamName
+        "username": teamName,
+        "billingPlan": plan,
+        "billingCycle": frequency
       }
     });
     var response = await api.post(api.host + '/api/teams', body: payload);
@@ -36,7 +40,10 @@ class RiveTeamsApi<T extends RiveTeam> {
     } on FormatException catch (e) {
       log.severe('Unable to parse response from server: $e');
     }
-    return RiveTeam.fromData(data);
+    final team = RiveTeam.fromData(data);
+    team.teamMembers = await getAffiliates(team.ownerId);
+
+    return team;
   }
 
   /// GET /api/teams
@@ -57,41 +64,11 @@ class RiveTeamsApi<T extends RiveTeam> {
       log.severe('Unable to parse response from server: $e');
     }
     print('TEAMS SERVER BODY: ${response.body}');
-    return RiveTeam.fromDataList(data);
-  }
-
-  // PUT /api/teams/<teamId>
-  Future<void> updateTeamInfo(
-    teamId, {
-    String name,
-    String username,
-    String location,
-    String website,
-    String bio,
-    String twitter,
-    String instagram,
-    bool isForHire,
-  }) async {
-    String payload = jsonEncode({
-      'data': {
-        'teamName': name,
-        'teamUsername': username,
-        'location': location,
-        'website': website,
-        'blurb': bio,
-        'twitter': twitter,
-        'instagram': instagram,
-      }
-    });
-    var response =
-        await api.put(api.host + '/api/teams/$teamId', body: payload);
-    if (response.statusCode != 200) {
-      // Todo: some form of error handling? also whats wrong with our error logging :D
-      var message = 'Could not create new team ${response.body}';
-      log.severe(message);
-      print(message);
-      return null;
+    var teams = RiveTeam.fromDataList(data);
+    for (final team in teams) {
+      team.teamMembers = await getAffiliates(team.ownerId);
     }
+    return teams;
   }
 
   /// GET /api/teams/<team_id>/affiliates
@@ -111,7 +88,6 @@ class RiveTeamsApi<T extends RiveTeam> {
     } on FormatException catch (e) {
       log.severe('Unable to parse response from server: $e');
     }
-    print('Affiliates: ${response.body}');
     var teamUsers = data
         .map((userData) => RiveUser.asTeamMember(userData))
         .toList(growable: false);
