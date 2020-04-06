@@ -11,6 +11,7 @@ import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class PlanSettings extends StatefulWidget {
   final RiveTeam team;
@@ -114,7 +115,8 @@ class _PlanState extends State<PlanSettings> {
           Separator(color: colors.fileLineGrey),
           // Vertical padding.
           const SizedBox(height: 30),
-          SettingsPanelSection(label: 'Payment', contents: (ctx) => Row()),
+          PaymentMethod(),
+          // SettingsPanelSection(label: 'Payment', contents: (ctx) => Row()),
           // Vertical padding.
           const SizedBox(height: 30),
           Separator(color: colors.fileLineGrey),
@@ -162,14 +164,17 @@ class BillCalculator extends StatelessWidget {
               children: [
                 Text('New ${plan.name} bill', style: light),
                 const SizedBox(height: 10),
-                Text('Pay now', style: light)
+                Text('Pay now', style: light),
               ]),
           const SizedBox(width: 10),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Text('\$${subscription.calculatedCost}',
                 style: dark.copyWith(fontFamily: 'Roboto-Regular')),
             const SizedBox(height: 10),
-            Text('\$0', style: dark.copyWith(fontWeight: FontWeight.bold))
+            Padding(
+                padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
+                child: Text('\$0',
+                    style: dark.copyWith(fontWeight: FontWeight.bold)))
           ]),
         ],
       ),
@@ -187,24 +192,20 @@ class BillCalculator extends StatelessWidget {
       Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('New ${plan.name} bill', style: light),
-                const SizedBox(height: 10),
-                Text('Pay now (prorated)', style: light)
-              ]),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Text('New ${plan.name} bill', style: light),
+            const SizedBox(height: 10),
+            Text('Pay now (prorated)', style: light)
+          ]),
           const SizedBox(width: 10),
-          Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Text('\$${subscription.calculatedCost}',
-                    style: dark.copyWith(fontFamily: 'Roboto-Regular')),
-                const SizedBox(height: 10),
-                Text('\$$costDifference', style: dark)
-              ]),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Text('\$${subscription.calculatedCost}',
+                style: dark.copyWith(fontFamily: 'Roboto-Regular')),
+            const SizedBox(height: 10),
+            Padding(
+                padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
+                child: Text('\$$costDifference', style: dark))
+          ]),
         ],
       ),
       const SizedBox(height: 25),
@@ -267,5 +268,87 @@ class BillCalculator extends StatelessWidget {
                   ..._credit(lightGreyText, darkGreyText, buttonColor),
               ],
             ));
+  }
+}
+
+class PaymentMethod extends StatefulWidget {
+  @override
+  _MethodState createState() => _MethodState();
+}
+
+class _MethodState extends State<PaymentMethod> {
+  bool _useSaved = true;
+
+  void _changeView(bool useSaved) {
+    setState(() {
+      _useSaved = useSaved;
+    });
+  }
+
+  Widget _savedInfo(BuildContext ctx) {
+    final theme = RiveTheme.of(ctx);
+    final styles = theme.textStyles;
+    final colors = theme.colors;
+
+    return Column(
+      children: <Widget>[
+        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          TintedIcon(icon: 'image', color: colors.commonButtonTextColor),
+          const SizedBox(width: 10),
+          Text('American Express 1007. Expires 10/2022',
+              style: styles.fileGreyTextLarge.copyWith(
+                fontSize: 13,
+              )),
+          const Spacer(),
+          GestureDetector(
+            onTap: () => _changeView(false),
+            child: Text('Change',
+                style: styles.fileGreyTextLarge.copyWith(
+                  fontSize: 12,
+                  height: 1.75, // Height: 21.
+                  decoration: TextDecoration.underline,
+                )),
+          ),
+        ]),
+        const SizedBox(height: 15),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            TintedIcon(icon: 'image', color: colors.commonButtonTextColor),
+            const SizedBox(width: 10),
+            RichText(
+              text: TextSpan(children: [
+                TextSpan(
+                    text: 'Next payment due: ',
+                    style: styles.hierarchyTabHovered
+                        .copyWith(fontSize: 13, height: 1.15)),
+                TextSpan(
+                    // TODO: get date from subscription.
+                    text: 'Jan 20, 2021',
+                    style: styles.fileGreyTextLarge.copyWith(
+                      fontSize: 13,
+                      height: 1.15,
+                    )),
+              ]),
+            )
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _cardInput(BuildContext ctx) {
+    return GestureDetector(
+      onTap: () => _changeView(true),
+      child: Text('GO BACK'),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsPanelSection(
+      label: 'Payment',
+      contents: (ctx) => _useSaved ? _savedInfo(ctx) : _cardInput(ctx),
+    );
   }
 }
