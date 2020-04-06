@@ -4,6 +4,43 @@ enum BillingFrequency { yearly, monthly }
 /// The subscription team option
 enum TeamsOption { basic, premium }
 
+extension PlanExtension on TeamsOption {
+  String get name {
+    switch (this) {
+      case TeamsOption.basic:
+        return 'normal';
+      case TeamsOption.premium:
+        return 'premium';
+      default:
+        return 'normal';
+    }
+  }
+}
+
+extension FrequencyExtension on BillingFrequency {
+  String get name {
+    switch (this) {
+      case BillingFrequency.yearly:
+        return 'yearly';
+      case BillingFrequency.monthly:
+        return 'monthly';
+      default:
+        return 'monthly';
+    }
+  }
+
+  static BillingFrequency fromName(String cycle) {
+    switch (cycle) {
+      case 'monthly':
+        return BillingFrequency.monthly;
+      case 'yearly':
+        return BillingFrequency.yearly;
+      default:
+        return null;
+    }
+  }
+}
+
 class RiveTeamBilling {
   TeamsOption plan;
 

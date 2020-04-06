@@ -12,43 +12,6 @@ const billingPolicyUrl =
 const premiumMonthlyCost = 45;
 const basicMonthlyCost = 14;
 
-extension PlanExtension on TeamsOption {
-  String get name {
-    switch (this) {
-      case TeamsOption.basic:
-        return 'normal';
-      case TeamsOption.premium:
-        return 'premium';
-      default:
-        return 'normal';
-    }
-  }
-}
-
-extension FrequencyExtension on BillingFrequency {
-  String get name {
-    switch (this) {
-      case BillingFrequency.yearly:
-        return 'yearly';
-      case BillingFrequency.monthly:
-        return 'monthly';
-      default:
-        return 'monthly';
-    }
-  }
-
-  static BillingFrequency fromName(String cycle) {
-    switch (cycle) {
-      case 'monthly':
-        return BillingFrequency.monthly;
-      case 'yearly':
-        return BillingFrequency.yearly;
-      default:
-        return null;
-    }
-  }
-}
-
 /// The active wizard panel
 enum WizardPanel { one, two }
 
@@ -149,13 +112,14 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     return subscription;
   }
 
-
-  static Future<bool> updatePlan(
-      RiveApi api, RiveTeam team) async {
-    // var response = await RiveTeamsApi(api).updatePlan(team.ownerId);
-    // return response != null;
+  Future<bool> updatePlan(RiveApi api, int teamId) async {
+    var res = await RiveTeamsApi(api).updatePlan(teamId, option, billing);
+    if (res) {
+      _currentCost = calculatedCost;
+      notifyListeners();
+    }
+    return res;
   }
-
 
   @override
   set option(TeamsOption value) {

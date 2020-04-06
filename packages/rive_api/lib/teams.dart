@@ -115,4 +115,20 @@ class RiveTeamsApi<T extends RiveTeam> {
     }
     return RiveTeamBilling.fromData(data['data']);
   }
+
+  Future<bool> updatePlan(
+      int teamId, TeamsOption plan, BillingFrequency frequency) async {
+    String payload = jsonEncode({
+      'data': {'billingPlan': plan.name, 'billingCycle': frequency.name}
+    });
+    var response =
+        await api.put(api.host + '/api/teams/$teamId/billing', body: payload);
+    if (response.statusCode != 200) {
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      print(message);
+      return null;
+    }
+    return true;
+  }
 }

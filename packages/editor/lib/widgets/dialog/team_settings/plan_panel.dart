@@ -37,8 +37,9 @@ class _PlanState extends State<PlanSettings> {
   void _onSubChange() => setState(() {});
 
   void _onBillChanged() {
-    // TODO: update backend?
     print("Current plan is: ${_sub.billing.name}, ${_sub.option.name}");
+    // TODO: track response?
+    _sub.updatePlan(widget.api, widget.team.ownerId);
   }
 
   @override
@@ -119,10 +120,7 @@ class _PlanState extends State<PlanSettings> {
           Separator(color: colors.fileLineGrey),
           // Vertical padding.
           const SizedBox(height: 30),
-          BillCalculator(
-            subscription: _sub,
-            onBillChanged: _onBillChanged
-          ),
+          BillCalculator(subscription: _sub, onBillChanged: _onBillChanged),
         ]);
   }
 }
