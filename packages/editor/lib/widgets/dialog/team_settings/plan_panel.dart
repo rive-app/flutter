@@ -28,14 +28,18 @@ class _PlanState extends State<PlanSettings> {
     PlanSubscriptionPackage.fetchData(widget.api, widget.team.ownerId)
         .then((value) => setState(() {
               _sub = value;
+              _sub.addListener(_onSubChange);
             }));
-
     super.initState();
+  }
+
+  void _onSubChange() {
+    setState(() {});
   }
 
   @override
   void dispose() {
-    _sub.dispose();
+    _sub.dispose(); // Cleans up listeners.
     super.dispose();
   }
 

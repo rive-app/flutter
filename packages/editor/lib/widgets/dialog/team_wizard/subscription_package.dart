@@ -56,6 +56,7 @@ abstract class SubscriptionPackage with ChangeNotifier {
   BillingFrequency _billing = BillingFrequency.yearly;
   BillingFrequency get billing => _billing;
   set billing(BillingFrequency value) {
+    if (_billing == value) return;
     _billing = value;
     notifyListeners();
   }
@@ -86,6 +87,7 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
 
   @override
   set option(TeamsOption value) {
+    if (_option == value) return;
     _option = value;
     notifyListeners();
   }
