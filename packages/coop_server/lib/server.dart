@@ -31,16 +31,13 @@ class RiveCoopServer extends CoopServer {
   void heartbeat() => PrivateApi().heartbeat();
 
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
-    var process = _CoopIsolate();
-    var success = await process.initProcess(
+    var process = RiveCoopIsolateProcess();
+    await process.initProcess(
         argument.sendPort, argument.options, argument.ownerId, argument.fileId);
-    if (success) {
-      // ok, anything to do?
-    }
   }
 }
 
-class _CoopIsolate extends CoopIsolateProcess {
+class RiveCoopIsolateProcess extends CoopIsolateProcess {
   CoopFile file;
   int _nextChangeId;
   final _privateApi = PrivateApi();
@@ -160,6 +157,11 @@ class _CoopIsolate extends CoopIsolateProcess {
     // check data is not null, check signature, if it's RIVE deserialize
     // if it's { or something else, send wtf.
     var data = await _privateApi.load(ownerId, fileId);
+    if (data == null) {
+      // private api is currently not availble or somehow failed, make sure we
+      // terminate the connect (client will retry).
+      return false;
+    }
 
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
         (data == null || data.isEmpty)) {

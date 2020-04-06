@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 
 import 'package:core/coop/protocol_version.dart';
 import 'package:core/coop/coop_isolate.dart';
+import 'package:meta/meta.dart';
 
 final _log = Logger('coop_server');
 
@@ -22,6 +23,9 @@ abstract class CoopServer {
   HttpServer _server;
 
   int get editingFileCount => _isolates.keys.length;
+
+  Iterable<CoopIsolate> get isolates => _isolates.values;
+
   int get clientCount =>
       _isolates.values.fold(0, (count, isolate) => count + isolate.clientCount);
 
@@ -34,6 +38,11 @@ abstract class CoopServer {
     await _server.close(force: true);
     return true;
   }
+
+  /// Allow implementations to override the isolate process interface.
+  @protected
+  CoopIsolate makeIsolateInterface(int ownerId, int fileId) =>
+      CoopIsolate(this, ownerId, fileId);
 
   /// Listen for incoming connections and upgrade them to web sockets if valid
   /// This is assumed to be coming from a trusted source and so no user permissions
@@ -48,7 +57,7 @@ abstract class CoopServer {
     _log.info('Listening on ${InternetAddress.anyIPv4}:$port');
     _server.listen((HttpRequest request) async {
       var segments = request.requestedUri.pathSegments;
-      _log.finest('Received message ${_segmentsToString(segments)}');
+
       // If there are not 5 segments, return health status
       if (segments.length != 5) {
         request.response.statusCode = 200;
@@ -56,7 +65,6 @@ abstract class CoopServer {
         await request.response.close();
         return;
       }
-
       // Web socket request from the 2D service
       // This replaces the code for parsing segments of length 5
       // when the co-op server moves inside the VPC
@@ -72,10 +80,11 @@ abstract class CoopServer {
         String key = _isolateKey(data.ownerId, data.fileId);
         var isolate = _isolates[key];
         if (isolate == null) {
-          isolate = CoopIsolate(this, data.ownerId, data.fileId);
+          isolate = makeIsolateInterface(data.ownerId, data.fileId);
           // Immediately make it available...
           _isolates[key] = isolate;
           if (!await isolate.spawn(handler, options)) {
+            _isolates.remove(key);
             _log.severe('Unable to spawn isolate for file $key');
             await ws.close();
             return;

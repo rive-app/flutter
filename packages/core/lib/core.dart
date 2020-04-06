@@ -141,7 +141,8 @@ abstract class CoreContext implements LocalSettings {
 
   final Map<Id, Core> _objects = {};
 
-  final Map<ChangeSet, FreshChange> _freshChanges = {};
+  @protected
+  final Map<ChangeSet, FreshChange> freshChanges = {};
   // final List<ChangeSet> _unsyncedChanges = [];
   CoreContext(this.fileId) : _lastChangeId = CoopCommand.minChangeId;
 
@@ -209,7 +210,7 @@ abstract class CoreContext implements LocalSettings {
 
     // schedule those changes to be sent to other clients (and server for
     // saving)
-    _coopMakeChangeSet(_currentChanges, useFrom: false);
+    coopMakeChangeSet(_currentChanges, useFrom: false);
     _journalIndex = journal.length;
     _currentChanges = null;
     return true;
@@ -239,8 +240,8 @@ abstract class CoreContext implements LocalSettings {
       localSettings: this,
       token: token,
     )
-      ..changesAccepted = _changesAccepted
-      ..changesRejected = _changesRejected
+      ..changesAccepted = changesAccepted
+      ..changesRejected = changesRejected
       ..makeChanges = _receiveCoopChanges
       ..wipe = _wipe
       ..gotClientId = (actualClientId) {
@@ -484,7 +485,7 @@ abstract class CoreContext implements LocalSettings {
       }
     });
 
-    _coopMakeChangeSet(changes, useFrom: isUndo);
+    coopMakeChangeSet(changes, useFrom: isUndo);
     completeChanges();
     for (final object in regeneratedObjects) {
       onAddedClean(object);
@@ -499,9 +500,10 @@ abstract class CoreContext implements LocalSettings {
       HashMap<Id, HashMap<int, int>>();
 
   @mustCallSuper
-  void _changesAccepted(ChangeSet changes) {
+  @protected
+  void changesAccepted(ChangeSet changes) {
     log.finest("ACCEPTING ${changes.id}.");
-    _freshChanges.remove(changes);
+    freshChanges.remove(changes);
 
     // Update the inflight counters for the properties.
     for (final objectChanges in changes.objects) {
@@ -520,11 +522,12 @@ abstract class CoreContext implements LocalSettings {
   }
 
   @mustCallSuper
-  void _changesRejected(ChangeSet changes) {
+  @protected
+  void changesRejected(ChangeSet changes) {
     // TODO: We should actually just reconnect here.
     abandonChanges(changes);
     // Re-apply the original value if the changed value matches the current one.
-    var fresh = _freshChanges[changes];
+    var fresh = freshChanges[changes];
     fresh.change.entries.forEach((objectId, changes) {
       var object = _objects[objectId];
       if (object != null) {
@@ -543,7 +546,8 @@ abstract class CoreContext implements LocalSettings {
     });
   }
 
-  void _coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
+  @protected
+  ChangeSet coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
     // Client should only be null during some testing.
     var sendChanges = ChangeSet()
       ..id = _lastChangeId == null ? null : _lastChangeId++
@@ -583,9 +587,11 @@ abstract class CoreContext implements LocalSettings {
 
       sendChanges.objects.add(objectChanges);
     });
-    _freshChanges[sendChanges] = FreshChange(changes, useFrom);
+    freshChanges[sendChanges] = FreshChange(changes, useFrom);
+    print("MAKE CHANGES $changes");
     _client?.queueChanges(sendChanges);
     persistChanges(sendChanges);
+    return sendChanges;
   }
 
   void persistChanges(ChangeSet changes);
@@ -625,13 +631,13 @@ abstract class CoreContext implements LocalSettings {
 
       // Check if this object has changes already in-flight.
       var objectInflight = _inflight[objectChanges.objectId];
-      if(objectInflight != null) {
+      if (objectInflight != null) {
         // prune out changes that are still waiting for acknowledge.
         List<Change> changesToApply = [];
-        for(final change in objectChanges.changes) {
+        for (final change in objectChanges.changes) {
           var flightValue = objectInflight[change.op];
           // Only approve a change that doesn't have an inflight change.
-          if(flightValue == null || flightValue == 0) {
+          if (flightValue == null || flightValue == 0) {
             changesToApply.add(change);
           }
         }
@@ -676,7 +682,7 @@ abstract class CoreContext implements LocalSettings {
     _objects.clear();
     _journalIndex = 0;
     journal.clear();
-    _freshChanges.clear();
+    freshChanges.clear();
     _inflight.clear();
 
     // TODO: rethink this

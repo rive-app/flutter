@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:core/debounce.dart';
+import 'package:meta/meta.dart';
 
 import 'change.dart';
 import 'coop_server.dart';
@@ -30,6 +31,13 @@ class CoopIsolate {
   final int fileId;
   CoopIsolate(this.server, this.ownerId, this.fileId);
   int get clientCount => _clients.length;
+
+  /// Allow implementations to override sending to isolate. This allows tests to
+  /// do things like delay sending operations to the isolate in order to test
+  /// sequence of send/receive events that deterministically allow edge cases to
+  /// occur.
+  @protected
+  void sendToIsolate(dynamic data) => _sendToIsolatePort.send(data);
 
   Future<bool> addClient(
       int userOwnerId, int desiredClientId, WebSocket socket) async {
@@ -58,19 +66,18 @@ class CoopIsolate {
     var id = ids.isEmpty ? 0 : ids.reduce(max) + 1;
     _clients[id] = socket;
 
-    _sendToIsolatePort
-        .send(_CoopServerAddClient(id, userOwnerId, desiredClientId));
+    sendToIsolate(_CoopServerAddClient(id, userOwnerId, desiredClientId));
     socket.listen(
       (dynamic data) {
         if (data is Uint8List) {
           // If we get binary data, send it along to the isolate.
-          _sendToIsolatePort.send(_CoopServerProcessData(id, data));
+          sendToIsolate(_CoopServerProcessData(id, data));
         }
       },
       onDone: () {
         // Client disconnected.
         _clients.remove(id);
-        _sendToIsolatePort.send(_CoopServerRemoveClient(id));
+        sendToIsolate(_CoopServerRemoveClient(id));
         if (_clients.isEmpty) {
           _killTimer?.cancel();
           _killTimer = Timer(killTimeout, shutdown);
@@ -89,17 +96,15 @@ class CoopIsolate {
       return false;
     }
     _shutdownCompleter = Completer<bool>();
-    _sendToIsolatePort.send(_CoopServerShutdown());
+    sendToIsolate(_CoopServerShutdown());
     return _shutdownCompleter.future;
   }
 
   Future<bool> spawn(void entryPoint(CoopIsolateArgument message),
       Map<String, String> options) async {
     var completer = Completer<bool>();
-    _isolate = await Isolate.spawn(
-        entryPoint,
-        CoopIsolateArgument(ownerId, fileId,
-            sendPort: _receiveFromIsolatePort.sendPort, options: options));
+
+    // Make sure to listen before spawn.
     _receiveFromIsolatePort.listen((dynamic data) {
       if (data is SendPort && _sendToIsolatePort == null) {
         _sendToIsolatePort = data;
@@ -113,13 +118,26 @@ class CoopIsolate {
         _queuedSockets.clear();
       } else if (data is _CoopServerProcessData) {
         _clients[data.id]?.add(data.data);
-      } else if (data is _CoopServerShutdown && _shutdownCompleter != null) {
+      } else if (data is _CoopServerShutdown) {
         _isolate?.kill();
         _isolate = null;
-        _shutdownCompleter.complete(true);
-        server.remove(this);
+
+        /// This was a requested shutdown
+        if (_shutdownCompleter != null) {
+          _shutdownCompleter.complete(true);
+          server.remove(this);
+        } else {
+          // we died on boot.
+          completer.complete(false);
+        }
       }
     });
+
+    // Spawn it.
+    _isolate = await Isolate.spawn(
+        entryPoint,
+        CoopIsolateArgument(ownerId, fileId,
+            sendPort: _receiveFromIsolatePort.sendPort, options: options));
     return completer.future;
   }
 }
@@ -182,6 +200,8 @@ abstract class CoopIsolateProcess {
     if (await initialize(ownerId, fileId, options)) {
       _sendToMainPort.send(_receiveFromMainPort.sendPort);
       return true;
+    } else {
+      _sendToMainPort.send(_CoopServerShutdown());
     }
     return false;
   }
@@ -210,6 +230,7 @@ abstract class CoopIsolateProcess {
   }
 
   Future<void> _receive(dynamic data) async {
+    print("GOT $data");
     if (data is _CoopServerAddClient) {
       int actualClientId = data.clientId;
       // Check if the client id the connection wants to use is valid.

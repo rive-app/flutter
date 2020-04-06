@@ -23,8 +23,6 @@ import 'src/isolated_persist.dart';
 final log = Logger('rive_core');
 
 class RiveFile extends RiveCoreContext {
-  final Map<String, dynamic> overridePreferences;
-  final bool useSharedPreferences;
   final List<Artboard> artboards = [];
   final Set<RiveFileDelegate> delegates = {};
   int _dirt = 0;
@@ -61,8 +59,6 @@ class RiveFile extends RiveCoreContext {
     String fileId, {
     @required LocalDataPlatform localDataPlatform,
     this.api,
-    this.overridePreferences,
-    this.useSharedPreferences = true,
   })  : _isolatedPersist = IsolatedPersist(localDataPlatform, fileId),
         super(fileId);
 
@@ -158,15 +154,6 @@ class RiveFile extends RiveCoreContext {
 
   @override
   Future<int> getIntSetting(String key) async {
-    if (overridePreferences != null) {
-      dynamic val = overridePreferences[key];
-      if (val is int) {
-        return val;
-      }
-    }
-    if (!useSharedPreferences) {
-      return null;
-    }
     _prefs ??= await SharedPreferences.getInstance();
     return _prefs.getInt(key);
   }
@@ -176,15 +163,6 @@ class RiveFile extends RiveCoreContext {
 
   @override
   Future<String> getStringSetting(String key) async {
-    if (overridePreferences != null) {
-      dynamic val = overridePreferences[key];
-      if (val is String) {
-        return val;
-      }
-    }
-    if (!useSharedPreferences) {
-      return null;
-    }
     _prefs ??= await SharedPreferences.getInstance();
     return _prefs.getString(key);
   }
@@ -263,18 +241,12 @@ class RiveFile extends RiveCoreContext {
 
   @override
   Future<void> setIntSetting(String key, int value) async {
-    if (!useSharedPreferences) {
-      return;
-    }
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs.setInt(key, value);
   }
 
   @override
   Future<void> setStringSetting(String key, String value) async {
-    if (!useSharedPreferences) {
-      return;
-    }
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs.setString(key, value);
   }
