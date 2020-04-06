@@ -242,7 +242,7 @@ abstract class CoreContext implements LocalSettings {
     )
       ..changesAccepted = changesAccepted
       ..changesRejected = changesRejected
-      ..makeChanges = _receiveCoopChanges
+      ..makeChanges = receiveCoopChanges
       ..wipe = _wipe
       ..gotClientId = (actualClientId) {
         clientId = actualClientId;
@@ -613,7 +613,8 @@ abstract class CoreContext implements LocalSettings {
     delayed.forEach(onAddedClean);
   }
 
-  void _receiveCoopChanges(ChangeSet changes) {
+  @protected
+  void receiveCoopChanges(ChangeSet changes) {
     // We've received changes from Coop. Initialize the delayAdd list so that
     // onAdded doesn't get called as objects are created. We'll manually call it
     // at the end of this method once all the changes have been made.

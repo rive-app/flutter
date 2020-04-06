@@ -71,7 +71,7 @@ class CoopIsolate {
       (dynamic data) {
         if (data is Uint8List) {
           // If we get binary data, send it along to the isolate.
-          sendToIsolate(_CoopServerProcessData(id, data));
+          sendToIsolate(CoopServerProcessData(id, data));
         }
       },
       onDone: () {
@@ -116,7 +116,7 @@ class CoopIsolate {
               .then(q.completer.complete);
         }
         _queuedSockets.clear();
-      } else if (data is _CoopServerProcessData) {
+      } else if (data is CoopServerProcessData) {
         _clients[data.id]?.add(data.data);
       } else if (data is _CoopServerShutdown) {
         _isolate?.kill();
@@ -226,7 +226,7 @@ abstract class CoopIsolateProcess {
 
   Future<bool> shutdown();
   void write(CoopServerClient client, Uint8List data) {
-    _sendToMainPort.send(_CoopServerProcessData(client.id, data));
+    _sendToMainPort.send(CoopServerProcessData(client.id, data));
   }
 
   Future<void> _receive(dynamic data) async {
@@ -255,7 +255,7 @@ abstract class CoopIsolateProcess {
         _clients.remove(client.id);
         propagatePlayers();
       }
-    } else if (data is _CoopServerProcessData) {
+    } else if (data is CoopServerProcessData) {
       _clients[data.id]?.receiveData(data.data);
       // _clients.add(CoopServerClient(this, _clients.length));
     } else if (data is _CoopServerShutdown) {
@@ -277,10 +277,10 @@ class _CoopServerAddClient {
   _CoopServerAddClient(this.id, this.userOwnerId, this.clientId);
 }
 
-class _CoopServerProcessData {
+class CoopServerProcessData {
   final int id;
   final Uint8List data;
-  _CoopServerProcessData(this.id, this.data);
+  CoopServerProcessData(this.id, this.data);
 }
 
 class _CoopServerRemoveClient {

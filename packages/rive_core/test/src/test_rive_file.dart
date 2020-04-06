@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:core/coop/change.dart';
 import 'package:core/core_property_changes.dart';
@@ -71,16 +72,24 @@ class TestRiveFile extends RiveFile {
     return super.setStringSetting(key, value);
   }
 
-  final _changeSetCompleters = Expando<Completer<bool>>();
+  final _changeSetCompleters = Expando<TestChanges>();
+
+  Completer<ChangeSet> _nextPropertyChanges;
+  Completer<ChangeSet> waitForNextChanges() =>
+      _nextPropertyChanges = Completer<ChangeSet>();
+
+  @override
+  void receiveCoopChanges(ChangeSet changes) {
+    super.receiveCoopChanges(changes);
+    var completer = _nextPropertyChanges;
+    _nextPropertyChanges = null;
+    completer?.complete(changes);
+  }
 
   @override
   ChangeSet coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
-    _lastMadeChanges = super.coopMakeChangeSet(changes, useFrom: useFrom);
-    // Map from the changes to a completer. N.B. we have to do this (instead of
-    // subclassing ChangeSet) as ChangeSet gets sent to an isolate and must be
-    // pure data (no completers/stored closures/etc).
-    _changeSetCompleters[_lastMadeChanges] = Completer<bool>();
-    return _lastMadeChanges;
+    return _lastMadeChanges =
+        super.coopMakeChangeSet(changes, useFrom: useFrom);
   }
 
   // Hackity hack hack, but at least it's only for testing.
@@ -95,7 +104,12 @@ class TestRiveFile extends RiveFile {
     // want to override the whole pipeline...so this is an easy hack for tests.
     _lastMadeChanges = null;
     if (captureJournalEntry()) {
-      return TestChanges(_lastMadeChanges);
+      // Map from the changes to a completer. N.B. we have to do this (instead
+      // of subclassing ChangeSet) as ChangeSet gets sent to an isolate and must
+      // be pure data (no completers/stored closures/etc).
+      var testChanges = TestChanges(_lastMadeChanges);
+      _changeSetCompleters[_lastMadeChanges] = testChanges;
+      return testChanges;
     }
     return null;
   }
@@ -103,13 +117,15 @@ class TestRiveFile extends RiveFile {
   @override
   void changesAccepted(ChangeSet changes) {
     super.changesAccepted(changes);
-    _changeSetCompleters[changes].complete(true);
+    print(
+        "ACCEPTING CHANGES $changes $_changeSetCompleters ${_changeSetCompleters[changes]}");
+    _changeSetCompleters[changes]?._completer?.complete(true);
   }
 
   @override
   void changesRejected(ChangeSet changes) {
     super.changesRejected(changes);
-    _changeSetCompleters[changes].complete(false);
+    _changeSetCompleters[changes]?._completer?.complete(false);
   }
 
   Future<void> settle() async {

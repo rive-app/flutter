@@ -3,7 +3,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:core/coop/change.dart';
+import 'package:core/coop/coop_command.dart';
 import 'package:core/coop/coop_server_client.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:core/coop/coop_server.dart';
 import 'package:core/coop/coop_isolate.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,6 +92,23 @@ class TestCoopIsolate extends CoopIsolate {
 
     super.sendToIsolate(first);
     return first;
+  }
+
+  /// Wait for a changeset to be received by the server.
+  Future<dynamic> processNextChange() async {
+    do {
+      dynamic next = await processNextCommand();
+      if (next is CoopServerProcessData) {
+        var data = next.data;
+        var reader = BinaryReader(
+            ByteData.view(data.buffer, data.offsetInBytes, data.length));
+        int command = reader.readVarUint();
+        if (command >= CoopCommand.minChangeId) {
+          // it's a changeset
+          return next;
+        }
+      }
+    } while (true);
   }
 
   @override

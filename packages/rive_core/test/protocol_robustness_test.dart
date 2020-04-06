@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:core/coop/connect_result.dart';
+import 'package:core/coop/coop_command.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/node.dart';
@@ -100,19 +102,28 @@ void main() {
       // deterministically.
       serverFileContext.manualDrive = true;
 
-      var node = client1.add(Node()..name = 'nice-node');
+      // Make a node on client 1.
+      var niceNodeOnClient1 = client1.add(Node()..name = 'nice-node');
 
       // Make the change and send them to the server.
       var changes = client1.captureTestChanges();
 
-      print("Ok $changes, wait for command");
+      // Have client2 wait to receive the changes.
+      var changesReceived = client2.waitForNextChanges();
 
       // Wait for the server to receive the changes from the client.
-      dynamic command = await serverFileContext.processNextCommand();
-      print("COMMAND $command");
+      await serverFileContext.processNextChange();
 
       // The changes should've been accepted by the server.
       expect(await changes.accept(), true);
+
+      // The second client should've received the changes and now have
+      // 'nice-node'.
+      await changesReceived.future;
+
+      var niceNodeOnClient2 = client2.resolve<Node>(niceNodeOnClient1.id);
+      expect(niceNodeOnClient2 != null, true);
+      expect(niceNodeOnClient2.name, 'nice-node');
 
       // node.name = 'name change2';
       // file.captureJournalEntry();
