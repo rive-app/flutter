@@ -12,14 +12,16 @@ class RiveTeam extends RiveOwner {
       {@required this.id,
       @required int ownerId,
       @required String name,
-      @required username})
-      : super(id: ownerId, name: name, username: username);
+      @required username,
+      String avatar})
+      : super(id: ownerId, name: name, username: username, avatar: avatar);
 
   factory RiveTeam.fromData(Map<String, dynamic> data) => RiveTeam(
       id: data.getInt('id'),
       ownerId: data.getInt('ownerId'),
       name: data.getString('name'),
-      username: data.getString('username'));
+      username: data.getString('username'),
+      avatar: data.getString('avatar'));
 
   /// Returns a list of teams from a JSON document
   static List<RiveTeam> fromDataList(List<dynamic> dataList) => dataList
