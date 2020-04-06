@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
+import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
@@ -66,49 +67,16 @@ abstract class SubscriptionPackage with ChangeNotifier {
   TeamsOption get option => _option;
   set option(TeamsOption value);
 
+  int get teamSize;
+
+  int get monthlyCost =>
+      _option == TeamsOption.premium ? premiumMonthlyCost : basicMonthlyCost;
+
   /// Returns the initial billing cost for the selected options
   int get calculatedCost {
-    final monthlyCost =
-        _option == TeamsOption.premium ? premiumMonthlyCost : basicMonthlyCost;
-    return monthlyCost * (_billing == BillingFrequency.yearly ? 12 : 1);
-  }
-}
-
-/// Data class for managing subscription data in the Team Settings 'Plan' modal.
-class PlanSubscriptionPackage extends SubscriptionPackage {
-  static Future<PlanSubscriptionPackage> fetchData(
-      RiveApi api, int teamId) async {
-    var response = await RiveTeamsApi(api).getBillingInfo(teamId);
-    var subscription = PlanSubscriptionPackage()
-      ..option = response.plan
-      ..billing = response.frequency;
-    return subscription;
-  }
-
-  @override
-  set option(TeamsOption value) {
-    if (_option == value) return;
-    _option = value;
-    notifyListeners();
-  }
-}
-
-/// Data class for tracking data in the team subscription widget
-class TeamSubscriptionPackage extends SubscriptionPackage {
-  /// Team name
-  String _name;
-  String get name => _name;
-  set name(String value) {
-    _name = value;
-    notifyListeners();
-  }
-
-  @override
-  set option(TeamsOption value) {
-    if (isNameValid) {
-      _option = value;
-    }
-    notifyListeners();
+    return teamSize *
+        monthlyCost *
+        (_billing == BillingFrequency.yearly ? 12 : 1);
   }
 
   /// Credit card number
@@ -143,6 +111,81 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
     notifyListeners();
   }
 
+  /// Validate the team options
+  bool get isOptionValid => _option != null;
+
+  /// Validate the credit card
+  bool get isCardNrValid {
+    if (_cardNumber == null) {
+      return false;
+    }
+
+    if (!RegExp(r'^[0-9]{16}$').hasMatch(_cardNumber)) {
+      return false;
+    }
+    return true;
+  }
+}
+
+/// Data class for managing subscription data in the Team Settings 'Plan' modal.
+class PlanSubscriptionPackage extends SubscriptionPackage {
+  // TODO: current plan expiration date.
+  int _currentCost;
+  int get currentCost => _currentCost;
+
+  int _teamSize;
+  @override
+  int get teamSize => _teamSize;
+
+  static Future<PlanSubscriptionPackage> fetchData(
+      RiveApi api, RiveTeam team) async {
+    var response = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+    var subscription = PlanSubscriptionPackage()
+      ..option = response.plan
+      ..billing = response.frequency
+      .._teamSize = team.teamMembers.length;
+    subscription._currentCost = subscription.calculatedCost;
+
+    return subscription;
+  }
+
+
+  static Future<bool> updatePlan(
+      RiveApi api, RiveTeam team) async {
+    // var response = await RiveTeamsApi(api).updatePlan(team.ownerId);
+    // return response != null;
+  }
+
+
+  @override
+  set option(TeamsOption value) {
+    if (_option == value) return;
+    _option = value;
+    notifyListeners();
+  }
+}
+
+/// Data class for tracking data in the team subscription widget
+class TeamSubscriptionPackage extends SubscriptionPackage {
+  /// Team name
+  String _name;
+  String get name => _name;
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
+
+  @override
+  set option(TeamsOption value) {
+    if (isNameValid) {
+      _option = value;
+    }
+    notifyListeners();
+  }
+
+  // When creating a team, team size is only the creator.
+  int get teamSize => 1;
+
   // User friendly Name validation error messages
   String _nameValidationError;
   String get nameValidationError => _nameValidationError;
@@ -170,21 +213,6 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
       return false;
     }
     _nameValidationError = null;
-    return true;
-  }
-
-  /// Validate the team options
-  bool get isOptionValid => _option != null;
-
-  /// Validate the credit card
-  bool get isCardNrValid {
-    if (_cardNumber == null) {
-      return false;
-    }
-
-    if (!RegExp(r'^[0-9]{16}$').hasMatch(_cardNumber)) {
-      return false;
-    }
     return true;
   }
 

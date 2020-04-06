@@ -32,9 +32,10 @@ class _TeamSubscriptionChoiceWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final colors = RiveTheme.of(context).colors;
-    final textStyles = RiveTheme.of(context).textStyles;
-    final gradient = RiveTheme.of(context).gradients.redPurpleBottomCenter;
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final textStyles = theme.textStyles;
+    final gradient = theme.gradients.redPurpleBottomCenter;
 
     final isHighlighted = _hover || widget.isSelected;
 
@@ -65,12 +66,9 @@ class _TeamSubscriptionChoiceWidgetState
               boxShadow: isHighlighted
                   ? [
                       BoxShadow(
-                        color: RiveTheme.of(context)
-                            .colors
-                            .commonDarkGrey
-                            .withOpacity(0.1),
-                        blurRadius: 12,
-                        offset: const Offset(0, 8),
+                        color: colors.commonButtonColor,
+                        blurRadius: 30,
+                        offset: const Offset(0, 15),
                       )
                     ]
                   : null,

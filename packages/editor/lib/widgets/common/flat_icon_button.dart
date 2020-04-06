@@ -62,6 +62,7 @@ class FlatIconButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: mainAxisAlignment,
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 // This correctly aligned the text vertically
