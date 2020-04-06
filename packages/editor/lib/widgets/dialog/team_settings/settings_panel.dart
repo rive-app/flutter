@@ -1,3 +1,4 @@
+import 'package:file_chooser/file_chooser.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/owner.dart';
@@ -29,13 +30,15 @@ Future showSettings({BuildContext context}) {
         if (owner is RiveTeam) {
           RiveTeamsApi(api).getAffiliates(owner.ownerId);
         }
-        return Settings(owner: owner);
+        return Settings(api: api, owner: owner);
       });
 }
 
 class Settings extends StatefulWidget {
   final RiveOwner owner;
-  const Settings({@required this.owner, Key key}) : super(key: key);
+  final RiveApi api;
+  const Settings({@required this.api, @required this.owner, Key key})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _SettingsState();
@@ -43,6 +46,7 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   int _selectedIndex = 0;
+  String newAvatarPath;
 
   bool get isTeam => widget.owner is RiveTeam;
   RiveTeam get team => isTeam ? widget.owner as RiveTeam : null;
@@ -70,6 +74,33 @@ class _SettingsState extends State<Settings> {
           isSelected: index == _selectedIndex,
         ),
       );
+
+  Future<void> changeAvatar() async {
+    FileChooserResult result = await showOpenPanel(
+      allowedFileTypes: [
+        const FileTypeFilterGroup(
+          fileExtensions: ['png'],
+        )
+      ],
+      canSelectDirectories: false,
+      allowsMultipleSelection: false,
+      confirmButtonText: 'Select',
+    );
+
+    if (result.paths.isNotEmpty) {
+      final remoteAvatarPath = await RiveTeamsApi(widget.api)
+          .uploadAvatar(widget.owner.ownerId, result.paths.first);
+      // TODO: need error handling.
+      // also we could display the avatar before uploading it on 'save'
+      // but there's a bit of a journey issue there as the avatar is shown on
+      // lots of settings pages.
+      if (remoteAvatarPath != null) {
+        setState(() {
+          newAvatarPath = remoteAvatarPath;
+        });
+      }
+    }
+  }
 
   Widget _nav(List<SettingsScreen> screens, Color background) {
     var i = 0;
@@ -109,6 +140,11 @@ class _SettingsState extends State<Settings> {
           children: <Widget>[
             SettingsHeader(
                 name: widget.owner.displayName,
+                // TODO: hm, we probably should store avatar with team.
+                avatarPath: (newAvatarPath == null)
+                    ? widget.owner.avatar
+                    : newAvatarPath,
+                changeAvatar: changeAvatar,
                 teamSize: team?.size ?? -1),
             Separator(color: colors.fileLineGrey),
             Expanded(child: screens[_selectedIndex].builder(context)),

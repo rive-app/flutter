@@ -7,8 +7,11 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 class SettingsHeader extends StatelessWidget {
   final String name;
   final int teamSize;
+  final String avatarPath;
+  final Function() changeAvatar;
 
-  const SettingsHeader({@required this.name, this.teamSize});
+  const SettingsHeader(
+      {@required this.name, this.teamSize, this.avatarPath, this.changeAvatar});
 
   bool get isTeam => teamSize > 0;
 
@@ -17,7 +20,7 @@ class SettingsHeader extends StatelessWidget {
     final theme = RiveTheme.of(context);
     final textStyles = theme.textStyles;
     final riveColors = theme.colors;
-    
+
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
         child: Row(
@@ -27,17 +30,33 @@ class SettingsHeader extends StatelessWidget {
             SizedBox(
               width: 50,
               height: 50,
-              child: Stack(
-                children: [
-                  const Positioned.fill(
-                      child: CustomPaint(
-                          painter: _DashedCirclePainter(
-                    radius: 25,
-                  ))),
-                  Center(
-                      child: TintedIcon(
-                          color: riveColors.fileIconColor, icon: 'image'))
-                ],
+              child: GestureDetector(
+                onTap: changeAvatar,
+                child: Stack(
+                  children: [
+                    if (avatarPath == null) ...[
+                      const Positioned.fill(
+                          child: CustomPaint(
+                              painter: _DashedCirclePainter(
+                        radius: 25,
+                      ))),
+                      Center(
+                          child: TintedIcon(
+                              color: riveColors.fileIconColor, icon: 'image'))
+                    ],
+                    if (avatarPath != null)
+                      Center(
+                        child: SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.transparent,
+                            backgroundImage: NetworkImage(avatarPath),
+                          ),
+                        ),
+                      )
+                  ],
+                ),
               ),
             ),
             const SizedBox(width: 10),
