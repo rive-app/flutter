@@ -1,15 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:rive_api/models/billing.dart';
+import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
 import 'package:rive_editor/widgets/gradient_border.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/common/flat_icon_button.dart';
-import 'package:rive_editor/utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// The first panel in the teams sign-up wizard
 class TeamWizardPanelOne extends StatelessWidget {
@@ -91,14 +90,12 @@ class TeamWizardPanelOne extends StatelessWidget {
                         'A space where you and your team can share files.',
                     onTap: () => sub.option = TeamsOption.basic,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: TeamSubscriptionChoiceWidget(
-                      label: 'Premium Team',
-                      costLabel: '\$$premiumMonthlyCost',
-                      explanation: '1 day support.',
-                      onTap: () => sub.option = TeamsOption.premium,
-                    ),
+                  const SizedBox(width: 30),
+                  TeamSubscriptionChoiceWidget(
+                    label: 'Premium Team',
+                    costLabel: '\$$premiumMonthlyCost',
+                    explanation: '1 day support.',
+                    onTap: () => sub.option = TeamsOption.premium,
                   ),
                 ],
               ),
@@ -134,14 +131,18 @@ class TeamSubscriptionChoiceWidget extends StatefulWidget {
   final String costLabel;
   final String explanation;
   final VoidCallback onTap;
+  final bool showButton;
+  final bool isSelected;
 
-  const TeamSubscriptionChoiceWidget({
-    Key key,
-    this.label,
-    this.costLabel,
-    this.explanation,
-    this.onTap,
-  }) : super(key: key);
+  const TeamSubscriptionChoiceWidget(
+      {Key key,
+      this.label,
+      this.costLabel,
+      this.explanation,
+      this.onTap,
+      this.showButton = true,
+      this.isSelected = false})
+      : super(key: key);
 
   @override
   _TeamSubscriptionChoiceWidgetState createState() =>
@@ -164,6 +165,8 @@ class _TeamSubscriptionChoiceWidgetState
     final buttonTextColor =
         _hover ? Colors.white : colors.commonButtonTextColorDark;
 
+    final isHighlighted = _hover || widget.isSelected;
+
     return GestureDetector(
       onTap: widget.onTap,
       child: MouseRegion(
@@ -172,7 +175,7 @@ class _TeamSubscriptionChoiceWidgetState
         child: GradientBorder(
           strokeWidth: 3,
           radius: 10,
-          shouldPaint: _hover,
+          shouldPaint: isHighlighted,
           gradient: gradient,
           child: Container(
             height: 193,
@@ -182,7 +185,7 @@ class _TeamSubscriptionChoiceWidgetState
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: backgroundColor,
-              boxShadow: _hover
+              boxShadow: isHighlighted
                   ? [
                       BoxShadow(
                         color: RiveTheme.of(context)
@@ -246,19 +249,20 @@ class _TeamSubscriptionChoiceWidgetState
                     ),
                   ),
                 ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: FlatIconButton(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        label: 'Choose',
-                        color: buttonColor,
-                        textColor: buttonTextColor,
-                        elevated: _hover,
+                if (widget.showButton)
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: FlatIconButton(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          label: 'Choose',
+                          color: buttonColor,
+                          textColor: buttonTextColor,
+                          elevated: _hover,
+                        ),
                       ),
-                    ),
-                  ],
-                )
+                    ],
+                  )
               ],
             ),
           ),

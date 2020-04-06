@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
-
 import 'package:rive_api/api.dart';
-import 'package:rive_api/models/team.dart';
+import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
@@ -11,12 +10,6 @@ const billingPolicyUrl =
 
 const premiumMonthlyCost = 45;
 const basicMonthlyCost = 14;
-
-/// The subscription frequency options
-enum BillingFrequency { yearly, monthly }
-
-/// The subscription team option
-enum TeamsOption { basic, premium }
 
 extension PlanExtension on TeamsOption {
   String get name {
@@ -42,21 +35,23 @@ extension FrequencyExtension on BillingFrequency {
         return 'monthly';
     }
   }
+
+  static BillingFrequency fromName(String cycle) {
+    switch (cycle) {
+      case 'monthly':
+        return BillingFrequency.monthly;
+      case 'yearly':
+        return BillingFrequency.yearly;
+      default:
+        return null;
+    }
+  }
 }
 
 /// The active wizard panel
 enum WizardPanel { one, two }
 
-/// Data class for tracking data in the team subscription widget
-class TeamSubscriptionPackage with ChangeNotifier {
-  /// Team name
-  String _name;
-  String get name => _name;
-  set name(String value) {
-    _name = value;
-    notifyListeners();
-  }
-
+abstract class SubscriptionPackage with ChangeNotifier {
   /// Team subscription freuqency
   BillingFrequency _billing = BillingFrequency.yearly;
   BillingFrequency get billing => _billing;
@@ -68,6 +63,45 @@ class TeamSubscriptionPackage with ChangeNotifier {
   /// The teams option
   TeamsOption _option;
   TeamsOption get option => _option;
+  set option(TeamsOption value);
+
+  /// Returns the initial billing cost for the selected options
+  int get calculatedCost {
+    final monthlyCost =
+        _option == TeamsOption.premium ? premiumMonthlyCost : basicMonthlyCost;
+    return monthlyCost * (_billing == BillingFrequency.yearly ? 12 : 1);
+  }
+}
+
+/// Data class for managing subscription data in the Team Settings 'Plan' modal.
+class PlanSubscriptionPackage extends SubscriptionPackage {
+  static Future<PlanSubscriptionPackage> fetchData(
+      RiveApi api, int teamId) async {
+    var response = await RiveTeamsApi(api).getBillingInfo(teamId);
+    var subscription = PlanSubscriptionPackage()
+      ..option = response.plan
+      ..billing = response.frequency;
+    return subscription;
+  }
+
+  @override
+  set option(TeamsOption value) {
+    _option = value;
+    notifyListeners();
+  }
+}
+
+/// Data class for tracking data in the team subscription widget
+class TeamSubscriptionPackage extends SubscriptionPackage {
+  /// Team name
+  String _name;
+  String get name => _name;
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
+
+  @override
   set option(TeamsOption value) {
     if (isNameValid) {
       _option = value;
@@ -159,20 +193,9 @@ class TeamSubscriptionPackage with ChangeNotifier {
   bool get isStep2Valid => isNameValid && isOptionValid && isCardNrValid;
 
   Future submit(BuildContext context, RiveApi api) async {
-    await _RiveTeamApi(api).createTeam(
+    await RiveTeamsApi(api).createTeam(
         teamName: name, plan: _option.name, frequency: _billing.name);
     await RiveContext.of(context).reloadTeams();
     Navigator.of(context, rootNavigator: true).pop(null);
   }
-
-  /// Returns the initial billing cost for the selected options
-  int get calculatedCost {
-    final monthlyCost =
-        _option == TeamsOption.premium ? premiumMonthlyCost : basicMonthlyCost;
-    return monthlyCost * (_billing == BillingFrequency.yearly ? 12 : 1);
-  }
-}
-
-class _RiveTeamApi extends RiveTeamsApi<RiveTeam> {
-  _RiveTeamApi(RiveApi api) : super(api);
 }

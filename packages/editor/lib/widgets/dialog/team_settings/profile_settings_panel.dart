@@ -9,7 +9,6 @@ import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/theme.dart';
 
 class ProfileSettings extends StatefulWidget {
   final RiveOwner owner;
@@ -75,53 +74,19 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     });
   }
 
-  Widget _textFieldRow(List<SettingsTextField> textFields) {
-    if (textFields.isEmpty) {
+  Widget _textFieldRow(List<Widget> children) {
+    if (children.isEmpty) {
       return const SizedBox();
     }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Expanded(child: textFields.first),
-        for (final textField in textFields.sublist(1)) ...[
+        Expanded(child: children.first),
+        for (final child in children.sublist(1)) ...[
           const SizedBox(width: 30),
-          Expanded(child: textField)
+          Expanded(child: child)
         ]
-      ],
-    );
-  }
-
-  Widget _formSection(
-      {String label,
-      TextStyle labelStyle,
-      List<List<SettingsTextField>> rows}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          label,
-          style: labelStyle,
-        ),
-        const Spacer(),
-        ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 75,
-            maxWidth: 390,
-          ),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (rows.isNotEmpty) ...[
-                  _textFieldRow(rows.first),
-                  for (final row in rows.sublist(1)) ...[
-                    const SizedBox(height: 30),
-                    _textFieldRow(row)
-                  ]
-                ]
-              ]),
-        )
       ],
     );
   }
@@ -131,13 +96,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     if (_isLoading) {
       return const SizedBox();
     }
-    final theme = RiveThemeData();
+    final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final textStyles = theme.textStyles;
     var labelPrefix = widget.owner is RiveTeam ? 'Team ' : '';
 
     return Column(
-      // Stretches the two separators
+      // Stretches the separators
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Expanded(
@@ -146,124 +111,120 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.all(30),
               children: [
-                _formSection(
+                SettingsPanelSection(
                     label: 'Account',
-                    labelStyle: textStyles.fileGreyTextLarge,
-                    rows: [
-                      [
-                        SettingsTextField(
-                          label: '${labelPrefix}Name',
-                          onChanged: (value) => _name = value,
-                          initialValue: _name,
-                        ),
-                        SettingsTextField(
-                          label: '${labelPrefix}Username',
-                          onChanged: (value) => _username = value,
-                          initialValue: _username,
-                        )
-                      ],
-                      [
-                        SettingsTextField(
-                          label: 'Location',
-                          hint: 'Where is your team based?',
-                          onChanged: (value) => _location = value,
-                          initialValue: _location,
-                        ),
-                        SettingsTextField(
-                          label: 'Website',
-                          hint: 'Website',
-                          onChanged: (value) => _website = value,
-                          initialValue: _website,
-                        )
-                      ],
-                      [
-                        SettingsTextField(
-                          label: 'Bio',
-                          hint: 'Tell users a bit about your team',
-                          onChanged: (value) => _bio = value,
-                          initialValue: _bio,
-                        )
-                      ]
-                    ]),
+                    contents: (panelContext) => Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _textFieldRow([
+                                SettingsTextField(
+                                  label: '${labelPrefix}Name',
+                                  onChanged: (value) => _name = value,
+                                  initialValue: _name,
+                                ),
+                                SettingsTextField(
+                                  label: '${labelPrefix}Username',
+                                  onChanged: (value) => _username = value,
+                                  initialValue: _username,
+                                )
+                              ]),
+                              const SizedBox(height: 30),
+                              _textFieldRow(
+                                [
+                                  SettingsTextField(
+                                    label: 'Location',
+                                    hint: 'Where is your team based?',
+                                    onChanged: (value) => _location = value,
+                                    initialValue: _location,
+                                  ),
+                                  SettingsTextField(
+                                    label: 'Website',
+                                    hint: 'Website',
+                                    onChanged: (value) => _website = value,
+                                    initialValue: _website,
+                                  )
+                                ],
+                              ),
+                              const SizedBox(height: 30),
+                              _textFieldRow([
+                                SettingsTextField(
+                                  label: 'Bio',
+                                  hint: 'Tell users a bit about your team',
+                                  onChanged: (value) => _bio = value,
+                                  initialValue: _bio,
+                                )
+                              ])
+                            ])),
                 const SizedBox(height: 30),
                 Separator(color: colors.fileLineGrey),
                 const SizedBox(height: 30),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'For Hire',
-                      style: textStyles.fileGreyTextLarge,
-                    ),
-                    const Spacer(),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minWidth: 75,
-                        maxWidth: 390,
-                      ),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            LabeledRadio(
-                                label: 'Available For Hire',
-                                groupValue: _isForHire,
-                                value: true,
-                                onChanged: _updateForHire),
-                            Padding(
-                              // Padding: 20 (radio button) + 10 text padding
-                              padding: const EdgeInsets.only(left: 30.0),
-                              // TODO: add link to the "artists for hire".
-                              // What will it link to?
-                              child: Text(
-                                  'Allow other users to message you about work'
-                                  ' opportunities. You will also show up in our list'
-                                  ' of artists for hire.',
-                                  style: textStyles.hierarchyTabHovered
-                                      .copyWith(fontSize: 13, height: 1.6)),
-                            ),
-                            const SizedBox(height: 24),
-                            LabeledRadio(
-                                label: 'Not Available For Hire',
-                                groupValue: _isForHire,
-                                value: false,
-                                onChanged: _updateForHire),
-                            const SizedBox(width: 30),
-                            Padding(
-                              // Padding: 20 (radio button) + 10 text padding
-                              padding: const EdgeInsets.only(left: 30.0),
-                              child: Text(
-                                  "Don't allow other users to contact you about"
-                                  ' work opportunities.',
-                                  style: textStyles.hierarchyTabHovered
-                                      .copyWith(fontSize: 13, height: 1.6)),
-                            )
-                          ]),
-                    )
-                  ],
+                SettingsPanelSection(
+                  label: 'For Hire',
+                  contents: (panelContext) => Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        LabeledRadio(
+                            label: 'Available For Hire',
+                            groupValue: _isForHire,
+                            value: true,
+                            onChanged: _updateForHire),
+                        Padding(
+                          // Padding: 20 (radio button) + 10 text padding
+                          padding: const EdgeInsets.only(left: 30.0),
+                          // TODO: add link to the "artists for hire".
+                          // What will it link to?
+                          child: Text(
+                              'Allow other users to message you about work'
+                              ' opportunities. You will also show up in our list'
+                              ' of artists for hire.',
+                              style: textStyles.hierarchyTabHovered
+                                  .copyWith(fontSize: 13, height: 1.6)),
+                        ),
+                        const SizedBox(height: 24),
+                        LabeledRadio(
+                            label: 'Not Available For Hire',
+                            groupValue: _isForHire,
+                            value: false,
+                            onChanged: _updateForHire),
+                        const SizedBox(width: 30),
+                        Padding(
+                          // Padding: 20 (radio button) + 10 text padding
+                          padding: const EdgeInsets.only(left: 30.0),
+                          child: Text(
+                              "Don't allow other users to contact you about"
+                              ' work opportunities.',
+                              style: textStyles.hierarchyTabHovered
+                                  .copyWith(fontSize: 13, height: 1.6)),
+                        )
+                      ]),
                 ),
                 const SizedBox(height: 30),
                 Separator(color: colors.fileLineGrey),
                 const SizedBox(height: 30),
-                _formSection(
-                    label: 'Social',
-                    labelStyle: textStyles.fileGreyTextLarge,
-                    rows: [
-                      [
-                        SettingsTextField(
-                          label: 'Twitter',
-                          hint: 'Link',
-                          onChanged: (value) => _twitter = value,
-                          initialValue: _twitter,
-                        ),
-                        SettingsTextField(
-                          label: 'Instagram',
-                          hint: 'Link',
-                          onChanged: (value) => _instagram = value,
-                          initialValue: _instagram,
-                        )
-                      ]
-                    ])
+                SettingsPanelSection(
+                  label: 'Social',
+                  contents: (panelContext) => Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _textFieldRow([
+                          SettingsTextField(
+                            label: 'Twitter',
+                            hint: 'Link',
+                            onChanged: (value) => _twitter = value,
+                            initialValue: _twitter,
+                          ),
+                          SettingsTextField(
+                            label: 'Instagram',
+                            hint: 'Link',
+                            onChanged: (value) => _instagram = value,
+                            initialValue: _instagram,
+                          )
+                        ])
+                      ]),
+                ),
               ]),
         ),
         Separator(color: colors.fileLineGrey),
@@ -322,6 +283,37 @@ class LabeledRadio extends StatelessWidget {
           Text(label, style: styles.greyText),
         ],
       ),
+    );
+  }
+}
+
+class SettingsPanelSection extends StatelessWidget {
+  final String label;
+  final WidgetBuilder contents;
+
+  const SettingsPanelSection({@required this.label, this.contents, Key key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyles = RiveTheme.of(context).textStyles;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          label,
+          style: textStyles.fileGreyTextLarge,
+        ),
+        const Spacer(),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 75,
+            maxWidth: 393,
+          ),
+          child: contents(context),
+        )
+      ],
     );
   }
 }

@@ -4,6 +4,7 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
+import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
 
@@ -93,5 +94,25 @@ class RiveTeamsApi<T extends RiveTeam> {
         .toList(growable: false);
 
     return teamUsers;
+  }
+
+  Future<RiveTeamBilling> getBillingInfo(int teamId) async {
+    var response = await api.get(api.host + '/api/teams/$teamId/billing');
+    if (response.statusCode != 200) {
+      // Todo: some form of error handling? also whats wrong with our error logging :D
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      print(message);
+      return null;
+    }
+
+    print("Got my data! ${response.body}");
+    dynamic data;
+    try {
+      data = json.decode(response.body);
+    } on FormatException catch (e) {
+      log.severe('Unable to parse response from server: $e');
+    }
+    return RiveTeamBilling.fromData(data['data']);
   }
 }
