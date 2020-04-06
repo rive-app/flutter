@@ -5,8 +5,9 @@ import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/profile_settings_panel.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard/panel_one.dart';
+import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
@@ -99,6 +100,18 @@ class _PlanState extends State<PlanSettings> {
                       ),
                     ]);
               }),
+          // Vertical padding.
+          const SizedBox(height: 30),
+          Separator(color: colors.fileLineGrey),
+          // Vertical padding.
+          const SizedBox(height: 30),
+          SettingsPanelSection(label: 'Payment', contents: (ctx) => Row()),
+          // Vertical padding.
+          const SizedBox(height: 30),
+          Separator(color: colors.fileLineGrey),
+          // Vertical padding.
+          const SizedBox(height: 30),
+          SettingsPanelSection(label: 'Bill', contents: (ctx) => Row()),
         ]);
   }
 }
