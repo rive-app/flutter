@@ -8,7 +8,7 @@ class SettingsHeader extends StatelessWidget {
   final String name;
   final int teamSize;
   final String avatarPath;
-  final Function() changeAvatar;
+  final VoidCallback changeAvatar;
 
   const SettingsHeader(
       {@required this.name, this.teamSize, this.avatarPath, this.changeAvatar});
