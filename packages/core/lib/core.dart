@@ -704,9 +704,20 @@ abstract class CoreContext implements LocalSettings {
     journal.clear();
   }
 
-  void cursorMoved(double x, double y) =>
-      debounce(() => _client?.sendCursor(x, y),
-          duration: const Duration(milliseconds: 33));
+  double _lastCursorX = 0, _lastCursorY = 0;
+  void cursorMoved(double x, double y) {
+    _lastCursorX = x;
+    _lastCursorY = y;
+    debounce(_sendLastCursor, duration: const Duration(milliseconds: 33));
+  }
+
+  void _sendLastCursor() {
+    if (_client == null || !_client.isConnected) {
+      return;
+    }
+
+    _client.sendCursor(_lastCursorX, _lastCursorY);
+  }
 
   void connectionStateChanged(ConnectionState state);
 }

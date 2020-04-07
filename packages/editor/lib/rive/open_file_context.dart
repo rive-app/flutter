@@ -252,7 +252,7 @@ class OpenFileContext with RiveFileDelegate {
         stateChanged.notify();
         break;
       case ConnectionState.connected:
-        _state = OpenFileState.loading;
+        _state = OpenFileState.open;
         stateChanged.notify();
         break;
       default:
