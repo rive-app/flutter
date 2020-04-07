@@ -253,7 +253,7 @@ class Rive {
     teams.value = await _RiveTeamApi(api).teams;
 
     // cache the previously active file browser.
-    var activeFileBrowserOwner = activeFileBrowser.value.owner.ownerId;
+    var activeFileBrowserOwner = activeFileBrowser.value?.owner?.ownerId;
     fileBrowsers.clear();
 
     final fileBrowser = FileBrowser(user.value);
@@ -274,7 +274,7 @@ class Rive {
 
     // reset the active file browser!
     activeFileBrowser.value = fileBrowsers.firstWhere(
-        (fileBrowser) => fileBrowser.owner.ownerId == activeFileBrowserOwner,
+        (fileBrowser) => fileBrowser.owner?.ownerId == activeFileBrowserOwner,
         orElse: () => fileBrowser);
 
     openActiveFileBrowser();

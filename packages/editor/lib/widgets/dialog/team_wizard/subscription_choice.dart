@@ -10,6 +10,7 @@ class TeamSubscriptionChoiceWidget extends StatefulWidget {
   final VoidCallback onTap;
   final bool showButton;
   final bool isSelected;
+  final double borderThickness;
 
   const TeamSubscriptionChoiceWidget(
       {Key key,
@@ -17,6 +18,7 @@ class TeamSubscriptionChoiceWidget extends StatefulWidget {
       this.costLabel,
       this.explanation,
       this.onTap,
+      this.borderThickness,
       this.showButton = true,
       this.isSelected = false})
       : super(key: key);
@@ -54,13 +56,13 @@ class _TeamSubscriptionChoiceWidgetState
         onEnter: (_) => setHover(true),
         onExit: (_) => setHover(false),
         child: GradientBorder(
-          strokeWidth: 3,
+          strokeWidth: widget.borderThickness,
           radius: 10,
           shouldPaint: isHighlighted,
           gradient: gradient,
           child: Container(
             height: 193,
-            width: 175,
+            width: 181,
             margin: const EdgeInsets.all(3),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
