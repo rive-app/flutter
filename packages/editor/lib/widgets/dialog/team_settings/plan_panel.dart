@@ -38,7 +38,6 @@ class _PlanState extends State<PlanSettings> {
   void _onSubChange() => setState(() {});
 
   void _onBillChanged() {
-    print("Current plan is: ${_sub.billing.name}, ${_sub.option.name}");
     // TODO: track response?
     _sub.updatePlan(widget.api, widget.team.ownerId);
   }
@@ -127,7 +126,6 @@ class _PlanState extends State<PlanSettings> {
           // Vertical padding.
           const SizedBox(height: 30),
           PaymentMethod(),
-          // SettingsPanelSection(label: 'Payment', contents: (ctx) => Row()),
           // Vertical padding.
           const SizedBox(height: 30),
           Separator(color: colors.fileLineGrey),
@@ -296,8 +294,8 @@ class _MethodState extends State<PaymentMethod> {
     });
   }
 
-  Widget _savedInfo(BuildContext ctx) {
-    final theme = RiveTheme.of(ctx);
+  Widget _savedInfo(BuildContext context) {
+    final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
     final colors = theme.colors;
 
@@ -347,7 +345,7 @@ class _MethodState extends State<PaymentMethod> {
     );
   }
 
-  Widget _cardInput(BuildContext ctx) {
+  Widget _cardInput(BuildContext context) {
     return GestureDetector(
       onTap: () => _changeView(true),
       child: Text('GO BACK'),
