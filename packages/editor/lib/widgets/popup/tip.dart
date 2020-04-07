@@ -60,10 +60,15 @@ class Tip {
   /// works.
   final PopupDirection direction;
 
+  /// Alternative directions used when the desired one would result in an
+  /// off-screen layout.
+  final List<PopupDirection> fallbackDirections;
+
   const Tip({
     this.label,
     this.shortcut,
     this.direction = PopupDirection.bottomToCenter,
+    this.fallbackDirections = PopupDirection.all,
   });
 }
 
@@ -175,6 +180,8 @@ class TipContext {
         width: null,
 
         direction: _currentTip.direction,
+        fallbackDirections: _currentTip.fallbackDirections,
+        
         builder: (context) => Padding(
           padding: const EdgeInsets.all(15),
           child: _buildTip(context, _currentTip),

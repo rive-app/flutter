@@ -30,17 +30,6 @@ class ArrowPopup {
 
   bool close() => popup.close();
 
-  static Path _arrowFromDirection(PopupDirection direction) {
-    if (direction.offsetVector.dx == 1) {
-      return _pathArrowLeft;
-    } else if (direction.offsetVector.dx == -1) {
-      return _pathArrowRight;
-    } else if (direction.offsetVector.dy == 1) {
-      return _pathArrowUp;
-    }
-    return _pathArrowDown;
-  }
-
   factory ArrowPopup.show(
     BuildContext context, {
 
@@ -72,6 +61,10 @@ class ArrowPopup {
     /// direction it opens in relative to the context that opened it.
     PopupDirection direction = PopupDirection.bottomToRight,
 
+    /// Alternative directions used when the desired one would result in an
+    /// off-screen layout.
+    List<PopupDirection> fallbackDirections = PopupDirection.all,
+
     /// Background color for the popup.
     Color background = const Color.fromRGBO(17, 17, 17, 1),
 
@@ -85,6 +78,7 @@ class ArrowPopup {
   }) {
     var contextRect = ContextToGlobalRect()..updateRect(context);
 
+    _ListPopupMultiLayoutDelegate _layoutDelegate;
     return ArrowPopup(
       contextRect: contextRect,
       popup: Popup.show(
@@ -95,23 +89,23 @@ class ArrowPopup {
           return ValueListenableBuilder<Rect>(
             valueListenable: contextRect.rect,
             builder: (context, contextRect, child) => CustomMultiChildLayout(
-              delegate: _ListPopupMultiLayoutDelegate(
+              delegate: (_layoutDelegate = _ListPopupMultiLayoutDelegate(
                 from: contextRect,
                 direction: direction,
+                fallbackDirections: fallbackDirections,
                 width: width,
                 offset: offset,
                 directionPadding: directionPadding,
                 arrowTweak: arrowTweak,
-              ),
+              )),
               children: [
                 if (showArrow)
                   LayoutId(
                     id: _ListPopupLayoutElement.arrow,
                     child: CustomPaint(
-                      painter: _ArrowPathPainter(
-                        background,
-                        _arrowFromDirection(direction),
-                      ),
+                      painter: _ArrowPathPainter(background, _layoutDelegate
+                          // _arrowFromDirection(direction),
+                          ),
                     ),
                   ),
                 LayoutId(
@@ -157,14 +151,17 @@ Offset _wholePixels(Offset offset) =>
 class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
   final Rect from;
   final PopupDirection direction;
+  final List<PopupDirection> fallbackDirections;
   final double directionPadding;
   final double width;
   final Offset offset;
   final Offset arrowTweak;
+  PopupDirection bestDirection;
 
   _ListPopupMultiLayoutDelegate({
     this.from,
     this.direction,
+    this.fallbackDirections = PopupDirection.all,
     this.directionPadding,
     this.width,
     this.offset,
@@ -179,6 +176,24 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
         oldDelegate.offset != offset ||
         oldDelegate.arrowTweak != arrowTweak;
   }
+
+  Offset _computeBodyPosition(PopupDirection direction, Size bodySize) =>
+      from.topLeft +
+      // Align to target of interest/dock position (from)
+      direction.from.alongSize(from.size) -
+      // Align the list relative to that position (to)
+      direction.to.alongSize(bodySize) +
+      // Offset by whatever list position tweak was passed in.
+      offset +
+      // Apply any directionaly padding
+      (direction.offsetVector * directionPadding);
+
+  bool _isOutOf(
+          Offset bodyPosition, Size bodySize, Size size, Size arrowSize) =>
+      bodyPosition.dx < arrowSize.width / 2 ||
+      bodyPosition.dx + bodySize.width > size.width - arrowSize.width ||
+      bodyPosition.dy < arrowSize.height / 2 ||
+      bodyPosition.dy + bodySize.height > size.height - arrowSize.height;
 
   @override
   void performLayout(Size size) {
@@ -198,17 +213,22 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
           : BoxConstraints.tightFor(width: width),
     );
 
-    var vector = direction.offsetVector;
+    Offset bodyPosition = _computeBodyPosition(direction, bodySize);
+    bestDirection = direction;
+    Offset vector = direction.offsetVector;
 
-    var bodyPosition = from.topLeft +
-        // Align to target of interest/dock position (from)
-        direction.from.alongSize(from.size) -
-        // Align the list relative to that position (to)
-        direction.to.alongSize(bodySize) +
-        // Offset by whatever list position tweak was passed in.
-        offset +
-        // Apply any directionaly padding
-        (vector * directionPadding);
+    if (_isOutOf(bodyPosition, bodySize, size, arrowSize)) {
+      // Our ideal failed, try the fallbacks.
+      for (final alternativeDirection in fallbackDirections) {
+        bodyPosition = _computeBodyPosition(alternativeDirection, bodySize);
+        vector = alternativeDirection.offsetVector;
+        bestDirection = alternativeDirection;
+        if (!_isOutOf(bodyPosition, bodySize, size, arrowSize)) {
+          // this fallback is good
+          break;
+        }
+      }
+    }
 
     if (hasArrow) {
       positionChild(
@@ -272,16 +292,35 @@ const double _arrowRadius = 6;
 
 class _ArrowPathPainter extends CustomPainter {
   final Color color;
-  final Path path;
+  /// This is hideous, but passing the layout delegate lets us get the computed
+  /// layout direction and determine the arrow path at rendertime. Also the
+  /// hideousness is self contained to this file, so no one outside of here has
+  /// to ever really look at this and have their eyeballs melt off. For anyone
+  /// who ventured this far:
+  /// https://media.giphy.com/media/lIU7yoG72gyhq/giphy.gif
+  final _ListPopupMultiLayoutDelegate layoutDelegate;
 
-  _ArrowPathPainter(this.color, this.path);
+  _ArrowPathPainter(this.color, this.layoutDelegate);
 
   @override
   bool shouldRepaint(_ArrowPathPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.path != path;
+      oldDelegate.color != color ||
+      oldDelegate.layoutDelegate != layoutDelegate;
+
+  static Path _arrowFromDirection(PopupDirection direction) {
+    if (direction.offsetVector.dx == 1) {
+      return _pathArrowLeft;
+    } else if (direction.offsetVector.dx == -1) {
+      return _pathArrowRight;
+    } else if (direction.offsetVector.dy == 1) {
+      return _pathArrowUp;
+    }
+    return _pathArrowDown;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
+    var path = _arrowFromDirection(layoutDelegate.bestDirection);
     canvas.drawPath(
       path,
       Paint()

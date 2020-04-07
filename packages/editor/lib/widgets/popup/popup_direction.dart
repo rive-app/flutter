@@ -136,7 +136,6 @@ class PopupDirection {
     offsetVector: Offset(-1, 0),
   );
 
-
   /// Open the popup on the left of the area of interest and align the content
   /// to the top edge of the area of interest so it grows out towards the bottom
   /// of the screen.
@@ -155,4 +154,19 @@ class PopupDirection {
 
   @override
   int get hashCode => hashValues(from.x, from.y, to.x, to.y);
+
+  static const List<PopupDirection> all = [
+    bottomToRight,
+    bottomToLeft,
+    bottomToCenter,
+    rightToTop,
+    rightToCenter,
+    rightToBottom,
+    topToLeft,
+    topToCenter,
+    topToRight,
+    leftToTop,
+    leftToCenter,
+    leftToBottom
+  ];
 }
