@@ -67,22 +67,33 @@ class _PlanState extends State<PlanSettings> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          ComboBox<BillingFrequency>(
-                            popupWidth: 100,
-                            sizing: ComboSizing.content,
-                            underline: true,
-                            underlineColor: colors.inputUnderline,
-                            valueColor: textStyles.fileGreyTextLarge.color,
-                            options: BillingFrequency.values,
-                            value: _sub?.billing ?? BillingFrequency.monthly,
-                            toLabel: (option) => describeEnum(option).capsFirst,
-                            contentPadding: const EdgeInsets.only(bottom: 3),
-                            change: (billing) => _sub.billing = billing,
+                          Padding(
+                            // Align text baseline with label & button.
+                            padding: const EdgeInsets.only(top: 3),
+                            child: ComboBox<BillingFrequency>(
+                              popupWidth: 100,
+                              sizing: ComboSizing.content,
+                              underline: true,
+                              underlineColor: colors.inputUnderline,
+                              valueColor: textStyles.fileGreyTextLarge.color,
+                              options: BillingFrequency.values,
+                              value: _sub?.billing ?? BillingFrequency.monthly,
+                              toLabel: (option) =>
+                                  describeEnum(option).capsFirst,
+                              change: (billing) => _sub.billing = billing,
+                            ),
                           ),
                           const Spacer(),
                           GestureDetector(
-                              onTap: () {}, child: const Text('Cancel Plan')),
+                              onTap: () {/** TODO: cancel plan */},
+                              child: Text('Cancel Plan',
+                                  style: textStyles.fileGreyTextLarge.copyWith(
+                                    fontSize: 12,
+                                    height: 1.6,
+                                    decoration: TextDecoration.underline,
+                                  ))),
                         ],
                       ),
                       const SizedBox(height: 30),
@@ -250,9 +261,9 @@ class BillCalculator extends StatelessWidget {
     final colors = theme.colors;
 
     final lightGreyText =
-        textStyles.hierarchyTabHovered.copyWith(fontSize: 13, height: 1.6);
+        textStyles.hierarchyTabHovered.copyWith(fontSize: 13, height: 1.4);
     final darkGreyText = textStyles.notificationTitle.copyWith(
-        fontFamily: 'Roboto-Medium', fontWeight: FontWeight.w700, height: 1.6);
+        fontFamily: 'Roboto-Medium', fontWeight: FontWeight.w700, height: 1.4);
     final buttonColor = colors.commonDarkGrey;
     final diff = costDifference;
 
@@ -292,36 +303,35 @@ class _MethodState extends State<PaymentMethod> {
 
     return Column(
       children: <Widget>[
-        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          TintedIcon(icon: 'image', color: colors.commonButtonTextColor),
+        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          TintedIcon(icon: 'card', color: colors.commonButtonTextColor),
           const SizedBox(width: 10),
           Text('American Express 1007. Expires 10/2022',
-              style: styles.fileGreyTextLarge.copyWith(
-                fontSize: 13,
-              )),
+              style:
+                  styles.fileGreyTextLarge.copyWith(fontSize: 13, height: 1.4)),
           const Spacer(),
           GestureDetector(
             onTap: () => _changeView(false),
             child: Text('Change',
                 style: styles.fileGreyTextLarge.copyWith(
                   fontSize: 12,
-                  height: 1.75, // Height: 21.
+                  height: 1.6,
                   decoration: TextDecoration.underline,
                 )),
           ),
         ]),
         const SizedBox(height: 15),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            TintedIcon(icon: 'image', color: colors.commonButtonTextColor),
+            TintedIcon(icon: 'date', color: colors.commonButtonTextColor),
             const SizedBox(width: 10),
             RichText(
               text: TextSpan(children: [
                 TextSpan(
                     text: 'Next payment due: ',
                     style: styles.hierarchyTabHovered
-                        .copyWith(fontSize: 13, height: 1.15)),
+                        .copyWith(fontSize: 13, height: 1.4)),
                 TextSpan(
                     // TODO: get date from subscription.
                     text: 'Jan 20, 2021',
