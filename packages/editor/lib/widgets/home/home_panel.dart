@@ -59,7 +59,7 @@ class Home extends StatelessWidget {
 
     return PropagatingListener(
       behavior: HitTestBehavior.deferToChild,
-      onPointerUp: (_) => fileBrowser.deselectAll(),
+      onPointerUp: (_) => fileBrowser?.deselectAll(),
       child: ValueListenableBuilder<FileBrowser>(
         valueListenable: rive.activeFileBrowser,
         builder: (context, browser, _) => ChangeNotifierProvider.value(
