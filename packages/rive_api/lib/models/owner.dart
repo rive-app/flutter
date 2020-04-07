@@ -1,7 +1,7 @@
 /// The most basic elements of an owner of Rive assets/files
 /// Subclassed by User and Team
 abstract class RiveOwner {
-  const RiveOwner({int id, this.name, this.username}) : _id = id;
+  const RiveOwner({int id, this.name, this.username, this.avatar}) : _id = id;
 
   /// This id of the owner
   final int _id;
@@ -10,6 +10,7 @@ abstract class RiveOwner {
   final String name;
 
   final String username;
+  final String avatar;
 
   /// Helper getter for subclasses of RiveOwner
   /// who might have multiple types of ids

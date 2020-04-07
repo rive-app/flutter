@@ -6,8 +6,10 @@ import 'package:rive_api/models/team.dart';
 import 'package:rive_core/selectable_item.dart';
 
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
+import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
@@ -61,19 +63,7 @@ class FolderTreeView extends StatelessWidget {
         width: 15,
         height: 15,
         child: Center(
-          child: TintedIcon(
-            // TODO: tree should not need to know about teams users
-            // this should be done some other way.
-            // maybe folder tree's have a 'special' header node
-            // maybe we just have a different sliver at the screen layer
-            // for it
-            icon: (item.data.owner == null)
-                ? 'folder'
-                : (item.data.owner is RiveTeam) ? 'teams' : 'user',
-            color: fileBrowser?.selectedFolder == item.data
-                ? colors.fileSelectedFolderIcon
-                : colors.fileUnselectedFolderIcon,
-          ),
+          child: TreeRowIcon(item: item, colors: colors),
         ),
       ),
       extraBuilder: (context, item, index) => Container(),
@@ -105,5 +95,48 @@ class FolderTreeView extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class TreeRowIcon extends StatelessWidget {
+  // TODO: tree should not need to know about teams users
+  // this should be done some other way.
+  // maybe folder tree's have a 'special' header node
+  // maybe we just have a different sliver at the screen layer
+  // for it
+  const TreeRowIcon({
+    @required this.item,
+    @required this.colors,
+    @required this.fileBrowser,
+    Key key,
+  }) : super(key: key);
+
+  final FlatTreeItem<RiveFolder> item;
+  final RiveColors colors;
+  final FileBrowser fileBrowser;
+
+  @override
+  Widget build(BuildContext context) {
+    if (item.data.owner?.avatar != null) {
+      return Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircleAvatar(
+            backgroundColor: Colors.transparent,
+            backgroundImage: NetworkImage(item.data.owner?.avatar),
+          ),
+        ),
+      );
+    } else {
+      return TintedIcon(
+        icon: (item.data.owner == null)
+            ? 'folder'
+            : (item.data.owner is RiveTeam) ? 'teams' : 'user',
+        color: fileBrowser?.selectedFolder == item.data
+            ? colors.fileSelectedFolderIcon
+            : colors.fileUnselectedFolderIcon,
+      );
+    }
   }
 }
