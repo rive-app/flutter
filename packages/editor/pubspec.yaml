@@ -31,6 +31,12 @@ dependencies:
   path_provider: ^1.6.5
   path_provider_macos: ^0.0.4
 
+  file_chooser:
+    git:
+      url: git://github.com/google/flutter-desktop-embedding.git
+      path: plugins/file_chooser
+      ref: 888f58887b388f5e875662e1def33f2d12696564
+
 dev_dependencies:
   test: any
   mockito: ^4.1.1

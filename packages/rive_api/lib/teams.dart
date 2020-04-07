@@ -7,12 +7,28 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
+import 'package:flutter/services.dart' show ByteData, rootBundle;
 
 /// Api for accessing the signed in users folders and files.
 class RiveTeamsApi<T extends RiveTeam> {
   final RiveApi api;
   final Logger log = Logger('Rive API');
   RiveTeamsApi(this.api);
+
+  dynamic parseResponse(response) {
+    if (response.statusCode != 200) {
+      // Todo: some form of error handling? also whats wrong with our error logging :D
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      print(message);
+      return null;
+    }
+    try {
+      return json.decode(response.body);
+    } on FormatException catch (e) {
+      log.severe('Unable to parse response from server: $e');
+    }
+  }
 
   /// POST /api/teams
   Future<T> createTeam(
@@ -28,18 +44,9 @@ class RiveTeamsApi<T extends RiveTeam> {
       }
     });
     var response = await api.post(api.host + '/api/teams', body: payload);
-    if (response.statusCode != 200) {
-      // Todo: some form of error handling? also whats wrong with our error logging :D
-      var message = 'Could not create new team ${response.body}';
-      log.severe(message);
-      print(message);
+    Map<String, dynamic> data = parseResponse(response);
+    if (data == null) {
       return null;
-    }
-    Map<String, dynamic> data;
-    try {
-      data = json.decode(response.body) as Map<String, dynamic>;
-    } on FormatException catch (e) {
-      log.severe('Unable to parse response from server: $e');
     }
     final team = RiveTeam.fromData(data);
     team.teamMembers = await getAffiliates(team.ownerId);
@@ -51,18 +58,9 @@ class RiveTeamsApi<T extends RiveTeam> {
   /// Returns the teams for the current user
   Future<List<T>> get teams async {
     var response = await api.get(api.host + '/api/teams');
-    if (response.statusCode != 200) {
-      // Todo: some form of error handling? also whats wrong with our error logging :D
-      var message = 'Could not get teams ${response.body}';
-      log.severe(message);
-      print(message);
+    List<dynamic> data = parseResponse(response);
+    if (data == null) {
       return null;
-    }
-    List<dynamic> data;
-    try {
-      data = json.decode(response.body);
-    } on FormatException catch (e) {
-      log.severe('Unable to parse response from server: $e');
     }
     print('TEAMS SERVER BODY: ${response.body}');
     var teams = RiveTeam.fromDataList(data);
@@ -76,18 +74,10 @@ class RiveTeamsApi<T extends RiveTeam> {
   /// Returns the teams for the current user
   Future<List<RiveUser>> getAffiliates(int teamId) async {
     var response = await api.get(api.host + '/api/teams/$teamId/affiliates');
-    if (response.statusCode != 200) {
-      // Todo: some form of error handling? also whats wrong with our error logging :D
-      var message = 'Could not create new team ${response.body}';
-      log.severe(message);
-      print(message);
+
+    List<dynamic> data = parseResponse(response);
+    if (data == null) {
       return null;
-    }
-    List<dynamic> data;
-    try {
-      data = json.decode(response.body);
-    } on FormatException catch (e) {
-      log.severe('Unable to parse response from server: $e');
     }
     var teamUsers = data
         .map((userData) => RiveUser.asTeamMember(userData))
@@ -130,5 +120,17 @@ class RiveTeamsApi<T extends RiveTeam> {
       return null;
     }
     return true;
+  }
+
+  Future<String> uploadAvatar(int teamId, String localUrl) async {
+    ByteData bytes = await rootBundle.load(localUrl);
+
+    var response = await api.post(api.host + '/api/teams/$teamId/avatar',
+        body: bytes.buffer.asInt8List());
+    Map<String, dynamic> data = parseResponse(response);
+    if (data == null) {
+      return null;
+    }
+    return data['url'];
   }
 }

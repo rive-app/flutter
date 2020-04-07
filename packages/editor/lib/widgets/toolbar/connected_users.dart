@@ -46,25 +46,26 @@ class ConnectedUsers extends StatelessWidget {
 class AvatarView extends StatelessWidget {
   final String imageUrl;
   final Color color;
+  final double diameter;
 
   const AvatarView({
     @required this.imageUrl,
     @required this.color,
     Key key,
+    this.diameter = 30,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    const double kRadius = 30;
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
     return Center(
       child: SizedBox(
-        width: kRadius,
-        height: kRadius,
+        width: diameter,
+        height: diameter,
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(color: color, width: 2),
-            borderRadius: BorderRadius.circular(kRadius / 2),
+            borderRadius: BorderRadius.circular(diameter / 2),
           ),
           child: CircleAvatar(
             child: hasImage ? null : Center(child: Icon(Icons.person)),
