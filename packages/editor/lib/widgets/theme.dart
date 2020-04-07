@@ -109,6 +109,8 @@ class RiveColors {
   // Tree
   Color get darkTreeLines => const Color(0x33FFFFFF);
 
+  Color get shadow25 => const Color(0x44000000);
+
   Color get lightTreeLines => const Color(0x27666666);
   Color get selectedTreeLines => const Color(0xFF79B7E6);
 }
