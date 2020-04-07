@@ -9,6 +9,8 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
+import 'editor_text_field.dart';
+
 typedef ChooseOption<T> = void Function(T);
 typedef OptionToLabel<T> = String Function(T);
 typedef OptionRetriever<T> = Future<List<T>> Function(String);
@@ -76,6 +78,7 @@ class ComboBox<T> extends StatefulWidget {
   final Alignment alignment;
   final EdgeInsetsGeometry contentPadding;
   final Event trigger;
+  final TextStyle valueTextStyle;
 
   static const double _chevronWidth = 5;
   static const double _horizontalPadding = 15;
@@ -99,6 +102,7 @@ class ComboBox<T> extends StatefulWidget {
     this.alignment = Alignment.topLeft,
     this.trigger,
     this.cursorColor,
+    this.valueTextStyle,
   }) : super(key: key);
 
   @override
@@ -262,32 +266,16 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
                 minWidth: 10,
               ),
               child: IntrinsicWidth(
-                child: TextField(
-                  cursorColor: widget.cursorColor,
+                child: EditorTextField(
+                  allowDrag: false,
+                  color: widget.valueColor,
+                  style: widget.valueTextStyle,
                   controller: _controller,
                   focusNode: _focusNode,
                   onChanged: _textInputChanged,
                   onSubmitted: (text) {
                     widget.change(_popup.focus.option);
                   },
-                  style:
-                      theme.textStyles.basic.copyWith(color: widget.valueColor),
-                  textAlignVertical: TextAlignVertical.top,
-                  textAlign: TextAlign.left,
-                  decoration: InputDecoration(
-                    hintText: label,
-                    hintStyle: theme.textStyles.basic
-                        .copyWith(color: widget.valueColor),
-                    isDense: true,
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    border: InputBorder.none,
-                    filled: false,
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
                 ),
               ),
             ),
@@ -406,9 +394,8 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         .toList(growable: false);
   }
 
-  String itemLabel(T item) => item == null
-      ? ''
-      : widget.toLabel == null ? item.toString() : widget.toLabel(item);
+  String itemLabel(T item) =>
+      widget.toLabel == null ? item?.toString() ?? '' : widget.toLabel(item);
 
   String get label => itemLabel(widget.value);
 
@@ -424,8 +411,8 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
               _typeahead(
                 Text(
                   label,
-                  style:
-                      theme.textStyles.basic.copyWith(color: widget.valueColor),
+                  style: (widget.valueTextStyle ?? theme.textStyles.basic)
+                      .copyWith(color: widget.valueColor),
                 ),
                 theme: theme,
               ),

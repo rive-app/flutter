@@ -188,35 +188,45 @@ class _InvitePanelState extends State<InvitePanel> {
                                           _inviteQueue.remove(e);
                                         });
                                       })),
-                              ComboBox<RiveUser>(
-                                trigger: _openCombo,
-                                // Start with an empty value.
-                                value: null,
-                                sizing: ComboSizing.collapsed,
-                                popupSizing: ComboPopupSizing.content,
-                                typeahead: true,
-                                underline: false,
-                                chevron: false,
-                                valueColor: colors.commonButtonTextColorDark,
-                                cursorColor: colors.commonButtonTextColorDark,
-                                retriever: _autocomplete,
-                                change: (val) {
-                                  setState(() {
-                                    _inviteQueue.add(UserInvite(
-                                        val.ownerId, val.displayName));
-                                    debounce(_startTypeahead);
-                                  });
-                                },
-                                toLabel: (user) {
-                                  var label = '';
-                                  if (user.name != null) {
-                                    label = '${user.name} ';
-                                  }
-                                  if (user.username != null) {
-                                    label += '@${user.username}';
-                                  }
-                                  return label;
-                                },
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: ComboBox<RiveUser>(
+                                  trigger: _openCombo,
+                                  // Start with an empty value.
+                                  value: null,
+                                  sizing: ComboSizing.collapsed,
+                                  popupSizing: ComboPopupSizing.content,
+                                  typeahead: true,
+                                  underline: false,
+                                  chevron: false,
+                                  valueColor: colors.inactiveText,
+                                  cursorColor: colors.commonButtonTextColorDark,
+                                  valueTextStyle:
+                                      RiveTheme.of(context).textStyles.basic,
+                                  retriever: _autocomplete,
+                                  change: (val) {
+                                    setState(() {
+                                      _inviteQueue.add(UserInvite(
+                                          val.ownerId, val.displayName));
+                                      debounce(_startTypeahead);
+                                    });
+                                  },
+                                  toLabel: (user) {
+                                    print("USER IS $user");
+                                    if (user == null) {
+                                      return 'Invite a member...';
+                                    }
+                                    var label = '';
+                                    if (user.name != null) {
+                                      label = '${user.name} ';
+                                    }
+                                    if (user.username != null) {
+                                      label += '@${user.username}';
+                                    }
+                                    return label;
+                                  },
+                                ),
                               ),
                             ]),
                       ),
