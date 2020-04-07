@@ -38,7 +38,8 @@ class SettingsTextField extends StatelessWidget {
               hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
               contentPadding: const EdgeInsets.only(bottom: 2),
               focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: colors.commonDarkGrey)),
+                  borderSide:
+                      BorderSide(color: colors.commonDarkGrey, width: 2)),
             ),
             style: textStyles.fileGreyTextLarge
                 .copyWith(fontSize: 13, letterSpacing: 0)),

@@ -81,6 +81,7 @@ class RiveColors {
   Color get fileBackgroundDarkGrey => const Color(0xFF666666);
   Color get fileBackgroundLightGrey => const Color(0xFFF1F1F1);
   Color get fileSelectedBlue => const Color(0xFF57A5E0);
+  Color get fileHoveredBlue => fileSelectedBlue.withOpacity(0.3);
   Color get fileLineGrey => const Color(0xFFD8D8D8);
   Color get fileTextLightGrey => lightGrey;
   Color get fileSelectedFolderIcon => white;

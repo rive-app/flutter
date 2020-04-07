@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/owner.dart';
+import 'package:rive_api/models/profile.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/profiles.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
@@ -21,15 +22,7 @@ class ProfileSettings extends StatefulWidget {
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
-  bool _isLoading = true;
-  String _name;
-  String _username;
-  String _location;
-  String _website;
-  String _bio;
-  String _twitter;
-  String _instagram;
-  bool _isForHire;
+  ProfilePackage _profile;
   RiveProfilesApi _profilesApi;
 
   @override
@@ -39,40 +32,25 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     final owner = widget.owner;
 
     _profilesApi = RiveProfilesApi(widget.api);
-    _profilesApi.getInfo(owner).then((profile) {
-      // TODO: use a more robust check for setState.
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _name = owner.name;
-          _username = owner.username;
-          _location = profile.location;
-          _website = profile.website;
-          _twitter = profile.twitter;
-          _instagram = profile.instagram;
-          _isForHire = profile.isForHire;
-        });
-      }
+    ProfilePackage.getProfile(widget.api, owner).then((value) {
+      setState(() {
+        _profile = value;
+        _profile.addListener(_onProfileChange);
+      });
     });
   }
+
+  @override
+  void dispose() {
+    _profile.dispose();
+    super.dispose();
+  }
+
+  void _onProfileChange() => setState(() {});
 
   void _submitChanges() {
-    _profilesApi.updateInfo(widget.owner,
-        name: _name,
-        username: _username,
-        location: _location,
-        website: _website,
-        bio: _bio,
-        twitter: _twitter,
-        instagram: _instagram,
-        isForHire: _isForHire);
-  }
-
-  void _updateForHire(bool newValue) {
-    if (_isForHire == newValue) return;
-    setState(() {
-      _isForHire = newValue;
-    });
+    _profile.submitChanges(
+        widget.api, widget.owner); //.then((value) => /** TODO: */);
   }
 
   Widget _textFieldRow(List<Widget> children) {
@@ -94,7 +72,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    // TODO: use FutureBuilder?
+    if (_profile == null) {
       return const SizedBox();
     }
     final theme = RiveTheme.of(context);
@@ -121,13 +100,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                               _textFieldRow([
                                 SettingsTextField(
                                   label: '${labelPrefix}Name',
-                                  onChanged: (value) => _name = value,
-                                  initialValue: _name,
+                                  onChanged: (value) => _profile.name = value,
+                                  initialValue: _profile.name,
                                 ),
                                 SettingsTextField(
                                   label: '${labelPrefix}Username',
-                                  onChanged: (value) => _username = value,
-                                  initialValue: _username,
+                                  onChanged: (value) =>
+                                      _profile.username = value,
+                                  initialValue: _profile.username,
                                 )
                               ]),
                               const SizedBox(height: 30),
@@ -136,14 +116,16 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                                   SettingsTextField(
                                     label: 'Location',
                                     hint: 'Where is your team based?',
-                                    onChanged: (value) => _location = value,
-                                    initialValue: _location,
+                                    onChanged: (value) =>
+                                        _profile.location = value,
+                                    initialValue: _profile.location,
                                   ),
                                   SettingsTextField(
                                     label: 'Website',
                                     hint: 'Website',
-                                    onChanged: (value) => _website = value,
-                                    initialValue: _website,
+                                    onChanged: (value) =>
+                                        _profile.website = value,
+                                    initialValue: _profile.website,
                                   )
                                 ],
                               ),
@@ -152,8 +134,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                                 SettingsTextField(
                                   label: 'Bio',
                                   hint: 'Tell users a bit about your team',
-                                  onChanged: (value) => _bio = value,
-                                  initialValue: _bio,
+                                  onChanged: (value) => _profile.bio = value,
+                                  initialValue: _profile.bio,
                                 )
                               ])
                             ])),
@@ -168,9 +150,9 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                       children: [
                         LabeledRadio(
                             label: 'Available For Hire',
-                            groupValue: _isForHire,
+                            groupValue: _profile.isForHire,
                             value: true,
-                            onChanged: _updateForHire),
+                            onChanged: (value) => _profile.isForHire = value),
                         Padding(
                           // Padding: 20 (radio button) + 10 text padding
                           padding: const EdgeInsets.only(left: 30.0),
@@ -186,9 +168,9 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         const SizedBox(height: 24),
                         LabeledRadio(
                             label: 'Not Available For Hire',
-                            groupValue: _isForHire,
+                            groupValue: _profile.isForHire,
                             value: false,
-                            onChanged: _updateForHire),
+                            onChanged: (value) => _profile.isForHire = value),
                         const SizedBox(width: 30),
                         Padding(
                           // Padding: 20 (radio button) + 10 text padding
@@ -214,16 +196,61 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                           SettingsTextField(
                             label: 'Twitter',
                             hint: 'Link',
-                            onChanged: (value) => _twitter = value,
-                            initialValue: _twitter,
+                            onChanged: (value) => _profile.twitter = value,
+                            initialValue: _profile.twitter,
                           ),
                           SettingsTextField(
                             label: 'Instagram',
                             hint: 'Link',
-                            onChanged: (value) => _instagram = value,
-                            initialValue: _instagram,
+                            onChanged: (value) => _profile.instagram = value,
+                            initialValue: _profile.instagram,
                           )
-                        ])
+                        ]),
+                        const SizedBox(height: 30),
+                        _textFieldRow([
+                          SettingsTextField(
+                            label: 'Dribbble',
+                            hint: 'Link',
+                            onChanged: (value) => _profile.dribbble = value,
+                            initialValue: _profile.dribbble,
+                          ),
+                          SettingsTextField(
+                            label: 'LinkedIn',
+                            hint: 'Link',
+                            onChanged: (value) => _profile.linkedin = value,
+                            initialValue: _profile.linkedin,
+                          )
+                        ]),
+                        const SizedBox(height: 30),
+                        _textFieldRow([
+                          SettingsTextField(
+                            label: 'Behance',
+                            hint: 'Link',
+                            onChanged: (value) => _profile.behance = value,
+                            initialValue: _profile.behance,
+                          ),
+                          SettingsTextField(
+                            label: 'Vimeo',
+                            hint: 'Link',
+                            onChanged: (value) => _profile.vimeo = value,
+                            initialValue: _profile.vimeo,
+                          )
+                        ]),
+                        const SizedBox(height: 30),
+                        _textFieldRow([
+                          SettingsTextField(
+                            label: 'GitHub',
+                            hint: 'Link',
+                            onChanged: (value) => _profile.github = value,
+                            initialValue: _profile.github,
+                          ),
+                          SettingsTextField(
+                            label: 'Medium',
+                            hint: 'Link',
+                            onChanged: (value) => _profile.medium = value,
+                            initialValue: _profile.medium,
+                          )
+                        ]),
                       ]),
                 ),
               ]),
@@ -285,5 +312,123 @@ class LabeledRadio extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class ProfilePackage with ChangeNotifier {
+  RiveProfile _profile;
+
+  ProfilePackage();
+
+  // Initializer for this profile.
+  static Future<ProfilePackage> getProfile(RiveApi api, RiveOwner owner) async {
+    var response = await RiveProfilesApi(api).getInfo(owner);
+    if (response != null) {
+      return ProfilePackage().._profile = response;
+    }
+    return null;
+  }
+
+  Future<void> submitChanges(RiveApi api, RiveOwner owner) async {
+    var response =
+        await RiveProfilesApi(api).updateInfo(owner, profile: _profile);
+  }
+
+  String get name => _profile.name;
+  set name(String value) {
+    if (value == _profile.name) return;
+    _profile.name = value;
+    notifyListeners();
+  }
+
+  String get username => _profile.username;
+  set username(String value) {
+    if (value == _profile.username) return;
+    _profile.username = value;
+    notifyListeners();
+  }
+
+  String get location => _profile.location;
+  set location(String value) {
+    if (value == _profile.location) return;
+    _profile.location = value;
+    notifyListeners();
+  }
+
+  String get website => _profile.website;
+  set website(String value) {
+    if (value == _profile.website) return;
+    _profile.website = value;
+    notifyListeners();
+  }
+
+  String get bio => _profile.bio;
+  set bio(String value) {
+    if (value == _profile.bio) return;
+    _profile.bio = value;
+    notifyListeners();
+  }
+
+  String get twitter => _profile.twitter;
+  set twitter(String value) {
+    if (value == _profile.twitter) return;
+    _profile.twitter = value;
+    notifyListeners();
+  }
+
+  String get instagram => _profile.instagram;
+  set instagram(String value) {
+    if (value == _profile.instagram) return;
+    _profile.instagram = value;
+    notifyListeners();
+  }
+
+  String get dribbble => _profile.dribbble;
+  set dribbble(String value) {
+    if (value == _profile.dribbble) return;
+    _profile.dribbble = value;
+    notifyListeners();
+  }
+
+  String get linkedin => _profile.linkedin;
+  set linkedin(String value) {
+    if (value == _profile.linkedin) return;
+    _profile.linkedin = value;
+    notifyListeners();
+  }
+
+  String get behance => _profile.behance;
+  set behance(String value) {
+    if (value == _profile.behance) return;
+    _profile.behance = value;
+    notifyListeners();
+  }
+
+  String get vimeo => _profile.vimeo;
+  set vimeo(String value) {
+    if (value == _profile.vimeo) return;
+    _profile.vimeo = value;
+    notifyListeners();
+  }
+
+  String get github => _profile.github;
+  set github(String value) {
+    if (value == _profile.github) return;
+    _profile.github = value;
+    notifyListeners();
+  }
+
+  String get medium => _profile.medium;
+  set medium(String value) {
+    if (value == _profile.medium) return;
+    _profile.medium = value;
+    notifyListeners();
+  }
+
+  bool get isForHire => _profile.isForHire;
+  set isForHire(bool value) {
+    if (value == _profile.isForHire) return;
+    _profile.isForHire = value;
+    notifyListeners();
   }
 }

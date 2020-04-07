@@ -23,7 +23,6 @@ extension FrequencyExtension on BillingFrequency {
       case BillingFrequency.yearly:
         return 'yearly';
       case BillingFrequency.monthly:
-        return 'monthly';
       default:
         return 'monthly';
     }
@@ -36,7 +35,7 @@ extension FrequencyExtension on BillingFrequency {
       case 'yearly':
         return BillingFrequency.yearly;
       default:
-        return null;
+        throw ArgumentError('Invalid billing frequency: $cycle');
     }
   }
 }

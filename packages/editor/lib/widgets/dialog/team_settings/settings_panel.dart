@@ -64,7 +64,7 @@ class _SettingsState extends State<Settings> {
   }
 
   Widget _label(SettingsScreen screen, int index) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: 5),
         child: _SettingsTabItem(
           onSelect: () {
             setState(() {
@@ -156,9 +156,8 @@ class _SettingsState extends State<Settings> {
   }
 }
 
-class _SettingsTabItem extends StatelessWidget {
+class _SettingsTabItem extends StatefulWidget {
   final String label;
-
   final bool isSelected;
   final VoidCallback onSelect;
 
@@ -167,24 +166,49 @@ class _SettingsTabItem extends StatelessWidget {
       : super(key: key);
 
   @override
+  _TabItemState createState() => _TabItemState();
+}
+
+class _TabItemState extends State<_SettingsTabItem> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onSelect,
-      child: Container(
-        height: 31,
-        child: DropItemBackground(
-          DropState.none,
-          isSelected ? SelectionState.selected : SelectionState.none,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Roboto-Regular',
-                fontSize: 13,
-                color: isSelected
-                    ? Colors.white
-                    : const Color.fromRGBO(102, 102, 102, 1),
+    final colors = RiveTheme.of(context).colors;
+    SelectionState state;
+    Color tabColor;
+    if (widget.isSelected) {
+      state = SelectionState.selected;
+      tabColor = colors.fileSelectedBlue;
+    } else if (_isHovered) {
+      state = SelectionState.hovered;
+      tabColor = colors.buttonLight;
+    } else {
+      state = SelectionState.none;
+    }
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onSelect,
+        child: Container(
+          height: 31,
+          child: DropItemBackground(
+            DropState.none,
+            state,
+            color: tabColor,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+              child: Text(
+                widget.label,
+                style: TextStyle(
+                  fontFamily: 'Roboto-Regular',
+                  fontSize: 13,
+                  color: widget.isSelected
+                      ? Colors.white
+                      : const Color.fromRGBO(102, 102, 102, 1),
+                ),
               ),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
@@ -8,9 +9,11 @@ import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard/panel_two.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class PlanSettings extends StatefulWidget {
@@ -38,7 +41,6 @@ class _PlanState extends State<PlanSettings> {
   void _onSubChange() => setState(() {});
 
   void _onBillChanged() {
-    print("Current plan is: ${_sub.billing.name}, ${_sub.option.name}");
     // TODO: track response?
     _sub.updatePlan(widget.api, widget.team.ownerId);
   }
@@ -67,22 +69,33 @@ class _PlanState extends State<PlanSettings> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          ComboBox<BillingFrequency>(
-                            popupWidth: 100,
-                            sizing: ComboSizing.content,
-                            underline: true,
-                            underlineColor: colors.inputUnderline,
-                            valueColor: textStyles.fileGreyTextLarge.color,
-                            options: BillingFrequency.values,
-                            value: _sub?.billing ?? BillingFrequency.monthly,
-                            toLabel: (option) => describeEnum(option).capsFirst,
-                            contentPadding: const EdgeInsets.only(bottom: 3),
-                            change: (billing) => _sub.billing = billing,
+                          Padding(
+                            // Align text baseline with label & button.
+                            padding: const EdgeInsets.only(top: 3),
+                            child: ComboBox<BillingFrequency>(
+                              popupWidth: 100,
+                              sizing: ComboSizing.content,
+                              underline: true,
+                              underlineColor: colors.inputUnderline,
+                              valueColor: textStyles.fileGreyTextLarge.color,
+                              options: BillingFrequency.values,
+                              value: _sub?.billing ?? BillingFrequency.monthly,
+                              toLabel: (option) =>
+                                  describeEnum(option).capsFirst,
+                              change: (billing) => _sub.billing = billing,
+                            ),
                           ),
                           const Spacer(),
                           GestureDetector(
-                              onTap: () {}, child: const Text('Cancel Plan')),
+                              onTap: () {/** TODO: cancel plan */},
+                              child: Text('Cancel Plan',
+                                  style: textStyles.fileGreyTextLarge.copyWith(
+                                    fontSize: 12,
+                                    height: 1.6,
+                                    decoration: TextDecoration.underline,
+                                  ))),
                         ],
                       ),
                       const SizedBox(height: 30),
@@ -115,8 +128,7 @@ class _PlanState extends State<PlanSettings> {
           Separator(color: colors.fileLineGrey),
           // Vertical padding.
           const SizedBox(height: 30),
-          PaymentMethod(),
-          // SettingsPanelSection(label: 'Payment', contents: (ctx) => Row()),
+          PaymentMethod(_sub),
           // Vertical padding.
           const SizedBox(height: 30),
           Separator(color: colors.fileLineGrey),
@@ -250,9 +262,9 @@ class BillCalculator extends StatelessWidget {
     final colors = theme.colors;
 
     final lightGreyText =
-        textStyles.hierarchyTabHovered.copyWith(fontSize: 13, height: 1.6);
+        textStyles.hierarchyTabHovered.copyWith(fontSize: 13, height: 1.4);
     final darkGreyText = textStyles.notificationTitle.copyWith(
-        fontFamily: 'Roboto-Medium', fontWeight: FontWeight.w700, height: 1.6);
+        fontFamily: 'Roboto-Medium', fontWeight: FontWeight.w700, height: 1.4);
     final buttonColor = colors.commonDarkGrey;
     final diff = costDifference;
 
@@ -272,6 +284,10 @@ class BillCalculator extends StatelessWidget {
 }
 
 class PaymentMethod extends StatefulWidget {
+  final PlanSubscriptionPackage sub;
+
+  const PaymentMethod(this.sub, {Key key}) : super(key: key);
+
   @override
   _MethodState createState() => _MethodState();
 }
@@ -285,62 +301,77 @@ class _MethodState extends State<PaymentMethod> {
     });
   }
 
-  Widget _savedInfo(BuildContext ctx) {
-    final theme = RiveTheme.of(ctx);
+  Widget _nextPayment(Color iconColor, TextStyles styles) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        TintedIcon(icon: 'date', color: iconColor),
+        const SizedBox(width: 10),
+        RichText(
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'Next payment due: ',
+                style: styles.hierarchyTabHovered
+                    .copyWith(fontSize: 13, height: 1.4)),
+            TextSpan(
+                // TODO: get date from subscription.
+                text: 'Jan 20, 2021',
+                style: styles.fileGreyTextLarge.copyWith(
+                  fontSize: 13,
+                  height: 1.15,
+                )),
+          ]),
+        )
+      ],
+    );
+  }
+
+  Widget _underlineButton(String label, TextStyles styles, bool toSaved) {
+    return GestureDetector(
+      onTap: () => _changeView(toSaved),
+      child: Text(label,
+          style: styles.fileGreyTextLarge.copyWith(
+            fontSize: 12,
+            decoration: TextDecoration.underline,
+          )),
+    );
+  }
+
+  Widget _savedInfo(BuildContext context) {
+    final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
     final colors = theme.colors;
 
     return Column(
       children: <Widget>[
-        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          TintedIcon(icon: 'image', color: colors.commonButtonTextColor),
+        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          TintedIcon(icon: 'card', color: colors.commonButtonTextColor),
           const SizedBox(width: 10),
           Text('American Express 1007. Expires 10/2022',
-              style: styles.fileGreyTextLarge.copyWith(
-                fontSize: 13,
-              )),
+              style:
+                  styles.fileGreyTextLarge.copyWith(fontSize: 13, height: 1.4)),
           const Spacer(),
-          GestureDetector(
-            onTap: () => _changeView(false),
-            child: Text('Change',
-                style: styles.fileGreyTextLarge.copyWith(
-                  fontSize: 12,
-                  height: 1.75, // Height: 21.
-                  decoration: TextDecoration.underline,
-                )),
-          ),
+          _underlineButton('Change', styles, false),
         ]),
         const SizedBox(height: 15),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            TintedIcon(icon: 'image', color: colors.commonButtonTextColor),
-            const SizedBox(width: 10),
-            RichText(
-              text: TextSpan(children: [
-                TextSpan(
-                    text: 'Next payment due: ',
-                    style: styles.hierarchyTabHovered
-                        .copyWith(fontSize: 13, height: 1.15)),
-                TextSpan(
-                    // TODO: get date from subscription.
-                    text: 'Jan 20, 2021',
-                    style: styles.fileGreyTextLarge.copyWith(
-                      fontSize: 13,
-                      height: 1.15,
-                    )),
-              ]),
-            )
-          ],
-        ),
+        _nextPayment(colors.commonButtonTextColor, styles)
       ],
     );
   }
 
-  Widget _cardInput(BuildContext ctx) {
-    return GestureDetector(
-      onTap: () => _changeView(true),
-      child: Text('GO BACK'),
+  Widget _cardInput(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final styles = theme.textStyles;
+    final colors = theme.colors;
+    return Column(
+      children: [
+        CreditCardForm(
+            sub: widget.sub,
+            trailingButtonBuilder: (_) =>
+                _underlineButton('Use saved card instead', styles, true)),
+        const SizedBox(height: 30),
+        _nextPayment(colors.commonButtonTextColor, styles)
+      ],
     );
   }
 
@@ -349,6 +380,203 @@ class _MethodState extends State<PaymentMethod> {
     return SettingsPanelSection(
       label: 'Payment',
       contents: (ctx) => _useSaved ? _savedInfo(ctx) : _cardInput(ctx),
+    );
+  }
+}
+
+class CreditCardForm extends StatelessWidget {
+  final SubscriptionPackage sub;
+  final WidgetBuilder trailingButtonBuilder;
+
+  const CreditCardForm({this.sub, this.trailingButtonBuilder, Key key})
+      : super(key: key);
+
+  Widget _creditCardNumber(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final styles = theme.textStyles;
+    final colors = theme.colors;
+    return Column(children: [
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'Card Number',
+            style: styles.inspectorPropertyLabel.copyWith(height: 1.4),
+          ),
+          const Spacer(),
+          if (trailingButtonBuilder != null) trailingButtonBuilder(context)
+        ],
+      ),
+      const SizedBox(height: 12),
+      TextFormField(
+        initialValue: sub.cardNumber,
+        cursorColor: colors.commonDarkGrey,
+        textAlign: TextAlign.left,
+        textAlignVertical: TextAlignVertical.center,
+        style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
+        inputFormatters: <TextInputFormatter>[
+          WhitelistingTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(16),
+          CardNumberFormatter()
+        ],
+        decoration: InputDecoration(
+          isDense: true,
+          enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: colors.inputUnderline, width: 2)),
+          focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: colors.commonDarkGrey, width: 2)),
+          hintText: '0000 0000 0000 0000',
+          hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
+          errorStyle: styles.textFieldInputValidationError,
+          contentPadding: const EdgeInsets.only(bottom: 3),
+        ),
+        onChanged: (cardNumber) => sub.cardNumber = cardNumber,
+      )
+    ]);
+  }
+
+  Widget _creditCardDetails(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final styles = theme.textStyles;
+    final colors = theme.colors;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // CVV
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'CVC/CVV',
+                style: styles.inspectorPropertyLabel,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: sub.ccv,
+                cursorColor: colors.commonDarkGrey,
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.center,
+                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
+                inputFormatters: <TextInputFormatter>[
+                  WhitelistingTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+                decoration: InputDecoration(
+                  isDense: true,
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.inputUnderline, width: 2)),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.commonDarkGrey, width: 2)),
+                  hintText: '3-4 digits',
+                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorStyle: styles.textFieldInputValidationError,
+                  contentPadding: const EdgeInsets.only(bottom: 3),
+                ),
+                onChanged: (ccv) => sub.ccv = ccv,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 30),
+        // Expiration
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Expiration',
+                style: styles.inspectorPropertyLabel,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: sub.expiration,
+                cursorColor: colors.commonDarkGrey,
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.center,
+                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
+                inputFormatters: <TextInputFormatter>[
+                  WhitelistingTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                  DateTextInputFormatter(),
+                  DateTextRegexCheck()
+                ],
+                decoration: InputDecoration(
+                  isDense: true,
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.inputUnderline, width: 2)),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.commonDarkGrey, width: 2)),
+                  hintText: 'MM/YY',
+                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorStyle: styles.textFieldInputValidationError,
+                  contentPadding: const EdgeInsets.only(bottom: 3),
+                ),
+                onChanged: (expiration) => sub.expiration = expiration,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 30),
+        // Zip
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Zip',
+                style: styles.inspectorPropertyLabel,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: sub.zip,
+                cursorColor: colors.commonDarkGrey,
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.center,
+                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
+                inputFormatters: <TextInputFormatter>[
+                  WhitelistingTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(5),
+                ],
+                decoration: InputDecoration(
+                  isDense: true,
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.inputUnderline, width: 2)),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: colors.commonDarkGrey, width: 2)),
+                  hintText: '90210',
+                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorStyle: styles.textFieldInputValidationError,
+                  contentPadding: const EdgeInsets.only(bottom: 3),
+                ),
+                onChanged: (zip) => sub.zip = zip,
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: use FutureBuilder?
+    if (sub == null) {
+      return const SizedBox();
+    }
+    return Column(
+      children: [
+        _creditCardNumber(context),
+        const SizedBox(height: 30),
+        _creditCardDetails(context),
+      ],
     );
   }
 }
