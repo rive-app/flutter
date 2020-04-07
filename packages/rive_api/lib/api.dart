@@ -45,13 +45,13 @@ class AppException implements Exception {
 }
 
 class BadRequestException extends AppException {
-  BadRequestException([message]) : super(message, "Invalid Request: ");
+  BadRequestException([message]) : super(message, 'Invalid Request: ');
 }
 
 class UnauthorisedException extends AppException {
-  UnauthorisedException([message]) : super(message, "Unauthorised: ");
+  UnauthorisedException([message]) : super(message, 'Unauthorised: ');
 }
 
 class ServerErrorException extends AppException {
-  ServerErrorException([String message]) : super(message, "Server Error: ");
+  ServerErrorException([String message]) : super(message, 'Server Error: ');
 }

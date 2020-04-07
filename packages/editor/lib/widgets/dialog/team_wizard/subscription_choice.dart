@@ -31,9 +31,7 @@ class TeamSubscriptionChoiceWidget extends StatefulWidget {
 class _TeamSubscriptionChoiceWidgetState
     extends State<TeamSubscriptionChoiceWidget> {
   bool _hover = false;
-  void setHover(bool hover) {
-    setState(() => _hover = hover);
-  }
+  void setHover(bool hover) => setState(() => _hover = hover);
 
   @override
   Widget build(BuildContext context) {

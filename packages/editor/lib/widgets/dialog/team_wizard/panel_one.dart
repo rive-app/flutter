@@ -11,14 +11,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// The first panel in the teams sign-up wizard
 class TeamWizardPanelOne extends StatelessWidget {
-  TeamWizardPanelOne(this.sub, {Key key}) : super(key: key);
+  const TeamWizardPanelOne(this.sub, {Key key}) : super(key: key);
   final TeamSubscriptionPackage sub;
-
-  double targetPadding = 30;
-  double subscriptionBorderThickness = 3;
 
   @override
   Widget build(BuildContext context) {
+    const double targetPadding = 30;
+    const double subscriptionBorderThickness = 3;
     final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
     final options = [
@@ -29,14 +28,14 @@ class TeamWizardPanelOne extends StatelessWidget {
       width: 452,
       height: 364,
       child: Padding(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
             horizontal: targetPadding - subscriptionBorderThickness,
             vertical: targetPadding),
         child: Column(
           children: <Widget>[
             Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: subscriptionBorderThickness),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: subscriptionBorderThickness),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
