@@ -137,7 +137,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     if (isChangeValid) {
       // Changes were good, modify file and propagate them to other clients.
       file = modifiedFile;
-      print("CHANGE ID ${serverChangeSet.id}");
+      // print("CHANGE ID ${serverChangeSet.id}");
       propagateChanges(client, serverChangeSet);
       return true;
     } else {
@@ -197,7 +197,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     // TODO: consider changing this to readyClients as clients that are
     // connecting/sending offline changes should not receive mid-flight changes
     // prior to their ready.
-    print("PROPAGATING TO ${clients.length} CLIENTS");
+    // print("PROPAGATING TO ${clients.length} CLIENTS");
     for (final to in clients) {
       // don't send to self
       if (client == to) {
@@ -213,7 +213,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     file.serialize(writer);
     var result =
         await _privateApi.save(file.ownerId, file.fileId, writer.uint8Buffer);
-    print("GOT REVISION ID ${result.revisionId}");
+    // print("GOT REVISION ID ${result.revisionId}");
   }
 
   @override
