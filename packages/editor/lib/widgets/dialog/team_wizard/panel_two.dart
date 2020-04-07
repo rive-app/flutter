@@ -46,14 +46,14 @@ class TeamWizardPanelTwo extends StatelessWidget {
           ),
         )),
         Padding(
-          padding: const EdgeInsets.only(left: 32),
+          padding: const EdgeInsets.only(left: 30),
           child: SizedBox(
             width: 71,
             child: _optionsComboBox(context),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 32),
+          padding: const EdgeInsets.only(left: 30),
           child: SizedBox(
             width: 71,
             child: _billingComboBox(context),
@@ -70,7 +70,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
 
     return ComboBox<TeamsOption>(
       popupWidth: 100,
-      sizing: ComboSizing.content,
+      sizing: ComboSizing.expanded,
       underline: true,
       underlineColor: colors.inputUnderline,
       valueColor: textStyles.fileGreyTextLarge.color,
@@ -89,7 +89,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
 
     return ComboBox<BillingFrequency>(
       popupWidth: 100,
-      sizing: ComboSizing.content,
+      sizing: ComboSizing.expanded,
       underline: true,
       underlineColor: colors.inputUnderline,
       valueColor: textStyles.fileGreyTextLarge.color,
@@ -103,10 +103,8 @@ class TeamWizardPanelTwo extends StatelessWidget {
 
   Widget _creditCard(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 30, bottom: 15),
-      padding: const EdgeInsets.all(31),
-      width: 392,
-      height: 250,
+      margin: const EdgeInsets.only(top: 30, bottom: 27),
+      padding: const EdgeInsets.only(top: 30, bottom: 31, left: 30, right: 30),
       decoration: BoxDecoration(
         border: Border.all(width: 1.0, color: const Color(0xFFE3E3E3)),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -349,7 +347,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
     final textStyles = RiveTheme.of(context).textStyles;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 11),
+      padding: const EdgeInsets.only(top: 28),
       child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
         Text(
           'Due now (1 user)',
@@ -369,7 +367,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Padding(
-        padding: const EdgeInsets.only(top: 24),
+        padding: const EdgeInsets.only(top: 30),
         // child: FlatButton(child: Text('stff'), onPressed: () {}),
         child: Container(
           width: 181,
@@ -392,7 +390,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 452,
-      height: 505,
+      height: 522,
       child: Padding(
         padding: const EdgeInsets.all(30),
         child: Column(

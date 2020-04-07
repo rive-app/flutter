@@ -109,6 +109,8 @@ class RiveColors {
   // Tree
   Color get darkTreeLines => const Color(0x33FFFFFF);
 
+  Color get shadow25 => const Color(0x44000000);
+
   Color get lightTreeLines => const Color(0x27666666);
   Color get selectedTreeLines => const Color(0xFF79B7E6);
 }
@@ -165,10 +167,10 @@ class TextStyles {
       fontFamily: 'Roboto-Light', color: Color(0xFFCCCCCC), fontSize: 13);
 
   TextStyle get tooltipDisclaimer => const TextStyle(
-      fontFamily: 'Roboto-Light',
-      color: Color(0xFF888888),
-      fontSize: 13,
-      fontWeight: FontWeight.w200);
+        fontFamily: 'Roboto-Light',
+        color: Color(0xFF888888),
+        fontSize: 13,
+      );
 
   TextStyle get tooltipBold => const TextStyle(
       fontFamily: 'Roboto-Light',
@@ -180,14 +182,12 @@ class TextStyles {
       fontFamily: 'Roboto-Light',
       color: Color(0xFF333333),
       fontSize: 13,
-      fontWeight: FontWeight.w300,
       decoration: TextDecoration.underline);
 
   TextStyle get tooltipHyperlinkHovered => const TextStyle(
       fontFamily: 'Roboto-Light',
       color: Color(0xFF57A5E0),
       fontSize: 13,
-      fontWeight: FontWeight.w300,
       decoration: TextDecoration.underline);
 
   TextStyle get hyperLinkSubtext => const TextStyle(

@@ -249,8 +249,12 @@ class Rive {
 
   Future<void> reloadTeams() async {
     // Load the teams to which the user belongs
-    fileBrowsers.clear();
+
     teams.value = await _RiveTeamApi(api).teams;
+
+    // cache the previously active file browser.
+    var activeFileBrowserOwner = activeFileBrowser.value?.owner?.ownerId;
+    fileBrowsers.clear();
 
     final fileBrowser = FileBrowser(user.value);
     fileBrowser.initialize(this);
@@ -264,10 +268,14 @@ class Rive {
       fileBrowsers.add(_tmp);
     });
 
-    activeFileBrowser.value = fileBrowser;
     folderTreeControllers.value = fileBrowsers
         .map((FileBrowser fileBrowser) => fileBrowser.myTreeController.value)
         .toList();
+
+    // reset the active file browser!
+    activeFileBrowser.value = fileBrowsers.firstWhere(
+        (fileBrowser) => fileBrowser.owner?.ownerId == activeFileBrowserOwner,
+        orElse: () => fileBrowser);
 
     openActiveFileBrowser();
   }

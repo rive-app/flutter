@@ -16,6 +16,8 @@ class TeamWizardPanelOne extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double targetPadding = 30;
+    const double subscriptionBorderThickness = 3;
     final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
     final options = [
@@ -24,78 +26,84 @@ class TeamWizardPanelOne extends StatelessWidget {
     ];
     return SizedBox(
       width: 452,
-      height: 376,
+      height: 364,
       child: Padding(
-        padding: const EdgeInsets.all(30),
+        padding: const EdgeInsets.symmetric(
+            horizontal: targetPadding - subscriptionBorderThickness,
+            vertical: targetPadding),
         child: Column(
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: TextFormField(
-                    textAlign: TextAlign.left,
-                    textAlignVertical: TextAlignVertical.center,
-                    style: textStyles.fileGreyTextLarge,
-                    initialValue: sub.name,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide:
-                            BorderSide(color: colors.inputUnderline, width: 2),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: subscriptionBorderThickness),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: TextFormField(
+                      textAlign: TextAlign.left,
+                      textAlignVertical: TextAlignVertical.center,
+                      style: textStyles.fileGreyTextLarge,
+                      initialValue: sub.name,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: colors.inputUnderline, width: 2),
+                        ),
+                        hintText: 'Team name',
+                        errorText: sub.nameValidationError,
+                        hintStyle: textStyles.textFieldInputHint,
+                        errorStyle: textStyles.textFieldInputValidationError,
+                        contentPadding: const EdgeInsets.only(bottom: 3),
+                        filled: true,
+                        hoverColor: Colors.transparent,
+                        fillColor: Colors.transparent,
                       ),
-                      hintText: 'Team name',
-                      errorText: sub.nameValidationError,
-                      hintStyle: textStyles.textFieldInputHint,
-                      errorStyle: textStyles.textFieldInputValidationError,
-                      contentPadding: const EdgeInsets.only(bottom: 3),
-                      filled: true,
-                      hoverColor: Colors.transparent,
-                      fillColor: Colors.transparent,
-                    ),
-                    onChanged: (name) => sub.name = name,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 32),
-                  child: SizedBox(
-                    width: 71,
-                    child: ComboBox<BillingFrequency>(
-                      popupWidth: 100,
-                      sizing: ComboSizing.content,
-                      underline: true,
-                      underlineColor: colors.inputUnderline,
-                      valueColor: textStyles.fileGreyTextLarge.color,
-                      options: options,
-                      value: sub.billing,
-                      toLabel: (option) => describeEnum(option).capsFirst,
-                      contentPadding: const EdgeInsets.only(bottom: 3),
-                      change: (billing) => sub.billing = billing,
+                      onChanged: (name) => sub.name = name,
                     ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30),
+                    child: SizedBox(
+                      width: 71,
+                      child: ComboBox<BillingFrequency>(
+                        popupWidth: 100,
+                        sizing: ComboSizing.expanded,
+                        underline: true,
+                        underlineColor: colors.inputUnderline,
+                        valueColor: textStyles.fileGreyTextLarge.color,
+                        options: options,
+                        value: sub.billing,
+                        toLabel: (option) => describeEnum(option).capsFirst,
+                        contentPadding: const EdgeInsets.only(bottom: 3),
+                        change: (billing) => sub.billing = billing,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: sub.nameValidationError == null
-                  ? const EdgeInsets.only(top: 31, bottom: 31)
-                  : const EdgeInsets.only(top: 9, bottom: 31),
+                  ? const EdgeInsets.only(top: 27, bottom: 24)
+                  : const EdgeInsets.only(top: 5, bottom: 24),
               child: Row(
                 children: <Widget>[
                   TeamSubscriptionChoiceWidget(
-                    label: 'Team',
-                    costLabel: '\$$basicMonthlyCost',
-                    explanation:
-                        'A space where you and your team can share files.',
-                    onTap: () => sub.option = TeamsOption.basic,
-                  ),
-                  const SizedBox(width: 30),
+                      label: 'Team',
+                      costLabel: '\$$basicMonthlyCost',
+                      explanation:
+                          'A space where you and your team can share files.',
+                      onTap: () => sub.option = TeamsOption.basic,
+                      borderThickness: subscriptionBorderThickness),
+                  const SizedBox(width: 24),
                   TeamSubscriptionChoiceWidget(
-                    label: 'Premium Team',
-                    costLabel: '\$$premiumMonthlyCost',
-                    explanation: '1 day support.',
-                    onTap: () => sub.option = TeamsOption.premium,
-                  ),
+                      label: 'Premium Team',
+                      costLabel: '\$$premiumMonthlyCost',
+                      explanation: '1 day support.',
+                      onTap: () => sub.option = TeamsOption.premium,
+                      borderThickness: subscriptionBorderThickness),
                 ],
               ),
             ),
@@ -117,7 +125,7 @@ class TeamWizardPanelOne extends StatelessWidget {
                 const TextSpan(text: '.'),
               ],
               style: textStyles.tooltipDisclaimer,
-            ))
+            )),
           ],
         ),
       ),
