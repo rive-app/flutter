@@ -2,6 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
 /// Callback for creating the background of a tree row. This has some special
@@ -9,14 +10,17 @@ import 'package:tree_widget/flat_tree_item.dart';
 /// item. The TreeView is specifically built to allow theming all aspects,
 /// including stylings for drag and drop.
 class DropItemBackground extends StatelessWidget {
-  const DropItemBackground(this.dropState, this.selectionState, {this.child});
+  const DropItemBackground(this.dropState, this.selectionState,
+      {this.child, this.color});
 
   final DropState dropState;
   final SelectionState selectionState;
   final Widget child;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
     switch (dropState) {
       case DropState.parent:
         return Padding(
@@ -74,11 +78,12 @@ class DropItemBackground extends StatelessWidget {
       case DropState.none:
         switch (selectionState) {
           case SelectionState.hovered:
-            return SelectionBorder(child: child, isSelected: false);
+            return SelectionBorder(
+                child: child, color: color ?? colors.fileHoveredBlue);
           case SelectionState.selected:
             return SelectionBorder(
               child: child,
-              isSelected: true,
+              color: color ?? colors.fileSelectedBlue,
             );
           case SelectionState.none:
             break;
@@ -96,11 +101,11 @@ class DropItemBackground extends StatelessWidget {
 /// layer and breaks the blend modes...haven't found it yet. Keeping this widget
 /// as it's still lighter weight at runtime than a Container.
 class SelectionBorder extends SingleChildRenderObjectWidget {
-  final bool isSelected;
+  final Color color;
 
   const SelectionBorder({
+    @required this.color,
     Key key,
-    this.isSelected = false,
     Widget child,
   }) : super(
           key: key,
@@ -109,34 +114,29 @@ class SelectionBorder extends SingleChildRenderObjectWidget {
 
   @override
   _RenderSelectionBorder createRenderObject(BuildContext context) {
-    return _RenderSelectionBorder(isSelected: isSelected);
+    return _RenderSelectionBorder(color: color);
   }
 
   @override
   void updateRenderObject(
       BuildContext context, _RenderSelectionBorder renderObject) {
-    renderObject.isSelected = isSelected;
+    renderObject.color = color;
   }
 }
 
 class _RenderSelectionBorder extends RenderProxyBox {
-  final Paint selectedPaint = Paint()..color = const Color(0xFF57A5E0);
+  final Paint _borderPaint;
 
-  final Paint hoverPaint = Paint()
-    ..color = const Color.fromRGBO(87, 165, 224, 0.3);
-
-  bool _isSelected;
-
-  _RenderSelectionBorder({RenderBox child, bool isSelected})
-      : _isSelected = isSelected,
+  _RenderSelectionBorder({RenderBox child, Color color})
+      : _borderPaint = Paint()..color = color,
         super(child);
 
-  bool get isSelected => _isSelected;
-  set isSelected(bool value) {
-    if (_isSelected == value) {
+  Color get color => _borderPaint.color;
+  set color(Color value) {
+    if (_borderPaint.color == value) {
       return;
     }
-    _isSelected = value;
+    _borderPaint.color = value;
     markNeedsPaint();
   }
 
@@ -151,7 +151,7 @@ class _RenderSelectionBorder extends RenderProxyBox {
       ..addRRect(
           RRect.fromRectAndRadius(offset & size, const Radius.circular(5)));
 
-    canvas.drawPath(path, isSelected ? selectedPaint : hoverPaint);
+    canvas.drawPath(path, _borderPaint);
 
     super.paint(context, offset);
   }
