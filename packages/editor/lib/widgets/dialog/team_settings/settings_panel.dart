@@ -188,12 +188,8 @@ class _TabItemState extends State<_SettingsTabItem> {
     }
 
     return MouseRegion(
-      onEnter: (_) => setState(() {
-        _isHovered = true;
-      }),
-      onExit: (_) => setState(() {
-        _isHovered = false;
-      }),
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTap: widget.onSelect,
         child: Container(

@@ -35,7 +35,6 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     ProfilePackage.getProfile(widget.api, owner).then((value) {
       setState(() {
         _profile = value;
-        print("What's my behance? ${value.behance}");
         _profile.addListener(_onProfileChange);
       });
     });
