@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
-
 import 'package:rive_api/api.dart';
+import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -12,55 +12,15 @@ const billingPolicyUrl =
 const premiumMonthlyCost = 45;
 const basicMonthlyCost = 14;
 
-/// The subscription frequency options
-enum BillingFrequency { yearly, monthly }
-
-/// The subscription team option
-enum TeamsOption { basic, premium }
-
-extension PlanExtension on TeamsOption {
-  String get name {
-    switch (this) {
-      case TeamsOption.basic:
-        return 'normal';
-      case TeamsOption.premium:
-        return 'premium';
-      default:
-        return 'normal';
-    }
-  }
-}
-
-extension FrequencyExtension on BillingFrequency {
-  String get name {
-    switch (this) {
-      case BillingFrequency.yearly:
-        return 'yearly';
-      case BillingFrequency.monthly:
-        return 'monthly';
-      default:
-        return 'monthly';
-    }
-  }
-}
-
 /// The active wizard panel
 enum WizardPanel { one, two }
 
-/// Data class for tracking data in the team subscription widget
-class TeamSubscriptionPackage with ChangeNotifier {
-  /// Team name
-  String _name;
-  String get name => _name;
-  set name(String value) {
-    _name = value;
-    notifyListeners();
-  }
-
+abstract class SubscriptionPackage with ChangeNotifier {
   /// Team subscription freuqency
   BillingFrequency _billing = BillingFrequency.yearly;
   BillingFrequency get billing => _billing;
   set billing(BillingFrequency value) {
+    if (_billing == value) return;
     _billing = value;
     notifyListeners();
   }
@@ -68,11 +28,18 @@ class TeamSubscriptionPackage with ChangeNotifier {
   /// The teams option
   TeamsOption _option;
   TeamsOption get option => _option;
-  set option(TeamsOption value) {
-    if (isNameValid) {
-      _option = value;
-    }
-    notifyListeners();
+  set option(TeamsOption value);
+
+  int get teamSize;
+
+  int get monthlyCost =>
+      _option == TeamsOption.premium ? premiumMonthlyCost : basicMonthlyCost;
+
+  /// Returns the initial billing cost for the selected options
+  int get calculatedCost {
+    return teamSize *
+        monthlyCost *
+        (_billing == BillingFrequency.yearly ? 12 : 1);
   }
 
   /// Credit card number
@@ -107,6 +74,82 @@ class TeamSubscriptionPackage with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Validate the team options
+  bool get isOptionValid => _option != null;
+
+  /// Validate the credit card
+  bool get isCardNrValid {
+    if (_cardNumber == null) {
+      return false;
+    }
+
+    if (!RegExp(r'^[0-9]{16}$').hasMatch(_cardNumber)) {
+      return false;
+    }
+    return true;
+  }
+}
+
+/// Data class for managing subscription data in the Team Settings 'Plan' modal.
+class PlanSubscriptionPackage extends SubscriptionPackage {
+  // TODO: current plan expiration date.
+  int _currentCost;
+  int get currentCost => _currentCost;
+
+  int _teamSize;
+  @override
+  int get teamSize => _teamSize;
+
+  static Future<PlanSubscriptionPackage> fetchData(
+      RiveApi api, RiveTeam team) async {
+    var response = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+    var subscription = PlanSubscriptionPackage()
+      ..option = response.plan
+      ..billing = response.frequency
+      .._teamSize = team.teamMembers.length;
+    subscription._currentCost = subscription.calculatedCost;
+
+    return subscription;
+  }
+
+  Future<bool> updatePlan(RiveApi api, int teamId) async {
+    var res = await RiveTeamsApi(api).updatePlan(teamId, option, billing);
+    if (res) {
+      _currentCost = calculatedCost;
+      notifyListeners();
+    }
+    return res;
+  }
+
+  @override
+  set option(TeamsOption value) {
+    if (_option == value) return;
+    _option = value;
+    notifyListeners();
+  }
+}
+
+/// Data class for tracking data in the team subscription widget
+class TeamSubscriptionPackage extends SubscriptionPackage {
+  /// Team name
+  String _name;
+  String get name => _name;
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
+
+  @override
+  set option(TeamsOption value) {
+    if (isNameValid) {
+      _option = value;
+    }
+    notifyListeners();
+  }
+
+  // When creating a team, team size is only the creator.
+  int get teamSize => 1;
+
   // User friendly Name validation error messages
   String _nameValidationError;
   String get nameValidationError => _nameValidationError;
@@ -137,21 +180,6 @@ class TeamSubscriptionPackage with ChangeNotifier {
     return true;
   }
 
-  /// Validate the team options
-  bool get isOptionValid => _option != null;
-
-  /// Validate the credit card
-  bool get isCardNrValid {
-    if (_cardNumber == null) {
-      return false;
-    }
-
-    if (!RegExp(r'^[0-9]{16}$').hasMatch(_cardNumber)) {
-      return false;
-    }
-    return true;
-  }
-
   /// Step 1 is valid; safe to proceed to step 2
   bool get isStep1Valid => isNameValid && isOptionValid;
 
@@ -159,20 +187,9 @@ class TeamSubscriptionPackage with ChangeNotifier {
   bool get isStep2Valid => isNameValid && isOptionValid && isCardNrValid;
 
   Future submit(BuildContext context, RiveApi api) async {
-    await _RiveTeamApi(api).createTeam(
+    await RiveTeamsApi(api).createTeam(
         teamName: name, plan: _option.name, frequency: _billing.name);
     await RiveContext.of(context).reloadTeams();
     Navigator.of(context, rootNavigator: true).pop(null);
   }
-
-  /// Returns the initial billing cost for the selected options
-  int get calculatedCost {
-    final monthlyCost =
-        _option == TeamsOption.premium ? premiumMonthlyCost : basicMonthlyCost;
-    return monthlyCost * (_billing == BillingFrequency.yearly ? 12 : 1);
-  }
-}
-
-class _RiveTeamApi extends RiveTeamsApi<RiveTeam> {
-  _RiveTeamApi(RiveApi api) : super(api);
 }

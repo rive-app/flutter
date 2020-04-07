@@ -51,6 +51,7 @@ class _TeamMemberState extends State<TeamMembers> {
   void _updateAffiliates() {
     final teamId = widget.owner.ownerId;
     _api.getAffiliates(teamId).then((users) {
+      // TODO: use a more robust check for setState.
       if (mounted) {
         setState(() {
           widget.owner.teamMembers = users;
@@ -67,22 +68,25 @@ class _TeamMemberState extends State<TeamMembers> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(padding: const EdgeInsets.all(30), children: [
-      InvitePanel(
-        api: widget.api,
-        teamId: widget.owner.ownerId,
-        teamUpdated: _updateAffiliates,
-      ),
-      const SizedBox(height: 20),
-      // Team Members Section.
-      Column(children: [
-        for (final teamMember in _teamMembers)
-          _TeamMember(
-            user: teamMember,
-            onRoleChanged: (role) => _onRoleChanged(teamMember, role),
+    return ListView(
+        padding: const EdgeInsets.all(30),
+        physics: const ClampingScrollPhysics(),
+        children: [
+          InvitePanel(
+            api: widget.api,
+            teamId: widget.owner.ownerId,
+            teamUpdated: _updateAffiliates,
           ),
-      ]),
-    ]);
+          const SizedBox(height: 20),
+          // Team Members Section.
+          Column(children: [
+            for (final teamMember in _teamMembers)
+              _TeamMember(
+                user: teamMember,
+                onRoleChanged: (role) => _onRoleChanged(teamMember, role),
+              ),
+          ]),
+        ]);
   }
 }
 
@@ -126,6 +130,7 @@ class _InvitePanelState extends State<InvitePanel> {
         .sendInvites(widget.teamId, ids, _selectedInviteType.name)
         .then((value) {
       if (value.isNotEmpty) {
+        // TODO: use a more robust check for setState.
         if (mounted) {
           setState(() {
             _inviteQueue.clear();

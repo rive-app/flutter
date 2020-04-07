@@ -7,9 +7,10 @@ import 'package:rive_api/teams.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/profile_settings_panel.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/plan_panel.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/profile_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_header.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/team_members_panel.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/members_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:tree_widget/flat_tree_item.dart';
@@ -206,9 +207,10 @@ class SettingsScreen {
             (ctx) => ProfileSettings(_getOwner(ctx), _getApi(ctx))),
         SettingsScreen('Members',
             (ctx) => TeamMembers(_getOwner(ctx) as RiveTeam, _getApi(ctx))),
-        SettingsScreen('Groups', (ctx) => const SizedBox()),
-        SettingsScreen('Purchase Permissions', (ctx) => const SizedBox()),
-        SettingsScreen('Plan', (ctx) => const SizedBox()),
+        // SettingsScreen('Groups', (ctx) => const SizedBox()),
+        // SettingsScreen('Purchase Permissions', (ctx) => const SizedBox()),
+        SettingsScreen('Plan',
+            (ctx) => PlanSettings(_getOwner(ctx) as RiveTeam, _getApi(ctx))),
         SettingsScreen('Billing History', (ctx) => const SizedBox()),
       ];
     } else {

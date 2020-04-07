@@ -231,18 +231,18 @@ class TextStyles {
         fontSize: 13,
       );
   TextStyle get fileGreyTextSmall => const TextStyle(
-        fontFamily: 'Roboto-Medium',
+        fontFamily: 'Roboto-Regular',
         color: Color(0xFF333333),
         fontSize: 11,
         fontWeight: FontWeight.w300,
       );
   TextStyle get fileGreyTextLarge => const TextStyle(
-      fontFamily: 'Roboto-Medium',
+      fontFamily: 'Roboto-Regular',
       color: Color(0xFF333333),
       fontSize: 16,
       fontWeight: FontWeight.w400);
   TextStyle get fileLightGreyText => const TextStyle(
-      fontFamily: 'Roboto-Medium',
+      fontFamily: 'Roboto-Regular',
       color: Color(0xFF666666),
       fontSize: 13,
       fontWeight: FontWeight.w300);
