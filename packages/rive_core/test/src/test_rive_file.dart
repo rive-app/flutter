@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:core/coop/change.dart';
+import 'package:core/core.dart';
 import 'package:core/core_property_changes.dart';
 import 'package:meta/meta.dart';
 import 'package:local_data/local_data.dart';
@@ -11,6 +11,7 @@ class TestChanges {
   final ChangeSet changeSet;
   final Completer<bool> _completer = Completer<bool>();
   Future<bool> accept() => _completer.future;
+  bool get isCompleted => _completer.isCompleted;
   TestChanges(this.changeSet);
 }
 
@@ -117,20 +118,29 @@ class TestRiveFile extends RiveFile {
   @override
   void changesAccepted(ChangeSet changes) {
     super.changesAccepted(changes);
-    print(
-        "ACCEPTING CHANGES $changes $_changeSetCompleters ${_changeSetCompleters[changes]}");
     _changeSetCompleters[changes]?._completer?.complete(true);
   }
 
   @override
-  void changesRejected(ChangeSet changes) {
-    super.changesRejected(changes);
+  Future<void> changesRejected(ChangeSet changes) async {
     _changeSetCompleters[changes]?._completer?.complete(false);
+    await super.changesRejected(changes);
   }
 
   Future<void> settle() async {
     while (freshChanges.isNotEmpty) {
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
+  }
+
+  /// Returns true if the system has an inflight change for the object with
+  /// [objectId] and property with [propertyKey].
+  bool hasInflightChanges(Id objectId, int propertyKey) {
+    var objectFlight = inflight[objectId];
+    if (objectFlight == null) {
+      return false;
+    }
+    var value = objectFlight[propertyKey];
+    return value != null && value > 0;
   }
 }

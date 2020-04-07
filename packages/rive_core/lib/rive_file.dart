@@ -1,3 +1,4 @@
+import 'package:core/coop/coop_client.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/backboard.dart';
@@ -174,10 +175,13 @@ class RiveFile extends RiveCoreContext {
   }
 
   /// Mark a component as needing its artboard to be resolved.
-  void markDependenciesDirty(Component component) {
+  bool markDependenciesDirty(Component component) {
+    if (!_needDependenciesBuilt.add(component)) {
+      return false;
+    }
     _dirt |= _RiveDirt.dependencies;
-    _needDependenciesBuilt.add(component);
     markNeedsAdvance();
+    return true;
   }
 
   /// Mark an artboard as needing its dependencies sorted.
@@ -343,6 +347,10 @@ class RiveFile extends RiveCoreContext {
     assert(objects.whereType<Backboard>().length == 1,
         'File should contain exactly one backboard.');
   }
+
+  @override
+  void connectionStateChanged(core.ConnectionState state) =>
+      delegates.forEach((delegate) => delegate.onConnectionStateChanged(state));
 }
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.
@@ -357,6 +365,9 @@ abstract class RiveFileDelegate {
 
   /// Called when the entire file is wiped as data is about to load/reload.
   void onWipe();
+
+  /// Let the delegate know the connection state somehow changed.
+  void onConnectionStateChanged(core.ConnectionState state);
 }
 
 class _RiveDirt {

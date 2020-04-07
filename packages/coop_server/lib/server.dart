@@ -131,7 +131,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
 
     bool isChangeValid = true;
     if (validateDependencies) {
-      // TODO: do the validation
+      isChangeValid = !modifiedFile.hasCyclicDependencies();
     }
 
     if (isChangeValid) {
@@ -199,6 +199,10 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     // prior to their ready.
     print("PROPAGATING TO ${clients.length} CLIENTS");
     for (final to in clients) {
+      // don't send to self
+      if (client == to) {
+        continue;
+      }
       to.write(writer.uint8Buffer);
     }
   }

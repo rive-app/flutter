@@ -21,6 +21,7 @@ typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
 typedef HelloCallback = void Function(int);
 typedef PlayersCallback = void Function(List<Player>);
 typedef UpdateCursorCallback = void Function(int, PlayerCursor);
+typedef ConnectionChangedCallback = void Function(ConnectionState);
 
 enum ConnectionState { disconnected, connecting, handshaking, connected }
 
@@ -32,6 +33,13 @@ class CoopClient extends CoopReader {
   bool get isAuthenticated => _isAuthenticated;
   ConnectionState get connectionState => _connectionState;
   ConnectionState _connectionState = ConnectionState.disconnected;
+  void _changeState(ConnectionState state) {
+    if (_connectionState != state) {
+      _connectionState = state;
+      stateChanged?.call(state);
+    }
+  }
+
   int _reconnectAttempt = 0;
   Timer _reconnectTimer;
   Timer _pingTimer;
@@ -52,6 +60,7 @@ class CoopClient extends CoopReader {
   HelloCallback gotClientId;
   PlayersCallback updatePlayers;
   UpdateCursorCallback updateCursor;
+  ConnectionChangedCallback stateChanged;
 
   CoopClient(
     String host,
@@ -71,7 +80,6 @@ class CoopClient extends CoopReader {
       _reconnectAttempt = 1;
     }
     _reconnectAttempt *= 2;
-    print("WILL WAIT ${_reconnectAttempt * 8000}");
     _reconnectTimer =
         Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
   }
@@ -91,7 +99,9 @@ class CoopClient extends CoopReader {
     await _subscription?.cancel();
     _allowReconnect = false;
     _pingTimer?.cancel();
+    if(_channel != null) {
     await _channel.sink.close();
+    }
     return true;
   }
 
@@ -123,15 +133,13 @@ class CoopClient extends CoopReader {
     _channel = RiveWebSocketChannel.connect(Uri.parse(url), _token);
     _connectionCompleter = Completer<ConnectResult>();
 
-    _connectionState = ConnectionState.connecting;
+    _changeState(ConnectionState.connecting);
 
     runZoned(() {
       _subscription =
           _channel.stream.listen(_onStreamData, onError: (dynamic error) {
-        print("CONNECTION ERROR");
         _disconnected();
       }, onDone: () {
-        print("CONNECTION MURDERED");
         _disconnected();
         _connectionCompleter?.complete(ConnectResult.networkError);
         _connectionCompleter = null;
@@ -152,7 +160,7 @@ class CoopClient extends CoopReader {
   }
 
   Future<void> _disconnected() async {
-    _connectionState = ConnectionState.disconnected;
+    _changeState(ConnectionState.disconnected);
     _pingTimer?.cancel();
     if (_channel != null && _channel.sink != null) {
       await _channel.sink.close();
@@ -178,7 +186,6 @@ class CoopClient extends CoopReader {
     // Handle the server telling us to disconnect.
     _allowReconnect = false;
     await _disconnected();
-    print("GOT GOODBYE");
     _connectionCompleter?.complete(ConnectResult.notAuthorized);
     _connectionCompleter = null;
   }
@@ -216,7 +223,7 @@ class CoopClient extends CoopReader {
   Future<void> recvHello(int clientId) async {
     _clientId = clientId;
     gotClientId?.call(clientId);
-    _connectionState = ConnectionState.handshaking;
+    _changeState(ConnectionState.handshaking);
     _reconnectAttempt = 0;
     _isAuthenticated = true;
 
@@ -230,7 +237,7 @@ class CoopClient extends CoopReader {
 
   @override
   Future<void> recvReady() async {
-    _connectionState = ConnectionState.connected;
+    _changeState(ConnectionState.connected);
     _connectionCompleter?.complete(ConnectResult.connected);
     _connectionCompleter = null;
     _ping();

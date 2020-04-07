@@ -7,10 +7,10 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/transform_space.dart';
+import 'package:utilities/dependency_sorter.dart';
 
 import 'component.dart';
 import 'component_dirt.dart';
-import 'dependency_sorter.dart';
 import 'src/generated/artboard_base.dart';
 
 export 'src/generated/artboard_base.dart';
@@ -118,13 +118,14 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   /// Sort the DAG for resolution in order of dependencies such that dependent
   /// compnents process after their dependencies.
   void sortDependencies() {
-    var optimistic = DependencySorter();
+    var optimistic = DependencySorter<Component>();
     var order = optimistic.sort(this);
     if (order == null) {
       // cycle detected, use a more robust solver
-      var robust = TarjansDependencySorter();
+      var robust = TarjansDependencySorter<Component>();
       order = robust.sort(this);
     }
+
     _dependencyOrder = order;
     for (final component in _dependencyOrder) {
       component.graphOrder = graphOrder++;

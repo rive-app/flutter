@@ -1,11 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:core/coop/connect_result.dart';
-// import 'package:core/coop/coop_isolate.dart';
+import 'package:local_data/local_data.dart';
 
-// import 'package:rive_core/node.dart';
-import 'package:rive_core/rive_file.dart';
-
+import 'src/test_rive_file.dart';
 import 'src/test_server.dart';
 
 void main() {
@@ -17,8 +15,11 @@ void main() {
       final server = TestCoopServer();
       expect(await server.listen(port: 8124), true);
 
+      LocalDataPlatform dataPlatform = LocalDataPlatform.make();
+
       // Create fake server file.
-      final file = RiveFile('fake',
+      final file = TestRiveFile('fake',
+          localDataPlatform: dataPlatform,
           overridePreferences: <String, dynamic>{
             "session": 22,
             "token": "fake",

@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_command.dart';
-import 'package:core/coop/coop_server_client.dart';
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:core/coop/coop_server.dart';
 import 'package:core/coop/coop_isolate.dart';
@@ -117,13 +115,11 @@ class TestCoopIsolate extends CoopIsolate {
       var next = _nextDataReceived;
       _nextDataReceived = null;
       if (next != null) {
-        print("drive to completer $data");
         // We're already waiting for data, so just send this along.
         next?.complete(data);
         super.sendToIsolate(data);
       } else {
         // Queue it for when we next request it.
-        print("drive to queued completer $data");
         _isolateQueue.add(data);
       }
     } else {

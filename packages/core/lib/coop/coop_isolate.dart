@@ -66,7 +66,7 @@ class CoopIsolate {
     var id = ids.isEmpty ? 0 : ids.reduce(max) + 1;
     _clients[id] = socket;
 
-    sendToIsolate(_CoopServerAddClient(id, userOwnerId, desiredClientId));
+    sendToIsolate(CoopServerAddClient(id, userOwnerId, desiredClientId));
     socket.listen(
       (dynamic data) {
         if (data is Uint8List) {
@@ -77,7 +77,7 @@ class CoopIsolate {
       onDone: () {
         // Client disconnected.
         _clients.remove(id);
-        sendToIsolate(_CoopServerRemoveClient(id));
+        sendToIsolate(CoopServerRemoveClient(id));
         if (_clients.isEmpty) {
           _killTimer?.cancel();
           _killTimer = Timer(killTimeout, shutdown);
@@ -230,8 +230,7 @@ abstract class CoopIsolateProcess {
   }
 
   Future<void> _receive(dynamic data) async {
-    print("GOT $data");
-    if (data is _CoopServerAddClient) {
+    if (data is CoopServerAddClient) {
       int actualClientId = data.clientId;
       // Check if the client id the connection wants to use is valid.
       if (actualClientId == null || actualClientId < 1) {
@@ -249,7 +248,7 @@ abstract class CoopIsolateProcess {
       }
       _clients[data.id] =
           CoopServerClient(this, data.id, data.userOwnerId, actualClientId);
-    } else if (data is _CoopServerRemoveClient) {
+    } else if (data is CoopServerRemoveClient) {
       var client = _clients[data.id];
       if (client != null) {
         _clients.remove(client.id);
@@ -270,11 +269,11 @@ abstract class CoopIsolateProcess {
   }
 }
 
-class _CoopServerAddClient {
+class CoopServerAddClient {
   final int id;
   final int userOwnerId;
   final int clientId;
-  _CoopServerAddClient(this.id, this.userOwnerId, this.clientId);
+  CoopServerAddClient(this.id, this.userOwnerId, this.clientId);
 }
 
 class CoopServerProcessData {
@@ -283,9 +282,9 @@ class CoopServerProcessData {
   CoopServerProcessData(this.id, this.data);
 }
 
-class _CoopServerRemoveClient {
+class CoopServerRemoveClient {
   final int id;
-  _CoopServerRemoveClient(this.id);
+  CoopServerRemoveClient(this.id);
 }
 
 class _CoopServerShutdown {}

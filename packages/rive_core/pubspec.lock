@@ -115,7 +115,7 @@ packages:
     source: path
     version: "0.0.2"
   graphs:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: graphs
       url: "https://pub.dartlang.org"

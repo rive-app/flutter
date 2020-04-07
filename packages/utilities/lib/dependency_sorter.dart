@@ -1,28 +1,35 @@
 import 'dart:collection';
-
 import 'package:graphs/graphs.dart';
 
-import 'component.dart';
+/// Interface for a node in the dependency graph.
+abstract class DependencyGraphNode<T> {
+  Set<T> get dependents;
+}
 
-class DependencySorter {
-  HashSet<Component> _perm;
-  HashSet<Component> _temp;
-  List<Component> _order;
+/// A simple dependency sorter which will solve well formed dependency
+/// structures. It'll detect dependency cycles but it will not help find what
+/// caused the cycle or provide any attempt at a best guess for order in cyclic
+/// scenarios. Use this as a best case first run and fall back to a more complex
+/// solver if this one finds a cycle.
+class DependencySorter<T extends DependencyGraphNode<T>> {
+  HashSet<T> _perm;
+  HashSet<T> _temp;
+  List<T> _order;
 
   DependencySorter() {
-    _perm = HashSet<Component>();
-    _temp = HashSet<Component>();
+    _perm = HashSet<T>();
+    _temp = HashSet<T>();
   }
 
-  List<Component> sort(Component root) {
-    _order = <Component>[];
+  List<T> sort(T root) {
+    _order = <T>[];
     if (!visit(root)) {
       return null;
     }
     return _order;
   }
 
-  bool visit(Component n) {
+  bool visit(T n) {
     if (_perm.contains(n)) {
       return true;
     }
@@ -33,9 +40,9 @@ class DependencySorter {
 
     _temp.add(n);
 
-    Set<Component> dependents = n.dependents;
+    Set<T> dependents = n.dependents;
     if (dependents != null) {
-      for (final Component d in dependents) {
+      for (final T d in dependents) {
         if (!visit(d)) {
           return false;
         }
@@ -54,19 +61,20 @@ class DependencySorter {
 /// `sort`. NOTE: Nodes isolated by cycles will not be found in `_order` or
 /// `cycleNodes` e.g. `A -> B <-> C -> D` isolates D when running a sort based
 /// on A
-class TarjansDependencySorter extends DependencySorter {
-  HashSet<Component> _cycleNodes;
+class TarjansDependencySorter<T extends DependencyGraphNode<T>>
+    extends DependencySorter<T> {
+  HashSet<T> _cycleNodes;
   TarjansDependencySorter() {
-    _perm = HashSet<Component>();
-    _temp = HashSet<Component>();
-    _cycleNodes = HashSet<Component>();
+    _perm = HashSet<T>();
+    _temp = HashSet<T>();
+    _cycleNodes = HashSet<T>();
   }
 
-  HashSet<Component> get cycleNodes => _cycleNodes;
+  HashSet<T> get cycleNodes => _cycleNodes;
 
   @override
-  List<Component> sort(Component root) {
-    _order = <Component>[];
+  List<T> sort(T root) {
+    _order = <T>[];
 
     if (!visit(root)) {
       // if we detect cycles, go find them all
@@ -75,8 +83,8 @@ class TarjansDependencySorter extends DependencySorter {
       _cycleNodes.clear();
       _order.clear();
 
-      var cycles = stronglyConnectedComponents<Component>(
-          [root], (Component node) => node.dependents);
+      var cycles =
+          stronglyConnectedComponents<T>([root], (T node) => node.dependents);
 
       cycles.forEach((cycle) {
         // cycles of len 1 are not cycles.
@@ -95,7 +103,7 @@ class TarjansDependencySorter extends DependencySorter {
   }
 
   @override
-  bool visit(Component n) {
+  bool visit(T n) {
     if (cycleNodes.contains(n)) {
       // skip any nodes on a known cycle.
       return true;
