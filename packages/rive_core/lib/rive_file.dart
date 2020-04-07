@@ -1,3 +1,4 @@
+import 'package:core/coop/coop_client.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/backboard.dart';
@@ -23,8 +24,6 @@ import 'src/isolated_persist.dart';
 final log = Logger('rive_core');
 
 class RiveFile extends RiveCoreContext {
-  final Map<String, dynamic> overridePreferences;
-  final bool useSharedPreferences;
   final List<Artboard> artboards = [];
   final Set<RiveFileDelegate> delegates = {};
   int _dirt = 0;
@@ -61,8 +60,6 @@ class RiveFile extends RiveCoreContext {
     String fileId, {
     @required LocalDataPlatform localDataPlatform,
     this.api,
-    this.overridePreferences,
-    this.useSharedPreferences = true,
   })  : _isolatedPersist = IsolatedPersist(localDataPlatform, fileId),
         super(fileId);
 
@@ -158,15 +155,6 @@ class RiveFile extends RiveCoreContext {
 
   @override
   Future<int> getIntSetting(String key) async {
-    if (overridePreferences != null) {
-      dynamic val = overridePreferences[key];
-      if (val is int) {
-        return val;
-      }
-    }
-    if (!useSharedPreferences) {
-      return null;
-    }
     _prefs ??= await SharedPreferences.getInstance();
     return _prefs.getInt(key);
   }
@@ -176,15 +164,6 @@ class RiveFile extends RiveCoreContext {
 
   @override
   Future<String> getStringSetting(String key) async {
-    if (overridePreferences != null) {
-      dynamic val = overridePreferences[key];
-      if (val is String) {
-        return val;
-      }
-    }
-    if (!useSharedPreferences) {
-      return null;
-    }
     _prefs ??= await SharedPreferences.getInstance();
     return _prefs.getString(key);
   }
@@ -196,10 +175,13 @@ class RiveFile extends RiveCoreContext {
   }
 
   /// Mark a component as needing its artboard to be resolved.
-  void markDependenciesDirty(Component component) {
+  bool markDependenciesDirty(Component component) {
+    if (!_needDependenciesBuilt.add(component)) {
+      return false;
+    }
     _dirt |= _RiveDirt.dependencies;
-    _needDependenciesBuilt.add(component);
     markNeedsAdvance();
+    return true;
   }
 
   /// Mark an artboard as needing its dependencies sorted.
@@ -263,18 +245,12 @@ class RiveFile extends RiveCoreContext {
 
   @override
   Future<void> setIntSetting(String key, int value) async {
-    if (!useSharedPreferences) {
-      return;
-    }
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs.setInt(key, value);
   }
 
   @override
   Future<void> setStringSetting(String key, String value) async {
-    if (!useSharedPreferences) {
-      return;
-    }
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs.setString(key, value);
   }
@@ -345,6 +321,7 @@ class RiveFile extends RiveCoreContext {
   void onConnected() {
     // Find backboard.
     var backboards = objects.whereType<Backboard>();
+
     if (backboards.isEmpty) {
       // Don't have one? Patch up the file and make one...
       batchAdd(() {
@@ -356,12 +333,24 @@ class RiveFile extends RiveCoreContext {
       // Don't allow undoing it.
       clearJournal();
     } else {
+      if (backboards.length > 1) {
+        do {
+          remove(backboards.last);
+        } while (backboards.length > 1);
+        // Save the creation of the backboard.
+        captureJournalEntry();
+        // Don't allow undoing it.
+        clearJournal();
+      }
       _backboard = backboards.first;
     }
-
     assert(objects.whereType<Backboard>().length == 1,
         'File should contain exactly one backboard.');
   }
+
+  @override
+  void connectionStateChanged(core.ConnectionState state) =>
+      delegates.forEach((delegate) => delegate.onConnectionStateChanged(state));
 }
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.
@@ -376,6 +365,9 @@ abstract class RiveFileDelegate {
 
   /// Called when the entire file is wiped as data is about to load/reload.
   void onWipe();
+
+  /// Let the delegate know the connection state somehow changed.
+  void onConnectionStateChanged(core.ConnectionState state);
 }
 
 class _RiveDirt {

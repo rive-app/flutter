@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:utilities/dependency_sorter.dart';
 
 import 'src/generated/component_base.dart';
 
@@ -11,13 +12,17 @@ export 'src/generated/component_base.dart';
 
 final log = Logger('rive_core');
 
-abstract class Component extends ComponentBase<RiveFile> {
+abstract class Component extends ComponentBase<RiveFile>
+    implements DependencyGraphNode<Component> {
   Artboard _artboard;
   dynamic _userData;
 
   // Used during update process.
   int graphOrder = 0;
   int dirt = 0;
+
+  // This is really only for sanity and earlying out of recursive loops.
+  static const int maxTreeDepth = 5000;
 
   bool addDirt(int value, {bool recurse = false}) {
     if ((dirt & value) == value) {
@@ -66,8 +71,10 @@ abstract class Component extends ComponentBase<RiveFile> {
 
   /// Find the artboard in the hierarchy.
   bool resolveArtboard() {
-    log.finest("RESOLVING ARTBOARD FOR $name");
-    for (Component curr = this; curr != null; curr = curr.parent) {
+    int sanity = maxTreeDepth;
+    for (Component curr = this;
+        curr != null && sanity > 0;
+        curr = curr.parent, sanity--) {
       visitAncestor(curr);
       if (curr is Artboard) {
         _changeArtboard(curr);
@@ -131,20 +138,14 @@ abstract class Component extends ComponentBase<RiveFile> {
     markDependenciesDirty();
   }
 
-  // @mustCallSuper
-  // @protected
-  // void markArtboardDirty() {
-  //   context?.markArtboardDirty(this);
-  // }
-
   /// Components that depend on this component.
   final Set<Component> _dependents = {};
 
   /// Components that this component depends on.
   final Set<Component> _dependsOn = {};
 
+  @override
   Set<Component> get dependents => _dependents;
-  // int _dirt = 0;
 
   bool addDependent(Component dependent) {
     assert(dependent != null, "Dependent cannot be null.");
@@ -166,7 +167,10 @@ abstract class Component extends ComponentBase<RiveFile> {
   bool isValidParent(Component parent) => parent is ContainerComponent;
 
   void markDependenciesDirty() {
-    context?.markDependenciesDirty(this);
+    if (context == null || !context.markDependenciesDirty(this)) {
+      // no context, or already dirty.
+      return;
+    }
     for (final dependent in _dependents) {
       dependent.markDependenciesDirty();
     }
@@ -207,6 +211,7 @@ abstract class Component extends ComponentBase<RiveFile> {
   /// component. It's important for specialization of Component to respond to
   /// override [onDependencyRemoved] and clean up any further stored references
   /// to that component (for example the target of a Constraint).
+  @override
   @mustCallSuper
   void onRemoved() {
     for (final parentDep in _dependsOn) {

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'package:utilities/dependency_sorter.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_command.dart';
 import 'package:core/core.dart';
@@ -84,10 +85,42 @@ class CoopFile {
 
     return changeSet;
   }
+
+  bool hasCyclicDependencies() {
+    final roots = <CoopFileObject>[];
+    for (final object in objects.values) {
+      var dependents = object.properties[CoreContext.dependentsKey];
+      if (dependents != null) {
+        var reader = BinaryReader.fromList(dependents.data);
+        int count = reader.readVarUint();
+        for (int i = 0; i < count; i++) {
+          var dependent = objects[Id.deserialize(reader)];
+          if (dependent != null) {
+            object.dependents.add(dependent);
+          }
+        }
+      }
+      if (object.key == CoreContext.rootDependencyKey) {
+        roots.add(object);
+      }
+    }
+
+    // Test all the roots (artboards) in the file.
+    for (final root in roots) {
+      final solver = DependencySorter<CoopFileObject>();
+
+      if (solver.sort(root) == null) {
+        // Cyclic dependency detected.
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 // Store session, nextObjectId, nextChange Id in Dynamo
-class CoopFileObject extends Entity {
+class CoopFileObject extends Entity
+    implements DependencyGraphNode<CoopFileObject> {
   /// The local id received from the session representing this object.
   Id objectId;
 
@@ -160,6 +193,9 @@ class CoopFileObject extends Entity {
       ..properties = clonedProperties
       ..copy(this);
   }
+
+  @override
+  final Set<CoopFileObject> dependents = <CoopFileObject>{};
 }
 
 class ObjectProperty extends Entity {

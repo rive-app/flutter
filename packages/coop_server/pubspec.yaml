@@ -10,9 +10,5 @@ dependencies:
   core:
     path: ../core
 
-# dependency_overrides:
-#   core:
-#     path: ../../rive-editor/dependencies/core-dart/core
-
 dev_dependencies:
   test: ^1.14.1

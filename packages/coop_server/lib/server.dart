@@ -31,16 +31,13 @@ class RiveCoopServer extends CoopServer {
   void heartbeat() => PrivateApi().heartbeat();
 
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
-    var process = _CoopIsolate();
-    var success = await process.initProcess(
+    var process = RiveCoopIsolateProcess();
+    await process.initProcess(
         argument.sendPort, argument.options, argument.ownerId, argument.fileId);
-    if (success) {
-      // ok, anything to do?
-    }
   }
 }
 
-class _CoopIsolate extends CoopIsolateProcess {
+class RiveCoopIsolateProcess extends CoopIsolateProcess {
   CoopFile file;
   int _nextChangeId;
   final _privateApi = PrivateApi();
@@ -134,13 +131,13 @@ class _CoopIsolate extends CoopIsolateProcess {
 
     bool isChangeValid = true;
     if (validateDependencies) {
-      // TODO: do the validation
+      isChangeValid = !modifiedFile.hasCyclicDependencies();
     }
 
     if (isChangeValid) {
       // Changes were good, modify file and propagate them to other clients.
       file = modifiedFile;
-      print("CHANGE ID ${serverChangeSet.id}");
+      // print("CHANGE ID ${serverChangeSet.id}");
       propagateChanges(client, serverChangeSet);
       return true;
     } else {
@@ -160,6 +157,11 @@ class _CoopIsolate extends CoopIsolateProcess {
     // check data is not null, check signature, if it's RIVE deserialize
     // if it's { or something else, send wtf.
     var data = await _privateApi.load(ownerId, fileId);
+    if (data == null) {
+      // private api is currently not availble or somehow failed, make sure we
+      // terminate the connect (client will retry).
+      return false;
+    }
 
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
         (data == null || data.isEmpty)) {
@@ -195,8 +197,12 @@ class _CoopIsolate extends CoopIsolateProcess {
     // TODO: consider changing this to readyClients as clients that are
     // connecting/sending offline changes should not receive mid-flight changes
     // prior to their ready.
-    print("PROPAGATING TO ${clients.length} CLIENTS");
+    // print("PROPAGATING TO ${clients.length} CLIENTS");
     for (final to in clients) {
+      // don't send to self
+      if (client == to) {
+        continue;
+      }
       to.write(writer.uint8Buffer);
     }
   }
@@ -207,7 +213,7 @@ class _CoopIsolate extends CoopIsolateProcess {
     file.serialize(writer);
     var result =
         await _privateApi.save(file.ownerId, file.fileId, writer.uint8Buffer);
-    print("GOT REVISION ID ${result.revisionId}");
+    // print("GOT REVISION ID ${result.revisionId}");
   }
 
   @override

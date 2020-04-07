@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -123,6 +124,10 @@ abstract class CoreContext implements LocalSettings {
   static const int removeKey = 2;
   static const int dependentsKey = 3;
 
+  /// Key of the root object to check dependencies on (this is an Artboard in
+  /// Rive).
+  static const int rootDependencyKey = 1;
+
   final String fileId;
   CoopClient _client;
   int _lastChangeId;
@@ -140,7 +145,8 @@ abstract class CoreContext implements LocalSettings {
 
   final Map<Id, Core> _objects = {};
 
-  final Map<ChangeSet, FreshChange> _freshChanges = {};
+  @protected
+  final Map<ChangeSet, FreshChange> freshChanges = {};
   // final List<ChangeSet> _unsyncedChanges = [];
   CoreContext(this.fileId) : _lastChangeId = CoopCommand.minChangeId;
 
@@ -208,7 +214,7 @@ abstract class CoreContext implements LocalSettings {
 
     // schedule those changes to be sent to other clients (and server for
     // saving)
-    _coopMakeChangeSet(_currentChanges, useFrom: false);
+    coopMakeChangeSet(_currentChanges, useFrom: false);
     _journalIndex = journal.length;
     _currentChanges = null;
     return true;
@@ -238,9 +244,9 @@ abstract class CoreContext implements LocalSettings {
       localSettings: this,
       token: token,
     )
-      ..changesAccepted = _changesAccepted
-      ..changesRejected = _changesRejected
-      ..makeChanges = _receiveCoopChanges
+      ..changesAccepted = changesAccepted
+      ..changesRejected = changesRejected
+      ..makeChanges = receiveCoopChanges
       ..wipe = _wipe
       ..gotClientId = (actualClientId) {
         clientId = actualClientId;
@@ -259,7 +265,8 @@ abstract class CoreContext implements LocalSettings {
       ..updatePlayers = _updatePlayers
       ..updateCursor = (int clientId, PlayerCursor cursor) {
         _players[clientId]?.cursor = cursor;
-      };
+      }
+      ..stateChanged = connectionStateChanged;
 
     var result = await _client.connect();
     if (result == ConnectResult.connected) {
@@ -483,44 +490,79 @@ abstract class CoreContext implements LocalSettings {
       }
     });
 
-    _coopMakeChangeSet(changes, useFrom: isUndo);
+    coopMakeChangeSet(changes, useFrom: isUndo);
     completeChanges();
     for (final object in regeneratedObjects) {
       onAddedClean(object);
     }
   }
 
+  /// Map of inflight[objectId][propertyKey][changeCount] to track whether
+  /// there are still in-flight changes for an object. We need a changeCount as
+  /// the property can be changed multiple times and shouldn't be removed from
+  /// the set until it returns to 0.
+  @protected
+  final HashMap<Id, HashMap<int, int>> inflight =
+      HashMap<Id, HashMap<int, int>>();
+
   @mustCallSuper
-  void _changesAccepted(ChangeSet changes) {
+  @protected
+  void changesAccepted(ChangeSet changes) {
     log.finest("ACCEPTING ${changes.id}.");
-    _freshChanges.remove(changes);
+    freshChanges.remove(changes);
+
+    // Update the inflight counters for the properties.
+    for (final objectChanges in changes.objects) {
+      var objectInflightChanges =
+          inflight[objectChanges.objectId] ??= HashMap<int, int>();
+      for (final change in objectChanges.changes) {
+        var value = objectInflightChanges[change.op];
+        if (value != null) {
+          var v = max(0, value - 1);
+          if (v == 0) {
+            objectInflightChanges.remove(change.op);
+            if (objectInflightChanges.isEmpty) {
+              inflight.remove(objectChanges.objectId);
+            }
+          } else {
+            objectInflightChanges[change.op] = v;
+          }
+        }
+      }
+    }
     abandonChanges(changes);
   }
 
   @mustCallSuper
-  void _changesRejected(ChangeSet changes) {
-    abandonChanges(changes);
-    // Re-apply the original value if the changed value matches the current one.
-    var fresh = _freshChanges[changes];
-    fresh.change.entries.forEach((objectId, changes) {
-      var object = _objects[objectId];
-      if (object != null) {
-        changes.forEach((key, entry) {
-          // value is still what we had tried to change it too (nothing else has
-          // changed it since).
-          if ((fresh.useFrom ? entry.from : entry.to) ==
-              getObjectProperty(object, key)) {
-            // If so, we can reset it to the original value since this change
-            // got rejected.
-            setObjectProperty(
-                object, key, fresh.useFrom ? entry.to : entry.from);
-          }
-        });
-      }
-    });
+  @protected
+  Future<void> changesRejected(ChangeSet changes) async {
+    await _client.disconnect();
+    await _client.connect();
+
+    // TODO: We should actually just reconnect here.
+    // abandonChanges(changes);
+    // // Re-apply the original value if the changed value matches the current one.
+    // var fresh = freshChanges[changes];
+    // fresh.change.entries.forEach((objectId, changes) {
+    //   var object = _objects[objectId];
+    //   if (object != null) {
+    //     changes.forEach((key, entry) {
+    //       // value is still what we had tried to change it too (nothing else has
+    //       // changed it since).
+    //       if ((fresh.useFrom ? entry.from : entry.to) ==
+    //           getObjectProperty(object, key)) {
+    //         // If so, we can reset it to the original value since this change
+    //         // got rejected.
+    //         setObjectProperty(
+    //             object, key, fresh.useFrom ? entry.to : entry.from);
+    //       }
+    //     });
+    //   }
+    // });
   }
 
-  void _coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
+  @protected
+  ChangeSet coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
     // Client should only be null during some testing.
     var sendChanges = ChangeSet()
       ..id = _lastChangeId == null ? null : _lastChangeId++
@@ -532,7 +574,10 @@ abstract class CoreContext implements LocalSettings {
 
       var hydrateKey = useFrom ? removeKey : addKey;
       var dehydrateKey = useFrom ? addKey : removeKey;
+
+      var objectInflightChanges = inflight[objectId] ??= HashMap<int, int>();
       changes.forEach((key, entry) {
+        objectInflightChanges[key] = (objectInflightChanges[key] ??= 0) + 1;
         if (key == hydrateKey) {
           //changeProperty(object, addKey, removeKey, object.coreType);
           //changeProperty(object, removeKey, addKey, object.coreType);
@@ -557,9 +602,10 @@ abstract class CoreContext implements LocalSettings {
 
       sendChanges.objects.add(objectChanges);
     });
-    _freshChanges[sendChanges] = FreshChange(changes, useFrom);
+    freshChanges[sendChanges] = FreshChange(changes, useFrom);
     _client?.queueChanges(sendChanges);
     persistChanges(sendChanges);
+    return sendChanges;
   }
 
   void persistChanges(ChangeSet changes);
@@ -581,7 +627,9 @@ abstract class CoreContext implements LocalSettings {
     delayed.forEach(onAddedClean);
   }
 
-  void _receiveCoopChanges(ChangeSet changes) {
+  @protected
+  @mustCallSuper
+  void receiveCoopChanges(ChangeSet changes) {
     // We've received changes from Coop. Initialize the delayAdd list so that
     // onAdded doesn't get called as objects are created. We'll manually call it
     // at the end of this method once all the changes have been made.
@@ -592,17 +640,26 @@ abstract class CoreContext implements LocalSettings {
     // changes.
     var wasRecording = _isRecording;
     _isRecording = false;
+
     for (final objectChanges in changes.objects) {
-      // TODO: (maybe) This would be the moment to strip out in-flight (fresh)
-      // changes from this set to avoid the flickering issue.
+      // Check if this object has changes already in-flight.
+      var objectInflight = inflight[objectChanges.objectId];
+      if (objectInflight != null) {
+        // prune out changes that are still waiting for acknowledge.
+        List<Change> changesToApply = [];
+        for (final change in objectChanges.changes) {
+          var flightValue = objectInflight[change.op];
+          // Only approve a change that doesn't have an inflight change.
+          if (flightValue == null || flightValue == 0) {
+            changesToApply.add(change);
+          }
+        }
+        objectChanges.changes = changesToApply;
+      }
       applyCoopChanges(objectChanges);
     }
     completeAdd();
-    // completeAddDirty();
     _isRecording = wasRecording;
-
-    // completeChanges();
-    // completeAddClean();
   }
 
   /// Add a set of components as a batched operation, cleaning dirt and
@@ -634,7 +691,8 @@ abstract class CoreContext implements LocalSettings {
     _objects.clear();
     _journalIndex = 0;
     journal.clear();
-    _freshChanges.clear();
+    freshChanges.clear();
+    inflight.clear();
 
     // TODO: rethink this
     // _unsyncedChanges.clear();
@@ -646,9 +704,22 @@ abstract class CoreContext implements LocalSettings {
     journal.clear();
   }
 
-  void cursorMoved(double x, double y) =>
-      debounce(() => _client?.sendCursor(x, y),
-          duration: const Duration(milliseconds: 33));
+  double _lastCursorX = 0, _lastCursorY = 0;
+  void cursorMoved(double x, double y) {
+    _lastCursorX = x;
+    _lastCursorY = y;
+    debounce(_sendLastCursor, duration: const Duration(milliseconds: 33));
+  }
+
+  void _sendLastCursor() {
+    if (_client == null || !_client.isConnected) {
+      return;
+    }
+
+    _client.sendCursor(_lastCursorX, _lastCursorY);
+  }
+
+  void connectionStateChanged(ConnectionState state);
 }
 
 class FreshChange {

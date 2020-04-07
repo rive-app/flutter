@@ -1,4 +1,5 @@
 import 'package:core/coop/connect_result.dart';
+import 'package:core/coop/coop_client.dart';
 import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:flutter/foundation.dart';
@@ -232,4 +233,30 @@ class OpenFileContext with RiveFileDelegate {
 
   bool undo() => core.undo();
   bool redo() => core.redo();
+
+  @override
+  Future<void> onChangesRejected() async {
+    // TODO: have the UI
+    _state = OpenFileState.loading;
+    stateChanged.notify();
+    await core.disconnect();
+  }
+
+  @override
+  void onConnectionStateChanged(ConnectionState state) {
+    /// We use this to handle changes that can come in during use. Right now we
+    /// only handle showing the re-connecting (connecting) state.
+    switch (state) {
+      case ConnectionState.connecting:
+        _state = OpenFileState.loading;
+        stateChanged.notify();
+        break;
+      case ConnectionState.connected:
+        _state = OpenFileState.open;
+        stateChanged.notify();
+        break;
+      default:
+        break;
+    }
+  }
 }
