@@ -5,9 +5,31 @@ import 'base_popup.dart';
 typedef ListPopupItemBuilder<T> = Widget Function(
     BuildContext context, T item, bool isHovered);
 
+/// Helper to extract the global coordinate rect of a specific build context's
+/// first render object.
+class ContextToGlobalRect {
+  ValueNotifier<Rect> rect = ValueNotifier<Rect>(Rect.zero);
+
+  void updateRect(BuildContext context) {
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+    final boxOffset = renderBox.localToGlobal(Offset.zero);
+    rect.value = boxOffset & size;
+  }
+}
+
 /// Opens a popup with an arrow pointing to the area of interest/whatever
 /// launched the popup.
 class ArrowPopup {
+  final Popup popup;
+  final ContextToGlobalRect contextRect;
+  ArrowPopup({
+    this.contextRect,
+    this.popup,
+  });
+
+  bool close() => popup.close();
+
   static Path _arrowFromDirection(PopupDirection direction) {
     if (direction.offsetVector.dx == 1) {
       return _pathArrowLeft;
@@ -19,7 +41,7 @@ class ArrowPopup {
     return _pathArrowDown;
   }
 
-  static Popup show(
+  factory ArrowPopup.show(
     BuildContext context, {
 
     /// The widget builder for the content in the popup body.
@@ -61,58 +83,63 @@ class ArrowPopup {
     /// Callback invoked whenver the popup is closed.
     VoidCallback onClose,
   }) {
-    RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-    final boxOffset = renderBox.localToGlobal(Offset.zero);
+    var contextRect = ContextToGlobalRect()..updateRect(context);
 
-    return Popup.show(
-      context,
-      onClose: onClose,
-      includeCloseGuard: includeCloseGuard,
-      builder: (context) {
-        return CustomMultiChildLayout(
-          delegate: _ListPopupMultiLayoutDelegate(
-            from: boxOffset & size,
-            direction: direction,
-            width: width,
-            offset: offset,
-            directionPadding: directionPadding,
-            arrowTweak: arrowTweak,
-          ),
-          children: [
-            if (showArrow)
-              LayoutId(
-                id: _ListPopupLayoutElement.arrow,
-                child: CustomPaint(
-                  painter: _ArrowPathPainter(
-                    background,
-                    _arrowFromDirection(direction),
-                  ),
-                ),
+    return ArrowPopup(
+      contextRect: contextRect,
+      popup: Popup.show(
+        context,
+        onClose: onClose,
+        includeCloseGuard: includeCloseGuard,
+        builder: (context) {
+          return ValueListenableBuilder<Rect>(
+            valueListenable: contextRect.rect,
+            builder: (context, contextRect, child) => CustomMultiChildLayout(
+              delegate: _ListPopupMultiLayoutDelegate(
+                from: contextRect,
+                direction: direction,
+                width: width,
+                offset: offset,
+                directionPadding: directionPadding,
+                arrowTweak: arrowTweak,
               ),
-            LayoutId(
-              id: _ListPopupLayoutElement.body,
-              child: Material(
-                type: MaterialType.transparency,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: background,
-                    borderRadius: BorderRadius.circular(5.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3473),
-                        offset: const Offset(0.0, 30.0),
-                        blurRadius: 30,
-                      )
-                    ],
+              children: [
+                if (showArrow)
+                  LayoutId(
+                    id: _ListPopupLayoutElement.arrow,
+                    child: CustomPaint(
+                      painter: _ArrowPathPainter(
+                        background,
+                        _arrowFromDirection(direction),
+                      ),
+                    ),
                   ),
-                  child: builder(context),
+                LayoutId(
+                  id: _ListPopupLayoutElement.body,
+                  child: child,
                 ),
+              ],
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: background,
+                  borderRadius: BorderRadius.circular(5.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3473),
+                      offset: const Offset(0.0, 30.0),
+                      blurRadius: 30,
+                    )
+                  ],
+                ),
+                child: builder(context),
               ),
             ),
-          ],
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -163,7 +190,7 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
         BoxConstraints.loose(size),
       );
     }
-    
+
     Size bodySize = layoutChild(
       _ListPopupLayoutElement.body,
       width == null

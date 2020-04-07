@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/arrow_popup.dart';
-import 'package:rive_editor/widgets/popup/base_popup.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 
 /// A widget that opens a tooltip when it is hovered.
@@ -75,7 +74,7 @@ class TipContext {
 
   BuildContext _nextContext;
   Tip _nextTip;
-  Popup _currentPopup;
+  ArrowPopup _currentPopup;
   Tip _currentTip;
   Timer _timer;
   int _suppressionCount = 0;

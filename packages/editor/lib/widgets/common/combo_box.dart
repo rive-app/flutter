@@ -274,7 +274,9 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
                   focusNode: _focusNode,
                   onChanged: _textInputChanged,
                   onSubmitted: (text) {
-                    widget.change(_popup.focus.option);
+                    var option = _popup.focus.option;
+                    _close();
+                    widget.change(option);
                   },
                 ),
               ),
@@ -286,10 +288,12 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
   void _opened() {
     _focusNode?.removeListener(_focusChange);
     if (widget.typeahead) {
-      _focusNode = FocusNode(canRequestFocus: true);
-      _focusNode.addListener(_focusChange);
-      _controller = TextEditingController(text: '');
-      _focusNode.requestFocus();
+      setState(() {
+        _focusNode = FocusNode(canRequestFocus: true);
+        _focusNode.addListener(_focusChange);
+        _controller = TextEditingController(text: '');
+        _focusNode.requestFocus();
+      });
     }
   }
 
@@ -332,9 +336,9 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         itemBuilder: (context, item, isHovered) => Align(
           alignment: Alignment.centerLeft,
           child: Padding(
-            padding: const EdgeInsets.only(
-                left: ComboBox._horizontalPadding,
-                right: ComboBox._horizontalPadding),
+            padding: const EdgeInsets.symmetric(
+              horizontal: ComboBox._horizontalPadding,
+            ),
             child: Text(
               widget.toLabel == null
                   ? item.option.toString()
@@ -354,15 +358,18 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
   }
 
   void _close() {
+    _controller?.clear();
     _focusNode?.removeListener(_focusChange);
-    _focusNode = null;
     _popup?.close();
     setState(() {
       _popup = null;
+      _focusNode = null;
+      _controller = null;
     });
   }
 
   void _focusChange() {
+    _placePopup();
     if (!_focusNode.hasPrimaryFocus) {
       _close();
     } else {
@@ -372,9 +379,13 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
   }
 
   Future<void> _textInputChanged(String value) async {
+    var popup = _popup;
     var list = await _filter(value) ?? [];
+    // Popup could've changed while we were waiting for results.
+    if(popup != _popup) {
+      return;
+    }
     // Wrap our items in PopupListItem.
-
     var values = list
         .map((option) => _ComboOption(option, widget.change))
         .toList(growable: false);
@@ -382,7 +393,11 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     if (values.isNotEmpty) {
       _popup.focus = values.first;
     }
+    _placePopup();
   }
+
+  // Convenience method to trigger relayout of the type-ahead results.
+  void _placePopup() => _popup?.arrowPopup?.contextRect?.updateRect(context);
 
   Future<List<T>> _filter(String value) async {
     if (widget.retriever != null) {

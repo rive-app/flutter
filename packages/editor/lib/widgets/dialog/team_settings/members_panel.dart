@@ -149,12 +149,6 @@ class _InvitePanelState extends State<InvitePanel> {
       _api.autocomplete(input);
 
   @override
-  void dispose() {
-    cancelDebounce(_startTypeahead);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
 
@@ -209,11 +203,10 @@ class _InvitePanelState extends State<InvitePanel> {
                                     setState(() {
                                       _inviteQueue.add(UserInvite(
                                           val.ownerId, val.displayName));
-                                      debounce(_startTypeahead);
+                                          _startTypeahead();
                                     });
                                   },
                                   toLabel: (user) {
-                                    print("USER IS $user");
                                     if (user == null) {
                                       return 'Invite a member...';
                                     }
