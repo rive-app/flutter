@@ -16,6 +16,7 @@ import 'package:rive_editor/widgets/dialog/team_settings/user_invite_box.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
 extension TeamRoleOptions on TeamRole {
   static List<String> get names =>
@@ -177,11 +178,17 @@ class _InvitePanelState extends State<InvitePanel> {
                             runSpacing: 10,
                             children: [
                               ..._inviteQueue.map(
-                                  (e) => UserInviteBox(e.name, onRemove: () {
-                                        setState(() {
-                                          _inviteQueue.remove(e);
-                                        });
-                                      })),
+                                (e) => UserInviteBox(
+                                  e.name,
+                                  onRemove: () {
+                                    setState(
+                                      () {
+                                        _inviteQueue.remove(e);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 10),
@@ -203,8 +210,19 @@ class _InvitePanelState extends State<InvitePanel> {
                                     setState(() {
                                       _inviteQueue.add(UserInvite(
                                           val.ownerId, val.displayName));
-                                          _startTypeahead();
+                                      _startTypeahead();
                                     });
+                                  },
+                                  leadingBuilder: (context, isHovered, item) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 5),
+                                      child: AvatarView(
+                                        diameter: 20,
+                                        borderWidth: 0,
+                                        imageUrl: item.avatar,
+                                        color: Colors.transparent,
+                                      ),
+                                    );
                                   },
                                   toLabel: (user) {
                                     if (user == null) {

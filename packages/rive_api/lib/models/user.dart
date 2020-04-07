@@ -53,6 +53,7 @@ class RiveUser extends RiveOwner {
       ownerId: data.getInt('i'),
       username: data.getString('n'),
       name: data.getString('l'),
+      avatar: data.getString('a'),
     );
   }
 

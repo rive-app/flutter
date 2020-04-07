@@ -14,6 +14,8 @@ import 'editor_text_field.dart';
 typedef ChooseOption<T> = void Function(T);
 typedef OptionToLabel<T> = String Function(T);
 typedef OptionRetriever<T> = Future<List<T>> Function(String);
+typedef OptionBuilder<T> = Widget Function(
+    BuildContext context, bool isHovered, T option);
 
 class _ComboOption<T> extends PopupListItem {
   final T option;
@@ -73,6 +75,7 @@ class ComboBox<T> extends StatefulWidget {
   final double popupWidth;
   final ChooseOption<T> change;
   final OptionToLabel<T> toLabel;
+  final OptionBuilder<T> leadingBuilder;
   final OptionRetriever<T> retriever;
   final bool typeahead;
   final Alignment alignment;
@@ -96,6 +99,7 @@ class ComboBox<T> extends StatefulWidget {
     this.popupWidth,
     this.change,
     this.toLabel,
+    this.leadingBuilder,
     this.underlineColor,
     this.contentPadding,
     this.typeahead = false,
@@ -339,16 +343,22 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
             padding: const EdgeInsets.symmetric(
               horizontal: ComboBox._horizontalPadding,
             ),
-            child: Text(
-              widget.toLabel == null
-                  ? item.option.toString()
-                  : widget.toLabel(item.option),
-              style: theme.textStyles.basic.copyWith(
-                color: isHovered || widget.value == item.option
-                    ? Colors.white
-                    : const Color(0xFF8C8C8C),
-              ),
-            ),
+            child: widget.leadingBuilder != null
+                ? Row(
+                    children: [
+                      widget.leadingBuilder(context, isHovered, item.option),
+                      _optionItemText(
+                        item.option,
+                        isHovered,
+                        theme.textStyles.basic,
+                      ),
+                    ],
+                  )
+                : _optionItemText(
+                    item.option,
+                    isHovered,
+                    theme.textStyles.basic,
+                  ),
           ),
         ),
         width: width,
@@ -356,6 +366,15 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
       _opened();
     });
   }
+
+  Widget _optionItemText(T option, bool isHovered, TextStyle style) => Text(
+        widget.toLabel == null ? option.toString() : widget.toLabel(option),
+        style: style.copyWith(
+          color: isHovered || widget.value == option
+              ? Colors.white
+              : const Color(0xFF8C8C8C),
+        ),
+      );
 
   void _close() {
     _controller?.clear();
@@ -382,7 +401,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     var popup = _popup;
     var list = await _filter(value) ?? [];
     // Popup could've changed while we were waiting for results.
-    if(popup != _popup) {
+    if (popup != _popup) {
       return;
     }
     // Wrap our items in PopupListItem.

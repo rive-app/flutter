@@ -55,7 +55,7 @@ class RiveArtists {
   Future<List<RiveUser>> autocomplete(String text) async {
     try {
       var response = await api.get(
-          api.host + '/api/search/ac/artists/${Uri.encodeComponent(text)}');
+          api.host + '/api/search/ac/avatar_artists/${Uri.encodeComponent(text)}');
 
       if (response.statusCode == 200) {
         List data;

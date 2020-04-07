@@ -47,12 +47,14 @@ class AvatarView extends StatelessWidget {
   final String imageUrl;
   final Color color;
   final double diameter;
+  final double borderWidth;
 
   const AvatarView({
     @required this.imageUrl,
     @required this.color,
     Key key,
     this.diameter = 30,
+    this.borderWidth = 2,
   }) : super(key: key);
 
   @override
@@ -64,11 +66,18 @@ class AvatarView extends StatelessWidget {
         height: diameter,
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: color, width: 2),
+            border: Border.all(color: color, width: borderWidth),
             borderRadius: BorderRadius.circular(diameter / 2),
           ),
           child: CircleAvatar(
-            child: hasImage ? null : Center(child: Icon(Icons.person)),
+            child: hasImage
+                ? null
+                : Center(
+                    child: Icon(
+                      Icons.person,
+                      size: diameter,
+                    ),
+                  ),
             backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
           ),
         ),
