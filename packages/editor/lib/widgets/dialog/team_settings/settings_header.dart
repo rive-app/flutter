@@ -21,6 +21,30 @@ class SettingsHeader extends StatelessWidget {
     final textStyles = theme.textStyles;
     final riveColors = theme.colors;
 
+    List<Widget> children = [];
+    if (avatarPath == null) {
+      children.addAll([
+        const Positioned.fill(
+            child: CustomPaint(
+                painter: _DashedCirclePainter(
+          radius: 25,
+        ))),
+        Center(
+            child: TintedIcon(color: riveColors.fileIconColor, icon: 'image'))
+      ]);
+    } else {
+      children.add(Center(
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: CircleAvatar(
+            backgroundColor: Colors.transparent,
+            backgroundImage: NetworkImage(avatarPath),
+          ),
+        ),
+      ));
+    }
+
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
         child: Row(
@@ -32,31 +56,7 @@ class SettingsHeader extends StatelessWidget {
               height: 50,
               child: GestureDetector(
                 onTap: changeAvatar,
-                child: Stack(
-                  children: [
-                    if (avatarPath == null) ...[
-                      const Positioned.fill(
-                          child: CustomPaint(
-                              painter: _DashedCirclePainter(
-                        radius: 25,
-                      ))),
-                      Center(
-                          child: TintedIcon(
-                              color: riveColors.fileIconColor, icon: 'image'))
-                    ],
-                    if (avatarPath != null)
-                      Center(
-                        child: SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: CircleAvatar(
-                            backgroundColor: Colors.transparent,
-                            backgroundImage: NetworkImage(avatarPath),
-                          ),
-                        ),
-                      )
-                  ],
-                ),
+                child: Stack(children: children),
               ),
             ),
             const SizedBox(width: 10),
