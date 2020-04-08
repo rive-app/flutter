@@ -122,8 +122,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     // delegate.
     if (worldTransformed) {
       _delegate?.boundsChanged();
-    }
-    if (stopsChanged) {
+    } else if (stopsChanged) {
       _delegate?.stopsChanged();
     }
   }
@@ -140,5 +139,29 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     } else {
       _delegate = null;
     }
+  }
+
+  @override
+  void startXChanged(double from, double to) {
+    super.startXChanged(from, to);
+    addDirt(ComponentDirt.worldTransform);
+  }
+
+  @override
+  void startYChanged(double from, double to) {
+    super.startYChanged(from, to);
+    addDirt(ComponentDirt.worldTransform);
+  }
+
+  @override
+  void endXChanged(double from, double to) {
+    super.endXChanged(from, to);
+    addDirt(ComponentDirt.worldTransform);
+  }
+
+  @override
+  void endYChanged(double from, double to) {
+    super.endYChanged(from, to);
+    addDirt(ComponentDirt.worldTransform);
   }
 }

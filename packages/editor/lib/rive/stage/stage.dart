@@ -11,6 +11,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
+import 'package:rive_core/shapes/paint/radial_gradient.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -26,6 +27,7 @@ import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
+import 'package:rive_editor/rive/stage/items/stage_radial_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
@@ -36,6 +38,7 @@ import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
+import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 
 typedef CustomSelectionHandler = bool Function(StageItem);
 
@@ -357,6 +360,9 @@ class Stage extends Debouncer {
   void mouseDrag(int button, double x, double y) {
     _computeWorldMouse(x, y);
     file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
+    // Store the tool that got activated by this operation separate from the
+    // _activeTool so we can know if we were already dragging.
+    StageTool activatedTool;
     switch (button) {
       case 2:
         double dx = x - _lastMousePosition[0];
@@ -371,16 +377,25 @@ class Stage extends Debouncer {
         markNeedsAdvance();
         break;
       case 1:
-        // [tool] is set to its value in the tool setter.
+        if (tool is TransformingTool) {
+          if (_activeTool == null) {
+            activatedTool = tool;
+            activatedTool.setEditMode(activeEditMode);
+            (activatedTool as TransformingTool).startTransformers(
+                file.selection.items.whereType<StageItem>(), _worldMouse);
+          } else {
+            (_activeTool as TransformingTool).advanceTransformers(_worldMouse);
+          }
+        }
         if (tool is DraggableTool) {
           var artboard = activeArtboard;
           var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
 
           // [_activeTool] is [null] before dragging operation starts.
           if (_activeTool == null) {
-            _activeTool = tool;
-            _activeTool.setEditMode(activeEditMode);
-            (_activeTool as DraggableTool).startDrag(
+            activatedTool = tool;
+            activatedTool.setEditMode(activeEditMode);
+            (activatedTool as DraggableTool).startDrag(
                 file.selection.items.whereType<StageItem>(),
                 artboard,
                 worldMouse);
@@ -391,6 +406,10 @@ class Stage extends Debouncer {
           }
         }
         break;
+    }
+
+    if (activatedTool != null) {
+      _activeTool = activatedTool;
     }
   }
 
@@ -403,8 +422,19 @@ class Stage extends Debouncer {
       // show a popup.
     }
 
-    if (_activeTool is DraggableTool && _activeTool != null) {
+    bool toolCompleted = false;
+
+    // See if either a drag or transform operation was in progress.
+    if (_activeTool is TransformingTool) {
+      (_activeTool as TransformingTool).completeTransformers();
+      toolCompleted = true;
+    }
+    if (_activeTool is DraggableTool) {
       (_activeTool as DraggableTool).endDrag();
+      toolCompleted = true;
+    }
+
+    if (toolCompleted) {
       _activeTool = null;
       file.core.captureJournalEntry();
       markNeedsAdvance();
@@ -636,6 +666,7 @@ class Stage extends Debouncer {
     PointsPathBase.typeKey: () => StagePath(),
     StraightVertexBase.typeKey: () => StageVertex(),
     LinearGradientBase.typeKey: () => StageLinearGradient(),
+    RadialGradientBase.typeKey: () => StageRadialGradient(),
     GradientStopBase.typeKey: () => StageGradientStop(),
   };
 

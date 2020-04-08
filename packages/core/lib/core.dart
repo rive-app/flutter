@@ -18,7 +18,6 @@ import 'debounce.dart';
 
 export 'package:fractional/fractional.dart';
 export 'package:core/id.dart';
-export 'src/list_equality.dart';
 
 final log = Logger('Core');
 
