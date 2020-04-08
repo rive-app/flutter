@@ -292,6 +292,7 @@ const double _arrowRadius = 6;
 
 class _ArrowPathPainter extends CustomPainter {
   final Color color;
+
   /// This is hideous, but passing the layout delegate lets us get the computed
   /// layout direction and determine the arrow path at rendertime. Also the
   /// hideousness is self contained to this file, so no one outside of here has
@@ -320,7 +321,14 @@ class _ArrowPathPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    var path = _arrowFromDirection(layoutDelegate.bestDirection);
+    // best direction is null sometimes, but not always
+    // for example, on the 'new team' button, this turns to null
+    // when you quickly move the mouse out into the File's center panel.
+    var direction = (layoutDelegate.bestDirection == null)
+        ? layoutDelegate.direction
+        : layoutDelegate.bestDirection;
+
+    var path = _arrowFromDirection(direction);
     canvas.drawPath(
       path,
       Paint()
