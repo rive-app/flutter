@@ -333,11 +333,15 @@ class _ArrowPathPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Layout delegate hasn't updated yet.
-    if (layoutDelegate.bestDirection == null) {
+    // Use the best available direction, note that now we'll propagate the
+    // direction if the delegate updates without triggering a re-layout (which
+    // was causing some of the issues here).
+    var direction = layoutDelegate.bestDirection ?? layoutDelegate.direction;
+    if (direction == null) {
+      // Layout delegate hasn't updated yet.
       return;
     }
-    var path = _arrowFromDirection(layoutDelegate.bestDirection);
+    var path = _arrowFromDirection(direction);
     canvas.drawPath(
       path,
       Paint()

@@ -5,7 +5,7 @@ class RiveProfile {
   String name;
   String username;
   String website;
-  String bio;
+  String blurb;
   String location;
   String twitter;
   String instagram;
@@ -21,7 +21,7 @@ class RiveProfile {
     this.name,
     this.username,
     this.website,
-    this.bio,
+    this.blurb,
     this.location,
     this.twitter,
     this.instagram,
@@ -39,7 +39,7 @@ class RiveProfile {
           name: owner.name,
           username: owner.username,
           website: data.getString('website'),
-          bio: data.getString('bio'),
+          blurb: data.getString('blurb'),
           location: data.getString('location'),
           twitter: data.getString('twitter'),
           instagram: data.getString('instagram'),

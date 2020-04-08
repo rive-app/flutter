@@ -70,7 +70,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
 
     return ComboBox<TeamsOption>(
       popupWidth: 100,
-      sizing: ComboSizing.expanded,
+      sizing: ComboSizing.sized,
       underline: true,
       underlineColor: colors.inputUnderline,
       valueColor: textStyles.fileGreyTextLarge.color,
@@ -89,7 +89,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
 
     return ComboBox<BillingFrequency>(
       popupWidth: 100,
-      sizing: ComboSizing.expanded,
+      sizing: ComboSizing.sized,
       underline: true,
       underlineColor: colors.inputUnderline,
       valueColor: textStyles.fileGreyTextLarge.color,

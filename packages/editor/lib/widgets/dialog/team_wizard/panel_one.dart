@@ -69,7 +69,7 @@ class TeamWizardPanelOne extends StatelessWidget {
                       width: 71,
                       child: ComboBox<BillingFrequency>(
                         popupWidth: 100,
-                        sizing: ComboSizing.expanded,
+                        sizing: ComboSizing.sized,
                         underline: true,
                         underlineColor: colors.inputUnderline,
                         valueColor: textStyles.fileGreyTextLarge.color,

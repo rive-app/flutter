@@ -23,7 +23,6 @@ class ProfileSettings extends StatefulWidget {
 
 class _ProfileSettingsState extends State<ProfileSettings> {
   ProfilePackage _profile;
-  RiveProfilesApi _profilesApi;
 
   @override
   void initState() {
@@ -31,18 +30,20 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
     final owner = widget.owner;
 
-    _profilesApi = RiveProfilesApi(widget.api);
     ProfilePackage.getProfile(widget.api, owner).then((value) {
-      setState(() {
-        _profile = value;
-        _profile.addListener(_onProfileChange);
-      });
+      // TODO: user future builder.
+      if (mounted) {
+        setState(() {
+          _profile = value;
+          _profile.addListener(_onProfileChange);
+        });
+      }
     });
   }
 
   @override
   void dispose() {
-    _profile.dispose();
+    _profile?.dispose();
     super.dispose();
   }
 
@@ -134,8 +135,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                                 SettingsTextField(
                                   label: 'Bio',
                                   hint: 'Tell users a bit about your team',
-                                  onChanged: (value) => _profile.bio = value,
-                                  initialValue: _profile.bio,
+                                  onChanged: (value) => _profile.blurb = value,
+                                  initialValue: _profile.blurb,
                                 )
                               ])
                             ])),
@@ -329,10 +330,8 @@ class ProfilePackage with ChangeNotifier {
     return null;
   }
 
-  Future<void> submitChanges(RiveApi api, RiveOwner owner) async {
-    var response =
-        await RiveProfilesApi(api).updateInfo(owner, profile: _profile);
-  }
+  Future<void> submitChanges(RiveApi api, RiveOwner owner) async =>
+      RiveProfilesApi(api).updateInfo(owner, profile: _profile);
 
   String get name => _profile.name;
   set name(String value) {
@@ -362,10 +361,10 @@ class ProfilePackage with ChangeNotifier {
     notifyListeners();
   }
 
-  String get bio => _profile.bio;
-  set bio(String value) {
-    if (value == _profile.bio) return;
-    _profile.bio = value;
+  String get blurb => _profile.blurb;
+  set blurb(String value) {
+    if (value == _profile.blurb) return;
+    _profile.blurb = value;
     notifyListeners();
   }
 

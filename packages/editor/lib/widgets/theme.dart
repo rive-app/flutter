@@ -263,7 +263,7 @@ class TextStyles {
   // Wizard TextField
   // Common
   TextStyle get textFieldInputHint => const TextStyle(
-      fontFamily: 'Roboto-Medium', color: Color(0xFFBBBBBB), fontSize: 16);
+      fontFamily: 'Roboto-Regular', color: Color(0xFFBBBBBB), fontSize: 16);
 
   TextStyle get textFieldInputValidationError =>
       const TextStyle(fontFamily: 'Roboto-Medium', color: red, fontSize: 13);
