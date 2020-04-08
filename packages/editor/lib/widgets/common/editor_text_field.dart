@@ -13,9 +13,11 @@ class EditorTextField extends StatefulWidget {
   final Color color;
   final Color editingColor;
   final ValueChanged<String> onSubmitted;
+  final ValueChanged<String> onChanged;
   final bool allowDrag;
   final void Function(double) drag;
   final void Function() completeDrag;
+  final TextStyle style;
 
   const EditorTextField({
     @required this.controller,
@@ -23,9 +25,13 @@ class EditorTextField extends StatefulWidget {
     this.color,
     this.editingColor,
     this.onSubmitted,
+    this.onChanged,
     this.allowDrag = true,
     this.drag,
     this.completeDrag,
+    this.style = const TextStyle(
+      fontSize: 13,
+    ),
     Key key,
   }) : super(key: key);
 
@@ -133,8 +139,7 @@ class _EditorTextFieldState extends State<EditorTextField>
           focusNode: widget.focusNode,
           cursorColor: widget.editingColor ?? widget.color,
           backgroundCursorColor: widget.editingColor ?? widget.color,
-          style: TextStyle(
-            fontSize: 13,
+          style: widget.style.copyWith(
             color: widget.editingColor ?? widget.color,
           ),
           selectionControls: selectionControls,
@@ -146,6 +151,7 @@ class _EditorTextFieldState extends State<EditorTextField>
           keyboardType: TextInputType.multiline,
           selectionColor: RiveTheme.of(context).colors.textSelection,
           onSubmitted: widget.onSubmitted,
+          onChanged: widget.onChanged,
           scrollPhysics: const NeverScrollableScrollPhysics(),
         ),
       ),

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/arrow_popup.dart';
-import 'package:rive_editor/widgets/popup/base_popup.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 
 /// A widget that opens a tooltip when it is hovered.
@@ -61,10 +60,15 @@ class Tip {
   /// works.
   final PopupDirection direction;
 
+  /// Alternative directions used when the desired one would result in an
+  /// off-screen layout.
+  final List<PopupDirection> fallbackDirections;
+
   const Tip({
     this.label,
     this.shortcut,
     this.direction = PopupDirection.bottomToCenter,
+    this.fallbackDirections = PopupDirection.all,
   });
 }
 
@@ -75,7 +79,7 @@ class TipContext {
 
   BuildContext _nextContext;
   Tip _nextTip;
-  Popup _currentPopup;
+  ArrowPopup _currentPopup;
   Tip _currentTip;
   Timer _timer;
   int _suppressionCount = 0;
@@ -176,6 +180,8 @@ class TipContext {
         width: null,
 
         direction: _currentTip.direction,
+        fallbackDirections: _currentTip.fallbackDirections,
+        
         builder: (context) => Padding(
           padding: const EdgeInsets.all(15),
           child: _buildTip(context, _currentTip),

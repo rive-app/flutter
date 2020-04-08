@@ -463,8 +463,12 @@ class NavigationPanel extends StatelessWidget {
                             label: 'New Team',
                             icon: 'teams-button',
                             tip: const Tip(
-                                label: 'Create a new team',
-                                direction: PopupDirection.topToCenter),
+                              label: 'Create a new team',
+                              direction: PopupDirection.bottomToCenter,
+                              fallbackDirections: [
+                                PopupDirection.topToCenter,
+                              ],
+                            ),
                             onTap: () => showTeamWizard<void>(
                               context: context,
                             ),

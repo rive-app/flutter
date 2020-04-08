@@ -57,7 +57,8 @@ typedef ListPopupItemEvent<T> = void Function(BuildContext context, T item);
 /// Consider re-architecting this in the future as there is quite a bit of
 /// complexity with the management of the sub-popups.
 class ListPopup<T extends PopupListItem> {
-  Popup _popup;
+  ArrowPopup _arrow;
+  ArrowPopup get arrowPopup => _arrow;
   final ListPopup<T> parent;
   final ListPopupItemBuilder<T> itemBuilder;
   final bool handleKeyPresses;
@@ -93,7 +94,7 @@ class ListPopup<T extends PopupListItem> {
   }
 
   /// Whether this popup is open and visible.
-  bool get isOpen => Popup.isOpen(_popup);
+  bool get isOpen => Popup.isOpen(_arrow.popup);
 
   /// Called to let the list know one of the widgets representing an item was
   /// hovered.
@@ -110,7 +111,7 @@ class ListPopup<T extends PopupListItem> {
       return;
     }
     _subPopup.closeSubPopup();
-    Popup.remove(_subPopup._popup);
+    Popup.remove(_subPopup._arrow.popup);
     // _parent.focus = null;
     _child = null;
     _subPopup = null;
@@ -120,7 +121,7 @@ class ListPopup<T extends PopupListItem> {
   bool close() {
     parent?._child = null;
     focus = null;
-    return Popup.remove(_popup);
+    return Popup.remove(_arrow.popup);
   }
 
   /// Move the focus down, cycle back to the top if we hit the bottom.
@@ -279,7 +280,7 @@ class ListPopup<T extends PopupListItem> {
       handleKeyPresses: handleKeyPresses,
     );
 
-    list._popup = ArrowPopup.show(
+    list._arrow = ArrowPopup.show(
       context,
       width: width,
       offset: offset,

@@ -34,7 +34,7 @@ class TopNav extends StatelessWidget {
             valueColor: riveColors.toolbarButton,
             options: fileBrowser.sortOptions.value,
             value: sortOption,
-            toLabel: (option) => option.name,
+            toLabel: (option) => option?.name ?? '',
             change: (option) => fileBrowser.loadFileList(sortOption: option),
           ),
         ),

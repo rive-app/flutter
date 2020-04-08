@@ -9,9 +9,13 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
+import 'editor_text_field.dart';
+
 typedef ChooseOption<T> = void Function(T);
 typedef OptionToLabel<T> = String Function(T);
 typedef OptionRetriever<T> = Future<List<T>> Function(String);
+typedef OptionBuilder<T> = Widget Function(
+    BuildContext context, bool isHovered, T option);
 
 class _ComboOption<T> extends PopupListItem {
   final T option;
@@ -71,11 +75,13 @@ class ComboBox<T> extends StatefulWidget {
   final double popupWidth;
   final ChooseOption<T> change;
   final OptionToLabel<T> toLabel;
+  final OptionBuilder<T> leadingBuilder;
   final OptionRetriever<T> retriever;
   final bool typeahead;
   final Alignment alignment;
   final EdgeInsetsGeometry contentPadding;
   final Event trigger;
+  final TextStyle valueTextStyle;
 
   static const double _chevronWidth = 5;
   static const double _horizontalPadding = 15;
@@ -93,12 +99,14 @@ class ComboBox<T> extends StatefulWidget {
     this.popupWidth,
     this.change,
     this.toLabel,
+    this.leadingBuilder,
     this.underlineColor,
     this.contentPadding,
     this.typeahead = false,
     this.alignment = Alignment.topLeft,
     this.trigger,
     this.cursorColor,
+    this.valueTextStyle,
   }) : super(key: key);
 
   @override
@@ -262,32 +270,18 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
                 minWidth: 10,
               ),
               child: IntrinsicWidth(
-                child: TextField(
-                  cursorColor: widget.cursorColor,
+                child: EditorTextField(
+                  allowDrag: false,
+                  color: widget.valueColor,
+                  style: widget.valueTextStyle,
                   controller: _controller,
                   focusNode: _focusNode,
                   onChanged: _textInputChanged,
                   onSubmitted: (text) {
-                    widget.change(_popup.focus.option);
+                    var option = _popup.focus.option;
+                    _close();
+                    widget.change(option);
                   },
-                  style:
-                      theme.textStyles.basic.copyWith(color: widget.valueColor),
-                  textAlignVertical: TextAlignVertical.top,
-                  textAlign: TextAlign.left,
-                  decoration: InputDecoration(
-                    hintText: label,
-                    hintStyle: theme.textStyles.basic
-                        .copyWith(color: widget.valueColor),
-                    isDense: true,
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    border: InputBorder.none,
-                    filled: false,
-                    focusedBorder: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    errorBorder: InputBorder.none,
-                    disabledBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
                 ),
               ),
             ),
@@ -298,10 +292,12 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
   void _opened() {
     _focusNode?.removeListener(_focusChange);
     if (widget.typeahead) {
-      _focusNode = FocusNode(canRequestFocus: true);
-      _focusNode.addListener(_focusChange);
-      _controller = TextEditingController(text: '');
-      _focusNode.requestFocus();
+      setState(() {
+        _focusNode = FocusNode(canRequestFocus: true);
+        _focusNode.addListener(_focusChange);
+        _controller = TextEditingController(text: '');
+        _focusNode.requestFocus();
+      });
     }
   }
 
@@ -344,19 +340,25 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         itemBuilder: (context, item, isHovered) => Align(
           alignment: Alignment.centerLeft,
           child: Padding(
-            padding: const EdgeInsets.only(
-                left: ComboBox._horizontalPadding,
-                right: ComboBox._horizontalPadding),
-            child: Text(
-              widget.toLabel == null
-                  ? item.option.toString()
-                  : widget.toLabel(item.option),
-              style: theme.textStyles.basic.copyWith(
-                color: isHovered || widget.value == item.option
-                    ? Colors.white
-                    : const Color(0xFF8C8C8C),
-              ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: ComboBox._horizontalPadding,
             ),
+            child: widget.leadingBuilder != null
+                ? Row(
+                    children: [
+                      widget.leadingBuilder(context, isHovered, item.option),
+                      _optionItemText(
+                        item.option,
+                        isHovered,
+                        theme.textStyles.basic,
+                      ),
+                    ],
+                  )
+                : _optionItemText(
+                    item.option,
+                    isHovered,
+                    theme.textStyles.basic,
+                  ),
           ),
         ),
         width: width,
@@ -365,16 +367,28 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     });
   }
 
+  Widget _optionItemText(T option, bool isHovered, TextStyle style) => Text(
+        widget.toLabel == null ? option.toString() : widget.toLabel(option),
+        style: style.copyWith(
+          color: isHovered || widget.value == option
+              ? Colors.white
+              : const Color(0xFF8C8C8C),
+        ),
+      );
+
   void _close() {
+    _controller?.clear();
     _focusNode?.removeListener(_focusChange);
-    _focusNode = null;
     _popup?.close();
     setState(() {
       _popup = null;
+      _focusNode = null;
+      _controller = null;
     });
   }
 
   void _focusChange() {
+    _placePopup();
     if (!_focusNode.hasPrimaryFocus) {
       _close();
     } else {
@@ -384,9 +398,13 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
   }
 
   Future<void> _textInputChanged(String value) async {
+    var popup = _popup;
     var list = await _filter(value) ?? [];
+    // Popup could've changed while we were waiting for results.
+    if (popup != _popup) {
+      return;
+    }
     // Wrap our items in PopupListItem.
-
     var values = list
         .map((option) => _ComboOption(option, widget.change))
         .toList(growable: false);
@@ -394,7 +412,11 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     if (values.isNotEmpty) {
       _popup.focus = values.first;
     }
+    _placePopup();
   }
+
+  // Convenience method to trigger relayout of the type-ahead results.
+  void _placePopup() => _popup?.arrowPopup?.contextRect?.updateRect(context);
 
   Future<List<T>> _filter(String value) async {
     if (widget.retriever != null) {
@@ -406,9 +428,8 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         .toList(growable: false);
   }
 
-  String itemLabel(T item) => item == null
-      ? ''
-      : widget.toLabel == null ? item.toString() : widget.toLabel(item);
+  String itemLabel(T item) =>
+      widget.toLabel == null ? item?.toString() ?? '' : widget.toLabel(item);
 
   String get label => itemLabel(widget.value);
 
@@ -424,8 +445,8 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
               _typeahead(
                 Text(
                   label,
-                  style:
-                      theme.textStyles.basic.copyWith(color: widget.valueColor),
+                  style: (widget.valueTextStyle ?? theme.textStyles.basic)
+                      .copyWith(color: widget.valueColor),
                 ),
                 theme: theme,
               ),

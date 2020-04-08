@@ -16,6 +16,7 @@ import 'package:rive_editor/widgets/dialog/team_settings/user_invite_box.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
 extension TeamRoleOptions on TeamRole {
   static List<String> get names =>
@@ -149,12 +150,6 @@ class _InvitePanelState extends State<InvitePanel> {
       _api.autocomplete(input);
 
   @override
-  void dispose() {
-    cancelDebounce(_startTypeahead);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
 
@@ -183,40 +178,66 @@ class _InvitePanelState extends State<InvitePanel> {
                             runSpacing: 10,
                             children: [
                               ..._inviteQueue.map(
-                                  (e) => UserInviteBox(e.name, onRemove: () {
-                                        setState(() {
-                                          _inviteQueue.remove(e);
-                                        });
-                                      })),
-                              ComboBox<RiveUser>(
-                                trigger: _openCombo,
-                                // Start with an empty value.
-                                value: null,
-                                sizing: ComboSizing.collapsed,
-                                popupSizing: ComboPopupSizing.content,
-                                typeahead: true,
-                                underline: false,
-                                chevron: false,
-                                valueColor: colors.commonButtonTextColorDark,
-                                cursorColor: colors.commonButtonTextColorDark,
-                                retriever: _autocomplete,
-                                change: (val) {
-                                  setState(() {
-                                    _inviteQueue.add(UserInvite(
-                                        val.ownerId, val.displayName));
-                                    debounce(_startTypeahead);
-                                  });
-                                },
-                                toLabel: (user) {
-                                  var label = '';
-                                  if (user.name != null) {
-                                    label = '${user.name} ';
-                                  }
-                                  if (user.username != null) {
-                                    label += '@${user.username}';
-                                  }
-                                  return label;
-                                },
+                                (e) => UserInviteBox(
+                                  e.name,
+                                  onRemove: () {
+                                    setState(
+                                      () {
+                                        _inviteQueue.remove(e);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: ComboBox<RiveUser>(
+                                  trigger: _openCombo,
+                                  // Start with an empty value.
+                                  value: null,
+                                  sizing: ComboSizing.collapsed,
+                                  popupSizing: ComboPopupSizing.content,
+                                  typeahead: true,
+                                  underline: false,
+                                  chevron: false,
+                                  valueColor: colors.inactiveText,
+                                  cursorColor: colors.commonButtonTextColorDark,
+                                  valueTextStyle:
+                                      RiveTheme.of(context).textStyles.basic,
+                                  retriever: _autocomplete,
+                                  change: (val) {
+                                    setState(() {
+                                      _inviteQueue.add(UserInvite(
+                                          val.ownerId, val.displayName));
+                                      _startTypeahead();
+                                    });
+                                  },
+                                  leadingBuilder: (context, isHovered, item) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 5),
+                                      child: AvatarView(
+                                        diameter: 20,
+                                        borderWidth: 0,
+                                        imageUrl: item.avatar,
+                                        color: Colors.transparent,
+                                      ),
+                                    );
+                                  },
+                                  toLabel: (user) {
+                                    if (user == null) {
+                                      return 'Invite a member...';
+                                    }
+                                    var label = '';
+                                    if (user.name != null) {
+                                      label = '${user.name} ';
+                                    }
+                                    if (user.username != null) {
+                                      label += '@${user.username}';
+                                    }
+                                    return label;
+                                  },
+                                ),
                               ),
                             ]),
                       ),
