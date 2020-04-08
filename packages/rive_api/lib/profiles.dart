@@ -24,8 +24,8 @@ class RiveProfilesApi<T extends RiveOwner> {
   Future<void> _updateTeamInfo(RiveTeam team, RiveProfile profile) async {
     var teamId = team.ownerId;
     String payload = jsonEncode({
-      'teamName': team.name,
-      'teamUsername': team.username,
+      'name': profile.name,
+      'username': profile.username,
       'location': profile.location,
       'website': profile.website,
       'blurb': profile.blurb,
