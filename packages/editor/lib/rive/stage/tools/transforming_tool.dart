@@ -87,6 +87,11 @@ mixin TransformingTool {
       var mutableSelection = Set<StageItem>.from(details.items);
 
       for (final transformer in transformers) {
+        // Because previous transformers can mutate the set...
+        if (mutableSelection.isEmpty) {
+          break;
+        }
+
         if (transformer.init(mutableSelection, details)) {
           details._transformers.add(transformer);
         }
