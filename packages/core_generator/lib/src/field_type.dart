@@ -5,8 +5,8 @@ abstract class FieldType {
   String _dartName;
   String get dartName => _dartName;
 
-  final String import;
-  FieldType(this.name, {String dartName, this.import}) {
+  final Iterable<String> imports;
+  FieldType(this.name, {String dartName, this.imports}) {
     _dartName = dartName ?? name;
     _types[name] = this;
   }

@@ -1,7 +1,13 @@
 import 'package:core_generator/src/field_type.dart';
 
 class IdFieldType extends FieldType {
-  IdFieldType() : super('Id', import: 'package:core/id.dart');
+  IdFieldType()
+      : super(
+          'Id',
+          imports: [
+            'package:core/id.dart',
+          ],
+        );
 
   @override
   String encode(String writerName, String varName) {

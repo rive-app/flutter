@@ -11,7 +11,7 @@ import 'package:rive_editor/widgets/inspector/properties/inspector_popout_compon
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.dart';
-import 'package:core/core.dart';
+import 'package:utilities/list_equality.dart';
 
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a color fill on a shape.

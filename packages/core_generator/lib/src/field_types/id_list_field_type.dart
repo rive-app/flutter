@@ -1,7 +1,11 @@
 import '../field_type.dart';
 
 class IdListFieldType extends FieldType {
-  IdListFieldType() : super('List<Id>', import: 'package:core/id.dart');
+  IdListFieldType()
+      : super('List<Id>', imports: [
+          'package:core/id.dart',
+          'package:utilities/list_equality.dart',
+        ]);
 
   @override
   String encode(String writerName, String varName) {

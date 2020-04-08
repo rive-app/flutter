@@ -117,10 +117,12 @@ class Definition {
     }
 
     for (final property in _properties) {
-      if (property.type.import == null) {
+      if (property.type.imports == null) {
         continue;
       }
-      imports.add('import \'${property.type.import}\';');
+      for (final import in property.type.imports) {
+        imports.add('import \'${import}\';');
+      }
     }
 
     // If we extend another class, we need the import for the concrete version.

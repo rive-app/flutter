@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 
 import 'package:flutter/material.dart';
+import 'package:utilities/list_equality.dart';
 
 /// Stateful widget that manages a list of [Core] elements.
 ///

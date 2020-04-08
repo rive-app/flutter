@@ -358,6 +358,9 @@ class Stage extends Debouncer {
   void mouseDrag(int button, double x, double y) {
     _computeWorldMouse(x, y);
     file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
+    // Store the tool that got activated by this operation separate from the
+    // _activeTool so we can know if we were already dragging.
+    StageTool activatedTool;
     switch (button) {
       case 2:
         double dx = x - _lastMousePosition[0];
@@ -374,9 +377,9 @@ class Stage extends Debouncer {
       case 1:
         if (tool is TransformingTool) {
           if (_activeTool == null) {
-            _activeTool = tool;
-            _activeTool.setEditMode(activeEditMode);
-            (_activeTool as TransformingTool).startTransformers(
+            activatedTool = tool;
+            activatedTool.setEditMode(activeEditMode);
+            (activatedTool as TransformingTool).startTransformers(
                 file.selection.items.whereType<StageItem>(), _worldMouse);
           } else {
             (_activeTool as TransformingTool).advanceTransformers(_worldMouse);
@@ -388,9 +391,9 @@ class Stage extends Debouncer {
 
           // [_activeTool] is [null] before dragging operation starts.
           if (_activeTool == null) {
-            _activeTool = tool;
-            _activeTool.setEditMode(activeEditMode);
-            (_activeTool as DraggableTool).startDrag(
+            activatedTool = tool;
+            activatedTool.setEditMode(activeEditMode);
+            (activatedTool as DraggableTool).startDrag(
                 file.selection.items.whereType<StageItem>(),
                 artboard,
                 worldMouse);
@@ -401,6 +404,10 @@ class Stage extends Debouncer {
           }
         }
         break;
+    }
+
+    if(activatedTool != null) {
+      _activeTool = activatedTool;
     }
   }
 

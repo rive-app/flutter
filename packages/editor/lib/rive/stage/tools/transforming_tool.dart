@@ -5,7 +5,9 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 
-class MouseTransformSpace {
+/// The current state of a mouse's translation in some transform space. Also
+/// stores previous translation and the delta between them.
+class MouseTranslation {
   Vec2D _last;
   Vec2D _current;
   Vec2D _delta;
@@ -14,7 +16,7 @@ class MouseTransformSpace {
   Vec2D get current => _current;
   Vec2D get delta => _delta;
 
-  MouseTransformSpace(Vec2D origin)
+  MouseTranslation(Vec2D origin)
       : _last = Vec2D.clone(origin),
         _current = Vec2D.clone(origin),
         _delta = Vec2D();
@@ -26,19 +28,21 @@ class MouseTransformSpace {
   }
 }
 
-class TransformDragDetails {
+/// Transform details passed to the various drag operation handlers that a
+/// transformer is expected to implement.
+class DragTransformDetails {
   final Artboard artboard;
 
-  final MouseTransformSpace world;
-  final MouseTransformSpace artboardWorld;
+  final MouseTranslation world;
+  final MouseTranslation artboardWorld;
   final List<StageItem> items = [];
   final List<StageTransformer> _transformers = [];
 
-  TransformDragDetails(this.artboard, Vec2D worldMouse)
-      : world = MouseTransformSpace(worldMouse),
+  DragTransformDetails(this.artboard, Vec2D worldMouse)
+      : world = MouseTranslation(worldMouse),
         artboardWorld = artboard == null
             ? null
-            : MouseTransformSpace(
+            : MouseTranslation(
                 Vec2D.subtract(Vec2D(), worldMouse, artboard.originWorld),
               );
 }
@@ -49,7 +53,7 @@ class TransformDragDetails {
 /// different transformers work in different spaces, we group by those spaces
 /// and create multiple versions of the transformers as necessary.
 mixin TransformingTool {
-  Map<Artboard, TransformDragDetails> _artboardTransformSpaces;
+  Map<Artboard, DragTransformDetails> _artboardTransformSpaces;
 
   /// Start a drag operation in world coordinates relative to the origin of the
   /// [activeArtboard]. The [activeArtboard] for this operation is provided as
@@ -64,7 +68,7 @@ mixin TransformingTool {
       dynamic component = item.component;
       if (component is Component) {
         var space = _artboardTransformSpaces[component.artboard] ??=
-            TransformDragDetails(component.artboard, worldMouse);
+            DragTransformDetails(component.artboard, worldMouse);
         space.items.add(item);
       }
     }

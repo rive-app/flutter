@@ -20,6 +20,8 @@ dependencies:
     path: ../rive_api
   rive_widgets:
     path: ../rive_widgets
+  utilities:
+    path: ../utilities
 
   http: ^0.12.0+4
   trotter: ^1.1.1

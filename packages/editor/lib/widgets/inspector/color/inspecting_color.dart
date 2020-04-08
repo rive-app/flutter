@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/component.dart';
 import 'package:core/core.dart' as core;
+import 'package:utilities/list_equality.dart' as utils;
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -457,7 +458,7 @@ class _ShapesInspectingColor extends InspectingColor {
   }
 
   ColorType _determineColorType() =>
-      core.equalValue<ShapePaint, ColorType>(shapePaints, (shapePaint) {
+      utils.equalValue<ShapePaint, ColorType>(shapePaints, (shapePaint) {
         // determine which concrete color type this shapePaint is using.
         var colorComponent = shapePaint.paintMutator as Component;
         if (colorComponent == null) {
@@ -494,7 +495,7 @@ class _ShapesInspectingColor extends InspectingColor {
         if (preview.value.length != 1 ||
             preview.value.first != editingColor.value.toColor()) {
           // check all colors are the same
-          Color color = core.equalValue<ShapePaint, Color>(shapePaints,
+          Color color = utils.equalValue<ShapePaint, Color>(shapePaints,
               (shapePaint) => (shapePaint.paintMutator as SolidColor).color);
           preview.value = color == null ? [] : [color];
         }
@@ -531,13 +532,13 @@ class _ShapesInspectingColor extends InspectingColor {
         // are stored in Lists, we need a custom equality check for the
         // equalValue call too.
         List<GradientStop> colorStops =
-            core.equalValue<ShapePaint, List<GradientStop>>(
+            utils.equalValue<ShapePaint, List<GradientStop>>(
           shapePaints,
           (shapePaint) =>
               (shapePaint.paintMutator as core.LinearGradient).gradientStops,
           // Override the equality check for the equalValue as we want it to use
           // listEquals
-          equalityCheck: (a, b) => core.listEquals(
+          equalityCheck: (a, b) => utils.listEquals(
             a,
             b,
             // Override the listEquals equality as in this case we consider
@@ -757,7 +758,7 @@ class _CorePropertyInspectingColor extends InspectingColor {
     if (preview.value.length != 1 ||
         preview.value.first != editingColor.value.toColor()) {
       // check all colors are the same
-      Color color = core.equalValue<core.Core, Color>(objects, _colorValue);
+      Color color = utils.equalValue<core.Core, Color>(objects, _colorValue);
       preview.value = color == null ? [] : [color];
     }
   }
