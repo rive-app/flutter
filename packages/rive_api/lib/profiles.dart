@@ -28,7 +28,7 @@ class RiveProfilesApi<T extends RiveOwner> {
       'teamUsername': team.username,
       'location': profile.location,
       'website': profile.website,
-      'blurb': profile.bio,
+      'blurb': profile.blurb,
       'twitter': profile.twitter,
       'instagram': profile.instagram,
       'dribbble': profile.dribbble,
