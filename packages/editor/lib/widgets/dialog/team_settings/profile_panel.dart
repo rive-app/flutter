@@ -134,8 +134,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                                 SettingsTextField(
                                   label: 'Bio',
                                   hint: 'Tell users a bit about your team',
-                                  onChanged: (value) => _profile.bio = value,
-                                  initialValue: _profile.bio,
+                                  onChanged: (value) => _profile.blurb = value,
+                                  initialValue: _profile.blurb,
                                 )
                               ])
                             ])),
@@ -362,10 +362,10 @@ class ProfilePackage with ChangeNotifier {
     notifyListeners();
   }
 
-  String get bio => _profile.bio;
-  set bio(String value) {
-    if (value == _profile.bio) return;
-    _profile.bio = value;
+  String get blurb => _profile.blurb;
+  set blurb(String value) {
+    if (value == _profile.blurb) return;
+    _profile.blurb = value;
     notifyListeners();
   }
 
