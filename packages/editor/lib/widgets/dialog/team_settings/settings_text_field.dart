@@ -22,7 +22,7 @@ class SettingsTextField extends StatelessWidget {
       children: <Widget>[
         Text(label,
             style: textStyles.hierarchyTabHovered
-                .copyWith(fontSize: 13, letterSpacing: 0)),
+                .copyWith(fontSize: 13, height: 1.15)),
         const SizedBox(height: 11),
         TextFormField(
             onChanged: onChanged,
@@ -35,7 +35,8 @@ class SettingsTextField extends StatelessWidget {
             decoration: InputDecoration(
               isDense: true,
               hintText: hint,
-              hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
+              hintStyle: textStyles.textFieldInputHint
+                  .copyWith(fontSize: 13, height: 1.15),
               contentPadding: const EdgeInsets.only(bottom: 2),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: colors.input, width: 2),

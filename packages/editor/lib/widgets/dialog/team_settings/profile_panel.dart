@@ -331,7 +331,7 @@ class ProfilePackage with ChangeNotifier {
   }
 
   Future<void> submitChanges(RiveApi api, RiveOwner owner) async =>
-      await RiveProfilesApi(api).updateInfo(owner, profile: _profile);
+      RiveProfilesApi(api).updateInfo(owner, profile: _profile);
 
   String get name => _profile.name;
   set name(String value) {
