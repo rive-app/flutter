@@ -1,10 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:local_data/local_data.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_core/rive_file.dart';
+
+import 'src/test_rive_file.dart';
 
 void main() {
   test('undo/redo node name', () {
-    final file = RiveFile('fake');
+    LocalDataPlatform dataPlatform = LocalDataPlatform.make();
+
+    final file = TestRiveFile(
+      'fake',
+      localDataPlatform: dataPlatform,
+      overridePreferences: <String, dynamic>{
+        'token': 'fake',
+        'clientId': 1,
+      },
+      useSharedPreferences: false,
+    );
 
     const String name1 = 'First Name';
     const String name2 = 'Second Name';

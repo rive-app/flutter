@@ -365,8 +365,10 @@ class _ShapesInspectingColor extends InspectingColor {
   @override
   void dispose() {
     super.dispose();
-    var stage = findStage();
-    _addedToStage.forEach(stage.removeItem);
+
+    for(final item in _addedToStage) {
+      item.stage?.removeItem(item);
+    }
     _addedToStage.clear();
 
     for (final paint in shapePaints) {
@@ -596,8 +598,6 @@ class _ShapesInspectingColor extends InspectingColor {
       preview.value = [];
     }
 
-    var stage = findStage();
-
     // Determine what we want on stage vs what we've already added to remove the
     // old ones. Even if some get removed via deletion outside of this
     // inspector, the leak is short lived (as soon as the inspector is closed it
@@ -611,25 +611,17 @@ class _ShapesInspectingColor extends InspectingColor {
 
     var removeFromStage = _addedToStage.difference(wantOnStage);
 
-    removeFromStage.forEach(stage.removeItem);
-    wantOnStage.forEach(stage.addItem);
+    for (final remove in removeFromStage) {
+      remove.stage?.removeItem(remove);
+    }
+
+    var stage = _context?.stage;
+    if (stage != null) {
+      wantOnStage.forEach(stage.addItem);
+    }
+
     _addedToStage.clear();
     _addedToStage.addAll(wantOnStage);
-  }
-
-  Stage findStage() {
-    if (_stage != null) {
-      return _stage;
-    }
-    // Lots of work to find the stage...is there any case where this isn't
-    // valid? The Mutator will always have a shape paint container, which is
-    // currently either an artboard or a shape (both components) which always
-    // have stageItems. We should be ok here, even though it looks like a
-    // disaster. Later we could simplify this by grabbing the stage from the
-    // file (when stage is created with a file).
-    var firstShapeContainer =
-        shapePaints.first.paintMutator.shapePaintContainer as Component;
-    return _stage = firstShapeContainer.stageItem.stage;
   }
 
   void _notified() {

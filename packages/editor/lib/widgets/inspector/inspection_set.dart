@@ -1,7 +1,9 @@
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/selection_context.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 /// A pre-filtered set of different inspectable types (intersectingCoreTypes,
@@ -11,17 +13,20 @@ class InspectionSet {
   final Set<int> intersectingCoreTypes;
   final Set<StageItem> stageItems;
   final List<Component> components;
-  final Backboard backboard;
+  final OpenFileContext fileContext;
+
+  Backboard get backboard => fileContext.core.backboard;
+  Stage get stage => fileContext.stage;
 
   InspectionSet(
     this.intersectingCoreTypes,
     this.stageItems,
     this.components,
-    this.backboard,
+    this.fileContext,
   );
 
   factory InspectionSet.fromSelection(
-      Backboard backboard, SelectionContext<SelectableItem> selection) {
+      OpenFileContext fileContext, SelectionContext<SelectableItem> selection) {
     // Get stageItems from selections.
     final stageItems = <StageItem>{};
     for (final item in selection.items) {
@@ -44,9 +49,9 @@ class InspectionSet {
       for (int i = 1; i < components.length; i++) {
         coreTypes = coreTypes.intersection(components[i].coreTypes);
       }
-      return InspectionSet(coreTypes, stageItems, components, backboard);
+      return InspectionSet(coreTypes, stageItems, components, fileContext);
     }
 
-    return InspectionSet({}, stageItems, components, backboard);
+    return InspectionSet({}, stageItems, components, fileContext);
   }
 }

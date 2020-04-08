@@ -56,15 +56,7 @@ class FillsInspectorBuilder extends ListenableInspectorBuilder {
 
     core.batchAdd(() {
       for (final component in inspecting.components) {
-        var shape = component as ShapePaintContainer;
-        var fill = Fill()..name = 'Fill ${shape.fills.length + 1}';
-        var solidColor = SolidColor()..color = const Color(0xFFFF5678);
-
-        core.add(fill);
-        core.add(solidColor);
-
-        fill.appendChild(solidColor);
-        shape.appendChild(fill);
+        (component as ShapePaintContainer).createFill(const Color(0xFFFF5678));
       }
     });
     core.captureJournalEntry();

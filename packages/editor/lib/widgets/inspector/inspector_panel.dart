@@ -54,7 +54,7 @@ class _InspectorPanelState extends State<InspectorPanel> {
           // coreTypes for the inspector builders to use to determine if there
           // are things they can help inspect.
           var inspectionSet =
-              InspectionSet.fromSelection(file.core.backboard, selection);
+              InspectionSet.fromSelection(file, selection);
 
           // Remove previous listeners, these listen to inspector builders
           // wanting to change the contents in the full inspection list item.
