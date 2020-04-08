@@ -37,6 +37,9 @@ class SettingsTextField extends StatelessWidget {
               hintText: hint,
               hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
               contentPadding: const EdgeInsets.only(bottom: 2),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: colors.input, width: 2),
+              ),
               focusedBorder: UnderlineInputBorder(
                   borderSide:
                       BorderSide(color: colors.commonDarkGrey, width: 2)),
