@@ -36,6 +36,7 @@ import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
+import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 
 typedef CustomSelectionHandler = bool Function(StageItem);
 
@@ -371,7 +372,16 @@ class Stage extends Debouncer {
         markNeedsAdvance();
         break;
       case 1:
-        // [tool] is set to its value in the tool setter.
+        if (tool is TransformingTool) {
+          if (_activeTool == null) {
+            _activeTool = tool;
+            _activeTool.setEditMode(activeEditMode);
+            (_activeTool as TransformingTool).startTransformers(
+                file.selection.items.whereType<StageItem>(), _worldMouse);
+          } else {
+            (_activeTool as TransformingTool).advanceTransformers(_worldMouse);
+          }
+        }
         if (tool is DraggableTool) {
           var artboard = activeArtboard;
           var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
@@ -403,8 +413,19 @@ class Stage extends Debouncer {
       // show a popup.
     }
 
-    if (_activeTool is DraggableTool && _activeTool != null) {
+    bool toolCompleted = false;
+
+    // See if either a drag or transform operation was in progress.
+    if (_activeTool is TransformingTool) {
+      (_activeTool as TransformingTool).completeTransformers();
+      toolCompleted = true;
+    }
+    if (_activeTool is DraggableTool) {
       (_activeTool as DraggableTool).endDrag();
+      toolCompleted = true;
+    }
+
+    if (toolCompleted) {
       _activeTool = null;
       file.core.captureJournalEntry();
       markNeedsAdvance();

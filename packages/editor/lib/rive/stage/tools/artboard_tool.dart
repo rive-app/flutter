@@ -47,11 +47,6 @@ class ArtboardTool extends StageTool with DraggableTool {
   }
 
   @override
-  void endDrag() {
-    stage.file.core.captureJournalEntry();
-  }
-
-  @override
   void updateDrag(Vec2D worldMouse) {
     switch (editModeMap[editMode]) {
       case DraggingMode.symmetric:
@@ -93,4 +88,9 @@ class ArtboardTool extends StageTool with DraggableTool {
   }
 
   static final ArtboardTool instance = ArtboardTool();
+
+  @override
+  void endDrag() {
+    // Intentionally empty.
+  }
 }

@@ -129,7 +129,7 @@ class RiveEditorApp extends StatelessWidget {
                               return Login();
 
                             case RiveState.editor:
-                              return EditorScaffold();
+                              return const EditorScaffold();
 
                             case RiveState.disconnected:
                               return DisconnectedScreen();
@@ -335,7 +335,7 @@ class _TabBar extends StatelessWidget {
           valueListenable: rive.selectedTab,
           builder: (context, tab, child) => DockingTabBar(
             selectedTab: tab,
-            dockedTabs: [
+            dockedTabs: const [
               Rive.systemTab,
             ],
             dynamicTabs: rive.fileTabs,
