@@ -16,11 +16,19 @@ import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/selection_context.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
+import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
+import 'package:rive_editor/rive/stage/tools/node_tool.dart';
+import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
+import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
+
+typedef ActionHandler = bool Function(ShortcutAction action);
 
 enum OpenFileState { loading, error, open }
 
@@ -65,6 +73,27 @@ class OpenFileContext with RiveFileDelegate {
 
   /// Whether this file is currently in animate mode.
   final ValueNotifier<bool> isAnimateMode = ValueNotifier<bool>(false);
+
+  final List<ActionHandler> _actionHandlers = [];
+
+  /// Add an action handler which is will receive any performed action before
+  /// the file context attempts to handle it. Return true to let the file
+  /// context know that the action has already been handled and should not be
+  /// interpretted by any of the remaining handlers. Return false to let the
+  /// other handlers attempt to handle it, or ultimately the file context
+  /// itself.
+  bool addActionHandler(ActionHandler handler) {
+    if (_actionHandlers.contains(handler)) {
+      return false;
+    }
+
+    _actionHandlers.add(handler);
+    return true;
+  }
+
+  /// Remove an action handler from the chain.
+  bool removeActionHandler(ActionHandler handler) =>
+      _actionHandlers.remove(handler);
 
   OpenFileContext(
     this.ownerId,
@@ -235,14 +264,6 @@ class OpenFileContext with RiveFileDelegate {
   bool redo() => core.redo();
 
   @override
-  Future<void> onChangesRejected() async {
-    // TODO: have the UI
-    _state = OpenFileState.loading;
-    stateChanged.notify();
-    await core.disconnect();
-  }
-
-  @override
   void onConnectionStateChanged(ConnectionState state) {
     /// We use this to handle changes that can come in during use. Right now we
     /// only handle showing the re-connecting (connecting) state.
@@ -257,6 +278,83 @@ class OpenFileContext with RiveFileDelegate {
         break;
       default:
         break;
+    }
+  }
+
+  /// Will attempt to perform the given action. If the action is not handled,
+  /// [triggerAction] will return false.
+  bool triggerAction(ShortcutAction action) {
+
+    // See if any of our handlers care.
+    // https://www.youtube.com/watch?v=1o4s1KVJaVA
+    for (final actionHandler in _actionHandlers.reversed) {
+      if (actionHandler(action)) {
+        return true;
+      }
+    }
+    // No one gives a F#$(C<, let's see if we can help this poor friend.
+    switch (action) {
+      case ShortcutAction.translateTool:
+        stage?.tool = TranslateTool.instance;
+        return true;
+
+      case ShortcutAction.artboardTool:
+        stage?.tool = ArtboardTool.instance;
+        return true;
+
+      case ShortcutAction.ellipseTool:
+        stage?.tool = EllipseTool.instance;
+        return true;
+
+      case ShortcutAction.penTool:
+        stage?.tool = PenTool.instance;
+        return true;
+
+      case ShortcutAction.rectangleTool:
+        stage?.tool = RectangleTool.instance;
+        return true;
+
+      case ShortcutAction.nodeTool:
+        stage?.tool = NodeTool.instance;
+        return true;
+
+      case ShortcutAction.undo:
+        undo();
+        return true;
+
+      case ShortcutAction.redo:
+        redo();
+        return true;
+
+      case ShortcutAction.delete:
+        // Need to make a new list because as we delete we also remove them
+        // from the selection. This avoids modifying the selection set while
+        // iterating.
+        deleteSelection();
+        return true;
+
+      case ShortcutAction.freezeImagesToggle:
+        stage?.freezeImages = !stage.freezeImages;
+        return true;
+
+      case ShortcutAction.freezeJointsToggle:
+        stage?.freezeJoints = !stage.freezeJoints;
+        return true;
+
+      case ShortcutAction.resetRulers:
+        // TODO: Reset rulers.
+        return true;
+
+      case ShortcutAction.toggleRulers:
+        stage?.showRulers = !stage.showRulers;
+        return true;
+
+      case ShortcutAction.toggleEditMode:
+        stage?.toggleEditMode();
+        return true;
+
+      default:
+        return false;
     }
   }
 }

@@ -14,6 +14,7 @@ import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -366,7 +367,7 @@ class _ShapesInspectingColor extends InspectingColor {
   void dispose() {
     super.dispose();
 
-    for(final item in _addedToStage) {
+    for (final item in _addedToStage) {
       item.stage?.removeItem(item);
     }
     _addedToStage.clear();
@@ -649,11 +650,36 @@ class _ShapesInspectingColor extends InspectingColor {
   void startEditing(OpenFileContext context) {
     super.startEditing(context);
     context.stage.customSelectionHandler = _stageSelected;
+    context.addActionHandler(_handleShortcut);
+  }
+
+  bool _handleShortcut(ShortcutAction action) {
+    if (context == null || action != ShortcutAction.delete) {
+      return false;
+    }
+    var stops = context.selection.items.whereType<StageGradientStop>();
+    if (stops.isEmpty) {
+      return false;
+    }
+
+    // Delete the selected stops and handle the shortcut. Make a copy of it so
+    // it doesn't get modified as we iterate.
+    for (final stageStop in stops.toList(growable: false)) {
+      // Make sure this operation doesn't leave the gradient with less than 2
+      // stops.
+      var gradient = stageStop.component.parent as core.LinearGradient;
+      if (gradient.gradientStops.length > 2) {
+        stageStop.component.remove();
+      }
+    }
+    context.core.captureJournalEntry();
+    return true;
   }
 
   @override
   void stopEditing() {
     context?.stage?.clearSelectionHandler(_stageSelected);
+    context?.removeActionHandler(_handleShortcut);
 
     super.stopEditing();
   }
