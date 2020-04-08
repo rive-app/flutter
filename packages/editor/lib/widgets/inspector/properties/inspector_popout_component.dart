@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
@@ -38,8 +39,13 @@ class InspectorPopoutComponent extends StatelessWidget {
   }
 
   void _remove() {
-    var coreContext = components.first.context;
-    components.forEach(coreContext.remove);
+    for (final component in components) {
+      if (component is ContainerComponent) {
+        component.removeRecursive();
+      } else {
+        component.remove();
+      }
+    }
     components.first.context.captureJournalEntry();
   }
 

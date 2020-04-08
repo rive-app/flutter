@@ -6,6 +6,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:meta/meta.dart';
+import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/transform_space.dart';
 
 /// An abstraction to give a common interface to any component that can contain
@@ -45,4 +46,19 @@ abstract class ShapePaintContainer {
   bool addDependent(Component dependent);
   void appendChild(Component child);
   Mat2D get worldTransform;
+
+  /// Create a new color fill and add it to this shape.
+  Fill createFill(Color color) {
+    assert(context != null);
+    assert(color != null);
+    var fill = Fill()..name = 'Fill ${fills.length + 1}';
+    var solidColor = SolidColor()..color = color;
+
+    context.add(fill);
+    context.add(solidColor);
+
+    fill.appendChild(solidColor);
+    appendChild(fill);
+    return fill;
+  }
 }

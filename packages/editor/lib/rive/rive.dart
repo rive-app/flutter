@@ -346,62 +346,15 @@ class Rive {
   }
 
   void triggerAction(ShortcutAction action) {
-    var stage = file.value?.stage;
-    switch (action) {
-      case ShortcutAction.translateTool:
-        stage?.tool = TranslateTool.instance;
-        break;
-
-      case ShortcutAction.artboardTool:
-        stage?.tool = ArtboardTool.instance;
-        break;
-
-      case ShortcutAction.ellipseTool:
-        stage?.tool = EllipseTool.instance;
-        break;
-
-      case ShortcutAction.penTool:
-        stage?.tool = PenTool.instance;
-        break;
-
-      case ShortcutAction.rectangleTool:
-        stage?.tool = RectangleTool.instance;
-        break;
-
-      case ShortcutAction.nodeTool:
-        stage?.tool = NodeTool.instance;
-        break;
-
-      case ShortcutAction.undo:
-        file.value.undo();
-        break;
-      case ShortcutAction.redo:
-        file.value.redo();
-        break;
-      case ShortcutAction.delete:
-        // Need to make a new list because as we delete we also remove them
-        // from the selection. This avoids modifying the selection set while
-        // iterating.
-        file.value?.deleteSelection();
-        break;
-      case ShortcutAction.freezeImagesToggle:
-        stage?.freezeImages = !stage.freezeImages;
-        break;
-      case ShortcutAction.freezeJointsToggle:
-        stage?.freezeJoints = !stage.freezeJoints;
-        break;
-      case ShortcutAction.resetRulers:
-        print('RESET RULERS HERE');
-        break;
-      case ShortcutAction.toggleRulers:
-        stage?.showRulers = !stage.showRulers;
-        break;
-      case ShortcutAction.toggleEditMode:
-        stage?.toggleEditMode();
-        break;
-      default:
-        break;
+    var fileContext = file.value;
+    // Let the open file context attempt to process the action if it wants to.
+    bool handled = fileContext?.triggerAction(action) ?? false;
+    if(handled) {
+      return;
     }
+
+    // TODO: If there are unhandled shortcut actions we care about at this
+    // level, we should process them here. 
   }
 
   void _serializeTabs() {
