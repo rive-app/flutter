@@ -28,12 +28,6 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
-import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
-import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
-import 'package:rive_editor/rive/stage/tools/node_tool.dart';
-import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
-import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
-import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 
@@ -349,12 +343,12 @@ class Rive {
     var fileContext = file.value;
     // Let the open file context attempt to process the action if it wants to.
     bool handled = fileContext?.triggerAction(action) ?? false;
-    if(handled) {
+    if (handled) {
       return;
     }
 
     // TODO: If there are unhandled shortcut actions we care about at this
-    // level, we should process them here. 
+    // level, we should process them here.
   }
 
   void _serializeTabs() {
