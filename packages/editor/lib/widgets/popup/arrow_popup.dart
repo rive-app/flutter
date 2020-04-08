@@ -78,7 +78,6 @@ class ArrowPopup {
   }) {
     var contextRect = ContextToGlobalRect()..updateRect(context);
 
-    _ListPopupMultiLayoutDelegate _layoutDelegate;
     return ArrowPopup(
       contextRect: contextRect,
       popup: Popup.show(
@@ -88,8 +87,9 @@ class ArrowPopup {
         builder: (context) {
           return ValueListenableBuilder<Rect>(
             valueListenable: contextRect.rect,
-            builder: (context, contextRect, child) => CustomMultiChildLayout(
-              delegate: (_layoutDelegate = _ListPopupMultiLayoutDelegate(
+            builder: (context, contextRect, child) {
+              _ListPopupMultiLayoutDelegate _layoutDelegate =
+                  _ListPopupMultiLayoutDelegate(
                 from: contextRect,
                 direction: direction,
                 fallbackDirections: fallbackDirections,
@@ -97,23 +97,27 @@ class ArrowPopup {
                 offset: offset,
                 directionPadding: directionPadding,
                 arrowTweak: arrowTweak,
-              )),
-              children: [
-                if (showArrow)
-                  LayoutId(
-                    id: _ListPopupLayoutElement.arrow,
-                    child: CustomPaint(
-                      painter: _ArrowPathPainter(background, _layoutDelegate
-                          // _arrowFromDirection(direction),
-                          ),
+              );
+              return CustomMultiChildLayout(
+                delegate: _layoutDelegate,
+                children: [
+                  if (showArrow)
+                    LayoutId(
+                      id: _ListPopupLayoutElement.arrow,
+                      child: CustomPaint(
+                        painter: _ArrowPathPainter(
+                          background,
+                          _layoutDelegate,
+                        ),
+                      ),
                     ),
+                  LayoutId(
+                    id: _ListPopupLayoutElement.body,
+                    child: child,
                   ),
-                LayoutId(
-                  id: _ListPopupLayoutElement.body,
-                  child: child,
-                ),
-              ],
-            ),
+                ],
+              );
+            },
             child: Material(
               type: MaterialType.transparency,
               child: Container(
@@ -170,11 +174,18 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ListPopupMultiLayoutDelegate oldDelegate) {
-    return oldDelegate.from != from ||
+    var should = oldDelegate.from != from ||
         oldDelegate.direction != direction ||
         oldDelegate.width != width ||
         oldDelegate.offset != offset ||
         oldDelegate.arrowTweak != arrowTweak;
+    if (!should) {
+      // total hack, if it shouldn't re-layout, make sure we copy the
+      // oldDelegate's bestPosition so we can provide it to whatever else
+      // cares about it.
+      bestDirection = oldDelegate.bestDirection;
+    }
+    return should;
   }
 
   Offset _computeBodyPosition(PopupDirection direction, Size bodySize) =>
@@ -292,6 +303,7 @@ const double _arrowRadius = 6;
 
 class _ArrowPathPainter extends CustomPainter {
   final Color color;
+
   /// This is hideous, but passing the layout delegate lets us get the computed
   /// layout direction and determine the arrow path at rendertime. Also the
   /// hideousness is self contained to this file, so no one outside of here has
@@ -305,7 +317,8 @@ class _ArrowPathPainter extends CustomPainter {
   @override
   bool shouldRepaint(_ArrowPathPainter oldDelegate) =>
       oldDelegate.color != color ||
-      oldDelegate.layoutDelegate != layoutDelegate;
+      oldDelegate.layoutDelegate != layoutDelegate ||
+      layoutDelegate.bestDirection == null;
 
   static Path _arrowFromDirection(PopupDirection direction) {
     if (direction.offsetVector.dx == 1) {
@@ -320,6 +333,10 @@ class _ArrowPathPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Layout delegate hasn't updated yet.
+    if (layoutDelegate.bestDirection == null) {
+      return;
+    }
     var path = _arrowFromDirection(layoutDelegate.bestDirection);
     canvas.drawPath(
       path,

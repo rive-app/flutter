@@ -123,7 +123,11 @@ class StageLinearGradient extends StageItem<core.LinearGradient>
   }
 
   @override
-  void boundsChanged() => _update();
+  void boundsChanged() {
+    _update();
+    // Move the stops too.
+    stopsChanged();
+  }
 
   @override
   void draw(Canvas canvas) {

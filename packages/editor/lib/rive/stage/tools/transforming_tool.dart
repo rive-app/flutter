@@ -21,7 +21,7 @@ class MouseTranslation {
         _current = Vec2D.clone(origin),
         _delta = Vec2D();
 
-  void moveTo(Vec2D location) {
+  void _moveTo(Vec2D location) {
     _last = _current;
     _current = Vec2D.clone(location);
     _delta = Vec2D.subtract(Vec2D(), location, _last);
@@ -37,6 +37,12 @@ class DragTransformDetails {
   final MouseTranslation artboardWorld;
   final List<StageItem> items = [];
   final List<StageTransformer> _transformers = [];
+
+  void _moveTo(Vec2D worldMouse) {
+    artboardWorld
+        ._moveTo(Vec2D.subtract(Vec2D(), worldMouse, artboard.originWorld));
+    world._moveTo(worldMouse);
+  }
 
   DragTransformDetails(this.artboard, Vec2D worldMouse)
       : world = MouseTranslation(worldMouse),
@@ -78,7 +84,7 @@ mixin TransformingTool {
       // Make a mutable list so that the transformers can modify it if they want
       // to take items out of play from other transformers. N.B. transformer
       // order is important in such cases.
-      var mutableSelection = details.items.toList(growable: false);
+      var mutableSelection = Set<StageItem>.from(details.items);
 
       for (final transformer in transformers) {
         if (transformer.init(mutableSelection, details)) {
@@ -91,7 +97,7 @@ mixin TransformingTool {
   @mustCallSuper
   void advanceTransformers(Vec2D worldMouse) {
     for (final details in _artboardTransformSpaces.values) {
-      details.world.moveTo(worldMouse);
+      details._moveTo(worldMouse);
       for (final transformer in details._transformers) {
         transformer.advance(details);
       }

@@ -123,7 +123,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     if (worldTransformed) {
       _delegate?.boundsChanged();
     }
-    if (stopsChanged) {
+    else if (stopsChanged) {
       _delegate?.stopsChanged();
     }
   }
