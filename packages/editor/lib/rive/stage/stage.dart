@@ -11,6 +11,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
+import 'package:rive_core/shapes/paint/radial_gradient.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -26,6 +27,7 @@ import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
+import 'package:rive_editor/rive/stage/items/stage_radial_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
@@ -406,7 +408,7 @@ class Stage extends Debouncer {
         break;
     }
 
-    if(activatedTool != null) {
+    if (activatedTool != null) {
       _activeTool = activatedTool;
     }
   }
@@ -664,6 +666,7 @@ class Stage extends Debouncer {
     PointsPathBase.typeKey: () => StagePath(),
     StraightVertexBase.typeKey: () => StageVertex(),
     LinearGradientBase.typeKey: () => StageLinearGradient(),
+    RadialGradientBase.typeKey: () => StageRadialGradient(),
     GradientStopBase.typeKey: () => StageGradientStop(),
   };
 

@@ -7,7 +7,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
-import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
+import 'package:rive_editor/rive/stage/items/stage_gradient.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
