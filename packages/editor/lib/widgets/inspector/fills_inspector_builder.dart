@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rive_core/shapes/paint/fill.dart';
-import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -21,6 +19,15 @@ class FillsInspectorBuilder extends ListenableInspectorBuilder {
     // Rebuild whenever the fills are changed on any of our shapes.
     changeWhen(shapes.map((shape) => shape.fillsChanged));
 
+    // We're guaranteed that the number of fills is the same, so we can
+    // transpose the set and edit each Nth list of Fills as one unique value (if
+    // they're not the same the editor will handle that condition and allow the
+    // user to set them all to the same fill).
+    //
+    // We return fills.reversed as designers expect these in reverse order as
+    // opposed to how we store them: https://github.com/rive-app/rive/issues/173
+    var listOfCommonFills = shapes.transpose((shape) => shape.fills).reversed;
+
     return [
       (context) => InspectorGroup(
           name: 'Fills',
@@ -31,11 +38,7 @@ class FillsInspectorBuilder extends ListenableInspectorBuilder {
           },
           add: () => _createFill(ActiveFile.of(context), inspecting)),
       if (_isExpanded) ...[
-        // We're guaranteed that the number of fills is the same, so we can
-        // transpose the set and edit each Nth list of Fills as one unique value
-        // (if they're not the same the editor will handle that condition and
-        // allow the user to set them all to the same fill).
-        for (final fills in shapes.transpose((shape) => shape.fills))
+        for (final fills in listOfCommonFills)
           (context) => PropertyFill(fills: fills)
       ]
     ];
