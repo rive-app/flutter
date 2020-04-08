@@ -7,6 +7,7 @@ import 'package:rive_api/teams.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/billing_history.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/plan_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/profile_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_header.dart';
@@ -235,7 +236,8 @@ class SettingsScreen {
         // SettingsScreen('Purchase Permissions', (ctx) => const SizedBox()),
         SettingsScreen('Plan',
             (ctx) => PlanSettings(_getOwner(ctx) as RiveTeam, _getApi(ctx))),
-        SettingsScreen('Billing History', (ctx) => const SizedBox()),
+        SettingsScreen('Billing History',
+            (ctx) => BillingHistory(_getOwner(ctx) as RiveTeam, _getApi(ctx))),
       ];
     } else {
       return [

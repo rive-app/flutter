@@ -24,7 +24,7 @@ class SettingsPanelSection extends StatelessWidget {
         ConstrainedBox(
           constraints: const BoxConstraints(
             minWidth: 75,
-            maxWidth: 393,
+            maxWidth: 405,
           ),
           child: contents(context),
         )

@@ -18,7 +18,7 @@ class TeamSubscriptionChoiceWidget extends StatefulWidget {
       this.costLabel,
       this.explanation,
       this.onTap,
-      this.borderThickness,
+      this.borderThickness = 3,
       this.showButton = true,
       this.isSelected = false})
       : super(key: key);

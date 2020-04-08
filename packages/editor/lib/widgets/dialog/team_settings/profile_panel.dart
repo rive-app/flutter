@@ -23,7 +23,6 @@ class ProfileSettings extends StatefulWidget {
 
 class _ProfileSettingsState extends State<ProfileSettings> {
   ProfilePackage _profile;
-  RiveProfilesApi _profilesApi;
 
   @override
   void initState() {
@@ -31,18 +30,20 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
     final owner = widget.owner;
 
-    _profilesApi = RiveProfilesApi(widget.api);
     ProfilePackage.getProfile(widget.api, owner).then((value) {
-      setState(() {
-        _profile = value;
-        _profile.addListener(_onProfileChange);
-      });
+      // TODO: user future builder.
+      if (mounted) {
+        setState(() {
+          _profile = value;
+          _profile.addListener(_onProfileChange);
+        });
+      }
     });
   }
 
   @override
   void dispose() {
-    _profile.dispose();
+    _profile?.dispose();
     super.dispose();
   }
 
@@ -329,10 +330,8 @@ class ProfilePackage with ChangeNotifier {
     return null;
   }
 
-  Future<void> submitChanges(RiveApi api, RiveOwner owner) async {
-    var response =
-        await RiveProfilesApi(api).updateInfo(owner, profile: _profile);
-  }
+  Future<void> submitChanges(RiveApi api, RiveOwner owner) async =>
+      RiveProfilesApi(api).updateInfo(owner, profile: _profile);
 
   String get name => _profile.name;
   set name(String value) {
