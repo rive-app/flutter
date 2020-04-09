@@ -83,6 +83,6 @@ class RiveProfilesApi<T extends RiveOwner> {
     } on FormatException catch (e) {
       log.severe('Unable to parse response from server: $e');
     }
-    return RiveProfile.fromData(data, owner);
+    return RiveProfile.fromData(data);
   }
 }
