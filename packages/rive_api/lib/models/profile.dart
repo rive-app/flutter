@@ -1,4 +1,3 @@
-import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
 class RiveProfile {
@@ -34,20 +33,19 @@ class RiveProfile {
     this.isForHire,
   });
 
-  factory RiveProfile.fromData(Map<String, dynamic> data, RiveOwner owner) =>
-      RiveProfile(
-          name: owner.name,
-          username: owner.username,
-          website: data.getString('website'),
-          blurb: data.getString('blurb'),
-          location: data.getString('location'),
-          twitter: data.getString('twitter'),
-          instagram: data.getString('instagram'),
-          dribbble: data.getString('dribbble'),
-          linkedin: data.getString('linkedin'),
-          behance: data.getString('behance'),
-          vimeo: data.getString('vimeo'),
-          github: data.getString('github'),
-          medium: data.getString('medium'),
-          isForHire: data.getInt('isForHire') == 1);
+  factory RiveProfile.fromData(Map<String, dynamic> data) => RiveProfile(
+      name: data.getString('name'),
+      username: data.getString('username'),
+      website: data.getString('website'),
+      blurb: data.getString('blurb'),
+      location: data.getString('location'),
+      twitter: data.getString('twitter'),
+      instagram: data.getString('instagram'),
+      dribbble: data.getString('dribbble'),
+      linkedin: data.getString('linkedin'),
+      behance: data.getString('behance'),
+      vimeo: data.getString('vimeo'),
+      github: data.getString('github'),
+      medium: data.getString('medium'),
+      isForHire: data.getInt('isForHire') == 1);
 }
