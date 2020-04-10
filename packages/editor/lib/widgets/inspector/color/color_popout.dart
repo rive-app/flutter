@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_editor/widgets/common/converters/alpha_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/blue_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/brightness_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/green_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/hex_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/hue_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/red_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/saturation_value_converter.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/color_slider.dart';
@@ -9,6 +18,7 @@ import 'package:rive_editor/widgets/inspector/color/hue_slider_background.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/inspector/color/opacity_slider_background.dart';
 import 'package:rive_editor/widgets/inspector/color/saturation_brightness_picker.dart';
+import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -187,18 +197,180 @@ class ColorPopout extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ),
+                            )
                           ],
                         ),
                       ),
                     ],
                   ),
                 ),
+                _ColorTriplet(
+                  value: hsv,
+                  labelA: 'H',
+                  labelB: 'S',
+                  labelC: 'B',
+                  converterA: HueValueConverter(hsv),
+                  converterB: SaturationValueConverter(hsv),
+                  converterC: BrightnessValueConverter(hsv),
+                  change: type == null ? null : inspecting.changeColor,
+                  completeChange: inspecting.completeChange,
+                ),
+                const SizedBox(height: 15),
+                _ColorTriplet(
+                  value: hsv,
+                  labelA: 'R',
+                  labelB: 'G',
+                  labelC: 'B',
+                  converterA: RedValueConverter(hsv),
+                  converterB: GreenValueConverter(hsv),
+                  converterC: BlueValueConverter(hsv),
+                  change: type == null ? null : inspecting.changeColor,
+                  completeChange: inspecting.completeChange,
+                ),
+                const SizedBox(height: 15),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _LabeledTextField(
+                          label: 'HEX',
+                          value: hsv,
+                          padRight: true,
+                          converter: HexValueConverter.instance,
+                          change: type == null ? null : inspecting.changeColor,
+                          completeChange: inspecting.completeChange,
+                        ),
+                      ),
+                      Expanded(
+                        child: _LabeledTextField(
+                          value: hsv,
+                          label: 'A',
+                          converter: AlphaValueConverter(hsv),
+                          change: type == null ? null : inspecting.changeColor,
+                          completeChange: inspecting.completeChange,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 15),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ColorTriplet extends StatelessWidget {
+  final HSVColor value;
+  final String labelA, labelB, labelC;
+  final InputValueConverter<HSVColor> converterA, converterB, converterC;
+  final void Function(HSVColor value) change;
+  final void Function() completeChange;
+
+  const _ColorTriplet({
+    Key key,
+    this.labelA,
+    this.labelB,
+    this.labelC,
+    this.converterA,
+    this.converterB,
+    this.converterC,
+    this.value,
+    this.change,
+    this.completeChange,
+  }) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: _LabeledTextField(
+              label: labelA,
+              converter: converterA,
+              value: value,
+              padRight: true,
+              change: change,
+              completeChange: completeChange,
+            ),
+          ),
+          Expanded(
+            child: _LabeledTextField(
+              label: labelB,
+              converter: converterB,
+              value: value,
+              padRight: true,
+              change: change,
+              completeChange: completeChange,
+            ),
+          ),
+          Expanded(
+            child: _LabeledTextField(
+              label: labelC,
+              converter: converterC,
+              value: value,
+              change: change,
+              completeChange: completeChange,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LabeledTextField extends StatelessWidget {
+  final String label;
+  final bool padRight;
+  final InputValueConverter<HSVColor> converter;
+  final HSVColor value;
+  final void Function(HSVColor value) change;
+  final void Function() completeChange;
+
+  const _LabeledTextField({
+    Key key,
+    this.label,
+    this.padRight = false,
+    this.converter,
+    this.value,
+    this.change,
+    this.completeChange,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var labelStyle = RiveTheme.of(context).textStyles.inspectorPropertyLabel;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            bottom: 4,
+            right: 5,
+          ),
+          child: Text(
+            label,
+            style: labelStyle,
+          ),
+        ),
+        Expanded(
+          child: InspectorTextField(
+            value: value,
+            converter: converter,
+            change: change,
+            completeChange: completeChange,
+          ),
+        ),
+        if (padRight) const SizedBox(width: 5),
+      ],
     );
   }
 }
