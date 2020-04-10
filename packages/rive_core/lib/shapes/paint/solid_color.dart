@@ -23,7 +23,7 @@ class SolidColor extends SolidColorBase with ShapePaintMutator {
     // SolidColor to the dependencies graph.
     paint?.color = color;
 
-    // Since we're not in the dependency tray, chuck dirt onto the shape, which
+    // Since we're not in the dependency tree, chuck dirt onto the shape, which
     // is. This just ensures we'll paint as soon as possible to show the updated
     // color.
     shapePaintContainer?.addDirt(ComponentDirt.paint);
