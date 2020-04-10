@@ -8,6 +8,32 @@ class OpacitySliderBackground extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    paintCheckerPattern(canvas, size, background, foreground: () {
+      var rect = Offset.zero & size;
+      canvas.drawRect(
+        rect,
+        Paint()
+          ..shader = LinearGradient(
+            colors: [
+              color.withOpacity(0),
+              color,
+            ],
+            stops: const [
+              0,
+              1,
+            ],
+          ).createShader(rect),
+      );
+    });
+  }
+
+  @override
+  bool shouldRepaint(OpacitySliderBackground oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.background != background;
+
+  // Paint a clipped checker pattern.
+  static void paintCheckerPattern(Canvas canvas, Size size, Color color,
+      {void Function() foreground}) {
     final Rect rect = Offset.zero & size;
 
     canvas.save();
@@ -24,7 +50,7 @@ class OpacitySliderBackground extends CustomPainter {
     Rect gridRectB =
         Rect.fromLTWH(gridSize, offset + gridSize, gridSize, gridSize);
     int count = (size.width / gridSize / 2).ceil();
-    var gridPaint = Paint()..color = background;
+    var gridPaint = Paint()..color = color;
     canvas.save();
     for (int i = 0; i < count; i++) {
       canvas.drawRect(gridRectA, gridPaint);
@@ -33,25 +59,7 @@ class OpacitySliderBackground extends CustomPainter {
     }
     canvas.restore();
 
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [
-            color.withOpacity(0),
-            color,
-          ],
-          stops: const [
-            0,
-            1,
-          ],
-        ).createShader(rect),
-    );
-
+    foreground?.call();
     canvas.restore();
   }
-
-  @override
-  bool shouldRepaint(OpacitySliderBackground oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.background != background;
 }
