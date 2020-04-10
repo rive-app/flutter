@@ -65,7 +65,10 @@ class ColorPopout extends StatelessWidget {
                 completeChange: inspecting.completeChange,
                 background: (context) => Container(
                   child: CustomPaint(
-                    painter: GradientSliderBackground(stops),
+                    painter: GradientSliderBackground(
+                      stops,
+                      RiveTheme.of(context).colors.popupIcon,
+                    ),
                   ),
                 ),
               ),
