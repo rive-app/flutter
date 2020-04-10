@@ -11,63 +11,28 @@ import 'package:rive_editor/widgets/inspector/properties/inspector_popout_compon
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.dart';
-import 'package:utilities/list_equality.dart';
 
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a color fill on a shape.
-class PropertyFill extends StatefulWidget {
+class PropertyFill extends StatelessWidget {
   final Iterable<Fill> fills;
+  final InspectingColor inspectingColor;
 
   const PropertyFill({
     @required this.fills,
+    @required this.inspectingColor,
     Key key,
   }) : super(key: key);
-
-  static const double inputWidth = 70;
-
-  @override
-  _PropertyFillState createState() => _PropertyFillState();
-}
-
-class _PropertyFillState extends State<PropertyFill> {
-  InspectingColor _inspectingColor;
-  @override
-  void initState() {
-    _inspectingColor = InspectingColor.forShapePaints(widget.fills);
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(PropertyFill oldWidget) {
-    if (!iterableEquals(widget.fills, oldWidget.fills)) {
-      setState(() {
-        _inspectingColor?.dispose();
-        var color = InspectingColor.forShapePaints(widget.fills);
-        if(_inspectingColor.isEditing) {
-          // Propagate the context.
-          color.startEditing(_inspectingColor.context);
-        }
-        _inspectingColor = color;
-      });
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _inspectingColor?.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return InspectorPopoutComponent(
-      components: widget.fills,
+      components: fills,
       prefix: (context) => Padding(
         padding: const EdgeInsets.only(right: 10),
         child: InspectorColorSwatch(
           inspectorContext: context,
-          inspectingColor: _inspectingColor,
+          inspectingColor: inspectingColor,
         ),
       ),
       isVisiblePropertyKey: ShapePaintBase.isVisiblePropertyKey,
@@ -86,7 +51,7 @@ class _PropertyFillState extends State<PropertyFill> {
               const SizedBox(width: 20),
               Expanded(
                 child: CoreTextField(
-                  objects: widget.fills,
+                  objects: fills,
                   propertyKey: ComponentBase.namePropertyKey,
                   converter: StringValueConverter.instance,
                 ),
@@ -104,7 +69,7 @@ class _PropertyFillState extends State<PropertyFill> {
               const SizedBox(width: 20),
               CoreComboBox(
                 sizing: ComboSizing.expanded,
-                objects: widget.fills,
+                objects: fills,
                 propertyKey: FillBase.fillRulePropertyKey,
                 options: PathFillType.values,
                 toLabel: (PathFillType fillType) {

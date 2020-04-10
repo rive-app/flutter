@@ -164,4 +164,11 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     super.endYChanged(from, to);
     addDirt(ComponentDirt.worldTransform);
   }
+
+  @override
+  void opacityChanged(double from, double to) {
+    super.opacityChanged(from, to);
+    markGradientDirty();
+    paint.color = const ui.Color(0xFFFFFFFF).withOpacity(to);
+  }
 }

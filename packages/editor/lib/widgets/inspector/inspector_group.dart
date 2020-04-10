@@ -23,9 +23,11 @@ class InspectorGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 2,
+      padding: const EdgeInsets.only(
+        left: 20,
+        right: 15,
+        top: 2,
+        bottom: 2,
       ),
       child: Row(
         children: [

@@ -17,7 +17,6 @@ import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
-import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 
@@ -79,6 +78,9 @@ abstract class InspectingColor {
   /// The editing index in the list of color stops.
   final ValueNotifier<int> editingIndex = ValueNotifier<int>(0);
 
+  /// The opacity value of the inspecting color.
+  final ValueNotifier<double> opacity = ValueNotifier<double>(1);
+
   bool get canChangeType;
 
   /// The value of the currently editing color.
@@ -92,7 +94,7 @@ abstract class InspectingColor {
   InspectingColor();
 
   factory InspectingColor.forShapePaints(Iterable<ShapePaint> paints) =>
-      _ShapesInspectingColor(paints);
+      ShapesInspectingColor(paints);
 
   factory InspectingColor.forSolidProperty(
           Iterable<core.Core> objects, int propertyKey) =>
@@ -132,13 +134,15 @@ abstract class InspectingColor {
   void completeChange() {
     context?.core?.captureJournalEntry();
   }
+
+  /// Change the opacity of the inspecting color.
+  void changeOpacity(double opacity);
 }
 
 /// Concrete implementation of InspectingColor for [ShapePaint]s.
-class _ShapesInspectingColor extends InspectingColor {
+class ShapesInspectingColor extends InspectingColor {
   // Keep track of what we've added to the stage so far.
   final Set<StageItem> _addedToStage = {};
-  Stage _stage;
 
   @override
   bool get canChangeType => true;
@@ -154,7 +158,7 @@ class _ShapesInspectingColor extends InspectingColor {
   bool _suppressUpdating = false;
 
   Iterable<ShapePaint> shapePaints;
-  _ShapesInspectingColor(this.shapePaints) {
+  ShapesInspectingColor(this.shapePaints) {
     for (final paint in shapePaints) {
       paint.paintMutatorChanged.addListener(_mutatorChanged);
     }
@@ -440,6 +444,7 @@ class _ShapesInspectingColor extends InspectingColor {
     }
     // Force update the preview.
     preview.value = [editingColor.value.toColor()];
+    opacity.value = color.alpha / 255;
 
     // });
   }
@@ -490,7 +495,9 @@ class _ShapesInspectingColor extends InspectingColor {
       case ColorType.solid:
         // If the full list is solid then we definitely have a SolidColor
         // mutator.
-        _changeEditingColor(HSVColor.fromColor((first as SolidColor).color));
+        var color = (first as SolidColor).color;
+        _changeEditingColor(HSVColor.fromColor(color));
+        opacity.value = color.alpha / 255;
 
         if (preview.value.length != 1 ||
             preview.value.first != editingColor.value.toColor()) {
@@ -500,8 +507,6 @@ class _ShapesInspectingColor extends InspectingColor {
           preview.value = color == null ? [] : [color];
         }
 
-        // Since they're all solid, we know they'll all have a Core colorValue
-        // that change that we want to listen to.
         for (final shapePaint in shapePaints) {
           // Make sure solid colors are selected on stage.
           if (context != null &&
@@ -514,8 +519,6 @@ class _ShapesInspectingColor extends InspectingColor {
               append: true,
             );
           }
-          _listenToCoreProperty(shapePaint.paintMutator as Component,
-              SolidColorBase.colorValuePropertyKey);
         }
 
         break;
@@ -576,29 +579,57 @@ class _ShapesInspectingColor extends InspectingColor {
           }
         }
 
-        // Listen to events we are interested in. These will trigger another
-        // _updatePaints call.
+        // Determine what we want on the stage.
         for (final shapePaint in shapePaints) {
           var gradient = shapePaint.paintMutator as core.LinearGradient;
           if (gradient.stageItem != null && showStageStops) {
             wantOnStage.add(gradient.stageItem);
           }
-          _listenTo(gradient.stopsChanged);
           for (final stop in gradient.gradientStops) {
             if (showStageStops && stop.stageItem != null) {
               wantOnStage.add(stop.stageItem);
             }
-            _listenToCoreProperty(stop, GradientStopBase.positionPropertyKey);
-            _listenToCoreProperty(stop, GradientStopBase.colorValuePropertyKey);
           }
         }
         break;
     }
+
+    // Listen to any property change on any shape paint regardless of current
+    // shared type.
+    for (final shapePaint in shapePaints) {
+      var mutator = shapePaint.paintMutator;
+      if (mutator is core.LinearGradient) {
+        _listenTo(mutator.stopsChanged);
+        _listenToCoreProperty(
+            mutator, core.LinearGradientBase.opacityPropertyKey);
+        for (final stop in mutator.gradientStops) {
+          _listenToCoreProperty(stop, GradientStopBase.positionPropertyKey);
+          _listenToCoreProperty(stop, GradientStopBase.colorValuePropertyKey);
+        }
+      } else if (mutator is SolidColor) {
+        _listenToCoreProperty(mutator, SolidColorBase.colorValuePropertyKey);
+      }
+    }
+
     type.value = colorType;
     if (colorType == null) {
       _changeEditingColor(InspectingColor.defaultEditingColor);
       preview.value = [];
     }
+
+    // Check if all opacity values are equal.
+    double commonOpacity =
+        utils.equalValue<ShapePaint, double>(shapePaints, (shapePaint) {
+      var mutator = shapePaint.paintMutator;
+      if (mutator is core.LinearGradient) {
+        return mutator.opacity;
+      } else if (mutator is SolidColor) {
+        return mutator.color.opacity;
+      }
+      return 0;
+    });
+
+    opacity.value = commonOpacity;
 
     // Determine what we want on stage vs what we've already added to remove the
     // old ones. Even if some get removed via deletion outside of this
@@ -703,6 +734,31 @@ class _ShapesInspectingColor extends InspectingColor {
 
     return true;
   }
+
+  @override
+  void changeOpacity(double value) {
+    var validValue = value.clamp(0, 1).toDouble();
+
+    // If there are any solid colors, use a valid valid in 8 bit range.
+    if (shapePaints.firstWhere((shape) => shape.paintMutator is SolidColor,
+            orElse: () => null) !=
+        null) {
+      // put valid value in 0-255 range so that all values are equal
+      // regardless of backing storage.
+      validValue = const Color(0xFFFFFFFF).withOpacity(validValue).opacity;
+    }
+
+    for (final shape in shapePaints) {
+      var mutator = shape.paintMutator;
+      if (mutator is core.LinearGradient) {
+        mutator.opacity = validValue;
+      } else if (mutator is SolidColor) {
+        var color = mutator.color.withOpacity(validValue);
+        mutator.color = color;
+      }
+    }
+    _updatePaints();
+  }
 }
 
 /// Concrete implementation of InspectingColor for any core property that
@@ -754,6 +810,7 @@ class _CorePropertyInspectingColor extends InspectingColor {
 
     var first = _colorValue(objects.first);
     editingColor.value = HSVColor.fromColor(first);
+    opacity.value = first.alpha / 255;
 
     if (preview.value.length != 1 ||
         preview.value.first != editingColor.value.toColor()) {
@@ -766,6 +823,7 @@ class _CorePropertyInspectingColor extends InspectingColor {
   @override
   void changeColor(HSVColor color) {
     editingColor.value = color;
+    opacity.value = color.alpha / 255;
     _suppressUpdating = true;
 
     var value = color.toColor().value;
@@ -804,4 +862,20 @@ class _CorePropertyInspectingColor extends InspectingColor {
 
   @override
   void editorOpened() {}
+
+  @override
+  void changeOpacity(double opacity) {
+    var colorType = type.value;
+    if (colorType == null) {
+      return;
+    }
+    switch (colorType) {
+      case ColorType.solid:
+        changeColor(editingColor.value.withAlpha(opacity));
+        break;
+      case ColorType.linear:
+      case ColorType.radial:
+        break;
+    }
+  }
 }

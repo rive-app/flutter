@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
-import 'package:rive_editor/widgets/common/converters/zoom_input_converter.dart';
+import 'package:rive_editor/widgets/common/converters/percentage_input_converter.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
@@ -25,7 +25,7 @@ class VisibilityPopupButton extends StatelessWidget {
           builder: (context, value, _) => SizedBox(
             width: 32,
             child: Text(
-              ZoomInputConverter.instance.toDisplayValue(value),
+              PercentageInputConverter.instance.toDisplayValue(value),
               textAlign: TextAlign.right,
               style: theme.textStyles.basic.copyWith(
                 color: isHovered
@@ -46,7 +46,7 @@ class VisibilityPopupButton extends StatelessWidget {
             child: ValueNotifierTextField(
               key: zoomKey,
               notifier: file.stage.zoomLevelNotifier,
-              converter: ZoomInputConverter.instance,
+              converter: PercentageInputConverter.instance,
               change: (double value) => file.stage.zoomLevel = value,
             ),
             select: () {},
@@ -56,7 +56,7 @@ class VisibilityPopupButton extends StatelessWidget {
               child: ValueNotifierTextField(
                 key: resKey,
                 notifier: file.stage.resolutionNotifier,
-                converter: ZoomInputConverter.instance,
+                converter: PercentageInputConverter.instance,
               ),
               select: () {},
               dismissOnSelect: false),

@@ -42,16 +42,6 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
           }
           widget.change?.call(value);
         },
-        completeChange: () {
-          if (widget.objects.isEmpty) {
-            return;
-          }
-          widget.objects.first.context.captureJournalEntry();
-
-          // Force focus back to the main context so that we can immediately
-          // undo this change if we want to by hitting ctrl/comamnd z.
-          RiveContext.of(context).focus();
-        },
       ),
     );
   }

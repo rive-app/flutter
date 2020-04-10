@@ -216,7 +216,6 @@ class ColorPopout extends StatelessWidget {
                   converterB: SaturationValueConverter(hsv),
                   converterC: BrightnessValueConverter(hsv),
                   change: type == null ? null : inspecting.changeColor,
-                  completeChange: inspecting.completeChange,
                 ),
                 const SizedBox(height: 15),
                 _ColorTriplet(
@@ -228,7 +227,6 @@ class ColorPopout extends StatelessWidget {
                   converterB: GreenValueConverter(hsv),
                   converterC: BlueValueConverter(hsv),
                   change: type == null ? null : inspecting.changeColor,
-                  completeChange: inspecting.completeChange,
                 ),
                 const SizedBox(height: 15),
                 Padding(
@@ -244,7 +242,6 @@ class ColorPopout extends StatelessWidget {
                           padRight: true,
                           converter: HexValueConverter.instance,
                           change: type == null ? null : inspecting.changeColor,
-                          completeChange: inspecting.completeChange,
                         ),
                       ),
                       Expanded(
@@ -253,7 +250,6 @@ class ColorPopout extends StatelessWidget {
                           label: 'A',
                           converter: AlphaValueConverter(hsv),
                           change: type == null ? null : inspecting.changeColor,
-                          completeChange: inspecting.completeChange,
                         ),
                       ),
                     ],
@@ -274,7 +270,6 @@ class _ColorTriplet extends StatelessWidget {
   final String labelA, labelB, labelC;
   final InputValueConverter<HSVColor> converterA, converterB, converterC;
   final void Function(HSVColor value) change;
-  final void Function() completeChange;
 
   const _ColorTriplet({
     Key key,
@@ -286,45 +281,43 @@ class _ColorTriplet extends StatelessWidget {
     this.converterC,
     this.value,
     this.change,
-    this.completeChange,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: _LabeledTextField(
-              label: labelA,
-              converter: converterA,
-              value: value,
-              padRight: true,
-              change: change,
-              completeChange: completeChange,
+    return FocusTraversalGroup(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: _LabeledTextField(
+                label: labelA,
+                converter: converterA,
+                value: value,
+                padRight: true,
+                change: change,
+              ),
             ),
-          ),
-          Expanded(
-            child: _LabeledTextField(
-              label: labelB,
-              converter: converterB,
-              value: value,
-              padRight: true,
-              change: change,
-              completeChange: completeChange,
+            Expanded(
+              child: _LabeledTextField(
+                label: labelB,
+                converter: converterB,
+                value: value,
+                padRight: true,
+                change: change,
+              ),
             ),
-          ),
-          Expanded(
-            child: _LabeledTextField(
-              label: labelC,
-              converter: converterC,
-              value: value,
-              change: change,
-              completeChange: completeChange,
+            Expanded(
+              child: _LabeledTextField(
+                label: labelC,
+                converter: converterC,
+                value: value,
+                change: change,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -336,7 +329,6 @@ class _LabeledTextField extends StatelessWidget {
   final InputValueConverter<HSVColor> converter;
   final HSVColor value;
   final void Function(HSVColor value) change;
-  final void Function() completeChange;
 
   const _LabeledTextField({
     Key key,
@@ -345,7 +337,6 @@ class _LabeledTextField extends StatelessWidget {
     this.converter,
     this.value,
     this.change,
-    this.completeChange,
   }) : super(key: key);
 
   @override
@@ -369,7 +360,6 @@ class _LabeledTextField extends StatelessWidget {
             value: value,
             converter: converter,
             change: change,
-            completeChange: completeChange,
           ),
         ),
         if (padRight) const SizedBox(width: 5),

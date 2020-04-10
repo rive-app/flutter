@@ -37,6 +37,14 @@
         "int": 35,
         "string": "endy"
       }
+    },
+    "opacity": {
+      "type": "double",
+      "initialValue": "1",
+      "key": {
+        "int": 46,
+        "string": "opacity"
+      }
     }
   }
 }

@@ -159,6 +159,7 @@ abstract class RiveCoreContext extends CoreContext {
         case LinearGradientBase.startYPropertyKey:
         case LinearGradientBase.endXPropertyKey:
         case LinearGradientBase.endYPropertyKey:
+        case LinearGradientBase.opacityPropertyKey:
         case GradientStopBase.positionPropertyKey:
         case NodeBase.xPropertyKey:
         case NodeBase.yPropertyKey:
@@ -272,6 +273,7 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearGradientBase.startYPropertyKey:
       case LinearGradientBase.endXPropertyKey:
       case LinearGradientBase.endYPropertyKey:
+      case LinearGradientBase.opacityPropertyKey:
       case GradientStopBase.positionPropertyKey:
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
@@ -368,6 +370,11 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearGradientBase.endYPropertyKey:
         if (object is LinearGradientBase && value is double) {
           object.endY = value;
+        }
+        break;
+      case LinearGradientBase.opacityPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.opacity = value;
         }
         break;
       case SolidColorBase.colorValuePropertyKey:
@@ -584,6 +591,11 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearGradientBase.endYPropertyKey:
         if (object is LinearGradientBase) {
           return object.endY;
+        }
+        break;
+      case LinearGradientBase.opacityPropertyKey:
+        if (object is LinearGradientBase) {
+          return object.opacity;
         }
         break;
       case SolidColorBase.colorValuePropertyKey:
