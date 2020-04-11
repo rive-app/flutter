@@ -7,6 +7,7 @@ import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
+import 'package:rive_core/shapes/paint/stroke.dart';
 import 'package:rive_core/transform_space.dart';
 
 /// An abstraction to give a common interface to any component that can contain
@@ -14,6 +15,9 @@ import 'package:rive_core/transform_space.dart';
 abstract class ShapePaintContainer {
   final Set<Fill> fills = {};
   final Event fillsChanged = Event();
+
+  final Set<Stroke> strokes = {};
+  final Event strokesChanged = Event();
 
   @protected
   bool addFill(Fill fill) {
@@ -28,6 +32,24 @@ abstract class ShapePaintContainer {
   bool removeFill(Fill fill) {
     if (fills.remove(fill)) {
       fillsChanged.notify();
+      return true;
+    }
+    return false;
+  }
+
+  @protected
+  bool addStroke(Stroke stroke) {
+    if (strokes.add(stroke)) {
+      strokesChanged.notify();
+      return true;
+    }
+    return false;
+  }
+
+  @protected
+  bool removeStroke(Stroke stroke) {
+    if (strokes.remove(stroke)) {
+      strokesChanged.notify();
       return true;
     }
     return false;
@@ -60,5 +82,20 @@ abstract class ShapePaintContainer {
     fill.appendChild(solidColor);
     appendChild(fill);
     return fill;
+  }
+
+  /// Create a new color stroke and add it to this shape.
+  Stroke createStroke(Color color) {
+    assert(context != null);
+    assert(color != null);
+    var stroke = Stroke()..name = 'Stroke ${strokes.length + 1}';
+    var solidColor = SolidColor()..color = color;
+
+    context.add(stroke);
+    context.add(solidColor);
+
+    stroke.appendChild(solidColor);
+    appendChild(stroke);
+    return stroke;
   }
 }

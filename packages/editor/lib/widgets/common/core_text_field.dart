@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
-import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 
 /// A text field that manipulates core properties.

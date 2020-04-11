@@ -6,6 +6,7 @@ import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
+import 'package:rive_core/shapes/paint/stroke.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
@@ -42,16 +43,26 @@ class Shape extends ShapeBase with ShapePaintContainer {
   @override
   void childAdded(Component child) {
     super.childAdded(child);
-    if (child is Fill) {
-      addFill(child);
+    switch (child.coreType) {
+      case FillBase.typeKey:
+        addFill(child as Fill);
+        break;
+      case StrokeBase.typeKey:
+        addStroke(child as Stroke);
+        break;
     }
   }
 
   @override
   void childRemoved(Component child) {
     super.childRemoved(child);
-    if (child is Fill) {
-      removeFill(child);
+    switch (child.coreType) {
+      case FillBase.typeKey:
+        removeFill(child as Fill);
+        break;
+      case StrokeBase.typeKey:
+        removeStroke(child as Stroke);
+        break;
     }
   }
 
@@ -125,6 +136,9 @@ class Shape extends ShapeBase with ShapePaintContainer {
     var path = _pathComposer.uiPath;
     for (final fill in fills) {
       fill.draw(canvas, path);
+    }
+    for (final stroke in strokes) {
+      stroke.draw(canvas, path);
     }
   }
 }
