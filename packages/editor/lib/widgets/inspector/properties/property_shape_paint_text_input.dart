@@ -9,6 +9,9 @@ import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 
+/// The text input row underneath the color swatch for fills/strokes. Allows
+/// inputting the color value (if it's a solid), the opacity, and the stroke
+/// thickness (if it's a stroke).
 class PropertyShapePaintTextInput extends StatelessWidget {
   static final _percentageConverter = PercentageInputConverter(0);
 
