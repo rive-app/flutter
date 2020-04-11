@@ -90,6 +90,12 @@ class RiveContext extends InheritedWidget {
     return context.dependOnInheritedWidgetOfExactType<RiveContext>().rive;
   }
 
+  /// Call this when you don't want the context to depend on this (usually you
+  /// want this as Rive never changes anyway).
+  static Rive find(BuildContext context) {
+    return context.findAncestorWidgetOfExactType<RiveContext>().rive;
+  }
+
   @override
   bool updateShouldNotify(RiveContext old) => rive != old.rive;
 }
@@ -107,6 +113,9 @@ class ActiveFile extends InheritedWidget {
 
   static OpenFileContext of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<ActiveFile>().file;
+
+  static OpenFileContext find(BuildContext context) =>
+      context.findAncestorWidgetOfExactType<ActiveFile>().file;
 
   @override
   bool updateShouldNotify(ActiveFile old) => file != old.file;

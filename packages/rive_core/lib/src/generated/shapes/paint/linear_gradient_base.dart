@@ -106,6 +106,28 @@ abstract class LinearGradientBase extends ContainerComponent {
     onPropertyChanged(endYPropertyKey, from, to);
   }
 
+  /// --------------------------------------------------------------------------
+  /// Opacity field with key 46.
+  double _opacity = 1;
+  static const int opacityPropertyKey = 46;
+  double get opacity => _opacity;
+
+  /// Change the [_opacity] field value.
+  /// [opacityChanged] will be invoked only if the field's value has changed.
+  set opacity(double value) {
+    if (_opacity == value) {
+      return;
+    }
+    double from = _opacity;
+    _opacity = value;
+    opacityChanged(from, value);
+  }
+
+  @mustCallSuper
+  void opacityChanged(double from, double to) {
+    onPropertyChanged(opacityPropertyKey, from, to);
+  }
+
   @override
   void changeNonNull() {
     super.changeNonNull();
@@ -121,6 +143,9 @@ abstract class LinearGradientBase extends ContainerComponent {
     if (endY != null) {
       onPropertyChanged(endYPropertyKey, endY, endY);
     }
+    if (opacity != null) {
+      onPropertyChanged(opacityPropertyKey, opacity, opacity);
+    }
   }
 
   @override
@@ -134,6 +159,8 @@ abstract class LinearGradientBase extends ContainerComponent {
         return endX as K;
       case endYPropertyKey:
         return endY as K;
+      case opacityPropertyKey:
+        return opacity as K;
       default:
         return super.getProperty<K>(propertyKey);
     }

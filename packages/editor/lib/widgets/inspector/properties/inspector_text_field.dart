@@ -85,9 +85,13 @@ class InspectorTextField<T> extends StatefulWidget {
   /// you want to save the changed value (or track the change for undo/redo).
   final void Function() completeChange;
 
+  /// Placeholder text shown when disabled.
+  final String disabledText;
+
   const InspectorTextField({
     @required this.value,
     @required this.converter,
+    this.disabledText = '',
     this.change,
     this.completeChange,
     Key key,
@@ -101,7 +105,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   final _ConvertingTextEditingController<T> _controller =
       _ConvertingTextEditingController<T>();
   final FocusNode _focusNode =
-      FocusNode(canRequestFocus: true, skipTraversal: true);
+      FocusNode(canRequestFocus: true, skipTraversal: false);
   bool _hasFocus = false;
 
   @override
@@ -141,25 +145,40 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
     super.didUpdateWidget(oldWidget);
   }
 
+  void _completeChange() {
+    ActiveFile.find(context)?.core?.captureJournalEntry();
+    // Force focus back to the main context so that we can immediately
+    // undo this change if we want to by hitting ctrl/comamnd z.
+    RiveContext.find(context).focus();
+    widget.completeChange?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return Underline(
       color: _hasFocus ? theme.colors.separatorActive : theme.colors.separator,
-      child: EditorTextField(
-        controller: _controller,
-        focusNode: _focusNode,
-        color: theme.colors.inspectorTextColor,
-        editingColor: theme.colors.activeText,
-        allowDrag: widget.converter.allowDrag,
-        drag: (amount) =>
-            widget.change(widget.converter.drag(widget.value, amount)),
-        completeDrag: () => widget.completeChange?.call(),
-        onSubmitted: (string) {
-          widget.change?.call(widget.converter.fromEditingValue(string));
-          widget.completeChange?.call();
-        },
-      ),
+      child: widget.change == null
+          ? Text(
+              widget.disabledText,
+              overflow: TextOverflow.clip,
+              maxLines: 1,
+              style: theme.textStyles.inspectorPropertyLabel,
+            )
+          : EditorTextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              color: theme.colors.inspectorTextColor,
+              editingColor: theme.colors.activeText,
+              allowDrag: widget.converter.allowDrag,
+              drag: (amount) =>
+                  widget.change(widget.converter.drag(widget.value, amount)),
+              completeDrag: _completeChange,
+              onSubmitted: (string) {
+                widget.change?.call(widget.converter.fromEditingValue(string));
+                _completeChange();
+              },
+            ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/src/generated/shapes/paint/fill_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/fill_base.dart';
 
@@ -9,6 +10,12 @@ class Fill extends FillBase {
 
   PathFillType get fillType => PathFillType.values[fillRule];
   set fillType(PathFillType type) => fillRule = type.index;
+
+  @override
+  void fillRuleChanged(int from, int to) {
+    super.fillRuleChanged(from, to);
+    parent?.addDirt(ComponentDirt.paint);
+  }
 
   @override
   void update(int dirt) {
