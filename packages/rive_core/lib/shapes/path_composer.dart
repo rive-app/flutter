@@ -8,8 +8,8 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/shapes/path_composer_base.dart';
 
 /// The PathComposer builds the desired world and local paths for the shapes and
-/// their fills/strokes. It gaurantees that one of local or world path is always
-/// availble. If the Shape only wants a local path, we'll only build a local
+/// their fills/strokes. It guarantees that one of local or world path is always
+/// available. If the Shape only wants a local path, we'll only build a local
 /// one. If the Shape only wants a world path, we'll build only that world path.
 /// If it wants both, we build both. If it wants none, we still build a world
 /// path.
