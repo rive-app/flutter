@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/shapes/paint/stroke_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/stroke_base.dart';
 
@@ -40,6 +41,17 @@ class Stroke extends StrokeBase {
   }
 
   @override
+  void transformAffectsStrokeChanged(bool from, bool to) {
+    super.transformAffectsStrokeChanged(from, to);
+
+  print("CHANGING FROM $from $to");
+    var parentShape = parent;
+    if (parentShape is Shape) {
+      parentShape.transformAffectsStrokeChanged();
+    }
+  }
+
+  @override
   void update(int dirt) {
     // Intentionally empty, fill doesn't update.
     // Because Fill never adds dependencies, it'll also never get called.
@@ -50,7 +62,7 @@ class Stroke extends StrokeBase {
     if (!isVisible) {
       return;
     }
-    // path.fillType = fillType;
+    
     canvas.drawPath(path, paint);
   }
 }

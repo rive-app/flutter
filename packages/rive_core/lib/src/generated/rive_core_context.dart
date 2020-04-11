@@ -154,7 +154,7 @@ abstract class RiveCoreContext extends CoreContext {
           setObjectProperty(object, change.op, value);
           break;
         case ShapePaintBase.isVisiblePropertyKey:
-        case ShapeBase.transformAffectsStrokePropertyKey:
+        case StrokeBase.transformAffectsStrokePropertyKey:
         case PointsPathBase.isClosedPropertyKey:
           var value = reader.readInt8() == 1;
           setObjectProperty(object, change.op, value);
@@ -266,7 +266,7 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ShapePaintBase.isVisiblePropertyKey:
-      case ShapeBase.transformAffectsStrokePropertyKey:
+      case StrokeBase.transformAffectsStrokePropertyKey:
       case PointsPathBase.isClosedPropertyKey:
         if (value != null && value is bool) {
           var writer = BinaryWriter(alignment: 1);
@@ -402,6 +402,11 @@ abstract class RiveCoreContext extends CoreContext {
           object.join = value;
         }
         break;
+      case StrokeBase.transformAffectsStrokePropertyKey:
+        if (object is StrokeBase && value is bool) {
+          object.transformAffectsStroke = value;
+        }
+        break;
       case SolidColorBase.colorValuePropertyKey:
         if (object is SolidColorBase && value is int) {
           object.colorValue = value;
@@ -460,11 +465,6 @@ abstract class RiveCoreContext extends CoreContext {
       case DrawableBase.blendModePropertyKey:
         if (object is DrawableBase && value is int) {
           object.blendMode = value;
-        }
-        break;
-      case ShapeBase.transformAffectsStrokePropertyKey:
-        if (object is ShapeBase && value is bool) {
-          object.transformAffectsStroke = value;
         }
         break;
       case PathVertexBase.xPropertyKey:
@@ -638,6 +638,11 @@ abstract class RiveCoreContext extends CoreContext {
           return object.join;
         }
         break;
+      case StrokeBase.transformAffectsStrokePropertyKey:
+        if (object is StrokeBase) {
+          return object.transformAffectsStroke;
+        }
+        break;
       case SolidColorBase.colorValuePropertyKey:
         if (object is SolidColorBase) {
           return object.colorValue;
@@ -696,11 +701,6 @@ abstract class RiveCoreContext extends CoreContext {
       case DrawableBase.blendModePropertyKey:
         if (object is DrawableBase) {
           return object.blendMode;
-        }
-        break;
-      case ShapeBase.transformAffectsStrokePropertyKey:
-        if (object is ShapeBase) {
-          return object.transformAffectsStroke;
         }
         break;
       case PathVertexBase.xPropertyKey:

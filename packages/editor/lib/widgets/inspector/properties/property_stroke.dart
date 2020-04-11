@@ -118,6 +118,27 @@ class PropertyStroke extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Text(
+                'Transform Affects',
+                style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+              ),
+              const SizedBox(width: 20),
+              CoreComboBox(
+                sizing: ComboSizing.expanded,
+                objects: strokes,
+                propertyKey: StrokeBase.transformAffectsStrokePropertyKey,
+                options: const [true, false],
+                toLabel: (bool value) =>
+                    value == null ? '-' : value ? 'True' : 'False',
+                toCoreValue: (bool value) => value,
+                fromCoreValue: (bool value) => value,
+              ),
+            ],
+          ),
         ],
       ),
     );

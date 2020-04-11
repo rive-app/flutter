@@ -53,6 +53,8 @@ class InspectorPopout extends StatefulWidget {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     final boxOffset = renderBox.localToGlobal(Offset.zero);
 
+    // close all other popups when we're opening a new 'main' popup.
+    Popup.closeAll(force: true);
     return Popup.show(
       context,
       onClose: onClose,

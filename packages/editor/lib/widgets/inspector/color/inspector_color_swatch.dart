@@ -50,6 +50,7 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
           // already open.
           return;
         }
+        
         _popup = InspectorPopout.popout(
           widget.inspectorContext,
           width: 206,

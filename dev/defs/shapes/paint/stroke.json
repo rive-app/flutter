@@ -29,6 +29,14 @@
         "int": 49,
         "string": "join"
       }
+    },
+    "transformAffectsStroke": {
+      "type": "bool",
+      "initialValue": "true",
+      "key": {
+        "int": 50,
+        "string": "transformaffectsstroke"
+      }
     }
   }
 }

@@ -18,6 +18,7 @@ abstract class ShapePaint extends ShapePaintBase {
   Paint get paint => _paint;
   ShapePaintMutator _paintMutator;
   ShapePaintContainer _shapePaintContainer;
+  ShapePaintContainer get shapePaintContainer => _shapePaintContainer;
 
   ShapePaint() {
     _paint = makePaint();

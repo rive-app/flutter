@@ -46,8 +46,12 @@ class Popup {
     var close = _popups
         .where((popup) => popup._canAutoClose || force)
         .toList(growable: false);
-    _popups.clear();
 
+    if (force) {
+      _popups.clear();
+    } else {
+      _popups.removeWhere((popup) => popup._canAutoClose);
+    }
     for (final popup in close) {
       popup.close();
     }

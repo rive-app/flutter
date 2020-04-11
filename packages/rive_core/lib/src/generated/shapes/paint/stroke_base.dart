@@ -86,6 +86,29 @@ abstract class StrokeBase extends ShapePaint {
     onPropertyChanged(joinPropertyKey, from, to);
   }
 
+  /// --------------------------------------------------------------------------
+  /// TransformAffectsStroke field with key 50.
+  bool _transformAffectsStroke = true;
+  static const int transformAffectsStrokePropertyKey = 50;
+  bool get transformAffectsStroke => _transformAffectsStroke;
+
+  /// Change the [_transformAffectsStroke] field value.
+  /// [transformAffectsStrokeChanged] will be invoked only if the field's value
+  /// has changed.
+  set transformAffectsStroke(bool value) {
+    if (_transformAffectsStroke == value) {
+      return;
+    }
+    bool from = _transformAffectsStroke;
+    _transformAffectsStroke = value;
+    transformAffectsStrokeChanged(from, value);
+  }
+
+  @mustCallSuper
+  void transformAffectsStrokeChanged(bool from, bool to) {
+    onPropertyChanged(transformAffectsStrokePropertyKey, from, to);
+  }
+
   @override
   void changeNonNull() {
     super.changeNonNull();
@@ -98,6 +121,10 @@ abstract class StrokeBase extends ShapePaint {
     if (join != null) {
       onPropertyChanged(joinPropertyKey, join, join);
     }
+    if (transformAffectsStroke != null) {
+      onPropertyChanged(transformAffectsStrokePropertyKey,
+          transformAffectsStroke, transformAffectsStroke);
+    }
   }
 
   @override
@@ -109,6 +136,8 @@ abstract class StrokeBase extends ShapePaint {
         return cap as K;
       case joinPropertyKey:
         return join as K;
+      case transformAffectsStrokePropertyKey:
+        return transformAffectsStroke as K;
       default:
         return super.getProperty<K>(propertyKey);
     }

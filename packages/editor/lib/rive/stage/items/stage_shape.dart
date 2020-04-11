@@ -19,9 +19,21 @@ class StageShape extends StageContourItem<Shape> {
   @override
   bool hitHiFi(Vec2D worldMouse) {
     final origin = component.artboard.originWorld;
-    return component.pathComposer.uiPath
+    return worldPath
         .contains(Offset(worldMouse[0] - origin[0], worldMouse[1] - origin[1]));
   }
+
+  // The path composer will only build the type of path that is necessary for
+  // runtime rendering. If that doesn't include a world path, then we need to
+  // get one from the provided local path. There's a bit of a dance between
+  // PathComposer and Shape for when and how PathComposer builds these paths,
+  // see the respective update functions of each to fully graps the nuances. It
+  // basically boild down to whether there are strokes that want to be affected
+  // by their transform or not.
+  Path get worldPath => component.fillInWorld
+      ? component.pathComposer.worldPath
+      : component.pathComposer.localPath
+          .transform(component.worldTransform.mat4);
 
   @override
   void draw(Canvas canvas) {
@@ -35,7 +47,7 @@ class StageShape extends StageContourItem<Shape> {
     canvas.save();
     final origin = component.artboard.originWorld;
     canvas.translate(origin[0], origin[1]);
-    canvas.drawPath(component.pathComposer.uiPath, StageItem.selectedPaint);
+    canvas.drawPath(worldPath, StageItem.selectedPaint);
     canvas.restore();
   }
 }
