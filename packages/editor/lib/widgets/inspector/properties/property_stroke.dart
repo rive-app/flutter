@@ -5,7 +5,7 @@ import 'package:rive_editor/widgets/common/converters/string_value_converter.dar
 import 'package:rive_editor/widgets/common/core_combo_box.dart';
 import 'package:rive_editor/widgets/common/core_editor_switch.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
-import 'package:rive_editor/widgets/common/editor_switch.dart';
+import 'package:rive_editor/widgets/common/multi_toggle.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
@@ -128,6 +128,35 @@ class PropertyStroke extends StatelessWidget {
                 },
                 toCoreValue: (StrokeJoin strokeJoin) => strokeJoin.index,
                 fromCoreValue: (int value) => StrokeJoin.values[value],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                child: Text(
+                  'Join',
+                  style:
+                      RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+                ),
+              ),
+              const SizedBox(width: 20),
+              MultiToggle(
+                value: StrokeJoin.bevel,
+                options: StrokeJoin.values,
+                toIcon: (StrokeJoin strokeJoin) {
+                  switch (strokeJoin) {
+                    case StrokeJoin.bevel:
+                      return 'Bevel';
+                    case StrokeJoin.round:
+                      return 'Round';
+                    case StrokeJoin.miter:
+                      return 'Miter';
+                  }
+                  return '-';
+                },
               ),
             ],
           ),
