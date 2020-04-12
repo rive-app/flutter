@@ -82,3 +82,5 @@ build/
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 .vscode/launch.json
+/dev/extract_icons/package-lock.json
+/dev/extract_icons/node_modules
