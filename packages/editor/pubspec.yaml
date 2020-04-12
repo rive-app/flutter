@@ -8,6 +8,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  core:
+    path: ../core
   rive_core:
     path: ../rive_core
   tree_widget:
@@ -50,7 +52,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/icons/
-    
+
   uses-material-design: true
   fonts:
     - family: Roboto-Regular

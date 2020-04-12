@@ -114,6 +114,9 @@ class RiveColors {
 
   Color get lightTreeLines => const Color(0x27666666);
   Color get selectedTreeLines => const Color(0xFF79B7E6);
+  Color get toggleBackground => const Color(0xFF252525);
+  Color get toggleForeground => white;
+  Color get toggleForegroundDisabled => const Color(0xFF444444);
 }
 
 /// TextStyles used in the Rive Theme

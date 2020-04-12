@@ -3,7 +3,9 @@ import 'package:rive_core/component.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_combo_box.dart';
+import 'package:rive_editor/widgets/common/core_editor_switch.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
+import 'package:rive_editor/widgets/common/editor_switch.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
@@ -15,6 +17,7 @@ import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
 /// editing a color fill on a shape.
 class PropertyStroke extends StatelessWidget {
+  static const double inputWidth = 70;
   final Iterable<ShapePaint> strokes;
   final InspectingColor inspectingColor;
 
@@ -44,12 +47,16 @@ class PropertyStroke extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Text(
-                'Name',
-                style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+              Expanded(
+                child: Text(
+                  'Name',
+                  style:
+                      RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+                ),
               ),
               const SizedBox(width: 20),
-              Expanded(
+              SizedBox(
+                width: inputWidth,
                 child: CoreTextField(
                   objects: strokes,
                   propertyKey: ComponentBase.namePropertyKey,
@@ -62,9 +69,12 @@ class PropertyStroke extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Text(
-                'Cap',
-                style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+              Expanded(
+                child: Text(
+                  'Cap',
+                  style:
+                      RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+                ),
               ),
               const SizedBox(width: 20),
               CoreComboBox(
@@ -92,9 +102,12 @@ class PropertyStroke extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Text(
-                'Join',
-                style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+              Expanded(
+                child: Text(
+                  'Join',
+                  style:
+                      RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+                ),
               ),
               const SizedBox(width: 20),
               CoreComboBox(
@@ -122,20 +135,17 @@ class PropertyStroke extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.max,
             children: [
-              Text(
-                'Transform Affects',
-                style: RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+              Expanded(
+                child: Text(
+                  'Transform Affects',
+                  style:
+                      RiveTheme.of(context).textStyles.inspectorPropertyLabel,
+                ),
               ),
               const SizedBox(width: 20),
-              CoreComboBox(
-                sizing: ComboSizing.expanded,
+              CoreEditorSwitch(
                 objects: strokes,
                 propertyKey: StrokeBase.transformAffectsStrokePropertyKey,
-                options: const [true, false],
-                toLabel: (bool value) =>
-                    value == null ? '-' : value ? 'True' : 'False',
-                toCoreValue: (bool value) => value,
-                fromCoreValue: (bool value) => value,
               ),
             ],
           ),
