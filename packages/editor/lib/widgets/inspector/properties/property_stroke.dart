@@ -72,7 +72,7 @@ class PropertyStroke extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Join',
+                  'Cap',
                   style:
                       RiveTheme.of(context).textStyles.inspectorPropertyLabel,
                 ),
