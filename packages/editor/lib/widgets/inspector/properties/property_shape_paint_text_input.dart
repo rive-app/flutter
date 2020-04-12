@@ -44,11 +44,12 @@ class PropertyShapePaintTextInput extends StatelessWidget {
         builder: (context, HSVColor hsv, child) {
           return Padding(
             padding:
-                const EdgeInsets.only(top: 5, bottom: 5, left: 45, right: 20),
+                const EdgeInsets.only(top: 0, bottom: 10, left: 45, right: 20),
             child: Row(
               children: [
-                Expanded(
+                Flexible(
                   flex: 12,
+                  fit: FlexFit.tight,
                   child: InspectorTextField(
                     value: hsv,
                     converter: HexValueConverter.instance,
@@ -59,8 +60,9 @@ class PropertyShapePaintTextInput extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(
+                Flexible(
                   flex: 11,
+                  fit: FlexFit.tight,
                   child: ValueListenableBuilder(
                     valueListenable: inspectingColor.opacity,
                     builder: (context, double opacity, _) => InspectorTextField(
@@ -71,8 +73,9 @@ class PropertyShapePaintTextInput extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(
+                Flexible(
                   flex: 10,
+                  fit: FlexFit.tight,
                   child: shapePaints.isNotEmpty && shapePaints.first is Stroke
                       ? CoreTextField(
                           objects: shapePaints,

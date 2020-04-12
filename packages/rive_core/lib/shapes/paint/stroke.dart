@@ -43,8 +43,6 @@ class Stroke extends StrokeBase {
   @override
   void transformAffectsStrokeChanged(bool from, bool to) {
     super.transformAffectsStrokeChanged(from, to);
-
-  print("CHANGING FROM $from $to");
     var parentShape = parent;
     if (parentShape is Shape) {
       parentShape.transformAffectsStrokeChanged();

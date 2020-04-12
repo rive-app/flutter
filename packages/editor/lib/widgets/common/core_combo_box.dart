@@ -83,7 +83,7 @@ class _CoreComboBoxState<T, K> extends State<CoreComboBox<T, K>> {
 
           // Force focus back to the main context so that we can immediately
           // undo this change if we want to by hitting ctrl/comamnd z.
-          RiveContext.of(context).focus();
+          RiveContext.find(context).focus();
         },
         toLabel: widget.toLabel,
         typeahead: widget.typeahead,
