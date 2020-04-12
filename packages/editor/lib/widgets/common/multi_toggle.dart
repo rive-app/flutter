@@ -5,7 +5,7 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 typedef ChooseOption<T> = void Function(T);
 typedef OptionToIcon<T> = String Function(T);
 
-/// A toggle (on/off) switch with styling for the Rive editor.
+/// A multi toggle that displays icons in a row for each option.
 class MultiToggle<T> extends StatelessWidget {
   final T value;
   final List<T> options;
@@ -20,6 +20,20 @@ class MultiToggle<T> extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
+  Widget _select(Widget icon, Color background) {
+    return background != null
+        ? DecoratedBox(
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(15),
+              ),
+            ),
+            child: icon,
+          )
+        : icon;
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
@@ -27,18 +41,30 @@ class MultiToggle<T> extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colors.toggleBackground,
         borderRadius: const BorderRadius.all(
-          Radius.circular(10),
+          Radius.circular(15),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.all(2),
         child: Row(
           children: [
             for (final option in options)
-              TintedIcon(
-                color: const Color(0xFFFFFFFF),
-                icon: toIcon(option),
-              )
+              _select(
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapDown: (_) => change?.call(option),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: TintedIcon(
+                      color: option == value
+                          ? const Color(0xFFFFFFFF)
+                          : theme.colors.inspectorTextColor,
+                      icon: toIcon(option),
+                    ),
+                  ),
+                ),
+                option == value ? theme.colors.toggleForegroundDisabled : null,
+              ),
           ],
         ),
       ),

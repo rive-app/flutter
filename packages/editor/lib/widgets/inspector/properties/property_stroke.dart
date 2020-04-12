@@ -4,6 +4,7 @@ import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_combo_box.dart';
 import 'package:rive_editor/widgets/common/core_editor_switch.dart';
+import 'package:rive_editor/widgets/common/core_multi_toggle.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/common/multi_toggle.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -71,27 +72,30 @@ class PropertyStroke extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Cap',
+                  'Join',
                   style:
                       RiveTheme.of(context).textStyles.inspectorPropertyLabel,
                 ),
               ),
               const SizedBox(width: 20),
-              CoreComboBox(
-                sizing: ComboSizing.expanded,
+              CoreMultiToggle(
                 objects: strokes,
                 propertyKey: StrokeBase.capPropertyKey,
-                options: StrokeCap.values,
-                toLabel: (StrokeCap strokeCap) {
-                  switch (strokeCap) {
+                options: const [
+                  StrokeCap.butt,
+                  StrokeCap.round,
+                  StrokeCap.square,
+                ],
+                toIcon: (StrokeCap cap) {
+                  switch (cap) {
                     case StrokeCap.butt:
-                      return 'Butt';
+                      return 'cap-none';
                     case StrokeCap.round:
-                      return 'Round';
+                      return 'cap-round';
                     case StrokeCap.square:
-                      return 'Square';
+                      return 'cap-square';
                   }
-                  return '-';
+                  return null;
                 },
                 toCoreValue: (StrokeCap strokeCap) => strokeCap.index,
                 fromCoreValue: (int value) => StrokeCap.values[value],
@@ -110,53 +114,27 @@ class PropertyStroke extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 20),
-              CoreComboBox(
-                sizing: ComboSizing.expanded,
+              CoreMultiToggle(
                 objects: strokes,
                 propertyKey: StrokeBase.joinPropertyKey,
-                options: StrokeJoin.values,
-                toLabel: (StrokeJoin strokeJoin) {
-                  switch (strokeJoin) {
-                    case StrokeJoin.bevel:
-                      return 'Bevel';
-                    case StrokeJoin.round:
-                      return 'Round';
-                    case StrokeJoin.miter:
-                      return 'Miter';
-                  }
-                  return '-';
-                },
-                toCoreValue: (StrokeJoin strokeJoin) => strokeJoin.index,
-                fromCoreValue: (int value) => StrokeJoin.values[value],
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(
-                child: Text(
-                  'Join',
-                  style:
-                      RiveTheme.of(context).textStyles.inspectorPropertyLabel,
-                ),
-              ),
-              const SizedBox(width: 20),
-              MultiToggle(
-                value: StrokeJoin.bevel,
-                options: StrokeJoin.values,
+                options: const [
+                  StrokeJoin.round,
+                  StrokeJoin.bevel,
+                  StrokeJoin.miter,
+                ],
                 toIcon: (StrokeJoin strokeJoin) {
                   switch (strokeJoin) {
                     case StrokeJoin.bevel:
-                      return 'Bevel';
+                      return 'join-bevel';
                     case StrokeJoin.round:
-                      return 'Round';
+                      return 'join-round';
                     case StrokeJoin.miter:
-                      return 'Miter';
+                      return 'join-miter';
                   }
-                  return '-';
+                  return null;
                 },
+                toCoreValue: (StrokeJoin strokeJoin) => strokeJoin.index,
+                fromCoreValue: (int value) => StrokeJoin.values[value],
               ),
             ],
           ),
