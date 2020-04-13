@@ -3,7 +3,7 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/settings_text_field.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/labeled_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class BillingHistory extends StatelessWidget {
@@ -76,13 +76,13 @@ class BillingHistory extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _textFieldRow([
-            SettingsTextField(
+            LabeledTextField(
               label: 'Business Name',
               hint: 'Company name for receipts',
               onChanged: (value) => billingHistory.businessName = value,
               initialValue: billingHistory.businessName,
             ),
-            SettingsTextField(
+            LabeledTextField(
               label: 'VAT/GST ID',
               hint: 'Optional',
               onChanged: (value) => billingHistory.vat = value,
@@ -91,7 +91,7 @@ class BillingHistory extends StatelessWidget {
           ]),
           const SizedBox(height: 30),
           _textFieldRow([
-            SettingsTextField(
+            LabeledTextField(
               label: 'Business Name',
               hint: 'Add your company address of record',
               onChanged: (value) => billingHistory.businessName = value,
