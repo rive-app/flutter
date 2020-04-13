@@ -34,7 +34,6 @@ class CoreMultiToggle<T, K> extends StatelessWidget {
         value: value == null ? null : fromCoreValue(value),
         toIcon: toIcon,
         change: (T option) {
-          print("CHANGE $option");
           if (objects.isEmpty) {
             return;
           }
