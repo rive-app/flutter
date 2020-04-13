@@ -24,24 +24,22 @@ class RiveRadio<T> extends StatefulWidget {
 }
 
 class _RiveRadioState<T> extends State<RiveRadio<T>> {
-  Map<LocalKey, ActionFactory> _actionMap;
+  Map<Type, Action<Intent>> _actionMap;
   bool _hasFocus = false;
   bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
-    final activateActionKey = ActivateAction.key;
-    final callbackAction =
-        () => CallbackAction(activateActionKey, onInvoke: _activate);
-    _actionMap = {activateActionKey: callbackAction};
+    final callbackAction = CallbackAction<ActivateIntent>(onInvoke: _activate);
+    _actionMap = {ActivateIntent: callbackAction};
   }
 
-  void _activate(FocusNode node, Intent intent) {
+  void _activate(ActivateIntent intent) {
     if (widget.onChanged != null) {
       widget.onChanged(widget.value);
     }
-    final renderObject = node.context.findRenderObject();
+    final renderObject = context.findRenderObject();
     renderObject.sendSemanticsEvent(const TapSemanticEvent());
   }
 
