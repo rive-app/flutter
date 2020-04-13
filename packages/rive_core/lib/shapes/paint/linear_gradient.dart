@@ -90,9 +90,12 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     }
 
     bool worldTransformed = dirt & ComponentDirt.worldTransform != 0;
+    bool localTransformed = dirt & ComponentDirt.transform != 0;
+
     // We rebuild the gradient if the gradient is dirty or we paint in world
     // space and the world space transform has changed.
     var rebuildGradient = dirt & ComponentDirt.paint != 0 ||
+        localTransformed ||
         (paintsInWorldSpace && worldTransformed);
 
     if (rebuildGradient) {
@@ -120,7 +123,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
 
     // Regardless of rebuild, if the world transformed, let's notify the
     // delegate.
-    if (worldTransformed) {
+    if (worldTransformed || localTransformed) {
       _delegate?.boundsChanged();
     } else if (stopsChanged) {
       _delegate?.stopsChanged();
@@ -144,25 +147,25 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   @override
   void startXChanged(double from, double to) {
     super.startXChanged(from, to);
-    addDirt(ComponentDirt.worldTransform);
+    addDirt(ComponentDirt.transform);
   }
 
   @override
   void startYChanged(double from, double to) {
     super.startYChanged(from, to);
-    addDirt(ComponentDirt.worldTransform);
+    addDirt(ComponentDirt.transform);
   }
 
   @override
   void endXChanged(double from, double to) {
     super.endXChanged(from, to);
-    addDirt(ComponentDirt.worldTransform);
+    addDirt(ComponentDirt.transform);
   }
 
   @override
   void endYChanged(double from, double to) {
     super.endYChanged(from, to);
-    addDirt(ComponentDirt.worldTransform);
+    addDirt(ComponentDirt.transform);
   }
 
   @override

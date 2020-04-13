@@ -63,6 +63,7 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
           },
           autoClose: false,
           onClose: () {
+            widget.inspectingColor.stopEditing();
             _popup = null;
           },
         );
