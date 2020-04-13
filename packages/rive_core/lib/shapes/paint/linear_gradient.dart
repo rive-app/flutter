@@ -93,7 +93,8 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     bool localTransformed = dirt & ComponentDirt.transform != 0;
 
     // We rebuild the gradient if the gradient is dirty or we paint in world
-    // space and the world space transform has changed.
+    // space and the world space transform has changed, or the local transform
+    // has changed. Local transform changes when a stop moves in local space.
     var rebuildGradient = dirt & ComponentDirt.paint != 0 ||
         localTransformed ||
         (paintsInWorldSpace && worldTransformed);
