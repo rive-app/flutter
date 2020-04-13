@@ -9,7 +9,7 @@ import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/settings_text_field.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/labeled_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ProfileSettings extends StatefulWidget {
@@ -99,12 +99,12 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               _textFieldRow([
-                                SettingsTextField(
+                                LabeledTextField(
                                   label: '${labelPrefix}Name',
                                   onChanged: (value) => _profile.name = value,
                                   initialValue: _profile.name,
                                 ),
-                                SettingsTextField(
+                                LabeledTextField(
                                   label: '${labelPrefix}Username',
                                   onChanged: (value) =>
                                       _profile.username = value,
@@ -114,14 +114,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                               const SizedBox(height: 30),
                               _textFieldRow(
                                 [
-                                  SettingsTextField(
+                                  LabeledTextField(
                                     label: 'Location',
                                     hint: 'Where is your team based?',
                                     onChanged: (value) =>
                                         _profile.location = value,
                                     initialValue: _profile.location,
                                   ),
-                                  SettingsTextField(
+                                  LabeledTextField(
                                     label: 'Website',
                                     hint: 'Website',
                                     onChanged: (value) =>
@@ -132,7 +132,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                               ),
                               const SizedBox(height: 30),
                               _textFieldRow([
-                                SettingsTextField(
+                                LabeledTextField(
                                   label: 'Bio',
                                   hint: 'Tell users a bit about your team',
                                   onChanged: (value) => _profile.blurb = value,
@@ -151,37 +151,22 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                       children: [
                         LabeledRadio(
                             label: 'Available For Hire',
+                            description:
+                                'Allow other users to message you about work'
+                                ' opportunities. You will also show up in our'
+                                'list of artists for hire.',
                             groupValue: _profile.isForHire,
                             value: true,
                             onChanged: (value) => _profile.isForHire = value),
-                        Padding(
-                          // Padding: 20 (radio button) + 10 text padding
-                          padding: const EdgeInsets.only(left: 30.0),
-                          // TODO: add link to the "artists for hire".
-                          // What will it link to?
-                          child: Text(
-                              'Allow other users to message you about work'
-                              ' opportunities. You will also show up in our list'
-                              ' of artists for hire.',
-                              style: textStyles.hierarchyTabHovered
-                                  .copyWith(fontSize: 13, height: 1.6)),
-                        ),
                         const SizedBox(height: 24),
                         LabeledRadio(
                             label: 'Not Available For Hire',
+                            description:
+                                "Don't allow other users to contact you about"
+                                ' work opportunities.',
                             groupValue: _profile.isForHire,
                             value: false,
                             onChanged: (value) => _profile.isForHire = value),
-                        const SizedBox(width: 30),
-                        Padding(
-                          // Padding: 20 (radio button) + 10 text padding
-                          padding: const EdgeInsets.only(left: 30.0),
-                          child: Text(
-                              "Don't allow other users to contact you about"
-                              ' work opportunities.',
-                              style: textStyles.hierarchyTabHovered
-                                  .copyWith(fontSize: 13, height: 1.6)),
-                        )
                       ]),
                 ),
                 const SizedBox(height: 30),
@@ -194,13 +179,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _textFieldRow([
-                          SettingsTextField(
+                          LabeledTextField(
                             label: 'Twitter',
                             hint: 'Link',
                             onChanged: (value) => _profile.twitter = value,
                             initialValue: _profile.twitter,
                           ),
-                          SettingsTextField(
+                          LabeledTextField(
                             label: 'Instagram',
                             hint: 'Link',
                             onChanged: (value) => _profile.instagram = value,
@@ -209,13 +194,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         ]),
                         const SizedBox(height: 30),
                         _textFieldRow([
-                          SettingsTextField(
+                          LabeledTextField(
                             label: 'Dribbble',
                             hint: 'Link',
                             onChanged: (value) => _profile.dribbble = value,
                             initialValue: _profile.dribbble,
                           ),
-                          SettingsTextField(
+                          LabeledTextField(
                             label: 'LinkedIn',
                             hint: 'Link',
                             onChanged: (value) => _profile.linkedin = value,
@@ -224,13 +209,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         ]),
                         const SizedBox(height: 30),
                         _textFieldRow([
-                          SettingsTextField(
+                          LabeledTextField(
                             label: 'Behance',
                             hint: 'Link',
                             onChanged: (value) => _profile.behance = value,
                             initialValue: _profile.behance,
                           ),
-                          SettingsTextField(
+                          LabeledTextField(
                             label: 'Vimeo',
                             hint: 'Link',
                             onChanged: (value) => _profile.vimeo = value,
@@ -239,13 +224,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         ]),
                         const SizedBox(height: 30),
                         _textFieldRow([
-                          SettingsTextField(
+                          LabeledTextField(
                             label: 'GitHub',
                             hint: 'Link',
                             onChanged: (value) => _profile.github = value,
                             initialValue: _profile.github,
                           ),
-                          SettingsTextField(
+                          LabeledTextField(
                             label: 'Medium',
                             hint: 'Link',
                             onChanged: (value) => _profile.medium = value,
@@ -277,6 +262,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
 class LabeledRadio extends StatelessWidget {
   final String label;
+  final String description;
   final bool groupValue;
   final bool value;
   final ValueChanged<bool> onChanged;
@@ -285,6 +271,7 @@ class LabeledRadio extends StatelessWidget {
     @required this.label,
     @required this.groupValue,
     @required this.onChanged,
+    this.description,
     this.value,
   });
 
@@ -298,18 +285,32 @@ class LabeledRadio extends StatelessWidget {
       onTap: () {
         if (value != groupValue) onChanged(value);
       },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          RiveRadio<bool>(
-            groupValue: groupValue,
-            value: value,
-            onChanged: onChanged,
-            selectedColor: colors.commonDarkGrey,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              RiveRadio<bool>(
+                groupValue: groupValue,
+                value: value,
+                onChanged: onChanged,
+                selectedColor: colors.commonDarkGrey,
+              ),
+              const SizedBox(width: 10),
+              Text(label, style: styles.greyText),
+            ],
           ),
-          const SizedBox(width: 10),
-          Text(label, style: styles.greyText),
+          Padding(
+            // Padding: 20 (radio button) + 10 text padding
+            padding: const EdgeInsets.only(left: 30.0),
+            // TODO: add link to the "artists for hire".
+            // What will it link to?
+            child: Text(description,
+                style: styles.hierarchyTabHovered
+                    .copyWith(fontSize: 13, height: 1.6)),
+          )
         ],
       ),
     );
