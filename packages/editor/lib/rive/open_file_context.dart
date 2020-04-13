@@ -139,13 +139,17 @@ class OpenFileContext with RiveFileDelegate {
       selection.clear();
 
       core.advance(0);
-      var stage = Stage(this);
-      _stage = stage;
+      makeStage();
       _stage.tool = TranslateTool();
       _resetTreeControllers();
       stateChanged.notify();
     }
     return true;
+  }
+
+  @protected
+  void makeStage() {
+    _stage = Stage(this);
   }
 
   void dispose() {
@@ -284,7 +288,6 @@ class OpenFileContext with RiveFileDelegate {
   /// Will attempt to perform the given action. If the action is not handled,
   /// [triggerAction] will return false.
   bool triggerAction(ShortcutAction action) {
-
     // See if any of our handlers care.
     // https://www.youtube.com/watch?v=1o4s1KVJaVA
     for (final actionHandler in _actionHandlers.reversed) {
