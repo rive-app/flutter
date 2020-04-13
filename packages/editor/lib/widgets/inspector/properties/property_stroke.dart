@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
-import 'package:rive_editor/widgets/common/core_combo_box.dart';
 import 'package:rive_editor/widgets/common/core_editor_switch.dart';
 import 'package:rive_editor/widgets/common/core_multi_toggle.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
-import 'package:rive_editor/widgets/common/multi_toggle.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';

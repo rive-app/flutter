@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/common/multi_toggle.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// A multi toggle that displays icons in a row for each option backed by a core
 /// value.
