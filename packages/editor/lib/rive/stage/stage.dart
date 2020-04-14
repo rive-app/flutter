@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:core/debounce.dart';
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/artboard.dart';
@@ -52,6 +53,7 @@ abstract class StageDelegate {
   void stageNeedsAdvance();
   void stageNeedsRedraw();
   Future<ui.Image> rasterize();
+  Cursor customCursor;
 }
 
 abstract class LateDrawViewDelegate {
@@ -121,6 +123,7 @@ class Stage extends Debouncer {
       return;
     }
     if (value.activate(this)) {
+      toolNotifier.value?.deactivate();
       toolNotifier.value = value;
     }
     // Tools that are Moveable (e.g. PenTool) are activated as soon as
@@ -708,4 +711,8 @@ class Stage extends Debouncer {
     // TODO: Try to get the StagePaths or the StageShapes from the current
     // selection, and set it the current editing shape.
   }
+
+  void hideCursor() => delegate?.customCursor?.hide();
+
+  void showCursor() => delegate?.customCursor?.show();
 }

@@ -50,6 +50,9 @@ class _ResizePanelState extends State<ResizePanel> {
   }
 
   void _updateCursor(BuildContext context) {
+    if (CustomCursor.find(context).isHidden) {
+      return;
+    }
     if (_isLit) {
       _showResizeCursor(context, const Duration(milliseconds: 500));
     } else if (_isDragging) {

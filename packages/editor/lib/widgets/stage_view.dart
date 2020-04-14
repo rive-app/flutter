@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -9,14 +10,19 @@ class StageView extends LeafRenderObjectWidget {
   /// The Rive context.
   final OpenFileContext file;
   final Stage stage;
-
-  const StageView({this.file, this.stage});
+  final Cursor customCursor;
+  const StageView({
+    this.file,
+    this.stage,
+    this.customCursor,
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _StageViewRenderObject()
       ..file = file
-      ..stage = stage;
+      ..stage = stage
+      ..customCursor = customCursor;
   }
 
   @override
@@ -24,7 +30,8 @@ class StageView extends LeafRenderObjectWidget {
       BuildContext context, covariant _StageViewRenderObject renderObject) {
     renderObject
       ..file = file
-      ..stage = stage;
+      ..stage = stage
+      ..customCursor = customCursor;
   }
 
   @override
@@ -34,6 +41,10 @@ class StageView extends LeafRenderObjectWidget {
 }
 
 class _StageViewRenderObject extends RenderBox implements StageDelegate {
+  // Just a way for the stage to request a change of cursor.
+  @override
+  Cursor customCursor;
+
   OpenFileContext _file;
 
   OpenFileContext get file => _file;

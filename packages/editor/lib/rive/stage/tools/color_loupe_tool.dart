@@ -85,6 +85,7 @@ class ColorLoupeTool extends StageTool
     if (!super.activate(stage)) {
       return false;
     }
+    stage.hideCursor();
     stage.file.addActionHandler(_handleAction);
     stage.markNeedsAdvance();
     return true;
@@ -104,6 +105,11 @@ class ColorLoupeTool extends StageTool
   }
 
   @override
+  void deactivate() {
+    stage.showCursor();
+  }
+
+  @override
   void lateDraw(PaintingContext context, ui.Offset offset, Size viewSize) {
     var canvas = context.canvas;
 
@@ -114,6 +120,7 @@ class ColorLoupeTool extends StageTool
     var localMouse = stage.localMouse;
     var mx = (offset.dx + localMouse.dx).roundToDouble();
     var my = (offset.dy + localMouse.dy).roundToDouble();
+
     canvas.save();
     canvas.clipRect(offset & viewSize);
 

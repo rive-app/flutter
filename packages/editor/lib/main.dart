@@ -15,6 +15,7 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/catastrophe.dart';
+import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/draw_order.dart';
 import 'package:rive_editor/widgets/hierarchy.dart';
@@ -455,6 +456,7 @@ class StagePanel extends StatelessWidget {
               : StageView(
                   file: file,
                   stage: stage,
+                  customCursor: CustomCursor.of(context),
                 ),
         ),
         Positioned.fill(

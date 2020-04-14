@@ -41,6 +41,9 @@ abstract class StageTool {
     return true;
   }
 
+  /// Cleanup anything that was setup during activation.
+  void deactivate() {}
+
   void setEditMode(EditMode editMode) {
     _editMode = editMode;
     onEditModeChange();
