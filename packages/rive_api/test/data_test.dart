@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:rive_api/apis/changelog.dart';
+import 'package:rive_api/models/notification.dart';
 import 'package:test/test.dart';
 
 import 'package:rive_api/models/team.dart';
@@ -128,6 +129,20 @@ void main() {
       expect(changelogs.last.items.length, 2);
       expect(changelogs.last.items.last.title, 'Test Title 2');
       expect(changelogs.last.items.last.description, 'Test description 2');
+    });
+  });
+
+  group('Notification', () {
+    test('Follow notifications are constructed from JSON correctly', () {
+      final data = {'type': 'follow', 'senderId': '2', 'date': 1586832870};
+      final jsonData = jsonEncode(data);
+
+      final notification = Notification.fromData(json.decode(jsonData));
+      expect(notification, isA<FollowNotification>());
+
+      expect((notification as FollowNotification).dateTime,
+          DateTime.fromMillisecondsSinceEpoch(1586832870 * 1000));
+      expect((notification as FollowNotification).senderId, 2);
     });
   });
 }
