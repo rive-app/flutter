@@ -86,6 +86,7 @@ class ColorLoupeTool extends StageTool
       return false;
     }
     stage.file.addActionHandler(_handleAction);
+    stage.markNeedsAdvance();
     return true;
   }
 
