@@ -17,11 +17,12 @@ class TranslateTool extends StageTool with TransformingTool {
 
   @override
   List<StageTransformer> get transformers => [
-        ArtboardTranslateTransformer(),
-
-        // gradient stop transformers must come before node transformers in
+        // gradient stop transformers must come before other transformers in
         // order to allow them to cull nodes from the transformation set
         GradientStopTranslateTransformer(),
+
+        ArtboardTranslateTransformer(),
+
 
         NodeTranslateTransformer(),
       ];
