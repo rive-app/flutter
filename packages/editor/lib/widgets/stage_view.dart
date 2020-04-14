@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -41,7 +42,7 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
       return;
     }
     _file = value;
-    _file?.stage?.delegate(this);
+    _file?.stage?.delegateTo(this);
     markNeedsPaint();
   }
 
@@ -52,7 +53,7 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
       return;
     }
     _stage = value;
-    stage.delegate(this);
+    stage.delegateTo(this);
     markNeedsPaint();
   }
 
@@ -87,4 +88,11 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
   void stageNeedsRedraw() {
     markNeedsPaint();
   }
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  Future<ui.Image> rasterize() =>
+      (layer as OffsetLayer).toImage(Offset.zero & size); //, pixelRatio = 1 });
 }

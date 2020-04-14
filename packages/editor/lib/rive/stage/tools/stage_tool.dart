@@ -35,6 +35,7 @@ abstract class StageTool {
           : worldMouse;
 
   /// Override this to check if this tool is valid.
+  @mustCallSuper
   bool activate(Stage stage) {
     _stage = stage;
     return true;

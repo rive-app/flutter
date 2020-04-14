@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:rive_core/math/vec2d.dart';
 
 mixin MoveableTool {
@@ -10,8 +11,11 @@ mixin MoveableTool {
     }
   }
 
-  void updateMove(Vec2D worldMouse) {
+  /// Returns true if the stage should advance after movement.
+  @mustCallSuper
+  bool updateMove(Vec2D worldMouse) {
     _mousePosition = worldMouse;
+    return true;
   }
 
   void onExit() {

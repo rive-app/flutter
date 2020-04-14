@@ -21,6 +21,7 @@ import 'package:rive_editor/widgets/hierarchy.dart';
 import 'package:rive_editor/widgets/home/home_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
+import 'package:rive_editor/widgets/stage_late_view.dart';
 import 'package:rive_widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
@@ -453,6 +454,13 @@ class StagePanel extends StatelessWidget {
               ? Container()
               : StageView(
                   file: file,
+                  stage: stage,
+                ),
+        ),
+        Positioned.fill(
+          child: stage == null
+              ? Container()
+              : StageLateView(
                   stage: stage,
                 ),
         ),

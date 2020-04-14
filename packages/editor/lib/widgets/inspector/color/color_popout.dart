@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/stage/tools/color_loupe_tool.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/converters/alpha_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/blue_value_converter.dart';
@@ -10,6 +11,7 @@ import 'package:rive_editor/widgets/common/converters/input_value_converter.dart
 import 'package:rive_editor/widgets/common/converters/red_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/saturation_value_converter.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/color_slider.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
@@ -20,7 +22,6 @@ import 'package:rive_editor/widgets/inspector/color/opacity_slider_background.da
 import 'package:rive_editor/widgets/inspector/color/saturation_brightness_picker.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// The contents of the color picker shown in a popout.
 class ColorPopout extends StatelessWidget {
@@ -85,7 +86,7 @@ class ColorPopout extends StatelessWidget {
     var theme = RiveTheme.of(context);
     return ValueListenableBuilder(
       valueListenable: inspecting.type,
-      builder: (context, ColorType type, child) => Column(
+      builder: (_, ColorType type, child) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -119,7 +120,7 @@ class ColorPopout extends StatelessWidget {
           ],
           ValueListenableBuilder(
             valueListenable: inspecting.editingColor,
-            builder: (context, HSVColor hsv, child) => Column(
+            builder: (_, HSVColor hsv, child) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -137,9 +138,17 @@ class ColorPopout extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      TintedIcon(
+                      TintedIconButton(
                         icon: 'eyedropper',
                         color: theme.colors.popupIcon,
+                        onPress: () {
+                          var tool = ColorLoupeTool.instance;
+                          inspecting.context.stage.tool = tool;
+                          tool.pickColor = (color) {
+                            inspecting.changeColor(HSVColor.fromColor(color));
+                            inspecting.completeChange();
+                          };
+                        },
                       ),
                       const SizedBox(width: 20),
                       Expanded(
