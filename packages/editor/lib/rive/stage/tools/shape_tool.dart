@@ -12,6 +12,7 @@ import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 const Map<EditMode, DraggingMode> editModeMap = {
@@ -28,6 +29,8 @@ abstract class ShapeTool extends StageTool with DraggableTool {
   ParametricPath _path;
 
   Artboard _currentArtboard;
+  
+  final StageToolTip _tip = StageToolTip();
 
   @override
   void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
@@ -121,6 +124,9 @@ abstract class ShapeTool extends StageTool with DraggableTool {
     _path.height = _end[1] - _start[1];
     _path.x = _path.width / 2;
     _path.y = _path.height / 2;
+
+    _tip.text =
+        '${(_end[0] - _start[0]).round()}x${(_end[1] - _start[1]).round()}';
   }
 
   @override
@@ -155,56 +161,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
           ..style = PaintingStyle.stroke
           ..color = RiveThemeData().colors.shapeBounds);
 
-    _paintToolTip(
-        canvas,
-        '${(_end[0] - _start[0]).round()}x${(_end[1] - _start[1]).round()}',
-        cursor);
-  }
-
-  /// Paints a tool tip; currently used for the dargging xy co-ords
-  void _paintToolTip(Canvas canvas, String text, Vec2D pos) {
-    final style = ParagraphStyle(
-        textAlign: TextAlign.left, fontFamily: 'Roboto-Light', fontSize: 11);
-    ParagraphBuilder builder = ParagraphBuilder(style)
-      ..pushStyle(
-        TextStyle(
-          foreground: Paint()..color = RiveThemeData().colors.toolTipText,
-        ),
-      );
-    builder.addText(text);
-    Paragraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 400));
-    List<TextBox> boxes = paragraph.getBoxesForRange(0, text.length);
-    final size = boxes.isEmpty
-        ? Size.zero
-        : Size(boxes.last.right - boxes.first.left + 1,
-            boxes.last.bottom - boxes.first.top + 1);
-
-    const offset = Offset(10, 10);
-    const padding = Size(10, 6);
-
-    // Fix the position to full pixels.
-    // Which will line this up better with the paragraph
-    final topLeft = (pos[0] + offset.dx).floorToDouble();
-    final topRight = (pos[1] + offset.dy).floorToDouble();
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          topLeft,
-          topRight,
-          size.width + padding.width * 2,
-          size.height + padding.height * 2,
-        ),
-        const Radius.circular(5),
-      ),
-      Paint()..color = RiveThemeData().colors.toolTip,
-    );
-
-    // Draw the tooltip text
-    canvas.drawParagraph(
-      paragraph,
-      Offset(topLeft + padding.width, topRight + padding.height),
-    );
+    _tip.paint(canvas, Offset(cursor[0]+10, cursor[1]+10));
   }
 
   @override

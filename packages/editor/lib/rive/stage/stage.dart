@@ -1,6 +1,8 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:core/debounce.dart';
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/artboard.dart';
@@ -35,6 +37,7 @@ import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/late_draw_stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
@@ -49,6 +52,13 @@ typedef _ItemFactory = StageItem Function();
 abstract class StageDelegate {
   void stageNeedsAdvance();
   void stageNeedsRedraw();
+  Future<ui.Image> rasterize();
+  Cursor customCursor;
+}
+
+abstract class LateDrawViewDelegate {
+  void markNeedsPaint();
+  LateDrawStageTool tool;
 }
 
 /// Hacky way to do friend class access in Dart by using an interface with
@@ -87,6 +97,7 @@ class Stage extends Debouncer {
   final Vec2D _viewTranslationTarget = Vec2D();
   double _viewZoomTarget = 1;
   Vec2D _worldMouse = Vec2D();
+  Offset localMouse = Offset.zero;
   bool _mouseDownSelected = false;
   EditMode activeEditMode = EditMode.normal;
 
@@ -101,6 +112,8 @@ class Stage extends Debouncer {
     return false;
   }
 
+  LateDrawViewDelegate lateDrawDelegate;
+
   StageDelegate _delegate;
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
   StageTool _activeTool;
@@ -110,6 +123,7 @@ class Stage extends Debouncer {
       return;
     }
     if (value.activate(this)) {
+      toolNotifier.value?.deactivate();
       toolNotifier.value = value;
     }
     // Tools that are Moveable (e.g. PenTool) are activated as soon as
@@ -121,6 +135,14 @@ class Stage extends Debouncer {
       _activeTool = null;
     }
     _activeTool = value is MoveableTool ? value : null;
+
+    // Update the late draw render object to know which tool it should be
+    // delegating draw operations for (if any).
+    if (value is LateDrawStageTool) {
+      lateDrawDelegate?.tool = value as LateDrawStageTool;
+    } else {
+      lateDrawDelegate?.tool = null;
+    }
   }
 
   // Joints freezed flag
@@ -239,7 +261,11 @@ class Stage extends Debouncer {
     }
   }
 
-  void delegate(StageDelegate value) {
+  StageDelegate get delegate => _delegate;
+  void delegateTo(StageDelegate value) {
+    if (value == _delegate) {
+      return;
+    }
     _delegate = value;
   }
 
@@ -292,6 +318,7 @@ class Stage extends Debouncer {
   }
 
   void _computeWorldMouse(double localX, double localY) {
+    localMouse = Offset(localX, localY);
     _worldMouse = Vec2D.transformMat2D(
         Vec2D(), Vec2D.fromValues(localX, localY), _inverseViewTransform);
   }
@@ -320,8 +347,9 @@ class Stage extends Debouncer {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
-    if (_activeTool is MoveableTool) {
-      (_activeTool as MoveableTool).updateMove(_worldMouse);
+    if (_activeTool is MoveableTool &&
+        (_activeTool as MoveableTool).updateMove(_worldMouse)) {
+      // Only advance if the tool specifically requests it.
       markNeedsAdvance();
     }
   }
@@ -600,7 +628,6 @@ class Stage extends Debouncer {
     var viewAABB = obbToAABB(
         AABB.fromValues(0, 0, _viewportWidth, _viewportHeight),
         _inverseViewTransform);
-
     _visibleItems.clear();
     visTree.query(viewAABB, (int proxyId, StageItem item) {
       if (item.isVisible) {
@@ -684,4 +711,8 @@ class Stage extends Debouncer {
     // TODO: Try to get the StagePaths or the StageShapes from the current
     // selection, and set it the current editing shape.
   }
+
+  void hideCursor() => delegate?.customCursor?.hide();
+
+  void showCursor() => delegate?.customCursor?.show();
 }

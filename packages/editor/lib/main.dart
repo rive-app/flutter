@@ -15,12 +15,14 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/catastrophe.dart';
+import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/draw_order.dart';
 import 'package:rive_editor/widgets/hierarchy.dart';
 import 'package:rive_editor/widgets/home/home_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
+import 'package:rive_editor/widgets/stage_late_view.dart';
 import 'package:rive_widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
@@ -453,6 +455,14 @@ class StagePanel extends StatelessWidget {
               ? Container()
               : StageView(
                   file: file,
+                  stage: stage,
+                  customCursor: CustomCursor.of(context),
+                ),
+        ),
+        Positioned.fill(
+          child: stage == null
+              ? Container()
+              : StageLateView(
                   stage: stage,
                 ),
         ),

@@ -1,3 +1,4 @@
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';

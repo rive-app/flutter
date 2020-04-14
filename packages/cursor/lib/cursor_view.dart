@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'system_cursor.dart';
 
@@ -34,7 +33,7 @@ class Cursor extends ChangeNotifier {
   CursorBuilder _builder;
   bool _isShowing = true;
 
-  void _change(CursorBuilder builder) {
+  void withBuilder(CursorBuilder builder) {
     if (_builder == builder) {
       return;
     }
@@ -52,6 +51,21 @@ class Cursor extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  /// Show the default cursor if we were hiding it.
+  void show() {
+    if (_builder == _emptyBuilder) {
+      withBuilder(null);
+    }
+  }
+
+  /// Hide the cursor.
+  void hide() => withBuilder(_emptyBuilder);
+
+  bool get isCustom => _builder != null;
+  bool get isHidden => _builder == _emptyBuilder;
+
+  Widget _emptyBuilder(BuildContext context) => const SizedBox();
 
   static var shadowPaint = Paint()
     ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5.0)
@@ -122,16 +136,37 @@ class Cursor extends ChangeNotifier {
 
   /// Use a custom [builder] to make your own cursor.
   static void change(BuildContext context, CursorBuilder builder) {
-    Provider.of<Cursor>(context, listen: false)._change(builder);
+    CustomCursor.find(context).withBuilder(builder);
   }
 
   /// Reset the cursor to the default platform one.
   static void reset(BuildContext context) {
-    Provider.of<Cursor>(context, listen: false)._change(null);
+    CustomCursor.find(context).withBuilder(null);
   }
 
   /// Check if the cursor matches some [builder].
   void matches(CursorBuilder builder) => _builder == builder;
+}
+
+/// Easy way to grab the active file from the context.
+class CustomCursor extends InheritedWidget {
+  const CustomCursor({
+    @required this.cursor,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final Cursor cursor;
+
+  static Cursor of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CustomCursor>().cursor;
+
+  static Cursor find(BuildContext context) =>
+      context.findAncestorWidgetOfExactType<CustomCursor>().cursor;
+
+  @override
+  bool updateShouldNotify(CustomCursor old) => cursor != old.cursor;
 }
 
 class CursorView extends StatefulWidget {
@@ -156,8 +191,8 @@ class _CursorViewState extends State<CursorView> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<Cursor>.value(
-      value: _cursor,
+    return CustomCursor(
+      cursor: _cursor,
       child: MouseRegion(
         opaque: false,
         onHover: (details) {
@@ -182,21 +217,10 @@ class _CursorViewState extends State<CursorView> {
                 Positioned.fill(
                   child: widget.child,
                 ),
-                Consumer<Cursor>(
-                  builder: (context, state, widget) {
-                    var child = state?._builder?.call(context);
-                    if (child != null) {
-                      return Positioned(
-                        left: _position.dx,
-                        top: _position.dy,
-                        child: IgnorePointer(child: child),
-                      );
-                    } else {
-                      return nullCursor;
-                    }
-                  },
-                ),
-              ].where((item) => item != nullCursor).toList(growable: false),
+                _ActualCursor(
+                  position: _position,
+                )
+              ],
             ),
           ),
         ),
@@ -205,12 +229,22 @@ class _CursorViewState extends State<CursorView> {
   }
 }
 
-class NullCursor extends StatelessWidget {
-  const NullCursor();
+class _ActualCursor extends StatelessWidget {
+  final Offset position;
+
+  const _ActualCursor({Key key, this.position}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Container();
+    var cursor = CustomCursor.of(context);
+    var child = cursor?._builder?.call(context);
+    if (child != null) {
+      return Positioned(
+        left: position.dx,
+        top: position.dy,
+        child: IgnorePointer(child: child),
+      );
+    } else {
+      return SizedBox();
+    }
   }
 }
-
-const nullCursor = NullCursor();
