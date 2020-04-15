@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 
+import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/utils.dart';
 
 import 'package:rive_api/apis/changelog.dart';
 import 'package:rive_api/models/notification.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 enum PanelTypes { personal, announcements }
 
-/// Placeholder for the notifications panel
+/// Panel showing all notifications including 'For You' and 'Announcements'
+/// This is stateful as we track here which of the sections to display
 class NotificationsPanel extends StatefulWidget {
   @override
   _NotificationsPanelState createState() => _NotificationsPanelState();
@@ -52,12 +54,100 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
   }
 }
 
-class PersonalPanel extends StatelessWidget {
-  const PersonalPanel(this.onTap);
+/// Displays the header containing 'For You' and 'Announcements'
+class NotificationsHeader extends StatelessWidget {
+  const NotificationsHeader(this.type, this.onTap);
+  final PanelTypes type;
+
+  /// Callback to handle tapping the panel headers
   final Function(PanelTypes) onTap;
 
   @override
   Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    return Underline(
+      color: theme.colors.panelBackgroundLightGrey,
+      thickness: 1,
+      offset: 20,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          GestureDetector(
+            child: Text(
+              'For You',
+              style: type == PanelTypes.personal
+                  ? theme.textStyles.notificationHeaderSelected
+                  : theme.textStyles.notificationHeader,
+            ),
+            onTap: () => onTap(PanelTypes.personal),
+          ),
+          const SizedBox(width: 30),
+          GestureDetector(
+            child: Text(
+              'Announcements',
+              style: type == PanelTypes.announcements
+                  ? theme.textStyles.notificationHeaderSelected
+                  : theme.textStyles.notificationHeader,
+            ),
+            onTap: () => onTap(PanelTypes.announcements),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Displayed when panel data is loading
+class PanelLoading extends StatelessWidget {
+  const PanelLoading(this.type, this.onTap);
+  final PanelTypes type;
+
+  /// Callback to handle tapping the panel headers
+  final Function(PanelTypes) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        const SizedBox(height: 30),
+        NotificationsHeader(type, onTap),
+        const SizedBox(height: 50),
+        const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ],
+    );
+  }
+}
+
+class PersonalPanel extends StatelessWidget {
+  const PersonalPanel(this.onTap);
+  final Function(PanelTypes) onTap;
+
+  List<Widget> _buildNotificationsList(
+      Iterable<RiveNotification> notifications, RiveThemeData theme) {
+    if (notifications.isEmpty) {
+      return [
+        const SizedBox(height: 30),
+        Center(
+            child: Text(
+          'No notifications for you ...',
+          style: theme.textStyles.notificationHeader,
+        )),
+      ];
+    } else {
+      return [
+        for (final notification in notifications) ...[
+          const SizedBox(height: 30),
+          NotificationCard(child: NotificationContent(notification))
+        ],
+      ];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
     return StreamBuilder<Iterable<RiveNotification>>(
       stream: NotificationProvider.of(context).notificationsStream,
       builder: (context, snapshot) => snapshot.hasData
@@ -65,15 +155,10 @@ class PersonalPanel extends StatelessWidget {
               children: [
                 const SizedBox(height: 30),
                 NotificationsHeader(PanelTypes.personal, onTap),
-                for (final notification in snapshot.data) ...[
-                  const SizedBox(height: 30),
-                  NotificationCard(
-                    child: NotificationContent(notification),
-                  )
-                ],
+                ..._buildNotificationsList(snapshot.data, theme)
               ],
             )
-          : const Center(child: CircularProgressIndicator()),
+          : PanelLoading(PanelTypes.personal, onTap),
     );
   }
 }
@@ -110,52 +195,8 @@ class _AnnouncementsPanelState extends State<AnnouncementsPanel> {
                       )
                     ]
                   ])
-                : const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                : PanelLoading(PanelTypes.announcements, widget.onTap),
       );
-}
-
-class NotificationsHeader extends StatelessWidget {
-  const NotificationsHeader(this.type, this.onTap);
-  final PanelTypes type;
-
-  /// callback to handle tapping the panel headers
-  final Function(PanelTypes) onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = RiveTheme.of(context);
-    return Underline(
-      color: theme.colors.panelBackgroundLightGrey,
-      thickness: 1,
-      offset: 20,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          GestureDetector(
-            child: Text(
-              'For You',
-              style: type == PanelTypes.personal
-                  ? theme.textStyles.notificationHeaderSelected
-                  : theme.textStyles.notificationHeader,
-            ),
-            onTap: () => onTap(PanelTypes.personal),
-          ),
-          const SizedBox(width: 30),
-          GestureDetector(
-            child: Text(
-              'Announcements',
-              style: type == PanelTypes.announcements
-                  ? theme.textStyles.notificationHeaderSelected
-                  : theme.textStyles.notificationHeader,
-            ),
-            onTap: () => onTap(PanelTypes.announcements),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class NotificationCard extends StatelessWidget {
