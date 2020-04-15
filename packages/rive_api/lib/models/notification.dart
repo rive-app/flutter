@@ -3,27 +3,9 @@ import 'package:meta/meta.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
 /// Different notification types that can come from the Rive back end
+/// Only showing the types currently handled by the Rive app
 enum NotificationType {
   follow,
-  shotComment,
-  shotLike,
-  conversationReply,
-  blogComment,
-  blogMention,
-  shotMention,
-  conversationMention,
-  yourShotComment,
-  yourConversationReply,
-  yourBlogComment,
-  shotCommentMention,
-  blogCommentMention,
-  conversationReplyMention,
-  acceptedInvitation,
-  fileMention,
-  fileCommentMention,
-  fileLike,
-  yourFileComment,
-  fileComment,
   teamInvite,
 }
 

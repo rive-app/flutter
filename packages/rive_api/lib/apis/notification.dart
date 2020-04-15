@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/notification.dart';
+import 'package:rive_api/src/deserialize_helper.dart';
 
 final Logger log = Logger('Rive API');
 
@@ -13,60 +14,31 @@ class NotificationsApi {
   const NotificationsApi(this.api);
   final RiveApi api;
 
-  /// GET /api/notifications (NOT IMPLEMENTED YET)
+  /// GET /api/notifications
   /// Returns the current notifications for a user
-  // Future<List<Notification>> _notifications() async {
-  //   var response = await api.get(api.host + '/api/notifications');
-  //   List<dynamic> data = json.decode(response.body);
+  Future<List<RiveNotification>> get notifications async {
+    var res = await api.get('${api.host}/api/notifications');
 
-  //   final notifications = Notification.fromDataList(data);
-  //   return notifications;
-  // }
+    final data = json.decode(res.body) as Map<String, dynamic>;
+    assert(
+      data.containsKey('data') && data.containsKey('count'),
+      'Incorrect json format for notifications',
+    );
 
-  static final tmpData = [
-    {
-      'type': 'follow',
-      'ownerId': 1,
-      'senderId': '2',
-      'senderName': 'Matt Sullivan',
-      'date': 1586832870
-    },
-    {
-      'type': 'follow',
-      'ownerId': 1,
-      'senderId': '3',
-      'senderName': 'Luigi Rosso',
-      'date': 1586823871
-    },
-    {
-      'type': 'team_invite',
-      'ownerId': 1,
-      'senderId': 2,
-      'senderName': 'Matt Sullivan',
-      'teamId': 1,
-      'teamName': 'Rive',
-      'inviteId': 1,
-      'date': 1586818871,
-    },
-    {
-      'type': 'follow',
-      'ownerId': 1,
-      'senderId': '4',
-      'senderName': 'Umberto Sonnino',
-      'date': 1586812872
-    },
-    {
-      'type': 'follow',
-      'ownerId': 1,
-      'senderId': '3',
-      'senderName': 'Max Talbot',
-      'date': 1586632873,
-    },
-  ];
+    return RiveNotification.fromDataList(data['data']);
+  }
 
-  Future<List<RiveNotification>> get notifications {
-    final notifications = RiveNotification.fromDataList(tmpData);
-    return Future.value(notifications);
-    // return notifications;
+  /// GET /api/notifications
+  /// Returns the current notification count for a user
+  Future<int> get notificationCount async {
+    var res = await api.get('${api.host}/api/notifications');
+
+    final data = json.decode(res.body) as Map<String, dynamic>;
+    assert(
+      data.containsKey('data') && data.containsKey('count'),
+      'Incorrect json format for notifications',
+    );
+
+    return data.getInt('count');
   }
 }

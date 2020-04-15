@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive_api/api.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
@@ -178,7 +177,7 @@ class InsertInheritedWidgets extends StatelessWidget {
               // TODO: This can live above the home widget;
               //  move when home is refactored
               child: NotificationProvider(
-                manager: NotificationManager(api: RiveApi()),
+                manager: NotificationManager(api: rive.api),
                 child: child,
               ),
             ),
