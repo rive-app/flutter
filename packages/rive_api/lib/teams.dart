@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:logging/logging.dart';
+
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
-import 'package:flutter/services.dart' show ByteData, rootBundle;
 
 final Logger log = Logger('Rive API');
 
@@ -89,17 +90,30 @@ class RiveTeamsApi<T extends RiveTeam> {
     return data['url'];
   }
 
-  /// Invites a user to a team
-  Future<void> invite(int teamId, int userId) async {
+  /// Send a list of team invites to users
+  Future<List<int>> sendInvites(
+      int teamId, List<int> inviteIds, TeamRole permission) async {
+    var response = <int>[];
+    for (final ownerId in inviteIds) {
+      int id = await sendInvite(teamId, ownerId, permission);
+      if (id != null) {
+        response.add(id);
+      }
+    }
+    return response;
+  }
+
+  /// POST /api/teams/:team_owner_id/invite
+  /// Sends a team invite to a user
+  Future<int> sendInvite(int teamId, int ownerId, TeamRole permission) async {
     String payload = json.encode({
       'data': {
-        'ownerId': userId,
-        'permission': 'write',
+        'ownerId': ownerId,
+        'permission': permission.name,
       }
     });
-    await api.post(
-      '${api.host}/api/teams/$teamId/invite',
-      body: payload,
-    );
+    await api.post('${api.host}/api/teams/$teamId/invite', body: payload);
+
+    return ownerId;
   }
 }

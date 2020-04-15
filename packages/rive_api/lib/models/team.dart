@@ -4,28 +4,6 @@ import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
-/// Permissions users can have on a team
-enum TeamPermission { read, write, purchase, admin, own }
-
-extension TeamPermissionExtension on TeamPermission {
-  String get name {
-    switch (this) {
-      case TeamPermission.read:
-        return 'read';
-      case TeamPermission.write:
-        return 'write';
-      case TeamPermission.purchase:
-        return 'purchase';
-      case TeamPermission.admin:
-        return 'admin';
-      case TeamPermission.own:
-        return 'own';
-      default:
-        return null;
-    }
-  }
-}
-
 class RiveTeam extends RiveOwner {
   final int id;
   final List<RiveUser> _members = [];

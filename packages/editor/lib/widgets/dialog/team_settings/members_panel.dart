@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/artists.dart';
+import 'package:rive_api/teams.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
-import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
@@ -16,13 +16,6 @@ import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
-
-extension TeamRoleOptions on TeamRole {
-  static List<String> get names =>
-      TeamRole.values.map((e) => describeEnum(e).capsFirst).toList();
-
-  String get name => describeEnum(this).capsFirst;
-}
 
 class TeamMembers extends StatefulWidget {
   final RiveApi api;
@@ -109,25 +102,30 @@ class _InvitePanelState extends State<InvitePanel> {
   final _inviteQueue = <Invite>[];
 
   TeamRole _selectedInviteType = TeamRole.member;
-  RiveArtists _api;
+  RiveArtists _userApi;
+  RiveTeamsApi _teamApi;
   final _openCombo = Event();
 
   @override
   void initState() {
     super.initState();
-    _api = RiveArtists(widget.api);
+    _userApi = RiveArtists(widget.api);
+    _teamApi = RiveTeamsApi(widget.api);
   }
 
   void _sendInvites() {
     var ids = <int>[];
-    // TODO: add support for email invites too.
     _inviteQueue.forEach((invite) {
       if (invite is UserInvite) {
         ids.add(invite.ownerId);
       }
     });
-    _api
-        .sendInvites(widget.teamId, ids, _selectedInviteType.name)
+    _teamApi
+        .sendInvites(
+      widget.teamId,
+      ids,
+      _selectedInviteType,
+    )
         .then((value) {
       if (value.isNotEmpty) {
         // TODO: use a more robust check for setState.
@@ -146,7 +144,7 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 
   Future<List<RiveUser>> _autocomplete(String input) =>
-      _api.autocomplete(input);
+      _userApi.autocomplete(input);
 
   @override
   Widget build(BuildContext context) {
@@ -356,7 +354,7 @@ class _TeamMember extends StatelessWidget {
                   value: _getRole(),
                   change: onRoleChanged,
                   alignment: Alignment.topRight,
-                  options: TeamRoleOptions.names..add('Delete'),
+                  options: TeamRoleExtension.names..add('Delete'),
                   popupWidth: 116,
                   underline: false,
                   valueColor: colors.fileBackgroundDarkGrey,
