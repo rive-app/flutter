@@ -6,11 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
@@ -173,7 +175,12 @@ class InsertInheritedWidgets extends StatelessWidget {
             context: TipContext(),
             child: IconCache(
               cache: iconCache,
-              child: child,
+              // TODO: This can live above the home widget;
+              //  move when home is refactored
+              child: NotificationProvider(
+                manager: NotificationManager(api: RiveApi()),
+                child: child,
+              ),
             ),
           ),
         ),
