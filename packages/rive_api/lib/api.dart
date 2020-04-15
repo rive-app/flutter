@@ -4,8 +4,8 @@ import 'src/web_service_client.dart';
 export 'src/http_exception.dart';
 
 class RiveApi extends WebServiceClient {
-  // final String host = 'http://localhost:3000';
-  final String host = 'https://stryker.rive.app';
+  final String host = 'http://localhost:3000';
+  // inal String host = 'https://stryker.rive.app';
   RiveApi() : super('rive-api') {
     // TODO: might be nice to have a way to add a generic 'not 20X' handler
     this.addStatusCodeHandler(400, handle_400);

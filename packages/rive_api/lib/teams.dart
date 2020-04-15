@@ -9,11 +9,12 @@ import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:flutter/services.dart' show ByteData, rootBundle;
 
+final Logger log = Logger('Rive API');
+
 /// Api for accessing the signed in users folders and files.
 class RiveTeamsApi<T extends RiveTeam> {
+  const RiveTeamsApi(this.api);
   final RiveApi api;
-  final Logger log = Logger('Rive API');
-  RiveTeamsApi(this.api);
 
   /// POST /api/teams
   Future<T> createTeam(
@@ -86,5 +87,19 @@ class RiveTeamsApi<T extends RiveTeam> {
     Map<String, dynamic> data = json.decode(response.body);
 
     return data['url'];
+  }
+
+  /// Invites a user to a team
+  Future<void> invite(int teamId, int userId) async {
+    String payload = json.encode({
+      'data': {
+        'ownerId': userId,
+        'permission': 'write',
+      }
+    });
+    await api.post(
+      '${api.host}/api/teams/$teamId/invite',
+      body: payload,
+    );
   }
 }
