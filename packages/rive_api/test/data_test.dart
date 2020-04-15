@@ -132,17 +132,17 @@ void main() {
     });
   });
 
-  group('Notification', () {
+  group('RiveNotification', () {
     test('Follow notifications are constructed from JSON correctly', () {
       final data = {'type': 'follow', 'senderId': '2', 'date': 1586832870};
       final jsonData = jsonEncode(data);
 
-      final notification = Notification.fromData(json.decode(jsonData));
-      expect(notification, isA<FollowNotification>());
+      final notification = RiveNotification.fromData(json.decode(jsonData));
+      expect(notification, isA<RiveFollowNotification>());
 
-      expect((notification as FollowNotification).dateTime,
+      expect((notification as RiveFollowNotification).dateTime,
           DateTime.fromMillisecondsSinceEpoch(1586832870 * 1000));
-      expect((notification as FollowNotification).senderId, 2);
+      expect((notification as RiveFollowNotification).senderId, 2);
     });
   });
 }
