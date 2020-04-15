@@ -125,6 +125,7 @@ abstract class Component extends ComponentBase<RiveFile>
     parentChanged(old, value);
   }
 
+  @protected
   void parentChanged(ContainerComponent from, ContainerComponent to) {
     if (from != null) {
       from.children.remove(this);

@@ -133,7 +133,7 @@ class Definition {
 
     bool defineContextExtension = _extensionOf?._name == null;
     if (defineContextExtension) {
-      imports.add('import \'$snakeContextName.dart\';');
+      imports.add('import \'package:${config.packageName}/src/generated/$snakeContextName.dart\';');
     }
 
     var importList = imports.toList(growable: false)..sort();

@@ -1,0 +1,81 @@
+{
+  "name": "Animation",
+  "key": {
+    "int": 27,
+    "string": "animation"
+  },
+  "properties": {
+    "artboardId": {
+      "type": "Id",
+      "key": {
+        "int": 54,
+        "string": "artboardid"
+      },
+      "description": "Identifier used to track the artboard this animation belongs to."
+    },
+    "name": {
+      "type": "String",
+      "key": {
+        "int": 55,
+        "string": "name"
+      },
+      "description": "Name of the animation."
+    },
+    "fps": {
+      "type": "int",
+      "key": {
+        "int": 56,
+        "string": "fps"
+      },
+      "description": "Frames per second used to quantize keyframe times to discrete values that match this rate."
+    },
+    "duration": {
+      "type": "int",
+      "key": {
+        "int": 57,
+        "string": "duration"
+      },
+      "description": "Duration expressed in number of frames."
+    },
+    "speed": {
+      "type": "double",
+      "key": {
+        "int": 58,
+        "string": "speed"
+      },
+      "description": "Playback speed multiplier."
+    },
+    "loop": {
+      "type": "int",
+      "key": {
+        "int": 59,
+        "string": "loop"
+      },
+      "description": "Loop value option matches LoopType enumeration."
+    },
+    "workStart": {
+      "type": "int",
+      "key": {
+        "int": 60,
+        "string": "workstart"
+      },
+      "description": "Start of the work area in frames."
+    },
+    "workEnd": {
+      "type": "int",
+      "key": {
+        "int": 61,
+        "string": "workend"
+      },
+      "description": "End of the work area in frames."
+    },
+    "enableWorkArea": {
+      "type": "bool",
+      "key": {
+        "int": 62,
+        "string": "enableworkarea"
+      },
+      "description": "Whether or not the work area is enabled."
+    }
+  }
+}
