@@ -15,4 +15,7 @@ class IntFieldType extends FieldType {
 
   @override
   int get encodingAlignment => 4;
+
+  @override 
+  String get defaultValue => '0';
 }

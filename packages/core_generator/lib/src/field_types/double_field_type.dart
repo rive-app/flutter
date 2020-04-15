@@ -15,4 +15,7 @@ class DoubleFieldType extends FieldType {
 
   @override
   int get encodingAlignment => 8;
+
+  @override 
+  String get defaultValue => '0.0';
 }

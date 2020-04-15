@@ -30,4 +30,6 @@ abstract class FieldType {
   String equalityCheck(String varAName, String varBName) {
     return "$varAName == $varBName";
   }
+
+  String get defaultValue => 'null';
 }

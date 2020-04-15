@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:colorize/colorize.dart';
+import 'package:core_generator/src/field_type.dart';
 import 'package:core_generator/src/field_types/id_field_type.dart';
 import 'package:dart_style/dart_style.dart';
 
@@ -133,7 +134,8 @@ class Definition {
 
     bool defineContextExtension = _extensionOf?._name == null;
     if (defineContextExtension) {
-      imports.add('import \'package:${config.packageName}/src/generated/$snakeContextName.dart\';');
+      imports.add(
+          'import \'package:${config.packageName}/src/generated/$snakeContextName.dart\';');
     }
 
     var importList = imports.toList(growable: false)..sort();
@@ -381,12 +383,12 @@ class Definition {
     ctxCode.writeln('default:return null;}}');
 
     // Group fields by definition type.
-    Map<String, List<Property>> groups = {};
+    Map<FieldType, List<Property>> groups = {};
 
     for (final definition in definitions.values) {
       for (final property in definition._properties) {
-        groups[property.type.dartName] ??= <Property>[];
-        groups[property.type.dartName].add(property);
+        groups[property.type] ??= <Property>[];
+        groups[property.type].add(property);
       }
     }
 
@@ -531,7 +533,47 @@ class Definition {
         ctxCode.writeln('break;');
       }
     }
-    ctxCode.writeln('}return null;}}');
+    ctxCode.writeln('}return null;}');
+
+    // Build setter/getter for specific types.
+    groups.forEach((type, properties) {
+      var capitalizedType =
+          '${type.dartName[0].toUpperCase()}${type.dartName.substring(1)}'
+              .replaceAll('<', '')
+              .replaceAll('>', '');
+      ctxCode.writeln('''
+        static $type get${capitalizedType}(Core object, int propertyKey) {
+          switch(propertyKey) {
+          ''');
+      for (final property in properties) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.write('.${property.name}PropertyKey:');
+        ctxCode.writeln(
+            'return (object as ${property.definition._name}Base).${property.name};');
+      }
+
+      ctxCode.writeln('}return ${type.defaultValue};}');
+    });
+
+    groups.forEach((type, properties) {
+      var capitalizedType =
+          '${type.dartName[0].toUpperCase()}${type.dartName.substring(1)}'
+              .replaceAll('<', '')
+              .replaceAll('>', '');
+      ctxCode.writeln('''
+        static void set${capitalizedType}(Core object, int propertyKey, $type value) {
+          switch(propertyKey) {
+          ''');
+      for (final property in properties) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.write('.${property.name}PropertyKey:');
+        ctxCode.writeln(
+            '(object as ${property.definition._name}Base).${property.name} = value;break;');
+      }
+
+      ctxCode.writeln('}}');
+    });
+    ctxCode.writeln('}');
 
     var output = config.output;
     var folder =

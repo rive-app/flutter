@@ -15,4 +15,8 @@ class BoolFieldType extends FieldType {
 
   @override
   int get encodingAlignment => 1;
+
+
+  @override 
+  String get defaultValue => 'false';
 }

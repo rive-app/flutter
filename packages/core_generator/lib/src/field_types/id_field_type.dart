@@ -21,4 +21,5 @@ class IdFieldType extends FieldType {
 
   @override
   int get encodingAlignment => 4;
+
 }
