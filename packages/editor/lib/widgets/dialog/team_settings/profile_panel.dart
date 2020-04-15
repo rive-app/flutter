@@ -31,7 +31,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     final owner = widget.owner;
 
     ProfilePackage.getProfile(widget.api, owner).then((value) {
-      // TODO: user future builder.
+      // TODO: use future builder.
       if (mounted) {
         setState(() {
           _profile = value;

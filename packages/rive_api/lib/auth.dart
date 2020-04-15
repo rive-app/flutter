@@ -75,4 +75,13 @@ class RiveAuth {
     }
     return null;
   }
+
+  Future<bool> signout() async {
+    var response = await api.get(api.host + '/signout');
+    if (response.statusCode == 200) {
+      await api.clearCookies();
+      return true;
+    }
+    return false;
+  }
 }

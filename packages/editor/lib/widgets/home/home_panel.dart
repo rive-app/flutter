@@ -415,27 +415,29 @@ class NavigationPanel extends StatelessWidget {
               valueListenable: RiveContext.of(context).folderTreeControllers,
               builder: (context, folderTreeControllers, _) {
                 var slivers = <Widget>[];
-                for (int i = 0; i < folderTreeControllers.length; i++) {
-                  slivers.add(
-                    FolderTreeView(
-                      style: treeStyle,
-                      controller: folderTreeControllers[i],
-                    ),
-                  );
-                  if (i != folderTreeControllers.length - 1) {
+                if (folderTreeControllers != null) {
+                  for (int i = 0; i < folderTreeControllers.length; i++) {
                     slivers.add(
-                      SliverToBoxAdapter(
-                        child: Separator(
-                          color: riveColors.fileLineGrey,
-                          padding: EdgeInsets.only(
-                            left: treeStyle.padding.left,
-                            right: 0,
-                            top: 12,
-                            bottom: 12,
-                          ),
-                        ),
+                      FolderTreeView(
+                        style: treeStyle,
+                        controller: folderTreeControllers[i],
                       ),
                     );
+                    if (i != folderTreeControllers.length - 1) {
+                      slivers.add(
+                        SliverToBoxAdapter(
+                          child: Separator(
+                            color: riveColors.fileLineGrey,
+                            padding: EdgeInsets.only(
+                              left: treeStyle.padding.left,
+                              right: 0,
+                              top: 12,
+                              bottom: 12,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                   }
                 }
 
