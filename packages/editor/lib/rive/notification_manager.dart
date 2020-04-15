@@ -12,7 +12,7 @@ class NotificationManager {
   NotificationManager({@required RiveApi api}) : _api = NotificationsApi(api) {
     _fetchNotifications();
     // Start the polling timer to periodically pull notifications
-    poller = Timer.periodic(
+    _poller = Timer.periodic(
       const Duration(seconds: 60),
       (t) => _fetchNotifications(),
     );
@@ -38,7 +38,7 @@ class NotificationManager {
   void dispose() {
     _notificationsController.close();
     _notificationCountController.close();
-    poller?.cancel();
+    _poller?.cancel();
   }
 
   /*
@@ -56,7 +56,7 @@ class NotificationManager {
   }
 
   /// Timer for polling new notifications
-  Timer poller;
+  Timer _poller;
 
   /*
    * API calls

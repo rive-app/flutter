@@ -312,7 +312,7 @@ class TeamInviteNotification extends StatelessWidget {
                 color: theme.colors.buttonLight,
                 mainAxisAlignment: MainAxisAlignment.center,
                 textColor: theme.colors.commonButtonTextColorDark,
-                onTap: () => print('ACCEPTED'),
+                onTap: () => print('IGNORED'),
               ),
             ],
           ),
