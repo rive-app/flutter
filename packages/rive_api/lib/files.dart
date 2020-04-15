@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:http/http.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/cdn.dart';
 import 'package:rive_api/models/file.dart';
@@ -29,15 +30,26 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
   RiveFilesApi(this.api);
 
   /// Fill in the details for the list of provided files (name, preview, etc).
+  Future<bool> fillTeamDetails(int teamOwnerId, Iterable<K> files) async {
+    String ids =
+        jsonEncode(files.map((file) => file.id).toList(growable: false));
+    var response =
+        await api.post(api.host + '/api/teams/$teamOwnerId/files', body: ids);
+    return _parseDetails(files, response);
+  }
+
   Future<bool> fillDetails(Iterable<K> files) async {
+    String ids =
+        jsonEncode(files.map((file) => file.id).toList(growable: false));
+    var response = await api.post(api.host + '/api/my/files', body: ids);
+    return _parseDetails(files, response);
+  }
+
+  bool _parseDetails(Iterable<K> files, Response response) {
     Map<int, K> lookup = <int, K>{};
     for (final file in files) {
       lookup[file.id] = file;
     }
-
-    String ids =
-        jsonEncode(files.map((file) => file.id).toList(growable: false));
-    var response = await api.post(api.host + '/api/my/files', body: ids);
 
     if (response.statusCode == 200) {
       Map<String, dynamic> data;
@@ -88,6 +100,18 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
     var response =
         await api.get(api.host + sort.route + 'rive/' + (folder?.id ?? ''));
 
+    return _parseFolderFiles(response, cacheLocator);
+  }
+
+  Future<List<K>> teamFolderFiles(int teamOwnerId, RiveFileSortOption sort,
+      {T folder, FileLocator<K> cacheLocator}) async {
+    var response = await api.get(api.host +
+        '/api/teams/$teamOwnerId/files/a-z/rive/' +
+        (folder?.id ?? ''));
+    return _parseFolderFiles(response, cacheLocator);
+  }
+
+  List<K> _parseFolderFiles(Response response, FileLocator<K> cacheLocator) {
     if (response.statusCode == 200) {
       List data;
       try {
@@ -114,9 +138,19 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
 
   T makeFolder(Map<String, dynamic> data);
 
+  Future<FoldersResult<T>> teamFolders(int teamOwnerId) async {
+    var response =
+        await api.get(api.host + '/api/teams/${teamOwnerId}/folders');
+    return _parseFoldersReponse(response);
+  }
+
   /// Flat list of all the folders in the signed in user's hierarchy.
   Future<FoldersResult<T>> myFolders() async {
     var response = await api.get(api.host + '/api/my/files/folders');
+    return _parseFoldersReponse(response);
+  }
+
+  FoldersResult<T> _parseFoldersReponse(Response response) {
     if (response.statusCode == 200) {
       Map<String, dynamic> data;
       try {
@@ -185,8 +219,7 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
 
   /// Find the socket server url to connect to for a specific file.
   Future<CoopConnectionInfo> establishCoop(int ownerId, int fileId) async {
-    var response = await api
-        .get(api.host + '/api/files/$ownerId/$fileId/coop');
+    var response = await api.get(api.host + '/api/files/$ownerId/$fileId/coop');
     if (response.statusCode != 200) {
       return null;
     }
