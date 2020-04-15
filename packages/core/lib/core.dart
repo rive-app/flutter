@@ -333,8 +333,11 @@ abstract class CoreContext implements LocalSettings {
   }
 
   Future<bool> disconnect() async {
-    var disconnectResult = await _client.disconnect();
-    _client = null;
+    var disconnectResult = false;
+    if (_client != null) {
+      disconnectResult = await _client.disconnect();
+      _client = null;
+    }
     return disconnectResult;
   }
 
