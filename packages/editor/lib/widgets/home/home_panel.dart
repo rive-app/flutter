@@ -261,7 +261,7 @@ class FilesPanel extends StatelessWidget {
                   ),
                   _buildFiles(context, files, fileBrowser, rive),
                 ],
-                if (files.isEmpty && folders.isEmpty) ...[
+                if (files != null && files.isEmpty && folders.isEmpty) ...[
                   SliverFillRemaining(child: _buildEmpty(context))
                 ]
               ],
