@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
+import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -19,6 +20,44 @@ class SettingsHeader extends StatefulWidget {
 
 class _SettingsHeaderState extends State<SettingsHeader> {
   bool get isTeam => widget.teamSize > 0;
+
+  Widget _trailing() {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+    if (isTeam) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            '${widget.teamSize} members',
+            style: textStyles.fileGreyTextLarge
+                .copyWith(fontSize: 13, height: 1.3),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Add More',
+            style: textStyles.hyperLinkSubtext,
+          )
+        ],
+      );
+    } else {
+      return FlatIconButton(
+        label: 'Sign Out',
+        color: colors.commonDarkGrey,
+        textColor: Colors.white,
+        onTap: () async {
+          final rive = RiveContext.of(context);
+          var success = await rive.signout(
+              onSignout: Navigator.of(context, rootNavigator: true).pop);
+          if (!success) {
+            // TODO: signal the signout error.
+          }
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,23 +93,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
               ],
             ),
             const Spacer(),
-            if (isTeam)
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${widget.teamSize} members',
-                    style: textStyles.fileGreyTextLarge
-                        .copyWith(fontSize: 13, height: 1.3),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Add More',
-                    style: textStyles.hyperLinkSubtext,
-                  )
-                ],
-              ),
+            _trailing()
           ],
         ));
   }

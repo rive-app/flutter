@@ -130,6 +130,8 @@ class Rive {
   }
 
   ValueListenable<RiveUser> get user => _user;
+  // TODO: is this a robust enough check?
+  bool get isSignedIn => _user.value != null;
 
   RiveOwner get currentOwner => activeFileBrowser.value.owner;
 
@@ -239,6 +241,24 @@ class Rive {
       _state.value = RiveState.login;
     }
     return null;
+  }
+
+  // Tell the server that the user has signed out and remove the token from
+  // Shared Preferences.
+  Future<bool> signout({VoidCallback onSignout}) async {
+    var result = await RiveAuth(api).signout();
+    if (!result) {
+      return false;
+    }
+    _prefs ??= await SharedPreferences.getInstance();
+    result = await _prefs.remove('token');
+    if(!result) {
+      return false;
+    }
+    onSignout?.call();
+    _user.value = null;
+    _state.value = RiveState.login;
+    return true;
   }
 
   Future<void> reloadTeams() async {

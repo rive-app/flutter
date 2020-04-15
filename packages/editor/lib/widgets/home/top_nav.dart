@@ -50,8 +50,12 @@ class TopNav extends StatelessWidget {
         TintedIconButton(
           onPress: () async {
             await showSettings(context: context);
-            // Our state for Teams could be out of date now.
-            await RiveContext.of(context).reloadTeams();
+            var rive = RiveContext.of(context);
+
+            if (rive.isSignedIn) {
+              // Our state for Teams could be out of date now.
+              await RiveContext.of(context).reloadTeams();
+            }
           },
           icon: 'settings',
           backgroundHover: riveColors.fileBackgroundLightGrey,
