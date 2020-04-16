@@ -2,16 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class LabeledTextField extends StatefulWidget {
+  final ValueChanged<String> onSubmit;
   final ValueChanged<String> onChanged;
   final String label;
   final String hint;
   final String initialValue;
+  final bool autofocus;
+  final bool enabled;
+  final TextEditingController controller;
 
   const LabeledTextField({
     @required this.label,
     this.hint,
+    this.onSubmit,
     this.onChanged,
     this.initialValue,
+    this.autofocus = false,
+    this.enabled = true,
+    this.controller,
     Key key,
   }) : super(key: key);
 
@@ -22,7 +30,7 @@ class LabeledTextField extends StatefulWidget {
 class _LabeledTextFieldState extends State<LabeledTextField>
     implements TextSelectionGestureDetectorBuilderDelegate {
   final _focusNode = FocusNode(canRequestFocus: true, skipTraversal: false);
-  final _textController = TextEditingController();
+  TextEditingController _textController;
 
   @override
   final GlobalKey<EditableTextState> editableTextKey =
@@ -36,6 +44,7 @@ class _LabeledTextFieldState extends State<LabeledTextField>
 
   @override
   void initState() {
+    _textController = widget.controller ?? TextEditingController();
     _textController.text = widget.initialValue;
     _focusNode.addListener(_getFocus);
     super.initState();
@@ -56,7 +65,10 @@ class _LabeledTextFieldState extends State<LabeledTextField>
   @override
   void dispose() {
     _focusNode.dispose(); // Also removes listeners.
-    _textController.dispose();
+    if (widget.controller == null) {
+      // This State is responsible for the text controller.
+      _textController.dispose();
+    }
     super.dispose();
   }
 
@@ -76,25 +88,25 @@ class _LabeledTextFieldState extends State<LabeledTextField>
           Text(widget.label,
               style: textStyles.hierarchyTabHovered
                   .copyWith(fontSize: 13, height: 1.15)),
-          const SizedBox(height: 11),
+          const SizedBox(height: 10),
           TextFormField(
               key: editableTextKey,
               onChanged: widget.onChanged,
+              onFieldSubmitted: widget.onSubmit,
+              autofocus: widget.autofocus,
+              enabled: widget.enabled,
               cursorColor: colors.commonDarkGrey,
               controller: _textController,
               focusNode: _focusNode,
               enableInteractiveSelection: false,
               showCursor: true,
               textAlign: TextAlign.left,
-              keyboardType: TextInputType.multiline,
-              minLines: 1,
-              maxLines: 5,
               decoration: InputDecoration(
                 isDense: true,
                 hintText: widget.hint,
                 hintStyle: textStyles.textFieldInputHint
                     .copyWith(fontSize: 13, height: 1.15),
-                contentPadding: const EdgeInsets.only(bottom: 2),
+                contentPadding: const EdgeInsets.only(bottom: 8),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: colors.input, width: 2),
                 ),

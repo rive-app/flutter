@@ -201,6 +201,12 @@ class TextStyles {
       letterSpacing: 0,
       decoration: TextDecoration.underline);
 
+  TextStyle get loginText => const TextStyle(
+      fontFamily: 'Roboto-Regular',
+      color: Color(0xFF888888),
+      fontSize: 13,
+      letterSpacing: 0);
+
   // Notifications
   TextStyle get notificationTitle => const TextStyle(
         fontFamily: 'Roboto-Medium',
@@ -270,6 +276,15 @@ class TextStyles {
 
   TextStyle get textFieldInputValidationError =>
       const TextStyle(fontFamily: 'Roboto-Medium', color: red, fontSize: 13);
+ 
+  TextStyle get buttonUnderline => const TextStyle(
+      fontFamily: 'Roboto-Regular',
+      color: Color(0xFF333333),
+      fontSize: 12,
+      height: 1.6,
+      fontWeight: FontWeight.w400,
+      decoration: TextDecoration.underline
+      );
 }
 
 /// Gradients used in the Rive Theme
