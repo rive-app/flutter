@@ -18,6 +18,7 @@ class NotificationsApi {
   /// Returns the current notifications for a user
   Future<List<RiveNotification>> get notifications async {
     var res = await api.get('${api.host}/api/notifications');
+    print('Received:\n${res.body}');
 
     final data = json.decode(res.body) as Map<String, dynamic>;
     assert(
@@ -32,7 +33,6 @@ class NotificationsApi {
   /// Returns the current notification count for a user
   Future<int> get notificationCount async {
     var res = await api.get('${api.host}/api/notifications');
-
     final data = json.decode(res.body) as Map<String, dynamic>;
     assert(
       data.containsKey('data') && data.containsKey('count'),

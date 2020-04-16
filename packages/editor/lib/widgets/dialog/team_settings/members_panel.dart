@@ -2,6 +2,7 @@ import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
+import 'package:rive_api/apis/following.dart';
 import 'package:rive_api/artists.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_api/models/team.dart';
@@ -11,6 +12,7 @@ import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/user_invite_box.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -301,13 +303,24 @@ class _TeamMember extends StatelessWidget {
     final styles = theme.textStyles;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
+      padding: const EdgeInsets.only(bottom: 20),
       child: SizedBox(
         height: 20,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            // TODO: remove at some point
+            // Hacking in a follow button here
+            TintedIconButton(
+              icon: 'tool-create',
+              padding: const EdgeInsets.all(0),
+              onPress: () {
+                final api = FollowingApi(RiveContext.of(context).api);
+                api.follow(user.ownerId);
+              },
+            ),
+            const SizedBox(width: 5),
             SizedBox(
               child: Avatar(
                 iconBuilder: (context) {
