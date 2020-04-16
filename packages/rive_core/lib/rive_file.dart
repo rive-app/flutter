@@ -354,25 +354,26 @@ class RiveFile extends RiveCoreContext {
       delegates.forEach((delegate) => delegate.onConnectionStateChanged(state));
 
   @override
-  CoreIdType get idType => null;
+  CoreIdType get idType => RiveIdType.instance;
 
   @override
-  CoreIntType get intType => null;
+  CoreIntType get intType => RiveIntType.instance;
 
   @override
-  CoreStringType get stringType => null;
+  CoreStringType get stringType => RiveStringType.instance;
 
   @override
   CoreDoubleType get doubleType => RiveDoubleType.instance;
 
   @override
-  CoreBoolType get boolType => null;
+  CoreBoolType get boolType => RiveBoolType.instance;
 
   @override
-  CoreListIdType get listIdType => null;
+  CoreListIdType get listIdType => RiveListIdType.instance;
 
   @override
-  CoreFractionalIndexType get fractionalIndexType => null;
+  CoreFractionalIndexType get fractionalIndexType =>
+      RiveFractionalIndexType.instance;
 }
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.

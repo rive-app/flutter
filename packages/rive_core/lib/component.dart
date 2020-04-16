@@ -6,6 +6,7 @@ import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:utilities/dependency_sorter.dart';
 
@@ -254,6 +255,14 @@ abstract class Component extends ComponentBase<RiveFile>
   /// this component.
   void remove() => context?.remove(this);
 
+  T makeKeyFrame<T extends KeyFrame>(int propertyKey) {
+    var coreType = context.coreType(propertyKey);
+    if (coreType is KeyFrameGenerator<T>) {
+      return (coreType as KeyFrameGenerator<T>).makeKeyFrame();
+    }
+    return null;
+  }
+
   T addKeyFrame<T extends KeyFrame>(
       Animation animation, int propertyKey, int time) {
     assert(hasProperty(propertyKey),
@@ -275,8 +284,7 @@ abstract class Component extends ComponentBase<RiveFile>
         // already have a frame at this time, return it.
         assert(frame is T);
         return frame as T;
-      }
-      else {
+      } else {
         // insert after index-1, before index
       }
     } else {
@@ -286,7 +294,5 @@ abstract class Component extends ComponentBase<RiveFile>
   }
 
   KeyFrameDouble addKeyFrameDouble(
-      Animation animation, int propertyKey, int time) {
-      
-  }
+      Animation animation, int propertyKey, int time) {}
 }
