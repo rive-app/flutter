@@ -63,7 +63,8 @@ class FolderTreeView extends StatelessWidget {
         width: 15,
         height: 15,
         child: Center(
-          child: TreeRowIcon(item: item, colors: colors),
+          child:
+              TreeRowIcon(item: item, colors: colors, fileBrowser: fileBrowser),
         ),
       ),
       extraBuilder: (context, item, index) => Container(),
