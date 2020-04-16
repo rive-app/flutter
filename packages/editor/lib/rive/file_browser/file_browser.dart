@@ -131,24 +131,14 @@ class FileBrowser extends FileBrowserController {
       selectedSortOption.value = result.sortOptions[0];
     }
 
-    var data = myTreeController.value.data;
-    data.clear();
-
-    // HACK
     if (result.root.isNotEmpty) {
       result.root.first.owner = _owner;
     }
 
-    data.addAll(result.root);
-
-    // await openFolder(result.root.isEmpty ? null : result.root.first, false);
-    onFoldersChanged();
-    return true;
-  }
-
-  void onFoldersChanged() {
-    myTreeController.value.flatten();
+    myTreeController.value.replaceData(result.root);
     myTreeController.notifyListeners();
+
+    return true;
   }
 
   @override

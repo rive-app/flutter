@@ -84,6 +84,8 @@ abstract class TreeController<T> with ChangeNotifier {
   /// have children.
   List<T> childrenOf(T treeItem);
 
+  HashSet<T> get expanded => _expanded;
+
   /// Hide the children of [item].
   void collapse(T item) {
     final expanded = _expanded;
@@ -122,6 +124,14 @@ abstract class TreeController<T> with ChangeNotifier {
     _indexLookup = lookup;
     notifyListeners();
   }
+
+  /// Whether the [treeItem] is currently expanded
+  bool isExpanded(T treeItem) {
+    return expanded.contains(treeItem);
+  }
+
+  /// get a key that identifies the dataitem in this context
+  dynamic dataKey(T treeItem) => treeItem.hashCode;
 
   /// Whether the [treeItem] can be interacted with.
   bool isDisabled(T treeItem);
@@ -369,4 +379,32 @@ abstract class TreeController<T> with ChangeNotifier {
       }
     }
   }
+
+  void replaceData(List<T> newData) {
+    final expandedKeys = Set<dynamic>();
+    flat.forEach((element) {
+      if (isExpanded(element.data)) {
+        expandedKeys.add(dataKey(element.data));
+      }
+    });
+    _expanded.clear();
+    _data.clear();
+
+    newData.forEach((_newDataRoot) {
+      walk(_newDataRoot, (item) => item.children, (item) {
+        if (expandedKeys.contains(dataKey(item))) {
+          _expanded.add(item);
+        }
+      });
+    });
+
+    _data.addAll(newData);
+
+    flatten();
+  }
+}
+
+void walk(root, children, cb) {
+  cb(root);
+  children(root).forEach((child) => walk(child, children, cb));
 }

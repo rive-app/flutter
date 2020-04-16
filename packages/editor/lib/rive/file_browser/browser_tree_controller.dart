@@ -24,6 +24,11 @@ class FolderTreeController extends TreeController<RiveFolder> {
       List<FlatTreeItem<RiveFolder>> items) {}
 
   @override
+  dynamic dataKey(RiveFolder treeItem) {
+    return treeItem.id;
+  }
+
+  @override
   bool isDisabled(RiveFolder treeItem) {
     return false;
   }
