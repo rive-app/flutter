@@ -148,7 +148,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   void _completeChange() {
     ActiveFile.find(context)?.core?.captureJournalEntry();
     // Force focus back to the main context so that we can immediately
-    // undo this change if we want to by hitting ctrl/comamnd z.
+    // undo this change if we want to by hitting ctrl/command z.
     RiveContext.find(context).focus();
     widget.completeChange?.call();
   }

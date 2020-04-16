@@ -15,13 +15,13 @@ class HexValueConverter extends InputValueConverter<HSVColor> {
   }
 
   @override
-  String toEditingValue(HSVColor value) => value
-      .toColor()
-      .value
-      .toRadixString(16)
-      .toString()
-      .substring(2)
-      .toUpperCase();
+  String toEditingValue(HSVColor value) {
+    var rgba = value.toColor();
+    return '${rgba.red.toRadixString(16).padLeft(2, '0')}'
+            '${rgba.green.toRadixString(16).padLeft(2, '0')}'
+            '${rgba.blue.toRadixString(16).padLeft(2, '0')}'
+        .toUpperCase();
+  }
 
   @override
   bool get allowDrag => false;

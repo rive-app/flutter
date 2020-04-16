@@ -90,7 +90,7 @@ class RiveContext extends InheritedWidget {
   static Rive of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<RiveContext>().rive;
   }
-
+  
   /// Call this when you don't want the context to depend on this (usually you
   /// want this as Rive never changes anyway).
   static Rive find(BuildContext context) {
