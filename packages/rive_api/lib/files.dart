@@ -200,6 +200,26 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
   Future<K> createFile({T folder}) async {
     var response = await api
         .post(api.host + '/api/my/files/rive/create/' + (folder?.id ?? ''));
+    return _parseFileResponse(response);
+  }
+
+  Future<K> createTeamFile(
+    int teamOwnerId, {
+    T folder,
+  }) async {
+    String payload = json.encode({
+      'data': {'fileName': 'New File'}
+    });
+    var response = await api.post(
+        api.host + '/api/teams/${teamOwnerId}/folders/${folder.id}/new/rive/',
+        body: payload);
+    return _parseFileResponse(response);
+  }
+
+  K _parseFileResponse(Response response) {
+    // Team response
+    // {"file":{"id":1,"oid":40846,"name":"New File","route":"/a/null/files/rive/new-file","product":"rive"},"reroute":"/a/null/files/rive/new-file"}
+
     if (response.statusCode != 200) {
       return null;
     }
@@ -215,6 +235,36 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
       return makeFile(fileData.getInt("id"));
     }
     return null;
+  }
+
+  Future<T> createFolder(T folder) async {
+    String payload =
+        json.encode({'name': 'New Folder', 'order': 0, 'parent': folder.id});
+
+    var response =
+        await api.post(api.host + '/api/my/files/folder', body: payload);
+    return _parseFolderResponse(response);
+  }
+
+  T _parseFolderResponse(Response response) {
+    if (response.statusCode == 200) {
+      var folderResponse = json.decode(response.body);
+      return makeFolder(folderResponse);
+    }
+    return null;
+  }
+
+  Future<T> createTeamFolder(
+    int teamOwnerId, {
+    T folder,
+  }) async {
+    String payload = json.encode({
+      'data': {'folderName': 'New Folder'}
+    });
+    var response = await api.post(
+        api.host + '/api/teams/${teamOwnerId}/folders/' + (folder?.id ?? ''),
+        body: payload);
+    return _parseFolderResponse(response);
   }
 
   /// Find the socket server url to connect to for a specific file.

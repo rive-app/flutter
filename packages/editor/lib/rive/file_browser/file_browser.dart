@@ -18,6 +18,8 @@ import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/home/home_panel.dart';
 
+import 'package:pedantic/pedantic.dart';
+
 const kTreeItemHeight = 35.0;
 
 class FileBrowser extends FileBrowserController {
@@ -155,7 +157,14 @@ class FileBrowser extends FileBrowserController {
   }
 
   Future<void> createFile() async {
-    var newFile = await _filesApi.createFile(folder: _current);
+    RiveFile newFile;
+    if (_owner is RiveTeam) {
+      newFile =
+          await _filesApi.createTeamFile(_owner.ownerId, folder: _current);
+    } else {
+      newFile = await _filesApi.createFile(folder: _current);
+    }
+
     if (newFile != null) {
       //file.id
       await loadFileList();
@@ -164,6 +173,19 @@ class FileBrowser extends FileBrowserController {
       int index =
           _current.files.value.indexWhere((item) => item.id == newFile.id);
       print("File is at index $index");
+    }
+  }
+
+  Future<void> createFolder() async {
+    RiveFolder newFolder;
+    if (_owner is RiveTeam) {
+      newFolder =
+          await _filesApi.createTeamFolder(_owner.ownerId, folder: _current);
+    } else {
+      newFolder = await _filesApi.createFolder(_current);
+    }
+    if (newFolder != null) {
+      unawaited(load());
     }
   }
 
@@ -211,7 +233,10 @@ class FileBrowser extends FileBrowserController {
           folder: _current, cacheLocator: cacheLocator);
     }
 
-    _current.files.value = folderFiles;
+    // TODO: if you click around the folder structure
+    // the whole system can get out of whack and _current can land on null
+    // briefly
+    _current?.files?.value = folderFiles;
 
     return true;
   }

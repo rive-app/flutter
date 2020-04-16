@@ -16,9 +16,9 @@ dependencies:
   utilities:
     path: ../utilities
   local_data:
-      path: ../local_data
+    path: ../local_data
   window_utils:
-      path: ../window_utils
+    path: ../window_utils
 
 dev_dependencies:
   flutter_test:
