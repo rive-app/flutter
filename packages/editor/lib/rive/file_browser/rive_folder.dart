@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/folder.dart';
-import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_core/selectable_item.dart';
 
@@ -17,7 +16,6 @@ class RiveFolder extends RiveApiFolder with SelectableItem {
 
   RiveFolder(Map<String, dynamic> data) : super(data) {
     _key = ValueKey<String>(id);
-    owner = data.containsKey('team') ? data['team'] as RiveTeam : null;
   }
   ValueListenable<bool> get draggingState => _draggingState;
   bool get hasFolders => children?.isNotEmpty ?? false;
