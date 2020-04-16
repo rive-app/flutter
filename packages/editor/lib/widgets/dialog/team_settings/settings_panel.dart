@@ -18,12 +18,24 @@ import 'package:tree_widget/flat_tree_item.dart';
 
 const double settingsTabNavWidth = 215;
 
+enum SettingsPanel { settings, members, plan, history }
+
+/// map to map SettingsPanels to their appropriate indexes.
+final panelMap = {
+  SettingsPanel.settings: 0,
+  SettingsPanel.members: 1,
+  SettingsPanel.plan: 2,
+  SettingsPanel.history: 3,
+};
+
 // Helper functions.
 RiveOwner _getOwner(BuildContext ctx) => RiveContext.of(ctx).currentOwner;
 
 RiveApi _getApi(BuildContext ctx) => RiveContext.of(ctx).api;
 
-Future showSettings({BuildContext context}) {
+Future showSettings(
+    {BuildContext context,
+    SettingsPanel initialPanel = SettingsPanel.settings}) {
   return showRiveDialog<void>(
       context: context,
       builder: (ctx) {
@@ -32,22 +44,27 @@ Future showSettings({BuildContext context}) {
         if (owner is RiveTeam) {
           RiveTeamsApi(api).getAffiliates(owner.ownerId);
         }
-        return Settings(api: api, owner: owner);
+        return Settings(api: api, owner: owner, initialPanel: initialPanel);
       });
 }
 
 class Settings extends StatefulWidget {
   final RiveOwner owner;
   final RiveApi api;
-  const Settings({@required this.api, @required this.owner, Key key})
+  final SettingsPanel initialPanel;
+  const Settings(
+      {@required this.api, @required this.owner, Key key, this.initialPanel})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _SettingsState();
+  State<StatefulWidget> createState() => _SettingsState(initialPanel);
 }
 
 class _SettingsState extends State<Settings> {
-  int _selectedIndex = 0;
+  _SettingsState(SettingsPanel initalPanel) {
+    _selectedIndex = panelMap[initalPanel];
+  }
+  int _selectedIndex;
   String newAvatarPath;
 
   bool get isTeam => widget.owner is RiveTeam;
