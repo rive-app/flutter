@@ -2,7 +2,6 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
-import 'package:core/id.dart';
 import 'package:meta/meta.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 
@@ -145,6 +144,19 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
         return interpolatorId as K;
       default:
         return super.getProperty<K>(propertyKey);
+    }
+  }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case keyedPropertyIdPropertyKey:
+      case timePropertyKey:
+      case interpolationPropertyKey:
+      case interpolatorIdPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
     }
   }
 }

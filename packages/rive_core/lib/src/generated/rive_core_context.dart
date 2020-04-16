@@ -36,6 +36,7 @@ import 'backboard_base.dart';
 import 'component_base.dart';
 import 'drawable_base.dart';
 import 'node_base.dart';
+import 'package:core/field_types/core_field_type.dart';
 import 'shapes/cubic_vertex_base.dart';
 import 'shapes/ellipse_base.dart';
 import 'shapes/paint/fill_base.dart';
@@ -109,31 +110,13 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
-  @override
-  bool isPropertyId(int propertyKey) {
-    switch (propertyKey) {
-      case KeyedObjectBase.objectIdPropertyKey:
-        return true;
-      case KeyedObjectBase.animationIdPropertyKey:
-        return true;
-      case KeyedPropertyBase.keyedObjectIdPropertyKey:
-        return true;
-      case AnimationBase.artboardIdPropertyKey:
-        return true;
-      case KeyFrameBase.keyedPropertyIdPropertyKey:
-        return true;
-      case KeyFrameBase.interpolatorIdPropertyKey:
-        return true;
-      case ComponentBase.parentIdPropertyKey:
-        return true;
-      case BackboardBase.activeArtboardIdPropertyKey:
-        return true;
-      case BackboardBase.mainArtboardIdPropertyKey:
-        return true;
-      default:
-        return false;
-    }
-  }
+  CoreIdType get idType;
+  CoreIntType get intType;
+  CoreStringType get stringType;
+  CoreDoubleType get doubleType;
+  CoreBoolType get boolType;
+  CoreListIdType get listIdType;
+  CoreFractionalIndexType get fractionalIndexType;
 
   @override
   void applyCoopChanges(ObjectChanges objectChanges) {
@@ -171,7 +154,7 @@ abstract class RiveCoreContext extends CoreContext {
         case ComponentBase.parentIdPropertyKey:
         case BackboardBase.activeArtboardIdPropertyKey:
         case BackboardBase.mainArtboardIdPropertyKey:
-          var value = Id.deserialize(reader);
+          var value = idType.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
         case KeyedPropertyBase.propertyKeyPropertyKey:
@@ -189,12 +172,12 @@ abstract class RiveCoreContext extends CoreContext {
         case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModePropertyKey:
         case BackboardBase.colorValuePropertyKey:
-          var value = reader.readVarInt();
+          var value = intType.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
         case AnimationBase.namePropertyKey:
         case ComponentBase.namePropertyKey:
-          var value = reader.readString();
+          var value = stringType.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
         case AnimationBase.speedPropertyKey:
@@ -232,28 +215,23 @@ abstract class RiveCoreContext extends CoreContext {
         case ArtboardBase.yPropertyKey:
         case ArtboardBase.originXPropertyKey:
         case ArtboardBase.originYPropertyKey:
-          var value = reader.readFloat64();
+          var value = doubleType.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
         case AnimationBase.enableWorkAreaPropertyKey:
         case ShapePaintBase.isVisiblePropertyKey:
         case StrokeBase.transformAffectsStrokePropertyKey:
         case PointsPathBase.isClosedPropertyKey:
-          var value = reader.readInt8() == 1;
+          var value = boolType.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
         case ComponentBase.dependentIdsPropertyKey:
-          var value = List<Id>(reader.readVarUint());
-          for (int i = 0; i < value.length; i++) {
-            value[i] = Id.deserialize(reader);
-          }
+          var value = listIdType.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
         case ComponentBase.childOrderPropertyKey:
         case DrawableBase.drawOrderPropertyKey:
-          var numerator = reader.readVarInt();
-          var denominator = reader.readVarInt();
-          var value = FractionalIndex(numerator, denominator);
+          var value = fractionalIndexType.deserialize(reader);
           setObjectProperty(object, change.op, value);
           break;
         default:
@@ -287,9 +265,7 @@ abstract class RiveCoreContext extends CoreContext {
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.mainArtboardIdPropertyKey:
         if (value != null && value is Id) {
-          var writer = BinaryWriter(alignment: 4);
-          value.serialize(writer);
-          change.value = writer.uint8Buffer;
+          change.value = idType.serialize(value);
         } else {
           return null;
         }
@@ -310,9 +286,7 @@ abstract class RiveCoreContext extends CoreContext {
       case DrawableBase.blendModePropertyKey:
       case BackboardBase.colorValuePropertyKey:
         if (value != null && value is int) {
-          var writer = BinaryWriter(alignment: 4);
-          writer.writeVarInt(value);
-          change.value = writer.uint8Buffer;
+          change.value = intType.serialize(value);
         } else {
           return null;
         }
@@ -320,9 +294,7 @@ abstract class RiveCoreContext extends CoreContext {
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
         if (value != null && value is String) {
-          var writer = BinaryWriter(alignment: 32);
-          writer.writeString(value);
-          change.value = writer.uint8Buffer;
+          change.value = stringType.serialize(value);
         } else {
           return null;
         }
@@ -363,9 +335,7 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originXPropertyKey:
       case ArtboardBase.originYPropertyKey:
         if (value != null && value is double) {
-          var writer = BinaryWriter(alignment: 8);
-          writer.writeFloat64(value);
-          change.value = writer.uint8Buffer;
+          change.value = doubleType.serialize(value);
         } else {
           return null;
         }
@@ -375,21 +345,14 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.transformAffectsStrokePropertyKey:
       case PointsPathBase.isClosedPropertyKey:
         if (value != null && value is bool) {
-          var writer = BinaryWriter(alignment: 1);
-          writer.writeInt8(value ? 1 : 0);
-          change.value = writer.uint8Buffer;
+          change.value = boolType.serialize(value);
         } else {
           return null;
         }
         break;
       case ComponentBase.dependentIdsPropertyKey:
         if (value != null && value is List<Id>) {
-          var writer = BinaryWriter(alignment: 8);
-          writer.writeVarUint(value.length);
-          for (final id in value) {
-            id.serialize(writer);
-          }
-          change.value = writer.uint8Buffer;
+          change.value = listIdType.serialize(value);
         } else {
           return null;
         }
@@ -397,10 +360,7 @@ abstract class RiveCoreContext extends CoreContext {
       case ComponentBase.childOrderPropertyKey:
       case DrawableBase.drawOrderPropertyKey:
         if (value != null && value is FractionalIndex) {
-          var writer = BinaryWriter(alignment: 8);
-          writer.writeVarInt(value.numerator);
-          writer.writeVarInt(value.denominator);
-          change.value = writer.uint8Buffer;
+          change.value = fractionalIndexType.serialize(value);
         } else {
           return null;
         }
@@ -1102,6 +1062,88 @@ abstract class RiveCoreContext extends CoreContext {
         break;
     }
     return null;
+  }
+
+  CoreFieldType coreType(int propertyKey) {
+    switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+      case KeyedObjectBase.animationIdPropertyKey:
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+      case AnimationBase.artboardIdPropertyKey:
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+      case KeyFrameBase.interpolatorIdPropertyKey:
+      case ComponentBase.parentIdPropertyKey:
+      case BackboardBase.activeArtboardIdPropertyKey:
+      case BackboardBase.mainArtboardIdPropertyKey:
+        return idType;
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+      case AnimationBase.fpsPropertyKey:
+      case AnimationBase.durationPropertyKey:
+      case AnimationBase.loopPropertyKey:
+      case AnimationBase.workStartPropertyKey:
+      case AnimationBase.workEndPropertyKey:
+      case KeyFrameBase.timePropertyKey:
+      case KeyFrameBase.interpolationPropertyKey:
+      case StrokeBase.capPropertyKey:
+      case StrokeBase.joinPropertyKey:
+      case SolidColorBase.colorValuePropertyKey:
+      case GradientStopBase.colorValuePropertyKey:
+      case FillBase.fillRulePropertyKey:
+      case DrawableBase.blendModePropertyKey:
+      case BackboardBase.colorValuePropertyKey:
+        return intType;
+      case AnimationBase.namePropertyKey:
+      case ComponentBase.namePropertyKey:
+        return stringType;
+      case AnimationBase.speedPropertyKey:
+      case CubicInterpolatorBase.x1PropertyKey:
+      case CubicInterpolatorBase.y1PropertyKey:
+      case CubicInterpolatorBase.x2PropertyKey:
+      case CubicInterpolatorBase.y2PropertyKey:
+      case KeyFrameDoubleBase.valuePropertyKey:
+      case LinearGradientBase.startXPropertyKey:
+      case LinearGradientBase.startYPropertyKey:
+      case LinearGradientBase.endXPropertyKey:
+      case LinearGradientBase.endYPropertyKey:
+      case LinearGradientBase.opacityPropertyKey:
+      case StrokeBase.thicknessPropertyKey:
+      case GradientStopBase.positionPropertyKey:
+      case NodeBase.xPropertyKey:
+      case NodeBase.yPropertyKey:
+      case NodeBase.rotationPropertyKey:
+      case NodeBase.scaleXPropertyKey:
+      case NodeBase.scaleYPropertyKey:
+      case NodeBase.opacityPropertyKey:
+      case PathVertexBase.xPropertyKey:
+      case PathVertexBase.yPropertyKey:
+      case StraightVertexBase.radiusPropertyKey:
+      case ParametricPathBase.widthPropertyKey:
+      case ParametricPathBase.heightPropertyKey:
+      case RectangleBase.cornerRadiusPropertyKey:
+      case CubicVertexBase.inXPropertyKey:
+      case CubicVertexBase.inYPropertyKey:
+      case CubicVertexBase.outXPropertyKey:
+      case CubicVertexBase.outYPropertyKey:
+      case ArtboardBase.widthPropertyKey:
+      case ArtboardBase.heightPropertyKey:
+      case ArtboardBase.xPropertyKey:
+      case ArtboardBase.yPropertyKey:
+      case ArtboardBase.originXPropertyKey:
+      case ArtboardBase.originYPropertyKey:
+        return doubleType;
+      case AnimationBase.enableWorkAreaPropertyKey:
+      case ShapePaintBase.isVisiblePropertyKey:
+      case StrokeBase.transformAffectsStrokePropertyKey:
+      case PointsPathBase.isClosedPropertyKey:
+        return boolType;
+      case ComponentBase.dependentIdsPropertyKey:
+        return listIdType;
+      case ComponentBase.childOrderPropertyKey:
+      case DrawableBase.drawOrderPropertyKey:
+        return fractionalIndexType;
+      default:
+        return null;
+    }
   }
 
   static Id getId(Core object, int propertyKey) {

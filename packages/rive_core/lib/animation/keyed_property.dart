@@ -54,15 +54,8 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
     _keyframeOrderDirty = true;
   }
 
-  void apply(int time, double mix, core.Core object) {
-    if (_keyframes.isEmpty) {
-      return;
-    }
-    if (_keyframeOrderDirty) {
-      _keyframes.sort((a, b) => a.time.compareTo(b.time));
-      _keyframeOrderDirty = false;
-    }
-
+  /// Find the index in the keyframe list of a specific time frame.
+  int indexOfFrame(int time) {
     int idx = 0;
     // Binary find the keyframe index.
     {
@@ -86,6 +79,24 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
 
       idx = start;
     }
+    return idx;
+  }
+
+  /// Number of keyframes for this keyed property.
+  int get numFrames => _keyframes.length;
+
+  KeyFrame getFrameAt(int index) => _keyframes[index];
+
+  void apply(int time, double mix, core.Core object) {
+    if (_keyframes.isEmpty) {
+      return;
+    }
+    if (_keyframeOrderDirty) {
+      _keyframes.sort((a, b) => a.time.compareTo(b.time));
+      _keyframeOrderDirty = false;
+    }
+
+    int idx = indexOfFrame(time);
 
     int pk = propertyKey;
     if (idx == 0) {

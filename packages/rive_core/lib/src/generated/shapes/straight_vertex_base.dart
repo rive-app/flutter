@@ -59,4 +59,14 @@ abstract class StraightVertexBase extends PathVertex {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case radiusPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

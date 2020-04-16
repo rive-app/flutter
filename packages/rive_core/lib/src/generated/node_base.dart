@@ -188,4 +188,19 @@ abstract class NodeBase extends ContainerComponent {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case xPropertyKey:
+      case yPropertyKey:
+      case rotationPropertyKey:
+      case scaleXPropertyKey:
+      case scaleYPropertyKey:
+      case opacityPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

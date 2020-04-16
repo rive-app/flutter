@@ -65,4 +65,14 @@ abstract class RectangleBase extends ParametricPath {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case cornerRadiusPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

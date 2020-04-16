@@ -133,4 +133,17 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case x1PropertyKey:
+      case y1PropertyKey:
+      case x2PropertyKey:
+      case y2PropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

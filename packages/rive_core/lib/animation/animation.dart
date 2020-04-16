@@ -7,6 +7,9 @@ import 'package:rive_core/src/generated/animation/animation_base.dart';
 export 'package:rive_core/src/generated/animation/animation_base.dart';
 
 class Animation extends AnimationBase<RiveFile> {
+  /// Map objectId to KeyedObject. N.B. this is the id of the object that we
+  /// want to key in core, not of the KeyedObject. It's a clear way to see if an
+  /// object is keyed in this animation.
   final HashMap<Id, KeyedObject> _keyedObjects = HashMap<Id, KeyedObject>();
 
   @override
@@ -46,8 +49,8 @@ class Animation extends AnimationBase<RiveFile> {
     return true;
   }
 
-  /// Called by rive_core to remove a KeyedObject to the animation. This should
-  /// be @internal when it's supported.
+  /// Called by rive_core to remove a KeyedObject from the animation. This
+  /// should be @internal when it's supported.
   bool internalRemoveKeyedObject(KeyedObject object) {
     var removed = _keyedObjects.remove(object.objectId);
     assert(removed == null || removed == object);
@@ -55,7 +58,7 @@ class Animation extends AnimationBase<RiveFile> {
   }
 
   /// Get the keyed data for a Core object already in this animation.
-  KeyedObject getKeyed(Core object) => _keyedObjects[object];
+  KeyedObject getKeyed(Core object) => _keyedObjects[object.id];
 
   /// Add a core object to this animation and make the objects necessary to key
   /// it. Expects that the object is not yet keyed. Use [getKeyed] to see if
@@ -70,15 +73,29 @@ class Animation extends AnimationBase<RiveFile> {
     var keyedObject = KeyedObject()
       ..objectId = object.id
       ..animationId = id;
+
     context.add(keyedObject);
 
-    // N.B. we don't add the animation manually here as it gets added by us
-    // adding it to core. This let's us reuse the same codepath for
-    // KeyedObject's making it into the _keyeObjects map.
+    // We also add it here in case we're doing a batch add (onAddedDirty will be
+    // called later for the keyedObject).
+    internalAddKeyedObject(keyedObject);
 
     // However, we can make sure that it is there.
     assert(getKeyed(object) == keyedObject);
 
     return keyedObject;
+  }
+
+  /// Pass in a different [core] context if you want to apply the animation to a
+  /// different instance. This isn't meant to be used yet but left as mostly a
+  /// note to remember that at runtime we have to support applying animtaions to
+  /// instances. We do a nice job of not duping all that data at runtime (so
+  /// animations exist once but entire Rive file can be instanced multiple times
+  /// playing different positions).
+  void apply(int time, {double mix = 1, RiveFile coreContext}) {
+    coreContext ??= context;
+    for (final keyedObject in _keyedObjects.values) {
+      keyedObject.apply(time, mix, coreContext);
+    }
   }
 }

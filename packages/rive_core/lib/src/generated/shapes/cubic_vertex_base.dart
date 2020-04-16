@@ -143,4 +143,17 @@ abstract class CubicVertexBase extends PathVertex {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case inXPropertyKey:
+      case inYPropertyKey:
+      case outXPropertyKey:
+      case outYPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

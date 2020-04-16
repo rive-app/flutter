@@ -145,4 +145,17 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case dependentIdsPropertyKey:
+      case namePropertyKey:
+      case parentIdPropertyKey:
+      case childOrderPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

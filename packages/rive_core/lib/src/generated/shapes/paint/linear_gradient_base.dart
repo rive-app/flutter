@@ -165,4 +165,18 @@ abstract class LinearGradientBase extends ContainerComponent {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case startXPropertyKey:
+      case startYPropertyKey:
+      case endXPropertyKey:
+      case endYPropertyKey:
+      case opacityPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

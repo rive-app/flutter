@@ -203,4 +203,19 @@ abstract class ArtboardBase extends ContainerComponent {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case widthPropertyKey:
+      case heightPropertyKey:
+      case xPropertyKey:
+      case yPropertyKey:
+      case originXPropertyKey:
+      case originYPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

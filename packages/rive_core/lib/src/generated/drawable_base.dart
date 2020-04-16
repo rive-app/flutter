@@ -86,4 +86,15 @@ abstract class DrawableBase extends Node {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case drawOrderPropertyKey:
+      case blendModePropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

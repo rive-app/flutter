@@ -19,6 +19,15 @@ import 'debounce.dart';
 export 'package:fractional/fractional.dart';
 export 'package:core/id.dart';
 
+export 'package:core/field_types/core_bool_type.dart';
+export 'package:core/field_types/core_double_type.dart';
+export 'package:core/field_types/core_fractional_index_type.dart';
+export 'package:core/field_types/core_id_type.dart';
+export 'package:core/field_types/core_int_type.dart';
+export 'package:core/field_types/core_list_id_type.dart';
+export 'package:core/field_types/core_string_type.dart';
+
+
 final log = Logger('Core');
 
 class ChangeEntry {
@@ -48,6 +57,12 @@ abstract class Core<T extends CoreContext> {
   /// matching the propertyKey.
   K getProperty<K>(int propertyKey) {
     return null;
+  }
+
+  /// Generated classes override this to return whether they store this
+  /// property.
+  bool hasProperty(int propertyKey) {
+    return false;
   }
 
   /// Register to receive a notification whenever a property with propertyKey
@@ -195,9 +210,6 @@ abstract class CoreContext implements LocalSettings {
 
   @protected
   void applyCoopChanges(ObjectChanges objectChanges);
-
-  @protected
-  bool isPropertyId(int propertyKey);
 
   bool captureJournalEntry() {
     if (_currentChanges == null) {

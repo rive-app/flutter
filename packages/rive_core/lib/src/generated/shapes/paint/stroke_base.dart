@@ -142,4 +142,17 @@ abstract class StrokeBase extends ShapePaint {
         return super.getProperty<K>(propertyKey);
     }
   }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case thicknessPropertyKey:
+      case capPropertyKey:
+      case joinPropertyKey:
+      case transformAffectsStrokePropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
+    }
+  }
 }

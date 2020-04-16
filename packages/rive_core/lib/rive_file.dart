@@ -2,6 +2,7 @@ import 'package:core/coop/coop_client.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/backboard.dart';
+import 'package:rive_core/rive_core_field_type.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
@@ -351,6 +352,27 @@ class RiveFile extends RiveCoreContext {
   @override
   void connectionStateChanged(core.ConnectionState state) =>
       delegates.forEach((delegate) => delegate.onConnectionStateChanged(state));
+
+  @override
+  CoreIdType get idType => null;
+
+  @override
+  CoreIntType get intType => null;
+
+  @override
+  CoreStringType get stringType => null;
+
+  @override
+  CoreDoubleType get doubleType => RiveDoubleType.instance;
+
+  @override
+  CoreBoolType get boolType => null;
+
+  @override
+  CoreListIdType get listIdType => null;
+
+  @override
+  CoreFractionalIndexType get fractionalIndexType => null;
 }
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.

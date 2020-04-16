@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
-import 'package:core/id.dart';
 import 'package:meta/meta.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 
@@ -83,6 +82,17 @@ abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
         return propertyKey as K;
       default:
         return super.getProperty<K>(propertyKey);
+    }
+  }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case keyedObjectIdPropertyKey:
+      case propertyKeyPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
     }
   }
 }

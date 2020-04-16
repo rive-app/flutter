@@ -1,6 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:rive_core/animation/animation.dart';
+import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
@@ -198,7 +201,6 @@ abstract class Component extends ComponentBase<RiveFile>
 
   @override
   void onAddedDirty() {
-    log.finest("ADDING $name $id $parentId");
     if (parentId != null) {
       parent = context?.resolve(parentId);
       if (parent == null) {
@@ -251,4 +253,40 @@ abstract class Component extends ComponentBase<RiveFile>
   /// it's safe to clean up references to parents and anything that depends on
   /// this component.
   void remove() => context?.remove(this);
+
+  T addKeyFrame<T extends KeyFrame>(
+      Animation animation, int propertyKey, int time) {
+    assert(hasProperty(propertyKey),
+        '$this doesn\'t store a property with key $propertyKey');
+    var keyedObject = animation.getKeyed(this);
+    keyedObject ??= animation.makeKeyed(this);
+
+    var property = keyedObject.getKeyed(propertyKey);
+    property ??= keyedObject.makeKeyed(propertyKey);
+
+    var keyFrameIndex = property.indexOfFrame(time);
+
+    if (keyFrameIndex == 0) {
+      // add to start
+    } else if (keyFrameIndex < property.numFrames) {
+      // might match a frame
+      KeyFrame frame = property.getFrameAt(keyFrameIndex);
+      if (frame.time == time) {
+        // already have a frame at this time, return it.
+        assert(frame is T);
+        return frame as T;
+      }
+      else {
+        // insert after index-1, before index
+      }
+    } else {
+      // add to end
+    }
+    return null;
+  }
+
+  KeyFrameDouble addKeyFrameDouble(
+      Animation animation, int propertyKey, int time) {
+      
+  }
 }

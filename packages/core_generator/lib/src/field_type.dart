@@ -5,9 +5,14 @@ abstract class FieldType {
   String _dartName;
   String get dartName => _dartName;
 
+  String _runtimeCoreType;
+  String get runtimeCoreType => _runtimeCoreType;
+
   final Iterable<String> imports;
-  FieldType(this.name, {String dartName, this.imports}) {
+  FieldType(this.name, String runtimeCoreType,
+      {String dartName, this.imports}) {
     _dartName = dartName ?? name;
+    _runtimeCoreType = runtimeCoreType;
     _types[name] = this;
   }
 
@@ -23,13 +28,17 @@ abstract class FieldType {
     return name;
   }
 
-  int get encodingAlignment;
-  String encode(String writerName, String varName);
-  String decode(String readerName, String varName);
-
   String equalityCheck(String varAName, String varBName) {
     return "$varAName == $varBName";
   }
 
   String get defaultValue => 'null';
+
+  String get uncapitalizedName => '${name[0].toLowerCase()}${name.substring(1)}'
+      .replaceAll('<', '')
+      .replaceAll('>', '');
+      
+  String get capitalizedName => '${name[0].toUpperCase()}${name.substring(1)}'
+      .replaceAll('<', '')
+      .replaceAll('>', '');
 }

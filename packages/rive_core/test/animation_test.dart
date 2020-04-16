@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
@@ -40,14 +42,16 @@ void main() {
   test('apply an animation', () {
     var file = _makeFile();
 
+    Animation animation;
+    Node node;
     file.batchAdd(() {
-      var node = Node()
+      node = Node()
         ..name = 'Moving Node'
         ..x = 0
         ..y = 0;
       file.add(node);
 
-      var animation = Animation()..name = 'Test Animation';
+      animation = Animation()..name = 'Test Animation';
       file.add(animation);
 
       expect(animation.getKeyed(node), null);
@@ -57,6 +61,12 @@ void main() {
       expect(keyedObject.getKeyed(NodeBase.xPropertyKey), null);
 
       var keyedProperty = keyedObject.makeKeyed(NodeBase.xPropertyKey);
+
+      expect(keyedObject.getKeyed(NodeBase.xPropertyKey), keyedProperty);
+
+      node.addKeyFrame(animation, NodeBase.xPropertyKey, 0);
+
+      node.addKeyFrameDouble(animation, NodeBase.xPropertyKey, 0);
 
       // TODO: explore Core api to get these keyed dynamically.
       var keyFrame1 = KeyFrameDouble()
@@ -70,5 +80,13 @@ void main() {
       file.add(keyFrame1);
       file.add(keyFrame2);
     });
+
+    file.captureJournalEntry();
+
+    animation.apply(30);
+
+    expect(node.x, lerpDouble(34, 40, 0.5));
+
+    print("NODE POSITION ${node.x}");
   });
 }

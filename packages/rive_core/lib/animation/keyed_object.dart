@@ -73,9 +73,10 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       ..propertyKey = propertyKey;
     context.add(keyedProperty);
 
-    // N.B. we don't add the keyed property manually here as it gets added by us
-    // adding it to core. This let's us reuse the same codepath for
-    // keyedProperty's making it into the _keyedProperties map.
+    
+    // We also add it here in case we're doing a batch add (onAddedDirty will be
+    // called later for the keyedObject).
+    internalAddKeyedProperty(keyedProperty);
 
     // However, we can make sure that it is there.
     assert(getKeyed(propertyKey) == keyedProperty);
@@ -83,14 +84,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     return keyedProperty;
   }
 
-  /// Pass in a different [core] context if you want to apply the animation to a
-  /// different instance. This isn't meant to be used yet but left as mostly a
-  /// note to remember that at runtime we have to support applying animtaions to
-  /// instances. We do a nice job of not duping all that data at runtime (so
-  /// animations exist once but entire Rive file can be instanced multiple times
-  /// playing different positions).
-  void apply(int time, double mix, {RiveFile coreContext}) {
-    coreContext ??= context;
+  void apply(int time, double mix, RiveFile coreContext) {
     core.Core object = coreContext.resolve(objectId);
     if (object == null) {
       return;
