@@ -9,15 +9,27 @@ class EditorSwitch extends StatelessWidget {
 
   final bool isOn;
   final VoidCallback toggle;
+  final Color onColor;
+  final Color offColor;
+  final Color backgroundColor;
 
   const EditorSwitch({
     @required this.isOn,
+    this.onColor,
+    this.offColor,
+    this.backgroundColor,
     this.toggle,
     Key key,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
+    var colors = theme.colors;
+
+    var buttonColor = (isOn != null && isOn)
+        ? onColor ?? colors.toggleForeground
+        : offColor ?? colors.toggleForegroundDisabled;
+
     return GestureDetector(
       onTapDown: (_) => toggle(),
       child: SizedBox(
@@ -25,7 +37,7 @@ class EditorSwitch extends StatelessWidget {
         height: size.height,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: theme.colors.toggleBackground,
+            color: backgroundColor ?? colors.toggleBackground,
             borderRadius: const BorderRadius.all(
               Radius.circular(10),
             ),
@@ -41,9 +53,7 @@ class EditorSwitch extends StatelessWidget {
                 height: knobDiameter,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: isOn != null && isOn 
-                        ? theme.colors.toggleForeground
-                        : theme.colors.toggleForegroundDisabled,
+                    color: buttonColor,
                     borderRadius: const BorderRadius.all(
                       Radius.circular(knobRadius),
                     ),

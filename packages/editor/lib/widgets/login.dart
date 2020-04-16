@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_api/auth.dart';
+import 'package:rive_editor/widgets/common/editor_switch.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/labeled_text_field.dart';
@@ -37,17 +38,16 @@ class ObscuringTextEditingController extends TextEditingController {
 }
 
 class _LoginState extends State<Login> {
-  final passwordController = ObscuringTextEditingController();
-  final usernameController = TextEditingController();
+  final ObscuringTextEditingController passwordController =
+      ObscuringTextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   String username;
   bool _isLoggingIn = false;
   bool _isLoginPanel = true;
 
-  void _switchPanel(bool isLogin) {
-    if (isLogin == _isLoginPanel) return;
-
+  void _switchPanel() {
     setState(() {
-      _isLoginPanel = isLogin;
+      _isLoginPanel = !_isLoginPanel;
     });
   }
 
@@ -81,6 +81,7 @@ class _LoginState extends State<Login> {
     final styles = theme.textStyles;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Top padding.
@@ -91,7 +92,7 @@ class _LoginState extends State<Login> {
           'One-click sign in if your account is connected to',
           style: styles.loginText,
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 20),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -179,42 +180,8 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Widget _loginPanel() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-            flex: 3, // Top 1/3
-            child: Padding(
-              padding: const EdgeInsets.all(30.0),
-              child: Container(
-                color: Colors.deepOrangeAccent.withOpacity(0.25),
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: Switch(
-                    value: _isLoginPanel,
-                    onChanged: _switchPanel,
-                  ),
-                ),
-              ),
-            )),
-        Expanded(
-            flex: 7, // The rest.
-            child: Container(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 120),
-                child: Container(
-                    color: Colors.limeAccent.withOpacity(0.2),
-                    child: _loginForm()),
-              ),
-            )),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    var rive = RiveContext.of(context);
     return Stack(
       children: <Widget>[
         Positioned.fill(
@@ -224,16 +191,28 @@ class _LoginState extends State<Login> {
             },
           ),
         ),
-        Positioned.fill(
-          child: Row(children: [
-            Expanded(
-                child: Container(
-              // TODO: image background or Rive animation.
-              color: Colors.amberAccent[100],
-            )),
-            SizedBox(width: 704, child: _loginPanel())
-          ]),
-        ),
+        Row(children: [
+          // TODO: image background or Rive animation.
+          Flexible(
+              child: Container(
+            color: Colors.lime[100],
+          )),
+          SizedBox(
+              width: 714,
+              child: Stack(children: [
+                Positioned(
+                  right: 30,
+                  top: 30,
+                  child: EditorSwitch(
+                    isOn: _isLoginPanel,
+                    toggle: _switchPanel,
+                    onColor: Colors.white,
+                    offColor: Colors.white,
+                  ),
+                ),
+                Align(alignment: Alignment.center, child: _loginForm()),
+              ])),
+        ]),
         // Positioned.fill(
         //   child: Center(
         //     child: Container(
