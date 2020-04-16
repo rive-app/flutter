@@ -100,9 +100,11 @@ class _SettingsHeaderState extends State<SettingsHeader> {
 }
 
 class EditableAvatar extends StatefulWidget {
+  final double avatarRadius;
   const EditableAvatar({
     @required this.avatarPath,
     @required this.changeAvatar,
+    this.avatarRadius = 25,
     Key key,
   }) : super(key: key);
 
@@ -110,18 +112,20 @@ class EditableAvatar extends StatefulWidget {
   final VoidCallback changeAvatar;
 
   @override
-  _EditableAvatarState createState() => _EditableAvatarState();
+  _EditableAvatarState createState() =>
+      _EditableAvatarState(radius: avatarRadius);
 }
 
 class _EditableAvatarState extends State<EditableAvatar> {
+  final double radius;
   bool _hover = false;
+
+  _EditableAvatarState({this.radius = 25});
   void setHover(bool hover) {
     setState(() {
       _hover = hover;
     });
   }
-
-  final double radius = 25;
 
   @override
   Widget build(BuildContext context) {
@@ -163,8 +167,9 @@ class _EditableAvatarState extends State<EditableAvatar> {
       child: GestureDetector(
         onTap: widget.changeAvatar,
         child: MouseRegion(
-          onEnter: (_) => setHover(true),
-          onExit: (_) => setHover(false),
+          // only trigger hover change if we have a changeAvatar implementation
+          onEnter: (_) => setHover((widget.changeAvatar != null) && true),
+          onExit: (_) => setHover((widget.changeAvatar != null) && false),
           child: Stack(children: children),
         ),
       ),

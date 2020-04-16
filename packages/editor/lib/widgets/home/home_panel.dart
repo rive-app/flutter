@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:cursor/propagating_listener.dart';
 
 import 'package:rive_api/files.dart';
+import 'package:rive_api/models/team.dart';
 
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/widgets/home/team_detail_panel.dart';
 import 'package:rive_editor/widgets/notifications.dart';
 
 import 'package:tree_widget/tree_scroll_view.dart';
@@ -79,6 +81,15 @@ class Home extends StatelessWidget {
                 Expanded(
                   child: MainPanel(),
                 ),
+                if (fileBrowser.owner is RiveTeam)
+                  ResizePanel(
+                    hitSize: resizeEdgeSize,
+                    direction: ResizeDirection.horizontal,
+                    side: ResizeSide.start,
+                    min: 252,
+                    max: 500,
+                    child: TeamDetailPanel(team: fileBrowser.owner as RiveTeam),
+                  ),
               ],
             ),
           ),
