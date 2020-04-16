@@ -81,7 +81,7 @@ class Home extends StatelessWidget {
                 Expanded(
                   child: MainPanel(),
                 ),
-                if (fileBrowser.owner is RiveTeam)
+                if (fileBrowser?.owner is RiveTeam)
                   ResizePanel(
                     hitSize: resizeEdgeSize,
                     direction: ResizeDirection.horizontal,
