@@ -145,6 +145,12 @@ class _NotificationProviderState extends State<NotificationProvider> {
   }
 
   @override
+  void dispose() {
+    _manager.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => _InheritedNotificationProvider(
         manager: _manager,
         child: widget.child,
