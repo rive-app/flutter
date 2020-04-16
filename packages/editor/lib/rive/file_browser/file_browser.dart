@@ -135,8 +135,16 @@ class FileBrowser extends FileBrowserController {
       result.root.first.owner = _owner;
     }
 
+    String selectedFolderId = _current?.id;
     myTreeController.value.replaceData(result.root);
     myTreeController.notifyListeners();
+    if (selectedFolderId != null) {
+      var selectedFolder = myTreeController.value.flat
+          .firstWhere((element) => element.data.id == selectedFolderId);
+      if (selectedFolder != null) {
+        unawaited(openFolder(selectedFolder.data, true));
+      }
+    }
 
     return true;
   }
