@@ -70,14 +70,17 @@ void main() {
       kf2 = node.addKeyFrame(animation, NodeBase.xPropertyKey, 60)..value = 40;
       expect(kf2.frame, 60, reason: 'frame value should be 60');
     });
-
-    file.captureJournalEntry();
+    expect(file.captureJournalEntry(), true,
+        reason: 'animation creation should capture an entry');
 
     expect(kf1.seconds, 0, reason: 'seconds should have resolved to 0');
     expect(kf2.seconds, 1, reason: 'seconds should have resolved to 1');
 
     animation.apply(0.5);
     expect(node.x, lerpDouble(34, 40, 0.5));
+    animation.context.revertChanges();
+    expect(file.captureJournalEntry(), false,
+        reason: 'there should be no changes after animation is complete');
 
     kf1.frame = 6;
     kf1.value = -14;

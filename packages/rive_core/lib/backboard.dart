@@ -15,7 +15,6 @@ class Backboard extends BackboardBase {
 
   @override
   void activeArtboardIdChanged(Id from, Id to) {
-    super.activeArtboardIdChanged(from, to);
     _activeArtboard = context?.resolve(to);
     _activeArtboard?.addDirt(ComponentDirt.paint);
   }
@@ -28,7 +27,6 @@ class Backboard extends BackboardBase {
 
   @override
   void mainArtboardIdChanged(Id from, Id to) {
-    super.mainArtboardIdChanged(from, to);
     _mainArtboard = context?.resolve(to);
     _mainArtboard?.addDirt(ComponentDirt.paint);
   }
@@ -39,9 +37,7 @@ class Backboard extends BackboardBase {
   }
 
   @override
-  void colorValueChanged(int from, int to) {
-    super.colorValueChanged(from, to);
-  }
+  void colorValueChanged(int from, int to) {}
 
   @override
   void onAdded() {}

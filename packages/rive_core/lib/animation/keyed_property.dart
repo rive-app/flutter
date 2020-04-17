@@ -1,9 +1,12 @@
-import 'package:core/core.dart' as core;
+import 'package:core/core.dart';
+import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 export 'package:rive_core/src/generated/animation/keyed_property_base.dart';
+
+final _log = Logger('animation');
 
 class KeyedProperty extends KeyedPropertyBase<RiveFile> {
   final List<KeyFrame> _keyframes = [];
@@ -18,7 +21,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
     if (keyedObjectId != null) {
       KeyedObject keyedObject = context?.resolve(keyedObjectId);
       if (keyedObject == null) {
-        log.finest("Failed to resolve KeyedObject with id $keyedObjectId");
+        _log.finest("Failed to resolve KeyedObject with id $keyedObjectId");
       } else {
         keyedObject.internalAddKeyedProperty(this);
       }
@@ -95,7 +98,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
 
   KeyFrame getFrameAt(int index) => _keyframes[index];
 
-  void apply(double seconds, double mix, core.Core object) {
+  void apply(double seconds, double mix, Core object) {
     if (_keyframes.isEmpty) {
       return;
     }
@@ -139,4 +142,10 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
       }
     }
   }
+
+  @override
+  void keyedObjectIdChanged(Id from, Id to) {}
+
+  @override
+  void propertyKeyChanged(int from, int to) {}
 }

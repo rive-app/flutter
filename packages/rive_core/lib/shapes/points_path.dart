@@ -32,4 +32,7 @@ class PointsPath extends PointsPathBase {
     }
     addDirt(ComponentDirt.path);
   }
+
+  @override
+  void isClosedChanged(bool from, bool to) {}
 }

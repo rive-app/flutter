@@ -4,7 +4,6 @@
 import 'package:core/core.dart';
 import 'package:core/id.dart';
 import 'package:fractional/fractional.dart';
-import 'package:meta/meta.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/list_equality.dart';
 
@@ -33,13 +32,11 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     }
     List<Id> from = _dependentIds;
     _dependentIds = value;
+    onPropertyChanged(dependentIdsPropertyKey, from, value);
     dependentIdsChanged(from, value);
   }
 
-  @mustCallSuper
-  void dependentIdsChanged(List<Id> from, List<Id> to) {
-    onPropertyChanged(dependentIdsPropertyKey, from, to);
-  }
+  void dependentIdsChanged(List<Id> from, List<Id> to);
 
   /// --------------------------------------------------------------------------
   /// Name field with key 4.
@@ -58,13 +55,11 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     }
     String from = _name;
     _name = value;
+    onPropertyChanged(namePropertyKey, from, value);
     nameChanged(from, value);
   }
 
-  @mustCallSuper
-  void nameChanged(String from, String to) {
-    onPropertyChanged(namePropertyKey, from, to);
-  }
+  void nameChanged(String from, String to);
 
   /// --------------------------------------------------------------------------
   /// ParentId field with key 5.
@@ -82,13 +77,11 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _parentId;
     _parentId = value;
+    onPropertyChanged(parentIdPropertyKey, from, value);
     parentIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void parentIdChanged(Id from, Id to) {
-    onPropertyChanged(parentIdPropertyKey, from, to);
-  }
+  void parentIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
   /// ChildOrder field with key 6.
@@ -106,13 +99,11 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     }
     FractionalIndex from = _childOrder;
     _childOrder = value;
+    onPropertyChanged(childOrderPropertyKey, from, value);
     childOrderChanged(from, value);
   }
 
-  @mustCallSuper
-  void childOrderChanged(FractionalIndex from, FractionalIndex to) {
-    onPropertyChanged(childOrderPropertyKey, from, to);
-  }
+  void childOrderChanged(FractionalIndex from, FractionalIndex to);
 
   @override
   void changeNonNull() {

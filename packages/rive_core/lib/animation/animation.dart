@@ -98,4 +98,31 @@ class Animation extends AnimationBase<RiveFile> {
       keyedObject.apply(time, mix, coreContext);
     }
   }
+
+  @override
+  void artboardIdChanged(Id from, Id to) {}
+
+  @override
+  void durationChanged(int from, int to) {}
+
+  @override
+  void enableWorkAreaChanged(bool from, bool to) {}
+
+  @override
+  void fpsChanged(int from, int to) {}
+
+  @override
+  void loopChanged(int from, int to) {}
+
+  @override
+  void nameChanged(String from, String to) {}
+
+  @override
+  void speedChanged(double from, double to) {}
+
+  @override
+  void workEndChanged(int from, int to) {}
+
+  @override
+  void workStartChanged(int from, int to) {}
 }

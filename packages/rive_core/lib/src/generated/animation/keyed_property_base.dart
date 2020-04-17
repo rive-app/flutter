@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
-import 'package:meta/meta.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 
 abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
@@ -30,13 +29,11 @@ abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _keyedObjectId;
     _keyedObjectId = value;
+    onPropertyChanged(keyedObjectIdPropertyKey, from, value);
     keyedObjectIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void keyedObjectIdChanged(Id from, Id to) {
-    onPropertyChanged(keyedObjectIdPropertyKey, from, to);
-  }
+  void keyedObjectIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
   /// PropertyKey field with key 53.
@@ -55,13 +52,11 @@ abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _propertyKey;
     _propertyKey = value;
+    onPropertyChanged(propertyKeyPropertyKey, from, value);
     propertyKeyChanged(from, value);
   }
 
-  @mustCallSuper
-  void propertyKeyChanged(int from, int to) {
-    onPropertyChanged(propertyKeyPropertyKey, from, to);
-  }
+  void propertyKeyChanged(int from, int to);
 
   @override
   void changeNonNull() {

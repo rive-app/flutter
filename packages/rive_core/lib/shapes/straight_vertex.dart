@@ -7,4 +7,19 @@ class StraightVertex extends StraightVertexBase {
 
   @override
   String toString() => 'x[$x], y[$y], r[$radius]';
+
+  @override
+  void radiusChanged(double from, double to) {
+    // TODO: implement radiusChanged
+  }
+
+  @override
+  void xChanged(double from, double to) {
+    // TODO: implement xChanged
+  }
+
+  @override
+  void yChanged(double from, double to) {
+    // TODO: implement yChanged
+  }
 }

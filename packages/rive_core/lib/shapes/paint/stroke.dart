@@ -21,28 +21,24 @@ class Stroke extends StrokeBase {
 
   @override
   void capChanged(int from, int to) {
-    super.capChanged(from, to);
     paint.strokeCap = StrokeCap.values[to];
     parent?.addDirt(ComponentDirt.paint);
   }
 
   @override
   void joinChanged(int from, int to) {
-    super.joinChanged(from, to);
     paint.strokeJoin = StrokeJoin.values[to];
     parent?.addDirt(ComponentDirt.paint);
   }
 
   @override
   void thicknessChanged(double from, double to) {
-    super.thicknessChanged(from, to);
     paint.strokeWidth = to;
     parent?.addDirt(ComponentDirt.paint);
   }
 
   @override
   void transformAffectsStrokeChanged(bool from, bool to) {
-    super.transformAffectsStrokeChanged(from, to);
     var parentShape = parent;
     if (parentShape is Shape) {
       parentShape.transformAffectsStrokeChanged();
@@ -60,7 +56,7 @@ class Stroke extends StrokeBase {
     if (!isVisible) {
       return;
     }
-    
+
     canvas.drawPath(path, paint);
   }
 }

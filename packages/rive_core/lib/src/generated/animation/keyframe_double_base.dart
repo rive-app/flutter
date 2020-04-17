@@ -2,7 +2,6 @@
 /// lib/src/generated/animation/keyframe_double_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 
@@ -27,13 +26,11 @@ abstract class KeyFrameDoubleBase extends KeyFrame {
     }
     double from = _value;
     _value = value;
+    onPropertyChanged(valuePropertyKey, from, value);
     valueChanged(from, value);
   }
 
-  @mustCallSuper
-  void valueChanged(double from, double to) {
-    onPropertyChanged(valuePropertyKey, from, to);
-  }
+  void valueChanged(double from, double to);
 
   @override
   void changeNonNull() {

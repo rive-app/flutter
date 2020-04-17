@@ -2,7 +2,6 @@
 /// lib/src/generated/shapes/paint/shape_paint_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -32,13 +31,11 @@ abstract class ShapePaintBase extends ContainerComponent {
     }
     bool from = _isVisible;
     _isVisible = value;
+    onPropertyChanged(isVisiblePropertyKey, from, value);
     isVisibleChanged(from, value);
   }
 
-  @mustCallSuper
-  void isVisibleChanged(bool from, bool to) {
-    onPropertyChanged(isVisiblePropertyKey, from, to);
-  }
+  void isVisibleChanged(bool from, bool to);
 
   @override
   void changeNonNull() {

@@ -2,7 +2,6 @@
 /// lib/src/generated/shapes/straight_vertex_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
@@ -34,13 +33,11 @@ abstract class StraightVertexBase extends PathVertex {
     }
     double from = _radius;
     _radius = value;
+    onPropertyChanged(radiusPropertyKey, from, value);
     radiusChanged(from, value);
   }
 
-  @mustCallSuper
-  void radiusChanged(double from, double to) {
-    onPropertyChanged(radiusPropertyKey, from, to);
-  }
+  void radiusChanged(double from, double to);
 
   @override
   void changeNonNull() {

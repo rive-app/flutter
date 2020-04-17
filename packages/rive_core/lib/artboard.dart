@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:core/id.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -79,7 +80,6 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   @override
   void nameChanged(String from, String to) {
-    super.nameChanged(from, to);
     _delegate?.markNameDirty();
   }
 
@@ -93,8 +93,6 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   @override
   void heightChanged(double from, double to) {
-    super.heightChanged(from, to);
-
     addDirt(ComponentDirt.worldTransform);
   }
 
@@ -155,22 +153,16 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   @override
   void widthChanged(double from, double to) {
-    super.widthChanged(from, to);
-
     addDirt(ComponentDirt.worldTransform);
   }
 
   @override
   void xChanged(double from, double to) {
-    super.xChanged(from, to);
-
     addDirt(ComponentDirt.worldTransform);
   }
 
   @override
   void yChanged(double from, double to) {
-    super.yChanged(from, to);
-
     addDirt(ComponentDirt.worldTransform);
   }
 
@@ -219,4 +211,13 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   /// Our world transform is always the identity. Artboard defines world space.
   @override
   Mat2D get worldTransform => Mat2D();
+
+  @override
+  void dependentIdsChanged(List<Id> from, List<Id> to) {}
+
+  @override
+  void originXChanged(double from, double to) {}
+
+  @override
+  void originYChanged(double from, double to) {}
 }

@@ -27,4 +27,16 @@ class KeyFrameDouble extends KeyFrameDoubleBase {
               interpolatedValue * mix);
     }
   }
+
+  @override
+  void interpolationChanged(int from, int to) {}
+
+  @override
+  void interpolatorIdChanged(Id from, Id to) {}
+
+  @override
+  void keyedPropertyIdChanged(Id from, Id to) {}
+
+  @override
+  void valueChanged(double from, double to) {}
 }

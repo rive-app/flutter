@@ -1,8 +1,3 @@
-import 'package:core/coop/change.dart';
-import 'package:core/core.dart';
-import 'package:utilities/binary_buffer/binary_reader.dart';
-import 'package:utilities/binary_buffer/binary_writer.dart';
-
 import '../../animation/animation.dart';
 import '../../animation/cubic_interpolator.dart';
 import '../../animation/keyed_object.dart';
@@ -36,7 +31,12 @@ import 'backboard_base.dart';
 import 'component_base.dart';
 import 'drawable_base.dart';
 import 'node_base.dart';
+import 'package:core/coop/change.dart';
+import 'package:core/core.dart';
 import 'package:core/field_types/core_field_type.dart';
+import 'package:core/key_state.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'shapes/cubic_vertex_base.dart';
 import 'shapes/ellipse_base.dart';
 import 'shapes/paint/fill_base.dart';
@@ -155,7 +155,7 @@ abstract class RiveCoreContext extends CoreContext {
         case BackboardBase.activeArtboardIdPropertyKey:
         case BackboardBase.mainArtboardIdPropertyKey:
           var value = idType.deserialize(reader);
-          setObjectProperty(object, change.op, value);
+          setId(object, change.op, value);
           break;
         case KeyedPropertyBase.propertyKeyPropertyKey:
         case AnimationBase.fpsPropertyKey:
@@ -173,12 +173,12 @@ abstract class RiveCoreContext extends CoreContext {
         case DrawableBase.blendModePropertyKey:
         case BackboardBase.colorValuePropertyKey:
           var value = intType.deserialize(reader);
-          setObjectProperty(object, change.op, value);
+          setInt(object, change.op, value);
           break;
         case AnimationBase.namePropertyKey:
         case ComponentBase.namePropertyKey:
           var value = stringType.deserialize(reader);
-          setObjectProperty(object, change.op, value);
+          setString(object, change.op, value);
           break;
         case AnimationBase.speedPropertyKey:
         case CubicInterpolatorBase.x1PropertyKey:
@@ -216,23 +216,23 @@ abstract class RiveCoreContext extends CoreContext {
         case ArtboardBase.originXPropertyKey:
         case ArtboardBase.originYPropertyKey:
           var value = doubleType.deserialize(reader);
-          setObjectProperty(object, change.op, value);
+          setDouble(object, change.op, value);
           break;
         case AnimationBase.enableWorkAreaPropertyKey:
         case ShapePaintBase.isVisiblePropertyKey:
         case StrokeBase.transformAffectsStrokePropertyKey:
         case PointsPathBase.isClosedPropertyKey:
           var value = boolType.deserialize(reader);
-          setObjectProperty(object, change.op, value);
+          setBool(object, change.op, value);
           break;
         case ComponentBase.dependentIdsPropertyKey:
           var value = listIdType.deserialize(reader);
-          setObjectProperty(object, change.op, value);
+          setListId(object, change.op, value);
           break;
         case ComponentBase.childOrderPropertyKey:
         case DrawableBase.drawOrderPropertyKey:
           var value = fractionalIndexType.deserialize(reader);
-          setObjectProperty(object, change.op, value);
+          setFractionalIndex(object, change.op, value);
           break;
         default:
           break;
@@ -712,6 +712,28 @@ abstract class RiveCoreContext extends CoreContext {
       case BackboardBase.colorValuePropertyKey:
         if (object is BackboardBase && value is int) {
           object.colorValue = value;
+        }
+        break;
+    }
+  }
+
+  static void setKeyState(Core object, int propertyKey, KeyState value) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+        if (object is NodeBase) {
+          object.xKeyState = value;
+        }
+        break;
+    }
+  }
+
+  @override
+  void resetAnimated(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+        if (object is NodeBase) {
+          object.xAnimated = null;
+          object.xKeyState = KeyState.none;
         }
         break;
     }
@@ -1523,6 +1545,14 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case ArtboardBase.originYPropertyKey:
         (object as ArtboardBase).originY = value;
+        break;
+    }
+  }
+
+  static void animateDouble(Core object, int propertyKey, double value) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+        (object as NodeBase).xAnimated = value;
         break;
     }
   }

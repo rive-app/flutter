@@ -2,7 +2,6 @@
 /// Do not modify manually.
 
 import 'package:fractional/fractional.dart';
-import 'package:meta/meta.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -34,13 +33,11 @@ abstract class DrawableBase extends Node {
     }
     FractionalIndex from = _drawOrder;
     _drawOrder = value;
+    onPropertyChanged(drawOrderPropertyKey, from, value);
     drawOrderChanged(from, value);
   }
 
-  @mustCallSuper
-  void drawOrderChanged(FractionalIndex from, FractionalIndex to) {
-    onPropertyChanged(drawOrderPropertyKey, from, to);
-  }
+  void drawOrderChanged(FractionalIndex from, FractionalIndex to);
 
   /// --------------------------------------------------------------------------
   /// BlendMode field with key 23.
@@ -56,13 +53,11 @@ abstract class DrawableBase extends Node {
     }
     int from = _blendMode;
     _blendMode = value;
+    onPropertyChanged(blendModePropertyKey, from, value);
     blendModeChanged(from, value);
   }
 
-  @mustCallSuper
-  void blendModeChanged(int from, int to) {
-    onPropertyChanged(blendModePropertyKey, from, to);
-  }
+  void blendModeChanged(int from, int to);
 
   @override
   void changeNonNull() {

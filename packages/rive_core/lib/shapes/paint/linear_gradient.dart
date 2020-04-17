@@ -147,31 +147,26 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
 
   @override
   void startXChanged(double from, double to) {
-    super.startXChanged(from, to);
     addDirt(ComponentDirt.transform);
   }
 
   @override
   void startYChanged(double from, double to) {
-    super.startYChanged(from, to);
     addDirt(ComponentDirt.transform);
   }
 
   @override
   void endXChanged(double from, double to) {
-    super.endXChanged(from, to);
     addDirt(ComponentDirt.transform);
   }
 
   @override
   void endYChanged(double from, double to) {
-    super.endYChanged(from, to);
     addDirt(ComponentDirt.transform);
   }
 
   @override
   void opacityChanged(double from, double to) {
-    super.opacityChanged(from, to);
     paint.color = const ui.Color(0xFFFFFFFF).withOpacity(to);
     // We don't need to rebuild anything, just let our shape know we should
     // repaint.

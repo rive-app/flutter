@@ -2,7 +2,6 @@
 /// lib/src/generated/shapes/paint/gradient_stop_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 
@@ -27,13 +26,11 @@ abstract class GradientStopBase extends Component {
     }
     int from = _colorValue;
     _colorValue = value;
+    onPropertyChanged(colorValuePropertyKey, from, value);
     colorValueChanged(from, value);
   }
 
-  @mustCallSuper
-  void colorValueChanged(int from, int to) {
-    onPropertyChanged(colorValuePropertyKey, from, to);
-  }
+  void colorValueChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// Position field with key 39.
@@ -49,13 +46,11 @@ abstract class GradientStopBase extends Component {
     }
     double from = _position;
     _position = value;
+    onPropertyChanged(positionPropertyKey, from, value);
     positionChanged(from, value);
   }
 
-  @mustCallSuper
-  void positionChanged(double from, double to) {
-    onPropertyChanged(positionPropertyKey, from, to);
-  }
+  void positionChanged(double from, double to);
 
   @override
   void changeNonNull() {

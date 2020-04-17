@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
-import 'package:meta/meta.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 
 abstract class CubicInterpolatorBase<T extends RiveCoreContext>
@@ -28,13 +27,11 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
     }
     double from = _x1;
     _x1 = value;
+    onPropertyChanged(x1PropertyKey, from, value);
     x1Changed(from, value);
   }
 
-  @mustCallSuper
-  void x1Changed(double from, double to) {
-    onPropertyChanged(x1PropertyKey, from, to);
-  }
+  void x1Changed(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Y1 field with key 64.
@@ -50,13 +47,11 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
     }
     double from = _y1;
     _y1 = value;
+    onPropertyChanged(y1PropertyKey, from, value);
     y1Changed(from, value);
   }
 
-  @mustCallSuper
-  void y1Changed(double from, double to) {
-    onPropertyChanged(y1PropertyKey, from, to);
-  }
+  void y1Changed(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// X2 field with key 65.
@@ -72,13 +67,11 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
     }
     double from = _x2;
     _x2 = value;
+    onPropertyChanged(x2PropertyKey, from, value);
     x2Changed(from, value);
   }
 
-  @mustCallSuper
-  void x2Changed(double from, double to) {
-    onPropertyChanged(x2PropertyKey, from, to);
-  }
+  void x2Changed(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Y2 field with key 66.
@@ -94,13 +87,11 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
     }
     double from = _y2;
     _y2 = value;
+    onPropertyChanged(y2PropertyKey, from, value);
     y2Changed(from, value);
   }
 
-  @mustCallSuper
-  void y2Changed(double from, double to) {
-    onPropertyChanged(y2PropertyKey, from, to);
-  }
+  void y2Changed(double from, double to);
 
   @override
   void changeNonNull() {

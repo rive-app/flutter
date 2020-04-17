@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
-import 'package:meta/meta.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 
 abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
@@ -29,13 +28,11 @@ abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _objectId;
     _objectId = value;
+    onPropertyChanged(objectIdPropertyKey, from, value);
     objectIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void objectIdChanged(Id from, Id to) {
-    onPropertyChanged(objectIdPropertyKey, from, to);
-  }
+  void objectIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
   /// AnimationId field with key 52.
@@ -54,13 +51,11 @@ abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _animationId;
     _animationId = value;
+    onPropertyChanged(animationIdPropertyKey, from, value);
     animationIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void animationIdChanged(Id from, Id to) {
-    onPropertyChanged(animationIdPropertyKey, from, to);
-  }
+  void animationIdChanged(Id from, Id to);
 
   @override
   void changeNonNull() {

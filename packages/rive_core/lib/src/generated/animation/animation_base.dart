@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
-import 'package:meta/meta.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 
 abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
@@ -29,13 +28,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _artboardId;
     _artboardId = value;
+    onPropertyChanged(artboardIdPropertyKey, from, value);
     artboardIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void artboardIdChanged(Id from, Id to) {
-    onPropertyChanged(artboardIdPropertyKey, from, to);
-  }
+  void artboardIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
   /// Name field with key 55.
@@ -53,13 +50,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     String from = _name;
     _name = value;
+    onPropertyChanged(namePropertyKey, from, value);
     nameChanged(from, value);
   }
 
-  @mustCallSuper
-  void nameChanged(String from, String to) {
-    onPropertyChanged(namePropertyKey, from, to);
-  }
+  void nameChanged(String from, String to);
 
   /// --------------------------------------------------------------------------
   /// Fps field with key 56.
@@ -78,13 +73,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _fps;
     _fps = value;
+    onPropertyChanged(fpsPropertyKey, from, value);
     fpsChanged(from, value);
   }
 
-  @mustCallSuper
-  void fpsChanged(int from, int to) {
-    onPropertyChanged(fpsPropertyKey, from, to);
-  }
+  void fpsChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// Duration field with key 57.
@@ -102,13 +95,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _duration;
     _duration = value;
+    onPropertyChanged(durationPropertyKey, from, value);
     durationChanged(from, value);
   }
 
-  @mustCallSuper
-  void durationChanged(int from, int to) {
-    onPropertyChanged(durationPropertyKey, from, to);
-  }
+  void durationChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// Speed field with key 58.
@@ -126,13 +117,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     double from = _speed;
     _speed = value;
+    onPropertyChanged(speedPropertyKey, from, value);
     speedChanged(from, value);
   }
 
-  @mustCallSuper
-  void speedChanged(double from, double to) {
-    onPropertyChanged(speedPropertyKey, from, to);
-  }
+  void speedChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Loop field with key 59.
@@ -150,13 +139,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _loop;
     _loop = value;
+    onPropertyChanged(loopPropertyKey, from, value);
     loopChanged(from, value);
   }
 
-  @mustCallSuper
-  void loopChanged(int from, int to) {
-    onPropertyChanged(loopPropertyKey, from, to);
-  }
+  void loopChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// WorkStart field with key 60.
@@ -174,13 +161,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _workStart;
     _workStart = value;
+    onPropertyChanged(workStartPropertyKey, from, value);
     workStartChanged(from, value);
   }
 
-  @mustCallSuper
-  void workStartChanged(int from, int to) {
-    onPropertyChanged(workStartPropertyKey, from, to);
-  }
+  void workStartChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// WorkEnd field with key 61.
@@ -198,13 +183,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _workEnd;
     _workEnd = value;
+    onPropertyChanged(workEndPropertyKey, from, value);
     workEndChanged(from, value);
   }
 
-  @mustCallSuper
-  void workEndChanged(int from, int to) {
-    onPropertyChanged(workEndPropertyKey, from, to);
-  }
+  void workEndChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// EnableWorkArea field with key 62.
@@ -223,13 +206,11 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     bool from = _enableWorkArea;
     _enableWorkArea = value;
+    onPropertyChanged(enableWorkAreaPropertyKey, from, value);
     enableWorkAreaChanged(from, value);
   }
 
-  @mustCallSuper
-  void enableWorkAreaChanged(bool from, bool to) {
-    onPropertyChanged(enableWorkAreaPropertyKey, from, to);
-  }
+  void enableWorkAreaChanged(bool from, bool to);
 
   @override
   void changeNonNull() {

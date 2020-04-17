@@ -2,7 +2,6 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
-import 'package:meta/meta.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 
 abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
@@ -29,20 +28,19 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _keyedPropertyId;
     _keyedPropertyId = value;
+    onPropertyChanged(keyedPropertyIdPropertyKey, from, value);
     keyedPropertyIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void keyedPropertyIdChanged(Id from, Id to) {
-    onPropertyChanged(keyedPropertyIdPropertyKey, from, to);
-  }
+  void keyedPropertyIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
   /// Frame field with key 67.
   int _frame;
   static const int framePropertyKey = 67;
 
-  /// Timecode as frame number.
+  /// Timecode as frame number can be converted to time by dividing by animation
+  /// fps.
   int get frame => _frame;
 
   /// Change the [_frame] field value.
@@ -53,13 +51,11 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _frame;
     _frame = value;
+    onPropertyChanged(framePropertyKey, from, value);
     frameChanged(from, value);
   }
 
-  @mustCallSuper
-  void frameChanged(int from, int to) {
-    onPropertyChanged(framePropertyKey, from, to);
-  }
+  void frameChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// Interpolation field with key 68.
@@ -79,13 +75,11 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _interpolation;
     _interpolation = value;
+    onPropertyChanged(interpolationPropertyKey, from, value);
     interpolationChanged(from, value);
   }
 
-  @mustCallSuper
-  void interpolationChanged(int from, int to) {
-    onPropertyChanged(interpolationPropertyKey, from, to);
-  }
+  void interpolationChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// InterpolatorId field with key 69.
@@ -105,13 +99,11 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _interpolatorId;
     _interpolatorId = value;
+    onPropertyChanged(interpolatorIdPropertyKey, from, value);
     interpolatorIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void interpolatorIdChanged(Id from, Id to) {
-    onPropertyChanged(interpolatorIdPropertyKey, from, to);
-  }
+  void interpolatorIdChanged(Id from, Id to);
 
   @override
   void changeNonNull() {

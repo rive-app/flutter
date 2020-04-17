@@ -15,8 +15,6 @@ class SolidColor extends SolidColorBase with ShapePaintMutator {
 
   @override
   void colorValueChanged(int from, int to) {
-    super.colorValueChanged(from, to);
-
     // Since all we need to do is set the color on the paint, we can just do
     // this whenever it changes as it's such a lightweight operation. We don't
     // need to schedule it for the next update cycle, which saves us from adding

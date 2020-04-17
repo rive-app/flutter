@@ -1,7 +1,6 @@
 /// Core automatically generated lib/src/generated/artboard_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -33,13 +32,11 @@ abstract class ArtboardBase extends ContainerComponent {
     }
     double from = _width;
     _width = value;
+    onPropertyChanged(widthPropertyKey, from, value);
     widthChanged(from, value);
   }
 
-  @mustCallSuper
-  void widthChanged(double from, double to) {
-    onPropertyChanged(widthPropertyKey, from, to);
-  }
+  void widthChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Height field with key 8.
@@ -57,13 +54,11 @@ abstract class ArtboardBase extends ContainerComponent {
     }
     double from = _height;
     _height = value;
+    onPropertyChanged(heightPropertyKey, from, value);
     heightChanged(from, value);
   }
 
-  @mustCallSuper
-  void heightChanged(double from, double to) {
-    onPropertyChanged(heightPropertyKey, from, to);
-  }
+  void heightChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// X field with key 9.
@@ -81,13 +76,11 @@ abstract class ArtboardBase extends ContainerComponent {
     }
     double from = _x;
     _x = value;
+    onPropertyChanged(xPropertyKey, from, value);
     xChanged(from, value);
   }
 
-  @mustCallSuper
-  void xChanged(double from, double to) {
-    onPropertyChanged(xPropertyKey, from, to);
-  }
+  void xChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Y field with key 10.
@@ -105,13 +98,11 @@ abstract class ArtboardBase extends ContainerComponent {
     }
     double from = _y;
     _y = value;
+    onPropertyChanged(yPropertyKey, from, value);
     yChanged(from, value);
   }
 
-  @mustCallSuper
-  void yChanged(double from, double to) {
-    onPropertyChanged(yPropertyKey, from, to);
-  }
+  void yChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// OriginX field with key 11.
@@ -129,13 +120,11 @@ abstract class ArtboardBase extends ContainerComponent {
     }
     double from = _originX;
     _originX = value;
+    onPropertyChanged(originXPropertyKey, from, value);
     originXChanged(from, value);
   }
 
-  @mustCallSuper
-  void originXChanged(double from, double to) {
-    onPropertyChanged(originXPropertyKey, from, to);
-  }
+  void originXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// OriginY field with key 12.
@@ -153,13 +142,11 @@ abstract class ArtboardBase extends ContainerComponent {
     }
     double from = _originY;
     _originY = value;
+    onPropertyChanged(originYPropertyKey, from, value);
     originYChanged(from, value);
   }
 
-  @mustCallSuper
-  void originYChanged(double from, double to) {
-    onPropertyChanged(originYPropertyKey, from, to);
-  }
+  void originYChanged(double from, double to);
 
   @override
   void changeNonNull() {

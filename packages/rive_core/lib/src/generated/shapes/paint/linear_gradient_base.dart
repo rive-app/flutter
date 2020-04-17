@@ -2,7 +2,6 @@
 /// lib/src/generated/shapes/paint/linear_gradient_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -32,13 +31,11 @@ abstract class LinearGradientBase extends ContainerComponent {
     }
     double from = _startX;
     _startX = value;
+    onPropertyChanged(startXPropertyKey, from, value);
     startXChanged(from, value);
   }
 
-  @mustCallSuper
-  void startXChanged(double from, double to) {
-    onPropertyChanged(startXPropertyKey, from, to);
-  }
+  void startXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// StartY field with key 33.
@@ -54,13 +51,11 @@ abstract class LinearGradientBase extends ContainerComponent {
     }
     double from = _startY;
     _startY = value;
+    onPropertyChanged(startYPropertyKey, from, value);
     startYChanged(from, value);
   }
 
-  @mustCallSuper
-  void startYChanged(double from, double to) {
-    onPropertyChanged(startYPropertyKey, from, to);
-  }
+  void startYChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// EndX field with key 34.
@@ -76,13 +71,11 @@ abstract class LinearGradientBase extends ContainerComponent {
     }
     double from = _endX;
     _endX = value;
+    onPropertyChanged(endXPropertyKey, from, value);
     endXChanged(from, value);
   }
 
-  @mustCallSuper
-  void endXChanged(double from, double to) {
-    onPropertyChanged(endXPropertyKey, from, to);
-  }
+  void endXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// EndY field with key 35.
@@ -98,13 +91,11 @@ abstract class LinearGradientBase extends ContainerComponent {
     }
     double from = _endY;
     _endY = value;
+    onPropertyChanged(endYPropertyKey, from, value);
     endYChanged(from, value);
   }
 
-  @mustCallSuper
-  void endYChanged(double from, double to) {
-    onPropertyChanged(endYPropertyKey, from, to);
-  }
+  void endYChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Opacity field with key 46.
@@ -120,13 +111,11 @@ abstract class LinearGradientBase extends ContainerComponent {
     }
     double from = _opacity;
     _opacity = value;
+    onPropertyChanged(opacityPropertyKey, from, value);
     opacityChanged(from, value);
   }
 
-  @mustCallSuper
-  void opacityChanged(double from, double to) {
-    onPropertyChanged(opacityPropertyKey, from, to);
-  }
+  void opacityChanged(double from, double to);
 
   @override
   void changeNonNull() {

@@ -2,7 +2,6 @@
 /// lib/src/generated/shapes/paint/stroke_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -34,13 +33,11 @@ abstract class StrokeBase extends ShapePaint {
     }
     double from = _thickness;
     _thickness = value;
+    onPropertyChanged(thicknessPropertyKey, from, value);
     thicknessChanged(from, value);
   }
 
-  @mustCallSuper
-  void thicknessChanged(double from, double to) {
-    onPropertyChanged(thicknessPropertyKey, from, to);
-  }
+  void thicknessChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Cap field with key 48.
@@ -56,13 +53,11 @@ abstract class StrokeBase extends ShapePaint {
     }
     int from = _cap;
     _cap = value;
+    onPropertyChanged(capPropertyKey, from, value);
     capChanged(from, value);
   }
 
-  @mustCallSuper
-  void capChanged(int from, int to) {
-    onPropertyChanged(capPropertyKey, from, to);
-  }
+  void capChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// Join field with key 49.
@@ -78,13 +73,11 @@ abstract class StrokeBase extends ShapePaint {
     }
     int from = _join;
     _join = value;
+    onPropertyChanged(joinPropertyKey, from, value);
     joinChanged(from, value);
   }
 
-  @mustCallSuper
-  void joinChanged(int from, int to) {
-    onPropertyChanged(joinPropertyKey, from, to);
-  }
+  void joinChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// TransformAffectsStroke field with key 50.
@@ -101,13 +94,11 @@ abstract class StrokeBase extends ShapePaint {
     }
     bool from = _transformAffectsStroke;
     _transformAffectsStroke = value;
+    onPropertyChanged(transformAffectsStrokePropertyKey, from, value);
     transformAffectsStrokeChanged(from, value);
   }
 
-  @mustCallSuper
-  void transformAffectsStrokeChanged(bool from, bool to) {
-    onPropertyChanged(transformAffectsStrokePropertyKey, from, to);
-  }
+  void transformAffectsStrokeChanged(bool from, bool to);
 
   @override
   void changeNonNull() {

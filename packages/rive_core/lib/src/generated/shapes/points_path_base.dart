@@ -1,7 +1,6 @@
 /// Core automatically generated lib/src/generated/shapes/points_path_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -37,13 +36,11 @@ abstract class PointsPathBase extends Path {
     }
     bool from = _isClosed;
     _isClosed = value;
+    onPropertyChanged(isClosedPropertyKey, from, value);
     isClosedChanged(from, value);
   }
 
-  @mustCallSuper
-  void isClosedChanged(bool from, bool to) {
-    onPropertyChanged(isClosedPropertyKey, from, to);
-  }
+  void isClosedChanged(bool from, bool to);
 
   @override
   void changeNonNull() {

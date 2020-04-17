@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:core/error_logger.dart';
 import 'package:cursor/cursor_view.dart';
@@ -51,7 +52,7 @@ Future<void> main() async {
       WindowUtils.setSize(kDefaultWIndowSize);
     },
   );
-
+  print("WINDOW DRA ${window.onDrawFrame}");
   final iconCache = RiveIconCache(rootBundle);
   final rive = Rive(
     iconCache: iconCache,

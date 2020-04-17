@@ -10,6 +10,7 @@ class Property {
   final FieldType type;
   final Definition definition;
   String initialValue;
+  bool animates = false;
   Key key;
   String description;
   bool isNullable = false;
@@ -37,6 +38,10 @@ class Property {
     if (init is String) {
       initialValue = init;
     }
+    dynamic a = data['animates'];
+    if (a is bool) {
+      animates = a;
+    }
     key = Key.fromJSON(data["key"]) ?? Key.forProperty(this);
   }
 
@@ -50,12 +55,20 @@ class Property {
     } else {
       code.writeln('${type.dartName} _$name;');
     }
+    if (animates) {
+      code.writeln('${type.dartName} _${name}Animated;');
+      code.writeln('KeyState _${name}KeyState;');
+    }
     code.writeln('static const int $propertyKey = ${key.intValue};');
 
     if (description != null) {
       code.write(comment(description, indent: 1));
     }
-    code.writeln('${type.dartName} get $name => _$name;');
+    if (animates) {
+      code.writeln('${type.dartName} get $name => _${name}Animated ?? _$name;');
+    } else {
+      code.writeln('${type.dartName} get $name => _$name;');
+    }
     code.write(comment('Change the [_$name] field value.', indent: 1));
     code.write(comment(
         '[${name}Changed] will be invoked only if the '
@@ -66,12 +79,32 @@ class Property {
         if(${type.equalityCheck('_$name', 'value')}) { return; }
         ${type.dartName} from = _$name;
         _$name = value;
+        onPropertyChanged($propertyKey, from, value);
         ${name}Changed(from, value);
       }''');
-    code.writeln('''@mustCallSuper
-    void ${name}Changed(${type.dartName} from, ${type.dartName} to) {
-        onPropertyChanged($propertyKey, from, to);
-      }\n''');
+    if (animates) {
+      code.writeln('${type.dartName} get ${name}Animated => _${name}Animated;');
+      code.writeln('''set ${name}Animated(${type.dartName} value) {
+        if (_${name}Animated == value) {
+          return;
+        }
+        ${type.dartName} from = ${name};
+        _${name}Animated = value;
+        ${type.dartName} to = ${name};
+        onAnimatedPropertyChanged($propertyKey, from, to);
+        ${name}Changed(from, to);
+      }''');
+      code.writeln('KeyState get ${name}KeyState => _${name}KeyState;');
+      code.writeln('''set ${name}KeyState(KeyState value) {
+        if (_${name}KeyState == value) {
+          return;
+        }
+        // Force update anything listening on this property.
+        onAnimatedPropertyChanged($propertyKey, _${name}Animated, _${name}Animated);
+      }''');
+    }
+    code.writeln('void ${name}Changed('
+        '${type.dartName} from, ${type.dartName} to);\n');
 
     return code.toString();
   }
@@ -81,6 +114,9 @@ class Property {
 
     if (initialValue != null) {
       data['initialValue'] = initialValue;
+    }
+    if (animates) {
+      data['animates'] = true;
     }
     data['key'] = key.serialize();
     if (description != null) {

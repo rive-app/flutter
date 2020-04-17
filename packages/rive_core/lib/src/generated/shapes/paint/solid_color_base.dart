@@ -2,7 +2,6 @@
 /// lib/src/generated/shapes/paint/solid_color_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 
@@ -27,13 +26,11 @@ abstract class SolidColorBase extends Component {
     }
     int from = _colorValue;
     _colorValue = value;
+    onPropertyChanged(colorValuePropertyKey, from, value);
     colorValueChanged(from, value);
   }
 
-  @mustCallSuper
-  void colorValueChanged(int from, int to) {
-    onPropertyChanged(colorValuePropertyKey, from, to);
-  }
+  void colorValueChanged(int from, int to);
 
   @override
   void changeNonNull() {

@@ -13,7 +13,7 @@ import 'src/generated/component_base.dart';
 
 export 'src/generated/component_base.dart';
 
-final log = Logger('rive_core');
+final _log = Logger('rive_core');
 
 abstract class Component extends ComponentBase<RiveFile>
     implements DependencyGraphNode<Component> {
@@ -102,14 +102,11 @@ abstract class Component extends ComponentBase<RiveFile>
 
   @override
   void parentIdChanged(Id from, Id to) {
-    super.parentIdChanged(from, to);
     parent = context?.resolve(to);
   }
 
   @override
   void childOrderChanged(FractionalIndex from, FractionalIndex to) {
-    super.childOrderChanged(from, to);
-
     if (parent != null) {
       // Let the context know that our parent needs to be re-sorted.
       context?.markChildSortDirty(parent);
@@ -204,7 +201,7 @@ abstract class Component extends ComponentBase<RiveFile>
     if (parentId != null) {
       parent = context?.resolve(parentId);
       if (parent == null) {
-        log.finest("Failed to resolve parent with id $parentId");
+        _log.finest("Failed to resolve parent with id $parentId");
       }
     }
   }
@@ -292,5 +289,16 @@ abstract class Component extends ComponentBase<RiveFile>
     return makeKeyFrame<T>(propertyKey)
       ..frame = frame
       ..keyedPropertyId = property.id;
+  }
+
+  @override
+  void dependentIdsChanged(List<Id> from, List<Id> to) {
+    /// Nothing to do when dependent ids changes, this is only used to propagate
+    /// the ids to coop for validation during multi-session editing.
+  }
+
+  @override
+  void nameChanged(String from, String to) {
+    /// Changing name doesn't really do anything.
   }
 }

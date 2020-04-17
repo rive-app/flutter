@@ -12,6 +12,7 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -27,6 +28,7 @@ import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
+import 'package:rive_core/rive_animation_controller.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
 
@@ -144,6 +146,7 @@ class OpenFileContext with RiveFileDelegate {
       _resetTreeControllers();
       stateChanged.notify();
     }
+    core.animationController = HackyAnimationController(core);
     return true;
   }
 
@@ -359,5 +362,34 @@ class OpenFileContext with RiveFileDelegate {
       default:
         return false;
     }
+  }
+}
+
+class HackyAnimationController extends RiveAnimationController {
+  final RiveFile file;
+  Shape _shape;
+  double _value;
+  HackyAnimationController(this.file) {
+    for (final object in file.objects) {
+      if (object is Shape && object.name == 'Turner') {
+        _shape = object;
+        _value = _shape.rotation;
+        break;
+      }
+    }
+  }
+
+  @override
+  bool advance(double elapsedSeconds) {
+    // test._animationController
+    if (_shape != null) {
+      _value += 0.1;
+      if (_value > 3.14) {
+        _value = 3.14;
+      }
+      _shape.rotation = _value;
+      return _value < 3.14;
+    }
+    return false;
   }
 }

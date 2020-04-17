@@ -1,8 +1,11 @@
 import 'package:core/core.dart' as core;
+import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 export 'package:rive_core/src/generated/animation/keyframe_base.dart';
+
+final _log = Logger('animation');
 
 abstract class KeyFrame extends KeyFrameBase<RiveFile> {
   double _timeInSeconds;
@@ -27,7 +30,7 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile> {
     if (keyedPropertyId != null) {
       KeyedProperty keyedProperty = context?.resolve(keyedPropertyId);
       if (keyedProperty == null) {
-        log.finest("Failed to resolve KeyedProperty with id $keyedPropertyId");
+        _log.finest("Failed to resolve KeyedProperty with id $keyedPropertyId");
       } else {
         keyedProperty.internalAddKeyFrame(this);
       }
@@ -41,7 +44,6 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile> {
   void frameChanged(int from, int to) {
     keyedProperty?.markKeyFrameOrderDirty();
     _updateSeconds();
-    super.frameChanged(from, to);
   }
 
   /// Apply the value of this keyframe to the object's property.

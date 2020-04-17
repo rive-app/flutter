@@ -1,9 +1,8 @@
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/src/generated/node_base.dart';
 import 'package:rive_core/transform_delegate.dart';
-
-import 'math/mat2d.dart';
-import 'src/generated/node_base.dart';
 
 export 'src/generated/node_base.dart';
 
@@ -91,36 +90,30 @@ class Node extends NodeBase {
   @override
   void xChanged(double from, double to) {
     markTransformDirty();
-    super.xChanged(from, to);
   }
 
   @override
   void yChanged(double from, double to) {
     markTransformDirty();
-    super.yChanged(from, to);
   }
 
   @override
   void rotationChanged(double from, double to) {
     markTransformDirty();
-    super.rotationChanged(from, to);
   }
 
   @override
   void scaleXChanged(double from, double to) {
     markTransformDirty();
-    super.scaleXChanged(from, to);
   }
 
   @override
   void scaleYChanged(double from, double to) {
     markTransformDirty();
-    super.scaleYChanged(from, to);
   }
 
   @override
   void opacityChanged(double from, double to) {
     markTransformDirty();
-    super.opacityChanged(from, to);
   }
 }

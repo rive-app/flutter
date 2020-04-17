@@ -1,7 +1,7 @@
 /// Core automatically generated lib/src/generated/node_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
+import 'package:core/key_state.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -17,8 +17,10 @@ abstract class NodeBase extends ContainerComponent {
   /// --------------------------------------------------------------------------
   /// X field with key 13.
   double _x = 0;
+  double _xAnimated;
+  KeyState _xKeyState;
   static const int xPropertyKey = 13;
-  double get x => _x;
+  double get x => _xAnimated ?? _x;
 
   /// Change the [_x] field value.
   /// [xChanged] will be invoked only if the field's value has changed.
@@ -28,13 +30,32 @@ abstract class NodeBase extends ContainerComponent {
     }
     double from = _x;
     _x = value;
+    onPropertyChanged(xPropertyKey, from, value);
     xChanged(from, value);
   }
 
-  @mustCallSuper
-  void xChanged(double from, double to) {
-    onPropertyChanged(xPropertyKey, from, to);
+  double get xAnimated => _xAnimated;
+  set xAnimated(double value) {
+    if (_xAnimated == value) {
+      return;
+    }
+    double from = x;
+    _xAnimated = value;
+    double to = x;
+    onAnimatedPropertyChanged(xPropertyKey, from, to);
+    xChanged(from, to);
   }
+
+  KeyState get xKeyState => _xKeyState;
+  set xKeyState(KeyState value) {
+    if (_xKeyState == value) {
+      return;
+    }
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(xPropertyKey, _xAnimated, _xAnimated);
+  }
+
+  void xChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Y field with key 14.
@@ -50,13 +71,11 @@ abstract class NodeBase extends ContainerComponent {
     }
     double from = _y;
     _y = value;
+    onPropertyChanged(yPropertyKey, from, value);
     yChanged(from, value);
   }
 
-  @mustCallSuper
-  void yChanged(double from, double to) {
-    onPropertyChanged(yPropertyKey, from, to);
-  }
+  void yChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Rotation field with key 15.
@@ -72,13 +91,11 @@ abstract class NodeBase extends ContainerComponent {
     }
     double from = _rotation;
     _rotation = value;
+    onPropertyChanged(rotationPropertyKey, from, value);
     rotationChanged(from, value);
   }
 
-  @mustCallSuper
-  void rotationChanged(double from, double to) {
-    onPropertyChanged(rotationPropertyKey, from, to);
-  }
+  void rotationChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// ScaleX field with key 16.
@@ -94,13 +111,11 @@ abstract class NodeBase extends ContainerComponent {
     }
     double from = _scaleX;
     _scaleX = value;
+    onPropertyChanged(scaleXPropertyKey, from, value);
     scaleXChanged(from, value);
   }
 
-  @mustCallSuper
-  void scaleXChanged(double from, double to) {
-    onPropertyChanged(scaleXPropertyKey, from, to);
-  }
+  void scaleXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// ScaleY field with key 17.
@@ -116,13 +131,11 @@ abstract class NodeBase extends ContainerComponent {
     }
     double from = _scaleY;
     _scaleY = value;
+    onPropertyChanged(scaleYPropertyKey, from, value);
     scaleYChanged(from, value);
   }
 
-  @mustCallSuper
-  void scaleYChanged(double from, double to) {
-    onPropertyChanged(scaleYPropertyKey, from, to);
-  }
+  void scaleYChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Opacity field with key 18.
@@ -138,13 +151,11 @@ abstract class NodeBase extends ContainerComponent {
     }
     double from = _opacity;
     _opacity = value;
+    onPropertyChanged(opacityPropertyKey, from, value);
     opacityChanged(from, value);
   }
 
-  @mustCallSuper
-  void opacityChanged(double from, double to) {
-    onPropertyChanged(opacityPropertyKey, from, to);
-  }
+  void opacityChanged(double from, double to);
 
   @override
   void changeNonNull() {

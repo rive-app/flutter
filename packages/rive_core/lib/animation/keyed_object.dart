@@ -1,11 +1,14 @@
 import 'dart:collection';
 
-import 'package:core/core.dart' as core;
+import 'package:core/core.dart';
+import 'package:logging/logging.dart';
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
 export 'package:rive_core/src/generated/animation/keyed_object_base.dart';
+
+final _log = Logger('animation');
 
 class KeyedObject extends KeyedObjectBase<RiveFile> {
   final HashMap<int, KeyedProperty> _keyedProperties =
@@ -21,7 +24,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     if (animationId != null) {
       Animation animation = context?.resolve(animationId);
       if (animation == null) {
-        log.finest("Failed to resolve animation with id $animationId");
+        _log.finest("Failed to resolve animation with id $animationId");
       } else {
         animation.internalAddKeyedObject(this);
       }
@@ -73,7 +76,6 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       ..propertyKey = propertyKey;
     context.add(keyedProperty);
 
-    
     // We also add it here in case we're doing a batch add (onAddedDirty will be
     // called later for the keyedObject).
     internalAddKeyedProperty(keyedProperty);
@@ -85,7 +87,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   }
 
   void apply(double time, double mix, RiveFile coreContext) {
-    core.Core object = coreContext.resolve(objectId);
+    Core object = coreContext.resolve(objectId);
     if (object == null) {
       return;
     }
@@ -93,4 +95,10 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       keyedProperty.apply(time, mix, object);
     }
   }
+
+  @override
+  void animationIdChanged(Id from, Id to) {}
+
+  @override
+  void objectIdChanged(Id from, Id to) {}
 }

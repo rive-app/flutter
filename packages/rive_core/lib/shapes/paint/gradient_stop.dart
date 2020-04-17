@@ -15,13 +15,11 @@ class GradientStop extends GradientStopBase {
 
   @override
   void positionChanged(double from, double to) {
-    super.positionChanged(from, to);
     _gradient?.markStopsDirty();
   }
 
   @override
   void colorValueChanged(int from, int to) {
-    super.colorValueChanged(from, to);
     _gradient?.markGradientDirty();
   }
 

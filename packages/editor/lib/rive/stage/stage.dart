@@ -624,6 +624,7 @@ class Stage extends Debouncer {
   }
 
   void draw(PaintingContext context, Offset offset, Size size) {
+    // file.core.startDrawStage();
     Mat2D.invert(_inverseViewTransform, _viewTransform);
     var viewAABB = obbToAABB(
         AABB.fromValues(0, 0, _viewportWidth, _viewportHeight),
@@ -681,6 +682,8 @@ class Stage extends Debouncer {
     // Widget space
     _activeTool?.draw(canvas);
     canvas.restore();
+
+    file.core.endDrawStage();
   }
 
   final Map<int, _ItemFactory> _factories = {

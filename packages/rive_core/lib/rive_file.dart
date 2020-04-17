@@ -2,10 +2,10 @@ import 'package:core/coop/coop_client.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/backboard.dart';
+import 'package:rive_core/rive_animation_controller.dart';
 import 'package:rive_core/rive_core_field_type.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logging/logging.dart';
 
 import 'package:core/coop/change.dart';
 import 'package:core/coop/player.dart';
@@ -22,8 +22,6 @@ import 'package:rive_core/container_component.dart';
 import 'src/generated/rive_core_context.dart';
 import 'src/isolated_persist.dart';
 
-final log = Logger('rive_core');
-
 class RiveFile extends RiveCoreContext {
   final List<Artboard> artboards = [];
   final Set<RiveFileDelegate> delegates = {};
@@ -34,9 +32,23 @@ class RiveFile extends RiveCoreContext {
   Backboard _backboard;
   Backboard get backboard => _backboard;
 
-  // Track if a property has changed since last advance, force an advance (and
-  // redraw) if any have.
+  /// Track if a property has changed since last advance, force an advance (and
+  /// redraw) if any have.
   bool _propertyChanged = false;
+
+  /// An aniation controller that can be attached to mutate the file for
+  /// rendering but not for coop changes.
+  RiveAnimationController _animationController;
+  RiveAnimationController get animationController => _animationController;
+  set animationController(RiveAnimationController value) {
+    if (_animationController == value) {
+      return;
+    }
+    _animationController?.removeListener(markNeedsAdvance);
+    _animationController = value;
+    _animationController?.addListener(markNeedsAdvance);
+    markNeedsAdvance();
+  }
 
   final ValueNotifier<Iterable<ClientSidePlayer>> allPlayers =
       ValueNotifier<Iterable<ClientSidePlayer>>([]);
@@ -75,7 +87,41 @@ class RiveFile extends RiveCoreContext {
 
   bool addDelegate(RiveFileDelegate delegate) => delegates.add(delegate);
 
+  bool _isAnimating = false;
+  double _frameElapsed = 0;
+  void startDrawStage() {
+    if (_animationController == null) {
+      return;
+    }
+    _isAnimating = true;
+    if (_animationController.advance(_frameElapsed)) {
+      // at this point we only care about advancing again if the aniation
+      // controller wants us to, we'll clean up anything it did anyway.
+      for (final artboard in artboards) {
+        artboard.advance(_frameElapsed);
+      }
+    }
+  }
+
+  void endDrawStage() {
+    if (!_isAnimating) {
+      return;
+    }
+// If the animation controller made changes lets revert them.
+    if (revertChanges()) {
+      // always clean again after animation controller advances. This is
+      // presumably to sort draw order changes, right?
+      cleanDirt();
+      for (final artboard in artboards) {
+        artboard.advance(_frameElapsed);
+      }
+    }
+    _isAnimating = false;
+    _propertyChanged = false;
+  }
+
   bool advance(double elapsed) {
+    _frameElapsed = elapsed;
     cleanDirt();
     bool advanced = _propertyChanged;
     for (final artboard in artboards) {
@@ -84,6 +130,10 @@ class RiveFile extends RiveCoreContext {
       }
     }
     _propertyChanged = false;
+
+    print("ADVNACED $advanced");
+    startDrawStage();
+
     return advanced;
   }
 
@@ -225,8 +275,12 @@ class RiveFile extends RiveCoreContext {
     /// a dependency order being marked dirty.
   }
 
-  void markNeedsAdvance() =>
-      delegates.forEach((delegate) => delegate.markNeedsAdvance());
+  void markNeedsAdvance() {
+    if (_isAnimating) {
+      return;
+    }
+    delegates.forEach((delegate) => delegate.markNeedsAdvance());
+  }
 
   @override
   void onAddedDirty(Core object) {
