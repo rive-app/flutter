@@ -211,9 +211,12 @@ class Editor extends StatelessWidget {
 
     // Active file can change, so let's depend on it.
     final file = ActiveFile.of(context);
+    if (file == null) {
+      return const CircularProgressIndicator();
+    }
 
     return ListenableBuilder<Event>(
-      listenable: file?.stateChanged,
+      listenable: file.stateChanged,
       builder: (context, event, _) {
         switch (file.state) {
           case OpenFileState.loading:
