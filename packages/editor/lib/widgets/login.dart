@@ -369,16 +369,15 @@ class _LoginState extends State<Login> {
   }
 
   Widget _panelContents() {
-    return ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: 473,
-        ),
+    return SizedBox(
+        width: 473,
+        height: 578,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Top padding.
-            const SizedBox(height: 100),
+            const SizedBox(height: 160),
             Image.asset('assets/images/rive_logo.png'),
             const SizedBox(height: 55),
             AnimatedSwitcher(
