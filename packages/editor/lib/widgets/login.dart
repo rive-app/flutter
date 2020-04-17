@@ -47,6 +47,7 @@ class _LoginState extends State<Login> {
   final TextEditingController emailController = TextEditingController();
 
   bool _isLoggingIn = false;
+  bool _isSending = false;
   LoginPage _currentPanel = LoginPage.login;
 
   void _togglePanel() {
@@ -59,7 +60,29 @@ class _LoginState extends State<Login> {
     });
   }
 
-  Future<void> _submit() async {
+  Future<void> _recover() async {
+    if (_isSending) {
+      return;
+    }
+    print('Sending recovery email');
+    setState(() {
+      _isSending = true;
+    });
+    final api = RiveContext.of(context).api;
+    var auth = RiveAuth(api);
+    final emailSent =
+        await auth.forgot(Uri.encodeComponent(usernameController.text));
+    if (emailSent) {
+      print("Sent recovery email!");
+    }
+    setState(() {
+      _isSending = false;
+    });
+  }
+
+  Future<void> _signup() async {}
+
+  Future<void> _login() async {
     if (_isLoggingIn) {
       return;
     }
@@ -106,9 +129,9 @@ class _LoginState extends State<Login> {
           RichText(
             text: TextSpan(
                 style: styles.loginText.copyWith(height: 1.6),
-                text:
-                    'Forgot your password? Type in the email or username associated'
-                    ' with your account and we’ll send you an email to reset it. ',
+                text: 'Forgot your password? Type in the email or username'
+                    ' associated with your account and we’ll send you an'
+                    ' email to reset it. ',
                 children: [
                   TextSpan(
                     text: 'Back to sign in.',
@@ -128,7 +151,7 @@ class _LoginState extends State<Login> {
               label: 'Email or Username',
               hint: 'Type your email or username…',
               controller: usernameController,
-              onSubmit: (_) {/** TODO: _recover(); */},
+              onSubmit: (_) => _recover(),
             ),
           ),
           const SizedBox(height: 60),
@@ -136,8 +159,9 @@ class _LoginState extends State<Login> {
             width: 145,
             child: FlatIconButton(
               label: 'Send Email',
-              onTap: () {/** TODO: _recover() */},
-              color: colors.commonDarkGrey,
+              onTap: _recover,
+              color:
+                  _isSending ? colors.commonLightGrey : colors.commonDarkGrey,
               textColor: Colors.white,
               radius: 20,
               elevated: true,
@@ -206,9 +230,10 @@ class _LoginState extends State<Login> {
           SizedBox(
             width: 145,
             child: FlatIconButton(
-              label: _isLoggingIn ? 'Verifying' : 'Log In',
-              onTap: _submit,
-              color: colors.commonDarkGrey,
+              label: _isLoggingIn ? 'Verifying' : 'Sign Up',
+              onTap: _signup,
+              color:
+                  _isLoggingIn ? colors.commonLightGrey : colors.commonDarkGrey,
               textColor: Colors.white,
               radius: 20,
               elevated: true,
@@ -274,7 +299,7 @@ class _LoginState extends State<Login> {
                   hint: 'Type your email or username…',
                   enabled: !_isLoggingIn,
                   controller: usernameController,
-                  onSubmit: (_) => _submit(),
+                  onSubmit: (_) => _login(),
                 ),
               ),
               const SizedBox(width: 30),
@@ -287,7 +312,7 @@ class _LoginState extends State<Login> {
                       hint: '6 character minumum…',
                       enabled: !_isLoggingIn,
                       controller: passwordController,
-                      onSubmit: (_) => _submit(),
+                      onSubmit: (_) => _login(),
                     ),
                     const SizedBox(height: 8),
                     UnderlineTextButton(
@@ -306,8 +331,9 @@ class _LoginState extends State<Login> {
             width: 145,
             child: FlatIconButton(
               label: _isLoggingIn ? 'Verifying' : 'Log In',
-              onTap: _submit,
-              color: colors.commonDarkGrey,
+              onTap: _login,
+              color:
+                  _isLoggingIn ? colors.commonLightGrey : colors.commonDarkGrey,
               textColor: Colors.white,
               radius: 20,
               elevated: true,
@@ -494,6 +520,7 @@ class _SocialSigninButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
     return FlatIconButton(
+        onTap: onTap,
         label: label,
         icon: Padding(
           padding: const EdgeInsets.only(left: 25.0),

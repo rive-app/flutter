@@ -84,4 +84,13 @@ class RiveAuth {
     }
     return false;
   }
+
+  Future<bool> forgot(String emailOrUsername) async {
+    var response =
+        await api.post(api.host + '/signin/forgot?id=$emailOrUsername');
+    if (response.statusCode == 200) {
+      return true;
+    }
+    return false;
+  }
 }
