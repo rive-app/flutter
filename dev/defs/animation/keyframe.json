@@ -14,13 +14,13 @@
       },
       "description": "The id of the KeyedProperty this KeyFrame belongs to."
     },
-    "time": {
+    "frame": {
       "type": "int",
       "key": {
         "int": 67,
-        "string": "time"
+        "string": "frame"
       },
-      "description": "Keyframe time in frames relative to this animation's fps."
+      "description": "Timecode as frame number can be converted to time by dividing by animation fps."
     },
     "interpolation": {
       "type": "int",

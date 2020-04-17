@@ -5,8 +5,20 @@ import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 export 'package:rive_core/src/generated/animation/keyframe_base.dart';
 
 abstract class KeyFrame extends KeyFrameBase<RiveFile> {
+  double _timeInSeconds;
+  double get seconds => _timeInSeconds;
+
   @override
-  void onAdded() {}
+  void onAdded() {
+    _updateSeconds();
+  }
+
+  void _updateSeconds() {
+    if (keyedProperty?.keyedObject?.animation == null) {
+      return;
+    }
+    _timeInSeconds = frame / keyedProperty.keyedObject.animation.fps;
+  }
 
   KeyedProperty get keyedProperty => context?.resolve(keyedPropertyId);
 
@@ -26,9 +38,10 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile> {
   void onRemoved() => keyedProperty?.internalRemoveKeyFrame(this);
 
   @override
-  void timeChanged(int from, int to) {
+  void frameChanged(int from, int to) {
     keyedProperty?.markKeyFrameOrderDirty();
-    super.timeChanged(from, to);
+    _updateSeconds();
+    super.frameChanged(from, to);
   }
 
   /// Apply the value of this keyframe to the object's property.
@@ -36,6 +49,6 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile> {
 
   /// Interpolate the value between this keyframe and the next and apply it to
   /// the object's property.
-  void applyInterpolation(core.Core object, int propertyKey, int time,
+  void applyInterpolation(core.Core object, int propertyKey, double seconds,
       covariant KeyFrame nextFrame, double mix);
 }

@@ -84,7 +84,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     return keyedProperty;
   }
 
-  void apply(int time, double mix, RiveFile coreContext) {
+  void apply(double time, double mix, RiveFile coreContext) {
     core.Core object = coreContext.resolve(objectId);
     if (object == null) {
       return;

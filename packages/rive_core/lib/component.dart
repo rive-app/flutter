@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/animation/keyframe.dart';
-import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_core_field_type.dart';
@@ -255,16 +254,20 @@ abstract class Component extends ComponentBase<RiveFile>
   /// this component.
   void remove() => context?.remove(this);
 
+  /// Create the corresponding keyframe for the property key.
   T makeKeyFrame<T extends KeyFrame>(int propertyKey) {
     var coreType = context.coreType(propertyKey);
     if (coreType is KeyFrameGenerator<T>) {
-      return (coreType as KeyFrameGenerator<T>).makeKeyFrame();
+      var keyFrame = (coreType as KeyFrameGenerator<T>).makeKeyFrame();
+      context.add(keyFrame);
+      return keyFrame;
     }
     return null;
   }
 
+  /// Add a keyframe on this object for [propertyKey] at [time].
   T addKeyFrame<T extends KeyFrame>(
-      Animation animation, int propertyKey, int time) {
+      Animation animation, int propertyKey, int frame) {
     assert(hasProperty(propertyKey),
         '$this doesn\'t store a property with key $propertyKey');
     var keyedObject = animation.getKeyed(this);
@@ -273,26 +276,21 @@ abstract class Component extends ComponentBase<RiveFile>
     var property = keyedObject.getKeyed(propertyKey);
     property ??= keyedObject.makeKeyed(propertyKey);
 
-    var keyFrameIndex = property.indexOfFrame(time);
+    // Need to see if we already have a keyframe at this time value, so might as
+    // well search for it and store the index to insert the new one if we need
+    // to.
+    var keyFrameIndex = property.indexOfFrame(frame);
 
-    if (keyFrameIndex == 0) {
-      // add to start
-    } else if (keyFrameIndex < property.numFrames) {
-      // might match a frame
-      KeyFrame frame = property.getFrameAt(keyFrameIndex);
-      if (frame.time == time) {
-        // already have a frame at this time, return it.
-        assert(frame is T);
-        return frame as T;
-      } else {
-        // insert after index-1, before index
+    if (keyFrameIndex < property.numFrames) {
+      var keyFrame = property.getFrameAt(keyFrameIndex);
+      if (keyFrame.frame == frame) {
+        assert(keyFrame is T);
+        return keyFrame as T;
       }
-    } else {
-      // add to end
     }
-    return null;
-  }
 
-  KeyFrameDouble addKeyFrameDouble(
-      Animation animation, int propertyKey, int time) {}
+    return makeKeyFrame<T>(propertyKey)
+      ..frame = frame
+      ..keyedPropertyId = property.id;
+  }
 }

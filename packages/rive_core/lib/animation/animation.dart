@@ -92,7 +92,7 @@ class Animation extends AnimationBase<RiveFile> {
   /// instances. We do a nice job of not duping all that data at runtime (so
   /// animations exist once but entire Rive file can be instanced multiple times
   /// playing different positions).
-  void apply(int time, {double mix = 1, RiveFile coreContext}) {
+  void apply(double time, {double mix = 1, RiveFile coreContext}) {
     coreContext ??= context;
     for (final keyedObject in _keyedObjects.values) {
       keyedObject.apply(time, mix, coreContext);

@@ -11,11 +11,10 @@ class KeyFrameDouble extends KeyFrameDoubleBase {
 
   @override
   void applyInterpolation(Core<CoreContext> object, int propertyKey,
-      int currentTime, KeyFrameDouble nextFrame, double mix) {
-    var f = (currentTime - time) / (nextFrame.time - time);
+      double currentTime, KeyFrameDouble nextFrame, double mix) {
+    var f = (currentTime - seconds) / (nextFrame.seconds - seconds);
 
-    var fi = 1 - f;
-    var interpolatedValue = value * fi + nextFrame.value * f;
+    var interpolatedValue = value + (nextFrame.value - value) * f;
 
     if (mix == 1) {
       RiveCoreContext.setDouble(object, propertyKey, interpolatedValue);

@@ -163,7 +163,7 @@ abstract class RiveCoreContext extends CoreContext {
         case AnimationBase.loopPropertyKey:
         case AnimationBase.workStartPropertyKey:
         case AnimationBase.workEndPropertyKey:
-        case KeyFrameBase.timePropertyKey:
+        case KeyFrameBase.framePropertyKey:
         case KeyFrameBase.interpolationPropertyKey:
         case StrokeBase.capPropertyKey:
         case StrokeBase.joinPropertyKey:
@@ -276,7 +276,7 @@ abstract class RiveCoreContext extends CoreContext {
       case AnimationBase.loopPropertyKey:
       case AnimationBase.workStartPropertyKey:
       case AnimationBase.workEndPropertyKey:
-      case KeyFrameBase.timePropertyKey:
+      case KeyFrameBase.framePropertyKey:
       case KeyFrameBase.interpolationPropertyKey:
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
@@ -464,9 +464,9 @@ abstract class RiveCoreContext extends CoreContext {
           object.keyedPropertyId = value;
         }
         break;
-      case KeyFrameBase.timePropertyKey:
+      case KeyFrameBase.framePropertyKey:
         if (object is KeyFrameBase && value is int) {
-          object.time = value;
+          object.frame = value;
         }
         break;
       case KeyFrameBase.interpolationPropertyKey:
@@ -810,9 +810,9 @@ abstract class RiveCoreContext extends CoreContext {
           return object.keyedPropertyId;
         }
         break;
-      case KeyFrameBase.timePropertyKey:
+      case KeyFrameBase.framePropertyKey:
         if (object is KeyFrameBase) {
-          return object.time;
+          return object.frame;
         }
         break;
       case KeyFrameBase.interpolationPropertyKey:
@@ -1082,7 +1082,7 @@ abstract class RiveCoreContext extends CoreContext {
       case AnimationBase.loopPropertyKey:
       case AnimationBase.workStartPropertyKey:
       case AnimationBase.workEndPropertyKey:
-      case KeyFrameBase.timePropertyKey:
+      case KeyFrameBase.framePropertyKey:
       case KeyFrameBase.interpolationPropertyKey:
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
@@ -1184,8 +1184,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as AnimationBase).workStart;
       case AnimationBase.workEndPropertyKey:
         return (object as AnimationBase).workEnd;
-      case KeyFrameBase.timePropertyKey:
-        return (object as KeyFrameBase).time;
+      case KeyFrameBase.framePropertyKey:
+        return (object as KeyFrameBase).frame;
       case KeyFrameBase.interpolationPropertyKey:
         return (object as KeyFrameBase).interpolation;
       case StrokeBase.capPropertyKey:
@@ -1376,8 +1376,8 @@ abstract class RiveCoreContext extends CoreContext {
       case AnimationBase.workEndPropertyKey:
         (object as AnimationBase).workEnd = value;
         break;
-      case KeyFrameBase.timePropertyKey:
-        (object as KeyFrameBase).time = value;
+      case KeyFrameBase.framePropertyKey:
+        (object as KeyFrameBase).frame = value;
         break;
       case KeyFrameBase.interpolationPropertyKey:
         (object as KeyFrameBase).interpolation = value;

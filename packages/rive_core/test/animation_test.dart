@@ -1,11 +1,8 @@
 import 'dart:ui';
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/animation/animation.dart';
-import 'package:rive_core/animation/keyed_object.dart';
-import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
@@ -44,6 +41,7 @@ void main() {
 
     Animation animation;
     Node node;
+    KeyFrameDouble kf1, kf2;
     file.batchAdd(() {
       node = Node()
         ..name = 'Moving Node'
@@ -51,7 +49,9 @@ void main() {
         ..y = 0;
       file.add(node);
 
-      animation = Animation()..name = 'Test Animation';
+      animation = Animation()
+        ..name = 'Test Animation'
+        ..fps = 60;
       file.add(animation);
 
       expect(animation.getKeyed(node), null);
@@ -64,29 +64,31 @@ void main() {
 
       expect(keyedObject.getKeyed(NodeBase.xPropertyKey), keyedProperty);
 
-      node.addKeyFrame(animation, NodeBase.xPropertyKey, 0);
+      kf1 = node.addKeyFrame(animation, NodeBase.xPropertyKey, 0)..value = 34;
+      expect(kf1.frame, 0, reason: 'frame value should be 0');
 
-      node.addKeyFrameDouble(animation, NodeBase.xPropertyKey, 0);
-
-      // TODO: explore Core api to get these keyed dynamically.
-      var keyFrame1 = KeyFrameDouble()
-        ..keyedPropertyId = keyedProperty.id
-        ..time = 0
-        ..value = 34.0;
-      var keyFrame2 = KeyFrameDouble()
-        ..keyedPropertyId = keyedProperty.id
-        ..time = 60
-        ..value = 40.0;
-      file.add(keyFrame1);
-      file.add(keyFrame2);
+      kf2 = node.addKeyFrame(animation, NodeBase.xPropertyKey, 60)..value = 40;
+      expect(kf2.frame, 60, reason: 'frame value should be 60');
     });
 
     file.captureJournalEntry();
 
-    animation.apply(30);
+    expect(kf1.seconds, 0, reason: 'seconds should have resolved to 0');
+    expect(kf2.seconds, 1, reason: 'seconds should have resolved to 1');
 
+    animation.apply(0.5);
     expect(node.x, lerpDouble(34, 40, 0.5));
 
-    print("NODE POSITION ${node.x}");
+    kf1.frame = 6;
+    kf1.value = -14;
+    file.captureJournalEntry();
+    expect(kf1.seconds, 0.1, reason: 'seconds should have resolved to 0.1');
+
+    animation.apply(0.5);
+    expect(node.x, 10);
+
+    // Expect undo to work with animations too.
+    file.undo();
+    expect(kf1.seconds, 0, reason: 'seconds should have resolved to 0');
   });
 }

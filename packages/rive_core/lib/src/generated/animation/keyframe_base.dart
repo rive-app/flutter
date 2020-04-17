@@ -38,27 +38,27 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
   }
 
   /// --------------------------------------------------------------------------
-  /// Time field with key 67.
-  int _time;
-  static const int timePropertyKey = 67;
+  /// Frame field with key 67.
+  int _frame;
+  static const int framePropertyKey = 67;
 
-  /// Keyframe time in frames relative to this animation's fps.
-  int get time => _time;
+  /// Timecode as frame number.
+  int get frame => _frame;
 
-  /// Change the [_time] field value.
-  /// [timeChanged] will be invoked only if the field's value has changed.
-  set time(int value) {
-    if (_time == value) {
+  /// Change the [_frame] field value.
+  /// [frameChanged] will be invoked only if the field's value has changed.
+  set frame(int value) {
+    if (_frame == value) {
       return;
     }
-    int from = _time;
-    _time = value;
-    timeChanged(from, value);
+    int from = _frame;
+    _frame = value;
+    frameChanged(from, value);
   }
 
   @mustCallSuper
-  void timeChanged(int from, int to) {
-    onPropertyChanged(timePropertyKey, from, to);
+  void frameChanged(int from, int to) {
+    onPropertyChanged(framePropertyKey, from, to);
   }
 
   /// --------------------------------------------------------------------------
@@ -119,8 +119,8 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
       onPropertyChanged(
           keyedPropertyIdPropertyKey, keyedPropertyId, keyedPropertyId);
     }
-    if (time != null) {
-      onPropertyChanged(timePropertyKey, time, time);
+    if (frame != null) {
+      onPropertyChanged(framePropertyKey, frame, frame);
     }
     if (interpolation != null) {
       onPropertyChanged(interpolationPropertyKey, interpolation, interpolation);
@@ -136,8 +136,8 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     switch (propertyKey) {
       case keyedPropertyIdPropertyKey:
         return keyedPropertyId as K;
-      case timePropertyKey:
-        return time as K;
+      case framePropertyKey:
+        return frame as K;
       case interpolationPropertyKey:
         return interpolation as K;
       case interpolatorIdPropertyKey:
@@ -151,7 +151,7 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
   bool hasProperty(int propertyKey) {
     switch (propertyKey) {
       case keyedPropertyIdPropertyKey:
-      case timePropertyKey:
+      case framePropertyKey:
       case interpolationPropertyKey:
       case interpolatorIdPropertyKey:
         return true;
