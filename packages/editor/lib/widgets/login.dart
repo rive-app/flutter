@@ -10,6 +10,7 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:window_utils/window_utils.dart';
 
 enum LoginPage { login, register, recover }
+typedef LoginFunction = Future<bool> Function();
 
 class Login extends StatefulWidget {
   @override
@@ -64,7 +65,6 @@ class _LoginState extends State<Login> {
     if (_isSending) {
       return;
     }
-    print('Sending recovery email');
     setState(() {
       _isSending = true;
     });
@@ -73,7 +73,8 @@ class _LoginState extends State<Login> {
     final emailSent =
         await auth.forgot(Uri.encodeComponent(usernameController.text));
     if (emailSent) {
-      print("Sent recovery email!");
+      // print("Sent recovery email!");
+      _togglePanel(); // Back to login page.
     }
     setState(() {
       _isSending = false;
@@ -84,24 +85,19 @@ class _LoginState extends State<Login> {
     if (_buttonDisabled) {
       return;
     }
-
-    final rive = RiveContext.of(context);
-
-    setState(() {
-      _buttonDisabled = true;
-    });
+    _disableButton(true);
 
     final username = usernameController.text;
     final email = emailController.text;
     final password = passwordController.text;
+
+    final rive = RiveContext.of(context);
     final auth = RiveAuth(rive.api);
 
     if (await auth.register(username, email, password)) {
       await rive.updateUser();
     } else {
-      setState(() {
-        _buttonDisabled = false;
-      });
+      _disableButton(false);
     }
   }
 
@@ -112,9 +108,7 @@ class _LoginState extends State<Login> {
 
     final rive = RiveContext.of(context);
 
-    setState(() {
-      _buttonDisabled = true;
-    });
+    _disableButton(true);
     var auth = RiveAuth(rive.api);
     if (await auth.login(
       usernameController.text,
@@ -123,9 +117,7 @@ class _LoginState extends State<Login> {
       await rive.updateUser();
     }
     if (mounted) {
-      setState(() {
-        _buttonDisabled = false;
-      });
+      _disableButton(false);
     }
   }
 
@@ -267,6 +259,28 @@ class _LoginState extends State<Login> {
         ]);
   }
 
+  void _disableButton(bool val) {
+    if (val != _buttonDisabled) {
+      setState(() {
+        _buttonDisabled = val;
+      });
+    }
+  }
+
+  void _socialLogin(LoginFunction loginFunc) async {
+    if (_buttonDisabled) {
+      return;
+    }
+    _disableButton(true);
+    final rive = RiveContext.of(context);
+
+    if (await loginFunc()) {
+      await rive.updateUser();
+    } else {
+      _disableButton(false);
+    }
+  }
+
   Widget _socials() {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -274,25 +288,51 @@ class _LoginState extends State<Login> {
         _SocialSigninButton(
           label: 'Apple',
           icon: 'signin-apple',
-          onTap: () {},
+          onTap: null, // TODO: not supported yet.
+          /* _buttonDisabled
+              ? null
+              : () async {
+                  final rive = RiveContext.of(context);
+                  final api = rive.api;
+                  final auth = RiveAuth(api);
+                  _socialLogin(auth.loginApple); 
+                },*/
         ),
         const SizedBox(width: 10),
         _SocialSigninButton(
           label: 'Google',
           icon: 'signin-google',
-          onTap: () {},
+          onTap: _buttonDisabled
+              ? null
+              : () async {
+                  final api = RiveContext.of(context).api;
+                  final auth = RiveAuth(api);
+                  _socialLogin(auth.loginGoogle);
+                },
         ),
         const SizedBox(width: 10),
         _SocialSigninButton(
           label: 'Facebook',
           icon: 'signin-facebook',
-          onTap: () {},
+          onTap: _buttonDisabled
+              ? null
+              : () async {
+                  final api = RiveContext.of(context).api;
+                  final auth = RiveAuth(api);
+                  _socialLogin(auth.loginFacebook);
+                },
         ),
         const SizedBox(width: 10),
         _SocialSigninButton(
           label: 'Twitter',
           icon: 'signin-twitter',
-          onTap: () {},
+          onTap: _buttonDisabled
+              ? null
+              : () async {
+                  final api = RiveContext.of(context).api;
+                  final auth = RiveAuth(api);
+                  _socialLogin(auth.loginTwitter);
+                },
         ),
       ],
     );
@@ -460,69 +500,6 @@ class _LoginState extends State<Login> {
                 Align(alignment: Alignment.center, child: _panelContents()),
               ])),
         ]),
-        // Positioned.fill(
-        //   child: Center(
-        //     child: Container(
-        //       constraints: const BoxConstraints(minWidth: 100, maxWidth: 400),
-        //       child: Column(
-        //         mainAxisAlignment: MainAxisAlignment.center,
-        //         children: [
-        //           TextField(
-        //             autofocus: true,
-        //             enabled: !_buttonDisabled,
-        //             controller: usernameController,
-        //             decoration: const InputDecoration(hintText: 'Username'),
-        //             onSubmitted: (_) => _submit(rive),
-        //           ),
-        //           TextField(
-        //             enabled: !_buttonDisabled,
-        //             controller: passwordController,
-        //             decoration: const InputDecoration(hintText: 'Password'),
-        //             onSubmitted: (_) => _submit(rive),
-        //           ),
-        //           Container(height: 20.0),
-        //           RaisedButton(
-        //             child: Text(_buttonDisabled ? 'Verifying' : 'Login'),
-        //             onPressed: _buttonDisabled ? null : () => _submit(rive),
-        //           ),
-        //           FlatButton(
-        //             child: const Text('Login with Twitter'),
-        //             onPressed: _buttonDisabled
-        //                 ? null
-        //                 : () async {
-        //                     var auth = RiveAuth(rive.api);
-        //                     if (await auth.loginTwitter()) {
-        //                       await rive.updateUser();
-        //                     }
-        //                   },
-        //           ),
-        //           FlatButton(
-        //             child: const Text('Login with Facebook'),
-        //             onPressed: _buttonDisabled
-        //                 ? null
-        //                 : () async {
-        //                     var auth = RiveAuth(rive.api);
-        //                     if (await auth.loginFacebook()) {
-        //                       await rive.updateUser();
-        //                     }
-        //                   },
-        //           ),
-        //           FlatButton(
-        //             child: const Text('Login with Google'),
-        //             onPressed: _buttonDisabled
-        //                 ? null
-        //                 : () async {
-        //                     var auth = RiveAuth(rive.api);
-        //                     if (await auth.loginGoogle()) {
-        //                       await rive.updateUser();
-        //                     }
-        //                   },
-        //           ),
-        //         ],
-        //       ),
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }
