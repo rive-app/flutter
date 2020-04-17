@@ -8,6 +8,8 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:window_utils/window_utils.dart';
 
+enum LoginPage { login, register, recover }
+
 class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
@@ -43,11 +45,15 @@ class _LoginState extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   String username;
   bool _isLoggingIn = false;
-  bool _isLoginPanel = true;
+  LoginPage _currentPanel = LoginPage.login;
 
-  void _switchPanel() {
+  void _togglePanel() {
     setState(() {
-      _isLoginPanel = !_isLoginPanel;
+      if (_currentPanel == LoginPage.login) {
+        _currentPanel = LoginPage.register;
+      } else {
+        _currentPanel = LoginPage.login;
+      }
     });
   }
 
@@ -155,7 +161,9 @@ class _LoginState extends State<Login> {
                     const SizedBox(height: 8),
                     UnderlineTextButton(
                       text: 'Forgot your Password?',
-                      onPressed: () {/** TODO: */},
+                      onPressed: () => setState(() {
+                        _currentPanel = LoginPage.recover;
+                      }),
                     ),
                   ],
                 ),
@@ -182,6 +190,24 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+
+    bool isSwitchOn;
+    switch (_currentPanel) {
+      case LoginPage.register:
+        isSwitchOn = true;
+        break;
+      case LoginPage.recover:
+        isSwitchOn = null;
+        break;
+      case LoginPage.login:
+      default:
+        isSwitchOn = false;
+        break;
+    }
+
     return Stack(
       children: <Widget>[
         Positioned.fill(
@@ -203,11 +229,33 @@ class _LoginState extends State<Login> {
                 Positioned(
                   right: 30,
                   top: 30,
-                  child: EditorSwitch(
-                    isOn: _isLoginPanel,
-                    toggle: _switchPanel,
-                    onColor: Colors.white,
-                    offColor: Colors.white,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Log In',
+                        style: textStyles.regularText.copyWith(
+                            color: _currentPanel == LoginPage.login
+                                ? colors.commonDarkGrey
+                                : colors.commonLightGrey),
+                      ),
+                      const SizedBox(width: 10),
+                      EditorSwitch(
+                        isOn: isSwitchOn,
+                        toggle: _togglePanel,
+                        onColor: Colors.white,
+                        offColor: Colors.white,
+                        backgroundColor: isSwitchOn == null
+                            ? colors.toggleInactiveBackground
+                            : colors.toggleBackground,
+                      ),
+                      const SizedBox(width: 10),
+                      Text('Sign Up',
+                          style: textStyles.regularText.copyWith(
+                              color: _currentPanel == LoginPage.register
+                                  ? colors.commonDarkGrey
+                                  : colors.commonLightGrey)),
+                    ],
                   ),
                 ),
                 Align(alignment: Alignment.center, child: _loginForm()),
