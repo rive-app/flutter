@@ -51,6 +51,7 @@ abstract class NodeBase extends ContainerComponent {
     if (_xKeyState == value) {
       return;
     }
+    _xKeyState = value;
     // Force update anything listening on this property.
     onAnimatedPropertyChanged(xPropertyKey, _xAnimated, _xAnimated);
   }

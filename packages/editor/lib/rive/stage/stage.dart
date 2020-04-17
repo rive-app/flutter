@@ -573,8 +573,6 @@ class Stage extends Debouncer {
 
   void dispose() {}
 
-  void _onFileChanged() {}
-
   bool get shouldAdvance => _needsAdvance || needsDebounce;
   bool _needsAdvance = true;
 
@@ -682,8 +680,6 @@ class Stage extends Debouncer {
     // Widget space
     _activeTool?.draw(canvas);
     canvas.restore();
-
-    file.core.endDrawStage();
   }
 
   final Map<int, _ItemFactory> _factories = {

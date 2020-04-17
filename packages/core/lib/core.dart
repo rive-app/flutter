@@ -251,20 +251,6 @@ abstract class CoreContext implements LocalSettings {
   @protected
   void applyCoopChanges(ObjectChanges objectChanges);
 
-  /// Revert the current set of changes without sending them to coop.
-  bool revertChanges() {
-    if (_currentChanges == null || _currentChanges.entries.isEmpty) {
-      _currentChanges = null;
-      return false;
-    }
-    bool wasRecording = _isRecording;
-    _isRecording = false;
-    _applyJournalEntry(_currentChanges, isUndo: true, sendToCoop: false);
-    _isRecording = wasRecording;
-    _currentChanges = null;
-    return true;
-  }
-
   bool captureJournalEntry() {
     if (_currentChanges == null) {
       return false;

@@ -99,6 +99,7 @@ class Property {
         if (_${name}KeyState == value) {
           return;
         }
+        _${name}KeyState = value;
         // Force update anything listening on this property.
         onAnimatedPropertyChanged($propertyKey, _${name}Animated, _${name}Animated);
       }''');

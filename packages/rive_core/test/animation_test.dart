@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:core/key_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/animation/animation.dart';
@@ -76,9 +77,13 @@ void main() {
     expect(kf1.seconds, 0, reason: 'seconds should have resolved to 0');
     expect(kf2.seconds, 1, reason: 'seconds should have resolved to 1');
 
+    // start animation
+    file.startAnimating();
     animation.apply(0.5);
     expect(node.x, lerpDouble(34, 40, 0.5));
-    animation.context.revertChanges();
+    expect(node.xAnimated, lerpDouble(34, 40, 0.5));
+    expect(node.xKeyState, KeyState.interpolated);
+
     expect(file.captureJournalEntry(), false,
         reason: 'there should be no changes after animation is complete');
 

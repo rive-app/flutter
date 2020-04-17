@@ -1,6 +1,5 @@
 enum KeyState {
   none,
-  keyed,
+  keyframe,
   interpolated,
-  changed,
 }

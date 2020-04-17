@@ -1,9 +1,11 @@
 import 'package:core/core.dart';
+import 'package:core/key_state.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
+import 'package:rive_core/src/generated/rive_core_context.dart';
 export 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 
 final _log = Logger('animation');
@@ -127,18 +129,31 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
 
     int pk = propertyKey;
     if (idx == 0) {
-      _keyframes[0].apply(object, pk, mix);
+      var first = _keyframes[0];
+      RiveCoreContext.setKeyState(object, pk,
+          first.seconds == seconds ? KeyState.keyframe : KeyState.interpolated);
+      first.apply(object, pk, mix);
     } else {
       if (idx < _keyframes.length) {
         KeyFrame fromFrame = _keyframes[idx - 1];
         KeyFrame toFrame = _keyframes[idx];
         if (seconds == toFrame.seconds) {
+          RiveCoreContext.setKeyState(object, pk, KeyState.keyframe);
           toFrame.apply(object, pk, mix);
         } else {
+          RiveCoreContext.setKeyState(
+              object, pk, KeyState.interpolated);
           fromFrame.applyInterpolation(object, pk, seconds, toFrame, mix);
         }
       } else {
-        _keyframes[idx - 1].apply(object, pk, mix);
+        var last = _keyframes[idx - 1];
+        RiveCoreContext.setKeyState(
+            object,
+            pk,
+            last.seconds == seconds
+                ? KeyState.keyframe
+                : KeyState.interpolated);
+        last.apply(object, pk, mix);
       }
     }
   }

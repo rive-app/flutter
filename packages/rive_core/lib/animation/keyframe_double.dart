@@ -6,7 +6,7 @@ export 'package:rive_core/src/generated/animation/keyframe_double_base.dart';
 class KeyFrameDouble extends KeyFrameDoubleBase {
   @override
   void apply(Core<CoreContext> object, int propertyKey, double mix) {
-    RiveCoreContext.setDouble(object, propertyKey, value * mix);
+    RiveCoreContext.animateDouble(object, propertyKey, value * mix);
   }
 
   @override
@@ -17,10 +17,10 @@ class KeyFrameDouble extends KeyFrameDoubleBase {
     var interpolatedValue = value + (nextFrame.value - value) * f;
 
     if (mix == 1) {
-      RiveCoreContext.setDouble(object, propertyKey, interpolatedValue);
+      RiveCoreContext.animateDouble(object, propertyKey, interpolatedValue);
     } else {
       var mixi = 1.0 - mix;
-      RiveCoreContext.setDouble(
+      RiveCoreContext.animateDouble(
           object,
           propertyKey,
           RiveCoreContext.getDouble(object, propertyKey) * mixi +
