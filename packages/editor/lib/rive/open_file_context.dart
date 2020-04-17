@@ -116,9 +116,10 @@ class OpenFileContext with RiveFileDelegate {
       // TODO: We're already connected, the user re-clicked on this tab.
       print('TODO: make sure Core connection is still open, maybe ping it?');
     } else {
-      var spectre = api.cookies['spectre'];
-      var urlEncodedSpectre = Uri.encodeComponent(spectre);
-      var filePath = '$ownerId/$fileId/$urlEncodedSpectre';
+      // var spectre = api.cookies['spectre'];
+      // var urlEncodedSpectre = Uri.encodeComponent(spectre);
+      var filePath = '$ownerId/$fileId'; // /$urlEncodedSpectre';
+      print('ANYWHERE');
       LocalDataPlatform dataPlatform = LocalDataPlatform.make();
       await dataPlatform.initialize();
       core = RiveFile(filePath, api: api, localDataPlatform: dataPlatform);
@@ -130,7 +131,7 @@ class OpenFileContext with RiveFileDelegate {
       var result = await core.connect(
         connectionInfo.socketHost,
         filePath,
-        spectre,
+        // spectre,
       );
       if (result == ConnectResult.connected) {
         _state = OpenFileState.open;

@@ -10,7 +10,7 @@ final _sentry = SentryClient(dsn: _dsn);
 
 /// Configure logging options
 
-void configureLogger() {
+void configureLogger({bool disableSentry=false}) {
   // Set the log level from the LOG_LEVEL env variable
   final level = Platform.environment['LOG_LEVEL'];
   switch (level) {
@@ -24,7 +24,7 @@ void configureLogger() {
       Logger.root.level = Level.INFO;
   }
   final disableSentryEnv = Platform.environment['DISABLE_SENTRY'];
-  final disableSentry = disableSentryEnv != null;
+  final _disableSentry = disableSentry || disableSentryEnv != null;
   print('Sentry disabled status $disableSentry');
 
   // Print to the console and for SEVERE, write to sentry
@@ -32,7 +32,7 @@ void configureLogger() {
   Logger.root.onRecord.listen((r) {
     print('${r.level.name}: ${r.time}: '
         '${r.message}: ${r.error ?? ''}: ${r.stackTrace ?? ''}');
-    if (!disableSentry && r.level.compareTo(Level.SEVERE) >= 0) {
+    if (!_disableSentry && r.level.compareTo(Level.SEVERE) >= 0) {
       try {
         print('Capturing to Sentry');
         _sentry.capture(
