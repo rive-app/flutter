@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_editor/widgets/common/editor_switch.dart';
@@ -43,7 +44,8 @@ class _LoginState extends State<Login> {
   final ObscuringTextEditingController passwordController =
       ObscuringTextEditingController();
   final TextEditingController usernameController = TextEditingController();
-  String username;
+  final TextEditingController emailController = TextEditingController();
+
   bool _isLoggingIn = false;
   LoginPage _currentPanel = LoginPage.login;
 
@@ -81,59 +83,188 @@ class _LoginState extends State<Login> {
     }
   }
 
+  Widget get _visibleForm {
+    switch (_currentPanel) {
+      case LoginPage.recover:
+        return _recoverForm();
+      case LoginPage.register:
+        return _registerForm();
+      case LoginPage.login:
+      default:
+        return _loginForm();
+    }
+  }
+
+  Widget _recoverForm() {
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
+    return Column(
+        key: const ValueKey<int>(2),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+                style: styles.loginText.copyWith(height: 1.6),
+                text:
+                    'Forgot your password? Type in the email or username associated'
+                    ' with your account and we’ll send you an email to reset it. ',
+                children: [
+                  TextSpan(
+                    text: 'Back to sign in.',
+                    style: styles.buttonUnderline
+                        .copyWith(height: 1.6, fontSize: 13),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => setState(() {
+                            _currentPanel = LoginPage.login;
+                          }),
+                  ),
+                ]),
+          ),
+          const SizedBox(height: 50),
+          SizedBox(
+            width: 216,
+            child: LabeledTextField(
+              label: 'Email or Username',
+              hint: 'Type your email or username…',
+              controller: usernameController,
+              onSubmit: (_) {/** TODO: _recover(); */},
+            ),
+          ),
+          const SizedBox(height: 60),
+          SizedBox(
+            width: 145,
+            child: FlatIconButton(
+              label: 'Send Email',
+              onTap: () {/** TODO: _recover() */},
+              color: colors.commonDarkGrey,
+              textColor: Colors.white,
+              radius: 20,
+              elevated: true,
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
+          ),
+        ]);
+  }
+
+  Widget _registerForm() {
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
+    return Column(
+        key: const ValueKey<int>(1),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Connect an account for one-click sign in',
+            style: styles.loginText,
+          ),
+          const SizedBox(height: 20),
+          _socials(),
+          const SizedBox(height: 60),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: LabeledTextField(
+                  label: 'Username',
+                  hint: 'Pick a username',
+                  controller: usernameController,
+                  onSubmit: (_) {/** TODO:_register()*/},
+                ),
+              ),
+              const SizedBox(width: 30),
+              Expanded(
+                child: LabeledTextField(
+                  label: 'Email',
+                  hint: 'you@domain.com',
+                  controller: emailController,
+                  onSubmit: (_) {/** TODO:_register()*/},
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 30),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: LabeledTextField(
+                  label: 'Password',
+                  hint: '6 character minumum…',
+                  controller: passwordController,
+                  onSubmit: (_) {/** TODO: _register(); */},
+                ),
+              ),
+              const SizedBox(width: 30),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 40),
+          SizedBox(
+            width: 145,
+            child: FlatIconButton(
+              label: _isLoggingIn ? 'Verifying' : 'Log In',
+              onTap: _submit,
+              color: colors.commonDarkGrey,
+              textColor: Colors.white,
+              radius: 20,
+              elevated: true,
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
+          ),
+        ]);
+  }
+
+  Widget _socials() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _SocialSigninButton(
+          label: 'Apple',
+          icon: 'signin-apple',
+          onTap: () {},
+        ),
+        const SizedBox(width: 10),
+        _SocialSigninButton(
+          label: 'Google',
+          icon: 'signin-google',
+          onTap: () {},
+        ),
+        const SizedBox(width: 10),
+        _SocialSigninButton(
+          label: 'Facebook',
+          icon: 'signin-facebook',
+          onTap: () {},
+        ),
+        const SizedBox(width: 10),
+        _SocialSigninButton(
+          label: 'Twitter',
+          icon: 'signin-twitter',
+          onTap: () {},
+        ),
+      ],
+    );
+  }
+
   Widget _loginForm() {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final styles = theme.textStyles;
-
     return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Top padding.
-        const SizedBox(height: 100),
-        Image.asset('assets/images/rive_logo.png'),
-        const SizedBox(height: 55),
-        Text(
-          'One-click sign in if your account is connected to',
-          style: styles.loginText,
-        ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _SocialSigninButton(
-              label: 'Apple',
-              icon: 'signin-apple',
-              onTap: () {},
-            ),
-            const SizedBox(width: 10),
-            _SocialSigninButton(
-              label: 'Google',
-              icon: 'signin-google',
-              onTap: () {},
-            ),
-            const SizedBox(width: 10),
-            _SocialSigninButton(
-              label: 'Facebook',
-              icon: 'signin-facebook',
-              onTap: () {},
-            ),
-            const SizedBox(width: 10),
-            _SocialSigninButton(
-              label: 'Twitter',
-              icon: 'signin-twitter',
-              onTap: () {},
-            ),
-          ],
-        ),
-        const SizedBox(height: 60),
-        ConstrainedBox(
-          // Would really like to find a better way to handle this.
-          constraints: const BoxConstraints(
-            maxWidth: 473,
+        key: const ValueKey<int>(0),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'One-click sign in if your account is connected to',
+            style: styles.loginText,
           ),
-          child: Row(
+          const SizedBox(height: 20),
+          _socials(),
+          const SizedBox(height: 60),
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -170,22 +301,40 @@ class _LoginState extends State<Login> {
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 40),
-        SizedBox(
-          width: 145,
-          child: FlatIconButton(
-            label: _isLoggingIn ? 'Verifying' : 'Log In',
-            onTap: _submit,
-            color: colors.commonDarkGrey,
-            textColor: Colors.white,
-            radius: 20,
-            elevated: true,
-            mainAxisAlignment: MainAxisAlignment.center,
+          const SizedBox(height: 40),
+          SizedBox(
+            width: 145,
+            child: FlatIconButton(
+              label: _isLoggingIn ? 'Verifying' : 'Log In',
+              onTap: _submit,
+              color: colors.commonDarkGrey,
+              textColor: Colors.white,
+              radius: 20,
+              elevated: true,
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
           ),
+        ]);
+  }
+
+  Widget _panelContents() {
+    return ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 473,
         ),
-      ],
-    );
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top padding.
+            const SizedBox(height: 100),
+            Image.asset('assets/images/rive_logo.png'),
+            const SizedBox(height: 55),
+            AnimatedSwitcher(
+                duration: const Duration(milliseconds: 100),
+                child: _visibleForm),
+          ],
+        ));
   }
 
   @override
@@ -258,7 +407,7 @@ class _LoginState extends State<Login> {
                     ],
                   ),
                 ),
-                Align(alignment: Alignment.center, child: _loginForm()),
+                Align(alignment: Alignment.center, child: _panelContents()),
               ])),
         ]),
         // Positioned.fill(
