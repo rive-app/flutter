@@ -27,7 +27,7 @@ class RiveNotification {
   final DateTime dateTime;
 
   /// Builds a list of notifications from json data
-  static List<RiveNotification> fromDataList(dataList) => dataList
+  static List<RiveNotification> fromDataList(List<dynamic> dataList) => dataList
       .map<RiveNotification>((data) => RiveNotification.fromData(data))
       .toList(growable: false);
 

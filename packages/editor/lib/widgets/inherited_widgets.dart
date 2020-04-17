@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/notification_manager.dart';
+import 'package:rive_editor/rive/managers/follow_manager.dart';
+import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
@@ -90,7 +91,7 @@ class RiveContext extends InheritedWidget {
   static Rive of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<RiveContext>().rive;
   }
-  
+
   /// Call this when you don't want the context to depend on this (usually you
   /// want this as Rive never changes anyway).
   static Rive find(BuildContext context) {
@@ -121,6 +122,8 @@ class ActiveFile extends InheritedWidget {
   @override
   bool updateShouldNotify(ActiveFile old) => file != old.file;
 }
+
+// Notifications state manager
 
 class NotificationProvider extends StatefulWidget {
   const NotificationProvider({@required this.manager, this.child});
@@ -169,5 +172,51 @@ class _InheritedNotificationProvider extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_InheritedNotificationProvider old) =>
+      manager != old.manager;
+}
+
+// Follow state provider
+
+class FollowProvider extends StatefulWidget {
+    const FollowProvider({@required this.manager, this.child});
+  final Widget child;
+  final FollowManager manager;
+
+  @override
+  _FollowProviderState createState() => _FollowProviderState();
+
+  static FollowManager of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_InheritedFollowProvider>()
+      .manager;
+}
+
+class _FollowProviderState extends State<FollowProvider> {
+  FollowManager _manager;
+
+  @override
+  void initState() {
+    _manager = widget.manager;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) => _InheritedFollowProvider(
+        manager: _manager,
+        child: widget.child,
+      );
+}
+
+class _InheritedFollowProvider extends InheritedWidget {
+  const _InheritedFollowProvider({
+    @required this.manager,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final FollowManager manager;
+
+  @override
+  bool updateShouldNotify(_InheritedFollowProvider old) =>
       manager != old.manager;
 }
