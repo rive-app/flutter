@@ -43,6 +43,7 @@ class FlatIconButton extends StatelessWidget {
     return _tip(
       InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(radius),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(

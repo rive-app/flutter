@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -20,11 +21,13 @@ class SettingsHeader extends StatefulWidget {
 
 class _SettingsHeaderState extends State<SettingsHeader> {
   bool get isTeam => widget.teamSize > 0;
+  bool _isSigningOut = false;
 
   Widget _trailing() {
     final theme = RiveTheme.of(context);
     final textStyles = theme.textStyles;
     final colors = theme.colors;
+
     if (isTeam) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -43,17 +46,25 @@ class _SettingsHeaderState extends State<SettingsHeader> {
         ],
       );
     } else {
-      return FlatIconButton(
-        label: 'Sign Out',
-        color: colors.commonDarkGrey,
-        textColor: Colors.white,
-        onTap: () async {
+      return UnderlineTextButton(
+        text: 'Sign Out',
+        textColor:
+            _isSigningOut ? colors.commonLightGrey : colors.commonDarkGrey,
+        onPressed: () async {
+          if (_isSigningOut) return;
+          setState(() {
+            _isSigningOut = true;
+          });
           final rive = RiveContext.of(context);
           var success = await rive.signout(
               onSignout: Navigator.of(context, rootNavigator: true).pop);
           if (!success) {
             // TODO: signal the signout error.
-          }
+            setState(() {
+              // Let the user try again.
+              _isSigningOut = false;
+            });
+          } 
         },
       );
     }

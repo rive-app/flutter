@@ -92,9 +92,10 @@ class RiveColors {
   Color get fileSearchIcon => const Color(0xFF999999);
 
   // Common
+  Color get commonLightGrey => const Color(0xFF888888);
   Color get commonDarkGrey => const Color(0xFF333333);
   Color get commonButtonColor => const Color(0x19000000);
-  Color get commonButtonTextColor => const Color(0xFF888888);
+  Color get commonButtonTextColor => commonLightGrey;
   Color get commonButtonTextColorDark => const Color(0xFF666666);
   Color get commonButtonInactiveGrey => const Color(0xFFE7E7E7);
 
@@ -115,6 +116,7 @@ class RiveColors {
   Color get lightTreeLines => const Color(0x27666666);
   Color get selectedTreeLines => const Color(0xFF79B7E6);
   Color get toggleBackground => const Color(0xFF252525);
+  Color get toggleInactiveBackground => const Color(0xFFF1F1F1);
   Color get toggleForeground => white;
   Color get toggleForegroundDisabled => const Color(0xFF444444);
 }
@@ -276,14 +278,20 @@ class TextStyles {
 
   TextStyle get textFieldInputValidationError =>
       const TextStyle(fontFamily: 'Roboto-Medium', color: red, fontSize: 13);
- 
+
   TextStyle get buttonUnderline => const TextStyle(
       fontFamily: 'Roboto-Regular',
       color: Color(0xFF333333),
       fontSize: 12,
       height: 1.6,
       fontWeight: FontWeight.w400,
-      decoration: TextDecoration.underline
+      decoration: TextDecoration.underline);
+
+  TextStyle get regularText => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        fontSize: 13,
+        height: 1.15,
+        fontWeight: FontWeight.normal,
       );
 }
 
