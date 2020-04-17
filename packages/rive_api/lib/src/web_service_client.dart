@@ -133,9 +133,10 @@ class WebServiceClient {
       return response;
     } on Exception catch (error) {
       var errorString = error.toString();
-      // print('er \'$errorString\'');
+      print('er \'$errorString\'');
       if (errorString.startsWith('XMLHttpRequest') ||
-          errorString.startsWith('SocketException')) {
+          errorString.startsWith('SocketException') ||
+          errorString.startsWith('Unauthorised')) {
         throw HttpException(errorString, error);
       } else {
         rethrow;

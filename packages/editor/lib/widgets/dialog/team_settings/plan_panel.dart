@@ -8,6 +8,7 @@ import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/panel_two.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
@@ -88,14 +89,10 @@ class _PlanState extends State<PlanSettings> {
                             ),
                           ),
                           const Spacer(),
-                          GestureDetector(
-                              onTap: () {/** TODO: cancel plan */},
-                              child: Text('Cancel Plan',
-                                  style: textStyles.fileGreyTextLarge.copyWith(
-                                    fontSize: 12,
-                                    height: 1.6,
-                                    decoration: TextDecoration.underline,
-                                  ))),
+                          UnderlineTextButton(
+                            text: 'Cancel Plan',
+                            onPressed: () {/** TODO: cancel plan */},
+                          ),
                         ],
                       ),
                       const SizedBox(height: 30),
@@ -329,11 +326,7 @@ class _MethodState extends State<PaymentMethod> {
   Widget _underlineButton(String label, TextStyles styles, bool toSaved) {
     return GestureDetector(
       onTap: () => _changeView(toSaved),
-      child: Text(label,
-          style: styles.fileGreyTextLarge.copyWith(
-            fontSize: 12,
-            decoration: TextDecoration.underline,
-          )),
+      child: Text(label, style: styles.buttonUnderline),
     );
   }
 
@@ -351,7 +344,10 @@ class _MethodState extends State<PaymentMethod> {
               style:
                   styles.fileGreyTextLarge.copyWith(fontSize: 13, height: 1.4)),
           const Spacer(),
-          _underlineButton('Change', styles, false),
+          UnderlineTextButton(
+            text: 'Change',
+            onPressed: () => _changeView(false),
+          ),
         ]),
         const SizedBox(height: 15),
         _nextPayment(colors.commonButtonTextColor, styles)
@@ -367,8 +363,10 @@ class _MethodState extends State<PaymentMethod> {
       children: [
         CreditCardForm(
             sub: widget.sub,
-            trailingButtonBuilder: (_) =>
-                _underlineButton('Use saved card instead', styles, true)),
+            trailingButtonBuilder: (_) => UnderlineTextButton(
+                  text: 'Use saved card instead',
+                  onPressed: () => _changeView(true),
+                )),
         const SizedBox(height: 30),
         _nextPayment(colors.commonButtonTextColor, styles)
       ],

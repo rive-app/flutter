@@ -75,7 +75,7 @@ class FlatIconButton extends StatelessWidget {
                   ),
                 ),
               ),
-              if (icon != null) ...[icon],
+              if (icon != null) icon,
             ],
           ),
         ),

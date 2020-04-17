@@ -79,7 +79,6 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     }
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
-    final textStyles = theme.textStyles;
     var labelPrefix = widget.owner is RiveTeam ? 'Team ' : '';
 
     return Column(
