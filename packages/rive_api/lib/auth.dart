@@ -93,4 +93,22 @@ class RiveAuth {
     }
     return false;
   }
+
+  Future<bool> register(String username, String email, String password) async {
+    final body = jsonEncode(
+      <String, String>{
+        'username': username,
+        'password': password,
+        'email': email,
+      },
+    );
+    print("Trying to register $body");
+    var response = await api.post(api.host + '/register', body: body);
+
+    print('body ${response.body} ${response.statusCode}');
+    if (response.statusCode == 200) {
+      return true;
+    }
+    return false;
+  }
 }

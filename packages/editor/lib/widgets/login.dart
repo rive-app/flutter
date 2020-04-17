@@ -46,7 +46,7 @@ class _LoginState extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
-  bool _isLoggingIn = false;
+  bool _buttonDisabled = false;
   bool _isSending = false;
   LoginPage _currentPanel = LoginPage.login;
 
@@ -80,17 +80,40 @@ class _LoginState extends State<Login> {
     });
   }
 
-  Future<void> _signup() async {}
-
-  Future<void> _login() async {
-    if (_isLoggingIn) {
+  Future<void> _signup() async {
+    if (_buttonDisabled) {
       return;
     }
 
     final rive = RiveContext.of(context);
 
     setState(() {
-      _isLoggingIn = true;
+      _buttonDisabled = true;
+    });
+
+    final username = usernameController.text;
+    final email = emailController.text;
+    final password = passwordController.text;
+    final auth = RiveAuth(rive.api);
+
+    if (await auth.register(username, email, password)) {
+      await rive.updateUser();
+    } else {
+      setState(() {
+        _buttonDisabled = false;
+      });
+    }
+  }
+
+  Future<void> _login() async {
+    if (_buttonDisabled) {
+      return;
+    }
+
+    final rive = RiveContext.of(context);
+
+    setState(() {
+      _buttonDisabled = true;
     });
     var auth = RiveAuth(rive.api);
     if (await auth.login(
@@ -101,7 +124,7 @@ class _LoginState extends State<Login> {
     }
     if (mounted) {
       setState(() {
-        _isLoggingIn = false;
+        _buttonDisabled = false;
       });
     }
   }
@@ -195,7 +218,7 @@ class _LoginState extends State<Login> {
                   label: 'Username',
                   hint: 'Pick a username',
                   controller: usernameController,
-                  onSubmit: (_) {/** TODO:_register()*/},
+                  onSubmit: (_) => _signup(),
                 ),
               ),
               const SizedBox(width: 30),
@@ -204,7 +227,7 @@ class _LoginState extends State<Login> {
                   label: 'Email',
                   hint: 'you@domain.com',
                   controller: emailController,
-                  onSubmit: (_) {/** TODO:_register()*/},
+                  onSubmit: (_) => _signup(),
                 ),
               ),
             ],
@@ -219,7 +242,7 @@ class _LoginState extends State<Login> {
                   label: 'Password',
                   hint: '6 character minumum…',
                   controller: passwordController,
-                  onSubmit: (_) {/** TODO: _register(); */},
+                  onSubmit: (_) => _signup(),
                 ),
               ),
               const SizedBox(width: 30),
@@ -230,10 +253,11 @@ class _LoginState extends State<Login> {
           SizedBox(
             width: 145,
             child: FlatIconButton(
-              label: _isLoggingIn ? 'Verifying' : 'Sign Up',
+              label: _buttonDisabled ? 'Verifying' : 'Sign Up',
               onTap: _signup,
-              color:
-                  _isLoggingIn ? colors.commonLightGrey : colors.commonDarkGrey,
+              color: _buttonDisabled
+                  ? colors.commonLightGrey
+                  : colors.commonDarkGrey,
               textColor: Colors.white,
               radius: 20,
               elevated: true,
@@ -297,7 +321,7 @@ class _LoginState extends State<Login> {
                 child: LabeledTextField(
                   label: 'Email or Username',
                   hint: 'Type your email or username…',
-                  enabled: !_isLoggingIn,
+                  enabled: !_buttonDisabled,
                   controller: usernameController,
                   onSubmit: (_) => _login(),
                 ),
@@ -310,7 +334,7 @@ class _LoginState extends State<Login> {
                     LabeledTextField(
                       label: 'Password',
                       hint: '6 character minumum…',
-                      enabled: !_isLoggingIn,
+                      enabled: !_buttonDisabled,
                       controller: passwordController,
                       onSubmit: (_) => _login(),
                     ),
@@ -330,10 +354,11 @@ class _LoginState extends State<Login> {
           SizedBox(
             width: 145,
             child: FlatIconButton(
-              label: _isLoggingIn ? 'Verifying' : 'Log In',
+              label: _buttonDisabled ? 'Verifying' : 'Log In',
               onTap: _login,
-              color:
-                  _isLoggingIn ? colors.commonLightGrey : colors.commonDarkGrey,
+              color: _buttonDisabled
+                  ? colors.commonLightGrey
+                  : colors.commonDarkGrey,
               textColor: Colors.white,
               radius: 20,
               elevated: true,
@@ -396,7 +421,7 @@ class _LoginState extends State<Login> {
           // TODO: image background or Rive animation.
           Flexible(
               child: Container(
-            color: Colors.lime[100],
+            color: colors.commonLightGrey,
           )),
           SizedBox(
               width: 714,
@@ -445,25 +470,25 @@ class _LoginState extends State<Login> {
         //         children: [
         //           TextField(
         //             autofocus: true,
-        //             enabled: !_isLoggingIn,
+        //             enabled: !_buttonDisabled,
         //             controller: usernameController,
         //             decoration: const InputDecoration(hintText: 'Username'),
         //             onSubmitted: (_) => _submit(rive),
         //           ),
         //           TextField(
-        //             enabled: !_isLoggingIn,
+        //             enabled: !_buttonDisabled,
         //             controller: passwordController,
         //             decoration: const InputDecoration(hintText: 'Password'),
         //             onSubmitted: (_) => _submit(rive),
         //           ),
         //           Container(height: 20.0),
         //           RaisedButton(
-        //             child: Text(_isLoggingIn ? 'Verifying' : 'Login'),
-        //             onPressed: _isLoggingIn ? null : () => _submit(rive),
+        //             child: Text(_buttonDisabled ? 'Verifying' : 'Login'),
+        //             onPressed: _buttonDisabled ? null : () => _submit(rive),
         //           ),
         //           FlatButton(
         //             child: const Text('Login with Twitter'),
-        //             onPressed: _isLoggingIn
+        //             onPressed: _buttonDisabled
         //                 ? null
         //                 : () async {
         //                     var auth = RiveAuth(rive.api);
@@ -474,7 +499,7 @@ class _LoginState extends State<Login> {
         //           ),
         //           FlatButton(
         //             child: const Text('Login with Facebook'),
-        //             onPressed: _isLoggingIn
+        //             onPressed: _buttonDisabled
         //                 ? null
         //                 : () async {
         //                     var auth = RiveAuth(rive.api);
@@ -485,7 +510,7 @@ class _LoginState extends State<Login> {
         //           ),
         //           FlatButton(
         //             child: const Text('Login with Google'),
-        //             onPressed: _isLoggingIn
+        //             onPressed: _buttonDisabled
         //                 ? null
         //                 : () async {
         //                     var auth = RiveAuth(rive.api);

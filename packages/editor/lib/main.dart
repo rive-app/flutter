@@ -213,7 +213,7 @@ class Editor extends StatelessWidget {
     final file = ActiveFile.of(context);
 
     return ListenableBuilder<Event>(
-      listenable: file.stateChanged,
+      listenable: file?.stateChanged,
       builder: (context, event, _) {
         switch (file.state) {
           case OpenFileState.loading:
