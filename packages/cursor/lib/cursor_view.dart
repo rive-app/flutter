@@ -42,7 +42,7 @@ class CursorInstance {
 
 class Cursor extends ChangeNotifier {
   List<CursorInstance> _instances = [];
-  // bool _isShowing = true;
+  bool _isSystemCursorHidden = false;
 
   void remove(CursorInstance instance) {
     if (_instances.remove(instance)) {
@@ -52,9 +52,15 @@ class Cursor extends ChangeNotifier {
 
   void _update() {
     if (_instances.isEmpty) {
-      SystemCursor.show();
+      if (_isSystemCursorHidden) {
+        SystemCursor.show();
+        _isSystemCursorHidden = false;
+      }
     } else {
-      SystemCursor.hide();
+      if (!_isSystemCursorHidden) {
+        SystemCursor.hide();
+        _isSystemCursorHidden = true;
+      }
     }
     notifyListeners();
   }
