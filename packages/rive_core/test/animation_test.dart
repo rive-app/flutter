@@ -92,6 +92,9 @@ void main() {
     file.captureJournalEntry();
     expect(kf1.seconds, 0.1, reason: 'seconds should have resolved to 0.1');
 
+    file.resetAnimation();
+    expect(node.xAnimated, null);
+    expect(node.xKeyState, KeyState.none);
     animation.apply(0.5);
     expect(node.x, 10);
 

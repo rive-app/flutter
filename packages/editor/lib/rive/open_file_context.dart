@@ -31,6 +31,7 @@ import 'package:local_data/local_data.dart';
 typedef ActionHandler = bool Function(ShortcutAction action);
 
 enum OpenFileState { loading, error, open }
+enum EditorMode { design, animate }
 
 /// Helper for state managed by a single open file. The file may be open (in a
 /// tab) but it is not guaranteed to be in memory.
@@ -72,7 +73,8 @@ class OpenFileContext with RiveFileDelegate {
       SelectionContext<SelectableItem>();
 
   /// Whether this file is currently in animate mode.
-  final ValueNotifier<bool> isAnimateMode = ValueNotifier<bool>(false);
+  final ValueNotifier<EditorMode> mode =
+      ValueNotifier<EditorMode>(EditorMode.design);
 
   final List<ActionHandler> _actionHandlers = [];
 

@@ -25,6 +25,7 @@ import 'package:rive_editor/widgets/home/home_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
 import 'package:rive_editor/widgets/stage_late_view.dart';
+import 'package:rive_editor/widgets/toolbar/mode_toggle.dart';
 import 'package:rive_widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
@@ -33,7 +34,6 @@ import 'package:rive_editor/widgets/stage_view.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
-import 'package:rive_editor/widgets/toolbar/design_animate_toggle.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
@@ -52,7 +52,7 @@ Future<void> main() async {
       WindowUtils.setSize(kDefaultWIndowSize);
     },
   );
-  print("WINDOW DRA ${window.onDrawFrame}");
+
   final iconCache = RiveIconCache(rootBundle);
   final rive = Rive(
     iconCache: iconCache,
@@ -257,7 +257,29 @@ class Editor extends StatelessWidget {
                       VisibilityPopupButton(),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: DesignAnimateToggle(),
+                        // child: DesignAnimateToggle(),
+                        child: ValueListenableBuilder<EditorMode>(
+                          valueListenable: file.mode,
+                          builder: (context, mode, _) => ModeToggle(
+                            modes: const [
+                              EditorMode.design,
+                              EditorMode.animate,
+                            ],
+                            selected: mode,
+                            label: (EditorMode mode) {
+                              switch (mode) {
+                                case EditorMode.design:
+                                  return 'Design';
+                                case EditorMode.animate:
+                                  return 'Animate';
+                              }
+                              return '???';
+                            },
+                            select: (EditorMode mode) {
+                              file.mode.value = mode;
+                            },
+                          ),
+                        ),
                       ),
                     ],
                   ),

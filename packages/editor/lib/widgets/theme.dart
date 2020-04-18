@@ -119,6 +119,10 @@ class RiveColors {
   Color get toggleInactiveBackground => const Color(0xFFF1F1F1);
   Color get toggleForeground => white;
   Color get toggleForegroundDisabled => const Color(0xFF444444);
+
+  // Mode button
+  Color get modeBackground => const Color(0xFF2F2F2F);
+  Color get modeForeground => const Color(0xFF444444);
 }
 
 /// TextStyles used in the Rive Theme
@@ -292,6 +296,18 @@ class TextStyles {
         fontSize: 13,
         height: 1.15,
         fontWeight: FontWeight.normal,
+      );
+
+  // Mode button
+  TextStyle get modeLabel => const TextStyle(
+        fontFamily: 'Roboto-Medium',
+        color: Color(0xFF888888),
+        fontSize: 13,
+      );
+  TextStyle get modeLabelSelected => const TextStyle(
+        fontFamily: 'Roboto-Medium',
+        color: Color(0xFFFFFFFF),
+        fontSize: 13,
       );
 }
 
