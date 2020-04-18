@@ -301,7 +301,7 @@ class _TeamMember extends StatelessWidget {
     final styles = theme.textStyles;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
+      padding: const EdgeInsets.only(bottom: 20),
       child: SizedBox(
         height: 20,
         child: Row(

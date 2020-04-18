@@ -11,7 +11,8 @@ import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/notification_manager.dart';
+import 'package:rive_editor/rive/managers/follow_manager.dart';
+import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
@@ -131,8 +132,15 @@ class RiveEditorApp extends StatelessWidget {
 
                           case RiveState.editor:
                             return NotificationProvider(
-                                manager: NotificationManager(api: rive.api),
-                                child: const EditorScaffold());
+                              manager: NotificationManager(api: rive.api),
+                              child: FollowProvider(
+                                manager: FollowManager(
+                                  api: rive.api,
+                                  ownerId: rive.user.value.ownerId,
+                                ),
+                                child: const EditorScaffold(),
+                              ),
+                            );
                           case RiveState.disconnected:
                             return DisconnectedScreen();
                             break;

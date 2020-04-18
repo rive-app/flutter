@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
+import 'package:rive_api/models/follow.dart';
+
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_header.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -59,7 +63,7 @@ class TeamDetailPanel extends StatelessWidget {
                     ),
                     Expanded(
                         child: Padding(
-                      padding: const EdgeInsets.only(left: 7.0),
+                      padding: const EdgeInsets.only(left: 7),
                       child: Text(
                         team.name,
                         style: textStyles.fileGreyTextLarge,
@@ -164,10 +168,52 @@ class _TeamMember extends StatelessWidget {
                     ),
                 ],
               ),
-            )
+            ),
+            // Adding a follow button here temporarily
+            const Spacer(flex: 1),
+            FollowUnfollow(user.ownerId),
           ],
         ),
       ),
     );
+  }
+}
+
+class FollowUnfollow extends StatelessWidget {
+  const FollowUnfollow(this.ownerId);
+  final int ownerId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+
+    return StreamBuilder<Iterable<RiveFollowee>>(
+        stream: FollowProvider.of(context).followeesStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final following = snapshot.data.any((f) => ownerId == f.ownerId);
+            if (following) {
+              return TintedIconButton(
+                  icon: 'delete',
+                  padding: const EdgeInsets.all(0),
+                  backgroundHover: Colors.transparent,
+                  iconHover: theme.colors.buttonHover,
+                  onPress: () {
+                    FollowProvider.of(context).unfollowSink.add(ownerId);
+                  });
+            } else {
+              return TintedIconButton(
+                  icon: 'tool-create',
+                  padding: const EdgeInsets.all(0),
+                  backgroundHover: Colors.transparent,
+                  iconHover: theme.colors.buttonHover,
+                  onPress: () {
+                    FollowProvider.of(context).followSink.add(ownerId);
+                  });
+            }
+          } else {
+            return Container();
+          }
+        });
   }
 }
