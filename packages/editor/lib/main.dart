@@ -239,73 +239,72 @@ class Editor extends StatelessWidget {
             );
           case OpenFileState.open:
           default:
-            return AnimationPanel(
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    height: 42,
-                    color: const Color.fromRGBO(60, 60, 60, 1),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        HamburgerPopupButton(),
-                        TransformPopupButton(),
-                        CreatePopupButton(),
-                        SharePopupButton(),
-                        const Spacer(),
-                        ConnectedUsers(rive: rive),
-                        VisibilityPopupButton(),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          // child: DesignAnimateToggle(),
-                          child: ValueListenableBuilder<EditorMode>(
-                            valueListenable: file.mode,
-                            builder: (context, mode, _) => ModeToggle(
-                              modes: const [
-                                EditorMode.design,
-                                EditorMode.animate,
-                              ],
-                              selected: mode,
-                              label: (EditorMode mode) {
-                                switch (mode) {
-                                  case EditorMode.design:
-                                    return 'Design';
-                                  case EditorMode.animate:
-                                    return 'Animate';
-                                }
-                                return '???';
-                              },
-                              select: (EditorMode mode) {
-                                file.mode.value = mode;
-                              },
-                            ),
+            return Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  height: 42,
+                  color: const Color.fromRGBO(60, 60, 60, 1),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      HamburgerPopupButton(),
+                      TransformPopupButton(),
+                      CreatePopupButton(),
+                      SharePopupButton(),
+                      const Spacer(),
+                      ConnectedUsers(rive: rive),
+                      VisibilityPopupButton(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        // child: DesignAnimateToggle(),
+                        child: ValueListenableBuilder<EditorMode>(
+                          valueListenable: file.mode,
+                          builder: (context, mode, _) => ModeToggle(
+                            modes: const [
+                              EditorMode.design,
+                              EditorMode.animate,
+                            ],
+                            selected: mode,
+                            label: (EditorMode mode) {
+                              switch (mode) {
+                                case EditorMode.design:
+                                  return 'Design';
+                                case EditorMode.animate:
+                                  return 'Animate';
+                              }
+                              return '???';
+                            },
+                            select: (EditorMode mode) {
+                              file.mode.value = mode;
+                            },
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        HierarchyPanel(),
-                        const Expanded(
-                          child: StagePanel(),
-                        ),
-                        const ResizePanel(
-                          hitSize: resizeEdgeSize,
-                          direction: ResizeDirection.horizontal,
-                          side: ResizeSide.start,
-                          min: 235,
-                          max: 500,
-                          child: InspectorPanel(),
-                        ),
-                      ],
-                    ),
+                ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      HierarchyPanel(),
+                      const Expanded(
+                        child: StagePanel(),
+                      ),
+                      const ResizePanel(
+                        hitSize: resizeEdgeSize,
+                        direction: ResizeDirection.horizontal,
+                        side: ResizeSide.start,
+                        min: 235,
+                        max: 500,
+                        child: InspectorPanel(),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                AnimationPanel(),
+              ],
             );
             break;
         }

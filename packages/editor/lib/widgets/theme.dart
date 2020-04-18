@@ -123,6 +123,9 @@ class RiveColors {
   // Mode button
   Color get modeBackground => const Color(0xFF2F2F2F);
   Color get modeForeground => const Color(0xFF444444);
+
+  // Aniation panel
+  Color get animationPanelBackground => const Color(0xFF282828);
 }
 
 /// TextStyles used in the Rive Theme

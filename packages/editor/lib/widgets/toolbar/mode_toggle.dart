@@ -192,7 +192,6 @@ class _ModeDecorationPainter extends BoxPainter {
     assert(configuration != null);
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size;
-    // final TextDirection textDirection = configuration.textDirection;
     var selectedRect = offset + Offset(_decoration.left, 0) &
         Size(_buttonWidth, configuration.size.height);
     canvas.drawRRect(

@@ -1,144 +1,109 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/widgets/common/animated_factor_builder.dart';
+import 'package:rive_editor/widgets/common/fractional_intrinsic_height.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 
 /// Container for the animation panel that allows it to slide up from the bottom
 /// when animation mode is activated.
-class AnimationPanel extends StatelessWidget {
-  final Widget child;
-
-  const AnimationPanel({Key key, this.child}) : super(key: key);
+class AnimationPanel extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(child: child),
-        Positioned.fill(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              const Expanded(child: SizedBox()),
-              _SlidingAnimationPanel(
-                child: const ColoredBox(
-                  color: Color(0x99000000),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  _AnimationPanelState createState() => _AnimationPanelState();
 }
 
-class _AnimatedOffsetBuilder extends StatefulWidget {
-  final double offset;
-  final Widget Function(BuildContext, double, Widget) builder;
-  final Widget child;
-
-  const _AnimatedOffsetBuilder({
-    Key key,
-    this.offset,
-    this.builder,
-    this.child,
-  }) : super(key: key);
-  @override
-  __AnimatedOffsetBuilderState createState() => __AnimatedOffsetBuilderState();
-}
-
-class __AnimatedOffsetBuilderState extends State<_AnimatedOffsetBuilder>
+class _AnimationPanelState extends State<AnimationPanel>
     with SingleTickerProviderStateMixin {
-  AnimationController controller;
-  double _animatedOffset;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    controller.value = _animatedOffset = widget.offset;
-    // controller.animateTo(widget.offset);
-    controller.addListener(() {
-      setState(() {
-        _animatedOffset = Curves.easeInOut.transform(controller.value);
-      });
-    });
-  }
-
-  @override
-  void didUpdateWidget(_AnimatedOffsetBuilder oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.offset != widget.offset) {
-      controller.animateTo(widget.offset);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _animatedOffset, widget.child);
-  }
-}
-
-class _SlidingAnimationPanel extends StatelessWidget {
-  final Widget child;
-
-  const _SlidingAnimationPanel({Key key, this.child}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     var activeFile = ActiveFile.of(context);
     return ValueListenableBuilder(
       valueListenable: activeFile.mode,
-      child: child,
+      child: _AnimationPanelContents(),
       builder: (context, EditorMode mode, child) {
-        return _AnimatedOffsetBuilder(
-          offset: mode == EditorMode.animate ? 0 : 1,
+        return AnimatedFactorBuilder(
           child: child,
-          builder: (context, offset, child) {
-            if (offset == 1) {
-              return child;
-            }
-            return ResizePanel(
+          factor: mode == EditorMode.animate ? 1 : 0,
+          builder: (context, factor, child) => FractionalIntrinsicHeight(
+            heightFactor: factor,
+            child: ResizePanel(
               hitSize: 10,
               direction: ResizeDirection.vertical,
               side: ResizeSide.start,
               min: 235,
               max: 500,
-              child: CustomSingleChildLayout(
-                delegate: _AnimationPanelLayout(
-                  offscreen: offset,
-                ),
+              child: _PanelShadow(
+                show: factor > 0,
                 child: child,
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );
   }
 }
 
-/// Custom positioner to help align the animation panel so it can slide off
-/// screen even though it's of dynamic size.
-class _AnimationPanelLayout extends SingleChildLayoutDelegate {
-  final double offscreen;
+class _PanelShadow extends StatelessWidget {
+  final bool show;
+  final Widget child;
 
-  _AnimationPanelLayout({this.offscreen});
+  const _PanelShadow({
+    Key key,
+    this.show,
+    this.child,
+  }) : super(key: key);
 
   @override
-  bool shouldRelayout(_AnimationPanelLayout oldDelegate) {
-    return oldDelegate.offscreen != offscreen;
+  Widget build(BuildContext context) {
+    return Stack(
+      overflow: Overflow.visible,
+      children: [
+        if (show)
+          Positioned(
+            top: -10,
+            height: 10,
+            left: 0,
+            right: 0,
+            child: CustomPaint(
+              painter: _PanelShadowPainter(),
+            ),
+          ),
+        Positioned.fill(
+          child: child,
+        ),
+      ],
+    );
   }
+}
+
+class _PanelShadowPainter extends CustomPainter {
+  final _paint = Paint()
+    ..shader = ui.Gradient.linear(
+      Offset.zero,
+      const Offset(0, 10),
+      [
+        const Color(0x00000000),
+        const Color(0x1A000000),
+      ],
+    );
+  @override
+  bool shouldRepaint(_PanelShadowPainter oldDelegate) => false;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
-      constraints;
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Offset.zero & size, _paint);
+  }
+}
 
+class _AnimationPanelContents extends StatelessWidget {
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    return Offset(0, childSize.height * offscreen);
+  Widget build(BuildContext context) {
+    var theme = RiveTheme.of(context);
+    return ColoredBox(
+      color: theme.colors.animationPanelBackground,
+    );
   }
 }
