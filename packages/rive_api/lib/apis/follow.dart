@@ -21,7 +21,6 @@ class FollowingApi {
     if (res.statusCode == 200) {
       final followees =
           RiveFollowee.fromDataList(json.decode(res.body)['artists']);
-      print('Found ${followees.length} followees');
       return followees;
     } else {
       throw Exception('Error fetching followees: ${res.statusCode}');
@@ -32,13 +31,11 @@ class FollowingApi {
   /// POST: /api/artists/<ownerId>/follow
   Future<void> follow(int ownerId) async {
     final res = await api.post('${api.host}/api/artists/$ownerId/follow');
-    print('Status code for follow: ${res.statusCode}');
   }
 
   /// Unfollow another user
   /// POST: /api/artists/<ownerId>/unfollow
   Future<void> unfollow(int ownerId) async {
     final res = await api.post('${api.host}/api/artists/$ownerId/unfollow');
-    print('Status code for unfollow: ${res.statusCode}');
   }
 }

@@ -9,15 +9,9 @@ enum NotificationType {
   teamInvite,
 }
 
-/// Returns the notification type from a string
-NotificationType notificationTypeFromString(String value) {
-  switch (value) {
-    case 'team_invite':
-      return NotificationType.teamInvite;
-    case 'follow':
-    default:
-      return NotificationType.follow;
-  }
+NotificationType notificationTypeFromInt(int value) {
+  assert(value < NotificationType.values.length);
+  return NotificationType.values[value];
 }
 
 /// Base notification class that has a factory that will construct
@@ -33,25 +27,31 @@ class RiveNotification {
 
   /// Builds the right type of notification based on json data
   factory RiveNotification.fromData(Map<String, dynamic> data) {
-    final type = notificationTypeFromString(data['type']);
+    final type = notificationTypeFromInt(data['t']);
+    // Need to explicitly cast here for the extension methods to work
+    final userData = data['u'] as Map<String, dynamic>;
     switch (type) {
       case NotificationType.teamInvite:
         return RiveTeamInviteNotification(
           dateTime:
-              DateTime.fromMillisecondsSinceEpoch(data.getInt('date') * 1000),
-          senderId: data.getInt('senderId'),
-          senderName: data.getString('senderName'),
-          teamId: data.getInt('teamId'),
-          teamName: data.getString('teamName'),
-          inviteId: data.getInt('inviteId'),
+              DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
+          senderId: userData.getInt('oi'),
+          senderName: userData.getString('nm'),
+          teamId: userData.getInt('ti'),
+          teamName: userData.getString('tn'),
+          inviteId: userData.getInt('ii'),
         );
+
+      // New follower notification:
+      // {"u":{"oi":40842,"pf":11,"un":"matt","nm":"Matt","av":null,"fl":1,"f1":1,"f2":2,"bg":null,"s1":null,"s2":null},"t":0,"w":1587171124}
       case NotificationType.follow:
       default:
         return RiveFollowNotification(
           dateTime:
-              DateTime.fromMillisecondsSinceEpoch(data.getInt('date') * 1000),
-          senderId: data.getInt('senderId'),
-          senderName: data.getString('senderName'),
+              DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
+          followerId: userData.getInt('oi'),
+          followerName: userData.getString('nm'),
+          followerUsername: userData.getString('un'),
         );
     }
   }
@@ -61,13 +61,15 @@ class RiveNotification {
 /// Contains the follower id (sendId) and name (senderName)
 class RiveFollowNotification extends RiveNotification {
   const RiveFollowNotification({
+    @required this.followerId,
+    @required this.followerName,
+    @required this.followerUsername,
     @required DateTime dateTime,
-    @required this.senderId,
-    @required this.senderName,
   }) : super(dateTime);
 
-  final int senderId;
-  final String senderName;
+  final int followerId;
+  final String followerName;
+  final String followerUsername;
 }
 
 /// A team invite notification
