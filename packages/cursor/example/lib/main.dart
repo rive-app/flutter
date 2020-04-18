@@ -23,19 +23,27 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainBody extends StatelessWidget {
+class MainBody extends StatefulWidget {
+  @override
+  _MainBodyState createState() => _MainBodyState();
+}
+
+class _MainBodyState extends State<MainBody> {
+  CursorInstance _custom = null;
   @override
   Widget build(BuildContext context) {
     return Center(
       child: MouseRegion(
         onEnter: (details) {
-          Cursor.change(
+          _custom?.remove();
+          _custom = Cursor.change(
               context,
               (context) =>
                   Container(width: 20, height: 20, color: Colors.green));
         },
         onExit: (details) {
-          Cursor.reset(context);
+          _custom?.remove();
+          _custom = null;
         },
         child: Container(width: 100, height: 100, color: Colors.red),
       ),

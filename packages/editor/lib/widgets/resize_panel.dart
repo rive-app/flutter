@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:core/debounce.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cursor/cursor_view.dart';
@@ -42,6 +43,19 @@ class _ResizePanelState extends State<ResizePanel> {
   bool _showDragEdge = false;
   Timer _lightTimer;
   OverlayEntry _resizeOverlay;
+  CursorInstance _customCursor;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _lightTimer?.cancel();
+    if (_customCursor != null) {
+      // annoying, have to do this to avoid:
+      // setState() or markNeedsBuild() called when widget tree was locked.
+      debounce(_customCursor.remove);
+    }
+    _customCursor = null;
+  }
 
   @override
   void initState() {
@@ -58,7 +72,7 @@ class _ResizePanelState extends State<ResizePanel> {
     } else if (_isDragging) {
       _showResizeCursor(context, const Duration(milliseconds: 0));
     } else {
-      _hideResizeCursor(context);
+      _hideResizeCursor();
     }
   }
 
@@ -71,7 +85,8 @@ class _ResizePanelState extends State<ResizePanel> {
     if (_resizeOverlay != null) {
       return;
     }
-    CursorIcon.show(
+    _customCursor?.remove();
+    _customCursor = CursorIcon.show(
       context,
       widget.direction == ResizeDirection.vertical
           ? 'cursor-resize-vertical'
@@ -133,8 +148,9 @@ class _ResizePanelState extends State<ResizePanel> {
     });
   }
 
-  void _hideResizeCursor(BuildContext context) {
-    Cursor.reset(context);
+  void _hideResizeCursor() {
+    _customCursor?.remove();
+    _customCursor = null;
     _lightTimer?.cancel();
     _resizeOverlay?.remove();
     _resizeOverlay = null;
