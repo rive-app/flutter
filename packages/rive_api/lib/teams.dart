@@ -21,13 +21,15 @@ class RiveTeamsApi<T extends RiveTeam> {
   Future<T> createTeam(
       {@required String teamName,
       @required String plan,
-      @required String frequency}) async {
+      @required String frequency,
+      @required String stripeToken}) async {
     String payload = jsonEncode({
       "data": {
         "name": teamName,
         "username": teamName,
         "billingPlan": plan,
-        "billingCycle": frequency
+        "billingCycle": frequency,
+        "billingToken": stripeToken
       }
     });
     var response = await api.post(api.host + '/api/teams', body: payload);

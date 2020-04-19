@@ -166,6 +166,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
           ),
         ),
         TextFormField(
+          enabled: !sub.processing,
           textAlign: TextAlign.left,
           textAlignVertical: TextAlignVertical.center,
           style: textStyles.inspectorPropertyLabel,
@@ -218,6 +219,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               TextFormField(
+                enabled: !sub.processing,
                 textAlign: TextAlign.left,
                 textAlignVertical: TextAlignVertical.center,
                 style: textStyles.inspectorPropertyLabel,
@@ -262,6 +264,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               TextFormField(
+                enabled: !sub.processing,
                 textAlign: TextAlign.left,
                 textAlignVertical: TextAlignVertical.center,
                 style: textStyles.inspectorPropertyLabel,
@@ -308,6 +311,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               TextFormField(
+                enabled: !sub.processing,
                 textAlign: TextAlign.left,
                 textAlignVertical: TextAlignVertical.center,
                 style: textStyles.inspectorPropertyLabel,
@@ -398,11 +402,14 @@ class TeamWizardPanelTwo extends StatelessWidget {
           width: 181,
           child: FlatIconButton(
             mainAxisAlignment: MainAxisAlignment.center,
-            label: 'Create Team & Pay',
-            color: colors.buttonDark,
+            label:
+                (sub.processing) ? 'Processing Payment' : 'Create Team & Pay',
+            color: (sub.processing) ? colors.buttonLight : colors.buttonDark,
             textColor: Colors.white,
             onTap: () {
-              sub.submit(context, RiveContext.of(context).api);
+              if (!sub.processing) {
+                sub.submit(context, RiveContext.of(context).api);
+              }
             },
             // elevated: _hover,
           ),

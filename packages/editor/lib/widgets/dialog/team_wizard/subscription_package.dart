@@ -3,7 +3,9 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
+import 'package:rive_api/stripe.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:utilities/utilities.dart';
 
 /// Billing policy URL
 const billingPolicyUrl =
@@ -100,7 +102,7 @@ abstract class SubscriptionPackage with ChangeNotifier {
       return false;
     }
 
-    if (_ccv.length != 3 || _ccv.length != 4) {
+    if (_ccv.length < 3) {
       _ccvError = 'Incomplete';
       return false;
     }
@@ -199,6 +201,14 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
     notifyListeners();
   }
 
+  /// Form Processing
+  bool _processing = false;
+  bool get processing => _processing;
+  set processing(bool value) {
+    _processing = value;
+    notifyListeners();
+  }
+
   @override
   set option(TeamsOption value) {
     if (isNameValid) {
@@ -259,12 +269,44 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
   /// Step 2 is valid; safe to attempt team creation
   bool get isStep2Valid => isNameValid && isOptionValid && isCardInputValid;
 
+  String get expMonth => expiration.split('/').first;
+  String get expYear => '20${expiration.split('/').last}';
+
   Future submit(BuildContext context, RiveApi api) async {
     if (isStep2Valid) {
-      await RiveTeamsApi(api).createTeam(
-          teamName: name, plan: _option.name, frequency: _billing.name);
-      await RiveContext.of(context).reloadTeams();
-      Navigator.of(context, rootNavigator: true).pop(null);
+      processing = true;
+
+      try {
+        var publicKey = await StripeApi(api).getStripePublicKey();
+        var tokenResponse = await createToken(
+            publicKey, cardNumber, expMonth, expYear, ccv, zip);
+        print('creating team');
+        await RiveTeamsApi(api).createTeam(
+            teamName: name,
+            plan: _option.name,
+            frequency: _billing.name,
+            stripeToken: tokenResponse.token);
+        print('loading teams');
+        await RiveContext.of(context).reloadTeams();
+        Navigator.of(context, rootNavigator: true).pop(null);
+      } on StripeAPIError catch (error) {
+        switch (error.type) {
+          case StripeErrorTypes.cardNumber:
+            _cardValidationError = error.error;
+            break;
+          case StripeErrorTypes.cardCCV:
+            _ccvError = error.error;
+            break;
+          case StripeErrorTypes.cardExpiration:
+            _expirationError = error.error;
+            break;
+          default:
+            // todo.. fine
+            _cardValidationError = error.error;
+        }
+      } finally {
+        processing = false;
+      }
     } else {
       notifyListeners();
     }
