@@ -377,7 +377,7 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void connectionStateChanged(core.ConnectionState state) =>
+  void connectionStateChanged(core.CoopConnectionState state) =>
       delegates.forEach((delegate) => delegate.onConnectionStateChanged(state));
 
   @override
@@ -405,19 +405,19 @@ class RiveFile extends RiveCoreContext {
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.
 abstract class RiveFileDelegate {
-  void markNeedsAdvance();
+  void markNeedsAdvance() {}
   void onArtboardsChanged() {}
-  void onDirtCleaned();
+  void onDirtCleaned() {}
   void onObjectAdded(Core object) {}
   void onObjectRemoved(Core object) {}
   void onPlayerAdded(ClientSidePlayer player) {}
   void onPlayerRemoved(ClientSidePlayer player) {}
 
   /// Called when the entire file is wiped as data is about to load/reload.
-  void onWipe();
+  void onWipe() {}
 
   /// Let the delegate know the connection state somehow changed.
-  void onConnectionStateChanged(core.ConnectionState state);
+  void onConnectionStateChanged(core.CoopConnectionState state) {}
 }
 
 class _RiveDirt {

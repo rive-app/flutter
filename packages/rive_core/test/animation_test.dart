@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:core/key_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
-import 'package:rive_core/animation/animation.dart';
+import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
@@ -40,7 +40,7 @@ void main() {
   test('apply an animation', () {
     var file = _makeFile();
 
-    Animation animation;
+    LinearAnimation animation;
     Node node;
     KeyFrameDouble kf1, kf2;
     file.batchAdd(() {
@@ -50,7 +50,7 @@ void main() {
         ..y = 0;
       file.add(node);
 
-      animation = Animation()
+      animation = LinearAnimation()
         ..name = 'Test Animation'
         ..fps = 60;
       file.add(animation);

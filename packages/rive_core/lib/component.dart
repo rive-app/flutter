@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_core_field_type.dart';
@@ -264,7 +264,7 @@ abstract class Component extends ComponentBase<RiveFile>
 
   /// Add a keyframe on this object for [propertyKey] at [time].
   T addKeyFrame<T extends KeyFrame>(
-      Animation animation, int propertyKey, int frame) {
+      LinearAnimation animation, int propertyKey, int frame) {
     assert(hasProperty(propertyKey),
         '$this doesn\'t store a property with key $propertyKey');
     var keyedObject = animation.getKeyed(this);

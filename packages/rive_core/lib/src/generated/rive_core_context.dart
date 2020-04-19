@@ -3,6 +3,7 @@ import '../../animation/cubic_interpolator.dart';
 import '../../animation/keyed_object.dart';
 import '../../animation/keyed_property.dart';
 import '../../animation/keyframe_double.dart';
+import '../../animation/linear_animation.dart';
 import '../../artboard.dart';
 import '../../backboard.dart';
 import '../../node.dart';
@@ -26,6 +27,7 @@ import 'animation/keyed_object_base.dart';
 import 'animation/keyed_property_base.dart';
 import 'animation/keyframe_base.dart';
 import 'animation/keyframe_double_base.dart';
+import 'animation/linear_animation_base.dart';
 import 'artboard_base.dart';
 import 'backboard_base.dart';
 import 'component_base.dart';
@@ -71,6 +73,8 @@ abstract class RiveCoreContext extends CoreContext {
         return CubicInterpolator();
       case KeyFrameDoubleBase.typeKey:
         return KeyFrameDouble();
+      case LinearAnimationBase.typeKey:
+        return LinearAnimation();
       case LinearGradientBase.typeKey:
         return LinearGradient();
       case RadialGradientBase.typeKey:
@@ -158,13 +162,13 @@ abstract class RiveCoreContext extends CoreContext {
           setId(object, change.op, value);
           break;
         case KeyedPropertyBase.propertyKeyPropertyKey:
-        case AnimationBase.fpsPropertyKey:
-        case AnimationBase.durationPropertyKey:
-        case AnimationBase.loopPropertyKey:
-        case AnimationBase.workStartPropertyKey:
-        case AnimationBase.workEndPropertyKey:
         case KeyFrameBase.framePropertyKey:
         case KeyFrameBase.interpolationPropertyKey:
+        case LinearAnimationBase.fpsPropertyKey:
+        case LinearAnimationBase.durationPropertyKey:
+        case LinearAnimationBase.loopPropertyKey:
+        case LinearAnimationBase.workStartPropertyKey:
+        case LinearAnimationBase.workEndPropertyKey:
         case StrokeBase.capPropertyKey:
         case StrokeBase.joinPropertyKey:
         case SolidColorBase.colorValuePropertyKey:
@@ -180,12 +184,12 @@ abstract class RiveCoreContext extends CoreContext {
           var value = stringType.deserialize(reader);
           setString(object, change.op, value);
           break;
-        case AnimationBase.speedPropertyKey:
         case CubicInterpolatorBase.x1PropertyKey:
         case CubicInterpolatorBase.y1PropertyKey:
         case CubicInterpolatorBase.x2PropertyKey:
         case CubicInterpolatorBase.y2PropertyKey:
         case KeyFrameDoubleBase.valuePropertyKey:
+        case LinearAnimationBase.speedPropertyKey:
         case LinearGradientBase.startXPropertyKey:
         case LinearGradientBase.startYPropertyKey:
         case LinearGradientBase.endXPropertyKey:
@@ -218,7 +222,7 @@ abstract class RiveCoreContext extends CoreContext {
           var value = doubleType.deserialize(reader);
           setDouble(object, change.op, value);
           break;
-        case AnimationBase.enableWorkAreaPropertyKey:
+        case LinearAnimationBase.enableWorkAreaPropertyKey:
         case ShapePaintBase.isVisiblePropertyKey:
         case StrokeBase.transformAffectsStrokePropertyKey:
         case PointsPathBase.isClosedPropertyKey:
@@ -271,13 +275,13 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case KeyedPropertyBase.propertyKeyPropertyKey:
-      case AnimationBase.fpsPropertyKey:
-      case AnimationBase.durationPropertyKey:
-      case AnimationBase.loopPropertyKey:
-      case AnimationBase.workStartPropertyKey:
-      case AnimationBase.workEndPropertyKey:
       case KeyFrameBase.framePropertyKey:
       case KeyFrameBase.interpolationPropertyKey:
+      case LinearAnimationBase.fpsPropertyKey:
+      case LinearAnimationBase.durationPropertyKey:
+      case LinearAnimationBase.loopPropertyKey:
+      case LinearAnimationBase.workStartPropertyKey:
+      case LinearAnimationBase.workEndPropertyKey:
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
       case SolidColorBase.colorValuePropertyKey:
@@ -299,12 +303,12 @@ abstract class RiveCoreContext extends CoreContext {
           return null;
         }
         break;
-      case AnimationBase.speedPropertyKey:
       case CubicInterpolatorBase.x1PropertyKey:
       case CubicInterpolatorBase.y1PropertyKey:
       case CubicInterpolatorBase.x2PropertyKey:
       case CubicInterpolatorBase.y2PropertyKey:
       case KeyFrameDoubleBase.valuePropertyKey:
+      case LinearAnimationBase.speedPropertyKey:
       case LinearGradientBase.startXPropertyKey:
       case LinearGradientBase.startYPropertyKey:
       case LinearGradientBase.endXPropertyKey:
@@ -340,7 +344,7 @@ abstract class RiveCoreContext extends CoreContext {
           return null;
         }
         break;
-      case AnimationBase.enableWorkAreaPropertyKey:
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
       case ShapePaintBase.isVisiblePropertyKey:
       case StrokeBase.transformAffectsStrokePropertyKey:
       case PointsPathBase.isClosedPropertyKey:
@@ -404,41 +408,6 @@ abstract class RiveCoreContext extends CoreContext {
           object.name = value;
         }
         break;
-      case AnimationBase.fpsPropertyKey:
-        if (object is AnimationBase && value is int) {
-          object.fps = value;
-        }
-        break;
-      case AnimationBase.durationPropertyKey:
-        if (object is AnimationBase && value is int) {
-          object.duration = value;
-        }
-        break;
-      case AnimationBase.speedPropertyKey:
-        if (object is AnimationBase && value is double) {
-          object.speed = value;
-        }
-        break;
-      case AnimationBase.loopPropertyKey:
-        if (object is AnimationBase && value is int) {
-          object.loop = value;
-        }
-        break;
-      case AnimationBase.workStartPropertyKey:
-        if (object is AnimationBase && value is int) {
-          object.workStart = value;
-        }
-        break;
-      case AnimationBase.workEndPropertyKey:
-        if (object is AnimationBase && value is int) {
-          object.workEnd = value;
-        }
-        break;
-      case AnimationBase.enableWorkAreaPropertyKey:
-        if (object is AnimationBase && value is bool) {
-          object.enableWorkArea = value;
-        }
-        break;
       case CubicInterpolatorBase.x1PropertyKey:
         if (object is CubicInterpolatorBase && value is double) {
           object.x1 = value;
@@ -482,6 +451,41 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyFrameDoubleBase.valuePropertyKey:
         if (object is KeyFrameDoubleBase && value is double) {
           object.value = value;
+        }
+        break;
+      case LinearAnimationBase.fpsPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.fps = value;
+        }
+        break;
+      case LinearAnimationBase.durationPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.duration = value;
+        }
+        break;
+      case LinearAnimationBase.speedPropertyKey:
+        if (object is LinearAnimationBase && value is double) {
+          object.speed = value;
+        }
+        break;
+      case LinearAnimationBase.loopPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.loop = value;
+        }
+        break;
+      case LinearAnimationBase.workStartPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.workStart = value;
+        }
+        break;
+      case LinearAnimationBase.workEndPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.workEnd = value;
+        }
+        break;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        if (object is LinearAnimationBase && value is bool) {
+          object.enableWorkArea = value;
         }
         break;
       case ComponentBase.dependentIdsPropertyKey:
@@ -772,41 +776,6 @@ abstract class RiveCoreContext extends CoreContext {
           return object.name;
         }
         break;
-      case AnimationBase.fpsPropertyKey:
-        if (object is AnimationBase) {
-          return object.fps;
-        }
-        break;
-      case AnimationBase.durationPropertyKey:
-        if (object is AnimationBase) {
-          return object.duration;
-        }
-        break;
-      case AnimationBase.speedPropertyKey:
-        if (object is AnimationBase) {
-          return object.speed;
-        }
-        break;
-      case AnimationBase.loopPropertyKey:
-        if (object is AnimationBase) {
-          return object.loop;
-        }
-        break;
-      case AnimationBase.workStartPropertyKey:
-        if (object is AnimationBase) {
-          return object.workStart;
-        }
-        break;
-      case AnimationBase.workEndPropertyKey:
-        if (object is AnimationBase) {
-          return object.workEnd;
-        }
-        break;
-      case AnimationBase.enableWorkAreaPropertyKey:
-        if (object is AnimationBase) {
-          return object.enableWorkArea;
-        }
-        break;
       case CubicInterpolatorBase.x1PropertyKey:
         if (object is CubicInterpolatorBase) {
           return object.x1;
@@ -850,6 +819,41 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyFrameDoubleBase.valuePropertyKey:
         if (object is KeyFrameDoubleBase) {
           return object.value;
+        }
+        break;
+      case LinearAnimationBase.fpsPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.fps;
+        }
+        break;
+      case LinearAnimationBase.durationPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.duration;
+        }
+        break;
+      case LinearAnimationBase.speedPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.speed;
+        }
+        break;
+      case LinearAnimationBase.loopPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.loop;
+        }
+        break;
+      case LinearAnimationBase.workStartPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.workStart;
+        }
+        break;
+      case LinearAnimationBase.workEndPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.workEnd;
+        }
+        break;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.enableWorkArea;
         }
         break;
       case ComponentBase.dependentIdsPropertyKey:
@@ -1099,13 +1103,13 @@ abstract class RiveCoreContext extends CoreContext {
       case BackboardBase.mainArtboardIdPropertyKey:
         return idType;
       case KeyedPropertyBase.propertyKeyPropertyKey:
-      case AnimationBase.fpsPropertyKey:
-      case AnimationBase.durationPropertyKey:
-      case AnimationBase.loopPropertyKey:
-      case AnimationBase.workStartPropertyKey:
-      case AnimationBase.workEndPropertyKey:
       case KeyFrameBase.framePropertyKey:
       case KeyFrameBase.interpolationPropertyKey:
+      case LinearAnimationBase.fpsPropertyKey:
+      case LinearAnimationBase.durationPropertyKey:
+      case LinearAnimationBase.loopPropertyKey:
+      case LinearAnimationBase.workStartPropertyKey:
+      case LinearAnimationBase.workEndPropertyKey:
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
       case SolidColorBase.colorValuePropertyKey:
@@ -1117,12 +1121,12 @@ abstract class RiveCoreContext extends CoreContext {
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
         return stringType;
-      case AnimationBase.speedPropertyKey:
       case CubicInterpolatorBase.x1PropertyKey:
       case CubicInterpolatorBase.y1PropertyKey:
       case CubicInterpolatorBase.x2PropertyKey:
       case CubicInterpolatorBase.y2PropertyKey:
       case KeyFrameDoubleBase.valuePropertyKey:
+      case LinearAnimationBase.speedPropertyKey:
       case LinearGradientBase.startXPropertyKey:
       case LinearGradientBase.startYPropertyKey:
       case LinearGradientBase.endXPropertyKey:
@@ -1153,7 +1157,7 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originXPropertyKey:
       case ArtboardBase.originYPropertyKey:
         return doubleType;
-      case AnimationBase.enableWorkAreaPropertyKey:
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
       case ShapePaintBase.isVisiblePropertyKey:
       case StrokeBase.transformAffectsStrokePropertyKey:
       case PointsPathBase.isClosedPropertyKey:
@@ -1196,20 +1200,20 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case KeyedPropertyBase.propertyKeyPropertyKey:
         return (object as KeyedPropertyBase).propertyKey;
-      case AnimationBase.fpsPropertyKey:
-        return (object as AnimationBase).fps;
-      case AnimationBase.durationPropertyKey:
-        return (object as AnimationBase).duration;
-      case AnimationBase.loopPropertyKey:
-        return (object as AnimationBase).loop;
-      case AnimationBase.workStartPropertyKey:
-        return (object as AnimationBase).workStart;
-      case AnimationBase.workEndPropertyKey:
-        return (object as AnimationBase).workEnd;
       case KeyFrameBase.framePropertyKey:
         return (object as KeyFrameBase).frame;
       case KeyFrameBase.interpolationPropertyKey:
         return (object as KeyFrameBase).interpolation;
+      case LinearAnimationBase.fpsPropertyKey:
+        return (object as LinearAnimationBase).fps;
+      case LinearAnimationBase.durationPropertyKey:
+        return (object as LinearAnimationBase).duration;
+      case LinearAnimationBase.loopPropertyKey:
+        return (object as LinearAnimationBase).loop;
+      case LinearAnimationBase.workStartPropertyKey:
+        return (object as LinearAnimationBase).workStart;
+      case LinearAnimationBase.workEndPropertyKey:
+        return (object as LinearAnimationBase).workEnd;
       case StrokeBase.capPropertyKey:
         return (object as StrokeBase).cap;
       case StrokeBase.joinPropertyKey:
@@ -1240,8 +1244,6 @@ abstract class RiveCoreContext extends CoreContext {
 
   static double getDouble(Core object, int propertyKey) {
     switch (propertyKey) {
-      case AnimationBase.speedPropertyKey:
-        return (object as AnimationBase).speed;
       case CubicInterpolatorBase.x1PropertyKey:
         return (object as CubicInterpolatorBase).x1;
       case CubicInterpolatorBase.y1PropertyKey:
@@ -1252,6 +1254,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as CubicInterpolatorBase).y2;
       case KeyFrameDoubleBase.valuePropertyKey:
         return (object as KeyFrameDoubleBase).value;
+      case LinearAnimationBase.speedPropertyKey:
+        return (object as LinearAnimationBase).speed;
       case LinearGradientBase.startXPropertyKey:
         return (object as LinearGradientBase).startX;
       case LinearGradientBase.startYPropertyKey:
@@ -1316,8 +1320,8 @@ abstract class RiveCoreContext extends CoreContext {
 
   static bool getBool(Core object, int propertyKey) {
     switch (propertyKey) {
-      case AnimationBase.enableWorkAreaPropertyKey:
-        return (object as AnimationBase).enableWorkArea;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        return (object as LinearAnimationBase).enableWorkArea;
       case ShapePaintBase.isVisiblePropertyKey:
         return (object as ShapePaintBase).isVisible;
       case StrokeBase.transformAffectsStrokePropertyKey:
@@ -1383,26 +1387,26 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyedPropertyBase.propertyKeyPropertyKey:
         (object as KeyedPropertyBase).propertyKey = value;
         break;
-      case AnimationBase.fpsPropertyKey:
-        (object as AnimationBase).fps = value;
-        break;
-      case AnimationBase.durationPropertyKey:
-        (object as AnimationBase).duration = value;
-        break;
-      case AnimationBase.loopPropertyKey:
-        (object as AnimationBase).loop = value;
-        break;
-      case AnimationBase.workStartPropertyKey:
-        (object as AnimationBase).workStart = value;
-        break;
-      case AnimationBase.workEndPropertyKey:
-        (object as AnimationBase).workEnd = value;
-        break;
       case KeyFrameBase.framePropertyKey:
         (object as KeyFrameBase).frame = value;
         break;
       case KeyFrameBase.interpolationPropertyKey:
         (object as KeyFrameBase).interpolation = value;
+        break;
+      case LinearAnimationBase.fpsPropertyKey:
+        (object as LinearAnimationBase).fps = value;
+        break;
+      case LinearAnimationBase.durationPropertyKey:
+        (object as LinearAnimationBase).duration = value;
+        break;
+      case LinearAnimationBase.loopPropertyKey:
+        (object as LinearAnimationBase).loop = value;
+        break;
+      case LinearAnimationBase.workStartPropertyKey:
+        (object as LinearAnimationBase).workStart = value;
+        break;
+      case LinearAnimationBase.workEndPropertyKey:
+        (object as LinearAnimationBase).workEnd = value;
         break;
       case StrokeBase.capPropertyKey:
         (object as StrokeBase).cap = value;
@@ -1441,9 +1445,6 @@ abstract class RiveCoreContext extends CoreContext {
 
   static void setDouble(Core object, int propertyKey, double value) {
     switch (propertyKey) {
-      case AnimationBase.speedPropertyKey:
-        (object as AnimationBase).speed = value;
-        break;
       case CubicInterpolatorBase.x1PropertyKey:
         (object as CubicInterpolatorBase).x1 = value;
         break;
@@ -1458,6 +1459,9 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case KeyFrameDoubleBase.valuePropertyKey:
         (object as KeyFrameDoubleBase).value = value;
+        break;
+      case LinearAnimationBase.speedPropertyKey:
+        (object as LinearAnimationBase).speed = value;
         break;
       case LinearGradientBase.startXPropertyKey:
         (object as LinearGradientBase).startX = value;
@@ -1559,8 +1563,8 @@ abstract class RiveCoreContext extends CoreContext {
 
   static void setBool(Core object, int propertyKey, bool value) {
     switch (propertyKey) {
-      case AnimationBase.enableWorkAreaPropertyKey:
-        (object as AnimationBase).enableWorkArea = value;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        (object as LinearAnimationBase).enableWorkArea = value;
         break;
       case ShapePaintBase.isVisiblePropertyKey:
         (object as ShapePaintBase).isVisible = value;

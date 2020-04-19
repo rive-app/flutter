@@ -21,9 +21,9 @@ typedef GetOfflineChangesCallback = Future<List<ChangeSet>> Function();
 typedef HelloCallback = void Function(int);
 typedef PlayersCallback = void Function(List<Player>);
 typedef UpdateCursorCallback = void Function(int, PlayerCursor);
-typedef ConnectionChangedCallback = void Function(ConnectionState);
+typedef ConnectionChangedCallback = void Function(CoopConnectionState);
 
-enum ConnectionState { disconnected, connecting, handshaking, connected }
+enum CoopConnectionState { disconnected, connecting, handshaking, connected }
 
 class CoopClient extends CoopReader {
   final String url;
@@ -31,9 +31,9 @@ class CoopClient extends CoopReader {
   CoopWriter _writer;
   bool _isAuthenticated = false;
   bool get isAuthenticated => _isAuthenticated;
-  ConnectionState get connectionState => _connectionState;
-  ConnectionState _connectionState = ConnectionState.disconnected;
-  void _changeState(ConnectionState state) {
+  CoopConnectionState get connectionState => _connectionState;
+  CoopConnectionState _connectionState = CoopConnectionState.disconnected;
+  void _changeState(CoopConnectionState state) {
     if (_connectionState != state) {
       _connectionState = state;
       stateChanged?.call(state);
@@ -84,7 +84,7 @@ class CoopClient extends CoopReader {
         Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
   }
 
-  bool get isConnected => _connectionState == ConnectionState.connected;
+  bool get isConnected => _connectionState == CoopConnectionState.connected;
 
   void _ping() {
     if (!isConnected) {
@@ -133,7 +133,7 @@ class CoopClient extends CoopReader {
     _channel = RiveWebSocketChannel.connect(Uri.parse(url), _token);
     _connectionCompleter = Completer<ConnectResult>();
 
-    _changeState(ConnectionState.connecting);
+    _changeState(CoopConnectionState.connecting);
 
     runZoned(() {
       _subscription =
@@ -160,7 +160,7 @@ class CoopClient extends CoopReader {
   }
 
   Future<void> _disconnected() async {
-    _changeState(ConnectionState.disconnected);
+    _changeState(CoopConnectionState.disconnected);
     _pingTimer?.cancel();
     if (_channel != null && _channel.sink != null) {
       await _channel.sink.close();
@@ -170,8 +170,8 @@ class CoopClient extends CoopReader {
   }
 
   void write(Uint8List buffer) {
-    assert(_connectionState == ConnectionState.handshaking ||
-        _connectionState == ConnectionState.connected);
+    assert(_connectionState == CoopConnectionState.handshaking ||
+        _connectionState == CoopConnectionState.connected);
     _channel?.sink?.add(buffer);
   }
 
@@ -223,13 +223,13 @@ class CoopClient extends CoopReader {
   Future<void> recvHello(int clientId) async {
     _clientId = clientId;
     gotClientId?.call(clientId);
-    _changeState(ConnectionState.handshaking);
+    _changeState(CoopConnectionState.handshaking);
     _reconnectAttempt = 0;
     _isAuthenticated = true;
 
     // Once all offline changes are sent...
 
-    assert(_connectionState == ConnectionState.handshaking);
+    assert(_connectionState == CoopConnectionState.handshaking);
 
     var changes = await getOfflineChanges?.call();
     _writer.writeSync(changes);
@@ -237,7 +237,7 @@ class CoopClient extends CoopReader {
 
   @override
   Future<void> recvReady() async {
-    _changeState(ConnectionState.connected);
+    _changeState(CoopConnectionState.connected);
     _connectionCompleter?.complete(ConnectResult.connected);
     _connectionCompleter = null;
     _ping();

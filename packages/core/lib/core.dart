@@ -787,7 +787,7 @@ abstract class CoreContext implements LocalSettings {
     _client.sendCursor(_lastCursorX, _lastCursorY);
   }
 
-  void connectionStateChanged(ConnectionState state);
+  void connectionStateChanged(CoopConnectionState state);
 }
 
 class FreshChange {

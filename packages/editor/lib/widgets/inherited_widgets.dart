@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
+import 'package:rive_editor/rive/managers/animation_manager.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -178,7 +179,7 @@ class _InheritedNotificationProvider extends InheritedWidget {
 // Follow state provider
 
 class FollowProvider extends StatefulWidget {
-    const FollowProvider({@required this.manager, this.child});
+  const FollowProvider({@required this.manager, this.child});
   final Widget child;
   final FollowManager manager;
 
@@ -218,5 +219,66 @@ class _InheritedFollowProvider extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_InheritedFollowProvider old) =>
+      manager != old.manager;
+}
+
+// Animation provider. This is responsible for building new managers when the
+// file changes.
+class AnimationProvider extends StatefulWidget {
+  const AnimationProvider({@required this.file, this.child});
+  final Widget child;
+  final OpenFileContext file;
+
+  @override
+  _AnimationProviderState createState() => _AnimationProviderState();
+
+  static AnimationManager of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_InheritedAnimationProvider>()
+      .manager;
+}
+
+class _AnimationProviderState extends State<AnimationProvider> {
+  AnimationManager _manager;
+
+  @override
+  void initState() {
+    _manager = widget.file == null ? null : AnimationManager(file: widget.file);
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(AnimationProvider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.file != widget.file) {
+      _manager =
+          widget.file == null ? null : AnimationManager(file: widget.file);
+    }
+  }
+
+  @override
+  void dispose() {
+    _manager.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => _InheritedAnimationProvider(
+        manager: _manager,
+        child: widget.child,
+      );
+}
+
+class _InheritedAnimationProvider extends InheritedWidget {
+  const _InheritedAnimationProvider({
+    @required this.manager,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final AnimationManager manager;
+
+  @override
+  bool updateShouldNotify(_InheritedAnimationProvider old) =>
       manager != old.manager;
 }

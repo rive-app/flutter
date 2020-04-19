@@ -2,10 +2,11 @@ import 'dart:collection';
 
 import 'package:core/core.dart';
 import 'package:logging/logging.dart';
-import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
+
+import 'linear_animation.dart';
 export 'package:rive_core/src/generated/animation/keyed_object_base.dart';
 
 final _log = Logger('animation');
@@ -17,12 +18,12 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   @override
   void onAdded() {}
 
-  Animation get animation => context?.resolve(animationId);
+  LinearAnimation get animation => context?.resolve(animationId);
 
   @override
   void onAddedDirty() {
     if (animationId != null) {
-      Animation animation = context?.resolve(animationId);
+      LinearAnimation animation = context?.resolve(animationId);
       if (animation == null) {
         _log.finest("Failed to resolve animation with id $animationId");
       } else {
@@ -45,7 +46,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       assert(
           value == property,
           'Trying to add a KeyedProperty for a property'
-          'that\'s already keyed in this Animation?!');
+          'that\'s already keyed in this LinearAnimation?!');
       return false;
     }
     _keyedProperties[property.propertyKey] = property;

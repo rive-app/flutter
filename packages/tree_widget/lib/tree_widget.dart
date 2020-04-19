@@ -370,7 +370,15 @@ class TreeView<T> extends StatelessWidget {
                                           ),
                                         ),
                                       ]
-                                    : [SizedBox(width: indent)],
+                                    : [
+                                        SizedBox(
+                                          width: style.showFirstLine ||
+                                                  hasChildren ||
+                                                  spaces != 0
+                                              ? indent
+                                              : 0,
+                                        )
+                                      ],
                                 for (int i = 0; i < item.spacing - 1; i++)
                                   Padding(
                                     padding: EdgeInsets.only(right: padIndent),

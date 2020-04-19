@@ -1,11 +1,29 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:core/debounce.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/animation/animation.dart';
+import 'package:rive_editor/rive/managers/animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/common/animated_factor_builder.dart';
 import 'package:rive_editor/widgets/common/fractional_intrinsic_height.dart';
+import 'package:rive_editor/widgets/common/renamable.dart';
+import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
+import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
+import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:tree_widget/flat_tree_item.dart';
+import 'package:tree_widget/tree_controller.dart';
+import 'package:tree_widget/tree_scroll_view.dart';
+import 'package:tree_widget/tree_style.dart';
+import 'package:tree_widget/tree_widget.dart';
+import 'package:rive_core/selectable_item.dart';
 
 /// Container for the animation panel that allows it to slide up from the bottom
 /// when animation mode is activated.
@@ -103,7 +121,225 @@ class _AnimationPanelContents extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return ColoredBox(
-      color: theme.colors.animationPanelBackground,
+        color: theme.colors.animationPanelBackground,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: 236,
+              child: ColoredBox(
+                color: theme.colors.tabBackground,
+                child: AnimationHierarchyView(
+                  animationManager: AnimationProvider.of(context),
+                ),
+              ),
+            ),
+            Expanded(
+              child: SizedBox(),
+            ),
+            SizedBox(width: 200),
+          ],
+        ));
+  }
+}
+
+class AnimationTreeController
+    extends TreeController<ValueStream<AnimationViewModel>> {
+  final AnimationManager animationManager;
+  StreamSubscription<Iterable<ValueStream<AnimationViewModel>>> _subscription;
+
+  AnimationTreeController(this.animationManager) : super([]) {
+    _subscription = animationManager.animations.listen(_animationsChanged);
+  }
+
+  void _animationsChanged(
+      Iterable<ValueStream<AnimationViewModel>> animations) {
+    data = animations.toList();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription.cancel();
+    cancelDebounce(flatten);
+  }
+
+  @override
+  List<ValueStream<AnimationViewModel>> childrenOf(
+          ValueStream<AnimationViewModel> treeItem) =>
+      null;
+
+  @override
+  void drop(
+      FlatTreeItem<ValueStream<AnimationViewModel>> target,
+      DropState state,
+      List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {}
+
+  @override
+  bool isDisabled(ValueStream<AnimationViewModel> treeItem) {
+    return false;
+  }
+
+  @override
+  bool isProperty(ValueStream<AnimationViewModel> treeItem) => false;
+
+  @override
+  List<FlatTreeItem<ValueStream<AnimationViewModel>>> onDragStart(
+          DragStartDetails details,
+          FlatTreeItem<ValueStream<AnimationViewModel>> item) =>
+      [];
+
+  @override
+  void onMouseEnter(PointerEnterEvent event,
+      FlatTreeItem<ValueStream<AnimationViewModel>> item) {}
+
+  @override
+  void onMouseExit(PointerExitEvent event,
+      FlatTreeItem<ValueStream<AnimationViewModel>> item) {}
+
+  @override
+  void onTap(FlatTreeItem<ValueStream<AnimationViewModel>> item) {}
+
+  @override
+  int spacingOf(ValueStream<AnimationViewModel> treeItem) => 1;
+}
+
+class AnimationHierarchyView extends StatefulWidget {
+  final AnimationManager animationManager;
+
+  const AnimationHierarchyView({
+    @required this.animationManager,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _AnimationHierarchyViewState createState() => _AnimationHierarchyViewState();
+}
+
+class _AnimationHierarchyViewState extends State<AnimationHierarchyView> {
+  AnimationTreeController _treeController;
+  @override
+  void initState() {
+    _treeController = AnimationTreeController(widget.animationManager);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _treeController.dispose();
+  }
+
+  @override
+  void didUpdateWidget(AnimationHierarchyView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animationManager != widget.animationManager) {
+      _treeController = AnimationTreeController(widget.animationManager);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = RiveTheme.of(context);
+    var style = TreeStyle(
+      showFirstLine: false,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      lineColor: RiveTheme.of(context).colors.darkTreeLines,
+    );
+    return TreeScrollView(
+      style: style,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              bottom: 3,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'ANIMATIONS',
+                    style: theme.textStyles.inspectorSectionHeader
+                        .copyWith(height: 1),
+                  ),
+                ),
+                TintedIconButton(
+                  icon: 'add',
+                  onPress: widget.animationManager.makeLinearAnimation,
+                )
+              ],
+            ),
+          ),
+        ),
+        TreeView<ValueStream<AnimationViewModel>>(
+          style: style,
+          controller: _treeController,
+          expanderBuilder: (context, item, style) => Container(
+            child: Center(
+              child: TreeExpander(
+                key: item.key,
+                iconColor: Colors.white,
+                isExpanded: item.isExpanded,
+              ),
+            ),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: style.lineColor,
+                width: 1.0,
+                style: BorderStyle.solid,
+              ),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(7.5),
+              ),
+            ),
+          ),
+          iconBuilder: (context, item, style) => TintedIcon(
+            icon: item.data.value.icon,
+            color: theme.colors.inspectorTextColor,
+          ),
+          backgroundBuilder: (context, item, style) =>
+              ValueListenableBuilder<DropState>(
+            valueListenable: item.dropState,
+            builder: (context, dropState, _) => StreamBuilder(
+              stream: item.data,
+              builder: (context, viewModel) =>
+                  DropItemBackground(dropState, SelectionState.none),
+            ),
+          ),
+          itemBuilder: (context, item, style) => StreamBuilder(
+            stream: item.data,
+            builder: (context, viewModel) => Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    // Use CorePropertyBuilder to get notified when the
+                    // component's name changes.
+                    child: CorePropertyBuilder<String>(
+                      object: item.data.value.animation,
+                      propertyKey: AnimationBase.namePropertyKey,
+                      builder: (context, name, _) => Renamable(
+                        style: theme.textStyles.inspectorWhiteLabel,
+                        name: name,
+                        color: false //state == SelectionState.selected
+                            ? Colors.white
+                            : theme.colors.inspectorTextColor,
+                        onRename: (name) {
+                          // item.data.name = name;
+                          // controller.file.core.captureJournalEntry();
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 5)
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

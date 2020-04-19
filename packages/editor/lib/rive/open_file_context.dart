@@ -271,15 +271,15 @@ class OpenFileContext with RiveFileDelegate {
   bool redo() => core.redo();
 
   @override
-  void onConnectionStateChanged(ConnectionState state) {
+  void onConnectionStateChanged(CoopConnectionState state) {
     /// We use this to handle changes that can come in during use. Right now we
     /// only handle showing the re-connecting (connecting) state.
     switch (state) {
-      case ConnectionState.connecting:
+      case CoopConnectionState.connecting:
         _state = OpenFileState.loading;
         stateChanged.notify();
         break;
-      case ConnectionState.connected:
+      case CoopConnectionState.connected:
         _state = OpenFileState.open;
         stateChanged.notify();
         break;

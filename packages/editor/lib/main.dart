@@ -195,7 +195,10 @@ class InsertInheritedWidgets extends StatelessWidget {
                     // determine it without looking for the rive context.
                     ActiveFile(
                   file: file,
-                  child: child,
+                  child: AnimationProvider(
+                    file: file,
+                    child: child,
+                  ),
                 ),
                 // Passing the child in separate from the value listenable
                 // builder as anything interested in the ActiveFile will .of()
