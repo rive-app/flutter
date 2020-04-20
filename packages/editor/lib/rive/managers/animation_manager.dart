@@ -27,6 +27,7 @@ class AnimationManager with RiveFileDelegate {
   final _selectedAnimationStream = BehaviorSubject<AnimationViewModel>();
   final _selectAnimationController = StreamController<AnimationViewModel>();
   final _deleteController = StreamController<AnimationViewModel>();
+  final _renameController = StreamController<RenameAnimationModel>();
 
   /// Input to create new animations.
   final _createController = StreamController<AnimationType>();
@@ -55,6 +56,9 @@ class AnimationManager with RiveFileDelegate {
     // Listen for delete requests.
     _deleteController.stream.listen(_onDelete);
 
+    // Listen for rename requests.
+    _renameController.stream.listen(_onRename);
+
     _createController.stream.listen((type) {
       switch (type) {
         case AnimationType.linear:
@@ -62,6 +66,14 @@ class AnimationManager with RiveFileDelegate {
           break;
       }
     });
+  }
+
+  void _onRename(RenameAnimationModel model) {
+    assert(model?.viewModel?.animation?.context != null);
+    var core = model.viewModel.animation.context;
+
+    model.viewModel.animation.name = model.name;
+    core.captureJournalEntry();
   }
 
   void _onDelete(AnimationViewModel viewModel) {
@@ -201,6 +213,7 @@ class AnimationManager with RiveFileDelegate {
   Sink<AnimationViewModel> get mouseOut => _mouseOutController;
   Sink<AnimationType> get create => _createController;
   Sink<AnimationViewModel> get delete => _deleteController;
+  Sink<RenameAnimationModel> get rename => _renameController;
 
   void _makeLinearAnimation() {
     var regex = RegExp(r"Untitled ([0-9])+");
@@ -224,6 +237,7 @@ class AnimationManager with RiveFileDelegate {
   /// Cleanup the manager.
   void dispose() {
     // Make sure to close all streams and cancel any debounced methods.
+    _renameController.close();
     _deleteController.close();
     _createController.close();
     _mouseOverController.close();
@@ -262,4 +276,12 @@ class AnimationViewModel {
         icon: icon ?? this.icon,
         selectionState: selectionState ?? this.selectionState,
       );
+}
+
+/// A data model sent to the manager to trigger a rename of an animation.
+class RenameAnimationModel {
+  final String name;
+  final AnimationViewModel viewModel;
+
+  RenameAnimationModel(this.name, this.viewModel);
 }

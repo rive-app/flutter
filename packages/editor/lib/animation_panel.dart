@@ -353,34 +353,38 @@ class _AnimationHierarchyViewState extends State<AnimationHierarchyView> {
               ),
             ),
           ),
-          itemBuilder: (context, item, style) => StreamBuilder(
+          itemBuilder: (context, item, style) =>
+              StreamBuilder<AnimationViewModel>(
             stream: item.data,
-            builder: (context, viewModel) => Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    // Use CorePropertyBuilder to get notified when the
-                    // component's name changes.
-                    child: CorePropertyBuilder<String>(
-                      object: item.data.value.animation,
-                      propertyKey: AnimationBase.namePropertyKey,
-                      builder: (context, name, _) => Renamable(
-                        style: theme.textStyles.inspectorWhiteLabel,
-                        name: name,
-                        color: false //state == SelectionState.selected
-                            ? Colors.white
-                            : theme.colors.inspectorTextColor,
-                        onRename: (name) {
-                          // item.data.name = name;
-                          // controller.file.core.captureJournalEntry();
-                        },
-                      ),
+            builder: (context, snapshot) => Expanded(
+              child: !snapshot.hasData
+                  ? const SizedBox()
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          // Use CorePropertyBuilder to get notified when the
+                          // component's name changes.
+                          child: CorePropertyBuilder<String>(
+                            object: snapshot.data.animation,
+                            propertyKey: AnimationBase.namePropertyKey,
+                            builder: (context, name, _) => Renamable(
+                              style: theme.textStyles.inspectorWhiteLabel,
+                              name: name,
+                              color: snapshot.data.selectionState !=
+                                      SelectionState.none
+                                  ? Colors.white
+                                  : theme.colors.inspectorTextColor,
+                              onRename: (name) {
+                                widget.animationManager.rename.add(
+                                    RenameAnimationModel(name, snapshot.data));
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5)
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 5)
-                ],
-              ),
             ),
           ),
         ),
