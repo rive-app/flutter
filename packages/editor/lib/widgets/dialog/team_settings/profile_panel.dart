@@ -102,12 +102,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                                   label: '${labelPrefix}Name',
                                   onChanged: (value) => _profile.name = value,
                                   initialValue: _profile.name,
+                                  hint: 'Pick a name',
                                 ),
                                 LabeledTextField(
                                   label: '${labelPrefix}Username',
                                   onChanged: (value) =>
                                       _profile.username = value,
                                   initialValue: _profile.username,
+                                  hint: 'Pick a username',
                                 )
                               ]),
                               const SizedBox(height: 30),
