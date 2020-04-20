@@ -51,14 +51,12 @@ class _LoginState extends State<Login> {
   bool _isSending = false;
   LoginPage _currentPanel = LoginPage.login;
 
-  void _togglePanel() {
-    setState(() {
-      if (_currentPanel == LoginPage.login) {
-        _currentPanel = LoginPage.register;
-      } else {
-        _currentPanel = LoginPage.login;
-      }
-    });
+  void _selectPanel(LoginPage page) {
+    if (page != _currentPanel) {
+      setState(() {
+        _currentPanel = page;
+      });
+    }
   }
 
   Future<void> _recover() async {
@@ -73,8 +71,7 @@ class _LoginState extends State<Login> {
     final emailSent =
         await auth.forgot(Uri.encodeComponent(usernameController.text));
     if (emailSent) {
-      // print("Sent recovery email!");
-      _togglePanel(); // Back to login page.
+      _selectPanel(LoginPage.login); // Back to login page.
     }
     setState(() {
       _isSending = false;
@@ -153,9 +150,7 @@ class _LoginState extends State<Login> {
                     style: styles.buttonUnderline
                         .copyWith(height: 1.6, fontSize: 13),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () => setState(() {
-                            _currentPanel = LoginPage.login;
-                          }),
+                      ..onTap = () => _selectPanel(LoginPage.login),
                   ),
                 ]),
           ),
@@ -381,9 +376,7 @@ class _LoginState extends State<Login> {
                     const SizedBox(height: 8),
                     UnderlineTextButton(
                       text: 'Forgot your Password?',
-                      onPressed: () => setState(() {
-                        _currentPanel = LoginPage.recover;
-                      }),
+                      onPressed: () => _selectPanel(LoginPage.recover),
                     ),
                   ],
                 ),
@@ -430,22 +423,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
-    final textStyles = theme.textStyles;
     final colors = theme.colors;
-
-    bool isSwitchOn;
-    switch (_currentPanel) {
-      case LoginPage.register:
-        isSwitchOn = true;
-        break;
-      case LoginPage.recover:
-        isSwitchOn = null;
-        break;
-      case LoginPage.login:
-      default:
-        isSwitchOn = false;
-        break;
-    }
 
     return Stack(
       children: <Widget>[
@@ -466,41 +444,89 @@ class _LoginState extends State<Login> {
               width: 714,
               child: Stack(children: [
                 Positioned(
-                  right: 30,
-                  top: 30,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Log In',
-                        style: textStyles.regularText.copyWith(
-                            color: _currentPanel == LoginPage.login
-                                ? colors.commonDarkGrey
-                                : colors.commonLightGrey),
-                      ),
-                      const SizedBox(width: 10),
-                      EditorSwitch(
-                        isOn: isSwitchOn,
-                        toggle: _togglePanel,
-                        onColor: Colors.white,
-                        offColor: Colors.white,
-                        backgroundColor: isSwitchOn == null
-                            ? colors.toggleInactiveBackground
-                            : colors.toggleBackground,
-                      ),
-                      const SizedBox(width: 10),
-                      Text('Sign Up',
-                          style: textStyles.regularText.copyWith(
-                              color: _currentPanel == LoginPage.register
-                                  ? colors.commonDarkGrey
-                                  : colors.commonLightGrey)),
-                    ],
-                  ),
-                ),
+                    right: 30,
+                    top: 30,
+                    child: _LoginSwitch(
+                        panel: _currentPanel, onSelect: _selectPanel)),
                 Align(alignment: Alignment.center, child: _panelContents()),
               ])),
         ]),
       ],
+    );
+  }
+}
+
+class _LoginSwitch extends StatelessWidget {
+  final LoginPage panel;
+  final ValueChanged<LoginPage> onSelect;
+
+  const _LoginSwitch({@required this.panel, @required this.onSelect, Key key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+
+    bool isLogin;
+    switch (panel) {
+      case LoginPage.register:
+        isLogin = true;
+        break;
+      case LoginPage.recover:
+        isLogin = null;
+        break;
+      case LoginPage.login:
+      default:
+        isLogin = false;
+        break;
+    }
+
+    return Container(
+      height: 20,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          GestureDetector(
+            onTap: () => onSelect(LoginPage.login),
+            behavior: HitTestBehavior.opaque,
+            child: Center(
+              child: Text(
+                'Log In',
+                style: textStyles.regularText.copyWith(
+                    color: panel == LoginPage.login
+                        ? colors.commonDarkGrey
+                        : colors.commonLightGrey),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          EditorSwitch(
+            isOn: isLogin,
+            toggle: () => onSelect(panel == LoginPage.register
+                ? LoginPage.login
+                : LoginPage.register),
+            onColor: Colors.white,
+            offColor: Colors.white,
+            backgroundColor: panel == LoginPage.recover
+                ? colors.toggleInactiveBackground
+                : colors.toggleBackground,
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: () => onSelect(LoginPage.register),
+            behavior: HitTestBehavior.opaque,
+            child: Center(
+              child: Text('Sign Up',
+                  style: textStyles.regularText.copyWith(
+                      color: panel == LoginPage.register
+                          ? colors.commonDarkGrey
+                          : colors.commonLightGrey)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
