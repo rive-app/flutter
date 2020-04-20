@@ -60,6 +60,10 @@ class MyTreeController extends TreeController<TreeItem> {
 
   @override
   void onTap(FlatTreeItem<TreeItem> item) {}
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<TreeItem> item) {}
 }
 
 void main() {

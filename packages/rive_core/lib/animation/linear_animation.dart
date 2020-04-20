@@ -12,6 +12,9 @@ class LinearAnimation extends LinearAnimationBase {
   /// object is keyed in this animation.
   final HashMap<Id, KeyedObject> _keyedObjects = HashMap<Id, KeyedObject>();
 
+  /// The metadata for the objects that are keyed in this animation.
+  Iterable<KeyedObject> get keyedObjects => _keyedObjects.values;
+
   @override
   void onAdded() {
     // TODO: implement onAdded

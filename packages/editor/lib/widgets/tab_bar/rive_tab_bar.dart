@@ -452,8 +452,8 @@ class _RenderTabFader extends RenderProxyBox {
 
     if (_separator != null) {
       context.canvas.drawLine(
-        rect.topLeft.translate(0, TabDecoration.cornerRadius + 1),
-        rect.bottomLeft.translate(0, -TabDecoration.cornerRadius - 1),
+        rect.topLeft.translate(1, TabDecoration.cornerRadius + 1),
+        rect.bottomLeft.translate(1, -TabDecoration.cornerRadius - 1),
         Paint()..color = _separator..isAntiAlias = false,
       );
     }

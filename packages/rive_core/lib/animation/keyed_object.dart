@@ -15,6 +15,8 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   final HashMap<int, KeyedProperty> _keyedProperties =
       HashMap<int, KeyedProperty>();
 
+  Iterable<KeyedProperty> get keyedProperties => _keyedProperties.values;
+
   @override
   void onAdded() {}
 

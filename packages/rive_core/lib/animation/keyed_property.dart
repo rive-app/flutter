@@ -13,6 +13,8 @@ final _log = Logger('animation');
 class KeyedProperty extends KeyedPropertyBase<RiveFile> {
   final List<KeyFrame> _keyframes = [];
 
+  Iterable<KeyFrame> get keyframes => _keyframes;
+
   @override
   void onAdded() {}
 

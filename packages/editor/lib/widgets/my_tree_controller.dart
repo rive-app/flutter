@@ -136,4 +136,9 @@ class MyTreeController extends TreeController<TreeItem> {
         ? 2
         : 1;
   }
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<TreeItem> item) {
+  }
 }

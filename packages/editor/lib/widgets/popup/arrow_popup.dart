@@ -44,6 +44,9 @@ class ArrowPopup {
     /// from what launched the popup).
     Offset offset = Offset.zero,
 
+    /// Specify global position to use instead of direction.
+    Offset position,
+
     /// Spacing applied between the area of interest and the popup in the
     /// direction this popup is docked/opened.
     double directionPadding = 16,
@@ -88,35 +91,43 @@ class ArrowPopup {
           return ValueListenableBuilder<Rect>(
             valueListenable: contextRect.rect,
             builder: (context, contextRect, child) {
-              _ListPopupMultiLayoutDelegate _layoutDelegate =
-                  _ListPopupMultiLayoutDelegate(
-                from: contextRect,
-                direction: direction,
-                fallbackDirections: fallbackDirections,
-                width: width,
-                offset: offset,
-                directionPadding: directionPadding,
-                arrowTweak: arrowTweak,
-              );
-              return CustomMultiChildLayout(
-                delegate: _layoutDelegate,
-                children: [
-                  if (showArrow)
-                    LayoutId(
-                      id: _ListPopupLayoutElement.arrow,
-                      child: CustomPaint(
-                        painter: _ArrowPathPainter(
-                          background,
-                          _layoutDelegate,
+              if (position != null) {
+                // Use a layout system for a global cursor position.
+                return CustomSingleChildLayout(
+                  delegate: _PositionedPopupDelegate(position, width),
+                  child: child,
+                );
+              } else {
+                _ListPopupMultiLayoutDelegate _layoutDelegate =
+                    _ListPopupMultiLayoutDelegate(
+                  from: contextRect,
+                  direction: direction,
+                  fallbackDirections: fallbackDirections,
+                  width: width,
+                  offset: offset,
+                  directionPadding: directionPadding,
+                  arrowTweak: arrowTweak,
+                );
+                return CustomMultiChildLayout(
+                  delegate: _layoutDelegate,
+                  children: [
+                    if (showArrow)
+                      LayoutId(
+                        id: _ListPopupLayoutElement.arrow,
+                        child: CustomPaint(
+                          painter: _ArrowPathPainter(
+                            background,
+                            _layoutDelegate,
+                          ),
                         ),
                       ),
+                    LayoutId(
+                      id: _ListPopupLayoutElement.body,
+                      child: child,
                     ),
-                  LayoutId(
-                    id: _ListPopupLayoutElement.body,
-                    child: child,
-                  ),
-                ],
-              );
+                  ],
+                );
+              }
             },
             child: Material(
               type: MaterialType.transparency,
@@ -149,6 +160,9 @@ enum _ListPopupLayoutElement { arrow, body }
 // when the direction is negative on one axis.
 Offset _wholePixels(Offset offset) =>
     Offset(offset.dx.floorToDouble(), offset.dy.floorToDouble());
+
+// Amount to pad from screen edges.
+const double _edgePad = 10;
 
 /// A custom layout module for list popup which handles aligning the arrow and
 /// content to the desired region of interest and expansion direction.
@@ -201,10 +215,12 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
 
   bool _isOutOf(
           Offset bodyPosition, Size bodySize, Size size, Size arrowSize) =>
-      bodyPosition.dx < arrowSize.width / 2 ||
-      bodyPosition.dx + bodySize.width > size.width - arrowSize.width ||
-      bodyPosition.dy < arrowSize.height / 2 ||
-      bodyPosition.dy + bodySize.height > size.height - arrowSize.height;
+      bodyPosition.dx < arrowSize.width / 2 + _edgePad ||
+      bodyPosition.dx + bodySize.width >
+          size.width - arrowSize.width - _edgePad ||
+      bodyPosition.dy < arrowSize.height / 2 + _edgePad ||
+      bodyPosition.dy + bodySize.height >
+          size.height - arrowSize.height - _edgePad;
 
   @override
   void performLayout(Size size) {
@@ -229,14 +245,42 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
     Offset vector = direction.offsetVector;
 
     if (_isOutOf(bodyPosition, bodySize, size, arrowSize)) {
-      // Our ideal failed, try the fallbacks.
-      for (final alternativeDirection in fallbackDirections) {
-        bodyPosition = _computeBodyPosition(alternativeDirection, bodySize);
-        vector = alternativeDirection.offsetVector;
-        bestDirection = alternativeDirection;
-        if (!_isOutOf(bodyPosition, bodySize, size, arrowSize)) {
-          // this fallback is good
-          break;
+      if (fallbackDirections == null) {
+        // special case where we shift the position to fit.
+
+        // Shift vertical if we overflow the bottom.
+        if (bodyPosition.dy + bodySize.height >
+            size.height - arrowSize.height - _edgePad) {
+          bodyPosition = Offset(
+              bodyPosition.dx,
+              bodyPosition.dy -
+                  (bodyPosition.dy +
+                      bodySize.height -
+                      (size.height - arrowSize.height - _edgePad)));
+        }
+
+        // Move down if we underflow top of screen.
+        if (bodyPosition.dy < arrowSize.height / 2 + _edgePad) {
+          bodyPosition =
+              Offset(bodyPosition.dx, arrowSize.height / 2 + _edgePad);
+        }
+
+        // Fix horizontal if we overflow to the right.
+        if (bodyPosition.dx + bodySize.width >
+            size.width - arrowSize.width - _edgePad) {
+          bodyPosition =
+              Offset(bodyPosition.dx - width - from.width, bodyPosition.dy);
+        }
+      } else {
+        // Our ideal failed, try the fallbacks.
+        for (final alternativeDirection in fallbackDirections) {
+          bodyPosition = _computeBodyPosition(alternativeDirection, bodySize);
+          vector = alternativeDirection.offsetVector;
+          bestDirection = alternativeDirection;
+          if (!_isOutOf(bodyPosition, bodySize, size, arrowSize)) {
+            // this fallback is good
+            break;
+          }
         }
       }
     }
@@ -348,5 +392,48 @@ class _ArrowPathPainter extends CustomPainter {
         ..color = color
         ..style = PaintingStyle.fill,
     );
+  }
+}
+
+/// Positions the popup in the best fitting space for a global cursor
+/// coordinate.
+class _PositionedPopupDelegate extends SingleChildLayoutDelegate {
+  final Offset position;
+  final double width;
+  const _PositionedPopupDelegate(this.position, this.width);
+
+  @override
+  bool shouldRelayout(_PositionedPopupDelegate oldDelegate) => false;
+
+  @override
+  Size getSize(BoxConstraints constraints) => constraints.smallest;
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.tightFor(width: width);
+
+  @override
+  Offset getPositionForChild(Size size, Size bodySize) {
+    var bodyPosition = position;
+    // Shift vertical if we overflow the bottom.
+    if (bodyPosition.dy + bodySize.height > size.height - _edgePad) {
+      bodyPosition = Offset(
+          bodyPosition.dx,
+          bodyPosition.dy -
+              (bodyPosition.dy + bodySize.height - (size.height - _edgePad)));
+    }
+
+    // Move down if we underflow top of screen.
+    if (bodyPosition.dy < _edgePad) {
+      bodyPosition = Offset(bodyPosition.dx, _edgePad);
+    }
+
+    // Fix horizontal if we overflow to the right.
+    if (bodyPosition.dx + bodySize.width > size.width - _edgePad) {
+      bodyPosition = Offset(
+          bodyPosition.dx -
+              (bodyPosition.dx + bodySize.width - (size.width - _edgePad)),
+          bodyPosition.dy);
+    }
+    return bodyPosition;
   }
 }

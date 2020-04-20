@@ -81,7 +81,6 @@ class RiveColors {
   Color get fileBackgroundDarkGrey => const Color(0xFF666666);
   Color get fileBackgroundLightGrey => const Color(0xFFF1F1F1);
   Color get fileSelectedBlue => const Color(0xFF57A5E0);
-  Color get fileHoveredBlue => fileSelectedBlue.withOpacity(0.3);
   Color get fileLineGrey => const Color(0xFFD8D8D8);
   Color get fileTextLightGrey => lightGrey;
   Color get fileSelectedFolderIcon => white;
@@ -90,6 +89,7 @@ class RiveColors {
   Color get fileBorder => const Color(0xFFD8D8D8);
   Color get fileSearchBorder => const Color(0xFFE3E3E3);
   Color get fileSearchIcon => const Color(0xFF999999);
+  Color get filesTreeStroke => const Color(0xFFCCCCCC);
 
   // Common
   Color get commonLightGrey => const Color(0xFF888888);
@@ -111,6 +111,10 @@ class RiveColors {
   // Tree
   Color get darkTreeLines => const Color(0x33FFFFFF);
 
+  // Hierarchy
+  Color get editorTreeHover => const Color(0x20AAAAAA);
+  Color get animationSelected => const Color(0x24888888);
+
   Color get shadow25 => const Color(0x44000000);
 
   Color get lightTreeLines => const Color(0x27666666);
@@ -119,6 +123,9 @@ class RiveColors {
   Color get toggleInactiveBackground => const Color(0xFFF1F1F1);
   Color get toggleForeground => white;
   Color get toggleForegroundDisabled => const Color(0xFF444444);
+
+  Color get treeHover => const Color(0x32AAAAAA);
+  
 
   // Mode button
   Color get modeBackground => const Color(0xFF2F2F2F);

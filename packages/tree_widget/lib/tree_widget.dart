@@ -308,111 +308,115 @@ class TreeView<T> extends StatelessWidget {
                   /// stays around when it's being dragged.
                   key: item.key,
                   keepAlive: controller.dragOperation?.startItem == item,
-                  child: SizedBox(
-                    height: itemHeight,
-                    child: Stack(
-                      overflow: Overflow.visible,
-                      children: <Widget>[
-                        Positioned.fill(
-                          top: 0,
-                          child: Stack(
-                            children: lines,
-                            overflow: Overflow.visible,
-                          ),
-                        ),
-                        if (backgroundBuilder != null)
-                          Positioned(
-                            left: 0, //indent + spaceLeft - iconMargin / 2,
+                  child: RepaintBoundary(
+                    child: SizedBox(
+                      height: itemHeight,
+                      child: Stack(
+                        overflow: Overflow.visible,
+                        children: <Widget>[
+                          Positioned.fill(
                             top: 0,
-                            bottom: 0,
-                            right: 0,
-                            child: _InputHelper<T>(
-                              style: style,
-                              isDragging: dragging,
-                              item: item,
-                              child: backgroundBuilder(context, item, style),
+                            child: Stack(
+                              children: lines,
+                              overflow: Overflow.visible,
                             ),
                           ),
-                        Positioned(
-                          left: spaceLeft,
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Opacity(
-                            opacity: dragOpacity,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                ...hasChildren
-                                    ? [
-                                        SizedBox(
-                                          width: indent,
-                                          height: iconHeight,
-                                          child: Padding(
-                                            padding: EdgeInsets.only(
-                                                right: padIndent),
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                if (item.isExpanded) {
-                                                  controller
-                                                      .collapse(item.data);
-                                                } else {
-                                                  controller.expand(item.data);
-                                                }
-                                              },
-                                              child: expanderBuilder(
-                                                context,
-                                                item,
-                                                style,
+                          if (backgroundBuilder != null)
+                            Positioned(
+                              left: 0, //indent + spaceLeft - iconMargin / 2,
+                              top: 0,
+                              bottom: 0,
+                              right: 0,
+                              child: _InputHelper<T>(
+                                style: style,
+                                isDragging: dragging,
+                                item: item,
+                                child: backgroundBuilder(context, item, style),
+                              ),
+                            ),
+                          Positioned(
+                            left: spaceLeft,
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: Opacity(
+                              opacity: dragOpacity,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  ...hasChildren
+                                      ? [
+                                          SizedBox(
+                                            width: indent,
+                                            height: iconHeight,
+                                            child: Padding(
+                                              padding: EdgeInsets.only(
+                                                  right: padIndent),
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  if (item.isExpanded) {
+                                                    controller
+                                                        .collapse(item.data);
+                                                  } else {
+                                                    controller
+                                                        .expand(item.data);
+                                                  }
+                                                },
+                                                child: expanderBuilder(
+                                                  context,
+                                                  item,
+                                                  style,
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ]
-                                    : [
-                                        SizedBox(
-                                          width: style.showFirstLine ||
-                                                  hasChildren ||
-                                                  spaces != 0
-                                              ? indent
-                                              : 0,
-                                        )
-                                      ],
-                                for (int i = 0; i < item.spacing - 1; i++)
+                                        ]
+                                      : [
+                                          SizedBox(
+                                            width: style.showFirstLine ||
+                                                    hasChildren ||
+                                                    spaces != 0
+                                                ? indent
+                                                : 0,
+                                          )
+                                        ],
+                                  for (int i = 0; i < item.spacing - 1; i++)
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.only(right: padIndent),
+                                      child: SizedBox(
+                                        width: iconWidth,
+                                        height: iconHeight,
+                                        child: extraBuilder?.call(
+                                            context, item, i),
+                                      ),
+                                    ),
                                   Padding(
                                     padding: EdgeInsets.only(right: padIndent),
                                     child: SizedBox(
                                       width: iconWidth,
                                       height: iconHeight,
-                                      child:
-                                          extraBuilder?.call(context, item, i),
-                                    ),
-                                  ),
-                                Padding(
-                                  padding: EdgeInsets.only(right: padIndent),
-                                  child: SizedBox(
-                                    width: iconWidth,
-                                    height: iconHeight,
-                                    child: IgnorePointer(
-                                      child: iconBuilder(
-                                        context,
-                                        item,
-                                        style,
+                                      child: IgnorePointer(
+                                        child: iconBuilder(
+                                          context,
+                                          item,
+                                          style,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                itemBuilder(
-                                  context,
-                                  item,
-                                  style,
-                                ),
-                              ],
+                                  itemBuilder(
+                                    context,
+                                    item,
+                                    style,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -461,9 +465,11 @@ class _InputHelper<T> extends StatelessWidget {
               },
         onExit: (event) => controller.onMouseExit(event, item),
         child: Listener(
-          onPointerDown: (event) {},
-          onPointerMove: (event) {
-            // print("MOVE ${event.localPosition}");
+          onPointerDown: (event) {
+            if (event.buttons == 2) {
+              // Handle right click.
+              controller.onRightClick(context, event, item);
+            }
           },
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,

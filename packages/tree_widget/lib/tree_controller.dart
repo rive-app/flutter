@@ -174,6 +174,13 @@ abstract class TreeController<T> with ChangeNotifier {
   /// Called when an item is tapped or clicked on.
   void onTap(FlatTreeItem<T> item);
 
+  /// Called when a right (secondary) click is received on an item. Should we
+  /// consider renaming to onRequestContextMenu? We propagate the event so that
+  /// implementations can get the global coordinates to show something like a
+  /// popup menu.
+  void onRightClick(
+      BuildContext context, PointerDownEvent event, FlatTreeItem<T> item);
+
   /// The units of horizontal spacing occupied by [treeItem]. Most items consume
   /// 1 unit of horizontal spacing. 1 unit of horizontal spacing equates to the
   /// icon size + some padding. In some cases tree items need extra units when
@@ -187,7 +194,6 @@ abstract class TreeController<T> with ChangeNotifier {
 
   void startDrag(DragStartDetails details, BuildContext context,
       FlatTreeItem<T> dragStartItem, List<FlatTreeItem<T>> items) {
-    //print("OVERLAY ${Overlay.of(context)}"); //.insert(this._overlayEntry);
     _dragOperation?.dispose();
     _dragOperation = _TreeDragOperation(dragStartItem, items: items);
     _dragOperation.offset.value = details.globalPosition;

@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
@@ -59,5 +60,11 @@ class DrawOrderTreeController extends TreeController<Component> {
   List<FlatTreeItem<Component>> onDragStart(
       DragStartDetails details, FlatTreeItem<Component> item) {
     return [];
+  }
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<Component> item) {
+    // TODO: implement onRightClick
   }
 }

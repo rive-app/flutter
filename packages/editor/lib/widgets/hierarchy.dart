@@ -26,6 +26,7 @@ class HierarchyTreeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
     var style = TreeStyle(
       showFirstLine: true,
       padding: const EdgeInsets.all(10),
@@ -57,9 +58,9 @@ class HierarchyTreeView extends StatelessWidget {
             ),
           ),
           iconBuilder: (context, item, style) => Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.grey,
-              borderRadius: const BorderRadius.all(
+              borderRadius: BorderRadius.all(
                 Radius.circular(2),
               ),
             ),
@@ -82,7 +83,11 @@ class HierarchyTreeView extends StatelessWidget {
             builder: (context, dropState, _) =>
                 ValueListenableBuilder<SelectionState>(
               builder: (context, selectionState, _) {
-                return DropItemBackground(dropState, selectionState);
+                return DropItemBackground(
+                  dropState,
+                  selectionState,
+                  hoverColor: theme.colors.editorTreeHover,
+                );
               },
               valueListenable: item.data.stageItem?.selectionState,
             ),

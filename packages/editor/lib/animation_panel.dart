@@ -5,6 +5,7 @@ import 'package:core/debounce.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/animation/animation.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/managers/animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/common/animated_factor_builder.dart';
@@ -13,6 +14,8 @@ import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
@@ -23,7 +26,6 @@ import 'package:tree_widget/tree_controller.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
-import 'package:rive_core/selectable_item.dart';
 
 /// Container for the animation panel that allows it to slide up from the bottom
 /// when animation mode is activated.
@@ -54,7 +56,9 @@ class _AnimationPanelState extends State<AnimationPanel>
               max: 500,
               child: _PanelShadow(
                 show: factor > 0,
-                child: child,
+                // Don't add the animation panel contents to the layout if we're
+                // not showing the panel at all, save some cycles.
+                child: factor != 0 ? child : const SizedBox(),
               ),
             ),
           ),
@@ -191,17 +195,50 @@ class AnimationTreeController
 
   @override
   void onMouseEnter(PointerEnterEvent event,
-      FlatTreeItem<ValueStream<AnimationViewModel>> item) {}
+      FlatTreeItem<ValueStream<AnimationViewModel>> item) {
+    animationManager.mouseOver.add(item.data.value);
+  }
 
   @override
   void onMouseExit(PointerExitEvent event,
-      FlatTreeItem<ValueStream<AnimationViewModel>> item) {}
+      FlatTreeItem<ValueStream<AnimationViewModel>> item) {
+    animationManager.mouseOut.add(item.data.value);
+  }
 
   @override
-  void onTap(FlatTreeItem<ValueStream<AnimationViewModel>> item) {}
+  void onTap(FlatTreeItem<ValueStream<AnimationViewModel>> item) {
+    animationManager.select.add(item.data.value);
+  }
 
   @override
   int spacingOf(ValueStream<AnimationViewModel> treeItem) => 1;
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<ValueStream<AnimationViewModel>> item) {
+    var viewModel = item.data.value;
+    ListPopup<PopupContextItem>.show(
+      context,
+      showArrow: false,
+      // direction: PopupDirection.rightToBottom,
+      position: event.position + const Offset(0, -6),
+      width: 194,
+      itemBuilder: (popupContext, item, isHovered) =>
+          item.itemBuilder(popupContext, isHovered),
+      items: [
+        PopupContextItem('Duplicate', select: () => false),
+        PopupContextItem(
+          'Delete',
+          select: () => animationManager.delete.add(viewModel),
+        ),
+        PopupContextItem.separator(),
+        PopupContextItem('Sort', popup: [
+          PopupContextItem('Alphabetically', select: () => false),
+          PopupContextItem('Date Created', select: () => false),
+        ]),
+      ],
+    );
+  }
 }
 
 class AnimationHierarchyView extends StatefulWidget {
@@ -267,7 +304,8 @@ class _AnimationHierarchyViewState extends State<AnimationHierarchyView> {
                 ),
                 TintedIconButton(
                   icon: 'add',
-                  onPress: widget.animationManager.makeLinearAnimation,
+                  onPress: () =>
+                      widget.animationManager.create.add(AnimationType.linear),
                 )
               ],
             ),
@@ -302,10 +340,17 @@ class _AnimationHierarchyViewState extends State<AnimationHierarchyView> {
           backgroundBuilder: (context, item, style) =>
               ValueListenableBuilder<DropState>(
             valueListenable: item.dropState,
-            builder: (context, dropState, _) => StreamBuilder(
+            builder: (context, dropState, _) =>
+                StreamBuilder<AnimationViewModel>(
               stream: item.data,
-              builder: (context, viewModel) =>
-                  DropItemBackground(dropState, SelectionState.none),
+              builder: (context, snapshot) => DropItemBackground(
+                dropState,
+                snapshot.hasData
+                    ? snapshot.data.selectionState
+                    : SelectionState.none,
+                color: theme.colors.animationSelected,
+                hoverColor: theme.colors.editorTreeHover,
+              ),
             ),
           ),
           itemBuilder: (context, item, style) => StreamBuilder(

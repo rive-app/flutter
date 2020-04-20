@@ -142,4 +142,7 @@ class HierarchyTreeController extends TreeController<Component> {
   int spacingOf(Component treeItem) {
     return 1;
   }
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event, FlatTreeItem<Component> item) {}
 }
