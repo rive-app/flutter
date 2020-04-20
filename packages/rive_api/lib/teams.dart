@@ -118,4 +118,10 @@ class RiveTeamsApi<T extends RiveTeam> {
 
     return ownerId;
   }
+
+  /// Accepts a team invite
+  Future<void> acceptInvite(int inviteId) async {}
+
+  /// Declines a team invite
+  Future<void> declineInvite(int inviteId) async {}
 }
