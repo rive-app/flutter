@@ -10,3 +10,4 @@ dev_dependencies:
   test: ^1.14.2
   fractional:
     path: ../fractional
+  http: ^0.12.0

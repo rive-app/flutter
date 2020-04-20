@@ -104,7 +104,11 @@ class TeamWizardPanelTwo extends StatelessWidget {
   Widget _creditCard(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 30, bottom: 27),
-      padding: const EdgeInsets.only(top: 30, bottom: 31, left: 30, right: 30),
+      padding: (sub.ccvError == null &&
+              sub.expirationError == null &&
+              sub.zipError == null)
+          ? const EdgeInsets.only(top: 30, bottom: 31, left: 30, right: 30)
+          : const EdgeInsets.only(top: 30, bottom: 8, left: 30, right: 30),
       decoration: BoxDecoration(
         border: Border.all(width: 1.0, color: const Color(0xFFE3E3E3)),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -119,7 +123,9 @@ class TeamWizardPanelTwo extends StatelessWidget {
           _creditCardNumber(context),
           // Credit card details
           Padding(
-            padding: const EdgeInsets.only(top: 28),
+            padding: sub.cardValidationError == null
+                ? const EdgeInsets.only(top: 28)
+                : const EdgeInsets.only(top: 5),
             child: _cardDetails(context),
           ),
         ],
@@ -160,6 +166,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
           ),
         ),
         TextFormField(
+          enabled: !sub.processing,
           textAlign: TextAlign.left,
           textAlignVertical: TextAlignVertical.center,
           style: textStyles.inspectorPropertyLabel,
@@ -174,10 +181,13 @@ class TeamWizardPanelTwo extends StatelessWidget {
             enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: colors.inputUnderline, width: 2)),
             hintText: '0000 0000 0000 0000',
-            //errorText:
-            //    sub.isCardNrValid ? null : 'Invalid card number',
+            errorText: sub.cardValidationError,
             hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
             errorStyle: textStyles.textFieldInputValidationError,
+            errorBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                    color: textStyles.textFieldInputValidationError.color,
+                    width: 2)),
             contentPadding: const EdgeInsets.only(bottom: 3),
             filled: true,
             hoverColor: Colors.transparent,
@@ -194,6 +204,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
     final textStyles = RiveTheme.of(context).textStyles;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // CVV
@@ -208,6 +219,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               TextFormField(
+                enabled: !sub.processing,
                 textAlign: TextAlign.left,
                 textAlignVertical: TextAlignVertical.center,
                 style: textStyles.inspectorPropertyLabel,
@@ -224,7 +236,12 @@ class TeamWizardPanelTwo extends StatelessWidget {
                   hintText: '3-4 digits',
                   hintStyle:
                       textStyles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorText: sub.ccvError,
                   errorStyle: textStyles.textFieldInputValidationError,
+                  errorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: textStyles.textFieldInputValidationError.color,
+                          width: 2)),
                   contentPadding: const EdgeInsets.only(bottom: 3),
                   filled: true,
                   hoverColor: Colors.transparent,
@@ -247,6 +264,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               TextFormField(
+                enabled: !sub.processing,
                 textAlign: TextAlign.left,
                 textAlignVertical: TextAlignVertical.center,
                 style: textStyles.inspectorPropertyLabel,
@@ -265,7 +283,12 @@ class TeamWizardPanelTwo extends StatelessWidget {
                   hintText: 'MM/YY',
                   hintStyle:
                       textStyles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorText: sub.expirationError,
                   errorStyle: textStyles.textFieldInputValidationError,
+                  errorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: textStyles.textFieldInputValidationError.color,
+                          width: 2)),
                   contentPadding: const EdgeInsets.only(bottom: 3),
                   filled: true,
                   hoverColor: Colors.transparent,
@@ -288,6 +311,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               TextFormField(
+                enabled: !sub.processing,
                 textAlign: TextAlign.left,
                 textAlignVertical: TextAlignVertical.center,
                 style: textStyles.inspectorPropertyLabel,
@@ -304,7 +328,12 @@ class TeamWizardPanelTwo extends StatelessWidget {
                   hintText: '90210',
                   hintStyle:
                       textStyles.textFieldInputHint.copyWith(fontSize: 13),
+                  errorText: sub.zipError,
                   errorStyle: textStyles.textFieldInputValidationError,
+                  errorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: textStyles.textFieldInputValidationError.color,
+                          width: 2)),
                   contentPadding: const EdgeInsets.only(bottom: 3),
                   filled: true,
                   hoverColor: Colors.transparent,
@@ -373,11 +402,14 @@ class TeamWizardPanelTwo extends StatelessWidget {
           width: 181,
           child: FlatIconButton(
             mainAxisAlignment: MainAxisAlignment.center,
-            label: 'Create Team & Pay',
-            color: colors.buttonDark,
+            label:
+                (sub.processing) ? 'Processing Payment' : 'Create Team & Pay',
+            color: (sub.processing) ? colors.buttonLight : colors.buttonDark,
             textColor: Colors.white,
             onTap: () {
-              sub.submit(context, RiveContext.of(context).api);
+              if (!sub.processing) {
+                sub.submit(context, RiveContext.of(context).api);
+              }
             },
             // elevated: _hover,
           ),

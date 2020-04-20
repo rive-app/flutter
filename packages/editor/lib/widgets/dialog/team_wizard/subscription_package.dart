@@ -3,7 +3,9 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
+import 'package:rive_api/stripe.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:utilities/utilities.dart';
 
 /// Billing policy URL
 const billingPolicyUrl =
@@ -80,14 +82,74 @@ abstract class SubscriptionPackage with ChangeNotifier {
   /// Validate the credit card
   bool get isCardNrValid {
     if (_cardNumber == null) {
+      _cardValidationError = 'Missing card number';
       return false;
     }
 
-    if (!RegExp(r'^[0-9]{16}$').hasMatch(_cardNumber)) {
+    if (!RegExp(r'^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}$')
+        .hasMatch(_cardNumber)) {
+      print(_cardNumber);
+      _cardValidationError = 'Card number format mismatch';
       return false;
     }
+    _cardValidationError = null;
     return true;
   }
+
+  bool get isCcvValid {
+    if (_ccv == null) {
+      _ccvError = 'Missing';
+      return false;
+    }
+
+    if (_ccv.length < 3) {
+      _ccvError = 'Incomplete';
+      return false;
+    }
+    _ccvError = null;
+    return true;
+  }
+
+  bool get isZipValid {
+    if (_zip == null) {
+      _zipError = 'Missing';
+      return false;
+    }
+
+    if (_zip.length < 5) {
+      _zipError = 'Incomplete';
+      return false;
+    }
+    _zipError = null;
+    return true;
+  }
+
+  bool get isExpirationValid {
+    if (_expiration == null) {
+      _expirationError = 'Missing';
+      return false;
+    }
+
+    if (_expiration.length < 5) {
+      _expirationError = 'Incomplete';
+      return false;
+    }
+    _expirationError = null;
+    return true;
+  }
+
+  // User friendly error messages
+  String _cardValidationError;
+  String get cardValidationError => _cardValidationError;
+
+  String _ccvError;
+  String get ccvError => _ccvError;
+
+  String _expirationError;
+  String get expirationError => _expirationError;
+
+  String _zipError;
+  String get zipError => _zipError;
 }
 
 /// Data class for managing subscription data in the Team Settings 'Plan' modal.
@@ -139,6 +201,14 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
     notifyListeners();
   }
 
+  /// Form Processing
+  bool _processing = false;
+  bool get processing => _processing;
+  set processing(bool value) {
+    _processing = value;
+    notifyListeners();
+  }
+
   @override
   set option(TeamsOption value) {
     if (isNameValid) {
@@ -183,13 +253,62 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
   /// Step 1 is valid; safe to proceed to step 2
   bool get isStep1Valid => isNameValid && isOptionValid;
 
+  bool get isCardInputValid {
+    // Matt, im sure there' sa better way to do this
+    // we want to check all of these, as they set errors
+    // as a byproduct...
+    // I guess its a bit of a shite pattern, shoudl probalby
+    // have a validate function thats separate...
+    isCardNrValid;
+    isZipValid;
+    isExpirationValid;
+    isCcvValid;
+    return isCardNrValid && isZipValid && isExpirationValid && isCcvValid;
+  }
+
   /// Step 2 is valid; safe to attempt team creation
-  bool get isStep2Valid => isNameValid && isOptionValid && isCardNrValid;
+  bool get isStep2Valid => isNameValid && isOptionValid && isCardInputValid;
+
+  String get expMonth => expiration.split('/').first;
+  String get expYear => '20${expiration.split('/').last}';
 
   Future submit(BuildContext context, RiveApi api) async {
-    await RiveTeamsApi(api).createTeam(
-        teamName: name, plan: _option.name, frequency: _billing.name);
-    await RiveContext.of(context).reloadTeams();
-    Navigator.of(context, rootNavigator: true).pop(null);
+    if (isStep2Valid) {
+      processing = true;
+
+      try {
+        var publicKey = await StripeApi(api).getStripePublicKey();
+        var tokenResponse = await createToken(
+            publicKey, cardNumber, expMonth, expYear, ccv, zip);
+        print('creating team');
+        await RiveTeamsApi(api).createTeam(
+            teamName: name,
+            plan: _option.name,
+            frequency: _billing.name,
+            stripeToken: tokenResponse.token);
+        print('loading teams');
+        await RiveContext.of(context).reloadTeams();
+        Navigator.of(context, rootNavigator: true).pop(null);
+      } on StripeAPIError catch (error) {
+        switch (error.type) {
+          case StripeErrorTypes.cardNumber:
+            _cardValidationError = error.error;
+            break;
+          case StripeErrorTypes.cardCCV:
+            _ccvError = error.error;
+            break;
+          case StripeErrorTypes.cardExpiration:
+            _expirationError = error.error;
+            break;
+          default:
+            // todo.. fine
+            _cardValidationError = error.error;
+        }
+      } finally {
+        processing = false;
+      }
+    } else {
+      notifyListeners();
+    }
   }
 }
