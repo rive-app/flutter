@@ -308,6 +308,7 @@ class TeamInviteNotification extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
+    final manager = NotificationProvider.of(context);
     return Row(
       children: [
         Expanded(
@@ -345,7 +346,7 @@ class TeamInviteNotification extends StatelessWidget {
                 textColor: Colors.white,
                 mainAxisAlignment: MainAxisAlignment.center,
                 elevated: true,
-                onTap: () => print('ACCEPTED'),
+                onTap: () => manager.acceptTeamInvite.add(notification),
               ),
               const SizedBox(height: 10),
               FlatIconButton(
@@ -353,7 +354,7 @@ class TeamInviteNotification extends StatelessWidget {
                 color: theme.colors.buttonLight,
                 mainAxisAlignment: MainAxisAlignment.center,
                 textColor: theme.colors.commonButtonTextColorDark,
-                onTap: () => print('IGNORED'),
+                onTap: () => manager.declineTeamInvite.add(notification),
               ),
             ],
           ),

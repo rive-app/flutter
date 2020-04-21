@@ -32,14 +32,16 @@ class RiveNotification {
     final userData = data['u'] as Map<String, dynamic>;
     switch (type) {
       case NotificationType.teamInvite:
+        final teamData = data['m'] as Map<String, dynamic>;
         return RiveTeamInviteNotification(
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
           senderId: userData.getInt('oi'),
           senderName: userData.getString('nm'),
-          teamId: userData.getInt('ti'),
-          teamName: userData.getString('tn'),
-          inviteId: userData.getInt('ii'),
+          teamId: teamData.getInt('ti'),
+          teamName: teamData.getString('tn'),
+          inviteId: teamData.getInt('ii'),
+          permission: teamData.getInt('pn'),
         );
 
       // New follower notification:
@@ -83,6 +85,7 @@ class RiveTeamInviteNotification extends RiveNotification {
     @required this.teamId,
     @required this.teamName,
     @required this.inviteId,
+    @required this.permission,
   }) : super(dateTime);
 
   final int senderId;
@@ -90,4 +93,5 @@ class RiveTeamInviteNotification extends RiveNotification {
   final int teamId;
   final String teamName;
   final int inviteId;
+  final int permission;
 }

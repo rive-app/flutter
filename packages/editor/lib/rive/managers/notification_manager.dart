@@ -1,26 +1,25 @@
-import 'dart:async' show Timer;
+import 'dart:async';
 
-import 'package:rxdart/rxdart.dart';
-import 'package:meta/meta.dart';
-
+import 'package:rive_api/teams.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/apis/notification.dart';
 import 'package:rive_api/models/notification.dart';
 
+import 'package:rxdart/rxdart.dart';
+import 'package:meta/meta.dart';
+
 /// State manager for notifications
 class NotificationManager {
-  NotificationManager({@required RiveApi api}) : _api = NotificationsApi(api) {
-    _fetchNotifications();
-    // Start the polling timer to periodically pull notifications
-    _poller = Timer.periodic(
-      const Duration(seconds: 60),
-      (t) => _fetchNotifications(),
-    );
+  NotificationManager({@required RiveApi api})
+      : _api = NotificationsApi(api),
+        _teamApi = RiveTeamsApi(api) {
+    _init();
   }
   final NotificationsApi _api;
+  final RiveTeamsApi _teamApi;
 
   /*
-   * Streams
+   * Outbound streams
    */
 
   /// Outbound stream of an interable of notifications
@@ -34,10 +33,28 @@ class NotificationManager {
   Stream<int> get notificationCountStream =>
       _notificationCountController.stream;
 
+  /*
+   * Inbound sinks
+   */
+
+  /// Inbound acceptance of a team invite
+  final _acceptTeamInviteController =
+      StreamController<RiveTeamInviteNotification>.broadcast();
+  Sink<RiveTeamInviteNotification> get acceptTeamInvite =>
+      _acceptTeamInviteController;
+
+  /// Inbound decline of a team invite
+  final _declineTeamInviteController =
+      StreamController<RiveTeamInviteNotification>.broadcast();
+  Sink<RiveTeamInviteNotification> get declineTeamInvite =>
+      _acceptTeamInviteController;
+
   /// Clean up all the stream controllers and that polling timer
   void dispose() {
     _notificationsController.close();
     _notificationCountController.close();
+    _acceptTeamInviteController.close();
+    _declineTeamInviteController.close();
     _poller?.cancel();
   }
 
@@ -45,12 +62,34 @@ class NotificationManager {
    * State
    */
 
+  /// Initiatize the state
+  void _init() {
+    // Handle incoming team invitation acceptances
+    _acceptTeamInviteController.stream.listen(_acceptTeamInvite);
+    // Handle incloing team invitation declines
+    _declineTeamInviteController.stream.listen(_declineTeamInvite);
+    // Fetch the notifications
+    _fetchNotifications();
+    // Start the polling timer to periodically pull notifications
+    _poller = Timer.periodic(
+      const Duration(seconds: 60),
+      (t) => _fetchNotifications(),
+    );
+  }
+
   /// Cache the notifications coming from the server
   final __notifications = <RiveNotification>[];
-  // List<RiveNotification> get _notifications => __notifications;
+  List<RiveNotification> get _notifications => __notifications;
   set _notifications(List<RiveNotification> values) {
     __notifications.clear();
     __notifications.addAll(values);
+    _notificationsController.add(__notifications);
+    _notificationCountController.add(__notifications.length);
+  }
+
+  /// Removes a notification from the list
+  void _removeNotification(RiveNotification n) {
+    _notifications.remove(n);
     _notificationsController.add(__notifications);
     _notificationCountController.add(__notifications.length);
   }
@@ -62,6 +101,19 @@ class NotificationManager {
    * API calls
    */
 
+  /// Fetch a user's notifications from the back end
   Future<void> _fetchNotifications() async =>
       _notifications = await _api.notifications;
+
+  /// Accepts a team invite
+  Future<void> _acceptTeamInvite(RiveTeamInviteNotification n) async {
+    await _teamApi.acceptInvite(n.inviteId);
+    _removeNotification(n);
+  }
+
+  /// Decline a team invite
+  Future<void> _declineTeamInvite(RiveTeamInviteNotification n) async {
+    await _teamApi.declineInvite(n.inviteId);
+    _removeNotification(n);
+  }
 }
