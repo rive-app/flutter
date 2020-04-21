@@ -7,6 +7,7 @@ import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard/wizard_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -152,7 +153,6 @@ class TeamWizardPanelTwo extends StatelessWidget {
   }
 
   Widget _creditCardNumber(BuildContext context) {
-    final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
 
     return Column(
@@ -165,42 +165,23 @@ class TeamWizardPanelTwo extends StatelessWidget {
             style: textStyles.inspectorPropertyLabel,
           ),
         ),
-        TextFormField(
+        WizardTextFormField(
+          onChanged: (cardNumber) => sub.cardNumber = cardNumber,
           enabled: !sub.processing,
-          textAlign: TextAlign.left,
-          textAlignVertical: TextAlignVertical.center,
-          style: textStyles.inspectorPropertyLabel,
           initialValue: sub.cardNumber,
           inputFormatters: <TextInputFormatter>[
             WhitelistingTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(16),
             CardNumberFormatter()
           ],
-          decoration: InputDecoration(
-            isDense: true,
-            enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: colors.inputUnderline, width: 2)),
-            hintText: '0000 0000 0000 0000',
-            errorText: sub.cardValidationError,
-            hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
-            errorStyle: textStyles.textFieldInputValidationError,
-            errorBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                    color: textStyles.textFieldInputValidationError.color,
-                    width: 2)),
-            contentPadding: const EdgeInsets.only(bottom: 3),
-            filled: true,
-            hoverColor: Colors.transparent,
-            fillColor: Colors.transparent,
-          ),
-          onChanged: (cardNumber) => sub.cardNumber = cardNumber,
+          hintText: '0000 0000 0000 0000',
+          errorText: sub.cardValidationError,
         ),
       ],
     );
   }
 
   Widget _cardDetails(BuildContext context) {
-    final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
 
     return Row(
@@ -218,36 +199,16 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                enabled: !sub.processing,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: textStyles.inspectorPropertyLabel,
+              WizardTextFormField(
                 initialValue: sub.ccv,
                 inputFormatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  hintText: '3-4 digits',
-                  hintStyle:
-                      textStyles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorText: sub.ccvError,
-                  errorStyle: textStyles.textFieldInputValidationError,
-                  errorBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                          color: textStyles.textFieldInputValidationError.color,
-                          width: 2)),
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                  filled: true,
-                  hoverColor: Colors.transparent,
-                  fillColor: Colors.transparent,
-                ),
+                enabled: !sub.processing,
                 onChanged: (ccv) => sub.ccv = ccv,
+                hintText: '3-4 digits',
+                errorText: sub.ccvError,
               ),
             ],
           ),
@@ -263,11 +224,9 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              WizardTextFormField(
+                onChanged: (expiration) => sub.expiration = expiration,
                 enabled: !sub.processing,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: textStyles.inspectorPropertyLabel,
                 initialValue: sub.expiration,
                 inputFormatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
@@ -275,26 +234,8 @@ class TeamWizardPanelTwo extends StatelessWidget {
                   DateTextInputFormatter(),
                   DateTextRegexCheck()
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  hintText: 'MM/YY',
-                  hintStyle:
-                      textStyles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorText: sub.expirationError,
-                  errorStyle: textStyles.textFieldInputValidationError,
-                  errorBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                          color: textStyles.textFieldInputValidationError.color,
-                          width: 2)),
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                  filled: true,
-                  hoverColor: Colors.transparent,
-                  fillColor: Colors.transparent,
-                ),
-                onChanged: (expiration) => sub.expiration = expiration,
+                hintText: 'MM/YY',
+                errorText: sub.expirationError,
               ),
             ],
           ),
@@ -310,37 +251,17 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              WizardTextFormField(
+                onChanged: (zip) => sub.zip = zip,
                 enabled: !sub.processing,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: textStyles.inspectorPropertyLabel,
                 initialValue: sub.zip,
                 inputFormatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(5),
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  hintText: '90210',
-                  hintStyle:
-                      textStyles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorText: sub.zipError,
-                  errorStyle: textStyles.textFieldInputValidationError,
-                  errorBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                          color: textStyles.textFieldInputValidationError.color,
-                          width: 2)),
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                  filled: true,
-                  hoverColor: Colors.transparent,
-                  fillColor: Colors.transparent,
-                ),
-                onChanged: (zip) => sub.zip = zip,
-              )
+                hintText: '90210',
+                errorText: sub.zipError,
+              ),
             ],
           ),
         ),
@@ -367,7 +288,10 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 }),
           const TextSpan(text: '.'),
         ],
-        style: textStyles.tooltipDisclaimer,
+        style: textStyles.tooltipDisclaimer.copyWith(
+          // want line height to be 21px
+          height: 21 / textStyles.tooltipDisclaimer.fontSize,
+        ),
       ),
     );
   }
@@ -422,7 +346,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 452,
-      height: 522,
+      height: 534,
       child: Padding(
         padding: const EdgeInsets.all(30),
         child: Column(

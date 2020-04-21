@@ -33,7 +33,7 @@ class HierarchyTreeView extends StatelessWidget {
       lineColor: RiveTheme.of(context).colors.darkTreeLines,
     );
     return TreeScrollView(
-      style: style,
+      padding: style.padding,
       slivers: [
         TreeView<Component>(
           style: style,

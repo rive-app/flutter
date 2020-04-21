@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/artboard.dart';
-import 'package:rive_core/backboard.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/managers/animation_manager.dart';

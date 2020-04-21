@@ -100,7 +100,9 @@ class _PlanState extends State<PlanSettings> {
                         children: <Widget>[
                           TeamSubscriptionChoiceWidget(
                             label: 'Team',
-                            costLabel: '\$$basicMonthlyCost',
+                            costLabel: (_sub == null)
+                                ? '\$'
+                                : '\$${costLookup[_sub.billing][TeamsOption.basic]}',
                             explanation:
                                 'A space where you and your team can share files.',
                             onTap: () => _sub.option = TeamsOption.basic,
@@ -110,7 +112,9 @@ class _PlanState extends State<PlanSettings> {
                           const SizedBox(width: 30),
                           TeamSubscriptionChoiceWidget(
                             label: 'Premium Team',
-                            costLabel: '\$$premiumMonthlyCost',
+                            costLabel: (_sub == null)
+                                ? '\$'
+                                : '\$${costLookup[_sub.billing][TeamsOption.premium]}',
                             explanation: '1 day support.',
                             onTap: () => _sub.option = TeamsOption.premium,
                             showButton: false,

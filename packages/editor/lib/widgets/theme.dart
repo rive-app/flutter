@@ -216,6 +216,12 @@ class TextStyles {
       letterSpacing: 0,
       decoration: TextDecoration.underline);
 
+  TextStyle get buttonTextStyle => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: Color(0xFF888888),
+        fontSize: 13,
+      );
+
   TextStyle get loginText => const TextStyle(
       fontFamily: 'Roboto-Regular',
       color: Color(0xFF888888),

@@ -11,8 +11,21 @@ import 'package:utilities/utilities.dart';
 const billingPolicyUrl =
     'https://docs.2dimensions.com/rive-help-center/get-started/fair-billing-policy';
 
-const premiumMonthlyCost = 45;
-const basicMonthlyCost = 14;
+const premiumYearlyCost = 45;
+const basicYearlyCost = 14;
+const premiumMonthlyCost = 68;
+const basicMonthlyCost = 21;
+
+final Map<BillingFrequency, Map<TeamsOption, int>> costLookup = {
+  BillingFrequency.yearly: {
+    TeamsOption.premium: premiumYearlyCost,
+    TeamsOption.basic: basicYearlyCost,
+  },
+  BillingFrequency.monthly: {
+    TeamsOption.premium: premiumMonthlyCost,
+    TeamsOption.basic: basicMonthlyCost,
+  }
+};
 
 /// The active wizard panel
 enum WizardPanel { one, two }
@@ -34,14 +47,11 @@ abstract class SubscriptionPackage with ChangeNotifier {
 
   int get teamSize;
 
-  int get monthlyCost =>
-      _option == TeamsOption.premium ? premiumMonthlyCost : basicMonthlyCost;
+  int get cost => costLookup[_billing][_option];
 
   /// Returns the initial billing cost for the selected options
   int get calculatedCost {
-    return teamSize *
-        monthlyCost *
-        (_billing == BillingFrequency.yearly ? 12 : 1);
+    return teamSize * cost * (_billing == BillingFrequency.yearly ? 12 : 1);
   }
 
   /// Credit card number
@@ -88,7 +98,6 @@ abstract class SubscriptionPackage with ChangeNotifier {
 
     if (!RegExp(r'^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}$')
         .hasMatch(_cardNumber)) {
-      print(_cardNumber);
       _cardValidationError = 'Card number format mismatch';
       return false;
     }
@@ -213,6 +222,10 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
   set option(TeamsOption value) {
     if (isNameValid) {
       _option = value;
+    } else {
+      // assign name to be '' if its been set yet
+      // this teases an error out
+      name ??= '';
     }
     notifyListeners();
   }
@@ -232,7 +245,12 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
     /// Regex for valid team names
     final _legalNameMatch = RegExp(r'^[A-Za-z0-9]+$');
 
-    if (name == null || name == '') {
+    if (name == null) {
+      // never entered a name... lets ignore it
+      return false;
+    }
+
+    if (name == '') {
       _nameValidationError = 'Please enter a valid team name.';
       return false;
     }
@@ -280,13 +298,11 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
         var publicKey = await StripeApi(api).getStripePublicKey();
         var tokenResponse = await createToken(
             publicKey, cardNumber, expMonth, expYear, ccv, zip);
-        print('creating team');
         await RiveTeamsApi(api).createTeam(
             teamName: name,
             plan: _option.name,
             frequency: _billing.name,
             stripeToken: tokenResponse.token);
-        print('loading teams');
         await RiveContext.of(context).reloadTeams();
         Navigator.of(context, rootNavigator: true).pop(null);
       } on StripeAPIError catch (error) {

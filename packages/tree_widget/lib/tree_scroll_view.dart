@@ -1,18 +1,17 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:tree_widget/tree_style.dart';
 
 /// Helper to build a scrollview for a tree composed with a list of slivers.
 /// Automatically adds the top and bottom padding from the tree style.
 class TreeScrollView extends StatelessWidget {
-  final TreeStyle style;
+  final EdgeInsets padding;
   final List<Widget> slivers;
   final ScrollController scrollController;
   final Key center;
   const TreeScrollView({
     Key key,
-    this.style,
+    this.padding,
     this.slivers,
     this.scrollController,
     this.center,
@@ -33,12 +32,14 @@ class TreeScrollView extends StatelessWidget {
           slivers: [
             // Add top padding (can't use Sliver padding, as using one with empty
             // sliver causes bugs with virtualization).
-            SliverToBoxAdapter(child: SizedBox(height: style.padding.top)),
+            if (padding != null)
+              SliverToBoxAdapter(child: SizedBox(height: padding.top)),
 
             ...slivers,
 
             // Add bottom padding
-            SliverToBoxAdapter(child: SizedBox(height: style.padding.bottom)),
+            if (padding != null)
+              SliverToBoxAdapter(child: SizedBox(height: padding.bottom)),
           ],
         ),
       ),

@@ -311,7 +311,7 @@ class _AnimationHierarchyViewState extends State<AnimationHierarchyView> {
       lineColor: RiveTheme.of(context).colors.darkTreeLines,
     );
     return TreeScrollView(
-      style: style,
+      padding: style.padding,
       slivers: [
         SliverToBoxAdapter(
           child: Padding(

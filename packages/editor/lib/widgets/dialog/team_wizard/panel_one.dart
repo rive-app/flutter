@@ -6,6 +6,7 @@ import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard/wizard_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,7 +27,7 @@ class TeamWizardPanelOne extends StatelessWidget {
     ];
     return SizedBox(
       width: 452,
-      height: 364,
+      height: 375,
       child: Padding(
         padding: const EdgeInsets.symmetric(
             horizontal: targetPadding - subscriptionBorderThickness,
@@ -40,27 +41,13 @@ class TeamWizardPanelOne extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
-                    child: TextFormField(
-                      textAlign: TextAlign.left,
-                      textAlignVertical: TextAlignVertical.center,
-                      style: textStyles.fileGreyTextLarge,
-                      initialValue: sub.name,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: colors.inputUnderline, width: 2),
-                        ),
-                        hintText: 'Team name',
-                        errorText: sub.nameValidationError,
-                        hintStyle: textStyles.textFieldInputHint,
-                        errorStyle: textStyles.textFieldInputValidationError,
-                        contentPadding: const EdgeInsets.only(bottom: 3),
-                        filled: true,
-                        hoverColor: Colors.transparent,
-                        fillColor: Colors.transparent,
-                      ),
+                    child: WizardTextFormField(
                       onChanged: (name) => sub.name = name,
+                      enabled: !sub.processing,
+                      initialValue: sub.name,
+                      fontSize: 16,
+                      hintText: 'Team name',
+                      errorText: sub.nameValidationError,
                     ),
                   ),
                   Padding(
@@ -92,7 +79,8 @@ class TeamWizardPanelOne extends StatelessWidget {
                 children: <Widget>[
                   TeamSubscriptionChoiceWidget(
                       label: 'Team',
-                      costLabel: '\$$basicMonthlyCost',
+                      costLabel:
+                          '\$${costLookup[sub.billing][TeamsOption.basic]}',
                       explanation:
                           'A space where you and your team can share files.',
                       onTap: () => sub.option = TeamsOption.basic,
@@ -100,7 +88,8 @@ class TeamWizardPanelOne extends StatelessWidget {
                   const SizedBox(width: 24),
                   TeamSubscriptionChoiceWidget(
                       label: 'Premium Team',
-                      costLabel: '\$$premiumMonthlyCost',
+                      costLabel:
+                          '\$${costLookup[sub.billing][TeamsOption.premium]}',
                       explanation: '1 day support.',
                       onTap: () => sub.option = TeamsOption.premium,
                       borderThickness: subscriptionBorderThickness),
@@ -124,7 +113,10 @@ class TeamWizardPanelOne extends StatelessWidget {
                       }),
                 const TextSpan(text: '.'),
               ],
-              style: textStyles.tooltipDisclaimer,
+              style: textStyles.tooltipDisclaimer.copyWith(
+                // want line height to be 21px
+                height: 21 / textStyles.tooltipDisclaimer.fontSize,
+              ),
             )),
           ],
         ),
