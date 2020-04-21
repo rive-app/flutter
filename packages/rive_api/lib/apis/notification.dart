@@ -24,21 +24,15 @@ class NotificationsApi {
       'Incorrect json format for notifications',
     );
     // Need to decode a second time as we have json within json
-    final decodedData = json.decode(data['data']);
+
+    var decodedData = data['data'];
+    if (decodedData is String) {
+      decodedData = json.decode(decodedData);
+    }
+
     // Adding in a test team notification temporarily
-    // TODO: REMOVE
     final notifications = <RiveNotification>[]
-      ..addAll(RiveNotification.fromDataList(decodedData))
-      ..add(RiveTeamInviteNotification(
-        dateTime:
-            DateTime.fromMillisecondsSinceEpoch((1587419781 - 10000) * 1000),
-        senderId: 40842,
-        senderName: 'Matt',
-        teamId: 40847,
-        teamName: 'Awesome',
-        inviteId: 1,
-        permission: 15,
-      ));
+      ..addAll(RiveNotification.fromDataList(decodedData));
     return notifications;
   }
 

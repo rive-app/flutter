@@ -120,8 +120,12 @@ class RiveTeamsApi<T extends RiveTeam> {
   }
 
   /// Accepts a team invite
-  Future<void> acceptInvite(int inviteId) async {}
+  Future<void> acceptInvite(int teamId) async {
+    await api.post('${api.host}/api/teams/$teamId/invite/accept');
+  }
 
   /// Declines a team invite
-  Future<void> declineInvite(int inviteId) async {}
+  Future<void> declineInvite(int teamId) async {
+    await api.post('${api.host}/api/teams/$teamId/invite/reject');
+  }
 }

@@ -63,7 +63,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
               // Let the user try again.
               _isSigningOut = false;
             });
-          } 
+          }
         },
       );
     }
@@ -142,13 +142,6 @@ class _EditableAvatarState extends State<EditableAvatar> {
     List<Widget> children = [];
     final theme = RiveTheme.of(context);
     final riveColors = theme.colors;
-    if (_hover) {
-      children.add(Positioned.fill(
-          child: CustomPaint(
-              painter: _CirclePainter(
-        radius: radius,
-      ))));
-    }
     if (widget.avatarPath == null) {
       children.addAll([
         Positioned.fill(
@@ -170,6 +163,13 @@ class _EditableAvatarState extends State<EditableAvatar> {
           ),
         ),
       ));
+    }
+    if (_hover) {
+      children.add(Positioned.fill(
+          child: CustomPaint(
+              painter: _CirclePainter(
+        radius: radius,
+      ))));
     }
     return SizedBox(
       width: radius * 2,
