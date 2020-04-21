@@ -1,7 +1,10 @@
-
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/widgets/animation/animation_toolbar.dart';
 import 'package:rive_editor/widgets/animation/animations_list.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/resize_panel.dart';
+
+import 'linear_animation_tree.dart';
 
 /// The contents that display inside of the animation panel.
 class AnimationPanelContents extends StatelessWidget {
@@ -25,9 +28,27 @@ class AnimationPanelContents extends StatelessWidget {
                     ),
             ),
           ),
+          ResizePanel(
+            hitSize: 10,
+            direction: ResizeDirection.horizontal,
+            side: ResizeSide.end,
+            min: 300,
+            max: 600,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                AnimationToolbar(),
+                Expanded(
+                  child: LinearAnimationTree(),
+                ),
+              ],
+            ),
+          ),
           // Placeholder for timeline and curve editor.
           const Expanded(
-            child: SizedBox(),
+            child: ColoredBox(
+              color: Color(0xFF000000),
+            ),
           ),
           const SizedBox(width: 200),
         ],
