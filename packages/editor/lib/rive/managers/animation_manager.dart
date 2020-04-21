@@ -13,7 +13,7 @@ import 'package:rxdart/rxdart.dart';
 
 /// Animation type that can be created by the [AnimationManager].
 enum AnimationType { linear }
-enum AnimationOrder { aToZ, zToA }
+enum AnimationOrder { aToZ, zToA, custom }
 
 /// A manager for a file's list of animations allowing creating and updating
 /// them.
@@ -80,6 +80,10 @@ class AnimationManager {
       case AnimationOrder.zToA:
         activeArtboard.animations.sort((a, b) => b.name.compareTo(a.name));
         break;
+      case AnimationOrder.custom:
+        // Expect the implementor to have custom set the fractional indices.
+        activeArtboard.context.captureJournalEntry();
+        return;
     }
     activeArtboard.animations.setFractionalIndices();
     activeArtboard.context.captureJournalEntry();
@@ -181,7 +185,7 @@ class AnimationManager {
     }
     _animations.clear();
     _animationStreamControllers.clear();
-    
+
     var animations = activeArtboard?.animations;
     animations.forEach(_updateAnimation);
 
