@@ -8,7 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_core/event.dart';
-import 'package:rive_editor/animation_panel.dart';
+import 'package:rive_editor/widgets/animation/animation_panel.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
