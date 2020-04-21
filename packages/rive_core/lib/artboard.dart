@@ -1,6 +1,9 @@
 import 'dart:ui';
 
+import 'package:core/core.dart';
+import 'package:core/debounce.dart';
 import 'package:core/id.dart';
+import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -20,12 +23,25 @@ abstract class ArtboardDelegate extends BoundsDelegate {
   void markNameDirty();
 }
 
+class _AnimationList extends FractionallyIndexedList<Animation> {
+  @override
+  FractionalIndex orderOf(Animation animation) {
+    return animation.order;
+  }
+
+  @override
+  void setOrderOf(Animation animation, FractionalIndex order) {
+    animation.order = order;
+  }
+}
+
 class Artboard extends ArtboardBase with ShapePaintContainer {
   final Path path = Path();
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
   final List<Drawable> _drawables = [];
   final Set<Component> _components = {};
+  final _AnimationList _animations = _AnimationList();
   int _dirtDepth = 0;
   int _dirt = 255;
 
@@ -220,4 +236,36 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   @override
   void originYChanged(double from, double to) {}
+
+  /// Called by rive_core to add an Animation to an Artboard. This should be
+  /// @internal when it's supported.
+  bool internalAddAnimation(Animation animation) {
+    if (_animations.contains(animation)) {
+      return false;
+    }
+    _animations.add(animation);
+    markAnimationOrderDirty();
+    return true;
+  }
+
+  /// Called by rive_core to remove an Animation to an Artboard. This should be
+  /// @internal when it's supported.
+  bool internalRemoveAnimation(Animation animation) {
+    bool removed = _animations.remove(animation);
+    if(removed) {
+      markAnimationOrderDirty();
+    }
+    return removed;
+  }
+
+  /// Schedule re-sorting the animations list.
+  void markAnimationOrderDirty() {
+    // We don't actually track this with the component dirty state as it has no
+    // bearing at runtime and shouldn't clutter our runtime pipeline.
+    debounce(_orderAnimations);
+  }
+
+  void _orderAnimations() {
+    
+  }
 }

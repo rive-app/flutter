@@ -361,6 +361,7 @@ class Definition {
     StringBuffer ctxCode = StringBuffer('');
 
     List<String> imports = [
+      'import \'dart:collection\';',
       'import \'package:core/coop/change.dart\';',
       'import \'package:core/core.dart\';',
       'import \'package:utilities/binary_buffer/binary_reader.dart\';',

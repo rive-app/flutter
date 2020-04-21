@@ -251,7 +251,9 @@ abstract class CoreContext implements LocalSettings {
   @protected
   void applyCoopChanges(ObjectChanges objectChanges);
 
-  bool captureJournalEntry() {
+  /// Capture the latest set of changes as a journal entry and sync them to
+  /// coop. Set [record] to false if you don't want this change to be undone.
+  bool captureJournalEntry({bool record: true}) {
     if (_currentChanges == null) {
       return false;
     }
@@ -261,7 +263,9 @@ abstract class CoreContext implements LocalSettings {
     journal.removeRange(_journalIndex, journal.length);
 
     // add the new changes to the journal
-    journal.add(_currentChanges);
+    if (record) {
+      journal.add(_currentChanges);
+    }
 
     // schedule those changes to be sent to other clients (and server for
     // saving)

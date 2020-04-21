@@ -24,6 +24,9 @@ abstract class PopupListItem {
   /// Child popup displayed when this list item is hovered over.
   List<PopupListItem> get popup;
 
+  /// Width of the child popup window
+  double get popupWidth => 177;
+
   /// Callback to invoke when the item is pressed on/selected.
   SelectCallback get select;
 
@@ -177,7 +180,11 @@ class ListPopup<T extends PopupListItem> {
       return;
     }
     if (_focus.popup != null) {
-      showChildPopup(_focus.shellContext, child: _focus);
+      showChildPopup(
+        _focus.shellContext,
+        width: _focus.popupWidth ?? 177,
+        child: _focus,
+      );
       // Grab first focus.
       _subPopup.focusDown();
     }
@@ -201,7 +208,7 @@ class ListPopup<T extends PopupListItem> {
       width: width,
       margin: margin,
       direction: PopupDirection.rightToBottom,
-      
+
       // Intentionally set fallback to null, which tells it to attempt shifting
       // vertical before popping horizontal (as you'd expect a subpopup to
       // attempt fitting).
@@ -443,6 +450,7 @@ class __PopupListItemShellState<T extends PopupListItem>
           if (widget.item.popup != null) {
             widget.listPopup.showChildPopup(
               context,
+              width: widget.item.popupWidth ?? 177,
               child: widget.item,
             );
           }

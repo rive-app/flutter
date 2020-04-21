@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:tree_widget/tree_widget.dart';
 
 import 'flat_tree_item.dart';
 import 'tree_style.dart';
@@ -192,8 +193,13 @@ abstract class TreeController<T> with ChangeNotifier {
   /// ![](https://rive-app.github.io/assets-for-api-docs/assets/tree-widget-flutter/extra_spacing.png)
   int spacingOf(T treeItem);
 
-  void startDrag(DragStartDetails details, BuildContext context,
-      FlatTreeItem<T> dragStartItem, List<FlatTreeItem<T>> items) {
+  void startDrag(
+      DragStartDetails details,
+      BuildContext context,
+      FlatTreeItem<T> dragStartItem,
+      List<FlatTreeItem<T>> items,
+      TreeViewDragBuilder<T> builder,
+      TreeStyle style) {
     _dragOperation?.dispose();
     _dragOperation = _TreeDragOperation(dragStartItem, items: items);
     _dragOperation.offset.value = details.globalPosition;
@@ -204,19 +210,7 @@ abstract class TreeController<T> with ChangeNotifier {
           left: position.dx - 200,
           width: 400,
           top: position.dy + 10,
-          child: Material(
-            type: MaterialType.transparency,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: items
-                    .map(
-                      (item) => Text(item.data.toString()),
-                    )
-                    .toList(),
-              ),
-            ),
-          ),
+          child: builder(context, items, style),
         ),
       ),
     );

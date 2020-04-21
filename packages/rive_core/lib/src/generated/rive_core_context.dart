@@ -31,6 +31,7 @@ import 'animation/linear_animation_base.dart';
 import 'artboard_base.dart';
 import 'backboard_base.dart';
 import 'component_base.dart';
+import 'dart:collection';
 import 'drawable_base.dart';
 import 'node_base.dart';
 import 'package:core/coop/change.dart';
@@ -117,10 +118,10 @@ abstract class RiveCoreContext extends CoreContext {
   CoreIdType get idType;
   CoreIntType get intType;
   CoreStringType get stringType;
+  CoreFractionalIndexType get fractionalIndexType;
   CoreDoubleType get doubleType;
   CoreBoolType get boolType;
   CoreListIdType get listIdType;
-  CoreFractionalIndexType get fractionalIndexType;
 
   @override
   void applyCoopChanges(ObjectChanges objectChanges) {
@@ -184,6 +185,12 @@ abstract class RiveCoreContext extends CoreContext {
           var value = stringType.deserialize(reader);
           setString(object, change.op, value);
           break;
+        case AnimationBase.orderPropertyKey:
+        case ComponentBase.childOrderPropertyKey:
+        case DrawableBase.drawOrderPropertyKey:
+          var value = fractionalIndexType.deserialize(reader);
+          setFractionalIndex(object, change.op, value);
+          break;
         case CubicInterpolatorBase.x1PropertyKey:
         case CubicInterpolatorBase.y1PropertyKey:
         case CubicInterpolatorBase.x2PropertyKey:
@@ -232,11 +239,6 @@ abstract class RiveCoreContext extends CoreContext {
         case ComponentBase.dependentIdsPropertyKey:
           var value = listIdType.deserialize(reader);
           setListId(object, change.op, value);
-          break;
-        case ComponentBase.childOrderPropertyKey:
-        case DrawableBase.drawOrderPropertyKey:
-          var value = fractionalIndexType.deserialize(reader);
-          setFractionalIndex(object, change.op, value);
           break;
         default:
           break;
@@ -303,6 +305,15 @@ abstract class RiveCoreContext extends CoreContext {
           return null;
         }
         break;
+      case AnimationBase.orderPropertyKey:
+      case ComponentBase.childOrderPropertyKey:
+      case DrawableBase.drawOrderPropertyKey:
+        if (value != null && value is FractionalIndex) {
+          change.value = fractionalIndexType.serialize(value);
+        } else {
+          return null;
+        }
+        break;
       case CubicInterpolatorBase.x1PropertyKey:
       case CubicInterpolatorBase.y1PropertyKey:
       case CubicInterpolatorBase.x2PropertyKey:
@@ -361,14 +372,6 @@ abstract class RiveCoreContext extends CoreContext {
           return null;
         }
         break;
-      case ComponentBase.childOrderPropertyKey:
-      case DrawableBase.drawOrderPropertyKey:
-        if (value != null && value is FractionalIndex) {
-          change.value = fractionalIndexType.serialize(value);
-        } else {
-          return null;
-        }
-        break;
       default:
         break;
     }
@@ -406,6 +409,11 @@ abstract class RiveCoreContext extends CoreContext {
       case AnimationBase.namePropertyKey:
         if (object is AnimationBase && value is String) {
           object.name = value;
+        }
+        break;
+      case AnimationBase.orderPropertyKey:
+        if (object is AnimationBase && value is FractionalIndex) {
+          object.order = value;
         }
         break;
       case CubicInterpolatorBase.x1PropertyKey:
@@ -776,6 +784,11 @@ abstract class RiveCoreContext extends CoreContext {
           return object.name;
         }
         break;
+      case AnimationBase.orderPropertyKey:
+        if (object is AnimationBase) {
+          return object.order;
+        }
+        break;
       case CubicInterpolatorBase.x1PropertyKey:
         if (object is CubicInterpolatorBase) {
           return object.x1;
@@ -1121,6 +1134,10 @@ abstract class RiveCoreContext extends CoreContext {
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
         return stringType;
+      case AnimationBase.orderPropertyKey:
+      case ComponentBase.childOrderPropertyKey:
+      case DrawableBase.drawOrderPropertyKey:
+        return fractionalIndexType;
       case CubicInterpolatorBase.x1PropertyKey:
       case CubicInterpolatorBase.y1PropertyKey:
       case CubicInterpolatorBase.x2PropertyKey:
@@ -1164,9 +1181,6 @@ abstract class RiveCoreContext extends CoreContext {
         return boolType;
       case ComponentBase.dependentIdsPropertyKey:
         return listIdType;
-      case ComponentBase.childOrderPropertyKey:
-      case DrawableBase.drawOrderPropertyKey:
-        return fractionalIndexType;
       default:
         return null;
     }
@@ -1238,6 +1252,18 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as AnimationBase).name;
       case ComponentBase.namePropertyKey:
         return (object as ComponentBase).name;
+    }
+    return null;
+  }
+
+  static FractionalIndex getFractionalIndex(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case AnimationBase.orderPropertyKey:
+        return (object as AnimationBase).order;
+      case ComponentBase.childOrderPropertyKey:
+        return (object as ComponentBase).childOrder;
+      case DrawableBase.drawOrderPropertyKey:
+        return (object as DrawableBase).drawOrder;
     }
     return null;
   }
@@ -1340,16 +1366,6 @@ abstract class RiveCoreContext extends CoreContext {
     return null;
   }
 
-  static FractionalIndex getFractionalIndex(Core object, int propertyKey) {
-    switch (propertyKey) {
-      case ComponentBase.childOrderPropertyKey:
-        return (object as ComponentBase).childOrder;
-      case DrawableBase.drawOrderPropertyKey:
-        return (object as DrawableBase).drawOrder;
-    }
-    return null;
-  }
-
   static void setId(Core object, int propertyKey, Id value) {
     switch (propertyKey) {
       case KeyedObjectBase.objectIdPropertyKey:
@@ -1439,6 +1455,21 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case ComponentBase.namePropertyKey:
         (object as ComponentBase).name = value;
+        break;
+    }
+  }
+
+  static void setFractionalIndex(
+      Core object, int propertyKey, FractionalIndex value) {
+    switch (propertyKey) {
+      case AnimationBase.orderPropertyKey:
+        (object as AnimationBase).order = value;
+        break;
+      case ComponentBase.childOrderPropertyKey:
+        (object as ComponentBase).childOrder = value;
+        break;
+      case DrawableBase.drawOrderPropertyKey:
+        (object as DrawableBase).drawOrder = value;
         break;
     }
   }
@@ -1582,18 +1613,6 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case ComponentBase.dependentIdsPropertyKey:
         (object as ComponentBase).dependentIds = value;
-        break;
-    }
-  }
-
-  static void setFractionalIndex(
-      Core object, int propertyKey, FractionalIndex value) {
-    switch (propertyKey) {
-      case ComponentBase.childOrderPropertyKey:
-        (object as ComponentBase).childOrder = value;
-        break;
-      case DrawableBase.drawOrderPropertyKey:
-        (object as DrawableBase).drawOrder = value;
         break;
     }
   }

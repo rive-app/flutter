@@ -180,6 +180,21 @@ class AnimationTreeController
       List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {}
 
   @override
+  bool allowDrop(
+      FlatTreeItem<ValueStream<AnimationViewModel>> item,
+      DropState state,
+      List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {
+    // Only allow re-ordering.
+    switch (state) {
+      case DropState.above:
+      case DropState.below:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  @override
   bool isDisabled(ValueStream<AnimationViewModel> treeItem) {
     return false;
   }
@@ -191,7 +206,7 @@ class AnimationTreeController
   List<FlatTreeItem<ValueStream<AnimationViewModel>>> onDragStart(
           DragStartDetails details,
           FlatTreeItem<ValueStream<AnimationViewModel>> item) =>
-      [];
+      [item];
 
   @override
   void onMouseEnter(PointerEnterEvent event,
@@ -217,12 +232,13 @@ class AnimationTreeController
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<ValueStream<AnimationViewModel>> item) {
     var viewModel = item.data.value;
+    const double width = 130;
     ListPopup<PopupContextItem>.show(
       context,
       showArrow: false,
       // direction: PopupDirection.rightToBottom,
       position: event.position + const Offset(0, -6),
-      width: 194,
+      width: width,
       itemBuilder: (popupContext, item, isHovered) =>
           item.itemBuilder(popupContext, isHovered),
       items: [
@@ -232,9 +248,15 @@ class AnimationTreeController
           select: () => animationManager.delete.add(viewModel),
         ),
         PopupContextItem.separator(),
-        PopupContextItem('Sort', popup: [
-          PopupContextItem('Alphabetically', select: () => false),
-          PopupContextItem('Date Created', select: () => false),
+        PopupContextItem('Sort', popupWidth: width, popup: [
+          PopupContextItem(
+            'A-Z',
+            select: () => animationManager.order.add(AnimationOrder.aToZ),
+          ),
+          PopupContextItem(
+            'Z-A',
+            select: () => animationManager.order.add(AnimationOrder.zToA),
+          ),
         ]),
       ],
     );
@@ -314,6 +336,17 @@ class _AnimationHierarchyViewState extends State<AnimationHierarchyView> {
         TreeView<ValueStream<AnimationViewModel>>(
           style: style,
           controller: _treeController,
+          dragItemBuilder: (context, items, style) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: items
+                .map(
+                  (item) => Text(
+                    item.data.value.animation.name,
+                    style: theme.textStyles.treeDragItem,
+                  ),
+                )
+                .toList(),
+          ),
           expanderBuilder: (context, item, style) => Container(
             child: Center(
               child: TreeExpander(

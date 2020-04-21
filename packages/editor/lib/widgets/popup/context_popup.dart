@@ -49,23 +49,29 @@ class PopupContextItem extends PopupListItem {
   final List<PopupContextItem> popup;
 
   @override
+  final double popupWidth;
+
+  @override
   final SelectCallback select;
 
   @override
   final bool dismissOnSelect;
 
-  PopupContextItem(this.name,
-      {this.icon,
-      this.iconColor,
-      this.iconBuilder,
-      this.shortcut,
-      this.child,
-      this.popup,
-      this.select,
-      this.rebuildItem,
-      this.iconColorBuilder,
-      this.padIcon = false,
-      this.dismissOnSelect = true});
+  PopupContextItem(
+    this.name, {
+    this.icon,
+    this.iconColor,
+    this.iconBuilder,
+    this.shortcut,
+    this.child,
+    this.popup,
+    this.select,
+    this.rebuildItem,
+    this.iconColorBuilder,
+    this.padIcon = false,
+    this.dismissOnSelect = true,
+    this.popupWidth,
+  });
 
   @override
   String toString() {
@@ -84,6 +90,7 @@ class PopupContextItem extends PopupListItem {
         select = null,
         rebuildItem = null,
         padIcon = null,
+        popupWidth = null,
         dismissOnSelect = true;
 
   bool get isSeparator => name == null;

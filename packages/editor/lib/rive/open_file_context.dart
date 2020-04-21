@@ -230,7 +230,7 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   void _resetTreeControllers() {
-    treeController.value = HierarchyTreeController(core.artboards, file: this);
+    treeController.value = HierarchyTreeController(this);
     drawOrderTreeController.value = DrawOrderTreeController(
       DrawOrderManager(core.artboards).drawableComponentsInOrder,
       file: this,

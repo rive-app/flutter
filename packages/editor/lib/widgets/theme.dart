@@ -125,7 +125,6 @@ class RiveColors {
   Color get toggleForegroundDisabled => const Color(0xFF444444);
 
   Color get treeHover => const Color(0x32AAAAAA);
-  
 
   // Mode button
   Color get modeBackground => const Color(0xFF2F2F2F);
@@ -319,6 +318,13 @@ class TextStyles {
         color: Color(0xFFFFFFFF),
         fontSize: 13,
       );
+
+  // Tree
+  TextStyle get treeDragItem => const TextStyle(
+      fontFamily: 'Roboto-Regular',
+      color: white,
+      fontSize: 13,
+      decoration: TextDecoration.none);
 }
 
 /// Gradients used in the Rive Theme

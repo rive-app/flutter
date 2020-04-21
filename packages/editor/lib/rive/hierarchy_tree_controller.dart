@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_core/artboard.dart';
+import 'package:core/debounce.dart';
+import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -13,8 +14,40 @@ import 'stage/stage_item.dart';
 /// propagate selections.
 class HierarchyTreeController extends TreeController<Component> {
   final OpenFileContext file;
-  HierarchyTreeController(List<Artboard> artboards, {this.file})
-      : super(artboards);
+
+  HierarchyTreeController(this.file) : super([]) {
+    if (file.core.backboard.activeArtboard != null) {
+      data = [file.core.backboard.activeArtboard];
+    }
+
+    file.core.backboard.addListener(
+        BackboardBase.activeArtboardIdPropertyKey, _activeArtboardChanged);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    // N.B. assumes backboard doesn't change.
+    bool removed = file.core.backboard.removeListener(
+        BackboardBase.activeArtboardIdPropertyKey, _activeArtboardChanged);
+    assert(
+        removed,
+        'removeListener should\'ve returned true as the backboard was listened '
+        'to in the constructor, if it returned false it means the backboard '
+        'probably changed and is a condition we currently do not support.');
+  }
+
+  void _activeArtboardChanged(dynamic from, dynamic to) {
+    debounce(_updateArtboard);
+  }
+
+  void _updateArtboard() {
+    data = [
+      if (file.core.backboard.activeArtboard != null)
+        file.core.backboard.activeArtboard
+    ];
+  }
 
   @override
   List<Component> childrenOf(Component treeItem) =>
@@ -144,5 +177,6 @@ class HierarchyTreeController extends TreeController<Component> {
   }
 
   @override
-  void onRightClick(BuildContext context, PointerDownEvent event, FlatTreeItem<Component> item) {}
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<Component> item) {}
 }

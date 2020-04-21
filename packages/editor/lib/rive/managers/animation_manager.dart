@@ -14,6 +14,21 @@ import 'package:rxdart/rxdart.dart';
 
 /// Animation type that can be created by the [AnimationManager].
 enum AnimationType { linear }
+enum AnimationOrder { aToZ, zToA }
+
+class _AnimationList
+    extends FractionallyIndexedList<BehaviorSubject<AnimationViewModel>> {
+  @override
+  FractionalIndex orderOf(BehaviorSubject<AnimationViewModel> stream) {
+    return stream.value.animation.order;
+  }
+
+  @override
+  void setOrderOf(
+      BehaviorSubject<AnimationViewModel> stream, FractionalIndex order) {
+    stream.value.animation.order = order;
+  }
+}
 
 /// A manager for a file's list of animations allowing creating and updating
 /// them.
@@ -23,7 +38,7 @@ class AnimationManager with RiveFileDelegate {
       HashMap<Id, BehaviorSubject<AnimationViewModel>>();
   final _animationsController =
       BehaviorSubject<Iterable<ValueStream<AnimationViewModel>>>();
-  final _animations = <BehaviorSubject<AnimationViewModel>>[];
+  final _animations = _AnimationList();
   final _selectedAnimationStream = BehaviorSubject<AnimationViewModel>();
   final _selectAnimationController = StreamController<AnimationViewModel>();
   final _deleteController = StreamController<AnimationViewModel>();
@@ -31,6 +46,9 @@ class AnimationManager with RiveFileDelegate {
 
   /// Input to create new animations.
   final _createController = StreamController<AnimationType>();
+
+  /// Input to sort animations.
+  final _orderController = StreamController<AnimationOrder>();
 
   /// Input for animation hover.
   final _mouseOverController = StreamController<AnimationViewModel>();
@@ -66,6 +84,25 @@ class AnimationManager with RiveFileDelegate {
           break;
       }
     });
+
+    _orderController.stream.listen(_onOrder);
+  }
+
+  void _onOrder(AnimationOrder order) {
+    switch (order) {
+      case AnimationOrder.aToZ:
+        _animations.sort(
+            (a, b) => a.value.animation.name.compareTo(b.value.animation.name));
+        break;
+      case AnimationOrder.zToA:
+        _animations.sort(
+            (a, b) => b.value.animation.name.compareTo(a.value.animation.name));
+        break;
+    }
+
+    _animations.setFractionalIndices();
+    file.core.captureJournalEntry();
+    debounce(_updateAnimations);
   }
 
   void _onRename(RenameAnimationModel model) {
@@ -182,9 +219,12 @@ class AnimationManager with RiveFileDelegate {
 
   // Internally call this whenever the list of animations needs to be re-sorted.
   void _updateAnimations() {
-    // For now just sort them by name.
-    _animations.sort(
-        (a, b) => a.value.animation.name.compareTo(b.value.animation.name));
+    if (!_animations.validateFractional()) {
+      // List wasn't valid for some reason, it was patched up so save the change
+      // and don't allow undoing.
+      file.core.captureJournalEntry(record: false);
+    }
+    _animations.sortFractional();
     _animationsController.add(_animations);
 
     // If we just added our first animation, make it the selected one.
@@ -214,6 +254,7 @@ class AnimationManager with RiveFileDelegate {
   Sink<AnimationType> get create => _createController;
   Sink<AnimationViewModel> get delete => _deleteController;
   Sink<RenameAnimationModel> get rename => _renameController;
+  Sink<AnimationOrder> get order => _orderController;
 
   void _makeLinearAnimation() {
     var regex = RegExp(r"Untitled ([0-9])+");
@@ -240,6 +281,7 @@ class AnimationManager with RiveFileDelegate {
     _renameController.close();
     _deleteController.close();
     _createController.close();
+    _orderController.close();
     _mouseOverController.close();
     _mouseOutController.close();
     _selectedAnimationStream.close();

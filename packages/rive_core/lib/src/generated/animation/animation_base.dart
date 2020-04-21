@@ -3,6 +3,7 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
+import 'package:fractional/fractional.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 
 abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
@@ -56,6 +57,28 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
 
   void nameChanged(String from, String to);
 
+  /// --------------------------------------------------------------------------
+  /// Order field with key 73.
+  FractionalIndex _order;
+  static const int orderPropertyKey = 73;
+
+  /// Order this animation shows up in the animations list.
+  FractionalIndex get order => _order;
+
+  /// Change the [_order] field value.
+  /// [orderChanged] will be invoked only if the field's value has changed.
+  set order(FractionalIndex value) {
+    if (_order == value) {
+      return;
+    }
+    FractionalIndex from = _order;
+    _order = value;
+    onPropertyChanged(orderPropertyKey, from, value);
+    orderChanged(from, value);
+  }
+
+  void orderChanged(FractionalIndex from, FractionalIndex to);
+
   @override
   void changeNonNull() {
     if (artboardId != null) {
@@ -63,6 +86,9 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     if (name != null) {
       onPropertyChanged(namePropertyKey, name, name);
+    }
+    if (order != null) {
+      onPropertyChanged(orderPropertyKey, order, order);
     }
   }
 
@@ -73,6 +99,8 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
         return artboardId as K;
       case namePropertyKey:
         return name as K;
+      case orderPropertyKey:
+        return order as K;
       default:
         return super.getProperty<K>(propertyKey);
     }
@@ -83,6 +111,7 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     switch (propertyKey) {
       case artboardIdPropertyKey:
       case namePropertyKey:
+      case orderPropertyKey:
         return true;
       default:
         return super.getProperty(propertyKey);

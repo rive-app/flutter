@@ -243,6 +243,10 @@ class RiveFile extends RiveCoreContext {
     delegates.forEach((delegate) => delegate.onObjectAdded(object));
     if (object is Artboard) {
       artboards.add(object);
+      // If this is the first artboard, make it active.`
+      if (_backboard != null && artboards.length == 1) {
+        _backboard.activeArtboard = object;
+      }
       delegates.forEach((delegate) => delegate.onArtboardsChanged());
     }
   }
@@ -253,6 +257,11 @@ class RiveFile extends RiveCoreContext {
     delegates.forEach((delegate) => delegate.onObjectRemoved(object));
     if (object is Artboard) {
       artboards.remove(object);
+      // If this was the active artboard, select another.
+      if (_backboard.activeArtboard == object) {
+        _backboard.activeArtboard =
+            artboards.isNotEmpty ? artboards.first : null;
+      }
       delegates.forEach((delegate) => delegate.onArtboardsChanged());
     }
   }
@@ -347,9 +356,10 @@ class RiveFile extends RiveCoreContext {
 
   @override
   void onConnected() {
-    // Find backboard.
+    // Let's validate the file. First thing we expect is that it has a
+    // backboard.
     var backboards = objects.whereType<Backboard>();
-
+    bool didPatch = false;
     if (backboards.isEmpty) {
       // Don't have one? Patch up the file and make one...
       batchAdd(() {
@@ -365,13 +375,23 @@ class RiveFile extends RiveCoreContext {
         do {
           remove(backboards.last);
         } while (backboards.length > 1);
-        // Save the creation of the backboard.
-        captureJournalEntry();
-        // Don't allow undoing it.
-        clearJournal();
+        didPatch = true;
       }
       _backboard = backboards.first;
     }
+
+    if (_backboard.activeArtboard == null && artboards.isNotEmpty) {
+      // We should always have an active artboard (unless there are not
+      // artboards yet).
+      _backboard.activeArtboard = artboards.first;
+    }
+
+    if (didPatch) {
+      // We had to patch up the file, save the changes and disallow undo.
+      captureJournalEntry();
+      clearJournal();
+    }
+
     assert(objects.whereType<Backboard>().length == 1,
         'File should contain exactly one backboard.');
   }

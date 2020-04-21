@@ -20,6 +20,14 @@
         "string": "name"
       },
       "description": "Name of the animation."
+    },
+    "order": {
+      "type": "FractionalIndex",
+      "key": {
+        "int": 73,
+        "string": "order"
+      },
+      "description": "Order this animation shows up in the animations list."
     }
   }
 }
