@@ -242,7 +242,9 @@ class Editor extends StatelessWidget {
       builder: (context, event, _) {
         switch (file.state) {
           case OpenFileState.loading:
-            return const Center(
+            return Container(
+              color: RiveTheme.of(context).colors.stageBackground,
+              alignment: Alignment.center,
               child: CircularProgressIndicator(),
             );
           case OpenFileState.error:
