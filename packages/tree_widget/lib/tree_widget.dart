@@ -85,6 +85,8 @@ class TreeView<T> extends StatelessWidget {
         padding: EdgeInsets.only(
           left: style.padding.left,
           right: style.padding.right,
+          top: style.padding.top,
+          bottom: style.padding.bottom,
         ),
         sliver: ListenableBuilder(
           listenable: controller,

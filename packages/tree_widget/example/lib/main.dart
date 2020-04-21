@@ -267,7 +267,7 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
       child: Text("Click me"),
     )));
     return TreeScrollView(
-      style: treeStyle,
+      padding: treeStyle.padding,
       slivers: slivers,
     );
   }

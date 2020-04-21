@@ -297,8 +297,8 @@ class NavigationPanel extends StatelessWidget {
       padding: const EdgeInsets.only(
         left: 10,
         right: 10,
-        bottom: 0,
-        top: 5,
+        bottom: 12,
+        top: 12,
       ),
       lineColor: RiveTheme.of(context).colors.lightTreeLines,
       itemHeight: kTreeItemHeight,
@@ -417,9 +417,7 @@ class NavigationPanel extends StatelessWidget {
           ),
           Separator(
             color: riveColors.fileLineGrey,
-            padding: const EdgeInsets.only(
-              top: 20,
-            ),
+            padding: const EdgeInsets.only(top: 20),
           ),
           Expanded(
             child: ValueListenableBuilder<List<FolderTreeController>>(
@@ -441,9 +439,6 @@ class NavigationPanel extends StatelessWidget {
                             color: riveColors.fileLineGrey,
                             padding: EdgeInsets.only(
                               left: treeStyle.padding.left,
-                              right: 0,
-                              top: 12,
-                              bottom: 12,
                             ),
                           ),
                         ),
@@ -454,47 +449,49 @@ class NavigationPanel extends StatelessWidget {
 
                 slivers.add(
                   SliverInlineFooter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Separator(
-                          color: riveColors.fileLineGrey,
-                          padding: EdgeInsets.only(
-                            left: treeStyle.padding.left,
-                            top: 12,
-                            bottom: 0,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 20,
-                            right: 10,
-                            bottom: 20,
-                            top: 20,
-                          ),
-                          child: DashedFlatButton(
-                            label: 'New Team',
-                            icon: 'teams-button',
-                            tip: const Tip(
-                              label: 'Create a new team',
-                              direction: PopupDirection.bottomToCenter,
-                              fallbackDirections: [
-                                PopupDirection.topToCenter,
-                              ],
-                            ),
-                            onTap: () => showTeamWizard<void>(
-                              context: context,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: riveColors.fileBackgroundLightGrey,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Separator(
+                            color: riveColors.fileLineGrey,
+                            padding: EdgeInsets.only(
+                              left: treeStyle.padding.left,
                             ),
                           ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 20,
+                              right: 10,
+                              bottom: 20,
+                              top: 20,
+                            ),
+                            child: DashedFlatButton(
+                              label: 'New Team',
+                              icon: 'teams-button',
+                              tip: const Tip(
+                                label: 'Create a new team',
+                                direction: PopupDirection.bottomToCenter,
+                                fallbackDirections: [
+                                  PopupDirection.topToCenter,
+                                ],
+                              ),
+                              onTap: () => showTeamWizard<void>(
+                                context: context,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
                 return TreeScrollView(
                   scrollController:
                       RiveContext.of(context).treeScrollController,
-                  style: treeStyle,
                   slivers: slivers,
                 );
               },
