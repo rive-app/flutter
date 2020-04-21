@@ -62,9 +62,26 @@ class RiveColors {
 
   // Buttons
   Color get buttonLight => const Color(0xFFE3E3E3);
+  Color get buttonLightHover => const Color(0xFFDEDEDE);
+  Color get buttonLightText => const Color(0xFF666666);
+  Color get buttonLightDisabled => const Color(0xFFF8F8F8);
+  Color get buttonLightTextDisabled => const Color(0xFFD9D9D9);
+
+  Color get iconButtonLightIcon => const Color(0xFF888888);
+  Color get iconButtonLightDisabled => const Color(0xFFEBEBEB);
+  Color get iconButtonLightTextDisabled => const Color(0xFFCECECE);
+  Color get iconButtonLightIconDisabled => const Color(0xFFD7D7D7);
+
   Color get buttonDark => const Color(0xFF444444);
+  Color get textButtonDark => const Color(0xFF333333);
+  Color get buttonDarkText => white;
+  Color get buttonDarkDisabled => const Color(0xFFCCCCCC);
+  Color get buttonDarkTextHovered => white;
+  Color get buttonDarkDisabledText => white;
+
   Color get buttonNoHover => const Color(0xFF707070);
   Color get buttonHover => white;
+
 
   // Cursors
   Color get cursorGreen => const Color(0xFF16E6B3);

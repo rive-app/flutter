@@ -243,9 +243,15 @@ class _LoginState extends State<Login> {
               label: _buttonDisabled ? 'Verifying' : 'Sign Up',
               onTap: _signup,
               color: _buttonDisabled
-                  ? colors.commonLightGrey
-                  : colors.commonDarkGrey,
-              textColor: Colors.white,
+                  ? colors.buttonDarkDisabled
+                  : colors.textButtonDark,
+              textColor: _buttonDisabled
+                  ? colors.buttonDarkDisabledText
+                  : Colors.white,
+              hoverColor: _buttonDisabled
+                  ? colors.buttonDarkDisabled
+                  : colors.textButtonDark,
+              hoverTextColor: Colors.white,
               radius: 20,
               elevated: true,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -262,38 +268,40 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void _socialLogin(LoginFunction loginFunc) async {
+  Future<void> _socialLogin(LoginFunction loginFunc) async {
     if (_buttonDisabled) {
       return;
     }
-    _disableButton(true);
+    // _disableButton(true);
     final rive = RiveContext.of(context);
 
     if (await loginFunc()) {
       await rive.updateUser();
-    } else {
-      _disableButton(false);
     }
+    // else {
+    //   _disableButton(false);
+    // }
   }
 
   Widget _socials() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        /* TODO: not supported yet.
         _SocialSigninButton(
           label: 'Apple',
           icon: 'signin-apple',
-          onTap: null, // TODO: not supported yet.
-          /* _buttonDisabled
+          onTap: null, 
+           _buttonDisabled
               ? null
               : () async {
                   final rive = RiveContext.of(context);
                   final api = rive.api;
                   final auth = RiveAuth(api);
                   _socialLogin(auth.loginApple); 
-                },*/
+                },
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 10),*/
         _SocialSigninButton(
           label: 'Google',
           icon: 'signin-google',
@@ -302,7 +310,7 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  _socialLogin(auth.loginGoogle);
+                  await _socialLogin(auth.loginGoogle);
                 },
         ),
         const SizedBox(width: 10),
@@ -314,7 +322,7 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  _socialLogin(auth.loginFacebook);
+                  await _socialLogin(auth.loginFacebook);
                 },
         ),
         const SizedBox(width: 10),
@@ -326,7 +334,7 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  _socialLogin(auth.loginTwitter);
+                  await _socialLogin(auth.loginTwitter);
                 },
         ),
       ],
@@ -390,9 +398,15 @@ class _LoginState extends State<Login> {
               label: _buttonDisabled ? 'Verifying' : 'Log In',
               onTap: _login,
               color: _buttonDisabled
-                  ? colors.commonLightGrey
-                  : colors.commonDarkGrey,
-              textColor: Colors.white,
+                  ? colors.buttonDarkDisabled
+                  : colors.textButtonDark,
+              textColor: _buttonDisabled
+                  ? colors.buttonDarkDisabledText
+                  : Colors.white,
+              hoverColor: _buttonDisabled
+                  ? colors.buttonDarkDisabled
+                  : colors.textButtonDark,
+              hoverTextColor: Colors.white,
               radius: 20,
               elevated: true,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -546,14 +560,26 @@ class _SocialSigninButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
+    var isEnabled = onTap != null;
+    var buttonColor =
+        isEnabled ? colors.buttonLight : colors.buttonLightDisabled;
+    var textColor =
+        isEnabled ? colors.buttonLightText : colors.buttonLightTextDisabled;
+    var iconColor = isEnabled
+        ? colors.iconButtonLightIcon
+        : colors.iconButtonLightIconDisabled;
     return FlatIconButton(
         onTap: onTap,
         label: label,
+        color: buttonColor,
+        hoverColor: colors.buttonLightHover,
+        hoverTextColor: colors.buttonLightText,
+        textColor: textColor,
         icon: Padding(
           padding: const EdgeInsets.only(left: 25.0),
           child: TintedIcon(
             icon: icon,
-            color: colors.commonButtonTextColor,
+            color: iconColor,
           ),
         ));
   }
