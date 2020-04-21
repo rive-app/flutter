@@ -124,26 +124,31 @@ class _AnimationPanelContents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
+    var animationManager = AnimationProvider.of(context);
     return ColoredBox(
-        color: theme.colors.animationPanelBackground,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: 236,
-              child: ColoredBox(
-                color: theme.colors.tabBackground,
-                child: AnimationHierarchyView(
-                  animationManager: AnimationProvider.of(context),
-                ),
-              ),
+      color: theme.colors.animationPanelBackground,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 236,
+            child: ColoredBox(
+              color: theme.colors.tabBackground,
+              child: animationManager == null
+                  ? const SizedBox()
+                  : AnimationHierarchyView(
+                      animationManager: animationManager,
+                    ),
             ),
-            Expanded(
-              child: SizedBox(),
-            ),
-            SizedBox(width: 200),
-          ],
-        ));
+          ),
+          // Placeholder for timeline and curve editor.
+          const Expanded(
+            child: SizedBox(),
+          ),
+          const SizedBox(width: 200),
+        ],
+      ),
+    );
   }
 }
 

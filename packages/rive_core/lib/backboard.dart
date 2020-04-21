@@ -3,14 +3,24 @@ import 'dart:ui';
 import 'package:core/core.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/src/generated/backboard_base.dart';
 export 'package:rive_core/src/generated/backboard_base.dart';
 
 class Backboard extends BackboardBase {
+  /// An event fired when the active artboard changes, this should probably be
+  /// removed from the runtimes.
+  final Event activeArtboardChanged = Event();
+
   Artboard _activeArtboard;
   Artboard get activeArtboard => _activeArtboard;
   set activeArtboard(Artboard value) {
+    if (_activeArtboard == value) {
+      return;
+    }
+    _activeArtboard = value;
     activeArtboardId = value.id;
+    activeArtboardChanged.notify();
   }
 
   @override

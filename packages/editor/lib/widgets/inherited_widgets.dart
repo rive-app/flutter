@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/artboard.dart';
+import 'package:rive_core/backboard.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/managers/animation_manager.dart';
@@ -225,9 +227,9 @@ class _InheritedFollowProvider extends InheritedWidget {
 // Animation provider. This is responsible for building new managers when the
 // file changes.
 class AnimationProvider extends StatefulWidget {
-  const AnimationProvider({@required this.file, this.child});
+  const AnimationProvider({@required this.activeArtboard, this.child});
   final Widget child;
-  final OpenFileContext file;
+  final Artboard activeArtboard;
 
   @override
   _AnimationProviderState createState() => _AnimationProviderState();
@@ -242,16 +244,19 @@ class _AnimationProviderState extends State<AnimationProvider> {
 
   @override
   void initState() {
-    _manager = widget.file == null ? null : AnimationManager(file: widget.file);
+    _manager = widget.activeArtboard == null
+        ? null
+        : AnimationManager(activeArtboard: widget.activeArtboard);
     super.initState();
   }
 
   @override
   void didUpdateWidget(AnimationProvider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.file != widget.file) {
-      _manager =
-          widget.file == null ? null : AnimationManager(file: widget.file);
+    if (oldWidget.activeArtboard != widget.activeArtboard) {
+      _manager = widget.activeArtboard == null
+          ? null
+          : AnimationManager(activeArtboard: widget.activeArtboard);
     }
   }
 

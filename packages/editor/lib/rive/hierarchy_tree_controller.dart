@@ -1,7 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:core/debounce.dart';
-import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -20,8 +18,7 @@ class HierarchyTreeController extends TreeController<Component> {
       data = [file.core.backboard.activeArtboard];
     }
 
-    file.core.backboard.addListener(
-        BackboardBase.activeArtboardIdPropertyKey, _activeArtboardChanged);
+    file.core.backboard.activeArtboardChanged.addListener(_updateArtboard);
   }
 
   @override
@@ -29,17 +26,7 @@ class HierarchyTreeController extends TreeController<Component> {
     super.dispose();
 
     // N.B. assumes backboard doesn't change.
-    bool removed = file.core.backboard.removeListener(
-        BackboardBase.activeArtboardIdPropertyKey, _activeArtboardChanged);
-    assert(
-        removed,
-        'removeListener should\'ve returned true as the backboard was listened '
-        'to in the constructor, if it returned false it means the backboard '
-        'probably changed and is a condition we currently do not support.');
-  }
-
-  void _activeArtboardChanged(dynamic from, dynamic to) {
-    debounce(_updateArtboard);
+    file.core.backboard.activeArtboardChanged.removeListener(_updateArtboard);
   }
 
   void _updateArtboard() {

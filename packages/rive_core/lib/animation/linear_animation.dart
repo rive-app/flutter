@@ -15,21 +15,6 @@ class LinearAnimation extends LinearAnimationBase {
   /// The metadata for the objects that are keyed in this animation.
   Iterable<KeyedObject> get keyedObjects => _keyedObjects.values;
 
-  @override
-  void onAdded() {
-    // TODO: implement onAdded
-  }
-
-  @override
-  void onAddedDirty() {
-    // TODO: implement onAddedDirty
-  }
-
-  @override
-  void onRemoved() {
-    // TODO: implement onRemoved
-  }
-
   /// Called by rive_core to add a KeyedObject to the animation. This should be
   /// @internal when it's supported.
   bool internalAddKeyedObject(KeyedObject object) {

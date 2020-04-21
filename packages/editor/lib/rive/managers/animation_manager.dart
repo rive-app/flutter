@@ -7,42 +7,27 @@ import 'package:core/id.dart';
 import 'package:meta/meta.dart';
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/animation/linear_animation.dart';
-import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// Animation type that can be created by the [AnimationManager].
 enum AnimationType { linear }
 enum AnimationOrder { aToZ, zToA }
 
-class _AnimationList
-    extends FractionallyIndexedList<BehaviorSubject<AnimationViewModel>> {
-  @override
-  FractionalIndex orderOf(BehaviorSubject<AnimationViewModel> stream) {
-    return stream.value.animation.order;
-  }
-
-  @override
-  void setOrderOf(
-      BehaviorSubject<AnimationViewModel> stream, FractionalIndex order) {
-    stream.value.animation.order = order;
-  }
-}
-
 /// A manager for a file's list of animations allowing creating and updating
 /// them.
-class AnimationManager with RiveFileDelegate {
-  final OpenFileContext file;
+class AnimationManager {
+  final Artboard activeArtboard;
   final _animationStreamControllers =
       HashMap<Id, BehaviorSubject<AnimationViewModel>>();
   final _animationsController =
       BehaviorSubject<Iterable<ValueStream<AnimationViewModel>>>();
-  final _animations = _AnimationList();
   final _selectedAnimationStream = BehaviorSubject<AnimationViewModel>();
   final _selectAnimationController = StreamController<AnimationViewModel>();
   final _deleteController = StreamController<AnimationViewModel>();
   final _renameController = StreamController<RenameAnimationModel>();
+  final _animations = <BehaviorSubject<AnimationViewModel>>[];
 
   /// Input to create new animations.
   final _createController = StreamController<AnimationType>();
@@ -57,12 +42,11 @@ class AnimationManager with RiveFileDelegate {
   Animation _selectedAnimation;
 
   AnimationManager({
-    @required this.file,
+    @required this.activeArtboard,
   }) {
+    activeArtboard.animationsChanged.addListener(_updateAnimations);
     // Initialize the list of animations.
-    file.core.objects.whereType<Animation>().forEach(_updateAnimation);
     _updateAnimations();
-    file.core.addDelegate(this);
 
     // Listen for animation hover changes.
     _mouseOverController.stream.listen(_onMouseOver);
@@ -91,18 +75,14 @@ class AnimationManager with RiveFileDelegate {
   void _onOrder(AnimationOrder order) {
     switch (order) {
       case AnimationOrder.aToZ:
-        _animations.sort(
-            (a, b) => a.value.animation.name.compareTo(b.value.animation.name));
+        activeArtboard.animations.sort((a, b) => a.name.compareTo(b.name));
         break;
       case AnimationOrder.zToA:
-        _animations.sort(
-            (a, b) => b.value.animation.name.compareTo(a.value.animation.name));
+        activeArtboard.animations.sort((a, b) => b.name.compareTo(a.name));
         break;
     }
-
-    _animations.setFractionalIndices();
-    file.core.captureJournalEntry();
-    debounce(_updateAnimations);
+    activeArtboard.animations.setFractionalIndices();
+    activeArtboard.context.captureJournalEntry();
   }
 
   void _onRename(RenameAnimationModel model) {
@@ -194,37 +174,17 @@ class AnimationManager with RiveFileDelegate {
     }
   }
 
-  @protected
-  @override
-  void onObjectAdded(Core object) {
-    if (object is Animation) {
-      _updateAnimation(object);
-      debounce(_updateAnimations);
-    }
-  }
-
-  @protected
-  @override
-  void onObjectRemoved(Core object) {
-    if (object is Animation) {
-      var stream = _animationStreamControllers[object.id];
-      if (stream != null) {
-        _animationStreamControllers.remove(object.id);
-      }
-      if (_animations.remove(stream)) {
-        debounce(_updateAnimations);
-      }
-    }
-  }
-
   // Internally call this whenever the list of animations needs to be re-sorted.
   void _updateAnimations() {
-    if (!_animations.validateFractional()) {
-      // List wasn't valid for some reason, it was patched up so save the change
-      // and don't allow undoing.
-      file.core.captureJournalEntry(record: false);
+    for (final animation in _animations) {
+      animation.close();
     }
-    _animations.sortFractional();
+    _animations.clear();
+    _animationStreamControllers.clear();
+    
+    var animations = activeArtboard?.animations;
+    animations.forEach(_updateAnimation);
+
     _animationsController.add(_animations);
 
     // If we just added our first animation, make it the selected one.
@@ -257,6 +217,7 @@ class AnimationManager with RiveFileDelegate {
   Sink<AnimationOrder> get order => _orderController;
 
   void _makeLinearAnimation() {
+    assert(activeArtboard != null);
     var regex = RegExp(r"Untitled ([0-9])+");
     int maxUntitled = 0;
     for (final animationStream in _animationStreamControllers.values) {
@@ -270,13 +231,16 @@ class AnimationManager with RiveFileDelegate {
     }
     var animation = LinearAnimation()
       ..name = 'Untitled ${maxUntitled + 1}'
-      ..fps = 60;
-    file.core.add(animation);
-    file.core.captureJournalEntry();
+      ..fps = 60
+      ..artboardId = activeArtboard.id;
+    var core = activeArtboard.context;
+    core.add(animation);
+    core.captureJournalEntry();
   }
 
   /// Cleanup the manager.
   void dispose() {
+    activeArtboard.animationsChanged.removeListener(_updateAnimations);
     // Make sure to close all streams and cancel any debounced methods.
     _renameController.close();
     _deleteController.close();
