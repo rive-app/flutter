@@ -41,17 +41,13 @@ class TeamWizardPanelOne extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
-                    child: getTextFormField(
+                    child: WizardTextFormField(
                       onChanged: (name) => sub.name = name,
                       enabled: !sub.processing,
                       initialValue: sub.name,
-                      style: textStyles.fileGreyTextLarge,
-                      inputDecoration: getInputDecoration(
-                          hintText: 'Team name',
-                          errorText: sub.nameValidationError,
-                          riveColors: colors,
-                          hintStyle: textStyles.textFieldInputHint,
-                          errorStyle: textStyles.textFieldInputValidationError),
+                      fontSize: 16,
+                      hintText: 'Team name',
+                      errorText: sub.nameValidationError,
                     ),
                   ),
                   Padding(

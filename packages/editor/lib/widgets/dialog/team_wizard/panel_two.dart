@@ -166,22 +166,18 @@ class TeamWizardPanelTwo extends StatelessWidget {
             style: textStyles.inspectorPropertyLabel,
           ),
         ),
-        getTextFormField(
-            onChanged: (cardNumber) => sub.cardNumber = cardNumber,
-            enabled: !sub.processing,
-            initialValue: sub.cardNumber,
-            inputFormatters: <TextInputFormatter>[
-              WhitelistingTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(16),
-              CardNumberFormatter()
-            ],
-            style: textStyles.inspectorPropertyLabel,
-            inputDecoration: getInputDecoration(
-                hintText: '0000 0000 0000 0000',
-                errorText: sub.cardValidationError,
-                riveColors: colors,
-                hintStyle: textStyles.textFieldInputHint.copyWith(fontSize: 13),
-                errorStyle: textStyles.textFieldInputValidationError)),
+        WizardTextFormField(
+          onChanged: (cardNumber) => sub.cardNumber = cardNumber,
+          enabled: !sub.processing,
+          initialValue: sub.cardNumber,
+          inputFormatters: <TextInputFormatter>[
+            WhitelistingTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(16),
+            CardNumberFormatter()
+          ],
+          hintText: '0000 0000 0000 0000',
+          errorText: sub.cardValidationError,
+        ),
       ],
     );
   }
@@ -205,22 +201,16 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              getTextFormField(
-                onChanged: (ccv) => sub.ccv = ccv,
-                enabled: !sub.processing,
+              WizardTextFormField(
                 initialValue: sub.ccv,
                 inputFormatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                 ],
-                style: textStyles.inspectorPropertyLabel,
-                inputDecoration: getInputDecoration(
-                    hintText: '3-4 digits',
-                    errorText: sub.ccvError,
-                    riveColors: colors,
-                    hintStyle:
-                        textStyles.textFieldInputHint.copyWith(fontSize: 13),
-                    errorStyle: textStyles.textFieldInputValidationError),
+                enabled: !sub.processing,
+                onChanged: (ccv) => sub.ccv = ccv,
+                hintText: '3-4 digits',
+                errorText: sub.ccvError,
               ),
             ],
           ),
@@ -236,7 +226,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              getTextFormField(
+              WizardTextFormField(
                 onChanged: (expiration) => sub.expiration = expiration,
                 enabled: !sub.processing,
                 initialValue: sub.expiration,
@@ -246,14 +236,8 @@ class TeamWizardPanelTwo extends StatelessWidget {
                   DateTextInputFormatter(),
                   DateTextRegexCheck()
                 ],
-                style: textStyles.inspectorPropertyLabel,
-                inputDecoration: getInputDecoration(
-                    hintText: 'MM/YY',
-                    errorText: sub.expirationError,
-                    riveColors: colors,
-                    hintStyle:
-                        textStyles.textFieldInputHint.copyWith(fontSize: 13),
-                    errorStyle: textStyles.textFieldInputValidationError),
+                hintText: 'MM/YY',
+                errorText: sub.expirationError,
               ),
             ],
           ),
@@ -269,7 +253,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              getTextFormField(
+              WizardTextFormField(
                 onChanged: (zip) => sub.zip = zip,
                 enabled: !sub.processing,
                 initialValue: sub.zip,
@@ -277,14 +261,8 @@ class TeamWizardPanelTwo extends StatelessWidget {
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(5),
                 ],
-                style: textStyles.inspectorPropertyLabel,
-                inputDecoration: getInputDecoration(
-                    hintText: '90210',
-                    errorText: sub.zipError,
-                    riveColors: colors,
-                    hintStyle:
-                        textStyles.textFieldInputHint.copyWith(fontSize: 13),
-                    errorStyle: textStyles.textFieldInputValidationError),
+                hintText: '90210',
+                errorText: sub.zipError,
               ),
             ],
           ),
