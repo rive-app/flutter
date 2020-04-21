@@ -9,8 +9,9 @@ import 'package:rive_editor/widgets/common/fractional_intrinsic_height.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 
-/// Container for the animation panel that allows it to slide up from the bottom
-/// when animation mode is activated.
+/// Shell for the animation panel that allows it to slide up from the bottom
+/// when animation mode is activated. See [AnimationPanelContents] for the
+/// various component widgets that actually make up the panel.
 class AnimationPanel extends StatefulWidget {
   @override
   _AnimationPanelState createState() => _AnimationPanelState();
