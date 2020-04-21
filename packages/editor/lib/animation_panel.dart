@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -173,6 +174,28 @@ class AnimationTreeController
     cancelDebounce(flatten);
   }
 
+  FlatTreeItem<ValueStream<AnimationViewModel>> _previousExcluding(
+      FlatTreeItem<ValueStream<AnimationViewModel>> target,
+      List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {
+    for (var item = target.prev; item != null; item = item.prev) {
+      if (!items.contains(item)) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  FlatTreeItem<ValueStream<AnimationViewModel>> _nextExcluding(
+      FlatTreeItem<ValueStream<AnimationViewModel>> target,
+      List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {
+    for (var item = target.next; item != null; item = item.next) {
+      if (!items.contains(item)) {
+        return item;
+      }
+    }
+    return null;
+  }
+
   @override
   List<ValueStream<AnimationViewModel>> childrenOf(
           ValueStream<AnimationViewModel> treeItem) =>
@@ -182,7 +205,30 @@ class AnimationTreeController
   void drop(
       FlatTreeItem<ValueStream<AnimationViewModel>> target,
       DropState state,
-      List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {}
+      List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {
+    FractionalIndex before, after;
+
+    switch (state) {
+      case DropState.above:
+        before =
+            _previousExcluding(target, items)?.data?.value?.animation?.order ??
+                const FractionalIndex.min();
+        after = target.data.value.animation.order;
+        break;
+      case DropState.below:
+        before = target.data.value.animation.order;
+        after = _nextExcluding(target, items)?.data?.value?.animation?.order ??
+            const FractionalIndex.max();
+        break;
+      default:
+        break;
+    }
+    for (final item in items) {
+      before = FractionalIndex.between(before, after);
+      item.data.value.animation.order = before;
+    }
+    animationManager.order.add(AnimationOrder.custom);
+  }
 
   @override
   bool allowDrop(
