@@ -573,8 +573,6 @@ class Stage extends Debouncer {
 
   void dispose() {}
 
-  void _onFileChanged() {}
-
   bool get shouldAdvance => _needsAdvance || needsDebounce;
   bool _needsAdvance = true;
 
@@ -624,6 +622,7 @@ class Stage extends Debouncer {
   }
 
   void draw(PaintingContext context, Offset offset, Size size) {
+    // file.core.startDrawStage();
     Mat2D.invert(_inverseViewTransform, _viewTransform);
     var viewAABB = obbToAABB(
         AABB.fromValues(0, 0, _viewportWidth, _viewportHeight),

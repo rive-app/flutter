@@ -1,7 +1,6 @@
 /// Core automatically generated lib/src/generated/shapes/rectangle_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -40,13 +39,11 @@ abstract class RectangleBase extends ParametricPath {
     }
     double from = _cornerRadius;
     _cornerRadius = value;
+    onPropertyChanged(cornerRadiusPropertyKey, from, value);
     cornerRadiusChanged(from, value);
   }
 
-  @mustCallSuper
-  void cornerRadiusChanged(double from, double to) {
-    onPropertyChanged(cornerRadiusPropertyKey, from, to);
-  }
+  void cornerRadiusChanged(double from, double to);
 
   @override
   void changeNonNull() {
@@ -63,6 +60,16 @@ abstract class RectangleBase extends ParametricPath {
         return cornerRadius as K;
       default:
         return super.getProperty<K>(propertyKey);
+    }
+  }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case cornerRadiusPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
     }
   }
 }

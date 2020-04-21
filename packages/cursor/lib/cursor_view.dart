@@ -29,41 +29,74 @@ class _PathPainter extends CustomPainter {
   }
 }
 
+class CursorInstance {
+  final CursorBuilder builder;
+  final Cursor context;
+
+  CursorInstance(this.builder, this.context);
+
+  void remove() {
+    context.remove(this);
+  }
+}
+
 class Cursor extends ChangeNotifier {
-  CursorBuilder _builder;
-  bool _isShowing = true;
+  List<CursorInstance> _instances = [];
+  bool _isSystemCursorHidden = false;
 
-  void withBuilder(CursorBuilder builder) {
-    if (_builder == builder) {
-      return;
+  void remove(CursorInstance instance) {
+    if (_instances.remove(instance)) {
+      _update();
     }
-    _builder = builder;
+  }
 
-    var show = _builder == null;
-    if (_isShowing != show) {
-      _isShowing = show;
-      if (show) {
+  void _update() {
+    if (_instances.isEmpty) {
+      if (_isSystemCursorHidden) {
         SystemCursor.show();
-      } else {
+        _isSystemCursorHidden = false;
+      }
+    } else {
+      if (!_isSystemCursorHidden) {
         SystemCursor.hide();
+        _isSystemCursorHidden = true;
       }
     }
-
     notifyListeners();
+  }
+
+  CursorInstance withBuilder(CursorBuilder builder) {
+    if (isHidden) {
+      show();
+    }
+    var instance = CursorInstance(builder, this);
+    _instances.add(instance);
+    _update();
+    return instance;
   }
 
   /// Show the default cursor if we were hiding it.
   void show() {
-    if (_builder == _emptyBuilder) {
-      withBuilder(null);
+    if (_instances.isEmpty) {
+      return;
+    }
+
+    if (_instances.last.builder == _emptyBuilder) {
+      _instances.last.remove();
     }
   }
 
   /// Hide the cursor.
-  void hide() => withBuilder(_emptyBuilder);
+  CursorInstance hide() => withBuilder(_emptyBuilder);
 
-  bool get isCustom => _builder != null;
-  bool get isHidden => _builder == _emptyBuilder;
+  // bool get isCustom => _builder != null;
+  bool get isHidden {
+    if (_instances.isEmpty) {
+      return false;
+    }
+
+    return _instances.last.builder == _emptyBuilder;
+  }
 
   Widget _emptyBuilder(BuildContext context) => const SizedBox();
 
@@ -135,17 +168,19 @@ class Cursor extends ChangeNotifier {
   }
 
   /// Use a custom [builder] to make your own cursor.
-  static void change(BuildContext context, CursorBuilder builder) {
-    CustomCursor.find(context).withBuilder(builder);
+  static CursorInstance change(BuildContext context, CursorBuilder builder) {
+    return CustomCursor.find(context).withBuilder(builder);
   }
 
   /// Reset the cursor to the default platform one.
-  static void reset(BuildContext context) {
-    CustomCursor.find(context).withBuilder(null);
-  }
+  // static Cursor reset(BuildContext context) {
+  //   var cursor = CustomCursor.find(context);
+  //   cursor.withBuilder(null);
+  //   return cursor;
+  // }
 
   /// Check if the cursor matches some [builder].
-  void matches(CursorBuilder builder) => _builder == builder;
+  // void matches(CursorBuilder builder) => _builder == builder;
 }
 
 /// Easy way to grab the active file from the context.
@@ -188,6 +223,22 @@ class CursorView extends StatefulWidget {
 class _CursorViewState extends State<CursorView> {
   Offset _position = Offset.zero;
   final Cursor _cursor = Cursor();
+
+  @override
+  void initState() {
+    super.initState();
+    _cursor.addListener(_cursorChanged);
+  }
+
+  @override
+  void dispose() {
+    _cursor.removeListener(_cursorChanged);
+    super.dispose();
+  }
+
+  void _cursorChanged() {
+    (context as StatefulElement).markNeedsBuild();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +287,12 @@ class _ActualCursor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var cursor = CustomCursor.of(context);
-    var child = cursor?._builder?.call(context);
+
+    if (cursor == null || cursor._instances.isEmpty) {
+      return SizedBox();
+    }
+
+    var child = cursor._instances.last.builder.call(context);
     if (child != null) {
       return Positioned(
         left: position.dx,

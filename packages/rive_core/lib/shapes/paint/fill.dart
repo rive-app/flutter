@@ -13,7 +13,6 @@ class Fill extends FillBase {
 
   @override
   void fillRuleChanged(int from, int to) {
-    super.fillRuleChanged(from, to);
     parent?.addDirt(ComponentDirt.paint);
   }
 

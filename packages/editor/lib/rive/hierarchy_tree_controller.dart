@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -13,8 +12,29 @@ import 'stage/stage_item.dart';
 /// propagate selections.
 class HierarchyTreeController extends TreeController<Component> {
   final OpenFileContext file;
-  HierarchyTreeController(List<Artboard> artboards, {this.file})
-      : super(artboards);
+
+  HierarchyTreeController(this.file) : super([]) {
+    if (file.core.backboard.activeArtboard != null) {
+      data = [file.core.backboard.activeArtboard];
+    }
+
+    file.core.backboard.activeArtboardChanged.addListener(_updateArtboard);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    // N.B. assumes backboard doesn't change.
+    file.core.backboard.activeArtboardChanged.removeListener(_updateArtboard);
+  }
+
+  void _updateArtboard() {
+    data = [
+      if (file.core.backboard.activeArtboard != null)
+        file.core.backboard.activeArtboard
+    ];
+  }
 
   @override
   List<Component> childrenOf(Component treeItem) =>
@@ -142,4 +162,8 @@ class HierarchyTreeController extends TreeController<Component> {
   int spacingOf(Component treeItem) {
     return 1;
   }
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<Component> item) {}
 }

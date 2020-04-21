@@ -1,8 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:utilities/dependency_sorter.dart';
 
@@ -10,7 +13,7 @@ import 'src/generated/component_base.dart';
 
 export 'src/generated/component_base.dart';
 
-final log = Logger('rive_core');
+final _log = Logger('rive_core');
 
 abstract class Component extends ComponentBase<RiveFile>
     implements DependencyGraphNode<Component> {
@@ -99,14 +102,11 @@ abstract class Component extends ComponentBase<RiveFile>
 
   @override
   void parentIdChanged(Id from, Id to) {
-    super.parentIdChanged(from, to);
     parent = context?.resolve(to);
   }
 
   @override
   void childOrderChanged(FractionalIndex from, FractionalIndex to) {
-    super.childOrderChanged(from, to);
-
     if (parent != null) {
       // Let the context know that our parent needs to be re-sorted.
       context?.markChildSortDirty(parent);
@@ -125,6 +125,7 @@ abstract class Component extends ComponentBase<RiveFile>
     parentChanged(old, value);
   }
 
+  @protected
   void parentChanged(ContainerComponent from, ContainerComponent to) {
     if (from != null) {
       from.children.remove(this);
@@ -197,11 +198,10 @@ abstract class Component extends ComponentBase<RiveFile>
 
   @override
   void onAddedDirty() {
-    log.finest("ADDING $name $id $parentId");
     if (parentId != null) {
       parent = context?.resolve(parentId);
       if (parent == null) {
-        log.finest("Failed to resolve parent with id $parentId");
+        _log.finest("Failed to resolve parent with id $parentId");
       }
     }
   }
@@ -250,4 +250,55 @@ abstract class Component extends ComponentBase<RiveFile>
   /// it's safe to clean up references to parents and anything that depends on
   /// this component.
   void remove() => context?.remove(this);
+
+  /// Create the corresponding keyframe for the property key.
+  T makeKeyFrame<T extends KeyFrame>(int propertyKey) {
+    var coreType = context.coreType(propertyKey);
+    if (coreType is KeyFrameGenerator<T>) {
+      var keyFrame = (coreType as KeyFrameGenerator<T>).makeKeyFrame();
+      context.add(keyFrame);
+      return keyFrame;
+    }
+    return null;
+  }
+
+  /// Add a keyframe on this object for [propertyKey] at [time].
+  T addKeyFrame<T extends KeyFrame>(
+      LinearAnimation animation, int propertyKey, int frame) {
+    assert(hasProperty(propertyKey),
+        '$this doesn\'t store a property with key $propertyKey');
+    var keyedObject = animation.getKeyed(this);
+    keyedObject ??= animation.makeKeyed(this);
+
+    var property = keyedObject.getKeyed(propertyKey);
+    property ??= keyedObject.makeKeyed(propertyKey);
+
+    // Need to see if we already have a keyframe at this time value, so might as
+    // well search for it and store the index to insert the new one if we need
+    // to.
+    var keyFrameIndex = property.indexOfFrame(frame);
+
+    if (keyFrameIndex < property.numFrames) {
+      var keyFrame = property.getFrameAt(keyFrameIndex);
+      if (keyFrame.frame == frame) {
+        assert(keyFrame is T);
+        return keyFrame as T;
+      }
+    }
+
+    return makeKeyFrame<T>(propertyKey)
+      ..frame = frame
+      ..keyedPropertyId = property.id;
+  }
+
+  @override
+  void dependentIdsChanged(List<Id> from, List<Id> to) {
+    /// Nothing to do when dependent ids changes, this is only used to propagate
+    /// the ids to coop for validation during multi-session editing.
+  }
+
+  @override
+  void nameChanged(String from, String to) {
+    /// Changing name doesn't really do anything.
+  }
 }

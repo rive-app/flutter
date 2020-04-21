@@ -1,7 +1,6 @@
 /// Core automatically generated lib/src/generated/shapes/path_vertex_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 
@@ -28,13 +27,11 @@ abstract class PathVertexBase extends Component {
     }
     double from = _x;
     _x = value;
+    onPropertyChanged(xPropertyKey, from, value);
     xChanged(from, value);
   }
 
-  @mustCallSuper
-  void xChanged(double from, double to) {
-    onPropertyChanged(xPropertyKey, from, to);
-  }
+  void xChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Y field with key 25.
@@ -52,13 +49,11 @@ abstract class PathVertexBase extends Component {
     }
     double from = _y;
     _y = value;
+    onPropertyChanged(yPropertyKey, from, value);
     yChanged(from, value);
   }
 
-  @mustCallSuper
-  void yChanged(double from, double to) {
-    onPropertyChanged(yPropertyKey, from, to);
-  }
+  void yChanged(double from, double to);
 
   @override
   void changeNonNull() {
@@ -80,6 +75,17 @@ abstract class PathVertexBase extends Component {
         return y as K;
       default:
         return super.getProperty<K>(propertyKey);
+    }
+  }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case xPropertyKey:
+      case yPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
     }
   }
 }

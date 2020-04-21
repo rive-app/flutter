@@ -8,6 +8,7 @@ class ChangeEntry {
 }
 
 class CorePropertyChanges {
+  /// TODO: consider if using a HashMap (no order) would work here.
   final Map<Id, Map<int, ChangeEntry>> entries = {};
 
   void change<T>(Core object, int propertyKey, T from, T to) {

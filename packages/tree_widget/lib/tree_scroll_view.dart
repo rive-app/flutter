@@ -21,7 +21,8 @@ class TreeScrollView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
-      child: _InvertedDrawOrderScrollView(
+      child: RepaintBoundary(
+        child: _InvertedDrawOrderScrollView(
           // reverse: true,
           controller: scrollController,
 
@@ -38,7 +39,9 @@ class TreeScrollView extends StatelessWidget {
 
             // Add bottom padding
             SliverToBoxAdapter(child: SizedBox(height: style.padding.bottom)),
-          ]),
+          ],
+        ),
+      ),
     );
   }
 }

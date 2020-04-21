@@ -10,7 +10,7 @@ import 'package:core/coop/change.dart';
 import 'package:core/debounce.dart';
 import 'package:local_data/local_data.dart';
 
-final log = Logger('rive_core');
+final _log = Logger('rive_core');
 
 const String _changesDataName = 'changes';
 
@@ -54,14 +54,14 @@ class _IsolatedPersistBackground {
         while (!reader.isEOF) {
           var change = ChangeSet()..deserialize(reader);
           _persistables[change.id] = change;
-          log.finest("READ ID ${change.id}");
+          _log.finest("READ ID ${change.id}");
         }
       } on Exception catch (_) {
         _persistables.clear();
         // TODO: let user this happened (data was corrupt)
       }
     }
-    log.finest("GOT ${_persistables.length} PERSISTABLES!");
+    _log.finest("GOT ${_persistables.length} PERSISTABLES!");
 
     _sendToMain = arg.sendPort;
     _receiveOnIsolate = ReceivePort();
@@ -71,15 +71,15 @@ class _IsolatedPersistBackground {
       bool save = true;
       switch (op.action) {
         case _PersistableAction.add:
-          log.finest("ADDING ${op.persistable.id}");
+          _log.finest("ADDING ${op.persistable.id}");
           _persistables[op.persistable.id] = op.persistable;
           break;
         case _PersistableAction.remove:
           var removed = _persistables.remove(op.persistable.id);
-          log.finest("REMOVING ${op.persistable.id} $removed");
+          _log.finest("REMOVING ${op.persistable.id} $removed");
           break;
         case _PersistableAction.fetch:
-          log.finest("GOT FETCH FROM API");
+          _log.finest("GOT FETCH FROM API");
           save = false;
           _sendToMain.send(_persistables.values.toList(growable: false));
           break;

@@ -2,9 +2,7 @@
 /// Do not modify manually.
 
 import 'package:core/core.dart';
-import 'package:core/id.dart';
-import 'package:meta/meta.dart';
-import 'rive_core_context.dart';
+import 'package:rive_core/src/generated/rive_core_context.dart';
 
 abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 23;
@@ -30,13 +28,11 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _activeArtboardId;
     _activeArtboardId = value;
+    onPropertyChanged(activeArtboardIdPropertyKey, from, value);
     activeArtboardIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void activeArtboardIdChanged(Id from, Id to) {
-    onPropertyChanged(activeArtboardIdPropertyKey, from, to);
-  }
+  void activeArtboardIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
   /// MainArtboardId field with key 44.
@@ -56,13 +52,11 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
     }
     Id from = _mainArtboardId;
     _mainArtboardId = value;
+    onPropertyChanged(mainArtboardIdPropertyKey, from, value);
     mainArtboardIdChanged(from, value);
   }
 
-  @mustCallSuper
-  void mainArtboardIdChanged(Id from, Id to) {
-    onPropertyChanged(mainArtboardIdPropertyKey, from, to);
-  }
+  void mainArtboardIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
   /// ColorValue field with key 45.
@@ -80,13 +74,11 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
     }
     int from = _colorValue;
     _colorValue = value;
+    onPropertyChanged(colorValuePropertyKey, from, value);
     colorValueChanged(from, value);
   }
 
-  @mustCallSuper
-  void colorValueChanged(int from, int to) {
-    onPropertyChanged(colorValuePropertyKey, from, to);
-  }
+  void colorValueChanged(int from, int to);
 
   @override
   void changeNonNull() {
@@ -114,6 +106,18 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
         return colorValue as K;
       default:
         return super.getProperty<K>(propertyKey);
+    }
+  }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case activeArtboardIdPropertyKey:
+      case mainArtboardIdPropertyKey:
+      case colorValuePropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
     }
   }
 }

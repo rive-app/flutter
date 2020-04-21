@@ -18,4 +18,22 @@ class CubicVertex extends CubicVertexBase {
     inX = value[0];
     inY = value[1];
   }
+
+  @override
+  void inXChanged(double from, double to) {}
+
+  @override
+  void inYChanged(double from, double to) {}
+
+  @override
+  void outXChanged(double from, double to) {}
+
+  @override
+  void outYChanged(double from, double to) {}
+
+  @override
+  void xChanged(double from, double to) {}
+
+  @override
+  void yChanged(double from, double to) {}
 }

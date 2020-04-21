@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:tree_widget/tree_widget.dart';
 
 import 'flat_tree_item.dart';
 import 'tree_style.dart';
@@ -57,7 +58,12 @@ abstract class TreeController<T> with ChangeNotifier {
   List<FlatTreeItem<T>> _flat;
   HashMap<Key, int> _indexLookup = HashMap<Key, int>();
   HashMap<Key, int> get indexLookup => _indexLookup;
-  final List<T> _data;
+  Iterable<T> _data;
+  Iterable<T> get data => _data;
+  set data(Iterable<T> value) {
+    _data = value;
+    flatten();
+  }
 
   _TreeDragOperation<T> _dragOperation;
 
@@ -169,6 +175,13 @@ abstract class TreeController<T> with ChangeNotifier {
   /// Called when an item is tapped or clicked on.
   void onTap(FlatTreeItem<T> item);
 
+  /// Called when a right (secondary) click is received on an item. Should we
+  /// consider renaming to onRequestContextMenu? We propagate the event so that
+  /// implementations can get the global coordinates to show something like a
+  /// popup menu.
+  void onRightClick(
+      BuildContext context, PointerDownEvent event, FlatTreeItem<T> item);
+
   /// The units of horizontal spacing occupied by [treeItem]. Most items consume
   /// 1 unit of horizontal spacing. 1 unit of horizontal spacing equates to the
   /// icon size + some padding. In some cases tree items need extra units when
@@ -180,9 +193,13 @@ abstract class TreeController<T> with ChangeNotifier {
   /// ![](https://rive-app.github.io/assets-for-api-docs/assets/tree-widget-flutter/extra_spacing.png)
   int spacingOf(T treeItem);
 
-  void startDrag(DragStartDetails details, BuildContext context,
-      FlatTreeItem<T> dragStartItem, List<FlatTreeItem<T>> items) {
-    //print("OVERLAY ${Overlay.of(context)}"); //.insert(this._overlayEntry);
+  void startDrag(
+      DragStartDetails details,
+      BuildContext context,
+      FlatTreeItem<T> dragStartItem,
+      List<FlatTreeItem<T>> items,
+      TreeViewDragBuilder<T> builder,
+      TreeStyle style) {
     _dragOperation?.dispose();
     _dragOperation = _TreeDragOperation(dragStartItem, items: items);
     _dragOperation.offset.value = details.globalPosition;
@@ -193,19 +210,7 @@ abstract class TreeController<T> with ChangeNotifier {
           left: position.dx - 200,
           width: 400,
           top: position.dy + 10,
-          child: Material(
-            type: MaterialType.transparency,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: items
-                    .map(
-                      (item) => Text(item.data.toString()),
-                    )
-                    .toList(),
-              ),
-            ),
-          ),
+          child: builder(context, items, style),
         ),
       ),
     );
@@ -380,7 +385,8 @@ abstract class TreeController<T> with ChangeNotifier {
     }
   }
 
-  void replaceData(List<T> newData) {
+  /// Replace the existing data set and try to keep the same items expanded.
+  void replaceData(Iterable<T> newData) {
     final expandedKeys = Set<dynamic>();
     flat.forEach((element) {
       if (isExpanded(element.data)) {
@@ -388,23 +394,22 @@ abstract class TreeController<T> with ChangeNotifier {
       }
     });
     _expanded.clear();
-    _data.clear();
 
     newData.forEach((_newDataRoot) {
-      walk(_newDataRoot, (item) => item.children, (item) {
+      _walk(_newDataRoot, (item) => item.children, (item) {
         if (expandedKeys.contains(dataKey(item))) {
           _expanded.add(item);
         }
       });
     });
 
-    _data.addAll(newData);
+    _data = newData;
 
     flatten();
   }
 }
 
-void walk(root, children, cb) {
+void _walk(root, children, cb) {
   cb(root);
-  children(root).forEach((child) => walk(child, children, cb));
+  children(root).forEach((child) => _walk(child, children, cb));
 }

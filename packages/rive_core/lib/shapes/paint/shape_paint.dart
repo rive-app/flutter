@@ -51,7 +51,6 @@ abstract class ShapePaint extends ShapePaintBase {
 
   @override
   void isVisibleChanged(bool from, bool to) {
-    super.isVisibleChanged(from, to);
     _shapePaintContainer?.addDirt(ComponentDirt.paint);
   }
 

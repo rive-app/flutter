@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:colorize/colorize.dart';
+import 'package:core_generator/src/field_type.dart';
 import 'package:core_generator/src/field_types/id_field_type.dart';
 import 'package:dart_style/dart_style.dart';
 
@@ -112,17 +113,24 @@ class Definition {
         imports.add('import \'package:core/core.dart\';');
       }
     }
-    if (_properties.isNotEmpty) {
-      imports.add('import \'package:meta/meta.dart\';');
-    }
+    // if (_properties.isNotEmpty) {
+    //   imports.add('import \'package:meta/meta.dart\';');
+    // }
 
+    bool animates = false;
     for (final property in _properties) {
+      if (property.animates) {
+        animates = true;
+      }
       if (property.type.imports == null) {
         continue;
       }
       for (final import in property.type.imports) {
         imports.add('import \'${import}\';');
       }
+    }
+    if (animates) {
+      imports.add('import \'package:core/key_state.dart\';');
     }
 
     // If we extend another class, we need the import for the concrete version.
@@ -133,7 +141,8 @@ class Definition {
 
     bool defineContextExtension = _extensionOf?._name == null;
     if (defineContextExtension) {
-      imports.add('import \'$snakeContextName.dart\';');
+      imports.add(
+          'import \'package:${config.packageName}/src/generated/$snakeContextName.dart\';');
     }
 
     var importList = imports.toList(growable: false)..sort();
@@ -182,6 +191,19 @@ class Definition {
       code.writeln('''
           default: 
           return super.getProperty<K>(propertyKey);
+        }''');
+      code.writeln('}');
+
+      code.writeln('''@override
+      bool hasProperty(int propertyKey) {
+      switch (propertyKey) {''');
+      for (final property in _properties) {
+        code.writeln('case ${property.name}PropertyKey:');
+      }
+      code.writeln('return true;');
+      code.writeln('''
+          default: 
+          return super.getProperty(propertyKey);
         }''');
       code.writeln('}');
     }
@@ -336,15 +358,17 @@ class Definition {
       definition.generateCode(snakeContextName);
     }
 
-    StringBuffer ctxCode =
-        StringBuffer('''import \'package:core/coop/change.dart\';
-                        import \'package:core/core.dart\';
-                        import 'package:utilities/binary_buffer/binary_reader.dart';
-                        import 'package:utilities/binary_buffer/binary_writer.dart';
-                        
-                        ''');
+    StringBuffer ctxCode = StringBuffer('');
 
-    List<String> imports = [];
+    List<String> imports = [
+      'import \'dart:collection\';',
+      'import \'package:core/coop/change.dart\';',
+      'import \'package:core/core.dart\';',
+      'import \'package:utilities/binary_buffer/binary_reader.dart\';',
+      'import \'package:core/field_types/core_field_type.dart\';',
+      'import \'package:utilities/binary_buffer/binary_writer.dart\';',
+      'import \'package:core/key_state.dart\';'
+    ];
     for (final definition in definitions.values) {
       // We want the base version if there are properties or we need to instance
       // the concrete version as we need to the typeKey which is in the base
@@ -381,37 +405,21 @@ class Definition {
     ctxCode.writeln('default:return null;}}');
 
     // Group fields by definition type.
-    Map<String, List<Property>> groups = {};
+    Map<FieldType, List<Property>> groups = {};
 
     for (final definition in definitions.values) {
       for (final property in definition._properties) {
-        groups[property.type.dartName] ??= <Property>[];
-        groups[property.type.dartName].add(property);
+        groups[property.type] ??= <Property>[];
+        groups[property.type].add(property);
       }
     }
 
-    // Build the isPropertyId method.
-    ctxCode.writeln('''@override
-      bool isPropertyId(int propertyKey) {
-        switch(propertyKey) {
-          ''');
-    for (final definition in definitions.values) {
-      for (final property in definition._properties) {
-        bool wroteCase = false;
-        if (property.type is IdFieldType) {
-          wroteCase = true;
-          ctxCode.writeln(
-              'case ${definition._name}Base.${property.name}PropertyKey:');
-        }
-        if (wroteCase) {
-          ctxCode.writeln('     return true;');
-        }
-      }
+    // Iterate used fields to get getters.
+    for (final fieldType in groups.keys) {
+      ctxCode.writeln(
+          '${fieldType.runtimeCoreType} get ${fieldType.uncapitalizedName}Type;');
     }
-    ctxCode.writeln('''default: 
-                      return false; 
-          }
-        }''');
+    ctxCode.writeln('');
 
     // Build the applyCoopChanges method.
     ctxCode.writeln('''@override
@@ -451,8 +459,11 @@ class Definition {
       }
 
       var fieldType = properties.first.type;
-      ctxCode.writeln(fieldType.decode('reader', 'value'));
-      ctxCode.writeln('setObjectProperty(object, change.op, value);');
+
+      ctxCode.writeln(
+          'var value = ${fieldType.uncapitalizedName}Type.deserialize(reader);');
+      ctxCode.writeln(
+          'set${fieldType.capitalizedName}(object, change.op, value);');
       ctxCode.writeln('break;');
     });
 
@@ -482,10 +493,11 @@ class Definition {
       var fieldType = properties.first.type;
       ctxCode.writeln('if(value != null && value is ${fieldType.dartName}) {');
 
-      ctxCode.writeln('''var writer = 
-            BinaryWriter(alignment: ${fieldType.encodingAlignment});''');
-      ctxCode.write(fieldType.encode('writer', 'value'));
-      ctxCode.writeln('change.value = writer.uint8Buffer;');
+      // ctxCode.writeln('''var writer =
+      //       BinaryWriter(alignment: ${fieldType.encodingAlignment});''');
+      // ctxCode.write(fieldType.encode('writer', 'value'));
+      ctxCode.writeln(
+          'change.value = ${fieldType.uncapitalizedName}Type.serialize(value);');
       ctxCode.writeln('}else { return null;}break;');
     });
     ctxCode.writeln('default:break;}  return change;}');
@@ -515,6 +527,49 @@ class Definition {
     }
     ctxCode.writeln('}}');
 
+    ctxCode.writeln('''
+        static void setKeyState(Core object, int propertyKey, KeyState value) {
+          switch(propertyKey) {
+          ''');
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        if (!property.animates) {
+          continue;
+        }
+        ctxCode.writeln(
+            'case ${definition._name}Base.${property.name}PropertyKey:');
+
+        ctxCode.writeln('''if(object is ${definition._name}Base) {
+                      object.${property.name}KeyState = value;
+                  }''');
+
+        ctxCode.writeln('break;');
+      }
+    }
+    ctxCode.writeln('}}');
+
+    ctxCode.writeln('''@override
+        void resetAnimated(Core object, int propertyKey) {
+          switch(propertyKey) {
+          ''');
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        if (!property.animates) {
+          continue;
+        }
+        ctxCode.writeln(
+            'case ${definition._name}Base.${property.name}PropertyKey:');
+
+        ctxCode.writeln('''if(object is ${definition._name}Base) {
+                      object.${property.name}Animated = null;
+                      object.${property.name}KeyState = KeyState.none;
+                  }''');
+
+        ctxCode.writeln('break;');
+      }
+    }
+    ctxCode.writeln('}}');
+
     // Build object property getter
     ctxCode.writeln('''@override
         Object getObjectProperty(Core object, int propertyKey) {
@@ -531,7 +586,83 @@ class Definition {
         ctxCode.writeln('break;');
       }
     }
-    ctxCode.writeln('}return null;}}');
+    ctxCode.writeln('}return null;}');
+
+    // Build is/setter/getter for specific types.
+    ctxCode.writeln('''
+        CoreFieldType coreType(int propertyKey) {
+          switch(propertyKey) {
+          ''');
+    groups.forEach((type, properties) {
+      for (final property in properties) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.write('.${property.name}PropertyKey:');
+      }
+      ctxCode.writeln('return ${type.uncapitalizedName}Type;');
+    });
+    ctxCode.writeln('default:return null;');
+    ctxCode.writeln('}}');
+
+    groups.forEach((type, properties) {
+      var capitalizedType =
+          '${type.dartName[0].toUpperCase()}${type.dartName.substring(1)}'
+              .replaceAll('<', '')
+              .replaceAll('>', '');
+      ctxCode.writeln('''
+        static $type get${capitalizedType}(Core object, int propertyKey) {
+          switch(propertyKey) {
+          ''');
+      for (final property in properties) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.write('.${property.name}PropertyKey:');
+        ctxCode.writeln(
+            'return (object as ${property.definition._name}Base).${property.name};');
+      }
+
+      ctxCode.writeln('}return ${type.defaultValue};}');
+    });
+
+    groups.forEach((type, properties) {
+      var capitalizedType =
+          '${type.dartName[0].toUpperCase()}${type.dartName.substring(1)}'
+              .replaceAll('<', '')
+              .replaceAll('>', '');
+      ctxCode.writeln('''
+        static void set${capitalizedType}(Core object, int propertyKey, $type value) {
+          switch(propertyKey) {
+          ''');
+      bool animates = false;
+      for (final property in properties) {
+        if (property.animates) {
+          animates = true;
+        }
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.write('.${property.name}PropertyKey:');
+        ctxCode.writeln(
+            '(object as ${property.definition._name}Base).${property.name} = value;break;');
+      }
+
+      ctxCode.writeln('}}');
+      if (animates) {
+        ctxCode.writeln('''
+        static void animate${capitalizedType}(Core object, int propertyKey, 
+          $type value) {
+          switch(propertyKey) {
+          ''');
+        for (final property in properties) {
+          if (!property.animates) {
+            continue;
+          }
+          ctxCode.write('case ${property.definition._name}Base');
+          ctxCode.write('.${property.name}PropertyKey:');
+          ctxCode.writeln('(object as ${property.definition._name}Base).'
+              '${property.name}Animated = value;break;');
+        }
+
+        ctxCode.writeln('}}');
+      }
+    });
+    ctxCode.writeln('}');
 
     var output = config.output;
     var folder =

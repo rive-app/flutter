@@ -1,7 +1,12 @@
 import 'dart:ui';
 
+import 'package:core/core.dart';
+import 'package:core/debounce.dart';
+import 'package:core/id.dart';
+import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/drawable.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
@@ -19,12 +24,27 @@ abstract class ArtboardDelegate extends BoundsDelegate {
   void markNameDirty();
 }
 
+class _AnimationList extends FractionallyIndexedList<Animation> {
+  @override
+  FractionalIndex orderOf(Animation animation) {
+    return animation.order;
+  }
+
+  @override
+  void setOrderOf(Animation animation, FractionalIndex order) {
+    animation.order = order;
+  }
+}
+
 class Artboard extends ArtboardBase with ShapePaintContainer {
   final Path path = Path();
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
   final List<Drawable> _drawables = [];
   final Set<Component> _components = {};
+  final _AnimationList _animations = _AnimationList();
+  _AnimationList get animations => _animations;
+  final animationsChanged = Event();
   int _dirtDepth = 0;
   int _dirt = 255;
 
@@ -79,7 +99,6 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   @override
   void nameChanged(String from, String to) {
-    super.nameChanged(from, to);
     _delegate?.markNameDirty();
   }
 
@@ -93,8 +112,6 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   @override
   void heightChanged(double from, double to) {
-    super.heightChanged(from, to);
-
     addDirt(ComponentDirt.worldTransform);
   }
 
@@ -155,22 +172,16 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   @override
   void widthChanged(double from, double to) {
-    super.widthChanged(from, to);
-
     addDirt(ComponentDirt.worldTransform);
   }
 
   @override
   void xChanged(double from, double to) {
-    super.xChanged(from, to);
-
     addDirt(ComponentDirt.worldTransform);
   }
 
   @override
   void yChanged(double from, double to) {
-    super.yChanged(from, to);
-
     addDirt(ComponentDirt.worldTransform);
   }
 
@@ -219,4 +230,61 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   /// Our world transform is always the identity. Artboard defines world space.
   @override
   Mat2D get worldTransform => Mat2D();
+
+  @override
+  void dependentIdsChanged(List<Id> from, List<Id> to) {}
+
+  @override
+  void originXChanged(double from, double to) {}
+
+  @override
+  void originYChanged(double from, double to) {}
+
+  /// Called by rive_core to add an Animation to an Artboard. This should be
+  /// @internal when it's supported.
+  bool internalAddAnimation(Animation animation) {
+    if (_animations.contains(animation)) {
+      return false;
+    }
+    _animations.add(animation);
+    // -> editor-only - We don't care if animations are ordered in the runtime.
+    markAnimationOrderDirty();
+    // <- editor-only
+    return true;
+  }
+
+  /// Called by rive_core to remove an Animation from an Artboard. This should
+  /// be @internal when it's supported.
+  bool internalRemoveAnimation(Animation animation) {
+    bool removed = _animations.remove(animation);
+    // -> editor-only
+    if (removed) {
+      markAnimationOrderDirty();
+    }
+    // <- editor-only
+    return removed;
+  }
+
+  // -> editor-only
+  /// Schedule re-sorting the animations list.
+  void markAnimationOrderDirty() {
+    // We don't actually track this with the component dirty state as it has no
+    // bearing at runtime and shouldn't clutter our runtime pipeline.
+    debounce(_orderAnimations);
+  }
+  // <- editor-only
+
+  // -> editor-only - Thinking about introducing some comment syntax to remove
+  // anything between editor-only markers from the runtime code. Kind of hoping
+  // the runtime code can be generated from the rive_core code.
+  void _orderAnimations() {
+    if (!_animations.validateFractional()) {
+      // List wasn't valid for some reason, it was patched up so save the change
+      // and don't allow undoing.
+      context?.captureJournalEntry(record: false);
+    }
+    _animations.sortFractional();
+    animationsChanged.notify();
+  }
+  // <- editor-only
 }

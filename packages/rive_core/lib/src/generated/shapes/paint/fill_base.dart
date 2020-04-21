@@ -1,7 +1,6 @@
 /// Core automatically generated lib/src/generated/shapes/paint/fill_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -33,13 +32,11 @@ abstract class FillBase extends ShapePaint {
     }
     int from = _fillRule;
     _fillRule = value;
+    onPropertyChanged(fillRulePropertyKey, from, value);
     fillRuleChanged(from, value);
   }
 
-  @mustCallSuper
-  void fillRuleChanged(int from, int to) {
-    onPropertyChanged(fillRulePropertyKey, from, to);
-  }
+  void fillRuleChanged(int from, int to);
 
   @override
   void changeNonNull() {
@@ -56,6 +53,16 @@ abstract class FillBase extends ShapePaint {
         return fillRule as K;
       default:
         return super.getProperty<K>(propertyKey);
+    }
+  }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case fillRulePropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
     }
   }
 }

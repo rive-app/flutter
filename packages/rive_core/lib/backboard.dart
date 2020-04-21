@@ -3,19 +3,28 @@ import 'dart:ui';
 import 'package:core/core.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/src/generated/backboard_base.dart';
 export 'package:rive_core/src/generated/backboard_base.dart';
 
 class Backboard extends BackboardBase {
+  /// An event fired when the active artboard changes, this should probably be
+  /// removed from the runtimes.
+  final Event activeArtboardChanged = Event();
+
   Artboard _activeArtboard;
   Artboard get activeArtboard => _activeArtboard;
   set activeArtboard(Artboard value) {
+    if (_activeArtboard == value) {
+      return;
+    }
+    _activeArtboard = value;
     activeArtboardId = value.id;
+    activeArtboardChanged.notify();
   }
 
   @override
   void activeArtboardIdChanged(Id from, Id to) {
-    super.activeArtboardIdChanged(from, to);
     _activeArtboard = context?.resolve(to);
     _activeArtboard?.addDirt(ComponentDirt.paint);
   }
@@ -28,7 +37,6 @@ class Backboard extends BackboardBase {
 
   @override
   void mainArtboardIdChanged(Id from, Id to) {
-    super.mainArtboardIdChanged(from, to);
     _mainArtboard = context?.resolve(to);
     _mainArtboard?.addDirt(ComponentDirt.paint);
   }
@@ -39,9 +47,7 @@ class Backboard extends BackboardBase {
   }
 
   @override
-  void colorValueChanged(int from, int to) {
-    super.colorValueChanged(from, to);
-  }
+  void colorValueChanged(int from, int to) {}
 
   @override
   void onAdded() {}

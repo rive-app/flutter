@@ -4,21 +4,7 @@ class IdFieldType extends FieldType {
   IdFieldType()
       : super(
           'Id',
-          imports: [
-            'package:core/id.dart',
-          ],
+          'CoreIdType',
         );
 
-  @override
-  String encode(String writerName, String varName) {
-    return '$varName.serialize($writerName);';
-  }
-
-  @override
-  String decode(String readerName, String varName) {
-    return 'var $varName = Id.deserialize($readerName);';
-  }
-
-  @override
-  int get encodingAlignment => 4;
 }

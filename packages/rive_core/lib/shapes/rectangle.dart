@@ -25,4 +25,7 @@ class Rectangle extends RectangleBase {
           ..y = height / 2
           ..radius = cornerRadius,
       ];
+
+  @override
+  void cornerRadiusChanged(double from, double to) => markPathDirty();
 }

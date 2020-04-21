@@ -50,7 +50,7 @@ class FolderTreeView extends StatelessWidget {
           border: Border.all(
             color: fileBrowser?.selectedFolder == item.data
                 ? colors.selectedTreeLines
-                : style.lineColor,
+                : colors.filesTreeStroke,
             width: 1.0,
             style: BorderStyle.solid,
           ),

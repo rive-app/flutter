@@ -6,7 +6,6 @@ const String _outputFolder = 'output-folder';
 const String _package = 'package';
 const String _coreContext = 'core-context';
 const String _regenKeys = 'regen-keys';
-const String _basePath = './core_defs/';
 
 /// Configuration for running the Core generator.
 class Configuration {

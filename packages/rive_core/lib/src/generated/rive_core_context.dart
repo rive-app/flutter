@@ -1,8 +1,9 @@
-import 'package:core/coop/change.dart';
-import 'package:core/core.dart';
-import 'package:utilities/binary_buffer/binary_reader.dart';
-import 'package:utilities/binary_buffer/binary_writer.dart';
-
+import '../../animation/animation.dart';
+import '../../animation/cubic_interpolator.dart';
+import '../../animation/keyed_object.dart';
+import '../../animation/keyed_property.dart';
+import '../../animation/keyframe_double.dart';
+import '../../animation/linear_animation.dart';
 import '../../artboard.dart';
 import '../../backboard.dart';
 import '../../node.dart';
@@ -20,11 +21,25 @@ import '../../shapes/rectangle.dart';
 import '../../shapes/shape.dart';
 import '../../shapes/straight_vertex.dart';
 import '../../shapes/triangle.dart';
+import 'animation/animation_base.dart';
+import 'animation/cubic_interpolator_base.dart';
+import 'animation/keyed_object_base.dart';
+import 'animation/keyed_property_base.dart';
+import 'animation/keyframe_base.dart';
+import 'animation/keyframe_double_base.dart';
+import 'animation/linear_animation_base.dart';
 import 'artboard_base.dart';
 import 'backboard_base.dart';
 import 'component_base.dart';
+import 'dart:collection';
 import 'drawable_base.dart';
 import 'node_base.dart';
+import 'package:core/coop/change.dart';
+import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
+import 'package:core/key_state.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'shapes/cubic_vertex_base.dart';
 import 'shapes/ellipse_base.dart';
 import 'shapes/paint/fill_base.dart';
@@ -49,6 +64,18 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   Core makeCoreInstance(int typeKey) {
     switch (typeKey) {
+      case KeyedObjectBase.typeKey:
+        return KeyedObject();
+      case KeyedPropertyBase.typeKey:
+        return KeyedProperty();
+      case AnimationBase.typeKey:
+        return Animation();
+      case CubicInterpolatorBase.typeKey:
+        return CubicInterpolator();
+      case KeyFrameDoubleBase.typeKey:
+        return KeyFrameDouble();
+      case LinearAnimationBase.typeKey:
+        return LinearAnimation();
       case LinearGradientBase.typeKey:
         return LinearGradient();
       case RadialGradientBase.typeKey:
@@ -88,19 +115,13 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
-  @override
-  bool isPropertyId(int propertyKey) {
-    switch (propertyKey) {
-      case ComponentBase.parentIdPropertyKey:
-        return true;
-      case BackboardBase.activeArtboardIdPropertyKey:
-        return true;
-      case BackboardBase.mainArtboardIdPropertyKey:
-        return true;
-      default:
-        return false;
-    }
-  }
+  CoreIdType get idType;
+  CoreIntType get intType;
+  CoreStringType get stringType;
+  CoreFractionalIndexType get fractionalIndexType;
+  CoreDoubleType get doubleType;
+  CoreBoolType get boolType;
+  CoreListIdType get listIdType;
 
   @override
   void applyCoopChanges(ObjectChanges objectChanges) {
@@ -129,36 +150,53 @@ abstract class RiveCoreContext extends CoreContext {
             remove(object);
           }
           break;
-        case ComponentBase.dependentIdsPropertyKey:
-          var value = List<Id>(reader.readVarUint());
-          for (int i = 0; i < value.length; i++) {
-            value[i] = Id.deserialize(reader);
-          }
-          setObjectProperty(object, change.op, value);
-          break;
-        case ComponentBase.namePropertyKey:
-          var value = reader.readString();
-          setObjectProperty(object, change.op, value);
-          break;
+        case KeyedObjectBase.objectIdPropertyKey:
+        case KeyedObjectBase.animationIdPropertyKey:
+        case KeyedPropertyBase.keyedObjectIdPropertyKey:
+        case AnimationBase.artboardIdPropertyKey:
+        case KeyFrameBase.keyedPropertyIdPropertyKey:
+        case KeyFrameBase.interpolatorIdPropertyKey:
         case ComponentBase.parentIdPropertyKey:
         case BackboardBase.activeArtboardIdPropertyKey:
         case BackboardBase.mainArtboardIdPropertyKey:
-          var value = Id.deserialize(reader);
-          setObjectProperty(object, change.op, value);
+          var value = idType.deserialize(reader);
+          setId(object, change.op, value);
           break;
+        case KeyedPropertyBase.propertyKeyPropertyKey:
+        case KeyFrameBase.framePropertyKey:
+        case KeyFrameBase.interpolationPropertyKey:
+        case LinearAnimationBase.fpsPropertyKey:
+        case LinearAnimationBase.durationPropertyKey:
+        case LinearAnimationBase.loopPropertyKey:
+        case LinearAnimationBase.workStartPropertyKey:
+        case LinearAnimationBase.workEndPropertyKey:
+        case StrokeBase.capPropertyKey:
+        case StrokeBase.joinPropertyKey:
+        case SolidColorBase.colorValuePropertyKey:
+        case GradientStopBase.colorValuePropertyKey:
+        case FillBase.fillRulePropertyKey:
+        case DrawableBase.blendModePropertyKey:
+        case BackboardBase.colorValuePropertyKey:
+          var value = intType.deserialize(reader);
+          setInt(object, change.op, value);
+          break;
+        case AnimationBase.namePropertyKey:
+        case ComponentBase.namePropertyKey:
+          var value = stringType.deserialize(reader);
+          setString(object, change.op, value);
+          break;
+        case AnimationBase.orderPropertyKey:
         case ComponentBase.childOrderPropertyKey:
         case DrawableBase.drawOrderPropertyKey:
-          var numerator = reader.readVarInt();
-          var denominator = reader.readVarInt();
-          var value = FractionalIndex(numerator, denominator);
-          setObjectProperty(object, change.op, value);
+          var value = fractionalIndexType.deserialize(reader);
+          setFractionalIndex(object, change.op, value);
           break;
-        case ShapePaintBase.isVisiblePropertyKey:
-        case StrokeBase.transformAffectsStrokePropertyKey:
-        case PointsPathBase.isClosedPropertyKey:
-          var value = reader.readInt8() == 1;
-          setObjectProperty(object, change.op, value);
-          break;
+        case CubicInterpolatorBase.x1PropertyKey:
+        case CubicInterpolatorBase.y1PropertyKey:
+        case CubicInterpolatorBase.x2PropertyKey:
+        case CubicInterpolatorBase.y2PropertyKey:
+        case KeyFrameDoubleBase.valuePropertyKey:
+        case LinearAnimationBase.speedPropertyKey:
         case LinearGradientBase.startXPropertyKey:
         case LinearGradientBase.startYPropertyKey:
         case LinearGradientBase.endXPropertyKey:
@@ -188,18 +226,19 @@ abstract class RiveCoreContext extends CoreContext {
         case ArtboardBase.yPropertyKey:
         case ArtboardBase.originXPropertyKey:
         case ArtboardBase.originYPropertyKey:
-          var value = reader.readFloat64();
-          setObjectProperty(object, change.op, value);
+          var value = doubleType.deserialize(reader);
+          setDouble(object, change.op, value);
           break;
-        case StrokeBase.capPropertyKey:
-        case StrokeBase.joinPropertyKey:
-        case SolidColorBase.colorValuePropertyKey:
-        case GradientStopBase.colorValuePropertyKey:
-        case FillBase.fillRulePropertyKey:
-        case DrawableBase.blendModePropertyKey:
-        case BackboardBase.colorValuePropertyKey:
-          var value = reader.readVarInt();
-          setObjectProperty(object, change.op, value);
+        case LinearAnimationBase.enableWorkAreaPropertyKey:
+        case ShapePaintBase.isVisiblePropertyKey:
+        case StrokeBase.transformAffectsStrokePropertyKey:
+        case PointsPathBase.isClosedPropertyKey:
+          var value = boolType.deserialize(reader);
+          setBool(object, change.op, value);
+          break;
+        case ComponentBase.dependentIdsPropertyKey:
+          var value = listIdType.deserialize(reader);
+          setListId(object, change.op, value);
           break;
         default:
           break;
@@ -222,60 +261,65 @@ abstract class RiveCoreContext extends CoreContext {
           change.value = writer.uint8Buffer;
         }
         break;
-      case ComponentBase.dependentIdsPropertyKey:
-        if (value != null && value is List<Id>) {
-          var writer = BinaryWriter(alignment: 8);
-          writer.writeVarUint(value.length);
-          for (final id in value) {
-            id.serialize(writer);
-          }
-          change.value = writer.uint8Buffer;
-        } else {
-          return null;
-        }
-        break;
-      case ComponentBase.namePropertyKey:
-        if (value != null && value is String) {
-          var writer = BinaryWriter(alignment: 32);
-          writer.writeString(value);
-          change.value = writer.uint8Buffer;
-        } else {
-          return null;
-        }
-        break;
+      case KeyedObjectBase.objectIdPropertyKey:
+      case KeyedObjectBase.animationIdPropertyKey:
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+      case AnimationBase.artboardIdPropertyKey:
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+      case KeyFrameBase.interpolatorIdPropertyKey:
       case ComponentBase.parentIdPropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.mainArtboardIdPropertyKey:
         if (value != null && value is Id) {
-          var writer = BinaryWriter(alignment: 4);
-          value.serialize(writer);
-          change.value = writer.uint8Buffer;
+          change.value = idType.serialize(value);
         } else {
           return null;
         }
         break;
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+      case KeyFrameBase.framePropertyKey:
+      case KeyFrameBase.interpolationPropertyKey:
+      case LinearAnimationBase.fpsPropertyKey:
+      case LinearAnimationBase.durationPropertyKey:
+      case LinearAnimationBase.loopPropertyKey:
+      case LinearAnimationBase.workStartPropertyKey:
+      case LinearAnimationBase.workEndPropertyKey:
+      case StrokeBase.capPropertyKey:
+      case StrokeBase.joinPropertyKey:
+      case SolidColorBase.colorValuePropertyKey:
+      case GradientStopBase.colorValuePropertyKey:
+      case FillBase.fillRulePropertyKey:
+      case DrawableBase.blendModePropertyKey:
+      case BackboardBase.colorValuePropertyKey:
+        if (value != null && value is int) {
+          change.value = intType.serialize(value);
+        } else {
+          return null;
+        }
+        break;
+      case AnimationBase.namePropertyKey:
+      case ComponentBase.namePropertyKey:
+        if (value != null && value is String) {
+          change.value = stringType.serialize(value);
+        } else {
+          return null;
+        }
+        break;
+      case AnimationBase.orderPropertyKey:
       case ComponentBase.childOrderPropertyKey:
       case DrawableBase.drawOrderPropertyKey:
         if (value != null && value is FractionalIndex) {
-          var writer = BinaryWriter(alignment: 8);
-          writer.writeVarInt(value.numerator);
-          writer.writeVarInt(value.denominator);
-          change.value = writer.uint8Buffer;
+          change.value = fractionalIndexType.serialize(value);
         } else {
           return null;
         }
         break;
-      case ShapePaintBase.isVisiblePropertyKey:
-      case StrokeBase.transformAffectsStrokePropertyKey:
-      case PointsPathBase.isClosedPropertyKey:
-        if (value != null && value is bool) {
-          var writer = BinaryWriter(alignment: 1);
-          writer.writeInt8(value ? 1 : 0);
-          change.value = writer.uint8Buffer;
-        } else {
-          return null;
-        }
-        break;
+      case CubicInterpolatorBase.x1PropertyKey:
+      case CubicInterpolatorBase.y1PropertyKey:
+      case CubicInterpolatorBase.x2PropertyKey:
+      case CubicInterpolatorBase.y2PropertyKey:
+      case KeyFrameDoubleBase.valuePropertyKey:
+      case LinearAnimationBase.speedPropertyKey:
       case LinearGradientBase.startXPropertyKey:
       case LinearGradientBase.startYPropertyKey:
       case LinearGradientBase.endXPropertyKey:
@@ -306,24 +350,24 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originXPropertyKey:
       case ArtboardBase.originYPropertyKey:
         if (value != null && value is double) {
-          var writer = BinaryWriter(alignment: 8);
-          writer.writeFloat64(value);
-          change.value = writer.uint8Buffer;
+          change.value = doubleType.serialize(value);
         } else {
           return null;
         }
         break;
-      case StrokeBase.capPropertyKey:
-      case StrokeBase.joinPropertyKey:
-      case SolidColorBase.colorValuePropertyKey:
-      case GradientStopBase.colorValuePropertyKey:
-      case FillBase.fillRulePropertyKey:
-      case DrawableBase.blendModePropertyKey:
-      case BackboardBase.colorValuePropertyKey:
-        if (value != null && value is int) {
-          var writer = BinaryWriter(alignment: 4);
-          writer.writeVarInt(value);
-          change.value = writer.uint8Buffer;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+      case ShapePaintBase.isVisiblePropertyKey:
+      case StrokeBase.transformAffectsStrokePropertyKey:
+      case PointsPathBase.isClosedPropertyKey:
+        if (value != null && value is bool) {
+          change.value = boolType.serialize(value);
+        } else {
+          return null;
+        }
+        break;
+      case ComponentBase.dependentIdsPropertyKey:
+        if (value != null && value is List<Id>) {
+          change.value = listIdType.serialize(value);
         } else {
           return null;
         }
@@ -337,6 +381,121 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   void setObjectProperty(Core object, int propertyKey, Object value) {
     switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+        if (object is KeyedObjectBase && value is Id) {
+          object.objectId = value;
+        }
+        break;
+      case KeyedObjectBase.animationIdPropertyKey:
+        if (object is KeyedObjectBase && value is Id) {
+          object.animationId = value;
+        }
+        break;
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+        if (object is KeyedPropertyBase && value is Id) {
+          object.keyedObjectId = value;
+        }
+        break;
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+        if (object is KeyedPropertyBase && value is int) {
+          object.propertyKey = value;
+        }
+        break;
+      case AnimationBase.artboardIdPropertyKey:
+        if (object is AnimationBase && value is Id) {
+          object.artboardId = value;
+        }
+        break;
+      case AnimationBase.namePropertyKey:
+        if (object is AnimationBase && value is String) {
+          object.name = value;
+        }
+        break;
+      case AnimationBase.orderPropertyKey:
+        if (object is AnimationBase && value is FractionalIndex) {
+          object.order = value;
+        }
+        break;
+      case CubicInterpolatorBase.x1PropertyKey:
+        if (object is CubicInterpolatorBase && value is double) {
+          object.x1 = value;
+        }
+        break;
+      case CubicInterpolatorBase.y1PropertyKey:
+        if (object is CubicInterpolatorBase && value is double) {
+          object.y1 = value;
+        }
+        break;
+      case CubicInterpolatorBase.x2PropertyKey:
+        if (object is CubicInterpolatorBase && value is double) {
+          object.x2 = value;
+        }
+        break;
+      case CubicInterpolatorBase.y2PropertyKey:
+        if (object is CubicInterpolatorBase && value is double) {
+          object.y2 = value;
+        }
+        break;
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        if (object is KeyFrameBase && value is Id) {
+          object.keyedPropertyId = value;
+        }
+        break;
+      case KeyFrameBase.framePropertyKey:
+        if (object is KeyFrameBase && value is int) {
+          object.frame = value;
+        }
+        break;
+      case KeyFrameBase.interpolationPropertyKey:
+        if (object is KeyFrameBase && value is int) {
+          object.interpolation = value;
+        }
+        break;
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        if (object is KeyFrameBase && value is Id) {
+          object.interpolatorId = value;
+        }
+        break;
+      case KeyFrameDoubleBase.valuePropertyKey:
+        if (object is KeyFrameDoubleBase && value is double) {
+          object.value = value;
+        }
+        break;
+      case LinearAnimationBase.fpsPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.fps = value;
+        }
+        break;
+      case LinearAnimationBase.durationPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.duration = value;
+        }
+        break;
+      case LinearAnimationBase.speedPropertyKey:
+        if (object is LinearAnimationBase && value is double) {
+          object.speed = value;
+        }
+        break;
+      case LinearAnimationBase.loopPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.loop = value;
+        }
+        break;
+      case LinearAnimationBase.workStartPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.workStart = value;
+        }
+        break;
+      case LinearAnimationBase.workEndPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.workEnd = value;
+        }
+        break;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        if (object is LinearAnimationBase && value is bool) {
+          object.enableWorkArea = value;
+        }
+        break;
       case ComponentBase.dependentIdsPropertyKey:
         if (object is ComponentBase && value is List<Id>) {
           object.dependentIds = value;
@@ -570,9 +729,146 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
+  static void setKeyState(Core object, int propertyKey, KeyState value) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+        if (object is NodeBase) {
+          object.xKeyState = value;
+        }
+        break;
+    }
+  }
+
+  @override
+  void resetAnimated(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+        if (object is NodeBase) {
+          object.xAnimated = null;
+          object.xKeyState = KeyState.none;
+        }
+        break;
+    }
+  }
+
   @override
   Object getObjectProperty(Core object, int propertyKey) {
     switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+        if (object is KeyedObjectBase) {
+          return object.objectId;
+        }
+        break;
+      case KeyedObjectBase.animationIdPropertyKey:
+        if (object is KeyedObjectBase) {
+          return object.animationId;
+        }
+        break;
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+        if (object is KeyedPropertyBase) {
+          return object.keyedObjectId;
+        }
+        break;
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+        if (object is KeyedPropertyBase) {
+          return object.propertyKey;
+        }
+        break;
+      case AnimationBase.artboardIdPropertyKey:
+        if (object is AnimationBase) {
+          return object.artboardId;
+        }
+        break;
+      case AnimationBase.namePropertyKey:
+        if (object is AnimationBase) {
+          return object.name;
+        }
+        break;
+      case AnimationBase.orderPropertyKey:
+        if (object is AnimationBase) {
+          return object.order;
+        }
+        break;
+      case CubicInterpolatorBase.x1PropertyKey:
+        if (object is CubicInterpolatorBase) {
+          return object.x1;
+        }
+        break;
+      case CubicInterpolatorBase.y1PropertyKey:
+        if (object is CubicInterpolatorBase) {
+          return object.y1;
+        }
+        break;
+      case CubicInterpolatorBase.x2PropertyKey:
+        if (object is CubicInterpolatorBase) {
+          return object.x2;
+        }
+        break;
+      case CubicInterpolatorBase.y2PropertyKey:
+        if (object is CubicInterpolatorBase) {
+          return object.y2;
+        }
+        break;
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        if (object is KeyFrameBase) {
+          return object.keyedPropertyId;
+        }
+        break;
+      case KeyFrameBase.framePropertyKey:
+        if (object is KeyFrameBase) {
+          return object.frame;
+        }
+        break;
+      case KeyFrameBase.interpolationPropertyKey:
+        if (object is KeyFrameBase) {
+          return object.interpolation;
+        }
+        break;
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        if (object is KeyFrameBase) {
+          return object.interpolatorId;
+        }
+        break;
+      case KeyFrameDoubleBase.valuePropertyKey:
+        if (object is KeyFrameDoubleBase) {
+          return object.value;
+        }
+        break;
+      case LinearAnimationBase.fpsPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.fps;
+        }
+        break;
+      case LinearAnimationBase.durationPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.duration;
+        }
+        break;
+      case LinearAnimationBase.speedPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.speed;
+        }
+        break;
+      case LinearAnimationBase.loopPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.loop;
+        }
+        break;
+      case LinearAnimationBase.workStartPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.workStart;
+        }
+        break;
+      case LinearAnimationBase.workEndPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.workEnd;
+        }
+        break;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        if (object is LinearAnimationBase) {
+          return object.enableWorkArea;
+        }
+        break;
       case ComponentBase.dependentIdsPropertyKey:
         if (object is ComponentBase) {
           return object.dependentIds;
@@ -805,5 +1101,519 @@ abstract class RiveCoreContext extends CoreContext {
         break;
     }
     return null;
+  }
+
+  CoreFieldType coreType(int propertyKey) {
+    switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+      case KeyedObjectBase.animationIdPropertyKey:
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+      case AnimationBase.artboardIdPropertyKey:
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+      case KeyFrameBase.interpolatorIdPropertyKey:
+      case ComponentBase.parentIdPropertyKey:
+      case BackboardBase.activeArtboardIdPropertyKey:
+      case BackboardBase.mainArtboardIdPropertyKey:
+        return idType;
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+      case KeyFrameBase.framePropertyKey:
+      case KeyFrameBase.interpolationPropertyKey:
+      case LinearAnimationBase.fpsPropertyKey:
+      case LinearAnimationBase.durationPropertyKey:
+      case LinearAnimationBase.loopPropertyKey:
+      case LinearAnimationBase.workStartPropertyKey:
+      case LinearAnimationBase.workEndPropertyKey:
+      case StrokeBase.capPropertyKey:
+      case StrokeBase.joinPropertyKey:
+      case SolidColorBase.colorValuePropertyKey:
+      case GradientStopBase.colorValuePropertyKey:
+      case FillBase.fillRulePropertyKey:
+      case DrawableBase.blendModePropertyKey:
+      case BackboardBase.colorValuePropertyKey:
+        return intType;
+      case AnimationBase.namePropertyKey:
+      case ComponentBase.namePropertyKey:
+        return stringType;
+      case AnimationBase.orderPropertyKey:
+      case ComponentBase.childOrderPropertyKey:
+      case DrawableBase.drawOrderPropertyKey:
+        return fractionalIndexType;
+      case CubicInterpolatorBase.x1PropertyKey:
+      case CubicInterpolatorBase.y1PropertyKey:
+      case CubicInterpolatorBase.x2PropertyKey:
+      case CubicInterpolatorBase.y2PropertyKey:
+      case KeyFrameDoubleBase.valuePropertyKey:
+      case LinearAnimationBase.speedPropertyKey:
+      case LinearGradientBase.startXPropertyKey:
+      case LinearGradientBase.startYPropertyKey:
+      case LinearGradientBase.endXPropertyKey:
+      case LinearGradientBase.endYPropertyKey:
+      case LinearGradientBase.opacityPropertyKey:
+      case StrokeBase.thicknessPropertyKey:
+      case GradientStopBase.positionPropertyKey:
+      case NodeBase.xPropertyKey:
+      case NodeBase.yPropertyKey:
+      case NodeBase.rotationPropertyKey:
+      case NodeBase.scaleXPropertyKey:
+      case NodeBase.scaleYPropertyKey:
+      case NodeBase.opacityPropertyKey:
+      case PathVertexBase.xPropertyKey:
+      case PathVertexBase.yPropertyKey:
+      case StraightVertexBase.radiusPropertyKey:
+      case ParametricPathBase.widthPropertyKey:
+      case ParametricPathBase.heightPropertyKey:
+      case RectangleBase.cornerRadiusPropertyKey:
+      case CubicVertexBase.inXPropertyKey:
+      case CubicVertexBase.inYPropertyKey:
+      case CubicVertexBase.outXPropertyKey:
+      case CubicVertexBase.outYPropertyKey:
+      case ArtboardBase.widthPropertyKey:
+      case ArtboardBase.heightPropertyKey:
+      case ArtboardBase.xPropertyKey:
+      case ArtboardBase.yPropertyKey:
+      case ArtboardBase.originXPropertyKey:
+      case ArtboardBase.originYPropertyKey:
+        return doubleType;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+      case ShapePaintBase.isVisiblePropertyKey:
+      case StrokeBase.transformAffectsStrokePropertyKey:
+      case PointsPathBase.isClosedPropertyKey:
+        return boolType;
+      case ComponentBase.dependentIdsPropertyKey:
+        return listIdType;
+      default:
+        return null;
+    }
+  }
+
+  static Id getId(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+        return (object as KeyedObjectBase).objectId;
+      case KeyedObjectBase.animationIdPropertyKey:
+        return (object as KeyedObjectBase).animationId;
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+        return (object as KeyedPropertyBase).keyedObjectId;
+      case AnimationBase.artboardIdPropertyKey:
+        return (object as AnimationBase).artboardId;
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        return (object as KeyFrameBase).keyedPropertyId;
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        return (object as KeyFrameBase).interpolatorId;
+      case ComponentBase.parentIdPropertyKey:
+        return (object as ComponentBase).parentId;
+      case BackboardBase.activeArtboardIdPropertyKey:
+        return (object as BackboardBase).activeArtboardId;
+      case BackboardBase.mainArtboardIdPropertyKey:
+        return (object as BackboardBase).mainArtboardId;
+    }
+    return null;
+  }
+
+  static int getInt(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+        return (object as KeyedPropertyBase).propertyKey;
+      case KeyFrameBase.framePropertyKey:
+        return (object as KeyFrameBase).frame;
+      case KeyFrameBase.interpolationPropertyKey:
+        return (object as KeyFrameBase).interpolation;
+      case LinearAnimationBase.fpsPropertyKey:
+        return (object as LinearAnimationBase).fps;
+      case LinearAnimationBase.durationPropertyKey:
+        return (object as LinearAnimationBase).duration;
+      case LinearAnimationBase.loopPropertyKey:
+        return (object as LinearAnimationBase).loop;
+      case LinearAnimationBase.workStartPropertyKey:
+        return (object as LinearAnimationBase).workStart;
+      case LinearAnimationBase.workEndPropertyKey:
+        return (object as LinearAnimationBase).workEnd;
+      case StrokeBase.capPropertyKey:
+        return (object as StrokeBase).cap;
+      case StrokeBase.joinPropertyKey:
+        return (object as StrokeBase).join;
+      case SolidColorBase.colorValuePropertyKey:
+        return (object as SolidColorBase).colorValue;
+      case GradientStopBase.colorValuePropertyKey:
+        return (object as GradientStopBase).colorValue;
+      case FillBase.fillRulePropertyKey:
+        return (object as FillBase).fillRule;
+      case DrawableBase.blendModePropertyKey:
+        return (object as DrawableBase).blendMode;
+      case BackboardBase.colorValuePropertyKey:
+        return (object as BackboardBase).colorValue;
+    }
+    return 0;
+  }
+
+  static String getString(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case AnimationBase.namePropertyKey:
+        return (object as AnimationBase).name;
+      case ComponentBase.namePropertyKey:
+        return (object as ComponentBase).name;
+    }
+    return null;
+  }
+
+  static FractionalIndex getFractionalIndex(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case AnimationBase.orderPropertyKey:
+        return (object as AnimationBase).order;
+      case ComponentBase.childOrderPropertyKey:
+        return (object as ComponentBase).childOrder;
+      case DrawableBase.drawOrderPropertyKey:
+        return (object as DrawableBase).drawOrder;
+    }
+    return null;
+  }
+
+  static double getDouble(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case CubicInterpolatorBase.x1PropertyKey:
+        return (object as CubicInterpolatorBase).x1;
+      case CubicInterpolatorBase.y1PropertyKey:
+        return (object as CubicInterpolatorBase).y1;
+      case CubicInterpolatorBase.x2PropertyKey:
+        return (object as CubicInterpolatorBase).x2;
+      case CubicInterpolatorBase.y2PropertyKey:
+        return (object as CubicInterpolatorBase).y2;
+      case KeyFrameDoubleBase.valuePropertyKey:
+        return (object as KeyFrameDoubleBase).value;
+      case LinearAnimationBase.speedPropertyKey:
+        return (object as LinearAnimationBase).speed;
+      case LinearGradientBase.startXPropertyKey:
+        return (object as LinearGradientBase).startX;
+      case LinearGradientBase.startYPropertyKey:
+        return (object as LinearGradientBase).startY;
+      case LinearGradientBase.endXPropertyKey:
+        return (object as LinearGradientBase).endX;
+      case LinearGradientBase.endYPropertyKey:
+        return (object as LinearGradientBase).endY;
+      case LinearGradientBase.opacityPropertyKey:
+        return (object as LinearGradientBase).opacity;
+      case StrokeBase.thicknessPropertyKey:
+        return (object as StrokeBase).thickness;
+      case GradientStopBase.positionPropertyKey:
+        return (object as GradientStopBase).position;
+      case NodeBase.xPropertyKey:
+        return (object as NodeBase).x;
+      case NodeBase.yPropertyKey:
+        return (object as NodeBase).y;
+      case NodeBase.rotationPropertyKey:
+        return (object as NodeBase).rotation;
+      case NodeBase.scaleXPropertyKey:
+        return (object as NodeBase).scaleX;
+      case NodeBase.scaleYPropertyKey:
+        return (object as NodeBase).scaleY;
+      case NodeBase.opacityPropertyKey:
+        return (object as NodeBase).opacity;
+      case PathVertexBase.xPropertyKey:
+        return (object as PathVertexBase).x;
+      case PathVertexBase.yPropertyKey:
+        return (object as PathVertexBase).y;
+      case StraightVertexBase.radiusPropertyKey:
+        return (object as StraightVertexBase).radius;
+      case ParametricPathBase.widthPropertyKey:
+        return (object as ParametricPathBase).width;
+      case ParametricPathBase.heightPropertyKey:
+        return (object as ParametricPathBase).height;
+      case RectangleBase.cornerRadiusPropertyKey:
+        return (object as RectangleBase).cornerRadius;
+      case CubicVertexBase.inXPropertyKey:
+        return (object as CubicVertexBase).inX;
+      case CubicVertexBase.inYPropertyKey:
+        return (object as CubicVertexBase).inY;
+      case CubicVertexBase.outXPropertyKey:
+        return (object as CubicVertexBase).outX;
+      case CubicVertexBase.outYPropertyKey:
+        return (object as CubicVertexBase).outY;
+      case ArtboardBase.widthPropertyKey:
+        return (object as ArtboardBase).width;
+      case ArtboardBase.heightPropertyKey:
+        return (object as ArtboardBase).height;
+      case ArtboardBase.xPropertyKey:
+        return (object as ArtboardBase).x;
+      case ArtboardBase.yPropertyKey:
+        return (object as ArtboardBase).y;
+      case ArtboardBase.originXPropertyKey:
+        return (object as ArtboardBase).originX;
+      case ArtboardBase.originYPropertyKey:
+        return (object as ArtboardBase).originY;
+    }
+    return 0.0;
+  }
+
+  static bool getBool(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        return (object as LinearAnimationBase).enableWorkArea;
+      case ShapePaintBase.isVisiblePropertyKey:
+        return (object as ShapePaintBase).isVisible;
+      case StrokeBase.transformAffectsStrokePropertyKey:
+        return (object as StrokeBase).transformAffectsStroke;
+      case PointsPathBase.isClosedPropertyKey:
+        return (object as PointsPathBase).isClosed;
+    }
+    return false;
+  }
+
+  static List<Id> getListId(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case ComponentBase.dependentIdsPropertyKey:
+        return (object as ComponentBase).dependentIds;
+    }
+    return null;
+  }
+
+  static void setId(Core object, int propertyKey, Id value) {
+    switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+        (object as KeyedObjectBase).objectId = value;
+        break;
+      case KeyedObjectBase.animationIdPropertyKey:
+        (object as KeyedObjectBase).animationId = value;
+        break;
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+        (object as KeyedPropertyBase).keyedObjectId = value;
+        break;
+      case AnimationBase.artboardIdPropertyKey:
+        (object as AnimationBase).artboardId = value;
+        break;
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        (object as KeyFrameBase).keyedPropertyId = value;
+        break;
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        (object as KeyFrameBase).interpolatorId = value;
+        break;
+      case ComponentBase.parentIdPropertyKey:
+        (object as ComponentBase).parentId = value;
+        break;
+      case BackboardBase.activeArtboardIdPropertyKey:
+        (object as BackboardBase).activeArtboardId = value;
+        break;
+      case BackboardBase.mainArtboardIdPropertyKey:
+        (object as BackboardBase).mainArtboardId = value;
+        break;
+    }
+  }
+
+  static void setInt(Core object, int propertyKey, int value) {
+    switch (propertyKey) {
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+        (object as KeyedPropertyBase).propertyKey = value;
+        break;
+      case KeyFrameBase.framePropertyKey:
+        (object as KeyFrameBase).frame = value;
+        break;
+      case KeyFrameBase.interpolationPropertyKey:
+        (object as KeyFrameBase).interpolation = value;
+        break;
+      case LinearAnimationBase.fpsPropertyKey:
+        (object as LinearAnimationBase).fps = value;
+        break;
+      case LinearAnimationBase.durationPropertyKey:
+        (object as LinearAnimationBase).duration = value;
+        break;
+      case LinearAnimationBase.loopPropertyKey:
+        (object as LinearAnimationBase).loop = value;
+        break;
+      case LinearAnimationBase.workStartPropertyKey:
+        (object as LinearAnimationBase).workStart = value;
+        break;
+      case LinearAnimationBase.workEndPropertyKey:
+        (object as LinearAnimationBase).workEnd = value;
+        break;
+      case StrokeBase.capPropertyKey:
+        (object as StrokeBase).cap = value;
+        break;
+      case StrokeBase.joinPropertyKey:
+        (object as StrokeBase).join = value;
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        (object as SolidColorBase).colorValue = value;
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        (object as GradientStopBase).colorValue = value;
+        break;
+      case FillBase.fillRulePropertyKey:
+        (object as FillBase).fillRule = value;
+        break;
+      case DrawableBase.blendModePropertyKey:
+        (object as DrawableBase).blendMode = value;
+        break;
+      case BackboardBase.colorValuePropertyKey:
+        (object as BackboardBase).colorValue = value;
+        break;
+    }
+  }
+
+  static void setString(Core object, int propertyKey, String value) {
+    switch (propertyKey) {
+      case AnimationBase.namePropertyKey:
+        (object as AnimationBase).name = value;
+        break;
+      case ComponentBase.namePropertyKey:
+        (object as ComponentBase).name = value;
+        break;
+    }
+  }
+
+  static void setFractionalIndex(
+      Core object, int propertyKey, FractionalIndex value) {
+    switch (propertyKey) {
+      case AnimationBase.orderPropertyKey:
+        (object as AnimationBase).order = value;
+        break;
+      case ComponentBase.childOrderPropertyKey:
+        (object as ComponentBase).childOrder = value;
+        break;
+      case DrawableBase.drawOrderPropertyKey:
+        (object as DrawableBase).drawOrder = value;
+        break;
+    }
+  }
+
+  static void setDouble(Core object, int propertyKey, double value) {
+    switch (propertyKey) {
+      case CubicInterpolatorBase.x1PropertyKey:
+        (object as CubicInterpolatorBase).x1 = value;
+        break;
+      case CubicInterpolatorBase.y1PropertyKey:
+        (object as CubicInterpolatorBase).y1 = value;
+        break;
+      case CubicInterpolatorBase.x2PropertyKey:
+        (object as CubicInterpolatorBase).x2 = value;
+        break;
+      case CubicInterpolatorBase.y2PropertyKey:
+        (object as CubicInterpolatorBase).y2 = value;
+        break;
+      case KeyFrameDoubleBase.valuePropertyKey:
+        (object as KeyFrameDoubleBase).value = value;
+        break;
+      case LinearAnimationBase.speedPropertyKey:
+        (object as LinearAnimationBase).speed = value;
+        break;
+      case LinearGradientBase.startXPropertyKey:
+        (object as LinearGradientBase).startX = value;
+        break;
+      case LinearGradientBase.startYPropertyKey:
+        (object as LinearGradientBase).startY = value;
+        break;
+      case LinearGradientBase.endXPropertyKey:
+        (object as LinearGradientBase).endX = value;
+        break;
+      case LinearGradientBase.endYPropertyKey:
+        (object as LinearGradientBase).endY = value;
+        break;
+      case LinearGradientBase.opacityPropertyKey:
+        (object as LinearGradientBase).opacity = value;
+        break;
+      case StrokeBase.thicknessPropertyKey:
+        (object as StrokeBase).thickness = value;
+        break;
+      case GradientStopBase.positionPropertyKey:
+        (object as GradientStopBase).position = value;
+        break;
+      case NodeBase.xPropertyKey:
+        (object as NodeBase).x = value;
+        break;
+      case NodeBase.yPropertyKey:
+        (object as NodeBase).y = value;
+        break;
+      case NodeBase.rotationPropertyKey:
+        (object as NodeBase).rotation = value;
+        break;
+      case NodeBase.scaleXPropertyKey:
+        (object as NodeBase).scaleX = value;
+        break;
+      case NodeBase.scaleYPropertyKey:
+        (object as NodeBase).scaleY = value;
+        break;
+      case NodeBase.opacityPropertyKey:
+        (object as NodeBase).opacity = value;
+        break;
+      case PathVertexBase.xPropertyKey:
+        (object as PathVertexBase).x = value;
+        break;
+      case PathVertexBase.yPropertyKey:
+        (object as PathVertexBase).y = value;
+        break;
+      case StraightVertexBase.radiusPropertyKey:
+        (object as StraightVertexBase).radius = value;
+        break;
+      case ParametricPathBase.widthPropertyKey:
+        (object as ParametricPathBase).width = value;
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        (object as ParametricPathBase).height = value;
+        break;
+      case RectangleBase.cornerRadiusPropertyKey:
+        (object as RectangleBase).cornerRadius = value;
+        break;
+      case CubicVertexBase.inXPropertyKey:
+        (object as CubicVertexBase).inX = value;
+        break;
+      case CubicVertexBase.inYPropertyKey:
+        (object as CubicVertexBase).inY = value;
+        break;
+      case CubicVertexBase.outXPropertyKey:
+        (object as CubicVertexBase).outX = value;
+        break;
+      case CubicVertexBase.outYPropertyKey:
+        (object as CubicVertexBase).outY = value;
+        break;
+      case ArtboardBase.widthPropertyKey:
+        (object as ArtboardBase).width = value;
+        break;
+      case ArtboardBase.heightPropertyKey:
+        (object as ArtboardBase).height = value;
+        break;
+      case ArtboardBase.xPropertyKey:
+        (object as ArtboardBase).x = value;
+        break;
+      case ArtboardBase.yPropertyKey:
+        (object as ArtboardBase).y = value;
+        break;
+      case ArtboardBase.originXPropertyKey:
+        (object as ArtboardBase).originX = value;
+        break;
+      case ArtboardBase.originYPropertyKey:
+        (object as ArtboardBase).originY = value;
+        break;
+    }
+  }
+
+  static void animateDouble(Core object, int propertyKey, double value) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+        (object as NodeBase).xAnimated = value;
+        break;
+    }
+  }
+
+  static void setBool(Core object, int propertyKey, bool value) {
+    switch (propertyKey) {
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        (object as LinearAnimationBase).enableWorkArea = value;
+        break;
+      case ShapePaintBase.isVisiblePropertyKey:
+        (object as ShapePaintBase).isVisible = value;
+        break;
+      case StrokeBase.transformAffectsStrokePropertyKey:
+        (object as StrokeBase).transformAffectsStroke = value;
+        break;
+      case PointsPathBase.isClosedPropertyKey:
+        (object as PointsPathBase).isClosed = value;
+        break;
+    }
+  }
+
+  static void setListId(Core object, int propertyKey, List<Id> value) {
+    switch (propertyKey) {
+      case ComponentBase.dependentIdsPropertyKey:
+        (object as ComponentBase).dependentIds = value;
+        break;
+    }
   }
 }

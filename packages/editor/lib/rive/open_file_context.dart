@@ -31,6 +31,7 @@ import 'package:local_data/local_data.dart';
 typedef ActionHandler = bool Function(ShortcutAction action);
 
 enum OpenFileState { loading, error, open }
+enum EditorMode { design, animate }
 
 /// Helper for state managed by a single open file. The file may be open (in a
 /// tab) but it is not guaranteed to be in memory.
@@ -72,7 +73,8 @@ class OpenFileContext with RiveFileDelegate {
       SelectionContext<SelectableItem>();
 
   /// Whether this file is currently in animate mode.
-  final ValueNotifier<bool> isAnimateMode = ValueNotifier<bool>(false);
+  final ValueNotifier<EditorMode> mode =
+      ValueNotifier<EditorMode>(EditorMode.design);
 
   final List<ActionHandler> _actionHandlers = [];
 
@@ -144,6 +146,7 @@ class OpenFileContext with RiveFileDelegate {
       _resetTreeControllers();
       stateChanged.notify();
     }
+
     return true;
   }
 
@@ -192,8 +195,8 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   @override
-  void onObjectRemoved(covariant Component object) {
-    if (object.stageItem != null) {
+  void onObjectRemoved(Core object) {
+    if (object is Component && object.stageItem != null) {
       selection.deselect(object.stageItem);
       _stage.removeItem(object.stageItem);
     }
@@ -227,7 +230,7 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   void _resetTreeControllers() {
-    treeController.value = HierarchyTreeController(core.artboards, file: this);
+    treeController.value = HierarchyTreeController(this);
     drawOrderTreeController.value = DrawOrderTreeController(
       DrawOrderManager(core.artboards).drawableComponentsInOrder,
       file: this,
@@ -268,15 +271,15 @@ class OpenFileContext with RiveFileDelegate {
   bool redo() => core.redo();
 
   @override
-  void onConnectionStateChanged(ConnectionState state) {
+  void onConnectionStateChanged(CoopConnectionState state) {
     /// We use this to handle changes that can come in during use. Right now we
     /// only handle showing the re-connecting (connecting) state.
     switch (state) {
-      case ConnectionState.connecting:
+      case CoopConnectionState.connecting:
         _state = OpenFileState.loading;
         stateChanged.notify();
         break;
-      case ConnectionState.connected:
+      case CoopConnectionState.connected:
         _state = OpenFileState.open;
         stateChanged.notify();
         break;

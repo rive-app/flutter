@@ -2,9 +2,9 @@ import 'package:core/coop/coop_client.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_core/backboard.dart';
+import 'package:rive_core/rive_core_field_type.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logging/logging.dart';
 
 import 'package:core/coop/change.dart';
 import 'package:core/coop/player.dart';
@@ -21,8 +21,6 @@ import 'package:rive_core/container_component.dart';
 import 'src/generated/rive_core_context.dart';
 import 'src/isolated_persist.dart';
 
-final log = Logger('rive_core');
-
 class RiveFile extends RiveCoreContext {
   final List<Artboard> artboards = [];
   final Set<RiveFileDelegate> delegates = {};
@@ -33,8 +31,8 @@ class RiveFile extends RiveCoreContext {
   Backboard _backboard;
   Backboard get backboard => _backboard;
 
-  // Track if a property has changed since last advance, force an advance (and
-  // redraw) if any have.
+  /// Track if a property has changed since last advance, force an advance (and
+  /// redraw) if any have.
   bool _propertyChanged = false;
 
   final ValueNotifier<Iterable<ClientSidePlayer>> allPlayers =
@@ -53,6 +51,10 @@ class RiveFile extends RiveCoreContext {
   /// Set of components that have had dependents changes and should recompute
   /// their dependentIds once the dependencies have been recomputed.
   final Set<Component> _needDependentIdsRebuilt = {};
+
+  /// Generic set of dirty operations that need to be cleaned with the next
+  /// clean call.
+  final Set<void Function()> _needsCleaning = {};
 
   SharedPreferences _prefs;
 
@@ -79,6 +81,7 @@ class RiveFile extends RiveCoreContext {
       }
     }
     _propertyChanged = false;
+
     return advanced;
   }
 
@@ -88,55 +91,76 @@ class RiveFile extends RiveCoreContext {
     _propertyChanged = true;
   }
 
+  /// Add a generic operation to be called when the next clean cycle occurs.
+  /// Usually use this to debounce an operation before capturing the next
+  /// journal entry.
+  void dirty(void Function() dirt) {
+    if (_needsCleaning.add(dirt)) {
+      _dirt |= _RiveDirt.generic;
+    }
+  }
+
   /// Perform any cleanup required due to properties being marked dirty.
   bool cleanDirt([int escapeHatch = 0]) {
     assert(escapeHatch < 1000);
     if (_dirt == 0) {
       return false;
     }
-    log.finest("CLEAN!");
     _dirt = 0;
 
-    // Copy it in case it is changed during the building (meaning this process
-    // needs to recurse).
-    Set<Component> needDependenciesBuilt =
-        Set<Component>.from(_needDependenciesBuilt);
-    _needDependenciesBuilt.clear();
+    if (_needDependenciesBuilt.isNotEmpty) {
+      // Copy it in case it is changed during the building (meaning this process
+      // needs to recurse).
+      Set<Component> needDependenciesBuilt =
+          Set<Component>.from(_needDependenciesBuilt);
+      _needDependenciesBuilt.clear();
 
-    // First resolve the artboards
-    for (final component in needDependenciesBuilt) {
-      component.resolveArtboard();
-    }
-
-    // Then build the dependencies
-    for (final component in needDependenciesBuilt) {
-      if (component.artboard != null) {
-        _needDependenciesOrdered.add(component.artboard);
-        log.finest("Component with good artboard ${component.name}");
-      } else {
-        log.finest("WHY IS THE ARTBOARD NULL $component ${component.name}??");
+      // First resolve the artboards
+      for (final component in needDependenciesBuilt) {
+        component.resolveArtboard();
       }
-      component.buildDependencies();
+
+      // Then build the dependencies
+      for (final component in needDependenciesBuilt) {
+        if (component.artboard != null) {
+          _needDependenciesOrdered.add(component.artboard);
+        }
+        component.buildDependencies();
+      }
     }
 
-    // Rebuild any dependent ids that will have changed from building
-    // dependencies.
-    for (final component in _needDependentIdsRebuilt) {
-      component.dependentIds =
-          component.dependents.map((other) => other.id).toList(growable: false);
+    if (_needDependentIdsRebuilt.isNotEmpty) {
+      // Rebuild any dependent ids that will have changed from building
+      // dependencies.
+      for (final component in _needDependentIdsRebuilt) {
+        component.dependentIds = component.dependents
+            .map((other) => other.id)
+            .toList(growable: false);
+      }
+      _needDependentIdsRebuilt.clear();
     }
-    _needDependentIdsRebuilt.clear();
+    if (_needChildSort.isNotEmpty) {
+      for (final parent in _needChildSort) {
+        parent.children.sortFractional();
+      }
+      _needChildSort.clear();
+    }
 
-    for (final parent in _needChildSort) {
-      parent.children.sortFractional();
+    if (_needDependenciesOrdered.isNotEmpty) {
+      // finally sort dependencies
+      for (final artboard in _needDependenciesOrdered) {
+        artboard.sortDependencies();
+      }
+      _needDependenciesOrdered.clear();
     }
-    _needChildSort.clear();
 
-    // finally sort dependencies
-    for (final artboard in _needDependenciesOrdered) {
-      artboard.sortDependencies();
+    if (_needsCleaning.isNotEmpty) {
+      var cleanup = Set<void Function()>.from(_needsCleaning);
+      _needsCleaning.clear();
+      for (final clean in cleanup) {
+        clean();
+      }
     }
-    _needDependenciesOrdered.clear();
 
     if (_dirt != 0) {
       cleanDirt(escapeHatch + 1);
@@ -194,10 +218,14 @@ class RiveFile extends RiveCoreContext {
   /// Mark a component as needing its dependent ids recalculated.
   void markDependentIdsDirty(Component component) {
     _needDependentIdsRebuilt.add(component);
+
+    /// Note that we don't mark _dirt here as this always happend in response to
+    /// a dependency order being marked dirty.
   }
 
-  void markNeedsAdvance() =>
-      delegates.forEach((delegate) => delegate.markNeedsAdvance());
+  void markNeedsAdvance() {
+    delegates.forEach((delegate) => delegate.markNeedsAdvance());
+  }
 
   @override
   void onAddedDirty(Core object) {
@@ -215,6 +243,10 @@ class RiveFile extends RiveCoreContext {
     delegates.forEach((delegate) => delegate.onObjectAdded(object));
     if (object is Artboard) {
       artboards.add(object);
+      // If this is the first artboard, make it active.`
+      if (_backboard != null && artboards.length == 1) {
+        _backboard.activeArtboard = object;
+      }
       delegates.forEach((delegate) => delegate.onArtboardsChanged());
     }
   }
@@ -225,6 +257,11 @@ class RiveFile extends RiveCoreContext {
     delegates.forEach((delegate) => delegate.onObjectRemoved(object));
     if (object is Artboard) {
       artboards.remove(object);
+      // If this was the active artboard, select another.
+      if (_backboard.activeArtboard == object) {
+        _backboard.activeArtboard =
+            artboards.isNotEmpty ? artboards.first : null;
+      }
       delegates.forEach((delegate) => delegate.onArtboardsChanged());
     }
   }
@@ -319,9 +356,10 @@ class RiveFile extends RiveCoreContext {
 
   @override
   void onConnected() {
-    // Find backboard.
+    // Let's validate the file. First thing we expect is that it has a
+    // backboard.
     var backboards = objects.whereType<Backboard>();
-
+    bool didPatch = false;
     if (backboards.isEmpty) {
       // Don't have one? Patch up the file and make one...
       batchAdd(() {
@@ -337,41 +375,74 @@ class RiveFile extends RiveCoreContext {
         do {
           remove(backboards.last);
         } while (backboards.length > 1);
-        // Save the creation of the backboard.
-        captureJournalEntry();
-        // Don't allow undoing it.
-        clearJournal();
+        didPatch = true;
       }
       _backboard = backboards.first;
     }
+
+    if (_backboard.activeArtboard == null && artboards.isNotEmpty) {
+      // We should always have an active artboard (unless there are not
+      // artboards yet).
+      _backboard.activeArtboard = artboards.first;
+    }
+
+    if (didPatch) {
+      // We had to patch up the file, save the changes and disallow undo.
+      captureJournalEntry();
+      clearJournal();
+    }
+
     assert(objects.whereType<Backboard>().length == 1,
         'File should contain exactly one backboard.');
   }
 
   @override
-  void connectionStateChanged(core.ConnectionState state) =>
+  void connectionStateChanged(core.CoopConnectionState state) =>
       delegates.forEach((delegate) => delegate.onConnectionStateChanged(state));
+
+  @override
+  CoreIdType get idType => RiveIdType.instance;
+
+  @override
+  CoreIntType get intType => RiveIntType.instance;
+
+  @override
+  CoreStringType get stringType => RiveStringType.instance;
+
+  @override
+  CoreDoubleType get doubleType => RiveDoubleType.instance;
+
+  @override
+  CoreBoolType get boolType => RiveBoolType.instance;
+
+  @override
+  CoreListIdType get listIdType => RiveListIdType.instance;
+
+  @override
+  CoreFractionalIndexType get fractionalIndexType =>
+      RiveFractionalIndexType.instance;
 }
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.
 abstract class RiveFileDelegate {
-  void markNeedsAdvance();
+  void markNeedsAdvance() {}
   void onArtboardsChanged() {}
-  void onDirtCleaned();
+  void onDirtCleaned() {}
   void onObjectAdded(Core object) {}
   void onObjectRemoved(Core object) {}
   void onPlayerAdded(ClientSidePlayer player) {}
   void onPlayerRemoved(ClientSidePlayer player) {}
 
   /// Called when the entire file is wiped as data is about to load/reload.
-  void onWipe();
+  void onWipe() {}
 
   /// Let the delegate know the connection state somehow changed.
-  void onConnectionStateChanged(core.ConnectionState state);
+  void onConnectionStateChanged(core.CoopConnectionState state) {}
 }
 
 class _RiveDirt {
   static const int dependencies = 1 << 0;
   static const int childSort = 1 << 1;
   static const int dependencyOrder = 1 << 2;
+  static const int generic = 1 << 3;
 }

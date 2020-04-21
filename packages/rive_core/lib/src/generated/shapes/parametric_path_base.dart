@@ -2,7 +2,6 @@
 /// lib/src/generated/shapes/parametric_path_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -38,13 +37,11 @@ abstract class ParametricPathBase extends Path {
     }
     double from = _width;
     _width = value;
+    onPropertyChanged(widthPropertyKey, from, value);
     widthChanged(from, value);
   }
 
-  @mustCallSuper
-  void widthChanged(double from, double to) {
-    onPropertyChanged(widthPropertyKey, from, to);
-  }
+  void widthChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Height field with key 21.
@@ -62,13 +59,11 @@ abstract class ParametricPathBase extends Path {
     }
     double from = _height;
     _height = value;
+    onPropertyChanged(heightPropertyKey, from, value);
     heightChanged(from, value);
   }
 
-  @mustCallSuper
-  void heightChanged(double from, double to) {
-    onPropertyChanged(heightPropertyKey, from, to);
-  }
+  void heightChanged(double from, double to);
 
   @override
   void changeNonNull() {
@@ -90,6 +85,17 @@ abstract class ParametricPathBase extends Path {
         return height as K;
       default:
         return super.getProperty<K>(propertyKey);
+    }
+  }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case widthPropertyKey:
+      case heightPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
     }
   }
 }

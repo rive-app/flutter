@@ -19,7 +19,15 @@ import 'debounce.dart';
 export 'package:fractional/fractional.dart';
 export 'package:core/id.dart';
 
-final log = Logger('Core');
+export 'package:core/field_types/core_bool_type.dart';
+export 'package:core/field_types/core_double_type.dart';
+export 'package:core/field_types/core_fractional_index_type.dart';
+export 'package:core/field_types/core_id_type.dart';
+export 'package:core/field_types/core_int_type.dart';
+export 'package:core/field_types/core_list_id_type.dart';
+export 'package:core/field_types/core_string_type.dart';
+
+final _log = Logger('Core');
 
 class ChangeEntry {
   Object from;
@@ -48,6 +56,12 @@ abstract class Core<T extends CoreContext> {
   /// matching the propertyKey.
   K getProperty<K>(int propertyKey) {
     return null;
+  }
+
+  /// Generated classes override this to return whether they store this
+  /// property.
+  bool hasProperty(int propertyKey) {
+    return false;
   }
 
   /// Register to receive a notification whenever a property with propertyKey
@@ -101,6 +115,21 @@ abstract class Core<T extends CoreContext> {
     }
   }
 
+  @protected
+  @mustCallSuper
+  void onAnimatedPropertyChanged<K>(int propertyKey, K from, K to) {
+    context?.changeAnimatedProperty(this, propertyKey, from, to);
+    if (_changeListeners == null) {
+      return;
+    }
+    var listeners = _changeListeners[propertyKey];
+    if (listeners != null) {
+      for (final listener in listeners) {
+        listener(from, to);
+      }
+    }
+  }
+
   /// Called when the object is first added to the context, no validation has
   /// occurred yet.
   void onAddedDirty();
@@ -142,7 +171,33 @@ abstract class CoreContext implements LocalSettings {
 
   bool _isRecording = true;
 
-  final Map<Id, Core> _objects = {};
+  // Track which entries were changing during animation and need to be reset
+  // prior to the next animation pass.
+  HashMap<Id, Set<int>> _animationChanges;
+  bool get isAnimating => _animationChanges != null;
+
+  void startAnimating() {
+    _animationChanges = HashMap<Id, Set<int>>();
+  }
+
+  void stopAnimating() {
+    _animationChanges.forEach(_resetAnimatedObjectProperty);
+    _animationChanges = null;
+  }
+
+  void resetAnimation() {
+    _animationChanges.forEach(_resetAnimatedObjectProperty);
+    _animationChanges.clear();
+  }
+
+  void _resetAnimatedObjectProperty(Id objectId, Set<int> propertyKeys) {
+    var coreObject = _objects[objectId];
+    for (final propertyKey in propertyKeys) {
+      resetAnimated(coreObject, propertyKey);
+    }
+  }
+
+  final HashMap<Id, Core> _objects = HashMap<Id, Core>();
 
   @protected
   final Map<ChangeSet, FreshChange> freshChanges = {};
@@ -196,10 +251,9 @@ abstract class CoreContext implements LocalSettings {
   @protected
   void applyCoopChanges(ObjectChanges objectChanges);
 
-  @protected
-  bool isPropertyId(int propertyKey);
-
-  bool captureJournalEntry() {
+  /// Capture the latest set of changes as a journal entry and sync them to
+  /// coop. Set [record] to false if you don't want this change to be undone.
+  bool captureJournalEntry({bool record: true}) {
     if (_currentChanges == null) {
       return false;
     }
@@ -209,7 +263,9 @@ abstract class CoreContext implements LocalSettings {
     journal.removeRange(_journalIndex, journal.length);
 
     // add the new changes to the journal
-    journal.add(_currentChanges);
+    if (record) {
+      journal.add(_currentChanges);
+    }
 
     // schedule those changes to be sent to other clients (and server for
     // saving)
@@ -225,6 +281,11 @@ abstract class CoreContext implements LocalSettings {
     }
     _currentChanges ??= CorePropertyChanges();
     _currentChanges.change(object, propertyKey, from, to);
+  }
+
+  void changeAnimatedProperty<T>(Core object, int propertyKey, T from, T to) {
+    var properties = _animationChanges[object.id] ??= {};
+    properties.add(propertyKey);
   }
 
   /// Method called when a journal entry is created or applied via an undo/redo.
@@ -355,6 +416,9 @@ abstract class CoreContext implements LocalSettings {
   Change makeCoopChange(int propertyKey, Object value);
 
   @protected
+  void resetAnimated(Core object, int propertyKey);
+
+  @protected
   Core makeCoreInstance(int typeKey);
 
   /// Find Core objects of type [T].
@@ -433,7 +497,11 @@ abstract class CoreContext implements LocalSettings {
     return true;
   }
 
-  void _applyJournalEntry(CorePropertyChanges changes, {bool isUndo}) {
+  void _applyJournalEntry(
+    CorePropertyChanges changes, {
+    bool isUndo,
+    bool sendToCoop = true,
+  }) {
     Set<Core> regeneratedObjects = {};
     changes.entries.forEach((objectId, objectChanges) {
       bool regenerated = false;
@@ -492,7 +560,9 @@ abstract class CoreContext implements LocalSettings {
       }
     });
 
-    coopMakeChangeSet(changes, useFrom: isUndo);
+    if (sendToCoop) {
+      coopMakeChangeSet(changes, useFrom: isUndo);
+    }
     completeChanges();
     for (final object in regeneratedObjects) {
       onAddedClean(object);
@@ -510,7 +580,7 @@ abstract class CoreContext implements LocalSettings {
   @mustCallSuper
   @protected
   void changesAccepted(ChangeSet changes) {
-    log.finest("ACCEPTING ${changes.id}.");
+    _log.finest("ACCEPTING ${changes.id}.");
     freshChanges.remove(changes);
 
     // Update the inflight counters for the properties.
@@ -583,13 +653,13 @@ abstract class CoreContext implements LocalSettings {
         if (key == hydrateKey) {
           //changeProperty(object, addKey, removeKey, object.coreType);
           //changeProperty(object, removeKey, addKey, object.coreType);
-          log.finest("GOT HYDRATION! $objectId ${entry.from} ${entry.to}");
+          _log.finest("GOT HYDRATION! $objectId ${entry.from} ${entry.to}");
           var change = makeCoopChange(addKey, entry.to);
           if (change != null) {
             objectChanges.changes.add(change);
           }
         } else if (key == dehydrateKey) {
-          log.finest("DEHYDRATE THIS THING.");
+          _log.finest("DEHYDRATE THIS THING.");
           var change = makeCoopChange(removeKey, objectId);
           if (change != null) {
             objectChanges.changes.add(change);
@@ -635,7 +705,7 @@ abstract class CoreContext implements LocalSettings {
     // We've received changes from Coop. Initialize the delayAdd list so that
     // onAdded doesn't get called as objects are created. We'll manually call it
     // at the end of this method once all the changes have been made.
-    log.finest("STARTING ADD");
+    _log.finest("STARTING ADD");
     startAdd();
 
     // Track whether recording was on/off, definitely turn it off during these
@@ -721,7 +791,7 @@ abstract class CoreContext implements LocalSettings {
     _client.sendCursor(_lastCursorX, _lastCursorY);
   }
 
-  void connectionStateChanged(ConnectionState state);
+  void connectionStateChanged(CoopConnectionState state);
 }
 
 class FreshChange {

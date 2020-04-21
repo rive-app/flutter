@@ -9,6 +9,7 @@
     "x": {
       "type": "double",
       "initialValue": "0",
+      "animates": true,
       "key": {
         "int": 13,
         "string": "x"

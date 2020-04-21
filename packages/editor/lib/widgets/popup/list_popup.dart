@@ -24,6 +24,9 @@ abstract class PopupListItem {
   /// Child popup displayed when this list item is hovered over.
   List<PopupListItem> get popup;
 
+  /// Width of the child popup window
+  double get popupWidth => 177;
+
   /// Callback to invoke when the item is pressed on/selected.
   SelectCallback get select;
 
@@ -177,7 +180,11 @@ class ListPopup<T extends PopupListItem> {
       return;
     }
     if (_focus.popup != null) {
-      showChildPopup(_focus.shellContext, child: _focus);
+      showChildPopup(
+        _focus.shellContext,
+        width: _focus.popupWidth ?? 177,
+        child: _focus,
+      );
       // Grab first focus.
       _subPopup.focusDown();
     }
@@ -194,18 +201,26 @@ class ListPopup<T extends PopupListItem> {
     if (_child == child) {
       return false;
     }
-    _subPopup = ListPopup.show(context,
-        itemBuilder: itemBuilder,
-        showArrow: false,
-        width: width,
-        margin: margin,
-        direction: PopupDirection.rightToBottom,
-        directionPadding: 0,
-        offset: Offset(0, -margin),
-        // double arrow = 10,
-        items: child.popup.cast<T>(),
-        background: background,
-        parent: this);
+    _subPopup = ListPopup.show(
+      context,
+      itemBuilder: itemBuilder,
+      showArrow: false,
+      width: width,
+      margin: margin,
+      direction: PopupDirection.rightToBottom,
+
+      // Intentionally set fallback to null, which tells it to attempt shifting
+      // vertical before popping horizontal (as you'd expect a subpopup to
+      // attempt fitting).
+      fallbackDirections: null,
+
+      directionPadding: 0,
+      offset: Offset(0, -margin),
+      // double arrow = 10,
+      items: child.popup.cast<T>(),
+      background: background,
+      parent: this,
+    );
     _child = child;
 
     return true;
@@ -214,6 +229,7 @@ class ListPopup<T extends PopupListItem> {
   factory ListPopup.show(
     BuildContext context, {
     @required ListPopupItemBuilder<T> itemBuilder,
+    Offset position,
     double width = 177,
     double margin = 10,
     Offset offset = Offset.zero,
@@ -222,6 +238,7 @@ class ListPopup<T extends PopupListItem> {
     bool showArrow = true,
     Offset arrowTweak = Offset.zero,
     PopupDirection direction = PopupDirection.bottomToRight,
+    List<PopupDirection> fallbackDirections = PopupDirection.all,
     List<T> items = const [],
     Color background = const Color.fromRGBO(17, 17, 17, 1),
     ListPopup<T> parent,
@@ -282,10 +299,12 @@ class ListPopup<T extends PopupListItem> {
 
     list._arrow = ArrowPopup.show(
       context,
+      position: position,
       width: width,
       offset: offset,
       directionPadding: directionPadding,
       direction: direction,
+      fallbackDirections: fallbackDirections,
       showArrow: showArrow,
       arrowTweak: arrowTweak,
       background: background,
@@ -431,6 +450,7 @@ class __PopupListItemShellState<T extends PopupListItem>
           if (widget.item.popup != null) {
             widget.listPopup.showChildPopup(
               context,
+              width: widget.item.popupWidth ?? 177,
               child: widget.item,
             );
           }

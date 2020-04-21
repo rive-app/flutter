@@ -10,13 +10,19 @@ import 'package:tree_widget/flat_tree_item.dart';
 /// item. The TreeView is specifically built to allow theming all aspects,
 /// including stylings for drag and drop.
 class DropItemBackground extends StatelessWidget {
-  const DropItemBackground(this.dropState, this.selectionState,
-      {this.child, this.color});
+  const DropItemBackground(
+    this.dropState,
+    this.selectionState, {
+    this.child,
+    this.color,
+    this.hoverColor,
+  });
 
   final DropState dropState;
   final SelectionState selectionState;
   final Widget child;
   final Color color;
+  final Color hoverColor;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +85,7 @@ class DropItemBackground extends StatelessWidget {
         switch (selectionState) {
           case SelectionState.hovered:
             return SelectionBorder(
-                child: child, color: color ?? colors.fileHoveredBlue);
+                child: child, color: hoverColor ?? color ?? colors.treeHover);
           case SelectionState.selected:
             return SelectionBorder(
               child: child,

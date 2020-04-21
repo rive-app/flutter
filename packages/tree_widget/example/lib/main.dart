@@ -275,6 +275,9 @@ class _ExampleTreeViewState extends State<ExampleTreeView> {
   MyTreeController _buildExampleDataSet(String firstName) {
     // Just some test data...
     var data = [
+      TreeItem("Animation 1"),
+      TreeItem("Animation 2"),
+      TreeItem("Animation 3"),
       TreeItem(
         firstName,
         children: [

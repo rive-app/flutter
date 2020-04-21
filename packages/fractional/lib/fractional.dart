@@ -47,11 +47,48 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
 
   void setOrderOf(T value, FractionalIndex order);
 
+  /// Set the fractional indices to match the current order of the items. This
+  /// is a pretty heavy operation as it could change the fractional index of
+  /// every item in the list. Should be used sparingly for cases that really
+  /// require it.
+  void setFractionalIndices() {
+    var previousIndex = _minIndex;
+    for (final item in _values) {
+      var index = FractionalIndex.between(previousIndex, _maxIndex);
+      setOrderOf(item, index);
+      previousIndex = index;
+    }
+  }
+
   int _compareIndex(T a, T b) {
     return orderOf(a).compareTo(orderOf(b));
   }
 
   void sortFractional() => _values.sort(_compareIndex);
+
+  bool validateFractional() {
+    var previousIndex = _minIndex;
+    
+    for(final item in _values) {
+      var order = orderOf(item);
+      if(order == null) {
+        continue;
+      }
+      if(order.compareTo(previousIndex) > 0) {
+        previousIndex = order;
+      }
+    }
+    bool wasValid = true;
+    for (final item in _values) {
+      if (orderOf(item) == null) {
+        var index = FractionalIndex.between(previousIndex, _maxIndex);
+        setOrderOf(item, index);
+        previousIndex = index;
+        wasValid = false;
+      }
+    }
+    return wasValid;
+  }
 
   @override
   void add(T item) {

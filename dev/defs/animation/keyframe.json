@@ -1,0 +1,42 @@
+{
+  "name": "KeyFrame",
+  "key": {
+    "int": 29,
+    "string": "keyframe"
+  },
+  "abstract": true,
+  "properties": {
+    "keyedPropertyId": {
+      "type": "Id",
+      "key": {
+        "int": 72,
+        "string": "keyedpropertyid"
+      },
+      "description": "The id of the KeyedProperty this KeyFrame belongs to."
+    },
+    "frame": {
+      "type": "int",
+      "key": {
+        "int": 67,
+        "string": "frame"
+      },
+      "description": "Timecode as frame number can be converted to time by dividing by animation fps."
+    },
+    "interpolation": {
+      "type": "int",
+      "key": {
+        "int": 68,
+        "string": "interpolation"
+      },
+      "description": "The type of interpolation index in KeyInterpolatorType applied to this keyframe."
+    },
+    "interpolatorId": {
+      "type": "Id",
+      "key": {
+        "int": 69,
+        "string": "interpolatorid"
+      },
+      "description": "The id of the custom interpolator used when interpolation == KeyInterpolatorType.custom."
+    }
+  }
+}

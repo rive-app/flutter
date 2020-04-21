@@ -2,7 +2,6 @@
 /// lib/src/generated/shapes/cubic_vertex_base.dart.
 /// Do not modify manually.
 
-import 'package:meta/meta.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
@@ -31,13 +30,11 @@ abstract class CubicVertexBase extends PathVertex {
     }
     double from = _inX;
     _inX = value;
+    onPropertyChanged(inXPropertyKey, from, value);
     inXChanged(from, value);
   }
 
-  @mustCallSuper
-  void inXChanged(double from, double to) {
-    onPropertyChanged(inXPropertyKey, from, to);
-  }
+  void inXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// InY field with key 28.
@@ -55,13 +52,11 @@ abstract class CubicVertexBase extends PathVertex {
     }
     double from = _inY;
     _inY = value;
+    onPropertyChanged(inYPropertyKey, from, value);
     inYChanged(from, value);
   }
 
-  @mustCallSuper
-  void inYChanged(double from, double to) {
-    onPropertyChanged(inYPropertyKey, from, to);
-  }
+  void inYChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// OutX field with key 29.
@@ -79,13 +74,11 @@ abstract class CubicVertexBase extends PathVertex {
     }
     double from = _outX;
     _outX = value;
+    onPropertyChanged(outXPropertyKey, from, value);
     outXChanged(from, value);
   }
 
-  @mustCallSuper
-  void outXChanged(double from, double to) {
-    onPropertyChanged(outXPropertyKey, from, to);
-  }
+  void outXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// OutY field with key 30.
@@ -103,13 +96,11 @@ abstract class CubicVertexBase extends PathVertex {
     }
     double from = _outY;
     _outY = value;
+    onPropertyChanged(outYPropertyKey, from, value);
     outYChanged(from, value);
   }
 
-  @mustCallSuper
-  void outYChanged(double from, double to) {
-    onPropertyChanged(outYPropertyKey, from, to);
-  }
+  void outYChanged(double from, double to);
 
   @override
   void changeNonNull() {
@@ -141,6 +132,19 @@ abstract class CubicVertexBase extends PathVertex {
         return outY as K;
       default:
         return super.getProperty<K>(propertyKey);
+    }
+  }
+
+  @override
+  bool hasProperty(int propertyKey) {
+    switch (propertyKey) {
+      case inXPropertyKey:
+      case inYPropertyKey:
+      case outXPropertyKey:
+      case outYPropertyKey:
+        return true;
+      default:
+        return super.getProperty(propertyKey);
     }
   }
 }

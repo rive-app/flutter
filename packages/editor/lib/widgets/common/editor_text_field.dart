@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -45,6 +46,7 @@ class _EditorTextFieldState extends State<EditorTextField>
   final TextSelectionControls selectionControls = materialTextSelectionControls;
 
   void _requestKeyboard() => editableTextKey.currentState?.requestKeyboard();
+  CursorInstance _customCursor;
 
   @override
   void initState() {
@@ -70,7 +72,8 @@ class _EditorTextFieldState extends State<EditorTextField>
 
   void _focusChanged() {
     if (widget.focusNode.hasFocus) {
-      CursorIcon.reset(context);
+      _customCursor?.remove();
+      _customCursor = null;
     }
   }
 
@@ -83,11 +86,14 @@ class _EditorTextFieldState extends State<EditorTextField>
         : MouseRegion(
             onEnter: (data) {
               if (!rive.isDragging) {
-                CursorIcon.show(context, 'cursor-resize-vertical');
+                _customCursor?.remove();
+                _customCursor =
+                    CursorIcon.show(context, 'cursor-resize-vertical');
               }
             },
             onExit: (data) {
-              CursorIcon.reset(context);
+              _customCursor?.remove();
+              _customCursor = null;
             },
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,

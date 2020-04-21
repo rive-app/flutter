@@ -72,4 +72,8 @@ class FolderTreeController extends TreeController<RiveFolder> {
   int spacingOf(RiveFolder treeItem) {
     return 1;
   }
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<RiveFolder> item) {}
 }

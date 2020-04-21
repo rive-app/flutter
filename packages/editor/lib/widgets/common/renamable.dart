@@ -13,6 +13,7 @@ class Renamable extends StatefulWidget {
   final String name;
   final Color color;
   final Color editingColor;
+  final TextStyle style;
 
   final RenameCallback onRename;
   const Renamable({
@@ -21,6 +22,7 @@ class Renamable extends StatefulWidget {
     this.color,
     this.editingColor,
     this.onRename,
+    this.style,
   }) : super(key: key);
 
   @override
@@ -88,6 +90,11 @@ class _RenamableState extends State<Renamable> {
                   controller: _controller,
                   focusNode: _focusNode,
                   color: widget.color,
+                  style: widget.style ??
+                      const TextStyle(
+                        fontFamily: 'Roboto-Regular',
+                        fontSize: 13,
+                      ),
                   editingColor: widget.editingColor,
                   onSubmitted: (text) {
                     widget.onRename?.call(text);
@@ -102,10 +109,13 @@ class _RenamableState extends State<Renamable> {
             : Text(
                 widget.name ?? '-',
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: widget.color,
-                ),
+                style: widget.style != null
+                    ? widget.style.copyWith(color: widget.color)
+                    : TextStyle(
+                        fontFamily: 'Roboto-Regular',
+                        fontSize: 13,
+                        color: widget.color,
+                      ),
               ),
       ),
     );
