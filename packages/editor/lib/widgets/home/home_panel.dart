@@ -286,9 +286,33 @@ class FilesPanel extends StatelessWidget {
 
 /// The options panel, typically on the left side of
 /// the home screen
-class NavigationPanel extends StatelessWidget {
+class NavigationPanel extends StatefulWidget {
+  @override
+  _NavigationPanelState createState() => _NavigationPanelState();
+}
+
+class _NavigationPanelState extends State<NavigationPanel> {
+  bool _bottomSliverDocked = false;
+  bool get bottomSliverDocked => _bottomSliverDocked;
+
+  set bottomSliverDocked(bool bottomSliverDocked) {
+    if (_bottomSliverDocked != bottomSliverDocked) {
+      setState(() {
+        _bottomSliverDocked = bottomSliverDocked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    var scrollController = RiveContext.of(context).treeScrollController;
+    scrollController.addListener(() {
+      // this KINDA works, sometimes window size changes trigger this
+      // sometimes they do not :( Matt will fix it up later though
+      bottomSliverDocked = scrollController.position.extentAfter == 0 &&
+          scrollController.position.extentBefore == 0;
+    });
+
     final theme = RiveTheme.of(context);
     final rive = RiveContext.of(context);
     final riveColors = theme.colors;
@@ -446,7 +470,6 @@ class NavigationPanel extends StatelessWidget {
                     }
                   }
                 }
-
                 slivers.add(
                   SliverInlineFooter(
                     child: Container(
@@ -459,7 +482,9 @@ class NavigationPanel extends StatelessWidget {
                           Separator(
                             color: riveColors.fileLineGrey,
                             padding: EdgeInsets.only(
-                              left: treeStyle.padding.left,
+                              left: bottomSliverDocked
+                                  ? treeStyle.padding.left
+                                  : 0,
                             ),
                           ),
                           Padding(
