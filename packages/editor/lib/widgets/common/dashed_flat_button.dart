@@ -22,8 +22,7 @@ class DashedPainter extends CustomPainter {
 
     Paint paint = Paint()
       ..strokeWidth = 1
-      ..color = RiveThemeData().colors.commonButtonTextColor
-      // ..strokeCap = strokeCap
+      ..color = RiveThemeData().colors.fileIconColor
       ..style = PaintingStyle.stroke;
     var path = Path();
     path.addRRect(RRect.fromRectAndRadius(

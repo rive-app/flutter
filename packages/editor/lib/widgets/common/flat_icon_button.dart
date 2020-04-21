@@ -40,6 +40,7 @@ class FlatIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
+    final riveStyles = RiveTheme.of(context).textStyles;
     return _tip(
       InkWell(
         onTap: onTap,
@@ -68,13 +69,10 @@ class FlatIconButton extends StatelessWidget {
               Padding(
                 // This correctly aligned the text vertically
                 padding: const EdgeInsets.only(bottom: 1),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: textColor ?? riveColors.commonButtonTextColor,
-                    fontSize: 13,
-                  ),
-                ),
+                child: Text(label,
+                    style: (textColor == null)
+                        ? riveStyles.buttonTextStyle.copyWith(color: textColor)
+                        : riveStyles.buttonTextStyle),
               ),
               if (icon != null) icon,
             ],
