@@ -79,7 +79,8 @@ class TeamWizardPanelOne extends StatelessWidget {
                 children: <Widget>[
                   TeamSubscriptionChoiceWidget(
                       label: 'Team',
-                      costLabel: '\$$basicMonthlyCost',
+                      costLabel:
+                          '\$${costLookup[sub.billing][TeamsOption.basic]}',
                       explanation:
                           'A space where you and your team can share files.',
                       onTap: () => sub.option = TeamsOption.basic,
@@ -87,7 +88,8 @@ class TeamWizardPanelOne extends StatelessWidget {
                   const SizedBox(width: 24),
                   TeamSubscriptionChoiceWidget(
                       label: 'Premium Team',
-                      costLabel: '\$$premiumMonthlyCost',
+                      costLabel:
+                          '\$${costLookup[sub.billing][TeamsOption.premium]}',
                       explanation: '1 day support.',
                       onTap: () => sub.option = TeamsOption.premium,
                       borderThickness: subscriptionBorderThickness),
