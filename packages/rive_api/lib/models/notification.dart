@@ -9,9 +9,12 @@ enum NotificationType {
   teamInvite,
 }
 
+final Map<int, NotificationType> notificationMap = {
+  20: NotificationType.teamInvite
+};
+
 NotificationType notificationTypeFromInt(int value) {
-  assert(value < NotificationType.values.length);
-  return NotificationType.values[value];
+  return notificationMap[value];
 }
 
 /// Base notification class that has a factory that will construct
@@ -33,6 +36,7 @@ class RiveNotification {
     switch (type) {
       case NotificationType.teamInvite:
         final teamData = data['m'] as Map<String, dynamic>;
+        assert(teamData != null, 'no team data? what gives?');
         return RiveTeamInviteNotification(
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),

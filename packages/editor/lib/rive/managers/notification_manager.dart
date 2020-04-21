@@ -107,13 +107,13 @@ class NotificationManager {
 
   /// Accepts a team invite
   Future<void> _acceptTeamInvite(RiveTeamInviteNotification n) async {
-    await _teamApi.acceptInvite(n.inviteId);
+    await _teamApi.acceptInvite(n.teamId);
     _removeNotification(n);
   }
 
   /// Decline a team invite
   Future<void> _declineTeamInvite(RiveTeamInviteNotification n) async {
-    await _teamApi.declineInvite(n.inviteId);
+    await _teamApi.declineInvite(n.teamId);
     _removeNotification(n);
   }
 }
