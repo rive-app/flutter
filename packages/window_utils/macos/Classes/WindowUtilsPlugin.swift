@@ -223,17 +223,26 @@ public class WindowUtils: NSObject, FlutterPlugin {
         let window = NSWindow()
         window.styleMask = NSWindow.StyleMask(rawValue: 0xf)
         window.backingType = .buffered
-        let _auth = FullScreenWebView()
-        _auth.url = url
-        _auth.jsHandler = jsMessage
-        if (jsMessage != "") {
-            _auth.jsResponse = { (message: Any) -> Void in
-                result(message)
+        let _webView = WebView()
+        _webView.url = url
+        _webView.jsHandler = jsMessage
+        // Only message once, when we get our handler data or when the window is closed.
+        var messaged = false;
+        _webView.closed = { (message: Any) -> Void in
+                if(!messaged) {
+                    messaged = true;
+                    result(message)
+                }
             }
-        } else {
-            result("\(key) created")
+        if (jsMessage != "") {
+            _webView.jsResponse = { (message: Any) -> Void in
+                if(!messaged) {
+                    messaged = true;
+                    result(message)
+                }
+            }
         }
-        window.contentViewController = _auth
+        window.contentViewController = _webView
         if let screen = window.screen {
             let screenRect = screen.visibleFrame
             let newWidth = width ?? Int(screenRect.maxX / 2)
@@ -262,11 +271,14 @@ public class WindowUtils: NSObject, FlutterPlugin {
 }
 
 
-class FullScreenWebView: NSViewController, WKUIDelegate, WKScriptMessageHandler {
+class WebView: NSViewController, WKUIDelegate, WKScriptMessageHandler, NSWindowDelegate {
     var webView: WKWebView!
     var url = "https://www.apple.com"
     var jsHandler: String = ""
     var jsResponse: (Any?) -> Void? = { (message: Any) -> Void in
+        print(message)
+    }
+    var closed: (Any?) -> Void? = { (message: Any) -> Void in
         print(message)
     }
 
@@ -291,5 +303,13 @@ class FullScreenWebView: NSViewController, WKUIDelegate, WKScriptMessageHandler 
             let val = message.body
             jsResponse(val)
         }
+    }
+
+    override func viewDidAppear() {
+        self.view.window?.delegate = self
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        closed(nil);
     }
 }
