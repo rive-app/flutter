@@ -6,6 +6,7 @@ import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
+import 'package:rive_editor/widgets/dialog/team_wizard/wizard_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -40,27 +41,17 @@ class TeamWizardPanelOne extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
-                    child: TextFormField(
-                      textAlign: TextAlign.left,
-                      textAlignVertical: TextAlignVertical.center,
-                      style: textStyles.fileGreyTextLarge,
-                      initialValue: sub.name,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: colors.inputUnderline, width: 2),
-                        ),
-                        hintText: 'Team name',
-                        errorText: sub.nameValidationError,
-                        hintStyle: textStyles.textFieldInputHint,
-                        errorStyle: textStyles.textFieldInputValidationError,
-                        contentPadding: const EdgeInsets.only(bottom: 3),
-                        filled: true,
-                        hoverColor: Colors.transparent,
-                        fillColor: Colors.transparent,
-                      ),
+                    child: getTextFormField(
                       onChanged: (name) => sub.name = name,
+                      enabled: !sub.processing,
+                      initialValue: sub.name,
+                      style: textStyles.fileGreyTextLarge,
+                      inputDecoration: getInputDecoration(
+                          hintText: 'Team name',
+                          errorText: sub.nameValidationError,
+                          riveColors: colors,
+                          hintStyle: textStyles.textFieldInputHint,
+                          errorStyle: textStyles.textFieldInputValidationError),
                     ),
                   ),
                   Padding(
