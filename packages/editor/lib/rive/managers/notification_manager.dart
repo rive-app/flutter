@@ -53,6 +53,8 @@ class NotificationManager {
   void dispose() {
     _notificationsController.close();
     _notificationCountController.close();
+    _acceptTeamInviteController.close();
+    _declineTeamInviteController.close();
     _poller?.cancel();
   }
 
