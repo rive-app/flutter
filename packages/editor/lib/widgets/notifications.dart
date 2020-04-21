@@ -265,7 +265,7 @@ class NotificationContent extends StatelessWidget {
     } else if (notification is RiveTeamInviteNotification) {
       return TeamInviteNotification(notification as RiveTeamInviteNotification);
     } else {
-      return const Text('Unknown notification type');
+      return UnknownNotification(notification);
     }
   }
 }
@@ -359,6 +359,37 @@ class TeamInviteNotification extends StatelessWidget {
             ],
           ),
         ),
+      ],
+    );
+  }
+}
+
+class UnknownNotification extends StatelessWidget {
+  const UnknownNotification(this.notification);
+  final RiveNotification notification;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('Unknown type of notification received.'),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TintedIcon(
+              icon: 'tool-create',
+              color: theme.colors.commonButtonTextColor,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              '${notification.dateTime.howLongAgo}',
+              style: theme.textStyles.tooltipDisclaimer,
+            ),
+          ],
+        )
       ],
     );
   }

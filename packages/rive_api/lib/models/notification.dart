@@ -7,14 +7,19 @@ import 'package:rive_api/src/deserialize_helper.dart';
 enum NotificationType {
   follow,
   teamInvite,
+  unknown,
 }
 
-final Map<int, NotificationType> notificationMap = {
-  20: NotificationType.teamInvite
-};
-
+/// Maps an int to a NotificationType
 NotificationType notificationTypeFromInt(int value) {
-  return notificationMap[value];
+  switch (value) {
+    case 0:
+      return NotificationType.follow;
+    case 20:
+      return NotificationType.teamInvite;
+    default:
+      return NotificationType.unknown;
+  }
 }
 
 /// Base notification class that has a factory that will construct
@@ -33,6 +38,7 @@ class RiveNotification {
     final type = notificationTypeFromInt(data['t']);
     // Need to explicitly cast here for the extension methods to work
     final userData = data['u'] as Map<String, dynamic>;
+
     switch (type) {
       case NotificationType.teamInvite:
         final teamData = data['m'] as Map<String, dynamic>;
@@ -41,7 +47,7 @@ class RiveNotification {
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
           senderId: userData.getInt('oi'),
-          senderName: userData.getString('nm'),
+          senderName: userData.getString('nm') ?? userData.getString('un'),
           teamId: teamData.getInt('ti'),
           teamName: teamData.getString('tn'),
           inviteId: teamData.getInt('ii'),
@@ -51,13 +57,18 @@ class RiveNotification {
       // New follower notification:
       // {"u":{"oi":40842,"pf":11,"un":"matt","nm":"Matt","av":null,"fl":1,"f1":1,"f2":2,"bg":null,"s1":null,"s2":null},"t":0,"w":1587171124}
       case NotificationType.follow:
-      default:
         return RiveFollowNotification(
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
           followerId: userData.getInt('oi'),
           followerName: userData.getString('nm'),
           followerUsername: userData.getString('un'),
+        );
+
+      case NotificationType.unknown:
+      default:
+        return RiveNotification(
+          DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
         );
     }
   }
