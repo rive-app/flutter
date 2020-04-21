@@ -27,7 +27,7 @@ class TeamWizardPanelOne extends StatelessWidget {
     ];
     return SizedBox(
       width: 452,
-      height: 364,
+      height: 375,
       child: Padding(
         padding: const EdgeInsets.symmetric(
             horizontal: targetPadding - subscriptionBorderThickness,
@@ -111,7 +111,10 @@ class TeamWizardPanelOne extends StatelessWidget {
                       }),
                 const TextSpan(text: '.'),
               ],
-              style: textStyles.tooltipDisclaimer,
+              style: textStyles.tooltipDisclaimer.copyWith(
+                // want line height to be 21px
+                height: 21 / textStyles.tooltipDisclaimer.fontSize,
+              ),
             )),
           ],
         ),

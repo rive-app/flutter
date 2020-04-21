@@ -153,7 +153,6 @@ class TeamWizardPanelTwo extends StatelessWidget {
   }
 
   Widget _creditCardNumber(BuildContext context) {
-    final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
 
     return Column(
@@ -183,7 +182,6 @@ class TeamWizardPanelTwo extends StatelessWidget {
   }
 
   Widget _cardDetails(BuildContext context) {
-    final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
 
     return Row(
@@ -290,7 +288,10 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 }),
           const TextSpan(text: '.'),
         ],
-        style: textStyles.tooltipDisclaimer,
+        style: textStyles.tooltipDisclaimer.copyWith(
+          // want line height to be 21px
+          height: 21 / textStyles.tooltipDisclaimer.fontSize,
+        ),
       ),
     );
   }
@@ -345,7 +346,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 452,
-      height: 522,
+      height: 534,
       child: Padding(
         padding: const EdgeInsets.all(30),
         child: Column(
