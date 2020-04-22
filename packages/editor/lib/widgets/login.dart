@@ -448,13 +448,17 @@ class _LoginState extends State<Login> {
             },
           ),
         ),
-        Row(children: [
-          // TODO: image background or Rive animation.
+        Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Flexible(
-              child: Container(
-            color: colors.commonLightGrey,
-          )),
-          SizedBox(
+            child: Container(
+              color: colors.commonLightGrey,
+              child: Image.asset(
+                'assets/images/mother_of_dashes.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
               width: 714,
               child: Stack(children: [
                 Positioned(
