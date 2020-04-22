@@ -10,7 +10,7 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:window_utils/window_utils.dart';
 
 enum LoginPage { login, register, recover }
-typedef LoginFunction = Future<bool> Function();
+typedef AuthAction = Future<bool> Function();
 
 class Login extends StatefulWidget {
   @override
@@ -268,13 +268,14 @@ class _LoginState extends State<Login> {
     }
   }
 
-  Future<void> _socialLogin(LoginFunction loginFunc) async {
+  Future<void> _socialAuth(AuthAction auth) async {
     if (_buttonDisabled) {
       return;
     }
     _disableButton(true);
     final rive = RiveContext.of(context);
-    if (await loginFunc()) {
+    final success = await auth();
+    if (success) {
       await rive.updateUser();
     } else {
       _disableButton(false);
@@ -282,6 +283,7 @@ class _LoginState extends State<Login> {
   }
 
   Widget _socials() {
+    final isRegister = _currentPanel == LoginPage.register;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -296,7 +298,7 @@ class _LoginState extends State<Login> {
                   final rive = RiveContext.of(context);
                   final api = rive.api;
                   final auth = RiveAuth(api);
-                  _socialLogin(auth.loginApple); 
+                  _socialAuth(auth.loginApple); 
                 },
         ),
         const SizedBox(width: 10),*/
@@ -308,7 +310,8 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  await _socialLogin(auth.loginGoogle);
+                  await _socialAuth(
+                      isRegister ? auth.registerGoogle : auth.loginGoogle);
                 },
         ),
         const SizedBox(width: 10),
@@ -320,7 +323,8 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  await _socialLogin(auth.loginFacebook);
+                  await _socialAuth(
+                      isRegister ? auth.registerFacebook : auth.loginFacebook);
                 },
         ),
         const SizedBox(width: 10),
@@ -330,9 +334,13 @@ class _LoginState extends State<Login> {
           onTap: _buttonDisabled
               ? null
               : () async {
-                  final api = RiveContext.of(context).api;
-                  final auth = RiveAuth(api);
-                  await _socialLogin(auth.loginTwitter);
+                  Scaffold.of(context).showSnackBar(const SnackBar(
+                    content: Text("Coming soon!"),
+                  ));
+                  // final api = RiveContext.of(context).api;
+                  // final auth = RiveAuth(api);
+                  // await _socialAuth(
+                  //     isRegister ? auth.registerTwitter : auth.loginTwitter);
                 },
         ),
       ],
