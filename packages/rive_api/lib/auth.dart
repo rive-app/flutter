@@ -30,7 +30,6 @@ class RiveAuth {
           },
         ));
 
-    // print('body ${response.body} ${response.statusCode}');
     if (response.statusCode == 200) {
       return true;
     }
@@ -67,7 +66,7 @@ class RiveAuth {
     var size = await WindowUtils.getWindowSize();
 
     var url = api.host + '/desktop/${action.name}/$provider';
-    print('Open webview for $url');
+
     var windowSize = const Size(580, 600);
     String spectre = await WindowUtils.openWebView(
       'auth',
@@ -128,10 +127,8 @@ class RiveAuth {
         'email': email,
       },
     );
-    print("Trying to register $body");
     var response = await api.post(api.host + '/register', body: body);
 
-    print('body ${response.body} ${response.statusCode}');
     if (response.statusCode == 200) {
       return true;
     }
