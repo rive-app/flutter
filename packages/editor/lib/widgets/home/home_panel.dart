@@ -378,10 +378,13 @@ class _NavigationPanelState extends State<NavigationPanel> {
                     label: 'Recents',
                     onTap: () {},
                   ),
-                  IconTile(
-                    iconName: 'popup-community',
-                    label: 'Community',
-                    onTap: () {},
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: IconTile(
+                      iconName: 'community-small',
+                      label: 'Community',
+                      onTap: () {},
+                    ),
                   ),
                 ],
               ),
