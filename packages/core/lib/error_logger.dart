@@ -18,21 +18,20 @@ class ErrorLogger {
 
   ErrorLogger._();
 
-
   Future<void> onError(Object e, StackTrace trace) async {
-    if (true /*isInDebugMode*/) {
+    if (isInDebugMode) {
       print('[Error]:\n$e');
       print('[Trace]:\n$trace');
       return;
-    // } else {
-    //   print("Logging to sentry the current error $e");
-    //   final response =
-    //       await _sentry.captureException(exception: e, stackTrace: trace);
-    //   if (response.isSuccessful) {
-    //     print('Sent to Sentry! ${response.eventId}');
-    //   } else {
-    //     print('Sentry report failed ${response.error}');
-    //   }
+    } else {
+      print("Logging to sentry the current error $e");
+      final response =
+          await _sentry.captureException(exception: e, stackTrace: trace);
+      if (response.isSuccessful) {
+        print('Sent to Sentry! ${response.eventId}');
+      } else {
+        print('Sentry report failed ${response.error}');
+      }
     }
   }
 }

@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
+import 'package:rive_core/persist/persist.dart';
 
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -104,7 +105,7 @@ class _IsolatedPersistBackground {
 }
 
 /// Api to interface with a background persister.
-class IsolatedPersist {
+class IsolatedPersist implements RivePersist {
   // On main thread
   final ReceivePort _receiveOnMain = ReceivePort();
   SendPort _sendToIsolate;
@@ -129,6 +130,7 @@ class IsolatedPersist {
             _receiveOnMain.sendPort, localDataPlatform, name));
   }
 
+  @override
   Future<List<ChangeSet>> changes() {
     _fetchCompleter = Completer<List<ChangeSet>>();
     _isolateAction(_PersistableAction.fetch);
@@ -136,6 +138,7 @@ class IsolatedPersist {
   }
 
   /// Let the isolate know we're done with our list of changes.
+  @override
   void wipe() {
     _isolateAction(_PersistableAction.wipe);
   }
@@ -144,8 +147,10 @@ class IsolatedPersist {
       _initCompleter.future.then(
           (_) => _sendToIsolate.send(_PersistableOperation(action, data)));
 
+  @override
   void add(ChangeSet data) => _isolateAction(_PersistableAction.add, data);
 
+  @override
   void remove(ChangeSet data) =>
       _isolateAction(_PersistableAction.remove, data);
 }
