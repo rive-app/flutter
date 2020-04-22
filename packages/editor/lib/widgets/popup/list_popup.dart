@@ -329,58 +329,65 @@ class ListPopup<T extends PopupListItem> {
                       margin * 2;
               return values.isEmpty
                   ? const SizedBox()
-                  : SizedBox(
-                      height: height,
-                      child:
 
-                          // null width == compute the width of the content
-                          //
-                          // If we've specified a null width, we cannot use a
-                          // scrollview (it'd have to layout all the children,
-                          // even virtualized ones and Flutter's scrollviews
-                          // don't really support the concept of intrinsic
-                          // width). So instead we use something that does
-                          // support that: a column. Just make sure you're not
-                          // feeding this list too much content if you're using
-                          // an intrinsic width.
-                          width == null
-                              ? IntrinsicWidth(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(height: margin),
-                                      for (final item in values)
-                                        Container(
+                  /// Need a separate focus scope here so that we don't try
+                  /// tabbing out of this list (weird that FocusTraversalScope
+                  /// didn't do this for us). Removing this will cause an error
+                  /// to throw when trying to tab from a TextField in this list.
+                  : FocusScope(
+                      child: SizedBox(
+                        height: height,
+                        child:
+
+                            // null width == compute the width of the content
+                            //
+                            // If we've specified a null width, we cannot use
+                            // a scrollview (it'd have to layout all the
+                            // children, even virtualized ones and Flutter's
+                            // scrollviews don't really support the concept of
+                            // intrinsic width). So instead we use something
+                            // that does support that: a column. Just make
+                            // sure you're not feeding this list too much
+                            // content if you're using an intrinsic width.
+                            width == null
+                                ? IntrinsicWidth(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(height: margin),
+                                        for (final item in values)
+                                          Container(
+                                            height: item.height,
+                                            child: _PopupListItemShell<T>(
+                                              list,
+                                              itemBuilder: itemBuilder,
+                                              item: item,
+                                            ),
+                                          ),
+                                        SizedBox(height: margin),
+                                      ],
+                                    ),
+                                  )
+                                : Scrollbar(
+                                    child: ListView.builder(
+                                      physics: const ClampingScrollPhysics(),
+                                      padding: EdgeInsets.only(
+                                          top: margin, bottom: margin),
+                                      itemCount: values.length,
+                                      itemBuilder: (context, index) {
+                                        var item = values[index];
+                                        return Container(
                                           height: item.height,
                                           child: _PopupListItemShell<T>(
                                             list,
                                             itemBuilder: itemBuilder,
                                             item: item,
                                           ),
-                                        ),
-                                      SizedBox(height: margin),
-                                    ],
+                                        );
+                                      },
+                                    ),
                                   ),
-                                )
-                              : Scrollbar(
-                                  child: ListView.builder(
-                                    physics: const ClampingScrollPhysics(),
-                                    padding: EdgeInsets.only(
-                                        top: margin, bottom: margin),
-                                    itemCount: values.length,
-                                    itemBuilder: (context, index) {
-                                      var item = values[index];
-                                      return Container(
-                                        height: item.height,
-                                        child: _PopupListItemShell<T>(
-                                          list,
-                                          itemBuilder: itemBuilder,
-                                          item: item,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
+                      ),
                     );
             },
           ),

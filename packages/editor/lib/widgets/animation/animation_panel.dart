@@ -35,8 +35,8 @@ class _AnimationPanelState extends State<AnimationPanel>
               hitSize: 10,
               direction: ResizeDirection.vertical,
               side: ResizeSide.start,
-              min: 235,
-              max: 500,
+              min: 300,
+              max: 600,
               child: _PanelShadow(
                 show: factor > 0,
                 // Don't add the animation panel contents to the layout if we're

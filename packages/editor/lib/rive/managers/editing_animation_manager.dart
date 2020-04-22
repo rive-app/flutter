@@ -6,35 +6,26 @@ import 'package:rxdart/rxdart.dart';
 class EditingAnimationManager {
   final LinearAnimation editingAnimation;
 
-  final _durationController = StreamController<int>();
   final _fpsController = StreamController<int>();
 
-  final _timeStream = BehaviorSubject<int>();
-  final _timeController = StreamController<int>();
-  final _timeCodeStream = BehaviorSubject<String>();
+  final _timeController = StreamController<double>();
   
 
   EditingAnimationManager(this.editingAnimation) {
-    editingAnimation.addListener(
-        LinearAnimationBase.fpsPropertyKey, _fpsChanged);
     _timeStream.add(0);
   }
 
-  void _fpsChanged(dynamic from, dynamic to) {
-    _updateTimeCode();
-  }
+  /// Change the current time displayed (value is in seconds).
+  Sink<double> get changeCurrentTime => _timeController;
+  
+  /// Change the fps of the current animation.
+  Sink<int> get changeRate => _fpsController;
 
-  void _updateTimeCode() {
-    _timeCodeStream.add('');
-  }
 
-  Sink<int> get changeCurrentTime => _timeController;
-  Stream<int> get currentTime => _timeStream;
+  final _timeStream = BehaviorSubject<int>();
+  ValueStream<int> get currentTime => _timeStream;
 
   void dispose() {
-    editingAnimation.removeListener(
-        LinearAnimationBase.fpsPropertyKey, _fpsChanged);
-    _durationController.close();
     _timeController.close();
     _timeStream.close();
     _fpsController.close();

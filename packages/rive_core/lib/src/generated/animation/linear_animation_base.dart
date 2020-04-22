@@ -15,7 +15,7 @@ abstract class LinearAnimationBase extends Animation {
 
   /// --------------------------------------------------------------------------
   /// Fps field with key 56.
-  int _fps;
+  int _fps = 60;
   static const int fpsPropertyKey = 56;
 
   /// Frames per second used to quantize keyframe times to discrete values that
@@ -38,7 +38,7 @@ abstract class LinearAnimationBase extends Animation {
 
   /// --------------------------------------------------------------------------
   /// Duration field with key 57.
-  int _duration;
+  int _duration = 60;
   static const int durationPropertyKey = 57;
 
   /// Duration expressed in number of frames.
@@ -52,15 +52,18 @@ abstract class LinearAnimationBase extends Animation {
     }
     int from = _duration;
     _duration = value;
+    print("YEAH DURATION $value");
     onPropertyChanged(durationPropertyKey, from, value);
+    print("YEAH DURATION $value!!");
     durationChanged(from, value);
+    print("YEAH DURATION $value!! !!");
   }
 
   void durationChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// Speed field with key 58.
-  double _speed;
+  double _speed = 1;
   static const int speedPropertyKey = 58;
 
   /// Playback speed multiplier.

@@ -1,6 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_editor/widgets/common/converters/int_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/speed_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/timecode_value_converter.dart';
+import 'package:rive_editor/widgets/common/core_text_field.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
@@ -22,14 +26,13 @@ class AnimationTimePopupButton extends StatelessWidget {
       propertyKey: LinearAnimationBase.fpsPropertyKey,
       builder: (context, int fps, _) {
         var converter = TimeCodeValueConverter(fps);
+        var theme = RiveTheme.of(context);
 
         return RivePopupButton(
           width: 221,
           // Custom icon builder to show the zoom level
           // instead of a menu icon
           iconBuilder: (context, rive, isHovered) {
-            var theme = RiveTheme.of(context);
-
             return Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 5,
@@ -52,13 +55,16 @@ class AnimationTimePopupButton extends StatelessWidget {
           },
           contextItemsBuilder: (context) {
             var currentKey = GlobalKey();
-
+            var durationKey = GlobalKey();
+            var fpsKey = GlobalKey();
+            var speedKey = GlobalKey();
             return [
               PopupContextItem(
                 'Current',
+                dismissOnSelect: false,
                 child: SizedBox(
                   width: 62,
-                  child: StreamBuilder<int>(
+                  child: ValueStreamBuilder<int>(
                     stream: animationManager.currentTime,
                     builder: (context, snapshot) => snapshot.hasData
                         ? InspectorTextField<int>(
@@ -69,6 +75,61 @@ class AnimationTimePopupButton extends StatelessWidget {
                           )
                         : const SizedBox(),
                   ),
+                ),
+              ),
+              PopupContextItem(
+                'Duration',
+                dismissOnSelect: false,
+                child: SizedBox(
+                  width: 62,
+                  child: CoreTextField<int>(
+                    key: durationKey,
+                    objects: [animationManager.editingAnimation],
+                    propertyKey: LinearAnimationBase.durationPropertyKey,
+                    converter: converter,
+                  ),
+                ),
+              ),
+              PopupContextItem(
+                'Playback Speed',
+                dismissOnSelect: false,
+                child: SizedBox(
+                  width: 62,
+                  child: CoreTextField<double>(
+                    key: speedKey,
+                    objects: [animationManager.editingAnimation],
+                    propertyKey: LinearAnimationBase.speedPropertyKey,
+                    converter: SpeedValueConverter.instance,
+                  ),
+                ),
+              ),
+              PopupContextItem(
+                'Snap Keys',
+                dismissOnSelect: false,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 37,
+                      child: CorePropertyBuilder<int>(
+                        object: animationManager.editingAnimation,
+                        propertyKey: LinearAnimationBase.fpsPropertyKey,
+                        builder: (context, fps, _) => InspectorTextField<int>(
+                          key: fpsKey,
+                          value: fps,
+                          change: (value) {
+                            print("CHANGE FPS $value");
+                          },
+                          converter: IntValueConverter.instance,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'fps',
+                      textAlign: TextAlign.right,
+                      style: theme.textStyles.inspectorPropertyLabel,
+                    ),
+                  ],
                 ),
               ),
               // PopupContextItem.separator(),

@@ -3,6 +3,7 @@ import 'package:rive_editor/rive/open_file_context.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
+import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -31,6 +32,8 @@ class RivePopupButton extends StatefulWidget {
   final double _width;
   final Tip tip;
   final Offset arrowTweak;
+  final PopupDirection direction;
+  final double directionPadding;
 
   const RivePopupButton({
     Key key,
@@ -41,6 +44,8 @@ class RivePopupButton extends StatefulWidget {
     this.opened,
     double width,
     this.tip,
+    this.direction = PopupDirection.bottomToRight,
+    this.directionPadding = 16,
   })  : _width = width ?? 177,
         super(key: key);
 
@@ -54,6 +59,8 @@ class _RivePopupButtonState extends State<RivePopupButton> {
   Widget build(BuildContext context) {
     return RiveBuilder(
       builder: (context, rive) => PopupButton<PopupContextItem>(
+        direction: widget.direction,
+        directionPadding: widget.directionPadding,
         opened: widget.opened,
         itemsBuilder: widget.contextItemsBuilder,
         width: widget._width,

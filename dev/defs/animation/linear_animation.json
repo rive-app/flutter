@@ -8,6 +8,7 @@
   "properties": {
     "fps": {
       "type": "int",
+      "initialValue": "60",
       "key": {
         "int": 56,
         "string": "fps"
@@ -16,6 +17,7 @@
     },
     "duration": {
       "type": "int",
+      "initialValue": "60",
       "key": {
         "int": 57,
         "string": "duration"
@@ -24,6 +26,7 @@
     },
     "speed": {
       "type": "double",
+      "initialValue": "1",
       "key": {
         "int": 58,
         "string": "speed"
