@@ -447,7 +447,7 @@ class _LoginState extends State<Login> {
           ),
         ),
         Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Flexible(
+          Expanded(
             child: Container(
               color: colors.commonLightGrey,
               child: Image.asset(
