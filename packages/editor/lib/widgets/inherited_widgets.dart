@@ -296,21 +296,26 @@ class EditingAnimationProvider extends StatelessWidget {
 
   const EditingAnimationProvider({Key key, this.child}) : super(key: key);
   @override
-  Widget build(BuildContext context) => StreamBuilder<AnimationViewModel>(
-        stream: AnimationsProvider.of(context).selectedAnimation,
-        builder: (context, snapshot) => _InheritedEditingAnimation(
-          child: child,
-          editingAnimationManager:
-              snapshot.hasData && snapshot.data.animation is LinearAnimation
-                  ? EditingAnimationManager(
-                      snapshot.data.animation as LinearAnimation)
-                  : null,
-        ),
-      );
+  Widget build(BuildContext context) {
+    var stream = AnimationsProvider.of(context)?.selectedAnimation;
+    return stream == null
+        ? SizedBox(child: child)
+        : StreamBuilder<AnimationViewModel>(
+            stream: AnimationsProvider.of(context)?.selectedAnimation,
+            builder: (context, snapshot) => _InheritedEditingAnimation(
+              child: child,
+              editingAnimationManager:
+                  snapshot.hasData && snapshot.data.animation is LinearAnimation
+                      ? EditingAnimationManager(
+                          snapshot.data.animation as LinearAnimation)
+                      : null,
+            ),
+          );
+  }
 
   static EditingAnimationManager of(BuildContext context) => context
       .dependOnInheritedWidgetOfExactType<_InheritedEditingAnimation>()
-      .editingAnimationManager;
+      ?.editingAnimationManager;
 }
 
 class _InheritedEditingAnimation extends InheritedWidget {
