@@ -294,7 +294,8 @@ class WebView: NSViewController, WKUIDelegate, WKScriptMessageHandler, NSWindowD
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let request = URLRequest(url: URL(string: url)!)
+        var request = URLRequest(url: URL(string: url)!)
+        request.httpShouldHandleCookies = false
         webView.load(request)
     }
 

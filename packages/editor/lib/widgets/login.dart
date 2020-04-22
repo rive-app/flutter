@@ -272,15 +272,13 @@ class _LoginState extends State<Login> {
     if (_buttonDisabled) {
       return;
     }
-    // _disableButton(true);
+    _disableButton(true);
     final rive = RiveContext.of(context);
-
     if (await loginFunc()) {
       await rive.updateUser();
+    } else {
+      _disableButton(false);
     }
-    // else {
-    //   _disableButton(false);
-    // }
   }
 
   Widget _socials() {
