@@ -8,6 +8,15 @@ import 'package:window_utils/window_utils.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/user.dart';
 
+enum _RiveAuthActions { signin, register }
+
+extension _AuthActionsNames on _RiveAuthActions {
+  String get name => {
+        _RiveAuthActions.signin: 'signin',
+        _RiveAuthActions.register: 'register',
+      }[this];
+}
+
 class RiveAuth {
   final RiveApi api;
   RiveAuth(this.api);
@@ -21,31 +30,47 @@ class RiveAuth {
           },
         ));
 
-    // print('body ${response.body} ${response.statusCode}');
     if (response.statusCode == 200) {
       return true;
     }
     return false;
   }
 
+  Future<bool> registerGoogle() =>
+      _oAuth(action: _RiveAuthActions.register, provider: 'google');
+
+  Future<bool> registerTwitter() =>
+      _oAuth(action: _RiveAuthActions.register, provider: 'twitter');
+
+  Future<bool> registerFacebook() =>
+      _oAuth(action: _RiveAuthActions.register, provider: 'facebook');
+
   /// Initiate an OAuth login session with Facebook.
-  Future<bool> loginFacebook() => _loginOAuth('facebook');
+  Future<bool> loginFacebook() =>
+      _oAuth(action: _RiveAuthActions.signin, provider: 'facebook');
 
   /// Initiate an OAuth login session with Twitter.
-  Future<bool> loginTwitter() => _loginOAuth('twitter');
+  Future<bool> loginTwitter() =>
+      _oAuth(action: _RiveAuthActions.signin, provider: 'twitter');
 
   /// Initiate an OAuth login session with Google.
-  Future<bool> loginGoogle() => _loginOAuth('google');
+  Future<bool> loginGoogle() =>
+      _oAuth(action: _RiveAuthActions.signin, provider: 'google');
 
-  Future<bool> _loginOAuth(String provider) async {
+  /// Initiate an OAUth session for the given [action] with one of the
+  /// supported [provider]s.
+  Future<bool> _oAuth(
+      {@required _RiveAuthActions action, @required String provider}) async {
     assert(!kIsWeb, 'Shouldn\'t be authenticating from Flutter Web.');
     var offset = await WindowUtils.getWindowOffset();
     var size = await WindowUtils.getWindowSize();
 
-    var windowSize = const Size(500, 600);
+    var url = api.host + '/desktop/${action.name}/$provider';
+
+    var windowSize = const Size(580, 600);
     String spectre = await WindowUtils.openWebView(
       'auth',
-      api.host + '/desktop/signin/$provider',
+      url,
       size: windowSize,
       offset: Offset(
         offset.dx + size.width / 2 - windowSize.width / 2,
@@ -58,7 +83,7 @@ class RiveAuth {
       await WindowUtils.closeWebView('auth');
       await api.persist();
     }
-    return spectre.isNotEmpty;
+    return spectre?.isNotEmpty ?? false;
   }
 
   Future<RiveUser> whoami() async {
@@ -102,10 +127,8 @@ class RiveAuth {
         'email': email,
       },
     );
-    print("Trying to register $body");
     var response = await api.post(api.host + '/register', body: body);
 
-    print('body ${response.body} ${response.statusCode}');
     if (response.statusCode == 200) {
       return true;
     }
