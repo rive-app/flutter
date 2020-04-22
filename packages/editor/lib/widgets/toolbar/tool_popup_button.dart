@@ -64,7 +64,7 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
           opened: (popup) {
             _popup = popup;
           },
-          contextItems: items,
+          contextItemsBuilder: (context) => items,
           iconBuilder: widget.iconBuilder ??
               (context, file, isHovered) {
                 var item = PopupContextItem.withIcon(tool.icon, items);

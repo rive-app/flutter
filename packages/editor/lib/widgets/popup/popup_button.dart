@@ -7,10 +7,20 @@ import 'list_popup.dart';
 /// Callback providing the opened popup.
 typedef PopupOpened<T extends PopupListItem> = void Function(ListPopup<T>);
 
+/// Callback to build the list of items when the popup is opened.
+typedef BuildPopupItems<T extends PopupListItem> = List<T> Function(
+    BuildContext);
+
 /// A widget that opens a popup when it is tapped on.
 class PopupButton<T extends PopupListItem> extends StatefulWidget {
   final WidgetBuilder builder;
-  final List<T> items;
+
+  /// Builds the list of items to be shown, this is only triggered when the
+  /// popup is opened.
+  final BuildPopupItems<T> itemsBuilder;
+
+  /// Called back for each visible item in the list built by [itemsBuilder] when
+  /// it needs to be built.
   final ListPopupItemBuilder<T> itemBuilder;
   final PopupOpened<T> opened;
   final double width;
@@ -20,7 +30,7 @@ class PopupButton<T extends PopupListItem> extends StatefulWidget {
 
   const PopupButton({
     @required this.builder,
-    @required this.items,
+    @required this.itemsBuilder,
     Key key,
     this.itemBuilder,
     this.opened,
@@ -49,7 +59,7 @@ class _PopupButtonState<T extends PopupListItem> extends State<PopupButton<T>> {
   @override
   void dispose() {
     super.dispose();
-    
+
     _tipContext?.encourage();
     _tipContext = null;
 
@@ -63,17 +73,20 @@ class _PopupButtonState<T extends PopupListItem> extends State<PopupButton<T>> {
         onTapDown: (details) {
           setState(
             () {
-              _popup = ListPopup<T>.show(context,
-                  direction: widget.direction,
-                  items: widget.items,
-                  itemBuilder: widget.itemBuilder,
-                  arrowTweak: widget.arrowTweak,
-                  width: widget.width,
-                  onClose: () {
-                    setState(() => _popup = null);
-                    _tipContext?.encourage();
-                    _tipContext = null;
-                  },);
+              var items = widget.itemsBuilder(context);
+              _popup = ListPopup<T>.show(
+                context,
+                direction: widget.direction,
+                items: items,
+                itemBuilder: widget.itemBuilder,
+                arrowTweak: widget.arrowTweak,
+                width: widget.width,
+                onClose: () {
+                  setState(() => _popup = null);
+                  _tipContext?.encourage();
+                  _tipContext = null;
+                },
+              );
               widget.opened?.call(_popup);
 
               // Don't show any tips while we're showing a popup.

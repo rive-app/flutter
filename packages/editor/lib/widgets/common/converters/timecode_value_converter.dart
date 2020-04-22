@@ -28,11 +28,11 @@ class TimeCodeValueConverter extends InputValueConverter<int> {
     int minutes = (seconds / 60).floor();
     int wholeSeconds = (seconds - minutes * 60).floor();
     int frames = value - (wholeSeconds + minutes * 60) * fps;
-    return minutes.toString().padLeft(2) +
+    return minutes.toString().padLeft(2, '0') +
         ':' +
-        wholeSeconds.toString().padLeft(2) +
+        wholeSeconds.toString().padLeft(2, '0') +
         ':' +
-        frames.toString().padLeft(2);
+        frames.toString().padLeft(2, '0');
   }
 
   static final TimeCodeValueConverter instance = TimeCodeValueConverter(2);

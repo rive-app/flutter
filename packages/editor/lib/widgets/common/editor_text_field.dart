@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:core/debounce.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
@@ -66,6 +67,9 @@ class _EditorTextFieldState extends State<EditorTextField>
 
   @override
   void dispose() {
+    if (_customCursor != null) {
+      debounce(_customCursor?.remove);
+    }
     widget.focusNode?.removeListener(_focusChanged);
     super.dispose();
   }

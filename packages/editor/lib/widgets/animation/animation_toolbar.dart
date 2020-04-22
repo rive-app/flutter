@@ -34,12 +34,10 @@ class AnimationToolbar extends StatelessWidget {
               print('loop');
             },
           ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: AnimationTimePopupButton(),
-            ),
+          const Expanded(
+            child: SizedBox(),
           ),
+          AnimationTimePopupButton(),
         ],
       ),
     );

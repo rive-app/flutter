@@ -302,12 +302,11 @@ class EditingAnimationProvider extends StatelessWidget {
         ? SizedBox(child: child)
         : StreamBuilder<AnimationViewModel>(
             stream: AnimationsProvider.of(context)?.selectedAnimation,
-            builder: (context, snapshot) => _InheritedEditingAnimation(
+            builder: (context, snapshot) => _EditingAnimation(
               child: child,
-              editingAnimationManager:
+              editingAnimation:
                   snapshot.hasData && snapshot.data.animation is LinearAnimation
-                      ? EditingAnimationManager(
-                          snapshot.data.animation as LinearAnimation)
+                      ? snapshot.data.animation as LinearAnimation
                       : null,
             ),
           );
@@ -316,6 +315,58 @@ class EditingAnimationProvider extends StatelessWidget {
   static EditingAnimationManager of(BuildContext context) => context
       .dependOnInheritedWidgetOfExactType<_InheritedEditingAnimation>()
       ?.editingAnimationManager;
+}
+
+class _EditingAnimation extends StatefulWidget {
+  final LinearAnimation editingAnimation;
+  final Widget child;
+  const _EditingAnimation({
+    @required this.editingAnimation,
+    @required this.child,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  __EditingAnimationState createState() => __EditingAnimationState();
+}
+
+class __EditingAnimationState extends State<_EditingAnimation> {
+  EditingAnimationManager _manager;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateManager();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _manager?.dispose();
+  }
+
+  void _updateManager() {
+    _manager?.dispose();
+    _manager = widget.editingAnimation == null
+        ? null
+        : EditingAnimationManager(widget.editingAnimation);
+  }
+
+  @override
+  void didUpdateWidget(_EditingAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.editingAnimation != widget.editingAnimation) {
+      _updateManager();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _InheritedEditingAnimation(
+      child: widget.child,
+      editingAnimationManager: _manager,
+    );
+  }
 }
 
 class _InheritedEditingAnimation extends InheritedWidget {

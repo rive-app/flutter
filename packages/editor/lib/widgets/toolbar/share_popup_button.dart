@@ -21,7 +21,7 @@ class SharePopupButton extends StatelessWidget {
         icon: 'tool-export',
       ),
       width: 206,
-      contextItems: [
+      contextItemsBuilder: (context) => [
         PopupContextItem(
           'Download for Runtime',
           icon: 'download',

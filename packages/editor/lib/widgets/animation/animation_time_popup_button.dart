@@ -1,121 +1,88 @@
 import 'package:flutter/widgets.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/widgets/common/converters/percentage_input_converter.dart';
+import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_editor/widgets/common/converters/timecode_value_converter.dart';
+import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
-import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
-import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
-import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
+import 'package:rive_editor/widgets/rive_popup_button.dart';
 
 class AnimationTimePopupButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ToolPopupButton(
-      width: 225,
-      // Custom icon builder to show the zoom level
-      // instead of a menu icon
-      iconBuilder: (context, rive, isHovered) {
-        var theme = RiveTheme.of(context);
-        return ValueListenableBuilder<double>(
-          valueListenable: rive.stage.zoomLevelNotifier,
-          builder: (context, value, _) => SizedBox(
-            width: 32,
-            child: Text(
-              PercentageInputConverter.instance.toDisplayValue(value),
-              textAlign: TextAlign.right,
-              style: theme.textStyles.basic.copyWith(
-                color: isHovered
-                    ? theme.colors.toolbarButtonHover
-                    : theme.colors.toolbarButton,
+    var animationManager = EditingAnimationProvider.of(context);
+    if (animationManager == null) {
+      return const SizedBox();
+    }
+
+    // We want to rebuild the whole thing whenever the fps changes as we need to
+    // recomute our converter.
+    return CorePropertyBuilder(
+      object: animationManager.editingAnimation,
+      propertyKey: LinearAnimationBase.fpsPropertyKey,
+      builder: (context, int fps, _) {
+        var converter = TimeCodeValueConverter(fps);
+
+        return RivePopupButton(
+          width: 221,
+          // Custom icon builder to show the zoom level
+          // instead of a menu icon
+          iconBuilder: (context, rive, isHovered) {
+            var theme = RiveTheme.of(context);
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 5,
               ),
-            ),
-          ),
+              child: StreamBuilder<int>(
+                stream: animationManager.currentTime,
+                builder: (context, snapshot) => snapshot.hasData
+                    ? Text(
+                        converter.toDisplayValue(snapshot.data),
+                        textAlign: TextAlign.right,
+                        style: theme.textStyles.basic.copyWith(
+                          color: isHovered
+                              ? theme.colors.toolbarButtonHover
+                              : theme.colors.toolbarButton,
+                        ),
+                      )
+                    : const SizedBox(),
+              ),
+            );
+          },
+          contextItemsBuilder: (context) {
+            var currentKey = GlobalKey();
+
+            return [
+              PopupContextItem(
+                'Current',
+                child: SizedBox(
+                  width: 62,
+                  child: StreamBuilder<int>(
+                    stream: animationManager.currentTime,
+                    builder: (context, snapshot) => snapshot.hasData
+                        ? InspectorTextField<int>(
+                            key: currentKey,
+                            value: snapshot.data,
+                            change: (value) {},
+                            converter: converter,
+                          )
+                        : const SizedBox(),
+                  ),
+                ),
+              ),
+              // PopupContextItem.separator(),
+              // CheckPopupItem(
+              //   'Show All Keys Row',
+              //   notifier: file.stage.showAxisNotifier,
+              //   isChecked: () => file.stage.showAxis,
+              //   select: () => file.stage.showAxis = !file.stage.showAxis,
+              //   dismissOnSelect: false,
+              // ),
+            ];
+          },
         );
-      },
-      makeItems: (file) {
-        // Use keys for the input widgets so they don't recycle.
-        var zoomKey = GlobalKey();
-        var resKey = GlobalKey();
-        return [
-          PopupContextItem(
-            'Zoom',
-            child: ValueNotifierTextField(
-              key: zoomKey,
-              notifier: file.stage.zoomLevelNotifier,
-              converter: PercentageInputConverter.instance,
-              change: (double value) => file.stage.zoomLevel = value,
-            ),
-            select: () {},
-            dismissOnSelect: false,
-          ),
-          PopupContextItem('Resolution',
-              child: ValueNotifierTextField(
-                key: resKey,
-                notifier: file.stage.resolutionNotifier,
-                converter: PercentageInputConverter.instance,
-              ),
-              select: () {},
-              dismissOnSelect: false),
-          PopupContextItem.separator(),
-          CheckPopupItem(
-            'Images',
-            notifier: file.stage.showImagesNotifier,
-            isChecked: () => file.stage.showImages,
-            select: () => file.stage.showImages = !file.stage.showImages,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Image Contour',
-            notifier: file.stage.showContourNotifier,
-            isChecked: () => file.stage.showContour,
-            select: () => file.stage.showContour = !file.stage.showContour,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Bones',
-            notifier: file.stage.showBonesNotifier,
-            isChecked: () => file.stage.showBones,
-            select: () => file.stage.showBones = !file.stage.showBones,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Effects',
-            notifier: file.stage.showEffectsNotifier,
-            isChecked: () => file.stage.showEffects,
-            select: () => file.stage.showEffects = !file.stage.showEffects,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Rulers',
-            shortcut: ShortcutAction.toggleRulers,
-            notifier: file.stage.showRulersNotifier,
-            isChecked: () => file.stage.showRulers,
-            select: () => file.rive.triggerAction(ShortcutAction.toggleRulers),
-            dismissOnSelect: false,
-          ),
-          PopupContextItem(
-            'Reset Rulers',
-            padIcon: true,
-            shortcut: ShortcutAction.resetRulers,
-            select: () => file.rive.triggerAction(ShortcutAction.resetRulers),
-          ),
-          CheckPopupItem(
-            'Grid',
-            notifier: file.stage.showGridNotifier,
-            isChecked: () => file.stage.showGrid,
-            select: () => file.stage.showGrid = !file.stage.showGrid,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Axis',
-            notifier: file.stage.showAxisNotifier,
-            isChecked: () => file.stage.showAxis,
-            select: () => file.stage.showAxis = !file.stage.showAxis,
-            dismissOnSelect: false,
-          ),
-        ];
       },
     );
   }
-    
 }
