@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/rive/managers/animation_manager.dart';
+import 'package:rive_editor/rive/managers/animations_manager.dart';
 import 'package:rive_editor/widgets/animation/animation_tree_controller.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
@@ -17,7 +17,7 @@ import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
 class AnimationsList extends StatefulWidget {
-  final AnimationManager animationManager;
+  final AnimationsManager animationManager;
 
   const AnimationsList({
     @required this.animationManager,

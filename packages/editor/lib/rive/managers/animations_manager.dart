@@ -11,13 +11,13 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rxdart/rxdart.dart';
 
-/// Animation type that can be created by the [AnimationManager].
+/// Animation type that can be created by the [AnimationsManager].
 enum AnimationType { linear }
 enum AnimationOrder { aToZ, zToA, custom }
 
 /// A manager for a file's list of animations allowing creating and updating
 /// them.
-class AnimationManager {
+class AnimationsManager {
   final Artboard activeArtboard;
   final _animationStreamControllers =
       HashMap<Id, BehaviorSubject<AnimationViewModel>>();
@@ -41,7 +41,7 @@ class AnimationManager {
   Animation _hoveredAnimation;
   Animation _selectedAnimation;
 
-  AnimationManager({
+  AnimationsManager({
     @required this.activeArtboard,
   }) {
     activeArtboard.animationsChanged.addListener(_updateAnimations);

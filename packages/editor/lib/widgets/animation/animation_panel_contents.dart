@@ -11,7 +11,7 @@ class AnimationPanelContents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
-    var animationManager = AnimationProvider.of(context);
+    var animationManager = AnimationsProvider.of(context);
     return ColoredBox(
       color: theme.colors.animationPanelBackground,
       child: Row(
