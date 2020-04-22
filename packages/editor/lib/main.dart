@@ -275,7 +275,7 @@ class Editor extends StatelessWidget {
                       ConnectedUsers(rive: rive),
                       VisibilityPopupButton(),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        padding: const EdgeInsets.only(left: 10, right:14),
                         // child: DesignAnimateToggle(),
                         child: ValueListenableBuilder<EditorMode>(
                           valueListenable: file.mode,
