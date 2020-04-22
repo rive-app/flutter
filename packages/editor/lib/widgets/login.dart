@@ -51,14 +51,12 @@ class _LoginState extends State<Login> {
   bool _isSending = false;
   LoginPage _currentPanel = LoginPage.login;
 
-  void _togglePanel() {
-    setState(() {
-      if (_currentPanel == LoginPage.login) {
-        _currentPanel = LoginPage.register;
-      } else {
-        _currentPanel = LoginPage.login;
-      }
-    });
+  void _selectPanel(LoginPage page) {
+    if (page != _currentPanel) {
+      setState(() {
+        _currentPanel = page;
+      });
+    }
   }
 
   Future<void> _recover() async {
@@ -73,8 +71,7 @@ class _LoginState extends State<Login> {
     final emailSent =
         await auth.forgot(Uri.encodeComponent(usernameController.text));
     if (emailSent) {
-      // print("Sent recovery email!");
-      _togglePanel(); // Back to login page.
+      _selectPanel(LoginPage.login); // Back to login page.
     }
     setState(() {
       _isSending = false;
@@ -153,9 +150,7 @@ class _LoginState extends State<Login> {
                     style: styles.buttonUnderline
                         .copyWith(height: 1.6, fontSize: 13),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () => setState(() {
-                            _currentPanel = LoginPage.login;
-                          }),
+                      ..onTap = () => _selectPanel(LoginPage.login),
                   ),
                 ]),
           ),
@@ -248,9 +243,15 @@ class _LoginState extends State<Login> {
               label: _buttonDisabled ? 'Verifying' : 'Sign Up',
               onTap: _signup,
               color: _buttonDisabled
-                  ? colors.commonLightGrey
-                  : colors.commonDarkGrey,
-              textColor: Colors.white,
+                  ? colors.buttonDarkDisabled
+                  : colors.textButtonDark,
+              textColor: _buttonDisabled
+                  ? colors.buttonDarkDisabledText
+                  : Colors.white,
+              hoverColor: _buttonDisabled
+                  ? colors.buttonDarkDisabled
+                  : colors.textButtonDark,
+              hoverTextColor: Colors.white,
               radius: 20,
               elevated: true,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -267,38 +268,40 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void _socialLogin(LoginFunction loginFunc) async {
+  Future<void> _socialLogin(LoginFunction loginFunc) async {
     if (_buttonDisabled) {
       return;
     }
-    _disableButton(true);
+    // _disableButton(true);
     final rive = RiveContext.of(context);
 
     if (await loginFunc()) {
       await rive.updateUser();
-    } else {
-      _disableButton(false);
     }
+    // else {
+    //   _disableButton(false);
+    // }
   }
 
   Widget _socials() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        /* TODO: not supported yet.
         _SocialSigninButton(
           label: 'Apple',
           icon: 'signin-apple',
-          onTap: null, // TODO: not supported yet.
-          /* _buttonDisabled
+          onTap: null, 
+           _buttonDisabled
               ? null
               : () async {
                   final rive = RiveContext.of(context);
                   final api = rive.api;
                   final auth = RiveAuth(api);
                   _socialLogin(auth.loginApple); 
-                },*/
+                },
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 10),*/
         _SocialSigninButton(
           label: 'Google',
           icon: 'signin-google',
@@ -307,7 +310,7 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  _socialLogin(auth.loginGoogle);
+                  await _socialLogin(auth.loginGoogle);
                 },
         ),
         const SizedBox(width: 10),
@@ -319,7 +322,7 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  _socialLogin(auth.loginFacebook);
+                  await _socialLogin(auth.loginFacebook);
                 },
         ),
         const SizedBox(width: 10),
@@ -331,7 +334,7 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  _socialLogin(auth.loginTwitter);
+                  await _socialLogin(auth.loginTwitter);
                 },
         ),
       ],
@@ -381,9 +384,7 @@ class _LoginState extends State<Login> {
                     const SizedBox(height: 8),
                     UnderlineTextButton(
                       text: 'Forgot your Password?',
-                      onPressed: () => setState(() {
-                        _currentPanel = LoginPage.recover;
-                      }),
+                      onPressed: () => _selectPanel(LoginPage.recover),
                     ),
                   ],
                 ),
@@ -397,9 +398,15 @@ class _LoginState extends State<Login> {
               label: _buttonDisabled ? 'Verifying' : 'Log In',
               onTap: _login,
               color: _buttonDisabled
-                  ? colors.commonLightGrey
-                  : colors.commonDarkGrey,
-              textColor: Colors.white,
+                  ? colors.buttonDarkDisabled
+                  : colors.textButtonDark,
+              textColor: _buttonDisabled
+                  ? colors.buttonDarkDisabledText
+                  : Colors.white,
+              hoverColor: _buttonDisabled
+                  ? colors.buttonDarkDisabled
+                  : colors.textButtonDark,
+              hoverTextColor: Colors.white,
               radius: 20,
               elevated: true,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -430,22 +437,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
-    final textStyles = theme.textStyles;
     final colors = theme.colors;
-
-    bool isSwitchOn;
-    switch (_currentPanel) {
-      case LoginPage.register:
-        isSwitchOn = true;
-        break;
-      case LoginPage.recover:
-        isSwitchOn = null;
-        break;
-      case LoginPage.login:
-      default:
-        isSwitchOn = false;
-        break;
-    }
 
     return Stack(
       children: <Widget>[
@@ -466,41 +458,89 @@ class _LoginState extends State<Login> {
               width: 714,
               child: Stack(children: [
                 Positioned(
-                  right: 30,
-                  top: 30,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Log In',
-                        style: textStyles.regularText.copyWith(
-                            color: _currentPanel == LoginPage.login
-                                ? colors.commonDarkGrey
-                                : colors.commonLightGrey),
-                      ),
-                      const SizedBox(width: 10),
-                      EditorSwitch(
-                        isOn: isSwitchOn,
-                        toggle: _togglePanel,
-                        onColor: Colors.white,
-                        offColor: Colors.white,
-                        backgroundColor: isSwitchOn == null
-                            ? colors.toggleInactiveBackground
-                            : colors.toggleBackground,
-                      ),
-                      const SizedBox(width: 10),
-                      Text('Sign Up',
-                          style: textStyles.regularText.copyWith(
-                              color: _currentPanel == LoginPage.register
-                                  ? colors.commonDarkGrey
-                                  : colors.commonLightGrey)),
-                    ],
-                  ),
-                ),
+                    right: 30,
+                    top: 30,
+                    child: _LoginSwitch(
+                        panel: _currentPanel, onSelect: _selectPanel)),
                 Align(alignment: Alignment.center, child: _panelContents()),
               ])),
         ]),
       ],
+    );
+  }
+}
+
+class _LoginSwitch extends StatelessWidget {
+  final LoginPage panel;
+  final ValueChanged<LoginPage> onSelect;
+
+  const _LoginSwitch({@required this.panel, @required this.onSelect, Key key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+
+    bool isLogin;
+    switch (panel) {
+      case LoginPage.register:
+        isLogin = true;
+        break;
+      case LoginPage.recover:
+        isLogin = null;
+        break;
+      case LoginPage.login:
+      default:
+        isLogin = false;
+        break;
+    }
+
+    return Container(
+      height: 20,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          GestureDetector(
+            onTap: () => onSelect(LoginPage.login),
+            behavior: HitTestBehavior.opaque,
+            child: Center(
+              child: Text(
+                'Log In',
+                style: textStyles.regularText.copyWith(
+                    color: panel == LoginPage.login
+                        ? colors.commonDarkGrey
+                        : colors.commonLightGrey),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          EditorSwitch(
+            isOn: isLogin,
+            toggle: () => onSelect(panel == LoginPage.register
+                ? LoginPage.login
+                : LoginPage.register),
+            onColor: Colors.white,
+            offColor: Colors.white,
+            backgroundColor: panel == LoginPage.recover
+                ? colors.toggleInactiveBackground
+                : colors.toggleBackground,
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: () => onSelect(LoginPage.register),
+            behavior: HitTestBehavior.opaque,
+            child: Center(
+              child: Text('Sign Up',
+                  style: textStyles.regularText.copyWith(
+                      color: panel == LoginPage.register
+                          ? colors.commonDarkGrey
+                          : colors.commonLightGrey)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -520,14 +560,26 @@ class _SocialSigninButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
+    var isEnabled = onTap != null;
+    var buttonColor =
+        isEnabled ? colors.buttonLight : colors.buttonLightDisabled;
+    var textColor =
+        isEnabled ? colors.buttonLightText : colors.buttonLightTextDisabled;
+    var iconColor = isEnabled
+        ? colors.iconButtonLightIcon
+        : colors.iconButtonLightIconDisabled;
     return FlatIconButton(
         onTap: onTap,
         label: label,
+        color: buttonColor,
+        hoverColor: colors.buttonLightHover,
+        hoverTextColor: colors.buttonLightText,
+        textColor: textColor,
         icon: Padding(
           padding: const EdgeInsets.only(left: 25.0),
           child: TintedIcon(
             icon: icon,
-            color: colors.commonButtonTextColor,
+            color: iconColor,
           ),
         ));
   }
