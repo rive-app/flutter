@@ -52,11 +52,8 @@ abstract class LinearAnimationBase extends Animation {
     }
     int from = _duration;
     _duration = value;
-    print("YEAH DURATION $value");
     onPropertyChanged(durationPropertyKey, from, value);
-    print("YEAH DURATION $value!!");
     durationChanged(from, value);
-    print("YEAH DURATION $value!! !!");
   }
 
   void durationChanged(int from, int to);
