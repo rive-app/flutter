@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fractional/fractional.dart';
-import 'package:rive_editor/rive/managers/animation_manager.dart';
+import 'package:rive_editor/rive/managers/animations_manager.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rxdart/rxdart.dart';
@@ -14,7 +14,7 @@ import 'package:core/debounce.dart';
 
 class AnimationTreeController
     extends TreeController<ValueStream<AnimationViewModel>> {
-  final AnimationManager animationManager;
+  final AnimationsManager animationManager;
   StreamSubscription<Iterable<ValueStream<AnimationViewModel>>> _subscription;
 
   AnimationTreeController(this.animationManager) : super([]) {

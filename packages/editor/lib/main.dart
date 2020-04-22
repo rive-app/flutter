@@ -203,9 +203,9 @@ class InsertInheritedWidgets extends StatelessWidget {
                     // manager creator needs it, but maybe in this case we could
                     // just get away with a builder?
                     builder: (context, activeArtboard, child) =>
-                        AnimationProvider(
+                        AnimationsProvider(
                       activeArtboard: activeArtboard,
-                      child: child,
+                      child: EditingAnimationProvider(child: child),
                     ),
                   ),
                 ),
