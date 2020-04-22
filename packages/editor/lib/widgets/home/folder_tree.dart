@@ -133,7 +133,7 @@ class TreeRowIcon extends StatelessWidget {
       return TintedIcon(
         icon: (item.data.owner == null)
             ? 'folder'
-            : (item.data.owner is RiveTeam) ? 'teams' : 'user',
+            : (item.data.owner is RiveTeam) ? 'teams' : 'your-files',
         color: fileBrowser?.selectedFolder == item.data
             ? colors.fileSelectedFolderIcon
             : colors.fileUnselectedFolderIcon,
