@@ -1,11 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/managers/animations_manager.dart';
+import 'package:rive_editor/rive/managers/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -301,25 +300,30 @@ class EditingAnimationProvider extends StatelessWidget {
         stream: AnimationsProvider.of(context).selectedAnimation,
         builder: (context, snapshot) => _InheritedEditingAnimation(
           child: child,
-          linearAnimation:
+          editingAnimationManager:
               snapshot.hasData && snapshot.data.animation is LinearAnimation
-                  ? snapshot.data.animation as LinearAnimation
+                  ? EditingAnimationManager(
+                      snapshot.data.animation as LinearAnimation)
                   : null,
         ),
       );
+
+  static EditingAnimationManager of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_InheritedEditingAnimation>()
+      .editingAnimationManager;
 }
 
 class _InheritedEditingAnimation extends InheritedWidget {
   const _InheritedEditingAnimation({
-    @required this.linearAnimation,
+    @required this.editingAnimationManager,
     @required Widget child,
     Key key,
   })  : assert(child != null),
         super(key: key, child: child);
 
-  final LinearAnimation linearAnimation;
+  final EditingAnimationManager editingAnimationManager;
 
   @override
   bool updateShouldNotify(_InheritedEditingAnimation old) =>
-      linearAnimation != old.linearAnimation;
+      editingAnimationManager != old.editingAnimationManager;
 }
