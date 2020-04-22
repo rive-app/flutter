@@ -6,7 +6,7 @@ import 'package:core/coop/change.dart';
 import 'package:core/coop/player.dart';
 import 'package:core/coop/player_cursor.dart';
 import 'package:core/coop/protocol_version.dart';
-import 'package:core/error_logger/error_logger.dart' as errorLogger;
+import 'package:core/error_logger/error_logger.dart' as error_logger;
 import 'package:core/web_socket/web_socket.dart';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -150,7 +150,7 @@ class CoopClient extends CoopReader {
       });
     }, onError: (Object error, StackTrace stackTrace) {
       try {
-        errorLogger.onError(error, stackTrace);
+        error_logger.onError(error, stackTrace);
       } on Exception catch (e) {
         print('Failed to report: $e');
         print('Error was: $error, $stackTrace');
