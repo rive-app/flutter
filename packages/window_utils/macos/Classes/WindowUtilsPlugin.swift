@@ -9,9 +9,9 @@ public class WindowUtils: NSObject, FlutterPlugin {
         let instance = WindowUtils()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-
+    
     var mouseStackCount = 1;
-
+    
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "getWindowOffset":
@@ -218,22 +218,19 @@ public class WindowUtils: NSObject, FlutterPlugin {
             result(FlutterMethodNotImplemented)
         }
     }
-
+    
     func createWebWindow(key: String, url: String, jsMessage: String, x: Double? = nil, y: Double? = nil, width: Int? = nil, height: Int? = nil, result: @escaping FlutterResult) {
-        let window = NSWindow()
-        window.styleMask = NSWindow.StyleMask(rawValue: 0xf)
-        window.backingType = .buffered
         let _webView = WebView()
         _webView.url = url
         _webView.jsHandler = jsMessage
         // Only message once, when we get our handler data or when the window is closed.
         var messaged = false;
         _webView.closed = { (message: Any) -> Void in
-                if(!messaged) {
-                    messaged = true;
-                    result(message)
-                }
+            if(!messaged) {
+                messaged = true;
+                result(message)
             }
+        }
         if (jsMessage != "") {
             _webView.jsResponse = { (message: Any) -> Void in
                 if(!messaged) {
@@ -242,6 +239,12 @@ public class WindowUtils: NSObject, FlutterPlugin {
                 }
             }
         }
+        
+        let window = NSWindow()
+        window.styleMask = NSWindow.StyleMask(rawValue: 0xf)
+        window.backingType = .buffered
+        window.title = key;
+        
         window.contentViewController = _webView
         if let screen = window.screen {
             let screenRect = screen.visibleFrame
@@ -254,15 +257,13 @@ public class WindowUtils: NSObject, FlutterPlugin {
             window.setFrameOrigin(NSPoint(x: newOriginX, y: newOriginY))
             window.setContentSize(NSSize(width: newWidth, height: newHeight))
         }
-        window.title = key;
-        window.titleVisibility = .hidden
         let windowController = NSWindowController()
         windowController.contentViewController = window.contentViewController
         windowController.shouldCascadeWindows = true
         windowController.window = window
         windowController.showWindow(self)
     }
-
+    
     func closeWindow(_key: String) -> Bool {
         let window = NSApp.windows.first(where: { $0.title == _key })
         window?.close()
@@ -271,7 +272,7 @@ public class WindowUtils: NSObject, FlutterPlugin {
 }
 
 
-class WebView: NSViewController, WKUIDelegate, WKScriptMessageHandler, NSWindowDelegate {
+class WebView: NSViewController, WKUIDelegate, WKScriptMessageHandler, WKNavigationDelegate, NSWindowDelegate {
     var webView: WKWebView!
     var url = "https://www.apple.com"
     var jsHandler: String = ""
@@ -281,36 +282,71 @@ class WebView: NSViewController, WKUIDelegate, WKScriptMessageHandler, NSWindowD
     var closed: (Any?) -> Void? = { (message: Any) -> Void in
         print(message)
     }
-
+    
+    
+    // NSViewController
     override func loadView() {
         let webConfig = WKWebViewConfiguration()
         webView = WKWebView(frame: .zero, configuration: webConfig)
+        // Register as WKUIDelegate
         webView.uiDelegate = self
+        // Register as WKNavigationDelegate
+        webView.navigationDelegate = self
         if (jsHandler != "") {
+            // Register as WKScriptMessageHandler
             webView.configuration.userContentController.add(self, name: jsHandler)
         }
         view = webView
+        
+        // Clear cookies
+        let dataStore = WKWebsiteDataStore.default()
+        let allTypes = WKWebsiteDataStore.allWebsiteDataTypes()
+        dataStore.fetchDataRecords(ofTypes: allTypes) { allRecords in
+            allRecords.forEach { record in
+                dataStore.removeData(ofTypes: record.dataTypes,
+                                     for: [record], completionHandler: {})
+            }
+        }
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        var request = URLRequest(url: URL(string: url)!)
-        request.httpShouldHandleCookies = false
+        let request = URLRequest(url: URL(string: url)!)
         webView.load(request)
     }
-
+    
+    override func viewDidAppear() {
+        guard let window = self.view.window else {
+            print("No window?")
+            return
+        }
+        // Add `self` as NSWindowDelegate to capture `windowWillClose` event.
+        window.delegate = self
+        // Completely remove titlebar.
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.styleMask.insert(.fullSizeContentView)
+    }
+    
+    // WKScriptMessageHandler
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == jsHandler {
             let val = message.body
             jsResponse(val)
         }
     }
-
-    override func viewDidAppear() {
-        self.view.window?.delegate = self
-    }
-
+    
+    // NSWindowDelegate
     func windowWillClose(_ notification: Notification) {
         closed(nil);
+    }
+    
+    // WKNavigationDelegate
+    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        // print("Redirecting?\n\(webView.url?.absoluteString ?? "Empty URL")")
+    }
+    
+    deinit {
+        webView = nil
     }
 }
