@@ -25,7 +25,7 @@ class AlignmentInspectorBuilder extends InspectorBuilder {
   List<WidgetBuilder> expand(InspectionSet inspecting) => [
         (context) => Padding(
               padding: const EdgeInsets.only(
-                  top: 12, bottom: 2, left: 10, right: 10),
+                  top: 20, bottom: 10, left: 10, right: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[

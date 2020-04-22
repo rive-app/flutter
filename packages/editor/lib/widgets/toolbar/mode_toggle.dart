@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
-const double _buttonWidth = 96;
+const double _buttonWidth = 98;
 const double _height = 30;
 const double _borderRadius = 15;
 

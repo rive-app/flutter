@@ -32,12 +32,10 @@ class ConnectedUsers extends StatelessWidget {
                     imageUrl: user?.avatar,
                   ),
                 ),
-                child,
               ],
             ],
           );
         },
-        child: Container(width: 20),
       ),
     );
   }
@@ -53,7 +51,7 @@ class AvatarView extends StatelessWidget {
     @required this.imageUrl,
     @required this.color,
     Key key,
-    this.diameter = 30,
+    this.diameter = 26,
     this.borderWidth = 2,
   }) : super(key: key);
 
@@ -61,24 +59,28 @@ class AvatarView extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
     return Center(
-      child: SizedBox(
-        width: diameter,
-        height: diameter,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: color, width: borderWidth),
-            borderRadius: BorderRadius.circular(diameter / 2),
-          ),
-          child: CircleAvatar(
-            child: hasImage
-                ? null
-                : Center(
-                    child: Icon(
-                      Icons.person,
-                      size: diameter,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal:10),
+        child: SizedBox(
+          width: diameter,
+          height: diameter,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: color, width: borderWidth),
+              borderRadius: BorderRadius.circular(diameter / 2),
+            ),
+            padding: const EdgeInsets.all(1.0),
+            child: CircleAvatar(
+              child: hasImage
+                  ? null
+                  : Center(
+                      child: Icon(
+                        Icons.person,
+                        size: diameter,
+                      ),
                     ),
-                  ),
-            backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+              backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+            ),
           ),
         ),
       ),
