@@ -219,6 +219,7 @@ class AnimationsManager {
   Sink<AnimationViewModel> get delete => _deleteController;
   Sink<RenameAnimationModel> get rename => _renameController;
   Sink<AnimationOrder> get order => _orderController;
+  Stream<AnimationViewModel> get selectedAnimation => _selectedAnimationStream;
 
   void _makeLinearAnimation() {
     assert(activeArtboard != null);
