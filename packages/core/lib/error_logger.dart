@@ -18,7 +18,6 @@ class ErrorLogger {
 
   ErrorLogger._();
 
-
   Future<void> onError(Object e, StackTrace trace) async {
     if (isInDebugMode) {
       print('[Error]:\n$e');

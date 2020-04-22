@@ -1,10 +1,10 @@
-import 'package:core/coop/coop_client.dart' as core;
 import 'package:flutter/material.dart';
-import 'package:local_data/local_data.dart';
-import 'package:rive_core/backboard.dart';
-import 'package:rive_core/rive_core_field_type.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:core/coop/coop_client.dart' as core;
+
+import 'package:local_data/local_data.dart';
 
 import 'package:core/coop/change.dart';
 import 'package:core/coop/player.dart';
@@ -13,19 +13,21 @@ import 'package:core/debounce.dart';
 
 import 'package:rive_api/api.dart';
 import 'package:rive_api/artists.dart';
-import 'package:rive_core/client_side_player.dart';
 
+import 'package:rive_core/backboard.dart';
+import 'package:rive_core/rive_core_field_type.dart';
+import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
-import 'src/generated/rive_core_context.dart';
-import 'src/isolated_persist.dart';
+import 'package:rive_core/persist/persist.dart';
+import 'package:rive_core/src/generated/rive_core_context.dart';
 
 class RiveFile extends RiveCoreContext {
   final List<Artboard> artboards = [];
   final Set<RiveFileDelegate> delegates = {};
   int _dirt = 0;
-  final IsolatedPersist _isolatedPersist;
+  final RivePersist _persist;
   final RiveApi api;
   final Set<ClientSidePlayer> _dirtyPlayers = {};
   Backboard _backboard;
@@ -62,12 +64,12 @@ class RiveFile extends RiveCoreContext {
     String fileId, {
     @required LocalDataPlatform localDataPlatform,
     this.api,
-  })  : _isolatedPersist = IsolatedPersist(localDataPlatform, fileId),
+  })  : _persist = RivePersist(localDataPlatform, fileId),
         super(fileId);
 
   @override
   void abandonChanges(ChangeSet changes) {
-    _isolatedPersist.remove(changes);
+    _persist.remove(changes);
   }
 
   bool addDelegate(RiveFileDelegate delegate) => delegates.add(delegate);
@@ -184,7 +186,7 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  Future<List<ChangeSet>> getOfflineChanges() => _isolatedPersist.changes();
+  Future<List<ChangeSet>> getOfflineChanges() => _persist.changes();
 
   @override
   Future<String> getStringSetting(String key) async {
@@ -270,12 +272,12 @@ class RiveFile extends RiveCoreContext {
   void onWipe() {
     artboards.clear();
     delegates.forEach((delegate) => delegate.onWipe());
-    _isolatedPersist.wipe();
+    _persist.wipe();
   }
 
   @override
   void persistChanges(ChangeSet changes) {
-    _isolatedPersist.add(changes);
+    _persist.add(changes);
   }
 
   bool removeDelegate(RiveFileDelegate delegate) => delegates.remove(delegate);
