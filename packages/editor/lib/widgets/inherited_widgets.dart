@@ -297,75 +297,16 @@ class EditingAnimationProvider extends StatelessWidget {
 
   const EditingAnimationProvider({Key key, this.child}) : super(key: key);
   @override
-  Widget build(BuildContext context) {
-    return _EditingAnimation(
-      child: child,
-      animationsManager: AnimationsProvider.of(context),
-    );
-  }
-}
-
-// Stateful widget that listens to the animationsManager's selectedAnimation
-// stream.
-class _EditingAnimation extends StatefulWidget {
-  final AnimationsManager animationsManager;
-  final Widget child;
-
-  const _EditingAnimation({
-    @required this.animationsManager,
-    @required this.child,
-    Key key,
-  }) : super(key: key);
-
-  @override
-  __EditingAnimationState createState() => __EditingAnimationState();
-}
-
-class __EditingAnimationState extends State<_EditingAnimation> {
-  StreamSubscription<AnimationViewModel> _selectedAnimationSubscription;
-  LinearAnimation _editingLinear;
-  @override
-  void initState() {
-    super.initState();
-    _selectedAnimationSubscription = widget.animationsManager.selectedAnimation
-        .listen(_changeSelectedAnimation);
-  }
-
-  void _changeSelectedAnimation(AnimationViewModel viewModel) {
-    var linear = viewModel.animation is LinearAnimation
-        ? viewModel.animation as LinearAnimation
-        : null;
-    if (linear != _editingLinear) {
-      setState(() {
-        _editingLinear = linear;
-      });
-    }
-  }
-
-  @override
-  void didUpdateWidget(_EditingAnimation oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.animationsManager != widget.animationsManager) {
-      _selectedAnimationSubscription?.cancel();
-      _selectedAnimationSubscription = widget
-          .animationsManager.selectedAnimation
-          .listen(_changeSelectedAnimation);
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _selectedAnimationSubscription?.cancel();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _InheritedEditingAnimation(
-      child: widget.child,
-      linearAnimation: _editingLinear,
-    );
-  }
+  Widget build(BuildContext context) => StreamBuilder<AnimationViewModel>(
+        stream: AnimationsProvider.of(context).selectedAnimation,
+        builder: (context, snapshot) => _InheritedEditingAnimation(
+          child: child,
+          linearAnimation:
+              snapshot.hasData && snapshot.data.animation is LinearAnimation
+                  ? snapshot.data.animation as LinearAnimation
+                  : null,
+        ),
+      );
 }
 
 class _InheritedEditingAnimation extends InheritedWidget {
