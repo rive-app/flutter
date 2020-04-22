@@ -104,6 +104,17 @@ class _MyAppState extends State<MyApp> {
           body: ListView(
             children: <Widget>[
               ListTile(
+                title: const Text('Open Browser Window'),
+                trailing: IconButton(
+                  icon: Icon(Icons.desktop_windows),
+                  onPressed: () {
+                    WindowUtils.openWebView('blah', 'https://rive.app').then((response) {
+                      print('WEBVIEW RESULT: $response');
+                    });
+                  },
+                ),
+              ),
+              ListTile(
                 title: const Text('Max Window Size'),
                 trailing: IconButton(
                   icon: Icon(Icons.desktop_windows),
