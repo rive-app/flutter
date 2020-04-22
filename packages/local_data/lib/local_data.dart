@@ -1,17 +1,12 @@
 import 'dart:typed_data';
 
-import 'src/local_data_stub.dart'
-    // ignore: uri_does_not_exist
-    if (dart.library.io) 'src/local_data_io.dart'
-    // ignore: uri_does_not_exist
+import 'src/local_data_io.dart'
     if (dart.library.html) 'src/local_data_web.dart';
 
 abstract class LocalDataPlatform {
   LocalDataPlatform();
   Future<bool> initialize();
-  factory LocalDataPlatform.make() {
-    return makeLocalDataPlatform();
-  }
+  factory LocalDataPlatform.make() => makeLocalDataPlatform();
 }
 
 abstract class LocalData {
@@ -21,7 +16,6 @@ abstract class LocalData {
   Future<bool> save(String name, Uint8List bytes);
   Future<Uint8List> load(String name);
 
-  factory LocalData.make(LocalDataPlatform platform, String context) {
-    return makeLocalData(platform, context);
-  }
+  factory LocalData.make(LocalDataPlatform platform, String context) =>
+      makeLocalData(platform, context);
 }
