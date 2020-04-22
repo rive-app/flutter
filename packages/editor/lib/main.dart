@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:core/error_logger.dart';
-import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:cursor/cursor_view.dart';
+
+import 'package:window_utils/window_utils.dart';
+
+import 'package:core/error_logger/error_logger.dart' as errorLogger;
 import 'package:rive_core/event.dart';
+
 import 'package:rive_editor/animation_panel.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
@@ -40,11 +45,10 @@ import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
-import 'package:window_utils/window_utils.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
-    ErrorLogger.instance.onError(details.exception, details.stack);
+    errorLogger.onError(details.exception, details.stack);
   };
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,7 +82,7 @@ Future<void> main() async {
     ),
     onError: (Object error, StackTrace stackTrace) {
       try {
-        ErrorLogger.instance.onError(error, stackTrace);
+        errorLogger.onError(error, stackTrace);
       } on Exception catch (e) {
         debugPrint('Failed to report: $e');
         debugPrint('Error was: $error, $stackTrace');

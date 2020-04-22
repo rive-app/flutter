@@ -1,3 +1,5 @@
+/// Native error logger usies sentry
+
 import 'package:sentry/sentry.dart';
 
 bool get isInDebugMode {
