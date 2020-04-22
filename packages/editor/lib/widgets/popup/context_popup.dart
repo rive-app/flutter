@@ -151,15 +151,11 @@ class PopupContextItem extends PopupListItem {
         child,
       ],
       if (popup != null && popup.isNotEmpty)
-        ColorFiltered(
-          colorFilter: ColorFilter.mode(
-            isHovered ? Colors.white : const Color.fromRGBO(112, 112, 112, 1),
-            BlendMode.srcIn,
-          ),
-          child: const Image(
-            image: AssetImage('assets/images/icons/chevron.png'),
-          ),
-        ),
+        TintedIcon(
+            color: isHovered
+                ? Colors.white
+                : const Color.fromRGBO(112, 112, 112, 1),
+            icon: 'chevron'),
       const SizedBox(width: 20),
     ]);
     return Row(
