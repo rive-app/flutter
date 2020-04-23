@@ -11,7 +11,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart' show required;
 
 import 'window_utils_platform_interface.dart';
 
@@ -312,65 +311,4 @@ class MethodChannelWindowUtils extends WindowUtilsPlatform {
     }
     return 'none';
   }
-}
-
-enum DragPosition {
-  top,
-  left,
-  right,
-  bottom,
-  topLeft,
-  bottomLeft,
-  topRight,
-  bottomRight
-}
-
-enum CursorType {
-  arrow,
-  cross,
-  hand,
-  resizeLeft,
-  resizeRight,
-  resizeDown,
-  resizeUp,
-  resizeLeftRight,
-  resizeUpDown,
-}
-
-enum MacOSCursorType {
-  arrow,
-  beamVertical,
-  crossHair,
-  closedHand,
-  openHand,
-  pointingHand,
-  resizeLeft,
-  resizeRight,
-  resizeDown,
-  resizeUp,
-  resizeLeftRight,
-  resizeUpDown,
-  beamHorizontial,
-  disappearingItem,
-  notAllowed,
-  dragLink,
-  dragCopy,
-  contextMenu,
-}
-
-enum WindowsCursorType {
-  appStart,
-  arrow,
-  cross,
-  hand,
-  help,
-  iBeam,
-  no,
-  resizeAll,
-  resizeNESW,
-  resizeNS,
-  resizeNWSE,
-  resizeWE,
-  upArrow,
-  wait,
 }

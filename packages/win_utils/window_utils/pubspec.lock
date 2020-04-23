@@ -401,6 +401,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.5.0+1"
+  window_utils_macos:
+    dependency: "direct main"
+    description:
+      path: "../window_utils_macos"
+      relative: true
+    source: path
+    version: "1.0.3"
   window_utils_platform_interface:
     dependency: "direct main"
     description:

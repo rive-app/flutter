@@ -6,15 +6,15 @@ flutter:
   plugin:
     platforms:
       macos:
-        pluginClass: WindowUtils
-      windows:
-        pluginClass: WindowUtils
+        default_package: window_utils_macos
 
 dependencies:
   flutter:
     sdk: flutter
   window_utils_platform_interface:
     path: ../window_utils_platform_interface
+  window_utils_macos:
+    path: ../window_utils_macos
 
 dev_dependencies:
   flutter_test:

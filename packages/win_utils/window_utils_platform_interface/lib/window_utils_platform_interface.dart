@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart' show required;
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'method_channel_window_utils.dart';
@@ -135,8 +134,65 @@ abstract class WindowUtilsPlatform extends PlatformInterface {
 
   Future<bool> resetCursor() =>
       throw UnimplementedError('resetCursor() has not been implemented.');
+}
 
-  String _getCursor(CursorType cursor, MacOSCursorType macOS,
-          WindowsCursorType windows) =>
-      throw UnimplementedError('openWebView() has not been implemented.');
+enum DragPosition {
+  top,
+  left,
+  right,
+  bottom,
+  topLeft,
+  bottomLeft,
+  topRight,
+  bottomRight
+}
+
+enum CursorType {
+  arrow,
+  cross,
+  hand,
+  resizeLeft,
+  resizeRight,
+  resizeDown,
+  resizeUp,
+  resizeLeftRight,
+  resizeUpDown,
+}
+
+enum MacOSCursorType {
+  arrow,
+  beamVertical,
+  crossHair,
+  closedHand,
+  openHand,
+  pointingHand,
+  resizeLeft,
+  resizeRight,
+  resizeDown,
+  resizeUp,
+  resizeLeftRight,
+  resizeUpDown,
+  beamHorizontial,
+  disappearingItem,
+  notAllowed,
+  dragLink,
+  dragCopy,
+  contextMenu,
+}
+
+enum WindowsCursorType {
+  appStart,
+  arrow,
+  cross,
+  hand,
+  help,
+  iBeam,
+  no,
+  resizeAll,
+  resizeNESW,
+  resizeNS,
+  resizeNWSE,
+  resizeWE,
+  upArrow,
+  wait,
 }

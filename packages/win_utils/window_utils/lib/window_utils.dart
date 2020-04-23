@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:window_utils_platform_interface/method_channel_window_utils.dart';
 import 'package:window_utils_platform_interface/window_utils_platform_interface.dart';
+
+export 'package:window_utils_platform_interface/window_utils_platform_interface.dart';
 
 Future<String> openWebView(String key, String url,
         {Offset offset, Size size, String jsMessage = ''}) =>

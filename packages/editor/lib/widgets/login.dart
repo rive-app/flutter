@@ -7,7 +7,7 @@ import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/labeled_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
-import 'package:window_utils/window_utils.dart';
+import 'package:window_utils/window_utils.dart' as win_utils;
 
 enum LoginPage { login, register, recover }
 typedef AuthAction = Future<AuthResponse> Function();
@@ -452,7 +452,7 @@ class _LoginState extends State<Login> {
         Positioned.fill(
           child: GestureDetector(
             onTapDown: (_) {
-              WindowUtils.startDrag();
+              win_utils.startDrag();
             },
           ),
         ),

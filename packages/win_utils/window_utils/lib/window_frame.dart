@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:window_utils/window_utils.dart';
-import 'package:window_utils_platform_interface/method_channel_window_utils.dart';
 
 class WindowsFrame extends StatelessWidget {
   const WindowsFrame({

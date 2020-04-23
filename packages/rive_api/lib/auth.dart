@@ -3,9 +3,12 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+
+
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/user.dart';
-import 'package:window_utils/window_utils.dart';
+
+import 'package:window_utils/window_utils.dart' as win_utils;
 
 const _authWebViewKey = 'auth';
 enum _RiveAuthActions { signin, register }
@@ -62,14 +65,20 @@ class RiveAuth {
   Future<AuthResponse> _oAuth(
       {@required _RiveAuthActions action, @required String provider}) async {
     assert(!kIsWeb, 'Shouldn\'t be authenticating from Flutter Web.');
-    var offset = await WindowUtils.getWindowOffset();
-    var size = await WindowUtils.getWindowSize();
+    var offset = await win_utils.getWindowOffset();
+    var size = await win_utils.getWindowSize();
 
     var url = api.host + '/desktop/${action.name}/$provider';
 
+<<<<<<< HEAD
     var windowSize = const Size(800, 600);
     String response = await WindowUtils.openWebView(
       _authWebViewKey,
+=======
+    var windowSize = const Size(580, 600);
+    String spectre = await win_utils.openWebView(
+      'auth',
+>>>>>>> win utils refactor working with macos
       url,
       size: windowSize,
       offset: Offset(
@@ -78,6 +87,7 @@ class RiveAuth {
       ),
       jsMessage: 'jsHandler',
     );
+<<<<<<< HEAD
 
     print("Response in this case was: ${response.runtimeType} $response");
     if (response == null) {
@@ -106,6 +116,12 @@ class RiveAuth {
     } on FormatException catch(err) {
       await WindowUtils.closeWebView(_authWebViewKey);
       return AuthResponse.fromError(err.message);
+=======
+    if (spectre != null) {
+      api.setCookie('spectre', spectre);
+      await win_utils.closeWebView('auth');
+      await api.persist();
+>>>>>>> win utils refactor working with macos
     }
   }
 
