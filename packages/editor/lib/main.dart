@@ -249,7 +249,7 @@ class Editor extends StatelessWidget {
             return Container(
               color: RiveTheme.of(context).colors.stageBackground,
               alignment: Alignment.center,
-              child: CircularProgressIndicator(),
+              child: const CircularProgressIndicator(),
             );
           case OpenFileState.error:
             return const Center(
@@ -290,9 +290,9 @@ class Editor extends StatelessWidget {
                                 case EditorMode.design:
                                   return 'Design';
                                 case EditorMode.animate:
+                                default:
                                   return 'Animate';
                               }
-                              return '???';
                             },
                             select: (EditorMode mode) {
                               file.mode.value = mode;
