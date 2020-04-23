@@ -21,6 +21,7 @@ import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
@@ -301,7 +302,14 @@ class Stage extends Debouncer {
   void mouseWheel(double x, double y, double dx, double dy) {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
-    zoomTo(x, y, _viewZoomTarget - dy / 30);
+    if (ShortcutAction.mouseWheelZoom.value) {
+      zoomTo(x, y, _viewZoomTarget - dy / 30);
+    } else {
+      _rightMouseMoveAccum += sqrt(dx * dx + dy * dy);
+      _viewTranslationTarget[0] -= dx;
+      _viewTranslationTarget[1] -= dy;
+      markNeedsAdvance();
+    }
   }
 
   StageItem _hoverItem;
