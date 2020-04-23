@@ -28,6 +28,7 @@ import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
+import 'package:rxdart/rxdart.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
 
@@ -60,6 +61,20 @@ class OpenFileContext with RiveFileDelegate {
   Stage _stage;
 
   OpenFileState _state = OpenFileState.loading;
+
+  final _isActiveStream = BehaviorSubject<bool>();
+  ValueStream<bool> get isActiveStream => _isActiveStream;
+  bool _isActive;
+
+  /// Whether this file is the currently active file.
+  bool get isActive => _isActive;
+  set isActive(bool value) {
+    if (value == _isActive) {
+      return;
+    }
+    _isActive = value;
+    _isActiveStream.add(value);
+  }
 
   /// Controller for the hierarchy of this file.
   final ValueNotifier<HierarchyTreeController> treeController =
@@ -100,7 +115,7 @@ class OpenFileContext with RiveFileDelegate {
 
   void startDragOperation() => rive.startDragOperation();
   void endDragOperation() => rive.endDragOperation();
-  
+
   OpenFileContext(
     this.ownerId,
     this.fileId, {
@@ -166,12 +181,10 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   void dispose() {
+    _isActiveStream.close();
     core?.disconnect();
     _stage?.dispose();
   }
-
-  /// Whether this file is the currently active file.
-  bool get isActive => rive.file.value == this;
 
   @override
   void markNeedsAdvance() {

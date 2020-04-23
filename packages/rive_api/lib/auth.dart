@@ -3,11 +3,11 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:window_utils/window_utils.dart';
-
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/user.dart';
+import 'package:window_utils/window_utils.dart';
 
+const _authWebViewKey = 'auth';
 enum _RiveAuthActions { signin, register }
 
 extension _AuthActionsNames on _RiveAuthActions {
@@ -36,30 +36,30 @@ class RiveAuth {
     return false;
   }
 
-  Future<bool> registerGoogle() =>
+  Future<AuthResponse> registerGoogle() =>
       _oAuth(action: _RiveAuthActions.register, provider: 'google');
 
-  Future<bool> registerTwitter() =>
+  Future<AuthResponse> registerTwitter() =>
       _oAuth(action: _RiveAuthActions.register, provider: 'twitter');
 
-  Future<bool> registerFacebook() =>
+  Future<AuthResponse> registerFacebook() =>
       _oAuth(action: _RiveAuthActions.register, provider: 'facebook');
 
   /// Initiate an OAuth login session with Facebook.
-  Future<bool> loginFacebook() =>
+  Future<AuthResponse> loginFacebook() =>
       _oAuth(action: _RiveAuthActions.signin, provider: 'facebook');
 
   /// Initiate an OAuth login session with Twitter.
-  Future<bool> loginTwitter() =>
+  Future<AuthResponse> loginTwitter() =>
       _oAuth(action: _RiveAuthActions.signin, provider: 'twitter');
 
   /// Initiate an OAuth login session with Google.
-  Future<bool> loginGoogle() =>
+  Future<AuthResponse> loginGoogle() =>
       _oAuth(action: _RiveAuthActions.signin, provider: 'google');
 
   /// Initiate an OAUth session for the given [action] with one of the
   /// supported [provider]s.
-  Future<bool> _oAuth(
+  Future<AuthResponse> _oAuth(
       {@required _RiveAuthActions action, @required String provider}) async {
     assert(!kIsWeb, 'Shouldn\'t be authenticating from Flutter Web.');
     var offset = await WindowUtils.getWindowOffset();
@@ -67,9 +67,9 @@ class RiveAuth {
 
     var url = api.host + '/desktop/${action.name}/$provider';
 
-    var windowSize = const Size(580, 600);
-    String spectre = await WindowUtils.openWebView(
-      'auth',
+    var windowSize = const Size(800, 600);
+    String response = await WindowUtils.openWebView(
+      _authWebViewKey,
       url,
       size: windowSize,
       offset: Offset(
@@ -78,12 +78,35 @@ class RiveAuth {
       ),
       jsMessage: 'jsHandler',
     );
-    if (spectre != null) {
-      api.setCookie('spectre', spectre);
-      await WindowUtils.closeWebView('auth');
-      await api.persist();
+
+    print("Response in this case was: ${response.runtimeType} $response");
+    if (response == null) {
+      print("Response was null here");
+      await WindowUtils.closeWebView(_authWebViewKey);
+      return AuthResponse.empty();
     }
-    return spectre?.isNotEmpty ?? false;
+
+    Map<String, dynamic> responseData;
+
+    try {
+      responseData = json.decode(response);
+      AuthResponse authResponse;
+      if (responseData.containsKey('spectre')) {
+        var spectre = responseData['spectre'];
+        authResponse = AuthResponse.fromMessage(spectre);
+        api.setCookie('spectre', spectre);
+        await api.persist();
+      } else if(responseData.containsKey('error')) {
+        var error = responseData['error'];
+        authResponse = AuthResponse.fromError(error);
+      }
+
+      await WindowUtils.closeWebView(_authWebViewKey);
+      return authResponse ?? AuthResponse.empty();
+    } on FormatException catch(err) {
+      await WindowUtils.closeWebView(_authWebViewKey);
+      return AuthResponse.fromError(err.message);
+    }
   }
 
   Future<RiveUser> whoami() async {
@@ -133,5 +156,23 @@ class RiveAuth {
       return true;
     }
     return false;
+  }
+}
+
+
+class AuthResponse {
+  String message, error;
+  AuthResponse.empty(); // Empty response.
+  AuthResponse.fromMessage(this.message);
+  AuthResponse.fromError(this.error);
+
+  bool get isEmpty => message == null && error == null;
+  bool get isError => error != null && error.isNotEmpty;
+  bool get isMessage => message != null && message.isNotEmpty;
+
+  @override
+  String toString() {
+    if (isEmpty) return "empty";
+    return error ?? message;
   }
 }
