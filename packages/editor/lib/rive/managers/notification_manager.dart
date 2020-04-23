@@ -33,6 +33,11 @@ class NotificationManager {
   Stream<int> get notificationCountStream =>
       _notificationCountController.stream;
 
+  /// Outbound stream of any notification messaging errors
+  final _notificationErrorController = BehaviorSubject<HttpException>();
+  Stream<HttpException> get notificationErrorStream =>
+      _notificationErrorController.stream;
+
   /*
    * Inbound sinks
    */
@@ -53,6 +58,7 @@ class NotificationManager {
   void dispose() {
     _notificationsController.close();
     _notificationCountController.close();
+    _notificationErrorController.close();
     _acceptTeamInviteController.close();
     _declineTeamInviteController.close();
     _poller?.cancel();
@@ -94,6 +100,15 @@ class NotificationManager {
     _notificationCountController.add(__notifications.length);
   }
 
+  HttpException __notificationError;
+  HttpException get _notificationError => __notificationError;
+  set _notificationError(HttpException exception) {
+    if (_notificationError != exception) {
+      __notificationError = exception;
+      _notificationErrorController.add(__notificationError);
+    }
+  }
+
   /// Timer for polling new notifications
   Timer _poller;
 
@@ -102,8 +117,15 @@ class NotificationManager {
    */
 
   /// Fetch a user's notifications from the back end
-  Future<void> _fetchNotifications() async =>
+  Future<void> _fetchNotifications() async {
+    try {
       _notifications = await _api.notifications;
+      _notificationError = null;
+    } on HttpException catch (e) {
+      _notificationError = e;
+      print('Failed to update notifications $e');
+    }
+  }
 
   /// Accepts a team invite
   Future<void> _acceptTeamInvite(RiveTeamInviteNotification n) async {
