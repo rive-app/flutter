@@ -275,7 +275,7 @@ class Editor extends StatelessWidget {
                       ConnectedUsers(rive: rive),
                       VisibilityPopupButton(),
                       Padding(
-                        padding: const EdgeInsets.only(left: 10, right:14),
+                        padding: const EdgeInsets.only(left: 10, right: 14),
                         // child: DesignAnimateToggle(),
                         child: ValueListenableBuilder<EditorMode>(
                           valueListenable: file.mode,
@@ -390,7 +390,7 @@ class _TabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: 95,
+      left: RiveTheme.of(context).platform.leftOffset,
       top: 0,
       bottom: 0,
       right: 0,

@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/widgets.dart';
 
+import 'theme/theme_native.dart' if (dart.library.html) 'theme/theme_web.dart';
+
 // General colors
 const lightGrey = Color(0xFF8C8C8C);
 const white = Color(0xFFFFFFFF);
@@ -10,9 +12,7 @@ const purple = Color(0xFFD041AB);
 /// Colors used in the Rive Theme
 /// Define them as getters and keep them const
 class RiveColors {
-  factory RiveColors() {
-    return _instance;
-  }
+  factory RiveColors() => _instance;
   const RiveColors._();
   static const RiveColors _instance = RiveColors._();
 
@@ -81,7 +81,6 @@ class RiveColors {
 
   Color get buttonNoHover => const Color(0xFF707070);
   Color get buttonHover => white;
-
 
   // Cursors
   Color get cursorGreen => const Color(0xFF16E6B3);
@@ -386,4 +385,5 @@ class RiveThemeData {
   RiveColors get colors => RiveColors();
   Gradients get gradients => const Gradients();
   TextStyles get textStyles => const TextStyles();
+  PlatformSpecific get platform => PlatformSpecific();
 }
