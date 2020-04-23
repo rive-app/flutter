@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/managers/animation_manager.dart';
+import 'package:rive_editor/rive/managers/animations_manager.dart';
+import 'package:rive_editor/rive/managers/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -223,39 +225,39 @@ class _InheritedFollowProvider extends InheritedWidget {
       manager != old.manager;
 }
 
-// Animation provider. This is responsible for building new managers when the
-// file changes.
-class AnimationProvider extends StatefulWidget {
-  const AnimationProvider({@required this.activeArtboard, this.child});
+// Animation provider. This is responsible for building new managers when active
+// artboard changes.
+class AnimationsProvider extends StatefulWidget {
+  const AnimationsProvider({@required this.activeArtboard, this.child});
   final Widget child;
   final Artboard activeArtboard;
 
   @override
-  _AnimationProviderState createState() => _AnimationProviderState();
+  _AnimationsProviderState createState() => _AnimationsProviderState();
 
-  static AnimationManager of(BuildContext context) => context
+  static AnimationsManager of(BuildContext context) => context
       .dependOnInheritedWidgetOfExactType<_InheritedAnimationProvider>()
       .manager;
 }
 
-class _AnimationProviderState extends State<AnimationProvider> {
-  AnimationManager _manager;
+class _AnimationsProviderState extends State<AnimationsProvider> {
+  AnimationsManager _manager;
 
   @override
   void initState() {
     _manager = widget.activeArtboard == null
         ? null
-        : AnimationManager(activeArtboard: widget.activeArtboard);
+        : AnimationsManager(activeArtboard: widget.activeArtboard);
     super.initState();
   }
 
   @override
-  void didUpdateWidget(AnimationProvider oldWidget) {
+  void didUpdateWidget(AnimationsProvider oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.activeArtboard != widget.activeArtboard) {
       _manager = widget.activeArtboard == null
           ? null
-          : AnimationManager(activeArtboard: widget.activeArtboard);
+          : AnimationsManager(activeArtboard: widget.activeArtboard);
     }
   }
 
@@ -280,9 +282,104 @@ class _InheritedAnimationProvider extends InheritedWidget {
   })  : assert(child != null),
         super(key: key, child: child);
 
-  final AnimationManager manager;
+  final AnimationsManager manager;
 
   @override
   bool updateShouldNotify(_InheritedAnimationProvider old) =>
       manager != old.manager;
+}
+
+// Linear Animation provider. This is responsible for building new managers when
+// the editing animation changes.
+class EditingAnimationProvider extends StatelessWidget {
+  final Widget child;
+
+  const EditingAnimationProvider({Key key, this.child}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    var stream = AnimationsProvider.of(context)?.selectedAnimation;
+    return stream == null
+        ? SizedBox(child: child)
+        : StreamBuilder<AnimationViewModel>(
+            stream: AnimationsProvider.of(context)?.selectedAnimation,
+            builder: (context, snapshot) => _EditingAnimation(
+              child: child,
+              editingAnimation:
+                  snapshot.hasData && snapshot.data.animation is LinearAnimation
+                      ? snapshot.data.animation as LinearAnimation
+                      : null,
+            ),
+          );
+  }
+
+  static EditingAnimationManager of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_InheritedEditingAnimation>()
+      ?.editingAnimationManager;
+}
+
+class _EditingAnimation extends StatefulWidget {
+  final LinearAnimation editingAnimation;
+  final Widget child;
+  const _EditingAnimation({
+    @required this.editingAnimation,
+    @required this.child,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  __EditingAnimationState createState() => __EditingAnimationState();
+}
+
+class __EditingAnimationState extends State<_EditingAnimation> {
+  EditingAnimationManager _manager;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateManager();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _manager?.dispose();
+  }
+
+  void _updateManager() {
+    _manager?.dispose();
+    _manager = widget.editingAnimation == null
+        ? null
+        : EditingAnimationManager(widget.editingAnimation);
+  }
+
+  @override
+  void didUpdateWidget(_EditingAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.editingAnimation != widget.editingAnimation) {
+      _updateManager();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _InheritedEditingAnimation(
+      child: widget.child,
+      editingAnimationManager: _manager,
+    );
+  }
+}
+
+class _InheritedEditingAnimation extends InheritedWidget {
+  const _InheritedEditingAnimation({
+    @required this.editingAnimationManager,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final EditingAnimationManager editingAnimationManager;
+
+  @override
+  bool updateShouldNotify(_InheritedEditingAnimation old) =>
+      editingAnimationManager != old.editingAnimationManager;
 }

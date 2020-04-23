@@ -114,7 +114,7 @@ class PropagatingListener extends StatelessWidget {
   const PropagatingListener({
     Key key,
     this.child,
-    this.behavior,
+    this.behavior = HitTestBehavior.opaque,
     this.onPointerDown,
     this.onPointerUp,
     this.onPointerMove,

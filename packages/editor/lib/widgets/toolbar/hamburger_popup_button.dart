@@ -35,7 +35,7 @@ class _HamburgerPopupButtonState extends State<HamburgerPopupButton> {
         icon: 'tool-menu',
       ),
       width: 267,
-      contextItems: [
+      contextItemsBuilder: (context) => [
         PopupContextItem("File Name",
             child: Container(
               width: 125,

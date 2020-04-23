@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:colorize/colorize.dart';
 import 'package:core_generator/src/field_type.dart';
-import 'package:core_generator/src/field_types/id_field_type.dart';
 import 'package:dart_style/dart_style.dart';
 
 import 'comment.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/editor_text_field.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
@@ -83,17 +84,23 @@ class InspectorTextField<T> extends StatefulWidget {
 
   /// Callback for when the editing operation is fully complete. This is when
   /// you want to save the changed value (or track the change for undo/redo).
-  final void Function() completeChange;
+  final void Function(T value) completeChange;
 
   /// Placeholder text shown when disabled.
   final String disabledText;
+
+  final FocusNode focusNode;
+
+  final bool captureJournalEntry;
 
   const InspectorTextField({
     @required this.value,
     @required this.converter,
     this.disabledText = '',
+    this.focusNode,
     this.change,
     this.completeChange,
+    this.captureJournalEntry = true,
     Key key,
   }) : super(key: key);
 
@@ -104,15 +111,17 @@ class InspectorTextField<T> extends StatefulWidget {
 class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   final _ConvertingTextEditingController<T> _controller =
       _ConvertingTextEditingController<T>();
-  final FocusNode _focusNode =
-      FocusNode(canRequestFocus: true, skipTraversal: false);
+  FocusNode _focusNode;
   bool _hasFocus = false;
+  bool _ownsFocusNode = false;
+  T _lastValue;
+  T _startDragValue;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_focusChange);
-    _controller.rawValue = widget.value;
+    _updateFocusNode();
+    _lastValue = _controller.rawValue = widget.value;
     _controller.converter = widget.converter;
   }
 
@@ -133,24 +142,41 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   @override
   void dispose() {
     _focusNode.removeListener(_focusChange);
-    _focusNode.dispose();
+    if (_ownsFocusNode) {
+      _focusNode.dispose();
+    }
     _controller.dispose();
     super.dispose();
   }
 
+  void _updateFocusNode() {
+    if (_ownsFocusNode) {
+      _focusNode?.dispose();
+    }
+    _ownsFocusNode = widget.focusNode == null;
+    _focusNode = widget.focusNode ??
+        FocusNode(canRequestFocus: true, skipTraversal: false);
+    _focusNode.addListener(_focusChange);
+  }
+
   @override
   void didUpdateWidget(InspectorTextField<T> oldWidget) {
-    _controller.rawValue = widget.value;
+    if (oldWidget.focusNode != widget.focusNode) {
+      _updateFocusNode();
+    }
+    _lastValue = _controller.rawValue = widget.value;
     _controller.converter = widget.converter;
     super.didUpdateWidget(oldWidget);
   }
 
   void _completeChange() {
-    ActiveFile.find(context)?.core?.captureJournalEntry();
+    if (widget.captureJournalEntry) {
+      ActiveFile.find(context)?.core?.captureJournalEntry();
+    }
     // Force focus back to the main context so that we can immediately
     // undo this change if we want to by hitting ctrl/command z.
     RiveContext.find(context).focus();
-    widget.completeChange?.call();
+    widget.completeChange?.call(_lastValue);
   }
 
   @override
@@ -165,19 +191,36 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
               maxLines: 1,
               style: theme.textStyles.inspectorPropertyLabel,
             )
-          : EditorTextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              color: theme.colors.inspectorTextColor,
-              editingColor: theme.colors.activeText,
-              allowDrag: widget.converter.allowDrag,
-              drag: (amount) =>
-                  widget.change(widget.converter.drag(widget.value, amount)),
-              completeDrag: _completeChange,
-              onSubmitted: (string) {
-                widget.change?.call(widget.converter.fromEditingValue(string));
-                _completeChange();
+          : RawKeyboardListener(
+              focusNode: FocusNode(),
+              onKey: (event) {
+                if (event is RawKeyDownEvent) {
+                  // lose focus if escape is hit
+                  if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+                    _focusNode.unfocus();
+                  }
+                }
               },
+              child: EditorTextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                color: theme.colors.inspectorTextColor,
+                editingColor: theme.colors.activeText,
+                allowDrag: widget.converter.allowDrag,
+                startDrag: () => _startDragValue = _lastValue,
+                cancelDrag: () {
+                  widget.change?.call(_lastValue = _startDragValue);
+                  _completeChange();
+                },
+                drag: (amount) => widget.change(
+                    _lastValue = widget.converter.drag(widget.value, amount)),
+                completeDrag: _completeChange,
+                onSubmitted: (string) {
+                  widget.change?.call(
+                      _lastValue = widget.converter.fromEditingValue(string));
+                  _completeChange();
+                },
+              ),
             ),
     );
   }

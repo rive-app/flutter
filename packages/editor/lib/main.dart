@@ -13,7 +13,7 @@ import 'package:window_utils/window_utils.dart';
 import 'package:core/error_logger/error_logger.dart' as error_logger;
 import 'package:rive_core/event.dart';
 
-import 'package:rive_editor/animation_panel.dart';
+import 'package:rive_editor/widgets/animation/animation_panel.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
@@ -22,7 +22,6 @@ import 'package:rive_editor/rive/managers/follow_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/widgets/catastrophe.dart';
 import 'package:rive_editor/widgets/common/active_artboard.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
@@ -62,7 +61,6 @@ Future<void> main() async {
   final iconCache = RiveIconCache(rootBundle);
   final rive = Rive(
     iconCache: iconCache,
-    focusNode: FocusNode(canRequestFocus: true, skipTraversal: true),
   );
 
   if (await rive.initialize() != RiveState.catastrophe) {
@@ -119,17 +117,8 @@ class RiveEditorApp extends StatelessWidget {
               home: DefaultTextStyle(
                 style: RiveTheme.of(context).textStyles.basic,
                 child: Scaffold(
-                  body: RawKeyboardListener(
+                  body: Focus(
                     focusNode: rive.focusNode,
-                    onKey: (event) {
-                      final focusScope = FocusScope.of(context);
-                      var primary = FocusManager.instance.primaryFocus;
-                      rive.onKeyEvent(
-                          defaultKeyBinding,
-                          event,
-                          primary != rive.focusNode &&
-                              focusScope.nearestScope != primary);
-                    },
                     child: ValueListenableBuilder<RiveState>(
                       valueListenable: rive.state,
                       builder: (context, state, _) {
@@ -207,9 +196,9 @@ class InsertInheritedWidgets extends StatelessWidget {
                     // manager creator needs it, but maybe in this case we could
                     // just get away with a builder?
                     builder: (context, activeArtboard, child) =>
-                        AnimationProvider(
+                        AnimationsProvider(
                       activeArtboard: activeArtboard,
-                      child: child,
+                      child: EditingAnimationProvider(child: child),
                     ),
                   ),
                 ),

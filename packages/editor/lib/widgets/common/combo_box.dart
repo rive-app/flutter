@@ -282,7 +282,8 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
                 child: EditorTextField(
                   allowDrag: false,
                   color: widget.valueColor,
-                  style: widget.valueTextStyle,
+                  style: (widget.valueTextStyle ?? theme.textStyles.basic)
+                      .copyWith(color: widget.valueColor),
                   controller: _controller,
                   focusNode: _focusNode,
                   onChanged: _textInputChanged,

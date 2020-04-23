@@ -12,6 +12,7 @@ import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
+import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -115,7 +116,20 @@ class Rive {
 
   final _user = ValueNotifier<RiveUser>(null);
 
-  Rive({this.iconCache, this.focusNode}) : api = RiveApi() {
+  Rive({this.iconCache}) : api = RiveApi() {
+    _focusNode = FocusNode(
+        canRequestFocus: true,
+        skipTraversal: true,
+        debugLabel: 'Rive Primary Focus Node',
+        onKey: (focusNode, event) {
+          onKeyEvent(
+            defaultKeyBinding,
+            event,
+            _focusNode != FocusManager.instance.primaryFocus,
+          );
+          return false;
+        });
+
     _filesApi = _NonUiRiveFilesApi(api);
     // Add the home screen listener for browser changes
     activeFileBrowser.addListener(() {
@@ -150,10 +164,11 @@ class Rive {
   _NonUiRiveFilesApi _filesApi;
 
   final RiveIconCache iconCache;
-  final FocusNode focusNode;
+  FocusNode _focusNode;
   SharedPreferences _prefs;
 
-  void focus() => focusNode.requestFocus();
+  void focus() => _focusNode.requestFocus();
+  FocusNode get focusNode => _focusNode;
 
   final _state = ValueNotifier<RiveState>(RiveState.init);
   ValueListenable<RiveState> get state => _state;
@@ -252,7 +267,7 @@ class Rive {
     }
     _prefs ??= await SharedPreferences.getInstance();
     result = await _prefs.remove('token');
-    if(!result) {
+    if (!result) {
       return false;
     }
     onSignout?.call();

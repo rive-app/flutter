@@ -27,6 +27,7 @@ import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
+import 'package:rive_editor/widgets/popup/base_popup.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
 
@@ -97,6 +98,9 @@ class OpenFileContext with RiveFileDelegate {
   bool removeActionHandler(ActionHandler handler) =>
       _actionHandlers.remove(handler);
 
+  void startDragOperation() => rive.startDragOperation();
+  void endDragOperation() => rive.endDragOperation();
+  
   OpenFileContext(
     this.ownerId,
     this.fileId, {
@@ -363,6 +367,10 @@ class OpenFileContext with RiveFileDelegate {
 
       case ShortcutAction.toggleEditMode:
         stage?.toggleEditMode();
+        return true;
+
+      case ShortcutAction.cancel:
+        Popup.closeAll();
         return true;
 
       default:

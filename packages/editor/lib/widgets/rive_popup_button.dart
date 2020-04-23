@@ -3,6 +3,7 @@ import 'package:rive_editor/rive/open_file_context.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
+import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -24,21 +25,27 @@ class RiveBuilder extends StatelessWidget {
 
 /// A button that triggers a popup and gets the current OpenFile context.
 class RivePopupButton extends StatefulWidget {
-  final List<PopupContextItem> contextItems;
+  final BuildPopupItems<PopupContextItem> contextItemsBuilder;
   final OpenFileHoverWidgetBuilder iconBuilder;
   final bool showChevron;
   final PopupOpened<PopupContextItem> opened;
   final double _width;
   final Tip tip;
+  final Offset arrowTweak;
+  final PopupDirection direction;
+  final double directionPadding;
 
   const RivePopupButton({
     Key key,
-    this.contextItems,
+    this.contextItemsBuilder,
     this.iconBuilder,
     this.showChevron = true,
+    this.arrowTweak,
     this.opened,
     double width,
     this.tip,
+    this.direction = PopupDirection.bottomToRight,
+    this.directionPadding = 16,
   })  : _width = width ?? 177,
         super(key: key);
 
@@ -52,10 +59,13 @@ class _RivePopupButtonState extends State<RivePopupButton> {
   Widget build(BuildContext context) {
     return RiveBuilder(
       builder: (context, rive) => PopupButton<PopupContextItem>(
+        direction: widget.direction,
+        directionPadding: widget.directionPadding,
         opened: widget.opened,
-        items: widget.contextItems,
+        itemsBuilder: widget.contextItemsBuilder,
         width: widget._width,
-        arrowTweak: widget.showChevron ? const Offset(-5, 0) : Offset.zero,
+        arrowTweak: widget.arrowTweak ??
+            (widget.showChevron ? const Offset(-5, 0) : Offset.zero),
         tip: widget.tip,
         builder: (context) => MouseRegion(
           onEnter: (_) => setState(() => _isHovered = true),

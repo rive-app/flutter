@@ -11,13 +11,13 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rxdart/rxdart.dart';
 
-/// Animation type that can be created by the [AnimationManager].
+/// Animation type that can be created by the [AnimationsManager].
 enum AnimationType { linear }
-enum AnimationOrder { aToZ, zToA }
+enum AnimationOrder { aToZ, zToA, custom }
 
 /// A manager for a file's list of animations allowing creating and updating
 /// them.
-class AnimationManager {
+class AnimationsManager {
   final Artboard activeArtboard;
   final _animationStreamControllers =
       HashMap<Id, BehaviorSubject<AnimationViewModel>>();
@@ -41,7 +41,7 @@ class AnimationManager {
   Animation _hoveredAnimation;
   Animation _selectedAnimation;
 
-  AnimationManager({
+  AnimationsManager({
     @required this.activeArtboard,
   }) {
     activeArtboard.animationsChanged.addListener(_updateAnimations);
@@ -80,6 +80,10 @@ class AnimationManager {
       case AnimationOrder.zToA:
         activeArtboard.animations.sort((a, b) => b.name.compareTo(a.name));
         break;
+      case AnimationOrder.custom:
+        // Expect the implementor to have custom set the fractional indices.
+        activeArtboard.context.captureJournalEntry();
+        return;
     }
     activeArtboard.animations.setFractionalIndices();
     activeArtboard.context.captureJournalEntry();
@@ -181,7 +185,7 @@ class AnimationManager {
     }
     _animations.clear();
     _animationStreamControllers.clear();
-    
+
     var animations = activeArtboard?.animations;
     animations.forEach(_updateAnimation);
 
@@ -215,6 +219,7 @@ class AnimationManager {
   Sink<AnimationViewModel> get delete => _deleteController;
   Sink<RenameAnimationModel> get rename => _renameController;
   Sink<AnimationOrder> get order => _orderController;
+  Stream<AnimationViewModel> get selectedAnimation => _selectedAnimationStream;
 
   void _makeLinearAnimation() {
     assert(activeArtboard != null);

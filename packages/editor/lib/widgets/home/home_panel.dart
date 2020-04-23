@@ -34,7 +34,6 @@ import 'package:rive_editor/widgets/home/item_view.dart';
 import 'package:rive_editor/widgets/home/profile_view.dart';
 import 'package:rive_editor/widgets/home/sliver_inline_footer.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
-import 'package:rive_editor/widgets/icons.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
@@ -353,36 +352,37 @@ class _NavigationPanelState extends State<NavigationPanel> {
               child: Column(
                 children: <Widget>[
                   IconTile(
-                      label: 'Search',
-                      iconName: 'search',
-                      onTap: () {},
-                    ),IconTile(
-                      label: 'Get Started',
-                      iconName: 'rocket',
-                      onTap: () {},
-                    ),
+                    label: 'Search',
+                    iconName: 'search',
+                    onTap: () {},
+                  ),
                   IconTile(
-                      iconName: 'notification',
-                      label: 'Notifications',
-                      highlight: section == HomeSection.notifications,
-                      onTap: () {
-                        // File browsers track their own selected states.
-                        // so you have to tell them specifically that stuff not selected
-                        rive.activeFileBrowser.value?.openFolder(null, false);
-                        rive.activeFileBrowser.value = null;
-                        rive.sectionListener.value = HomeSection.notifications;
-                      },
-                    ),
+                    label: 'Get Started',
+                    iconName: 'rocket',
+                    onTap: () {},
+                  ),
                   IconTile(
-                      iconName: 'recents',
-                      label: 'Recents',
-                      onTap: () {},
-                    ),
+                    iconName: 'notification',
+                    label: 'Notifications',
+                    highlight: section == HomeSection.notifications,
+                    onTap: () {
+                      // File browsers track their own selected states.
+                      // so you have to tell them specifically that stuff not selected
+                      rive.activeFileBrowser.value?.openFolder(null, false);
+                      rive.activeFileBrowser.value = null;
+                      rive.sectionListener.value = HomeSection.notifications;
+                    },
+                  ),
                   IconTile(
-                      iconName: 'popup-community',
-                      label: 'Community',
-                      onTap: () {},
-                    ),
+                    iconName: 'recents',
+                    label: 'Recents',
+                    onTap: () {},
+                  ),
+                  IconTile(
+                    iconName: 'popup-community',
+                    label: 'Community',
+                    onTap: () {},
+                  ),
                 ],
               ),
             ),
@@ -430,9 +430,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                           Separator(
                             color: riveColors.fileLineGrey,
                             padding: EdgeInsets.only(
-                              left: bottomSliverDocked
-                                  ? 20
-                                  : 0,
+                              left: bottomSliverDocked ? 20 : 0,
                             ),
                           ),
                           Padding(
@@ -446,7 +444,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
                               label: 'New Team',
                               icon: 'teams-button',
                               tip: const Tip(
-                                label: 'Create a space where you and\nyour team can share files.',
+                                label:
+                                    'Create a space where you and\nyour team can share files.',
                                 direction: PopupDirection.bottomToCenter,
                                 fallbackDirections: [
                                   PopupDirection.topToCenter,
