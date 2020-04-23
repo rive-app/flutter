@@ -47,7 +47,7 @@ class AnimationPanelContents extends StatelessWidget {
           // Placeholder for timeline and curve editor.
           const Expanded(
             child: ColoredBox(
-              color: Color(0xFF000000),
+              color: Color(0x45000000),
             ),
           ),
           const SizedBox(width: 200),
