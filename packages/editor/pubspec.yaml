@@ -17,7 +17,7 @@ dependencies:
   cursor:
     path: ../cursor
   window_utils:
-    path: ../win_utils/window_utils
+    path: ../window_utils/window_utils
   rive_api:
     path: ../rive_api
   rive_widgets:

@@ -684,21 +684,21 @@ packages:
   window_utils:
     dependency: "direct main"
     description:
-      path: "../win_utils/window_utils"
+      path: "../window_utils/window_utils"
       relative: true
     source: path
     version: "1.0.3"
   window_utils_macos:
     dependency: transitive
     description:
-      path: "../win_utils/window_utils_macos"
+      path: "../window_utils/window_utils_macos"
       relative: true
     source: path
     version: "1.0.3"
   window_utils_platform_interface:
     dependency: transitive
     description:
-      path: "../win_utils/window_utils_platform_interface"
+      path: "../window_utils/window_utils_platform_interface"
       relative: true
     source: path
     version: "1.0.3"
