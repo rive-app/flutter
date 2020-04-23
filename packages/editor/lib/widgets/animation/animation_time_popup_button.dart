@@ -54,21 +54,17 @@ class AnimationTimePopupButton extends StatelessWidget {
             );
           },
           contextItemsBuilder: (context) {
-            var currentKey = GlobalKey();
-            var durationKey = GlobalKey();
-            var fpsKey = GlobalKey();
-            var speedKey = GlobalKey();
             return [
-              PopupContextItem(
+              PopupContextItem.focusable(
                 'Current',
-                dismissOnSelect: false,
-                child: SizedBox(
+                child: (focus, key) => SizedBox(
                   width: 62,
                   child: ValueStreamBuilder<int>(
                     stream: animationManager.currentTime,
                     builder: (context, snapshot) => snapshot.hasData
                         ? InspectorTextField<int>(
-                            key: currentKey,
+                            key: key,
+                            focusNode: focus,
                             value: snapshot.data,
                             change: (value) {},
                             converter: converter,
@@ -77,36 +73,35 @@ class AnimationTimePopupButton extends StatelessWidget {
                   ),
                 ),
               ),
-              PopupContextItem(
+              PopupContextItem.focusable(
                 'Duration',
-                dismissOnSelect: false,
-                child: SizedBox(
+                child: (focus, key) => SizedBox(
                   width: 62,
                   child: CoreTextField<int>(
-                    key: durationKey,
+                    focusNode: focus,
+                    key: key,
                     objects: [animationManager.editingAnimation],
                     propertyKey: LinearAnimationBase.durationPropertyKey,
                     converter: converter,
                   ),
                 ),
               ),
-              PopupContextItem(
+              PopupContextItem.focusable(
                 'Playback Speed',
-                dismissOnSelect: false,
-                child: SizedBox(
+                child: (focus, key) => SizedBox(
                   width: 62,
                   child: CoreTextField<double>(
-                    key: speedKey,
+                    key: key,
+                    focusNode: focus,
                     objects: [animationManager.editingAnimation],
                     propertyKey: LinearAnimationBase.speedPropertyKey,
                     converter: SpeedValueConverter.instance,
                   ),
                 ),
               ),
-              PopupContextItem(
+              PopupContextItem.focusable(
                 'Snap Keys',
-                dismissOnSelect: false,
-                child: Row(
+                child: (focus, key) => Row(
                   children: [
                     SizedBox(
                       width: 37,
@@ -114,7 +109,8 @@ class AnimationTimePopupButton extends StatelessWidget {
                         object: animationManager.editingAnimation,
                         propertyKey: LinearAnimationBase.fpsPropertyKey,
                         builder: (context, fps, _) => InspectorTextField<int>(
-                          key: fpsKey,
+                          key: key,
+                          focusNode: focus,
                           value: fps,
                           change: (value) {
                             print("CHANGE FPS $value");

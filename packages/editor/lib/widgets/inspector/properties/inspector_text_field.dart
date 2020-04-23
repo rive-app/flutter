@@ -88,10 +88,13 @@ class InspectorTextField<T> extends StatefulWidget {
   /// Placeholder text shown when disabled.
   final String disabledText;
 
+  final FocusNode focusNode;
+
   const InspectorTextField({
     @required this.value,
     @required this.converter,
     this.disabledText = '',
+    this.focusNode,
     this.change,
     this.completeChange,
     Key key,
@@ -104,14 +107,14 @@ class InspectorTextField<T> extends StatefulWidget {
 class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   final _ConvertingTextEditingController<T> _controller =
       _ConvertingTextEditingController<T>();
-  final FocusNode _focusNode =
-      FocusNode(canRequestFocus: true, skipTraversal: false);
+  FocusNode _focusNode;
   bool _hasFocus = false;
+  bool _ownsFocusNode = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_focusChange);
+    _updateFocusNode();
     _controller.rawValue = widget.value;
     _controller.converter = widget.converter;
   }
@@ -133,13 +136,28 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   @override
   void dispose() {
     _focusNode.removeListener(_focusChange);
-    _focusNode.dispose();
+    if (_ownsFocusNode) {
+      _focusNode.dispose();
+    }
     _controller.dispose();
     super.dispose();
   }
 
+  void _updateFocusNode() {
+    if (_ownsFocusNode) {
+      _focusNode?.dispose();
+    }
+    _ownsFocusNode = widget.focusNode == null;
+    _focusNode = widget.focusNode ??
+        FocusNode(canRequestFocus: true, skipTraversal: false);
+    _focusNode.addListener(_focusChange);
+  }
+
   @override
   void didUpdateWidget(InspectorTextField<T> oldWidget) {
+    if (oldWidget.focusNode != widget.focusNode) {
+      _updateFocusNode();
+    }
     _controller.rawValue = widget.value;
     _controller.converter = widget.converter;
     super.didUpdateWidget(oldWidget);

@@ -13,12 +13,13 @@ class CoreTextField<T> extends StatefulWidget {
   final int propertyKey;
   final InputValueConverter<T> converter;
   final void Function(T value) change;
-
+  final FocusNode focusNode;
   const CoreTextField({
     @required this.objects,
     @required this.propertyKey,
     this.converter,
     this.change,
+    this.focusNode,
     Key key,
   }) : super(key: key);
 
@@ -34,6 +35,7 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
       propertyKey: widget.propertyKey,
       builder: (context, T value, _) => InspectorTextField(
         value: value,
+        focusNode: widget.focusNode,
         converter: widget.converter,
         change: (T value) {
           for (final object in widget.objects) {

@@ -36,9 +36,9 @@ class PopupButton<T extends PopupListItem> extends StatefulWidget {
     this.itemBuilder,
     this.opened,
     this.direction = PopupDirection.bottomToRight,
+    this.directionPadding = 16,
     this.arrowTweak = Offset.zero,
     this.width = 177,
-    this.directionPadding = 16,
     this.tip,
   }) : super(key: key);
 

@@ -1,3 +1,4 @@
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_widgets/nullable_listenable_builder.dart';
@@ -262,6 +263,13 @@ class ListPopup<T extends PopupListItem> {
               return true;
             }
             list.focus.select?.call();
+
+            // Early out if this popup item doesn't want any dismissals on
+            // select.
+            if (!list.focus.dismissOnSelect) {
+              return true;
+            }
+
             if (list.focus.dismissAll) {
               Popup.closeAll();
             } else {
@@ -425,11 +433,14 @@ class __PopupListItemShellState<T extends PopupListItem>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (details) {
+    return PropagatingListener(
+      onPointerDown: (details) {
         if (!widget.item.canSelect) {
           return;
         }
+        
+        details.stopPropagation();
+
         widget.item.select?.call();
         if (widget.item.dismissOnSelect) {
           if (widget.item.dismissAll) {

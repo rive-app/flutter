@@ -1,3 +1,4 @@
+import 'package:core/debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -92,6 +93,26 @@ class PopupContextItem extends PopupListItem {
         padIcon = null,
         popupWidth = null,
         dismissOnSelect = true;
+
+  /// Make a focusable PopupContexItem that gets a callback with the generated
+  /// key and focusNode to build the child. Note the child is built only once.
+  factory PopupContextItem.focusable(
+    String name, {
+    void Function() select,
+    Widget Function(FocusNode, Key) child,
+  }) {
+    final FocusNode focusNode = FocusNode();
+    final Key key = GlobalKey();
+    return PopupContextItem(
+      name,
+      dismissOnSelect: false,
+      select: () {
+        focusNode.requestFocus();
+        select?.call();
+      },
+      child: child(focusNode, key),
+    );
+  }
 
   bool get isSeparator => name == null;
 
