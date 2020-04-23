@@ -19,7 +19,10 @@ typedef MakeToolPopupItems = List<PopupContextItem> Function(OpenFileContext);
 /// currently selected item (and displays the appropriate icon in that case in
 /// the button itself).
 class ToolPopupButton extends StatefulWidget {
+  /// Make items is called once when the popup first opens. Most popups can get
+  /// away with caching and building their children only once.
   final MakeToolPopupItems makeItems;
+  final VoidCallback open;
   final String defaultIcon;
   final double width;
   final Tip tip;
@@ -27,6 +30,7 @@ class ToolPopupButton extends StatefulWidget {
 
   const ToolPopupButton({
     @required this.makeItems,
+    this.open,
     this.defaultIcon,
     this.iconBuilder,
     this.width,
@@ -64,7 +68,10 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
           opened: (popup) {
             _popup = popup;
           },
-          contextItemsBuilder: (context) => items,
+          contextItemsBuilder: (context) {
+            widget.open?.call();
+            return items;
+          },
           iconBuilder: widget.iconBuilder ??
               (context, file, isHovered) {
                 var item = PopupContextItem.withIcon(tool.icon, items);
