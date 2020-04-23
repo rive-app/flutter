@@ -1,10 +1,9 @@
-import 'package:core/debounce.dart';
 import 'package:flutter/material.dart';
+
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
-
-import 'list_popup.dart';
 
 typedef PopupItemWidgetBuilder = Widget Function(BuildContext, bool);
 typedef ColorBuilder = Color Function(bool);
