@@ -41,6 +41,78 @@ class TeamDetailPanel extends StatelessWidget {
       itemHeight: kTreeItemHeight,
     );
 
+    List<Widget> children = <Widget>[
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: <Widget>[
+            EditableAvatar(
+              avatarRadius: 15,
+              avatarPath: team.avatar,
+              changeAvatar: null,
+            ),
+            Expanded(
+                child: Padding(
+              padding: const EdgeInsets.only(left: 7),
+              child: Text(
+                team.name,
+                style: textStyles.fileGreyTextLarge,
+              ),
+            ))
+          ],
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: SizedBox(
+          height: 1,
+          child: TreeLine(
+            color: treeStyle.lineColor,
+          ),
+        ),
+      ),
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ListView(
+              children: team.teamMembers
+                  .map((member) => _TeamMember(user: member))
+                  .toList()),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: SizedBox(
+          height: 1,
+          child: TreeLine(
+            color: treeStyle.lineColor,
+          ),
+        ),
+      ),
+    ];
+
+    if (canEditTeam(team.permission)) {
+      children.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: FlatIconButton(
+          label: 'Edit Members',
+          icon: TintedIcon(
+            icon: 'teams-button',
+            color: RiveTheme.of(context).colors.fileIconColor,
+          ),
+          tip: const Tip(
+            label: 'Invite new members to your team',
+            direction: PopupDirection.topToCenter,
+            fallbackDirections: [
+              PopupDirection.topToCenter,
+            ],
+          ),
+          onTap: () => showSettings(
+              context: context, initialPanel: SettingsPanel.members),
+        ),
+      ));
+    }
+
     return Container(
         decoration: BoxDecoration(
           color: riveColors.fileBackgroundLightGrey,
@@ -52,74 +124,7 @@ class TeamDetailPanel extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: <Widget>[
-                    EditableAvatar(
-                      avatarRadius: 15,
-                      avatarPath: team.avatar,
-                      changeAvatar: null,
-                    ),
-                    Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.only(left: 7),
-                      child: Text(
-                        team.name,
-                        style: textStyles.fileGreyTextLarge,
-                      ),
-                    ))
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: SizedBox(
-                  height: 1,
-                  child: TreeLine(
-                    color: treeStyle.lineColor,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: ListView(
-                      children: team.teamMembers
-                          .map((member) => _TeamMember(user: member))
-                          .toList()),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: SizedBox(
-                  height: 1,
-                  child: TreeLine(
-                    color: treeStyle.lineColor,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: FlatIconButton(
-                  label: 'Edit Members',
-                  icon: TintedIcon(
-                    icon: 'teams-button',
-                    color: RiveTheme.of(context).colors.fileIconColor,
-                  ),
-                  tip: const Tip(
-                    label: 'Invite new members to your team',
-                    direction: PopupDirection.topToCenter,
-                    fallbackDirections: [
-                      PopupDirection.topToCenter,
-                    ],
-                  ),
-                  onTap: () => showSettings(
-                      context: context, initialPanel: SettingsPanel.members),
-                ),
-              ),
-            ]));
+            children: children));
   }
 }
 
