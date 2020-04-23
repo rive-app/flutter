@@ -89,7 +89,7 @@ class FolderTreeView extends StatelessWidget {
                 // fontWeight: FontWeight.w100,
                 color: fileBrowser?.selectedFolder == item.data
                     ? Colors.white
-                    : colors.fileTextLightGrey,
+                    : colors.fileTreeText,
               ),
             ),
           ),

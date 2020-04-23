@@ -6,6 +6,7 @@
 // ignore_for_file: implicit_dynamic_variable, implicit_dynamic_parameter
 
 import 'dart:html';
+// ignore: uri_does_not_exist
 import 'dart:indexed_db' as idb;
 import 'dart:typed_data';
 

@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/widgets.dart';
 
+import 'theme/theme_native.dart' if (dart.library.html) 'theme/theme_web.dart';
+
 // General colors
 const lightGrey = Color(0xFF8C8C8C);
 const white = Color(0xFFFFFFFF);
@@ -10,9 +12,7 @@ const purple = Color(0xFFD041AB);
 /// Colors used in the Rive Theme
 /// Define them as getters and keep them const
 class RiveColors {
-  factory RiveColors() {
-    return _instance;
-  }
+  factory RiveColors() => _instance;
   const RiveColors._();
   static const RiveColors _instance = RiveColors._();
 
@@ -82,7 +82,6 @@ class RiveColors {
   Color get buttonNoHover => const Color(0xFF707070);
   Color get buttonHover => white;
 
-
   // Cursors
   Color get cursorGreen => const Color(0xFF16E6B3);
   Color get cursorRed => const Color(0xFFFF929F);
@@ -99,7 +98,7 @@ class RiveColors {
   Color get fileBackgroundLightGrey => const Color(0xFFF1F1F1);
   Color get fileSelectedBlue => const Color(0xFF57A5E0);
   Color get fileLineGrey => const Color(0xFFD8D8D8);
-  Color get fileTextLightGrey => lightGrey;
+  Color get fileTreeText => const Color(0xFF666666);
   Color get fileSelectedFolderIcon => white;
   Color get fileUnselectedFolderIcon => const Color(0xFFA9A9A9);
   Color get fileIconColor => const Color(0xFFA9A9A9);
@@ -200,7 +199,7 @@ class TextStyles {
       fontFamily: 'Roboto-Light', color: Color(0xFF666666), fontSize: 13);
 
   TextStyle get tooltipText => const TextStyle(
-      fontFamily: 'Roboto-Light', color: Color(0xFFCCCCCC), fontSize: 13);
+      fontFamily: 'Roboto-Light', color: Color(0xFFCCCCCC), fontSize: 13, height: 1.61);
 
   TextStyle get tooltipDisclaimer => const TextStyle(
         fontFamily: 'Roboto-Light',
@@ -295,7 +294,7 @@ class TextStyles {
       fontSize: 13,
       fontWeight: FontWeight.w300);
   TextStyle get fileWhiteText => const TextStyle(
-      fontFamily: 'Roboto-Medium',
+      fontFamily: 'Roboto-Regular',
       color: white,
       fontSize: 13,
       fontWeight: FontWeight.w300);
@@ -386,4 +385,5 @@ class RiveThemeData {
   RiveColors get colors => RiveColors();
   Gradients get gradients => const Gradients();
   TextStyles get textStyles => const TextStyles();
+  PlatformSpecific get platform => PlatformSpecific();
 }

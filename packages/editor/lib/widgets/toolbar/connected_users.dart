@@ -17,11 +17,10 @@ class ConnectedUsers extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<OpenFileContext>(
       valueListenable: rive.file,
-      builder: (_, file, __) =>
+      builder: (context, file, _) =>
           ValueListenableBuilder<Iterable<ClientSidePlayer>>(
         valueListenable: file.core.allPlayers,
-        builder: (context, users, child) {
-          // print("Connected Users: ${users.length}");
+        builder: (context, users, _) {
           return Row(
             children: [
               for (var connectedUser in users) ...[
@@ -30,55 +29,70 @@ class ConnectedUsers extends StatelessWidget {
                   builder: (context, user, chld) => AvatarView(
                     color: StageCursor.colorFromPalette(connectedUser.index),
                     imageUrl: user?.avatar,
+                    name: user?.name ?? user?.username,
                   ),
                 ),
-                child,
               ],
             ],
           );
         },
-        child: Container(width: 20),
       ),
     );
   }
 }
 
 class AvatarView extends StatelessWidget {
-  final String imageUrl;
-  final Color color;
-  final double diameter;
-  final double borderWidth;
-
   const AvatarView({
     @required this.imageUrl,
     @required this.color,
+    @required this.name,
     Key key,
-    this.diameter = 30,
+    this.diameter = 26,
     this.borderWidth = 2,
   }) : super(key: key);
+
+  final String imageUrl;
+  final Color color;
+  final String name;
+  final double diameter;
+  final double borderWidth;
 
   @override
   Widget build(BuildContext context) {
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+    final hasName = name != null && name.isNotEmpty;
+
     return Center(
-      child: SizedBox(
-        width: diameter,
-        height: diameter,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: color, width: borderWidth),
-            borderRadius: BorderRadius.circular(diameter / 2),
-          ),
-          child: CircleAvatar(
-            child: hasImage
-                ? null
-                : Center(
-                    child: Icon(
-                      Icons.person,
-                      size: diameter,
-                    ),
-                  ),
-            backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: SizedBox(
+          width: diameter,
+          height: diameter,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: color, width: borderWidth),
+              borderRadius: BorderRadius.circular(diameter / 2),
+            ),
+            padding: const EdgeInsets.all(1),
+            child: CircleAvatar(
+              child: hasImage
+                  ? null
+                  : hasName
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(3),
+                            child: Text(
+                              name.substring(0, 1).toUpperCase(),
+                              style: TextStyle(
+                                fontSize: diameter / 2,
+                                height: 1,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(),
+              backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+            ),
           ),
         ),
       ),

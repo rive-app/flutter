@@ -217,6 +217,7 @@ class _InvitePanelState extends State<InvitePanel> {
                                         diameter: 20,
                                         borderWidth: 0,
                                         imageUrl: item.avatar,
+                                        name: item.name ?? item.username,
                                         color: Colors.transparent,
                                       ),
                                     );
