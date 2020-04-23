@@ -1,0 +1,33 @@
+name: window_utils_web
+description: Web platform implementation of window_utils
+homepage: https://rive.app
+version: 0.0.1
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: WindowUtilsPlugin
+        fileName: window_utils_web.dart
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  
+  window_utils_platform_interface:
+    path: ../window_utils_platform_interface
+  meta: ^1.1.7
+  js: ^0.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  window_utils:
+    path: ../window_utils
+  pedantic: ^1.8.0
+
+environment:
+  sdk: ">=2.6.0 <3.0.0"
+  flutter: ">=1.12.8 <2.0.0"

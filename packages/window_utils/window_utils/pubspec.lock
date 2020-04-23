@@ -102,6 +102,11 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_web_plugins:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   glob:
     dependency: transitive
     description:
@@ -415,6 +420,13 @@ packages:
       relative: true
     source: path
     version: "1.0.3"
+  window_utils_web:
+    dependency: "direct main"
+    description:
+      path: "../window_utils_web"
+      relative: true
+    source: path
+    version: "0.0.1"
   yaml:
     dependency: transitive
     description:

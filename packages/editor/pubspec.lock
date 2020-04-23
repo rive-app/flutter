@@ -702,6 +702,13 @@ packages:
       relative: true
     source: path
     version: "1.0.3"
+  window_utils_web:
+    dependency: "direct main"
+    description:
+      path: "../window_utils/window_utils_web"
+      relative: true
+    source: path
+    version: "0.0.1"
   yaml:
     dependency: transitive
     description:

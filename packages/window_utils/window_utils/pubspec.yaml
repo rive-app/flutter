@@ -7,6 +7,8 @@ flutter:
     platforms:
       macos:
         default_package: window_utils_macos
+      web:
+        default_package: window_utils_web
 
 dependencies:
   flutter:
@@ -15,6 +17,9 @@ dependencies:
     path: ../window_utils_platform_interface
   window_utils_macos:
     path: ../window_utils_macos
+  # Need to include this as endorsed web plugins not supported yet
+  window_utils_web:
+    path: ../window_utils_web
 
 dev_dependencies:
   flutter_test:

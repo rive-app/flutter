@@ -18,6 +18,9 @@ dependencies:
     path: ../cursor
   window_utils:
     path: ../window_utils/window_utils
+  # Need to include this as endorsed web plugins not supported yet
+  window_utils_web:
+    path: ../window_utils/window_utils_web
   rive_api:
     path: ../rive_api
   rive_widgets:
