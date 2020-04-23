@@ -3,11 +3,8 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-
-
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/user.dart';
-
 import 'package:window_utils/window_utils.dart' as win_utils;
 
 const _authWebViewKey = 'auth';
@@ -70,15 +67,9 @@ class RiveAuth {
 
     var url = api.host + '/desktop/${action.name}/$provider';
 
-<<<<<<< HEAD
     var windowSize = const Size(800, 600);
-    String response = await WindowUtils.openWebView(
+    String response = await win_utils.openWebView(
       _authWebViewKey,
-=======
-    var windowSize = const Size(580, 600);
-    String spectre = await win_utils.openWebView(
-      'auth',
->>>>>>> win utils refactor working with macos
       url,
       size: windowSize,
       offset: Offset(
@@ -87,12 +78,11 @@ class RiveAuth {
       ),
       jsMessage: 'jsHandler',
     );
-<<<<<<< HEAD
 
     print("Response in this case was: ${response.runtimeType} $response");
     if (response == null) {
       print("Response was null here");
-      await WindowUtils.closeWebView(_authWebViewKey);
+      await win_utils.closeWebView(_authWebViewKey);
       return AuthResponse.empty();
     }
 
@@ -106,22 +96,16 @@ class RiveAuth {
         authResponse = AuthResponse.fromMessage(spectre);
         api.setCookie('spectre', spectre);
         await api.persist();
-      } else if(responseData.containsKey('error')) {
+      } else if (responseData.containsKey('error')) {
         var error = responseData['error'];
         authResponse = AuthResponse.fromError(error);
       }
 
-      await WindowUtils.closeWebView(_authWebViewKey);
+      await win_utils.closeWebView(_authWebViewKey);
       return authResponse ?? AuthResponse.empty();
-    } on FormatException catch(err) {
-      await WindowUtils.closeWebView(_authWebViewKey);
+    } on FormatException catch (err) {
+      await win_utils.closeWebView(_authWebViewKey);
       return AuthResponse.fromError(err.message);
-=======
-    if (spectre != null) {
-      api.setCookie('spectre', spectre);
-      await win_utils.closeWebView('auth');
-      await api.persist();
->>>>>>> win utils refactor working with macos
     }
   }
 
@@ -174,7 +158,6 @@ class RiveAuth {
     return false;
   }
 }
-
 
 class AuthResponse {
   String message, error;
