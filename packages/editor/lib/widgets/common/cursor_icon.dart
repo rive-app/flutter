@@ -19,8 +19,18 @@ class CursorIcon {
     );
   }
 
-  /// Back to default cursor.
-  // static void reset(BuildContext context) => Cursor.reset(context);
+  static CursorInstance build(Cursor cursor, String icon) {
+    return cursor.withBuilder(
+      (context) => CustomSingleChildLayout(
+        delegate: const _CursorPositionDelegate(),
+        child: TintedIcon(
+          icon: icon,
+          // intentionally null so that the icon is 'au naturel'
+          color: null,
+        ),
+      ),
+    );
+  }
 }
 
 /// Custom positioner that places the cursor icon centered on its origin.

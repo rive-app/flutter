@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -43,6 +44,7 @@ import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
+import 'package:rive_editor/widgets/common/cursor_icon.dart';
 
 typedef CustomSelectionHandler = bool Function(StageItem);
 
@@ -103,6 +105,13 @@ class Stage extends Debouncer {
   EditMode activeEditMode = EditMode.normal;
 
   CustomSelectionHandler customSelectionHandler;
+
+  /// We store these two separtely to avoid contention with how they are
+  /// activated/disabled.
+  CursorInstance _rightClickHandCursor;
+  CursorInstance _panHandCursor;
+
+  bool _isPanning = false;
 
   // Clear the selection handler only if it was a previously set one.
   bool clearSelectionHandler(CustomSelectionHandler handler) {
@@ -333,6 +342,7 @@ class Stage extends Debouncer {
 
   void mouseMove(int button, double x, double y) {
     _computeWorldMouse(x, y);
+    _updatePanIcon();
 
     file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
 
@@ -369,7 +379,9 @@ class Stage extends Debouncer {
 
     switch (button) {
       case 1:
-        if (tool is ClickableTool) {
+        if (_panHandCursor != null) {
+          _isPanning = true;
+        } else if (tool is ClickableTool) {
           final artboard = activeArtboard;
           (tool as ClickableTool)
               .onClick(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
@@ -389,6 +401,11 @@ class Stage extends Debouncer {
         }
 
         break;
+      case 2:
+        _isPanning = true;
+        _rightClickHandCursor?.remove();
+        _rightClickHandCursor = _showCustomCursor('cursor-hand');
+        break;
       default:
     }
   }
@@ -399,49 +416,46 @@ class Stage extends Debouncer {
     // Store the tool that got activated by this operation separate from the
     // _activeTool so we can know if we were already dragging.
     StageTool activatedTool;
-    switch (button) {
-      case 2:
-        double dx = x - _lastMousePosition[0];
-        double dy = y - _lastMousePosition[1];
+    if (_isPanning) {
+      double dx = x - _lastMousePosition[0];
+      double dy = y - _lastMousePosition[1];
 
-        _rightMouseMoveAccum += sqrt(dx * dx + dy * dy);
-        _viewTranslationTarget[0] += dx;
-        _viewTranslationTarget[1] += dy;
+      _rightMouseMoveAccum += sqrt(dx * dx + dy * dy);
+      _viewTranslationTarget[0] += dx;
+      _viewTranslationTarget[1] += dy;
 
-        _lastMousePosition[0] = x;
-        _lastMousePosition[1] = y;
-        markNeedsAdvance();
-        break;
-      case 1:
-        if (tool is TransformingTool) {
-          if (_activeTool == null) {
-            activatedTool = tool;
-            activatedTool.setEditMode(activeEditMode);
-            (activatedTool as TransformingTool).startTransformers(
-                file.selection.items.whereType<StageItem>(), _worldMouse);
-          } else {
-            (_activeTool as TransformingTool).advanceTransformers(_worldMouse);
-          }
+      _lastMousePosition[0] = x;
+      _lastMousePosition[1] = y;
+      markNeedsAdvance();
+    } else {
+      if (tool is TransformingTool) {
+        if (_activeTool == null) {
+          activatedTool = tool;
+          activatedTool.setEditMode(activeEditMode);
+          (activatedTool as TransformingTool).startTransformers(
+              file.selection.items.whereType<StageItem>(), _worldMouse);
+        } else {
+          (_activeTool as TransformingTool).advanceTransformers(_worldMouse);
         }
-        if (tool is DraggableTool) {
-          var artboard = activeArtboard;
-          var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
+      }
+      if (tool is DraggableTool) {
+        var artboard = activeArtboard;
+        var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
 
-          // [_activeTool] is [null] before dragging operation starts.
-          if (_activeTool == null) {
-            activatedTool = tool;
-            activatedTool.setEditMode(activeEditMode);
-            (activatedTool as DraggableTool).startDrag(
-                file.selection.items.whereType<StageItem>(),
-                artboard,
-                worldMouse);
-          } else {
-            // [_activeTool] dragging operation has already started, so we
-            // need to progress.
-            (_activeTool as DraggableTool).drag(worldMouse);
-          }
+        // [_activeTool] is [null] before dragging operation starts.
+        if (_activeTool == null) {
+          activatedTool = tool;
+          activatedTool.setEditMode(activeEditMode);
+          (activatedTool as DraggableTool).startDrag(
+              file.selection.items.whereType<StageItem>(),
+              artboard,
+              worldMouse);
+        } else {
+          // [_activeTool] dragging operation has already started, so we
+          // need to progress.
+          (_activeTool as DraggableTool).drag(worldMouse);
         }
-        break;
+      }
     }
 
     if (activatedTool != null) {
@@ -450,6 +464,9 @@ class Stage extends Debouncer {
   }
 
   void mouseUp(int button, double x, double y) {
+    _isPanning = false;
+    _rightClickHandCursor?.remove();
+    _rightClickHandCursor = null;
     _computeWorldMouse(x, y);
 
     _lastMousePosition[0] = x;
@@ -486,6 +503,7 @@ class Stage extends Debouncer {
     if (_activeTool is MoveableTool) {
       (_activeTool as MoveableTool).onExit();
     }
+    _updatePanIcon();
   }
 
   // TODO: Get actual active artboard, not just the first one.
@@ -498,11 +516,50 @@ class Stage extends Debouncer {
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 
+  StreamSubscription<bool> _isActiveSubscription;
+
   Stage(this.file) {
     for (final object in file.core.objects) {
       if (object is Component) {
         initComponent(object);
       }
+    }
+    _isActiveSubscription = file.isActiveStream.listen(_fileActiveChanged);
+  }
+
+  /// Deal with the fileContext being activate/de-activated. This happens when a
+  /// tab containing the file is selected/changed. An inactive stage should be
+  /// kept in memory for quick retrieval if the user goes back to the tab, but
+  /// we don't want it listening to shortcuts anymore. Anything processing that
+  /// can be temporarily suspended should be. It can be re-activated when
+  /// isActive changes to true again. Eventually the stage object will have
+  /// [dispose] called when the tab has been deselected for enough time.
+  void _fileActiveChanged(bool isActive) {
+    if (isActive) {
+      ShortcutAction.pan.addListener(_panActionChanged);
+    } else {
+      ShortcutAction.pan.removeListener(_panActionChanged);
+    }
+  }
+
+  void _panActionChanged() {
+    if (!ShortcutAction.pan.value) {
+      // No longer panning? Break us out of a drag operation if we were in one.
+      _isPanning = false;
+    }
+    _updatePanIcon();
+  }
+
+  void _updatePanIcon() {
+    if (_isPanning) {
+      return;
+    }
+    // _worldMouse is null when we're hovered out of the stage
+    if (_worldMouse != null && ShortcutAction.pan.value) {
+      _panHandCursor ??= _showCustomCursor('cursor-hand');
+    } else {
+      _panHandCursor?.remove();
+      _panHandCursor = null;
     }
   }
 
@@ -579,7 +636,12 @@ class Stage extends Debouncer {
     hoverItem = null;
   }
 
-  void dispose() {}
+  void dispose() {
+    _isActiveSubscription.cancel();
+    _fileActiveChanged(false);
+    _panHandCursor?.remove();
+    _rightClickHandCursor?.remove();
+  }
 
   bool get shouldAdvance => _needsAdvance || needsDebounce;
   bool _needsAdvance = true;
@@ -720,6 +782,12 @@ class Stage extends Debouncer {
   }
 
   void hideCursor() => delegate?.customCursor?.hide();
-
   void showCursor() => delegate?.customCursor?.show();
+
+  CursorInstance _showCustomCursor(String icon) {
+    if (delegate?.customCursor != null) {
+      return CursorIcon.build(delegate.customCursor, icon);
+    }
+    return null;
+  }
 }

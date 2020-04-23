@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 
 /// A ShortcutAction that can be looked up by name (helpful for things like the
 /// shortcuts modal which shows available shortcut bindings, and  may eventually
@@ -6,7 +7,7 @@
 /// dictionary:
 ///
 /// {
-///   "tool-artboard": "Artboard Tool", 
+///   "tool-artboard": "Artboard Tool",
 ///   "tool-auto": "Select Tool",
 ///   ...
 /// }
@@ -40,7 +41,7 @@ class ShortcutAction {
   static const ShortcutAction nextFrame = ShortcutAction('frame-next');
   static const ShortcutAction nextKeyFrame = ShortcutAction('frame-next-key');
   static const ShortcutAction nodeTool = ShortcutAction('tool-node');
-  static const ShortcutAction pan = ShortcutAction('pan');
+  static TogglingShortcutAction pan = TogglingShortcutAction('pan');
   static const ShortcutAction paste = ShortcutAction('paste');
 
   static const ShortcutAction poseTool = ShortcutAction('tool-pose');
@@ -152,10 +153,20 @@ class ShortcutAction {
 
 /// A ShortcutAction that somehow mutates its value when it is pressed or
 /// released.
-abstract class StatefulShortcutAction<T> extends ShortcutAction {
+abstract class StatefulShortcutAction<T> extends ShortcutAction
+    with ChangeNotifier {
   T _value;
-  StatefulShortcutAction(String name) : super(name);
+  StatefulShortcutAction(String name, T defaultValue)
+      : _value = defaultValue,
+        super(name);
   T get value => _value;
+
+  void _changeValue(T change) {
+    if (change != _value) {
+      _value = change;
+      notifyListeners();
+    }
+  }
 
   void onPress();
   void onRelease();
@@ -164,15 +175,11 @@ abstract class StatefulShortcutAction<T> extends ShortcutAction {
 /// A ShortcutAction with a backing boolean value toggled on/off when the key
 /// is pressed/released.
 class TogglingShortcutAction extends StatefulShortcutAction<bool> {
-  TogglingShortcutAction(String name) : super(name);
+  TogglingShortcutAction(String name) : super(name, false);
 
   @override
-  void onPress() {
-    _value = true;
-  }
+  void onPress() => _changeValue(true);
 
   @override
-  void onRelease() {
-    _value = false;
-  }
+  void onRelease() => _changeValue(false);
 }
