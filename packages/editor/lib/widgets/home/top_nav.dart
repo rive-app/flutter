@@ -87,7 +87,7 @@ class TopNav extends StatelessWidget {
       },
       itemBuilder: (popupContext, item, isHovered) =>
           item.itemBuilder(popupContext, isHovered),
-      items: [
+      itemsBuilder: (context) => [
         PopupContextItem('New File', select: fileBrowser.createFile),
         PopupContextItem('New Folder', select: fileBrowser.createFolder),
         PopupContextItem.separator(),
