@@ -7,5 +7,5 @@ class PlatformSpecific {
   static const PlatformSpecific _instance = PlatformSpecific._();
 
   // Tab offset
-  double get leftOffset => 95;
+  double get leftOffset => 69;
 }

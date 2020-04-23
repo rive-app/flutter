@@ -336,77 +336,32 @@ class _NavigationPanelState extends State<NavigationPanel> {
     return Container(
       decoration: BoxDecoration(
         color: riveColors.fileBackgroundLightGrey,
-        border: Border(
-            right: BorderSide(
-          color: riveColors.fileBorder,
-        )),
       ),
-      padding: const EdgeInsets.only(top: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.only(
-              right: 20,
-              left: 20,
-            ),
-            child: Container(
-              height: 35,
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                color: riveColors.fileSearchBorder,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  SearchIcon(
-                    color: riveColors.fileSearchIcon,
-                    size: 16,
-                  ),
-                  Container(width: 10),
-                  Expanded(
-                    child: Container(
-                      height: 35,
-                      alignment: Alignment.centerLeft,
-                      child: TextField(
-                        textAlign: TextAlign.left,
-                        textAlignVertical: TextAlignVertical.center,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          hintText: 'Search',
-                          contentPadding: EdgeInsets.zero,
-                          filled: true,
-                          hoverColor: Colors.transparent,
-                          fillColor: Colors.transparent,
-                        ),
-                        style: RiveTheme.of(context).textStyles.fileSearchText,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              right: 10,
+              left: 10,
             ),
           ),
           ValueListenableBuilder<HomeSection>(
             valueListenable: rive.sectionListener,
             builder: (context, section, _) => Padding(
-              padding: const EdgeInsets.only(top: 10, left: 20),
+              padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
               child: Column(
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: IconTile(
+                  IconTile(
+                      label: 'Search',
+                      iconName: 'search',
+                      onTap: () {},
+                    ),IconTile(
                       label: 'Get Started',
                       iconName: 'rocket',
                       onTap: () {},
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: IconTile(
+                  IconTile(
                       iconName: 'notification',
                       label: 'Notifications',
                       highlight: section == HomeSection.notifications,
@@ -418,30 +373,23 @@ class _NavigationPanelState extends State<NavigationPanel> {
                         rive.sectionListener.value = HomeSection.notifications;
                       },
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: IconTile(
+                  IconTile(
                       iconName: 'recents',
                       label: 'Recents',
                       onTap: () {},
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: IconTile(
+                  IconTile(
                       iconName: 'popup-community',
                       label: 'Community',
                       onTap: () {},
                     ),
-                  ),
                 ],
               ),
             ),
           ),
           Separator(
             color: riveColors.fileLineGrey,
-            padding: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.only(top: 10),
           ),
           Expanded(
             child: ValueListenableBuilder<List<FolderTreeController>>(
@@ -462,7 +410,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                           child: Separator(
                             color: riveColors.fileLineGrey,
                             padding: EdgeInsets.only(
-                              left: treeStyle.padding.left,
+                              left: 20,
                             ),
                           ),
                         ),
@@ -483,14 +431,14 @@ class _NavigationPanelState extends State<NavigationPanel> {
                             color: riveColors.fileLineGrey,
                             padding: EdgeInsets.only(
                               left: bottomSliverDocked
-                                  ? treeStyle.padding.left
+                                  ? 20
                                   : 0,
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(
                               left: 20,
-                              right: 10,
+                              right: 20,
                               bottom: 20,
                               top: 20,
                             ),
@@ -498,7 +446,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                               label: 'New Team',
                               icon: 'teams-button',
                               tip: const Tip(
-                                label: 'Create a new team',
+                                label: 'Create a space where you and\nyour team can share files.',
                                 direction: PopupDirection.bottomToCenter,
                                 fallbackDirections: [
                                   PopupDirection.topToCenter,

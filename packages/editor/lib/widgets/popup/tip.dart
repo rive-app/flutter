@@ -183,7 +183,7 @@ class TipContext {
         fallbackDirections: _currentTip.fallbackDirections,
         
         builder: (context) => Padding(
-          padding: const EdgeInsets.all(15),
+          padding: const EdgeInsets.only(top:8, right:15, bottom: 13, left:15),
           child: _buildTip(context, _currentTip),
         ),
       );

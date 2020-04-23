@@ -24,20 +24,20 @@ class IconTile extends StatelessWidget {
     final highlightIconColor = theme.colors.fileSelectedFolderIcon;
     final unhighlightTextStyle = theme.textStyles.fileLightGreyText;
     final unhighlightIconColor = theme.colors.fileIconColor;
-    final highlightDecoration = BoxDecoration(
-      color: theme.colors.toolbarButtonSelected,
-      borderRadius: const BorderRadius.all(
-        Radius.circular(5),
-      ),
-    );
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: highlight ? highlightDecoration : null,
+        decoration: BoxDecoration(
+          color: highlight ? theme.colors.toolbarButtonSelected : theme.colors.fileBackgroundLightGrey,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(5),
+          ),
+        ),
+        height: 35,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            vertical: 8,
+            vertical: 0,
             horizontal: 10,
           ),
           child: Row(
