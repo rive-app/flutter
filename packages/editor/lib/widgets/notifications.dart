@@ -168,7 +168,7 @@ class PersonalPanel extends StatelessWidget {
           stream: NotificationProvider.of(context).notificationErrorStream,
           builder: (context, snapshot) => snapshot.hasData
               ? Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(20),
                   child: Text(
                       'There has been an error accessing '
                       'your notifications: ${snapshot.data}',

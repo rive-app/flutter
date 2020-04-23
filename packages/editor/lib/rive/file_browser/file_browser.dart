@@ -51,9 +51,7 @@ class FileBrowser extends FileBrowserController {
       ValueNotifier<RiveFileSortOption>(null);
 
   RiveOwner _owner;
-  set owner(RiveOwner owner) {
-    _owner = owner;
-  }
+  set owner(RiveOwner owner) => _owner = owner;
 
   RiveFolder _current;
   int _lastSelectedIndex;
