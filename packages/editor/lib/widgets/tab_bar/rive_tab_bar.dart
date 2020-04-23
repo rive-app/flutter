@@ -346,8 +346,6 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
                         index + widget.firstTabIndex - 1,
                     invertRight: widget.selectedIndex ==
                         index + widget.firstTabIndex + 1,
-                    // don't draw the last separator
-                    separator: index != widget.tabs.length - 1,
                   ),
                   childCount: widget.tabs.length,
                   addAutomaticKeepAlives: false,

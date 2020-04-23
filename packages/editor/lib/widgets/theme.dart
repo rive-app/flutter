@@ -98,7 +98,7 @@ class RiveColors {
   Color get fileBackgroundLightGrey => const Color(0xFFF1F1F1);
   Color get fileSelectedBlue => const Color(0xFF57A5E0);
   Color get fileLineGrey => const Color(0xFFD8D8D8);
-  Color get fileTextLightGrey => lightGrey;
+  Color get fileTreeText => const Color(0xFF666666);
   Color get fileSelectedFolderIcon => white;
   Color get fileUnselectedFolderIcon => const Color(0xFFA9A9A9);
   Color get fileIconColor => const Color(0xFFA9A9A9);
@@ -199,7 +199,7 @@ class TextStyles {
       fontFamily: 'Roboto-Light', color: Color(0xFF666666), fontSize: 13);
 
   TextStyle get tooltipText => const TextStyle(
-      fontFamily: 'Roboto-Light', color: Color(0xFFCCCCCC), fontSize: 13);
+      fontFamily: 'Roboto-Light', color: Color(0xFFCCCCCC), fontSize: 13, height: 1.61);
 
   TextStyle get tooltipDisclaimer => const TextStyle(
         fontFamily: 'Roboto-Light',
@@ -294,7 +294,7 @@ class TextStyles {
       fontSize: 13,
       fontWeight: FontWeight.w300);
   TextStyle get fileWhiteText => const TextStyle(
-      fontFamily: 'Roboto-Medium',
+      fontFamily: 'Roboto-Regular',
       color: white,
       fontSize: 13,
       fontWeight: FontWeight.w300);
