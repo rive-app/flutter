@@ -6,7 +6,15 @@ import 'package:tree_widget/tree_controller.dart';
 import 'tree_item.dart';
 
 class MyTreeController extends TreeController<TreeItem> {
-  MyTreeController(List<TreeItem> data) : super(data);
+  List<TreeItem> _data;
+  MyTreeController(this._data) : super();
+
+  @override
+  Iterable<TreeItem> get data => _data;
+
+  set data(Iterable<TreeItem> value) {
+    _data = value.toList();
+  }
 
   /// Our data set will store properties, so we opt-in to having them computed a
   /// flattening time.
@@ -139,6 +147,5 @@ class MyTreeController extends TreeController<TreeItem> {
 
   @override
   void onRightClick(BuildContext context, PointerDownEvent event,
-      FlatTreeItem<TreeItem> item) {
-  }
+      FlatTreeItem<TreeItem> item) {}
 }

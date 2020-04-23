@@ -14,8 +14,15 @@ import 'stage/stage_item.dart';
 /// propagate selections.
 class DrawOrderTreeController extends TreeController<Component> {
   final OpenFileContext file;
-  DrawOrderTreeController(List<Component> components, {this.file})
-      : super(components);
+  List<Component> _components;
+  DrawOrderTreeController(this._components, {this.file}) : super();
+
+  @override
+  Iterable<Component> get data => _components;
+
+  set data(Iterable<Component> value) {
+    _components = value.toList();
+  }
 
   @override
   List<Component> childrenOf(Component treeItem) => treeItem is Artboard

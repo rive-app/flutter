@@ -140,7 +140,8 @@ class FileBrowser extends FileBrowserController {
       result.root.first.owner = _owner;
     }
 
-    myTreeController.value.replaceData(result.root);
+    myTreeController.value.data = result.root;
+
     myTreeController.notifyListeners();
     if (selectedFolderId != null) {
       var selectedFolder = myTreeController.value.flat

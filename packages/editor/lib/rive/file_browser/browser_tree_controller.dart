@@ -10,10 +10,18 @@ import 'package:rive_editor/rive/rive.dart';
 
 /// TreeController for the Rive folders displayed in the FileBrowser screen.
 class FolderTreeController extends TreeController<RiveFolder> {
-  final List<RiveFolder> data;
+  List<RiveFolder> _data;
   final Rive rive;
   final FileBrowser fileBrowser;
-  FolderTreeController(this.data, {this.fileBrowser, this.rive}) : super(data);
+  FolderTreeController(this._data, {this.fileBrowser, this.rive}) : super();
+
+  @override
+  Iterable<RiveFolder> get data => _data;
+
+  set data(Iterable<RiveFolder> value) {
+    _data = value.toList();
+    refreshExpanded();
+  }
 
   @override
   List<RiveFolder> childrenOf(RiveFolder treeItem) =>
