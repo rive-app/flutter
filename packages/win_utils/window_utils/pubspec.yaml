@@ -1,0 +1,29 @@
+name: window_utils
+description: Flutter plugin for managing window decoration.
+version: 1.0.3
+
+flutter:
+  plugin:
+    platforms:
+      macos:
+        pluginClass: WindowUtils
+      windows:
+        pluginClass: WindowUtils
+
+dependencies:
+  flutter:
+    sdk: flutter
+  window_utils_platform_interface:
+    path: ../window_utils_platform_interface
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: ^1.3.0
+  mockito: ^4.1.1
+  plugin_platform_interface: ^1.0.0
+  pedantic: ^1.8.0
+
+environment:
+  sdk: ">=2.6.0 <3.0.0"
+  flutter: ">=1.17.0 <2.0.0"
