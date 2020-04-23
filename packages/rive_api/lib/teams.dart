@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
+import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/user.dart';
 
 final Logger log = Logger('Rive API');

@@ -6,6 +6,8 @@ import 'package:rive_api/artists.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
+import 'package:rive_api/models/team_role.dart';
+import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';

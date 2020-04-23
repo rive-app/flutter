@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_api/models/follow.dart';
+import 'package:rive_api/models/team_role.dart';
 
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
