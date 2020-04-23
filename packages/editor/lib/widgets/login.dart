@@ -10,7 +10,7 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:window_utils/window_utils.dart';
 
 enum LoginPage { login, register, recover }
-typedef AuthAction = Future<bool> Function();
+typedef AuthAction = Future<AuthResponse> Function();
 
 class Login extends StatefulWidget {
   @override
@@ -274,10 +274,12 @@ class _LoginState extends State<Login> {
     }
     _disableButton(true);
     final rive = RiveContext.of(context);
-    final success = await auth();
-    if (success) {
+    final authResponse = await auth();
+    if (authResponse.isEmpty) {
+      _disableButton(false);
+    } else if (authResponse.isMessage){
       await rive.updateUser();
-    } else {
+    } else if (authResponse.isError) {
       _disableButton(false);
     }
   }
