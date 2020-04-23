@@ -13,6 +13,7 @@ import 'package:window_utils/window_utils.dart';
 import 'package:core/error_logger/error_logger.dart' as error_logger;
 import 'package:rive_core/event.dart';
 
+import 'package:rive_editor/version.dart';
 import 'package:rive_editor/widgets/animation/animation_panel.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
@@ -327,7 +328,9 @@ class EditorScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var rive = RiveContext.of(context);
+    final rive = RiveContext.of(context);
+    final theme = RiveTheme.of(context);
+
     return Column(
       children: [
         Container(
@@ -346,6 +349,13 @@ class EditorScaffold extends StatelessWidget {
                     ),
                     _TabBar(rive: rive),
                   ],
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(right: 20),
+                child: Text(
+                  'v$appVersion',
+                  style: TextStyle(color: Colors.grey),
                 ),
               ),
             ],
