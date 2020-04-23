@@ -135,6 +135,29 @@ class FilesPanel extends StatelessWidget {
     );
   }
 
+  /// Displayed when a no folder is selected, somehow
+  Widget _buildNoFolderSelection(BuildContext context) {
+    return const Center(
+      child: Text(
+        'Please select your user space or any folder\n'
+        'in the panel the left side.',
+        style: TextStyle(color: Colors.grey),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildNoSelection(BuildContext context) {
+    return const Center(
+      child: Text(
+        'Please select your user space or any team\n'
+        'you may be a part of on the left.',
+        style: TextStyle(color: Colors.grey),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   Widget _buildFiles(BuildContext context, List<RiveFile> files,
       FileBrowser browser, Rive _rive) {
     if (files == null || files.isEmpty) return null;
@@ -224,8 +247,8 @@ class FilesPanel extends StatelessWidget {
     final rive = RiveContext.of(context);
     final fileBrowser = rive.activeFileBrowser.value;
 
-    if (fileBrowser?.selectedFolder == null) {
-      return _buildEmpty(context);
+    if (fileBrowser == null) {
+      return _buildNoSelection(context);
     }
     return LayoutBuilder(
       builder: (context, dimens) {
@@ -234,7 +257,7 @@ class FilesPanel extends StatelessWidget {
             fileBrowser.selectedFolder?.children?.cast<RiveFolder>() ?? [];
 
         if (fileBrowser.selectedFolder == null) {
-          return _buildEmpty(context);
+          return _buildNoFolderSelection(context);
         }
         var files = fileBrowser.selectedFolder.files;
         return ValueListenableBuilder<List<RiveFile>>(
