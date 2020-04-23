@@ -340,19 +340,25 @@ class Rive {
     value.file?.dispose();
   }
 
+  void _changeActiveFile(OpenFileContext context) {
+    file.value?.isActive = false;
+    file.value = context;
+    file.value?.isActive = true;
+  }
+
   void selectTab(RiveTabItem value) {
     if (value == systemTab) {
       fileBrowsers?.forEach((fileBrowser) => fileBrowser.load());
     } else if (value.file != null) {
-      // Seriously, https://media.giphy.com/media/aZ3LDBs1ExsE8/giphy.gif
-      file.value = value.file;
-      file.value.connect();
+      _changeActiveFile(value.file);
+      value.file.connect();
     }
 
     selectedTab.value = value;
   }
 
   final Set<_Key> _pressed = {};
+  final Set<StatefulShortcutAction> _pressedStateful = {};
 
   void onKeyEvent(ShortcutKeyBinding keyBinding, RawKeyEvent keyEvent,
       bool hasFocusObject) {
@@ -384,6 +390,16 @@ class Rive {
     var actions = keyBinding.lookupAction(
         _pressed.map((key) => key.physical).toList(growable: false));
 
+    var statefulActions = Set<StatefulShortcutAction>.from(
+        actions?.whereType<StatefulShortcutAction>() ??
+            <StatefulShortcutAction>[]);
+    for (final noLongerPressed
+        in _pressedStateful.difference(statefulActions)) {
+      noLongerPressed.onRelease();
+    }
+    _pressedStateful.clear();
+    _pressedStateful.addAll(statefulActions);
+
     actions?.forEach(triggerAction);
   }
 
@@ -395,8 +411,9 @@ class Rive {
       return;
     }
 
-    // TODO: If there are unhandled shortcut actions we care about at this
-    // level, we should process them here.
+    if (action is StatefulShortcutAction) {
+      action.onPress();
+    }
   }
 
   void _serializeTabs() {
@@ -431,7 +448,7 @@ class Rive {
 
     if (makeActive) {
       selectedTab.value = openFileTab;
-      file.value = openFileTab.file;
+      _changeActiveFile(openFileTab.file);
       await openFileTab.file.connect();
     }
     return openFileTab.file;

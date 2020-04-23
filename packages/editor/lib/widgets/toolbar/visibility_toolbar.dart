@@ -11,7 +11,13 @@ import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 
 /// Visibility popup menu in the toolbar
-class VisibilityPopupButton extends StatelessWidget {
+class VisibilityPopupButton extends StatefulWidget {
+  @override
+  _VisibilityPopupButtonState createState() => _VisibilityPopupButtonState();
+}
+
+class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
+  FocusNode _zoomFocusNode;
   @override
   Widget build(BuildContext context) {
     return ToolPopupButton(
@@ -36,89 +42,93 @@ class VisibilityPopupButton extends StatelessWidget {
           ),
         );
       },
-      makeItems: (file) {
-        // Use keys for the input widgets so they don't recycle.
-        var zoomKey = GlobalKey();
-        var resKey = GlobalKey();
-        return [
-          PopupContextItem(
-            'Zoom',
-            child: ValueNotifierTextField(
-              key: zoomKey,
+      open: () {
+        _zoomFocusNode?.requestFocus();
+      },
+      makeItems: (file) => [
+        PopupContextItem.focusable(
+          'Zoom',
+          child: (focus, key) {
+            // Focus this input right away when the popup displays.
+            (_zoomFocusNode = focus).requestFocus();
+            return ValueNotifierTextField(
+              key: key,
+              focusNode: focus,
               notifier: file.stage.zoomLevelNotifier,
               converter: PercentageInputConverter.instance,
               change: (double value) => file.stage.zoomLevel = value,
-            ),
-            select: () {},
-            dismissOnSelect: false,
+            );
+          },
+        ),
+        PopupContextItem.focusable(
+          'Resolution',
+          child: (focus, key) => ValueNotifierTextField(
+            key: key,
+            focusNode: focus,
+            notifier: file.stage.resolutionNotifier,
+            converter: PercentageInputConverter.instance,
+            change: (double value) => file.stage.resolution = value,
           ),
-          PopupContextItem('Resolution',
-              child: ValueNotifierTextField(
-                key: resKey,
-                notifier: file.stage.resolutionNotifier,
-                converter: PercentageInputConverter.instance,
-              ),
-              select: () {},
-              dismissOnSelect: false),
-          PopupContextItem.separator(),
-          CheckPopupItem(
-            'Images',
-            notifier: file.stage.showImagesNotifier,
-            isChecked: () => file.stage.showImages,
-            select: () => file.stage.showImages = !file.stage.showImages,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Image Contour',
-            notifier: file.stage.showContourNotifier,
-            isChecked: () => file.stage.showContour,
-            select: () => file.stage.showContour = !file.stage.showContour,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Bones',
-            notifier: file.stage.showBonesNotifier,
-            isChecked: () => file.stage.showBones,
-            select: () => file.stage.showBones = !file.stage.showBones,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Effects',
-            notifier: file.stage.showEffectsNotifier,
-            isChecked: () => file.stage.showEffects,
-            select: () => file.stage.showEffects = !file.stage.showEffects,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Rulers',
-            shortcut: ShortcutAction.toggleRulers,
-            notifier: file.stage.showRulersNotifier,
-            isChecked: () => file.stage.showRulers,
-            select: () => file.rive.triggerAction(ShortcutAction.toggleRulers),
-            dismissOnSelect: false,
-          ),
-          PopupContextItem(
-            'Reset Rulers',
-            padIcon: true,
-            shortcut: ShortcutAction.resetRulers,
-            select: () => file.rive.triggerAction(ShortcutAction.resetRulers),
-          ),
-          CheckPopupItem(
-            'Grid',
-            notifier: file.stage.showGridNotifier,
-            isChecked: () => file.stage.showGrid,
-            select: () => file.stage.showGrid = !file.stage.showGrid,
-            dismissOnSelect: false,
-          ),
-          CheckPopupItem(
-            'Axis',
-            notifier: file.stage.showAxisNotifier,
-            isChecked: () => file.stage.showAxis,
-            select: () => file.stage.showAxis = !file.stage.showAxis,
-            dismissOnSelect: false,
-          ),
-        ];
-      },
+          select: () {},
+        ),
+        PopupContextItem.separator(),
+        CheckPopupItem(
+          'Images',
+          notifier: file.stage.showImagesNotifier,
+          isChecked: () => file.stage.showImages,
+          select: () => file.stage.showImages = !file.stage.showImages,
+          dismissOnSelect: false,
+        ),
+        CheckPopupItem(
+          'Image Contour',
+          notifier: file.stage.showContourNotifier,
+          isChecked: () => file.stage.showContour,
+          select: () => file.stage.showContour = !file.stage.showContour,
+          dismissOnSelect: false,
+        ),
+        CheckPopupItem(
+          'Bones',
+          notifier: file.stage.showBonesNotifier,
+          isChecked: () => file.stage.showBones,
+          select: () => file.stage.showBones = !file.stage.showBones,
+          dismissOnSelect: false,
+        ),
+        CheckPopupItem(
+          'Effects',
+          notifier: file.stage.showEffectsNotifier,
+          isChecked: () => file.stage.showEffects,
+          select: () => file.stage.showEffects = !file.stage.showEffects,
+          dismissOnSelect: false,
+        ),
+        CheckPopupItem(
+          'Rulers',
+          shortcut: ShortcutAction.toggleRulers,
+          notifier: file.stage.showRulersNotifier,
+          isChecked: () => file.stage.showRulers,
+          select: () => file.rive.triggerAction(ShortcutAction.toggleRulers),
+          dismissOnSelect: false,
+        ),
+        PopupContextItem(
+          'Reset Rulers',
+          padIcon: true,
+          shortcut: ShortcutAction.resetRulers,
+          select: () => file.rive.triggerAction(ShortcutAction.resetRulers),
+        ),
+        CheckPopupItem(
+          'Grid',
+          notifier: file.stage.showGridNotifier,
+          isChecked: () => file.stage.showGrid,
+          select: () => file.stage.showGrid = !file.stage.showGrid,
+          dismissOnSelect: false,
+        ),
+        CheckPopupItem(
+          'Axis',
+          notifier: file.stage.showAxisNotifier,
+          isChecked: () => file.stage.showAxis,
+          select: () => file.stage.showAxis = !file.stage.showAxis,
+          dismissOnSelect: false,
+        ),
+      ],
     );
   }
 }
@@ -126,10 +136,12 @@ class VisibilityPopupButton extends StatelessWidget {
 /// Text field for T values. Takes a T notifier into which the text field value
 /// will be sent.
 class ValueNotifierTextField<T> extends StatelessWidget {
+  final FocusNode focusNode;
   const ValueNotifierTextField({
     @required this.notifier,
     @required this.converter,
     @required this.change,
+    this.focusNode,
     Key key,
   }) : super(key: key);
   final ValueNotifier<T> notifier;
@@ -142,6 +154,7 @@ class ValueNotifierTextField<T> extends StatelessWidget {
       child: ValueListenableBuilder<T>(
         valueListenable: notifier,
         builder: (context, value, _) => InspectorTextField<T>(
+          focusNode: focusNode,
           value: value,
           change: change,
           converter: converter,

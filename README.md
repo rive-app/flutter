@@ -21,3 +21,9 @@ docker build -t coop .
 docker tag coop:latest $AWS_COOP_ECR:latest
 docker push $AWS_COOP_ECR:latest
 ```
+
+## Build Mac
+```flutter run -d macos```
+
+## Build for Web
+```flutter run --release --dart-define=FLUTTER_WEB_USE_SKIA=true -d chrome```
