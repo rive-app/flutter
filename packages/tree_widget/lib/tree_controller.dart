@@ -58,19 +58,15 @@ abstract class TreeController<T> with ChangeNotifier {
   List<FlatTreeItem<T>> _flat;
   HashMap<Key, int> _indexLookup = HashMap<Key, int>();
   HashMap<Key, int> get indexLookup => _indexLookup;
-  Iterable<T> _data;
-  Iterable<T> get data => _data;
-  set data(Iterable<T> value) {
-    _data = value;
-    flatten();
-  }
+
+  Iterable<T> get data;
 
   _TreeDragOperation<T> _dragOperation;
 
   bool get isDragging => _dragOperation != null;
   _TreeDragOperation get dragOperation => _dragOperation;
 
-  TreeController(this._data) {
+  TreeController() {
     flatten();
   }
 
@@ -125,7 +121,7 @@ abstract class TreeController<T> with ChangeNotifier {
     var context = FlattenedTreeDataContext<T>(_expanded);
     var lookup = HashMap<Key, int>();
 
-    _flatten(context, _data, flat, lookup, [], null);
+    _flatten(context, data, flat, lookup, [], null);
     _flat = flat;
     _indexLookup = lookup;
     notifyListeners();
@@ -385,8 +381,9 @@ abstract class TreeController<T> with ChangeNotifier {
     }
   }
 
-  /// Replace the existing data set and try to keep the same items expanded.
-  void replaceData(Iterable<T> newData) {
+  /// Refresh what is expanded, data has changed form underneath this controller.
+  void refreshExpanded() {
+    // data has changed
     final expandedKeys = Set<dynamic>();
     flat.forEach((element) {
       if (isExpanded(element.data)) {
@@ -395,16 +392,13 @@ abstract class TreeController<T> with ChangeNotifier {
     });
     _expanded.clear();
 
-    newData.forEach((_newDataRoot) {
-      _walk(_newDataRoot, (item) => item.children, (item) {
+    data.forEach((_newDataRoot) {
+      _walk(_newDataRoot, (item) => childrenOf(item), (item) {
         if (expandedKeys.contains(dataKey(item))) {
           _expanded.add(item);
         }
       });
     });
-
-    _data = newData;
-
     flatten();
   }
 }

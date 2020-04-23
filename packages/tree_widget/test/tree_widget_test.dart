@@ -20,7 +20,15 @@ class PropertyTreeItem extends TreeItem {
 }
 
 class MyTreeController extends TreeController<TreeItem> {
-  MyTreeController(List<TreeItem> data) : super(data);
+  List<TreeItem> _data;
+  MyTreeController(this._data) : super();
+
+  @override
+  Iterable<TreeItem> get data => _data;
+
+  set data(Iterable<TreeItem> value) {
+    _data = value;
+  }
 
   @override
   List<TreeItem> childrenOf(TreeItem treeItem) {

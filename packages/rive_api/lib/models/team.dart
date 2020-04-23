@@ -1,11 +1,13 @@
 import 'package:meta/meta.dart';
 
 import 'package:rive_api/models/owner.dart';
+import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
 
 class RiveTeam extends RiveOwner {
   final int id;
+  final TeamRole permission;
   final List<RiveUser> _members = [];
 
   RiveTeam(
@@ -13,7 +15,8 @@ class RiveTeam extends RiveOwner {
       @required int ownerId,
       @required String name,
       @required username,
-      String avatar})
+      @required this.permission,
+      @required String avatar})
       : super(id: ownerId, name: name, username: username, avatar: avatar);
 
   factory RiveTeam.fromData(Map<String, dynamic> data) => RiveTeam(
@@ -21,7 +24,8 @@ class RiveTeam extends RiveOwner {
       ownerId: data.getInt('ownerId'),
       name: data.getString('name'),
       username: data.getString('username'),
-      avatar: data.getString('avatar'));
+      avatar: data.getString('avatar'),
+      permission: data.getTeamRole());
 
   /// Returns a list of teams from a JSON document
   static List<RiveTeam> fromDataList(List<dynamic> dataList) => dataList

@@ -126,6 +126,7 @@ class WebServiceClient {
   Future<http.Response> get(String url) async {
     try {
       final client = getClient();
+      print('getting $url');
       final response = await client.get(url, headers: headers);
 
       _processResponse(response);
@@ -148,6 +149,7 @@ class WebServiceClient {
       {dynamic body, Encoding encoding}) async {
     try {
       final client = getClient();
+      print('posting to $url');
       var response = await client.post(url,
           body: body, headers: headers, encoding: encoding);
 
@@ -169,6 +171,7 @@ class WebServiceClient {
       {dynamic body, Encoding encoding}) async {
     try {
       final client = getClient();
+      print('putting $url');
       var response = await client.put(url,
           body: body, headers: headers, encoding: encoding);
 
@@ -190,7 +193,7 @@ class WebServiceClient {
     await localDataPlatform.initialize();
     localData = LocalData.make(localDataPlatform, context);
     await localData.initialize();
-    
+
     var contents = await localData.load('cookie');
     if (contents == null || contents.isEmpty) {
       return true;

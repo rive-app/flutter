@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
-import 'package:utilities/utilities.dart';
 
 import 'package:rive_api/models/owner.dart';
+import 'package:rive_api/models/team_role.dart';
+import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_api/src/deserialize_helper.dart';
-
-enum TeamInviteStatus { accepted, pending }
-enum TeamRole { reader, member, purchaser, admin, owner }
 
 class RiveUser extends RiveOwner {
   final String avatar;
@@ -71,46 +69,4 @@ class RiveUser extends RiveOwner {
 
   @override
   String toString() => 'RiveUser($ownerId, @$username, \'$name\')';
-}
-
-extension DeserializeHelper on Map<String, dynamic> {
-  TeamInviteStatus getInvitationStatus() {
-    dynamic value = this['status'];
-    switch (value) {
-      case 'pending':
-        return TeamInviteStatus.pending;
-      case 'complete':
-        return TeamInviteStatus.accepted;
-      default:
-        return TeamInviteStatus.pending;
-    }
-  }
-
-  TeamRole getTeamRole() =>
-      TeamRoleExtension.teamRoleFromString(this['permission']);
-}
-
-/// TeamRole helper functions and extensions
-extension TeamRoleExtension on TeamRole {
-  String get name => describeEnum(this).capsFirst;
-
-  static List<String> get names =>
-      TeamRole.values.map((e) => describeEnum(e).capsFirst).toList();
-
-  static TeamRole teamRoleFromString(String value) {
-    switch (value) {
-      case 'Reader':
-        return TeamRole.reader;
-      case 'Member':
-        return TeamRole.member;
-      case 'Purchaser':
-        return TeamRole.purchaser;
-      case 'Admin':
-        return TeamRole.admin;
-      case 'Owner':
-        return TeamRole.owner;
-      default:
-        return null;
-    }
-  }
 }

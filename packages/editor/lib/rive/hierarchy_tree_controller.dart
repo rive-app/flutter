@@ -12,13 +12,23 @@ import 'stage/stage_item.dart';
 /// propagate selections.
 class HierarchyTreeController extends TreeController<Component> {
   final OpenFileContext file;
+  List<Component> _data;
 
-  HierarchyTreeController(this.file) : super([]) {
-    if (file.core.backboard.activeArtboard != null) {
-      data = [file.core.backboard.activeArtboard];
-    }
-
+  HierarchyTreeController(this.file) : super() {
     file.core.backboard.activeArtboardChanged.addListener(_updateArtboard);
+  }
+
+  @override
+  Iterable<Component> get data {
+    if (file.core.backboard.activeArtboard != null) {
+      // TODO: bit jucky
+      _data = [file.core.backboard.activeArtboard];
+    }
+    return _data;
+  }
+
+  set data(Iterable<Component> value) {
+    _data = value.toList();
   }
 
   @override

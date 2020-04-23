@@ -32,6 +32,8 @@ import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 
+import 'package:pedantic/pedantic.dart';
+
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
 enum HomeSection { files, notifications, community, recents, getStarted }
@@ -251,6 +253,11 @@ class Rive {
       await reloadTeams();
 
       // TODO: load last opened file list (from localdata)
+      if (fileBrowsers.first.myTreeController.value.data.isNotEmpty) {
+        unawaited(fileBrowsers.first.openFolder(
+            fileBrowsers.first.myTreeController.value.data.first, false));
+      }
+
       return me;
     } else {
       _state.value = RiveState.login;
@@ -283,19 +290,35 @@ class Rive {
 
     // cache the previously active file browser.
     var activeFileBrowserOwner = activeFileBrowser.value?.owner?.ownerId;
+
+    var oldBrowsers = fileBrowsers.sublist(0);
     fileBrowsers.clear();
 
-    final fileBrowser = FileBrowser(user.value);
-    fileBrowser.initialize(this);
-    await fileBrowser.load();
-    fileBrowsers.add(fileBrowser);
+    Future<FileBrowser> updateOrCreate(RiveOwner owner) async {
+      var _browser = oldBrowsers.firstWhere((fileBrowser) {
+        if (fileBrowser.owner.ownerId == owner.ownerId) {
+          // TODO: should we have a cleaner way to do this? somekinda copyWith?
+          fileBrowser.owner = owner;
+          return true;
+        }
+        return false;
+      }, orElse: () {
+        var fileBrowser = FileBrowser(owner);
+        fileBrowser.initialize(this);
+        return fileBrowser;
+      });
+      await _browser.load();
+      return _browser;
+    }
 
-    teams.value?.forEach((RiveTeam team) {
-      var _tmp = FileBrowser(team);
-      _tmp.initialize(this);
-      _tmp.load();
-      fileBrowsers.add(_tmp);
-    });
+    fileBrowsers.add(await updateOrCreate(user.value));
+
+    await updateOrCreate(user.value);
+    if (teams.value != null) {
+      for (var i = 0; i < teams.value.length; i++) {
+        fileBrowsers.add(await updateOrCreate(teams.value[i]));
+      }
+    }
 
     folderTreeControllers.value = fileBrowsers
         .map((FileBrowser fileBrowser) => fileBrowser.myTreeController.value)
@@ -304,17 +327,7 @@ class Rive {
     // reset the active file browser!
     activeFileBrowser.value = fileBrowsers.firstWhere(
         (fileBrowser) => fileBrowser.owner?.ownerId == activeFileBrowserOwner,
-        orElse: () => fileBrowser);
-
-    openActiveFileBrowser();
-  }
-
-  void openActiveFileBrowser() {
-    activeFileBrowser.value.openFolder(
-        activeFileBrowser.value.myTreeController.value.data.isEmpty
-            ? null
-            : activeFileBrowser.value.myTreeController.value.data.first,
-        false);
+        orElse: () => fileBrowsers.first);
   }
 
   void closeTab(RiveTabItem value) {

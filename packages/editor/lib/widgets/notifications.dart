@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_api/api.dart';
 
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -148,17 +149,34 @@ class PersonalPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
-    return StreamBuilder<Iterable<RiveNotification>>(
-      stream: NotificationProvider.of(context).notificationsStream,
-      builder: (context, snapshot) => snapshot.hasData
-          ? ListView(
-              children: [
-                const SizedBox(height: 30),
-                NotificationsHeader(PanelTypes.personal, onTap),
-                ..._buildNotificationsList(snapshot.data, theme)
-              ],
-            )
-          : PanelLoading(PanelTypes.personal, onTap),
+    return Column(
+      children: [
+        StreamBuilder<Iterable<RiveNotification>>(
+          stream: NotificationProvider.of(context).notificationsStream,
+          builder: (context, snapshot) => snapshot.hasData
+              ? Expanded(
+                  child: ListView(
+                  children: [
+                    const SizedBox(height: 30),
+                    NotificationsHeader(PanelTypes.personal, onTap),
+                    ..._buildNotificationsList(snapshot.data, theme)
+                  ],
+                ))
+              : Expanded(child: PanelLoading(PanelTypes.personal, onTap)),
+        ),
+        StreamBuilder<HttpException>(
+          stream: NotificationProvider.of(context).notificationErrorStream,
+          builder: (context, snapshot) => snapshot.hasData
+              ? Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                      'There has been an error accessing '
+                      'your notifications: ${snapshot.data}',
+                      style: theme.textStyles.textFieldInputValidationError),
+                )
+              : Container(),
+        )
+      ],
     );
   }
 }
