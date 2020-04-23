@@ -98,6 +98,9 @@ class OpenFileContext with RiveFileDelegate {
   bool removeActionHandler(ActionHandler handler) =>
       _actionHandlers.remove(handler);
 
+  void startDragOperation() => rive.startDragOperation();
+  void endDragOperation() => rive.endDragOperation();
+  
   OpenFileContext(
     this.ownerId,
     this.fileId, {

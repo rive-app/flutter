@@ -108,4 +108,11 @@ enum ShortcutAction {
 
   freezeJointsToggle,
   freezeImagesToggle,
+
+  // UI related
+  confirm,
+  left,
+  right,
+  up,
+  down,
 }

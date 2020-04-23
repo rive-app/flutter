@@ -58,7 +58,6 @@ Future<void> main() async {
   final iconCache = RiveIconCache(rootBundle);
   final rive = Rive(
     iconCache: iconCache,
-    focusNode: FocusNode(canRequestFocus: true, skipTraversal: true),
   );
 
   if (await rive.initialize() != RiveState.catastrophe) {
@@ -115,17 +114,8 @@ class RiveEditorApp extends StatelessWidget {
               home: DefaultTextStyle(
                 style: RiveTheme.of(context).textStyles.basic,
                 child: Scaffold(
-                  body: RawKeyboardListener(
+                  body: Focus(
                     focusNode: rive.focusNode,
-                    onKey: (event) {
-                      final focusScope = FocusScope.of(context);
-                      var primary = FocusManager.instance.primaryFocus;
-                      rive.onKeyEvent(
-                          defaultKeyBinding,
-                          event,
-                          primary != rive.focusNode &&
-                              focusScope.nearestScope != primary);
-                    },
                     child: ValueListenableBuilder<RiveState>(
                       valueListenable: rive.state,
                       builder: (context, state, _) {

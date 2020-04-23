@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:core/debounce.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:cursor/propagating_listener.dart';
@@ -17,8 +19,10 @@ class EditorTextField extends StatefulWidget {
   final ValueChanged<String> onSubmitted;
   final ValueChanged<String> onChanged;
   final bool allowDrag;
+  final void Function() startDrag;
   final void Function(double) drag;
   final void Function() completeDrag;
+  final void Function() cancelDrag;
   final TextStyle style;
 
   const EditorTextField({
@@ -31,6 +35,8 @@ class EditorTextField extends StatefulWidget {
     this.allowDrag = true,
     this.drag,
     this.completeDrag,
+    this.startDrag,
+    this.cancelDrag,
     this.style = const TextStyle(
       fontSize: 13,
     ),
@@ -48,6 +54,7 @@ class _EditorTextFieldState extends State<EditorTextField>
 
   void _requestKeyboard() => editableTextKey.currentState?.requestKeyboard();
   CursorInstance _customCursor;
+  OpenFileContext _dragOpOnFile;
 
   @override
   void initState() {
@@ -71,6 +78,13 @@ class _EditorTextFieldState extends State<EditorTextField>
       debounce(_customCursor?.remove);
     }
     widget.focusNode?.removeListener(_focusChanged);
+
+    // drag was in progress, clean it up
+    if (_dragOpOnFile != null) {
+      _dragOpOnFile.removeActionHandler(_dragActionHandler);
+      _dragOpOnFile.endDragOperation();
+    }
+
     super.dispose();
   }
 
@@ -83,8 +97,32 @@ class _EditorTextFieldState extends State<EditorTextField>
 
   bool get _isFocused => widget.focusNode.hasFocus;
 
+  bool _dragActionHandler(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.cancel:
+        _endDrag(cancel: true);
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  void _endDrag({bool cancel = false}) {
+    if (cancel) {
+      widget.cancelDrag?.call();
+    } else {
+      widget.completeDrag?.call();
+    }
+    if (_dragOpOnFile != null) {
+      _dragOpOnFile.endDragOperation();
+      _dragOpOnFile.removeActionHandler(_dragActionHandler);
+      _dragOpOnFile = null;
+    }
+  }
+
   Widget _handleVerticalDrag(Widget child) {
-    var rive = RiveContext.of(context);
+    var rive = RiveContext.find(context);
+    var activeFile = ActiveFile.find(context);
     return _isFocused || !widget.allowDrag
         ? child
         : MouseRegion(
@@ -102,14 +140,25 @@ class _EditorTextFieldState extends State<EditorTextField>
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onVerticalDragStart: (data) {
-                rive.startDragOperation();
+                activeFile.rive.focus();
+                _dragOpOnFile = activeFile;
+                _dragOpOnFile.startDragOperation();
+                widget.startDrag?.call();
+                activeFile.addActionHandler(_dragActionHandler);
               },
               onVerticalDragUpdate: (data) {
+                if (_dragOpOnFile == null) {
+                  // drag was canceled
+                  return;
+                }
                 widget.drag?.call(data.delta.dy);
               },
               onVerticalDragEnd: (details) {
-                widget.completeDrag?.call();
-                rive.endDragOperation();
+                if (_dragOpOnFile == null) {
+                  // drag was canceled
+                  return;
+                }
+                _endDrag();
               },
               onTapUp: (data) {
                 widget.focusNode.requestFocus();

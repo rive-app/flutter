@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/editor_text_field.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
@@ -114,6 +115,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   bool _hasFocus = false;
   bool _ownsFocusNode = false;
   T _lastValue;
+  T _startDragValue;
 
   @override
   void initState() {
@@ -189,20 +191,36 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
               maxLines: 1,
               style: theme.textStyles.inspectorPropertyLabel,
             )
-          : EditorTextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              color: theme.colors.inspectorTextColor,
-              editingColor: theme.colors.activeText,
-              allowDrag: widget.converter.allowDrag,
-              drag: (amount) => widget.change(
-                  _lastValue = widget.converter.drag(widget.value, amount)),
-              completeDrag: _completeChange,
-              onSubmitted: (string) {
-                widget.change?.call(
-                    _lastValue = widget.converter.fromEditingValue(string));
-                _completeChange();
+          : RawKeyboardListener(
+              focusNode: FocusNode(),
+              onKey: (event) {
+                if (event is RawKeyDownEvent) {
+                  // lose focus if escape is hit
+                  if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+                    _focusNode.unfocus();
+                  }
+                }
               },
+              child: EditorTextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                color: theme.colors.inspectorTextColor,
+                editingColor: theme.colors.activeText,
+                allowDrag: widget.converter.allowDrag,
+                startDrag: () => _startDragValue = _lastValue,
+                cancelDrag: () {
+                  widget.change?.call(_lastValue = _startDragValue);
+                  _completeChange();
+                },
+                drag: (amount) => widget.change(
+                    _lastValue = widget.converter.drag(widget.value, amount)),
+                completeDrag: _completeChange,
+                onSubmitted: (string) {
+                  widget.change?.call(
+                      _lastValue = widget.converter.fromEditingValue(string));
+                  _completeChange();
+                },
+              ),
             ),
     );
   }

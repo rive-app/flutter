@@ -1,6 +1,7 @@
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_widgets/nullable_listenable_builder.dart';
 import 'package:rive_editor/widgets/popup/arrow_popup.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
@@ -249,54 +250,50 @@ class ListPopup<T extends PopupListItem> {
   }) {
     ListPopup<T> list;
 
-    var focusNode = FocusNode(
-      canRequestFocus: true,
-      debugLabel: 'List Popup Focus',
-      skipTraversal: true,
-      onKey: (node, event) {
-        if (event is RawKeyDownEvent) {
-          if (event.physicalKey == PhysicalKeyboardKey.escape) {
-            list.close();
-          } else if (event.physicalKey == PhysicalKeyboardKey.enter ||
-              event.physicalKey == PhysicalKeyboardKey.numpadEnter) {
-            if (list.focus == null || !list.focus.canSelect) {
-              return true;
-            }
-            list.focus.select?.call();
-
-            // Early out if this popup item doesn't want any dismissals on
-            // select.
-            if (!list.focus.dismissOnSelect) {
-              return true;
-            }
-
-            if (list.focus.dismissAll) {
-              Popup.closeAll();
-            } else {
-              list.close();
-            }
-            return true;
-          } else if (event.physicalKey == PhysicalKeyboardKey.arrowUp) {
-            list.focusUp();
-            return true;
-          } else if (event.physicalKey == PhysicalKeyboardKey.arrowDown) {
-            list.focusDown();
-            return true;
-          } else if (event.physicalKey == PhysicalKeyboardKey.arrowLeft) {
-            list.focusLeft();
-            return true;
-          } else if (event.physicalKey == PhysicalKeyboardKey.arrowRight) {
-            // Focus right needs context as it can open a new popup.
-            list.focusRight();
+    bool handler(ShortcutAction action) {
+      switch (action) {
+        case ShortcutAction.cancel:
+          list.close();
+          return true;
+        case ShortcutAction.confirm:
+          if (list.focus == null || !list.focus.canSelect) {
             return true;
           }
-        }
-        return false;
-      },
-    );
+          list.focus.select?.call();
 
-    // Request focus as soon as we attach.
-    focusNode.requestFocus();
+          // Early out if this popup item doesn't want any dismissals on
+          // select.
+          if (!list.focus.dismissOnSelect) {
+            return true;
+          }
+
+          if (list.focus.dismissAll) {
+            Popup.closeAll();
+          } else {
+            list.close();
+          }
+          return true;
+        case ShortcutAction.up:
+          list.focusUp();
+          return true;
+        case ShortcutAction.down:
+          list.focusDown();
+          return true;
+        case ShortcutAction.left:
+          list.focusLeft();
+          return true;
+        case ShortcutAction.right:
+          list.focusRight();
+          return true;
+        default:
+          return false;
+      }
+    }
+
+    ;
+
+    var file = ActiveFile.find(context);
+    file.addActionHandler(handler);
 
     list = ListPopup<T>(
       items,
@@ -316,89 +313,84 @@ class ListPopup<T extends PopupListItem> {
       showArrow: showArrow,
       arrowTweak: arrowTweak,
       background: background,
-      onClose: onClose == null
-          ? list.close
-          : () {
-              onClose();
-              list.close();
-            },
+      onClose: () {
+        onClose?.call();
+        list.close();
+        file.removeActionHandler(handler);
+      },
       includeCloseGuard: includeCloseGuard,
       builder: (context) {
-        return Focus(
-          focusNode: focusNode,
-          child: ValueListenableBuilder<List<T>>(
-            valueListenable: list.values,
-            builder: (context, values, _) {
-              // The desired full height, the ListPopupLayoutDelegate
-              // won't let us exceed our constraints if these are too
-              // tall.
-              var height =
-                  values.fold<double>(0, (v, item) => v + item.height) +
-                      margin * 2;
-              return values.isEmpty
-                  ? const SizedBox()
+        return ValueListenableBuilder<List<T>>(
+          valueListenable: list.values,
+          builder: (context, values, _) {
+            // The desired full height, the ListPopupLayoutDelegate
+            // won't let us exceed our constraints if these are too
+            // tall.
+            var height = values.fold<double>(0, (v, item) => v + item.height) +
+                margin * 2;
+            return values.isEmpty
+                ? const SizedBox()
 
-                  /// Need a separate focus scope here so that we don't try
-                  /// tabbing out of this list (weird that FocusTraversalScope
-                  /// didn't do this for us). Removing this will cause an error
-                  /// to throw when trying to tab from a TextField in this list.
-                  : FocusScope(
-                      child: SizedBox(
-                        height: height,
-                        child:
+                /// Need a separate focus scope here so that we don't try
+                /// tabbing out of this list (weird that FocusTraversalScope
+                /// didn't do this for us). Removing this will cause an error
+                /// to throw when trying to tab from a TextField in this list.
+                : FocusScope(
+                    child: SizedBox(
+                      height: height,
+                      child:
 
-                            // null width == compute the width of the content
-                            //
-                            // If we've specified a null width, we cannot use
-                            // a scrollview (it'd have to layout all the
-                            // children, even virtualized ones and Flutter's
-                            // scrollviews don't really support the concept of
-                            // intrinsic width). So instead we use something
-                            // that does support that: a column. Just make
-                            // sure you're not feeding this list too much
-                            // content if you're using an intrinsic width.
-                            width == null
-                                ? IntrinsicWidth(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(height: margin),
-                                        for (final item in values)
-                                          Container(
-                                            height: item.height,
-                                            child: _PopupListItemShell<T>(
-                                              list,
-                                              itemBuilder: itemBuilder,
-                                              item: item,
-                                            ),
-                                          ),
-                                        SizedBox(height: margin),
-                                      ],
-                                    ),
-                                  )
-                                : Scrollbar(
-                                    child: ListView.builder(
-                                      physics: const ClampingScrollPhysics(),
-                                      padding: EdgeInsets.only(
-                                          top: margin, bottom: margin),
-                                      itemCount: values.length,
-                                      itemBuilder: (context, index) {
-                                        var item = values[index];
-                                        return Container(
+                          // null width == compute the width of the content
+                          //
+                          // If we've specified a null width, we cannot use
+                          // a scrollview (it'd have to layout all the
+                          // children, even virtualized ones and Flutter's
+                          // scrollviews don't really support the concept of
+                          // intrinsic width). So instead we use something
+                          // that does support that: a column. Just make
+                          // sure you're not feeding this list too much
+                          // content if you're using an intrinsic width.
+                          width == null
+                              ? IntrinsicWidth(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(height: margin),
+                                      for (final item in values)
+                                        Container(
                                           height: item.height,
                                           child: _PopupListItemShell<T>(
                                             list,
                                             itemBuilder: itemBuilder,
                                             item: item,
                                           ),
-                                        );
-                                      },
-                                    ),
+                                        ),
+                                      SizedBox(height: margin),
+                                    ],
                                   ),
-                      ),
-                    );
-            },
-          ),
+                                )
+                              : Scrollbar(
+                                  child: ListView.builder(
+                                    physics: const ClampingScrollPhysics(),
+                                    padding: EdgeInsets.only(
+                                        top: margin, bottom: margin),
+                                    itemCount: values.length,
+                                    itemBuilder: (context, index) {
+                                      var item = values[index];
+                                      return Container(
+                                        height: item.height,
+                                        child: _PopupListItemShell<T>(
+                                          list,
+                                          itemBuilder: itemBuilder,
+                                          item: item,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                    ),
+                  );
+          },
         );
       },
     );
@@ -438,7 +430,7 @@ class __PopupListItemShellState<T extends PopupListItem>
         if (!widget.item.canSelect) {
           return;
         }
-        
+
         details.stopPropagation();
 
         widget.item.select?.call();

@@ -5,12 +5,24 @@ import 'shortcut_keys.dart';
 /// Default key binding for Rive.
 final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
   [
+    Shortcut(ShortcutAction.toggleEditMode, [ShortcutKey.enter]),
     Shortcut(
-      ShortcutAction.toggleEditMode,
-      [
-        ShortcutKey.enter
-      ]
+      ShortcutAction.left,
+      [ShortcutKey.left],
     ),
+    Shortcut(
+      ShortcutAction.right,
+      [ShortcutKey.right],
+    ),
+    Shortcut(
+      ShortcutAction.up,
+      [ShortcutKey.up],
+    ),
+    Shortcut(
+      ShortcutAction.down,
+      [ShortcutKey.down],
+    ),
+    Shortcut(ShortcutAction.confirm, [ShortcutKey.enter]),
     Shortcut(
       ShortcutAction.copy,
       [
