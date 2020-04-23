@@ -153,7 +153,8 @@ class _TeamMember extends StatelessWidget {
                   if (user.avatar != null) {
                     return Image.network(user.avatar);
                   }
-                  return TintedIcon(color: colors.commonDarkGrey, icon: 'user');
+                  return TintedIcon(
+                      color: colors.commonDarkGrey, icon: 'your-files');
                 },
                 background: colors.fileBackgroundLightGrey,
               ),
