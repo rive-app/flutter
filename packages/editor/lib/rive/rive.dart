@@ -283,19 +283,29 @@ class Rive {
 
     // cache the previously active file browser.
     var activeFileBrowserOwner = activeFileBrowser.value?.owner?.ownerId;
+
+    var oldBrowsers = fileBrowsers.sublist(0);
     fileBrowsers.clear();
 
-    final fileBrowser = FileBrowser(user.value);
-    fileBrowser.initialize(this);
-    await fileBrowser.load();
-    fileBrowsers.add(fileBrowser);
+    void updateOrCreate(RiveOwner owner) {
+      fileBrowsers.add(oldBrowsers.firstWhere((fileBrowser) {
+        if (fileBrowser.owner.ownerId == owner.ownerId) {
+          fileBrowser.owner = owner;
+          fileBrowser.load();
 
-    teams.value?.forEach((RiveTeam team) {
-      var _tmp = FileBrowser(team);
-      _tmp.initialize(this);
-      _tmp.load();
-      fileBrowsers.add(_tmp);
-    });
+          return true;
+        }
+        return false;
+      }, orElse: () {
+        var fileBrowser = FileBrowser(owner);
+        fileBrowser.initialize(this);
+        fileBrowser.load();
+        return fileBrowser;
+      }));
+    }
+
+    updateOrCreate(user.value);
+    teams.value?.forEach(updateOrCreate);
 
     folderTreeControllers.value = fileBrowsers
         .map((FileBrowser fileBrowser) => fileBrowser.myTreeController.value)
@@ -304,17 +314,7 @@ class Rive {
     // reset the active file browser!
     activeFileBrowser.value = fileBrowsers.firstWhere(
         (fileBrowser) => fileBrowser.owner?.ownerId == activeFileBrowserOwner,
-        orElse: () => fileBrowser);
-
-    openActiveFileBrowser();
-  }
-
-  void openActiveFileBrowser() {
-    activeFileBrowser.value.openFolder(
-        activeFileBrowser.value.myTreeController.value.data.isEmpty
-            ? null
-            : activeFileBrowser.value.myTreeController.value.data.first,
-        false);
+        orElse: () => fileBrowsers.first);
   }
 
   void closeTab(RiveTabItem value) {

@@ -50,7 +50,11 @@ class FileBrowser extends FileBrowserController {
   final ValueNotifier<RiveFileSortOption> selectedSortOption =
       ValueNotifier<RiveFileSortOption>(null);
 
-  final RiveOwner _owner;
+  RiveOwner _owner;
+  set owner(RiveOwner owner) {
+    _owner = owner;
+  }
+
   RiveFolder _current;
   int _lastSelectedIndex;
   _EditorRiveFilesApi _filesApi;
@@ -114,6 +118,7 @@ class FileBrowser extends FileBrowserController {
   }
 
   Future<bool> load() async {
+    String selectedFolderId = currentFolder?.id;
     FoldersResult<RiveFolder> result;
     if (_owner is RiveTeam) {
       result = await _filesApi.teamFolders(_owner.ownerId);
@@ -135,7 +140,6 @@ class FileBrowser extends FileBrowserController {
       result.root.first.owner = _owner;
     }
 
-    String selectedFolderId = _current?.id;
     myTreeController.value.replaceData(result.root);
     myTreeController.notifyListeners();
     if (selectedFolderId != null) {
