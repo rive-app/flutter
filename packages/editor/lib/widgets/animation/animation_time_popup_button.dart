@@ -105,19 +105,29 @@ class AnimationTimePopupButton extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: 37,
-                      child: CorePropertyBuilder<int>(
-                        object: animationManager.editingAnimation,
-                        propertyKey: LinearAnimationBase.fpsPropertyKey,
-                        builder: (context, fps, _) => InspectorTextField<int>(
-                          key: key,
-                          focusNode: focus,
-                          value: fps,
-                          change: (value) {
-                            print("CHANGE FPS $value");
-                          },
-                          converter: IntValueConverter.instance,
-                        ),
-                      ),
+                      child: ValueStreamBuilder<int>(
+                          stream: animationManager.fps,
+                          builder: (context, snapshot) => snapshot.hasData
+                              ? InspectorTextField<int>(
+                                  key: key,
+                                  focusNode: focus,
+                                  value: snapshot.data,
+
+                                  /// Manager will handle this for us after it's
+                                  /// done processing the change.
+                                  captureJournalEntry: false,
+                                  change: (value) {
+                                    print("CHANGE: $value");
+                                    animationManager.previewRateChange
+                                        .add(value);
+                                  },
+                                  completeChange: (value) {
+                                    print("COMPLET: $value");
+                                    animationManager.changeRate.add(value);
+                                  },
+                                  converter: IntValueConverter.instance,
+                                )
+                              : const SizedBox()),
                     ),
                     const SizedBox(width: 6),
                     Text(

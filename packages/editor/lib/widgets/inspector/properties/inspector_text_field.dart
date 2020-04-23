@@ -83,12 +83,14 @@ class InspectorTextField<T> extends StatefulWidget {
 
   /// Callback for when the editing operation is fully complete. This is when
   /// you want to save the changed value (or track the change for undo/redo).
-  final void Function() completeChange;
+  final void Function(T value) completeChange;
 
   /// Placeholder text shown when disabled.
   final String disabledText;
 
   final FocusNode focusNode;
+
+  final bool captureJournalEntry;
 
   const InspectorTextField({
     @required this.value,
@@ -97,6 +99,7 @@ class InspectorTextField<T> extends StatefulWidget {
     this.focusNode,
     this.change,
     this.completeChange,
+    this.captureJournalEntry = true,
     Key key,
   }) : super(key: key);
 
@@ -110,12 +113,13 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   FocusNode _focusNode;
   bool _hasFocus = false;
   bool _ownsFocusNode = false;
+  T _lastValue;
 
   @override
   void initState() {
     super.initState();
     _updateFocusNode();
-    _controller.rawValue = widget.value;
+    _lastValue = _controller.rawValue = widget.value;
     _controller.converter = widget.converter;
   }
 
@@ -158,17 +162,19 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
     if (oldWidget.focusNode != widget.focusNode) {
       _updateFocusNode();
     }
-    _controller.rawValue = widget.value;
+    _lastValue = _controller.rawValue = widget.value;
     _controller.converter = widget.converter;
     super.didUpdateWidget(oldWidget);
   }
 
   void _completeChange() {
-    ActiveFile.find(context)?.core?.captureJournalEntry();
+    if (widget.captureJournalEntry) {
+      ActiveFile.find(context)?.core?.captureJournalEntry();
+    }
     // Force focus back to the main context so that we can immediately
     // undo this change if we want to by hitting ctrl/command z.
     RiveContext.find(context).focus();
-    widget.completeChange?.call();
+    widget.completeChange?.call(_lastValue);
   }
 
   @override
@@ -189,11 +195,12 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
               color: theme.colors.inspectorTextColor,
               editingColor: theme.colors.activeText,
               allowDrag: widget.converter.allowDrag,
-              drag: (amount) =>
-                  widget.change(widget.converter.drag(widget.value, amount)),
+              drag: (amount) => widget.change(
+                  _lastValue = widget.converter.drag(widget.value, amount)),
               completeDrag: _completeChange,
               onSubmitted: (string) {
-                widget.change?.call(widget.converter.fromEditingValue(string));
+                widget.change?.call(
+                    _lastValue = widget.converter.fromEditingValue(string));
                 _completeChange();
               },
             ),
