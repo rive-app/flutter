@@ -16,7 +16,7 @@ class AnimationTreeController
     extends TreeController<ValueStream<AnimationViewModel>> {
   final AnimationsManager animationManager;
   StreamSubscription<Iterable<ValueStream<AnimationViewModel>>> _subscription;
-  Iterable<ValueStream<AnimationViewModel>> _data;
+  Iterable<ValueStream<AnimationViewModel>> _data = [];
 
   AnimationTreeController(this.animationManager) : super() {
     _subscription = animationManager.animations.listen(_animationsChanged);
@@ -28,6 +28,7 @@ class AnimationTreeController
   void _animationsChanged(
       Iterable<ValueStream<AnimationViewModel>> animations) {
     _data = animations.toList();
+    flatten();
   }
 
   @override
