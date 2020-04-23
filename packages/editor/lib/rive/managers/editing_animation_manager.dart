@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:meta/meta.dart';
 
 class EditingAnimationManager {
   final LinearAnimation editingAnimation;
@@ -26,6 +28,9 @@ class EditingAnimationManager {
     editingAnimation.addListener(
         LinearAnimationBase.fpsPropertyKey, _coreFpsChanged);
   }
+
+  ValueNotifier<TimelineViewport> viewport =
+      ValueNotifier<TimelineViewport>(const TimelineViewport(0.0, 10.0, 30.0));
 
   void _coreFpsChanged(dynamic from, dynamic to) {
     _fpsStream.add(to as int);
@@ -62,4 +67,17 @@ class EditingAnimationManager {
     _fpsController.close();
     _fpsPreviewController.close();
   }
+}
+
+@immutable
+class TimelineViewport {
+  final double startSeconds;
+  final double endSeconds;
+  final double totalSeconds;
+
+  const TimelineViewport(this.startSeconds, this.endSeconds, this.totalSeconds)
+      : assert(startSeconds <= endSeconds);
+
+  TimelineViewport zoom(double start, double end) =>
+      TimelineViewport(start, end, totalSeconds);
 }
