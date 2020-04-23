@@ -339,53 +339,99 @@ class _NavigationPanelState extends State<NavigationPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(
-              right: 10,
-              left: 10,
-            ),
-          ),
+          // Not Implemented
+          // Padding(
+          //   padding: const EdgeInsets.only(
+          //     right: 20,
+          //     left: 20,
+          //   ),
+          //   child: Container(
+          //     height: 35,
+          //     padding: const EdgeInsets.only(left: 10, right: 10),
+          //     decoration: BoxDecoration(
+          //       borderRadius: BorderRadius.circular(5),
+          //       color: riveColors.fileSearchBorder,
+          //     ),
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       crossAxisAlignment: CrossAxisAlignment.center,
+          //       children: <Widget>[
+          //         SearchIcon(
+          //           color: riveColors.fileSearchIcon,
+          //           size: 16,
+          //         ),
+          //         Container(width: 10),
+          //         Expanded(
+          //           child: Container(
+          //             height: 35,
+          //             alignment: Alignment.centerLeft,
+          //             child: TextField(
+          //               textAlign: TextAlign.left,
+          //               textAlignVertical: TextAlignVertical.center,
+          //               decoration: InputDecoration(
+          //                 isDense: true,
+          //                 border: InputBorder.none,
+          //                 hintText: 'Search',
+          //                 contentPadding: EdgeInsets.zero,
+          //                 filled: true,
+          //                 hoverColor: Colors.transparent,
+          //                 fillColor: Colors.transparent,
+          //               ),
+          //               style: RiveTheme.of(context).textStyles.fileSearchText,
+          //             ),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
           ValueListenableBuilder<HomeSection>(
             valueListenable: rive.sectionListener,
             builder: (context, section, _) => Padding(
               padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
               child: Column(
                 children: <Widget>[
-                  IconTile(
-                    label: 'Search',
-                    iconName: 'search',
-                    onTap: () {},
-                  ),
-                  IconTile(
-                    label: 'Get Started',
-                    iconName: 'rocket',
-                    onTap: () {},
-                  ),
-                  IconTile(
-                    iconName: 'notification',
-                    label: 'Notifications',
-                    highlight: section == HomeSection.notifications,
-                    onTap: () {
-                      // File browsers track their own selected states.
-                      // so you have to tell them specifically that stuff not selected
-                      rive.activeFileBrowser.value?.openFolder(null, false);
-                      rive.activeFileBrowser.value = null;
-                      rive.sectionListener.value = HomeSection.notifications;
-                    },
-                  ),
-                  IconTile(
-                    iconName: 'recents',
-                    label: 'Recents',
-                    onTap: () {},
-                  ),
+                  // Not currently implemented
+                  // Padding(
+                  //   padding: const EdgeInsets.all(5),
+                  //   child: IconTile(
+                  //     label: 'Get Started',
+                  //     iconName: 'rocket',
+                  //     onTap: () {},
+                  //   ),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.all(5),
                     child: IconTile(
-                      iconName: 'community-small',
-                      label: 'Community',
-                      onTap: () {},
+                      iconName: 'notification',
+                      label: 'Notifications',
+                      highlight: section == HomeSection.notifications,
+                      onTap: () {
+                        // File browsers track their own selected states.
+                        // so you have to tell them specifically that stuff not selected
+                        rive.activeFileBrowser.value?.openFolder(null, false);
+                        rive.activeFileBrowser.value = null;
+                        rive.sectionListener.value = HomeSection.notifications;
+                      },
                     ),
                   ),
+                  // Not currently implemented
+                  // Padding(
+                  //   padding: const EdgeInsets.all(5),
+                  //   child: IconTile(
+                  //     iconName: 'recents',
+                  //     label: 'Recents',
+                  //     onTap: () {},
+                  //   ),
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(5),
+                  //   child: IconTile(
+                  //     iconName: 'community-small',
+                  //     label: 'Community',
+                  //     onTap: () {},
+                  //   ),
+                  // ),
                 ],
               ),
             ),
