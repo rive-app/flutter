@@ -21,6 +21,12 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   }
 
   @override
+  bool get isSelectable =>
+      // We can't be selected if we're already the active artboard.
+      component.context.backboard?.activeArtboard != component &&
+      super.isSelectable;
+
+  @override
   int get drawOrder => 0;
 
   @override
@@ -46,6 +52,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
           'backboard should already exist');
       component.context.backboard.activeArtboard = component;
     }
+    stage?.markNeedsRedraw();
   }
 
   @override
