@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:html' as html;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:window_utils_platform_interface/window_utils_platform_interface.dart';
+
+import 'package:window_utils_web/browser.dart' as browser;
 
 /// The web implementation of [WindowUtilsPlatform].
 ///
@@ -37,13 +40,25 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
 
   /// Stubbed out for web; does nothing except return the zero offset
   @override
-  Future<Size> getWindowSize([String key]) => Future.value(Size.zero);
+  Future<Size> getWindowSize([String key]) => Future.value(Size(
+        browser.width.toDouble(),
+        browser.height.toDouble(),
+      ));
 
   /// Stubbed out for web; does nothing except return an empty string
   @override
-  Future<String> openWebView(String key, String url,
-          {Offset offset, Size size, String jsMessage = ''}) =>
-      Future.value('');
+  Future<String> openWebView(
+    String key,
+    String url, {
+    Offset offset,
+    Size size,
+    String jsMessage = '',
+  }) {
+    // See https://github.com/flutter/flutter/issues/51461 for reference.
+    final target = browser.standalone ? '_top' : '';
+    final base = html.window.open(url, target);
+    return Future.value('');
+  }
 
   /// Stubbed out for web; does nothing except return true
   @override
