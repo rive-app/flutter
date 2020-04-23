@@ -48,7 +48,6 @@ class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
       makeItems: (file) => [
         PopupContextItem.focusable(
           'Zoom',
-          // Use a builder here to force focus to get called.
           child: (focus, key) {
             // Focus this input right away when the popup displays.
             (_zoomFocusNode = focus).requestFocus();
