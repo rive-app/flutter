@@ -352,7 +352,7 @@ class EditorScaffold extends StatelessWidget {
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.only(right: 20),
+                padding: EdgeInsets.only(left: 10, right: 20),
                 child: Text(
                   'v$appVersion',
                   style: TextStyle(color: Colors.grey),
