@@ -431,7 +431,7 @@ class _LoginState extends State<Login> {
           children: [
             // Top padding.
             const SizedBox(height: 160),
-            Image.asset('assets/images/rive_logo.png'),
+            Image.asset('assets/images/icons/rive-logo-login.png'),
             const SizedBox(height: 55),
             AnimatedSwitcher(
                 duration: const Duration(milliseconds: 100),
