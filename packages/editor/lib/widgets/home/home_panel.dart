@@ -308,8 +308,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
     scrollController.addListener(() {
       // this KINDA works, sometimes window size changes trigger this
       // sometimes they do not :( Matt will fix it up later though
-      bottomSliverDocked = scrollController.position.extentAfter == 0 &&
-          scrollController.position.extentBefore == 0;
+      bottomSliverDocked = scrollController.position.extentAfter != 0 ||
+          scrollController.position.extentBefore != 0;
     });
 
     final theme = RiveTheme.of(context);
@@ -433,7 +433,9 @@ class _NavigationPanelState extends State<NavigationPanel> {
                           Separator(
                             color: riveColors.fileLineGrey,
                             padding: EdgeInsets.only(
-                              left: bottomSliverDocked ? 20 : 0,
+                              left: bottomSliverDocked
+                                  ? 0
+                                  : treeStyle.padding.left,
                             ),
                           ),
                           Padding(
