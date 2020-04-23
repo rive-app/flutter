@@ -353,6 +353,7 @@ class Rive {
   }
 
   final Set<_Key> _pressed = {};
+  final Set<StatefulShortcutAction> _pressedStateful = {};
 
   void onKeyEvent(ShortcutKeyBinding keyBinding, RawKeyEvent keyEvent,
       bool hasFocusObject) {
@@ -384,6 +385,16 @@ class Rive {
     var actions = keyBinding.lookupAction(
         _pressed.map((key) => key.physical).toList(growable: false));
 
+    var statefulActions = Set<StatefulShortcutAction>.from(
+        actions?.whereType<StatefulShortcutAction>() ??
+            <StatefulShortcutAction>[]);
+    for (final noLongerPressed
+        in _pressedStateful.difference(statefulActions)) {
+      noLongerPressed.onRelease();
+    }
+    _pressedStateful.clear();
+    _pressedStateful.addAll(statefulActions);
+
     actions?.forEach(triggerAction);
   }
 
@@ -395,8 +406,9 @@ class Rive {
       return;
     }
 
-    // TODO: If there are unhandled shortcut actions we care about at this
-    // level, we should process them here.
+    if (action is StatefulShortcutAction) {
+      action.onPress();
+    }
   }
 
   void _serializeTabs() {
