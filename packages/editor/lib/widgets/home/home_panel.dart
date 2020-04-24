@@ -415,45 +415,33 @@ class _NavigationPanelState extends State<NavigationPanel> {
               child: Column(
                 children: <Widget>[
                   // Not currently implemented
-                  // Padding(
-                  //   padding: const EdgeInsets.all(5),
-                  //   child: IconTile(
-                  //     label: 'Get Started',
-                  //     iconName: 'rocket',
-                  //     onTap: () {},
-                  //   ),
+                  // IconTile(
+                  //   label: 'Get Started',
+                  //   iconName: 'rocket',
+                  //   onTap: () {},
                   // ),
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: IconTile(
-                      iconName: 'notification',
-                      label: 'Notifications',
-                      highlight: section == HomeSection.notifications,
-                      onTap: () {
-                        // File browsers track their own selected states.
-                        // so you have to tell them specifically that stuff not selected
-                        rive.activeFileBrowser.value?.openFolder(null, false);
-                        rive.activeFileBrowser.value = null;
-                        rive.sectionListener.value = HomeSection.notifications;
-                      },
-                    ),
+                  IconTile(
+                    iconName: 'notification',
+                    label: 'Notifications',
+                    highlight: section == HomeSection.notifications,
+                    onTap: () {
+                      // File browsers track their own selected states.
+                      // so you have to tell them specifically that stuff not selected
+                      rive.activeFileBrowser.value?.openFolder(null, false);
+                      rive.activeFileBrowser.value = null;
+                      rive.sectionListener.value = HomeSection.notifications;
+                    },
                   ),
                   // Not currently implemented
-                  // Padding(
-                  //   padding: const EdgeInsets.all(5),
-                  //   child: IconTile(
-                  //     iconName: 'recents',
-                  //     label: 'Recents',
-                  //     onTap: () {},
-                  //   ),
+                  // IconTile(
+                  //   iconName: 'recents',
+                  //   label: 'Recents',
+                  //   onTap: () {},
                   // ),
-                  // Padding(
-                  //   padding: const EdgeInsets.all(5),
-                  //   child: IconTile(
-                  //     iconName: 'community-small',
-                  //     label: 'Community',
-                  //     onTap: () {},
-                  //   ),
+                  // IconTile(
+                  //   iconName: 'community-small',
+                  //   label: 'Community',
+                  //   onTap: () {},
                   // ),
                 ],
               ),
@@ -504,7 +492,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                             padding: EdgeInsets.only(
                               left: bottomSliverDocked
                                   ? 0
-                                  : treeStyle.padding.left,
+                                  : 20,
                             ),
                           ),
                           Padding(
