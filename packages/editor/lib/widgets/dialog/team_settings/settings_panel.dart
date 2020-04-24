@@ -81,17 +81,14 @@ class _SettingsState extends State<Settings> {
         constraints: BoxConstraints(maxWidth: maxWidth), child: child);
   }
 
-  Widget _label(SettingsScreen screen, int index) => Padding(
-        padding: const EdgeInsets.only(bottom: 0),
-        child: _SettingsTabItem(
-          onSelect: () {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          label: screen.label,
-          isSelected: index == _selectedIndex,
-        ),
+  Widget _label(SettingsScreen screen, int index) => _SettingsTabItem(
+        onSelect: () {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        label: screen.label,
+        isSelected: index == _selectedIndex,
       );
 
   Future<void> changeAvatar() async {

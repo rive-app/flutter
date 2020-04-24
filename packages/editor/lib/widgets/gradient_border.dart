@@ -1,11 +1,13 @@
 import 'package:flutter/widgets.dart';
 
+const _transparent = LinearGradient(colors: [Color(0x00), Color(0x00)]);
+
 /// Paints a gradient border around a widget
 /// Make sure the child widget is transparent around the area
 /// where the border will be painted.
 class GradientBorder extends StatelessWidget {
   final _GradientPainter _painter;
-  final bool _shouldPaint;
+  final bool shouldPaint;
   final Widget _child;
 
   GradientBorder({
@@ -13,16 +15,17 @@ class GradientBorder extends StatelessWidget {
     @required double radius,
     @required Gradient gradient,
     @required Widget child,
-    bool shouldPaint = false,
+    this.shouldPaint = false,
   })  : _painter = _GradientPainter(
-            strokeWidth: strokeWidth, radius: radius, gradient: gradient),
-        _shouldPaint = shouldPaint,
+            strokeWidth: strokeWidth,
+            radius: radius,
+            gradient: shouldPaint ? gradient : _transparent),
         _child = child;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _shouldPaint ? _painter : null,
+      painter: _painter,
       child: _child,
     );
   }
