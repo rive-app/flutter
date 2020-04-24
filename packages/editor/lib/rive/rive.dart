@@ -32,7 +32,6 @@ import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 
-import 'package:pedantic/pedantic.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
@@ -253,8 +252,11 @@ class Rive {
       await reloadTeams();
       
       // TODO: load last opened file list (from localdata)
-      activeFileBrowser.value ??= fileBrowsers.first;
-
+      if (fileBrowsers.first.myTreeController.value.data.isNotEmpty) {	      
+        activeFileBrowser.value ??= fileBrowsers.first;
+        await fileBrowsers.first.openFolder(	
+            fileBrowsers.first.myTreeController.value.data.first, false);	
+      }
       return me;
     } else {
       _state.value = RiveState.login;
