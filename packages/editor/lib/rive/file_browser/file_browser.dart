@@ -50,9 +50,7 @@ class FileBrowser extends FileBrowserController {
   final ValueNotifier<RiveFileSortOption> selectedSortOption =
       ValueNotifier<RiveFileSortOption>(null);
 
-  RiveOwner _owner;
-  set owner(RiveOwner owner) => _owner = owner;
-  RiveOwner get owner => _owner;
+  RiveOwner owner;
 
   RiveFolder _current;
   int _lastSelectedIndex;
@@ -61,7 +59,7 @@ class FileBrowser extends FileBrowserController {
 
   final _draggingState = ValueNotifier<bool>(false);
 
-  FileBrowser(this._owner);
+  FileBrowser(this.owner);
 
   int get crossAxisCount {
     final w = _constraints.maxWidth;
@@ -119,8 +117,8 @@ class FileBrowser extends FileBrowserController {
   Future<bool> load() async {
     String selectedFolderId = currentFolder?.id;
     FoldersResult<RiveFolder> result;
-    if (_owner is RiveTeam) {
-      result = await _filesApi.teamFolders(_owner.ownerId);
+    if (owner is RiveTeam) {
+      result = await _filesApi.teamFolders(owner.ownerId);
     } else {
       result = await _filesApi.myFolders();
     }
@@ -136,7 +134,7 @@ class FileBrowser extends FileBrowserController {
     }
 
     if (result.root.isNotEmpty) {
-      result.root.first.owner = _owner;
+      result.root.first.owner = owner;
     }
 
     myTreeController.value.data = result.root;
@@ -160,9 +158,9 @@ class FileBrowser extends FileBrowserController {
 
   Future<void> createFile() async {
     RiveFile newFile;
-    if (_owner is RiveTeam) {
+    if (owner is RiveTeam) {
       newFile =
-          await _filesApi.createTeamFile(_owner.ownerId, folder: _current);
+          await _filesApi.createTeamFile(owner.ownerId, folder: _current);
     } else {
       newFile = await _filesApi.createFile(folder: _current);
     }
@@ -180,9 +178,9 @@ class FileBrowser extends FileBrowserController {
 
   Future<void> createFolder() async {
     RiveFolder newFolder;
-    if (_owner is RiveTeam) {
+    if (owner is RiveTeam) {
       newFolder =
-          await _filesApi.createTeamFolder(_owner.ownerId, folder: _current);
+          await _filesApi.createTeamFolder(owner.ownerId, folder: _current);
     } else {
       newFolder = await _filesApi.createFolder(_current);
     }
@@ -226,12 +224,12 @@ class FileBrowser extends FileBrowserController {
       return previous;
     }
 
-    if (_owner == null || _owner is RiveUser) {
+    if (owner == null || owner is RiveUser) {
       folderFiles = await _filesApi.folderFiles(_sortOption,
           folder: _current, cacheLocator: cacheLocator);
     } else {
       // dont have an api for this just yet.
-      folderFiles = await _filesApi.teamFolderFiles(_owner.ownerId, _sortOption,
+      folderFiles = await _filesApi.teamFolderFiles(owner.ownerId, _sortOption,
           folder: _current, cacheLocator: cacheLocator);
     }
 
@@ -349,8 +347,8 @@ class FileBrowser extends FileBrowserController {
     _detailsTimer = null;
     var files = _queuedFileDetails.toList(growable: false);
     _queuedFileDetails.clear();
-    if (_owner is RiveTeam) {
-      if (await _filesApi.fillTeamDetails(_owner.ownerId, files)) {}
+    if (owner is RiveTeam) {
+      if (await _filesApi.fillTeamDetails(owner.ownerId, files)) {}
     } else {
       if (await _filesApi.fillDetails(files)) {}
     }
