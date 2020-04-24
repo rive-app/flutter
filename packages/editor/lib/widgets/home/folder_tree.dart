@@ -69,13 +69,9 @@ class FolderTreeView extends StatelessWidget {
       ),
       extraBuilder: (context, item, index) => Container(),
       backgroundBuilder: (context, item, style) =>
-          ValueListenableBuilder<SelectionState>(
-        valueListenable: item.data.selectionState,
-        builder: (context, selectionState, _) => DropItemBackground(
-          DropState.none,
-          selectionState,
-        ),
-      ),
+        DropItemBackground(DropState.none, 
+            (fileBrowser?.selectedFolder == item.data) 
+                ? SelectionState.selected: SelectionState.none),
       itemBuilder: (context, item, style) => Expanded(
         child: Container(
           child: IgnorePointer(
