@@ -52,6 +52,7 @@ class FileBrowser extends FileBrowserController {
 
   RiveOwner _owner;
   set owner(RiveOwner owner) => _owner = owner;
+  RiveOwner get owner => _owner;
 
   RiveFolder _current;
   int _lastSelectedIndex;
@@ -68,7 +69,7 @@ class FileBrowser extends FileBrowserController {
     return _count == 0 ? 1 : _count;
   }
 
-  RiveOwner get owner => _owner;
+  
   RiveFolder get currentFolder => _current;
   ValueListenable<bool> get draggingState => _draggingState;
   bool get isDragging =>

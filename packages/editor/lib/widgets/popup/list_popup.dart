@@ -293,7 +293,7 @@ class ListPopup<T extends PopupListItem> {
     ;
 
     var file = ActiveFile.find(context);
-    file.addActionHandler(handler);
+    file?.addActionHandler(handler);
 
     list = ListPopup<T>(
       items,
@@ -316,7 +316,7 @@ class ListPopup<T extends PopupListItem> {
       onClose: () {
         onClose?.call();
         list.close();
-        file.removeActionHandler(handler);
+        file?.removeActionHandler(handler);
       },
       includeCloseGuard: includeCloseGuard,
       builder: (context) {

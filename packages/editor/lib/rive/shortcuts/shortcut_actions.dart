@@ -140,12 +140,12 @@ class ShortcutAction {
       TogglingShortcutAction('mouse-wheel-zoom');
   static const ShortcutAction confirm = ShortcutAction('action');
 
-  static const ShortcutAction left = ShortcutAction('action');
+  static const ShortcutAction left = ShortcutAction('action-left');
 
   // UI related
-  static const ShortcutAction right = ShortcutAction('action');
-  static const ShortcutAction up = ShortcutAction('action');
-  static const ShortcutAction down = ShortcutAction('action');
+  static const ShortcutAction right = ShortcutAction('action-right');
+  static const ShortcutAction up = ShortcutAction('action-up');
+  static const ShortcutAction down = ShortcutAction('action-down');
 
   final String name;
   const ShortcutAction(this.name);
