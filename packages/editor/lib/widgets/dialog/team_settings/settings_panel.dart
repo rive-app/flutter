@@ -223,7 +223,6 @@ class _TabItemState extends State<_SettingsTabItem> {
                     : const Color.fromRGBO(102, 102, 102, 1),
               ),
             ),
-            padding:0,
           ),
         ),
       ),
