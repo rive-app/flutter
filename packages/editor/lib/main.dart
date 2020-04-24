@@ -329,7 +329,6 @@ class EditorScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
-    final theme = RiveTheme.of(context);
 
     return Column(
       children: [

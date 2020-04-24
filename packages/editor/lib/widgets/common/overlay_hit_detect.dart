@@ -1,4 +1,8 @@
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/common/cursor_icon.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 /// A drag callback with local and local normalized (0-1) coordinates.
 typedef DragProxy = void Function(Offset local, Offset localNormalized);
@@ -15,6 +19,7 @@ class OverlayHitDetect extends StatefulWidget {
   final DragProxy drag;
   final VoidCallback endDrag;
   final VoidCallback press;
+  final String customCursorIcon;
 
   const OverlayHitDetect({
     Key key,
@@ -23,6 +28,7 @@ class OverlayHitDetect extends StatefulWidget {
     this.drag,
     this.endDrag,
     this.press,
+    this.customCursorIcon,
   }) : super(key: key);
 
   @override
@@ -31,6 +37,18 @@ class OverlayHitDetect extends StatefulWidget {
 
 class _OverlayHitDetectState extends State<OverlayHitDetect> {
   OverlayEntry _resizeOverlay;
+  CursorInstance _customCursor;
+  bool _isDragging = false;
+  // Need to store this otherwise it can cause a context lookup during pointerUp
+  // which can trigger after this widget is unmounted causing a  'Looking up a
+  // deactivated widget's ancestor is unsafe.' exception.
+  Rive _dragOperationOn;
+
+  @override
+  void dispose() {
+    _customCursor?.remove();
+    super.dispose();
+  }
 
   void _prepHitArea([Offset checkPosition]) {
     RenderBox dragRenderBox =
@@ -55,6 +73,13 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
           height: size.height,
           child: Listener(
             onPointerDown: (details) {
+              (_dragOperationOn = RiveContext.find(context))
+                  .startDragOperation();
+              _isDragging = true;
+              if (widget.customCursorIcon != null) {
+                _customCursor ??=
+                    CursorIcon.show(context, widget.customCursorIcon);
+              }
               widget.press?.call();
             },
             onPointerMove: (details) {
@@ -71,6 +96,10 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
                           .toDouble()));
             },
             onPointerUp: (details) {
+              _dragOperationOn?.endDragOperation();
+              _isDragging = false;
+              _customCursor?.remove();
+              _customCursor = null;
               _resizeOverlay?.remove();
               _resizeOverlay = null;
               _prepHitArea(details.position);
@@ -89,9 +118,29 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
   Widget build(BuildContext context) {
     return MouseRegion(
       opaque: false,
-      onHover: (details) => _prepHitArea(),
-      onEnter: (details) => _prepHitArea(),
+      onHover: (details) {
+        if(RiveContext.find(context).isDragging) {
+          return;
+        }
+        if (widget.customCursorIcon != null) {
+          _customCursor ??= CursorIcon.show(context, widget.customCursorIcon);
+        }
+        _prepHitArea();
+      },
+      onEnter: (details) {
+        if(RiveContext.find(context).isDragging) {
+          return;
+        }
+        if (widget.customCursorIcon != null) {
+          _customCursor ??= CursorIcon.show(context, widget.customCursorIcon);
+        }
+        _prepHitArea();
+      },
       onExit: (_) {
+        if (!_isDragging) {
+          _customCursor?.remove();
+          _customCursor = null;
+        }
         _resizeOverlay?.remove();
         _resizeOverlay = null;
       },

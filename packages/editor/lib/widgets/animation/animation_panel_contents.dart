@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/widgets/animation/animation_toolbar.dart';
 import 'package:rive_editor/widgets/animation/animations_list.dart';
+import 'package:rive_editor/widgets/animation/timeline_viewport_controls.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 
@@ -28,6 +29,7 @@ class AnimationPanelContents extends StatelessWidget {
                     ),
             ),
           ),
+          const SizedBox(width: 10),
           ResizePanel(
             hitSize: 10,
             direction: ResizeDirection.horizontal,
@@ -44,10 +46,27 @@ class AnimationPanelContents extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 10),
           // Placeholder for timeline and curve editor.
-          const Expanded(
-            child: ColoredBox(
-              color: Color(0x45000000),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 10),
+                TimelineViewportControls(),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(5),
+                      ),
+                      color: theme.colors.timelineBackground,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 200),

@@ -58,7 +58,7 @@ class _RivePopupButtonState extends State<RivePopupButton> {
   @override
   Widget build(BuildContext context) {
     return RiveBuilder(
-      builder: (context, rive) => PopupButton<PopupContextItem>(
+      builder: (context, activeFile) => PopupButton<PopupContextItem>(
         direction: widget.direction,
         directionPadding: widget.directionPadding,
         opened: widget.opened,
@@ -68,7 +68,13 @@ class _RivePopupButtonState extends State<RivePopupButton> {
             (widget.showChevron ? const Offset(-5, 0) : Offset.zero),
         tip: widget.tip,
         builder: (context) => MouseRegion(
-          onEnter: (_) => setState(() => _isHovered = true),
+          onEnter: (_) {
+            // If there's a drag operation active, don't show the hover.
+            if (activeFile.rive.isDragging) {
+              return;
+            }
+            setState(() => _isHovered = true);
+          },
           onExit: (_) => setState(() => _isHovered = false),
           child: Container(
             padding:
@@ -83,14 +89,14 @@ class _RivePopupButtonState extends State<RivePopupButton> {
               child: widget.showChevron
                   ? Row(
                       children: [
-                        widget.iconBuilder(context, rive, _isHovered),
+                        widget.iconBuilder(context, activeFile, _isHovered),
                         TintedIcon(
                           color: RiveTheme.of(context).colors.toolbarButton,
                           icon: 'dropdown',
                         ),
                       ],
                     )
-                  : widget.iconBuilder(context, rive, _isHovered),
+                  : widget.iconBuilder(context, activeFile, _isHovered),
             ),
           ),
         ),

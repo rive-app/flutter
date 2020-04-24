@@ -9,7 +9,6 @@ class AnimationToolbar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         vertical: 12,
-        horizontal: 9,
       ),
       child: Row(
         children: [
