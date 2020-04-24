@@ -63,7 +63,7 @@ class _PlanState extends State<PlanSettings> {
         physics: const ClampingScrollPhysics(),
         children: [
           SettingsPanelSection(
-              label: 'Account',
+              label: 'Plan',
               contents: (panelCtx) {
                 return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
