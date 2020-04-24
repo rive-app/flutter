@@ -75,3 +75,16 @@ class AnimationPanelContents extends StatelessWidget {
     );
   }
 }
+
+/// Wrapper for the widgets which concern themselves with editing a selected
+/// animation.
+class _EditingAnimation extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var editingAnimation = EditingAnimationProvider.of(context);
+    if (editingAnimation == null) {
+      return const SizedBox();
+    }
+  }
+
+}

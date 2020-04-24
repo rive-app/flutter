@@ -6,6 +6,7 @@ import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
+/// Viewport controls that allow scrubbing and zooming the timeline.
 class TimelineViewportControls extends StatelessWidget {
   static const double grabberHitSize = 10;
   static const double grabberSize = 10;
