@@ -103,6 +103,7 @@ class RiveColors {
   Color get fileUnselectedFolderIcon => const Color(0xFFA9A9A9);
   Color get fileIconColor => const Color(0xFFA9A9A9);
   Color get fileBorder => const Color(0xFFD8D8D8);
+  Color get fileTreeBackgroundHover => const Color(0xFFE3E3E3);
   Color get fileSearchBorder => const Color(0xFFE3E3E3);
   Color get fileSearchIcon => const Color(0xFF999999);
   Color get filesTreeStroke => const Color(0xFFCCCCCC);

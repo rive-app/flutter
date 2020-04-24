@@ -84,12 +84,18 @@ class DropItemBackground extends StatelessWidget {
       case DropState.none:
         switch (selectionState) {
           case SelectionState.hovered:
-            return SelectionBorder(
-                child: child, color: hoverColor ?? color ?? colors.treeHover);
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 2),
+              child: SelectionBorder(
+                  child: child, color: hoverColor ?? color ?? colors.treeHover),
+            );
           case SelectionState.selected:
-            return SelectionBorder(
-              child: child,
-              color: color ?? colors.fileSelectedBlue,
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 2),
+              child: SelectionBorder(
+                child: child,
+                color: color ?? colors.fileSelectedBlue,
+              ),
             );
           case SelectionState.none:
             break;
