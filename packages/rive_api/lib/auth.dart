@@ -5,7 +5,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/user.dart';
-import 'package:window_utils/window_utils.dart';
+import 'package:window_utils/window_utils.dart' as win_utils;
 
 const _authWebViewKey = 'auth';
 enum _RiveAuthActions { signin, register }
@@ -62,13 +62,13 @@ class RiveAuth {
   Future<AuthResponse> _oAuth(
       {@required _RiveAuthActions action, @required String provider}) async {
     assert(!kIsWeb, 'Shouldn\'t be authenticating from Flutter Web.');
-    var offset = await WindowUtils.getWindowOffset();
-    var size = await WindowUtils.getWindowSize();
+    var offset = await win_utils.getWindowOffset();
+    var size = await win_utils.getWindowSize();
 
     var url = api.host + '/desktop/${action.name}/$provider';
 
     var windowSize = const Size(800, 600);
-    String response = await WindowUtils.openWebView(
+    String response = await win_utils.openWebView(
       _authWebViewKey,
       url,
       size: windowSize,
@@ -82,7 +82,7 @@ class RiveAuth {
     print("Response in this case was: ${response.runtimeType} $response");
     if (response == null) {
       print("Response was null here");
-      await WindowUtils.closeWebView(_authWebViewKey);
+      await win_utils.closeWebView(_authWebViewKey);
       return AuthResponse.empty();
     }
 
@@ -96,15 +96,15 @@ class RiveAuth {
         authResponse = AuthResponse.fromMessage(spectre);
         api.setCookie('spectre', spectre);
         await api.persist();
-      } else if(responseData.containsKey('error')) {
+      } else if (responseData.containsKey('error')) {
         var error = responseData['error'];
         authResponse = AuthResponse.fromError(error);
       }
 
-      await WindowUtils.closeWebView(_authWebViewKey);
+      await win_utils.closeWebView(_authWebViewKey);
       return authResponse ?? AuthResponse.empty();
-    } on FormatException catch(err) {
-      await WindowUtils.closeWebView(_authWebViewKey);
+    } on FormatException catch (err) {
+      await win_utils.closeWebView(_authWebViewKey);
       return AuthResponse.fromError(err.message);
     }
   }
@@ -158,7 +158,6 @@ class RiveAuth {
     return false;
   }
 }
-
 
 class AuthResponse {
   String message, error;

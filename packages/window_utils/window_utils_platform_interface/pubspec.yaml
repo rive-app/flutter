@@ -1,0 +1,20 @@
+
+name: window_utils_platform_interface
+description: A common platform interface for the window_utils plugin.
+homepage: https://github.com/rive-app/rive
+version: 1.0.3
+
+environment:
+    sdk: ">=2.6.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meta: ^1.1.8
+  plugin_platform_interface: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^4.1.1
+  pedantic: ^1.9.0

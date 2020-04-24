@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'package:cursor/cursor_view.dart';
 
-import 'package:window_utils/window_utils.dart';
+import 'package:window_utils/window_utils.dart' as win_utils;
 
 import 'package:core/error_logger/error_logger.dart' as error_logger;
 import 'package:rive_core/event.dart';
@@ -54,8 +54,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding.instance.addPostFrameCallback(
     (_) {
-      WindowUtils.hideTitleBar();
-      WindowUtils.setSize(kDefaultWIndowSize);
+      win_utils.hideTitleBar();
+      win_utils.setSize(kDefaultWIndowSize);
     },
   );
 
@@ -343,7 +343,7 @@ class EditorScaffold extends StatelessWidget {
                     Positioned.fill(
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTapDown: (_) => WindowUtils.startDrag(),
+                        onTapDown: (_) => win_utils.startDrag(),
                       ),
                     ),
                     _TabBar(rive: rive),
