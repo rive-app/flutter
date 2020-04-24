@@ -8,6 +8,7 @@ const lightGrey = Color(0xFF8C8C8C);
 const white = Color(0xFFFFFFFF);
 const red = Color(0xFFFF5678);
 const purple = Color(0xFFD041AB);
+const transparent = Color(0x00000000);
 
 /// Colors used in the Rive Theme
 /// Define them as getters and keep them const
@@ -204,7 +205,10 @@ class TextStyles {
       fontFamily: 'Roboto-Light', color: Color(0xFF666666), fontSize: 13);
 
   TextStyle get tooltipText => const TextStyle(
-      fontFamily: 'Roboto-Light', color: Color(0xFFCCCCCC), fontSize: 13, height: 1.61);
+      fontFamily: 'Roboto-Light',
+      color: Color(0xFFCCCCCC),
+      fontSize: 13,
+      height: 1.61);
 
   TextStyle get tooltipDisclaimer => const TextStyle(
         fontFamily: 'Roboto-Light',
@@ -359,7 +363,10 @@ class TextStyles {
 class Gradients {
   const Gradients();
 
-  Gradient get magenta => const LinearGradient(
+  LinearGradient get transparentLinear =>
+      const LinearGradient(colors: [transparent, transparent]);
+
+  LinearGradient get magenta => const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
@@ -368,7 +375,7 @@ class Gradients {
         ],
       );
 
-  Gradient get redPurpleBottomCenter => const LinearGradient(
+  LinearGradient get redPurpleBottomCenter => const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomCenter,
         colors: [

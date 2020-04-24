@@ -10,14 +10,8 @@ import 'package:tree_widget/flat_tree_item.dart';
 /// item. The TreeView is specifically built to allow theming all aspects,
 /// including stylings for drag and drop.
 class DropItemBackground extends StatelessWidget {
-  const DropItemBackground(
-    this.dropState,
-    this.selectionState, {
-    this.child,
-    this.color,
-    this.hoverColor,
-    this.padding = 2
-  });
+  const DropItemBackground(this.dropState, this.selectionState,
+      {this.child, this.color, this.hoverColor, this.padding = 2});
 
   final double padding;
   final DropState dropState;
@@ -100,12 +94,14 @@ class DropItemBackground extends StatelessWidget {
               ),
             );
           case SelectionState.none:
+            return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2), child: child);
             break;
         }
         break;
     }
 
-    return SizedBox(child: child);
+    return child;
   }
 }
 

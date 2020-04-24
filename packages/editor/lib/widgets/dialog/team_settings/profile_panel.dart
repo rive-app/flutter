@@ -155,7 +155,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                             description:
                                 'Allow other users to message you about work'
                                 ' opportunities. You will also show up in our'
-                                'list of artists for hire.',
+                                ' list of artists for hire.',
                             groupValue: _profile.isForHire,
                             value: true,
                             onChanged: (value) => _profile.isForHire = value),
@@ -283,6 +283,7 @@ class LabeledRadio extends StatelessWidget {
     final styles = theme.textStyles;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         if (value != groupValue) onChanged(value);
       },

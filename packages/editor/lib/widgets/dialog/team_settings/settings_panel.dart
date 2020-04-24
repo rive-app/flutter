@@ -21,7 +21,7 @@ const double settingsTabNavWidth = 215;
 enum SettingsPanel { settings, members, plan, history }
 
 /// map to map SettingsPanels to their appropriate indexes.
-final panelMap = {
+final Map<SettingsPanel, int> panelMap = {
   SettingsPanel.settings: 0,
   SettingsPanel.members: 1,
   SettingsPanel.plan: 2,
@@ -81,17 +81,14 @@ class _SettingsState extends State<Settings> {
         constraints: BoxConstraints(maxWidth: maxWidth), child: child);
   }
 
-  Widget _label(SettingsScreen screen, int index) => Padding(
-        padding: const EdgeInsets.only(bottom: 5),
-        child: _SettingsTabItem(
-          onSelect: () {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          label: screen.label,
-          isSelected: index == _selectedIndex,
-        ),
+  Widget _label(SettingsScreen screen, int index) => _SettingsTabItem(
+        onSelect: () {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        label: screen.label,
+        isSelected: index == _selectedIndex,
       );
 
   Future<void> changeAvatar() async {
@@ -210,26 +207,22 @@ class _TabItemState extends State<_SettingsTabItem> {
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTap: widget.onSelect,
-        child: Container(
-          height: 31,
-          child: DropItemBackground(
-            DropState.none,
-            state,
-            color: tabColor,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-              child: Text(
-                widget.label,
-                style: TextStyle(
-                  fontFamily: 'Roboto-Regular',
-                  fontSize: 13,
-                  color: widget.isSelected
-                      ? Colors.white
-                      : const Color.fromRGBO(102, 102, 102, 1),
-                ),
+        child: DropItemBackground(
+          DropState.none,
+          state,
+          color: tabColor,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+            child: Text(
+              widget.label,
+              style: TextStyle(
+                fontFamily: 'Roboto-Regular',
+                fontSize: 13,
+                color: widget.isSelected
+                    ? Colors.white
+                    : const Color.fromRGBO(102, 102, 102, 1),
               ),
             ),
-            padding:0,
           ),
         ),
       ),

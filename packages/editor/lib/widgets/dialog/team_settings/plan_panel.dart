@@ -26,16 +26,26 @@ class PlanSettings extends StatefulWidget {
   State<StatefulWidget> createState() => _PlanState();
 }
 
-class _PlanState extends State<PlanSettings> {
+class _PlanState extends State<PlanSettings>
+    with SingleTickerProviderStateMixin {
   PlanSubscriptionPackage _sub;
+  bool _basicHover = false, _premiumHover = false;
+  AnimationController _controller;
+
+  bool get isBasic => _sub?.option == TeamsOption.basic;
+  bool get isPremium => _sub?.option == TeamsOption.premium;
+
   @override
   void initState() {
     // Fetch current team billing data from the backend.
     PlanSubscriptionPackage.fetchData(widget.api, widget.team)
         .then((value) => setState(() {
               _sub = value;
+              _toggleController();
               _sub.addListener(_onSubChange);
             }));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 200));
     super.initState();
   }
 
@@ -46,9 +56,44 @@ class _PlanState extends State<PlanSettings> {
     _sub.updatePlan(widget.api, widget.team.ownerId);
   }
 
+  void _toggleController() {
+    // React & prioritize to hover.
+    if (_basicHover) {
+      _controller.forward();
+    } else if (_premiumHover) {
+      _controller.reverse();
+    } else {
+      // Fallback: highlight our selected option.
+      if (isBasic) {
+        _controller.forward();
+      } else if (isPremium) {
+        _controller.reverse();
+      }
+    }
+  }
+
+  void setBasicHover(bool value) {
+    if (_basicHover != value) {
+      setState(() {
+        _basicHover = value;
+        _toggleController();
+      });
+    }
+  }
+
+  void setPremiumHover(bool value) {
+    if (_premiumHover != value) {
+      setState(() {
+        _premiumHover = value;
+        _toggleController();
+      });
+    }
+  }
+
   @override
   void dispose() {
     _sub.dispose(); // Cleans up listeners.
+    _controller.dispose();
     super.dispose();
   }
 
@@ -57,13 +102,13 @@ class _PlanState extends State<PlanSettings> {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final textStyles = theme.textStyles;
-
+    final labelLookup = costLookup[_sub?.billing];
     return ListView(
         padding: const EdgeInsets.all(30),
         physics: const ClampingScrollPhysics(),
         children: [
           SettingsPanelSection(
-              label: 'Account',
+              label: 'Plan',
               contents: (panelCtx) {
                 return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -96,32 +141,45 @@ class _PlanState extends State<PlanSettings> {
                         ],
                       ),
                       const SizedBox(height: 30),
-                      Row(
-                        children: <Widget>[
-                          TeamSubscriptionChoiceWidget(
-                            label: 'Team',
-                            costLabel: (_sub == null)
-                                ? '\$'
-                                : '\$${costLookup[_sub.billing][TeamsOption.basic]}',
-                            explanation:
-                                'A space where you and your team can share files.',
-                            onTap: () => _sub.option = TeamsOption.basic,
-                            showButton: false,
-                            isSelected: _sub?.option == TeamsOption.basic,
-                          ),
-                          const SizedBox(width: 30),
-                          TeamSubscriptionChoiceWidget(
-                            label: 'Premium Team',
-                            costLabel: (_sub == null)
-                                ? '\$'
-                                : '\$${costLookup[_sub.billing][TeamsOption.premium]}',
-                            explanation: '1 day support.',
-                            onTap: () => _sub.option = TeamsOption.premium,
-                            showButton: false,
-                            isSelected: _sub?.option == TeamsOption.premium,
-                          ),
-                        ],
-                      ),
+                      AnimatedBuilder(
+                          animation: _controller,
+                          builder: (_, __) {
+                            final t = _controller.value;
+                            // Simple quadratic.
+                            final animationValue = t * t;
+                            return Row(
+                              children: [
+                                SubscriptionChoiceRadio(
+                                  label: 'Team',
+                                  costLabel: (_sub == null)
+                                      ? ''
+                                      : '${labelLookup[TeamsOption.basic]}',
+                                  description: ''
+                                      'Create a space where you and '
+                                      'your team can share files.',
+                                  onTap: () => _sub.option = TeamsOption.basic,
+                                  onHoverChange: setBasicHover,
+                                  isSelected: isBasic,
+                                  highlight: animationValue,
+                                ),
+                                const SizedBox(width: 30),
+                                SubscriptionChoiceRadio(
+                                  label: 'Org',
+                                  costLabel: (_sub == null)
+                                      ? ''
+                                      : '${labelLookup[TeamsOption.premium]}',
+                                  description: ''
+                                      'Create projects that only some of '
+                                      'your team has access to.',
+                                  onTap: () =>
+                                      _sub.option = TeamsOption.premium,
+                                  onHoverChange: setPremiumHover,
+                                  isSelected: isPremium,
+                                  highlight: 1 - animationValue,
+                                ),
+                              ],
+                            );
+                          }),
                     ]);
               }),
           // Vertical padding.

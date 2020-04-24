@@ -80,6 +80,7 @@ class _LabeledTextFieldState extends State<LabeledTextField>
     final textStyles = theme.textStyles;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: _focusNode.requestFocus,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
