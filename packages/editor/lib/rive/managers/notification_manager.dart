@@ -10,7 +10,8 @@ import 'package:meta/meta.dart';
 
 /// State manager for notifications
 class NotificationManager {
-  NotificationManager({@required RiveApi api})
+  Sink<bool> teamUpdateSink;
+  NotificationManager({@required RiveApi api, this.teamUpdateSink})
       : _api = NotificationsApi(api),
         _teamApi = RiveTeamsApi(api) {
     _init();
@@ -52,7 +53,7 @@ class NotificationManager {
   final _declineTeamInviteController =
       StreamController<RiveTeamInviteNotification>.broadcast();
   Sink<RiveTeamInviteNotification> get declineTeamInvite =>
-      _acceptTeamInviteController;
+      _declineTeamInviteController;
 
   /// Clean up all the stream controllers and that polling timer
   void dispose() {
@@ -130,6 +131,7 @@ class NotificationManager {
   /// Accepts a team invite
   Future<void> _acceptTeamInvite(RiveTeamInviteNotification n) async {
     await _teamApi.acceptInvite(n.teamId);
+    teamUpdateSink.add(true);
     _removeNotification(n);
   }
 

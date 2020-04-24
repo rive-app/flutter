@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_editor/rive/managers/rive_manager.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
 
@@ -96,6 +97,7 @@ const double resizeEdgeSize = 10;
 class RiveEditorApp extends StatelessWidget {
   final Rive rive;
   final RiveIconCache iconCache;
+  
 
   const RiveEditorApp({
     Key key,
@@ -105,6 +107,8 @@ class RiveEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final riveManager = RiveManager(rive);
+
     return InsertInheritedWidgets(
       rive: rive,
       iconCache: iconCache,
@@ -129,7 +133,10 @@ class RiveEditorApp extends StatelessWidget {
 
                           case RiveState.editor:
                             return NotificationProvider(
-                              manager: NotificationManager(api: rive.api),
+                              manager: NotificationManager(
+                                api: rive.api, 
+                                teamUpdateSink:riveManager.teamUpdateSink
+                              ),
                               child: FollowProvider(
                                 manager: FollowManager(
                                   api: rive.api,
