@@ -251,12 +251,9 @@ class Rive {
       selectTab(systemTab);
 
       await reloadTeams();
-
+      
       // TODO: load last opened file list (from localdata)
-      if (fileBrowsers.first.myTreeController.value.data.isNotEmpty) {
-        unawaited(fileBrowsers.first.openFolder(
-            fileBrowsers.first.myTreeController.value.data.first, false));
-      }
+      activeFileBrowser.value ??= fileBrowsers.first;
 
       return me;
     } else {
@@ -289,8 +286,6 @@ class Rive {
     teams.value = await _RiveTeamApi(api).teams;
 
     // cache the previously active file browser.
-    var activeFileBrowserOwner = activeFileBrowser.value?.owner?.ownerId;
-
     var oldBrowsers = fileBrowsers.sublist(0);
     fileBrowsers.clear();
 
@@ -323,11 +318,6 @@ class Rive {
     folderTreeControllers.value = fileBrowsers
         .map((FileBrowser fileBrowser) => fileBrowser.myTreeController.value)
         .toList();
-
-    // reset the active file browser!
-    activeFileBrowser.value = fileBrowsers.firstWhere(
-        (fileBrowser) => fileBrowser.owner?.ownerId == activeFileBrowserOwner,
-        orElse: () => fileBrowsers.first);
   }
 
   void closeTab(RiveTabItem value) {
