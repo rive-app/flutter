@@ -4,10 +4,9 @@ import 'package:core/debounce.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_editor/widgets/common/cursor_icon.dart';
+import 'package:rive_editor/widgets/ignore_mouse.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-
-import 'common/cursor_icon.dart';
-import 'ignore_mouse.dart';
 
 enum ResizeDirection { vertical, horizontal }
 enum ResizeSide { start, end }
@@ -123,21 +122,22 @@ class _ResizePanelState extends State<ResizePanel> {
         break;
     }
     _resizeOverlay = OverlayEntry(
-        maintainState: true,
-        builder: (context) {
-          return Positioned(
-            key: _key,
-            left: left,
-            top: top,
-            width: width,
-            height: height,
-            child: detectDrag(
-              // Set this to Colors.red to see the drag overlay created to help
-              // gesture detect.
-              Container(color: Colors.transparent),
-            ),
-          );
-        });
+      maintainState: true,
+      builder: (context) {
+        return Positioned(
+          key: _key,
+          left: left,
+          top: top,
+          width: width,
+          height: height,
+          child: detectDrag(
+            // Set this to Colors.red to see the drag overlay created to help
+            // gesture detect.
+            Container(color: Colors.transparent),
+          ),
+        );
+      },
+    );
 
     Overlay.of(context).insert(_resizeOverlay);
 

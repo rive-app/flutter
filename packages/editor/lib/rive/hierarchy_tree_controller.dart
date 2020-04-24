@@ -12,23 +12,24 @@ import 'stage/stage_item.dart';
 /// propagate selections.
 class HierarchyTreeController extends TreeController<Component> {
   final OpenFileContext file;
-  List<Component> _data;
+  List<Component> _data = [];
 
   HierarchyTreeController(this.file) : super() {
+    // TODO: should this controller by a RiveFileDelegate so it can remove items
+    // from the expanded set when they are removed for good from the file?
+    // Probably a good idea or at least optimize it to track expansion via
+    // custom hash (like the id of an object in this case so that it works when
+    // objects are re-hydrated/instanced after an undo.
     file.core.backboard.activeArtboardChanged.addListener(_updateArtboard);
+    _updateArtboard();
   }
 
   @override
-  Iterable<Component> get data {
-    if (file.core.backboard.activeArtboard != null) {
-      // TODO: bit jucky
-      _data = [file.core.backboard.activeArtboard];
-    }
-    return _data;
-  }
+  Iterable<Component> get data => _data;
 
   set data(Iterable<Component> value) {
     _data = value.toList();
+    flatten();
   }
 
   @override

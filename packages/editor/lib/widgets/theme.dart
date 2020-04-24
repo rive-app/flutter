@@ -148,6 +148,10 @@ class RiveColors {
 
   // Aniation panel
   Color get animationPanelBackground => const Color(0xFF282828);
+  Color get timelineViewportControlsBackground => const Color(0xFF1F1F1F);
+  Color get timelineViewportControlsGrabber => const Color(0xFF33A7FF);
+  Color get timelineViewportControlsTrack => const Color(0xFF4C4C4C);
+  Color get timelineBackground => const Color(0xFF232323);
 }
 
 /// TextStyles used in the Rive Theme

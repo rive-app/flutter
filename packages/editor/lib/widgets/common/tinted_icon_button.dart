@@ -74,6 +74,10 @@ class _TintedIconButtonState extends State<TintedIconButton> {
         onTapDown: (_) => widget.onPress(),
         child: MouseRegion(
           onEnter: (_) {
+            // If there's a drag operation active, don't show the hover.
+            if (RiveContext.find(context).isDragging) {
+              return;
+            }
             setState(() => _isHovered = true);
           },
           onExit: (_) {
