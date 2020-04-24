@@ -229,6 +229,7 @@ class _TabItemState extends State<_SettingsTabItem> {
                 ),
               ),
             ),
+            padding:0,
           ),
         ),
       ),

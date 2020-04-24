@@ -32,7 +32,6 @@ import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 
-import 'package:pedantic/pedantic.dart';
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
@@ -251,13 +250,13 @@ class Rive {
       selectTab(systemTab);
 
       await reloadTeams();
-
+      
       // TODO: load last opened file list (from localdata)
-      if (fileBrowsers.first.myTreeController.value.data.isNotEmpty) {
-        unawaited(fileBrowsers.first.openFolder(
-            fileBrowsers.first.myTreeController.value.data.first, false));
+      if (fileBrowsers.first.myTreeController.value.data.isNotEmpty) {	      
+        activeFileBrowser.value ??= fileBrowsers.first;
+        await fileBrowsers.first.openFolder(	
+            fileBrowsers.first.myTreeController.value.data.first, false);	
       }
-
       return me;
     } else {
       _state.value = RiveState.login;
@@ -289,8 +288,6 @@ class Rive {
     teams.value = await _RiveTeamApi(api).teams;
 
     // cache the previously active file browser.
-    var activeFileBrowserOwner = activeFileBrowser.value?.owner?.ownerId;
-
     var oldBrowsers = fileBrowsers.sublist(0);
     fileBrowsers.clear();
 
@@ -323,11 +320,6 @@ class Rive {
     folderTreeControllers.value = fileBrowsers
         .map((FileBrowser fileBrowser) => fileBrowser.myTreeController.value)
         .toList();
-
-    // reset the active file browser!
-    activeFileBrowser.value = fileBrowsers.firstWhere(
-        (fileBrowser) => fileBrowser.owner?.ownerId == activeFileBrowserOwner,
-        orElse: () => fileBrowsers.first);
   }
 
   void closeTab(RiveTabItem value) {

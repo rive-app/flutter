@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:flutter/services.dart';
-import 'package:cursor/system_cursor.dart';
 import 'package:cursor/cursor_view.dart';
-import 'package:provider/provider.dart';
 
 void main() => runApp(MyApp());
 

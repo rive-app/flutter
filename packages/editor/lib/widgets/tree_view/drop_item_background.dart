@@ -16,8 +16,10 @@ class DropItemBackground extends StatelessWidget {
     this.child,
     this.color,
     this.hoverColor,
+    this.padding = 2
   });
 
+  final double padding;
   final DropState dropState;
   final SelectionState selectionState;
   final Widget child;
@@ -30,7 +32,7 @@ class DropItemBackground extends StatelessWidget {
     switch (dropState) {
       case DropState.parent:
         return Padding(
-          padding: const EdgeInsets.all(2),
+          padding: EdgeInsets.all(padding),
           child: DottedBorder(
             color: const Color.fromRGBO(87, 165, 224, 1.0),
             strokeWidth: 2,
@@ -43,11 +45,11 @@ class DropItemBackground extends StatelessWidget {
       case DropState.above:
         return Container(
           clipBehavior: Clip.none,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(
               top: BorderSide(
-                color: Color.fromRGBO(87, 165, 224, 1.0),
-                width: 2.0,
+                color: const Color.fromRGBO(87, 165, 224, 1.0),
+                width: padding,
                 style: BorderStyle.solid,
               ),
             ),
@@ -55,13 +57,13 @@ class DropItemBackground extends StatelessWidget {
         );
       case DropState.below:
         return Transform.translate(
-          offset: const Offset(0, 2),
+          offset: Offset(0, padding),
           child: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Color.fromRGBO(87, 165, 224, 1.0),
-                  width: 2.0,
+                  color: const Color.fromRGBO(87, 165, 224, 1.0),
+                  width: padding,
                   style: BorderStyle.solid,
                 ),
               ),
@@ -73,7 +75,7 @@ class DropItemBackground extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(
               color: const Color.fromRGBO(87, 165, 224, 1.0),
-              width: 2.0,
+              width: padding,
               style: BorderStyle.solid,
             ),
             borderRadius: const BorderRadius.all(
@@ -85,13 +87,13 @@ class DropItemBackground extends StatelessWidget {
         switch (selectionState) {
           case SelectionState.hovered:
             return Padding(
-              padding: EdgeInsets.symmetric(vertical: 2),
+              padding: EdgeInsets.symmetric(vertical: padding),
               child: SelectionBorder(
                   child: child, color: hoverColor ?? color ?? colors.treeHover),
             );
           case SelectionState.selected:
             return Padding(
-              padding: EdgeInsets.symmetric(vertical: 2),
+              padding: EdgeInsets.symmetric(vertical: padding),
               child: SelectionBorder(
                 child: child,
                 color: color ?? colors.fileSelectedBlue,
