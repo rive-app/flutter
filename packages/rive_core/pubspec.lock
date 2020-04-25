@@ -135,6 +135,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.3"
+  js:
+    dependency: transitive
+    description:
+      name: js
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.1+1"
   local_data:
     dependency: "direct main"
     description:
@@ -367,10 +374,31 @@ packages:
   window_utils:
     dependency: transitive
     description:
-      path: "../window_utils"
+      path: "../window_utils/window_utils"
       relative: true
     source: path
-    version: "1.0.2"
+    version: "1.0.3"
+  window_utils_macos:
+    dependency: transitive
+    description:
+      path: "../window_utils/window_utils_macos"
+      relative: true
+    source: path
+    version: "1.0.3"
+  window_utils_platform_interface:
+    dependency: transitive
+    description:
+      path: "../window_utils/window_utils_platform_interface"
+      relative: true
+    source: path
+    version: "1.0.3"
+  window_utils_web:
+    dependency: transitive
+    description:
+      path: "../window_utils/window_utils_web"
+      relative: true
+    source: path
+    version: "0.0.1"
 sdks:
   dart: ">=2.6.0 <3.0.0"
-  flutter: ">=1.12.13+hotfix.4 <2.0.0"
+  flutter: ">=1.17.0 <2.0.0"

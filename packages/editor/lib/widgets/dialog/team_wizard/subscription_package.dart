@@ -231,6 +231,7 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
   }
 
   // When creating a team, team size is only the creator.
+  @override
   int get teamSize => 1;
 
   // User friendly Name validation error messages
@@ -272,10 +273,10 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
   bool get isStep1Valid => isNameValid && isOptionValid;
 
   bool get isCardInputValid {
-    // Matt, im sure there' sa better way to do this
+    // Matt, im sure there's a better way to do this
     // we want to check all of these, as they set errors
     // as a byproduct...
-    // I guess its a bit of a shite pattern, shoudl probalby
+    // I guess its a bit of a shite pattern, shoulg probably
     // have a validate function thats separate...
     isCardNrValid;
     isZipValid;
@@ -320,6 +321,10 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
             // todo.. fine
             _cardValidationError = error.error;
         }
+      } on ApiException catch (exception) {
+        // card validation error is just the most convenient
+        // place to display this
+        _cardValidationError = exception.error.message;
       } finally {
         processing = false;
       }
