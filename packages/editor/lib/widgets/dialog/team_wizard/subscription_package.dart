@@ -272,8 +272,18 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
   /// Step 1 is valid; safe to proceed to step 2
   bool get isStep1Valid => isNameValid && isOptionValid;
 
-  bool get isCardInputValid =>
-      isCardNrValid && isZipValid && isExpirationValid && isCcvValid;
+  bool get isCardInputValid {
+    // Matt, im sure there's a better way to do this
+    // we want to check all of these, as they set errors
+    // as a byproduct...
+    // I guess its a bit of a shite pattern, shoulg probably
+    // have a validate function thats separate...
+    isCardNrValid;
+    isZipValid;
+    isExpirationValid;
+    isCcvValid;
+    return isCardNrValid && isZipValid && isExpirationValid && isCcvValid;
+  }
 
   /// Step 2 is valid; safe to attempt team creation
   bool get isStep2Valid => isNameValid && isOptionValid && isCardInputValid;
