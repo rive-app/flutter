@@ -6,6 +6,7 @@ import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/managers/animations_manager.dart';
 import 'package:rive_editor/rive/managers/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
+import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -382,4 +383,50 @@ class _InheritedEditingAnimation extends InheritedWidget {
   @override
   bool updateShouldNotify(_InheritedEditingAnimation old) =>
       editingAnimationManager != old.editingAnimationManager;
+}
+
+// Image manager state provider
+
+class ImageManagerProvider extends StatefulWidget {
+  const ImageManagerProvider({@required this.manager, this.child});
+  final Widget child;
+  final ImageManager manager;
+
+  @override
+  _ImageManagerProviderState createState() => _ImageManagerProviderState();
+
+  static ImageManager of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_InheritedImageProvider>()
+      .manager;
+}
+
+class _ImageManagerProviderState extends State<ImageManagerProvider> {
+  ImageManager _manager;
+
+  @override
+  void initState() {
+    _manager = widget.manager;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) => _InheritedImageProvider(
+        manager: _manager,
+        child: widget.child,
+      );
+}
+
+class _InheritedImageProvider extends InheritedWidget {
+  const _InheritedImageProvider({
+    @required this.manager,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final ImageManager manager;
+
+  @override
+  bool updateShouldNotify(_InheritedImageProvider old) =>
+      manager != old.manager;
 }

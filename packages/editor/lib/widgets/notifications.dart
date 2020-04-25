@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 
@@ -33,6 +35,14 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
         padding: const EdgeInsets.only(left: 20),
         child: Column(
           children: <Widget>[
+            StreamBuilder<Uint8List>(
+              stream: ImageManagerProvider.of(context).firstImageStream,
+              builder: (context, snapshot) => snapshot.hasData
+                  ? Image.memory(snapshot.data)
+                  : const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+            ),
             Expanded(
               child: Center(
                 child: SizedBox(
