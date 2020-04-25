@@ -256,6 +256,7 @@ class _AnimationsProviderState extends State<AnimationsProvider> {
   void didUpdateWidget(AnimationsProvider oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.activeArtboard != widget.activeArtboard) {
+      _manager?.dispose();
       _manager = widget.activeArtboard == null
           ? null
           : AnimationsManager(activeArtboard: widget.activeArtboard);
@@ -264,7 +265,7 @@ class _AnimationsProviderState extends State<AnimationsProvider> {
 
   @override
   void dispose() {
-    _manager.dispose();
+    _manager?.dispose();
     super.dispose();
   }
 
