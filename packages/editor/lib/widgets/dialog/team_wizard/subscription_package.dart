@@ -320,7 +320,11 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
             // todo.. fine
             _cardValidationError = error.error;
         }
-      } finally {
+      } on ApiException catch(exception) {
+        // card vlaidation error is just the most convenient 
+        // place to display this
+        _cardValidationError = exception.error.message;
+      }finally {
         processing = false;
       }
     } else {
