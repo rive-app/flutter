@@ -12,8 +12,6 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   plugin_platform_interface: ^1.0.2
-  provider: ^4.0.1
-  js: ^0.6.1+1
 
 dev_dependencies:
   flutter_test:
