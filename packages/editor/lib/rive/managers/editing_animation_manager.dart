@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -24,17 +25,35 @@ class EditingAnimationManager {
   final _viewportController = StreamController<TimelineViewport>();
 
   EditingAnimationManager(this.editingAnimation) {
-    /// TODO: compute real viewport and min seconds should be 2 frames in
-    /// seconds. Sync this whenever duration, fps, etc change.
-    _viewportStream.add(const TimelineViewport(5.0, 10.0, 30.0, 60));
     _timeStream.add(0);
     _fpsStream.add(editingAnimation.fps);
     _fpsController.stream.listen(_changeFps);
     _fpsPreviewController.stream.listen(_changePreviewFps);
     editingAnimation.addListener(
         LinearAnimationBase.fpsPropertyKey, _coreFpsChanged);
-
+    editingAnimation.addListener(
+        LinearAnimationBase.durationPropertyKey, _coreDurationChange);
     _viewportController.stream.listen(_changeViewport);
+
+    _syncViewport();
+  }
+
+  void _syncViewport() {
+    double start = min(
+        editingAnimation.duration / editingAnimation.fps -
+            2 / editingAnimation.fps,
+        _viewportStream.hasValue ? _viewportStream.value.startSeconds : 0);
+    double end = min(
+        editingAnimation.duration / editingAnimation.fps,
+        _viewportStream.hasValue
+            ? _viewportStream.value.endSeconds
+            : editingAnimation.duration / editingAnimation.fps);
+
+    _viewportStream.add(TimelineViewport(
+        start,
+        end,
+        editingAnimation.duration / editingAnimation.fps,
+        editingAnimation.fps));
   }
 
   void _changeViewport(TimelineViewport viewport) {
@@ -45,8 +64,10 @@ class EditingAnimationManager {
   final _viewportStream = BehaviorSubject<TimelineViewport>();
   ValueStream<TimelineViewport> get viewport => _viewportStream;
 
+  void _coreDurationChange(dynamic from, dynamic to) => debounce(_syncViewport);
   void _coreFpsChanged(dynamic from, dynamic to) {
     _fpsStream.add(to as int);
+    debounce(_syncViewport);
   }
 
   void _changePreviewFps(int value) {
@@ -55,11 +76,13 @@ class EditingAnimationManager {
 
   void _changeFps(int value) {
     int oldFps = editingAnimation.fps;
-    print("MAKE THE CHANGE $oldFps => $value");
+
     // When the FPS of the animation changes we need to update all properties
     // that are in frame value (like duration) and keyframe time values.
-
-    // TODO: don't forget to captureJournalEntry
+    editingAnimation.duration =
+        ((editingAnimation.duration / oldFps) * value).round();
+    editingAnimation.fps = value;
+    editingAnimation.context.captureJournalEntry();
   }
 
   /// Change the current time displayed (value is in seconds).
@@ -76,10 +99,13 @@ class EditingAnimationManager {
   Sink<int> get previewRateChange => _fpsPreviewController;
 
   void dispose() {
+    cancelDebounce(_syncViewport);
     _viewportController.close();
     _viewportStream.close();
     editingAnimation.removeListener(
         LinearAnimationBase.fpsPropertyKey, _coreFpsChanged);
+    editingAnimation.removeListener(
+        LinearAnimationBase.durationPropertyKey, _coreDurationChange);
     _timeController.close();
     _timeStream.close();
     _fpsController.close();
@@ -97,21 +123,18 @@ class TimelineViewport {
   final double totalSeconds;
   final int fps;
 
-  double get minSeconds => 2/fps;
+  double get minSeconds => 2 / fps;
 
   const TimelineViewport(
       this.startSeconds, this.endSeconds, this.totalSeconds, this.fps);
 
   /// Move the start of the viewport, clamping at end.
   TimelineViewport moveStart(double value) => TimelineViewport(
-      min(value, endSeconds - minSeconds),
-      endSeconds,
-      totalSeconds,
-      fps);
+      min(value, endSeconds - minSeconds), endSeconds, totalSeconds, fps);
 
   /// Move the start of the viewport, clamping at start.
-  TimelineViewport moveEnd(double value) => TimelineViewport(startSeconds,
-      max(value, startSeconds + minSeconds), totalSeconds, fps);
+  TimelineViewport moveEnd(double value) => TimelineViewport(
+      startSeconds, max(value, startSeconds + minSeconds), totalSeconds, fps);
 
   /// Move the viewport, clamping at edges.
   TimelineViewport move(double value) {

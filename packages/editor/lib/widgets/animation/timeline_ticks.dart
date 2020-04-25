@@ -194,12 +194,10 @@ class _TimelineTicksRenderObject extends RenderBox {
       if (v == 0) {
         v = (tickValue / rate).floor();
         v %= 60;
-        valueString = v.toString().padLeft(2, '0') + ':00';
+        valueString = v.toString().padLeft(2, '0') + ':00s';
       } else {
-        valueString = v.toString();
+        valueString = v.toString() + label;
       }
-
-      valueString += label;
       // Already have it?
       Paragraph paragraph = _paragraphCache[valueString];
       if (paragraph == null) {
