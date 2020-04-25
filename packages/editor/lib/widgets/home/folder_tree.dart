@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -68,10 +70,11 @@ class FolderTreeView extends StatelessWidget {
         ),
       ),
       extraBuilder: (context, item, index) => Container(),
-      backgroundBuilder: (context, item, style) =>
-        DropItemBackground(DropState.none, 
-            (fileBrowser?.selectedFolder == item.data) 
-                ? SelectionState.selected: SelectionState.none),
+      backgroundBuilder: (context, item, style) => DropItemBackground(
+          DropState.none,
+          (fileBrowser?.selectedFolder == item.data)
+              ? SelectionState.selected
+              : SelectionState.none),
       itemBuilder: (context, item, style) => Expanded(
         child: Container(
           child: IgnorePointer(
@@ -119,9 +122,15 @@ class TreeRowIcon extends StatelessWidget {
         child: SizedBox(
           width: 20,
           height: 20,
-          child: CircleAvatar(
-            backgroundColor: Colors.transparent,
-            backgroundImage: NetworkImage(item.data.owner?.avatar),
+          child: FutureBuilder<Uint8List>(
+            future: ImageCacheProvider.of(context)
+                .loadRawImageFromUrl(item.data.owner.avatar),
+            builder: (context, snapshot) => CircleAvatar(
+              backgroundColor: Colors.transparent,
+              // backgroundImage: NetworkImage(item.data.owner?.avatar),
+              backgroundImage:
+                  snapshot.hasData ? MemoryImage(snapshot.data) : null,
+            ),
           ),
         ),
       );

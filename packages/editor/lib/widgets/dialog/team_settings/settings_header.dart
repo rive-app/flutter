@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
@@ -157,10 +159,16 @@ class _EditableAvatarState extends State<EditableAvatar> {
         child: SizedBox(
           width: radius * 2,
           height: radius * 2,
-          child: CircleAvatar(
-            backgroundColor: Colors.transparent,
-            backgroundImage: NetworkImage(widget.avatarPath),
-          ),
+          child: FutureBuilder<Uint8List>(
+              future: ImageCacheProvider.of(context)
+                  .loadRawImageFromUrl(widget.avatarPath),
+              builder: (context, snapshot) {
+                return CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  backgroundImage:
+                      snapshot.hasData ? MemoryImage(snapshot.data) : null,
+                );
+              }),
         ),
       ));
     }

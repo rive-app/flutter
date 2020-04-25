@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ConnectedUsers extends StatelessWidget {
   final Rive rive;
@@ -74,25 +77,29 @@ class AvatarView extends StatelessWidget {
               borderRadius: BorderRadius.circular(diameter / 2),
             ),
             padding: const EdgeInsets.all(1),
-            child: CircleAvatar(
-              child: hasImage
-                  ? null
-                  : hasName
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(3),
-                            child: Text(
-                              name.substring(0, 1).toUpperCase(),
-                              style: TextStyle(
-                                fontSize: diameter / 2,
-                                height: 1,
-                              ),
-                            ),
-                          ),
-                        )
-                      : Container(),
-              backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
-            ),
+            child: hasImage
+                ? FutureBuilder<Uint8List>(
+                    future: ImageCacheProvider.of(context)
+                        .loadRawImageFromUrl(imageUrl),
+                    builder: (context, snapshot) {
+                      return CircleAvatar(
+                        backgroundImage: snapshot.hasData
+                            ? MemoryImage(snapshot.data)
+                            : null,
+                      );
+                    })
+                : Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Text(
+                        hasName ? name.substring(0, 1).toUpperCase() : '?',
+                        style: TextStyle(
+                          fontSize: diameter / 2,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
           ),
         ),
       ),

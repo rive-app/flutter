@@ -1,24 +1,37 @@
 import 'dart:typed_data';
 
-/// A test manager for (pre)loading, etc. images
+/// An experimental manager for caching images
 import 'package:http/http.dart' as http;
-import 'package:rxdart/subjects.dart';
 
 class ImageManager {
-  final _imageCache = <String, Uint8List>{};
+  final _rawImageCache = <String, CachedRawImage>{};
 
-  final _firstImage = BehaviorSubject<Uint8List>();
-  Stream<Uint8List> get firstImageStream => _firstImage.stream;
-
-  Future<void> loadImage(String url) async {
-    // Loads an image into memory from a url
-    print('BOB: STARTING IMAGE DL');
-    final res = await http.get(url);
-    print('BOB: COMPLETED IMAGE DL');
-    final bytes = res.bodyBytes;
-    print('BOB: STATUS CODE: ${res.statusCode}');
-    print('BOB: Loaded ${bytes.length} image bytes');
-    _imageCache[url] = bytes;
-    _firstImage.add(bytes);
+  /// Removes expired entries in the cache
+  void _expireCaches() {
+    _rawImageCache.removeWhere((key, value) => value.expired);
   }
+
+  /// Loads an image into memory from a url
+  Future<Uint8List> loadRawImageFromUrl(String url) async {
+    _expireCaches();
+    if (_rawImageCache.containsKey(url)) {
+      return _rawImageCache[url].rawImage;
+    }
+    final res = await http.get(url);
+    final bytes = res.bodyBytes;
+    _rawImageCache[url] = CachedRawImage(bytes, DateTime.now());
+    return bytes;
+  }
+}
+
+/// Cache ttl (1 hour)
+const ttl = Duration(hours: 1);
+
+/// Cached raw image with a timestamp
+class CachedRawImage {
+  const CachedRawImage(this.rawImage, this.timestamp);
+  final Uint8List rawImage;
+  final DateTime timestamp;
+
+  bool get expired => timestamp.isAfter(timestamp.add(ttl));
 }

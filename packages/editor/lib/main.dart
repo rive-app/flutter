@@ -127,8 +127,6 @@ class RiveEditorApp extends StatelessWidget {
                     child: ValueListenableBuilder<RiveState>(
                       valueListenable: rive.state,
                       builder: (context, state, _) {
-                        ImageManagerProvider.of(context).loadImage(
-                            'https://lumiere-a.akamaihd.net/v1/images/star-wars-the-rise-of-skywalker-theatrical-poster-1000_ebc74357.jpeg?region=1%2C318%2C999%2C499&width=960');
                         switch (state) {
                           case RiveState.login:
                             return Login();
@@ -184,7 +182,7 @@ class InsertInheritedWidgets extends StatelessWidget {
           rive: rive,
           child: TipRoot(
             context: TipContext(),
-            child: ImageManagerProvider(
+            child: ImageCacheProvider(
               manager: ImageManager(),
               child: IconCache(
                 cache: iconCache,

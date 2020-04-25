@@ -387,20 +387,20 @@ class _InheritedEditingAnimation extends InheritedWidget {
 
 // Image manager state provider
 
-class ImageManagerProvider extends StatefulWidget {
-  const ImageManagerProvider({@required this.manager, this.child});
+class ImageCacheProvider extends StatefulWidget {
+  const ImageCacheProvider({@required this.manager, this.child});
   final Widget child;
   final ImageManager manager;
 
   @override
-  _ImageManagerProviderState createState() => _ImageManagerProviderState();
+  _ImageCacheProviderState createState() => _ImageCacheProviderState();
 
   static ImageManager of(BuildContext context) => context
-      .dependOnInheritedWidgetOfExactType<_InheritedImageProvider>()
+      .dependOnInheritedWidgetOfExactType<_InheritedImageCacheProvider>()
       .manager;
 }
 
-class _ImageManagerProviderState extends State<ImageManagerProvider> {
+class _ImageCacheProviderState extends State<ImageCacheProvider> {
   ImageManager _manager;
 
   @override
@@ -410,14 +410,14 @@ class _ImageManagerProviderState extends State<ImageManagerProvider> {
   }
 
   @override
-  Widget build(BuildContext context) => _InheritedImageProvider(
+  Widget build(BuildContext context) => _InheritedImageCacheProvider(
         manager: _manager,
         child: widget.child,
       );
 }
 
-class _InheritedImageProvider extends InheritedWidget {
-  const _InheritedImageProvider({
+class _InheritedImageCacheProvider extends InheritedWidget {
+  const _InheritedImageCacheProvider({
     @required this.manager,
     @required Widget child,
     Key key,
@@ -427,6 +427,6 @@ class _InheritedImageProvider extends InheritedWidget {
   final ImageManager manager;
 
   @override
-  bool updateShouldNotify(_InheritedImageProvider old) =>
+  bool updateShouldNotify(_InheritedImageCacheProvider old) =>
       manager != old.manager;
 }
