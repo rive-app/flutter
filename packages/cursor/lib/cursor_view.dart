@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
 
-import 'system_cursor.dart';
+import 'system_cursor.dart' as cursor;
 
 typedef CursorBuilder = Widget Function(BuildContext context);
 
@@ -53,12 +53,12 @@ class Cursor extends ChangeNotifier {
   void _update() {
     if (_instances.isEmpty) {
       if (_isSystemCursorHidden) {
-        SystemCursor.show();
+        cursor.show();
         _isSystemCursorHidden = false;
       }
     } else {
       if (!_isSystemCursorHidden) {
-        SystemCursor.hide();
+        cursor.hide();
         _isSystemCursorHidden = true;
       }
     }

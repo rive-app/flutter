@@ -8,11 +8,11 @@ import 'method_channel_window_utils.dart';
 
 /// The interface that implementations of window_utils must implement.
 ///
-/// Platform implementations should extend this class rather than implement it as `url_launcher`
+/// Platform implementations should extend this class rather than implement it as `window_utils`
 /// does not consider newly added methods to be breaking changes. Extending this class
 /// (using `extends`) ensures that the subclass will get the default implementation, while
 /// platform implementations that `implements` this interface will be broken by newly added
-/// [UrlLauncherPlatform] methods.
+/// [WindowUtilsPlatform] methods.
 abstract class WindowUtilsPlatform extends PlatformInterface {
   /// Constructs a UrlLauncherPlatform.
   WindowUtilsPlatform() : super(token: _token);

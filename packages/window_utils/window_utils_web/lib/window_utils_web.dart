@@ -18,17 +18,11 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
 
   /// Stubbed out for web; does nothing except return true
   @override
-  Future<bool> hideTitleBar() {
-    print('Calling web version of hideTitleBar');
-    return Future.value(true);
-  }
+  Future<bool> hideTitleBar() => Future.value(true);
 
   /// Stubbed out for web; does nothing except return true
   @override
-  Future<bool> setSize(Size size) {
-    print('Calling web version of setSize');
-    return Future.value(true);
-  }
+  Future<bool> setSize(Size size) => Future.value(true);
 
   /// Stubbed out for web; does nothing except return true
   @override
@@ -56,7 +50,7 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
   }) {
     // See https://github.com/flutter/flutter/issues/51461 for reference.
     final target = browser.standalone ? '_top' : '';
-    final base = html.window.open(url, target);
+    html.window.open(url, target);
     return Future.value('');
   }
 

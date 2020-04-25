@@ -1,15 +1,6 @@
 import 'dart:async';
+import 'package:cursor/system_cursor_interface.dart';
 
-import 'package:flutter/services.dart';
+Future<void> hide() => SystemCursorPlatform.instance.hide();
 
-class SystemCursor {
-  static const MethodChannel _channel = const MethodChannel('cursor');
-
-  static Future<void> hide() async {
-    await _channel.invokeMethod('hide');
-  }
-
-  static Future<void> show() async {
-    await _channel.invokeMethod('show');
-  }
-}
+Future<void> show() => SystemCursorPlatform.instance.show();
