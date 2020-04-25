@@ -7,6 +7,9 @@ import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
+/// A guide view on the top of the timeline that shows the current viewport
+/// range, makes it easy to line up keyframes. Works based off the current
+/// viewport and ticks are aligned to frame rate. TODO: support workspace.
 class TimelineTicks extends StatelessWidget {
   static const double height = 19;
 
