@@ -154,6 +154,7 @@ class RiveColors {
   Color get timelineViewportControlsGrabber => const Color(0xFF33A7FF);
   Color get timelineViewportControlsTrack => const Color(0xFF4C4C4C);
   Color get timelineBackground => const Color(0xFF232323);
+  Color get timelineLine => const Color(0xFF303030);
 }
 
 /// TextStyles used in the Rive Theme
@@ -356,6 +357,10 @@ class TextStyles {
       color: white,
       fontSize: 13,
       decoration: TextDecoration.none);
+
+  // Timeline
+  TextStyle get timelineTicks => const TextStyle(
+      fontFamily: 'Roboto-Regular', color: lightGrey, fontSize: 11);
 }
 
 /// Gradients used in the Rive Theme

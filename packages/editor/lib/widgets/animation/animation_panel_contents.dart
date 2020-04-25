@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/widgets/animation/animation_toolbar.dart';
 import 'package:rive_editor/widgets/animation/animations_list.dart';
+import 'package:rive_editor/widgets/animation/timeline_ticks.dart';
 import 'package:rive_editor/widgets/animation/timeline_viewport_controls.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
@@ -56,14 +57,10 @@ class AnimationPanelContents extends StatelessWidget {
                 const SizedBox(height: 10),
                 TimelineViewportControls(),
                 const SizedBox(height: 10),
+                TimelineTicks(),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(5),
-                      ),
-                      color: theme.colors.timelineBackground,
-                    ),
+                  child: ColoredBox(
+                    color: theme.colors.timelineBackground,
                   ),
                 ),
               ],
