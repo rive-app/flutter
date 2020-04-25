@@ -112,7 +112,7 @@ packages:
       path: "../cursor"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "0.0.2"
   dotted_border:
     dependency: "direct main"
     description:

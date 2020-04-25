@@ -3,7 +3,7 @@ import FlutterMacOS
 
 public class CursorPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "cursor", binaryMessenger: registrar.messenger)
+    let channel = FlutterMethodChannel(name: "plugins.rive.app/cursor", binaryMessenger: registrar.messenger)
     let instance = CursorPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }

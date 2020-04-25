@@ -8,6 +8,8 @@ import 'package:rive_api/models/notification.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:meta/meta.dart';
 
+const pollDuration = Duration(minutes: 5);
+
 /// State manager for notifications
 class NotificationManager {
   Sink<bool> teamUpdateSink;
@@ -79,7 +81,7 @@ class NotificationManager {
     _fetchNotifications();
     // Start the polling timer to periodically pull notifications
     _poller = Timer.periodic(
-      const Duration(seconds: 60),
+      pollDuration,
       (t) => _fetchNotifications(),
     );
   }

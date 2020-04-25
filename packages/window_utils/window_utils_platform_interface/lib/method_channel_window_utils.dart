@@ -16,9 +16,9 @@ import 'window_utils_platform_interface.dart';
 
 // const MethodChannel _channel = MethodChannel('plugins.flutter.io/url_launcher');
 const MethodChannel _channel = MethodChannel('plugins.rive.app/window_utils');
-Random _random = Random.secure();
+final _random = Random.secure();
 
-/// An implementation of [UrlLauncherPlatform] that uses method channels.
+/// An implementation of [WindowUtilsPlatform] that uses method channels.
 class MethodChannelWindowUtils extends WindowUtilsPlatform {
   Future<String> openWebView(String key, String url,
       {Offset offset, Size size, String jsMessage = ''}) async {
