@@ -39,6 +39,10 @@ packages/rive_api/pubspec.lock
 build/
 
 
+# General plugin related 
+**/flutter_export_environment.sh
+**/GeneratedPluginRegistrant.*
+
 # Android related
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
@@ -72,9 +76,8 @@ build/
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
 **/ios/Flutter/flutter_assets/
-**/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
-**/ios/Runner/GeneratedPluginRegistrant.*
+**/Flutter-Generated.xcconfig
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
