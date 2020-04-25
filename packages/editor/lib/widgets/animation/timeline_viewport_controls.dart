@@ -11,21 +11,35 @@ class TimelineViewportControls extends StatelessWidget {
   static const double grabberHitSize = 10;
   static const double grabberSize = 10;
   static const double grabberRadius = grabberSize / 2;
+  static const double height = 10;
+
+  /// Draw the same background for the controls even if we don't have a
+  /// currently editing animation.
+  Widget _buildEmpty(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: _TimelineViewportControlsRenderer(
+        null,
+        RiveTheme.of(context).colors,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var editingAnimation = EditingAnimationProvider.of(context);
     if (editingAnimation == null) {
-      return const SizedBox();
+      return _buildEmpty(context);
     }
     return ValueStreamBuilder<TimelineViewport>(
       stream: editingAnimation.viewport,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const SizedBox();
+          return _buildEmpty(context);
         }
         var viewport = snapshot.data;
         return SizedBox(
-          height: 10,
+          height: height,
           child: CustomMultiChildLayout(
             delegate: _ViewportControlsLayoutDelegate(viewport),
             children: [
@@ -231,32 +245,32 @@ class _TimelineViewportControlsRenderObject extends RenderBox {
       return;
     }
     var canvas = context.canvas;
-    const double radius = TimelineViewportControls.grabberRadius;
-    var width = size.width - TimelineViewportControls.grabberSize;
-    var widthRatio =
-        (viewport.endSeconds - viewport.startSeconds) / viewport.totalSeconds;
 
-    var left = viewport.startSeconds / viewport.totalSeconds * width;
-    var right = viewport.endSeconds / viewport.totalSeconds * width;
-
-    canvas.save();
+    // draw background
     canvas.drawRRect(
         RRect.fromRectAndRadius(offset & size, const Radius.circular(15)),
         _background);
-    canvas.drawCircle(offset + Offset(radius + left, radius), radius, _grabber);
-    // TimelineViewportControls.grabberSize +
-    //         viewport.endSeconds / viewport.totalSeconds * width,
 
-    canvas.drawCircle(
-        offset + Offset(radius + right, radius), radius, _grabber);
-    canvas.drawRect(
-        offset + Offset(radius + left, 0) &
-            Size(width * widthRatio, size.height),
-        _track);
-    // canvas.translate(offset.dx.roundToDouble() + nudge.dx - _bounds.left,
-    //     offset.dy.roundToDouble() + nudge.dy - _bounds.top);
-    // canvas.drawPath(path, pathPaint);
-    canvas.restore();
+    if (viewport != null) {
+      const double radius = TimelineViewportControls.grabberRadius;
+      var width = size.width - TimelineViewportControls.grabberSize;
+      var widthRatio =
+          (viewport.endSeconds - viewport.startSeconds) / viewport.totalSeconds;
+
+      var left = viewport.startSeconds / viewport.totalSeconds * width;
+      var right = viewport.endSeconds / viewport.totalSeconds * width;
+
+      canvas.drawCircle(
+          offset + Offset(radius + left, radius), radius, _grabber);
+
+      canvas.drawCircle(
+          offset + Offset(radius + right, radius), radius, _grabber);
+
+      canvas.drawRect(
+          offset + Offset(radius + left, 0) &
+              Size(width * widthRatio, size.height),
+          _track);
+    }
   }
 }
 

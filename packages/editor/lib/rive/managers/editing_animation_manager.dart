@@ -26,7 +26,7 @@ class EditingAnimationManager {
   EditingAnimationManager(this.editingAnimation) {
     /// TODO: compute real viewport and min seconds should be 2 frames in
     /// seconds. Sync this whenever duration, fps, etc change.
-    _viewportStream.add(const TimelineViewport(5.0, 10.0, 30.0, 0.1));
+    _viewportStream.add(const TimelineViewport(5.0, 10.0, 30.0, 60));
     _timeStream.add(0);
     _fpsStream.add(editingAnimation.fps);
     _fpsController.stream.listen(_changeFps);
@@ -95,21 +95,23 @@ class TimelineViewport {
   final double startSeconds;
   final double endSeconds;
   final double totalSeconds;
-  final double minSeconds;
+  final int fps;
+
+  double get minSeconds => 2/fps;
 
   const TimelineViewport(
-      this.startSeconds, this.endSeconds, this.totalSeconds, this.minSeconds);
+      this.startSeconds, this.endSeconds, this.totalSeconds, this.fps);
 
   /// Move the start of the viewport, clamping at end.
   TimelineViewport moveStart(double value) => TimelineViewport(
       min(value, endSeconds - minSeconds),
       endSeconds,
       totalSeconds,
-      minSeconds);
+      fps);
 
   /// Move the start of the viewport, clamping at start.
   TimelineViewport moveEnd(double value) => TimelineViewport(startSeconds,
-      max(value, startSeconds + minSeconds), totalSeconds, minSeconds);
+      max(value, startSeconds + minSeconds), totalSeconds, fps);
 
   /// Move the viewport, clamping at edges.
   TimelineViewport move(double value) {
@@ -123,6 +125,6 @@ class TimelineViewport {
       shiftSeconds = value - (check - totalSeconds);
     }
     return TimelineViewport(startSeconds + shiftSeconds,
-        endSeconds + shiftSeconds, totalSeconds, minSeconds);
+        endSeconds + shiftSeconds, totalSeconds, fps);
   }
 }

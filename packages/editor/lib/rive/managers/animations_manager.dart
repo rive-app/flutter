@@ -70,6 +70,12 @@ class AnimationsManager {
     });
 
     _orderController.stream.listen(_onOrder);
+
+    if(_animationStreamControllers.isEmpty) {
+      /// Push through a null (none) selected animation if we don't have any
+      /// animations at all.
+      _selectedAnimationStream.add(null);
+    }
   }
 
   void _onOrder(AnimationOrder order) {
