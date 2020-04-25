@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 
-for d in $RIVE_ROOT/packages/*/ ; do
+list=`find $RIVE_ROOT/packages -type f -name 'pubspec.yaml' | sed -E 's|/[^/]+$||'`
+echo "$list"
+for d in  $list; do
+  echo "$d"
   folder=`basename $d`
   echo "UPDATING $d"
-  echo "$RIVE_ROOT/packages/$folder/pubspec.yaml"
-  if grep -Fq "sdk: flutter" $RIVE_ROOT/packages/$folder/pubspec.yaml
+  echo "$d/pubspec.yaml"
+  if grep -Fq "sdk: flutter" $d/pubspec.yaml
   then 
-    cd $RIVE_ROOT/packages/$folder && flutter pub get test && cd -
+    cd $d && flutter pub get test && cd -
     if [ $? -ne 0 ]; then
       exit 1
     fi
   else 
-    cd $RIVE_ROOT/packages/$folder && pub get test && cd -
+    cd $d && pub get test && cd -
     if [ $? -ne 0 ]; then
       exit 1
     fi
