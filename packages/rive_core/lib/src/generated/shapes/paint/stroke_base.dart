@@ -143,7 +143,7 @@ abstract class StrokeBase extends ShapePaint {
       case transformAffectsStrokePropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

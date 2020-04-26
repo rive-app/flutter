@@ -117,7 +117,7 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
       case colorValuePropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

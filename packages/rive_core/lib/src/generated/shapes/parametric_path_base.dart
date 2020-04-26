@@ -95,7 +95,7 @@ abstract class ParametricPathBase extends Path {
       case heightPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

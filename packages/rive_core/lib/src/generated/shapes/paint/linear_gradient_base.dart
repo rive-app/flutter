@@ -165,7 +165,7 @@ abstract class LinearGradientBase extends ContainerComponent {
       case opacityPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

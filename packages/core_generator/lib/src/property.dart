@@ -65,7 +65,15 @@ class Property {
       code.write(comment(description, indent: 1));
     }
     if (animates) {
+      code.write(comment(
+          'Get the [_$name] field value.'
+          'Note this may not match the core value '
+          'if animation mode is active.',
+          indent: 1));
       code.writeln('${type.dartName} get $name => _${name}Animated ?? _$name;');
+      code.write(
+          comment('Get the non-animation [_$name] field value.', indent: 1));
+      code.writeln('${type.dartName} get ${name}Core => _$name;');
     } else {
       code.writeln('${type.dartName} get $name => _$name;');
     }
@@ -74,8 +82,7 @@ class Property {
         '[${name}Changed] will be invoked only if the '
         'field\'\s value has changed.',
         indent: 1));
-
-    code.writeln('''set $name(${type.dartName} value) {
+    code.writeln('''set $name${animates ? 'Core' : ''}(${type.dartName} value) {
         if(${type.equalityCheck('_$name', 'value')}) { return; }
         ${type.dartName} from = _$name;
         _$name = value;
@@ -83,17 +90,29 @@ class Property {
         ${name}Changed(from, value);
       }''');
     if (animates) {
-      code.writeln('${type.dartName} get ${name}Animated => _${name}Animated;');
-      code.writeln('''set ${name}Animated(${type.dartName} value) {
+      code.writeln('''set $name(${type.dartName} value) {
+        if(context != null && context.isAnimating) {
+          _${name}Animate(value, true);
+          return;
+        }
+        ${name}Core = value;
+      }''');
+
+      code.writeln(
+          '''void _${name}Animate(${type.dartName} value, bool autoKey) {
         if (_${name}Animated == value) {
           return;
         }
         ${type.dartName} from = ${name};
         _${name}Animated = value;
         ${type.dartName} to = ${name};
-        onAnimatedPropertyChanged($propertyKey, from, to);
+        onAnimatedPropertyChanged($propertyKey, autoKey, from, to);
         ${name}Changed(from, to);
       }''');
+
+      code.writeln('${type.dartName} get ${name}Animated => _${name}Animated;');
+      code.writeln('''set ${name}Animated(${type.dartName} value) =>
+                        _${name}Animate(value, false);''');
       code.writeln('KeyState get ${name}KeyState => _${name}KeyState;');
       code.writeln('''set ${name}KeyState(KeyState value) {
         if (_${name}KeyState == value) {
@@ -101,7 +120,7 @@ class Property {
         }
         _${name}KeyState = value;
         // Force update anything listening on this property.
-        onAnimatedPropertyChanged($propertyKey, _${name}Animated, _${name}Animated);
+        onAnimatedPropertyChanged($propertyKey, false, _${name}Animated, _${name}Animated);
       }''');
     }
     code.writeln('void ${name}Changed('

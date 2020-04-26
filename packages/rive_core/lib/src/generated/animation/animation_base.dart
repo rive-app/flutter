@@ -114,7 +114,7 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
       case orderPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

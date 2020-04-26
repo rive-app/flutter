@@ -61,7 +61,7 @@ abstract class ShapePaintBase extends ContainerComponent {
       case isVisiblePropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

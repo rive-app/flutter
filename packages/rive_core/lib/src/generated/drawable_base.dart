@@ -89,7 +89,7 @@ abstract class DrawableBase extends Node {
       case blendModePropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

@@ -85,7 +85,7 @@ abstract class PathVertexBase extends Component {
       case yPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

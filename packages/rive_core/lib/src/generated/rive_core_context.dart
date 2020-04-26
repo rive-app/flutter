@@ -1,10 +1,3 @@
-import 'package:core/coop/change.dart';
-import 'package:core/core.dart';
-import 'package:core/field_types/core_field_type.dart';
-import 'package:core/key_state.dart';
-import 'package:utilities/binary_buffer/binary_reader.dart';
-import 'package:utilities/binary_buffer/binary_writer.dart';
-
 import '../../animation/animation.dart';
 import '../../animation/cubic_interpolator.dart';
 import '../../animation/keyed_object.dart';
@@ -40,6 +33,12 @@ import 'backboard_base.dart';
 import 'component_base.dart';
 import 'drawable_base.dart';
 import 'node_base.dart';
+import 'package:core/coop/change.dart';
+import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
+import 'package:core/key_state.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'shapes/cubic_vertex_base.dart';
 import 'shapes/ellipse_base.dart';
 import 'shapes/paint/fill_base.dart';

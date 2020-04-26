@@ -269,7 +269,6 @@ abstract class Component extends ComponentBase<RiveFile>
         '$this doesn\'t store a property with key $propertyKey');
     var keyedObject = animation.getKeyed(this);
     keyedObject ??= animation.makeKeyed(this);
-
     var property = keyedObject.getKeyed(propertyKey);
     property ??= keyedObject.makeKeyed(propertyKey);
 
@@ -277,6 +276,7 @@ abstract class Component extends ComponentBase<RiveFile>
     // well search for it and store the index to insert the new one if we need
     // to.
     var keyFrameIndex = property.indexOfFrame(frame);
+    print("INDEX $frame ${property.numFrames}");
 
     if (keyFrameIndex < property.numFrames) {
       var keyFrame = property.getFrameAt(keyFrameIndex);

@@ -20,11 +20,17 @@ abstract class NodeBase extends ContainerComponent {
   double _xAnimated;
   KeyState _xKeyState;
   static const int xPropertyKey = 13;
+
+  /// Get the [_x] field value.Note this may not match the core value if
+  /// animation mode is active.
   double get x => _xAnimated ?? _x;
+
+  /// Get the non-animation [_x] field value.
+  double get xCore => _x;
 
   /// Change the [_x] field value.
   /// [xChanged] will be invoked only if the field's value has changed.
-  set x(double value) {
+  set xCore(double value) {
     if (_x == value) {
       return;
     }
@@ -34,18 +40,27 @@ abstract class NodeBase extends ContainerComponent {
     xChanged(from, value);
   }
 
-  double get xAnimated => _xAnimated;
-  set xAnimated(double value) {
+  set x(double value) {
+    if (context != null && context.isAnimating) {
+      _xAnimate(value, true);
+      return;
+    }
+    xCore = value;
+  }
+
+  void _xAnimate(double value, bool autoKey) {
     if (_xAnimated == value) {
       return;
     }
     double from = x;
     _xAnimated = value;
     double to = x;
-    onAnimatedPropertyChanged(xPropertyKey, from, to);
+    onAnimatedPropertyChanged(xPropertyKey, autoKey, from, to);
     xChanged(from, to);
   }
 
+  double get xAnimated => _xAnimated;
+  set xAnimated(double value) => _xAnimate(value, false);
   KeyState get xKeyState => _xKeyState;
   set xKeyState(KeyState value) {
     if (_xKeyState == value) {
@@ -53,7 +68,7 @@ abstract class NodeBase extends ContainerComponent {
     }
     _xKeyState = value;
     // Force update anything listening on this property.
-    onAnimatedPropertyChanged(xPropertyKey, _xAnimated, _xAnimated);
+    onAnimatedPropertyChanged(xPropertyKey, false, _xAnimated, _xAnimated);
   }
 
   void xChanged(double from, double to);
@@ -212,7 +227,7 @@ abstract class NodeBase extends ContainerComponent {
       case opacityPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

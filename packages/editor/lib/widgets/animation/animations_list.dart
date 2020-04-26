@@ -16,6 +16,8 @@ import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
+/// List of animations shown in the animation panel. Selecting one activates it
+/// for editing. Animations can be added, sorted, and deleted.
 class AnimationsList extends StatefulWidget {
   final AnimationsManager animationManager;
 

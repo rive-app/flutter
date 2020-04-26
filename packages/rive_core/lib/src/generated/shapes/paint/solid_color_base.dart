@@ -56,7 +56,7 @@ abstract class SolidColorBase extends Component {
       case colorValuePropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

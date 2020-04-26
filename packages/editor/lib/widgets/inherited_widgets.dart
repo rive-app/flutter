@@ -246,26 +246,34 @@ class _AnimationsProviderState extends State<AnimationsProvider> {
 
   @override
   void initState() {
-    _manager = widget.activeArtboard == null
-        ? null
-        : AnimationsManager(activeArtboard: widget.activeArtboard);
+    _updateManager(widget.activeArtboard);
     super.initState();
+  }
+
+  void _updateManager(Artboard activeArtboard) {
+    // If the Core context changes, disable animation on it.
+    if (_manager?.activeArtboard?.context != activeArtboard?.context) {
+      _manager?.activeArtboard?.context?.stopAnimating();
+    }
+    _manager?.dispose();
+    _manager = activeArtboard == null
+        ? null
+        : AnimationsManager(activeArtboard: activeArtboard);
+    _manager?.activeArtboard?.context?.startAnimating();
   }
 
   @override
   void didUpdateWidget(AnimationsProvider oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.activeArtboard != widget.activeArtboard) {
-      _manager?.dispose();
-      _manager = widget.activeArtboard == null
-          ? null
-          : AnimationsManager(activeArtboard: widget.activeArtboard);
+      _updateManager(widget.activeArtboard);
     }
   }
 
   @override
   void dispose() {
-    _manager?.dispose();
+    // We're a goner, get rid of the manager and clean up animation mode.
+    _updateManager(null);
     super.dispose();
   }
 

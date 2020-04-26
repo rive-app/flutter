@@ -4,11 +4,13 @@ import 'dart:math';
 import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/component.dart';
+import 'package:rive_core/rive_file.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:meta/meta.dart';
 
 /// Animation manager for the currently editing [LinearAnimation].
-class EditingAnimationManager {
+class EditingAnimationManager with RiveFileDelegate {
   final LinearAnimation editingAnimation;
 
   final _fpsStream = BehaviorSubject<int>();
@@ -25,6 +27,7 @@ class EditingAnimationManager {
   final _viewportController = StreamController<TimelineViewport>();
 
   EditingAnimationManager(this.editingAnimation) {
+    editingAnimation.context.addDelegate(this);
     _timeStream.add(0);
     _fpsStream.add(editingAnimation.fps);
     _fpsController.stream.listen(_changeFps);
@@ -98,7 +101,11 @@ class EditingAnimationManager {
   ValueStream<int> get fps => _fpsStream;
   Sink<int> get previewRateChange => _fpsPreviewController;
 
+  /// Get the closest frame to the current playhead.
+  int get frame => _timeStream.value;
+
   void dispose() {
+    editingAnimation.context.removeDelegate(this);
     cancelDebounce(_syncViewport);
     _viewportController.close();
     _viewportStream.close();
@@ -110,6 +117,13 @@ class EditingAnimationManager {
     _timeStream.close();
     _fpsController.close();
     _fpsPreviewController.close();
+  }
+
+  @override
+  void onAutoKey(Component component, int propertyKey) {
+    var keyFrame = component.addKeyFrame(editingAnimation, propertyKey, frame);
+    // Set the value of the keyframe.
+    keyFrame.valueFrom(component, propertyKey);
   }
 }
 

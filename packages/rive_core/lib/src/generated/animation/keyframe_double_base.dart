@@ -56,7 +56,7 @@ abstract class KeyFrameDoubleBase extends KeyFrame {
       case valuePropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

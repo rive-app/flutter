@@ -202,7 +202,7 @@ class Definition {
       code.writeln('return true;');
       code.writeln('''
           default: 
-          return super.getProperty(propertyKey);
+          return super.hasProperty(propertyKey);
         }''');
       code.writeln('}');
     }
@@ -360,7 +360,6 @@ class Definition {
     StringBuffer ctxCode = StringBuffer('');
 
     List<String> imports = [
-      'import \'dart:collection\';',
       'import \'package:core/coop/change.dart\';',
       'import \'package:core/core.dart\';',
       'import \'package:utilities/binary_buffer/binary_reader.dart\';',
