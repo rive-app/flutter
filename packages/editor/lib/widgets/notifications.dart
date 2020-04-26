@@ -365,7 +365,7 @@ class TeamInviteNotification extends StatelessWidget {
                 color: theme.colors.commonDarkGrey,
                 textColor: Colors.white,
                 mainAxisAlignment: MainAxisAlignment.center,
-                elevated: true,
+                elevation: flatButtonIconElevation,
                 onTap: () => manager.acceptTeamInvite.add(notification),
               ),
               const SizedBox(height: 10),

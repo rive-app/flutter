@@ -11,23 +11,46 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// The first panel in the teams sign-up wizard
-class TeamWizardPanelOne extends StatelessWidget {
+class TeamWizardPanelOne extends StatefulWidget {
   const TeamWizardPanelOne(this.sub, {Key key}) : super(key: key);
   final TeamSubscriptionPackage sub;
+
+  @override
+  State<StatefulWidget> createState() => _ChoicePanelState();
+}
+
+class _ChoicePanelState extends State<TeamWizardPanelOne>
+    with TickerProviderStateMixin {
+  AnimationController _basicController, _premiumController;
+
+  @override
+  void initState() {
+    _basicController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 200));
+    _premiumController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 200));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _basicController.dispose();
+    _premiumController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     const double targetPadding = 30;
     const double subscriptionBorderThickness = 3;
-    final colors = RiveTheme.of(context).colors;
-    final textStyles = RiveTheme.of(context).textStyles;
-    final options = [
-      BillingFrequency.yearly,
-      BillingFrequency.monthly,
-    ];
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final textStyles = theme.textStyles;
+    final sub = widget.sub;
+
     return SizedBox(
       width: 452,
-      height: 375,
+      height: 399,
       child: Padding(
         padding: const EdgeInsets.symmetric(
             horizontal: targetPadding - subscriptionBorderThickness,
@@ -60,7 +83,7 @@ class TeamWizardPanelOne extends StatelessWidget {
                         underline: true,
                         underlineColor: colors.inputUnderline,
                         valueColor: textStyles.fileGreyTextLarge.color,
-                        options: options,
+                        options: BillingFrequency.values,
                         value: sub.billing,
                         toLabel: (option) => describeEnum(option).capsFirst,
                         contentPadding: const EdgeInsets.only(bottom: 3),
@@ -76,23 +99,54 @@ class TeamWizardPanelOne extends StatelessWidget {
                   ? const EdgeInsets.only(top: 27, bottom: 24)
                   : const EdgeInsets.only(top: 5, bottom: 24),
               child: Row(
-                children: <Widget>[
-                  TeamSubscriptionChoiceWidget(
-                      label: 'Team',
-                      costLabel:
-                          '\$${costLookup[sub.billing][TeamsOption.basic]}',
-                      explanation:
-                          'A space where you and your team can share files.',
-                      onTap: () => sub.option = TeamsOption.basic,
-                      borderThickness: subscriptionBorderThickness),
+                children: [
+                  MouseRegion(
+                    onEnter: (_) => _basicController.forward(),
+                    onExit: (_) => _basicController.reverse(),
+                    child: AnimatedBuilder(
+                      animation: _basicController,
+                      builder: (_, __) {
+                        final t = _basicController.value;
+                        final animationValue = t * t;
+                        final labelLookup = costLookup[sub?.billing];
+                        return SubscriptionChoice(
+                          label: 'Team',
+                          costLabel: sub == null
+                              ? ''
+                              : '${labelLookup[TeamsOption.basic]}',
+                          description: 'A space where you and your team'
+                              ' can share files.',
+                          onTap: () => sub.option = TeamsOption.basic,
+                          showRadio: false,
+                          highlight: animationValue,
+                        );
+                      },
+                    ),
+                  ),
                   const SizedBox(width: 24),
-                  TeamSubscriptionChoiceWidget(
-                      label: 'Premium Team',
-                      costLabel:
-                          '\$${costLookup[sub.billing][TeamsOption.premium]}',
-                      explanation: '1 day support.',
-                      onTap: () => sub.option = TeamsOption.premium,
-                      borderThickness: subscriptionBorderThickness),
+                  MouseRegion(
+                    onEnter: (_) => _premiumController.forward(),
+                    onExit: (_) => _premiumController.reverse(),
+                    child: AnimatedBuilder(
+                      animation: _premiumController,
+                      builder: (_, __) {
+                        final t = _premiumController.value;
+                        final animationValue = t * t;
+                        final labelLookup = costLookup[sub?.billing];
+                        return SubscriptionChoice(
+                          label: 'Premium Team',
+                          costLabel: sub == null
+                              ? ''
+                              : '${labelLookup[TeamsOption.premium]}',
+                          description: 'Create projects that only some of '
+                              'your team has access to.',
+                          onTap: () => sub.option = TeamsOption.premium,
+                          showRadio: false,
+                          highlight: animationValue,
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

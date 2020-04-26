@@ -29,7 +29,6 @@ class PlanSettings extends StatefulWidget {
 class _PlanState extends State<PlanSettings>
     with SingleTickerProviderStateMixin {
   PlanSubscriptionPackage _sub;
-  bool _basicHover = false, _premiumHover = false;
   AnimationController _controller;
 
   bool get isBasic => _sub?.option == TeamsOption.basic;
@@ -41,7 +40,9 @@ class _PlanState extends State<PlanSettings>
     PlanSubscriptionPackage.fetchData(widget.api, widget.team)
         .then((value) => setState(() {
               _sub = value;
+              // Toggle upon receiving the new value.
               _toggleController();
+              // Listen for upcoming changes.
               _sub.addListener(_onSubChange);
             }));
     _controller = AnimationController(
@@ -49,7 +50,7 @@ class _PlanState extends State<PlanSettings>
     super.initState();
   }
 
-  void _onSubChange() => setState(() {});
+  void _onSubChange() => setState(_toggleController);
 
   void _onBillChanged() {
     // TODO: track response?
@@ -57,36 +58,10 @@ class _PlanState extends State<PlanSettings>
   }
 
   void _toggleController() {
-    // React & prioritize to hover.
-    if (_basicHover) {
+    if (isBasic) {
       _controller.forward();
-    } else if (_premiumHover) {
+    } else if (isPremium) {
       _controller.reverse();
-    } else {
-      // Fallback: highlight our selected option.
-      if (isBasic) {
-        _controller.forward();
-      } else if (isPremium) {
-        _controller.reverse();
-      }
-    }
-  }
-
-  void setBasicHover(bool value) {
-    if (_basicHover != value) {
-      setState(() {
-        _basicHover = value;
-        _toggleController();
-      });
-    }
-  }
-
-  void setPremiumHover(bool value) {
-    if (_premiumHover != value) {
-      setState(() {
-        _premiumHover = value;
-        _toggleController();
-      });
     }
   }
 
@@ -149,7 +124,7 @@ class _PlanState extends State<PlanSettings>
                             final animationValue = t * t;
                             return Row(
                               children: [
-                                SubscriptionChoiceRadio(
+                                SubscriptionChoice(
                                   label: 'Team',
                                   costLabel: (_sub == null)
                                       ? ''
@@ -158,12 +133,12 @@ class _PlanState extends State<PlanSettings>
                                       'Create a space where you and '
                                       'your team can share files.',
                                   onTap: () => _sub.option = TeamsOption.basic,
-                                  onHoverChange: setBasicHover,
                                   isSelected: isBasic,
                                   highlight: animationValue,
+                                  showRadio: true,
                                 ),
                                 const SizedBox(width: 30),
-                                SubscriptionChoiceRadio(
+                                SubscriptionChoice(
                                   label: 'Org',
                                   costLabel: (_sub == null)
                                       ? ''
@@ -173,9 +148,9 @@ class _PlanState extends State<PlanSettings>
                                       'your team has access to.',
                                   onTap: () =>
                                       _sub.option = TeamsOption.premium,
-                                  onHoverChange: setPremiumHover,
                                   isSelected: isPremium,
                                   highlight: 1 - animationValue,
+                                  showRadio: true,
                                 ),
                               ],
                             );

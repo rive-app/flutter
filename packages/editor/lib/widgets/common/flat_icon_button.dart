@@ -3,6 +3,8 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 import 'package:rive_editor/widgets/popup/tip.dart';
 
+const double flatButtonIconElevation = 8;
+
 class FlatIconButton extends StatefulWidget {
   const FlatIconButton({
     @required this.label,
@@ -15,7 +17,7 @@ class FlatIconButton extends StatefulWidget {
     this.onTap,
     this.tip,
     this.mainAxisAlignment = MainAxisAlignment.spaceBetween,
-    this.elevated = false,
+    this.elevation = 0.0,
     this.radius = 15,
     this.height = 30,
   }) : super(key: key);
@@ -25,7 +27,7 @@ class FlatIconButton extends StatefulWidget {
   final VoidCallback onTap;
   final Color color, textColor;
   final Color hoverColor, hoverTextColor;
-  final bool elevated;
+  final double elevation;
   final double radius;
   final double height;
   final MainAxisAlignment mainAxisAlignment;
@@ -52,7 +54,7 @@ class _FlatIconState extends State<FlatIconButton> {
     final riveColors = RiveTheme.of(context).colors;
     final riveStyles = RiveTheme.of(context).textStyles;
     // Fall back to default color if we don't have a hover specified.
-    var hoverColor = widget.hoverColor ?? widget.color; 
+    var hoverColor = widget.hoverColor ?? widget.color;
     var color = (_isHovered ? hoverColor : widget.color) ??
         riveColors.commonButtonColor;
 
@@ -81,12 +83,12 @@ class _FlatIconState extends State<FlatIconButton> {
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(widget.radius),
-              boxShadow: widget.elevated
+              boxShadow: widget.elevation > 0
                   ? [
                       BoxShadow(
-                        color: riveColors.commonDarkGrey.withOpacity(0.1),
+                        color: Colors.black.withOpacity(0.1),
                         blurRadius: 12,
-                        offset: const Offset(0, 8),
+                        offset: Offset(0, widget.elevation),
                       )
                     ]
                   : null,
