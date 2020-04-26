@@ -31,11 +31,11 @@ class ItemView extends StatelessWidget {
           label: "Delete",
         ),
         if (item is RiveFile)
-          FlatIconButton(
+          const FlatIconButton(
             label: "Open",
             color: Colors.black,
             textColor: Colors.white,
-            elevated: true,
+            elevation: flatButtonIconElevation,
           ),
       ],
     );
