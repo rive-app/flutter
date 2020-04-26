@@ -1,3 +1,10 @@
+import 'package:core/coop/change.dart';
+import 'package:core/core.dart';
+import 'package:core/field_types/core_field_type.dart';
+import 'package:core/key_state.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+
 import '../../animation/animation.dart';
 import '../../animation/cubic_interpolator.dart';
 import '../../animation/keyed_object.dart';
@@ -33,12 +40,6 @@ import 'backboard_base.dart';
 import 'component_base.dart';
 import 'drawable_base.dart';
 import 'node_base.dart';
-import 'package:core/coop/change.dart';
-import 'package:core/core.dart';
-import 'package:core/field_types/core_field_type.dart';
-import 'package:core/key_state.dart';
-import 'package:utilities/binary_buffer/binary_reader.dart';
-import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'shapes/cubic_vertex_base.dart';
 import 'shapes/ellipse_base.dart';
 import 'shapes/paint/fill_base.dart';
@@ -109,6 +110,35 @@ abstract class RiveCoreContext extends CoreContext {
         return Artboard();
       case BackboardBase.typeKey:
         return Backboard();
+      default:
+        return null;
+    }
+  }
+
+  /// Get an integer representing the group for this property. Use this to
+  /// quickly hash groups of properties together and use the string version to
+  /// key labels/names from.
+  static int propertyKeyGroupHashCode(int propertyKey) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+      case NodeBase.yPropertyKey:
+        return 1;
+      case NodeBase.scaleXPropertyKey:
+      case NodeBase.scaleYPropertyKey:
+        return 2;
+      default:
+        return 0;
+    }
+  }
+
+  static String propertyKeyGroup(int propertyKey) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+      case NodeBase.yPropertyKey:
+        return 'position';
+      case NodeBase.scaleXPropertyKey:
+      case NodeBase.scaleYPropertyKey:
+        return 'scale';
       default:
         return null;
     }
@@ -735,6 +765,26 @@ abstract class RiveCoreContext extends CoreContext {
           object.xKeyState = value;
         }
         break;
+      case NodeBase.yPropertyKey:
+        if (object is NodeBase) {
+          object.yKeyState = value;
+        }
+        break;
+      case NodeBase.scaleXPropertyKey:
+        if (object is NodeBase) {
+          object.scaleXKeyState = value;
+        }
+        break;
+      case NodeBase.scaleYPropertyKey:
+        if (object is NodeBase) {
+          object.scaleYKeyState = value;
+        }
+        break;
+      case NodeBase.opacityPropertyKey:
+        if (object is NodeBase) {
+          object.opacityKeyState = value;
+        }
+        break;
     }
   }
 
@@ -745,6 +795,30 @@ abstract class RiveCoreContext extends CoreContext {
         if (object is NodeBase) {
           object.xAnimated = null;
           object.xKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.yPropertyKey:
+        if (object is NodeBase) {
+          object.yAnimated = null;
+          object.yKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.scaleXPropertyKey:
+        if (object is NodeBase) {
+          object.scaleXAnimated = null;
+          object.scaleXKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.scaleYPropertyKey:
+        if (object is NodeBase) {
+          object.scaleYAnimated = null;
+          object.scaleYKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.opacityPropertyKey:
+        if (object is NodeBase) {
+          object.opacityAnimated = null;
+          object.opacityKeyState = KeyState.none;
         }
         break;
     }
@@ -1587,6 +1661,18 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case NodeBase.xPropertyKey:
         (object as NodeBase).xAnimated = value;
+        break;
+      case NodeBase.yPropertyKey:
+        (object as NodeBase).yAnimated = value;
+        break;
+      case NodeBase.scaleXPropertyKey:
+        (object as NodeBase).scaleXAnimated = value;
+        break;
+      case NodeBase.scaleYPropertyKey:
+        (object as NodeBase).scaleYAnimated = value;
+        break;
+      case NodeBase.opacityPropertyKey:
+        (object as NodeBase).opacityAnimated = value;
         break;
     }
   }

@@ -380,9 +380,17 @@ class Definition {
         }
       }
     }
-    // Sort the imports to avoid linter warnings.
-    imports.sort();
-    ctxCode.writeAll(imports);
+    // Split imports and package imports.  Sort the imports to avoid linter
+    // warnings.
+    ctxCode.writeAll(imports
+        .where((import) => import.startsWith('import \'package:'))
+        .toList()
+          ..sort());
+    ctxCode.writeln('\n');
+    ctxCode.writeAll(imports
+        .where((import) => !import.startsWith('import \'package:'))
+        .toList()
+          ..sort());
 
     ctxCode.writeln('''abstract class ${config.coreContextName}
                         extends CoreContext {''');
@@ -402,6 +410,8 @@ class Definition {
     }
     ctxCode.writeln('default:return null;}}');
 
+    Map<String, List<Property>> propertyGroupToKey = {};
+
     // Group fields by definition type.
     Map<FieldType, List<Property>> groups = {};
 
@@ -409,8 +419,41 @@ class Definition {
       for (final property in definition._properties) {
         groups[property.type] ??= <Property>[];
         groups[property.type].add(property);
+        if (property.group != null) {
+          var list = propertyGroupToKey[property.group] ??= [];
+          list.add(property);
+        }
       }
     }
+
+    // Get property key group id.
+    ctxCode.write(comment(
+        'Get an integer representing the group for this property. Use this to quickly hash groups of properties together and use the string version to key labels/names from.',
+        indent: 1));
+    ctxCode.writeln('''static int propertyKeyGroupHashCode(int propertyKey) {
+      switch (propertyKey) {''');
+
+    List<String> propertyGroupToKeyKeys =
+        propertyGroupToKey.keys.toList(growable: false);
+    propertyGroupToKey.forEach((name, list) {
+      for (final property in list) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.writeln('.${property.name}PropertyKey:');
+      }
+      ctxCode.writeln('return ${propertyGroupToKeyKeys.indexOf(name) + 1};');
+    });
+    ctxCode.writeln('default: return 0; }}');
+
+    ctxCode.writeln('''static String propertyKeyGroup(int propertyKey) {
+      switch (propertyKey) {''');
+    propertyGroupToKey.forEach((name, list) {
+      for (final property in list) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.writeln('.${property.name}PropertyKey:');
+      }
+      ctxCode.writeln('return \'$name\';');
+    });
+    ctxCode.writeln('default: return null; }}');
 
     // Iterate used fields to get getters.
     for (final fieldType in groups.keys) {

@@ -1,19 +1,17 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/widgets/animation/animation_toolbar.dart';
 import 'package:rive_editor/widgets/animation/animations_list.dart';
+import 'package:rive_editor/widgets/animation/keyed_object_hierarchy.dart';
 import 'package:rive_editor/widgets/animation/timeline_ticks.dart';
 import 'package:rive_editor/widgets/animation/timeline_viewport_controls.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
-
-import 'linear_animation_tree.dart';
 
 /// The contents that display inside of the animation panel.
 class AnimationPanelContents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
-    var animationManager = AnimationsProvider.of(context);
     return ColoredBox(
       color: theme.colors.animationPanelBackground,
       child: Row(
@@ -23,11 +21,7 @@ class AnimationPanelContents extends StatelessWidget {
             width: 236,
             child: ColoredBox(
               color: theme.colors.tabBackground,
-              child: animationManager == null
-                  ? const SizedBox()
-                  : AnimationsList(
-                      animationManager: animationManager,
-                    ),
+              child: AnimationsList(),
             ),
           ),
           const SizedBox(width: 10),
@@ -42,7 +36,7 @@ class AnimationPanelContents extends StatelessWidget {
               children: [
                 AnimationToolbar(),
                 Expanded(
-                  child: LinearAnimationTree(),
+                  child: KeyedObjectHierarchy(),
                 ),
               ],
             ),

@@ -76,12 +76,20 @@ abstract class NodeBase extends ContainerComponent {
   /// --------------------------------------------------------------------------
   /// Y field with key 14.
   double _y = 0;
+  double _yAnimated;
+  KeyState _yKeyState;
   static const int yPropertyKey = 14;
-  double get y => _y;
+
+  /// Get the [_y] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get y => _yAnimated ?? _y;
+
+  /// Get the non-animation [_y] field value.
+  double get yCore => _y;
 
   /// Change the [_y] field value.
   /// [yChanged] will be invoked only if the field's value has changed.
-  set y(double value) {
+  set yCore(double value) {
     if (_y == value) {
       return;
     }
@@ -89,6 +97,37 @@ abstract class NodeBase extends ContainerComponent {
     _y = value;
     onPropertyChanged(yPropertyKey, from, value);
     yChanged(from, value);
+  }
+
+  set y(double value) {
+    if (context != null && context.isAnimating) {
+      _yAnimate(value, true);
+      return;
+    }
+    yCore = value;
+  }
+
+  void _yAnimate(double value, bool autoKey) {
+    if (_yAnimated == value) {
+      return;
+    }
+    double from = y;
+    _yAnimated = value;
+    double to = y;
+    onAnimatedPropertyChanged(yPropertyKey, autoKey, from, to);
+    yChanged(from, to);
+  }
+
+  double get yAnimated => _yAnimated;
+  set yAnimated(double value) => _yAnimate(value, false);
+  KeyState get yKeyState => _yKeyState;
+  set yKeyState(KeyState value) {
+    if (_yKeyState == value) {
+      return;
+    }
+    _yKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(yPropertyKey, false, _yAnimated, _yAnimated);
   }
 
   void yChanged(double from, double to);
@@ -116,12 +155,20 @@ abstract class NodeBase extends ContainerComponent {
   /// --------------------------------------------------------------------------
   /// ScaleX field with key 16.
   double _scaleX = 1;
+  double _scaleXAnimated;
+  KeyState _scaleXKeyState;
   static const int scaleXPropertyKey = 16;
-  double get scaleX => _scaleX;
+
+  /// Get the [_scaleX] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get scaleX => _scaleXAnimated ?? _scaleX;
+
+  /// Get the non-animation [_scaleX] field value.
+  double get scaleXCore => _scaleX;
 
   /// Change the [_scaleX] field value.
   /// [scaleXChanged] will be invoked only if the field's value has changed.
-  set scaleX(double value) {
+  set scaleXCore(double value) {
     if (_scaleX == value) {
       return;
     }
@@ -131,17 +178,57 @@ abstract class NodeBase extends ContainerComponent {
     scaleXChanged(from, value);
   }
 
+  set scaleX(double value) {
+    if (context != null && context.isAnimating) {
+      _scaleXAnimate(value, true);
+      return;
+    }
+    scaleXCore = value;
+  }
+
+  void _scaleXAnimate(double value, bool autoKey) {
+    if (_scaleXAnimated == value) {
+      return;
+    }
+    double from = scaleX;
+    _scaleXAnimated = value;
+    double to = scaleX;
+    onAnimatedPropertyChanged(scaleXPropertyKey, autoKey, from, to);
+    scaleXChanged(from, to);
+  }
+
+  double get scaleXAnimated => _scaleXAnimated;
+  set scaleXAnimated(double value) => _scaleXAnimate(value, false);
+  KeyState get scaleXKeyState => _scaleXKeyState;
+  set scaleXKeyState(KeyState value) {
+    if (_scaleXKeyState == value) {
+      return;
+    }
+    _scaleXKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        scaleXPropertyKey, false, _scaleXAnimated, _scaleXAnimated);
+  }
+
   void scaleXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// ScaleY field with key 17.
   double _scaleY = 1;
+  double _scaleYAnimated;
+  KeyState _scaleYKeyState;
   static const int scaleYPropertyKey = 17;
-  double get scaleY => _scaleY;
+
+  /// Get the [_scaleY] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get scaleY => _scaleYAnimated ?? _scaleY;
+
+  /// Get the non-animation [_scaleY] field value.
+  double get scaleYCore => _scaleY;
 
   /// Change the [_scaleY] field value.
   /// [scaleYChanged] will be invoked only if the field's value has changed.
-  set scaleY(double value) {
+  set scaleYCore(double value) {
     if (_scaleY == value) {
       return;
     }
@@ -151,17 +238,57 @@ abstract class NodeBase extends ContainerComponent {
     scaleYChanged(from, value);
   }
 
+  set scaleY(double value) {
+    if (context != null && context.isAnimating) {
+      _scaleYAnimate(value, true);
+      return;
+    }
+    scaleYCore = value;
+  }
+
+  void _scaleYAnimate(double value, bool autoKey) {
+    if (_scaleYAnimated == value) {
+      return;
+    }
+    double from = scaleY;
+    _scaleYAnimated = value;
+    double to = scaleY;
+    onAnimatedPropertyChanged(scaleYPropertyKey, autoKey, from, to);
+    scaleYChanged(from, to);
+  }
+
+  double get scaleYAnimated => _scaleYAnimated;
+  set scaleYAnimated(double value) => _scaleYAnimate(value, false);
+  KeyState get scaleYKeyState => _scaleYKeyState;
+  set scaleYKeyState(KeyState value) {
+    if (_scaleYKeyState == value) {
+      return;
+    }
+    _scaleYKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        scaleYPropertyKey, false, _scaleYAnimated, _scaleYAnimated);
+  }
+
   void scaleYChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// Opacity field with key 18.
   double _opacity = 1;
+  double _opacityAnimated;
+  KeyState _opacityKeyState;
   static const int opacityPropertyKey = 18;
-  double get opacity => _opacity;
+
+  /// Get the [_opacity] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get opacity => _opacityAnimated ?? _opacity;
+
+  /// Get the non-animation [_opacity] field value.
+  double get opacityCore => _opacity;
 
   /// Change the [_opacity] field value.
   /// [opacityChanged] will be invoked only if the field's value has changed.
-  set opacity(double value) {
+  set opacityCore(double value) {
     if (_opacity == value) {
       return;
     }
@@ -169,6 +296,38 @@ abstract class NodeBase extends ContainerComponent {
     _opacity = value;
     onPropertyChanged(opacityPropertyKey, from, value);
     opacityChanged(from, value);
+  }
+
+  set opacity(double value) {
+    if (context != null && context.isAnimating) {
+      _opacityAnimate(value, true);
+      return;
+    }
+    opacityCore = value;
+  }
+
+  void _opacityAnimate(double value, bool autoKey) {
+    if (_opacityAnimated == value) {
+      return;
+    }
+    double from = opacity;
+    _opacityAnimated = value;
+    double to = opacity;
+    onAnimatedPropertyChanged(opacityPropertyKey, autoKey, from, to);
+    opacityChanged(from, to);
+  }
+
+  double get opacityAnimated => _opacityAnimated;
+  set opacityAnimated(double value) => _opacityAnimate(value, false);
+  KeyState get opacityKeyState => _opacityKeyState;
+  set opacityKeyState(KeyState value) {
+    if (_opacityKeyState == value) {
+      return;
+    }
+    _opacityKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        opacityPropertyKey, false, _opacityAnimated, _opacityAnimated);
   }
 
   void opacityChanged(double from, double to);

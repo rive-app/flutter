@@ -22,7 +22,7 @@ class AnimationTimePopupButton extends StatelessWidget {
     // We want to rebuild the whole thing whenever the fps changes as we need to
     // recomute our converter.
     return CorePropertyBuilder(
-      object: animationManager.editingAnimation,
+      object: animationManager.animation,
       propertyKey: LinearAnimationBase.fpsPropertyKey,
       builder: (context, int fps, _) {
         var converter = TimeCodeValueConverter(fps);
@@ -80,7 +80,7 @@ class AnimationTimePopupButton extends StatelessWidget {
                   child: CoreTextField<int>(
                     focusNode: focus,
                     key: key,
-                    objects: [animationManager.editingAnimation],
+                    objects: [animationManager.animation],
                     propertyKey: LinearAnimationBase.durationPropertyKey,
                     converter: converter,
                   ),
@@ -93,7 +93,7 @@ class AnimationTimePopupButton extends StatelessWidget {
                   child: CoreTextField<double>(
                     key: key,
                     focusNode: focus,
-                    objects: [animationManager.editingAnimation],
+                    objects: [animationManager.animation],
                     propertyKey: LinearAnimationBase.speedPropertyKey,
                     converter: SpeedValueConverter.instance,
                   ),

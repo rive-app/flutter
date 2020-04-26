@@ -11,6 +11,7 @@ class Property {
   final Definition definition;
   String initialValue;
   bool animates = false;
+  String group;
   Key key;
   String description;
   bool isNullable = false;
@@ -41,6 +42,10 @@ class Property {
     dynamic a = data['animates'];
     if (a is bool) {
       animates = a;
+    }
+    dynamic g = data['group'];
+    if (g is String) {
+      group = g;
     }
     key = Key.fromJSON(data["key"]) ?? Key.forProperty(this);
   }
@@ -137,6 +142,9 @@ class Property {
     }
     if (animates) {
       data['animates'] = true;
+    }
+    if (group != null) {
+      data['group'] = group;
     }
     data['key'] = key.serialize();
     if (description != null) {

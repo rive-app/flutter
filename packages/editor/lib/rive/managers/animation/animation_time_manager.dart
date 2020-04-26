@@ -4,15 +4,14 @@ import 'dart:math';
 import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
-import 'package:rive_core/component.dart';
-import 'package:rive_core/rive_file.dart';
+import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:meta/meta.dart';
 
-/// Animation manager for the currently editing [LinearAnimation].
-class EditingAnimationManager with RiveFileDelegate {
-  final LinearAnimation editingAnimation;
-
+/// Time manager for the currently editing [LinearAnimation]. Allows controlling
+/// the viewport, changing animation duration, and tracking editing animation
+/// time.
+abstract class AnimationTimeManager extends AnimationManager {
   final _fpsStream = BehaviorSubject<int>();
 
   /// Use this to actually process the final fps rate change.
@@ -26,15 +25,13 @@ class EditingAnimationManager with RiveFileDelegate {
   final _timeController = StreamController<double>();
   final _viewportController = StreamController<TimelineViewport>();
 
-  EditingAnimationManager(this.editingAnimation) {
-    editingAnimation.context.addDelegate(this);
+  AnimationTimeManager(LinearAnimation animation) : super(animation) {
     _timeStream.add(0);
-    _fpsStream.add(editingAnimation.fps);
+    _fpsStream.add(animation.fps);
     _fpsController.stream.listen(_changeFps);
     _fpsPreviewController.stream.listen(_changePreviewFps);
-    editingAnimation.addListener(
-        LinearAnimationBase.fpsPropertyKey, _coreFpsChanged);
-    editingAnimation.addListener(
+    animation.addListener(LinearAnimationBase.fpsPropertyKey, _coreFpsChanged);
+    animation.addListener(
         LinearAnimationBase.durationPropertyKey, _coreDurationChange);
     _viewportController.stream.listen(_changeViewport);
 
@@ -42,21 +39,16 @@ class EditingAnimationManager with RiveFileDelegate {
   }
 
   void _syncViewport() {
-    double start = min(
-        editingAnimation.duration / editingAnimation.fps -
-            2 / editingAnimation.fps,
+    double start = min(animation.duration / animation.fps - 2 / animation.fps,
         _viewportStream.hasValue ? _viewportStream.value.startSeconds : 0);
     double end = min(
-        editingAnimation.duration / editingAnimation.fps,
+        animation.duration / animation.fps,
         _viewportStream.hasValue
             ? _viewportStream.value.endSeconds
-            : editingAnimation.duration / editingAnimation.fps);
+            : animation.duration / animation.fps);
 
     _viewportStream.add(TimelineViewport(
-        start,
-        end,
-        editingAnimation.duration / editingAnimation.fps,
-        editingAnimation.fps));
+        start, end, animation.duration / animation.fps, animation.fps));
   }
 
   void _changeViewport(TimelineViewport viewport) {
@@ -78,14 +70,13 @@ class EditingAnimationManager with RiveFileDelegate {
   }
 
   void _changeFps(int value) {
-    int oldFps = editingAnimation.fps;
+    int oldFps = animation.fps;
 
     // When the FPS of the animation changes we need to update all properties
     // that are in frame value (like duration) and keyframe time values.
-    editingAnimation.duration =
-        ((editingAnimation.duration / oldFps) * value).round();
-    editingAnimation.fps = value;
-    editingAnimation.context.captureJournalEntry();
+    animation.duration = ((animation.duration / oldFps) * value).round();
+    animation.fps = value;
+    animation.context.captureJournalEntry();
   }
 
   /// Change the current time displayed (value is in seconds).
@@ -105,25 +96,17 @@ class EditingAnimationManager with RiveFileDelegate {
   int get frame => _timeStream.value;
 
   void dispose() {
-    editingAnimation.context.removeDelegate(this);
     cancelDebounce(_syncViewport);
     _viewportController.close();
     _viewportStream.close();
-    editingAnimation.removeListener(
+    animation.removeListener(
         LinearAnimationBase.fpsPropertyKey, _coreFpsChanged);
-    editingAnimation.removeListener(
+    animation.removeListener(
         LinearAnimationBase.durationPropertyKey, _coreDurationChange);
     _timeController.close();
     _timeStream.close();
     _fpsController.close();
     _fpsPreviewController.close();
-  }
-
-  @override
-  void onAutoKey(Component component, int propertyKey) {
-    var keyFrame = component.addKeyFrame(editingAnimation, propertyKey, frame);
-    // Set the value of the keyframe.
-    keyFrame.valueFrom(component, propertyKey);
   }
 }
 

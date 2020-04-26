@@ -3,8 +3,8 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/managers/animations_manager.dart';
-import 'package:rive_editor/rive/managers/editing_animation_manager.dart';
+import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';

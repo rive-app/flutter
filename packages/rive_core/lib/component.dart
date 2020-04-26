@@ -251,12 +251,12 @@ abstract class Component extends ComponentBase<RiveFile>
   /// this component.
   void remove() => context?.remove(this);
 
-  /// Create the corresponding keyframe for the property key.
+  /// Create the corresponding keyframe for the property key. Note that this
+  /// doesn't add it to core, that's left up to the implementation.
   T makeKeyFrame<T extends KeyFrame>(int propertyKey) {
     var coreType = context.coreType(propertyKey);
     if (coreType is KeyFrameGenerator<T>) {
       var keyFrame = (coreType as KeyFrameGenerator<T>).makeKeyFrame();
-      context.add(keyFrame);
       return keyFrame;
     }
     return null;
@@ -276,7 +276,6 @@ abstract class Component extends ComponentBase<RiveFile>
     // well search for it and store the index to insert the new one if we need
     // to.
     var keyFrameIndex = property.indexOfFrame(frame);
-    print("INDEX $frame ${property.numFrames}");
 
     if (keyFrameIndex < property.numFrames) {
       var keyFrame = property.getFrameAt(keyFrameIndex);
@@ -286,9 +285,11 @@ abstract class Component extends ComponentBase<RiveFile>
       }
     }
 
-    return makeKeyFrame<T>(propertyKey)
+    var keyFrame = makeKeyFrame<T>(propertyKey)
       ..frame = frame
       ..keyedPropertyId = property.id;
+    context.add(keyFrame);
+    return keyFrame;
   }
 
   @override

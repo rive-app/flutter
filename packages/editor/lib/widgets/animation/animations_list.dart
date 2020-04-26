@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/rive/managers/animations_manager.dart';
+import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
 import 'package:rive_editor/widgets/animation/animation_tree_controller.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
@@ -18,19 +18,31 @@ import 'package:tree_widget/tree_widget.dart';
 
 /// List of animations shown in the animation panel. Selecting one activates it
 /// for editing. Animations can be added, sorted, and deleted.
-class AnimationsList extends StatefulWidget {
+class AnimationsList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var animationManager = AnimationsProvider.of(context);
+    return animationManager == null
+        ? const SizedBox()
+        : _AnimationsListTree(
+            animationManager: animationManager,
+          );
+  }
+}
+
+class _AnimationsListTree extends StatefulWidget {
   final AnimationsManager animationManager;
 
-  const AnimationsList({
+  const _AnimationsListTree({
     @required this.animationManager,
     Key key,
   }) : super(key: key);
 
   @override
-  _AnimationsListState createState() => _AnimationsListState();
+  __AnimationsListTreeState createState() => __AnimationsListTreeState();
 }
 
-class _AnimationsListState extends State<AnimationsList> {
+class __AnimationsListTreeState extends State<_AnimationsListTree> {
   AnimationTreeController _treeController;
   @override
   void initState() {
@@ -45,7 +57,7 @@ class _AnimationsListState extends State<AnimationsList> {
   }
 
   @override
-  void didUpdateWidget(AnimationsList oldWidget) {
+  void didUpdateWidget(_AnimationsListTree oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.animationManager != widget.animationManager) {
       _treeController = AnimationTreeController(widget.animationManager);
