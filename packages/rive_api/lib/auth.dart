@@ -79,7 +79,7 @@ class RiveAuth {
       jsMessage: 'jsHandler',
     );
 
-    print("Response in this case was: ${response.runtimeType} $response");
+    // print("Response in this case was: ${response.runtimeType} $response");
     if (response == null) {
       print("Response was null here");
       await win_utils.closeWebView(_authWebViewKey);

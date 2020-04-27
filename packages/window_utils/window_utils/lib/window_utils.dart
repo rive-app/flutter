@@ -8,7 +8,7 @@ export 'package:window_utils_platform_interface/window_utils_platform_interface.
 Future<String> openWebView(String key, String url,
         {Offset offset, Size size, String jsMessage = ''}) =>
     WindowUtilsPlatform.instance.openWebView(key, url,
-        offset: offset, size: size, jsMessage: jsMessage = '');
+        offset: offset, size: size, jsMessage: jsMessage);
 
 Future<bool> closeWebView(String key) =>
     WindowUtilsPlatform.instance.closeWebView(key);
