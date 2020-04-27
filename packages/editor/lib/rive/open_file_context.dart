@@ -277,7 +277,7 @@ class OpenFileContext with RiveFileDelegate {
         deathRow.add(component);
         // We need to recursively remove children too.
         if (component is ContainerComponent) {
-          component.applyToChildren((child) => deathRow.add(child));
+          component.forEachChild((child) => deathRow.add(child));
         }
       }
     }
