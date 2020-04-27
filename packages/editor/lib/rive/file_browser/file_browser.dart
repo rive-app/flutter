@@ -67,7 +67,6 @@ class FileBrowser extends FileBrowserController {
     return _count == 0 ? 1 : _count;
   }
 
-  
   RiveFolder get currentFolder => _current;
   ValueListenable<bool> get draggingState => _draggingState;
   bool get isDragging =>
@@ -159,8 +158,7 @@ class FileBrowser extends FileBrowserController {
   Future<void> createFile() async {
     RiveFile newFile;
     if (owner is RiveTeam) {
-      newFile =
-          await _filesApi.createTeamFile(owner.ownerId, folder: _current);
+      newFile = await _filesApi.createTeamFile(owner.ownerId, folder: _current);
     } else {
       newFile = await _filesApi.createFile(folder: _current);
     }
@@ -256,7 +254,6 @@ class FileBrowser extends FileBrowserController {
     if (value == null) {
       return false;
     }
-    myTreeController.value.expand(value);
     if (jumpTo) {
       // TODO: get rive's scrollcontroller? should this live in some kinda selected/userstat context?
       // List<FlatTreeItem<RiveFolder>> _all = myTreeController.value.flat;
