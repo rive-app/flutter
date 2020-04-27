@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/user.dart';
-import 'package:rive_api/src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 class RiveTeam extends RiveOwner {
   final int id;

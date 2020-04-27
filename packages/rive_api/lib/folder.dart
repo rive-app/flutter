@@ -1,4 +1,4 @@
-import 'src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 class RiveApiFolder {
   final String _parentId;

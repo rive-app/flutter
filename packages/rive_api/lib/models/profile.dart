@@ -1,4 +1,4 @@
-import 'package:rive_api/src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 class RiveProfile {
   String name;

@@ -1,4 +1,4 @@
-import 'package:rive_api/src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 /// Model for a user that the user is following
 /// Opposite of follower

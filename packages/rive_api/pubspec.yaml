@@ -1,6 +1,6 @@
 name: rive_api
-description: Rive backend API
-version: 1.0.0
+description: Rive backend API for clients
+version: 2.0.0
 author:
 
 environment:
@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^4.0.1
   http: ^0.12.0
   encrypt: ^4.0.0
   logging: ^0.11.4
@@ -27,6 +26,5 @@ dev_dependencies:
     sdk: flutter
 
   test: ^1.14.2
-  meta: ^1.1.8
 
 flutter:

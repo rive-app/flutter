@@ -1,6 +1,4 @@
-// import 'package:flare_dart/math/vec2d.dart';
-import 'dart:core';
-
+/// Extensions for making json deserialization simpler
 extension DeserializeHelper on Map<String, dynamic> {
   double getDouble(String key) => deserializeDouble(this[key]);
 
@@ -28,6 +26,7 @@ extension DeserializeHelper on Map<String, dynamic> {
 double deserializeDouble(dynamic value) {
   if (value is double) {
     return value;
+    // ignore: avoid_double_and_int_checks
   } else if (value is int) {
     return value.toDouble();
   } else if (value is String) {
@@ -47,10 +46,5 @@ int deserializeInt(dynamic value) {
   return 0;
 }
 
-bool deserializeBool(dynamic value) {
-  if (value is bool) {
-    return value;
-  }
-
-  return false;
-}
+// ignore: avoid_bool_literals_in_conditional_expressions
+bool deserializeBool(dynamic value) => value is bool ? value : false;
