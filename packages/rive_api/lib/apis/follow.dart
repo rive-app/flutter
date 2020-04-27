@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:logging/logging.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/models/follow.dart';
 
 final Logger log = Logger('Rive API');

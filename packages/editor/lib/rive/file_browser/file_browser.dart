@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:rive_api/api.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';

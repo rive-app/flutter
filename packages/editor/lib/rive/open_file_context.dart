@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';

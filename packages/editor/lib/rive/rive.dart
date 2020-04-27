@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:core/error_logger/error_logger.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/models/file.dart';
 import 'package:rive_api/folder.dart';
 import 'package:rive_api/models/owner.dart';
@@ -16,7 +18,6 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 
-import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_api/models/user.dart';

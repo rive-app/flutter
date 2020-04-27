@@ -11,7 +11,7 @@ import 'package:core/coop/player.dart';
 import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 
-import 'package:rive_api/api.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/artists.dart';
 
 import 'package:rive_core/backboard.dart';

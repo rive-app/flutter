@@ -4,7 +4,7 @@
 import 'dart:convert';
 
 import 'package:mockito/mockito.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';

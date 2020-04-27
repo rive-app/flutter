@@ -1,7 +1,7 @@
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/artists.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_api/models/team.dart';
