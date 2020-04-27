@@ -329,6 +329,7 @@ class _LoginState extends State<Login> {
                       isRegister ? auth.registerFacebook : auth.loginFacebook);
                 },
         ),
+        /*
         const SizedBox(width: 10),
         _SocialSigninButton(
           label: 'Twitter',
@@ -344,7 +345,7 @@ class _LoginState extends State<Login> {
                   // await _socialAuth(
                   //     isRegister ? auth.registerTwitter : auth.loginTwitter);
                 },
-        ),
+        ), */
       ],
     );
   }
