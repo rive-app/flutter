@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/rive_api.dart';
 
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/home/folder_tree.dart';

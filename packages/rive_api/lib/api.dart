@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart';
-
-import 'src/web_service_client.dart';
-export 'src/http_exception.dart';
+import 'package:rive_api/src/http/http.dart';
 
 class RiveApi extends WebServiceClient {
   // final String host = 'http://localhost:3000';
