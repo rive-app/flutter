@@ -49,4 +49,6 @@ HashMap<String, String> _defaultUIStrings =
   "opacity": "Opacity",
   "x": "X",
   "y": "Y",
+  "scaleX": "X",
+  "scaleY": "Y",
 });

@@ -2,13 +2,17 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
+import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
+import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
+import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
@@ -145,11 +149,40 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
 
   Widget _buildKeyedProperty(
       BuildContext context, RiveThemeData theme, KeyedPropertyViewModel model) {
-    return Renamable(
-      style: theme.textStyles.inspectorWhiteLabel,
-      name: model.label,
-      color: theme.colors.inspectorTextColor,
-      onRename: (name) {},
+    return Expanded(
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text(
+              UIStrings.of(context).withKey(model.label),
+              style: theme.textStyles.inspectorWhiteLabel,
+            ),
+          ),
+          if (model.subLabel != null)
+            Text(
+              UIStrings.of(context).withKey(model.subLabel),
+              style: theme.textStyles.animationSubLabel,
+            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 2, left: 9, right: 15),
+            child: SizedBox(
+              width: 69,
+              child: CoreTextField<double>(
+                underlineColor: theme.colors.timelineUnderline,
+                objects: [model.component],
+                propertyKey: model.keyedProperty.propertyKey,
+                converter: TranslationValueConverter.instance,
+              ),
+            ),
+          ),
+          TintedIcon(
+            icon: 'add',
+            color: theme.colors.inspectorTextColor,
+          )
+        ],
+      ),
     );
   }
 }

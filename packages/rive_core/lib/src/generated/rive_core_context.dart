@@ -131,7 +131,7 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
-  static String propertyKeyGroup(int propertyKey) {
+  static String propertyKeyGroupName(int propertyKey) {
     switch (propertyKey) {
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
@@ -139,6 +139,151 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
         return 'scale';
+      default:
+        return null;
+    }
+  }
+
+  static String propertyKeyName(int propertyKey) {
+    switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+        return 'objectId';
+      case KeyedObjectBase.animationIdPropertyKey:
+        return 'animationId';
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+        return 'keyedObjectId';
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+        return 'propertyKey';
+      case AnimationBase.artboardIdPropertyKey:
+        return 'artboardId';
+      case AnimationBase.namePropertyKey:
+        return 'name';
+      case AnimationBase.orderPropertyKey:
+        return 'order';
+      case CubicInterpolatorBase.x1PropertyKey:
+        return 'x1';
+      case CubicInterpolatorBase.y1PropertyKey:
+        return 'y1';
+      case CubicInterpolatorBase.x2PropertyKey:
+        return 'x2';
+      case CubicInterpolatorBase.y2PropertyKey:
+        return 'y2';
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        return 'keyedPropertyId';
+      case KeyFrameBase.framePropertyKey:
+        return 'frame';
+      case KeyFrameBase.interpolationPropertyKey:
+        return 'interpolation';
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        return 'interpolatorId';
+      case KeyFrameDoubleBase.valuePropertyKey:
+        return 'value';
+      case LinearAnimationBase.fpsPropertyKey:
+        return 'fps';
+      case LinearAnimationBase.durationPropertyKey:
+        return 'duration';
+      case LinearAnimationBase.speedPropertyKey:
+        return 'speed';
+      case LinearAnimationBase.loopPropertyKey:
+        return 'loop';
+      case LinearAnimationBase.workStartPropertyKey:
+        return 'workStart';
+      case LinearAnimationBase.workEndPropertyKey:
+        return 'workEnd';
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        return 'enableWorkArea';
+      case ComponentBase.dependentIdsPropertyKey:
+        return 'dependentIds';
+      case ComponentBase.namePropertyKey:
+        return 'name';
+      case ComponentBase.parentIdPropertyKey:
+        return 'parentId';
+      case ComponentBase.childOrderPropertyKey:
+        return 'childOrder';
+      case ShapePaintBase.isVisiblePropertyKey:
+        return 'isVisible';
+      case LinearGradientBase.startXPropertyKey:
+        return 'startX';
+      case LinearGradientBase.startYPropertyKey:
+        return 'startY';
+      case LinearGradientBase.endXPropertyKey:
+        return 'endX';
+      case LinearGradientBase.endYPropertyKey:
+        return 'endY';
+      case LinearGradientBase.opacityPropertyKey:
+        return 'opacity';
+      case StrokeBase.thicknessPropertyKey:
+        return 'thickness';
+      case StrokeBase.capPropertyKey:
+        return 'cap';
+      case StrokeBase.joinPropertyKey:
+        return 'join';
+      case StrokeBase.transformAffectsStrokePropertyKey:
+        return 'transformAffectsStroke';
+      case SolidColorBase.colorValuePropertyKey:
+        return 'colorValue';
+      case GradientStopBase.colorValuePropertyKey:
+        return 'colorValue';
+      case GradientStopBase.positionPropertyKey:
+        return 'position';
+      case FillBase.fillRulePropertyKey:
+        return 'fillRule';
+      case NodeBase.xPropertyKey:
+        return 'x';
+      case NodeBase.yPropertyKey:
+        return 'y';
+      case NodeBase.rotationPropertyKey:
+        return 'rotation';
+      case NodeBase.scaleXPropertyKey:
+        return 'scaleX';
+      case NodeBase.scaleYPropertyKey:
+        return 'scaleY';
+      case NodeBase.opacityPropertyKey:
+        return 'opacity';
+      case DrawableBase.drawOrderPropertyKey:
+        return 'drawOrder';
+      case DrawableBase.blendModePropertyKey:
+        return 'blendMode';
+      case PathVertexBase.xPropertyKey:
+        return 'x';
+      case PathVertexBase.yPropertyKey:
+        return 'y';
+      case StraightVertexBase.radiusPropertyKey:
+        return 'radius';
+      case PointsPathBase.isClosedPropertyKey:
+        return 'isClosed';
+      case ParametricPathBase.widthPropertyKey:
+        return 'width';
+      case ParametricPathBase.heightPropertyKey:
+        return 'height';
+      case RectangleBase.cornerRadiusPropertyKey:
+        return 'cornerRadius';
+      case CubicVertexBase.inXPropertyKey:
+        return 'inX';
+      case CubicVertexBase.inYPropertyKey:
+        return 'inY';
+      case CubicVertexBase.outXPropertyKey:
+        return 'outX';
+      case CubicVertexBase.outYPropertyKey:
+        return 'outY';
+      case ArtboardBase.widthPropertyKey:
+        return 'width';
+      case ArtboardBase.heightPropertyKey:
+        return 'height';
+      case ArtboardBase.xPropertyKey:
+        return 'x';
+      case ArtboardBase.yPropertyKey:
+        return 'y';
+      case ArtboardBase.originXPropertyKey:
+        return 'originX';
+      case ArtboardBase.originYPropertyKey:
+        return 'originY';
+      case BackboardBase.activeArtboardIdPropertyKey:
+        return 'activeArtboardId';
+      case BackboardBase.mainArtboardIdPropertyKey:
+        return 'mainArtboardId';
+      case BackboardBase.colorValuePropertyKey:
+        return 'colorValue';
       default:
         return null;
     }

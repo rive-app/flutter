@@ -22,6 +22,7 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/persist/persist.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+export 'package:rive_core/src/generated/rive_core_context.dart';
 
 class RiveFile extends RiveCoreContext {
   final List<Artboard> artboards = [];
@@ -95,8 +96,8 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  void changeAnimatedProperty(covariant Component component, int propertyKey,
-      bool autoKey) {
+  void changeAnimatedProperty(
+      covariant Component component, int propertyKey, bool autoKey) {
     super.changeAnimatedProperty(component, propertyKey, autoKey);
     if (autoKey) {
       delegates

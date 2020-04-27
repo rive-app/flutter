@@ -444,7 +444,7 @@ class Definition {
     });
     ctxCode.writeln('default: return 0; }}');
 
-    ctxCode.writeln('''static String propertyKeyGroup(int propertyKey) {
+    ctxCode.writeln('''static String propertyKeyGroupName(int propertyKey) {
       switch (propertyKey) {''');
     propertyGroupToKey.forEach((name, list) {
       for (final property in list) {
@@ -453,6 +453,17 @@ class Definition {
       }
       ctxCode.writeln('return \'$name\';');
     });
+    ctxCode.writeln('default: return null; }}');
+
+    ctxCode.writeln('''static String propertyKeyName(int propertyKey) {
+      switch (propertyKey) {''');
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        ctxCode.write('case ${property.definition._name}Base');
+        ctxCode.writeln('.${property.name}PropertyKey:');
+        ctxCode.writeln('return \'${property.name}\';');
+      }
+    }
     ctxCode.writeln('default: return null; }}');
 
     // Iterate used fields to get getters.

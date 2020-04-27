@@ -93,6 +93,12 @@ class InspectorTextField<T> extends StatefulWidget {
 
   final bool captureJournalEntry;
 
+  /// Color for the underline when it's not focused.
+  final Color underlineColor;
+
+  /// Color for the underline when this textfield has focus.
+  final Color focusedUnderlineColor;
+
   const InspectorTextField({
     @required this.value,
     @required this.converter,
@@ -101,6 +107,8 @@ class InspectorTextField<T> extends StatefulWidget {
     this.change,
     this.completeChange,
     this.captureJournalEntry = true,
+    this.underlineColor,
+    this.focusedUnderlineColor,
     Key key,
   }) : super(key: key);
 
@@ -183,7 +191,9 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return Underline(
-      color: _hasFocus ? theme.colors.separatorActive : theme.colors.separator,
+      color: _hasFocus
+          ? widget.focusedUnderlineColor ?? theme.colors.separatorActive
+          : widget.underlineColor ?? theme.colors.separator,
       child: widget.change == null
           ? Text(
               widget.disabledText,
