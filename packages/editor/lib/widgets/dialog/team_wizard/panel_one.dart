@@ -134,7 +134,7 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                         final animationValue = t * t;
                         final labelLookup = costLookup[sub?.billing];
                         return SubscriptionChoice(
-                          label: 'Premium Team',
+                          label: 'Org',
                           costLabel: sub == null
                               ? ''
                               : '${labelLookup[TeamsOption.premium]}',
