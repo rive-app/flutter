@@ -97,59 +97,59 @@ class _FileViewWidgetState extends State<FileViewWidget> {
       ),
       builder: (context, state, child) {
         final _isSelected = state == SelectionState.selected;
-        return Stack(
-          fit: StackFit.expand,
-          overflow: Overflow.visible,
-          children: <Widget>[
-            Visibility(
-              visible: _isSelected,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  boxShadow: [
-                    BoxShadow(
-                      color: RiveTheme.of(context)
-                          .colors
-                          .fileSelectedBlue
-                          .withOpacity(0.5),
-                      blurRadius: 50,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            ClickListener(
-              child: child,
-              onClick: (event) {
-                event.stopPropagation();
-                fileBrowser.selectItem(rive, widget.file);
-              },
-              onDoubleClick: (event) {
-                event.stopPropagation();
-                fileBrowser.openFile(rive, widget.file);
-              },
-            ),
-            Positioned.fill(
-              left: -4,
-              top: -4,
-              bottom: -4,
-              right: -4,
-              child: Visibility(
+        return ClickListener(
+          onClick: (event) {
+            event.stopPropagation();
+            fileBrowser.selectItem(rive, widget.file);
+          },
+          onDoubleClick: (event) {
+            event.stopPropagation();
+            fileBrowser.openFile(rive, widget.file);
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            overflow: Overflow.visible,
+            children: <Widget>[
+              Visibility(
                 visible: _isSelected,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.transparent,
-                    border: Border.all(
-                      color: RiveTheme.of(context).colors.fileSelectedBlue,
-                      width: 4,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: RiveTheme.of(context)
+                            .colors
+                            .fileSelectedBlue
+                            .withOpacity(0.5),
+                        blurRadius: 50,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+              child,
+              Positioned.fill(
+                left: -4,
+                top: -4,
+                bottom: -4,
+                right: -4,
+                child: Visibility(
+                  visible: _isSelected,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border.all(
+                        color: RiveTheme.of(context).colors.fileSelectedBlue,
+                        width: 4,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
