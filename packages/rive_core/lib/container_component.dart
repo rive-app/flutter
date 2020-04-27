@@ -75,13 +75,13 @@ abstract class ContainerComponent extends ContainerComponentBase {
     if (cb(this) == false) {
       return false;
     }
-    applyToChildren(cb);
+    forEachChild(cb);
     return true;
   }
 
   // Recursively descend onto all the children in the hierarchy tree.
   // If the callback returns false, it won't recurse down a particular branch.
-  void applyToChildren(DescentCallback cb) {
+  void forEachChild(DescentCallback cb) {
     for (final child in children) {
       if (cb(child) == false) {
         continue;
@@ -89,7 +89,7 @@ abstract class ContainerComponent extends ContainerComponentBase {
 
       // TODO: replace with a more robust check.
       if (child is ContainerComponent) {
-        child.applyToChildren(cb);
+        child.forEachChild(cb);
       }
     }
   }
@@ -104,7 +104,7 @@ abstract class ContainerComponent extends ContainerComponentBase {
     assert(context != null);
     
     Set<Component> deathRow = {this};
-    applyToChildren((child) => deathRow.add(child));
+    forEachChild((child) => deathRow.add(child));
     deathRow.forEach(context.remove);
   }
 }
