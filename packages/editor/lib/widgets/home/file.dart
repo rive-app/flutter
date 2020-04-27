@@ -101,6 +101,35 @@ class _FileViewWidgetState extends State<FileViewWidget> {
           fit: StackFit.expand,
           overflow: Overflow.visible,
           children: <Widget>[
+            Visibility(
+              visible: _isSelected,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  boxShadow: [
+                    BoxShadow(
+                      color: RiveTheme.of(context)
+                          .colors
+                          .fileSelectedBlue
+                          .withOpacity(0.5),
+                      blurRadius: 50,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            ClickListener(
+              child: child,
+              onClick: (event) {
+                event.stopPropagation();
+                fileBrowser.selectItem(rive, widget.file);
+              },
+              onDoubleClick: (event) {
+                event.stopPropagation();
+                fileBrowser.openFile(rive, widget.file);
+              },
+            ),
             Positioned.fill(
               left: -4,
               top: -4,
@@ -116,30 +145,9 @@ class _FileViewWidgetState extends State<FileViewWidget> {
                       width: 4,
                     ),
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: RiveTheme.of(context)
-                            .colors
-                            .fileSelectedBlue
-                            .withOpacity(0.5),
-                        blurRadius: 50,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
                   ),
                 ),
               ),
-            ),
-            ClickListener(
-              child: child,
-              onClick: (event) {
-                event.stopPropagation();
-                fileBrowser.selectItem(rive, widget.file);
-              },
-              onDoubleClick: (event) {
-                event.stopPropagation();
-                fileBrowser.openFile(rive, widget.file);
-              },
             ),
           ],
         );

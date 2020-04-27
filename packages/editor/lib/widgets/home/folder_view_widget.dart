@@ -66,7 +66,9 @@ class FolderViewWidget extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: RiveTheme.of(context).colors.fileBackgroundLightGrey,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(
+                      _isSelected ? 5: 10
+                      ),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Container(
