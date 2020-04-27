@@ -257,11 +257,12 @@ class Rive {
       selectTab(systemTab);
       await reloadTeams();
 
-      var selectedOwnerId =
-          await Settings.getInt(Preferences.selectedRiveOwnerId);
-
-      await selectRiveOwner(selectedOwnerId);
-
+      // TODO: load last opened file list (from localdata)
+      if (fileBrowsers.first.myTreeController.value.data.isNotEmpty) {
+        activeFileBrowser.value ??= fileBrowsers.first;
+        await fileBrowsers.first.openFolder(
+            fileBrowsers.first.myTreeController.value.data.first, false);
+      }
       return me;
     } else {
       _state.value = RiveState.login;
