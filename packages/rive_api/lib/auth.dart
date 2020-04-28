@@ -21,7 +21,7 @@ class RiveAuth {
   final RiveApi api;
   RiveAuth(this.api);
 
-  Future<bool> login(String username, String password) async {
+  Future<AuthResponse> login(String username, String password) async {
     var response = await api.post(api.host + '/signin',
         body: jsonEncode(
           <String, String>{
@@ -30,10 +30,23 @@ class RiveAuth {
           },
         ));
 
-    if (response.statusCode == 200) {
-      return true;
+    Map<String, dynamic> responseData;
+
+    try {
+      responseData = json.decode(response.body);
+      AuthResponse authResponse;
+      if (response.statusCode == 200 && responseData.containsKey('username')) {
+        var username = responseData['username'];
+        authResponse = AuthResponse.fromMessage(username);
+      } else if (response.statusCode == 422) {
+        if (responseData.containsKey('error')) {
+          return AuthResponse.fromError(description: responseData['error']);
+        }
+      }
+      return authResponse ?? AuthResponse.empty();
+    } on FormatException catch (err) {
+      return AuthResponse.fromError(description: err.message);
     }
-    return false;
   }
 
   Future<AuthResponse> registerGoogle() =>
@@ -79,9 +92,7 @@ class RiveAuth {
       jsMessage: 'jsHandler',
     );
 
-    // print("Response in this case was: ${response.runtimeType} $response");
     if (response == null) {
-      print("Response was null here");
       await win_utils.closeWebView(_authWebViewKey);
       return AuthResponse.empty();
     }
@@ -98,14 +109,14 @@ class RiveAuth {
         await api.persist();
       } else if (responseData.containsKey('error')) {
         var error = responseData['error'];
-        authResponse = AuthResponse.fromError(error);
+        authResponse = AuthResponse.fromError(description: error);
       }
 
       await win_utils.closeWebView(_authWebViewKey);
       return authResponse ?? AuthResponse.empty();
     } on FormatException catch (err) {
       await win_utils.closeWebView(_authWebViewKey);
-      return AuthResponse.fromError(err.message);
+      return AuthResponse.fromError(description: err.message);
     }
   }
 
@@ -142,7 +153,8 @@ class RiveAuth {
     return false;
   }
 
-  Future<bool> register(String username, String email, String password) async {
+  Future<AuthResponse> register(
+      String username, String email, String password) async {
     final body = jsonEncode(
       <String, String>{
         'username': username,
@@ -151,27 +163,52 @@ class RiveAuth {
       },
     );
     var response = await api.post(api.host + '/register', body: body);
+    Map<String, dynamic> responseData;
 
-    if (response.statusCode == 200) {
-      return true;
+    try {
+      responseData = json.decode(response.body);
+      AuthResponse authResponse;
+      if (response.statusCode == 200 && responseData.containsKey('username')) {
+        var username = responseData['username'];
+        authResponse = AuthResponse.fromMessage(username);
+      } else if (response.statusCode == 422) {
+        return AuthResponse.fromErrors(responseData);
+      }
+      return authResponse ?? AuthResponse.empty();
+    } on FormatException catch (err) {
+      return AuthResponse.fromError(description: err.message);
     }
-    return false;
   }
 }
 
 class AuthResponse {
-  String message, error;
+  String message;
+  Map<String, String> errors;
   AuthResponse.empty(); // Empty response.
   AuthResponse.fromMessage(this.message);
-  AuthResponse.fromError(this.error);
+  AuthResponse.fromError({String name = 'error', String description})
+      : errors = {name: description};
+  AuthResponse.fromErrors(Map<String, dynamic> networkErrors) {
+    errors = {};
+    networkErrors.forEach((key, value) {
+      if (value is String) {
+        errors[key] = value;
+      }
+    });
+  }
 
-  bool get isEmpty => message == null && error == null;
-  bool get isError => error != null && error.isNotEmpty;
+  bool get isEmpty => message == null && errors == null;
+  bool get isError => errors != null && errors.isNotEmpty;
   bool get isMessage => message != null && message.isNotEmpty;
 
   @override
   String toString() {
-    if (isEmpty) return "empty";
-    return error ?? message;
+    if (isEmpty) return 'empty';
+    if (isMessage) return message;
+    String errorString = '';
+    errors.forEach((key, value) {
+      errorString += '$key: $value\n';
+    });
+    return errorString.trimRight();
   }
 }

@@ -317,7 +317,7 @@ class TextStyles {
   TextStyle get greyText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF333333), fontSize: 13);
 
-  // Wizard TextField
+  // TextField
   // Common
   TextStyle get textFieldInputHint => const TextStyle(
       fontFamily: 'Roboto-Regular', color: Color(0xFFBBBBBB), fontSize: 16);
@@ -339,6 +339,9 @@ class TextStyles {
         height: 1.15,
         fontWeight: FontWeight.normal,
       );
+
+  TextStyle get errorText =>
+      const TextStyle(color: white, fontFamily: 'Roboto-Regular', fontSize: 13);
 
   // Mode button
   TextStyle get modeLabel => const TextStyle(

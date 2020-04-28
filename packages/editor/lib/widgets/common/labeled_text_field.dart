@@ -70,6 +70,7 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
             hintText: widget.hintText,
             errorText: widget.errorText,
             controller: widget.controller,
+            onSubmit: widget.onSubmit,
             focusNode: _focusNode,
           ),
         ],
