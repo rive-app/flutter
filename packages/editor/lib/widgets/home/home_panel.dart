@@ -499,9 +499,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
                             child: DashedFlatButton(
                               label: 'New Team',
                               icon: 'teams-button',
+                              textColor: const Color(0xFF888888),
+                              iconColor: const Color(0xFFA9A9A9),
                               tip: const Tip(
-                                label:
-                                    'Create a space where you and\nyour team can share files.',
+                                label: 'Create a space where you and'
+                                    '\nyour team can share files.',
                                 direction: PopupDirection.bottomToCenter,
                                 fallbackDirections: [
                                   PopupDirection.topToCenter,

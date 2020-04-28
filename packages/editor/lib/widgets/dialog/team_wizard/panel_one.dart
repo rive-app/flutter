@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_editor/widgets/common/rive_text_field.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard/wizard_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -64,13 +64,14 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
-                    child: WizardTextFormField(
+                    child: RiveTextField(
                       onChanged: (name) => sub.name = name,
                       enabled: !sub.processing,
                       initialValue: sub.name,
                       fontSize: 16,
                       hintText: 'Team name',
                       errorText: sub.nameValidationError,
+                      errorAlignment: MainAxisAlignment.start,
                     ),
                   ),
                   Padding(
@@ -96,8 +97,8 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
             ),
             Padding(
               padding: sub.nameValidationError == null
-                  ? const EdgeInsets.only(top: 27, bottom: 24)
-                  : const EdgeInsets.only(top: 5, bottom: 24),
+                  ? const EdgeInsets.only(top: 27, bottom: 23)
+                  : const EdgeInsets.only(top: 5, bottom: 23),
               child: Row(
                 children: [
                   MouseRegion(
