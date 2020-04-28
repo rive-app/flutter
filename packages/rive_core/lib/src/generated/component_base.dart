@@ -146,7 +146,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
       case childOrderPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

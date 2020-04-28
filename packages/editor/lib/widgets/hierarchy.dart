@@ -5,6 +5,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
@@ -57,14 +58,8 @@ class HierarchyTreeView extends StatelessWidget {
               ),
             ),
           ),
-          iconBuilder: (context, item, style) => Container(
-            decoration: const BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.all(
-                Radius.circular(2),
-              ),
-            ),
-          ),
+          iconBuilder: (context, item, style) =>
+              StageItemIcon(item: item.data.stageItem),
           extraBuilder: (context, item, index) => Container(
             decoration: BoxDecoration(
               border: Border.all(

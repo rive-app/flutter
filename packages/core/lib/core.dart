@@ -117,8 +117,9 @@ abstract class Core<T extends CoreContext> {
 
   @protected
   @mustCallSuper
-  void onAnimatedPropertyChanged<K>(int propertyKey, K from, K to) {
-    context?.changeAnimatedProperty(this, propertyKey, from, to);
+  void onAnimatedPropertyChanged<K>(
+      int propertyKey, bool autoKey, K from, K to) {
+    context?.changeAnimatedProperty(this, propertyKey, autoKey);
     if (_changeListeners == null) {
       return;
     }
@@ -176,13 +177,27 @@ abstract class CoreContext implements LocalSettings {
   HashMap<Id, Set<int>> _animationChanges;
   bool get isAnimating => _animationChanges != null;
 
-  void startAnimating() {
-    _animationChanges = HashMap<Id, Set<int>>();
+  /// Start tracking changes as keyframe values instead of core property values.
+  /// Returns true if animation was actived, false if it was already activated,
+  /// either way animation mode is guaranteed to be on after this call.
+  bool startAnimating() {
+    if (_animationChanges == null) {
+      _animationChanges = HashMap<Id, Set<int>>();
+      return true;
+    }
+    // we were already animating...
+    return false;
   }
 
-  void stopAnimating() {
+  /// Go back to tracking changes as core property changes. Retruns true if
+  /// animation mode was disabled, false if it was already disabled.
+  bool stopAnimating() {
+    if (_animationChanges == null) {
+      return false;
+    }
     _animationChanges.forEach(_resetAnimatedObjectProperty);
     _animationChanges = null;
+    return true;
   }
 
   void resetAnimation() {
@@ -275,6 +290,8 @@ abstract class CoreContext implements LocalSettings {
     return true;
   }
 
+  @protected
+  @mustCallSuper
   void changeProperty<T>(Core object, int propertyKey, T from, T to) {
     if (!_isRecording) {
       return;
@@ -283,7 +300,9 @@ abstract class CoreContext implements LocalSettings {
     _currentChanges.change(object, propertyKey, from, to);
   }
 
-  void changeAnimatedProperty<T>(Core object, int propertyKey, T from, T to) {
+  @protected
+  @mustCallSuper
+  void changeAnimatedProperty(Core object, int propertyKey, bool autoKey) {
     var properties = _animationChanges[object.id] ??= {};
     properties.add(propertyKey);
   }

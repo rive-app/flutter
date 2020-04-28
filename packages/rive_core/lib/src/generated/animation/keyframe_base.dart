@@ -148,7 +148,7 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
       case interpolatorIdPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

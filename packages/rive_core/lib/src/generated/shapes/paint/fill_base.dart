@@ -62,7 +62,7 @@ abstract class FillBase extends ShapePaint {
       case fillRulePropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

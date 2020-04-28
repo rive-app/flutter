@@ -127,23 +127,24 @@ class TreeView<T> extends StatelessWidget {
                       //style.opacity = DragOpacity;
                       opacity = inactiveOpacity;
                     }
-
-                    lines.add(
-                      Positioned(
-                        // top: -0.5,
-                        // bottom: -0.5,
-                        top: 0.0,
-                        bottom: 0.0,
-                        left: offset,
-                        child: SizedBox(
-                          width: 1,
-                          child: TreeLine(
-                            color: lineColor
-                                .withOpacity(lineColor.opacity * opacity),
+                    if (showLines) {
+                      lines.add(
+                        Positioned(
+                          // top: -0.5,
+                          // bottom: -0.5,
+                          top: 0.0,
+                          bottom: 0.0,
+                          left: offset,
+                          child: SizedBox(
+                            width: 1,
+                            child: TreeLine(
+                              color: lineColor
+                                  .withOpacity(lineColor.opacity * opacity),
+                            ),
                           ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   }
                   offset += indent;
                 }
@@ -175,25 +176,27 @@ class TreeView<T> extends StatelessWidget {
                     // style.opacity = DragOpacity;
                   }
                   // verticalLines.push(<div className={lastLineStyle} key={numberOfLines} style={style}></div>);
-                  lines.add(
-                    Positioned(
-                      left: offset,
-                      // top: top - 0.5,
-                      // bottom: bottom - 0.5,
-                      top: top,
-                      bottom: bottom,
-                      child: SizedBox(
-                        width: 1,
-                        child: TreeLine(
-                          dashPattern: !item.hasChildren && item.isProperty
-                              ? propertyDashPattern
-                              : null,
-                          color: lineColor
-                              .withOpacity(lineColor.opacity * opacity),
+                  if (showLines) {
+                    lines.add(
+                      Positioned(
+                        left: offset,
+                        // top: top - 0.5,
+                        // bottom: bottom - 0.5,
+                        top: top,
+                        bottom: bottom,
+                        child: SizedBox(
+                          width: 1,
+                          child: TreeLine(
+                            dashPattern: !item.hasChildren && item.isProperty
+                                ? propertyDashPattern
+                                : null,
+                            color: lineColor
+                                .withOpacity(lineColor.opacity * opacity),
+                          ),
                         ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 }
 
                 var spaces = -1;
@@ -250,7 +253,7 @@ class TreeView<T> extends StatelessWidget {
                       ),
                     );
                   }
-                  if (showLines && showOurLine && !item.isLastChild) {
+                  if (showOurLine && !item.isLastChild) {
                     // Example: Red connector under expander: https://cl.ly/473J3m462g0e
                     lines.insert(
                       0,
@@ -270,7 +273,7 @@ class TreeView<T> extends StatelessWidget {
                       ),
                     );
                   }
-                } else if (!(depth.length == 1 && depth[0] == -1)) {
+                } else if (showLines && !(depth.length == 1 && depth[0] == -1)) {
                   //(this.props.hideFirstHorizontalLine && depth.length === 1 && depth[0] === -1) ? null : <div className={horizontalLineStyle} style={{background:showOurLine && showLines ? null : "initial", opacity:dragOpacity}}></div>
                   lines.insert(
                     0,
@@ -311,6 +314,11 @@ class TreeView<T> extends StatelessWidget {
                   );
                 }
 
+                var icon = iconBuilder(
+                  context,
+                  item,
+                  style,
+                );
                 return KeepAlive(
                   /// We need a KeepAlive here to make sure the input helper
                   /// stays around when it's being dragged.
@@ -399,20 +407,17 @@ class TreeView<T> extends StatelessWidget {
                                           extraBuilder?.call(context, item, i),
                                     ),
                                   ),
-                                Padding(
-                                  padding: EdgeInsets.only(right: padIndent),
-                                  child: SizedBox(
-                                    width: iconWidth,
-                                    height: iconHeight,
-                                    child: IgnorePointer(
-                                      child: iconBuilder(
-                                        context,
-                                        item,
-                                        style,
+                                if (icon != null)
+                                  Padding(
+                                    padding: EdgeInsets.only(right: padIndent),
+                                    child: SizedBox(
+                                      width: iconWidth,
+                                      height: iconHeight,
+                                      child: IgnorePointer(
+                                        child: icon,
                                       ),
                                     ),
                                   ),
-                                ),
                                 itemBuilder(
                                   context,
                                   item,

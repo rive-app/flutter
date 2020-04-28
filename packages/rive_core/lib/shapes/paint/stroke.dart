@@ -13,6 +13,9 @@ class Stroke extends StrokeBase {
     ..strokeJoin = strokeJoin
     ..strokeWidth = thickness;
 
+  @override
+  String get timelineParentGroup => 'strokes';
+
   StrokeCap get strokeCap => StrokeCap.values[cap];
   set strokeCap(StrokeCap value) => cap = value.index;
 

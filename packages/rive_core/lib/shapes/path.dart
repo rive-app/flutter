@@ -32,6 +32,10 @@ abstract class Path extends PathBase {
 
   Mat2D get pathTransform;
 
+
+  @override
+  Component get timelineParent => _shape;
+
   @override
   void visitAncestor(Component ancestor) {
     if (ancestor is Shape) {

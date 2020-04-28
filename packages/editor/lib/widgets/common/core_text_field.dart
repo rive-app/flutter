@@ -14,12 +14,21 @@ class CoreTextField<T> extends StatefulWidget {
   final InputValueConverter<T> converter;
   final void Function(T value) change;
   final FocusNode focusNode;
+
+  /// Color for the underline when it's not focused.
+  final Color underlineColor;
+
+  /// Color for the underline when this textfield has focus.
+  final Color focusedUnderlineColor;
+
   const CoreTextField({
     @required this.objects,
     @required this.propertyKey,
     this.converter,
     this.change,
     this.focusNode,
+    this.underlineColor,
+    this.focusedUnderlineColor,
     Key key,
   }) : super(key: key);
 
@@ -37,6 +46,8 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
         value: value,
         focusNode: widget.focusNode,
         converter: widget.converter,
+        underlineColor: widget.underlineColor,
+        focusedUnderlineColor: widget.focusedUnderlineColor,
         change: (T value) {
           for (final object in widget.objects) {
             object.context.setObjectProperty(object, widget.propertyKey, value);

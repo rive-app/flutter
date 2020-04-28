@@ -24,7 +24,7 @@ class MyTreeController extends TreeController<TreeItem> {
   /// Abstract way to get the children of an item, without making storage
   /// assumptions.
   @override
-  List<TreeItem> childrenOf(TreeItem treeItem) {
+  Iterable<TreeItem> childrenOf(TreeItem treeItem) {
     return treeItem.children;
   }
 

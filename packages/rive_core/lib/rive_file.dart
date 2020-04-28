@@ -22,10 +22,12 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/persist/persist.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+export 'package:rive_core/src/generated/rive_core_context.dart';
 
 class RiveFile extends RiveCoreContext {
   final List<Artboard> artboards = [];
   final Set<RiveFileDelegate> delegates = {};
+
   int _dirt = 0;
   final RivePersist _persist;
   final RiveApi api;
@@ -91,6 +93,16 @@ class RiveFile extends RiveCoreContext {
   void changeProperty<T>(Core object, int propertyKey, T from, T to) {
     super.changeProperty<T>(object, propertyKey, from, to);
     _propertyChanged = true;
+  }
+
+  @override
+  void changeAnimatedProperty(
+      covariant Component component, int propertyKey, bool autoKey) {
+    super.changeAnimatedProperty(component, propertyKey, autoKey);
+    if (autoKey) {
+      delegates
+          .forEach((delegate) => delegate.onAutoKey(component, propertyKey));
+    }
   }
 
   /// Add a generic operation to be called when the next clean cycle occurs.
@@ -434,6 +446,7 @@ abstract class RiveFileDelegate {
   void onObjectRemoved(Core object) {}
   void onPlayerAdded(ClientSidePlayer player) {}
   void onPlayerRemoved(ClientSidePlayer player) {}
+  void onAutoKey(Component component, int propertyKey) {}
 
   /// Called when the entire file is wiped as data is about to load/reload.
   void onWipe() {}

@@ -148,6 +148,9 @@ abstract class Component extends ComponentBase<RiveFile>
   @override
   Set<Component> get dependents => _dependents;
 
+  Component get timelineParent => null;
+  String get timelineParentGroup => null;
+
   bool addDependent(Component dependent) {
     assert(dependent != null, "Dependent cannot be null.");
     assert(artboard == dependent.artboard,
@@ -251,12 +254,12 @@ abstract class Component extends ComponentBase<RiveFile>
   /// this component.
   void remove() => context?.remove(this);
 
-  /// Create the corresponding keyframe for the property key.
+  /// Create the corresponding keyframe for the property key. Note that this
+  /// doesn't add it to core, that's left up to the implementation.
   T makeKeyFrame<T extends KeyFrame>(int propertyKey) {
     var coreType = context.coreType(propertyKey);
     if (coreType is KeyFrameGenerator<T>) {
       var keyFrame = (coreType as KeyFrameGenerator<T>).makeKeyFrame();
-      context.add(keyFrame);
       return keyFrame;
     }
     return null;
@@ -269,7 +272,6 @@ abstract class Component extends ComponentBase<RiveFile>
         '$this doesn\'t store a property with key $propertyKey');
     var keyedObject = animation.getKeyed(this);
     keyedObject ??= animation.makeKeyed(this);
-
     var property = keyedObject.getKeyed(propertyKey);
     property ??= keyedObject.makeKeyed(propertyKey);
 
@@ -286,9 +288,11 @@ abstract class Component extends ComponentBase<RiveFile>
       }
     }
 
-    return makeKeyFrame<T>(propertyKey)
+    var keyFrame = makeKeyFrame<T>(propertyKey)
       ..frame = frame
       ..keyedPropertyId = property.id;
+    context.add(keyFrame);
+    return keyFrame;
   }
 
   @override

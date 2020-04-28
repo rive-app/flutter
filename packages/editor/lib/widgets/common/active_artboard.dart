@@ -1,27 +1,30 @@
-// Artboard provider. This is responsible for propagating the active artboard
-// down the widget tree. Handles things like switching current file, race
-// conditions with backboard loading (which stores the activeArtboard), and
-// finally activeArtboard changing on the backboard.
-
 import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
-// Weird, the package import fails here?
-// import 'package:editor/rive/open_file_context.dart';
-import '../../rive/open_file_context.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 
+/// Artboard provider. This is responsible for propagating the active artboard
+/// down the widget tree. Handles things like switching current file, race
+/// conditions with backboard loading (which stores the activeArtboard), and
+/// finally activeArtboard changing on the backboard.
 class ActiveArtboard extends StatefulWidget {
   const ActiveArtboard({
     @required this.file,
-    @required this.builder,
     this.child,
   });
   final Widget child;
   final OpenFileContext file;
-  final Widget Function(BuildContext, Artboard, Widget) builder;
 
   @override
   _ActiveArtboardState createState() => _ActiveArtboardState();
+
+  static Artboard of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_InheritedArtboardProvider>()
+      ?.artboard;
+
+  static Artboard find(BuildContext context) => context
+      .findAncestorWidgetOfExactType<_InheritedArtboardProvider>()
+      ?.artboard;
 }
 
 class _ActiveArtboardState extends State<ActiveArtboard> {
@@ -78,9 +81,23 @@ class _ActiveArtboardState extends State<ActiveArtboard> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.builder(
-        context,
-        _activeArtboard,
-        widget.child,
+  Widget build(BuildContext context) => _InheritedArtboardProvider(
+        artboard: _activeArtboard,
+        child: widget.child,
       );
+}
+
+class _InheritedArtboardProvider extends InheritedWidget {
+  const _InheritedArtboardProvider({
+    @required this.artboard,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final Artboard artboard;
+
+  @override
+  bool updateShouldNotify(_InheritedArtboardProvider old) =>
+      artboard != old.artboard;
 }

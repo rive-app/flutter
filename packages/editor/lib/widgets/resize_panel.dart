@@ -18,6 +18,10 @@ class ResizePanel extends StatefulWidget {
   final ResizeSide side;
   final Widget child;
   final double hitSize;
+  /// You can supply a dead zone to the ResizePanel at the start and the end of
+  /// the axis.
+  final double deadStart;
+  final double deadEnd;
 
   const ResizePanel({
     Key key,
@@ -26,6 +30,8 @@ class ResizePanel extends StatefulWidget {
     this.direction,
     this.side,
     this.child,
+    this.deadStart = 0,
+    this.deadEnd = 0,
     this.hitSize = 10,
   }) : super(key: key);
 
@@ -101,9 +107,9 @@ class _ResizePanelState extends State<ResizePanel> {
     double left = 0, top = 0, width = 0, height = 0;
     switch (widget.direction) {
       case ResizeDirection.horizontal:
-        height = size.height;
+        height = size.height - widget.deadStart - widget.deadEnd;
         width = widget.hitSize;
-        top = offset.dy;
+        top = offset.dy + widget.deadStart;
         if (widget.side == ResizeSide.start) {
           left = offset.dx - widget.hitSize;
         } else {
@@ -112,8 +118,8 @@ class _ResizePanelState extends State<ResizePanel> {
         break;
       case ResizeDirection.vertical:
         height = widget.hitSize;
-        width = size.width;
-        left = offset.dx;
+        width = size.width - widget.deadStart - widget.deadEnd;
+        left = offset.dx + widget.deadStart;
         if (widget.side == ResizeSide.start) {
           top = offset.dy - widget.hitSize;
         } else {
@@ -159,23 +165,24 @@ class _ResizePanelState extends State<ResizePanel> {
     });
   }
 
-  Positioned position(double size, double offset, Widget child) {
+  Positioned position(double size, double offset, Widget child,
+      {bool includeDeadZone = false}) {
     switch (widget.direction) {
       case ResizeDirection.horizontal:
         return Positioned(
             right: widget.side == ResizeSide.start ? null : offset,
             left: widget.side == ResizeSide.end ? null : offset,
             width: size,
-            top: 0,
-            bottom: 0,
+            top: includeDeadZone ? widget.deadStart : 0,
+            bottom: includeDeadZone ? widget.deadEnd : 0,
             child: child);
       case ResizeDirection.vertical:
         return Positioned(
             bottom: widget.side == ResizeSide.start ? null : offset,
             top: widget.side == ResizeSide.end ? null : offset,
             height: size,
-            left: 0,
-            right: 0,
+            left: includeDeadZone ? widget.deadStart : 0,
+            right: includeDeadZone ? widget.deadEnd : 0,
             child: child);
     }
     return Positioned(
@@ -302,6 +309,7 @@ class _ResizePanelState extends State<ResizePanel> {
                 ],
               ),
             ),
+            includeDeadZone: true,
           )
         ],
       ),

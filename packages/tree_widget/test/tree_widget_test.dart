@@ -31,7 +31,7 @@ class MyTreeController extends TreeController<TreeItem> {
   }
 
   @override
-  List<TreeItem> childrenOf(TreeItem treeItem) {
+  Iterable<TreeItem> childrenOf(TreeItem treeItem) {
     return treeItem.children;
   }
 

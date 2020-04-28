@@ -24,7 +24,7 @@ class FolderTreeController extends TreeController<RiveFolder> {
   }
 
   @override
-  List<RiveFolder> childrenOf(RiveFolder treeItem) =>
+  Iterable<RiveFolder> childrenOf(RiveFolder treeItem) =>
       treeItem.children.cast<RiveFolder>();
 
   @override

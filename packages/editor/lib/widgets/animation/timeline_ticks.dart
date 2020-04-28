@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
-import 'package:rive_editor/rive/managers/editing_animation_manager.dart';
+import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';

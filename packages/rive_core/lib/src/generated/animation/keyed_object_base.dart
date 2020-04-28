@@ -86,7 +86,7 @@ abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
       case animationIdPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }

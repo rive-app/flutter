@@ -115,6 +115,180 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
+  /// Get an integer representing the group for this property. Use this to
+  /// quickly hash groups of properties together and use the string version to
+  /// key labels/names from.
+  static int propertyKeyGroupHashCode(int propertyKey) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+      case NodeBase.yPropertyKey:
+        return 1;
+      case NodeBase.scaleXPropertyKey:
+      case NodeBase.scaleYPropertyKey:
+        return 2;
+      default:
+        return 0;
+    }
+  }
+
+  static String propertyKeyGroupName(int propertyKey) {
+    switch (propertyKey) {
+      case NodeBase.xPropertyKey:
+      case NodeBase.yPropertyKey:
+        return 'position';
+      case NodeBase.scaleXPropertyKey:
+      case NodeBase.scaleYPropertyKey:
+        return 'scale';
+      default:
+        return null;
+    }
+  }
+
+  static String propertyKeyName(int propertyKey) {
+    switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+        return 'objectId';
+      case KeyedObjectBase.animationIdPropertyKey:
+        return 'animationId';
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+        return 'keyedObjectId';
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+        return 'propertyKey';
+      case AnimationBase.artboardIdPropertyKey:
+        return 'artboardId';
+      case AnimationBase.namePropertyKey:
+        return 'name';
+      case AnimationBase.orderPropertyKey:
+        return 'order';
+      case CubicInterpolatorBase.x1PropertyKey:
+        return 'x1';
+      case CubicInterpolatorBase.y1PropertyKey:
+        return 'y1';
+      case CubicInterpolatorBase.x2PropertyKey:
+        return 'x2';
+      case CubicInterpolatorBase.y2PropertyKey:
+        return 'y2';
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        return 'keyedPropertyId';
+      case KeyFrameBase.framePropertyKey:
+        return 'frame';
+      case KeyFrameBase.interpolationPropertyKey:
+        return 'interpolation';
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        return 'interpolatorId';
+      case KeyFrameDoubleBase.valuePropertyKey:
+        return 'value';
+      case LinearAnimationBase.fpsPropertyKey:
+        return 'fps';
+      case LinearAnimationBase.durationPropertyKey:
+        return 'duration';
+      case LinearAnimationBase.speedPropertyKey:
+        return 'speed';
+      case LinearAnimationBase.loopPropertyKey:
+        return 'loop';
+      case LinearAnimationBase.workStartPropertyKey:
+        return 'workStart';
+      case LinearAnimationBase.workEndPropertyKey:
+        return 'workEnd';
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        return 'enableWorkArea';
+      case ComponentBase.dependentIdsPropertyKey:
+        return 'dependentIds';
+      case ComponentBase.namePropertyKey:
+        return 'name';
+      case ComponentBase.parentIdPropertyKey:
+        return 'parentId';
+      case ComponentBase.childOrderPropertyKey:
+        return 'childOrder';
+      case ShapePaintBase.isVisiblePropertyKey:
+        return 'isVisible';
+      case LinearGradientBase.startXPropertyKey:
+        return 'startX';
+      case LinearGradientBase.startYPropertyKey:
+        return 'startY';
+      case LinearGradientBase.endXPropertyKey:
+        return 'endX';
+      case LinearGradientBase.endYPropertyKey:
+        return 'endY';
+      case LinearGradientBase.opacityPropertyKey:
+        return 'opacity';
+      case StrokeBase.thicknessPropertyKey:
+        return 'thickness';
+      case StrokeBase.capPropertyKey:
+        return 'cap';
+      case StrokeBase.joinPropertyKey:
+        return 'join';
+      case StrokeBase.transformAffectsStrokePropertyKey:
+        return 'transformAffectsStroke';
+      case SolidColorBase.colorValuePropertyKey:
+        return 'colorValue';
+      case GradientStopBase.colorValuePropertyKey:
+        return 'colorValue';
+      case GradientStopBase.positionPropertyKey:
+        return 'position';
+      case FillBase.fillRulePropertyKey:
+        return 'fillRule';
+      case NodeBase.xPropertyKey:
+        return 'x';
+      case NodeBase.yPropertyKey:
+        return 'y';
+      case NodeBase.rotationPropertyKey:
+        return 'rotation';
+      case NodeBase.scaleXPropertyKey:
+        return 'scaleX';
+      case NodeBase.scaleYPropertyKey:
+        return 'scaleY';
+      case NodeBase.opacityPropertyKey:
+        return 'opacity';
+      case DrawableBase.drawOrderPropertyKey:
+        return 'drawOrder';
+      case DrawableBase.blendModePropertyKey:
+        return 'blendMode';
+      case PathVertexBase.xPropertyKey:
+        return 'x';
+      case PathVertexBase.yPropertyKey:
+        return 'y';
+      case StraightVertexBase.radiusPropertyKey:
+        return 'radius';
+      case PointsPathBase.isClosedPropertyKey:
+        return 'isClosed';
+      case ParametricPathBase.widthPropertyKey:
+        return 'width';
+      case ParametricPathBase.heightPropertyKey:
+        return 'height';
+      case RectangleBase.cornerRadiusPropertyKey:
+        return 'cornerRadius';
+      case CubicVertexBase.inXPropertyKey:
+        return 'inX';
+      case CubicVertexBase.inYPropertyKey:
+        return 'inY';
+      case CubicVertexBase.outXPropertyKey:
+        return 'outX';
+      case CubicVertexBase.outYPropertyKey:
+        return 'outY';
+      case ArtboardBase.widthPropertyKey:
+        return 'width';
+      case ArtboardBase.heightPropertyKey:
+        return 'height';
+      case ArtboardBase.xPropertyKey:
+        return 'x';
+      case ArtboardBase.yPropertyKey:
+        return 'y';
+      case ArtboardBase.originXPropertyKey:
+        return 'originX';
+      case ArtboardBase.originYPropertyKey:
+        return 'originY';
+      case BackboardBase.activeArtboardIdPropertyKey:
+        return 'activeArtboardId';
+      case BackboardBase.mainArtboardIdPropertyKey:
+        return 'mainArtboardId';
+      case BackboardBase.colorValuePropertyKey:
+        return 'colorValue';
+      default:
+        return null;
+    }
+  }
+
   CoreIdType get idType;
   CoreIntType get intType;
   CoreStringType get stringType;
@@ -731,9 +905,34 @@ abstract class RiveCoreContext extends CoreContext {
 
   static void setKeyState(Core object, int propertyKey, KeyState value) {
     switch (propertyKey) {
+      case StrokeBase.thicknessPropertyKey:
+        if (object is StrokeBase) {
+          object.thicknessKeyState = value;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase) {
           object.xKeyState = value;
+        }
+        break;
+      case NodeBase.yPropertyKey:
+        if (object is NodeBase) {
+          object.yKeyState = value;
+        }
+        break;
+      case NodeBase.scaleXPropertyKey:
+        if (object is NodeBase) {
+          object.scaleXKeyState = value;
+        }
+        break;
+      case NodeBase.scaleYPropertyKey:
+        if (object is NodeBase) {
+          object.scaleYKeyState = value;
+        }
+        break;
+      case NodeBase.opacityPropertyKey:
+        if (object is NodeBase) {
+          object.opacityKeyState = value;
         }
         break;
     }
@@ -742,10 +941,40 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   void resetAnimated(Core object, int propertyKey) {
     switch (propertyKey) {
+      case StrokeBase.thicknessPropertyKey:
+        if (object is StrokeBase) {
+          object.thicknessAnimated = null;
+          object.thicknessKeyState = KeyState.none;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase) {
           object.xAnimated = null;
           object.xKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.yPropertyKey:
+        if (object is NodeBase) {
+          object.yAnimated = null;
+          object.yKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.scaleXPropertyKey:
+        if (object is NodeBase) {
+          object.scaleXAnimated = null;
+          object.scaleXKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.scaleYPropertyKey:
+        if (object is NodeBase) {
+          object.scaleYAnimated = null;
+          object.scaleYKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.opacityPropertyKey:
+        if (object is NodeBase) {
+          object.opacityAnimated = null;
+          object.opacityKeyState = KeyState.none;
         }
         break;
     }
@@ -1586,8 +1815,23 @@ abstract class RiveCoreContext extends CoreContext {
 
   static void animateDouble(Core object, int propertyKey, double value) {
     switch (propertyKey) {
+      case StrokeBase.thicknessPropertyKey:
+        (object as StrokeBase).thicknessAnimated = value;
+        break;
       case NodeBase.xPropertyKey:
         (object as NodeBase).xAnimated = value;
+        break;
+      case NodeBase.yPropertyKey:
+        (object as NodeBase).yAnimated = value;
+        break;
+      case NodeBase.scaleXPropertyKey:
+        (object as NodeBase).scaleXAnimated = value;
+        break;
+      case NodeBase.scaleYPropertyKey:
+        (object as NodeBase).scaleYAnimated = value;
+        break;
+      case NodeBase.opacityPropertyKey:
+        (object as NodeBase).opacityAnimated = value;
         break;
     }
   }

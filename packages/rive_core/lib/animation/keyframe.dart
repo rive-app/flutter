@@ -53,4 +53,8 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile> {
   /// the object's property.
   void applyInterpolation(core.Core object, int propertyKey, double seconds,
       covariant KeyFrame nextFrame, double mix);
+
+  /// Set the value of this keyframe to the current value of [object]'s
+  /// [propertyKey].
+  void valueFrom(core.Core object, int propertyKey);
 }

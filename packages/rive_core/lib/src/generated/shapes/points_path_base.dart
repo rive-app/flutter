@@ -66,7 +66,7 @@ abstract class PointsPathBase extends Path {
       case isClosedPropertyKey:
         return true;
       default:
-        return super.getProperty(propertyKey);
+        return super.hasProperty(propertyKey);
     }
   }
 }
