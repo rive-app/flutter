@@ -343,8 +343,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
       padding: const EdgeInsets.only(
         left: 10,
         right: 10,
-        bottom: 12,
-        top: 12,
+        bottom: 10,
+        top: 9,
       ),
       lineColor: RiveTheme.of(context).colors.lightTreeLines,
       itemHeight: kTreeItemHeight,
@@ -490,9 +490,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                           Separator(
                             color: riveColors.fileLineGrey,
                             padding: EdgeInsets.only(
-                              left: bottomSliverDocked
-                                  ? 0
-                                  : 20,
+                              left: bottomSliverDocked ? 0 : 20,
                             ),
                           ),
                           Padding(
