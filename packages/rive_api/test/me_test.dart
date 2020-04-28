@@ -1,6 +1,6 @@
 import 'dart:async';
 
-/// Model tests
+/// Me tests
 import 'dart:convert';
 import 'package:mockito/mockito.dart';
 
@@ -32,7 +32,7 @@ void main() {
     test('Me manager provides logged in user data', () async {
       // Mock out the api
       final mockApi = MockMeApi();
-      when(mockApi.whoami()).thenAnswer(
+      when(mockApi.whoami).thenAnswer(
         (i) => Future.value(
           Me(name: 'Matt', avatarUrl: 'http://example.avatar.com'),
         ),

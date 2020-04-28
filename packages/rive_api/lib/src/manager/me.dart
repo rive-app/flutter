@@ -27,8 +27,5 @@ class MeManager {
    * API interface
    */
 
-  void _fetchMe() async {
-    print('Someone subscribed to the stream');
-    _meController.add(await _api.whoami());
-  }
+  void _fetchMe() async => _meController.add(await _api.whoami);
 }

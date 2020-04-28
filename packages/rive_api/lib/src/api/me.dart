@@ -11,10 +11,8 @@ class MeApi {
   MeApi() : api = RiveApi();
   final RiveApi api;
 
-  Future<Me> whoami() async {
+  Future<Me> get whoami async {
     final res = await api.getFromPath('/api/me');
-    print(res.statusCode);
-    print(res.body);
     try {
       final data = json.decode(res.body) as Map<String, dynamic>;
       // Check that the user's signed in
@@ -23,8 +21,8 @@ class MeApi {
       }
       return Me.fromData(data);
     } on FormatException catch (e) {
-      _log.severe('Error formatting me api response: $e');
-      throw e;
+      _log.severe('Error formatting whoami api response: $e');
+      rethrow;
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'package:rive_api/src/http/http.dart';
 
 export 'me.dart';
+export 'volume.dart';
 export 'package:rive_api/src/http/http_exception.dart';
 
 /// Now uses a singleton
