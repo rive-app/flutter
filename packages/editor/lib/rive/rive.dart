@@ -247,23 +247,27 @@ class Rive {
       var selectedOwnerId =
           await Settings.getInt(Preferences.selectedRiveOwnerId);
 
-      var _activeFileBrowser = fileBrowsers.firstWhere(
-        (FileBrowser fileBrowser) =>
-            fileBrowser.owner.ownerId == selectedOwnerId,
-        orElse: () => fileBrowsers.first,
-      );
+      await selectRiveOwner(selectedOwnerId);
 
-      if (activeFileBrowser.value == null &&
-          _activeFileBrowser.myTreeController.value.data.isNotEmpty) {
-        await setActiveFileBrowser(_activeFileBrowser);
-        await _activeFileBrowser.openFolder(
-            _activeFileBrowser.myTreeController.value.data.first, false);
-      }
       return me;
     } else {
       _state.value = RiveState.login;
     }
     return null;
+  }
+
+  Future<void> selectRiveOwner(int riveOwnerId) async {
+    var _desiredFileBrowser = fileBrowsers.firstWhere(
+      (FileBrowser fileBrowser) => fileBrowser.owner.ownerId == riveOwnerId,
+      orElse: () => (activeFileBrowser.value != null)
+          ? activeFileBrowser.value
+          : fileBrowsers.first,
+    );
+    if (_desiredFileBrowser.myTreeController.value.data.isNotEmpty) {
+      await setActiveFileBrowser(_desiredFileBrowser);
+      await _desiredFileBrowser.openFolder(
+          _desiredFileBrowser.myTreeController.value.data.first, false);
+    }
   }
 
   Future<void> setActiveFileBrowser(FileBrowser fileBrowser) async {
