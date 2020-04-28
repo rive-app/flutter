@@ -115,7 +115,7 @@ class _PlanState extends State<PlanSettings>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 16),
                       AnimatedBuilder(
                           animation: _controller,
                           builder: (_, __) {
