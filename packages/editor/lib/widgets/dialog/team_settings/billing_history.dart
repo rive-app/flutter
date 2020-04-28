@@ -75,6 +75,7 @@ class BillingHistory extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const SizedBox(height: 3),
           _textFieldRow([
             LabeledTextField(
               label: 'Business Name',
