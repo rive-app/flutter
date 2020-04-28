@@ -28,11 +28,14 @@ class SaveResult {
 /// Communication to 2D server private API
 ///
 class PrivateApi {
+  final String host;
   final Logger log = Logger('CoopServer');
 
-  /// 2D server end point host/url
-  final String host =
-      Platform.environment['PRIVATE_API'] ?? 'http://localhost:3003';
+  // host is either host, the env variable, or localhost:3003
+  PrivateApi({String host})
+      : host = host ??
+            Platform.environment['PRIVATE_API'] ??
+            'http://localhost:3003';
 
   /// Registers the co-op server with the 2D service.
   /// The 2D service will gather the co-op server's IP address

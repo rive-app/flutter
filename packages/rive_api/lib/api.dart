@@ -27,14 +27,17 @@ class ApiException implements Exception {
   final Response _response;
   APIError error;
 
-  ApiException(this._response){
-    try{
+  ApiException(this._response) {
+    try {
       Map<String, dynamic> data = json.decode(_response.body);
-      error = APIError(message:data['error']['message'], code:data['error']['code']);
-      } catch (_) {
-        // if creating the error goes wrong, just stick it all into the error message
-        error = APIError(message: _response.body.toString());
-      }
+      error = APIError(
+        message: data['error']['message'],
+        code: data['error']['code'],
+      );
+    } catch (_) {
+      // if creating the error goes wrong, just stick it all into the error message
+      error = APIError(message: _response.body.toString());
+    }
   }
 
   String toString() {

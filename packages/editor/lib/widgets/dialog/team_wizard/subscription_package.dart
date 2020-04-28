@@ -299,13 +299,14 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
         var publicKey = await StripeApi(api).getStripePublicKey();
         var tokenResponse = await createToken(
             publicKey, cardNumber, expMonth, expYear, ccv, zip);
-        await RiveTeamsApi(api).createTeam(
+        var newTeam = await RiveTeamsApi(api).createTeam(
             teamName: name,
             plan: _option.name,
             frequency: _billing.name,
             stripeToken: tokenResponse.token);
         await RiveContext.of(context).reloadTeams();
-        Navigator.of(context, rootNavigator: true).pop(null);
+        await RiveContext.of(context).selectRiveOwner(newTeam.ownerId);
+        Navigator.of(context, rootNavigator: true).pop();
       } on StripeAPIError catch (error) {
         switch (error.type) {
           case StripeErrorTypes.cardNumber:

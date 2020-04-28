@@ -270,28 +270,24 @@ class FilesPanel extends StatelessWidget {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 15),
+                        horizontal: 30, vertical: 30),
                     child: TopNav(fileBrowser),
                   ),
                 ),
                 if (folders != null && folders.isNotEmpty) ...[
-                  const SliverToBoxAdapter(
-                    child: TitleSection(
-                      name: 'Folders',
-                      height: kGridHeaderHeight,
-                      showDropdown: false,
-                    ),
-                  ),
                   _buildFolders(folders, fileBrowser),
                 ],
-                if (files != null && files.isNotEmpty) ...[
+                if (folders != null &&
+                    folders.isNotEmpty &&
+                    files != null &&
+                    files.isNotEmpty) ...[
                   SliverToBoxAdapter(
-                    child: TitleSection(
-                      name: 'Files',
-                      height: kGridHeaderHeight,
-                      showDropdown: folders == null || folders.isEmpty,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                     ),
-                  ),
+                  )
+                ],
+                if (files != null && files.isNotEmpty) ...[
                   _buildFiles(context, files, fileBrowser, rive),
                 ],
                 if (files != null && files.isEmpty && folders.isEmpty) ...[
@@ -343,8 +339,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
       padding: const EdgeInsets.only(
         left: 10,
         right: 10,
-        bottom: 12,
-        top: 12,
+        bottom: 10,
+        top: 9,
       ),
       lineColor: RiveTheme.of(context).colors.lightTreeLines,
       itemHeight: kTreeItemHeight,
@@ -424,11 +420,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
                     iconName: 'notification',
                     label: 'Notifications',
                     highlight: section == HomeSection.notifications,
-                    onTap: () {
+                    onTap: () async {
                       // File browsers track their own selected states.
                       // so you have to tell them specifically that stuff not selected
                       rive.activeFileBrowser.value?.openFolder(null, false);
-                      rive.activeFileBrowser.value = null;
+                      await rive.setActiveFileBrowser(null);
                       rive.sectionListener.value = HomeSection.notifications;
                     },
                   ),
@@ -490,9 +486,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                           Separator(
                             color: riveColors.fileLineGrey,
                             padding: EdgeInsets.only(
-                              left: bottomSliverDocked
-                                  ? 0
-                                  : 20,
+                              left: bottomSliverDocked ? 0 : 20,
                             ),
                           ),
                           Padding(

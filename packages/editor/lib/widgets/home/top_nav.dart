@@ -9,6 +9,7 @@ import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
+import 'package:rive_editor/widgets/home/folder_tree.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
@@ -25,6 +26,19 @@ class TopNav extends StatelessWidget {
     final riveColors = RiveTheme.of(context).colors;
     final selectedOwner = RiveContext.of(context).currentOwner;
     final children = <Widget>[];
+    if (fileBrowser.selectedFolder.owner != null) {
+      children.add(SizedAvatar(
+        owner: fileBrowser.selectedFolder.owner,
+        size: const Size(30, 30),
+        addBackground: true,
+        // TODO: the user icon and the your files icon look dumb with this
+        userIcon: 'teams',
+      ));
+      children.add(const Padding(
+        padding: EdgeInsets.only(right: 9),
+      ));
+    }
+    children.add(Text(fileBrowser.selectedFolder.displayName));
     children.add(const Spacer());
     children.add(ValueListenableBuilder<RiveFileSortOption>(
       valueListenable: fileBrowser.selectedSortOption,

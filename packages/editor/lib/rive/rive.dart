@@ -10,11 +10,10 @@ import 'package:rive_api/folder.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
+import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
@@ -31,7 +30,6 @@ import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
@@ -166,7 +164,6 @@ class Rive {
 
   final RiveIconCache iconCache;
   FocusNode _focusNode;
-  SharedPreferences _prefs;
 
   void focus() => _focusNode.requestFocus();
   FocusNode get focusNode => _focusNode;
@@ -240,28 +237,47 @@ class Rive {
     if (me != null) {
       _user.value = me;
       _state.value = RiveState.editor;
-      // Save token in localSettings
-      _prefs ??= await SharedPreferences.getInstance();
 
-      // spectre is our session token
-      final _spectreToken = api.cookies['spectre'];
-      await _prefs.setString('token', _spectreToken);
+      await Settings.setString(
+          Preferences.spectreToken, api.cookies['spectre']);
 
       selectTab(systemTab);
-
       await reloadTeams();
-      
-      // TODO: load last opened file list (from localdata)
-      if (fileBrowsers.first.myTreeController.value.data.isNotEmpty) {	      
-        activeFileBrowser.value ??= fileBrowsers.first;
-        await fileBrowsers.first.openFolder(	
-            fileBrowsers.first.myTreeController.value.data.first, false);	
-      }
+
+      var selectedOwnerId =
+          await Settings.getInt(Preferences.selectedRiveOwnerId);
+
+      await selectRiveOwner(selectedOwnerId);
+
       return me;
     } else {
       _state.value = RiveState.login;
     }
     return null;
+  }
+
+  Future<void> selectRiveOwner(int riveOwnerId) async {
+    var _desiredFileBrowser = fileBrowsers.firstWhere(
+      (FileBrowser fileBrowser) => fileBrowser.owner.ownerId == riveOwnerId,
+      orElse: () => (activeFileBrowser.value != null)
+          ? activeFileBrowser.value
+          : fileBrowsers.first,
+    );
+    if (_desiredFileBrowser.myTreeController.value.data.isNotEmpty) {
+      await setActiveFileBrowser(_desiredFileBrowser);
+      await _desiredFileBrowser.openFolder(
+          _desiredFileBrowser.myTreeController.value.data.first, false);
+    }
+  }
+
+  Future<void> setActiveFileBrowser(FileBrowser fileBrowser) async {
+    activeFileBrowser.value = fileBrowser;
+    if (fileBrowser == null) {
+      await Settings.clear(Preferences.selectedRiveOwnerId);
+    } else {
+      await Settings.setInt(
+          Preferences.selectedRiveOwnerId, fileBrowser.owner.ownerId);
+    }
   }
 
   // Tell the server that the user has signed out and remove the token from
@@ -271,8 +287,9 @@ class Rive {
     if (!result) {
       return false;
     }
-    _prefs ??= await SharedPreferences.getInstance();
-    result = await _prefs.remove('token');
+
+    result = await Settings.clear(Preferences.spectreToken);
+
     if (!result) {
       return false;
     }

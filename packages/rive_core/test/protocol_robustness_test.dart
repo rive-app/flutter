@@ -14,7 +14,7 @@ import 'src/test_server.dart';
 const String filePath = '1203/3203/1203';
 
 const int coopPort = 8124;
-const int privateApiPort = 3003;
+const int privateApiPort = 3006;
 
 /// The purpose of these tests is to maintin the robustness of the coop
 /// protocol.
@@ -22,9 +22,11 @@ void main() {
   test(
     'connecting to server',
     () async {
+      var privateApiHost = 'http://localhost:${privateApiPort}';
+
       TestWidgetsFlutterBinding.ensureInitialized();
 
-      final server = TestCoopServer();
+      final server = TestCoopServer(privateApiHost: privateApiHost);
       expect(await server.listen(port: coopPort), true);
 
       LocalDataPlatform dataPlatform = LocalDataPlatform.make();
@@ -277,7 +279,6 @@ void main() {
               await serverFileContext.processNextCommand()
                   is CoopServerAddClient,
               true);
-
         }
       }
 
