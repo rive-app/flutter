@@ -48,7 +48,7 @@ class HierarchyTreeController extends TreeController<Component> {
   }
 
   @override
-  List<Component> childrenOf(Component treeItem) =>
+  Iterable<Component> childrenOf(Component treeItem) =>
       treeItem is ContainerComponent
           ? treeItem.children
               // We only want to show items in the tree which are selectable, in

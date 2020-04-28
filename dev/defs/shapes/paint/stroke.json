@@ -9,6 +9,7 @@
     "thickness": {
       "type": "double",
       "initialValue": "1",
+      "animates": true,
       "key": {
         "int": 47,
         "string": "thickness"

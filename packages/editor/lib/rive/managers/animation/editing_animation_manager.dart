@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:core/core.dart';
+import 'package:core/debounce.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/linear_animation.dart';
@@ -14,9 +16,17 @@ import 'package:meta/meta.dart';
 /// Animation manager for the currently editing [LinearAnimation].
 class EditingAnimationManager extends AnimationTimeManager
     with RiveFileDelegate {
-  final _hierarchyController = BehaviorSubject<Iterable<KeyedViewModel>>();
+  final HashMap<Component, KeyedComponentViewModel> _componentViewModels =
+      HashMap<Component, KeyedComponentViewModel>();
+  final HashMap<Component, HashMap<String, KeyedGroupViewModel>>
+      _componentGroupViewModels =
+      HashMap<Component, HashMap<String, KeyedGroupViewModel>>();
 
-  Stream<Iterable<KeyedViewModel>> get hierarchy => _hierarchyController.stream;
+  final _hierarchyController =
+      BehaviorSubject<Iterable<KeyHierarchyViewModel>>();
+
+  Stream<Iterable<KeyHierarchyViewModel>> get hierarchy =>
+      _hierarchyController.stream;
 
   EditingAnimationManager(LinearAnimation animation) : super(animation) {
     animation.context.addDelegate(this);
@@ -25,6 +35,7 @@ class EditingAnimationManager extends AnimationTimeManager
 
   @override
   void dispose() {
+    cancelDebounce(_updateHierarchy);
     _hierarchyController.close();
     animation.context.removeDelegate(this);
     super.dispose();
@@ -42,7 +53,7 @@ class EditingAnimationManager extends AnimationTimeManager
     switch (object.coreType) {
       case KeyedObjectBase.typeKey:
       case KeyedPropertyBase.typeKey:
-        _updateHierarchy();
+        debounce(_updateHierarchy);
         break;
     }
   }
@@ -52,18 +63,51 @@ class EditingAnimationManager extends AnimationTimeManager
     switch (object.coreType) {
       case KeyedObjectBase.typeKey:
       case KeyedPropertyBase.typeKey:
-        _updateHierarchy();
+        debounce(_updateHierarchy);
         break;
     }
+  }
+
+  KeyedComponentViewModel _makeComponentViewModel(Component component,
+      {KeyedObject keyedObject}) {
+    KeyedComponentViewModel viewModel;
+    Set<KeyHierarchyViewModel> children = {};
+    _componentViewModels[component] = viewModel = KeyedComponentViewModel(
+      component: component,
+      keyedObject: keyedObject,
+      children: children,
+    );
+    return viewModel;
   }
 
   void _updateHierarchy() {
     var keyedObjects = animation.keyedObjects;
     var core = animation.context;
-    List<KeyedViewModel> hierarchy = [];
+
+    // Reset children.
+    for (final vm in _componentViewModels.values) {
+      vm.children.clear();
+      // Clear component groups.
+      var groups = _componentGroupViewModels[vm.component];
+      if (groups != null) {
+        for (final group in groups.values) {
+          group.children.clear();
+        }
+      }
+    }
+
+    // First pass, build all viewmodels for keyed objects and properties, no
+    // parenting yet but track which ones need to be.
+    Set<KeyHierarchyViewModel> hierarchy = {};
+    List<KeyedComponentViewModel> needParenting = [];
     for (final keyedObject in keyedObjects) {
       Component component = core.resolve(keyedObject.objectId);
-      List<KeyedViewModel> children = [];
+
+      var viewModel = _componentViewModels[component];
+      if (viewModel == null) {
+        _componentViewModels[component] = viewModel =
+            _makeComponentViewModel(component, keyedObject: keyedObject);
+      }
 
       // Build up a list of the properties that we can sort and then build into
       // viewmodels.
@@ -106,7 +150,7 @@ class EditingAnimationManager extends AnimationTimeManager
                   property.keyedProperty.propertyKey);
         }
 
-        children.add(
+        viewModel.children.add(
           KeyedPropertyViewModel(
             keyedProperty: property.keyedProperty,
             label: groupLabel ??
@@ -123,15 +167,55 @@ class EditingAnimationManager extends AnimationTimeManager
         lastGroupKey = property.groupKey;
       }
 
-      hierarchy.add(
-        KeyedObjectViewModel(
-          keyedObject: keyedObject,
-          component: component,
-          children: children,
-        ),
-      );
+      if (component.timelineParent == null) {
+        hierarchy.add(viewModel);
+      } else {
+        needParenting.add(viewModel);
+      }
     }
-    _hierarchyController.add(hierarchy);
+
+    // Now iterate the ones that need parenting. For loop as we might alter the
+    // collection.
+    for (int i = 0; i < needParenting.length; i++) {
+      final viewModel = needParenting[i];
+      // Make sure that all the parents were included in the timeline, some may
+      // not be if they weren't keyed (there'd be no KeyedObject in the file for
+      // them).
+      var timelineParent = viewModel.component.timelineParent;
+
+      var parent = _componentViewModels[timelineParent];
+      parent ??= _makeComponentViewModel(timelineParent);
+      if (timelineParent.timelineParent != null) {
+        needParenting.add(parent);
+      } else {
+        hierarchy.add(parent);
+      }
+
+      if (parent is KeyedComponentViewModel) {
+        var groupName = viewModel.component.timelineParentGroup;
+        if (groupName != null) {
+          // Find the right one.
+          var groups = _componentGroupViewModels[parent.component] ??=
+              HashMap<String, KeyedGroupViewModel>();
+
+          var group = groups[groupName];
+          // Create the group if we didn't have it.
+          if (group == null) {
+            Set<KeyHierarchyViewModel> children = {};
+            groups[groupName] = group =
+                KeyedGroupViewModel(label: groupName, children: children);
+          }
+          // Make sure parent contains group. It's a set so we can do this.
+          parent.children.add(group);
+          // Add us to the group.
+          group.children.add(viewModel);
+        } else {
+          parent.children.add(viewModel);
+        }
+      }
+    }
+
+    _hierarchyController.add(hierarchy.toList(growable: false));
   }
 }
 
@@ -139,35 +223,41 @@ class EditingAnimationManager extends AnimationTimeManager
 /// keyed object or a named group (like Strokes is a named group within a
 /// KeyedObject with more KeyedObjects within it).
 @immutable
-abstract class KeyedViewModel {
-  List<KeyedViewModel> get children;
-  const KeyedViewModel();
+abstract class KeyHierarchyViewModel {
+  Set<KeyHierarchyViewModel> get children;
+  const KeyHierarchyViewModel();
 }
 
-/// Represents a Core object's KeyedObject in the hierarchy.
+/// Represents a Component in the hierarchy that may have a keyedObject if it
+/// has keyed properties. It may not have keyed properties if it's just
+/// containing other groups/objects that themselves have keyed properties.
 @immutable
-class KeyedObjectViewModel extends KeyedViewModel {
+class KeyedComponentViewModel extends KeyHierarchyViewModel {
+  /// There's no guarantee that there will be a keyedObject for this
+  /// view model
   final KeyedObject keyedObject;
+
+  /// A component is always present in the viewmodel.
   final Component component;
 
   @override
-  final List<KeyedViewModel> children;
+  final Set<KeyHierarchyViewModel> children;
 
-  const KeyedObjectViewModel({
+  const KeyedComponentViewModel({
+    @required this.component,
     this.keyedObject,
-    this.component,
     this.children,
-  });
+  }) : assert(component != null);
 }
 
 /// An ephemeral group that has no backing core properties, just a logical
 /// grouping of sub keyed objects.
 @immutable
-class KeyedGroupViewModel extends KeyedViewModel {
+class KeyedGroupViewModel extends KeyHierarchyViewModel {
   final String label;
 
   @override
-  final List<KeyedViewModel> children;
+  final Set<KeyHierarchyViewModel> children;
 
   const KeyedGroupViewModel({
     this.label,
@@ -177,14 +267,14 @@ class KeyedGroupViewModel extends KeyedViewModel {
 
 /// A leaf in the animation hierarchy tree, a property with real keyframes.
 @immutable
-class KeyedPropertyViewModel extends KeyedViewModel {
+class KeyedPropertyViewModel extends KeyHierarchyViewModel {
   final KeyedProperty keyedProperty;
   final String label;
   final String subLabel;
   final Component component;
 
   @override
-  List<KeyedViewModel> get children => null;
+  Set<KeyHierarchyViewModel> get children => null;
 
   const KeyedPropertyViewModel({
     this.keyedProperty,

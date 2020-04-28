@@ -905,6 +905,11 @@ abstract class RiveCoreContext extends CoreContext {
 
   static void setKeyState(Core object, int propertyKey, KeyState value) {
     switch (propertyKey) {
+      case StrokeBase.thicknessPropertyKey:
+        if (object is StrokeBase) {
+          object.thicknessKeyState = value;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase) {
           object.xKeyState = value;
@@ -936,6 +941,12 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   void resetAnimated(Core object, int propertyKey) {
     switch (propertyKey) {
+      case StrokeBase.thicknessPropertyKey:
+        if (object is StrokeBase) {
+          object.thicknessAnimated = null;
+          object.thicknessKeyState = KeyState.none;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase) {
           object.xAnimated = null;
@@ -1804,6 +1815,9 @@ abstract class RiveCoreContext extends CoreContext {
 
   static void animateDouble(Core object, int propertyKey, double value) {
     switch (propertyKey) {
+      case StrokeBase.thicknessPropertyKey:
+        (object as StrokeBase).thicknessAnimated = value;
+        break;
       case NodeBase.xPropertyKey:
         (object as NodeBase).xAnimated = value;
         break;

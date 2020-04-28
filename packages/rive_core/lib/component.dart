@@ -148,6 +148,9 @@ abstract class Component extends ComponentBase<RiveFile>
   @override
   Set<Component> get dependents => _dependents;
 
+  Component get timelineParent => null;
+  String get timelineParentGroup => null;
+
   bool addDependent(Component dependent) {
     assert(dependent != null, "Dependent cannot be null.");
     assert(artboard == dependent.artboard,

@@ -2,6 +2,7 @@
 /// lib/src/generated/shapes/paint/stroke_base.dart.
 /// Do not modify manually.
 
+import 'package:core/key_state.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -22,12 +23,20 @@ abstract class StrokeBase extends ShapePaint {
   /// --------------------------------------------------------------------------
   /// Thickness field with key 47.
   double _thickness = 1;
+  double _thicknessAnimated;
+  KeyState _thicknessKeyState;
   static const int thicknessPropertyKey = 47;
-  double get thickness => _thickness;
+
+  /// Get the [_thickness] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get thickness => _thicknessAnimated ?? _thickness;
+
+  /// Get the non-animation [_thickness] field value.
+  double get thicknessCore => _thickness;
 
   /// Change the [_thickness] field value.
   /// [thicknessChanged] will be invoked only if the field's value has changed.
-  set thickness(double value) {
+  set thicknessCore(double value) {
     if (_thickness == value) {
       return;
     }
@@ -35,6 +44,38 @@ abstract class StrokeBase extends ShapePaint {
     _thickness = value;
     onPropertyChanged(thicknessPropertyKey, from, value);
     thicknessChanged(from, value);
+  }
+
+  set thickness(double value) {
+    if (context != null && context.isAnimating) {
+      _thicknessAnimate(value, true);
+      return;
+    }
+    thicknessCore = value;
+  }
+
+  void _thicknessAnimate(double value, bool autoKey) {
+    if (_thicknessAnimated == value) {
+      return;
+    }
+    double from = thickness;
+    _thicknessAnimated = value;
+    double to = thickness;
+    onAnimatedPropertyChanged(thicknessPropertyKey, autoKey, from, to);
+    thicknessChanged(from, to);
+  }
+
+  double get thicknessAnimated => _thicknessAnimated;
+  set thicknessAnimated(double value) => _thicknessAnimate(value, false);
+  KeyState get thicknessKeyState => _thicknessKeyState;
+  set thicknessKeyState(KeyState value) {
+    if (_thicknessKeyState == value) {
+      return;
+    }
+    _thicknessKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        thicknessPropertyKey, false, _thicknessAnimated, _thicknessAnimated);
   }
 
   void thicknessChanged(double from, double to);

@@ -8,7 +8,6 @@ import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
@@ -70,14 +69,14 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
     var theme = RiveTheme.of(context);
     var style = TreeStyle(
       showFirstLine: false,
-      hideLines: true,
-      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+      hideLines: false,
+      padding: const EdgeInsets.only(left: 10, right: 19),
       lineColor: RiveTheme.of(context).colors.darkTreeLines,
     );
     return TreeScrollView(
       padding: style.padding,
       slivers: [
-        TreeView<KeyedViewModel>(
+        TreeView<KeyHierarchyViewModel>(
           style: style,
           controller: _treeController,
           expanderBuilder: (context, item, style) => Container(
@@ -99,12 +98,18 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
               ),
             ),
           ),
-          iconBuilder: (context, item, style) => item.data
-                  is KeyedObjectViewModel
-              ? StageItemIcon(
-                  item: (item.data as KeyedObjectViewModel).component.stageItem,
-                )
-              : null,
+          iconBuilder: (context, item, style) {
+            if (item.data is! KeyedComponentViewModel) {
+              return null;
+            }
+            var viewModel = item.data as KeyedComponentViewModel;
+            if (viewModel.component.stageItem == null) {
+              return null;
+            }
+            return StageItemIcon(
+              item: (item.data as KeyedComponentViewModel).component.stageItem,
+            );
+          },
           backgroundBuilder: (context, item, style) => DropItemBackground(
             DropState.none,
             SelectionState.none,
@@ -113,8 +118,8 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
           ),
           itemBuilder: (context, item, style) {
             var data = item.data;
-            if (data is KeyedObjectViewModel) {
-              return _buildKeyedObject(context, theme, data);
+            if (data is KeyedComponentViewModel) {
+              return _buildKeyedComponent(context, theme, data);
             } else if (data is KeyedGroupViewModel) {
               return _buildKeyedGroup(context, theme, data);
             } else if (data is KeyedPropertyViewModel) {
@@ -127,8 +132,8 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
     );
   }
 
-  Widget _buildKeyedObject(
-      BuildContext context, RiveThemeData theme, KeyedObjectViewModel model) {
+  Widget _buildKeyedComponent(BuildContext context, RiveThemeData theme,
+      KeyedComponentViewModel model) {
     return Renamable(
       style: theme.textStyles.inspectorWhiteLabel,
       name: model.component.name,
@@ -139,11 +144,9 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
 
   Widget _buildKeyedGroup(
       BuildContext context, RiveThemeData theme, KeyedGroupViewModel model) {
-    return Renamable(
-      style: theme.textStyles.inspectorWhiteLabel,
-      name: model.label,
-      color: theme.colors.inspectorTextColor,
-      onRename: (name) {},
+    return Text(
+      UIStrings.of(context).withKey(model.label),
+      style: theme.textStyles.inspectorPropertyLabel,
     );
   }
 
@@ -157,7 +160,7 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
           Expanded(
             child: Text(
               UIStrings.of(context).withKey(model.label),
-              style: theme.textStyles.inspectorWhiteLabel,
+              style: theme.textStyles.inspectorPropertyLabel,
             ),
           ),
           if (model.subLabel != null)
@@ -166,7 +169,7 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
               style: theme.textStyles.animationSubLabel,
             ),
           Padding(
-            padding: const EdgeInsets.only(top: 2, left: 9, right: 15),
+            padding: const EdgeInsets.only(top: 2, left: 9),
             child: SizedBox(
               width: 69,
               child: CoreTextField<double>(
@@ -177,10 +180,6 @@ class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
               ),
             ),
           ),
-          TintedIcon(
-            icon: 'add',
-            color: theme.colors.inspectorTextColor,
-          )
         ],
       ),
     );

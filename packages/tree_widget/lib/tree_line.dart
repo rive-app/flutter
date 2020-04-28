@@ -82,7 +82,7 @@ class _TreeLineRenderer extends RenderBox {
         dashOffset = maxOffset;
       }
       var next =
-          Offset(isHorizontal ? dashOffset : 0, isHorizontal ? 0 : dashOffset);
+          offset + Offset(isHorizontal ? dashOffset : 0, isHorizontal ? 0 : dashOffset);
       if (index % 2 == 0) {
         canvas.drawLine(last, next, _paint);
       }

@@ -25,7 +25,7 @@ class DrawOrderTreeController extends TreeController<Component> {
   }
 
   @override
-  List<Component> childrenOf(Component treeItem) => treeItem is Artboard
+  Iterable<Component> childrenOf(Component treeItem) => treeItem is Artboard
       ? treeItem.children
           // We only want to show items in the tree which are selectable, in
           // order to be selectable they must have a stageItem.

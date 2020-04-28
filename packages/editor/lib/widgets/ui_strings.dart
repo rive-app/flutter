@@ -51,4 +51,6 @@ HashMap<String, String> _defaultUIStrings =
   "y": "Y",
   "scaleX": "X",
   "scaleY": "Y",
+  "thickness": "Thickness",
+  "strokes": "Strokes",
 });

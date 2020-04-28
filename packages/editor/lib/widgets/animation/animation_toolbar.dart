@@ -8,6 +8,8 @@ class AnimationToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
+        left: 10,
+        right: 10,
         top: 12,
         bottom: 8,
       ),

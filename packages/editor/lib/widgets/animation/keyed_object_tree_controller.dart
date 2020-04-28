@@ -8,19 +8,19 @@ import 'package:tree_widget/tree_controller.dart';
 
 import 'package:core/debounce.dart';
 
-class KeyedObjectTreeController extends TreeController<KeyedViewModel> {
+class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
   final EditingAnimationManager animationManager;
-  StreamSubscription<Iterable<KeyedViewModel>> _subscription;
-  Iterable<KeyedViewModel> _data = [];
+  StreamSubscription<Iterable<KeyHierarchyViewModel>> _subscription;
+  Iterable<KeyHierarchyViewModel> _data = [];
 
   KeyedObjectTreeController(this.animationManager) : super() {
     _subscription = animationManager.hierarchy.listen(_hierarchyChanged);
   }
 
   @override
-  Iterable<KeyedViewModel> get data => _data;
+  Iterable<KeyHierarchyViewModel> get data => _data;
 
-  void _hierarchyChanged(Iterable<KeyedViewModel> animations) {
+  void _hierarchyChanged(Iterable<KeyHierarchyViewModel> animations) {
     _data = animations.toList();
     flatten();
   }
@@ -33,51 +33,53 @@ class KeyedObjectTreeController extends TreeController<KeyedViewModel> {
   }
 
   @override
-  List<KeyedViewModel> childrenOf(KeyedViewModel treeItem) => treeItem.children;
+  Iterable<KeyHierarchyViewModel> childrenOf(KeyHierarchyViewModel treeItem) =>
+      treeItem.children;
 
   @override
-  void drop(FlatTreeItem<KeyedViewModel> target, DropState state,
-      List<FlatTreeItem<KeyedViewModel>> items) {}
+  void drop(FlatTreeItem<KeyHierarchyViewModel> target, DropState state,
+      List<FlatTreeItem<KeyHierarchyViewModel>> items) {}
 
   @override
-  bool allowDrop(FlatTreeItem<KeyedViewModel> item, DropState state,
-      List<FlatTreeItem<KeyedViewModel>> items) {
+  bool allowDrop(FlatTreeItem<KeyHierarchyViewModel> item, DropState state,
+      List<FlatTreeItem<KeyHierarchyViewModel>> items) {
     return false;
   }
 
   @override
-  bool isDisabled(KeyedViewModel treeItem) {
+  bool isDisabled(KeyHierarchyViewModel treeItem) {
     return false;
   }
 
   @override
-  bool isProperty(KeyedViewModel treeItem) => false;
+  bool isProperty(KeyHierarchyViewModel treeItem) => false;
 
   @override
-  List<FlatTreeItem<KeyedViewModel>> onDragStart(
-          DragStartDetails details, FlatTreeItem<KeyedViewModel> item) =>
+  List<FlatTreeItem<KeyHierarchyViewModel>> onDragStart(
+          DragStartDetails details, FlatTreeItem<KeyHierarchyViewModel> item) =>
       [item];
 
   @override
   void onMouseEnter(
-      PointerEnterEvent event, FlatTreeItem<KeyedViewModel> item) {
+      PointerEnterEvent event, FlatTreeItem<KeyHierarchyViewModel> item) {
     // animationManager.mouseOver.add(item.data.value);
   }
 
   @override
-  void onMouseExit(PointerExitEvent event, FlatTreeItem<KeyedViewModel> item) {
+  void onMouseExit(
+      PointerExitEvent event, FlatTreeItem<KeyHierarchyViewModel> item) {
     // animationManager.mouseOut.add(item.data.value);
   }
 
   @override
-  void onTap(FlatTreeItem<KeyedViewModel> item) {
+  void onTap(FlatTreeItem<KeyHierarchyViewModel> item) {
     // animationManager.select.add(item.data.value);
   }
 
   @override
-  int spacingOf(KeyedViewModel treeItem) => 1;
+  int spacingOf(KeyHierarchyViewModel treeItem) => 1;
 
   @override
   void onRightClick(BuildContext context, PointerDownEvent event,
-      FlatTreeItem<KeyedViewModel> item) {}
+      FlatTreeItem<KeyHierarchyViewModel> item) {}
 }

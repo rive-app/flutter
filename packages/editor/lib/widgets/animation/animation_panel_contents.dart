@@ -24,13 +24,13 @@ class AnimationPanelContents extends StatelessWidget {
               child: AnimationsList(),
             ),
           ),
-          const SizedBox(width: 10),
           ResizePanel(
             hitSize: 10,
             direction: ResizeDirection.horizontal,
             side: ResizeSide.end,
             min: 300,
             max: 600,
+            deadStart: 48,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
@@ -41,7 +41,6 @@ class AnimationPanelContents extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
           // Placeholder for timeline and curve editor.
           Expanded(
             child: Column(

@@ -84,7 +84,7 @@ abstract class TreeController<T> with ChangeNotifier {
 
   /// Return the children of T or null if none are available/treeItem doesn't
   /// have children.
-  List<T> childrenOf(T treeItem);
+  Iterable<T> childrenOf(T treeItem);
 
   HashSet<T> get expanded => _expanded;
 
@@ -285,7 +285,7 @@ abstract class TreeController<T> with ChangeNotifier {
 
   void _flatten(
       FlattenedTreeDataContext<T> context,
-      List<T> data,
+      Iterable<T> data,
       List<FlatTreeItem<T>> flat,
       HashMap<Key, int> lookup,
       List<int> depth,
@@ -298,16 +298,17 @@ abstract class TreeController<T> with ChangeNotifier {
     // int depthIndex = depth.length;
     // depth.add(spacing);
 
-    List<T> childItems;
+    Iterable<T> childItems;
     if (hasProperties) {
-      childItems = [];
+      var propertyChildItems = <T>[];
+      childItems = propertyChildItems;
       List<T> propertyItems = [];
       for (final item in data) {
         if (isProperty(item)) {
           propertyItems.add(item);
           continue;
         }
-        childItems.add(item);
+        propertyChildItems.add(item);
       }
       int length = propertyItems.length;
       int childLength = childItems.length;
@@ -341,9 +342,10 @@ abstract class TreeController<T> with ChangeNotifier {
     }
 
     var childLength = childItems.length;
-    for (int i = 0; i < childLength; i++) {
+    int i = 0;
+    for (final item in childItems) {
+      // for (int i = 0; i < childLength; i++) {
       var isLast = i == childLength - 1;
-      var item = childItems[i];
       var spacing = spacingOf(item);
       var isExpanded = context.expanded.contains(item);
       var children = childrenOf(item);
@@ -378,6 +380,7 @@ abstract class TreeController<T> with ChangeNotifier {
         _flatten(
             context, children, flat, lookup, List<int>.from(itemDepth), meta);
       }
+      i++;
     }
   }
 
