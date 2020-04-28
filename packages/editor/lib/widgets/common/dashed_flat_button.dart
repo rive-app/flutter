@@ -4,16 +4,16 @@ import 'package:path_drawing/path_drawing.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
-import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 // 3 pixels painted, 3 gap. etc.
-final dashArray = CircularIntervalList([3.toDouble(), 3.toDouble()]);
+final CircularIntervalList<double> dashArray =
+    CircularIntervalList([3.toDouble(), 3.toDouble()]);
 
 class DashedPainter extends CustomPainter {
   final double radius;
-
-  const DashedPainter({this.radius});
+  final Color dashColor;
+  const DashedPainter({@required this.radius, @required this.dashColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -22,7 +22,7 @@ class DashedPainter extends CustomPainter {
 
     Paint paint = Paint()
       ..strokeWidth = 1
-      ..color = RiveThemeData().colors.fileIconColor
+      ..color = dashColor
       ..style = PaintingStyle.stroke;
     var path = Path();
     path.addRRect(RRect.fromRectAndRadius(
@@ -42,29 +42,37 @@ class DashedFlatButton extends StatelessWidget {
   const DashedFlatButton({
     @required this.label,
     @required this.icon,
+    this.textColor,
+    this.iconColor,
     this.onTap,
     this.tip,
   });
 
   final String label;
   final String icon;
+  final Color textColor;
+  final Color iconColor;
   final VoidCallback onTap;
   final Tip tip;
 
   @override
   Widget build(BuildContext context) {
+    final iconColor =
+        this.iconColor ?? RiveTheme.of(context).colors.fileIconColor;
+
     final button = FlatIconButton(
       icon: TintedIcon(
         icon: icon,
-        color: RiveTheme.of(context).colors.fileIconColor,
+        color: iconColor,
       ),
       label: label,
       color: Colors.transparent,
+      textColor: textColor,
       onTap: onTap,
       tip: tip,
     );
     return CustomPaint(
-      painter: DashedPainter(radius: button.radius),
+      painter: DashedPainter(radius: button.radius, dashColor: iconColor),
       child: button,
     );
   }
