@@ -270,28 +270,24 @@ class FilesPanel extends StatelessWidget {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 15),
+                        horizontal: 30, vertical: 30),
                     child: TopNav(fileBrowser),
                   ),
                 ),
                 if (folders != null && folders.isNotEmpty) ...[
-                  const SliverToBoxAdapter(
-                    child: TitleSection(
-                      name: 'Folders',
-                      height: kGridHeaderHeight,
-                      showDropdown: false,
-                    ),
-                  ),
                   _buildFolders(folders, fileBrowser),
                 ],
-                if (files != null && files.isNotEmpty) ...[
+                if (folders != null &&
+                    folders.isNotEmpty &&
+                    files != null &&
+                    files.isNotEmpty) ...[
                   SliverToBoxAdapter(
-                    child: TitleSection(
-                      name: 'Files',
-                      height: kGridHeaderHeight,
-                      showDropdown: folders == null || folders.isEmpty,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                     ),
-                  ),
+                  )
+                ],
+                if (files != null && files.isNotEmpty) ...[
                   _buildFiles(context, files, fileBrowser, rive),
                 ],
                 if (files != null && files.isEmpty && folders.isEmpty) ...[

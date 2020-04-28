@@ -25,4 +25,6 @@ class RiveFolder extends RiveApiFolder with SelectableItem {
   set isDragging(bool val) => _draggingState.value = val;
 
   ValueKey<String> get key => _key;
+
+  String get displayName => (owner == null) ? name : owner.displayName;
 }
