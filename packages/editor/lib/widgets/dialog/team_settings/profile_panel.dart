@@ -6,10 +6,10 @@ import 'package:rive_api/models/profile.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/profiles.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/labeled_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ProfileSettings extends StatefulWidget {
@@ -103,14 +103,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                                   label: '${labelPrefix}Name',
                                   onChanged: (value) => _profile.name = value,
                                   initialValue: _profile.name,
-                                  hint: 'Pick a name',
+                                  hintText: 'Pick a name',
                                 ),
                                 LabeledTextField(
                                   label: '${labelPrefix}Username',
                                   onChanged: (value) =>
                                       _profile.username = value,
                                   initialValue: _profile.username,
-                                  hint: 'Pick a username',
+                                  hintText: 'Pick a username',
                                 )
                               ]),
                               const SizedBox(height: 30),
@@ -118,14 +118,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                                 [
                                   LabeledTextField(
                                     label: 'Location',
-                                    hint: 'Where is your team based?',
+                                    hintText: 'Where is your team based?',
                                     onChanged: (value) =>
                                         _profile.location = value,
                                     initialValue: _profile.location,
                                   ),
                                   LabeledTextField(
                                     label: 'Website',
-                                    hint: 'Website',
+                                    hintText: 'Website',
                                     onChanged: (value) =>
                                         _profile.website = value,
                                     initialValue: _profile.website,
@@ -136,7 +136,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                               _textFieldRow([
                                 LabeledTextField(
                                   label: 'Bio',
-                                  hint: 'Tell users a bit about your team',
+                                  hintText: 'Tell users a bit about your team',
                                   onChanged: (value) => _profile.blurb = value,
                                   initialValue: _profile.blurb,
                                 )
@@ -184,13 +184,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         _textFieldRow([
                           LabeledTextField(
                             label: 'Twitter',
-                            hint: 'Link',
+                            hintText: 'Link',
                             onChanged: (value) => _profile.twitter = value,
                             initialValue: _profile.twitter,
                           ),
                           LabeledTextField(
                             label: 'Instagram',
-                            hint: 'Link',
+                            hintText: 'Link',
                             onChanged: (value) => _profile.instagram = value,
                             initialValue: _profile.instagram,
                           )
@@ -199,13 +199,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         _textFieldRow([
                           LabeledTextField(
                             label: 'Dribbble',
-                            hint: 'Link',
+                            hintText: 'Link',
                             onChanged: (value) => _profile.dribbble = value,
                             initialValue: _profile.dribbble,
                           ),
                           LabeledTextField(
                             label: 'LinkedIn',
-                            hint: 'Link',
+                            hintText: 'Link',
                             onChanged: (value) => _profile.linkedin = value,
                             initialValue: _profile.linkedin,
                           )
@@ -214,13 +214,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         _textFieldRow([
                           LabeledTextField(
                             label: 'Behance',
-                            hint: 'Link',
+                            hintText: 'Link',
                             onChanged: (value) => _profile.behance = value,
                             initialValue: _profile.behance,
                           ),
                           LabeledTextField(
                             label: 'Vimeo',
-                            hint: 'Link',
+                            hintText: 'Link',
                             onChanged: (value) => _profile.vimeo = value,
                             initialValue: _profile.vimeo,
                           )
@@ -229,13 +229,13 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                         _textFieldRow([
                           LabeledTextField(
                             label: 'GitHub',
-                            hint: 'Link',
+                            hintText: 'Link',
                             onChanged: (value) => _profile.github = value,
                             initialValue: _profile.github,
                           ),
                           LabeledTextField(
                             label: 'Medium',
-                            hint: 'Link',
+                            hintText: 'Link',
                             onChanged: (value) => _profile.medium = value,
                             initialValue: _profile.medium,
                           )

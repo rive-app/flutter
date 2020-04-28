@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/team.dart';
+import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/labeled_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class BillingHistory extends StatelessWidget {
@@ -79,13 +79,13 @@ class BillingHistory extends StatelessWidget {
           _textFieldRow([
             LabeledTextField(
               label: 'Business Name',
-              hint: 'Company name for receipts',
+              hintText: 'Company name for receipts',
               onChanged: (value) => billingHistory.businessName = value,
               initialValue: billingHistory.businessName,
             ),
             LabeledTextField(
               label: 'VAT/GST ID',
-              hint: 'Optional',
+              hintText: 'Optional',
               onChanged: (value) => billingHistory.vat = value,
               initialValue: billingHistory.vat,
             )
@@ -94,7 +94,7 @@ class BillingHistory extends StatelessWidget {
           _textFieldRow([
             LabeledTextField(
               label: 'Business Name',
-              hint: 'Add your company address of record',
+              hintText: 'Add your company address of record',
               onChanged: (value) => billingHistory.businessName = value,
               initialValue: billingHistory.businessName,
             ),

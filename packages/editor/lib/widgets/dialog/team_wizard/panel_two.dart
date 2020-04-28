@@ -6,8 +6,8 @@ import 'package:rive_api/models/billing.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/rive_text_field.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard/wizard_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -165,11 +165,12 @@ class TeamWizardPanelTwo extends StatelessWidget {
             style: textStyles.inspectorPropertyLabel,
           ),
         ),
-        WizardTextFormField(
+        RiveTextField(
           onChanged: (cardNumber) => sub.cardNumber = cardNumber,
           enabled: !sub.processing,
           initialValue: sub.cardNumber,
-          inputFormatters: <TextInputFormatter>[
+          errorAlignment: MainAxisAlignment.start,
+          formatters: <TextInputFormatter>[
             WhitelistingTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(16),
             CardNumberFormatter()
@@ -199,9 +200,10 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              WizardTextFormField(
+              RiveTextField(
                 initialValue: sub.ccv,
-                inputFormatters: <TextInputFormatter>[
+                errorAlignment: MainAxisAlignment.start,
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                 ],
@@ -224,11 +226,12 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              WizardTextFormField(
+              RiveTextField(
                 onChanged: (expiration) => sub.expiration = expiration,
                 enabled: !sub.processing,
                 initialValue: sub.expiration,
-                inputFormatters: <TextInputFormatter>[
+                errorAlignment: MainAxisAlignment.start,
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                   DateTextInputFormatter(),
@@ -251,11 +254,12 @@ class TeamWizardPanelTwo extends StatelessWidget {
                 style: textStyles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              WizardTextFormField(
+              RiveTextField(
                 onChanged: (zip) => sub.zip = zip,
                 enabled: !sub.processing,
                 initialValue: sub.zip,
-                inputFormatters: <TextInputFormatter>[
+                errorAlignment: MainAxisAlignment.start,
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(5),
                 ],
@@ -346,7 +350,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 452,
-      height: 534,
+      height: 544,
       child: Padding(
         padding: const EdgeInsets.all(30),
         child: Column(
