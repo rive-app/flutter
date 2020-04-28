@@ -12,6 +12,7 @@ dependencies:
   http: ^0.12.0
   encrypt: ^4.0.0
   logging: ^0.11.4
+  rxdart: ^0.24.0
   utilities:
     path: ../utilities
   local_data:
@@ -24,7 +25,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   test: ^1.14.2
+  mockito: ^4.1.1
 
 flutter:

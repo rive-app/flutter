@@ -113,7 +113,7 @@ class WebServiceClient {
 
     // Check the acceptable status codes
     if (acceptableStatusCodes
-        .any((c) => c == statusCodeClass(res.statusCode))) {
+        .every((c) => c != statusCodeClass(res.statusCode))) {
       handleUnacceptableStatusCode(res);
     }
   }
