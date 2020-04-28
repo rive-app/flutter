@@ -420,11 +420,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
                     iconName: 'notification',
                     label: 'Notifications',
                     highlight: section == HomeSection.notifications,
-                    onTap: () {
+                    onTap: () async {
                       // File browsers track their own selected states.
                       // so you have to tell them specifically that stuff not selected
                       rive.activeFileBrowser.value?.openFolder(null, false);
-                      rive.activeFileBrowser.value = null;
+                      await rive.setActiveFileBrowser(null);
                       rive.sectionListener.value = HomeSection.notifications;
                     },
                   ),

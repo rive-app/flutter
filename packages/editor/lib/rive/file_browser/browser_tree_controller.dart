@@ -69,7 +69,7 @@ class FolderTreeController extends TreeController<RiveFolder> {
         // File browsers track their own selected states.
         // so you have to tell them specifically that stuff not selected
         rive.activeFileBrowser.value?.openFolder(null, false);
-        rive.activeFileBrowser.value = fileBrowser;
+        rive.setActiveFileBrowser(fileBrowser);
       }
 
       fileBrowser.openFolder(item.data, false);
