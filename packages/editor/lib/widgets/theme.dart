@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/widgets.dart';
+import 'package:tree_widget/tree_style.dart';
 
 import 'theme/theme_native.dart' if (dart.library.html) 'theme/theme_web.dart';
 
@@ -9,6 +10,8 @@ const white = Color(0xFFFFFFFF);
 const red = Color(0xFFFF5678);
 const purple = Color(0xFFD041AB);
 const transparent = Color(0x00000000);
+
+const _darkTreeLines = Color(0x33FFFFFF);
 
 /// Colors used in the Rive Theme
 /// Define them as getters and keep them const
@@ -127,7 +130,7 @@ class RiveColors {
   Color get input => const Color(0xFFBBBBBB);
 
   // Tree
-  Color get darkTreeLines => const Color(0x33FFFFFF);
+  Color get darkTreeLines => _darkTreeLines;
 
   // Hierarchy
   Color get editorTreeHover => const Color(0x20AAAAAA);
@@ -148,7 +151,7 @@ class RiveColors {
   Color get modeBackground => const Color(0xFF2F2F2F);
   Color get modeForeground => const Color(0xFF444444);
 
-  // Aniation panel
+  // Animation panel
   Color get animationPanelBackground => const Color(0xFF282828);
   Color get timelineViewportControlsBackground => const Color(0xFF1F1F1F);
   Color get timelineViewportControlsGrabber => const Color(0xFF33A7FF);
@@ -397,6 +400,17 @@ class Gradients {
       );
 }
 
+class TreeStyles {
+  const TreeStyles();
+
+  TreeStyle get timeline => const TreeStyle(
+        showFirstLine: false,
+        hideLines: false,
+        padding: EdgeInsets.only(left: 10, right: 19),
+        lineColor: _darkTreeLines,
+      );
+}
+
 /// Holds instances of various sub theme classes
 /// This is used by the RiveTheme InheritedWidget
 class RiveThemeData {
@@ -410,4 +424,5 @@ class RiveThemeData {
   Gradients get gradients => const Gradients();
   TextStyles get textStyles => const TextStyles();
   PlatformSpecific get platform => PlatformSpecific();
+  TreeStyles get treeStyles => const TreeStyles();
 }
