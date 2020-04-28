@@ -11,6 +11,9 @@ import 'package:coop_server_library/server.dart';
 
 class _TestCoopIsolateProcess extends RiveCoopIsolateProcess {
   Directory _dataDir;
+
+  _TestCoopIsolateProcess({String privateApiHost})
+      : super(privateApiHost: privateApiHost);
   // int ownerId;
   // int fileId;
   // int _nextClientId = 0;
@@ -60,8 +63,15 @@ class _TestCoopIsolateProcess extends RiveCoopIsolateProcess {
 class TestCoopIsolate extends CoopIsolate {
   final List<dynamic> _isolateQueue = <dynamic>[];
 
-  TestCoopIsolate(CoopServer server, int ownerId, int fileId)
-      : super(server, ownerId, fileId);
+  @override
+  final String privateApiHost;
+
+  TestCoopIsolate(
+    this.privateApiHost,
+    CoopServer server,
+    int ownerId,
+    int fileId,
+  ) : super(server, ownerId, fileId);
 
   bool _manualDrive = false;
   bool get manualDrive => _manualDrive;
@@ -129,11 +139,16 @@ class TestCoopIsolate extends CoopIsolate {
 }
 
 class TestCoopServer extends CoopServer {
+  final String privateApiHost;
+
+  TestCoopServer({this.privateApiHost});
+
   @override
   CoopIsolateHandler get handler => makeProcess;
 
   static Future<void> makeProcess(CoopIsolateArgument argument) async {
-    var process = _TestCoopIsolateProcess();
+    var process =
+        _TestCoopIsolateProcess(privateApiHost: argument.privateApiHost);
     await process.initProcess(
         argument.sendPort, argument.options, argument.ownerId, argument.fileId);
   }
@@ -158,8 +173,12 @@ class TestCoopServer extends CoopServer {
   }
 
   @override
-  CoopIsolate makeIsolateInterface(int ownerId, int fileId) =>
-      TestCoopIsolate(this, ownerId, fileId);
+  CoopIsolate makeIsolateInterface(int ownerId, int fileId) => TestCoopIsolate(
+        privateApiHost,
+        this,
+        ownerId,
+        fileId,
+      );
 }
 
 /// Manually test that the test server can be started

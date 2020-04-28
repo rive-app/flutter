@@ -31,6 +31,7 @@ class CoopIsolate {
   final int fileId;
   CoopIsolate(this.server, this.ownerId, this.fileId);
   int get clientCount => _clients.length;
+  String get privateApiHost => null;
 
   /// Allow implementations to override sending to isolate. This allows tests to
   /// do things like delay sending operations to the isolate in order to test
@@ -137,7 +138,9 @@ class CoopIsolate {
     _isolate = await Isolate.spawn(
         entryPoint,
         CoopIsolateArgument(ownerId, fileId,
-            sendPort: _receiveFromIsolatePort.sendPort, options: options));
+            privateApiHost: privateApiHost,
+            sendPort: _receiveFromIsolatePort.sendPort,
+            options: options));
     return completer.future;
   }
 }
@@ -145,11 +148,13 @@ class CoopIsolate {
 class CoopIsolateArgument {
   int ownerId;
   int fileId;
+  final String privateApiHost;
   final SendPort sendPort;
   final Map<String, String> options;
   CoopIsolateArgument(
     this.ownerId,
     this.fileId, {
+    this.privateApiHost,
     this.sendPort,
     this.options,
   });

@@ -40,7 +40,10 @@ class RiveCoopServer extends CoopServer {
 class RiveCoopIsolateProcess extends CoopIsolateProcess {
   CoopFile file;
   int _nextChangeId;
-  final _privateApi = PrivateApi();
+  final PrivateApi _privateApi;
+
+  RiveCoopIsolateProcess({String privateApiHost})
+      : _privateApi = PrivateApi(host: privateApiHost);
 
   @override
   bool attemptChange(CoopServerClient client, ChangeSet changeSet) {
