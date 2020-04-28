@@ -66,14 +66,15 @@ void main() {
       final auth = RiveAuth(client);
 
       when(auth.api.post(client.host + '/signin',
-          body: jsonEncode(
-            <String, String>{
-              'username': 'rive_user',
-              'password': '123456789',
-            },
-          ))).thenAnswer((_) async => http.Response('{"result": ""}', 200));
-
-      expect(await auth.login('rive_user', '123456789'), true);
+              body: jsonEncode(
+                <String, String>{
+                  'username': 'rive_user',
+                  'password': '123456789',
+                },
+              )))
+          .thenAnswer((_) async => http.Response('{"username": "test"}', 200));
+      final authResponse = await auth.login('rive_user', '123456789');
+      expect(authResponse.message, "test");
     });
   });
 
