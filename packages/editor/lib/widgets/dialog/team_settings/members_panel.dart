@@ -225,6 +225,9 @@ class _InvitePanelState extends State<InvitePanel> {
                                     );
                                   },
                                   toLabel: (user) {
+                                    if (_inviteQueue.isNotEmpty) {
+                                      return '';
+                                    }
                                     if (user == null) {
                                       return 'Invite a member...';
                                     }
@@ -317,7 +320,8 @@ class _TeamMember extends StatelessWidget {
                   if (user.avatar != null) {
                     return Image.network(user.avatar);
                   }
-                  return TintedIcon(color: colors.commonDarkGrey, icon: 'your-files');
+                  return TintedIcon(
+                      color: colors.commonDarkGrey, icon: 'your-files');
                 },
                 background: colors.fileBackgroundLightGrey,
               ),
