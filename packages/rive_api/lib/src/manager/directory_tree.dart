@@ -11,7 +11,7 @@ class DirectoryTreeManager {
     _treeController.onListen = _fetchDirectoryTree;
 
     // Record all inbound events for directory selection
-    _selectTreeController.stream.listen((dir) => _selectedDirectory = dir);
+    _activeDirectoryController.stream.listen((dir) => _activeDirectory = dir);
   }
   final DirectoryTreeApi _api;
   final Volume volume;
@@ -24,7 +24,7 @@ class DirectoryTreeManager {
     _treeController.add(tree);
   }
 
-  Directory _selectedDirectory;
+  Directory _activeDirectory;
 
   /*
    * Outbound streams
@@ -36,8 +36,8 @@ class DirectoryTreeManager {
   /*
    * Inbound sinks
    */
-  final _selectTreeController = StreamController<Directory>();
-  Sink<Directory> get selectedDirectory => _selectTreeController;
+  final _activeDirectoryController = StreamController<Directory>();
+  Sink<Directory> get activeDirectory => _activeDirectoryController;
 
   void dispose() => _treeController.close();
 
