@@ -601,9 +601,9 @@ class _LoginSwitch extends StatelessWidget {
           const SizedBox(width: 10),
           EditorSwitch(
             isOn: isLogin,
-            toggle: () => onSelect(panel == LoginPage.register
-                ? LoginPage.login
-                : LoginPage.register),
+            toggle: () => onSelect(panel == LoginPage.login
+                ? LoginPage.register
+                : LoginPage.login),
             onColor: Colors.white,
             offColor: Colors.white,
             backgroundColor: panel == LoginPage.recover
