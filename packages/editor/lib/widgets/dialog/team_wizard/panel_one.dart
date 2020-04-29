@@ -97,7 +97,7 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
             ),
             Padding(
               padding: sub.nameValidationError == null
-                  ? const EdgeInsets.only(top: 27, bottom: 23)
+                  ? const EdgeInsets.only(top: 25, bottom: 23)
                   : const EdgeInsets.only(top: 5, bottom: 23),
               child: Row(
                 children: [
