@@ -69,7 +69,7 @@ class _TeamMemberState extends State<TeamMembers> {
         children: [
           InvitePanel(
             api: widget.api,
-            teamId: widget.owner.ownerId,
+            team: widget.owner,
             teamUpdated: _updateAffiliates,
           ),
           const SizedBox(height: 20),
@@ -87,12 +87,12 @@ class _TeamMemberState extends State<TeamMembers> {
 
 class InvitePanel extends StatefulWidget {
   final RiveApi api;
-  final int teamId;
+  final RiveTeam team;
   final VoidCallback teamUpdated;
 
   const InvitePanel(
       {@required this.api,
-      @required this.teamId,
+      @required this.team,
       @required this.teamUpdated,
       Key key})
       : super(key: key);
@@ -108,6 +108,9 @@ class _InvitePanelState extends State<InvitePanel> {
   RiveTeamsApi _teamApi;
   final _openCombo = Event();
 
+  Set<int> get _inviteIds =>
+      Set.from(_inviteQueue.whereType<UserInvite>().map<int>((e) => e.ownerId));
+
   @override
   void initState() {
     super.initState();
@@ -116,16 +119,10 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 
   void _sendInvites() {
-    var ids = <int>[];
-    _inviteQueue.forEach((invite) {
-      if (invite is UserInvite) {
-        ids.add(invite.ownerId);
-      }
-    });
     _teamApi
         .sendInvites(
-      widget.teamId,
-      ids,
+      widget.team.ownerId,
+      _inviteIds,
       _selectedInviteType,
     )
         .then((value) {
@@ -145,8 +142,11 @@ class _InvitePanelState extends State<InvitePanel> {
     _openCombo.notify();
   }
 
-  Future<List<RiveUser>> _autocomplete(String input) =>
-      _userApi.autocomplete(input);
+  Future<List<RiveUser>> _autocomplete(String input) {
+    final teamMemberIds = widget.team.teamMembers.map((e) => e.ownerId);
+    final filterIds = _inviteIds..addAll(teamMemberIds);
+    return _userApi.autocomplete(input, filterIds);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -225,10 +225,8 @@ class _InvitePanelState extends State<InvitePanel> {
                                     );
                                   },
                                   toLabel: (user) {
-                                    if (_inviteQueue.isNotEmpty) {
-                                      return '';
-                                    }
                                     if (user == null) {
+                                      if (_inviteQueue.isNotEmpty) return '';
                                       return 'Invite a member...';
                                     }
                                     var label = '';

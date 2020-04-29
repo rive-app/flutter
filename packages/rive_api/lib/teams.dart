@@ -95,10 +95,10 @@ class RiveTeamsApi<T extends RiveTeam> {
 
   /// Send a list of team invites to users
   Future<List<int>> sendInvites(
-      int teamId, List<int> inviteIds, TeamRole permission) async {
+      int teamOwnerId, Set<int> inviteIds, TeamRole permission) async {
     var response = <int>[];
     for (final ownerId in inviteIds) {
-      int id = await sendInvite(teamId, ownerId, permission);
+      int id = await sendInvite(teamOwnerId, ownerId, permission);
       if (id != null) {
         response.add(id);
       }

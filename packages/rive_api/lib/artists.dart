@@ -47,12 +47,17 @@ class RiveArtists {
     }
   }
 
-  /// Get autocomplete results for some value typed into a text field. N.B. that
-  /// this returns results that have some markup for our old web version and the
-  /// id values returned by the backedn are actually userIds. We should cleanup
-  /// this route on stryker/arkham so that it returns the avatar too, no markup,
-  /// and the ownerId instead of userId.
-  Future<List<RiveUser>> autocomplete(String text) async {
+  /// Get autocomplete results for some value typed into a text field.
+  /// [text] provides the input text for this autocomplete search.
+  /// [filterIds] is a Set of owner ids that this autocomplete should filter
+  /// against. If one of the owner ids is a result to this autcomplete,
+  /// then this result won't be added to the list of results.
+  /// 
+  /// N.B. that this returns results that have some markup for our old web version 
+  /// and the id values returned by the backedn are actually userIds. 
+  /// We should cleanup this route on stryker/arkham so that it returns 
+  /// the avatar too, no markup, and the ownerId instead of userId.
+  Future<List<RiveUser>> autocomplete(String text, Set<int> filterIds) async {
     try {
       var response = await api.get(api.host +
           '/api/search/ac/avatar_artists/${Uri.encodeComponent(text)}');
@@ -73,7 +78,7 @@ class RiveArtists {
 
             var user =
                 RiveUser.fromAutoCompleteData(value as Map<String, dynamic>);
-            if (user != null) {
+            if (user != null && !filterIds.contains(user.ownerId)) {
               results.add(user);
             }
           }
