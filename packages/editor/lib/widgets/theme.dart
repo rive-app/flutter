@@ -159,6 +159,7 @@ class RiveColors {
   Color get timelineBackground => const Color(0xFF232323);
   Color get timelineLine => const Color(0xFF303030);
   Color get timelineUnderline => const Color(0xFF1E1E1E);
+  Color get key => const Color(0xFF57A5E0);
 }
 
 /// TextStyles used in the Rive Theme
@@ -411,6 +412,14 @@ class TreeStyles {
       );
 }
 
+/// Not sure about the naming of this one. Basically a set of numerical
+/// constants for the theme.
+class _Dimensions {
+  const _Dimensions();
+  double get timelineMarginLeft => 10;
+  double get timelineMarginRight => 30;
+}
+
 /// Holds instances of various sub theme classes
 /// This is used by the RiveTheme InheritedWidget
 class RiveThemeData {
@@ -425,4 +434,5 @@ class RiveThemeData {
   TextStyles get textStyles => const TextStyles();
   PlatformSpecific get platform => PlatformSpecific();
   TreeStyles get treeStyles => const TreeStyles();
+  _Dimensions get dimensions => const _Dimensions();
 }

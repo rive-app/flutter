@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/widgets/animation/playhead.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
@@ -90,21 +91,52 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
         ),
         // Placeholder for timeline and curve editor.
         Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Stack(
             children: [
-              const SizedBox(height: 10),
-              TimelineViewportControls(),
-              const SizedBox(height: 10),
-              TimelineTicks(),
-              Expanded(
-                child: TimelineKeys(
-                  theme: theme,
-                  verticalScroll: timelineVerticalScroll,
-                  treeController: _treeController,
+              Positioned.fill(
+                // The viewport controls, ticks, and timeline+keys are a great
+                // candidate for RepaintBoundary as they all change when the
+                // viewport changes. We also want to optimize for playback, edit
+                // operations need to be high performance but during playback
+                // keys aren't being changed, the viewport's not moving, and the
+                // ticks don't change.
+
+                // That means that moving a keyframe will result in re-render of
+                // the ticks and controls. This can be later optimized with more
+                // RepaintBoundaries if we find it's necessary, but I suspect it
+                // won't be. The heavier operation during movement of keyframes
+                // is just the individual row sorting + merging (and merge
+                // sorting) of the all keys.
+                child: RepaintBoundary(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 10),
+                      TimelineViewportControls(),
+                      const SizedBox(height: 10),
+                      TimelineTicks(),
+                      Expanded(
+                        child: TimelineKeys(
+                          theme: theme,
+                          verticalScroll: timelineVerticalScroll,
+                          treeController: _treeController,
+                          animationManager: widget.animationManager,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+              // Stack the playhead on top, this does move during playback so
+              // let's make it a super lightweight render op by separating it
+              // from the rest of the complex ui.
+              Positioned(
+                  top: 30,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Playhead(theme: theme,),)
             ],
           ),
         ),

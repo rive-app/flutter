@@ -1,8 +1,11 @@
 import 'dart:collection';
 import 'dart:ui';
 
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -38,15 +41,42 @@ class TimelineTicks extends StatelessWidget {
           return _buildEmpty(context);
         }
         var viewport = snapshot.data;
-        return SizedBox(
-          height: height,
-          child: _TimelineTicksRenderer(
-            viewport,
-            RiveTheme.of(context),
+        return PropagatingListener(
+          onPointerDown: (event) {
+            RiveContext.find(context).startDragOperation();
+            _placePlayhead(context, event.pointerEvent.localPosition, viewport,
+                editingAnimation);
+          },
+          onPointerMove: (event) => _placePlayhead(context,
+              event.pointerEvent.localPosition, viewport, editingAnimation),
+          onPointerUp: (event) {
+            RiveContext.find(context).endDragOperation();
+          },
+          child: SizedBox(
+            height: height,
+            child: _TimelineTicksRenderer(
+              viewport,
+              RiveTheme.of(context),
+            ),
           ),
         );
       },
     );
+  }
+
+  void _placePlayhead(BuildContext context, Offset offset,
+      TimelineViewport viewport, EditingAnimationManager manager) {
+    var renderObject = context.findRenderObject() as RenderBox;
+    var theme = RiveTheme.of(context);
+
+    var marginLeft = theme.dimensions.timelineMarginLeft;
+    var marginRight = theme.dimensions.timelineMarginRight;
+    var visibleDuration = viewport.endSeconds - viewport.startSeconds;
+    var secondsPerPixel =
+        visibleDuration / (renderObject.size.width - marginLeft - marginRight);
+    var time =
+        viewport.startSeconds + (offset.dx - marginLeft) * secondsPerPixel;
+    manager.changeCurrentTime.add(time);
   }
 }
 
@@ -73,17 +103,9 @@ class _TimelineTicksRenderer extends LeafRenderObjectWidget {
       ..viewport = viewport
       ..theme = theme;
   }
-
-  @override
-  void didUnmountRenderObject(
-      covariant _TimelineTicksRenderObject renderObject) {
-    // Any cleanup to do here?
-  }
 }
 
-class _TimelineTicksRenderObject extends RenderBox {
-  static const double marginLeft = 10;
-  static const double marginRight = 30;
+class _TimelineTicksRenderObject extends TimelineRenderBox {
   static const double tickHeight = 5;
 
   final List<Paragraph> _ticks = [];
@@ -95,60 +117,42 @@ class _TimelineTicksRenderObject extends RenderBox {
   double _left = 0;
   double _tickWidth = 1;
 
-  TimelineViewport _viewport;
-  RiveThemeData _theme;
-
   Paint _background;
   Paint _line;
 
-  RiveThemeData get theme => _theme;
-  set theme(RiveThemeData value) {
-    if (value == _theme) {
-      return;
-    }
-    _theme = value;
-    _background = Paint()..color = value.colors.timelineBackground;
+  @override
+  void onThemeChanged(RiveThemeData theme) {
+    _background = Paint()..color = theme.colors.timelineBackground;
     _line = Paint()
-      ..color = value.colors.timelineLine
+      ..color = theme.colors.timelineLine
       ..isAntiAlias = false
       ..strokeWidth = 1;
-
-    markNeedsPaint();
-  }
-
-  TimelineViewport get viewport => _viewport;
-  set viewport(TimelineViewport value) {
-    if (_viewport == value) {
-      return;
-    }
-    _viewport = value;
-    markNeedsLayout();
   }
 
   @override
   void performLayout() {
     super.performLayout();
-    if (_viewport == null) {
+    if (viewport == null) {
       return;
     }
-    var visibleDuration = _viewport.endSeconds - _viewport.startSeconds;
-    var secondsPerPixel =
-        visibleDuration / (size.width - marginLeft - marginRight);
+
+    var marginLeft = theme.dimensions.timelineMarginLeft;
+
     int idealTickWidth = 100;
     var secondsPerIdeal = secondsPerPixel * idealTickWidth;
 
     var unitsPerTick = secondsPerIdeal;
     var pixelsPerUnit = secondsPerPixel;
     var label = "s";
-    var startInUnits = _viewport.startSeconds;
+    var startInUnits = viewport.startSeconds;
     var rate = 60; // 60 seconds per minute
 
     if (unitsPerTick < 1) {
-      unitsPerTick = secondsPerIdeal * _viewport.fps;
-      pixelsPerUnit = secondsPerPixel * _viewport.fps;
-      startInUnits = startInUnits * _viewport.fps;
+      unitsPerTick = secondsPerIdeal * viewport.fps;
+      pixelsPerUnit = secondsPerPixel * viewport.fps;
+      startInUnits = startInUnits * viewport.fps;
       label = "f";
-      rate = _viewport.fps;
+      rate = viewport.fps;
     } else if (unitsPerTick > 60) {
       unitsPerTick = secondsPerIdeal / 60;
       pixelsPerUnit = secondsPerPixel / 60;

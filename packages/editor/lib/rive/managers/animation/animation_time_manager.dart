@@ -29,6 +29,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     _timeStream.add(0);
     _fpsStream.add(animation.fps);
     _fpsController.stream.listen(_changeFps);
+    _timeController.stream.listen(_changeCurrentTime);
     _fpsPreviewController.stream.listen(_changePreviewFps);
     animation.addListener(LinearAnimationBase.fpsPropertyKey, _coreFpsChanged);
     animation.addListener(
@@ -67,6 +68,11 @@ abstract class AnimationTimeManager extends AnimationManager {
 
   void _changePreviewFps(int value) {
     _fpsStream.add(value);
+  }
+
+  void _changeCurrentTime(double value) {
+    _timeStream
+        .add((value * animation.fps).clamp(0, animation.duration).round());
   }
 
   void _changeFps(int value) {

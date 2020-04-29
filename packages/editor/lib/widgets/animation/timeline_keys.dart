@@ -1,18 +1,30 @@
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
+import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
+const double _keyRadius = 4;
+
+/// Draws the rows in the timeline, separators, and their respective keys. Also
+/// handles interaction/user input with them.
 class TimelineKeys extends StatefulWidget {
   final RiveThemeData theme;
   final ScrollController verticalScroll;
   final KeyedObjectTreeController treeController;
+  final EditingAnimationManager animationManager;
 
   const TimelineKeys({
     @required this.theme,
     @required this.verticalScroll,
     @required this.treeController,
+    @required this.animationManager,
     Key key,
   }) : super(key: key);
 
@@ -71,10 +83,19 @@ class _TimelineKeysState extends State<TimelineKeys> {
 
   @override
   Widget build(BuildContext context) {
-    return _TimelineKeysRenderer(
-      theme: widget.theme,
-      verticalScrollOffset: _scrollOffset,
-      rows: _rows,
+    return ValueStreamBuilder<TimelineViewport>(
+      stream: widget.animationManager.viewport,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox();
+        }
+        return _TimelineKeysRenderer(
+          theme: widget.theme,
+          verticalScrollOffset: _scrollOffset,
+          rows: _rows,
+          viewport: snapshot.data,
+        );
+      },
     );
   }
 }
@@ -83,18 +104,21 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   final RiveThemeData theme;
   final double verticalScrollOffset;
   final List<FlatTreeItem<KeyHierarchyViewModel>> rows;
+  final TimelineViewport viewport;
 
   const _TimelineKeysRenderer({
     @required this.theme,
     @required this.verticalScrollOffset,
     @required this.rows,
+    @required this.viewport,
   });
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _TimelineKeysRenderObject()
       ..theme = theme
       ..verticalScrollOffset = verticalScrollOffset
-      ..rows = rows;
+      ..rows = rows
+      ..viewport = viewport;
   }
 
   @override
@@ -103,7 +127,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
     renderObject
       ..theme = theme
       ..verticalScrollOffset = verticalScrollOffset
-      ..rows = rows;
+      ..rows = rows
+      ..viewport = viewport;
     ;
   }
 
@@ -114,23 +139,37 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   }
 }
 
-class _TimelineKeysRenderObject extends RenderBox {
+class _TimelineKeysRenderObject extends TimelineRenderBox {
   final Paint _bgPaint = Paint();
   final Paint _separatorPaint = Paint();
+  final Paint _keyPaint = Paint();
+  final Path _keyPath = Path();
 
-  RiveThemeData _theme;
+  // We compute our own range as the one given by the viewport is padded, we
+  // actually need to draw a little more than the viewport.
+  double _secondsStart = 0;
+  double _secondsEnd = 0;
+
   double _verticalScrollOffset;
   List<FlatTreeItem<KeyHierarchyViewModel>> _rows;
 
-  RiveThemeData get theme => _theme;
-  set theme(RiveThemeData value) {
-    if (_theme == value) {
-      return;
-    }
-    _theme = value;
+  @override
+  void onThemeChanged(RiveThemeData theme) {
     _bgPaint.color = theme.colors.timelineBackground;
     _separatorPaint.color = theme.colors.timelineLine;
-    markNeedsPaint();
+    _keyPaint.color = theme.colors.key;
+
+    var transform = Mat2D();
+    Mat2D.fromRotation(transform, pi / 4);
+    _keyPath.reset();
+    _keyPath.addPath(
+      Path()
+        ..addRect(const Rect.fromLTRB(
+            -_keyRadius, -_keyRadius, _keyRadius, _keyRadius)),
+      Offset(0, theme.treeStyles.timeline.itemHeight / 2),
+      matrix4: transform.mat4,
+    );
+    markNeedsLayout();
   }
 
   double get verticalScrollOffset => _verticalScrollOffset;
@@ -157,6 +196,15 @@ class _TimelineKeysRenderObject extends RenderBox {
   @override
   void performLayout() {
     super.performLayout();
+
+    // We use layout to compute some of the constants for this viewport.
+    var marginLeft = theme.dimensions.timelineMarginLeft;
+    var marginRight = theme.dimensions.timelineMarginRight;
+
+    // This is the time at local x 0
+    _secondsStart = viewport.startSeconds - marginLeft * secondsPerPixel;
+    // This is the time at local x width
+    _secondsEnd = viewport.endSeconds + marginRight * secondsPerPixel;
   }
 
   @override
@@ -169,24 +217,48 @@ class _TimelineKeysRenderObject extends RenderBox {
     var rowHeight = theme.treeStyles.timeline.itemHeight;
 
     var firstRow =
-        (_verticalScrollOffset ~/ rowHeight).clamp(0, _rows.length - 1).toInt();
+        // Can't use truncating divisor as -0.3 ~/ 34 == 0, we always want to floor.
+        (_verticalScrollOffset / rowHeight).floor();
     var renderOffset = _verticalScrollOffset % rowHeight;
     var visibleRows = (size.height / rowHeight).ceil() + 1;
     var lastRow = (firstRow + visibleRows).clamp(0, _rows.length).toInt();
+
+    // If the first visible row is less than 0, offset our first translation by
+    // that many rows and then shift rendering to start at our first item.
+    if (firstRow < 0) {
+      renderOffset += firstRow * rowHeight;
+      firstRow = 0;
+    }
+    canvas.translate(offset.dx, offset.dy - renderOffset);
 
     for (int i = firstRow; i < lastRow; i++) {
       var row = _rows[i].data;
 
       // We only draw the separator line if it's delineating a component.
       if (row is KeyedComponentViewModel) {
-        var rowOffset = i * rowHeight;
-        Offset lineStart =
-            offset + Offset(0.0, -0.5 - _verticalScrollOffset + rowOffset);
+        // var rowOffset = i * rowHeight;
+        Offset lineStart = const Offset(0.0, -0.5);
 
-        Offset lineEnd = offset +
-            Offset(size.width, -0.5 - _verticalScrollOffset + rowOffset);
+        Offset lineEnd = Offset(size.width, -0.5);
         canvas.drawLine(lineStart, lineEnd, _separatorPaint);
+      } else if (row is KeyedPropertyViewModel) {
+        var keyed = row.keyedProperty;
+        var frames = keyed.keyframes;
+        // print("FRAMES $frames ${frames is List}");
+
+        double frameTime = 0.5;
+
+        // in order to draw frame time, we have to offset by
+        // (frameTime-_secondsStart)/_secondsPerPixel
+
+        var x = (frameTime - _secondsStart) / secondsPerPixel;
+        canvas.translate(x, 0);
+        canvas.drawPath(_keyPath, _keyPaint);
+
+        canvas.translate(-x, 0);
       }
+
+      canvas.translate(0, rowHeight);
     }
 
     // for (int i = 0; i < 10; i++) {
