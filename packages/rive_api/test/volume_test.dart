@@ -17,10 +17,19 @@ void main() {
     });
 
     test('Volume models are contructed correctly from json', () {
-      final jsonVolume = json.encode({'name': 'Volume'});
-      final volume = Volume.fromData(json.decode(jsonVolume));
+      var jsonVolume = json.encode({'name': 'Volume'});
+      var volume = Volume.fromData(json.decode(jsonVolume));
 
       expect(volume.name, 'Volume');
+      expect(volume.hasAvatar, false);
+
+      jsonVolume =
+          json.encode({'name': 'Volume 1', 'avatar': 'http://avatar.com'});
+      volume = Volume.fromData(json.decode(jsonVolume));
+
+      expect(volume.name, 'Volume 1');
+      expect(volume.hasAvatar, true);
+      expect(volume.avatarUrl, 'http://avatar.com');
     });
 
     test('Volume models are contructed correctly from a json list', () {
@@ -46,7 +55,7 @@ void main() {
           (i) => Future.value([
             Volume(name: 'Matt Vol'),
             Volume(name: 'Team Vol 1'),
-            Volume(name: 'Team Vol 2'),
+            Volume(name: 'Team Vol 2', avatarUrl: 'http://avatar.edu'),
           ]),
         );
 
@@ -58,6 +67,7 @@ void main() {
           expect(volumes.length, 3);
           expect(volumes.first.name, 'Matt Vol');
           expect(volumes.last.name, 'Team Vol 2');
+          expect(volumes.last.avatarUrl, 'http://avatar.edu');
           // Mark the test as completed
           testComplete.complete();
         });
