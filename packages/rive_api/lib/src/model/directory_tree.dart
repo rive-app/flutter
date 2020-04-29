@@ -44,6 +44,31 @@ class DirectoryTree {
         (childData) => _createDirectory(childData, sortedChildrenData));
     return Directory.fromData(directoryData, children: children);
   }
+
+  /// Does the tree contain the specified directory?
+  bool contains(Directory dir) {
+    for (final d in walk) {
+      if (d == dir) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Walks all directories in the tree(s)
+  Iterable<Directory> get walk sync* {
+    for (final dir in directories) {
+      yield* _treeWalk(dir);
+    }
+  }
+
+  /// Internal generator to walk a tree
+  Iterable<Directory> _treeWalk(Directory d) sync* {
+    for (final child in d.children) {
+      yield* _treeWalk(child);
+    }
+    yield d;
+  }
 }
 
 class Directory {
@@ -62,4 +87,10 @@ class Directory {
 
   @override
   String toString() => 'Directory($name)';
+
+  @override
+  bool operator ==(o) => o is Directory && o._id == _id;
+
+  @override
+  int get hashCode => _id;
 }

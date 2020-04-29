@@ -84,5 +84,66 @@ void main() {
               .children.first.name,
           'Bottom Dir 1');
     });
+
+    test('Directory tree models can be walked', () {
+      var tree = DirectoryTree.fromFolderList(json.decode(dirTreeJsonShallow));
+
+      var count = 0;
+      for (final dir in tree.walk) {
+        switch (count++) {
+          case 0:
+            expect(dir.name, 'Bottom Dir 1');
+            break;
+          case 1:
+            expect(dir.name, 'Bottom Dir 2');
+            break;
+          case 2:
+            expect(dir.name, 'Top Dir 1');
+            break;
+          case 3:
+            expect(dir.name, 'Bottom Dir 3');
+            break;
+          case 4:
+            expect(dir.name, 'Top Dir 2');
+            break;
+          default:
+            throw Exception('Should never be reached, count: $count');
+        }
+      }
+
+      tree = DirectoryTree.fromFolderList(json.decode(dirTreeJsonDeep));
+      count = 0;
+      for (final dir in tree.walk) {
+        switch (count++) {
+          case 0:
+            expect(dir.name, 'Bottom Dir 1');
+            break;
+          case 1:
+            expect(dir.name, 'Fourth Dir 1');
+            break;
+          case 2:
+            expect(dir.name, 'Third Dir 1');
+            break;
+          case 3:
+            expect(dir.name, 'Second Dir 1');
+            break;
+          case 4:
+            expect(dir.name, 'Top Dir 1');
+            break;
+          default:
+            throw Exception('Should never be reached, count: $count');
+        }
+      }
+    });
+
+    test('Directory tree can be checked if it contains a directory', () {
+      final tree = DirectoryTree.fromFolderList(json.decode(dirTreeJsonDeep));
+
+      final containedDir = Directory(id: 4, name: 'No matter');
+      final uncontainedDir = Directory(id: 6, name: 'Not contained');
+
+      expect(tree.contains(containedDir), true);
+      expect(tree.contains(uncontainedDir), false);
+    });
   });
 }

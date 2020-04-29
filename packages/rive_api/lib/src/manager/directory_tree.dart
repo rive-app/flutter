@@ -8,38 +8,50 @@ class DirectoryTreeManager {
   DirectoryTreeManager(this.volume, [DirectoryTreeApi api])
       : _api = api ?? DirectoryTreeApi() {
     // Fetch user details when stream is first listened to
-    _treeController.onListen = _fetchDirectoryTree;
-
-    // Record all inbound events for directory selection
-    _activeDirectoryController.stream.listen((dir) => _activeDirectory = dir);
+    _treeOutput.onListen = _fetchDirectoryTree;
+    // Setup input handlers
+    _handleActiveDirInput();
   }
   final DirectoryTreeApi _api;
   final Volume volume;
+
   /*
    * State
    */
+
   DirectoryTree __directoryTree;
   void set _directoryTree(DirectoryTree tree) {
     _directoryTree = tree;
-    _treeController.add(tree);
+    _treeOutput.add(tree);
   }
-
-  Directory _activeDirectory;
 
   /*
    * Outbound streams
    */
 
-  final _treeController = BehaviorSubject<DirectoryTree>();
-  Stream<DirectoryTree> get tree => _treeController.stream;
+  final _treeOutput = BehaviorSubject<DirectoryTree>();
+  Stream<DirectoryTree> get tree => _treeOutput.stream;
+
+  final _activeDirOutput = BehaviorSubject<Directory>();
+  Stream<DirectoryTree> get activeDirStream => _treeOutput.stream;
 
   /*
    * Inbound sinks
    */
-  final _activeDirectoryController = StreamController<Directory>();
-  Sink<Directory> get activeDirectory => _activeDirectoryController;
 
-  void dispose() => _treeController.close();
+  final _activeDirInput = StreamController<Directory>();
+  Sink<Directory> get activeDirSink => _activeDirInput;
+  _handleActiveDirInput() {
+    // Handle incoming active directory events
+    _activeDirInput.stream.listen((dir) {
+      // If the directory is in the tree, output it
+      if (__directoryTree.contains(dir)) {
+        _activeDirOutput.add(dir);
+      }
+    });
+  }
+
+  void dispose() => _treeOutput.close();
 
   /*
    * API interface
