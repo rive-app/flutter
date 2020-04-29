@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
@@ -243,29 +244,33 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
         canvas.drawLine(lineStart, lineEnd, _separatorPaint);
       } else if (row is KeyedPropertyViewModel) {
         var keyed = row.keyedProperty;
-        var frames = keyed.keyframes;
-        // print("FRAMES $frames ${frames is List}");
+        var frames = keyed.keyframes as List<KeyFrame>;
 
-        double frameTime = 0.5;
-
-        // in order to draw frame time, we have to offset by
-        // (frameTime-_secondsStart)/_secondsPerPixel
-
-        var x = (frameTime - _secondsStart) / secondsPerPixel;
-        canvas.translate(x, 0);
-        canvas.drawPath(_keyPath, _keyPaint);
-
-        canvas.translate(-x, 0);
+        // inxedOfFrame does a binary search on integer frame values so we need
+        // to offset the first frame by one to compensate for rounding errors.
+        // We end up potentially drawing an extra frame, but the it fixes
+        // popping and still culls majority of out of viewport frames.
+        var firstFrame = (_secondsStart * viewport.fps).floor() - 1;
+        var index = keyed.indexOfFrame(firstFrame);
+        int frameCount = frames.length;
+        var fps = viewport.fps;
+        double lastX = 0;
+        if (index < frameCount) {
+          lastX = (frames[index].frame / fps - _secondsStart) / secondsPerPixel;
+          canvas.translate(lastX, 0);
+          for (int i = index; i < frameCount; i++) {
+            var keyFrame = frames[i];
+            var x = (keyFrame.frame / fps - _secondsStart) / secondsPerPixel;
+            canvas.translate(x - lastX, 0);
+            lastX = x;
+            canvas.drawPath(_keyPath, _keyPaint);
+          }
+        }
+        canvas.translate(-lastX, 0);
       }
 
       canvas.translate(0, rowHeight);
     }
-
-    // for (int i = 0; i < 10; i++) {
-    //   canvas.drawLine(lineStart, lineEnd, _separatorPaint);
-    //   lineStart = Offset(lineStart.dx, lineStart.dy + rowHeight);
-    //   lineEnd = Offset(lineEnd.dx, lineEnd.dy + rowHeight);
-    // }
 
     canvas.restore();
   }
