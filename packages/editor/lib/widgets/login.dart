@@ -507,8 +507,16 @@ class _LoginState extends State<Login> {
             Image.asset('assets/images/icons/rive-logo-login.png'),
             const SizedBox(height: 55),
             AnimatedSwitcher(
-                duration: const Duration(milliseconds: 100),
-                child: _visibleForm),
+              duration: const Duration(milliseconds: 100),
+              child: _visibleForm,
+              layoutBuilder: (currentChild, _) => currentChild,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+            ),
           ],
         ));
   }
