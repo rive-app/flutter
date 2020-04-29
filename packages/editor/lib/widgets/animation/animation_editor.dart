@@ -132,11 +132,14 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
               // let's make it a super lightweight render op by separating it
               // from the rest of the complex ui.
               Positioned(
-                  top: 30,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Playhead(theme: theme,),)
+                top: 30,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Playhead(
+                  theme: theme,
+                ),
+              )
             ],
           ),
         ),
