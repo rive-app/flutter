@@ -63,35 +63,33 @@ class FolderViewWidget extends StatelessWidget {
                 fileBrowser.openFolder(folder, true);
               },
               child: Container(
+                decoration: BoxDecoration(
+                  color: RiveTheme.of(context).colors.fileBackgroundLightGrey,
+                  borderRadius: BorderRadius.circular(_isSelected ? 5 : 10),
+                ),
+                clipBehavior: Clip.antiAlias,
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: RiveTheme.of(context).colors.fileBackgroundLightGrey,
-                    borderRadius: BorderRadius.circular(_isSelected ? 5 : 10),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      children: <Widget>[
-                        FolderIcon(
-                            color: _isSelected
-                                ? RiveTheme.of(context).colors.fileSelectedBlue
-                                : RiveTheme.of(context)
-                                    .colors
-                                    .fileUnselectedFolderIcon),
-                        Container(width: 8),
-                        Expanded(
-                          child: Text(
-                            folder.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: _isSelected
-                                ? RiveTheme.of(context).textStyles.fileBlueText
-                                : RiveTheme.of(context).textStyles.greyText,
-                          ),
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Row(
+                    children: <Widget>[
+                      FolderIcon(
+                          color: _isSelected
+                              ? RiveTheme.of(context).colors.fileSelectedBlue
+                              : RiveTheme.of(context)
+                                  .colors
+                                  .fileUnselectedFolderIcon),
+                      Container(width: 8),
+                      Expanded(
+                        child: Text(
+                          folder.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _isSelected
+                              ? RiveTheme.of(context).textStyles.fileBlueText
+                              : RiveTheme.of(context).textStyles.greyText,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -70,11 +70,23 @@ class FolderTreeView extends StatelessWidget {
         ),
       ),
       extraBuilder: (context, item, index) => Container(),
-      backgroundBuilder: (context, item, style) => DropItemBackground(
-          DropState.none,
-          (fileBrowser?.selectedFolder == item.data)
-              ? SelectionState.selected
-              : SelectionState.none),
+      backgroundBuilder: (context, item, style) =>
+          ValueListenableBuilder<SelectionState>(
+        valueListenable: item.data.selectionState,
+        builder: (context, selectionState, _) {
+          // NOTE: selectionstate gets a bit confused here
+          // the tree and file browser are sharing items
+          // which means they share selection state, which
+          // isnt always what we want
+          var _selectionState = SelectionState.none;
+          if (fileBrowser?.selectedFolder == item.data) {
+            _selectionState = SelectionState.selected;
+          } else if (selectionState == SelectionState.hovered) {
+            _selectionState = SelectionState.hovered;
+          }
+          return DropItemBackground(DropState.none, _selectionState);
+        },
+      ),
       itemBuilder: (context, item, style) => Expanded(
         child: Container(
           child: IgnorePointer(
