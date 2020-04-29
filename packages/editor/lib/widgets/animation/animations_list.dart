@@ -19,6 +19,9 @@ import 'package:tree_widget/tree_widget.dart';
 /// List of animations shown in the animation panel. Selecting one activates it
 /// for editing. Animations can be added, sorted, and deleted.
 class AnimationsList extends StatelessWidget {
+  const AnimationsList({
+    Key key,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     var animationManager = AnimationsProvider.of(context);

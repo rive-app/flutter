@@ -31,6 +31,9 @@ class RiveTheme extends InheritedWidget {
   static RiveThemeData of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<RiveTheme>().theme;
 
+  static RiveThemeData find(BuildContext context) =>
+      context.findAncestorWidgetOfExactType<RiveTheme>().theme;
+
   @override
   bool updateShouldNotify(RiveTheme old) => theme != old.theme;
 }

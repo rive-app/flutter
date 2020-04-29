@@ -14,71 +14,30 @@ import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
-import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
 class KeyedObjectHierarchy extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var animationManager = EditingAnimationProvider.of(context);
-    if (animationManager == null) {
-      return const SizedBox();
-    }
-    return _KeyedObjectTree(
-      animationManager: animationManager,
-    );
-  }
-}
+  final ScrollController scrollController;
+  final KeyedObjectTreeController treeController;
 
-class _KeyedObjectTree extends StatefulWidget {
-  final EditingAnimationManager animationManager;
-
-  const _KeyedObjectTree({
-    @required this.animationManager,
+  const KeyedObjectHierarchy({
+    @required this.scrollController,
+    @required this.treeController,
     Key key,
   }) : super(key: key);
 
   @override
-  __KeyedObjectTreeState createState() => __KeyedObjectTreeState();
-}
-
-class __KeyedObjectTreeState extends State<_KeyedObjectTree> {
-  KeyedObjectTreeController _treeController;
-  @override
-  void initState() {
-    _treeController = KeyedObjectTreeController(widget.animationManager);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _treeController.dispose();
-  }
-
-  @override
-  void didUpdateWidget(_KeyedObjectTree oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.animationManager != widget.animationManager) {
-      _treeController = KeyedObjectTreeController(widget.animationManager);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
-    var style = TreeStyle(
-      showFirstLine: false,
-      hideLines: false,
-      padding: const EdgeInsets.only(left: 10, right: 19),
-      lineColor: RiveTheme.of(context).colors.darkTreeLines,
-    );
+    var style = theme.treeStyles.timeline;
+
     return TreeScrollView(
+      scrollController: scrollController,
       padding: style.padding,
       slivers: [
         TreeView<KeyHierarchyViewModel>(
           style: style,
-          controller: _treeController,
+          controller: treeController,
           expanderBuilder: (context, item, style) => Container(
             child: Center(
               child: TreeExpander(
