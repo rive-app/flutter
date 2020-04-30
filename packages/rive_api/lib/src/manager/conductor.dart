@@ -28,22 +28,24 @@ class Conductor {
 
   /// Wires up the sinks/streams for active directory
   void _wireActiveDirectory() {
-    final streams = [
-      // volumeManager.activeDirStream,
-      activeDirManager.activeDirStream,
-    ];
-    final sinks = [
+    // External sinks
+    final externalSinks = [
       volumeManager.activeDirSink,
       activeDirManager.activeDirSink,
-      activeDirSink,
     ];
 
-    final groupedStreams = StreamGroup<Directory>.broadcast();
-    streams.forEach((s) => groupedStreams.add(s));
+    // Handle inbound active directory change
+    // from the active dir manager
+    // Beware circular sinks/streams infinite loops
+    activeDirManager.activeDirStream.listen((d) {
+      externalSinks
+          .where((s) => s != activeDirManager.activeDirSink)
+          .forEach((s) => s.add(d));
+    });
 
-    /// Add any inbound dirs to the outbound sinks
-    groupedStreams.stream.listen((d) {
-      sinks.forEach((s) => s.add(d));
+    // Handle inbound active directory change
+    _activeDirectoryInput.stream.listen((d) {
+      externalSinks.forEach((s) => s.add(d));
     });
   }
 }
