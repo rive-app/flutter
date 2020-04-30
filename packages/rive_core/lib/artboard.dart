@@ -9,6 +9,7 @@ import 'package:rive_core/drawable.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/rive_animation_controller.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/transform_space.dart';
@@ -61,6 +62,14 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   /// Update any dirty components in this artboard.
   bool advance(double elapsedSeconds) {
+    bool didUpdate = false;
+    for (final controller in _animationControllers) {
+      if (controller.isPlaying) {
+        controller.apply(context, elapsedSeconds);
+        didUpdate = true;
+      }
+    }
+
     if ((_dirt & ComponentDirt.components) != 0) {
       const int maxSteps = 100;
       int step = 0;
@@ -84,9 +93,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
         }
         step++;
       }
+
       return true;
     }
-    return false;
+    return didUpdate;
   }
 
   @override
@@ -287,4 +297,37 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     animationsChanged.notify();
   }
   // <- editor-only
+
+  /// The animation controllers that are called back whenever the artboard
+  /// advances.
+  final Set<RiveAnimationController> _animationControllers = {};
+
+  /// Add an animation controller to this artboard. Playing will be scheduled if
+  /// it's already playing.
+  bool addController(RiveAnimationController controller) {
+    assert(controller != null);
+    if (_animationControllers.contains(controller) ||
+        !controller.init(context)) {
+      return false;
+    }
+    controller.isPlayingChanged.addListener(_onControllerPlayingChanged);
+    _animationControllers.add(controller);
+    if (controller.isPlaying) {
+      context?.markNeedsAdvance();
+    }
+    return true;
+  }
+
+  /// Remove an animation controller form this artboard.
+  bool removeController(RiveAnimationController controller) {
+    assert(controller != null);
+    if (_animationControllers.remove(controller)) {
+      controller.isPlayingChanged.removeListener(_onControllerPlayingChanged);
+      controller.dispose();
+      return true;
+    }
+    return false;
+  }
+
+  void _onControllerPlayingChanged() => context?.markNeedsAdvance();
 }
