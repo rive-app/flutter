@@ -26,10 +26,10 @@ class VolumeManager {
   /*
    * Inbound sinks
    */
+
   final _activeDirectoryInput = StreamController<DirectoryVM>();
-  Sink<DirectoryVM> get activeDirInput => _activeDirectoryInput;
+  Sink<DirectoryVM> get activeDirSink => _activeDirectoryInput;
   _handleActiveDirInput(DirectoryVM dir) {
-    assert(dir?.id != null);
     // Loop through all of the directory trees. If any contain
     // the active directory,
     // output a new DirectoryTreeVM with the AD included. If any
@@ -51,7 +51,11 @@ class VolumeManager {
   final _volumesOutput = BehaviorSubject<Iterable<VolumeVM>>();
   Stream<Iterable<VolumeVM>> get volumesStream => _volumesOutput.stream;
 
-  void dispose() => _volumesOutput.close();
+  void dispose() {
+    _treeOutputs.values.forEach((s) => s.close());
+    _activeDirectoryInput.close();
+    _volumesOutput.close();
+  }
 
   /*
    * API interface

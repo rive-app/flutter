@@ -183,7 +183,7 @@ void main() {
       await Future.wait(configComplete.map((e) => e.future));
 
       final activeDir = DirectoryVM(id: 1, name: 'Top Dir 1');
-      manager.activeDirInput.add(activeDir);
+      manager.activeDirSink.add(activeDir);
 
       // Wait for the tests to complete
       await testComplete.future;
