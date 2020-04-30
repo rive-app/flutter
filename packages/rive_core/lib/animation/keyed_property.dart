@@ -42,12 +42,21 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
       return false;
     }
     _keyframes.add(frame);
+    markKeyFrameOrderDirty();
     return true;
   }
 
   /// Called by rive_core to remove a KeyFrame from this KeyedProperty. This
   /// should be @internal when it's supported.
-  bool internalRemoveKeyFrame(KeyFrame frame) => _keyframes.remove(frame);
+  bool internalRemoveKeyFrame(KeyFrame frame) {
+    var removed = _keyframes.remove(frame);
+    context?.dirty(_notifyKeyframeRemoved);
+    return removed;
+  }
+
+  void _notifyKeyframeRemoved() {
+    keyedObject?.internalKeyFramesChanged();
+  }
 
   /// Called by keyframes when their time value changes. This is a pretty rare
   /// operation, usually occurs when a user moves a keyframe. Meaning: this
@@ -69,6 +78,8 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
         i--;
       }
     }
+
+    keyedObject?.internalKeyFramesChanged();
   }
 
   /// Find the index in the keyframe list of a specific time frame.
@@ -143,8 +154,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile> {
           RiveCoreContext.setKeyState(object, pk, KeyState.keyframe);
           toFrame.apply(object, pk, mix);
         } else {
-          RiveCoreContext.setKeyState(
-              object, pk, KeyState.interpolated);
+          RiveCoreContext.setKeyState(object, pk, KeyState.interpolated);
           fromFrame.applyInterpolation(object, pk, seconds, toFrame, mix);
         }
       } else {

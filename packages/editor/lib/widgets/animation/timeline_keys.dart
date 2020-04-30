@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
@@ -95,6 +96,7 @@ class _TimelineKeysState extends State<TimelineKeys> {
           verticalScrollOffset: _scrollOffset,
           rows: _rows,
           viewport: snapshot.data,
+          animation: widget.animationManager.animation,
         );
       },
     );
@@ -106,12 +108,14 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   final double verticalScrollOffset;
   final List<FlatTreeItem<KeyHierarchyViewModel>> rows;
   final TimelineViewport viewport;
+  final LinearAnimation animation;
 
   const _TimelineKeysRenderer({
     @required this.theme,
     @required this.verticalScrollOffset,
     @required this.rows,
     @required this.viewport,
+    @required this.animation,
   });
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -119,7 +123,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..theme = theme
       ..verticalScrollOffset = verticalScrollOffset
       ..rows = rows
-      ..viewport = viewport;
+      ..viewport = viewport
+      ..animation = animation;
   }
 
   @override
@@ -129,14 +134,15 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..theme = theme
       ..verticalScrollOffset = verticalScrollOffset
       ..rows = rows
-      ..viewport = viewport;
+      ..viewport = viewport
+      ..animation = animation;
     ;
   }
 
   @override
   void didUnmountRenderObject(
       covariant _TimelineKeysRenderObject renderObject) {
-    // Any cleanup to do here?
+    renderObject.dispose();
   }
 }
 
@@ -153,6 +159,21 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
   double _verticalScrollOffset;
   List<FlatTreeItem<KeyHierarchyViewModel>> _rows;
+
+  LinearAnimation _animation;
+  LinearAnimation get animation => _animation;
+  set animation(LinearAnimation value) {
+    if (value == _animation) {
+      return;
+    }
+    _animation?.keyframesChanged?.removeListener(markNeedsPaint);
+    _animation = value;
+    _animation.keyframesChanged.addListener(markNeedsPaint);
+  }
+
+  void dispose() {
+    _animation?.keyframesChanged?.removeListener(markNeedsPaint);
+  }
 
   @override
   void onThemeChanged(RiveThemeData theme) {

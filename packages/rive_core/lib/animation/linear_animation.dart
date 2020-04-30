@@ -1,12 +1,18 @@
 import 'dart:collection';
 
 import 'package:core/core.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/keyed_object.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 export 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 
 class LinearAnimation extends LinearAnimationBase {
+  final Event _keyframesChanged = Event();
+
+  Listenable get keyframesChanged => _keyframesChanged;
+
   /// Map objectId to KeyedObject. N.B. this is the id of the object that we
   /// want to key in core, not of the KeyedObject. It's a clear way to see if an
   /// object is keyed in this animation.
@@ -80,7 +86,7 @@ class LinearAnimation extends LinearAnimationBase {
   /// instances. We do a nice job of not duping all that data at runtime (so
   /// animations exist once but entire Rive file can be instanced multiple times
   /// playing different positions).
-  void apply(double time, {double mix = 1, RiveFile coreContext}) {
+  void apply(double time, {double mix = 1, RiveCoreContext coreContext}) {
     coreContext ??= context;
     for (final keyedObject in _keyedObjects.values) {
       keyedObject.apply(time, mix, coreContext);
@@ -107,4 +113,7 @@ class LinearAnimation extends LinearAnimationBase {
 
   @override
   void workStartChanged(int from, int to) {}
+
+  /// Should be @internal when supported.
+  void internalKeyFramesChanged() => _keyframesChanged.notify();
 }

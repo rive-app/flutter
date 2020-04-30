@@ -89,7 +89,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     return keyedProperty;
   }
 
-  void apply(double time, double mix, RiveFile coreContext) {
+  void apply(double time, double mix, RiveCoreContext coreContext) {
     Core object = coreContext.resolve(objectId);
     if (object == null) {
       return;
@@ -104,4 +104,9 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
 
   @override
   void objectIdChanged(Id from, Id to) {}
+
+  // Should be @internal when supported...
+  void internalKeyFramesChanged() {
+    animation?.internalKeyFramesChanged();
+  }
 }
