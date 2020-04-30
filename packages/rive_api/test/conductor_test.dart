@@ -117,16 +117,12 @@ void main() {
         // we expect the active dir to land
         vols.last.treeStream.listen((tree) {
           if (tree.activeDirectory != null) {
-            print(tree.activeDirectory.name);
             expect(tree.activeDirectory.id, 6);
             testComplete.complete();
           }
         });
       });
-
-      print('Injecting test dir');
       activeDirManager.activeDirSink.add(testDir);
-      print('Test dir injected');
 
       await testComplete.future;
     });

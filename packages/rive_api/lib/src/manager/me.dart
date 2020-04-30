@@ -30,6 +30,10 @@ class MeManager {
   /// Reloads the logged in user
   void reload() => _fetchMe();
 
+  /*
+   * Functions
+   */
+
   void dispose() => _meController.close();
 
   /*

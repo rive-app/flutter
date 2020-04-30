@@ -1,14 +1,21 @@
 /// Manages all data inputs and outputs for Rive data
 
+import 'dart:async';
+
 import 'package:rive_api/src/view_model/view_model.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// API definition, contract for those interfacing
 /// with the bus
 abstract class BusApi {
-  /// Basic user data: MeVM
+  /// User data: MeVM
   Stream<MeVM> get meStream;
-  Sink<MeVM> get meSink;
+
+  /// Volume data: MeVolume
+  Stream<Iterable<VolumeVM>> get volumeStream;
+
+  /// Active directory
+  // Stream<DirectoryVM> get activeDirStream;
 }
 
 /// Lower level access to controllers in the bus.
@@ -17,8 +24,11 @@ abstract class BusApi {
 /// MeManager gets data when the controller is first
 /// subscribed to.
 abstract class BusConfiguration {
-  /// Basic user data configuration
-  BehaviorSubject<MeVM> get meController;
+  /// User stream configuration
+  StreamController<MeVM> get meController;
+
+  /// Volume stream configuration
+  StreamController<Iterable<VolumeVM>> get volumeController;
 }
 
 /// API implementation
@@ -28,11 +38,15 @@ class Bus implements BusApi, BusConfiguration {
   static Bus _instance = Bus._();
   factory Bus() => _instance;
 
-  /// Basic user information: MeVM
+  /// User datta: MeVM
   /// By using one controller for both the stream
   /// and sink, no further wiring required
   final _meController = BehaviorSubject<MeVM>();
   BehaviorSubject<MeVM> get meController => _meController;
   Stream<MeVM> get meStream => _meController.stream;
-  Sink<MeVM> get meSink => _meController.sink;
+
+  /// Volume data: VolumeVM
+  final _volumeController = BehaviorSubject<Iterable<VolumeVM>>();
+  BehaviorSubject<Iterable<VolumeVM>> get volumeController => _volumeController;
+  Stream<Iterable<VolumeVM>> get volumeStream => _volumeController.stream;
 }

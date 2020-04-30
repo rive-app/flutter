@@ -34,4 +34,16 @@ class Team {
 
   @override
   int get hashCode => ownerId;
+
+  /// Data to generate a test team
+  static const _testData = {
+    'ownerId': 12345,
+    'name': 'Team Awesome',
+    'username': 'team_awesome',
+    'avatar': 'http://example.avatar.com',
+    'permission': 'member',
+  };
+
+  /// Create a test user
+  factory Team.testData() => Team.fromData(_testData);
 }

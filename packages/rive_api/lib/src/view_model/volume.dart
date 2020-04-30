@@ -12,7 +12,7 @@ import 'package:rive_api/src/model/model.dart';
 import 'package:rive_api/src/view_model/directory_tree.dart';
 import 'package:meta/meta.dart';
 
-// enum VolumeType { user, team }
+enum VolumeType { user, team }
 
 /// We could inherit from the data model as it shares some data,
 /// but I like the fact that this is readable without reference
@@ -43,14 +43,6 @@ class VolumeVM {
   final Stream<DirectoryTreeVM> treeStream;
   final VolumeType type;
 
-  factory VolumeVM.fromModel(Volume volume, Stream<DirectoryTreeVM> stream) =>
-      VolumeVM(
-        id: volume.id,
-        name: volume.name,
-        avatarUrl: volume.avatarUrl,
-        treeStream: stream,
-      );
-
   factory VolumeVM.fromMeModel(Me me, Stream<DirectoryTreeVM> stream) =>
       VolumeVM(
         type: VolumeType.user,
@@ -73,7 +65,7 @@ class VolumeVM {
   String toString() => 'VolumeVM($name)';
 
   @override
-  bool operator ==(o) => o is Volume && o.id == id;
+  bool operator ==(o) => o is VolumeVM && o.id == id;
 
   @override
   int get hashCode => id;

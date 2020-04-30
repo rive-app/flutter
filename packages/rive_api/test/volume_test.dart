@@ -24,6 +24,7 @@ void main() {
         Me(ownerId: 3, id: 1, name: 'Matt', signedIn: true),
       ),
     );
+
     mockVolApi = MockVolumeApi();
     when(mockVolApi.teams).thenAnswer(
       (i) => Future.value([
@@ -56,6 +57,7 @@ void main() {
               {'id': 8, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
             ])),
     );
+
     when(mockVolApi.directoryTreeMe).thenAnswer(
       (i) => Future.value(DirectoryTree.fromFolderList([
         {'id': 1, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
@@ -64,38 +66,32 @@ void main() {
     );
   });
 
-  group('Model', () {
-    test('Volume models are constructed correctly', () {
-      final volume = Volume(id: 1, name: 'Volume');
+  group('ViewModel', () {
+    test('Volume view models are constructed correctly', () {
+      final volume = VolumeVM(
+        id: 1,
+        name: 'Volume',
+        type: VolumeType.team,
+        treeStream: Stream<DirectoryTreeVM>.empty(),
+      );
       expect(volume.name, 'Volume');
     });
 
-    test('Volume models are contructed correctly from json', () {
-      var jsonVolume = json.encode({'name': 'Volume'});
-      var volume = Volume.fromData(json.decode(jsonVolume));
+    test('Volume view models are contructed correctly from Me models', () {
+      final me = Me.testData();
+      final volume = VolumeVM.fromMeModel(me, Stream<DirectoryTreeVM>.empty());
 
-      expect(volume.name, 'Volume');
-      expect(volume.hasAvatar, false);
-
-      jsonVolume =
-          json.encode({'name': 'Volume 1', 'avatar': 'http://avatar.com'});
-      volume = Volume.fromData(json.decode(jsonVolume));
-
-      expect(volume.name, 'Volume 1');
-      expect(volume.hasAvatar, true);
-      expect(volume.avatarUrl, 'http://avatar.com');
+      expect(volume.id, 40955);
+      expect(volume.name, 'Matt');
     });
 
-    test('Volume models are contructed correctly from a json list', () {
-      final jsonVolumes = json.encode([
-        {'name': 'Volume 1'},
-        {'name': 'Volume 2'},
-      ]);
-      final volumes = Volume.fromDataList(json.decode(jsonVolumes));
+    test('Volume view models are contructed correctly from Team models', () {
+      final team = Team.testData();
+      final volume =
+          VolumeVM.fromTeamModel(team, Stream<DirectoryTreeVM>.empty());
 
-      expect(volumes.length, 2);
-      expect(volumes.first.name, 'Volume 1');
-      expect(volumes.last.name, 'Volume 2');
+      expect(volume.id, 12345);
+      expect(volume.name, 'Team Awesome');
     });
   });
 

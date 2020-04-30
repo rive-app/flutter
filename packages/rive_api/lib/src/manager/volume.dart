@@ -7,8 +7,13 @@ import 'package:rive_api/src/view_model/view_model.dart';
 import 'package:rive_api/src/api/api.dart';
 
 class VolumeManager {
-  VolumeManager({MeApi meApi, VolumeApi volumeApi})
-      : _volApi = volumeApi ?? VolumeApi(),
+  VolumeManager({
+    BehaviorSubject<Iterable<VolumeVM>> volumeController,
+    MeApi meApi,
+    VolumeApi volumeApi,
+  })  : _volumesOutput =
+            volumeController ?? BehaviorSubject<Iterable<VolumeVM>>(),
+        _volApi = volumeApi ?? VolumeApi(),
         _meApi = meApi ?? MeApi() {
     _volumesOutput.onListen = _fetchVolumes;
     _activeDirectoryInput.stream.listen(_handleActiveDirInput);
@@ -48,7 +53,7 @@ class VolumeManager {
    * Outbound streams
    */
 
-  final _volumesOutput = BehaviorSubject<Iterable<VolumeVM>>();
+  final StreamController<Iterable<VolumeVM>> _volumesOutput;
   Stream<Iterable<VolumeVM>> get volumesStream => _volumesOutput.stream;
 
   /*
