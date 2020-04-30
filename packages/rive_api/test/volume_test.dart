@@ -47,6 +47,10 @@ void main() {
     });
   });
 
+  /// These tests get complicated due to async and having to wait
+  /// for events to roll through streams. In the UI, where things
+  /// are async by nature, this complexity should not be there.
+
   group('Manager', () {
     test('Volume manager provides user volumes', () async {
       // Mock out the api

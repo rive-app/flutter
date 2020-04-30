@@ -1,13 +1,20 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:async/async.dart';
+
 import 'package:rive_api/src/manager/manager.dart';
-import 'package:rive_api/src/model/model.dart';
 import 'package:rive_api/src/view_model/view_model.dart';
 
-/// Wires the different managers together
-
+/// Conductor is the manager of managers, or be more precise,
+/// the thing that wires all the sinks and streams together, so
+/// we don't have to do it all over the UI code.
+///
+/// We could just stick the conductor in an inherited widget,
+/// and use it to get references to any of the managers.
+///
+/// We could also expose all the sinks (inbound data) in the conductor,
+/// and then let the conductor route it. Or we can listen to the appropriate
+/// manager streams.
 class Conductor {
   Conductor({@required this.volumeManager, @required this.activeDirManager})
       : assert(volumeManager != null),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -46,6 +45,9 @@ void main() {
   });
 
   tearDown(() {});
+
+  /// Another nice side effect of the conductor is that it acts as a central
+  /// point for end to end testing of sinks and streams that span multiple managers.
 
   group('Model', () {
     test('Conductor passes an active directory to managers', () async {

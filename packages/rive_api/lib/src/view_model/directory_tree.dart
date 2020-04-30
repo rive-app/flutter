@@ -1,3 +1,8 @@
+/// These view models are a mess
+/// The tree should be properly converted
+/// to use DirectoryVM. Seems like a bunch of
+/// work to replicate the same structure ...
+///
 import 'package:meta/meta.dart';
 
 import 'package:rive_api/src/model/model.dart';

@@ -75,7 +75,7 @@ class VolumeManager {
     }
     // Create the volume view models
     _volumesOutput.add(
-      volumes.map((v) => VolumeVM.fromModelWithStream(v, _treeOutputs[v])),
+      volumes.map((v) => VolumeVM.fromModel(v, _treeOutputs[v])),
     );
   }
 
