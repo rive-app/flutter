@@ -253,10 +253,10 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     }
     canvas.translate(offset.dx, offset.dy - renderOffset);
 
-    // If we draw passed this x position, we can stop drawing as we're
-    // effectively off screen. We offset by half the width of the key as key
-    // origin is in the center of the key, so anything drawing with an origin of
-    // width + half key will not be within the bounds of this widget.
+    // If we draw past this x position, we can stop drawing as we're effectively
+    // off screen. We offset by half the width of the key as key origin is in
+    // the center of the key, so anything drawing with an origin of width + half
+    // key will not be within the bounds of this widget.
     var rightThreshold = size.width + _keyRadius;
 
     for (int i = firstRow; i < lastRow; i++) {
