@@ -108,8 +108,8 @@ class TeamWizardPanelTwo extends StatelessWidget {
       padding: (sub.ccvError == null &&
               sub.expirationError == null &&
               sub.zipError == null)
-          ? const EdgeInsets.only(top: 30, bottom: 31, left: 30, right: 30)
-          : const EdgeInsets.only(top: 30, bottom: 8, left: 30, right: 30),
+          ? const EdgeInsets.all(30)
+          : const EdgeInsets.all(30).copyWith(bottom: 10),
       decoration: BoxDecoration(
         border: Border.all(width: 1.0, color: const Color(0xFFE3E3E3)),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -125,7 +125,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
           // Credit card details
           Padding(
             padding: sub.cardValidationError == null
-                ? const EdgeInsets.only(top: 28)
+                ? const EdgeInsets.only(top: 25)
                 : const EdgeInsets.only(top: 5),
             child: _cardDetails(context),
           ),

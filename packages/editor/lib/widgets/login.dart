@@ -507,8 +507,16 @@ class _LoginState extends State<Login> {
             Image.asset('assets/images/icons/rive-logo-login.png'),
             const SizedBox(height: 55),
             AnimatedSwitcher(
-                duration: const Duration(milliseconds: 100),
-                child: _visibleForm),
+              duration: const Duration(milliseconds: 100),
+              child: _visibleForm,
+              layoutBuilder: (currentChild, _) => currentChild,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+            ),
           ],
         ));
   }
@@ -601,9 +609,9 @@ class _LoginSwitch extends StatelessWidget {
           const SizedBox(width: 10),
           EditorSwitch(
             isOn: isLogin,
-            toggle: () => onSelect(panel == LoginPage.register
-                ? LoginPage.login
-                : LoginPage.register),
+            toggle: () => onSelect(panel == LoginPage.login
+                ? LoginPage.register
+                : LoginPage.login),
             onColor: Colors.white,
             offColor: Colors.white,
             backgroundColor: panel == LoginPage.recover

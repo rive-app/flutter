@@ -120,7 +120,7 @@ class _RiveTextFieldState extends State<RiveTextField>
             isDense: true,
             hintText: widget.hintText,
             hintStyle: textStyles.textFieldInputHint
-                .copyWith(fontSize: 13, height: 1.15),
+                .copyWith(fontSize: widget.fontSize, height: 1.15),
             contentPadding: const EdgeInsets.only(bottom: 8),
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
