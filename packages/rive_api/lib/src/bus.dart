@@ -3,13 +3,19 @@
 import 'package:rive_api/src/view_model/view_model.dart';
 import 'package:rxdart/rxdart.dart';
 
-/// API definition
+/// API definition, contract for those interfacing
+/// with the bus
 abstract class BusApi {
-  /// Basic user data: name and avatar
+  /// Basic user data: MeVM
   Stream<MeVM> get meStream;
   Sink<MeVM> get meSink;
 }
 
+/// Lower level access to controllers in the bus.
+/// Sometimes needed by managers requiring controller
+/// level access for configuringb themselves; e.g.
+/// MeManager gets data when the controller is first
+/// subscribed to.
 abstract class BusConfiguration {
   /// Basic user data configuration
   BehaviorSubject<MeVM> get meController;
@@ -22,7 +28,7 @@ class Bus implements BusApi, BusConfiguration {
   static Bus _instance = Bus._();
   factory Bus() => _instance;
 
-  /// Basic user information: name and avatar
+  /// Basic user information: MeVM
   /// By using one controller for both the stream
   /// and sink, no further wiring required
   final _meController = BehaviorSubject<MeVM>();

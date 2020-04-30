@@ -17,11 +17,18 @@ class MeManager {
   final MeApi _api;
 
   /*
-   * Outbound streams
+   * Outbound
    */
 
   final BehaviorSubject<MeVM> _meController;
   Stream<MeVM> get me => _meController.stream;
+
+  /*
+   * Inbound
+   */
+
+  /// Reloads the logged in user
+  void reload() => _fetchMe();
 
   void dispose() => _meController.close();
 

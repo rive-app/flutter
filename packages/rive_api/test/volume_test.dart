@@ -11,7 +11,59 @@ import 'package:rive_api/src/api/api.dart';
 
 class MockVolumeApi extends Mock implements VolumeApi {}
 
+class MockMeApi extends Mock implements MeApi {}
+
 void main() {
+  MockMeApi mockMeApi;
+  MockVolumeApi mockVolApi;
+
+  setUp(() {
+    mockMeApi = MockMeApi();
+    when(mockMeApi.whoami).thenAnswer(
+      (_) => Future.value(
+        Me(ownerId: 3, id: 1, name: 'Matt', signedIn: true),
+      ),
+    );
+    mockVolApi = MockVolumeApi();
+    when(mockVolApi.teams).thenAnswer(
+      (i) => Future.value([
+        Team(
+            ownerId: 1,
+            name: 'Team Vol 1',
+            username: 'team_1',
+            permission: 'owner'),
+        Team(
+            ownerId: 2,
+            name: 'Team Vol 2',
+            username: 'team_2',
+            permission: 'member',
+            avatarUrl: 'http://avatar.edu'),
+      ]),
+    );
+
+    when(mockVolApi.directoryTreeTeam(any)).thenAnswer(
+      (i) => i.positionalArguments[0] == 1
+          ? Future.value(DirectoryTree.fromFolderList([
+              {'id': 1, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
+              {'id': 2, 'name': 'Top Dir 2', 'parent': null, 'order': 1},
+              {'id': 3, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
+              {'id': 4, 'name': 'Bottom Dir 2', 'parent': 1, 'order': 1},
+              {'id': 5, 'name': 'Bottom Dir 3', 'parent': 2, 'order': 0},
+            ]))
+          : Future.value(DirectoryTree.fromFolderList([
+              {'id': 6, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
+              {'id': 7, 'name': 'Top Dir 2', 'parent': null, 'order': 1},
+              {'id': 8, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
+            ])),
+    );
+    when(mockVolApi.directoryTreeMe).thenAnswer(
+      (i) => Future.value(DirectoryTree.fromFolderList([
+        {'id': 1, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
+        {'id': 2, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
+      ])),
+    );
+  });
+
   group('Model', () {
     test('Volume models are constructed correctly', () {
       final volume = Volume(id: 1, name: 'Volume');
@@ -53,23 +105,13 @@ void main() {
 
   group('Manager', () {
     test('Volume manager provides user volumes', () async {
-      // Mock out the api
-      final mockApi = MockVolumeApi();
-      when(mockApi.volumes).thenAnswer(
-        (i) => Future.value([
-          Volume(id: 1, name: 'Matt Vol'),
-          Volume(id: 2, name: 'Team Vol 1'),
-          Volume(id: 3, name: 'Team Vol 2', avatarUrl: 'http://avatar.edu'),
-        ]),
-      );
-
       // Track async completion of the test
       final testComplete = Completer();
 
-      final manager = VolumeManager(mockApi);
+      final manager = VolumeManager(meApi: mockMeApi, volumeApi: mockVolApi);
       manager.volumesStream.listen((volumes) {
         expect(volumes.length, 3);
-        expect(volumes.first.name, 'Matt Vol');
+        expect(volumes.first.name, 'Matt');
         expect(volumes.last.name, 'Team Vol 2');
         expect(volumes.last.avatarUrl, 'http://avatar.edu');
         // Mark the test as completed
@@ -83,30 +125,10 @@ void main() {
     });
 
     test('Volume manager provides directory trees', () async {
-      // Mock out the api
-      final mockApi = MockVolumeApi();
-      when(mockApi.volumes).thenAnswer(
-        (i) => Future.value([
-          Volume(id: 1, name: 'Matt Vol'),
-          Volume(id: 2, name: 'Team Vol 1'),
-          Volume(id: 3, name: 'Team Vol 2', avatarUrl: 'http://avatar.edu'),
-        ]),
-      );
-
-      when(mockApi.directoryTree(any)).thenAnswer(
-        (i) => Future.value(DirectoryTree.fromFolderList([
-          {'id': 1, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
-          {'id': 2, 'name': 'Top Dir 2', 'parent': null, 'order': 1},
-          {'id': 3, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
-          {'id': 4, 'name': 'Bottom Dir 2', 'parent': 1, 'order': 1},
-          {'id': 5, 'name': 'Bottom Dir 3', 'parent': 2, 'order': 0},
-        ])),
-      );
-
       // Track async completion of the test
       final testsComplete = [Completer(), Completer()];
 
-      final manager = VolumeManager(mockApi);
+      final manager = VolumeManager(meApi: mockMeApi, volumeApi: mockVolApi);
       manager.volumesStream.listen((volumes) {
         expect(volumes.length, 3);
         volumes.first.treeStream.listen((tree) {
@@ -128,31 +150,6 @@ void main() {
     });
 
     test('Volume manager updates active directory', () async {
-      // Mock out the api
-      final mockApi = MockVolumeApi();
-      when(mockApi.volumes).thenAnswer(
-        (i) => Future.value([
-          Volume(id: 1, name: 'Matt Vol'),
-          Volume(id: 2, name: 'Team Vol 1', avatarUrl: 'http://avatar.edu'),
-        ]),
-      );
-
-      when(mockApi.directoryTree(any)).thenAnswer((i) {
-        return i.positionalArguments[0].id == 1
-            ? Future.value(DirectoryTree.fromFolderList([
-                {'id': 1, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
-                {'id': 2, 'name': 'Top Dir 2', 'parent': null, 'order': 1},
-                {'id': 3, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
-                {'id': 4, 'name': 'Bottom Dir 2', 'parent': 1, 'order': 1},
-                {'id': 5, 'name': 'Bottom Dir 3', 'parent': 2, 'order': 0},
-              ]))
-            : Future.value(DirectoryTree.fromFolderList([
-                {'id': 6, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
-                {'id': 7, 'name': 'Top Dir 2', 'parent': null, 'order': 1},
-                {'id': 8, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
-              ]));
-      });
-
       // Track config completion; streams need to be
       // listened to before firing stuff into sink
       final configComplete = [Completer(), Completer()];
@@ -160,7 +157,8 @@ void main() {
       // Track async completion of the test
       final testComplete = Completer();
 
-      final manager = VolumeManager(mockApi);
+      final manager = VolumeManager(meApi: mockMeApi, volumeApi: mockVolApi);
+      ;
       manager.volumesStream.listen((volumes) {
         volumes.first.treeStream.listen((tree) {
           if (!configComplete.first.isCompleted) {

@@ -11,29 +11,25 @@ class VolumeApi {
   VolumeApi() : api = RiveApi();
   final RiveApi api;
 
-  Future<Iterable<Volume>> get volumes async {
-    // Note the user's personal volume
-    final me = await MeApi().whoami;
-    final userVolume = Volume(name: me.name);
+  Future<Iterable<Team>> get teams async {
     // Get the user's team volumes
     final res = await api.getFromPath('/api/teams');
     try {
       final data = json.decode(res.body) as List<dynamic>;
-      final teamVolumes = Volume.fromDataList(data);
-      return []
-        ..add(userVolume)
-        ..addAll(teamVolumes);
+      return Team.fromDataList(data);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
       rethrow;
     }
   }
 
-  Future<DirectoryTree> directoryTree(Volume volume) async {
-    var path = '/api/my/files/folders';
-    if (volume.type == VolumeType.team) {
-      path = '/api/teams/${volume.id}/folders';
-    }
+  Future<DirectoryTree> get directoryTreeMe async =>
+      _directoryTree('/api/my/files/folders');
+
+  Future<DirectoryTree> directoryTreeTeam(int id) async =>
+      _directoryTree('/api/teams/$id/folders');
+
+  Future<DirectoryTree> _directoryTree(String path) async {
     final res = await api.getFromPath(path);
     try {
       final data = json.decode(res.body) as Map<String, dynamic>;

@@ -10,6 +10,9 @@
 
 import 'package:rive_api/src/model/model.dart';
 import 'package:rive_api/src/view_model/directory_tree.dart';
+import 'package:meta/meta.dart';
+
+// enum VolumeType { user, team }
 
 /// We could inherit from the data model as it shares some data,
 /// but I like the fact that this is readable without reference
@@ -27,11 +30,18 @@ import 'package:rive_api/src/view_model/directory_tree.dart';
 ///   ...
 /// }
 class VolumeVM {
-  VolumeVM({this.id, this.name, this.avatarUrl, this.treeStream});
+  VolumeVM({
+    @required this.id,
+    @required this.name,
+    @required this.treeStream,
+    @required this.type,
+    this.avatarUrl,
+  });
   final int id;
   final String name;
   final String avatarUrl;
   final Stream<DirectoryTreeVM> treeStream;
+  final VolumeType type;
 
   factory VolumeVM.fromModel(Volume volume, Stream<DirectoryTreeVM> stream) =>
       VolumeVM(
@@ -40,4 +50,31 @@ class VolumeVM {
         avatarUrl: volume.avatarUrl,
         treeStream: stream,
       );
+
+  factory VolumeVM.fromMeModel(Me me, Stream<DirectoryTreeVM> stream) =>
+      VolumeVM(
+        type: VolumeType.user,
+        id: me.ownerId,
+        name: me.name,
+        avatarUrl: me.avatarUrl,
+        treeStream: stream,
+      );
+
+  factory VolumeVM.fromTeamModel(Team team, Stream<DirectoryTreeVM> stream) =>
+      VolumeVM(
+        type: VolumeType.team,
+        id: team.ownerId,
+        name: team.name,
+        avatarUrl: team.avatarUrl,
+        treeStream: stream,
+      );
+
+  @override
+  String toString() => 'VolumeVM($name)';
+
+  @override
+  bool operator ==(o) => o is Volume && o.id == id;
+
+  @override
+  int get hashCode => id;
 }
