@@ -13,6 +13,7 @@ dependencies:
   encrypt: ^4.0.0
   logging: ^0.11.4
   rxdart: ^0.24.0
+  async: ^2.4.1
   utilities:
     path: ../utilities
   local_data:

@@ -17,25 +17,28 @@ class ActiveDirectoryManager {
    * Outbound streams
    */
 
-  final _directoriesController = BehaviorSubject<Directory>();
-  Stream<Directory> get directories => _directoriesController.stream;
+  final _dirsOutput = BehaviorSubject<Directory>();
+  Stream<Directory> get dirsStream => _dirsOutput.stream;
 
-  final _fileStreamsController = BehaviorSubject<Iterable<Stream<File>>>();
-  Stream<Iterable<Stream<File>>> get fileStreams =>
-      _fileStreamsController.stream;
+  final _filesOutput = BehaviorSubject<Iterable<Stream<File>>>();
+  Stream<Iterable<Stream<File>>> get fileStreams => _filesOutput.stream;
+
+  /// The active directory can be set from the directory's sub-directories
+  final _activeDirOutput = BehaviorSubject<Directory>();
+  Stream<Directory> get activeDirStream => _activeDirOutput.stream;
 
   /*
    * Inbound sinks
    */
 
-  final _activeDirectoryController = StreamController<Directory>();
-  Sink<Directory> get activeDirectory => _activeDirectoryController;
+  final _activeDirInput = StreamController<Directory>();
+  Sink<Directory> get activeDirSink => _activeDirInput;
 
   void dispose() {
     // Close all open file streams
-    _fileStreamsController.value.forEach((s) => s.drain());
-    _directoriesController.close();
-    _fileStreamsController.close();
-    _activeDirectoryController.close();
+    _filesOutput.value.forEach((s) => s.drain());
+    _dirsOutput.close();
+    _filesOutput.close();
+    _activeDirInput.close();
   }
 }

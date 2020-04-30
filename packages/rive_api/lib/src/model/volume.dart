@@ -4,8 +4,9 @@ import 'package:utilities/deserialize.dart';
 enum VolumeType { user, team }
 
 class Volume {
-  const Volume({@required this.name, this.id, this.avatarUrl})
-      : assert(name != null);
+  const Volume({@required this.name, @required this.id, this.avatarUrl})
+      : assert(id != null),
+        assert(name != null);
   final int id;
   final String name;
   final String avatarUrl;
@@ -27,4 +28,10 @@ class Volume {
 
   @override
   String toString() => 'Volume($name)';
+
+  @override
+  bool operator ==(o) => o is Volume && o.id == id;
+
+  @override
+  int get hashCode => id;
 }

@@ -72,8 +72,8 @@ class DirectoryTree {
 }
 
 class Directory {
-  Directory({@required int id, @required this.name, this.children}) : _id = id;
-  final int _id;
+  Directory({@required this.id, @required this.name, this.children});
+  final int id;
   final String name;
   final Iterable<Directory> children;
 
@@ -89,8 +89,8 @@ class Directory {
   String toString() => 'Directory($name)';
 
   @override
-  bool operator ==(o) => o is Directory && o._id == _id;
+  bool operator ==(o) => o is Directory && o.id == id;
 
   @override
-  int get hashCode => _id;
+  int get hashCode => id;
 }
