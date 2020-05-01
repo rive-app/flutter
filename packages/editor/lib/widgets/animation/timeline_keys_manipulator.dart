@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:cursor/cursor_view.dart';
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +14,7 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
+import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
@@ -70,6 +72,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   HashSet<KeyFrame> _selection = HashSet<KeyFrame>();
   _DragOperation _dragOperation;
   KeyFrameMoveHelper _moveHelper;
+  CursorInstance _handCursor;
 
   Offset _marqueeStart;
   _Marquee _marquee;
@@ -94,6 +97,8 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
   @override
   void dispose() {
+    _handCursor?.remove();
+    _handCursor = null;
     widget.activeFile.selection.removeListener(_stageSelectionChanged);
     widget.activeFile.removeActionHandler(_onAction);
     super.dispose();
@@ -132,29 +137,37 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     );
   }
 
+  void _pan(Offset delta) {
+    // Compute vertical scroll
+    var position = widget.verticalScroll.position;
+    var newPosition = min(
+        max(position.pixels + delta.dy, position.minScrollExtent),
+        position.maxScrollExtent);
+    widget.verticalScroll.jumpTo(newPosition);
+
+    // Compute horizontal scroll
+    var helper = makeMouseHelper();
+    var timeScroll = delta.dx * helper.secondsPerPixel;
+    widget.animationManager.changeViewport
+        .add(widget.viewport.move(timeScroll));
+  }
+
   @override
   Widget build(BuildContext context) {
     return PropagatingListener(
       onPointerSignal: (details) {
         if (details.pointerEvent is PointerScrollEvent) {
-          var se = details.pointerEvent as PointerScrollEvent;
-
-          // Compute vertical scroll
-          double delta = se.scrollDelta.dy;
-          var position = widget.verticalScroll.position;
-          var newPosition = min(
-              max(position.pixels + delta, position.minScrollExtent),
-              position.maxScrollExtent);
-          widget.verticalScroll.jumpTo(newPosition);
-
-          // Compute horizontal scroll
-          var helper = makeMouseHelper();
-          var timeScroll = se.scrollDelta.dx * helper.secondsPerPixel;
-          widget.animationManager.changeViewport
-              .add(widget.viewport.move(timeScroll));
+          _pan((details.pointerEvent as PointerScrollEvent).scrollDelta);
         }
       },
       onPointerDown: (details) {
+        if (details.pointerEvent.buttons == 2) {
+          _handCursor = CursorIcon.show(context, 'cursor-hand');
+          // right click to pan.
+          _dragOperation = _DragOperation.pan;
+          return;
+        }
+
         var selected = HashSet<KeyFrame>();
 
         // Gotta clean this up.
@@ -195,6 +208,9 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
       },
       onPointerMove: (details) {
         switch (_dragOperation) {
+          case _DragOperation.pan:
+            _pan(details.pointerEvent.localDelta * -1);
+            break;
           case _DragOperation.move:
             if (_selection.isNotEmpty) {
               // TODO: cache viewport helpers? probably not worth it...
@@ -235,6 +251,8 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         });
         _moveHelper?.complete();
         _moveHelper = null;
+        _handCursor?.remove();
+        _handCursor = null;
       },
       child: Stack(
         children: [
