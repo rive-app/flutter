@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
@@ -9,19 +8,13 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
-import 'package:rive_editor/rive/open_file_context.dart';
-import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
+import 'package:rive_editor/widgets/animation/timeline_keys_manipulator.dart';
 import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:tree_widget/flat_tree_item.dart';
-
-const double _keyRadius = 4;
-// const double _keySquare = _keyRadius * 2;
-const double _visualKeyRadius =
-    5.6568542495; // //sqrt(_keySquare + _keySquare) / 2;
 
 /// Draws the rows in the timeline, separators, and their respective keys. Also
 /// handles interaction/user input with them.
@@ -30,14 +23,12 @@ class TimelineKeys extends StatefulWidget {
   final ScrollController verticalScroll;
   final KeyedObjectTreeController treeController;
   final EditingAnimationManager animationManager;
-  final OpenFileContext activeFile;
 
   const TimelineKeys({
     @required this.theme,
     @required this.verticalScroll,
     @required this.treeController,
     @required this.animationManager,
-    @required this.activeFile,
     Key key,
   }) : super(key: key);
 
@@ -48,51 +39,19 @@ class TimelineKeys extends StatefulWidget {
 class _TimelineKeysState extends State<TimelineKeys> {
   double _scrollOffset = 0;
   List<FlatTreeItem<KeyHierarchyViewModel>> _rows = [];
-  HashSet<KeyFrame> _selection = HashSet<KeyFrame>();
 
   @override
   void initState() {
     super.initState();
-    widget.activeFile.addActionHandler(_onAction);
-    widget.activeFile.selection.addListener(_stageSelectionChanged);
     widget.verticalScroll?.addListener(_onVerticalScrollChanged);
     _onVerticalScrollChanged();
     widget.treeController?.addListener(_onFlatListChanged);
     _onFlatListChanged();
   }
 
-  void _clearSelection() {
-    setState(() {
-      _selection = HashSet<KeyFrame>();
-    });
-  }
-
-  void _stageSelectionChanged() {
-    _clearSelection();
-  }
-
-  bool _onAction(ShortcutAction action) {
-    switch (action) {
-      case ShortcutAction.delete:
-        if (_selection.isNotEmpty) {
-          widget.animationManager.deleteKeyFrames.add(_selection);
-          _clearSelection();
-          return true;
-        }
-        break;
-    }
-    return false;
-  }
-
   @override
   void didUpdateWidget(TimelineKeys oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.activeFile != widget.activeFile) {
-      oldWidget.activeFile.removeActionHandler(_onAction);
-      widget.activeFile.addActionHandler(_onAction);
-      oldWidget.activeFile.selection.removeListener(_stageSelectionChanged);
-      widget.activeFile.selection.addListener(_stageSelectionChanged);
-    }
     if (oldWidget.verticalScroll != widget.verticalScroll) {
       oldWidget.verticalScroll?.removeListener(_onVerticalScrollChanged);
       widget.verticalScroll?.addListener(_onVerticalScrollChanged);
@@ -107,8 +66,6 @@ class _TimelineKeysState extends State<TimelineKeys> {
 
   @override
   void dispose() {
-    widget.activeFile.selection.removeListener(_stageSelectionChanged);
-    widget.activeFile.removeActionHandler(_onAction);
     widget.verticalScroll?.removeListener(_onVerticalScrollChanged);
     super.dispose();
   }
@@ -137,111 +94,24 @@ class _TimelineKeysState extends State<TimelineKeys> {
           return const SizedBox();
         }
         var viewport = snapshot.data;
-        return PropagatingListener(
-          onPointerDown: (details) {
-            var renderBox = context.findRenderObject() as RenderBox;
-
-            var selected = HashSet<KeyFrame>();
-
-            // Gotta clean this up.
-            if (widget.activeFile.rive.selectionMode.value ==
-                SelectionMode.multi) {
-              selected.addAll(_selection);
-            }
-            var frame = KeyFrameCursorHelper.click(
-                details.pointerEvent.localPosition,
-                renderBox.size,
-                widget.theme,
-                viewport,
-                _scrollOffset,
-                _rows);
-            if (frame is KeyFrame) {
-              selected.add(frame);
-            } else if (frame is AllKeyFrame) {
-              selected.addAll(frame.keyframes);
-            }
-            setState(() {
-              _selection = selected;
-            });
-          },
-          child: _TimelineKeysRenderer(
+        return TimelineKeysManipulator(
+          activeFile: ActiveFile.of(context),
+          viewport: viewport,
+          theme: widget.theme,
+          verticalScroll: widget.verticalScroll,
+          animationManager: widget.animationManager,
+          rows: _rows,
+          builder: (context, selection) => _TimelineKeysRenderer(
             theme: widget.theme,
             verticalScrollOffset: _scrollOffset,
             rows: _rows,
             viewport: viewport,
             animation: widget.animationManager.animation,
-            selection: _selection,
+            selection: selection,
           ),
         );
       },
     );
-  }
-}
-
-class KeyFrameCursorHelper {
-  /// Returns the KeyFrame that was clicked on.
-  static KeyFrameInterface click(
-      Offset position,
-      Size size,
-      RiveThemeData theme,
-      TimelineViewport viewport,
-      double verticalScroll,
-      List<FlatTreeItem<KeyHierarchyViewModel>> rows) {
-    // First find closest row.
-    var rowHeight = theme.treeStyles.timeline.itemHeight;
-
-    var rowIndex = ((verticalScroll + position.dy) / rowHeight).floor();
-    var row = rows[rowIndex].data;
-
-    var marginLeft = theme.dimensions.timelineMarginLeft;
-    var marginRight = theme.dimensions.timelineMarginRight;
-
-    var visibleDuration = viewport.endSeconds - viewport.startSeconds;
-    var secondsPerPixel =
-        visibleDuration / (size.width - marginLeft - marginRight);
-        
-    // Closest seconds to where we clicked.
-    var searchSeconds =
-        viewport.startSeconds + (-marginLeft + position.dx) * secondsPerPixel;
-
-    KeyFrameList keyFrameList;
-    if (row is KeyedPropertyViewModel) {
-      keyFrameList = row.keyedProperty;
-    } else if (row is AllKeysViewModel) {
-      keyFrameList = row.allProperties.cached;
-    }
-
-    if (keyFrameList == null) {
-      return null;
-    }
-
-    var fps = viewport.fps;
-    List<KeyFrameInterface> frames =
-        keyFrameList.keyframes as List<KeyFrameInterface>;
-    
-    // Find the time in frames but store it as a double so we can do precise
-    // distance evaluation below. We
-    double firstFrameDouble = searchSeconds * fps;
-    var firstFrame = firstFrameDouble.floor();
-    var index = keyFrameList.indexOfFrame(firstFrame);
-
-    // When we click, we want to get close with our binary search and then check
-    // the three nearest neighbors for which one we're closest to.
-    var start = max(index - 1, 0);
-    var end = min(index + 2, frames.length);
-    double closest = double.maxFinite;
-    KeyFrameInterface hit;
-
-    // We compare in frame (fps) space so we need to convert pixels to frames.
-    var threshold = _visualKeyRadius * secondsPerPixel * fps;
-    for (var i = start; i < end; i++) {
-      var diff = (frames[i].frame - firstFrameDouble).abs();
-      if (diff <= threshold && diff < closest) {
-        hit = frames[i];
-      }
-    }
-
-    return hit;
   }
 }
 
@@ -342,13 +212,20 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     _allkeyPaint.color = theme.colors.allKey;
     _selectedPaint.color = theme.colors.keySelection;
 
+    var keyRadius = theme.dimensions.keyHalfSquare;
     var transform = Mat2D();
     Mat2D.fromRotation(transform, pi / 4);
     _keyPath.reset();
     _keyPath.addPath(
       Path()
-        ..addRect(const Rect.fromLTRB(
-            -_keyRadius, -_keyRadius, _keyRadius, _keyRadius)),
+        ..addRect(
+          Rect.fromLTRB(
+            -keyRadius,
+            -keyRadius,
+            keyRadius,
+            keyRadius,
+          ),
+        ),
       Offset(0, theme.treeStyles.timeline.itemHeight / 2),
       matrix4: transform.mat4,
     );
@@ -418,7 +295,7 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     // off screen. We offset by half the width of the key as key origin is in
     // the center of the key, so anything drawing with an origin of width + half
     // key will not be within the bounds of this widget.
-    var rightThreshold = size.width + _keyRadius;
+    var rightThreshold = size.width + theme.dimensions.keyHalfBounds;
 
     for (int i = firstRow; i < lastRow; i++) {
       var row = _rows[i].data;

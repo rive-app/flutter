@@ -420,6 +420,15 @@ class _Dimensions {
   const _Dimensions();
   double get timelineMarginLeft => 10;
   double get timelineMarginRight => 30;
+  /// Half of the width of the square that is rotated to make the key shape in
+  /// the timeline.
+  double get keyHalfSquare => 4;
+  /// Half of the hypotenuse of the square, effectively the radius of the key if
+  /// it were inscribed in a circle. We use this to find if the key is out of
+  /// bounds. Not sure if this is appropriate in the theme, but it's used in a
+  /// few places so this makes it easy to get it. Just make sure you update the
+  /// value if you change the keyHalfSquare above.
+  double get keyHalfBounds => 5.6568542495; //sqrt(pow(keyHalfSquare*2, 2)*2)/2;
 }
 
 /// Holds instances of various sub theme classes

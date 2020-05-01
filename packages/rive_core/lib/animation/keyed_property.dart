@@ -50,6 +50,20 @@ class KeyFrameList<T extends KeyFrameInterface> {
 
 class KeyedProperty extends KeyedPropertyBase<RiveFile>
     with KeyFrameList<KeyFrame> {
+  // -> editor-only
+  bool _suppressValidation = false;
+  bool get suppressValidation => _suppressValidation;
+  set suppressValidation(bool value) {
+    if (_suppressValidation == value) {
+      return;
+    }
+    _suppressValidation = value;
+    if (!_suppressValidation) {
+      _sortAndValidateKeyFrames();
+    }
+  }
+  // <- editor-only
+
   @override
   void onAdded() {}
 
@@ -107,6 +121,14 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
 
   void _sortAndValidateKeyFrames() {
     sort();
+    
+    // -> editor-only
+    if (suppressValidation) {
+      keyedObject?.internalKeyFramesChanged();
+      return;
+    }
+    // <- editor-only
+
     for (int i = 0; i < _keyframes.length - 1; i++) {
       var a = _keyframes[i];
       var b = _keyframes[i + 1];
