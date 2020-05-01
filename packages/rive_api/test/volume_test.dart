@@ -116,8 +116,6 @@ void main() {
 
       // Wait for the test to complete
       await testComplete.future;
-
-      manager.dispose();
     });
 
     test('Volume manager provides directory trees', () async {
@@ -141,8 +139,6 @@ void main() {
 
       // Wait for the tests to complete
       await Future.wait(testsComplete.map((e) => e.future));
-
-      manager.dispose();
     });
 
     test('Volume manager updates active directory', () async {
@@ -185,8 +181,6 @@ void main() {
 
       // Wait for the tests to complete
       await testComplete.future;
-
-      manager.dispose();
-    }, timeout: const Timeout(Duration(milliseconds: 500)));
+    });
   });
 }

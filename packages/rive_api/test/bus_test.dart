@@ -4,6 +4,7 @@ import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rive_api/src/bus.dart';
 import 'package:rive_api/src/model/model.dart';
+import 'package:rive_api/src/view_model/view_model.dart';
 import 'package:rive_api/src/manager/manager.dart';
 import 'package:rive_api/src/api/api.dart';
 
@@ -15,6 +16,7 @@ void main() {
   Bus bus;
   MockMeApi meApi;
   MockVolumeApi volApi;
+  DirectoryVM activeDir;
 
   setUp(() {
     bus = Bus();
@@ -70,6 +72,8 @@ void main() {
         {'id': 2, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
       ])),
     );
+
+    activeDir = DirectoryVM(id: 7, name: 'Top Dir 2');
   });
 
   group('Bus', () {
@@ -78,13 +82,14 @@ void main() {
       final uiMock = bus.meStream;
       final c = Completer();
 
-      uiMock.listen((me) {
+      final sub = uiMock.listen((me) {
         expect(me, isNotNull);
         expect(me.name, 'Matt');
         c.complete();
       });
 
       await c.future;
+      sub.cancel();
     });
 
     test('Volume data is routed correctly', () async {
@@ -96,13 +101,60 @@ void main() {
       final uiMock = bus.volumeStream;
       final c = Completer();
 
-      uiMock.listen((vols) {
+      final sub = uiMock.listen((vols) {
         expect(vols, isNotNull);
         expect(vols.length, 3);
         c.complete();
       });
 
       await c.future;
+      sub.cancel();
+    });
+
+    test('The active directory manager can update the active directory',
+        () async {
+      final sm = SelectionManager(activeDirController: bus.activeDirController);
+      final uiMock = bus.activeDirStream;
+      final c = Completer();
+
+      final sub = uiMock.listen((ad) {
+        expect(ad, isNotNull);
+        expect(ad.id, 7);
+        c.complete();
+      });
+
+      sm.changeActiveDir(activeDir);
+
+      await c.future;
+      sub.cancel();
+    });
+
+    test('The active directory is routed correctly to the volume manager',
+        () async {
+      final sm = SelectionManager(activeDirController: bus.activeDirController);
+      VolumeManager(
+        volumeController: bus.volumeController,
+        activeDirController: bus.activeDirController,
+        volumeApi: volApi,
+        meApi: meApi,
+      );
+      final uiMock = bus.volumeStream;
+      final c = Completer();
+
+      final sub = uiMock.listen((vols) {
+        vols.last.treeStream.listen((tree) {
+          if (tree.activeDirectory != null) {
+            print('AD changed: ${tree.activeDirectory}');
+            expect(tree.activeDirectory.id, 7);
+            c.complete();
+          }
+        });
+      });
+
+      sm.changeActiveDir(activeDir);
+
+      await c.future;
+      sub.cancel();
     });
   });
 }

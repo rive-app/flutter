@@ -31,12 +31,6 @@ class MeManager {
   void reload() => _fetchMe();
 
   /*
-   * Functions
-   */
-
-  void dispose() => _meController.close();
-
-  /*
    * API interface
    */
 

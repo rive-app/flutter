@@ -72,8 +72,6 @@ void main() {
 
       // Wait for the test to complete
       await testComplete.future;
-
-      manager.dispose();
     });
   });
 }

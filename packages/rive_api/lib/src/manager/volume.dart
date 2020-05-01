@@ -9,10 +9,13 @@ import 'package:rive_api/src/api/api.dart';
 class VolumeManager {
   VolumeManager({
     BehaviorSubject<Iterable<VolumeVM>> volumeController,
+    StreamController<DirectoryVM> activeDirController,
     MeApi meApi,
     VolumeApi volumeApi,
   })  : _volumesOutput =
             volumeController ?? BehaviorSubject<Iterable<VolumeVM>>(),
+        _activeDirectoryInput =
+            activeDirController ?? StreamController<DirectoryVM>(),
         _volApi = volumeApi ?? VolumeApi(),
         _meApi = meApi ?? MeApi() {
     _volumesOutput.onListen = _fetchVolumes;
@@ -31,13 +34,14 @@ class VolumeManager {
   /// Tree streams for volumes by their ids
   final _treeOutputs = <int, BehaviorSubject<DirectoryTreeVM>>{};
 
+  /// Caching the active dir
   DirectoryVM _activeDirectory;
 
   /*
    * Inbound sinks
    */
 
-  final _activeDirectoryInput = StreamController<DirectoryVM>();
+  final _activeDirectoryInput;
   Sink<DirectoryVM> get activeDirSink => _activeDirectoryInput;
   _handleActiveDirInput(DirectoryVM dir) {
     _activeDirectory = dir;
@@ -112,12 +116,6 @@ class VolumeManager {
 /*
  * Functions
  */
-
-  void dispose() {
-    _treeOutputs.values.forEach((s) => s.close());
-    _activeDirectoryInput.close();
-    _volumesOutput.close();
-  }
 
   void _updateActiveDirectory(int id, DirectoryTree tree) {
     if (tree.contains(DirectoryVM.toModel(_activeDirectory))) {

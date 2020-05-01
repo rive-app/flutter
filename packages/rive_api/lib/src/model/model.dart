@@ -1,4 +1,4 @@
 export 'me.dart';
 export 'directory_tree.dart';
-export 'active_directory.dart';
+export 'file.dart';
 export 'team.dart';

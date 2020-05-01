@@ -30,7 +30,7 @@ class DirectoryVM extends Directory {
   bool modelEquals(Directory d) => this.id == d.id;
 
   @override
-  String toString() => 'DirectoryVM($name)';
+  String toString() => 'DirectoryVM($id, $name)';
 
   @override
   bool operator ==(o) => (o is DirectoryVM || o is Directory) && o.id == id;
