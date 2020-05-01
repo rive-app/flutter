@@ -7,7 +7,8 @@ export 'package:rive_core/src/generated/animation/keyframe_base.dart';
 
 final _log = Logger('animation');
 
-abstract class KeyFrame extends KeyFrameBase<RiveFile> {
+abstract class KeyFrame extends KeyFrameBase<RiveFile>
+    implements KeyFrameInterface {
   double _timeInSeconds;
   double get seconds => _timeInSeconds;
 
@@ -17,10 +18,12 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile> {
   }
 
   void _updateSeconds() {
-    if (keyedProperty?.keyedObject?.animation == null) {
+    var property = keyedProperty;
+    if (property?.keyedObject?.animation == null) {
       return;
     }
-    _timeInSeconds = frame / keyedProperty.keyedObject.animation.fps;
+    _timeInSeconds = frame / property.keyedObject.animation.fps;
+    property.internalKeyFrameMoved();
   }
 
   KeyedProperty get keyedProperty => context?.resolve(keyedPropertyId);

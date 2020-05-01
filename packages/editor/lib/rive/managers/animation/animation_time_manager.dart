@@ -13,7 +13,7 @@ class _SimpleAnimationController extends RiveAnimationController {
   final LinearAnimation animation;
   _SimpleAnimationController(this.animation);
 
-  double time;
+  double time = 0;
   @override
   void apply(RiveCoreContext core, double elapsedSeconds) {
     // Reset all previously animated properties.

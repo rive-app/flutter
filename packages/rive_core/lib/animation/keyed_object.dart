@@ -1,8 +1,10 @@
 import 'dart:collection';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
 
@@ -16,6 +18,10 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       HashMap<int, KeyedProperty>();
 
   Iterable<KeyedProperty> get keyedProperties => _keyedProperties.values;
+
+  final Event _keyframesMoved = Event();
+  // Dispatches whenever one or many keyframes have their time changed.
+  Listenable get keyframesMoved => _keyframesMoved;
 
   @override
   void onAdded() {}
@@ -109,4 +115,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   void internalKeyFramesChanged() {
     animation?.internalKeyFramesChanged();
   }
+
+  // Should be @internal when supported...
+  void internalKeyFramesMoved() => _keyframesMoved.notify();
 }

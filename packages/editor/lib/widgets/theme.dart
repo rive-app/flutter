@@ -160,6 +160,8 @@ class RiveColors {
   Color get timelineLine => const Color(0xFF303030);
   Color get timelineUnderline => const Color(0xFF1E1E1E);
   Color get key => const Color(0xFF57A5E0);
+  Color get allKey => const Color(0xFF8A8A8A);
+  Color get keySelection => const Color(0xFFFFFFFF);
 }
 
 /// TextStyles used in the Rive Theme

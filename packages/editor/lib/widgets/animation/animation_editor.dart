@@ -70,7 +70,7 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ResizePanel(
-          hitSize: 10,
+          hitSize: 5,
           direction: ResizeDirection.horizontal,
           side: ResizeSide.end,
           min: 300,
@@ -122,6 +122,7 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
                           verticalScroll: timelineVerticalScroll,
                           treeController: _treeController,
                           animationManager: widget.animationManager,
+                          activeFile: ActiveFile.of(context),
                         ),
                       ),
                     ],
