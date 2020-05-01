@@ -144,7 +144,6 @@ void main() {
       final sub = uiMock.listen((vols) {
         vols.last.treeStream.listen((tree) {
           if (tree.activeDirectory != null) {
-            print('AD changed: ${tree.activeDirectory}');
             expect(tree.activeDirectory.id, 7);
             c.complete();
           }
