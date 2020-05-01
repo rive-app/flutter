@@ -44,23 +44,83 @@ void main() {
     when(mockVolApi.directoryTreeTeam(any)).thenAnswer(
       (i) => i.positionalArguments[0] == 1
           ? Future.value(DirectoryTree.fromFolderList([
-              {'id': 1, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
-              {'id': 2, 'name': 'Top Dir 2', 'parent': null, 'order': 1},
-              {'id': 3, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
-              {'id': 4, 'name': 'Bottom Dir 2', 'parent': 1, 'order': 1},
-              {'id': 5, 'name': 'Bottom Dir 3', 'parent': 2, 'order': 0},
+              {
+                'id': 1,
+                'ownerId': 1,
+                'name': 'Top Dir 1',
+                'parent': null,
+                'order': 0
+              },
+              {
+                'id': 2,
+                'ownerId': 1,
+                'name': 'Top Dir 2',
+                'parent': null,
+                'order': 1
+              },
+              {
+                'id': 3,
+                'ownerId': 1,
+                'name': 'Bottom Dir 1',
+                'parent': 1,
+                'order': 0
+              },
+              {
+                'id': 4,
+                'ownerId': 1,
+                'name': 'Bottom Dir 2',
+                'parent': 1,
+                'order': 1
+              },
+              {
+                'id': 5,
+                'ownerId': 1,
+                'name': 'Bottom Dir 3',
+                'parent': 2,
+                'order': 0
+              },
             ]))
           : Future.value(DirectoryTree.fromFolderList([
-              {'id': 6, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
-              {'id': 7, 'name': 'Top Dir 2', 'parent': null, 'order': 1},
-              {'id': 8, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
+              {
+                'id': 1,
+                'ownerId': 2,
+                'name': 'Top Dir 1',
+                'parent': null,
+                'order': 0
+              },
+              {
+                'id': 2,
+                'ownerId': 2,
+                'name': 'Top Dir 2',
+                'parent': null,
+                'order': 1
+              },
+              {
+                'id': 3,
+                'ownerId': 2,
+                'name': 'Bottom Dir 1',
+                'parent': 1,
+                'order': 0
+              },
             ])),
     );
 
     when(mockVolApi.directoryTreeMe).thenAnswer(
       (i) => Future.value(DirectoryTree.fromFolderList([
-        {'id': 1, 'name': 'Top Dir 1', 'parent': null, 'order': 0},
-        {'id': 2, 'name': 'Bottom Dir 1', 'parent': 1, 'order': 0},
+        {
+          'id': 1,
+          'ownerId': 3,
+          'name': 'Top Dir 1',
+          'parent': null,
+          'order': 0
+        },
+        {
+          'id': 2,
+          'ownerId': 3,
+          'name': 'Bottom Dir 1',
+          'parent': 1,
+          'order': 0
+        },
       ])),
     );
   });
@@ -175,7 +235,7 @@ void main() {
       // Wait for config to complete
       await Future.wait(configComplete.map((e) => e.future));
 
-      final activeDir = DirectoryVM(id: 1, name: 'Top Dir 1');
+      final activeDir = DirectoryVM(id: 1, ownerId: 3, name: 'Top Dir 1');
       manager.activeDirSink.add(activeDir);
 
       // Wait for the tests to complete

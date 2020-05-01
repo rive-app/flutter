@@ -35,13 +35,13 @@ class DirectoryTree {
   /// Recursely builds a tree of directories
   static Directory _createDirectory(
     Map<String, dynamic> directoryData,
-    Map<int, List<Map<String, dynamic>>> sortedChildrenData,
+    Map<int, List<Map<String, dynamic>>> sortedData,
   ) {
     final directoryId = directoryData.getInt('id');
     assert(directoryId != null);
     // Create the children
-    final children = (sortedChildrenData[directoryId] ?? []).map<Directory>(
-        (childData) => _createDirectory(childData, sortedChildrenData));
+    final children = (sortedData[directoryId] ?? [])
+        .map<Directory>((childData) => _createDirectory(childData, sortedData));
     return Directory.fromData(directoryData, children: children);
   }
 
@@ -72,8 +72,13 @@ class DirectoryTree {
 }
 
 class Directory {
-  Directory({@required this.id, @required this.name, this.children});
+  Directory(
+      {@required this.id,
+      @required this.ownerId,
+      @required this.name,
+      this.children});
   final int id;
+  final int ownerId;
   final String name;
   final Iterable<Directory> children;
 
@@ -81,6 +86,7 @@ class Directory {
           {Iterable<Directory> children}) =>
       Directory(
         id: data.getInt('id'),
+        ownerId: data.containsKey('ownerId') ? data.getInt('ownerId') : null,
         name: data.getString('name'),
         children: children ?? [],
       );
@@ -89,7 +95,7 @@ class Directory {
   String toString() => 'Directory($name)';
 
   @override
-  bool operator ==(o) => o is Directory && o.id == id;
+  bool operator ==(o) => o is Directory && o.id == id && o.ownerId == ownerId;
 
   @override
   int get hashCode => id;

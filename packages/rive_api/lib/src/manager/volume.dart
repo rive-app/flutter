@@ -119,6 +119,8 @@ class VolumeManager {
 
   void _updateActiveDirectory(int id, DirectoryTree tree) {
     if (tree.contains(DirectoryVM.toModel(_activeDirectory))) {
+      print(tree);
+      print('contains $_activeDirectory');
       _treeOutputs[id].add(DirectoryTreeVM.fromModel(tree, _activeDirectory));
     } else if (_treeOutputs[id].value.activeDirectory != null) {
       _treeOutputs[id].add(DirectoryTreeVM.fromModel(tree));
