@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:cursor/propagating_listener.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
@@ -11,6 +12,7 @@ import 'package:rive_editor/rive/managers/animation/editing_animation_manager.da
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
@@ -49,10 +51,28 @@ class TimelineKeysManipulator extends StatefulWidget {
       _TimelineKeysManipulatorState();
 }
 
+@immutable
+class _Marquee {
+  final double startSeconds;
+  final double endSeconds;
+  final double startVerticalOffset;
+  final double endVerticalOffset;
+
+  const _Marquee({
+    this.startSeconds,
+    this.endSeconds,
+    this.startVerticalOffset,
+    this.endVerticalOffset,
+  });
+}
+
 class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   HashSet<KeyFrame> _selection = HashSet<KeyFrame>();
   _DragOperation _dragOperation;
   KeyFrameMoveHelper _moveHelper;
+
+  Offset _marqueeStart;
+  _Marquee _marquee;
 
   @override
   void initState() {
@@ -115,6 +135,25 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   @override
   Widget build(BuildContext context) {
     return PropagatingListener(
+      onPointerSignal: (details) {
+        if (details.pointerEvent is PointerScrollEvent) {
+          var se = details.pointerEvent as PointerScrollEvent;
+
+          // Compute vertical scroll
+          double delta = se.scrollDelta.dy;
+          var position = widget.verticalScroll.position;
+          var newPosition = min(
+              max(position.pixels + delta, position.minScrollExtent),
+              position.maxScrollExtent);
+          widget.verticalScroll.jumpTo(newPosition);
+
+          // Compute horizontal scroll
+          var helper = makeMouseHelper();
+          var timeScroll = se.scrollDelta.dx * helper.secondsPerPixel;
+          widget.animationManager.changeViewport
+              .add(widget.viewport.move(timeScroll));
+        }
+      },
       onPointerDown: (details) {
         var selected = HashSet<KeyFrame>();
 
@@ -125,9 +164,10 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
         var helper = makeMouseHelper();
 
+        var verticalOffset = widget.verticalScroll.offset;
         var frame = helper.frameAtOffset(
           details.pointerEvent.localPosition,
-          widget.verticalScroll.offset,
+          verticalOffset,
         );
         if (frame is KeyFrame) {
           selected.add(frame);
@@ -140,6 +180,10 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           _dragOperation = _DragOperation.move;
         } else {
           _dragOperation = _DragOperation.marquee;
+          var seconds =
+              helper.dxToSeconds(details.pointerEvent.localPosition.dx);
+          _marqueeStart = Offset(
+              seconds, details.pointerEvent.localPosition.dy + verticalOffset);
         }
 
         // Change the selection only if something new was selected...
@@ -165,15 +209,51 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
               _moveHelper.dragTo(seconds);
             }
             break;
+          case _DragOperation.marquee:
+            var viewportHelper = makeMouseHelper();
+            var seconds = viewportHelper
+                .dxToSeconds(details.pointerEvent.localPosition.dx);
+            var dy = details.pointerEvent.localPosition.dy +
+                widget.verticalScroll.offset;
+
+            setState(() {
+              _marquee = _Marquee(
+                startSeconds: min(seconds, _marqueeStart.dx),
+                endSeconds: max(seconds, _marqueeStart.dx),
+                startVerticalOffset: min(dy, _marqueeStart.dy),
+                endVerticalOffset: max(dy, _marqueeStart.dy),
+              );
+            });
+            break;
           default:
             break;
         }
       },
       onPointerUp: (details) {
+        setState(() {
+          _marquee = null;
+        });
         _moveHelper?.complete();
         _moveHelper = null;
       },
-      child: widget.builder(context, _selection),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: widget.builder(
+              context,
+              _selection,
+            ),
+          ),
+          Positioned.fill(
+            child: _MarqueeRenderer(
+              theme: widget.theme,
+              verticalScrollOffset: widget.verticalScroll.offset,
+              viewport: widget.viewport,
+              marquee: _marquee,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -337,5 +417,114 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
     }
 
     return hit;
+  }
+}
+
+class _MarqueeRenderer extends LeafRenderObjectWidget {
+  final RiveThemeData theme;
+  final double verticalScrollOffset;
+  final _Marquee marquee;
+  final TimelineViewport viewport;
+
+  const _MarqueeRenderer({
+    @required this.theme,
+    @required this.verticalScrollOffset,
+    @required this.viewport,
+    @required this.marquee,
+  });
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _MarqueeRenderObject()
+      ..theme = theme
+      ..verticalScrollOffset = verticalScrollOffset
+      ..viewport = viewport
+      ..marquee = marquee;
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, covariant _MarqueeRenderObject renderObject) {
+    renderObject
+      ..theme = theme
+      ..verticalScrollOffset = verticalScrollOffset
+      ..viewport = viewport
+      ..marquee = marquee;
+  }
+}
+
+class _MarqueeRenderObject extends TimelineRenderBox {
+  final Paint _stroke = Paint()
+    ..strokeWidth = 1
+    ..style = PaintingStyle.stroke;
+  final Paint _fill = Paint();
+
+  // We compute our own range as the one given by the viewport is padded, we
+  // actually need to draw a little more than the viewport.
+  double _secondsStart = 0;
+
+  double _verticalScrollOffset;
+  double get verticalScrollOffset => _verticalScrollOffset;
+  set verticalScrollOffset(double value) {
+    if (_verticalScrollOffset == value) {
+      return;
+    }
+    _verticalScrollOffset = value;
+    markNeedsPaint();
+  }
+
+  _Marquee _marquee;
+  _Marquee get marquee => _marquee;
+  set marquee(_Marquee value) {
+    if (value == _marquee) {
+      return;
+    }
+    _marquee = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void onThemeChanged(RiveThemeData theme) {
+    _stroke.color = theme.colors.keyMarqueeStroke;
+    _fill.color = theme.colors.keyMarqueeFill;
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+
+    // We use layout to compute some of the constants for this viewport.
+    var marginLeft = theme.dimensions.timelineMarginLeft;
+    var marginRight = theme.dimensions.timelineMarginRight;
+
+    // This is the time at local x 0
+    _secondsStart = viewport.startSeconds - marginLeft * secondsPerPixel;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_marquee == null) {
+      return;
+    }
+    var canvas = context.canvas;
+    canvas.save();
+    canvas.clipRect(offset & size);
+    canvas.translate(offset.dx, offset.dy);
+
+    var rect = Rect.fromLTRB(
+      ((marquee.startSeconds - _secondsStart) / secondsPerPixel)
+              .roundToDouble() -
+          0.5,
+      (marquee.startVerticalOffset - _verticalScrollOffset).roundToDouble() -
+          0.5,
+      ((marquee.endSeconds - _secondsStart) / secondsPerPixel).roundToDouble() +
+          0.5,
+      (marquee.endVerticalOffset - _verticalScrollOffset).roundToDouble() + 0.5,
+    );
+    canvas.drawRect(rect, _fill);
+    canvas.drawRect(rect, _stroke);
+    canvas.restore();
   }
 }

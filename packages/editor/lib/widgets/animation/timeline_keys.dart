@@ -177,7 +177,6 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
   // We compute our own range as the one given by the viewport is padded, we
   // actually need to draw a little more than the viewport.
   double _secondsStart = 0;
-  double _secondsEnd = 0;
 
   double _verticalScrollOffset;
   List<FlatTreeItem<KeyHierarchyViewModel>> _rows;
@@ -233,7 +232,6 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
       Offset(0, theme.treeStyles.timeline.itemHeight / 2),
       matrix4: transform.mat4,
     );
-    markNeedsLayout();
   }
 
   double get verticalScrollOffset => _verticalScrollOffset;
@@ -263,12 +261,9 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
     // We use layout to compute some of the constants for this viewport.
     var marginLeft = theme.dimensions.timelineMarginLeft;
-    var marginRight = theme.dimensions.timelineMarginRight;
 
     // This is the time at local x 0
     _secondsStart = viewport.startSeconds - marginLeft * secondsPerPixel;
-    // This is the time at local x width
-    _secondsEnd = viewport.endSeconds + marginRight * secondsPerPixel;
   }
 
   @override
@@ -337,7 +332,9 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
         // We end up potentially drawing an extra frame, but the it fixes
         // popping and still culls majority of out of viewport frames.
         var firstFrame = (_secondsStart * viewport.fps).floor() - 1;
-        var index = keyFrameList.indexOfFrame(firstFrame);
+        // Always draw one back so we can ensure that the lines connect. We do
+        // the same for the right hand side (draw one extra).
+        var index = max(0, keyFrameList.indexOfFrame(firstFrame) - 1);
         int frameCount = frames.length;
         var fps = viewport.fps;
         double lastX = 0;

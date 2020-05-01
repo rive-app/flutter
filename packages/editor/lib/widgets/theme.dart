@@ -163,6 +163,8 @@ class RiveColors {
   Color get allKey => const Color(0xFF8A8A8A);
   Color get keySelection => const Color(0xFFFFFFFF);
   Color get keyLine => const Color(0x3457A5E0);
+  Color get keyMarqueeFill => const Color(0x3433A7FF);
+  Color get keyMarqueeStroke => const Color(0xFF33A7FF);
 }
 
 /// TextStyles used in the Rive Theme
@@ -421,9 +423,11 @@ class _Dimensions {
   const _Dimensions();
   double get timelineMarginLeft => 10;
   double get timelineMarginRight => 30;
+
   /// Half of the width of the square that is rotated to make the key shape in
   /// the timeline.
   double get keyHalfSquare => 4;
+
   /// Half of the hypotenuse of the square, effectively the radius of the key if
   /// it were inscribed in a circle. We use this to find if the key is out of
   /// bounds. Not sure if this is appropriate in the theme, but it's used in a
