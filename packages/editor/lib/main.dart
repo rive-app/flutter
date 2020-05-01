@@ -67,10 +67,10 @@ Future<void> main() async {
     iconCache: iconCache,
   );
 
-  if (await rive.initialize() != RiveState.catastrophe) {
-    // this is just for the prototype...
-    // await rive.open('100/100');
-  }
+  // if (await rive.initialize() != RiveState.catastrophe) {
+  //   // this is just for the prototype...
+  //   // await rive.open('100/100');
+  // }
 
   // Runs the app in a custom [Zone] (i.e. an execution context).
   // Provides a convenient way to capture all errors, so they can be reported
@@ -123,37 +123,40 @@ class RiveEditorApp extends StatelessWidget {
               home: DefaultTextStyle(
                 style: RiveTheme.of(context).textStyles.basic,
                 child: Scaffold(
-                  body: Focus(
-                    focusNode: rive.focusNode,
-                    child: ValueListenableBuilder<RiveState>(
-                      valueListenable: rive.state,
-                      builder: (context, state, _) {
-                        switch (state) {
-                          case RiveState.login:
-                            return Login();
+                  body: LoadingScreen(
+                    future: rive.initialize(),
+                    child: Focus(
+                      focusNode: rive.focusNode,
+                      child: ValueListenableBuilder<RiveState>(
+                        valueListenable: rive.state,
+                        builder: (context, state, _) {
+                          switch (state) {
+                            case RiveState.login:
+                              return Login();
 
-                          case RiveState.editor:
-                            return NotificationProvider(
-                              manager: NotificationManager(
-                                  api: rive.api,
-                                  teamUpdateSink: riveManager.teamUpdateSink),
-                              child: FollowProvider(
-                                manager: FollowManager(
-                                  api: rive.api,
-                                  ownerId: rive.user.value.ownerId,
+                            case RiveState.editor:
+                              return NotificationProvider(
+                                manager: NotificationManager(
+                                    api: rive.api,
+                                    teamUpdateSink: riveManager.teamUpdateSink),
+                                child: FollowProvider(
+                                  manager: FollowManager(
+                                    api: rive.api,
+                                    ownerId: rive.user.value.ownerId,
+                                  ),
+                                  child: const EditorScaffold(),
                                 ),
-                                child: const EditorScaffold(),
-                              ),
-                            );
-                          case RiveState.disconnected:
-                            return DisconnectedScreen();
-                            break;
+                              );
+                            case RiveState.disconnected:
+                              return DisconnectedScreen();
+                              break;
 
-                          case RiveState.catastrophe:
-                          default:
-                            return Catastrophe();
-                        }
-                      },
+                            case RiveState.catastrophe:
+                            default:
+                              return Catastrophe();
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -586,6 +589,25 @@ class StagePanel extends StatelessWidget {
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// Loading screen that displays while Rive state is loading/initializing
+class LoadingScreen extends StatelessWidget {
+  const LoadingScreen({this.future, this.child});
+
+  /// The future to wait for completion
+  final Future future;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<dynamic>(
+      future: future,
+      builder: (context, snapshot) => snapshot.hasData
+          ? child
+          : const Center(child: CircularProgressIndicator()),
     );
   }
 }
