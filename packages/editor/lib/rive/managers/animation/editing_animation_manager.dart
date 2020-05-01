@@ -5,6 +5,7 @@ import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
@@ -25,18 +26,38 @@ class EditingAnimationManager extends AnimationTimeManager
   final _hierarchyController =
       BehaviorSubject<Iterable<KeyHierarchyViewModel>>();
 
+  final _deleteController = StreamController<HashSet<KeyFrame>>();
+
+  /// Delete a set of keyframes.
+  Sink<HashSet<KeyFrame>> get deleteKeyFrames => _deleteController;
+
   Stream<Iterable<KeyHierarchyViewModel>> get hierarchy =>
       _hierarchyController.stream;
+
+  final HashSet<_AllPropertiesHelper> _allPropertiesHelpers =
+      HashSet<_AllPropertiesHelper>();
 
   EditingAnimationManager(LinearAnimation animation) : super(animation) {
     animation.context.addDelegate(this);
     _updateHierarchy();
+
+    _deleteController.stream.listen(_deleteKeyFrames);
+  }
+
+  void _deleteKeyFrames(HashSet<KeyFrame> keyframes) {
+    var core = animation.context;
+    keyframes.forEach(core.remove);
+    core.captureJournalEntry();
   }
 
   @override
   void dispose() {
+    for (final allHelper in _allPropertiesHelpers) {
+      allHelper.reset();
+    }
     cancelDebounce(_updateHierarchy);
     _hierarchyController.close();
+    _deleteController.close();
     animation.context.removeDelegate(this);
     super.dispose();
   }
@@ -72,10 +93,13 @@ class EditingAnimationManager extends AnimationTimeManager
       {KeyedObject keyedObject}) {
     KeyedComponentViewModel viewModel;
     Set<KeyHierarchyViewModel> children = {};
+    final allProperties = _AllPropertiesHelper(animation);
+    _allPropertiesHelpers.add(allProperties);
     _componentViewModels[component] = viewModel = KeyedComponentViewModel(
       component: component,
       keyedObject: keyedObject,
       children: children,
+      allProperties: allProperties,
     );
     return viewModel;
   }
@@ -94,6 +118,11 @@ class EditingAnimationManager extends AnimationTimeManager
           group.children.clear();
         }
       }
+    }
+
+    // Reset helpers.
+    for (final allHelper in _allPropertiesHelpers) {
+      allHelper.reset();
     }
 
     // First pass, build all viewmodels for keyed objects and properties, no
@@ -164,6 +193,10 @@ class EditingAnimationManager extends AnimationTimeManager
           ),
         );
 
+        // Also add it to the keyed properties, this is the first step in
+        // building up the all properties.
+        viewModel.allProperties.add(property.keyedProperty);
+
         lastGroupKey = property.groupKey;
       }
 
@@ -177,7 +210,10 @@ class EditingAnimationManager extends AnimationTimeManager
     // Now iterate the ones that need parenting. For loop as we might alter the
     // collection.
     for (int i = 0; i < needParenting.length; i++) {
+      // This will always be a ComponentViewModel.
       final viewModel = needParenting[i];
+      var allProps = viewModel.allProperties;
+
       // Make sure that all the parents were included in the timeline, some may
       // not be if they weren't keyed (there'd be no KeyedObject in the file for
       // them).
@@ -185,34 +221,72 @@ class EditingAnimationManager extends AnimationTimeManager
 
       var parent = _componentViewModels[timelineParent];
       parent ??= _makeComponentViewModel(timelineParent);
+
+      // Aggregate the all properties...
+      parent.allProperties.merge(allProps);
+
       if (timelineParent.timelineParent != null) {
         needParenting.add(parent);
       } else {
         hierarchy.add(parent);
       }
 
-      if (parent is KeyedComponentViewModel) {
-        var groupName = viewModel.component.timelineParentGroup;
-        if (groupName != null) {
-          // Find the right one.
-          var groups = _componentGroupViewModels[parent.component] ??=
-              HashMap<String, KeyedGroupViewModel>();
+      // if (parent is KeyedComponentViewModel) {
+      var groupName = viewModel.component.timelineParentGroup;
+      if (groupName != null) {
+        // Find the right one.
+        var groups = _componentGroupViewModels[parent.component] ??=
+            HashMap<String, KeyedGroupViewModel>();
 
-          var group = groups[groupName];
-          // Create the group if we didn't have it.
-          if (group == null) {
-            Set<KeyHierarchyViewModel> children = {};
-            groups[groupName] = group =
-                KeyedGroupViewModel(label: groupName, children: children);
-          }
-          // Make sure parent contains group. It's a set so we can do this.
-          parent.children.add(group);
-          // Add us to the group.
-          group.children.add(viewModel);
-        } else {
-          parent.children.add(viewModel);
+        var group = groups[groupName];
+        // Create the group if we didn't have it.
+        if (group == null) {
+          Set<KeyHierarchyViewModel> children = {};
+          final allProperties = _AllPropertiesHelper(animation);
+          _allPropertiesHelpers.add(allProperties);
+          groups[groupName] = group = KeyedGroupViewModel(
+            label: groupName,
+            children: children,
+            allProperties: allProperties,
+          );
         }
+        // Make sure all properties from the component get inserted into the
+        // group.
+        parent.allProperties.merge(allProps);
+        group.allProperties.merge(allProps);
+        // Keep pushing them up the tree (could later change this to be
+        // recursive).
+        if (parent.component.timelineParent != null) {
+          var propagate = parent.component;
+          while (propagate.timelineParent != null) {
+            var parentViewModel =
+                _componentViewModels[propagate.timelineParent];
+            if (parentViewModel == null) {
+              break;
+            }
+            parentViewModel.allProperties.merge(allProps);
+            var groupName = propagate.timelineParentGroup;
+            if (groupName != null) {
+              var groups = _componentGroupViewModels[parentViewModel.component];
+              if (groups != null) {
+                var group = groups[groupName];
+                if (group != null) {
+                  group.allProperties.merge(allProps);
+                }
+              }
+            }
+            propagate = parentViewModel.component;
+          }
+        }
+
+        // Make sure parent contains group. It's a set so we can do this.
+        parent.children.add(group);
+        // Add us to the group.
+        group.children.add(viewModel);
+      } else {
+        parent.children.add(viewModel);
       }
+      // }
     }
 
     _hierarchyController.add(hierarchy.toList(growable: false));
@@ -228,11 +302,18 @@ abstract class KeyHierarchyViewModel {
   const KeyHierarchyViewModel();
 }
 
+/// Base class for a KeyedViewModel with all keys.
+@immutable
+abstract class AllKeysViewModel extends KeyHierarchyViewModel {
+  _AllPropertiesHelper get allProperties;
+  const AllKeysViewModel();
+}
+
 /// Represents a Component in the hierarchy that may have a keyedObject if it
 /// has keyed properties. It may not have keyed properties if it's just
 /// containing other groups/objects that themselves have keyed properties.
 @immutable
-class KeyedComponentViewModel extends KeyHierarchyViewModel {
+class KeyedComponentViewModel extends AllKeysViewModel {
   /// There's no guarantee that there will be a keyedObject for this
   /// view model
   final KeyedObject keyedObject;
@@ -243,18 +324,30 @@ class KeyedComponentViewModel extends KeyHierarchyViewModel {
   @override
   final Set<KeyHierarchyViewModel> children;
 
+  /// All keyed properties within this viewmodel.
+  @override
+  final _AllPropertiesHelper allProperties;
+
   const KeyedComponentViewModel({
     @required this.component,
     this.keyedObject,
     this.children,
+    this.allProperties,
   }) : assert(component != null);
 }
 
 /// An ephemeral group that has no backing core properties, just a logical
-/// grouping of sub keyed objects.
+/// grouping of sub keyed objects. N.B. that a group is never multi-nested, a
+/// KeyedGroupViewModel's children will always be KeyedComponentViewModel but we
+/// conform to KeyHierarchyViewModel to fit the class hierarchy/override for
+/// children.
 @immutable
-class KeyedGroupViewModel extends KeyHierarchyViewModel {
+class KeyedGroupViewModel extends AllKeysViewModel {
   final String label;
+
+  /// All keyed properties within this viewmodel.
+  @override
+  final _AllPropertiesHelper allProperties;
 
   @override
   final Set<KeyHierarchyViewModel> children;
@@ -262,6 +355,7 @@ class KeyedGroupViewModel extends KeyHierarchyViewModel {
   const KeyedGroupViewModel({
     this.label,
     this.children,
+    this.allProperties,
   });
 }
 
@@ -295,4 +389,76 @@ class _KeyedPropertyHelper {
     this.keyedProperty,
     this.propertyOrder,
   });
+}
+
+class AllKeyFrame implements KeyFrameInterface {
+  final HashSet<KeyFrame> keyframes = HashSet<KeyFrame>();
+
+  @override
+  final int frame;
+
+  AllKeyFrame(this.frame);
+}
+
+class _AllPropertiesHelper {
+  final LinearAnimation animation;
+  final HashSet<KeyedProperty> _all = HashSet<KeyedProperty>();
+  final HashSet<KeyedObject> _objects = HashSet<KeyedObject>();
+  KeyFrameList<AllKeyFrame> _cached;
+
+  _AllPropertiesHelper(this.animation);
+
+  /// Lazily rebuild the frames list when requested.
+  KeyFrameList<AllKeyFrame> get cached {
+    if (_cached != null) {
+      return _cached;
+    }
+
+    HashMap<int, AllKeyFrame> lut = HashMap<int, AllKeyFrame>();
+    // Merge the frames.
+    for (final keyedProperty in _all) {
+      for (final keyframe in keyedProperty.keyframes) {
+        var allKey = lut[keyframe.frame];
+        if (allKey == null) {
+          lut[keyframe.frame] = allKey = AllKeyFrame(keyframe.frame);
+        }
+        allKey.keyframes.add(keyframe);
+      }
+    }
+    _cached = KeyFrameList<AllKeyFrame>();
+    _cached.keyframes = lut.values;
+    _cached.sort();
+    return _cached;
+  }
+
+  void add(KeyedProperty property) {
+    _all.add(property);
+
+    var ko = property.keyedObject;
+    if (_objects.add(ko)) {
+      ko.keyframesMoved.addListener(_markDirty);
+      // Kind of a hack just to listen to the animation too, but only when we
+      // actually have a keyframe.
+      if (_objects.length == 1) {
+        animation.keyframesChanged.addListener(_markDirty);
+      }
+    }
+  }
+
+  void merge(_AllPropertiesHelper allHelper) {
+    allHelper._all.forEach(add);
+  }
+
+  void reset() {
+    animation.keyframesChanged.removeListener(_markDirty);
+    for (final object in _objects) {
+      object.keyframesMoved.removeListener(_markDirty);
+    }
+    _objects.clear();
+    _all.clear();
+  }
+
+  void _markDirty() {
+    _cached = null;
+  }
 }
