@@ -124,7 +124,7 @@ class RiveEditorApp extends StatelessWidget {
                 style: RiveTheme.of(context).textStyles.basic,
                 child: Scaffold(
                   body: LoadingScreen(
-                    future: rive.initialize(),
+                    rive: rive,
                     child: Focus(
                       focusNode: rive.focusNode,
                       child: ValueListenableBuilder<RiveState>(
@@ -594,20 +594,36 @@ class StagePanel extends StatelessWidget {
 }
 
 /// Loading screen that displays while Rive state is loading/initializing
-class LoadingScreen extends StatelessWidget {
-  const LoadingScreen({this.future, this.child});
-
-  /// The future to wait for completion
-  final Future future;
+class LoadingScreen extends StatefulWidget {
+  const LoadingScreen({this.rive, this.child});
+  final Rive rive;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
-      future: future,
-      builder: (context, snapshot) => snapshot.hasData
-          ? child
-          : const Center(child: CircularProgressIndicator()),
-    );
+  _LoadingScreenState createState() => _LoadingScreenState();
+}
+
+class _LoadingScreenState extends State<LoadingScreen> {
+  // Remember if Rive is initialized
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    _initialize();
+    super.initState();
   }
+
+  Future<void> _initialize() async {
+    final state = await widget.rive.initialize();
+    print('State is $state');
+    if (state == RiveState.catastrophe) {
+      throw Exception('Catastrophe initializing Rive');
+    }
+    setState(() => _initialized = true);
+  }
+
+  @override
+  Widget build(BuildContext context) => _initialized
+      ? widget.child
+      : const Center(child: CircularProgressIndicator());
 }
