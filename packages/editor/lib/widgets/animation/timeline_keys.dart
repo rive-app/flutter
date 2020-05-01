@@ -199,6 +199,8 @@ class KeyFrameCursorHelper {
     var visibleDuration = viewport.endSeconds - viewport.startSeconds;
     var secondsPerPixel =
         visibleDuration / (size.width - marginLeft - marginRight);
+        
+    // Closest seconds to where we clicked.
     var searchSeconds =
         viewport.startSeconds + (-marginLeft + position.dx) * secondsPerPixel;
 
@@ -216,14 +218,11 @@ class KeyFrameCursorHelper {
     var fps = viewport.fps;
     List<KeyFrameInterface> frames =
         keyFrameList.keyframes as List<KeyFrameInterface>;
-    // inxedOfFrame does a binary search on integer frame values so we need
-    // to offset the first frame by one to compensate for rounding errors.
-    // We end up potentially drawing an extra frame, but the it fixes
-    // popping and still culls majority of out of viewport frames.
+    
+    // Find the time in frames but store it as a double so we can do precise
+    // distance evaluation below. We
     double firstFrameDouble = searchSeconds * fps;
-
     var firstFrame = firstFrameDouble.floor();
-
     var index = keyFrameList.indexOfFrame(firstFrame);
 
     // When we click, we want to get close with our binary search and then check
@@ -232,6 +231,8 @@ class KeyFrameCursorHelper {
     var end = min(index + 2, frames.length);
     double closest = double.maxFinite;
     KeyFrameInterface hit;
+
+    // We compare in frame (fps) space so we need to convert pixels to frames.
     var threshold = _visualKeyRadius * secondsPerPixel * fps;
     for (var i = start; i < end; i++) {
       var diff = (frames[i].frame - firstFrameDouble).abs();
