@@ -14,9 +14,6 @@ abstract class BusApi {
 
   /// Volume data: MeVolume
   Stream<Iterable<VolumeVM>> get volumeStream;
-
-  /// Active directory
-  // Stream<DirectoryVM> get activeDirStream;
 }
 
 /// Lower level access to controllers in the bus.
@@ -33,7 +30,9 @@ abstract class BusConfiguration {
   StreamController<Iterable<VolumeVM>> get volumeController;
 
   /// Active directory stream configuration
-  /// Volume stream configuration
+  /// Note that we dont need to expose the stream if only
+  /// the managers are using it, as it will get plumbed directly
+  /// into them.
   StreamController<DirectoryVM> get activeDirController;
 }
 
