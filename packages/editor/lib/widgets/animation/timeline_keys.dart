@@ -165,6 +165,9 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
   final Paint _bgPaint = Paint();
   final Paint _separatorPaint = Paint();
   final Paint _keyPaint = Paint();
+  final Paint _connectKeyPaint = Paint()
+    ..strokeWidth = 1
+    ..style = PaintingStyle.stroke;
   final Paint _allkeyPaint = Paint();
   final Paint _selectedPaint = Paint()
     ..strokeWidth = 1
@@ -209,6 +212,7 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     _bgPaint.color = theme.colors.timelineBackground;
     _separatorPaint.color = theme.colors.timelineLine;
     _keyPaint.color = theme.colors.key;
+    _connectKeyPaint.color = theme.colors.keyLine;
     _allkeyPaint.color = theme.colors.allKey;
     _selectedPaint.color = theme.colors.keySelection;
 
@@ -295,7 +299,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     // off screen. We offset by half the width of the key as key origin is in
     // the center of the key, so anything drawing with an origin of width + half
     // key will not be within the bounds of this widget.
-    var rightThreshold = size.width + theme.dimensions.keyHalfBounds;
+    var halfBounds = theme.dimensions.keyHalfBounds;
+    var rightThreshold = size.width + halfBounds;
 
     for (int i = firstRow; i < lastRow; i++) {
       var row = _rows[i].data;
@@ -312,7 +317,9 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
       KeyFrameList keyFrameList;
 
       Paint keyPaint;
+      bool connectKeys = false;
       if (row is KeyedPropertyViewModel) {
+        connectKeys = true;
         keyFrameList = row.keyedProperty;
         keyPaint = _keyPaint;
       } else if (row is AllKeysViewModel) {
@@ -320,6 +327,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
         keyPaint = _allkeyPaint;
       }
 
+      var halfRowHeight = rowHeight / 2;
+      var lastSelected = false;
       if (keyFrameList != null) {
         List<KeyFrameInterface> frames =
             keyFrameList.keyframes as List<KeyFrameInterface>;
@@ -339,11 +348,12 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
             var keyFrame = frames[i];
             var x = (keyFrame.frame / fps - _secondsStart) / secondsPerPixel;
 
-            if (x > rightThreshold) {
-              // This row is done, it fell off the edge...
-              break;
-            }
-            canvas.translate(x - lastX, 0);
+            // We don't just break here as we may want to draw the last
+            // connected line for this row even if it's off screen.
+            bool isVisible = x <= rightThreshold;
+
+            var move = x - lastX;
+            canvas.translate(move, 0);
             lastX = x;
 
             bool isSelected;
@@ -352,12 +362,30 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
             } else {
               isSelected = _selection.contains(keyFrame);
             }
+
+            // Draw the keyframe itself.
             if (isSelected) {
               canvas.drawPath(_keyPath, _keyPaint);
               canvas.drawPath(_keyPath, _selectedPaint);
             } else {
               canvas.drawPath(_keyPath, keyPaint);
             }
+
+            // Draw connecting line between keyframes.
+            if (connectKeys && i != 0) {
+              canvas.drawLine(
+                  Offset(-move + halfBounds, halfRowHeight),
+                  Offset(-halfBounds, halfRowHeight),
+                  isSelected && lastSelected
+                      ? _selectedPaint
+                      : _connectKeyPaint);
+            }
+
+            if (!isVisible) {
+              break;
+            }
+
+            lastSelected = isSelected;
           }
         }
         canvas.translate(-lastX, 0);

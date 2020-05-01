@@ -162,6 +162,7 @@ class RiveColors {
   Color get key => const Color(0xFF57A5E0);
   Color get allKey => const Color(0xFF8A8A8A);
   Color get keySelection => const Color(0xFFFFFFFF);
+  Color get keyLine => const Color(0x3457A5E0);
 }
 
 /// TextStyles used in the Rive Theme

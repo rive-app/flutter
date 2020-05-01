@@ -51,7 +51,6 @@ class TimelineKeysManipulator extends StatefulWidget {
 
 class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   HashSet<KeyFrame> _selection = HashSet<KeyFrame>();
-  double _mouseDownSeconds = 0;
   _DragOperation _dragOperation;
   KeyFrameMoveHelper _moveHelper;
 
@@ -135,19 +134,20 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         } else if (frame is AllKeyFrame) {
           selected.addAll(frame.keyframes);
         }
-
         if (selected.isNotEmpty) {
           // If we selected something, store the position we started this press
           // operation from. We'll use this in the drag (onPointerMove).
-          _mouseDownSeconds =
-              helper.dxToSeconds(details.pointerEvent.localPosition.dx);
           _dragOperation = _DragOperation.move;
         } else {
           _dragOperation = _DragOperation.marquee;
         }
-        setState(() {
-          _selection = selected;
-        });
+
+        // Change the selection only if something new was selected...
+        if (selected.isEmpty || !_selection.containsAll(selected)) {
+          setState(() {
+            _selection = selected;
+          });
+        }
       },
       onPointerMove: (details) {
         switch (_dragOperation) {
