@@ -147,6 +147,8 @@ class ShortcutAction {
   static const ShortcutAction up = ShortcutAction('action-up');
   static const ShortcutAction down = ShortcutAction('action-down');
 
+  static const ShortcutAction closeTab = ShortcutAction('close-tab');
+
   final String name;
   const ShortcutAction(this.name);
 }
