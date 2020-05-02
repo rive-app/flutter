@@ -267,6 +267,16 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
     return _parseFolderResponse(response);
   }
 
+  /// Change the file name
+  Future<bool> changeFileName(int ownerId, int fileId, String name) async {
+    assert(name != null);
+    String payload = json.encode({'name': name});
+
+    var response = await api.post(api.host + '/api/files/$ownerId/$fileId/name',
+        body: payload);
+    return response.statusCode == 200;
+  }
+
   /// Find the socket server url to connect to for a specific file.
   Future<CoopConnectionInfo> establishCoop(int ownerId, int fileId) async {
     var response = await api.get(api.host + '/api/files/$ownerId/$fileId/coop');
