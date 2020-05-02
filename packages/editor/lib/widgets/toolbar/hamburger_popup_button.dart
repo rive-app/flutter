@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/string_notifier_value_converter.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -10,20 +10,7 @@ import 'package:rive_editor/widgets/popup/modal_popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
-class HamburgerPopupButton extends StatefulWidget {
-  @override
-  _HamburgerPopupButtonState createState() => _HamburgerPopupButtonState();
-}
-
-class _HamburgerPopupButtonState extends State<HamburgerPopupButton> {
-  final _focusNode = FocusNode();
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
+class HamburgerPopupButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RivePopupButton(
@@ -36,50 +23,53 @@ class _HamburgerPopupButtonState extends State<HamburgerPopupButton> {
       ),
       width: 267,
       contextItemsBuilder: (context) => [
-        PopupContextItem("File Name",
-            child: Container(
+        PopupContextItem('File Name',
+            child: SizedBox(
               width: 125,
-              child: Center(
-                child: InspectorTextField(
-                  value: RiveContext.of(context).file.value.name,
-                  converter: StringValueConverter.instance,
-                ),
+              child: InspectorTextField<ValueNotifier<String>>(
+                value: RiveContext.of(context).file.value.name,
+                converter: StringNotifierValueConverter(
+                    RiveContext.of(context).file.value.name),
+                change: (_) {},
+                completeChange: (s) {
+                  RiveContext.of(context).file.value.changeFileName(s.value);
+                },
               ),
             ),
             select: () {},
             dismissOnSelect: false),
         PopupContextItem(
-          "Team Permissions",
+          'Team Permissions',
           select: () => _showModal(context, (_) => Container()),
         ),
         PopupContextItem(
-          "Revision History",
+          'Revision History',
           select: () => _showModal(context, (_) => Container()),
         ),
         PopupContextItem.separator(),
         PopupContextItem(
-          "New File",
+          'New File',
           icon: 'add',
         ),
         PopupContextItem(
-          "New Folder",
+          'New Folder',
           icon: 'popup-folder',
         ),
         PopupContextItem.separator(),
         PopupContextItem(
-          "Manual",
+          'Manual',
         ),
         PopupContextItem(
-          "Shortcuts",
+          'Shortcuts',
         ),
         PopupContextItem(
-          "Report an Issue",
+          'Report an Issue',
         ),
         PopupContextItem(
-          "Request a Feature",
+          'Request a Feature',
         ),
         PopupContextItem(
-          "Work with Us!",
+          'Work with Us!',
         ),
       ],
     );

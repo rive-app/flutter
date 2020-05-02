@@ -75,12 +75,11 @@ class _PopupButtonState<T extends PopupListItem> extends State<PopupButton<T>> {
         onTapDown: (details) {
           setState(
             () {
-              var items = widget.itemsBuilder(context);
               _popup = ListPopup<T>.show(
                 context,
                 direction: widget.direction,
                 directionPadding: widget.directionPadding,
-                items: items,
+                items: widget.itemsBuilder(context),
                 itemBuilder: widget.itemBuilder,
                 arrowTweak: widget.arrowTweak,
                 width: widget.width,

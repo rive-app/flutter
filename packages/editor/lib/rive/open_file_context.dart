@@ -394,4 +394,10 @@ class OpenFileContext with RiveFileDelegate {
         return false;
     }
   }
+
+  /// Save the file name
+  void changeFileName(String name) {
+    this.name.value = name;
+    filesApi.changeFileName(ownerId, fileId, name);
+  }
 }
