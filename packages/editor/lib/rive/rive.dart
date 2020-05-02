@@ -69,7 +69,7 @@ class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
   _NonUiRiveFilesApi(RiveApi api) : super(api);
 
   @override
-  RiveApiFile makeFile(int id) {
+  RiveApiFile makeFile(int id, {String name, int ownerId}) {
     throw UnsupportedError(
         '_NonUiRiveFilesApi shouldn\'t be used to load file lists.');
   }

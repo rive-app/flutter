@@ -29,8 +29,8 @@ class EditorRiveFilesTestApi extends Mock
   RiveApi get api => RiveTestApi();
 
   @override
-  RiveFile makeFile(int id) {
-    return RiveFile(id, browser);
+  RiveFile makeFile(int id, {String name, int ownerId}) {
+    return RiveFile(id, browser, name: name, ownerId: ownerId);
   }
 
   @override
