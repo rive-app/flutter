@@ -27,7 +27,7 @@ class TopNav extends StatelessWidget {
     final selectedOwner = RiveContext.of(context).currentOwner;
     final children = <Widget>[];
     if (fileBrowser.selectedFolder.owner != null) {
-      children.add(SizedAvatar(
+      children.add(SizedAvatarOwner(
         owner: fileBrowser.selectedFolder.owner,
         size: const Size(30, 30),
         addBackground: true,
