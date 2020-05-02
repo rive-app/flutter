@@ -74,12 +74,19 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   KeyFrameMoveHelper _moveHelper;
   CursorInstance _handCursor;
 
+  // Stores time & offset
   Offset _marqueeStart;
+  // Stores local position so it can update during scroll/pan.
+  Offset _marqueeEnd;
+
+  // Actual marquee value.
   _Marquee _marquee;
 
   @override
   void initState() {
     super.initState();
+    widget.verticalScroll?.addListener(_onVerticalScrollChanged);
+    _onVerticalScrollChanged();
     widget.activeFile.addActionHandler(_onAction);
     widget.activeFile.selection.addListener(_stageSelectionChanged);
   }
@@ -87,6 +94,15 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   @override
   void didUpdateWidget(TimelineKeysManipulator oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.viewport != widget.viewport &&
+        _dragOperation == _DragOperation.marquee) {
+      _updateMarquee();
+    }
+    if (oldWidget.verticalScroll != widget.verticalScroll) {
+      oldWidget.verticalScroll?.removeListener(_onVerticalScrollChanged);
+      widget.verticalScroll?.addListener(_onVerticalScrollChanged);
+      _onVerticalScrollChanged();
+    }
     if (oldWidget.activeFile != widget.activeFile) {
       oldWidget.activeFile.removeActionHandler(_onAction);
       widget.activeFile.addActionHandler(_onAction);
@@ -95,8 +111,16 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     }
   }
 
+  void _onVerticalScrollChanged() {
+    if (_dragOperation != _DragOperation.marquee) {
+      return;
+    }
+    _updateMarquee();
+  }
+
   @override
   void dispose() {
+    widget.verticalScroll?.removeListener(_onVerticalScrollChanged);
     _handCursor?.remove();
     _handCursor = null;
     widget.activeFile.selection.removeListener(_stageSelectionChanged);
@@ -150,6 +174,21 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     var timeScroll = delta.dx * helper.secondsPerPixel;
     widget.animationManager.changeViewport
         .add(widget.viewport.move(timeScroll));
+  }
+
+  void _updateMarquee() {
+    var viewportHelper = makeMouseHelper();
+    var seconds = viewportHelper.dxToSeconds(_marqueeEnd.dx);
+    var dy = _marqueeEnd.dy + widget.verticalScroll.offset;
+
+    setState(() {
+      _marquee = _Marquee(
+        startSeconds: min(seconds, _marqueeStart.dx),
+        endSeconds: max(seconds, _marqueeStart.dx),
+        startVerticalOffset: min(dy, _marqueeStart.dy),
+        endVerticalOffset: max(dy, _marqueeStart.dy),
+      );
+    });
   }
 
   @override
@@ -226,26 +265,16 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
             }
             break;
           case _DragOperation.marquee:
-            var viewportHelper = makeMouseHelper();
-            var seconds = viewportHelper
-                .dxToSeconds(details.pointerEvent.localPosition.dx);
-            var dy = details.pointerEvent.localPosition.dy +
-                widget.verticalScroll.offset;
+            _marqueeEnd = details.pointerEvent.localPosition;
+            _updateMarquee();
 
-            setState(() {
-              _marquee = _Marquee(
-                startSeconds: min(seconds, _marqueeStart.dx),
-                endSeconds: max(seconds, _marqueeStart.dx),
-                startVerticalOffset: min(dy, _marqueeStart.dy),
-                endVerticalOffset: max(dy, _marqueeStart.dy),
-              );
-            });
             break;
           default:
             break;
         }
       },
       onPointerUp: (details) {
+        _dragOperation = null;
         setState(() {
           _marquee = null;
         });
