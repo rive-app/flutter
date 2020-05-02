@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
@@ -18,6 +19,7 @@ import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 
+/// Different kinds of mouse drag operations this manipulator supports.
 enum _DragOperation {
   move,
   marquee,
@@ -82,6 +84,9 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   // Actual marquee value.
   _Marquee _marquee;
 
+  Offset _edgeScroll;
+  Timer _edgeScrollTimer;
+
   @override
   void initState() {
     super.initState();
@@ -120,6 +125,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
   @override
   void dispose() {
+    _edgeScrollTimer?.cancel();
     widget.verticalScroll?.removeListener(_onVerticalScrollChanged);
     _handCursor?.remove();
     _handCursor = null;
@@ -176,6 +182,10 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         .add(widget.viewport.move(timeScroll));
   }
 
+  void _bumpEdgeScroll(Timer timer) {
+    _pan(_edgeScroll);
+  }
+
   void _updateMarquee() {
     var viewportHelper = makeMouseHelper();
     var seconds = viewportHelper.dxToSeconds(_marqueeEnd.dx);
@@ -188,13 +198,36 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
       endVerticalOffset: max(dy, _marqueeStart.dy),
     );
     // Compute selected items.
-    var selected =
-        viewportHelper.framesIn(marquee, widget.verticalScroll.offset);
+    var selected = viewportHelper.framesIn(marquee);
 
     setState(() {
       _marquee = marquee;
       _selection = selected;
     });
+
+    // Update edge scroll
+
+    var edgeScroll = Offset.zero;
+    const double edgeBumpAmount = 12;
+    const int edgeBumpMs = 35;
+    if (_marqueeEnd.dy < 0) {
+      edgeScroll = Offset(edgeScroll.dx, -edgeBumpAmount);
+    } else if (_marqueeEnd.dy > viewportHelper.widgetSize.height) {
+      edgeScroll = Offset(edgeScroll.dx, edgeBumpAmount);
+    }
+    if (_marqueeEnd.dx < 0) {
+      edgeScroll = Offset(-edgeBumpAmount, edgeScroll.dy);
+    } else if (_marqueeEnd.dx > viewportHelper.widgetSize.width) {
+      edgeScroll = Offset(edgeBumpAmount, edgeScroll.dy);
+    }
+    if (edgeScroll != Offset.zero) {
+      _edgeScroll = edgeScroll;
+      _edgeScrollTimer ??= Timer.periodic(
+          const Duration(milliseconds: edgeBumpMs), _bumpEdgeScroll);
+    } else {
+      _edgeScrollTimer?.cancel();
+      _edgeScrollTimer = null;
+    }
   }
 
   @override
@@ -280,6 +313,8 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         }
       },
       onPointerUp: (details) {
+        _edgeScrollTimer?.cancel();
+        _edgeScrollTimer = null;
         _dragOperation = null;
         setState(() {
           _marquee = null;
@@ -378,15 +413,16 @@ class KeyFrameMoveHelper {
   }
 }
 
+/// Class to help convert between viewport space, screenspace, and row space.
 class MouseTimelineViewportHelper {
   double _secondsPerPixel;
   double get secondsPerPixel => _secondsPerPixel;
   final double _marginLeft;
   double get marginLeft => _marginLeft;
   final TimelineViewport viewport;
-
+  final Size widgetSize;
   MouseTimelineViewportHelper(
-    Size widgetSize,
+    this.widgetSize,
     RiveThemeData theme,
     this.viewport,
   ) : _marginLeft = theme.dimensions.timelineMarginLeft {
@@ -421,16 +457,15 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
         theme.dimensions.keyHalfBounds * secondsPerPixel * viewport.fps;
   }
 
-  HashSet<KeyFrame> framesIn(_Marquee marquee, double verticalScroll) {
+  HashSet<KeyFrame> framesIn(_Marquee marquee) {
     HashSet<KeyFrame> keyframes = HashSet<KeyFrame>();
 
     // First find closest rows.
-    var rowIndexFrom =
-        ((verticalScroll + marquee.startVerticalOffset) / _rowHeight)
-            .round()
-            .clamp(0, rows.length - 1)
-            .toInt();
-    var rowIndexTo = ((verticalScroll + marquee.endVerticalOffset) / _rowHeight)
+    var rowIndexFrom = ((marquee.startVerticalOffset) / _rowHeight)
+        .round()
+        .clamp(0, rows.length - 1)
+        .toInt();
+    var rowIndexTo = ((marquee.endVerticalOffset) / _rowHeight)
         .round()
         .clamp(0, rows.length - 1)
         .toInt();
@@ -526,6 +561,7 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
   }
 }
 
+/// Draws the marquee.
 class _MarqueeRenderer extends LeafRenderObjectWidget {
   final RiveThemeData theme;
   final double verticalScrollOffset;
@@ -603,7 +639,6 @@ class _MarqueeRenderObject extends TimelineRenderBox {
 
     // We use layout to compute some of the constants for this viewport.
     var marginLeft = theme.dimensions.timelineMarginLeft;
-    var marginRight = theme.dimensions.timelineMarginRight;
 
     // This is the time at local x 0
     _secondsStart = viewport.startSeconds - marginLeft * secondsPerPixel;
