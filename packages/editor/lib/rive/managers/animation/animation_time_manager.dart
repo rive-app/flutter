@@ -11,7 +11,20 @@ import 'package:rive_core/rive_animation_controller.dart';
 
 class _SimpleAnimationController extends RiveAnimationController {
   final LinearAnimation animation;
-  _SimpleAnimationController(this.animation);
+  VoidCallback onTimeChanged;
+  _SimpleAnimationController(this.animation, this.onTimeChanged);
+
+  // This controller distinguishes between playing an animation (sustained
+  // playback) and applying a single frame (isPlaying).
+  bool _sustainedPlayback = false;
+  bool get sustainedPlayback => _sustainedPlayback;
+  set sustainedPlayback(bool value) {
+    if (value == _sustainedPlayback) {
+      return;
+    }
+    _sustainedPlayback = value;
+    isPlaying = true;
+  }
 
   double time = 0;
   @override
@@ -19,8 +32,15 @@ class _SimpleAnimationController extends RiveAnimationController {
     // Reset all previously animated properties.
     core.resetAnimation();
     animation.apply(time, coreContext: core);
-    // after apply, pause
-    isPlaying = false;
+
+    if (_sustainedPlayback) {
+      time += elapsedSeconds * animation.speed;
+      isPlaying = true;
+      onTimeChanged();
+    } else {
+      // after apply, pause
+      isPlaying = false;
+    }
   }
 
   @override
@@ -45,16 +65,24 @@ abstract class AnimationTimeManager extends AnimationManager {
   /// Use this to preview the rate change but don't commit the change (convert
   /// the various dependent values and capture).
   final _fpsPreviewController = StreamController<int>();
-  final _timeStream = BehaviorSubject<int>();
+  final _timeStream = BehaviorSubject<double>();
 
   final _timeController = StreamController<double>();
   final _viewportController = StreamController<TimelineViewport>();
 
+  final _isPlayingStream = BehaviorSubject<bool>();
+  final _playbackController = StreamController<bool>();
+
   _SimpleAnimationController _controller;
   AnimationTimeManager(LinearAnimation animation) : super(animation) {
-    _controller = _SimpleAnimationController(animation);
+    _controller = _SimpleAnimationController(animation, () {
+      _timeStream.add((_controller.time * animation.fps)
+          .clamp(0, animation.duration)
+          .toDouble());
+    });
     animation.artboard.addController(_controller);
 
+    _isPlayingStream.add(false);
     _timeStream.add(0);
     _fpsStream.add(animation.fps);
     _fpsController.stream.listen(_changeFps);
@@ -64,7 +92,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.addListener(
         LinearAnimationBase.durationPropertyKey, _coreDurationChange);
     _viewportController.stream.listen(_changeViewport);
-
+    _playbackController.stream.listen(_changePlayback);
     animation.keyframesChanged.addListener(_keyframesChanged);
 
     _syncViewport();
@@ -87,6 +115,11 @@ abstract class AnimationTimeManager extends AnimationManager {
         start, end, animation.duration / animation.fps, animation.fps));
   }
 
+  void _changePlayback(bool play) {
+    _controller.sustainedPlayback = play;
+    _isPlayingStream.add(play);
+  }
+
   void _changeViewport(TimelineViewport viewport) {
     _viewportStream.add(viewport);
     // TODO: change core properties...
@@ -94,6 +127,7 @@ abstract class AnimationTimeManager extends AnimationManager {
 
   final _viewportStream = BehaviorSubject<TimelineViewport>();
   ValueStream<TimelineViewport> get viewport => _viewportStream;
+  ValueStream<bool> get isPlaying => _isPlayingStream;
 
   void _coreDurationChange(dynamic from, dynamic to) => debounce(_syncViewport);
   void _coreFpsChanged(dynamic from, dynamic to) {
@@ -105,11 +139,13 @@ abstract class AnimationTimeManager extends AnimationManager {
     _fpsStream.add(value);
   }
 
+  /// Value is in seconds, quantize to nearest frame.
   void _changeCurrentTime(double value) {
-    _controller.time = value;
+    var frame =
+        (value * animation.fps).clamp(0, animation.duration).roundToDouble();
+    _controller.time = frame / animation.fps;
     _controller.isPlaying = true;
-    _timeStream
-        .add((value * animation.fps).clamp(0, animation.duration).round());
+    _timeStream.add(frame);
   }
 
   void _changeFps(int value) {
@@ -131,19 +167,24 @@ abstract class AnimationTimeManager extends AnimationManager {
   /// Change the current viewport
   Sink<TimelineViewport> get changeViewport => _viewportController;
 
-  ValueStream<int> get currentTime => _timeStream;
+  /// Change whether this animation is playing.
+  Sink<bool> get changePlayback => _playbackController;
+
+  ValueStream<double> get currentTime => _timeStream;
   ValueStream<int> get fps => _fpsStream;
   Sink<int> get previewRateChange => _fpsPreviewController;
 
   /// Get the closest frame to the current playhead.
-  int get frame => _timeStream.value;
+  int get frame => _timeStream.value.floor();
 
   void dispose() {
     animation.artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
-    
+
     cancelDebounce(_syncViewport);
     _viewportController.close();
+    _playbackController.close();
+    _isPlayingStream.close();
     _viewportStream.close();
     animation.removeListener(
         LinearAnimationBase.fpsPropertyKey, _coreFpsChanged);

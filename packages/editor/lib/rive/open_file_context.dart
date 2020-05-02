@@ -203,8 +203,12 @@ class OpenFileContext with RiveFileDelegate {
 
   @override
   void onDirtCleaned() {
-    debounce(treeController.value.flatten);
-    debounce(drawOrderTreeController.value.flatten);
+    if (treeController.value != null) {
+      debounce(treeController.value.flatten);
+    }
+    if (drawOrderTreeController.value != null) {
+      debounce(drawOrderTreeController.value.flatten);
+    }
     _stage?.markNeedsAdvance();
   }
 

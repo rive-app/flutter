@@ -122,7 +122,6 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
                           verticalScroll: timelineVerticalScroll,
                           treeController: _treeController,
                           animationManager: widget.animationManager,
-                          activeFile: ActiveFile.of(context),
                         ),
                       ),
                     ],

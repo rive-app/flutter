@@ -36,7 +36,7 @@ class KeyFrameList<T extends KeyFrameInterface> {
       } else if (closestFrame > frame) {
         end = mid - 1;
       } else {
-        start = mid;
+        idx = start = mid;
         break;
       }
 
@@ -50,13 +50,22 @@ class KeyFrameList<T extends KeyFrameInterface> {
 
 class KeyedProperty extends KeyedPropertyBase<RiveFile>
     with KeyFrameList<KeyFrame> {
-  @override
-  void onAdded() {}
+  // -> editor-only
+  bool _suppressValidation = false;
+  bool get suppressValidation => _suppressValidation;
+  set suppressValidation(bool value) {
+    if (_suppressValidation == value) {
+      return;
+    }
+    _suppressValidation = value;
+    if (!_suppressValidation) {
+      _sortAndValidateKeyFrames();
+    }
+  }
+  // <- editor-only
 
-  KeyedObject get keyedObject => context?.resolve(keyedObjectId);
-
   @override
-  void onAddedDirty() {
+  void onAdded() {
     if (keyedObjectId != null) {
       KeyedObject keyedObject = context?.resolve(keyedObjectId);
       if (keyedObject == null) {
@@ -66,6 +75,11 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       }
     }
   }
+
+  KeyedObject get keyedObject => context?.resolve(keyedObjectId);
+
+  @override
+  void onAddedDirty() {}
 
   @override
   void onRemoved() => keyedObject?.internalRemoveKeyedProperty(this);
@@ -85,6 +99,10 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
   /// should be @internal when it's supported.
   bool internalRemoveKeyFrame(KeyFrame frame) {
     var removed = _keyframes.remove(frame);
+    if (_keyframes.isEmpty) {
+      // Remove this keyed property.
+      context.remove(this);
+    }
     context?.dirty(_notifyKeyframeRemoved);
     return removed;
   }
@@ -107,6 +125,14 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
 
   void _sortAndValidateKeyFrames() {
     sort();
+
+    // -> editor-only
+    if (suppressValidation) {
+      keyedObject?.internalKeyFramesChanged();
+      return;
+    }
+    // <- editor-only
+
     for (int i = 0; i < _keyframes.length - 1; i++) {
       var a = _keyframes[i];
       var b = _keyframes[i + 1];
