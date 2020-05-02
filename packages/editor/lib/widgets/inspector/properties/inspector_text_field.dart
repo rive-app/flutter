@@ -209,6 +209,12 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
                   if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
                     _focusNode.unfocus();
                   }
+                  // Needed for web as the text field doesn't respond to enter
+                  if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+                    print('ENTER');
+                    // Can we capture the enter key here and have it be handled
+                    // identically in both the native and web apps?
+                  }
                 }
               },
               child: EditorTextField(
