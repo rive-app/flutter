@@ -65,12 +65,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
   // <- editor-only
 
   @override
-  void onAdded() {}
-
-  KeyedObject get keyedObject => context?.resolve(keyedObjectId);
-
-  @override
-  void onAddedDirty() {
+  void onAdded() {
     if (keyedObjectId != null) {
       KeyedObject keyedObject = context?.resolve(keyedObjectId);
       if (keyedObject == null) {
@@ -80,6 +75,11 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       }
     }
   }
+
+  KeyedObject get keyedObject => context?.resolve(keyedObjectId);
+
+  @override
+  void onAddedDirty() {}
 
   @override
   void onRemoved() => keyedObject?.internalRemoveKeyedProperty(this);
@@ -99,6 +99,10 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
   /// should be @internal when it's supported.
   bool internalRemoveKeyFrame(KeyFrame frame) {
     var removed = _keyframes.remove(frame);
+    if (_keyframes.isEmpty) {
+      // Remove this keyed property.
+      context.remove(this);
+    }
     context?.dirty(_notifyKeyframeRemoved);
     return removed;
   }

@@ -24,12 +24,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   Listenable get keyframesMoved => _keyframesMoved;
 
   @override
-  void onAdded() {}
-
-  LinearAnimation get animation => context?.resolve(animationId);
-
-  @override
-  void onAddedDirty() {
+  void onAdded() {
     if (animationId != null) {
       LinearAnimation animation = context?.resolve(animationId);
       if (animation == null) {
@@ -39,6 +34,11 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       }
     }
   }
+
+  LinearAnimation get animation => context?.resolve(animationId);
+
+  @override
+  void onAddedDirty() {}
 
   @override
   void onRemoved() => animation?.internalRemoveKeyedObject(this);
@@ -65,6 +65,10 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   /// be @internal when it's supported.
   bool internalRemoveKeyedProperty(KeyedProperty property) {
     var removed = _keyedProperties.remove(property.propertyKey);
+    if (_keyedProperties.isEmpty) {
+      // Remove this keyed property.
+      context.remove(this);
+    }
     assert(removed == null || removed == property);
     return removed != null;
   }

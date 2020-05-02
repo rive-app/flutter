@@ -14,6 +14,14 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
 
   @override
   void onAdded() {
+    if (keyedPropertyId != null) {
+      KeyedProperty keyedProperty = context?.resolve(keyedPropertyId);
+      if (keyedProperty == null) {
+        _log.finest("Failed to resolve KeyedProperty with id $keyedPropertyId");
+      } else {
+        keyedProperty.internalAddKeyFrame(this);
+      }
+    }
     _updateSeconds();
   }
 
@@ -29,16 +37,7 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   KeyedProperty get keyedProperty => context?.resolve(keyedPropertyId);
 
   @override
-  void onAddedDirty() {
-    if (keyedPropertyId != null) {
-      KeyedProperty keyedProperty = context?.resolve(keyedPropertyId);
-      if (keyedProperty == null) {
-        _log.finest("Failed to resolve KeyedProperty with id $keyedPropertyId");
-      } else {
-        keyedProperty.internalAddKeyFrame(this);
-      }
-    }
-  }
+  void onAddedDirty() {}
 
   @override
   void onRemoved() => keyedProperty?.internalRemoveKeyFrame(this);
