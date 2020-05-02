@@ -625,5 +625,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   Widget build(BuildContext context) => _initialized
       ? widget.child
-      : const Center(child: CircularProgressIndicator());
+      : Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text(
+                'Loading Rive 2 v$appVersion',
+                style: TextStyle(fontSize: 24),
+              ),
+              SizedBox(height: 20),
+              CircularProgressIndicator(),
+            ],
+          ),
+        );
 }
