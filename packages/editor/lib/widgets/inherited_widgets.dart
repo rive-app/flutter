@@ -328,6 +328,10 @@ class EditingAnimationProvider extends StatelessWidget {
   static EditingAnimationManager of(BuildContext context) => context
       .dependOnInheritedWidgetOfExactType<_InheritedEditingAnimation>()
       ?.editingAnimationManager;
+
+  static EditingAnimationManager find(BuildContext context) => context
+      .findAncestorWidgetOfExactType<_InheritedEditingAnimation>()
+      ?.editingAnimationManager;
 }
 
 class _EditingAnimation extends StatefulWidget {

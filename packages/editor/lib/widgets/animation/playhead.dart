@@ -18,7 +18,7 @@ class Playhead extends StatelessWidget {
     var editingAnimation = EditingAnimationProvider.of(context);
     return ValueStreamBuilder<TimelineViewport>(
       stream: editingAnimation.viewport,
-      builder: (context, viewportSnapshot) => ValueStreamBuilder<int>(
+      builder: (context, viewportSnapshot) => ValueStreamBuilder<double>(
         stream: editingAnimation.currentTime,
         builder: (context, timeSnapshot) {
           return _PlayheadRenderer(
@@ -34,7 +34,7 @@ class Playhead extends StatelessWidget {
 
 class _PlayheadRenderer extends LeafRenderObjectWidget {
   final TimelineViewport viewport;
-  final int time;
+  final double time;
   final RiveThemeData theme;
 
   const _PlayheadRenderer({
@@ -62,7 +62,7 @@ class _PlayheadRenderer extends LeafRenderObjectWidget {
 }
 
 class _PlayheadRenderObject extends TimelineRenderBox {
-  int _time;
+  double _time;
   static const double _arrowRadius = 5;
   final Paint _playhead = Paint()..isAntiAlias = false;
   final Paint _arrowPaint = Paint();
@@ -74,8 +74,8 @@ class _PlayheadRenderObject extends TimelineRenderBox {
 
   double _secondsStart = 0;
 
-  int get time => _time;
-  set time(int value) {
+  double get time => _time;
+  set time(double value) {
     if (_time == value) {
       return;
     }

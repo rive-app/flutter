@@ -516,6 +516,9 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
   ) {
     // First find closest row.
     var rowIndex = ((verticalScroll + position.dy) / _rowHeight).floor();
+    if(rowIndex < 0 || rowIndex >= rows.length) {
+      return null;
+    }
     var row = rows[rowIndex].data;
 
     // Closest seconds to where we clicked.

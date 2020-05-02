@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/widgets/animation/animation_time_popup_button.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 /// Toolbar shown across the top of the animation panel's hierarchy.
 class AnimationToolbar extends StatelessWidget {
@@ -15,18 +17,13 @@ class AnimationToolbar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          TintedIconButton(
-            icon: 'play',
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            onPress: () {
-              print('play');
-            },
-          ),
+          _PlaybackButton(),
           TintedIconButton(
             icon: 'to-start',
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
             onPress: () {
-              print('to-start');
+              var animationManager = EditingAnimationProvider.find(context);
+              animationManager.changeCurrentTime.add(0);
             },
           ),
           TintedIconButton(
@@ -41,6 +38,28 @@ class AnimationToolbar extends StatelessWidget {
           ),
           AnimationTimePopupButton(),
         ],
+      ),
+    );
+  }
+}
+
+class _PlaybackButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var animationManager = EditingAnimationProvider.of(context);
+    if (animationManager == null) {
+      return const SizedBox();
+    }
+
+    return ValueStreamBuilder<bool>(
+      stream: animationManager.isPlaying,
+      builder: (context, snapshot) => TintedIconButton(
+        icon: snapshot.hasData && snapshot.data ? 'pause' : 'play',
+        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        onPress: () {
+          animationManager.changePlayback
+              .add(snapshot.hasData && !snapshot.data);
+        },
       ),
     );
   }

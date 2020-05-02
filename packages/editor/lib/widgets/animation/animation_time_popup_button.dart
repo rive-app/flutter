@@ -37,11 +37,11 @@ class AnimationTimePopupButton extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                 vertical: 5,
               ),
-              child: StreamBuilder<int>(
+              child: StreamBuilder<double>(
                 stream: animationManager.currentTime,
                 builder: (context, snapshot) => snapshot.hasData
                     ? Text(
-                        converter.toDisplayValue(snapshot.data),
+                        converter.toDisplayValue(snapshot.data.round()),
                         textAlign: TextAlign.right,
                         style: theme.textStyles.basic.copyWith(
                           color: isHovered
@@ -59,13 +59,13 @@ class AnimationTimePopupButton extends StatelessWidget {
                 'Current',
                 child: (focus, key) => SizedBox(
                   width: 62,
-                  child: ValueStreamBuilder<int>(
+                  child: ValueStreamBuilder<double>(
                     stream: animationManager.currentTime,
                     builder: (context, snapshot) => snapshot.hasData
                         ? InspectorTextField<int>(
                             key: key,
                             focusNode: focus,
-                            value: snapshot.data,
+                            value: snapshot.data.round(),
                             change: (value) {},
                             converter: converter,
                           )
@@ -117,12 +117,10 @@ class AnimationTimePopupButton extends StatelessWidget {
                                   /// done processing the change.
                                   captureJournalEntry: false,
                                   change: (value) {
-                                    print("CHANGE: $value");
                                     animationManager.previewRateChange
                                         .add(value);
                                   },
                                   completeChange: (value) {
-                                    print("COMPLET: $value");
                                     animationManager.changeRate.add(value);
                                   },
                                   converter: IntValueConverter.instance,
