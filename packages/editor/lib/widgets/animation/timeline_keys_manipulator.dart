@@ -181,13 +181,19 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     var seconds = viewportHelper.dxToSeconds(_marqueeEnd.dx);
     var dy = _marqueeEnd.dy + widget.verticalScroll.offset;
 
+    var marquee = _Marquee(
+      startSeconds: min(seconds, _marqueeStart.dx),
+      endSeconds: max(seconds, _marqueeStart.dx),
+      startVerticalOffset: min(dy, _marqueeStart.dy),
+      endVerticalOffset: max(dy, _marqueeStart.dy),
+    );
+    // Compute selected items.
+    var selected =
+        viewportHelper.framesIn(marquee, widget.verticalScroll.offset);
+
     setState(() {
-      _marquee = _Marquee(
-        startSeconds: min(seconds, _marqueeStart.dx),
-        endSeconds: max(seconds, _marqueeStart.dx),
-        startVerticalOffset: min(dy, _marqueeStart.dy),
-        endVerticalOffset: max(dy, _marqueeStart.dy),
-      );
+      _marquee = marquee;
+      _selection = selected;
     });
   }
 
@@ -413,6 +419,59 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
         super(widgetSize, theme, viewport) {
     _horizontalThreshold =
         theme.dimensions.keyHalfBounds * secondsPerPixel * viewport.fps;
+  }
+
+  HashSet<KeyFrame> framesIn(_Marquee marquee, double verticalScroll) {
+    HashSet<KeyFrame> keyframes = HashSet<KeyFrame>();
+
+    // First find closest rows.
+    var rowIndexFrom =
+        ((verticalScroll + marquee.startVerticalOffset) / _rowHeight)
+            .round()
+            .clamp(0, rows.length - 1)
+            .toInt();
+    var rowIndexTo = ((verticalScroll + marquee.endVerticalOffset) / _rowHeight)
+        .round()
+        .clamp(0, rows.length - 1)
+        .toInt();
+    // var row = rows[rowIndex].data;
+
+    var fps = viewport.fps;
+
+    for (int i = rowIndexFrom; i < rowIndexTo; i++) {
+      var row = rows[i].data;
+
+      KeyFrameList keyFrameList;
+      if (row is KeyedPropertyViewModel) {
+        keyFrameList = row.keyedProperty;
+      } else if (row is AllKeysViewModel) {
+        keyFrameList = row.allProperties.cached;
+      }
+      List<KeyFrameInterface> frames =
+          keyFrameList.keyframes as List<KeyFrameInterface>;
+
+      double firstFrameDouble = marquee.startSeconds * fps;
+      double lastFrameDouble = marquee.endSeconds * fps;
+
+      var frameIndexFrom = keyFrameList.indexOfFrame(firstFrameDouble.floor());
+      var frameIndexTo = min(frames.length - 1,
+          keyFrameList.indexOfFrame(lastFrameDouble.floor()));
+
+      for (int j = frameIndexFrom; j <= frameIndexTo; j++) {
+        var keyframe = frames[j];
+        if (keyframe.frame < firstFrameDouble ||
+            keyframe.frame > lastFrameDouble) {
+          continue;
+        }
+        if (keyframe is AllKeyFrame) {
+          keyframes.addAll(keyframe.keyframes);
+        } else if (keyframe is KeyFrame) {
+          keyframes.add(keyframe);
+        }
+      }
+    }
+
+    return keyframes;
   }
 
   /// Returns the KeyFrame that was clicked on.

@@ -36,7 +36,7 @@ class KeyFrameList<T extends KeyFrameInterface> {
       } else if (closestFrame > frame) {
         end = mid - 1;
       } else {
-        start = mid;
+        idx = start = mid;
         break;
       }
 
@@ -121,7 +121,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
 
   void _sortAndValidateKeyFrames() {
     sort();
-    
+
     // -> editor-only
     if (suppressValidation) {
       keyedObject?.internalKeyFramesChanged();
