@@ -72,6 +72,12 @@ class _GradientPainter extends CustomPainter {
           _paint);
     } on UnimplementedError catch (e) {
       // Path.combine is not implemented on the web
+      Paint paint = Paint()
+        ..color = gradient.colors.first
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth;
+      Path path = Path()..addRRect(outerRRect);
+      canvas.drawPath(path, paint);
     }
   }
 
