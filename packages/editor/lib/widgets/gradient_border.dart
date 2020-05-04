@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-const _transparent = LinearGradient(colors: [Color(0x00), Color(0x00)]);
+const _transparent =
+    LinearGradient(colors: [Color(0x00000000), Color(0x00000000)]);
 
 /// Paints a gradient border around a widget
 /// Make sure the child widget is transparent around the area
@@ -61,13 +62,17 @@ class _GradientPainter extends CustomPainter {
     _paint.shader = gradient.createShader(outerRect);
 
     // create difference between outer and inner paths and draw it
-    canvas.drawPath(
-        Path.combine(
-          PathOperation.difference,
-          Path()..addRRect(outerRRect),
-          Path()..addRRect(innerRRect),
-        ),
-        _paint);
+    try {
+      canvas.drawPath(
+          Path.combine(
+            PathOperation.difference,
+            Path()..addRRect(outerRRect),
+            Path()..addRRect(innerRRect),
+          ),
+          _paint);
+    } on UnimplementedError catch (e) {
+      // Path.combine is not implemented on the web
+    }
   }
 
   @override
