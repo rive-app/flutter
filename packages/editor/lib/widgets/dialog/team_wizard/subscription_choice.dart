@@ -1,9 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
-import 'package:rive_editor/widgets/common/gradient_border/gradient_border.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class SubscriptionChoice extends StatefulWidget {
@@ -94,7 +95,7 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
           top: lerpDouble(2, 0, animationValue),
           bottom: lerpDouble(0, 2, animationValue),
         ),
-        child: GradientBorder(
+        child: NewGradientBorder(
           strokeWidth: 3,
           radius: 10,
           shouldPaint: true,
@@ -165,5 +166,88 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
         ),
       ),
     );
+  }
+}
+
+/// Customer border that uses a gradient in place of a solid color
+class NewGradientBorder extends SingleChildRenderObjectWidget {
+  const NewGradientBorder({
+    @required this.strokeWidth,
+    @required this.radius,
+    @required this.gradient,
+    this.shouldPaint = true,
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+  final double strokeWidth;
+  final double radius;
+  final bool shouldPaint;
+  final Gradient gradient;
+
+  @override
+  _RenderGradientBorder createRenderObject(BuildContext context) {
+    return _RenderGradientBorder(
+      strokeWidth: strokeWidth,
+      radius: radius,
+      gradient: gradient,
+      shouldPaint: shouldPaint,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderGradientBorder renderObject,
+  ) {
+    renderObject.strokeWidth = strokeWidth;
+    renderObject.radius = radius;
+    renderObject.gradient = gradient;
+    renderObject.shouldPaint = shouldPaint;
+  }
+}
+
+class _RenderGradientBorder extends RenderProxyBox {
+  _RenderGradientBorder(
+      {@required double strokeWidth,
+      @required this.radius,
+      @required this.gradient,
+      @required this.shouldPaint,
+      RenderBox child})
+      : _borderPaint = Paint()..strokeWidth = strokeWidth,
+        super(child);
+
+  final Paint _borderPaint;
+
+  double get strokeWidth => _borderPaint.strokeWidth;
+  set strokeWidth(double value) {
+    if (_borderPaint.strokeWidth == value) {
+      return;
+    }
+    _borderPaint.strokeWidth = value;
+    markNeedsPaint();
+  }
+
+  double radius;
+  bool shouldPaint;
+  Gradient gradient;
+
+  @override
+  bool hitTestSelf(Offset position) => true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final canvas = context.canvas;
+    final rect = offset & size;
+
+    _borderPaint.shader = gradient.createShader(rect);
+
+    var path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(rect, Radius.circular(radius)),
+      );
+
+    canvas.drawPath(path, _borderPaint);
+
+    super.paint(context, offset);
   }
 }
