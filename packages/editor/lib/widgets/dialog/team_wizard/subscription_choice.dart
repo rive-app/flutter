@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
-import 'package:rive_editor/widgets/gradient_border.dart';
+import 'package:rive_editor/widgets/common/gradient_border/gradient_border.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class SubscriptionChoice extends StatefulWidget {
