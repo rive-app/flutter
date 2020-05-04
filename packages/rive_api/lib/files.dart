@@ -134,7 +134,7 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
     return null;
   }
 
-  K makeFile(int id);
+  K makeFile(int id, {String name, int ownerId});
 
   T makeFolder(Map<String, dynamic> data);
 
@@ -229,10 +229,10 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
     } on FormatException catch (_) {
       return null;
     }
-
     dynamic fileData = data['file'];
     if (fileData is Map<String, dynamic>) {
-      return makeFile(fileData.getInt("id"));
+      return makeFile(fileData.getInt("id"),
+          name: fileData.getString('name'), ownerId: fileData.getInt('oid'));
     }
     return null;
   }

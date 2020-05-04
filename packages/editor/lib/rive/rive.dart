@@ -31,6 +31,8 @@ import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 
+import 'package:window_utils/window_utils.dart' as win_utils;
+
 enum RiveState { init, login, editor, disconnected, catastrophe }
 
 enum HomeSection { files, notifications, community, recents, getStarted }
@@ -67,7 +69,7 @@ class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
   _NonUiRiveFilesApi(RiveApi api) : super(api);
 
   @override
-  RiveApiFile makeFile(int id) {
+  RiveApiFile makeFile(int id, {String name, int ownerId}) {
     throw UnsupportedError(
         '_NonUiRiveFilesApi shouldn\'t be used to load file lists.');
   }
@@ -422,6 +424,15 @@ class Rive {
 
     if (action is StatefulShortcutAction) {
       action.onPress();
+    } else {
+      switch (action) {
+        case ShortcutAction.closeTab:
+          if (selectedTab.value == systemTab) {
+            win_utils.closeWindow();
+          } else {
+            closeTab(selectedTab.value);
+          }
+      }
     }
   }
 

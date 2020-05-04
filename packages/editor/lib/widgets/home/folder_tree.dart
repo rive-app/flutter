@@ -70,11 +70,23 @@ class FolderTreeView extends StatelessWidget {
         ),
       ),
       extraBuilder: (context, item, index) => Container(),
-      backgroundBuilder: (context, item, style) => DropItemBackground(
-          DropState.none,
-          (fileBrowser?.selectedFolder == item.data)
-              ? SelectionState.selected
-              : SelectionState.none),
+      backgroundBuilder: (context, item, style) =>
+          ValueListenableBuilder<SelectionState>(
+        valueListenable: item.data.selectionState,
+        builder: (context, selectionState, _) {
+          // NOTE: selectionstate gets a bit confused here
+          // the tree and file browser are sharing items
+          // which means they share selection state, which
+          // isnt always what we want
+          var _selectionState = SelectionState.none;
+          if (fileBrowser?.selectedFolder == item.data) {
+            _selectionState = SelectionState.selected;
+          } else if (selectionState == SelectionState.hovered) {
+            _selectionState = SelectionState.hovered;
+          }
+          return DropItemBackground(DropState.none, _selectionState);
+        },
+      ),
       itemBuilder: (context, item, style) => Expanded(
         child: Container(
           child: IgnorePointer(
@@ -128,7 +140,7 @@ class RiveFolderIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     var colors = RiveTheme.of(context).colors;
     if (folder.owner != null) {
-      return SizedAvatar(
+      return SizedAvatarOwner(
         owner: folder.owner,
         selected: selected,
       );
@@ -143,8 +155,8 @@ class RiveFolderIcon extends StatelessWidget {
   }
 }
 
-class SizedAvatar extends StatelessWidget {
-  const SizedAvatar({
+class SizedAvatarOwner extends StatelessWidget {
+  const SizedAvatarOwner({
     @required this.owner,
     this.selected = false,
     this.size = const Size(20, 20),
@@ -161,13 +173,43 @@ class SizedAvatar extends StatelessWidget {
   final String teamIcon;
   final String userIcon;
 
-  Widget _backupIcon(RiveColors colors) {
-    return TintedIcon(
+  @override
+  Widget build(BuildContext context) {
+    var colors = RiveTheme.of(context).colors;
+
+    return SizedAvatar(
+      url: owner.avatar,
       icon: (owner is RiveTeam) ? teamIcon : userIcon,
-      color: selected
+      iconColor: (selected)
           ? colors.fileSelectedFolderIcon
           : colors.fileUnselectedFolderIcon,
+      addBackground: addBackground,
+      size: size,
     );
+  }
+}
+
+class SizedAvatar extends StatelessWidget {
+  const SizedAvatar({
+    this.url,
+    this.iconColor,
+    this.size = const Size(20, 20),
+    this.icon = 'your-files',
+    this.addBackground = false,
+    Key key,
+  }) : super(key: key);
+
+  final String url;
+  final Size size;
+  final bool addBackground;
+  final String icon;
+  final Color iconColor;
+
+  Widget _backupIcon(RiveColors colors) {
+    return TintedIcon(
+        icon: icon,
+        color:
+            (iconColor == null) ? colors.fileUnselectedFolderIcon : iconColor);
   }
 
   Widget _backupIconWithBackground(RiveColors colors) {
@@ -189,7 +231,7 @@ class SizedAvatar extends StatelessWidget {
 
   Widget _networkImage(BuildContext context) {
     return FutureBuilder<Uint8List>(
-      future: ImageCacheProvider.of(context).loadRawImageFromUrl(owner.avatar),
+      future: ImageCacheProvider.of(context).loadRawImageFromUrl(url),
       builder: (context, snapshot) => CircleAvatar(
         backgroundColor: Colors.transparent,
         // backgroundImage: NetworkImage(item.data.owner?.avatar),
@@ -203,9 +245,9 @@ class SizedAvatar extends StatelessWidget {
     Widget _avatarChild;
     var colors = RiveTheme.of(context).colors;
 
-    if (owner.avatar == null && addBackground) {
+    if (url == null && addBackground) {
       _avatarChild = _backupIconWithBackground(colors);
-    } else if (owner.avatar == null) {
+    } else if (url == null) {
       _avatarChild = _backupIcon(colors);
     } else {
       _avatarChild = _networkImage(context);

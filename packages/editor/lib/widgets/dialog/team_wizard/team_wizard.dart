@@ -5,6 +5,7 @@ import 'package:rive_editor/widgets/dialog/team_wizard/panel_two.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/panel_one.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 Future<T> showTeamWizard<T>({BuildContext context}) {
   return showRiveDialog(
@@ -43,6 +44,7 @@ class _WizardState extends State<Wizard> {
 
   @override
   Widget build(BuildContext context) {
+    _sub.api = RiveContext.of(context).api;
     return activePanel == WizardPanel.one
         ? TeamWizardPanelOne(_sub)
         : TeamWizardPanelTwo(_sub);

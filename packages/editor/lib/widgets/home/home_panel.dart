@@ -8,6 +8,7 @@ import 'package:rive_api/files.dart';
 import 'package:rive_api/models/team.dart';
 
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/home/team_detail_panel.dart';
 import 'package:rive_editor/widgets/notifications.dart';
 
@@ -43,7 +44,7 @@ import 'package:provider/provider.dart';
 const double kFileAspectRatio = kGridWidth / kFileHeight;
 const double kFileHeight = 190;
 const double kFolderAspectRatio = kGridWidth / kFolderHeight;
-const double kFolderHeight = 60;
+const double kFolderHeight = 50;
 const double kGridHeaderHeight = 50;
 const double kGridSpacing = 30;
 const double kGridWidth = 187;
@@ -165,10 +166,9 @@ class FilesPanel extends StatelessWidget {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: kGridSpacing),
       sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          // maxCrossAxisExtent: kGridWidth,
-          crossAxisCount: browser.crossAxisCount,
-          childAspectRatio: kFileAspectRatio,
+        gridDelegate: const SliverGridDelegateFixedSize(
+          crossAxisExtent: kGridWidth,
+          mainAxisExtent: kFileHeight,
           mainAxisSpacing: kGridSpacing,
           crossAxisSpacing: kGridSpacing,
         ),
@@ -207,10 +207,9 @@ class FilesPanel extends StatelessWidget {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: kGridSpacing),
       sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          // maxCrossAxisExtent: kGridWidth,
-          crossAxisCount: browser.crossAxisCount,
-          childAspectRatio: kFolderAspectRatio,
+        gridDelegate: const SliverGridDelegateFixedSize(
+          crossAxisExtent: kGridWidth,
+          mainAxisExtent: kFolderHeight,
           mainAxisSpacing: kGridSpacing,
           crossAxisSpacing: kGridSpacing,
         ),
@@ -501,6 +500,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
                               icon: 'teams-button',
                               textColor: const Color(0xFF888888),
                               iconColor: const Color(0xFFA9A9A9),
+                              hoverTextColor: const Color(0xFF666666),
+                              hoverIconColor: const Color(0xFF888888),
                               tip: const Tip(
                                 label: 'Create a space where you and'
                                     '\nyour team can share files.',

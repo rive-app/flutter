@@ -14,9 +14,9 @@ class RiveFile extends RiveApiFile with SelectableItem, ChangeNotifier {
 
   final _draggingState = ValueNotifier<bool>(false);
 
-  RiveFile(int id, this.browser)
+  RiveFile(int id, this.browser, {String name, int ownerId})
       : key = ValueKey<int>(id),
-        super(id);
+        super(id, name: name, ownerId: ownerId);
 
   ValueListenable<bool> get draggingState => _draggingState;
   bool get isDragging => _draggingState.value;

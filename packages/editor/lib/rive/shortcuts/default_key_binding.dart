@@ -245,5 +245,12 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.semiColon,
       ],
     ),
+    Shortcut(
+      ShortcutAction.closeTab,
+      [
+        ShortcutKey.systemCmd,
+        ShortcutKey.w,
+      ],
+    ),
   ],
 );

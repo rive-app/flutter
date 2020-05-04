@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/home/folder_tree.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/utils.dart';
@@ -282,6 +283,15 @@ class NotificationContent extends StatelessWidget {
       return FollowNotification(notification as RiveFollowNotification);
     } else if (notification is RiveTeamInviteNotification) {
       return TeamInviteNotification(notification as RiveTeamInviteNotification);
+    } else if (notification is RiveTeamInviteAcceptedNotification) {
+      return TeamInviteAcceptedNotification(
+          notification as RiveTeamInviteAcceptedNotification);
+    } else if (notification is RiveTeamInviteRejectedNotification) {
+      return TeamInviteRejectedNotification(
+          notification as RiveTeamInviteRejectedNotification);
+    } else if (notification is RiveTeamInviteRescindedNotification) {
+      return TeamInviteRescindedNotification(
+          notification as RiveTeamInviteRescindedNotification);
     } else {
       return UnknownNotification(notification);
     }
@@ -333,8 +343,26 @@ class TeamInviteNotification extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('${notification.senderName} invited you to join'
-                  ' the ${notification.teamName} team.'),
+              RichText(
+                text: TextSpan(children: [
+                  TextSpan(
+                    text: notification.senderName,
+                    style: theme.textStyles.notificationTitle,
+                  ),
+                  TextSpan(
+                    text: ' invited you to join the ',
+                    style: theme.textStyles.fileLightGreyText,
+                  ),
+                  TextSpan(
+                    text: notification.teamName,
+                    style: theme.textStyles.notificationTitle,
+                  ),
+                  TextSpan(
+                    text: ' team.',
+                    style: theme.textStyles.fileLightGreyText,
+                  )
+                ]),
+              ),
               const SizedBox(height: 20),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,6 +381,17 @@ class TeamInviteNotification extends StatelessWidget {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.only(right: 20.0),
+          child: SizedBox(
+            width: 50,
+            child: SizedAvatar(
+              url: notification.avatarUrl,
+              size: const Size(50, 50),
+              addBackground: false,
+            ),
+          ),
+        ),
         SizedBox(
           width: 93,
           child: Column(
@@ -368,7 +407,7 @@ class TeamInviteNotification extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               FlatIconButton(
-                label: 'Ignore',
+                label: 'Dismiss',
                 color: theme.colors.buttonLight,
                 mainAxisAlignment: MainAxisAlignment.center,
                 textColor: theme.colors.commonButtonTextColorDark,
@@ -377,6 +416,137 @@ class TeamInviteNotification extends StatelessWidget {
             ],
           ),
         ),
+      ],
+    );
+  }
+}
+
+class TeamInviteAcceptedNotification extends StatelessWidget {
+  const TeamInviteAcceptedNotification(this.notification);
+  final RiveTeamInviteAcceptedNotification notification;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final rive = RiveContext.of(context);
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 10.0),
+          child: SizedBox(
+            width: 50,
+            child: SizedAvatar(
+              url: notification.avatarUrl,
+              size: const Size(50, 50),
+              addBackground: false,
+            ),
+          ),
+        ),
+        Expanded(
+            child: RichText(
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'You joined the ',
+                style: theme.textStyles.fileLightGreyText),
+            TextSpan(
+                text: notification.teamName,
+                style: theme.textStyles.notificationTitle),
+            TextSpan(text: ' team', style: theme.textStyles.fileLightGreyText)
+          ]),
+        )),
+        SizedBox(
+          width: 120,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FlatIconButton(
+                label: 'View Team Now',
+                color: theme.colors.buttonLight,
+                mainAxisAlignment: MainAxisAlignment.center,
+                textColor: theme.colors.commonButtonTextColorDark,
+                onTap: () {
+                  rive.selectRiveOwner(notification.teamId);
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class TeamInviteRejectedNotification extends StatelessWidget {
+  const TeamInviteRejectedNotification(this.notification);
+  final RiveTeamInviteRejectedNotification notification;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 10.0),
+          child: SizedBox(
+            width: 50,
+            child: SizedAvatar(
+              url: notification.avatarUrl,
+              size: const Size(50, 50),
+              addBackground: false,
+            ),
+          ),
+        ),
+        Expanded(
+            child: RichText(
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'You rejected the ',
+                style: theme.textStyles.fileLightGreyText),
+            TextSpan(
+                text: notification.teamName,
+                style: theme.textStyles.notificationTitle),
+            TextSpan(text: ' team', style: theme.textStyles.fileLightGreyText)
+          ]),
+        )),
+      ],
+    );
+  }
+}
+
+class TeamInviteRescindedNotification extends StatelessWidget {
+  const TeamInviteRescindedNotification(this.notification);
+  final RiveTeamInviteRescindedNotification notification;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 10.0),
+          child: SizedBox(
+            width: 50,
+            child: SizedAvatar(
+              url: notification.avatarUrl,
+              size: const Size(50, 50),
+              addBackground: false,
+            ),
+          ),
+        ),
+        Expanded(
+            child: RichText(
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'An invitation to ',
+                style: theme.textStyles.fileLightGreyText),
+            TextSpan(
+                text: notification.teamName,
+                style: theme.textStyles.notificationTitle),
+            TextSpan(
+                text: ' has been withdrawn',
+                style: theme.textStyles.fileLightGreyText)
+          ]),
+        )),
       ],
     );
   }

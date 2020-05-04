@@ -10,6 +10,7 @@ class FlatIconButton extends StatefulWidget {
     @required this.label,
     Key key,
     this.icon,
+    this.hoverIcon,
     this.color,
     this.textColor,
     this.hoverColor,
@@ -24,6 +25,7 @@ class FlatIconButton extends StatefulWidget {
 
   final String label;
   final Widget icon;
+  final Widget hoverIcon;
   final VoidCallback onTap;
   final Color color, textColor;
   final Color hoverColor, hoverTextColor;
@@ -64,6 +66,8 @@ class _FlatIconState extends State<FlatIconButton> {
     var textStyle = (textColor != null)
         ? riveStyles.buttonTextStyle.copyWith(color: textColor)
         : riveStyles.buttonTextStyle;
+    var _hoverIcon = widget.hoverIcon ?? widget.icon;
+    var _icon = _isHovered ? _hoverIcon : widget.icon;
     return _tip(
       MouseRegion(
         onEnter: (_) {
@@ -104,7 +108,7 @@ class _FlatIconState extends State<FlatIconButton> {
                   padding: const EdgeInsets.only(bottom: 1),
                   child: Text(widget.label, style: textStyle),
                 ),
-                if (widget.icon != null) widget.icon,
+                if (_icon != null) _icon,
               ],
             ),
           ),

@@ -155,23 +155,15 @@ class FileBrowser extends FileBrowserController {
     return rive.open(value.ownerId, value.id, value.name, makeActive: true);
   }
 
-  Future<void> createFile() async {
+  Future<RiveFile> createFile() async {
     RiveFile newFile;
     if (owner is RiveTeam) {
       newFile = await _filesApi.createTeamFile(owner.ownerId, folder: _current);
     } else {
       newFile = await _filesApi.createFile(folder: _current);
     }
-
-    if (newFile != null) {
-      //file.id
-      await loadFileList();
-      //file.id
-
-      int index =
-          _current.files.value.indexWhere((item) => item.id == newFile.id);
-      print("File is at index $index");
-    }
+    await loadFileList();
+    return newFile;
   }
 
   Future<void> createFolder() async {
@@ -425,8 +417,8 @@ class _EditorRiveFilesApi extends RiveFilesApi<RiveFolder, RiveFile> {
   _EditorRiveFilesApi(RiveApi api, this._browser) : super(api);
 
   @override
-  RiveFile makeFile(int id) {
-    return RiveFile(id, _browser);
+  RiveFile makeFile(int id, {String name, int ownerId}) {
+    return RiveFile(id, _browser, name: name, ownerId: ownerId);
   }
 
   @override

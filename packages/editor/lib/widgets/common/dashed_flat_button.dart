@@ -44,6 +44,8 @@ class DashedFlatButton extends StatelessWidget {
     @required this.icon,
     this.textColor,
     this.iconColor,
+    this.hoverTextColor,
+    this.hoverIconColor,
     this.onTap,
     this.tip,
   });
@@ -52,6 +54,8 @@ class DashedFlatButton extends StatelessWidget {
   final String icon;
   final Color textColor;
   final Color iconColor;
+  final Color hoverIconColor;
+  final Color hoverTextColor;
   final VoidCallback onTap;
   final Tip tip;
 
@@ -65,9 +69,14 @@ class DashedFlatButton extends StatelessWidget {
         icon: icon,
         color: iconColor,
       ),
+      hoverIcon: TintedIcon(
+        icon: icon,
+        color: hoverIconColor,
+      ),
       label: label,
       color: Colors.transparent,
       textColor: textColor,
+      hoverTextColor: hoverTextColor,
       onTap: onTap,
       tip: tip,
     );

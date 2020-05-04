@@ -25,9 +25,10 @@ class TopNav extends StatelessWidget {
   Widget _navControls(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
     final selectedOwner = RiveContext.of(context).currentOwner;
+    final rive = RiveContext.of(context);
     final children = <Widget>[];
     if (fileBrowser.selectedFolder.owner != null) {
-      children.add(SizedAvatar(
+      children.add(SizedAvatarOwner(
         owner: fileBrowser.selectedFolder.owner,
         size: const Size(30, 30),
         addBackground: true,
@@ -102,7 +103,10 @@ class TopNav extends StatelessWidget {
       itemBuilder: (popupContext, item, isHovered) =>
           item.itemBuilder(popupContext, isHovered),
       itemsBuilder: (context) => [
-        PopupContextItem('New File', select: fileBrowser.createFile),
+        PopupContextItem('New File', select: () async {
+          final file = await fileBrowser.createFile();
+          await fileBrowser.openFile(rive, file);
+        }),
         PopupContextItem('New Folder', select: fileBrowser.createFolder),
         PopupContextItem.separator(),
         PopupContextItem(
