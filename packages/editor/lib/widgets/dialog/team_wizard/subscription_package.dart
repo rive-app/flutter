@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
@@ -202,12 +203,28 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
 
 /// Data class for tracking data in the team subscription widget
 class TeamSubscriptionPackage extends SubscriptionPackage {
+  // Bit nasty, but riveapi is context bound :/
+  RiveApi api;
+
   /// Team name
   String _name;
   String get name => _name;
   set name(String value) {
     _name = value;
+    _nameCheckPassed = null;
     notifyListeners();
+  }
+
+  Timer _nameCheckDebounce;
+  bool _nameCheckPassed;
+  bool get nameCheckPassed => _nameCheckPassed;
+  set nameCheckPassed(bool value) {
+    if (_nameCheckPassed != value) {
+      _nameCheckPassed = value;
+      // trigger reset of name error
+      isNameValid;
+      notifyListeners();
+    }
   }
 
   /// Form Processing
@@ -265,6 +282,15 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
       _nameValidationError = 'No spaces or symbols';
       return false;
     }
+    if (nameCheckPassed == null) {
+      checkName();
+      _nameValidationError = 'Checking name...';
+      return false;
+    }
+    if (nameCheckPassed == false) {
+      _nameValidationError = 'Name reserved, please choose another';
+      return false;
+    }
     _nameValidationError = null;
     return true;
   }
@@ -282,7 +308,12 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
     isZipValid;
     isExpirationValid;
     isCcvValid;
-    return isCardNrValid && isZipValid && isExpirationValid && isCcvValid;
+    nameCheckPassed;
+    return isCardNrValid &&
+        isZipValid &&
+        isExpirationValid &&
+        isCcvValid &&
+        nameCheckPassed;
   }
 
   /// Step 2 is valid; safe to attempt team creation
@@ -290,6 +321,19 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
 
   String get expMonth => expiration.split('/').first;
   String get expYear => '20${expiration.split('/').last}';
+
+  Future checkName() async {
+    if (_nameCheckDebounce?.isActive ?? false) _nameCheckDebounce.cancel();
+    _nameCheckDebounce = Timer(const Duration(milliseconds: 233), _checkName);
+  }
+
+  Future _checkName() async {
+    final _nameCache = name;
+    final _checkPassed = await RiveTeamsApi(api).checkName(teamName: name);
+    // its async, lest make sure we're still looking at the result
+    // for the quesetion we asked.
+    if (_nameCache == name) nameCheckPassed = _checkPassed;
+  }
 
   Future submit(BuildContext context, RiveApi api) async {
     if (isStep2Valid) {

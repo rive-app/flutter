@@ -42,6 +42,20 @@ class RiveTeamsApi<T extends RiveTeam> {
     return team;
   }
 
+  Future<bool> checkName({@required String teamName}) async {
+    String payload = jsonEncode({
+      "data": {
+        "username": teamName,
+      }
+    });
+    try {
+      await api.post(api.host + '/api/teams/namecheck', body: payload);
+      return true;
+    } on ApiException {
+      return false;
+    }
+  }
+
   /// GET /api/teams
   /// Returns the teams for the current user
   Future<List<T>> get teams async {
