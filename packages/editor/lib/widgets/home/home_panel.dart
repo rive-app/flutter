@@ -500,6 +500,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
                               icon: 'teams-button',
                               textColor: const Color(0xFF888888),
                               iconColor: const Color(0xFFA9A9A9),
+                              hoverTextColor: const Color(0xFF666666),
+                              hoverIconColor: const Color(0xFF888888),
                               tip: const Tip(
                                 label: 'Create a space where you and'
                                     '\nyour team can share files.',
