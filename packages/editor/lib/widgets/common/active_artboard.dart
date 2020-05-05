@@ -35,6 +35,7 @@ class _ActiveArtboardState extends State<ActiveArtboard> {
     _file?.stateChanged?.removeListener(_fileStateChanged);
     _file = file;
     _file?.stateChanged?.addListener(_fileStateChanged);
+    _fileStateChanged();
   }
 
   void _fileStateChanged() {
