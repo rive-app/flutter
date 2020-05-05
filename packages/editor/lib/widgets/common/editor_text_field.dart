@@ -207,7 +207,7 @@ class _EditorTextFieldState extends State<EditorTextField>
           showCursor: true,
           selectionHeightStyle: BoxHeightStyle.tight,
           selectionWidthStyle: BoxWidthStyle.tight,
-          keyboardType: TextInputType.multiline,
+          keyboardType: TextInputType.text,
           selectionColor: RiveTheme.of(context).colors.textSelection,
           onSubmitted: widget.onSubmitted,
           onChanged: widget.onChanged,
