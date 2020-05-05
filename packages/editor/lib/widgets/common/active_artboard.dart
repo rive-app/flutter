@@ -40,7 +40,7 @@ class _ActiveArtboardState extends State<ActiveArtboard> {
 
   void _fileStateChanged() {
     // see if backboard is available
-    var bb = _file.core.backboard;
+    var bb = _file?.core?.backboard;
     if (bb == _backboard) {
       return;
     }
@@ -51,7 +51,7 @@ class _ActiveArtboardState extends State<ActiveArtboard> {
   }
 
   void _artboardChanged() {
-    var ab = _backboard.activeArtboard;
+    var ab = _backboard?.activeArtboard;
     if (_activeArtboard == ab) {
       return;
     }

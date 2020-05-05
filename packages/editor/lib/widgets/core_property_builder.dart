@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/frameDebounce.dart';
 
 /// TODO: determine if we can commit murder
 class CorePropertyBuilder<T> extends StatefulWidget {
@@ -59,6 +60,7 @@ class _CorePropertyBuilderState<T> extends State<CorePropertyBuilder<T>> {
   @override
   void dispose() {
     widget.object.removeListener(widget.propertyKey, _valueChanged);
+    cancelFrameDebounce(_rebuild);
     super.dispose();
   }
 
@@ -68,10 +70,18 @@ class _CorePropertyBuilderState<T> extends State<CorePropertyBuilder<T>> {
     _bindListener();
   }
 
+  void _rebuild() {
+    (context as StatefulElement).markNeedsBuild();
+  }
+
   void _valueChanged(dynamic from, dynamic to) {
     assert(to is T);
-    setState(() {
-      value = to as T;
-    });
+
+    // We debounce here to ensure that the update doesn't occur during a build
+    // (this can happen if animations/changes get applied in response to some
+    // other change that occurs during the build cycle).
+
+    value = to as T;
+    frameDebounce(_rebuild);
   }
 }

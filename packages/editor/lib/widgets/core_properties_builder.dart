@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 
 import 'package:flutter/material.dart';
+import 'package:rive_editor/frameDebounce.dart';
 import 'package:utilities/list_equality.dart';
 
 /// Stateful widget that manages a list of [Core] elements.
@@ -91,6 +92,7 @@ class _CorePropertiesBuilderState<T, K extends Core>
   @override
   void dispose() {
     _unbindListener(widget.objects, widget.propertyKey);
+    cancelFrameDebounce(_rebuild);
     super.dispose();
   }
 
@@ -100,9 +102,13 @@ class _CorePropertiesBuilderState<T, K extends Core>
     _bindListener();
   }
 
+
+  void _rebuild() {
+    (context as StatefulElement).markNeedsBuild();
+  }
+
   void _valueChanged(dynamic from, dynamic to) {
-    setState(() {
-      value = _validateValue();
-    });
+    value = _validateValue();
+    frameDebounce(_rebuild);
   }
 }
