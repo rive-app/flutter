@@ -89,6 +89,7 @@ abstract class AnimationTimeManager extends AnimationManager {
           .toDouble());
     });
     animation.artboard.addController(_controller);
+    _controller.isPlaying = true;
 
     _isPlayingStream.add(false);
     _timeStream.add(0);

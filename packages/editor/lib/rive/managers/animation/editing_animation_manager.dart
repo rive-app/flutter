@@ -66,6 +66,14 @@ class EditingAnimationManager extends AnimationTimeManager
 
   @override
   void onAutoKey(Component component, int propertyKey) {
+    /// The stage will switch the active artboard for us, but some of these
+    /// operations are debounced so there's a risk onAutoKey will call while
+    /// another artboard's animation is still active so we early out here if
+    /// autoKey is triggered for a property on an object that is not in the same
+    /// artboard as our currently editing animation.
+    if(component.artboard != animation.artboard) {
+      return;
+    }
     var keyFrame = component.addKeyFrame(animation, propertyKey, frame);
     // Set the value of the keyframe.
     keyFrame.valueFrom(component, propertyKey);

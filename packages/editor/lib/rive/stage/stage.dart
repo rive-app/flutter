@@ -506,13 +506,7 @@ class Stage extends Debouncer {
     _updatePanIcon();
   }
 
-  // TODO: Get actual active artboard, not just the first one.
-  Artboard get activeArtboard {
-    if (file.core.artboards.isEmpty) {
-      return null;
-    }
-    return file.core.artboards.first;
-  }
+  Artboard get activeArtboard => file.core?.backboard?.activeArtboard;
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 
