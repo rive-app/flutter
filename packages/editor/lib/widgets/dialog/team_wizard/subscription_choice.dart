@@ -95,7 +95,7 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
           top: lerpDouble(2, 0, animationValue),
           bottom: lerpDouble(0, 2, animationValue),
         ),
-        child: NewGradientBorder(
+        child: GradientBorder(
           strokeWidth: 3,
           radius: 10,
           shouldPaint: true,
@@ -170,8 +170,8 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
 }
 
 /// Customer border that uses a gradient in place of a solid color
-class NewGradientBorder extends SingleChildRenderObjectWidget {
-  const NewGradientBorder({
+class GradientBorder extends SingleChildRenderObjectWidget {
+  const GradientBorder({
     @required this.strokeWidth,
     @required this.radius,
     @required this.gradient,
