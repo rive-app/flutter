@@ -98,7 +98,6 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
         child: GradientBorder(
           strokeWidth: 3,
           radius: 10,
-          shouldPaint: true,
           gradient: LinearGradient.lerp(gradients.transparentLinear,
               gradients.redPurpleBottomCenter, animationValue),
           child: Container(
@@ -175,13 +174,11 @@ class GradientBorder extends SingleChildRenderObjectWidget {
     @required this.strokeWidth,
     @required this.radius,
     @required this.gradient,
-    this.shouldPaint = true,
     Key key,
     Widget child,
   }) : super(key: key, child: child);
   final double strokeWidth;
   final double radius;
-  final bool shouldPaint;
   final Gradient gradient;
 
   @override
@@ -190,7 +187,6 @@ class GradientBorder extends SingleChildRenderObjectWidget {
       strokeWidth: strokeWidth,
       radius: radius,
       gradient: gradient,
-      shouldPaint: shouldPaint,
     );
   }
 
@@ -202,7 +198,6 @@ class GradientBorder extends SingleChildRenderObjectWidget {
     renderObject.strokeWidth = strokeWidth;
     renderObject.radius = radius;
     renderObject.gradient = gradient;
-    renderObject.shouldPaint = shouldPaint;
   }
 }
 
@@ -211,7 +206,6 @@ class _RenderGradientBorder extends RenderProxyBox {
       {@required double strokeWidth,
       @required this.radius,
       @required this.gradient,
-      @required this.shouldPaint,
       RenderBox child})
       : _borderPaint = Paint()..strokeWidth = strokeWidth,
         super(child);
@@ -228,7 +222,6 @@ class _RenderGradientBorder extends RenderProxyBox {
   }
 
   double radius;
-  bool shouldPaint;
   Gradient gradient;
 
   @override
