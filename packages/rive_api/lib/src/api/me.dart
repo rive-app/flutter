@@ -3,12 +3,12 @@
 import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/src/model/model.dart';
+import 'package:rive_api/src/data_model/data_model.dart';
 
 final _log = Logger('Rive API Me');
 
 class MeApi {
-  MeApi() : api = RiveApi();
+  MeApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
   Future<Me> get whoami async {
