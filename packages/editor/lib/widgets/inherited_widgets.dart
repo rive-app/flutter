@@ -317,6 +317,7 @@ class EditingAnimationProvider extends StatelessWidget {
             stream: AnimationsProvider.of(context)?.selectedAnimation,
             builder: (context, snapshot) => _EditingAnimation(
               child: child,
+              activeFile: ActiveFile.of(context),
               editingAnimation:
                   snapshot.hasData && snapshot.data.animation is LinearAnimation
                       ? snapshot.data.animation as LinearAnimation
@@ -336,9 +337,11 @@ class EditingAnimationProvider extends StatelessWidget {
 
 class _EditingAnimation extends StatefulWidget {
   final LinearAnimation editingAnimation;
+  final OpenFileContext activeFile;
   final Widget child;
   const _EditingAnimation({
     @required this.editingAnimation,
+    @required this.activeFile,
     @required this.child,
     Key key,
   }) : super(key: key);
@@ -366,13 +369,14 @@ class __EditingAnimationState extends State<_EditingAnimation> {
     _manager?.dispose();
     _manager = widget.editingAnimation == null
         ? null
-        : EditingAnimationManager(widget.editingAnimation);
+        : EditingAnimationManager(widget.editingAnimation, widget.activeFile);
   }
 
   @override
   void didUpdateWidget(_EditingAnimation oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.editingAnimation != widget.editingAnimation) {
+    if (oldWidget.editingAnimation != widget.editingAnimation ||
+        oldWidget.activeFile != widget.activeFile) {
       _updateManager();
     }
   }

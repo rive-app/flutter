@@ -5,6 +5,8 @@ import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:meta/meta.dart';
 import 'package:rive_core/rive_animation_controller.dart';
@@ -57,6 +59,7 @@ class _SimpleAnimationController extends RiveAnimationController {
 /// the viewport, changing animation duration, and tracking editing animation
 /// time.
 abstract class AnimationTimeManager extends AnimationManager {
+  final OpenFileContext activeFile;
   final _fpsStream = BehaviorSubject<int>();
 
   /// Use this to actually process the final fps rate change.
@@ -74,9 +77,14 @@ abstract class AnimationTimeManager extends AnimationManager {
   final _playbackController = StreamController<bool>();
 
   _SimpleAnimationController _controller;
-  AnimationTimeManager(LinearAnimation animation) : super(animation) {
+  AnimationTimeManager(LinearAnimation animation, this.activeFile)
+      : super(animation) {
     _controller = _SimpleAnimationController(animation, () {
-      _timeStream.add((_controller.time * animation.fps)
+      double frames = _controller.time*animation.fps;
+      if( animation.duration-frames < 0) {
+        _changePlayback(false);
+      }
+      _timeStream.add(frames
           .clamp(0, animation.duration)
           .toDouble());
     });
@@ -96,9 +104,12 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.keyframesChanged.addListener(_keyframesChanged);
 
     _syncViewport();
+
+    activeFile.addActionHandler(_handleAction);
   }
 
   void _keyframesChanged() {
+    // _controller.apply(animation.context, 0);
     _controller.isPlaying = true;
   }
 
@@ -178,6 +189,7 @@ abstract class AnimationTimeManager extends AnimationManager {
   int get frame => _timeStream.value.floor();
 
   void dispose() {
+    activeFile.removeActionHandler(_handleAction);
     animation.artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
 
@@ -194,6 +206,22 @@ abstract class AnimationTimeManager extends AnimationManager {
     _timeStream.close();
     _fpsController.close();
     _fpsPreviewController.close();
+  }
+
+  bool _handleAction(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.togglePlay:
+        bool play = !_isPlayingStream.value;
+        // If we're super close to the end, rewing to start before playing.
+        if (play &&
+            (_timeStream.value - animation.duration).abs() <
+                0.01) {
+          _controller.time = 0;
+        }
+        _changePlayback(play);
+        return true;
+    }
+    return false;
   }
 }
 

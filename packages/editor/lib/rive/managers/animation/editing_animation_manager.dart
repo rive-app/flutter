@@ -10,6 +10,7 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
@@ -37,7 +38,8 @@ class EditingAnimationManager extends AnimationTimeManager
   final HashSet<_AllPropertiesHelper> _allPropertiesHelpers =
       HashSet<_AllPropertiesHelper>();
 
-  EditingAnimationManager(LinearAnimation animation) : super(animation) {
+  EditingAnimationManager(LinearAnimation animation, OpenFileContext activeFile)
+      : super(animation, activeFile) {
     animation.context.addDelegate(this);
     _updateHierarchy();
 
