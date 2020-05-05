@@ -5,9 +5,9 @@ class CurrentDirectoryManager {
   static setDirectory(int id) async {
     // Go fetch the directory from the api
     /// await directory with [id]
-    CurrentDirectory dir;
+    CurrentDirectoryVM dir;
     if (id == 0) {
-      dir = CurrentDirectory(0, "Your Files");
+      dir = CurrentDirectoryVM(0, "Your Files");
     } else {
       // get other directories?
       throw UnsupportedError('Need to implement this too!');

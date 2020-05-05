@@ -11,6 +11,8 @@
 import 'package:rive_api/src/model/model.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/core.dart';
+import 'package:rive_api/src/view_model/view_model.dart';
+import 'package:rxdart/subjects.dart';
 
 class FileVM {
   FileVM({

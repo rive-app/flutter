@@ -4,11 +4,8 @@ import 'package:rive_api/src/manager/current_directory.dart';
 import 'package:rive_api/src/manager/folder_contents.dart';
 import 'package:rive_api/src/manager/team.dart';
 import 'package:rive_api/src/plumber.dart';
-import 'package:rive_api/src/view_model/directory.dart';
-import 'package:rive_api/src/view_model/folder_contents.dart';
-import 'package:rive_api/src/view_model/team.dart';
+import 'package:rive_api/src/view_model/view_model.dart';
 import 'package:test/test.dart';
-
 
 void main() {
   Plumber plumber;
@@ -21,7 +18,7 @@ void main() {
     test('Init the Current Directory to Top Folder', () async {
       final c = Completer();
 
-      final stream = plumber.getStream<CurrentDirectory>();
+      final stream = plumber.getStream<CurrentDirectoryVM>();
 
       CurrentDirectoryManager.setDirectory(0);
 
@@ -43,7 +40,7 @@ void main() {
       // This manager listens for Current Directory¸ info, and it loads the relative files & folders.
       var manager = FolderContentsManager();
 
-      final stream = plumber.getStream<FolderContents>();
+      final stream = plumber.getStream<FolderContentsVM>();
 
       var subscription = stream.listen((folderContents) {
         expect(folderContents.files, isNotEmpty);
@@ -61,7 +58,7 @@ void main() {
 
       // I click on the interface, triggering a change in the current directory.
       print('Click');
-      plumber.message(CurrentDirectory(1, 'Ooof'));
+      plumber.message(CurrentDirectoryVM(1, 'Ooof'));
 
       await c1.future;
 
@@ -85,6 +82,39 @@ void main() {
       await c.future;
 
       subscription.cancel();
+    });
+
+    test('Load Folder Contents & receive details in a two-step process',
+        () async {
+      final c = Completer();
+      List<StreamSubscription> fileDetailsSubs = [];
+
+      // Instantiate the directory to the top level directory.
+      CurrentDirectoryManager.setDirectory(0);
+      // This manager listens for Current Directory¸ info, and it loads the relative files & folders.
+      var manager = FolderContentsManager();
+
+      final stream = plumber.getStream<FolderContentsVM>();
+
+      var contentsSub = stream.listen((contents) {
+        for (final filePipe in contents.files) {
+          var fileSub = filePipe.listen((value) {
+            print("This is my new file: $value");
+            if (value.id == 1 && value.name != null) {
+              c.complete();
+            }
+          });
+          fileDetailsSubs.add(fileSub);
+        }
+      });
+
+      await c.future;
+
+      contentsSub.cancel();
+      for (final subs in fileDetailsSubs) {
+        subs.cancel();
+      }
+      manager.dispose();
     });
   });
 }
