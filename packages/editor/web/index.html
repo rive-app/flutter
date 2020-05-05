@@ -37,6 +37,13 @@
       event.preventDefault();
     });
   </script>
+  <!-- Disable backspace navigation in Firefox -->
+  <script>
+    window.onkeydown = function (event) {
+      if (event.keyCode == 8 && event.target == document.body)
+        event.preventDefault();
+    }
+  </script>
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
 
