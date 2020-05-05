@@ -268,6 +268,8 @@ abstract class Component extends ComponentBase<RiveFile>
   /// Add a keyframe on this object for [propertyKey] at [time].
   T addKeyFrame<T extends KeyFrame>(
       LinearAnimation animation, int propertyKey, int frame) {
+    assert(animation.artboard == artboard,
+        'component is trying to key in an artboard that it doesn\'t belong to');
     assert(hasProperty(propertyKey),
         '$this doesn\'t store a property with key $propertyKey');
     var keyedObject = animation.getKeyed(this);

@@ -173,7 +173,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       } else if (closestSeconds > seconds) {
         end = mid - 1;
       } else {
-        start = mid;
+        idx = start = mid;
         break;
       }
       idx = start;

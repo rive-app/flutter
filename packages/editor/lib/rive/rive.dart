@@ -190,14 +190,22 @@ class Rive {
   }
 
   int _lastFrameTime = 0;
+  bool _useTime = false;
   void _drawFrame(Duration elapsed) {
     int elapsedMicroseconds = elapsed.inMicroseconds;
 
-    double elapsedSeconds = (elapsedMicroseconds - _lastFrameTime) * 1e-6;
+    double elapsedSeconds =
+        _useTime ? (elapsedMicroseconds - _lastFrameTime) * 1e-6 : 0;
     _lastFrameTime = elapsedMicroseconds;
 
     if (file.value?.advance(elapsedSeconds) ?? false) {
+      // Use elapsed seconds (compute them) only when we are in sustained
+      // playback.
+      _useTime = true;
       SchedulerBinding.instance.scheduleFrame();
+    }
+    else {
+      _useTime = false;
     }
   }
 

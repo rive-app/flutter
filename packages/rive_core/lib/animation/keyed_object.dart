@@ -65,6 +65,10 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   /// be @internal when it's supported.
   bool internalRemoveKeyedProperty(KeyedProperty property) {
     var removed = _keyedProperties.remove(property.propertyKey);
+    if(removed != null) {
+      /// Keyed property removed, it may have contained keyframes.
+      internalKeyFramesChanged();
+    }
     if (_keyedProperties.isEmpty) {
       // Remove this keyed property.
       context.remove(this);

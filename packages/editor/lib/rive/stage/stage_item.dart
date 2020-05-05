@@ -131,10 +131,20 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   @override
   void onSelectedChanged(bool value) {
     _stage?.markNeedsAdvance();
+    var c = component;
+
+    /// Whenever we select something, make sure we swap the active artboard to
+    /// the artboard this component is on, or the component this items
+    /// manipulates is on. Should we move this to a ComponentStageItem class?
+    /// This is safer as it ensures all StageItems will have this logic, so for
+    /// now it lives here.
+    if (c != null && c is Component && c.artboard != null) {
+      c.context.backboard.activeArtboard = c.artboard;
+    }
   }
 
   AABB _aabb = AABB();
-  
+
   AABB get aabb => _aabb;
   set aabb(AABB value) {
     if (AABB.areEqual(value, _aabb)) {

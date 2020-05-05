@@ -47,6 +47,9 @@ class LinearAnimation extends LinearAnimationBase {
   /// should be @internal when it's supported.
   bool internalRemoveKeyedObject(KeyedObject object) {
     var removed = _keyedObjects.remove(object.objectId);
+    if (removed != null) {
+      internalKeyFramesChanged();
+    }
     assert(removed == null || removed == object);
     return removed != null;
   }
