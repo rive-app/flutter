@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:core/error_logger/error_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -203,8 +204,7 @@ class Rive {
       // playback.
       _useTime = true;
       SchedulerBinding.instance.scheduleFrame();
-    }
-    else {
+    } else {
       _useTime = false;
     }
   }
@@ -247,6 +247,13 @@ class Rive {
     if (me != null) {
       _user.value = me;
       _state.value = RiveState.editor;
+
+      // Track the currently logged in user. Any error report will include the
+      // currently logged in user for context.
+      ErrorLogger.instance.user = ErrorLogUser(
+        id: me.ownerId.toString(),
+        username: me.username,
+      );
 
       await Settings.setString(
           Preferences.spectreToken, api.cookies['spectre']);
@@ -297,6 +304,12 @@ class Rive {
     if (!result) {
       return false;
     }
+
+    ErrorLogger.instance.dropCrumb(
+      category: 'auth',
+      message: 'signed out',
+      severity: CrumbSeverity.info,
+    );
 
     result = await Settings.clear(Preferences.spectreToken);
 
@@ -350,6 +363,21 @@ class Rive {
   }
 
   void closeTab(RiveTabItem value) {
+    ErrorLogger.instance.dropCrumb(
+      category: 'tabs',
+      message: 'close',
+      severity: CrumbSeverity.info,
+      data: value.file != null
+          ? {
+              "ownerId": value.file.ownerId.toString(),
+              "fileId": value.file.fileId.toString(),
+              "name": value.file.name.value,
+            }
+          : {
+              "icon": value.icon,
+            },
+    );
+
     fileTabs.remove(value);
     fileTabsChanged.notify();
     if (value == selectedTab.value) {
@@ -372,6 +400,21 @@ class Rive {
       _changeActiveFile(value.file);
       value.file.connect();
     }
+
+    ErrorLogger.instance.dropCrumb(
+      category: 'tabs',
+      message: 'select',
+      severity: CrumbSeverity.info,
+      data: value.file != null
+          ? {
+              "ownerId": value.file.ownerId.toString(),
+              "fileId": value.file.fileId.toString(),
+              "name": value.file.name.value,
+            }
+          : {
+              "icon": value.icon,
+            },
+    );
 
     selectedTab.value = value;
   }
@@ -459,6 +502,17 @@ class Rive {
             tab.file.fileId == fileId,
         orElse: () => null);
 
+    ErrorLogger.instance.dropCrumb(
+      category: 'tabs',
+      message: openFileTab == null ? 'open file' : 're-open file',
+      severity: CrumbSeverity.info,
+      data: {
+        "ownerId": ownerId.toString(),
+        "fileId": fileId.toString(),
+        "name": name,
+      },
+    );
+
     if (openFileTab == null) {
       var openFile = OpenFileContext(
         ownerId,
@@ -477,7 +531,18 @@ class Rive {
     if (makeActive) {
       selectedTab.value = openFileTab;
       _changeActiveFile(openFileTab.file);
-      await openFileTab.file.connect();
+      var connected = await openFileTab.file.connect();
+
+      ErrorLogger.instance.dropCrumb(
+        category: 'tabs',
+        message: connected ? 'connected to file' : 'failed to connect to file',
+        severity: connected ? CrumbSeverity.info : CrumbSeverity.warning,
+        data: {
+          "ownerId": ownerId.toString(),
+          "fileId": fileId.toString(),
+          "name": name,
+        },
+      );
     }
     return openFileTab.file;
   }

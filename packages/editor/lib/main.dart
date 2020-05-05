@@ -13,7 +13,7 @@ import 'package:rive_editor/widgets/ui_strings.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
 
-import 'package:core/error_logger/error_logger.dart' as error_logger;
+import 'package:core/error_logger/error_logger.dart';
 import 'package:rive_core/event.dart';
 
 import 'package:rive_editor/version.dart';
@@ -51,7 +51,7 @@ import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
-    error_logger.onError(details.exception, details.stack);
+    ErrorLogger.instance.reportException(details.exception, details.stack);
   };
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -84,7 +84,7 @@ Future<void> main() async {
     ),
     onError: (Object error, StackTrace stackTrace) {
       try {
-        error_logger.onError(error, stackTrace);
+        ErrorLogger.instance.reportException(error, stackTrace);
       } on Exception catch (e) {
         debugPrint('Failed to report: $e');
         debugPrint('Error was: $error, $stackTrace');
