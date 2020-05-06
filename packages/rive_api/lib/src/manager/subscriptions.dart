@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:rive_api/src/plumber.dart';
 
 typedef SubscribeCallback<T> = void Function(T);
@@ -7,6 +8,7 @@ typedef SubscribeCallback<T> = void Function(T);
 mixin Subscriptions {
   List<StreamSubscription> subscriptions;
 
+  @mustCallSuper
   void dispose() {
     subscriptions.forEach((sub) => sub.cancel());
     subscriptions.clear();

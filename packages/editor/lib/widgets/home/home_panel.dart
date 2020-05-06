@@ -1,43 +1,32 @@
+import 'package:cursor/propagating_listener.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
-
-import 'package:cursor/propagating_listener.dart';
-
-import 'package:rive_api/files.dart';
+import 'package:provider/provider.dart';
 import 'package:rive_api/models/team.dart';
-
-import 'package:rive_core/selectable_item.dart';
-import 'package:rive_editor/widgets/common/sliver_delegates.dart';
-import 'package:rive_editor/widgets/home/team_detail_panel.dart';
-import 'package:rive_editor/widgets/notifications.dart';
-
-import 'package:tree_widget/tree_scroll_view.dart';
-import 'package:tree_widget/tree_style.dart';
-
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
-
-import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
 import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/home/folder_tree.dart';
 import 'package:rive_editor/widgets/home/folder_view_widget.dart';
-import 'package:rive_editor/widgets/home/item_view.dart';
-import 'package:rive_editor/widgets/home/profile_view.dart';
 import 'package:rive_editor/widgets/home/sliver_inline_footer.dart';
+import 'package:rive_editor/widgets/home/team_detail_panel.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/notifications.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
-import 'package:provider/provider.dart';
+import 'package:tree_widget/tree_scroll_view.dart';
+import 'package:tree_widget/tree_style.dart';
 
 const double kFileAspectRatio = kGridWidth / kFileHeight;
 const double kFileHeight = 190;
@@ -533,81 +522,43 @@ class _NavigationPanelState extends State<NavigationPanel> {
   }
 }
 
-class UserPanel extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final rive = RiveContext.of(context);
-    final colors = RiveTheme.of(context).colors;
-    return Container(
-      width: 215,
-      color: colors.fileBackgroundLightGrey,
-      decoration: const BoxDecoration(
-        border: Border(
-            left: BorderSide(
-          color: Color.fromARGB(255, 216, 216, 216),
-        )),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: ValueListenableBuilder<SelectableItem>(
-          valueListenable: rive.activeFileBrowser.value.selectedItem,
-          builder: (context, selection, child) {
-            if (selection != null) {
-              return ItemView(item: selection);
-            }
-            return const ProfileView();
-          }),
-    );
-  }
-}
+class HomeStream extends StatelessWidget {
+  const HomeStream({Key key}) : super(key: key);
 
-class TitleSection extends StatelessWidget {
-  final String name;
-
-  final bool showDropdown;
-  final double height;
-  const TitleSection({
-    @required this.name,
-    @required this.height,
-    Key key,
-    this.showDropdown = false,
-  }) : super(key: key);
+  bool get isTeam => true;
 
   @override
   Widget build(BuildContext context) {
-    final fileBrowser = RiveContext.of(context).activeFileBrowser.value;
-    var options = fileBrowser.sortOptions.value;
-    var theme = RiveTheme.of(context);
-    return Container(
-      height: height,
-      padding: const EdgeInsets.only(left: 30),
+    final theme = RiveTheme.of(context);
+    return PropagatingListener(
+      behavior: HitTestBehavior.deferToChild,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Container(
-            child: Text(
-              name,
-              style: TextStyle(color: Colors.grey[700]),
+          ResizePanel(
+            hitSize: theme.dimensions.resizeEdgeSize,
+            direction: ResizeDirection.horizontal,
+            side: ResizeSide.end,
+            min: 252,
+            max: 500,
+            child: Container(
+              color: Colors.redAccent,
             ),
           ),
-          if (showDropdown)
-            Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: ValueListenableBuilder<RiveFileSortOption>(
-                valueListenable: fileBrowser.selectedSortOption,
-                builder: (context, sortOption, _) =>
-                    ComboBox<RiveFileSortOption>(
-                  popupWidth: 100,
-                  sizing: ComboSizing.collapsed,
-                  underline: false,
-                  valueColor: theme.colors.toolbarButton,
-                  options: options,
-                  value: sortOption,
-                  toLabel: (option) => option.name,
-                  change: (option) =>
-                      fileBrowser.loadFileList(sortOption: option),
+          Expanded(
+              child: Container(
+            color: Colors.greenAccent,
+          )),
+          if (isTeam)
+            ResizePanel(
+                hitSize: theme.dimensions.resizeEdgeSize,
+                direction: ResizeDirection.horizontal,
+                side: ResizeSide.start,
+                min: 252,
+                max: 500,
+                child: Container(color: Colors.blueAccent)
+                // child: TeamDetailPanel(team: fileBrowser.owner as RiveTeam),
                 ),
-              ),
-            ),
         ],
       ),
     );

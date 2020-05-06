@@ -407,6 +407,8 @@ class EditorScaffold extends StatelessWidget {
                 switch (tab) {
                   case Rive.systemTab:
                     return const Home();
+                  case Rive.homeTab:
+                    return const HomeStream();
                   default:
                     return const Editor();
                 }
@@ -440,6 +442,7 @@ class _TabBar extends StatelessWidget {
             selectedTab: tab,
             dockedTabs: const [
               Rive.systemTab,
+              Rive.homeTab,
             ],
             dynamicTabs: rive.fileTabs,
             select: rive.selectTab,

@@ -83,6 +83,7 @@ class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
 class Rive {
   /// The system tab for your files and settings.
   static const systemTab = RiveTabItem(icon: 'rive', closeable: false);
+  static const homeTab = RiveTabItem(icon: 'home', closeable: false);
 
   final ValueNotifier<List<RiveTeam>> teams =
       ValueNotifier<List<RiveTeam>>(null);
