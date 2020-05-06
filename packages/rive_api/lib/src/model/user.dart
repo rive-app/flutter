@@ -32,4 +32,12 @@ class User extends Owner {
 
   @override
   int get hashCode => ownerId;
+
+  @override
+  UserDM get asDM => UserDM(
+        ownerId: ownerId,
+        name: name,
+        username: username,
+        avatarUrl: avatarUrl,
+      );
 }

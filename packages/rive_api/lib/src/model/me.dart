@@ -52,4 +52,19 @@ class Me extends Owner {
 
   @override
   String toString() => 'Me($ownerId, $name)';
+
+  @override
+  MeDM get asDM => MeDM(
+        signedIn: signedIn,
+        id: id,
+        ownerId: ownerId,
+        name: name,
+        username: username,
+        avatarUrl: avatarUrl,
+        isAdmin: isAdmin,
+        isPaid: isPaid,
+        notificationCount: notificationCount,
+        verified: verified,
+        notice: notice,
+      );
 }

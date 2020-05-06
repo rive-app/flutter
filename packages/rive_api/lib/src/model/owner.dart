@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:rive_api/src/data_model/data_model.dart';
 
 abstract class Owner {
   const Owner({
@@ -9,4 +10,6 @@ abstract class Owner {
   final int ownerId;
   final String name;
   final String username;
+
+  OwnerDM get asDM;
 }

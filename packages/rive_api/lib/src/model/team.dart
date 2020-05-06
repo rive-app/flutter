@@ -35,4 +35,13 @@ class Team extends Owner {
 
   @override
   int get hashCode => ownerId;
+
+  @override
+  TeamDM get asDM => TeamDM(
+        ownerId: ownerId,
+        name: name,
+        username: username,
+        permission: permission,
+        avatarUrl: avatarUrl,
+      );
 }

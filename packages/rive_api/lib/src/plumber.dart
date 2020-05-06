@@ -27,4 +27,9 @@ class Plumber {
     var pipe = _pipeInit<T>();
     pipe.add(message);
   }
+
+  void clear<T>() {
+    var pipe = _pipeInit<T>();
+    pipe.add(null);
+  }
 }

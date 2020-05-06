@@ -33,4 +33,16 @@ class Folder {
 
   @override
   int get hashCode => hash2(id, ownerId);
+
+  FolderDM get asDM => FolderDM(
+        ownerId: ownerId,
+        name: name,
+        parent: parent,
+        order: order,
+        id: id,
+      );
 }
+
+class ActiveFolder extends Folder {}
+
+class SelectedFolder extends Folder {}
