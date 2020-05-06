@@ -8,6 +8,7 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/widgets/animation/key_path_maker.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/animation/timeline_keys_manipulator.dart';
 import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
@@ -161,7 +162,7 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   }
 }
 
-class _TimelineKeysRenderObject extends TimelineRenderBox {
+class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
   final Paint _bgPaint = Paint();
   final Paint _separatorPaint = Paint();
   final Paint _keyPaint = Paint();
@@ -172,7 +173,6 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
   final Paint _selectedPaint = Paint()
     ..strokeWidth = 1
     ..style = PaintingStyle.stroke;
-  final Path _keyPath = Path();
 
   // We compute our own range as the one given by the viewport is padded, we
   // actually need to draw a little more than the viewport.
@@ -215,23 +215,10 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     _allkeyPaint.color = theme.colors.allKey;
     _selectedPaint.color = theme.colors.keySelection;
 
-    var keyRadius = theme.dimensions.keyHalfSquare;
-    var transform = Mat2D();
-    Mat2D.fromRotation(transform, pi / 4);
-    _keyPath.reset();
-    _keyPath.addPath(
-      Path()
-        ..addRect(
-          Rect.fromLTRB(
-            -keyRadius,
-            -keyRadius,
-            keyRadius,
-            keyRadius,
-          ),
-        ),
-      Offset(0, theme.treeStyles.timeline.itemHeight / 2),
-      matrix4: transform.mat4,
-    );
+    makeKeyPath(
+        theme,
+        Offset(0,
+            (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 0.5));
   }
 
   double get verticalScrollOffset => _verticalScrollOffset;
@@ -301,7 +288,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
       var row = _rows[i].data;
 
       // We only draw the separator line if it's delineating a component.
-      if (row is KeyedComponentViewModel) {
+      if (true) {
+        //row is KeyedComponentViewModel) {
         // var rowOffset = i * rowHeight;
         Offset lineStart = const Offset(0.0, -0.5);
 
@@ -362,10 +350,10 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
             // Draw the keyframe itself.
             if (isSelected) {
-              canvas.drawPath(_keyPath, _keyPaint);
-              canvas.drawPath(_keyPath, _selectedPaint);
+              canvas.drawPath(keyPath, _keyPaint);
+              canvas.drawPath(keyPath, _selectedPaint);
             } else {
-              canvas.drawPath(_keyPath, keyPaint);
+              canvas.drawPath(keyPath, keyPaint);
             }
 
             // Draw connecting line between keyframes.

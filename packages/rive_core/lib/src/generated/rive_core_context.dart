@@ -903,6 +903,45 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
+  static bool animates(int propertyKey) {
+    switch (propertyKey) {
+      case StrokeBase.thicknessPropertyKey:
+      case NodeBase.xPropertyKey:
+      case NodeBase.yPropertyKey:
+      case NodeBase.scaleXPropertyKey:
+      case NodeBase.scaleYPropertyKey:
+      case NodeBase.opacityPropertyKey:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  static KeyState getKeyState(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case StrokeBase.thicknessPropertyKey:
+        return (object as StrokeBase).thicknessKeyState;
+        break;
+      case NodeBase.xPropertyKey:
+        return (object as NodeBase).xKeyState;
+        break;
+      case NodeBase.yPropertyKey:
+        return (object as NodeBase).yKeyState;
+        break;
+      case NodeBase.scaleXPropertyKey:
+        return (object as NodeBase).scaleXKeyState;
+        break;
+      case NodeBase.scaleYPropertyKey:
+        return (object as NodeBase).scaleYKeyState;
+        break;
+      case NodeBase.opacityPropertyKey:
+        return (object as NodeBase).opacityKeyState;
+        break;
+      default:
+        return null;
+    }
+  }
+
   static void setKeyState(Core object, int propertyKey, KeyState value) {
     switch (propertyKey) {
       case StrokeBase.thicknessPropertyKey:

@@ -80,13 +80,11 @@ abstract class AnimationTimeManager extends AnimationManager {
   AnimationTimeManager(LinearAnimation animation, this.activeFile)
       : super(animation) {
     _controller = _SimpleAnimationController(animation, () {
-      double frames = _controller.time*animation.fps;
-      if( animation.duration-frames < 0) {
+      double frames = _controller.time * animation.fps;
+      if (animation.duration - frames < 0) {
         _changePlayback(false);
       }
-      _timeStream.add(frames
-          .clamp(0, animation.duration)
-          .toDouble());
+      _timeStream.add(frames.clamp(0, animation.duration).toDouble());
     });
     animation.artboard.addController(_controller);
     _controller.isPlaying = true;
@@ -103,6 +101,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     _viewportController.stream.listen(_changeViewport);
     _playbackController.stream.listen(_changePlayback);
     animation.keyframesChanged.addListener(_keyframesChanged);
+    animation.keyframeValueChanged.addListener(_keyframesChanged);
 
     _syncViewport();
 
@@ -193,6 +192,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     activeFile.removeActionHandler(_handleAction);
     animation.artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
+    animation.keyframeValueChanged.removeListener(_keyframesChanged);
 
     cancelDebounce(_syncViewport);
     _viewportController.close();
@@ -214,9 +214,7 @@ abstract class AnimationTimeManager extends AnimationManager {
       case ShortcutAction.togglePlay:
         bool play = !_isPlayingStream.value;
         // If we're super close to the end, rewing to start before playing.
-        if (play &&
-            (_timeStream.value - animation.duration).abs() <
-                0.01) {
+        if (play && (_timeStream.value - animation.duration).abs() < 0.01) {
           _controller.time = 0;
         }
         _changePlayback(play);

@@ -99,6 +99,9 @@ class InspectorTextField<T> extends StatefulWidget {
   /// Color for the underline when this textfield has focus.
   final Color focusedUnderlineColor;
 
+  /// Trailing widget to inject after the text editor.
+  final Widget trailing;
+
   const InspectorTextField({
     @required this.value,
     @required this.converter,
@@ -109,6 +112,7 @@ class InspectorTextField<T> extends StatefulWidget {
     this.captureJournalEntry = true,
     this.underlineColor,
     this.focusedUnderlineColor,
+    this.trailing,
     Key key,
   }) : super(key: key);
 
@@ -187,6 +191,18 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
     widget.completeChange?.call(_lastValue);
   }
 
+  Widget _addTrailingWidget(BuildContext context, Widget child) {
+    if (widget.trailing == null) {
+      return child;
+    }
+    return Row(
+      children: [
+        Expanded(child: child),
+        widget.trailing,
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
@@ -194,50 +210,47 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
       color: _hasFocus
           ? widget.focusedUnderlineColor ?? theme.colors.separatorActive
           : widget.underlineColor ?? theme.colors.separator,
-      child: widget.change == null
-          ? Text(
-              widget.disabledText,
-              overflow: TextOverflow.clip,
-              maxLines: 1,
-              style: theme.textStyles.inspectorPropertyLabel,
-            )
-          : RawKeyboardListener(
-              focusNode: FocusNode(),
-              onKey: (event) {
-                if (event is RawKeyDownEvent) {
-                  // lose focus if escape is hit
-                  if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
-                    _focusNode.unfocus();
+      child: _addTrailingWidget(
+        context,
+        widget.change == null
+            ? Text(
+                widget.disabledText,
+                overflow: TextOverflow.clip,
+                maxLines: 1,
+                style: theme.textStyles.inspectorPropertyLabel,
+              )
+            : RawKeyboardListener(
+                focusNode: FocusNode(),
+                onKey: (event) {
+                  if (event is RawKeyDownEvent) {
+                    // lose focus if escape is hit
+                    if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+                      _focusNode.unfocus();
+                    }
                   }
-                  // Needed for web as the text field doesn't respond to enter
-                  if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-                    print('ENTER');
-                    // Can we capture the enter key here and have it be handled
-                    // identically in both the native and web apps?
-                  }
-                }
-              },
-              child: EditorTextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                color: theme.colors.inspectorTextColor,
-                editingColor: theme.colors.activeText,
-                allowDrag: widget.converter.allowDrag,
-                startDrag: () => _startDragValue = _lastValue,
-                cancelDrag: () {
-                  widget.change?.call(_lastValue = _startDragValue);
-                  _completeChange();
                 },
-                drag: (amount) => widget.change(
-                    _lastValue = widget.converter.drag(widget.value, amount)),
-                completeDrag: _completeChange,
-                onSubmitted: (string) {
-                  widget.change?.call(
-                      _lastValue = widget.converter.fromEditingValue(string));
-                  _completeChange();
-                },
+                child: EditorTextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  color: theme.colors.inspectorTextColor,
+                  editingColor: theme.colors.activeText,
+                  allowDrag: widget.converter.allowDrag,
+                  startDrag: () => _startDragValue = _lastValue,
+                  cancelDrag: () {
+                    widget.change?.call(_lastValue = _startDragValue);
+                    _completeChange();
+                  },
+                  drag: (amount) => widget.change(
+                      _lastValue = widget.converter.drag(widget.value, amount)),
+                  completeDrag: _completeChange,
+                  onSubmitted: (string) {
+                    widget.change?.call(
+                        _lastValue = widget.converter.fromEditingValue(string));
+                    _completeChange();
+                  },
+                ),
               ),
-            ),
+      ),
     );
   }
 }

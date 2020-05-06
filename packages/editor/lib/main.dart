@@ -96,6 +96,8 @@ Future<void> main() async {
 // Testing context menu items.
 const double resizeEdgeSize = 10;
 
+GlobalKey loadingScreenKey = GlobalKey();
+
 class RiveEditorApp extends StatelessWidget {
   final Rive rive;
   final RiveIconCache iconCache;
@@ -124,6 +126,7 @@ class RiveEditorApp extends StatelessWidget {
                 style: RiveTheme.of(context).textStyles.basic,
                 child: Scaffold(
                   body: LoadingScreen(
+                    key: loadingScreenKey,
                     rive: rive,
                     child: Focus(
                       focusNode: rive.focusNode,
@@ -205,7 +208,9 @@ class InsertInheritedWidgets extends StatelessWidget {
                       file: file,
                       child: ActiveArtboard(
                         file: file,
-                        child: child,
+                        child: AnimationInheritedWidgets(
+                          child: child,
+                        ),
                       ),
                     ),
                     // Passing the child in separate from the value listenable
@@ -219,6 +224,29 @@ class InsertInheritedWidgets extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class AnimationInheritedWidgets extends StatelessWidget {
+  final Widget child;
+
+  const AnimationInheritedWidgets({Key key, this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var activeFile = ActiveFile.of(context);
+    if(activeFile == null) {
+      return child;
+    }
+    return ValueListenableBuilder(
+      valueListenable: activeFile.mode,
+      builder: (context, EditorMode mode, _) {
+        return mode == EditorMode.animate ? AnimationsProvider(
+          activeArtboard: ActiveArtboard.of(context),
+          child: EditingAnimationProvider(child: child),
+        ) : child;
+      },
     );
   }
 }
@@ -595,7 +623,7 @@ class StagePanel extends StatelessWidget {
 
 /// Loading screen that displays while Rive state is loading/initializing
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({this.rive, this.child});
+  const LoadingScreen({this.rive, this.child, Key key}) : super(key: key);
   final Rive rive;
   final Widget child;
 

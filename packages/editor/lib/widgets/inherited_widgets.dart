@@ -241,7 +241,7 @@ class AnimationsProvider extends StatefulWidget {
 
   static AnimationsManager of(BuildContext context) => context
       .dependOnInheritedWidgetOfExactType<_InheritedAnimationProvider>()
-      .manager;
+      ?.manager;
 }
 
 class _AnimationsProviderState extends State<AnimationsProvider> {
