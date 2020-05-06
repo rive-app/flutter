@@ -16,4 +16,4 @@ class WebErrorLogger extends ErrorLogger {
   ErrorLogUser user;
 }
 
-ErrorLogger makeErrorLogger() => WebErrorLogger.instance;
+ErrorLogger getErrorLogger() => WebErrorLogger.instance;
