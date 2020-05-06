@@ -17,7 +17,7 @@ import 'package:rive_editor/widgets/theme.dart';
 ///
 /// The [propertyKey] is hander over to [CorePropertiesBuilder] to extract the
 /// associated field data to be displayed within this text field.
-class CoreTextField<T> extends StatefulWidget {
+class CoreTextField<T> extends StatelessWidget {
   final Iterable<Core> objects;
   final int propertyKey;
   final InputValueConverter<T> converter;
@@ -41,14 +41,9 @@ class CoreTextField<T> extends StatefulWidget {
     Key key,
   }) : super(key: key);
 
-  @override
-  _CoreTextFieldState<T> createState() => _CoreTextFieldState<T>();
-}
-
-class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
   Widget _determineEditorMode(
       BuildContext context, Widget Function(EditorMode) build) {
-    bool isAnimated = RiveCoreContext.animates(widget.propertyKey);
+    bool isAnimated = RiveCoreContext.animates(propertyKey);
     if (!isAnimated) {
       return build(null);
     }
@@ -65,11 +60,9 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
   }
 
   KeyState _computeKeyState() {
-    var objects = widget.objects;
     if (objects.isEmpty) {
       return null;
     }
-    var propertyKey = widget.propertyKey;
     var itr = objects.iterator;
     itr.moveNext();
 
@@ -83,14 +76,14 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
     return value;
   }
 
-  void _setKeys() {
+  void _setKeys(BuildContext context) {
     // set key
-    var components = widget.objects.cast<Component>();
+    var components = objects.cast<Component>();
     assert(components != null);
     assert(EditingAnimationProvider.find(context) != null);
 
-    EditingAnimationProvider.find(context).keyComponents.add(KeyComponentsEvent(
-        components: components, propertyKey: widget.propertyKey));
+    EditingAnimationProvider.find(context).keyComponents.add(
+        KeyComponentsEvent(components: components, propertyKey: propertyKey));
   }
 
   @override
@@ -98,26 +91,25 @@ class _CoreTextFieldState<T> extends State<CoreTextField<T>> {
     return _determineEditorMode(
       context,
       (mode) => CorePropertiesBuilder(
-        objects: widget.objects,
-        propertyKey: widget.propertyKey,
+        objects: objects,
+        propertyKey: propertyKey,
         builder: (context, T value, _) => InspectorTextField(
           value: value,
-          focusNode: widget.focusNode,
-          converter: widget.converter,
-          underlineColor: widget.underlineColor,
-          focusedUnderlineColor: widget.focusedUnderlineColor,
+          focusNode: focusNode,
+          converter: converter,
+          underlineColor: underlineColor,
+          focusedUnderlineColor: focusedUnderlineColor,
           trailing: mode == EditorMode.animate
               ? KeyStateWidget(
                   keyState: _computeKeyState(),
-                  setKey: _setKeys,
+                  setKey: () => _setKeys(context),
                 )
               : null,
           change: (T value) {
-            for (final object in widget.objects) {
-              object.context
-                  .setObjectProperty(object, widget.propertyKey, value);
+            for (final object in objects) {
+              object.context.setObjectProperty(object, propertyKey, value);
             }
-            widget.change?.call(value);
+            change?.call(value);
           },
         ),
       ),
