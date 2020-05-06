@@ -3,7 +3,7 @@
 // import 'package:rive_api/src/api/file.dart';
 // import 'package:rxdart/rxdart.dart';
 
-// import 'package:rive_api/src/view_model/view_model.dart';
+// import 'package:rive_api/src/old/view_model/view_model.dart';
 
 // class DirectoryDetailsManager {
 //   DirectoryDetailsManager({

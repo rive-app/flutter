@@ -1,9 +1,10 @@
-import 'package:utilities/deserialize.dart';
+import 'package:rive_api/src/data_model/data_model.dart';
 import 'package:meta/meta.dart';
+import 'owner.dart';
 
 /// Data model for a logged-in user
 
-class Me {
+class Me extends Owner {
   const Me({
     @required this.signedIn,
     @required this.id,
@@ -29,53 +30,26 @@ class Me {
   final bool verified;
   final String notice;
 
-  /// Creates a model from JSON:
-  ///
-  /// {
-  ///   'signedIn':true,
-  ///    'id':40877,
-  ///    'ownerId':40955,
-  ///    'name':'Demo',
-  ///    'username':'demo',
-  ///    'avatar':null,
-  ///    'isAdmin':false,
-  ///    'isPaid':false,
-  ///    'notificationCount':0,
-  ///    'verified':false,
-  ///    'notice':'confirm-email'
-  /// }
-  factory Me.fromData(Map<String, dynamic> data) => Me(
-        signedIn: data.getBool('signedIn'),
-        id: data.getInt('id'),
-        ownerId: data.getInt('ownerId'),
-        name: data.getString('name'),
-        username: data.getString('username'),
-        avatarUrl: data.getString('avatar'),
-        isAdmin: data.getBool('isAdmin'),
-        isPaid: data.getBool('isPaid'),
-        notificationCount: data.getInt('notificationCount'),
-        verified: data.getBool('verified'),
-        notice: data.getString('notice'),
+  factory Me.fromDM(MeDM me) => Me(
+        signedIn: me.signedIn,
+        id: me.id,
+        ownerId: me.ownerId,
+        name: me.name,
+        username: me.username,
+        avatarUrl: me.avatarUrl,
+        isAdmin: me.isAdmin,
+        isPaid: me.isPaid,
+        notificationCount: me.notificationCount,
+        verified: me.verified,
+        notice: me.notice,
       );
 
-  /// Data to generate a test user
-  static const _testData = {
-    'signedIn': true,
-    'id': 40877,
-    'ownerId': 40955,
-    'name': 'Matt',
-    'username': 'matt',
-    'avatar': 'http://example.avatar.com',
-    'isAdmin': false,
-    'isPaid': false,
-    'notificationCount': 0,
-    'verified': false,
-    'notice': 'confirm-email'
-  };
-
-  /// Create a test user
-  factory Me.testData() => Me.fromData(_testData);
+  @override
+  bool operator ==(o) => o is Me && o.ownerId == ownerId;
 
   @override
-  String toString() => 'Me($id, $name)';
+  int get hashCode => ownerId;
+
+  @override
+  String toString() => 'Me($ownerId, $name)';
 }

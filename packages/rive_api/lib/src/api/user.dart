@@ -11,13 +11,13 @@ class UserApi {
   UserApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<Iterable<User>> search(String searchString) async {
+  Future<Iterable<UserDM>> search(String searchString) async {
     final res = await api.getFromPath(
         '/api/search/ac/avatar_artists/${Uri.encodeComponent(searchString)}');
 
     try {
       final data = json.decode(res.body) as List<dynamic>;
-      return User.fromSearchDataList(data);
+      return UserDM.fromSearchDataList(data);
     } on FormatException catch (e) {
       _log.severe('Error formatting whoami api response: $e');
       rethrow;

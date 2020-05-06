@@ -1,9 +1,9 @@
 // import 'dart:async';
 // import 'dart:math';
 
-// import 'package:rive_api/src/manager/subscriptions.dart';
+// import 'package:rive_api/src/old/manager/subscriptions.dart';
 // import 'package:rive_api/src/plumber.dart';
-// import 'package:rive_api/src/view_model/view_model.dart';
+// import 'package:rive_api/src/old/view_model/view_model.dart';
 // import 'package:rxdart/subjects.dart';
 
 // class FolderContentsManager with Subscriptions {

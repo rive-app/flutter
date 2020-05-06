@@ -11,12 +11,12 @@ class TeamApi {
   TeamApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<Iterable<Team>> get teams async {
+  Future<Iterable<TeamDM>> get teams async {
     // Get the user's team volumes
     final res = await api.getFromPath('/api/teams');
     try {
       final data = json.decode(res.body) as List<dynamic>;
-      return Team.fromDataList(data);
+      return TeamDM.fromDataList(data);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
       rethrow;

@@ -2,8 +2,8 @@ import 'package:utilities/deserialize.dart';
 import 'package:meta/meta.dart';
 import 'cdn.dart';
 
-class File {
-  File({
+class FileDM {
+  FileDM({
     @required this.id,
     this.name,
     this.ownerId,
@@ -14,16 +14,16 @@ class File {
   final String name;
   final String preview;
 
-  static Iterable<File> fromDataList(List<dynamic> data, CDN cdn) =>
-      data.map((d) => File.fromData(d, cdn));
+  static Iterable<FileDM> fromDataList(List<dynamic> data, CdnDM cdn) =>
+      data.map((d) => FileDM.fromData(d, cdn));
 
-  factory File.fromData(Map<String, dynamic> data, CDN cdn) => File(
+  factory FileDM.fromData(Map<String, dynamic> data, CdnDM cdn) => FileDM(
         ownerId: data.getInt('ownerId'),
         name: data.getString('name'),
         preview: cdn.base + data.getString('preview') + cdn.params,
         id: data.getInt('id'),
       );
 
-  static Iterable<File> fromIdList(List<dynamic> data, int ownerId) =>
-      data.map((id) => File(id: id as int, ownerId: ownerId));
+  static Iterable<FileDM> fromIdList(List<dynamic> data, int ownerId) =>
+      data.map((id) => FileDM(id: id as int, ownerId: ownerId));
 }

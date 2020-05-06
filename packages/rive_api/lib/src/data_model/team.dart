@@ -2,8 +2,8 @@ import 'package:utilities/deserialize.dart';
 import 'package:meta/meta.dart';
 import 'owner.dart';
 
-class Team extends Owner {
-  const Team({
+class TeamDM extends OwnerDM {
+  const TeamDM({
     @required this.ownerId,
     @required this.name,
     @required this.username,
@@ -16,10 +16,10 @@ class Team extends Owner {
   final String avatarUrl;
   final String permission;
 
-  static Iterable<Team> fromDataList(List<dynamic> data) =>
-      data.map((d) => Team.fromData(d));
+  static Iterable<TeamDM> fromDataList(List<dynamic> data) =>
+      data.map((d) => TeamDM.fromData(d));
 
-  factory Team.fromData(Map<String, dynamic> data) => Team(
+  factory TeamDM.fromData(Map<String, dynamic> data) => TeamDM(
         ownerId: data.getInt('ownerId'),
         name: data.getString('name'),
         username: data.getString('username'),
@@ -28,23 +28,11 @@ class Team extends Owner {
       );
 
   @override
-  String toString() => 'Team($ownerId, $name)';
+  String toString() => 'TeamDM($ownerId, $name)';
 
   @override
-  bool operator ==(o) => o is Team && o.ownerId == ownerId;
+  bool operator ==(o) => o is TeamDM && o.ownerId == ownerId;
 
   @override
   int get hashCode => ownerId;
-
-  /// Data to generate a test team
-  static const _testData = {
-    'ownerId': 12345,
-    'name': 'Team Awesome',
-    'username': 'team_awesome',
-    'avatar': 'http://example.avatar.com',
-    'permission': 'member',
-  };
-
-  /// Create a test user
-  factory Team.testData() => Team.fromData(_testData);
 }

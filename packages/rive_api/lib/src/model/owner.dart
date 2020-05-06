@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
-abstract class OwnerDM {
-  const OwnerDM({
+abstract class Owner {
+  const Owner({
     @required this.ownerId,
     @required this.name,
     @required this.username,

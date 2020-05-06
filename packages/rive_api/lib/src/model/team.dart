@@ -1,7 +1,8 @@
-import 'package:utilities/deserialize.dart';
 import 'package:meta/meta.dart';
+import 'package:rive_api/src/data_model/data_model.dart';
+import 'owner.dart';
 
-class Team {
+class Team extends Owner {
   const Team({
     @required this.ownerId,
     @required this.name,
@@ -15,15 +16,15 @@ class Team {
   final String avatarUrl;
   final String permission;
 
-  static Iterable<Team> fromDataList(List<dynamic> data) =>
-      data.map((d) => Team.fromData(d));
+  static Iterable<Team> fromDMList(List<TeamDM> teams) =>
+      teams.map((team) => Team.fromDM(team));
 
-  factory Team.fromData(Map<String, dynamic> data) => Team(
-        ownerId: data.getInt('ownerId'),
-        name: data.getString('name'),
-        username: data.getString('username'),
-        avatarUrl: data.getString('avatar'),
-        permission: data.getString('permission'),
+  factory Team.fromDM(TeamDM team) => Team(
+        ownerId: team.ownerId,
+        name: team.name,
+        username: team.username,
+        permission: team.permission,
+        avatarUrl: team.avatarUrl,
       );
 
   @override
@@ -34,16 +35,4 @@ class Team {
 
   @override
   int get hashCode => ownerId;
-
-  /// Data to generate a test team
-  static const _testData = {
-    'ownerId': 12345,
-    'name': 'Team Awesome',
-    'username': 'team_awesome',
-    'avatar': 'http://example.avatar.com',
-    'permission': 'member',
-  };
-
-  /// Create a test user
-  factory Team.testData() => Team.fromData(_testData);
 }

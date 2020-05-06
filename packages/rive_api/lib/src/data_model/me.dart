@@ -4,8 +4,8 @@ import 'owner.dart';
 
 /// Data model for a logged-in user
 
-class Me extends Owner {
-  const Me({
+class MeDM extends OwnerDM {
+  const MeDM({
     @required this.signedIn,
     @required this.id,
     @required this.ownerId,
@@ -45,7 +45,7 @@ class Me extends Owner {
   ///    'verified':false,
   ///    'notice':'confirm-email'
   /// }
-  factory Me.fromData(Map<String, dynamic> data) => Me(
+  factory MeDM.fromData(Map<String, dynamic> data) => MeDM(
         signedIn: data.getBool('signedIn'),
         id: data.getInt('id'),
         ownerId: data.getInt('ownerId'),
@@ -59,24 +59,6 @@ class Me extends Owner {
         notice: data.getString('notice'),
       );
 
-  /// Data to generate a test user
-  static const _testData = {
-    'signedIn': true,
-    'id': 40877,
-    'ownerId': 40955,
-    'name': 'Matt',
-    'username': 'matt',
-    'avatar': 'http://example.avatar.com',
-    'isAdmin': false,
-    'isPaid': false,
-    'notificationCount': 0,
-    'verified': false,
-    'notice': 'confirm-email'
-  };
-
-  /// Create a test user
-  factory Me.testData() => Me.fromData(_testData);
-
   @override
-  String toString() => 'Me($id, $name)';
+  String toString() => 'MeDM($id, $name)';
 }

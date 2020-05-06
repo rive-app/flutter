@@ -11,7 +11,7 @@ class MeApi {
   MeApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<Me> get whoami async {
+  Future<MeDM> get whoami async {
     final res = await api.getFromPath('/api/me');
     try {
       final data = json.decode(res.body) as Map<String, dynamic>;
@@ -19,7 +19,7 @@ class MeApi {
       if (!_isSignedIn(data)) {
         throw HttpException('User is not signed in');
       }
-      return Me.fromData(data);
+      return MeDM.fromData(data);
     } on FormatException catch (e) {
       _log.severe('Error formatting whoami api response: $e');
       rethrow;

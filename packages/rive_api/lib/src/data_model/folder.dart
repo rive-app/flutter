@@ -3,8 +3,8 @@ import 'package:meta/meta.dart';
 import 'package:quiver/core.dart';
 import 'package:utilities/deserialize.dart';
 
-class Folder {
-  Folder({
+class FolderDM {
+  FolderDM({
     @required this.id,
     @required this.ownerId,
     @required this.name,
@@ -17,13 +17,13 @@ class Folder {
   final int order;
   final String name;
 
-  static Iterable<Folder> fromDataList(List<dynamic> data) =>
-      data.map((d) => Folder.fromData(d));
+  static Iterable<FolderDM> fromDataList(List<dynamic> data) =>
+      data.map((d) => FolderDM.fromData(d));
 
-  factory Folder.fromData(
+  factory FolderDM.fromData(
     Map<String, dynamic> data,
   ) =>
-      Folder(
+      FolderDM(
         id: data.getInt('id'),
         ownerId: data.containsKey('project_owner_id')
             ? data.getInt('project_owner_id')
@@ -34,10 +34,10 @@ class Folder {
       );
 
   @override
-  String toString() => 'Folder($name)';
+  String toString() => 'FolderDM($name)';
 
   @override
-  bool operator ==(o) => o is Folder && o.id == id && o.ownerId == ownerId;
+  bool operator ==(o) => o is FolderDM && o.id == id && o.ownerId == ownerId;
 
   @override
   int get hashCode => hash2(id, ownerId);

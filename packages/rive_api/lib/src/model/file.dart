@@ -1,5 +1,6 @@
-import 'package:utilities/deserialize.dart';
 import 'package:meta/meta.dart';
+import 'package:quiver/core.dart';
+import 'package:rive_api/src/data_model/data_model.dart';
 
 class File {
   File({
@@ -13,16 +14,19 @@ class File {
   final String name;
   final String preview;
 
-  static Iterable<File> fromDataList(List<dynamic> data) =>
-      data.map((d) => File.fromData(d));
+  static Iterable<File> fromDMList(List<FileDM> files) =>
+      files.map((file) => File.fromDM(file));
 
-  factory File.fromData(Map<String, dynamic> data) => File(
-        ownerId: data.getInt('oid'),
-        name: data.getString('name'),
-        preview: data.getString('preview'),
-        id: data.getInt('id'),
+  factory File.fromDM(FileDM file) => File(
+        ownerId: file.ownerId,
+        name: file.name,
+        preview: file.preview,
+        id: file.id,
       );
 
-  static Iterable<File> fromIdList(List<int> data, int ownerId) =>
-      data.map((id) => File(id: id, ownerId: ownerId));
+  @override
+  bool operator ==(o) => o is File && o.id == id && o.ownerId == ownerId;
+
+  @override
+  int get hashCode => hash2(id, ownerId);
 }

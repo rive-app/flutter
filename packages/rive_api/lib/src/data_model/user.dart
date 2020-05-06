@@ -2,8 +2,8 @@ import 'package:utilities/deserialize.dart';
 import 'package:meta/meta.dart';
 import 'owner.dart';
 
-class User extends Owner {
-  const User({
+class UserDM extends OwnerDM {
+  const UserDM({
     @required this.ownerId,
     @required this.name,
     @required this.username,
@@ -14,10 +14,10 @@ class User extends Owner {
   final String username;
   final String avatarUrl;
 
-  static Iterable<User> fromSearchDataList(List<dynamic> data) =>
-      data.map((d) => User.fromSearchData(d));
+  static Iterable<UserDM> fromSearchDataList(List<dynamic> data) =>
+      data.map((d) => UserDM.fromSearchData(d));
 
-  factory User.fromSearchData(Map<String, dynamic> data) => User(
+  factory UserDM.fromSearchData(Map<String, dynamic> data) => UserDM(
         ownerId: data.getInt('i'),
         name: data.getString('l'),
         username: data.getString('n'),
@@ -25,22 +25,11 @@ class User extends Owner {
       );
 
   @override
-  String toString() => 'User($ownerId, $name)';
+  String toString() => 'UserDM($ownerId, $name)';
 
   @override
-  bool operator ==(o) => o is User && o.ownerId == ownerId;
+  bool operator ==(o) => o is UserDM && o.ownerId == ownerId;
 
   @override
   int get hashCode => ownerId;
-
-  /// Data to generate a test team
-  static const _testData = {
-    "n": "pollux",
-    "i": 40836,
-    "l": "Guido Rosso",
-    "a": "https://cdn.2dimensions.com/avatars/40836-1-1570241275-krypton"
-  };
-
-  /// Create a test user
-  factory User.testData() => User.fromSearchData(_testData);
 }
