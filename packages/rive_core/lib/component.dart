@@ -307,4 +307,16 @@ abstract class Component extends ComponentBase<RiveFile>
   void nameChanged(String from, String to) {
     /// Changing name doesn't really do anything.
   }
+
+  final Set<VoidCallback> _whenDeleted = {};
+  bool whenDeleted(VoidCallback callback) => _whenDeleted.add(callback);
+
+  // Should be @internal when supported
+  void onDelete() {
+    var cbs = _whenDeleted.toList();
+    _whenDeleted.clear();
+    for (final cb in cbs) {
+      cb();
+    }
+  }
 }
