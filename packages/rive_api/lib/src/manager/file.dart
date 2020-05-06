@@ -9,7 +9,7 @@ class FileManager with Subscriptions {
     _folderApi = FolderApi();
     _plumber = Plumber();
     subscribe<Me>(_handleNewMe);
-    subscribe<Iterable<Team>>(_handleNewTeams);
+    subscribe<List<Team>>(_handleNewTeams);
   }
 
   FolderApi _folderApi;
@@ -17,18 +17,18 @@ class FileManager with Subscriptions {
   Plumber _plumber;
   Me _me;
 
-  Map _folderMap = Map<Owner, Iterable<Folder>>();
-  Map _fileMap = Map<Folder, Iterable<File>>();
+  Map<Owner, List<Folder>> _folderMap = Map<Owner, List<Folder>>();
+  Map<Folder, List<File>> _fileMap = Map<Folder, List<File>>();
 
   void _handleNewMe(Me me) {
     _clearFolderList();
     loadFolders(me);
   }
 
-  void _handleNewTeams(Iterable<Team> teams) {
+  void _handleNewTeams(List<Team> teams) {
     // lets ditch teams no longer reported.
     Set<Owner> removeKeys = {};
-    _folderMap.keys.forEach((folderOwner) {
+    _folderMap.keys?.forEach((folderOwner) {
       if (teams.contains(folderOwner) || _me == folderOwner) {
         // move along folders good.
       } else {
@@ -40,13 +40,14 @@ class FileManager with Subscriptions {
     });
     _updateFolderList();
 
-    teams.forEach((team) {
+    teams?.forEach((team) {
       loadFolders(team);
     });
   }
 
   void loadFolders(Owner owner) async {
-    final _folders = Folder.fromDMList(await _folderApi.folders(owner.asDM));
+    final _foldersDM = await _folderApi.folders(owner.asDM);
+    final _folders = Folder.fromDMList(_foldersDM.toList());
     _folderMap[owner] = _folders;
     _updateFolderList();
   }
@@ -57,7 +58,7 @@ class FileManager with Subscriptions {
 
   void _clearFolderList() {
     _folderMap.clear();
-    _plumber.clear<Map<Owner, Iterable<Folder>>>();
+    _plumber.clear<Map<Owner, List<Folder>>>();
   }
 
   void loadFiles(Folder folder) async {

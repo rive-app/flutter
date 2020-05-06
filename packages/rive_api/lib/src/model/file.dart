@@ -14,8 +14,8 @@ class File {
   final String name;
   final String preview;
 
-  static Iterable<File> fromDMList(List<FileDM> files) =>
-      files.map((file) => File.fromDM(file));
+  static List<File> fromDMList(List<FileDM> files) =>
+      files.map((file) => File.fromDM(file)).toList();
 
   factory File.fromDM(FileDM file) => File(
         ownerId: file.ownerId,

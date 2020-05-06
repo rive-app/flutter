@@ -11,17 +11,18 @@ class TeamManager with Subscriptions {
   }
 
   // Note: useful to cache this?
-  Iterable<Team> _teams;
+  List<Team> _teams;
   TeamApi _teamApi;
   Plumber _plumber;
 
   void _handleNewMe(Me me) {
-    Plumber().clear<Iterable<Team>>();
+    Plumber().clear<List<Team>>();
     loadTeams();
   }
 
   void loadTeams() async {
-    _teams = Team.fromDMList(await _teamApi.teams);
-    _plumber.message(_teams);
+    final _teamsDM = await _teamApi.teams;
+    _teams = Team.fromDMList(_teamsDM.toList());
+    _plumber.message(_teams.toList());
   }
 }

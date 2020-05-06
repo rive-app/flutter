@@ -20,7 +20,9 @@ class RiveApi extends WebServiceClient {
 // final host = 'http://localhost:3000';
   final host = 'https://stryker.rive.app';
 
-  Future<Response> getFromPath(String path) => get(host + path);
+  Future<Response> getFromPath(String path) {
+    return this.get(host + path);
+  }
 }
 
 void handleException(Response response) => throw ApiException(response);

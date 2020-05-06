@@ -16,8 +16,8 @@ class Team extends Owner {
   final String avatarUrl;
   final String permission;
 
-  static Iterable<Team> fromDMList(List<TeamDM> teams) =>
-      teams.map((team) => Team.fromDM(team));
+  static List<Team> fromDMList(List<TeamDM> teams) =>
+      teams.map((team) => Team.fromDM(team)).toList();
 
   factory Team.fromDM(TeamDM team) => Team(
         ownerId: team.ownerId,

@@ -17,8 +17,8 @@ class Folder {
   final int order;
   final String name;
 
-  static Iterable<Folder> fromDMList(List<FolderDM> folders) =>
-      folders.map((folder) => Folder.fromDM(folder));
+  static List<Folder> fromDMList(List<FolderDM> folders) =>
+      folders.map((folder) => Folder.fromDM(folder)).toList();
 
   factory Folder.fromDM(FolderDM folder) => Folder(
         ownerId: folder.ownerId,

@@ -14,8 +14,8 @@ class User extends Owner {
   final String username;
   final String avatarUrl;
 
-  static Iterable<User> fromDMList(List<UserDM> users) =>
-      users.map((user) => User.fromDM(user));
+  static List<User> fromDMList(List<UserDM> users) =>
+      users.map((user) => User.fromDM(user)).toList();
 
   factory User.fromDM(UserDM user) => User(
         ownerId: user.ownerId,
