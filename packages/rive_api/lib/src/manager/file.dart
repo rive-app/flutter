@@ -27,9 +27,19 @@ class FileManager with Subscriptions {
 
   void _handleNewTeams(Iterable<Team> teams) {
     // lets ditch teams no longer reported.
-    // for owners in _folderMap.keys {
-    //   if owner not in
-    // }
+    Set<Owner> removeKeys = {};
+    _folderMap.keys.forEach((folderOwner) {
+      if (teams.contains(folderOwner) || _me == folderOwner) {
+        // move along folders good.
+      } else {
+        removeKeys.add(folderOwner);
+      }
+    });
+    removeKeys.forEach((key) {
+      _folderMap.remove(key);
+    });
+    _updateFolderList();
+
     teams.forEach((team) {
       loadFolders(team);
     });
