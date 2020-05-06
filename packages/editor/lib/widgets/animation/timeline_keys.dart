@@ -215,7 +215,10 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
     _allkeyPaint.color = theme.colors.allKey;
     _selectedPaint.color = theme.colors.keySelection;
 
-    makeKeyPath(theme, Offset(0, theme.treeStyles.timeline.itemHeight / 2));
+    makeKeyPath(
+        theme,
+        Offset(0,
+            (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 0.5));
   }
 
   double get verticalScrollOffset => _verticalScrollOffset;
@@ -285,7 +288,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
       var row = _rows[i].data;
 
       // We only draw the separator line if it's delineating a component.
-      if (row is KeyedComponentViewModel) {
+      if (true) {
+        //row is KeyedComponentViewModel) {
         // var rowOffset = i * rowHeight;
         Offset lineStart = const Offset(0.0, -0.5);
 

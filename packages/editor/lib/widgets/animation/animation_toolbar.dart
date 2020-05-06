@@ -13,7 +13,7 @@ class AnimationToolbar extends StatelessWidget {
         left: 10,
         right: 10,
         top: 12,
-        bottom: 8,
+        bottom: 12,
       ),
       child: Row(
         children: [
