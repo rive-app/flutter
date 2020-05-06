@@ -236,16 +236,18 @@ class AnimationInheritedWidgets extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var activeFile = ActiveFile.of(context);
-    if(activeFile == null) {
+    if (activeFile == null) {
       return child;
     }
     return ValueListenableBuilder(
       valueListenable: activeFile.mode,
       builder: (context, EditorMode mode, _) {
-        return mode == EditorMode.animate ? AnimationsProvider(
-          activeArtboard: ActiveArtboard.of(context),
-          child: EditingAnimationProvider(child: child),
-        ) : child;
+        return mode == EditorMode.animate
+            ? AnimationsProvider(
+                activeArtboard: ActiveArtboard.of(context),
+                child: EditingAnimationProvider(child: child),
+              )
+            : child;
       },
     );
   }
@@ -491,6 +493,8 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
                     ),
                   ),
                 ),
+                // TODO: comment back in when draw order is working
+                /*
                 Padding(
                   padding: const EdgeInsets.only(left: 20, top: 20),
                   child: MouseRegion(
@@ -507,6 +511,7 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
                     ),
                   ),
                 ),
+                */
               ],
             ),
             if (hierarchySelected)
