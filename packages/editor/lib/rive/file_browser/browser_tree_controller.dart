@@ -8,6 +8,8 @@ import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 
+import 'package:rive_api/src/model/model.dart';
+
 /// TreeController for the Rive folders displayed in the FileBrowser screen.
 class FolderTreeController extends TreeController<RiveFolder> {
   List<RiveFolder> _data;
@@ -84,4 +86,73 @@ class FolderTreeController extends TreeController<RiveFolder> {
   @override
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<RiveFolder> item) {}
+}
+
+class FolderTreeItemController extends TreeController<FolderTreeItem> {
+  List<FolderTreeItem> _data;
+  FolderTreeItemController(FolderTree folderTree)
+      : _data = [folderTree.root],
+        super();
+
+  @override
+  Iterable<FolderTreeItem> get data => _data;
+
+  set data(Iterable<FolderTreeItem> value) {
+    _data = value.toList();
+    refreshExpanded();
+  }
+
+  @override
+  Iterable<FolderTreeItem> childrenOf(FolderTreeItem treeItem) =>
+      treeItem.children.cast<FolderTreeItem>();
+
+  @override
+  void drop(FlatTreeItem<FolderTreeItem> target, DropState state,
+      List<FlatTreeItem<FolderTreeItem>> items) {}
+
+  @override
+  dynamic dataKey(FolderTreeItem treeItem) {
+    return treeItem.folder.id;
+  }
+
+  @override
+  bool isDisabled(FolderTreeItem treeItem) {
+    return false;
+  }
+
+  @override
+  bool isProperty(FolderTreeItem treeItem) {
+    return false;
+  }
+
+  @override
+  List<FlatTreeItem<FolderTreeItem>> onDragStart(
+      DragStartDetails details, FlatTreeItem<FolderTreeItem> item) {
+    return [item];
+  }
+
+  @override
+  void onMouseEnter(
+      PointerEnterEvent event, FlatTreeItem<FolderTreeItem> item) {
+    print('hover on $item');
+  }
+
+  @override
+  void onMouseExit(PointerExitEvent event, FlatTreeItem<FolderTreeItem> item) {
+    print('hover off $item');
+  }
+
+  @override
+  void onTap(FlatTreeItem<FolderTreeItem> item) {
+    print('tipper tapper $item');
+  }
+
+  @override
+  int spacingOf(FolderTreeItem treeItem) {
+    return 1;
+  }
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<FolderTreeItem> item) {}
 }

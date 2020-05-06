@@ -271,14 +271,18 @@ class _NavigationPanelStreamState extends State<NavigationPanelStream> {
     }
   }
 
-  var userManager = UserManager();
-  var teamManager = TeamManager();
-  var fileManager = FileManager();
-  var folderTreeManager = FolderTreeManager();
+  @override
+  void initState() {
+    // TODO: burn this
+    var userManager = UserManager();
+    var teamManager = TeamManager();
+    var fileManager = FileManager();
+    var folderTreeManager = FolderTreeManager();
+    userManager.loadMe();
+  }
 
   @override
   Widget build(BuildContext context) {
-    userManager.loadMe();
     var scrollController = RiveContext.of(context).treeScrollController;
     scrollController.addListener(() {
       // this KINDA works, sometimes window size changes trigger this
@@ -337,17 +341,16 @@ class _NavigationPanelStreamState extends State<NavigationPanelStream> {
             child: StreamBuilder<List<FolderTree>>(
               stream: Plumber().getStream<List<FolderTree>>(),
               builder: (context, snapshot) {
-                print('HEREEEEEEEE');
-                print(snapshot.data);
                 var slivers = <Widget>[];
                 if (snapshot.data != null) {
                   for (int i = 0; i < snapshot.data.length; i++) {
-                    // slivers.add(
-                    //   FolderTreeView(
-                    //     style: treeStyle,
-                    //     controller: snapshot.data[i],
-                    //   ),
-                    // );
+                    // TODO: rather than folderTree's we prob ably rely on this controller?
+                    slivers.add(
+                      FolderTreeViewStream(
+                        style: treeStyle,
+                        controller: FolderTreeItemController(snapshot.data[i]),
+                      ),
+                    );
                     if (i != snapshot.data.length - 1) {
                       slivers.add(
                         SliverToBoxAdapter(

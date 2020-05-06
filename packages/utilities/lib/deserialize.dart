@@ -3,6 +3,7 @@ extension DeserializeHelper on Map<String, dynamic> {
   double getDouble(String key) => deserializeDouble(this[key]);
 
   int getInt(String key) => deserializeInt(this[key]);
+  int optInt(String key) => _rawDeserializeInt(this[key]);
 
   bool getBool(String key) => deserializeBool(this[key]);
 
@@ -36,6 +37,14 @@ double deserializeDouble(dynamic value) {
 }
 
 int deserializeInt(dynamic value) {
+  final output = _rawDeserializeInt(value);
+  if (output == null) {
+    return 0;
+  }
+  return output;
+}
+
+int _rawDeserializeInt(dynamic value) {
   if (value is int) {
     return value;
   } else if (value is double) {
@@ -43,7 +52,7 @@ int deserializeInt(dynamic value) {
   } else if (value is String) {
     return int.parse(value);
   }
-  return 0;
+  return null;
 }
 
 // ignore: avoid_bool_literals_in_conditional_expressions

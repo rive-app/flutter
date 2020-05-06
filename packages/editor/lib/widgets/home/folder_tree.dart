@@ -21,6 +21,8 @@ import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
+import 'package:rive_api/src/model/model.dart';
+
 /// Builds a TreeView styled for folders.
 class FolderTreeView extends StatelessWidget {
   final FolderTreeController controller;
@@ -98,6 +100,83 @@ class FolderTreeView extends StatelessWidget {
                 color: fileBrowser?.selectedFolder == item.data
                     ? Colors.white
                     : colors.fileTreeText,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FolderTreeViewStream extends StatelessWidget {
+  final FolderTreeItemController controller;
+  final TreeStyle style;
+
+  const FolderTreeViewStream({
+    @required this.controller,
+    this.style,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = RiveTheme.of(context).colors;
+
+    return TreeView<FolderTreeItem>(
+      style: style,
+      controller: controller,
+      expanderBuilder: (context, item, style) => Container(
+        child: Center(
+          child: TreeExpander(
+            key: item.key,
+            iconColor: colors.fileUnselectedFolderIcon,
+            isExpanded: item.isExpanded,
+          ),
+        ),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: colors.filesTreeStroke,
+            width: 1.0,
+            style: BorderStyle.solid,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(7.5),
+          ),
+        ),
+      ),
+      iconBuilder: (context, item, style) => Container(
+        width: 15,
+        height: 15,
+        child: Center(
+          child: TintedIcon(
+            icon: 'folder',
+            color: (item.data.selected)
+                ? colors.fileSelectedFolderIcon
+                : colors.fileUnselectedFolderIcon,
+          ),
+        ),
+      ),
+      extraBuilder: (context, item, index) => Container(),
+      backgroundBuilder: (context, item, style) {
+        var _selectionState = SelectionState.none;
+        if (item.data.selected) {
+          _selectionState = SelectionState.selected;
+        }
+        // else if (item.data.hovered) {
+        //   _selectionState = SelectionState.hovered;
+        // }
+        return DropItemBackground(DropState.none, _selectionState);
+      },
+      itemBuilder: (context, item, style) => Expanded(
+        child: Container(
+          child: IgnorePointer(
+            child: Text(
+              item.data.folder.name,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13,
+                color: colors.fileTreeText,
               ),
             ),
           ),

@@ -17,16 +17,27 @@ class Folder {
   final int order;
   final String name;
 
-  static List<Folder> fromDMList(List<FolderDM> folders) =>
-      folders.map((folder) => Folder.fromDM(folder)).toList();
+  static List<Folder> fromDMList(List<FolderDM> folders) {
+    var _defaultParent =
+        folders.firstWhere((element) => element.name == 'Your Files').id;
+    return folders
+        .map((folder) => Folder.fromDM(folder, _defaultParent))
+        .toList();
+  }
 
-  factory Folder.fromDM(FolderDM folder) => Folder(
-        ownerId: folder.ownerId,
-        name: folder.name,
-        parent: folder.parent,
-        order: folder.order,
-        id: folder.id,
-      );
+  factory Folder.fromDM(FolderDM folder, int defaultParent) {
+    var _parent = folder.parent;
+    if (_parent == null && folder.id != defaultParent) {
+      _parent = defaultParent;
+    }
+    return Folder(
+      ownerId: folder.ownerId,
+      name: folder.name,
+      parent: _parent,
+      order: folder.order,
+      id: folder.id,
+    );
+  }
 
   @override
   bool operator ==(o) => o is Folder && o.id == id && o.ownerId == ownerId;

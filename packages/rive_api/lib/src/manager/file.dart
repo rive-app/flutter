@@ -29,7 +29,8 @@ class FileManager with Subscriptions {
     // lets ditch teams no longer reported.
     Set<Owner> removeKeys = {};
     _folderMap.keys?.forEach((folderOwner) {
-      if (teams.contains(folderOwner) || _me == folderOwner) {
+      if ((teams != null && teams.contains(folderOwner)) ||
+          _me == folderOwner) {
         // move along folders good.
       } else {
         removeKeys.add(folderOwner);

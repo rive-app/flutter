@@ -12,15 +12,17 @@ class FolderTree {
 
   factory FolderTree.fromFolderList(Owner owner, List<Folder> folders) {
     final indexMap = Map<int, List<Folder>>();
+
     // map em out
     folders.forEach((Folder folder) {
-      indexMap[folder.parent] ??= [];
-      indexMap[folder.parent].add(folder);
+      if (folder.parent != null) {
+        indexMap[folder.parent] ??= [];
+        indexMap[folder.parent].add(folder);
+      }
     });
 
-    // TODO: bit of a cluster here, parent shoudl be null.
-    // but then there's the deleted files confusion here too.
-    var _rootFolder = folders.firstWhere((element) => element.id == 1);
+    var _rootFolder =
+        folders.firstWhere((element) => element.name == 'Your Files');
 
     return FolderTree(
         owner: owner, root: FolderTreeItem.create(_rootFolder, indexMap));
@@ -44,6 +46,7 @@ class FolderTreeItem {
     final List<FolderTreeItem> _children = (indexMap.containsKey(root.id))
         ? indexMap[root.id]
             .map((childFolder) => FolderTreeItem.create(childFolder, indexMap))
+            .toList()
         : [];
     return FolderTreeItem(
       folder: root,
