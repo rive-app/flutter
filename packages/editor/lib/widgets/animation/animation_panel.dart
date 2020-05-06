@@ -4,7 +4,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/animation/animation_panel_contents.dart';
-import 'package:rive_editor/widgets/common/active_artboard.dart';
 import 'package:rive_editor/widgets/common/animated_factor_builder.dart';
 import 'package:rive_editor/widgets/common/fractional_intrinsic_height.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -43,12 +42,7 @@ class _AnimationPanelState extends State<AnimationPanel>
                 // Don't add the animation panel contents (or the animations
                 // managers) to the layout if we're not showing the panel at
                 // all, save some cycles.
-                child: factor != 0
-                    ? AnimationsProvider(
-                        activeArtboard: ActiveArtboard.of(context),
-                        child: EditingAnimationProvider(child: child),
-                      )
-                    : const SizedBox(),
+                child: factor != 0 ? child : const SizedBox(),
               ),
             ),
           ),

@@ -10,8 +10,10 @@ export 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 
 class LinearAnimation extends LinearAnimationBase {
   final Event _keyframesChanged = Event();
+  final Event _keyframeValueChanged = Event();
 
   Listenable get keyframesChanged => _keyframesChanged;
+  Listenable get keyframeValueChanged => _keyframeValueChanged;
 
   /// Map objectId to KeyedObject. N.B. this is the id of the object that we
   /// want to key in core, not of the KeyedObject. It's a clear way to see if an
@@ -119,4 +121,7 @@ class LinearAnimation extends LinearAnimationBase {
 
   /// Should be @internal when supported.
   void internalKeyFramesChanged() => _keyframesChanged.notify();
+
+  /// Should be @internal when supported.
+  void internalKeyFrameValueChanged() => _keyframeValueChanged.notify();
 }

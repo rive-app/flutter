@@ -65,7 +65,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   /// be @internal when it's supported.
   bool internalRemoveKeyedProperty(KeyedProperty property) {
     var removed = _keyedProperties.remove(property.propertyKey);
-    if(removed != null) {
+    if (removed != null) {
       /// Keyed property removed, it may have contained keyframes.
       internalKeyFramesChanged();
     }
@@ -126,4 +126,8 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
 
   // Should be @internal when supported...
   void internalKeyFramesMoved() => _keyframesMoved.notify();
+
+  /// Should be @internal when supported.
+  void internalKeyFrameValueChanged() =>
+      animation?.internalKeyFrameValueChanged();
 }

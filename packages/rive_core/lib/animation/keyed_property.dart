@@ -214,4 +214,8 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
 
   @override
   void propertyKeyChanged(int from, int to) {}
+
+  /// Should be @internal when supported.
+  void internalKeyFrameValueChanged() =>
+      keyedObject?.internalKeyFrameValueChanged();
 }

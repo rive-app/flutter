@@ -579,6 +579,45 @@ class Definition {
     }
     ctxCode.writeln('}}');
 
+    ctxCode.writeln('static bool animates(int propertyKey) {'
+        'switch(propertyKey) {');
+    bool hasAnimated = false;
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        if (property.animates) {
+          ctxCode.writeln('case ${definition._name}Base'
+              '.${property.name}PropertyKey:');
+          hasAnimated = true;
+          continue;
+        }
+      }
+    }
+    if (hasAnimated) {
+      ctxCode.writeln('return true;');
+    }
+    ctxCode.writeln('default: return false;');
+    ctxCode.writeln('}}');
+
+    ctxCode.writeln('''
+        static KeyState getKeyState(Core object, int propertyKey) {
+          switch(propertyKey) {
+          ''');
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        if (!property.animates) {
+          continue;
+        }
+        ctxCode.writeln(
+            'case ${definition._name}Base.${property.name}PropertyKey:');
+        ctxCode.writeln('return (object as ${property.definition._name}Base).'
+            '${property.name}KeyState;');
+
+        ctxCode.writeln('break;');
+      }
+    }
+    ctxCode.writeln('default: return null;');
+    ctxCode.writeln('}}');
+
     ctxCode.writeln('''
         static void setKeyState(Core object, int propertyKey, KeyState value) {
           switch(propertyKey) {

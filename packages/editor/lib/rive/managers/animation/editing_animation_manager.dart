@@ -15,6 +15,17 @@ import 'package:rxdart/rxdart.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+@immutable
+class KeyComponentsEvent {
+  final Iterable<Component> components;
+  final int propertyKey;
+
+  const KeyComponentsEvent({
+    @required this.components,
+    @required this.propertyKey,
+  });
+}
+
 /// Animation manager for the currently editing [LinearAnimation].
 class EditingAnimationManager extends AnimationTimeManager
     with RiveFileDelegate {
@@ -28,9 +39,13 @@ class EditingAnimationManager extends AnimationTimeManager
       BehaviorSubject<Iterable<KeyHierarchyViewModel>>();
 
   final _deleteController = StreamController<HashSet<KeyFrame>>();
+  final _keyController = StreamController<KeyComponentsEvent>();
 
   /// Delete a set of keyframes.
   Sink<HashSet<KeyFrame>> get deleteKeyFrames => _deleteController;
+
+  /// Set a keyframe on a property for a bunch of components.
+  Sink<KeyComponentsEvent> get keyComponents => _keyController;
 
   Stream<Iterable<KeyHierarchyViewModel>> get hierarchy =>
       _hierarchyController.stream;
@@ -44,12 +59,22 @@ class EditingAnimationManager extends AnimationTimeManager
     _updateHierarchy();
 
     _deleteController.stream.listen(_deleteKeyFrames);
+    _keyController.stream.listen(_keyComponents);
+
+    // animation.keyframesChanged
   }
 
   void _deleteKeyFrames(HashSet<KeyFrame> keyframes) {
     var core = animation.context;
     keyframes.forEach(core.remove);
     core.captureJournalEntry();
+  }
+
+  void _keyComponents(KeyComponentsEvent event) {
+    for (final component in event.components) {
+      onAutoKey(component, event.propertyKey);
+    }
+    animation.context.captureJournalEntry();
   }
 
   @override
@@ -60,6 +85,7 @@ class EditingAnimationManager extends AnimationTimeManager
     cancelDebounce(_updateHierarchy);
     _hierarchyController.close();
     _deleteController.close();
+    _keyController.close();
     animation.context.removeDelegate(this);
     super.dispose();
   }
@@ -71,7 +97,7 @@ class EditingAnimationManager extends AnimationTimeManager
     /// another artboard's animation is still active so we early out here if
     /// autoKey is triggered for a property on an object that is not in the same
     /// artboard as our currently editing animation.
-    if(component.artboard != animation.artboard) {
+    if (component.artboard != animation.artboard) {
       return;
     }
     var keyFrame = component.addKeyFrame(animation, propertyKey, frame);

@@ -165,6 +165,7 @@ class RiveColors {
   Color get keyLine => const Color(0xBF57A5E0);
   Color get keyMarqueeFill => const Color(0x3433A7FF);
   Color get keyMarqueeStroke => const Color(0xFF33A7FF);
+  Color get keyStateEmpty => const Color(0xFF8C8C8C);
 }
 
 /// TextStyles used in the Rive Theme
