@@ -18,6 +18,11 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   final HashMap<int, KeyedProperty> _keyedProperties =
       HashMap<int, KeyedProperty>();
 
+  int _lastFrame = 0;
+
+  /// The last frame with a keyframe on it.
+  int get lastFrame => _lastFrame;
+
   Iterable<KeyedProperty> get keyedProperties => _keyedProperties.values;
 
   final Event _keyframesMoved = Event();
@@ -146,6 +151,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
 
   // Should be @internal when supported...
   void internalKeyFramesChanged() {
+    _computeLastKeyFrameTime();
     animation?.internalKeyFramesChanged();
   }
 
@@ -155,4 +161,13 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() =>
       animation?.internalKeyFrameValueChanged();
+
+  void _computeLastKeyFrameTime() {
+    _lastFrame = 0;
+    for (final property in _keyedProperties.values) {
+      if (property.lastFrame > _lastFrame) {
+        _lastFrame = property.lastFrame;
+      }
+    }
+  }
 }

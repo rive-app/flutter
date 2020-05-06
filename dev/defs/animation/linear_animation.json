@@ -33,13 +33,14 @@
       },
       "description": "Playback speed multiplier."
     },
-    "loop": {
+    "loopValue": {
       "type": "int",
+      "initialValue": "0",
       "key": {
         "int": 59,
         "string": "loop"
       },
-      "description": "Loop value option matches LoopType enumeration."
+      "description": "Loop value option matches Loop enumeration."
     },
     "workStart": {
       "type": "int",

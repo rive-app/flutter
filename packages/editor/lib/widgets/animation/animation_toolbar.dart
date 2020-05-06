@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/widgets/animation/animation_time_popup_button.dart';
+import 'package:rive_editor/widgets/animation/loop_popup_button.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -26,13 +27,7 @@ class AnimationToolbar extends StatelessWidget {
               animationManager.changeCurrentTime.add(0);
             },
           ),
-          TintedIconButton(
-            icon: 'loop',
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            onPress: () {
-              print('loop');
-            },
-          ),
+          LoopPopupButton(),
           const Expanded(
             child: SizedBox(),
           ),

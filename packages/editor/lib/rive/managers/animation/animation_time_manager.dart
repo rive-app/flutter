@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/animation/loop.dart';
 import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -13,7 +14,7 @@ import 'package:rive_core/rive_animation_controller.dart';
 
 class _SimpleAnimationController extends RiveAnimationController {
   final LinearAnimation animation;
-  VoidCallback onTimeChanged;
+  void Function(double) onTimeChanged;
   _SimpleAnimationController(this.animation, this.onTimeChanged);
 
   // This controller distinguishes between playing an animation (sustained
@@ -37,8 +38,37 @@ class _SimpleAnimationController extends RiveAnimationController {
 
     if (_sustainedPlayback) {
       time += elapsedSeconds * animation.speed;
+
+      double frames = time * animation.fps;
+
+      switch (animation.loop) {
+        case Loop.oneShot:
+          if (frames > animation.duration) {
+            _sustainedPlayback = false;
+            frames = animation.duration.toDouble();
+          }
+          break;
+        case Loop.stopLastKey:
+          if (frames > animation.lastFrame) {
+            _sustainedPlayback = false;
+            frames = animation.lastFrame.toDouble();
+          }
+          break;
+        case Loop.loop:
+          if (frames >= animation.duration) {
+            time %= animation.duration / animation.fps;
+            frames = time * animation.fps;
+          }
+          break;
+        case Loop.loopLastKey:
+          if (frames >= animation.lastFrame) {
+            time %= animation.lastFrame / animation.fps;
+            frames = time * animation.fps;
+          }
+          break;
+      }
       isPlaying = true;
-      onTimeChanged();
+      onTimeChanged(frames);
     } else {
       // after apply, pause
       isPlaying = false;
@@ -79,11 +109,8 @@ abstract class AnimationTimeManager extends AnimationManager {
   _SimpleAnimationController _controller;
   AnimationTimeManager(LinearAnimation animation, this.activeFile)
       : super(animation) {
-    _controller = _SimpleAnimationController(animation, () {
-      double frames = _controller.time * animation.fps;
-      if (animation.duration - frames < 0) {
-        _changePlayback(false);
-      }
+    _controller = _SimpleAnimationController(animation, (frames) {
+      _changePlayback(_controller.sustainedPlayback);
       _timeStream.add(frames.clamp(0, animation.duration).toDouble());
     });
     animation.artboard.addController(_controller);
@@ -127,6 +154,9 @@ abstract class AnimationTimeManager extends AnimationManager {
   }
 
   void _changePlayback(bool play) {
+    if (_isPlayingStream.value == play) {
+      return;
+    }
     _controller.sustainedPlayback = play;
     _isPlayingStream.add(play);
   }
