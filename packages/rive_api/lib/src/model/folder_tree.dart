@@ -1,6 +1,7 @@
 /// Tree of directories
 import 'package:meta/meta.dart';
 import 'package:rive_api/src/model/model.dart';
+import 'package:rxdart/subjects.dart';
 
 class FolderTree {
   FolderTree({
@@ -34,17 +35,13 @@ class FolderTree {
 }
 
 class FolderTreeItem {
-  FolderTreeItem(
-      {@required this.folder,
-      @required this.hover,
-      @required this.selected,
-      @required this.open,
-      @required this.children,
-      this.owner});
+  FolderTreeItem({@required this.folder, @required this.children, this.owner}) {
+    hover.add(false);
+    selected.add(false);
+  }
   final Folder folder;
-  final bool hover;
-  final bool selected;
-  final bool open;
+  final hover = BehaviorSubject<bool>();
+  final selected = BehaviorSubject<bool>();
   final Owner owner;
   final List<FolderTreeItem> children;
 
@@ -61,9 +58,6 @@ class FolderTreeItem {
       folder: null,
       children: [],
       owner: owner,
-      hover: true,
-      selected: false,
-      open: false,
     );
   }
 
@@ -79,9 +73,6 @@ class FolderTreeItem {
       folder: root,
       children: _children,
       owner: owner,
-      hover: true,
-      selected: false,
-      open: false,
     );
   }
 }

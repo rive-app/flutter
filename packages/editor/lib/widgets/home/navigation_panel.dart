@@ -352,12 +352,28 @@ class _NavigationPanelStreamState extends State<NavigationPanelStream> {
                         style: treeStyle,
                         controller:
                             FolderTreeItemController(snapshot.data[i].value)));
+
+                    /// TODO: Matt take a look at this please
+                    /// This works once, but when you switch away from the tab adn back into it. it all blows up pretty badly
+                    // slivers.add(StreamBuilder<FolderTree>(
+                    //     stream: snapshot.data[i],
+                    //     builder: (context, mySnapshot) {
+                    //       if (mySnapshot.hasData) {
+                    //         return FolderTreeViewStream(
+                    //             style: treeStyle,
+                    //             controller:
+                    //                 FolderTreeItemController(mySnapshot.data));
+                    //       } else {
+                    //         return SliverToBoxAdapter(child: Container());
+                    //       }
+                    //     }));
+
                     if (i != snapshot.data.length - 1) {
                       slivers.add(
                         SliverToBoxAdapter(
                           child: Separator(
                             color: riveColors.fileLineGrey,
-                            padding: EdgeInsets.only(
+                            padding: const EdgeInsets.only(
                               left: 20,
                             ),
                           ),

@@ -135,19 +135,23 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
   @override
   void onMouseEnter(
       PointerEnterEvent event, FlatTreeItem<FolderTreeItem> item) {
-    print('hover on $item');
+    item.data.hover.add(true);
   }
 
   @override
   void onMouseExit(PointerExitEvent event, FlatTreeItem<FolderTreeItem> item) {
-    print('hover off $item');
+    item.data.hover.add(false);
   }
 
   @override
   void onTap(FlatTreeItem<FolderTreeItem> item) {
     Plumber().message<CurrentDirectory>(
         CurrentDirectory(item.data.owner, item.data.folder.id));
-    print('tipper tapper $item');
+
+    flat.forEach((element) {
+      element.data.selected.add(false);
+    });
+    item.data.selected.add(true);
   }
 
   @override

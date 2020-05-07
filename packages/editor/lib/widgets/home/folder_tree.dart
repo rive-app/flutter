@@ -126,57 +126,82 @@ class FolderTreeViewStream extends StatelessWidget {
     return TreeView<FolderTreeItem>(
       style: style,
       controller: controller,
-      expanderBuilder: (context, item, style) => Container(
-        child: Center(
-          child: TreeExpander(
-            key: item.key,
-            iconColor: colors.fileUnselectedFolderIcon,
-            isExpanded: item.isExpanded,
+      expanderBuilder: (context, item, style) => StreamBuilder<bool>(
+        stream: item.data.selected.stream,
+        builder: (context, selectedStream) => Container(
+          child: Center(
+            child: TreeExpander(
+              key: item.key,
+              iconColor: (selectedStream.hasData && selectedStream.data)
+                  ? Colors.white
+                  : colors.fileUnselectedFolderIcon,
+              isExpanded: item.isExpanded,
+            ),
           ),
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: colors.filesTreeStroke,
-            width: 1.0,
-            style: BorderStyle.solid,
-          ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(7.5),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: (selectedStream.hasData && selectedStream.data)
+                  ? colors.selectedTreeLines
+                  : colors.filesTreeStroke,
+              width: 1.0,
+              style: BorderStyle.solid,
+            ),
+            borderRadius: const BorderRadius.all(
+              Radius.circular(7.5),
+            ),
           ),
         ),
       ),
-      iconBuilder: (context, item, style) => Container(
-        width: 15,
-        height: 15,
-        child: Center(
+      iconBuilder: (context, item, style) => StreamBuilder<bool>(
+        stream: item.data.selected.stream,
+        builder: (context, selectedStream) => Container(
+          width: 15,
+          height: 15,
+          child: Center(
             child: SizedAvatar(
-          url: item.data.iconURL,
-          icon: 'folder',
-          iconColor: (item.data.selected)
-              ? colors.fileSelectedFolderIcon
-              : colors.fileUnselectedFolderIcon,
-        )),
+              url: item.data.iconURL,
+              icon: 'folder',
+              iconColor: (selectedStream.hasData && selectedStream.data)
+                  ? colors.fileSelectedFolderIcon
+                  : colors.fileUnselectedFolderIcon,
+            ),
+          ),
+        ),
       ),
       extraBuilder: (context, item, index) => Container(),
       backgroundBuilder: (context, item, style) {
-        var _selectionState = SelectionState.none;
-        if (item.data.selected) {
-          _selectionState = SelectionState.selected;
-        }
-        // else if (item.data.hovered) {
-        //   _selectionState = SelectionState.hovered;
-        // }
-        return DropItemBackground(DropState.none, _selectionState);
+        return StreamBuilder<bool>(
+            stream: item.data.selected.stream,
+            builder: (context, selectedStream) {
+              bool selected = selectedStream.hasData && selectedStream.data;
+              return StreamBuilder<bool>(
+                  stream: item.data.hover.stream,
+                  builder: (context, hoverStream) {
+                    bool hovered = hoverStream.hasData && hoverStream.data;
+                    var _selectionState = SelectionState.none;
+                    if (selected) {
+                      _selectionState = SelectionState.selected;
+                    } else if (hovered) {
+                      _selectionState = SelectionState.hovered;
+                    }
+                    return DropItemBackground(DropState.none, _selectionState);
+                  });
+            });
       },
-      itemBuilder: (context, item, style) => Expanded(
-        child: Container(
-          child: IgnorePointer(
-            child: Text(
-              item.data.name,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                color: colors.fileTreeText,
+      itemBuilder: (context, item, style) => StreamBuilder<bool>(
+        stream: item.data.selected.stream,
+        builder: (context, selectedStream) => Expanded(
+          child: Container(
+            child: IgnorePointer(
+              child: Text(
+                item.data.name,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: (selectedStream.hasData && selectedStream.data)
+                      ? Colors.white
+                      : colors.fileTreeText,
+                ),
               ),
             ),
           ),
