@@ -65,7 +65,10 @@ class ShortcutAction {
   static const ShortcutAction ellipseTool = ShortcutAction('tool-ellipse');
   static const ShortcutAction timelineEnd = ShortcutAction('timeline-end');
   static const ShortcutAction timelineStart = ShortcutAction('timeline-start');
-  static const ShortcutAction togglePlay = ShortcutAction('play');
+  static const ShortcutAction togglePlay = ShortcutAction(
+    'play',
+    repeats: false,
+  );
   static const ShortcutAction translateTool = ShortcutAction('tool-translate');
   static const ShortcutAction undo = ShortcutAction('undo');
   static const ShortcutAction paintWeightTool = ShortcutAction('tool-weight');
@@ -150,7 +153,8 @@ class ShortcutAction {
   static const ShortcutAction closeTab = ShortcutAction('close-tab');
 
   final String name;
-  const ShortcutAction(this.name);
+  final bool repeats;
+  const ShortcutAction(this.name, {this.repeats = true});
 }
 
 /// A ShortcutAction that somehow mutates its value when it is pressed or

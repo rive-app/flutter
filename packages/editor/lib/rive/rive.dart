@@ -420,7 +420,7 @@ class Rive {
   }
 
   final Set<_Key> _pressed = {};
-  final Set<StatefulShortcutAction> _pressedStateful = {};
+  final Set<ShortcutAction> _pressedActions = {};
 
   void onKeyEvent(ShortcutKeyBinding keyBinding, RawKeyEvent keyEvent,
       bool hasFocusObject) {
@@ -449,20 +449,42 @@ class Rive {
     if (hasFocusObject) {
       return;
     }
-    var actions = keyBinding.lookupAction(
-        _pressed.map((key) => key.physical).toList(growable: false));
+    var actions = keyBinding
+        .lookupAction(
+            _pressed.map((key) => key.physical).toList(growable: false))
+        .toSet();
 
-    var statefulActions = Set<StatefulShortcutAction>.from(
-        actions?.whereType<StatefulShortcutAction>() ??
-            <StatefulShortcutAction>[]);
-    for (final noLongerPressed
-        in _pressedStateful.difference(statefulActions)) {
-      noLongerPressed.onRelease();
+    var released = _pressedActions.difference(actions);
+    for (final action in released) {
+      if (action is StatefulShortcutAction) {
+        action.onRelease();
+      }
+      releaseAction(action);
     }
-    _pressedStateful.clear();
-    _pressedStateful.addAll(statefulActions);
 
-    actions?.forEach(triggerAction);
+    // Some actions don't repeat, so remove them from the trigger list if
+    // they've already triggered for press. N.B. most platforms give  us a way
+    // to determine if this keydown is a repeat, Flutter does this only for
+    // Android so we have to do it ourselves here.
+    Set<ShortcutAction> toTrigger = {};
+    for (final action in actions) {
+      if (action.repeats) {
+        toTrigger.add(action);
+      } else if (!_pressedActions.contains(action)) {
+        // Action is not a repeating action, however it wasn't previously
+        // pressed so this is the first press down.
+        toTrigger.add(action);
+      }
+    }
+    _pressedActions.clear();
+    _pressedActions.addAll(actions);
+
+    toTrigger.forEach(triggerAction);
+  }
+
+  void releaseAction(ShortcutAction action) {
+    var fileContext = file.value;
+    fileContext?.releaseAction(action);
   }
 
   void triggerAction(ShortcutAction action) {

@@ -26,6 +26,22 @@ class _SimpleAnimationController extends RiveAnimationController {
       return;
     }
     _sustainedPlayback = value;
+    if (value) {
+      // If we're out of range, start playing from start.
+      var start = animation.enableWorkArea ? animation.workStart : 0;
+      var end =
+          animation.enableWorkArea ? animation.workEnd : animation.duration;
+      double frames = _time * animation.fps;
+      if (frames < start) {
+        frames = start.toDouble();
+        time = frames / animation.fps;
+      } else if (frames > end) {
+        frames = start.toDouble();
+        time = frames / animation.fps;
+      }
+    }
+
+    // Always advance/apply next frame.
     isPlaying = true;
   }
 
@@ -36,10 +52,10 @@ class _SimpleAnimationController extends RiveAnimationController {
       return;
     }
     _time = value;
-    _direction = 1;
+    direction = 1;
   }
 
-  int _direction = 1;
+  int direction = 1;
   @override
   void apply(RiveCoreContext core, double elapsedSeconds) {
     // Reset all previously animated properties.
@@ -47,32 +63,49 @@ class _SimpleAnimationController extends RiveAnimationController {
     animation.apply(_time, coreContext: core);
 
     if (_sustainedPlayback) {
-      _time += elapsedSeconds * animation.speed * _direction;
+      _time += elapsedSeconds * animation.speed * direction;
 
       double frames = _time * animation.fps;
 
+      var start = animation.enableWorkArea ? animation.workStart : 0;
+      var end =
+          animation.enableWorkArea ? animation.workEnd : animation.duration;
+      var range = end - start;
+
       switch (animation.loop) {
         case Loop.oneShot:
-          if (frames > animation.duration) {
+          if (frames > end) {
             _sustainedPlayback = false;
-            frames = animation.duration.toDouble();
+            frames = end.toDouble();
+            _time = frames / animation.fps;
           }
           break;
         case Loop.loop:
-          if (frames >= animation.duration) {
-            _time %= animation.duration / animation.fps;
+          if (frames >= end) {
             frames = _time * animation.fps;
+            frames = start + (frames - start) % range;
+            _time = frames / animation.fps;
           }
           break;
         case Loop.pingPong:
-          if (_direction == 1 && frames >= animation.duration) {
-            _direction = -1;
-            frames = animation.duration + (frames - animation.duration);
-            _time = frames / animation.fps;
-          } else if (_direction == -1 && frames < 0) {
-            _direction = 1;
-            frames = -frames;
-            _time = frames / animation.fps;
+          // ignore: literal_only_boolean_expressions
+          while (true) {
+            if (direction == 1 && frames >= end) {
+              direction = -1;
+              frames = end + (end - frames);
+              _time = frames / animation.fps;
+            } else if (direction == -1 && frames < start) {
+              direction = 1;
+              frames = start + (start - frames);
+              _time = frames / animation.fps;
+            } else {
+              // we're within the range, we can stop fixing. We do this in a
+              // loop to fix conditions when time has advanced so far that we've
+              // ping-ponged back and forth a few times in a single frame. We
+              // want to accomodate for this in cases where animations are not
+              // advanced on regular intervals.
+              break;
+            }
           }
           break;
       }
@@ -98,12 +131,16 @@ class _SimpleAnimationController extends RiveAnimationController {
 /// the viewport, changing animation duration, and tracking editing animation
 /// time.
 abstract class AnimationTimeManager extends AnimationManager {
+  static const int _playPressThresholdMs = 250;
+
   final OpenFileContext activeFile;
   final _fpsStream = BehaviorSubject<int>();
 
   final _workArea = BehaviorSubject<WorkAreaViewModel>();
   final _workAreaController = StreamController<WorkAreaViewModel>();
-  
+
+  final _loop = BehaviorSubject<Loop>();
+  final _loopController = StreamController<Loop>();
   // Use this to gate whether or not to update the stream (when we update
   // internally we may be changing multiple properties and not want to trigger
   // an update for each one).
@@ -111,6 +148,9 @@ abstract class AnimationTimeManager extends AnimationManager {
 
   ValueStream<WorkAreaViewModel> get workArea => _workArea;
   Sink<WorkAreaViewModel> get changeWorkArea => _workAreaController;
+
+  ValueStream<Loop> get loop => _loop;
+  Sink<Loop> get changeLoop => _loopController;
 
   /// Use this to actually process the final fps rate change.
   final _fpsController = StreamController<int>();
@@ -125,6 +165,11 @@ abstract class AnimationTimeManager extends AnimationManager {
 
   final _isPlayingStream = BehaviorSubject<bool>();
   final _playbackController = StreamController<bool>();
+
+  // When was the play action pressed down? We track this to only trigger play
+  // after a brief tap of the action to disambiguate with other actions (like
+  // pan).
+  DateTime _pressPlayTime = DateTime.now();
 
   _SimpleAnimationController _controller;
   AnimationTimeManager(LinearAnimation animation, this.activeFile)
@@ -157,12 +202,29 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.addListener(
         LinearAnimationBase.workEndPropertyKey, _workAreaPropertyChanged);
 
+    animation.addListener(
+        LinearAnimationBase.loopValuePropertyKey, _loopPropertyChanged);
+
     _syncViewport();
     _syncWorkArea();
+    _syncLoop();
 
     activeFile.addActionHandler(_handleAction);
+    activeFile.addReleaseActionHandler(_releaseAction);
 
     _workAreaController.stream.listen(_changeWorkArea);
+    _loopController.stream.listen(_changeLoop);
+  }
+
+  void _changeLoop(Loop loop) {
+    if (animation.loop == loop) {
+      return;
+    }
+    animation.loop = loop;
+
+    /// Whenever changing loop, set direction back to 1;
+    _controller.direction = 1;
+    animation.context.captureJournalEntry();
   }
 
   void _changeWorkArea(WorkAreaViewModel viewModel) {
@@ -172,6 +234,14 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.enableWorkArea = viewModel.active;
     _suppressSyncWorkArea = false;
     _syncWorkArea();
+  }
+
+  void _syncLoop() {
+    _loop.add(animation.loop);
+  }
+
+  void _loopPropertyChanged(dynamic from, dynamic to) {
+    _syncLoop();
   }
 
   void _workAreaPropertyChanged(dynamic from, dynamic to) {
@@ -293,7 +363,12 @@ abstract class AnimationTimeManager extends AnimationManager {
         LinearAnimationBase.workEndPropertyKey, _workAreaPropertyChanged);
     _workArea.close();
     _workAreaController.close();
+    animation.removeListener(
+        LinearAnimationBase.loopValuePropertyKey, _loopPropertyChanged);
+    _loop.close();
+    _loopController.close();
     activeFile.removeActionHandler(_handleAction);
+    activeFile.removeReleaseActionHandler(_releaseAction);
     animation.artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
     animation.keyframeValueChanged.removeListener(_keyframesChanged);
@@ -316,10 +391,29 @@ abstract class AnimationTimeManager extends AnimationManager {
   bool _handleAction(ShortcutAction action) {
     switch (action) {
       case ShortcutAction.togglePlay:
+        _pressPlayTime = DateTime.now();
+        return true;
+    }
+    return false;
+  }
+
+  bool _releaseAction(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.togglePlay:
+
+        // Trigger play if we had only pressed it for a brief time.
+        // Fixes: https://github.com/rive-app/rive/issues/415
+        if (DateTime.now().difference(_pressPlayTime).inMilliseconds >
+            _playPressThresholdMs) {
+          return false;
+        }
         bool play = !_isPlayingStream.value;
+        var start = animation.enableWorkArea ? animation.workStart : 0;
+        var end =
+            animation.enableWorkArea ? animation.workEnd : animation.duration;
         // If we're super close to the end, rewing to start before playing.
-        if (play && (_timeStream.value - animation.duration).abs() < 0.01) {
-          _controller.time = 0;
+        if (play && (_timeStream.value - end).abs() < 0.01) {
+          _controller.time = start / animation.fps;
         }
         _changePlayback(play);
         return true;

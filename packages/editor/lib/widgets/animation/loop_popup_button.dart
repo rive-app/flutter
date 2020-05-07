@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/loop.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
@@ -20,90 +21,85 @@ class LoopPopupButton extends StatelessWidget {
 
     var animation = animationManager.animation;
     // We want to rebuild the whole thing whenever the loop value changes.
-    return CorePropertyBuilder(
-      object: animation,
-      propertyKey: LinearAnimationBase.loopValuePropertyKey,
-      builder: (context, int loopValue, _) {
-        var loop = animation.loop;
-        String icon;
-        switch (loop) {
-          case Loop.oneShot:
-            icon = 'one-shot';
-            break;
-          case Loop.loop:
-            icon = 'loop';
-            break;
-          case Loop.pingPong:
-            icon = 'stop-last';
-            break;
-        }
-        final themeColors = RiveTheme.of(context).colors;
-        return RivePopupButton(
-          iconBuilder: (context, rive, isHovered) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 5,
+    return ValueStreamBuilder<Loop>(
+        stream: animationManager.loop,
+        builder: (context, snapshot) {
+          var loop = snapshot.data;
+          String icon;
+          switch (loop) {
+            case Loop.oneShot:
+              icon = 'one-shot';
+              break;
+            case Loop.loop:
+              icon = 'loop';
+              break;
+            case Loop.pingPong:
+              icon = 'ping-pong';
+              break;
+          }
+          final themeColors = RiveTheme.of(context).colors;
+          return RivePopupButton(
+            hoverColor: themeColors.timelineButtonBackGroundHover,
+            iconBuilder: (context, rive, isHovered) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 5,
+                ),
+                child: TintedIcon(
+                  icon: icon,
+                  color: isHovered
+                      ? themeColors.toolbarButtonHover
+                      : themeColors.toolbarButton,
+                ),
+              );
+            },
+            contextItemsBuilder: (context) => [
+              PopupContextItem(
+                'One Shot',
+                icon: 'one-shot',
+                select: () {
+                  animationManager.changeLoop.add(Loop.oneShot);
+                },
               ),
-              child: TintedIcon(
-                icon: icon,
-                color: isHovered
-                    ? themeColors.toolbarButtonHover
-                    : themeColors.toolbarButton,
+              PopupContextItem(
+                'Loop',
+                icon: 'loop',
+                select: () {
+                  animationManager.changeLoop.add(Loop.loop);
+                },
               ),
-            );
-          },
-          contextItemsBuilder: (context) => [
-            PopupContextItem(
-              'One Shot',
-              icon: 'one-shot',
-              select: () {
-                animation.loop = Loop.oneShot;
-                animation.context.captureJournalEntry();
-              },
-            ),
-            PopupContextItem(
-              'Loop',
-              icon: 'loop',
-              select: () {
-                animation.loop = Loop.loop;
-                animation.context.captureJournalEntry();
-              },
-            ),
-            PopupContextItem(
-              'Ping Pong',
-              icon: 'stop-last',
-              select: () {
-                animation.loop = Loop.pingPong;
-                animation.context.captureJournalEntry();
-              },
-            ),
-            PopupContextItem.separator(),
-            PopupContextItem(
-              'Work Area',
-              // notifier: file.stage.showRulersNotifier,
-              iconBuilder: (context, isHovered) => CorePropertyBuilder(
-                object: animation,
-                propertyKey: LinearAnimationBase.enableWorkAreaPropertyKey,
-                builder: (context, bool isEnabled, _) => isEnabled
-                    ? TintedIcon(
-                        icon: 'popup-check',
-                        color: isHovered
-                            ? RiveTheme.of(context).colors.buttonHover
-                            : RiveTheme.of(context).colors.buttonNoHover,
-                      )
-                    : const SizedBox(width: 20),
+              PopupContextItem(
+                'Ping Pong',
+                icon: 'ping-pong',
+                select: () {
+                  animationManager.changeLoop.add(Loop.pingPong);
+                },
               ),
-              padIcon: !animation.enableWorkArea,
-              select: () => animation.toggleWorkArea(),
-              dismissOnSelect: false,
-            ),
-          ],
-        );
-      },
-    );
+              PopupContextItem.separator(),
+              PopupContextItem(
+                'Work Area',
+                // notifier: file.stage.showRulersNotifier,
+                iconBuilder: (context, isHovered) => CorePropertyBuilder(
+                  object: animation,
+                  propertyKey: LinearAnimationBase.enableWorkAreaPropertyKey,
+                  builder: (context, bool isEnabled, _) => isEnabled
+                      ? TintedIcon(
+                          icon: 'popup-check',
+                          color: isHovered
+                              ? RiveTheme.of(context).colors.buttonHover
+                              : RiveTheme.of(context).colors.buttonNoHover,
+                        )
+                      : const SizedBox(width: 20),
+                ),
+                padIcon: !animation.enableWorkArea,
+                select: () => animation.toggleWorkArea(),
+                dismissOnSelect: false,
+              ),
+            ],
+          );
+        });
   }
 }
-
 
 /// Helper to toggle work area on the linear animation.
 extension ToggleWorkArea on LinearAnimation {

@@ -30,6 +30,8 @@ class AnimationTimePopupButton extends StatelessWidget {
         var theme = RiveTheme.of(context);
 
         return RivePopupButton(
+          hoverColor:
+              RiveTheme.of(context).colors.timelineButtonBackGroundHover,
           width: 221,
           // Custom icon builder to show the zoom level
           // instead of a menu icon

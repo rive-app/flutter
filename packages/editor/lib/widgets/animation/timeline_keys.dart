@@ -101,13 +101,18 @@ class _TimelineKeysState extends State<TimelineKeys> {
           verticalScroll: widget.verticalScroll,
           animationManager: widget.animationManager,
           rows: _rows,
-          builder: (context, selection) => _TimelineKeysRenderer(
-            theme: widget.theme,
-            verticalScrollOffset: _scrollOffset,
-            rows: _rows,
-            viewport: viewport,
-            animation: widget.animationManager.animation,
-            selection: selection,
+          builder: (context, selection) =>
+              ValueStreamBuilder<WorkAreaViewModel>(
+            stream: widget.animationManager.workArea,
+            builder: (context, workArea) => _TimelineKeysRenderer(
+              theme: widget.theme,
+              verticalScrollOffset: _scrollOffset,
+              rows: _rows,
+              viewport: viewport,
+              animation: widget.animationManager.animation,
+              selection: selection,
+              workArea: workArea.hasData ? workArea.data : null,
+            ),
           ),
         );
       },
@@ -122,6 +127,7 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   final TimelineViewport viewport;
   final LinearAnimation animation;
   final HashSet<KeyFrame> selection;
+  final WorkAreaViewModel workArea;
   const _TimelineKeysRenderer({
     @required this.theme,
     @required this.verticalScrollOffset,
@@ -129,6 +135,7 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
     @required this.viewport,
     @required this.animation,
     @required this.selection,
+    @required this.workArea,
   });
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -138,7 +145,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..rows = rows
       ..viewport = viewport
       ..animation = animation
-      ..selection = selection;
+      ..selection = selection
+      ..workArea = workArea;
   }
 
   @override
@@ -150,7 +158,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..rows = rows
       ..viewport = viewport
       ..animation = animation
-      ..selection = selection;
+      ..selection = selection
+      ..workArea = workArea;
     ;
   }
 
@@ -167,18 +176,30 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
   final Paint _keyPaint = Paint();
   final Paint _connectKeyPaint = Paint()
     ..strokeWidth = 1
-    ..style = PaintingStyle.stroke;
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = false;
   final Paint _allkeyPaint = Paint();
   final Paint _selectedPaint = Paint()
     ..strokeWidth = 1
     ..style = PaintingStyle.stroke;
-
-  // We compute our own range as the one given by the viewport is padded, we
-  // actually need to draw a little more than the viewport.
-  double _secondsStart = 0;
+  final Paint _workAreaBgPaint = Paint();
+  final Paint _workAreaLinePaint = Paint()
+    ..strokeWidth = 1
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = false;
 
   double _verticalScrollOffset;
   List<FlatTreeItem<KeyHierarchyViewModel>> _rows;
+
+  WorkAreaViewModel _workArea;
+  WorkAreaViewModel get workArea => _workArea;
+  set workArea(WorkAreaViewModel value) {
+    if (_workArea == value) {
+      return;
+    }
+    _workArea = value;
+    markNeedsPaint();
+  }
 
   HashSet<KeyFrame> _selection;
   HashSet<KeyFrame> get selection => _selection;
@@ -213,6 +234,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
     _connectKeyPaint.color = theme.colors.keyLine;
     _allkeyPaint.color = theme.colors.allKey;
     _selectedPaint.color = theme.colors.keySelection;
+    _workAreaBgPaint.color = theme.colors.workAreaBackground;
+    _workAreaLinePaint.color = theme.colors.workAreaDelineator;
 
     makeKeyPath(
         theme,
@@ -242,22 +265,25 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
   bool get sizedByParent => true;
 
   @override
-  void performLayout() {
-    super.performLayout();
-
-    // We use layout to compute some of the constants for this viewport.
-    var marginLeft = theme.dimensions.timelineMarginLeft;
-
-    // This is the time at local x 0
-    _secondsStart = viewport.startSeconds - marginLeft * secondsPerPixel;
-  }
-
-  @override
   void paint(PaintingContext context, Offset offset) {
     var canvas = context.canvas;
     canvas.drawRect(offset & size, _bgPaint);
     canvas.save();
     canvas.clipRect(offset & size);
+
+    if (_workArea?.active ?? false) {
+      var xStart = framesToPixels(_workArea.start);
+      var xEnd = framesToPixels(_workArea.end);
+
+      canvas.drawRect(
+          Rect.fromLTRB(xStart, offset.dy, xEnd, offset.dy + size.height),
+          _workAreaBgPaint);
+
+      canvas.drawLine(Offset(xStart, offset.dy),
+          Offset(xStart, offset.dy + size.height), _workAreaLinePaint);
+      canvas.drawLine(Offset(xEnd, offset.dy),
+          Offset(xEnd, offset.dy + size.height), _workAreaLinePaint);
+    }
 
     var rowHeight = theme.treeStyles.timeline.itemHeight;
 
@@ -287,8 +313,7 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
       var row = _rows[i].data;
 
       // We only draw the separator line if it's delineating a component.
-      if (true) {
-        //row is KeyedComponentViewModel) {
+      if (row is KeyedComponentViewModel) {
         // var rowOffset = i * rowHeight;
         Offset lineStart = const Offset(0.0, -0.5);
 
@@ -318,22 +343,19 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
         // to offset the first frame by one to compensate for rounding errors.
         // We end up potentially drawing an extra frame, but the it fixes
         // popping and still culls majority of out of viewport frames.
-        var firstFrame = (_secondsStart * viewport.fps).floor() - 1;
+        var firstFrame = (secondsStart * viewport.fps).floor() - 1;
         // Always draw one back so we can ensure that the lines connect. We do
         // the same for the right hand side (draw one extra).
         var index = max(0, keyFrameList.indexOfFrame(firstFrame) - 1);
         int frameCount = frames.length;
-        var fps = viewport.fps;
         double lastX = 0;
         if (index < frameCount) {
-          lastX =
-              ((frames[index].frame / fps - _secondsStart) / secondsPerPixel)
-                  .roundToDouble() + 0.5;
+          lastX = framesToPixels(frames[index].frame);
+
           canvas.translate(lastX, 0);
           for (int i = index; i < frameCount; i++) {
             var keyFrame = frames[i];
-            var x = ((keyFrame.frame / fps - _secondsStart) / secondsPerPixel)
-                .roundToDouble() + 0.5;
+            var x = framesToPixels(keyFrame.frame);
 
             // We don't just break here as we may want to draw the last
             // connected line for this row even if it's off screen.
