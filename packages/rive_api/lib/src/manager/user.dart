@@ -16,6 +16,9 @@ class UserManager with Subscriptions {
   MeApi _meApi;
   Plumber _plumber;
 
+  // used for testing atm.
+  void set meApi(MeApi meApi) => _meApi = meApi;
+
   void loadMe() async {
     _me = Me.fromDM(await _meApi.whoami);
     _plumber.message(_me);

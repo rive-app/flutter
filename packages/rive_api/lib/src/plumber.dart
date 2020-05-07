@@ -32,4 +32,9 @@ class Plumber {
     var pipe = _pipeInit<T>();
     pipe.add(null);
   }
+
+  void reset() {
+    // TODO: notify a few thigns to disconnect from each other?
+    _pipes.clear();
+  }
 }
