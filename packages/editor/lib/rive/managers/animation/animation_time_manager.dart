@@ -288,9 +288,6 @@ abstract class AnimationTimeManager extends AnimationManager {
     }
     _controller.sustainedPlayback = play;
     _isPlayingStream.add(play);
-    // Reset the direction to forward
-    // TODO: MATT FIX
-    _controller.direction = 1;
   }
 
   void _changeViewport(TimelineViewport viewport) {
