@@ -463,11 +463,11 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
     // First find closest rows.
     var rowIndexFrom = ((marquee.startVerticalOffset) / _rowHeight)
         .round()
-        .clamp(0, rows.length - 1)
+        .clamp(0, rows.length)
         .toInt();
     var rowIndexTo = ((marquee.endVerticalOffset) / _rowHeight)
         .round()
-        .clamp(0, rows.length - 1)
+        .clamp(0, rows.length)
         .toInt();
     // var row = rows[rowIndex].data;
 

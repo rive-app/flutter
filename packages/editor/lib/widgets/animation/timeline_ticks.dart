@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:cursor/propagating_listener.dart';
@@ -93,10 +94,14 @@ class TimelineTicks extends StatelessWidget {
                                   viewport,
                                   (frame) {
                                     editingAnimation.changeWorkArea.add(
-                                        WorkAreaViewModel(
-                                            start: frame,
-                                            end: snapshot.data.end,
-                                            active: snapshot.data.active));
+                                      WorkAreaViewModel(
+                                        start: frame
+                                            .clamp(0, snapshot.data.end - 1)
+                                            .toInt(),
+                                        end: snapshot.data.end,
+                                        active: snapshot.data.active,
+                                      ),
+                                    );
                                   },
                                 ),
                               ),
@@ -111,10 +116,17 @@ class TimelineTicks extends StatelessWidget {
                                     context, absolute, theme, viewport,
                                     (frame) {
                                   editingAnimation.changeWorkArea.add(
-                                      WorkAreaViewModel(
-                                          start: snapshot.data.start,
-                                          end: frame,
-                                          active: snapshot.data.active));
+                                    WorkAreaViewModel(
+                                      start: snapshot.data.start,
+                                      end: frame
+                                          .clamp(
+                                            snapshot.data.start + 1,
+                                            editingAnimation.animation.duration,
+                                          )
+                                          .toInt(),
+                                      active: snapshot.data.active,
+                                    ),
+                                  );
                                 }),
                               ),
                             ),

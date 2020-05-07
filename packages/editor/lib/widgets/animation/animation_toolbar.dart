@@ -20,6 +20,8 @@ class AnimationToolbar extends StatelessWidget {
         children: [
           _PlaybackButton(),
           TintedIconButton(
+            backgroundHover:
+                RiveTheme.of(context).colors.timelineButtonBackGroundHover,
             icon: 'to-start',
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
             onPress: () {
@@ -49,6 +51,8 @@ class _PlaybackButton extends StatelessWidget {
     return ValueStreamBuilder<bool>(
       stream: animationManager.isPlaying,
       builder: (context, snapshot) => TintedIconButton(
+        backgroundHover:
+            RiveTheme.of(context).colors.timelineButtonBackGroundHover,
         icon: snapshot.hasData && snapshot.data ? 'pause' : 'play',
         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         onPress: () {
