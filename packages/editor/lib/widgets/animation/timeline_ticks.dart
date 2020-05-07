@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:cursor/propagating_listener.dart';
@@ -170,6 +169,8 @@ class TimelineTicks extends StatelessWidget {
     var time =
         viewport.startSeconds + (offset.dx - marginLeft) * secondsPerPixel;
     manager.changeCurrentTime.add(time);
+    // If an animation is playing, stop
+    manager.changePlayback.add(false);
   }
 }
 

@@ -4,7 +4,6 @@ import 'package:rive_editor/rive/managers/animation/editing_animation_manager.da
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
-import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -93,12 +92,17 @@ class KeyedObjectHierarchy extends StatelessWidget {
 
   Widget _buildKeyedComponent(BuildContext context, RiveThemeData theme,
       KeyedComponentViewModel model) {
-    return Renamable(
+    return Text(
+      model.component.name,
       style: theme.textStyles.inspectorWhiteLabel,
-      name: model.component.name,
-      color: theme.colors.inspectorTextColor,
-      onRename: (name) {},
     );
+    // TODO: make component names renamable in the timeline
+    // return Renamable(
+    //   style: theme.textStyles.inspectorWhiteLabel,
+    //   name: model.component.name,
+    //   color: theme.colors.inspectorTextColor,
+    //   onRename: (name) {},
+    // );
   }
 
   Widget _buildKeyedGroup(
