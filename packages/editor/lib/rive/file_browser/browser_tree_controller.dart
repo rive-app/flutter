@@ -8,7 +8,8 @@ import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 
-import 'package:rive_api/src/model/model.dart';
+import 'package:rive_api/plumber.dart';
+import 'package:rive_api/model.dart';
 
 /// TreeController for the Rive folders displayed in the FileBrowser screen.
 class FolderTreeController extends TreeController<RiveFolder> {
@@ -144,6 +145,8 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
 
   @override
   void onTap(FlatTreeItem<FolderTreeItem> item) {
+    Plumber().message<CurrentDirectory>(
+        CurrentDirectory(item.data.owner, item.data.folder.id));
     print('tipper tapper $item');
   }
 

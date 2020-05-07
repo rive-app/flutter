@@ -58,7 +58,6 @@ class FolderTreeManager with Subscriptions {
   }
 
   void _initFolderTree(Owner owner) {
-    print('CREATING FOLDER TREE FOR $owner');
     if (!_folderTreeMap.containsKey(owner)) {
       _folderTreeMap[owner] = BehaviorSubject<FolderTree>();
       _folderTreeMap[owner].add(FolderTree.fromOwner(owner));

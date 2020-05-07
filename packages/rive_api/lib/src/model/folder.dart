@@ -18,8 +18,12 @@ class Folder {
   final String name;
 
   static List<Folder> fromDMList(List<FolderDM> folders) {
-    var _defaultParent =
-        folders.firstWhere((element) => element.name == 'Your Files').id;
+    // TODO: hack to fix some bad data. need to fix db for this really.
+    // as this confuses things
+    var _defaultParent = folders
+        .firstWhere((element) => element.name == 'Your Files',
+            orElse: () => null)
+        ?.id;
     return folders
         .map((folder) => Folder.fromDM(folder, _defaultParent))
         .toList();
@@ -53,7 +57,3 @@ class Folder {
         id: id,
       );
 }
-
-class ActiveFolder extends Folder {}
-
-class SelectedFolder extends Folder {}

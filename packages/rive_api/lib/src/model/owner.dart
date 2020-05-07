@@ -13,9 +13,7 @@ abstract class Owner {
   final String username;
   final String avatarUrl;
 
-  String get displayName => (name == null) ? username : name;
-
   OwnerDM get asDM;
-  
+
   String get displayName => name ?? username;
 }
