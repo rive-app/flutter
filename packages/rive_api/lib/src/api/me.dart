@@ -28,4 +28,13 @@ class MeApi {
 
   /// Checks to see if the user's signed in
   bool _isSignedIn(Map<String, dynamic> data) => data['signedIn'];
+
+  Future<bool> signout() async {
+    var response = await api.get(api.host + '/signout');
+    if (response.statusCode == 200) {
+      await api.clearCookies();
+      return true;
+    }
+    return false;
+  }
 }

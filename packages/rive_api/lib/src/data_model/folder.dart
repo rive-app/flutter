@@ -34,7 +34,7 @@ class FolderDM {
       );
 
   @override
-  String toString() => 'FolderDM($name)';
+  String toString() => 'FolderDM ($id, $name). Parent: $parent';
 
   @override
   bool operator ==(o) => o is FolderDM && o.id == id && o.ownerId == ownerId;

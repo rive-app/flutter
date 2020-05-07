@@ -16,9 +16,9 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 
-import 'package:rive_api/src/manager/manager.dart';
-import 'package:rive_api/src/model/model.dart';
-import 'package:rive_api/src/plumber.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 
 class NavigationPanel extends StatefulWidget {
   @override

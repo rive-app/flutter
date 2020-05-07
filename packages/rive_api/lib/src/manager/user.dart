@@ -7,30 +7,40 @@ class UserManager with Subscriptions {
   static UserManager _instance = UserManager._();
   factory UserManager() => _instance;
 
-  UserManager._() {
-    _meApi = MeApi();
-    _plumber = Plumber();
-  }
+  UserManager._() : _meApi = MeApi();
 
   UserManager.tester(MeApi meApi) {
     _meApi = meApi;
-    _plumber = Plumber();
   }
 
-  Me _me;
   MeApi _meApi;
-  Plumber _plumber;
+  Plumber get _plumber => Plumber();
 
   // used for testing atm.
   void set meApi(MeApi meApi) => _meApi = meApi;
 
   void loadMe() async {
-    _me = Me.fromDM(await _meApi.whoami);
-    _plumber.message(_me);
+    var currentMe = _plumber.getStream<Me>().value;
+    var me = Me.fromDM(await _meApi.whoami);
+
+    // Skip duplicates. 
+    if (currentMe != me) { 
+      _plumber.message<Me>(me);
+    } else {
+      print("I was reloading myself!");
+    }
   }
 
   void logout() async {
     // killMe() ?
     _plumber.clear<Me>();
+  }
+
+  Future<bool> signout() async {
+    final res = await _meApi.signout();
+    if (res) {
+      logout();
+    }
+    return res;
   }
 }

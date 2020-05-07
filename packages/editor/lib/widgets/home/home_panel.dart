@@ -10,6 +10,7 @@ import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/home/file.dart';
+import 'package:rive_editor/widgets/home/file_browser.dart';
 import 'package:rive_editor/widgets/home/folder_view_widget.dart';
 import 'package:rive_editor/widgets/home/navigation_panel.dart';
 import 'package:rive_editor/widgets/home/team_detail_panel.dart';
@@ -282,7 +283,7 @@ class FilesPanel extends StatelessWidget {
 class HomeStream extends StatelessWidget {
   const HomeStream({Key key}) : super(key: key);
 
-  bool get isTeam => true;
+  bool get isTeam => false;
 
   @override
   Widget build(BuildContext context) {
@@ -301,9 +302,11 @@ class HomeStream extends StatelessWidget {
             child: NavigationPanelStream(),
           ),
           Expanded(
-              child: Container(
-            color: Colors.greenAccent,
-          )),
+            child: Container(
+              color: Colors.amberAccent,
+              child: FileBrowserStream(),
+            ),
+          ),
           if (isTeam)
             ResizePanel(
                 hitSize: theme.dimensions.resizeEdgeSize,

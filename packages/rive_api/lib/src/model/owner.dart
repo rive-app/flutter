@@ -16,4 +16,6 @@ abstract class Owner {
   String get displayName => (name == null) ? username : name;
 
   OwnerDM get asDM;
+  
+  String get displayName => name ?? username;
 }

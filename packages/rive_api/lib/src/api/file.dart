@@ -14,16 +14,16 @@ class FileApi {
   Future<Iterable<FileDM>> getFiles(FolderDM folder) async {
     // TODO: add sorting, and file type options one day.
     if (folder.ownerId == null) {
-      return _myFiles(folder.id);
+      return myFiles(folder.id);
     } else {
-      return _teamFiles(folder.ownerId, folder.id);
+      return teamFiles(folder.ownerId, folder.id);
     }
   }
 
-  Future<Iterable<FileDM>> _myFiles(int folderId) async =>
+  Future<Iterable<FileDM>> myFiles(int folderId) async =>
       _files('/api/my/files/a-z/rive/${folderId}');
 
-  Future<Iterable<FileDM>> _teamFiles(int teamOwnerId, int folderId) async =>
+  Future<Iterable<FileDM>> teamFiles(int teamOwnerId, int folderId) async =>
       _files(
           '/api/teams/${teamOwnerId}/files/a-z/rive/${folderId}', teamOwnerId);
 

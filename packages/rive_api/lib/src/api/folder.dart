@@ -13,19 +13,19 @@ class FolderApi {
 
   Future<Iterable<FolderDM>> folders(OwnerDM owner) async {
     if (owner is MeDM) {
-      return _myFolders();
+      return myFolders();
     } else if (owner is TeamDM) {
-      return _teamFolders(owner);
+      return teamFolders(owner.ownerId);
     } else {
       throw Exception('$owner must be either a team or a me');
     }
   }
 
-  Future<Iterable<FolderDM>> _myFolders() async =>
+  Future<Iterable<FolderDM>> myFolders() async =>
       _folders('/api/my/files/folders');
 
-  Future<Iterable<FolderDM>> _teamFolders(TeamDM team) async =>
-      _folders('/api/teams/${team.ownerId}/folders');
+  Future<Iterable<FolderDM>> teamFolders(int ownerId) async =>
+      _folders('/api/teams/$ownerId/folders');
 
   Future<Iterable<FolderDM>> _folders(String path) async {
     final res = await api.getFromPath(path);
