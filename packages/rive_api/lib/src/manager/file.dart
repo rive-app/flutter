@@ -24,6 +24,7 @@ class FileManager with Subscriptions {
   Map<Folder, List<File>> _fileMap = Map<Folder, List<File>>();
 
   void _handleNewMe(Me me) {
+    _me = me;
     _clearFolderList();
     loadFolders(me);
   }

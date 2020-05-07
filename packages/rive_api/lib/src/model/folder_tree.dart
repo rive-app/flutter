@@ -10,6 +10,10 @@ class FolderTree {
   final Owner owner;
   final FolderTreeItem root;
 
+  factory FolderTree.fromOwner(Owner owner) {
+    return FolderTree(owner: owner, root: FolderTreeItem.dummy(owner));
+  }
+
   factory FolderTree.fromFolderList(Owner owner, List<Folder> folders) {
     final indexMap = Map<int, List<Folder>>();
 
@@ -23,7 +27,6 @@ class FolderTree {
 
     var _rootFolder =
         folders.firstWhere((element) => element.name == 'Your Files');
-    print(owner.avatarUrl);
     return FolderTree(
         owner: owner,
         root: FolderTreeItem.create(_rootFolder, indexMap, owner));
@@ -50,7 +53,18 @@ class FolderTreeItem {
   }
 
   String get name {
-    return (owner == null) ? this.folder.name : owner.name;
+    return (owner == null) ? this.folder.name : owner.displayName;
+  }
+
+  factory FolderTreeItem.dummy(Owner owner) {
+    return FolderTreeItem(
+      folder: null,
+      children: [],
+      owner: owner,
+      hover: true,
+      selected: false,
+      open: false,
+    );
   }
 
   factory FolderTreeItem.create(Folder root, Map<int, List<Folder>> indexMap,

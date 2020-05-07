@@ -12,6 +12,7 @@ import 'package:rive_editor/widgets/home/sliver_inline_footer.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 
@@ -30,9 +31,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
 
   set bottomSliverDocked(bool bottomSliverDocked) {
     if (_bottomSliverDocked != bottomSliverDocked) {
-      setState(() {
-        _bottomSliverDocked = bottomSliverDocked;
-      });
+      // something here is interfering
+      // this is getting deleted though. so you know.
+      // setState(() {
+      //   _bottomSliverDocked = bottomSliverDocked;
+      // });
     }
   }
 
@@ -338,19 +341,17 @@ class _NavigationPanelStreamState extends State<NavigationPanelStream> {
             padding: const EdgeInsets.only(top: 10),
           ),
           Expanded(
-            child: StreamBuilder<List<FolderTree>>(
-              stream: Plumber().getStream<List<FolderTree>>(),
+            child: StreamBuilder<List<BehaviorSubject<FolderTree>>>(
+              stream: Plumber().getStream<List<BehaviorSubject<FolderTree>>>(),
               builder: (context, snapshot) {
                 var slivers = <Widget>[];
                 if (snapshot.data != null) {
                   for (int i = 0; i < snapshot.data.length; i++) {
                     // TODO: rather than folderTree's we prob ably rely on this controller?
-                    slivers.add(
-                      FolderTreeViewStream(
+                    slivers.add(FolderTreeViewStream(
                         style: treeStyle,
-                        controller: FolderTreeItemController(snapshot.data[i]),
-                      ),
-                    );
+                        controller:
+                            FolderTreeItemController(snapshot.data[i].value)));
                     if (i != snapshot.data.length - 1) {
                       slivers.add(
                         SliverToBoxAdapter(
