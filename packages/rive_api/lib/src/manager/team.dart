@@ -10,17 +10,34 @@ class TeamManager with Subscriptions {
   TeamManager._() {
     _teamApi = TeamApi();
     _plumber = Plumber();
-    subscribe<Me>(_handleNewMe);
+    _attach();
+  }
+
+  TeamManager.tester(TeamApi teamApi) {
+    _teamApi = teamApi;
+    _plumber = Plumber();
+    _attach();
   }
 
   // Note: useful to cache this?
   List<Team> _teams;
   TeamApi _teamApi;
   Plumber _plumber;
+  Me _lastMe;
 
-  void _handleNewMe(Me me) {
-    Plumber().clear<List<Team>>();
-    loadTeams();
+  // For tests...
+  void _attach() {
+    subscribe<Me>(_handleNewMe);
+  }
+
+  void _handleNewMe(Me newMe) {
+    if (_lastMe != newMe) {
+      Plumber().clear<List<Team>>();
+    }
+    if (newMe != null) {
+      loadTeams();
+    }
+    _lastMe = newMe;
   }
 
   void loadTeams() async {

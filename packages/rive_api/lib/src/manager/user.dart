@@ -12,6 +12,11 @@ class UserManager with Subscriptions {
     _plumber = Plumber();
   }
 
+  UserManager.tester(MeApi meApi) {
+    _meApi = meApi;
+    _plumber = Plumber();
+  }
+
   Me _me;
   MeApi _meApi;
   Plumber _plumber;
@@ -26,6 +31,6 @@ class UserManager with Subscriptions {
 
   void logout() async {
     // killMe() ?
-    Plumber().clear<Me>();
+    _plumber.clear<Me>();
   }
 }

@@ -30,11 +30,16 @@ class Plumber {
 
   void clear<T>() {
     var pipe = _pipeInit<T>();
-    pipe.add(null);
+    if (pipe.value != null) {
+      pipe.add(null);
+    }
   }
 
   void reset() {
     // TODO: notify a few thigns to disconnect from each other?
+    _pipes.values.forEach((pipe) {
+      pipe.close();
+    });
     _pipes.clear();
   }
 }

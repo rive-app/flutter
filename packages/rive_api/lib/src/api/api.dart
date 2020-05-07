@@ -17,7 +17,7 @@ class RiveApi extends WebServiceClient {
   static final RiveApi _instance = RiveApi._();
   factory RiveApi() => _instance;
 
-// final host = 'http://localhost:3000';
+  // final host = 'http://localhost:3000';
   final host = 'https://stryker.rive.app';
 
   Future<Response> getFromPath(String path) {
