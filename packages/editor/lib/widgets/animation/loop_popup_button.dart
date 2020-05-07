@@ -39,6 +39,7 @@ class LoopPopupButton extends StatelessWidget {
           }
           final themeColors = RiveTheme.of(context).colors;
           return RivePopupButton(
+            hoverColor: themeColors.timelineButtonBackGroundHover,
             iconBuilder: (context, rive, isHovered) {
               return Padding(
                 padding: const EdgeInsets.symmetric(

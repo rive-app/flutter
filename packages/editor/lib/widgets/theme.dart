@@ -168,6 +168,7 @@ class RiveColors {
   Color get keyStateEmpty => const Color(0xFF8C8C8C);
   Color get workAreaBackground => const Color(0xFF2C2C2C);
   Color get workAreaDelineator => const Color(0xFF111111);
+  Color get timelineButtonBackGroundHover => const Color(0xFF323232);
 }
 
 /// TextStyles used in the Rive Theme

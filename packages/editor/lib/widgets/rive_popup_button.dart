@@ -34,6 +34,7 @@ class RivePopupButton extends StatefulWidget {
   final Offset arrowTweak;
   final PopupDirection direction;
   final double directionPadding;
+  final Color hoverColor;
 
   const RivePopupButton({
     Key key,
@@ -46,6 +47,7 @@ class RivePopupButton extends StatefulWidget {
     this.tip,
     this.direction = PopupDirection.bottomToRight,
     this.directionPadding = 16,
+    this.hoverColor,
   })  : _width = width ?? 177,
         super(key: key);
 
@@ -81,7 +83,8 @@ class _RivePopupButtonState extends State<RivePopupButton> {
                 EdgeInsets.only(left: 10, right: widget.showChevron ? 5 : 10),
             decoration: BoxDecoration(
               color: _isHovered
-                  ? RiveTheme.of(context).colors.toolbarButtonBackGroundHover
+                  ? widget.hoverColor ??
+                      RiveTheme.of(context).colors.toolbarButtonBackGroundHover
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(5),
             ),
