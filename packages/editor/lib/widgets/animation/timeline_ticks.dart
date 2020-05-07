@@ -158,6 +158,8 @@ class TimelineTicks extends StatelessWidget {
     var time =
         viewport.startSeconds + (offset.dx - marginLeft) * secondsPerPixel;
     manager.changeCurrentTime.add(time);
+    // If an animation is playing, stop
+    manager.changePlayback.add(false);
   }
 }
 
