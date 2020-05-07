@@ -52,10 +52,10 @@ class _SimpleAnimationController extends RiveAnimationController {
       return;
     }
     _time = value;
-    _direction = 1;
+    direction = 1;
   }
 
-  int _direction = 1;
+  int direction = 1;
   @override
   void apply(RiveCoreContext core, double elapsedSeconds) {
     // Reset all previously animated properties.
@@ -63,7 +63,7 @@ class _SimpleAnimationController extends RiveAnimationController {
     animation.apply(_time, coreContext: core);
 
     if (_sustainedPlayback) {
-      _time += elapsedSeconds * animation.speed * _direction;
+      _time += elapsedSeconds * animation.speed * direction;
 
       double frames = _time * animation.fps;
 
@@ -90,12 +90,12 @@ class _SimpleAnimationController extends RiveAnimationController {
         case Loop.pingPong:
           // ignore: literal_only_boolean_expressions
           while (true) {
-            if (_direction == 1 && frames >= end) {
-              _direction = -1;
+            if (direction == 1 && frames >= end) {
+              direction = -1;
               frames = end + (end - frames);
               _time = frames / animation.fps;
-            } else if (_direction == -1 && frames < start) {
-              _direction = 1;
+            } else if (direction == -1 && frames < start) {
+              direction = 1;
               frames = start + (start - frames);
               _time = frames / animation.fps;
             } else {
@@ -139,6 +139,8 @@ abstract class AnimationTimeManager extends AnimationManager {
   final _workArea = BehaviorSubject<WorkAreaViewModel>();
   final _workAreaController = StreamController<WorkAreaViewModel>();
 
+  final _loop = BehaviorSubject<Loop>();
+  final _loopController = StreamController<Loop>();
   // Use this to gate whether or not to update the stream (when we update
   // internally we may be changing multiple properties and not want to trigger
   // an update for each one).
@@ -146,6 +148,9 @@ abstract class AnimationTimeManager extends AnimationManager {
 
   ValueStream<WorkAreaViewModel> get workArea => _workArea;
   Sink<WorkAreaViewModel> get changeWorkArea => _workAreaController;
+
+  ValueStream<Loop> get loop => _loop;
+  Sink<Loop> get changeLoop => _loopController;
 
   /// Use this to actually process the final fps rate change.
   final _fpsController = StreamController<int>();
@@ -197,13 +202,29 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.addListener(
         LinearAnimationBase.workEndPropertyKey, _workAreaPropertyChanged);
 
+    animation.addListener(
+        LinearAnimationBase.loopValuePropertyKey, _loopPropertyChanged);
+
     _syncViewport();
     _syncWorkArea();
+    _syncLoop();
 
     activeFile.addActionHandler(_handleAction);
     activeFile.addReleaseActionHandler(_releaseAction);
 
     _workAreaController.stream.listen(_changeWorkArea);
+    _loopController.stream.listen(_changeLoop);
+  }
+
+  void _changeLoop(Loop loop) {
+    if (animation.loop == loop) {
+      return;
+    }
+    animation.loop = loop;
+
+    /// Whenever changing loop, set direction back to 1;
+    _controller.direction = 1;
+    animation.context.captureJournalEntry();
   }
 
   void _changeWorkArea(WorkAreaViewModel viewModel) {
@@ -213,6 +234,14 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.enableWorkArea = viewModel.active;
     _suppressSyncWorkArea = false;
     _syncWorkArea();
+  }
+
+  void _syncLoop() {
+    _loop.add(animation.loop);
+  }
+
+  void _loopPropertyChanged(dynamic from, dynamic to) {
+    _syncLoop();
   }
 
   void _workAreaPropertyChanged(dynamic from, dynamic to) {
@@ -334,6 +363,10 @@ abstract class AnimationTimeManager extends AnimationManager {
         LinearAnimationBase.workEndPropertyKey, _workAreaPropertyChanged);
     _workArea.close();
     _workAreaController.close();
+    animation.removeListener(
+        LinearAnimationBase.loopValuePropertyKey, _loopPropertyChanged);
+    _loop.close();
+    _loopController.close();
     activeFile.removeActionHandler(_handleAction);
     activeFile.removeReleaseActionHandler(_releaseAction);
     animation.artboard.removeController(_controller);
