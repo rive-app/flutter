@@ -128,6 +128,7 @@ class LinearAnimation extends LinearAnimationBase {
   @override
   void workStartChanged(int from, int to) {}
 
+
   /// Should be @internal when supported.
   void internalKeyFramesChanged() {
     _computeLastKeyFrameTime();

@@ -67,9 +67,9 @@ class _PlayheadRenderObject extends TimelineRenderBox {
   final Paint _playhead = Paint()..isAntiAlias = false;
   final Paint _arrowPaint = Paint();
   final Path _arrow = Path()
-    ..moveTo(-_arrowRadius, 12)
-    ..lineTo(0, 21)
-    ..lineTo(_arrowRadius, 12)
+    ..moveTo(-_arrowRadius, 0)
+    ..lineTo(0, 9)
+    ..lineTo(_arrowRadius, 0)
     ..close();
 
   double _secondsStart = 0;
@@ -111,7 +111,7 @@ class _PlayheadRenderObject extends TimelineRenderBox {
     canvas.translate(
         (offset.dx + x).roundToDouble() + 0.5, (offset.dy).roundToDouble());
     canvas.drawPath(_arrow, _arrowPaint);
-    canvas.drawLine(const Offset(0, 20), Offset(0, size.height), _playhead);
+    canvas.drawLine(const Offset(0, 9), Offset(0, size.height), _playhead);
     canvas.restore();
   }
 }

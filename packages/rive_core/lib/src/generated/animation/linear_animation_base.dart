@@ -148,7 +148,7 @@ abstract class LinearAnimationBase extends Animation {
 
   /// --------------------------------------------------------------------------
   /// EnableWorkArea field with key 62.
-  bool _enableWorkArea;
+  bool _enableWorkArea = false;
   static const int enableWorkAreaPropertyKey = 62;
 
   /// Whether or not the work area is enabled.

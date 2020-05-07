@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/loop.dart';
@@ -31,11 +33,8 @@ class LoopPopupButton extends StatelessWidget {
           case Loop.loop:
             icon = 'loop';
             break;
-          case Loop.stopLastKey:
+          case Loop.pingPong:
             icon = 'stop-last';
-            break;
-          case Loop.loopLastKey:
-            icon = 'loop-last';
             break;
         }
         final themeColors = RiveTheme.of(context).colors;
@@ -63,22 +62,6 @@ class LoopPopupButton extends StatelessWidget {
               },
             ),
             PopupContextItem(
-              'Stop Last Key',
-              icon: 'stop-last',
-              select: () {
-                animation.loop = Loop.stopLastKey;
-                animation.context.captureJournalEntry();
-              },
-            ),
-            PopupContextItem(
-              'Loop Last Key',
-              icon: 'loop-last',
-              select: () {
-                animation.loop = Loop.loopLastKey;
-                animation.context.captureJournalEntry();
-              },
-            ),
-            PopupContextItem(
               'Loop',
               icon: 'loop',
               select: () {
@@ -86,9 +69,56 @@ class LoopPopupButton extends StatelessWidget {
                 animation.context.captureJournalEntry();
               },
             ),
+            PopupContextItem(
+              'Ping Pong',
+              icon: 'stop-last',
+              select: () {
+                animation.loop = Loop.pingPong;
+                animation.context.captureJournalEntry();
+              },
+            ),
+            PopupContextItem.separator(),
+            PopupContextItem(
+              'Work Area',
+              // notifier: file.stage.showRulersNotifier,
+              iconBuilder: (context, isHovered) => CorePropertyBuilder(
+                object: animation,
+                propertyKey: LinearAnimationBase.enableWorkAreaPropertyKey,
+                builder: (context, bool isEnabled, _) => isEnabled
+                    ? TintedIcon(
+                        icon: 'popup-check',
+                        color: isHovered
+                            ? RiveTheme.of(context).colors.buttonHover
+                            : RiveTheme.of(context).colors.buttonNoHover,
+                      )
+                    : const SizedBox(width: 20),
+              ),
+              padIcon: !animation.enableWorkArea,
+              select: () => animation.toggleWorkArea(),
+              dismissOnSelect: false,
+            ),
           ],
         );
       },
     );
+  }
+}
+
+
+/// Helper to toggle work area on the linear animation.
+extension ToggleWorkArea on LinearAnimation {
+  void toggleWorkArea() {
+    enableWorkArea = !enableWorkArea;
+    if (enableWorkArea) {
+      // when we're enabling, do some validation
+      if (workStart == null) {
+        workStart = 0;
+        workEnd = duration;
+      } else {
+        workStart = max(0, workStart);
+        workEnd = min(duration, workEnd);
+      }
+    }
+    context.captureJournalEntry();
   }
 }

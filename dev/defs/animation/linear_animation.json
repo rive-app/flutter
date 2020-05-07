@@ -60,6 +60,7 @@
     },
     "enableWorkArea": {
       "type": "bool",
+      "initialValue": "false",
       "key": {
         "int": 62,
         "string": "enableworkarea"

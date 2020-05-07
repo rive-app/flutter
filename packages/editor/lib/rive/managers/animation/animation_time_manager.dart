@@ -29,17 +29,27 @@ class _SimpleAnimationController extends RiveAnimationController {
     isPlaying = true;
   }
 
-  double time = 0;
+  double _time = 0;
+  double get time => _time;
+  set time(double value) {
+    if (_time == value) {
+      return;
+    }
+    _time = value;
+    _direction = 1;
+  }
+
+  int _direction = 1;
   @override
   void apply(RiveCoreContext core, double elapsedSeconds) {
     // Reset all previously animated properties.
     core.resetAnimation();
-    animation.apply(time, coreContext: core);
+    animation.apply(_time, coreContext: core);
 
     if (_sustainedPlayback) {
-      time += elapsedSeconds * animation.speed;
+      _time += elapsedSeconds * animation.speed * _direction;
 
-      double frames = time * animation.fps;
+      double frames = _time * animation.fps;
 
       switch (animation.loop) {
         case Loop.oneShot:
@@ -48,22 +58,21 @@ class _SimpleAnimationController extends RiveAnimationController {
             frames = animation.duration.toDouble();
           }
           break;
-        case Loop.stopLastKey:
-          if (frames > animation.lastFrame) {
-            _sustainedPlayback = false;
-            frames = animation.lastFrame.toDouble();
-          }
-          break;
         case Loop.loop:
           if (frames >= animation.duration) {
-            time %= animation.duration / animation.fps;
-            frames = time * animation.fps;
+            _time %= animation.duration / animation.fps;
+            frames = _time * animation.fps;
           }
           break;
-        case Loop.loopLastKey:
-          if (frames >= animation.lastFrame) {
-            time %= animation.lastFrame / animation.fps;
-            frames = time * animation.fps;
+        case Loop.pingPong:
+          if (_direction == 1 && frames >= animation.duration) {
+            _direction = -1;
+            frames = animation.duration + (frames - animation.duration);
+            _time = frames / animation.fps;
+          } else if (_direction == -1 && frames < 0) {
+            _direction = 1;
+            frames = -frames;
+            _time = frames / animation.fps;
           }
           break;
       }
@@ -91,6 +100,17 @@ class _SimpleAnimationController extends RiveAnimationController {
 abstract class AnimationTimeManager extends AnimationManager {
   final OpenFileContext activeFile;
   final _fpsStream = BehaviorSubject<int>();
+
+  final _workArea = BehaviorSubject<WorkAreaViewModel>();
+  final _workAreaController = StreamController<WorkAreaViewModel>();
+  
+  // Use this to gate whether or not to update the stream (when we update
+  // internally we may be changing multiple properties and not want to trigger
+  // an update for each one).
+  bool _suppressSyncWorkArea = false;
+
+  ValueStream<WorkAreaViewModel> get workArea => _workArea;
+  Sink<WorkAreaViewModel> get changeWorkArea => _workAreaController;
 
   /// Use this to actually process the final fps rate change.
   final _fpsController = StreamController<int>();
@@ -130,14 +150,53 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.keyframesChanged.addListener(_keyframesChanged);
     animation.keyframeValueChanged.addListener(_keyframesChanged);
 
+    animation.addListener(LinearAnimationBase.enableWorkAreaPropertyKey,
+        _workAreaPropertyChanged);
+    animation.addListener(
+        LinearAnimationBase.workStartPropertyKey, _workAreaPropertyChanged);
+    animation.addListener(
+        LinearAnimationBase.workEndPropertyKey, _workAreaPropertyChanged);
+
     _syncViewport();
+    _syncWorkArea();
 
     activeFile.addActionHandler(_handleAction);
+
+    _workAreaController.stream.listen(_changeWorkArea);
+  }
+
+  void _changeWorkArea(WorkAreaViewModel viewModel) {
+    _suppressSyncWorkArea = true;
+    animation.workStart = viewModel.start;
+    animation.workEnd = viewModel.end;
+    animation.enableWorkArea = viewModel.active;
+    _suppressSyncWorkArea = false;
+    _syncWorkArea();
+  }
+
+  void _workAreaPropertyChanged(dynamic from, dynamic to) {
+    if (_suppressSyncWorkArea) {
+      return;
+    }
+    debounce(_syncWorkArea);
   }
 
   void _keyframesChanged() {
     // _controller.apply(animation.context, 0);
     _controller.isPlaying = true;
+  }
+
+  void _syncWorkArea() {
+    if (!animation.enableWorkArea) {
+      _workArea.add(const WorkAreaViewModel(active: false));
+      return;
+    }
+
+    _workArea.add(WorkAreaViewModel(
+      start: animation.workStart,
+      end: animation.workEnd,
+      active: animation.enableWorkArea,
+    ));
   }
 
   void _syncViewport() {
@@ -170,7 +229,13 @@ abstract class AnimationTimeManager extends AnimationManager {
   ValueStream<TimelineViewport> get viewport => _viewportStream;
   ValueStream<bool> get isPlaying => _isPlayingStream;
 
-  void _coreDurationChange(dynamic from, dynamic to) => debounce(_syncViewport);
+  void _coreDurationChange(dynamic from, dynamic to) {
+    if (animation.workEnd != null) {
+      animation.workEnd = min(animation.workEnd, animation.duration);
+    }
+    debounce(_syncViewport);
+  }
+
   void _coreFpsChanged(dynamic from, dynamic to) {
     _fpsStream.add(to as int);
     debounce(_syncViewport);
@@ -219,6 +284,15 @@ abstract class AnimationTimeManager extends AnimationManager {
   int get frame => _timeStream.value.floor();
 
   void dispose() {
+    cancelDebounce(_syncWorkArea);
+    animation.removeListener(LinearAnimationBase.enableWorkAreaPropertyKey,
+        _workAreaPropertyChanged);
+    animation.removeListener(
+        LinearAnimationBase.workStartPropertyKey, _workAreaPropertyChanged);
+    animation.removeListener(
+        LinearAnimationBase.workEndPropertyKey, _workAreaPropertyChanged);
+    _workArea.close();
+    _workAreaController.close();
     activeFile.removeActionHandler(_handleAction);
     animation.artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
@@ -291,4 +365,16 @@ class TimelineViewport {
     return TimelineViewport(startSeconds + shiftSeconds,
         endSeconds + shiftSeconds, totalSeconds, fps);
   }
+}
+
+@immutable
+class WorkAreaViewModel {
+  final int start, end;
+  final bool active;
+
+  const WorkAreaViewModel({
+    this.start,
+    this.end,
+    this.active = false,
+  });
 }
