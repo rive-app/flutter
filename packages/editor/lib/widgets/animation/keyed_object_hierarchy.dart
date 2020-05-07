@@ -4,7 +4,6 @@ import 'package:rive_editor/rive/managers/animation/editing_animation_manager.da
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
-import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';

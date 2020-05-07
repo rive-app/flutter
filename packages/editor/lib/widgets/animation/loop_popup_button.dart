@@ -59,6 +59,7 @@ class LoopPopupButton extends StatelessWidget {
               select: () {
                 animation.loop = Loop.oneShot;
                 animation.context.captureJournalEntry();
+                animationManager.changePlayback.add(false);
               },
             ),
             PopupContextItem(
@@ -67,6 +68,7 @@ class LoopPopupButton extends StatelessWidget {
               select: () {
                 animation.loop = Loop.loop;
                 animation.context.captureJournalEntry();
+                animationManager.changePlayback.add(false);
               },
             ),
             PopupContextItem(
@@ -75,6 +77,7 @@ class LoopPopupButton extends StatelessWidget {
               select: () {
                 animation.loop = Loop.pingPong;
                 animation.context.captureJournalEntry();
+                animationManager.changePlayback.add(false);
               },
             ),
             PopupContextItem.separator(),

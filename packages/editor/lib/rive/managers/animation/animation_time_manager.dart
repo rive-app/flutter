@@ -36,10 +36,12 @@ class _SimpleAnimationController extends RiveAnimationController {
       return;
     }
     _time = value;
-    _direction = 1;
+    resetDirection();
   }
 
   int _direction = 1;
+  void resetDirection() => _direction = 1;
+
   @override
   void apply(RiveCoreContext core, double elapsedSeconds) {
     // Reset all previously animated properties.
@@ -103,7 +105,7 @@ abstract class AnimationTimeManager extends AnimationManager {
 
   final _workArea = BehaviorSubject<WorkAreaViewModel>();
   final _workAreaController = StreamController<WorkAreaViewModel>();
-  
+
   // Use this to gate whether or not to update the stream (when we update
   // internally we may be changing multiple properties and not want to trigger
   // an update for each one).
@@ -218,6 +220,8 @@ abstract class AnimationTimeManager extends AnimationManager {
     }
     _controller.sustainedPlayback = play;
     _isPlayingStream.add(play);
+    // Reset the direction to forward
+    _controller.resetDirection();
   }
 
   void _changeViewport(TimelineViewport viewport) {
