@@ -48,15 +48,6 @@ class HamburgerPopupButton extends StatelessWidget {
         ),
         PopupContextItem.separator(),
         PopupContextItem(
-          'New File',
-          icon: 'add',
-        ),
-        PopupContextItem(
-          'New Folder',
-          icon: 'popup-folder',
-        ),
-        PopupContextItem.separator(),
-        PopupContextItem(
           'Manual',
         ),
         PopupContextItem(
