@@ -15,18 +15,24 @@ class MockRiveApi extends Mock implements RiveApi {
 
 void main() {
   group('User Manager ', () {
+    MockRiveApi riveApi;
+    MeApi mockedMeApi;
+    UserManager userManager;
+    setUp(() {
+      riveApi = MockRiveApi();
+      mockedMeApi = MeApi(riveApi);
+      userManager = UserManager();
+      userManager.meApi = mockedMeApi;
+
+      Plumber().reset();
+    });
     tearDown(() {
       Plumber().reset();
     });
 
     test('load me', () async {
-      final riveApi = MockRiveApi();
       when(riveApi.getFromPath('/api/me'))
           .thenAnswer((_) async => successMeResponse);
-
-      final mockedMeApi = MeApi(riveApi);
-      final userManager = UserManager();
-      userManager.meApi = mockedMeApi;
 
       final testComplete = Completer();
 
@@ -41,8 +47,6 @@ void main() {
     });
 
     test('logout', () async {
-      final userManager = UserManager();
-
       final testComplete = Completer();
 
       Plumber().getStream<Me>().listen((event) {
@@ -51,6 +55,34 @@ void main() {
       });
 
       userManager.logout();
+
+      await testComplete.future;
+    });
+
+    test('sequence', () async {
+      final userManager = UserManager();
+      when(riveApi.getFromPath('/api/me'))
+          .thenAnswer((_) async => successMeResponse);
+
+      final testComplete = Completer();
+
+      final checks = [
+        (Me me) => me.name == 'MaxMax',
+        (Me me) => me == null,
+        (Me me) => me.name == 'MaxMax',
+      ];
+
+      Plumber().getStream<Me>().listen((event) {
+        var check = checks.removeAt(0);
+        if (checks.length == 0) {
+          expect(check(event), true);
+          testComplete.complete();
+        }
+      });
+
+      userManager.loadMe();
+      userManager.logout();
+      userManager.loadMe();
 
       await testComplete.future;
     });
