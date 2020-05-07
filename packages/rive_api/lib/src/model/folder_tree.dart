@@ -23,25 +23,38 @@ class FolderTree {
 
     var _rootFolder =
         folders.firstWhere((element) => element.name == 'Your Files');
-
+    print(owner.avatarUrl);
     return FolderTree(
-        owner: owner, root: FolderTreeItem.create(_rootFolder, indexMap));
+        owner: owner,
+        root: FolderTreeItem.create(_rootFolder, indexMap, owner));
   }
 }
 
 class FolderTreeItem {
-  FolderTreeItem({
-    @required this.folder,
-    @required this.open,
-    @required this.selected,
-    @required this.children,
-  });
+  FolderTreeItem(
+      {@required this.folder,
+      @required this.hover,
+      @required this.selected,
+      @required this.open,
+      @required this.children,
+      this.owner});
   final Folder folder;
+  final bool hover;
   final bool selected;
   final bool open;
+  final Owner owner;
   final List<FolderTreeItem> children;
 
-  factory FolderTreeItem.create(Folder root, Map<int, List<Folder>> indexMap) {
+  String get iconURL {
+    return owner?.avatarUrl;
+  }
+
+  String get name {
+    return (owner == null) ? this.folder.name : owner.name;
+  }
+
+  factory FolderTreeItem.create(Folder root, Map<int, List<Folder>> indexMap,
+      [Owner owner]) {
     // Note: Cycles gonna kill us.
     final List<FolderTreeItem> _children = (indexMap.containsKey(root.id))
         ? indexMap[root.id]
@@ -51,6 +64,8 @@ class FolderTreeItem {
     return FolderTreeItem(
       folder: root,
       children: _children,
+      owner: owner,
+      hover: true,
       selected: false,
       open: false,
     );

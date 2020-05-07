@@ -6,10 +6,12 @@ abstract class Owner {
     @required this.ownerId,
     @required this.name,
     @required this.username,
+    this.avatarUrl,
   });
   final int ownerId;
   final String name;
   final String username;
+  final String avatarUrl;
 
   OwnerDM get asDM;
 }

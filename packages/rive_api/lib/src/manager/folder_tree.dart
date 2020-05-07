@@ -3,7 +3,10 @@ import 'package:rive_api/src/model/model.dart';
 import 'package:rive_api/src/plumber.dart';
 
 class FolderTreeManager with Subscriptions {
-  FolderTreeManager() {
+  static FolderTreeManager _instance = FolderTreeManager._();
+  factory FolderTreeManager() => _instance;
+
+  FolderTreeManager._() {
     _plumber = Plumber();
     subscribe<Map<Owner, List<Folder>>>(_handleChange);
   }
@@ -19,6 +22,8 @@ class FolderTreeManager with Subscriptions {
       folderMap.forEach((key, value) {
         _newFolderTrees.add(FolderTree.fromFolderList(key, value));
       });
+
+      _newFolderTrees.sort((a, b) => a.owner.name.compareTo(b.owner.name));
       _folderTrees = _newFolderTrees;
       _plumber.message(_folderTrees);
     }

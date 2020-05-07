@@ -4,7 +4,10 @@ import 'package:rive_api/src/model/model.dart';
 import 'package:rive_api/src/api/api.dart';
 
 class TeamManager with Subscriptions {
-  TeamManager() {
+  static TeamManager _instance = TeamManager._();
+  factory TeamManager() => _instance;
+
+  TeamManager._() {
     _teamApi = TeamApi();
     _plumber = Plumber();
     subscribe<Me>(_handleNewMe);

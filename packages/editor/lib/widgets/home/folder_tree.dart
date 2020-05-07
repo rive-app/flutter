@@ -149,13 +149,13 @@ class FolderTreeViewStream extends StatelessWidget {
         width: 15,
         height: 15,
         child: Center(
-          child: TintedIcon(
-            icon: 'folder',
-            color: (item.data.selected)
-                ? colors.fileSelectedFolderIcon
-                : colors.fileUnselectedFolderIcon,
-          ),
-        ),
+            child: SizedAvatar(
+          url: item.data.iconURL,
+          icon: 'folder',
+          iconColor: (item.data.selected)
+              ? colors.fileSelectedFolderIcon
+              : colors.fileUnselectedFolderIcon,
+        )),
       ),
       extraBuilder: (context, item, index) => Container(),
       backgroundBuilder: (context, item, style) {
@@ -172,7 +172,7 @@ class FolderTreeViewStream extends StatelessWidget {
         child: Container(
           child: IgnorePointer(
             child: Text(
-              item.data.folder.name,
+              item.data.name,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 13,

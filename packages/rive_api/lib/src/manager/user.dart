@@ -4,7 +4,10 @@ import 'package:rive_api/src/model/model.dart';
 import 'package:rive_api/src/api/api.dart';
 
 class UserManager with Subscriptions {
-  UserManager() {
+  static UserManager _instance = UserManager._();
+  factory UserManager() => _instance;
+
+  UserManager._() {
     _meApi = MeApi();
     _plumber = Plumber();
   }

@@ -4,7 +4,10 @@ import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/src/plumber.dart';
 
 class FileManager with Subscriptions {
-  FileManager() {
+  static FileManager _instance = FileManager._();
+  factory FileManager() => _instance;
+
+  FileManager._() {
     _fileApi = FileApi();
     _folderApi = FolderApi();
     _plumber = Plumber();
