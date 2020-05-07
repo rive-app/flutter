@@ -157,7 +157,6 @@ class RiveColors {
   Color get timelineViewportControlsGrabber => const Color(0xFF33A7FF);
   Color get timelineViewportControlsTrack => const Color(0xFF4C4C4C);
   Color get timelineBackground => const Color(0xFF232323);
-  // Color get timelineLine => const Color(0xFF303030);
   Color get timelineLine => const Color(0x0FFFFFFF);
   Color get timelineUnderline => const Color(0xFF1E1E1E);
   Color get key => const Color(0xFF57A5E0);
