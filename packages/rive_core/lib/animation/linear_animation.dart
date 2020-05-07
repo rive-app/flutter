@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/keyed_object.dart';
+import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
@@ -14,6 +15,11 @@ class LinearAnimation extends LinearAnimationBase {
 
   Listenable get keyframesChanged => _keyframesChanged;
   Listenable get keyframeValueChanged => _keyframeValueChanged;
+
+  int _lastFrame = 0;
+
+  /// The last frame with a keyframe on it.
+  int get lastFrame => _lastFrame;
 
   /// Map objectId to KeyedObject. N.B. this is the id of the object that we
   /// want to key in core, not of the KeyedObject. It's a clear way to see if an
@@ -98,6 +104,9 @@ class LinearAnimation extends LinearAnimationBase {
     }
   }
 
+  Loop get loop => Loop.values[loopValue];
+  set loop(Loop value) => loopValue = value.index;
+
   @override
   void durationChanged(int from, int to) {}
 
@@ -108,7 +117,7 @@ class LinearAnimation extends LinearAnimationBase {
   void fpsChanged(int from, int to) {}
 
   @override
-  void loopChanged(int from, int to) {}
+  void loopValueChanged(int from, int to) {}
 
   @override
   void speedChanged(double from, double to) {}
@@ -119,9 +128,22 @@ class LinearAnimation extends LinearAnimationBase {
   @override
   void workStartChanged(int from, int to) {}
 
+
   /// Should be @internal when supported.
-  void internalKeyFramesChanged() => _keyframesChanged.notify();
+  void internalKeyFramesChanged() {
+    _computeLastKeyFrameTime();
+    _keyframesChanged.notify();
+  }
 
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() => _keyframeValueChanged.notify();
+
+  void _computeLastKeyFrameTime() {
+    _lastFrame = 0;
+    for (final property in _keyedObjects.values) {
+      if (property.lastFrame > _lastFrame) {
+        _lastFrame = property.lastFrame;
+      }
+    }
+  }
 }

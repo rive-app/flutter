@@ -309,7 +309,7 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
         keyPaint = _allkeyPaint;
       }
 
-      var halfRowHeight = rowHeight / 2;
+      var lineY = rowHeight / 2 - 1;
       var lastSelected = false;
       if (keyFrameList != null) {
         List<KeyFrameInterface> frames =
@@ -326,11 +326,14 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
         var fps = viewport.fps;
         double lastX = 0;
         if (index < frameCount) {
-          lastX = (frames[index].frame / fps - _secondsStart) / secondsPerPixel;
+          lastX =
+              ((frames[index].frame / fps - _secondsStart) / secondsPerPixel)
+                  .roundToDouble() + 0.5;
           canvas.translate(lastX, 0);
           for (int i = index; i < frameCount; i++) {
             var keyFrame = frames[i];
-            var x = (keyFrame.frame / fps - _secondsStart) / secondsPerPixel;
+            var x = ((keyFrame.frame / fps - _secondsStart) / secondsPerPixel)
+                .roundToDouble() + 0.5;
 
             // We don't just break here as we may want to draw the last
             // connected line for this row even if it's off screen.
@@ -358,8 +361,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
             // Draw connecting line between keyframes.
             if (connectKeys && i != 0) {
               canvas.drawLine(
-                  Offset(-move + halfBounds, halfRowHeight),
-                  Offset(-halfBounds, halfRowHeight),
+                  Offset(-move + halfBounds, lineY),
+                  Offset(-halfBounds, lineY),
                   isSelected && lastSelected
                       ? _selectedPaint
                       : _connectKeyPaint);

@@ -60,8 +60,6 @@ class EditingAnimationManager extends AnimationTimeManager
 
     _deleteController.stream.listen(_deleteKeyFrames);
     _keyController.stream.listen(_keyComponents);
-
-    // animation.keyframesChanged
   }
 
   void _deleteKeyFrames(HashSet<KeyFrame> keyframes) {

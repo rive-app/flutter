@@ -37,7 +37,7 @@ class StageShape extends StageContourItem<Shape> {
 
   @override
   void draw(Canvas canvas) {
-    if (selectionState.value == SelectionState.none) {
+    if (selectionState.value == SelectionState.none || !stage.showSelection) {
       return;
     }
     assert(component.pathComposer != null);

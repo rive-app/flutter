@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/animation/loop.dart';
 import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -13,7 +14,7 @@ import 'package:rive_core/rive_animation_controller.dart';
 
 class _SimpleAnimationController extends RiveAnimationController {
   final LinearAnimation animation;
-  VoidCallback onTimeChanged;
+  void Function(double) onTimeChanged;
   _SimpleAnimationController(this.animation, this.onTimeChanged);
 
   // This controller distinguishes between playing an animation (sustained
@@ -28,17 +29,55 @@ class _SimpleAnimationController extends RiveAnimationController {
     isPlaying = true;
   }
 
-  double time = 0;
+  double _time = 0;
+  double get time => _time;
+  set time(double value) {
+    if (_time == value) {
+      return;
+    }
+    _time = value;
+    _direction = 1;
+  }
+
+  int _direction = 1;
   @override
   void apply(RiveCoreContext core, double elapsedSeconds) {
     // Reset all previously animated properties.
     core.resetAnimation();
-    animation.apply(time, coreContext: core);
+    animation.apply(_time, coreContext: core);
 
     if (_sustainedPlayback) {
-      time += elapsedSeconds * animation.speed;
+      _time += elapsedSeconds * animation.speed * _direction;
+
+      double frames = _time * animation.fps;
+
+      switch (animation.loop) {
+        case Loop.oneShot:
+          if (frames > animation.duration) {
+            _sustainedPlayback = false;
+            frames = animation.duration.toDouble();
+          }
+          break;
+        case Loop.loop:
+          if (frames >= animation.duration) {
+            _time %= animation.duration / animation.fps;
+            frames = _time * animation.fps;
+          }
+          break;
+        case Loop.pingPong:
+          if (_direction == 1 && frames >= animation.duration) {
+            _direction = -1;
+            frames = animation.duration + (frames - animation.duration);
+            _time = frames / animation.fps;
+          } else if (_direction == -1 && frames < 0) {
+            _direction = 1;
+            frames = -frames;
+            _time = frames / animation.fps;
+          }
+          break;
+      }
       isPlaying = true;
-      onTimeChanged();
+      onTimeChanged(frames);
     } else {
       // after apply, pause
       isPlaying = false;
@@ -62,6 +101,17 @@ abstract class AnimationTimeManager extends AnimationManager {
   final OpenFileContext activeFile;
   final _fpsStream = BehaviorSubject<int>();
 
+  final _workArea = BehaviorSubject<WorkAreaViewModel>();
+  final _workAreaController = StreamController<WorkAreaViewModel>();
+  
+  // Use this to gate whether or not to update the stream (when we update
+  // internally we may be changing multiple properties and not want to trigger
+  // an update for each one).
+  bool _suppressSyncWorkArea = false;
+
+  ValueStream<WorkAreaViewModel> get workArea => _workArea;
+  Sink<WorkAreaViewModel> get changeWorkArea => _workAreaController;
+
   /// Use this to actually process the final fps rate change.
   final _fpsController = StreamController<int>();
 
@@ -79,11 +129,8 @@ abstract class AnimationTimeManager extends AnimationManager {
   _SimpleAnimationController _controller;
   AnimationTimeManager(LinearAnimation animation, this.activeFile)
       : super(animation) {
-    _controller = _SimpleAnimationController(animation, () {
-      double frames = _controller.time * animation.fps;
-      if (animation.duration - frames < 0) {
-        _changePlayback(false);
-      }
+    _controller = _SimpleAnimationController(animation, (frames) {
+      _changePlayback(_controller.sustainedPlayback);
       _timeStream.add(frames.clamp(0, animation.duration).toDouble());
     });
     animation.artboard.addController(_controller);
@@ -103,14 +150,53 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.keyframesChanged.addListener(_keyframesChanged);
     animation.keyframeValueChanged.addListener(_keyframesChanged);
 
+    animation.addListener(LinearAnimationBase.enableWorkAreaPropertyKey,
+        _workAreaPropertyChanged);
+    animation.addListener(
+        LinearAnimationBase.workStartPropertyKey, _workAreaPropertyChanged);
+    animation.addListener(
+        LinearAnimationBase.workEndPropertyKey, _workAreaPropertyChanged);
+
     _syncViewport();
+    _syncWorkArea();
 
     activeFile.addActionHandler(_handleAction);
+
+    _workAreaController.stream.listen(_changeWorkArea);
+  }
+
+  void _changeWorkArea(WorkAreaViewModel viewModel) {
+    _suppressSyncWorkArea = true;
+    animation.workStart = viewModel.start;
+    animation.workEnd = viewModel.end;
+    animation.enableWorkArea = viewModel.active;
+    _suppressSyncWorkArea = false;
+    _syncWorkArea();
+  }
+
+  void _workAreaPropertyChanged(dynamic from, dynamic to) {
+    if (_suppressSyncWorkArea) {
+      return;
+    }
+    debounce(_syncWorkArea);
   }
 
   void _keyframesChanged() {
     // _controller.apply(animation.context, 0);
     _controller.isPlaying = true;
+  }
+
+  void _syncWorkArea() {
+    if (!animation.enableWorkArea) {
+      _workArea.add(const WorkAreaViewModel(active: false));
+      return;
+    }
+
+    _workArea.add(WorkAreaViewModel(
+      start: animation.workStart,
+      end: animation.workEnd,
+      active: animation.enableWorkArea,
+    ));
   }
 
   void _syncViewport() {
@@ -127,6 +213,9 @@ abstract class AnimationTimeManager extends AnimationManager {
   }
 
   void _changePlayback(bool play) {
+    if (_isPlayingStream.value == play) {
+      return;
+    }
     _controller.sustainedPlayback = play;
     _isPlayingStream.add(play);
   }
@@ -140,7 +229,13 @@ abstract class AnimationTimeManager extends AnimationManager {
   ValueStream<TimelineViewport> get viewport => _viewportStream;
   ValueStream<bool> get isPlaying => _isPlayingStream;
 
-  void _coreDurationChange(dynamic from, dynamic to) => debounce(_syncViewport);
+  void _coreDurationChange(dynamic from, dynamic to) {
+    if (animation.workEnd != null) {
+      animation.workEnd = min(animation.workEnd, animation.duration);
+    }
+    debounce(_syncViewport);
+  }
+
   void _coreFpsChanged(dynamic from, dynamic to) {
     _fpsStream.add(to as int);
     debounce(_syncViewport);
@@ -189,6 +284,15 @@ abstract class AnimationTimeManager extends AnimationManager {
   int get frame => _timeStream.value.floor();
 
   void dispose() {
+    cancelDebounce(_syncWorkArea);
+    animation.removeListener(LinearAnimationBase.enableWorkAreaPropertyKey,
+        _workAreaPropertyChanged);
+    animation.removeListener(
+        LinearAnimationBase.workStartPropertyKey, _workAreaPropertyChanged);
+    animation.removeListener(
+        LinearAnimationBase.workEndPropertyKey, _workAreaPropertyChanged);
+    _workArea.close();
+    _workAreaController.close();
     activeFile.removeActionHandler(_handleAction);
     animation.artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
@@ -261,4 +365,16 @@ class TimelineViewport {
     return TimelineViewport(startSeconds + shiftSeconds,
         endSeconds + shiftSeconds, totalSeconds, fps);
   }
+}
+
+@immutable
+class WorkAreaViewModel {
+  final int start, end;
+  final bool active;
+
+  const WorkAreaViewModel({
+    this.start,
+    this.end,
+    this.active = false,
+  });
 }

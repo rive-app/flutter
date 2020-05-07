@@ -11,6 +11,7 @@ import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.da
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 
+/// Popup button showing time options for the animation.
 class AnimationTimePopupButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

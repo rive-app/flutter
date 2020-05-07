@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
@@ -16,6 +17,11 @@ final _log = Logger('animation');
 class KeyedObject extends KeyedObjectBase<RiveFile> {
   final HashMap<int, KeyedProperty> _keyedProperties =
       HashMap<int, KeyedProperty>();
+
+  int _lastFrame = 0;
+
+  /// The last frame with a keyframe on it.
+  int get lastFrame => _lastFrame;
 
   Iterable<KeyedProperty> get keyedProperties => _keyedProperties.values;
 
@@ -33,6 +39,30 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
         animation.internalAddKeyedObject(this);
       }
     }
+
+    // Validate the object we're keying actually exists. By the time "onAdded"
+    // is called, the file should be in a stable state.
+    Component component;
+    if (objectId == null ||
+        (component = context?.resolve<Component>(objectId)) == null) {
+      _log.finest('Removing KeyedObject as we couldn\'t '
+          'resolve an object with id $objectId.');
+      _removeAll();
+    } else {
+      component.whenDeleted(_removeAll);
+    }
+  }
+
+  void _removeAll() {
+    assert(context != null);
+    // Copy lists to not modify them while iterating.
+    var kps = _keyedProperties.values.toList(growable: false);
+    for (final keyedProperty in kps) {
+      var keyframes = keyedProperty.keyframes.toList(growable: false);
+      keyframes.forEach(context.remove);
+      context.remove(keyedProperty);
+    }
+    context.remove(this);
   }
 
   LinearAnimation get animation => context?.resolve(animationId);
@@ -121,6 +151,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
 
   // Should be @internal when supported...
   void internalKeyFramesChanged() {
+    _computeLastKeyFrameTime();
     animation?.internalKeyFramesChanged();
   }
 
@@ -130,4 +161,13 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() =>
       animation?.internalKeyFrameValueChanged();
+
+  void _computeLastKeyFrameTime() {
+    _lastFrame = 0;
+    for (final property in _keyedProperties.values) {
+      if (property.lastFrame > _lastFrame) {
+        _lastFrame = property.lastFrame;
+      }
+    }
+  }
 }

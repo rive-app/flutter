@@ -288,6 +288,7 @@ class OpenFileContext with RiveFileDelegate {
     if (deathRow.isEmpty) {
       return false;
     }
+    deathRow.forEach((item) => item.onDelete());
     deathRow.forEach(core.remove);
     selection.clear();
     core.captureJournalEntry();

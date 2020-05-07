@@ -103,6 +103,7 @@ class Stage extends Debouncer {
   Offset localMouse = Offset.zero;
   bool _mouseDownSelected = false;
   EditMode activeEditMode = EditMode.normal;
+  bool _isHidingCursor = false;
 
   CustomSelectionHandler customSelectionHandler;
 
@@ -340,28 +341,32 @@ class Stage extends Debouncer {
         Vec2D(), Vec2D.fromValues(localX, localY), _inverseViewTransform);
   }
 
+  bool get showSelection => !_isHidingCursor;
+  bool get isSelectionEnabled => !_isHidingCursor;
+
   void mouseMove(int button, double x, double y) {
     _computeWorldMouse(x, y);
     _updatePanIcon();
 
     file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
 
-    AABB viewAABB = AABB.fromValues(
-        _worldMouse[0], _worldMouse[1], _worldMouse[0] + 1, _worldMouse[1] + 1);
-    StageItem hover;
-    visTree.query(viewAABB, (int proxyId, StageItem item) {
-      if (item.isSelectable &&
-          item.drawOrder >= (hover?.drawOrder ?? 0) &&
-          item.hitHiFi(_worldMouse)) {
-        hover = item.hoverTarget;
+    if (isSelectionEnabled) {
+      AABB viewAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
+          _worldMouse[0] + 1, _worldMouse[1] + 1);
+      StageItem hover;
+      visTree.query(viewAABB, (int proxyId, StageItem item) {
+        if (item.isSelectable &&
+            item.drawOrder >= (hover?.drawOrder ?? 0) &&
+            item.hitHiFi(_worldMouse)) {
+          hover = item.hoverTarget;
+        }
+        return true;
+      });
+      hover?.isHovered = true;
+      if (hover == null) {
+        hoverItem = null;
       }
-      return true;
-    });
-    hover?.isHovered = true;
-    if (hover == null) {
-      hoverItem = null;
     }
-
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
@@ -385,7 +390,7 @@ class Stage extends Debouncer {
           final artboard = activeArtboard;
           (tool as ClickableTool)
               .onClick(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
-        } else {
+        } else if(isSelectionEnabled) {
           if (_hoverItem != null) {
             _mouseDownSelected = true;
             if (customSelectionHandler != null) {
@@ -398,6 +403,9 @@ class Stage extends Debouncer {
           } else {
             _mouseDownSelected = false;
           }
+        }
+        else {
+          _mouseDownSelected = false;
         }
 
         break;
@@ -775,8 +783,17 @@ class Stage extends Debouncer {
     // selection, and set it the current editing shape.
   }
 
-  void hideCursor() => delegate?.customCursor?.hide();
-  void showCursor() => delegate?.customCursor?.show();
+  void hideCursor() {
+    _isHidingCursor = true;
+    markNeedsRedraw();
+    delegate?.customCursor?.hide();
+  }
+
+  void showCursor() {
+    _isHidingCursor = false;
+    markNeedsRedraw();
+    delegate?.customCursor?.show();
+  }
 
   CursorInstance _showCustomCursor(String icon) {
     if (delegate?.customCursor != null) {

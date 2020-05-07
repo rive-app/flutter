@@ -3,18 +3,22 @@ import 'dart:ui';
 
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
+import 'package:rive_editor/widgets/common/overlay_hit_detect.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 /// A guide view on the top of the timeline that shows the current viewport
 /// range, makes it easy to line up keyframes. Works based off the current
-/// viewport and ticks are aligned to frame rate. TODO: support workspace.
+/// viewport and ticks are aligned to frame rate.
 class TimelineTicks extends StatelessWidget {
   static const double height = 19;
+  static const double workAreaGrabberWidth = 10;
+  static const double workAreaGrabberHeight = 10;
 
   /// Draw the same background for the controls even if we don't have a
   /// currently editing animation.
@@ -24,6 +28,7 @@ class TimelineTicks extends StatelessWidget {
       child: _TimelineTicksRenderer(
         null,
         RiveTheme.of(context),
+        const WorkAreaViewModel(start: 0, end: 0, active: false),
       ),
     );
   }
@@ -34,6 +39,7 @@ class TimelineTicks extends StatelessWidget {
     if (editingAnimation == null) {
       return _buildEmpty(context);
     }
+
     return ValueStreamBuilder<TimelineViewport>(
       stream: editingAnimation.viewport,
       builder: (context, snapshot) {
@@ -54,14 +60,89 @@ class TimelineTicks extends StatelessWidget {
           },
           child: SizedBox(
             height: height,
-            child: _TimelineTicksRenderer(
-              viewport,
-              RiveTheme.of(context),
+            child: ValueStreamBuilder<WorkAreaViewModel>(
+              stream: editingAnimation.workArea,
+              builder: (context, snapshot) {
+                var theme = RiveTheme.of(context);
+                return snapshot.hasData
+                    ? CustomMultiChildLayout(
+                        delegate: _WorkAreaLayoutDelegate(
+                          workArea: snapshot.data,
+                          viewport: viewport,
+                          theme: theme,
+                        ),
+                        children: [
+                          LayoutId(
+                            id: _WorkAreaLayoutPart.ticksRenderer,
+                            child: _TimelineTicksRenderer(
+                              viewport,
+                              theme,
+                              snapshot.data,
+                            ),
+                          ),
+                          if (snapshot.data.active)
+                            LayoutId(
+                              id: _WorkAreaLayoutPart.start,
+                              child: OverlayHitDetect(
+                                customCursorIcon: 'cursor-resize-horizontal',
+                                dragContext: context,
+                                drag: (absolute, _) => _dragWorkAreaMarker(
+                                  context,
+                                  absolute,
+                                  theme,
+                                  viewport,
+                                  (frame) {
+                                    editingAnimation.changeWorkArea.add(
+                                        WorkAreaViewModel(
+                                            start: frame,
+                                            end: snapshot.data.end,
+                                            active: snapshot.data.active));
+                                  },
+                                ),
+                              ),
+                            ),
+                          if (snapshot.data.active)
+                            LayoutId(
+                              id: _WorkAreaLayoutPart.end,
+                              child: OverlayHitDetect(
+                                customCursorIcon: 'cursor-resize-horizontal',
+                                dragContext: context,
+                                drag: (absolute, _) => _dragWorkAreaMarker(
+                                    context, absolute, theme, viewport,
+                                    (frame) {
+                                  editingAnimation.changeWorkArea.add(
+                                      WorkAreaViewModel(
+                                          start: snapshot.data.start,
+                                          end: frame,
+                                          active: snapshot.data.active));
+                                }),
+                              ),
+                            ),
+                        ],
+                      )
+                    : _buildEmpty(context);
+              },
             ),
           ),
         );
       },
     );
+  }
+
+  void _dragWorkAreaMarker(
+      BuildContext context,
+      Offset dragPosition,
+      RiveThemeData theme,
+      TimelineViewport viewport,
+      void Function(int frame) callback) {
+    var marginLeft = theme.dimensions.timelineMarginLeft;
+    var marginRight = theme.dimensions.timelineMarginRight;
+    var normalized = (dragPosition.dx - marginLeft) /
+        (context.size.width - marginLeft - marginRight);
+    callback(((viewport.startSeconds +
+                (viewport.endSeconds - viewport.startSeconds) * normalized) *
+            viewport.fps)
+        .round());
   }
 
   void _placePlayhead(BuildContext context, Offset offset,
@@ -80,19 +161,114 @@ class TimelineTicks extends StatelessWidget {
   }
 }
 
+enum _WorkAreaLayoutPart {
+  ticksRenderer,
+  start,
+  end,
+}
+
+class _WorkAreaLayoutDelegate extends MultiChildLayoutDelegate {
+  final WorkAreaViewModel workArea;
+  final TimelineViewport viewport;
+  final RiveThemeData theme;
+
+  _WorkAreaLayoutDelegate({
+    @required this.workArea,
+    @required this.viewport,
+    @required this.theme,
+  });
+
+  @override
+  void performLayout(Size size) {
+    layoutChild(
+      _WorkAreaLayoutPart.ticksRenderer,
+      BoxConstraints.tightFor(
+        width: size.width,
+        height: size.height,
+      ),
+    );
+    positionChild(_WorkAreaLayoutPart.ticksRenderer, Offset.zero);
+
+    if (!hasChild(_WorkAreaLayoutPart.end) ||
+        !hasChild(_WorkAreaLayoutPart.start)) {
+      return;
+    }
+    var marginLeft = theme.dimensions.timelineMarginLeft;
+    var marginRight = theme.dimensions.timelineMarginRight;
+    var visibleDuration = viewport.endSeconds - viewport.startSeconds;
+    var secondsPerPixel =
+        visibleDuration / (size.width - marginLeft - marginRight);
+
+    var hitAreaOffset = -TimelineTicks.workAreaGrabberWidth / 2;
+    double baseLine = size.height - TimelineTicks.workAreaGrabberHeight;
+
+    var offsetStart = Offset(
+        (marginLeft +
+                    (workArea.start / viewport.fps - viewport.startSeconds) /
+                        secondsPerPixel +
+                    hitAreaOffset)
+                .roundToDouble() +
+            0.5,
+        baseLine);
+    var offsetEnd = Offset(
+        (marginLeft +
+                    (workArea.end / viewport.fps - viewport.startSeconds) /
+                        secondsPerPixel +
+                    hitAreaOffset)
+                .roundToDouble() +
+            0.5,
+        baseLine);
+
+    layoutChild(
+      _WorkAreaLayoutPart.start,
+      offsetStart.dx < -TimelineTicks.workAreaGrabberWidth ||
+              offsetStart.dx > size.width
+          ? const BoxConstraints.tightFor(width: 0, height: 0)
+          : const BoxConstraints.tightFor(
+              width: TimelineTicks.workAreaGrabberWidth,
+              height: TimelineTicks.workAreaGrabberHeight,
+            ),
+    );
+
+    positionChild(
+      _WorkAreaLayoutPart.start,
+      offsetStart,
+    );
+
+    layoutChild(
+      _WorkAreaLayoutPart.end,
+      offsetEnd.dx < -TimelineTicks.workAreaGrabberWidth ||
+              offsetEnd.dx > size.width
+          ? const BoxConstraints.tightFor(width: 0, height: 0)
+          : const BoxConstraints.tightFor(
+              width: TimelineTicks.workAreaGrabberWidth,
+              height: TimelineTicks.workAreaGrabberHeight,
+            ),
+    );
+    positionChild(_WorkAreaLayoutPart.end, offsetEnd);
+  }
+
+  @override
+  bool shouldRelayout(_WorkAreaLayoutDelegate oldDelegate) =>
+      oldDelegate.workArea != workArea || oldDelegate.viewport != viewport;
+}
+
 class _TimelineTicksRenderer extends LeafRenderObjectWidget {
   final TimelineViewport viewport;
   final RiveThemeData theme;
+  final WorkAreaViewModel workArea;
 
   const _TimelineTicksRenderer(
     this.viewport,
     this.theme,
+    this.workArea,
   );
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _TimelineTicksRenderObject()
       ..viewport = viewport
+      ..workArea = workArea
       ..theme = theme;
   }
 
@@ -101,14 +277,55 @@ class _TimelineTicksRenderer extends LeafRenderObjectWidget {
       BuildContext context, covariant _TimelineTicksRenderObject renderObject) {
     renderObject
       ..viewport = viewport
+      ..workArea = workArea
       ..theme = theme;
   }
 }
 
 class _TimelineTicksRenderObject extends TimelineRenderBox {
   static const double tickHeight = 5;
+  static const double workAreaMarkerWidth = 5;
+  static const double halfMarkerWidth = workAreaMarkerWidth / 2;
+  static const double markerWallHeight = 8;
+  static const double markerCornerRadius = 1;
 
   final List<Paragraph> _ticks = [];
+
+  // /----\
+  // |    |
+  // |    |
+  //   \/
+
+  //.     .
+  //     \    .
+  //      \
+  //          .
+  final Path workAreaTick = Path()
+    // Bottom Triangle
+    ..moveTo(-halfMarkerWidth, 0)
+    ..lineTo(0, 2)
+    ..lineTo(halfMarkerWidth, 0)
+    ..lineTo(halfMarkerWidth, -markerWallHeight)
+    ..cubicTo(
+        halfMarkerWidth,
+        -markerWallHeight - markerCornerRadius * circleConstant,
+        halfMarkerWidth - (1 - markerCornerRadius * circleConstant),
+        -markerWallHeight - markerCornerRadius,
+        halfMarkerWidth - markerCornerRadius,
+        -markerWallHeight - markerCornerRadius)
+    ..lineTo(-halfMarkerWidth + markerCornerRadius,
+        -markerWallHeight - markerCornerRadius)
+    ..cubicTo(
+        -halfMarkerWidth + (1 - markerCornerRadius * circleConstant),
+        -markerWallHeight - markerCornerRadius,
+        -halfMarkerWidth,
+        -markerWallHeight -
+            markerCornerRadius +
+            (1 - markerCornerRadius * circleConstant),
+        -halfMarkerWidth,
+        -markerWallHeight)
+    ..close();
+  final Paint markerPaint = Paint();
 
   /// Try to not rebuild paragraphs, cache them between layouts as usually we'll
   /// be scrolling and won't need to rebuild the whole set.
@@ -119,9 +336,19 @@ class _TimelineTicksRenderObject extends TimelineRenderBox {
 
   Paint _background;
   Paint _line;
+  WorkAreaViewModel _workArea;
+  WorkAreaViewModel get workArea => _workArea;
+  set workArea(WorkAreaViewModel value) {
+    if (_workArea == value) {
+      return;
+    }
+    _workArea = value;
+    markNeedsPaint();
+  }
 
   @override
   void onThemeChanged(RiveThemeData theme) {
+    markerPaint.color = theme.colors.timelineViewportControlsGrabber;
     _background = Paint()..color = theme.colors.timelineBackground;
     _line = Paint()
       ..color = theme.colors.timelineLine
@@ -243,18 +470,60 @@ class _TimelineTicksRenderObject extends TimelineRenderBox {
     const tickHeightOffset = Offset(0, -tickHeight);
     final tickIncOffset = Offset(_tickWidth, 0);
     final labelOffset = Offset(6, -theme.textStyles.timelineTicks.fontSize - 4);
+
     canvas.save();
-    canvas.clipRect(offset & size);
+    canvas.clipRect(offset & Size(size.width, size.height + 3));
     for (final tick in _ticks) {
-      canvas.drawLine(tickPos, tickPos + tickHeightOffset, _line);
+      var renderOffset = Offset(tickPos.dx.roundToDouble() + 0.5, tickPos.dy);
+
+      canvas.drawLine(renderOffset, renderOffset + tickHeightOffset, _line);
+
       canvas.drawParagraph(
         tick,
-        tickPos + labelOffset,
+        renderOffset + labelOffset,
       );
       tickPos += tickIncOffset;
     }
-    canvas.restore();
+
     canvas.drawLine(offset + Offset(0, size.height - 0.5),
-        offset + Offset(size.width, size.height - 0.5), _line);
+        offset + Offset(size.width + 0.5, size.height - 0.5), _line);
+
+    // Draw work area if necessary
+    if (_workArea.active) {
+      var marginLeft = theme.dimensions.timelineMarginLeft;
+      canvas.save();
+      canvas.translate(
+          (offset.dx +
+                      marginLeft +
+                      (_workArea.start / viewport.fps - viewport.startSeconds) /
+                          secondsPerPixel)
+                  .roundToDouble() +
+              0.5,
+          offset.dy + size.height);
+
+      canvas.drawPath(workAreaTick, markerPaint);
+      canvas.restore();
+
+      canvas.save();
+      canvas.translate(
+          (offset.dx +
+                      marginLeft +
+                      (_workArea.end / viewport.fps - viewport.startSeconds) /
+                          secondsPerPixel)
+                  .roundToDouble() +
+              0.5,
+          offset.dy + size.height);
+
+      canvas.drawPath(workAreaTick, markerPaint);
+
+      canvas.restore();
+    }
+
+    canvas.restore();
+    //     canvas.save();
+    //     canvas.translate(0, -100);
+    //     canvas.scale(50);
+    // canvas.drawPath(workAreaTick, Paint()..color = const Color(0xFFFF0000));
+    // canvas.restore();
   }
 }

@@ -255,8 +255,10 @@ class _CursorViewState extends State<CursorView> {
           child: PropagatingListener(
             behavior: HitTestBehavior.deferToChild,
             onPointerMove: (details) {
+              if(!mounted) {
+                return;
+              }
               setState(() {
-                // print("POS $_position");
                 _position = details.pointerEvent.position;
               });
             },

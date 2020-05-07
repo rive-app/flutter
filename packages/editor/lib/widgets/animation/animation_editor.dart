@@ -75,7 +75,7 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
           side: ResizeSide.end,
           min: 300,
           max: 600,
-          deadStart: 48,
+          deadStart: 60,
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -108,15 +108,13 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
                 // is just the individual row sorting + merging (and merge
                 // sorting) of the all keys.
                 child: RepaintBoundary(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  child: Stack(
                     children: [
-                      const SizedBox(height: 10),
-                      TimelineViewportControls(),
-                      const SizedBox(height: 10),
-                      TimelineTicks(),
-                      Expanded(
+                      Positioned.fill(
+                        top: 10 +
+                            TimelineViewportControls.height +
+                            10 +
+                            TimelineTicks.height,
                         child: TimelineKeys(
                           theme: theme,
                           verticalScroll: timelineVerticalScroll,
@@ -124,6 +122,18 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
                           animationManager: widget.animationManager,
                         ),
                       ),
+                      Positioned(
+                        top: 10 + TimelineViewportControls.height + 10,
+                        left: 0,
+                        right: 0,
+                        child: TimelineTicks(),
+                      ),
+                      Positioned(
+                        top: 10,
+                        left: 0,
+                        right: 0,
+                        child: TimelineViewportControls(),
+                      )
                     ],
                   ),
                 ),
@@ -132,7 +142,7 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
               // let's make it a super lightweight render op by separating it
               // from the rest of the complex ui.
               Positioned(
-                top: 30,
+                top: 10 + TimelineViewportControls.height + 10,
                 left: 0,
                 right: 0,
                 bottom: 0,

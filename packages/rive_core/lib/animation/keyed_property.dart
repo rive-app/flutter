@@ -147,6 +147,8 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
     keyedObject?.internalKeyFramesChanged();
   }
 
+  int get lastFrame => _keyframes.isEmpty ? 0 : _keyframes.last.frame;
+
   /// Number of keyframes for this keyed property.
   int get numFrames => _keyframes.length;
 

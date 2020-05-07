@@ -184,8 +184,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'duration';
       case LinearAnimationBase.speedPropertyKey:
         return 'speed';
-      case LinearAnimationBase.loopPropertyKey:
-        return 'loop';
+      case LinearAnimationBase.loopValuePropertyKey:
+        return 'loopValue';
       case LinearAnimationBase.workStartPropertyKey:
         return 'workStart';
       case LinearAnimationBase.workEndPropertyKey:
@@ -341,7 +341,7 @@ abstract class RiveCoreContext extends CoreContext {
         case KeyFrameBase.interpolationPropertyKey:
         case LinearAnimationBase.fpsPropertyKey:
         case LinearAnimationBase.durationPropertyKey:
-        case LinearAnimationBase.loopPropertyKey:
+        case LinearAnimationBase.loopValuePropertyKey:
         case LinearAnimationBase.workStartPropertyKey:
         case LinearAnimationBase.workEndPropertyKey:
         case StrokeBase.capPropertyKey:
@@ -455,7 +455,7 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyFrameBase.interpolationPropertyKey:
       case LinearAnimationBase.fpsPropertyKey:
       case LinearAnimationBase.durationPropertyKey:
-      case LinearAnimationBase.loopPropertyKey:
+      case LinearAnimationBase.loopValuePropertyKey:
       case LinearAnimationBase.workStartPropertyKey:
       case LinearAnimationBase.workEndPropertyKey:
       case StrokeBase.capPropertyKey:
@@ -650,9 +650,9 @@ abstract class RiveCoreContext extends CoreContext {
           object.speed = value;
         }
         break;
-      case LinearAnimationBase.loopPropertyKey:
+      case LinearAnimationBase.loopValuePropertyKey:
         if (object is LinearAnimationBase && value is int) {
-          object.loop = value;
+          object.loopValue = value;
         }
         break;
       case LinearAnimationBase.workStartPropertyKey:
@@ -1117,9 +1117,9 @@ abstract class RiveCoreContext extends CoreContext {
           return object.speed;
         }
         break;
-      case LinearAnimationBase.loopPropertyKey:
+      case LinearAnimationBase.loopValuePropertyKey:
         if (object is LinearAnimationBase) {
-          return object.loop;
+          return object.loopValue;
         }
         break;
       case LinearAnimationBase.workStartPropertyKey:
@@ -1388,7 +1388,7 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyFrameBase.interpolationPropertyKey:
       case LinearAnimationBase.fpsPropertyKey:
       case LinearAnimationBase.durationPropertyKey:
-      case LinearAnimationBase.loopPropertyKey:
+      case LinearAnimationBase.loopValuePropertyKey:
       case LinearAnimationBase.workStartPropertyKey:
       case LinearAnimationBase.workEndPropertyKey:
       case StrokeBase.capPropertyKey:
@@ -1490,8 +1490,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as LinearAnimationBase).fps;
       case LinearAnimationBase.durationPropertyKey:
         return (object as LinearAnimationBase).duration;
-      case LinearAnimationBase.loopPropertyKey:
-        return (object as LinearAnimationBase).loop;
+      case LinearAnimationBase.loopValuePropertyKey:
+        return (object as LinearAnimationBase).loopValue;
       case LinearAnimationBase.workStartPropertyKey:
         return (object as LinearAnimationBase).workStart;
       case LinearAnimationBase.workEndPropertyKey:
@@ -1683,8 +1683,8 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearAnimationBase.durationPropertyKey:
         (object as LinearAnimationBase).duration = value;
         break;
-      case LinearAnimationBase.loopPropertyKey:
-        (object as LinearAnimationBase).loop = value;
+      case LinearAnimationBase.loopValuePropertyKey:
+        (object as LinearAnimationBase).loopValue = value;
         break;
       case LinearAnimationBase.workStartPropertyKey:
         (object as LinearAnimationBase).workStart = value;

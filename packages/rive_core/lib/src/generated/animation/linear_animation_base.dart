@@ -81,26 +81,26 @@ abstract class LinearAnimationBase extends Animation {
   void speedChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
-  /// Loop field with key 59.
-  int _loop;
-  static const int loopPropertyKey = 59;
+  /// LoopValue field with key 59.
+  int _loopValue = 0;
+  static const int loopValuePropertyKey = 59;
 
-  /// Loop value option matches LoopType enumeration.
-  int get loop => _loop;
+  /// Loop value option matches Loop enumeration.
+  int get loopValue => _loopValue;
 
-  /// Change the [_loop] field value.
-  /// [loopChanged] will be invoked only if the field's value has changed.
-  set loop(int value) {
-    if (_loop == value) {
+  /// Change the [_loopValue] field value.
+  /// [loopValueChanged] will be invoked only if the field's value has changed.
+  set loopValue(int value) {
+    if (_loopValue == value) {
       return;
     }
-    int from = _loop;
-    _loop = value;
-    onPropertyChanged(loopPropertyKey, from, value);
-    loopChanged(from, value);
+    int from = _loopValue;
+    _loopValue = value;
+    onPropertyChanged(loopValuePropertyKey, from, value);
+    loopValueChanged(from, value);
   }
 
-  void loopChanged(int from, int to);
+  void loopValueChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// WorkStart field with key 60.
@@ -148,7 +148,7 @@ abstract class LinearAnimationBase extends Animation {
 
   /// --------------------------------------------------------------------------
   /// EnableWorkArea field with key 62.
-  bool _enableWorkArea;
+  bool _enableWorkArea = false;
   static const int enableWorkAreaPropertyKey = 62;
 
   /// Whether or not the work area is enabled.
@@ -181,8 +181,8 @@ abstract class LinearAnimationBase extends Animation {
     if (speed != null) {
       onPropertyChanged(speedPropertyKey, speed, speed);
     }
-    if (loop != null) {
-      onPropertyChanged(loopPropertyKey, loop, loop);
+    if (loopValue != null) {
+      onPropertyChanged(loopValuePropertyKey, loopValue, loopValue);
     }
     if (workStart != null) {
       onPropertyChanged(workStartPropertyKey, workStart, workStart);
@@ -205,8 +205,8 @@ abstract class LinearAnimationBase extends Animation {
         return duration as K;
       case speedPropertyKey:
         return speed as K;
-      case loopPropertyKey:
-        return loop as K;
+      case loopValuePropertyKey:
+        return loopValue as K;
       case workStartPropertyKey:
         return workStart as K;
       case workEndPropertyKey:
@@ -224,7 +224,7 @@ abstract class LinearAnimationBase extends Animation {
       case fpsPropertyKey:
       case durationPropertyKey:
       case speedPropertyKey:
-      case loopPropertyKey:
+      case loopValuePropertyKey:
       case workStartPropertyKey:
       case workEndPropertyKey:
       case enableWorkAreaPropertyKey:
