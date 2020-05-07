@@ -157,7 +157,8 @@ class RiveColors {
   Color get timelineViewportControlsGrabber => const Color(0xFF33A7FF);
   Color get timelineViewportControlsTrack => const Color(0xFF4C4C4C);
   Color get timelineBackground => const Color(0xFF232323);
-  Color get timelineLine => const Color(0xFF303030);
+  // Color get timelineLine => const Color(0xFF303030);
+  Color get timelineLine => const Color(0x0FFFFFFF);
   Color get timelineUnderline => const Color(0xFF1E1E1E);
   Color get key => const Color(0xFF57A5E0);
   Color get allKey => const Color(0xFF8A8A8A);
@@ -166,6 +167,8 @@ class RiveColors {
   Color get keyMarqueeFill => const Color(0x3433A7FF);
   Color get keyMarqueeStroke => const Color(0xFF33A7FF);
   Color get keyStateEmpty => const Color(0xFF8C8C8C);
+  Color get workAreaBackground => const Color(0xFF2C2C2C);
+  Color get workAreaDelineator => const Color(0xFF111111);
 }
 
 /// TextStyles used in the Rive Theme

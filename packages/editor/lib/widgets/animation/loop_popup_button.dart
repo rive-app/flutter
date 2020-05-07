@@ -34,7 +34,7 @@ class LoopPopupButton extends StatelessWidget {
             icon = 'loop';
             break;
           case Loop.pingPong:
-            icon = 'stop-last';
+            icon = 'ping-pong';
             break;
         }
         final themeColors = RiveTheme.of(context).colors;
@@ -71,7 +71,7 @@ class LoopPopupButton extends StatelessWidget {
             ),
             PopupContextItem(
               'Ping Pong',
-              icon: 'stop-last',
+              icon: 'ping-pong',
               select: () {
                 animation.loop = Loop.pingPong;
                 animation.context.captureJournalEntry();

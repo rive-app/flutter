@@ -10,6 +10,9 @@ abstract class TimelineRenderBox extends RenderBox {
   RiveThemeData _theme;
   double _secondsPerPixel;
 
+  double _secondsStart;
+  double get secondsStart => _secondsStart;
+
   double get secondsPerPixel => _secondsPerPixel;
   RiveThemeData get theme => _theme;
   set theme(RiveThemeData value) {
@@ -46,5 +49,13 @@ abstract class TimelineRenderBox extends RenderBox {
     var visibleDuration = _viewport.endSeconds - _viewport.startSeconds;
     _secondsPerPixel =
         visibleDuration / (size.width - marginLeft - marginRight);
+
+    // This is the time at local x 0
+    _secondsStart = viewport.startSeconds - marginLeft * secondsPerPixel;
   }
+
+  double framesToPixels(int frames) =>
+      ((frames / _viewport.fps - _secondsStart) / _secondsPerPixel)
+          .roundToDouble() +
+      0.5;
 }
