@@ -131,6 +131,8 @@ class _SimpleAnimationController extends RiveAnimationController {
 /// the viewport, changing animation duration, and tracking editing animation
 /// time.
 abstract class AnimationTimeManager extends AnimationManager {
+  static const int _playPressThresholdMs = 250;
+
   final OpenFileContext activeFile;
   final _fpsStream = BehaviorSubject<int>();
 
@@ -158,6 +160,11 @@ abstract class AnimationTimeManager extends AnimationManager {
 
   final _isPlayingStream = BehaviorSubject<bool>();
   final _playbackController = StreamController<bool>();
+
+  // When was the play action pressed down? We track this to only trigger play
+  // after a brief tap of the action to disambiguate with other actions (like
+  // pan).
+  DateTime _pressPlayTime = DateTime.now();
 
   _SimpleAnimationController _controller;
   AnimationTimeManager(LinearAnimation animation, this.activeFile)
@@ -194,6 +201,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     _syncWorkArea();
 
     activeFile.addActionHandler(_handleAction);
+    activeFile.addReleaseActionHandler(_releaseAction);
 
     _workAreaController.stream.listen(_changeWorkArea);
   }
@@ -327,6 +335,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     _workArea.close();
     _workAreaController.close();
     activeFile.removeActionHandler(_handleAction);
+    activeFile.removeReleaseActionHandler(_releaseAction);
     animation.artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
     animation.keyframeValueChanged.removeListener(_keyframesChanged);
@@ -349,10 +358,26 @@ abstract class AnimationTimeManager extends AnimationManager {
   bool _handleAction(ShortcutAction action) {
     switch (action) {
       case ShortcutAction.togglePlay:
+        _pressPlayTime = DateTime.now();
+        return true;
+    }
+    return false;
+  }
+
+  bool _releaseAction(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.togglePlay:
+
+        // Trigger play if we had only pressed it for a brief time.
+        // Fixes: https://github.com/rive-app/rive/issues/415
+        if (DateTime.now().difference(_pressPlayTime).inMilliseconds >
+            _playPressThresholdMs) {
+          return false;
+        }
         bool play = !_isPlayingStream.value;
         var start = animation.enableWorkArea ? animation.workStart : 0;
         var end =
-          animation.enableWorkArea ? animation.workEnd : animation.duration;
+            animation.enableWorkArea ? animation.workEnd : animation.duration;
         // If we're super close to the end, rewing to start before playing.
         if (play && (_timeStream.value - end).abs() < 0.01) {
           _controller.time = start / animation.fps;

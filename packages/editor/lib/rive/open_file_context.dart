@@ -93,6 +93,7 @@ class OpenFileContext with RiveFileDelegate {
       ValueNotifier<EditorMode>(EditorMode.design);
 
   final List<ActionHandler> _actionHandlers = [];
+  final List<ActionHandler> _releaseActionHandlers = [];
 
   /// Add an action handler which is will receive any performed action before
   /// the file context attempts to handle it. Return true to let the file
@@ -112,6 +113,20 @@ class OpenFileContext with RiveFileDelegate {
   /// Remove an action handler from the chain.
   bool removeActionHandler(ActionHandler handler) =>
       _actionHandlers.remove(handler);
+
+  /// Add an action handler for when the key triggering an action is released.
+  bool addReleaseActionHandler(ActionHandler handler) {
+    if (_releaseActionHandlers.contains(handler)) {
+      return false;
+    }
+
+    _releaseActionHandlers.add(handler);
+    return true;
+  }
+
+  /// Remove a release action handler from the chain.
+  bool removeReleaseActionHandler(ActionHandler handler) =>
+      _releaseActionHandlers.remove(handler);
 
   void startDragOperation() => rive.startDragOperation();
   void endDragOperation() => rive.endDragOperation();
@@ -314,6 +329,15 @@ class OpenFileContext with RiveFileDelegate {
       default:
         break;
     }
+  }
+
+  bool releaseAction(ShortcutAction action) {
+    for (final actionHandler in _releaseActionHandlers.reversed) {
+      if (actionHandler(action)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Will attempt to perform the given action. If the action is not handled,

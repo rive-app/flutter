@@ -44,7 +44,7 @@ class ShortcutKeyBinding {
         keymap = keymap[key]?.keys;
       }
     }
-    return null;
+    return [];
   }
 
   /// Get the list of keys that trigger a specific action.
