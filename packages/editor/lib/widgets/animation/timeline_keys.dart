@@ -94,24 +94,29 @@ class _TimelineKeysState extends State<TimelineKeys> {
           return const SizedBox();
         }
         var viewport = snapshot.data;
+        var keyFrameManager = KeyFrameManagerProvider.of(context);
         return TimelineKeysManipulator(
           activeFile: ActiveFile.of(context),
           viewport: viewport,
           theme: widget.theme,
           verticalScroll: widget.verticalScroll,
           animationManager: widget.animationManager,
+          keyFrameManager: keyFrameManager,
           rows: _rows,
-          builder: (context, selection) =>
-              ValueStreamBuilder<WorkAreaViewModel>(
+          builder: (context) => ValueStreamBuilder<WorkAreaViewModel>(
             stream: widget.animationManager.workArea,
-            builder: (context, workArea) => _TimelineKeysRenderer(
-              theme: widget.theme,
-              verticalScrollOffset: _scrollOffset,
-              rows: _rows,
-              viewport: viewport,
-              animation: widget.animationManager.animation,
-              selection: selection,
-              workArea: workArea.hasData ? workArea.data : null,
+            builder: (context, workArea) =>
+                ValueStreamBuilder<HashSet<KeyFrame>>(
+              stream: keyFrameManager.selection,
+              builder: (context, selection) => _TimelineKeysRenderer(
+                theme: widget.theme,
+                verticalScrollOffset: _scrollOffset,
+                rows: _rows,
+                viewport: viewport,
+                animation: widget.animationManager.animation,
+                selection: selection.data,
+                workArea: workArea.hasData ? workArea.data : null,
+              ),
             ),
           ),
         );
@@ -170,7 +175,9 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   }
 }
 
-class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
+class _TimelineKeysRenderObject extends TimelineRenderBox {
+  final Path keyPath = Path();
+  final Path holdKeyPath = Path();
   final Paint _bgPaint = Paint();
   final Paint _separatorPaint = Paint();
   final Paint _keyPaint = Paint();
@@ -238,9 +245,19 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
     _workAreaLinePaint.color = theme.colors.workAreaDelineator;
 
     makeKeyPath(
+        keyPath,
         theme,
         Offset(0,
             (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 0.5));
+
+    makeKeyPath(
+      holdKeyPath,
+      theme,
+      Offset(0.0,
+          (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 0.5),
+      rotation: 0,
+      padRadius: 0.5,
+    );
   }
 
   double get verticalScrollOffset => _verticalScrollOffset;
@@ -307,6 +324,7 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
     // the center of the key, so anything drawing with an origin of width + half
     // key will not be within the bounds of this widget.
     var halfBounds = theme.dimensions.keyHalfBounds;
+    var halfSquare = theme.dimensions.keyHalfSquare;
     var rightThreshold = size.width + halfBounds;
 
     for (int i = firstRow; i < lastRow; i++) {
@@ -336,6 +354,7 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
 
       var lineY = rowHeight / 2 - 1;
       var lastSelected = false;
+      var previousIsHold = false;
       if (keyFrameList != null) {
         List<KeyFrameInterface> frames =
             keyFrameList.keyframes as List<KeyFrameInterface>;
@@ -366,30 +385,40 @@ class _TimelineKeysRenderObject extends TimelineRenderBox with KeyPathMaker {
             lastX = x;
 
             bool isSelected;
+            var renderPath = keyPath;
             if (keyFrame is AllKeyFrame) {
               isSelected = _selection.containsAll(keyFrame.keyframes);
             } else {
+              if ((keyFrame as KeyFrameBase).interpolationType == 0) {
+                renderPath = holdKeyPath;
+              }
               isSelected = _selection.contains(keyFrame);
-            }
-
-            // Draw the keyframe itself.
-            if (isSelected) {
-              canvas.drawPath(keyPath, _keyPaint);
-              canvas.drawPath(keyPath, _selectedPaint);
-            } else {
-              canvas.drawPath(keyPath, keyPaint);
             }
 
             // Draw connecting line between keyframes.
             if (connectKeys && i != 0) {
               canvas.drawLine(
-                  Offset(-move + halfBounds, lineY),
-                  Offset(-halfBounds, lineY),
+                  Offset(
+                      -move +
+                          (previousIsHold ? halfSquare : halfBounds) +
+                          (lastSelected ? 0.5 : 0),
+                      lineY),
+                  Offset(renderPath == holdKeyPath ? -halfSquare : -halfBounds,
+                      lineY),
                   isSelected && lastSelected
                       ? _selectedPaint
                       : _connectKeyPaint);
             }
 
+            // Draw the keyframe itself.
+            if (isSelected) {
+              canvas.drawPath(renderPath, _keyPaint);
+              canvas.drawPath(renderPath, _selectedPaint);
+            } else {
+              canvas.drawPath(renderPath, keyPaint);
+            }
+
+            previousIsHold = renderPath == holdKeyPath;
             if (!isVisible) {
               break;
             }

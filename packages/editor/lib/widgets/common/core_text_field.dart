@@ -165,7 +165,8 @@ class KeyStateRenderer extends LeafRenderObjectWidget {
   }
 }
 
-class KeyStateRenderBox extends RenderBox with KeyPathMaker {
+class KeyStateRenderBox extends RenderBox {
+  final Path keyPath = Path();
   final Paint none = Paint()..style = PaintingStyle.stroke;
   final Paint keyframe = Paint();
   final Paint interpolated = Paint()..style = PaintingStyle.stroke;
@@ -180,7 +181,7 @@ class KeyStateRenderBox extends RenderBox with KeyPathMaker {
     markNeedsPaint();
 
     var pos = theme.dimensions.keyHalfBounds.roundToDouble();
-    makeKeyPath(_theme, Offset(pos, pos));
+    makeKeyPath(keyPath, _theme, Offset(pos, pos));
     none.color = _theme.colors.keyStateEmpty;
     keyframe.color = _theme.colors.key;
     interpolated.color = _theme.colors.key;

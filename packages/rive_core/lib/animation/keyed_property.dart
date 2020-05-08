@@ -111,6 +111,10 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
     keyedObject?.internalKeyFramesMoved();
   }
 
+  void internalKeyFrameInterpolationChanged() {
+    keyedObject?.internalKeyFramesChanged();
+  }
+
   void _notifyKeyframeRemoved() {
     keyedObject?.internalKeyFramesChanged();
   }
@@ -146,8 +150,6 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
 
     keyedObject?.internalKeyFramesChanged();
   }
-
-  int get lastFrame => _keyframes.isEmpty ? 0 : _keyframes.last.frame;
 
   /// Number of keyframes for this keyed property.
   int get numFrames => _keyframes.length;
@@ -196,7 +198,14 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
           toFrame.apply(object, pk, mix);
         } else {
           RiveCoreContext.setKeyState(object, pk, KeyState.interpolated);
-          fromFrame.applyInterpolation(object, pk, seconds, toFrame, mix);
+
+          /// Equivalent to fromFrame.interpolation ==
+          /// KeyFrameInterpolation.hold.
+          if (fromFrame.interpolationType == 0) {
+            fromFrame.apply(object, pk, mix);
+          } else {
+            fromFrame.applyInterpolation(object, pk, seconds, toFrame, mix);
+          }
         }
       } else {
         var last = _keyframes[idx - 1];

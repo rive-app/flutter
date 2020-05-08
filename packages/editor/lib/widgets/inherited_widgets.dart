@@ -5,6 +5,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
@@ -335,6 +336,16 @@ class EditingAnimationProvider extends StatelessWidget {
       ?.editingAnimationManager;
 }
 
+class KeyFrameManagerProvider {
+  static KeyFrameManager of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_InheritedKeyFrameManager>()
+      ?.keyFrameManager;
+
+  static KeyFrameManager find(BuildContext context) => context
+      .findAncestorWidgetOfExactType<_InheritedKeyFrameManager>()
+      ?.keyFrameManager;
+}
+
 class _EditingAnimation extends StatefulWidget {
   final LinearAnimation editingAnimation;
   final OpenFileContext activeFile;
@@ -352,6 +363,7 @@ class _EditingAnimation extends StatefulWidget {
 
 class __EditingAnimationState extends State<_EditingAnimation> {
   EditingAnimationManager _manager;
+  KeyFrameManager _keyFrameManager;
 
   @override
   void initState() {
@@ -363,13 +375,21 @@ class __EditingAnimationState extends State<_EditingAnimation> {
   void dispose() {
     super.dispose();
     _manager?.dispose();
+    _keyFrameManager?.dispose();
   }
 
   void _updateManager() {
     _manager?.dispose();
-    _manager = widget.editingAnimation == null
-        ? null
-        : EditingAnimationManager(widget.editingAnimation, widget.activeFile);
+    _keyFrameManager?.dispose();
+
+    if (widget.editingAnimation == null) {
+      _manager = _keyFrameManager = null;
+    } else {
+      _manager =
+          EditingAnimationManager(widget.editingAnimation, widget.activeFile);
+      _keyFrameManager =
+          KeyFrameManager(widget.editingAnimation, widget.activeFile);
+    }
   }
 
   @override
@@ -384,10 +404,28 @@ class __EditingAnimationState extends State<_EditingAnimation> {
   @override
   Widget build(BuildContext context) {
     return _InheritedEditingAnimation(
-      child: widget.child,
       editingAnimationManager: _manager,
+      child: _InheritedKeyFrameManager(
+        keyFrameManager: _keyFrameManager,
+        child: widget.child,
+      ),
     );
   }
+}
+
+class _InheritedKeyFrameManager extends InheritedWidget {
+  const _InheritedKeyFrameManager({
+    @required this.keyFrameManager,
+    @required Widget child,
+    Key key,
+  })  : assert(child != null),
+        super(key: key, child: child);
+
+  final KeyFrameManager keyFrameManager;
+
+  @override
+  bool updateShouldNotify(_InheritedKeyFrameManager old) =>
+      keyFrameManager != old.keyFrameManager;
 }
 
 class _InheritedEditingAnimation extends InheritedWidget {

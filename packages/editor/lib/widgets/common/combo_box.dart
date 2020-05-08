@@ -87,7 +87,7 @@ class ComboBox<T> extends StatefulWidget {
   final EdgeInsetsGeometry contentPadding;
   final Event trigger;
   final TextStyle valueTextStyle;
-
+  final bool disabled;
   static const double _chevronWidth = 5;
   static const double _horizontalPadding = 15;
 
@@ -112,6 +112,7 @@ class ComboBox<T> extends StatefulWidget {
     this.trigger,
     this.cursorColor,
     this.valueTextStyle,
+    this.disabled = false,
   }) : super(key: key);
 
   @override
@@ -443,27 +444,36 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
 
   String get label => itemLabel(widget.value);
 
+  Widget _disable(Widget child) {
+    if (!widget.disabled) {
+      return child;
+    }
+    return IgnorePointer(child: child);
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return _expand(
-      _ComboGestureDetector(
-        open: _open,
-        child: _underline(
-          _chevron(
-            _padding(
-              _typeahead(
-                Text(
-                  label,
-                  style: (widget.valueTextStyle ?? theme.textStyles.basic)
-                      .copyWith(color: widget.valueColor),
+      _disable(
+        _ComboGestureDetector(
+          open: _open,
+          child: _underline(
+            _chevron(
+              _padding(
+                _typeahead(
+                  Text(
+                    label,
+                    style: (widget.valueTextStyle ?? theme.textStyles.basic)
+                        .copyWith(color: widget.valueColor),
+                  ),
+                  theme: theme,
                 ),
-                theme: theme,
               ),
+              theme: theme,
             ),
             theme: theme,
           ),
-          theme: theme,
         ),
       ),
     );

@@ -38,11 +38,7 @@ class EditingAnimationManager extends AnimationTimeManager
   final _hierarchyController =
       BehaviorSubject<Iterable<KeyHierarchyViewModel>>();
 
-  final _deleteController = StreamController<HashSet<KeyFrame>>();
   final _keyController = StreamController<KeyComponentsEvent>();
-
-  /// Delete a set of keyframes.
-  Sink<HashSet<KeyFrame>> get deleteKeyFrames => _deleteController;
 
   /// Set a keyframe on a property for a bunch of components.
   Sink<KeyComponentsEvent> get keyComponents => _keyController;
@@ -58,14 +54,7 @@ class EditingAnimationManager extends AnimationTimeManager
     animation.context.addDelegate(this);
     _updateHierarchy();
 
-    _deleteController.stream.listen(_deleteKeyFrames);
     _keyController.stream.listen(_keyComponents);
-  }
-
-  void _deleteKeyFrames(HashSet<KeyFrame> keyframes) {
-    var core = animation.context;
-    keyframes.forEach(core.remove);
-    core.captureJournalEntry();
   }
 
   void _keyComponents(KeyComponentsEvent event) {
@@ -82,7 +71,6 @@ class EditingAnimationManager extends AnimationTimeManager
     }
     cancelDebounce(_updateHierarchy);
     _hierarchyController.close();
-    _deleteController.close();
     _keyController.close();
     animation.context.removeDelegate(this);
     super.dispose();

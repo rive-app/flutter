@@ -449,9 +449,9 @@ class Rive {
     if (hasFocusObject) {
       return;
     }
-    var actions = keyBinding
-        .lookupAction(
-            _pressed.map((key) => key.physical).toList(growable: false))
+    var actions = (keyBinding.lookupAction(
+                _pressed.map((key) => key.physical).toList(growable: false)) ??
+            [])
         .toSet();
 
     var released = _pressedActions.difference(actions);

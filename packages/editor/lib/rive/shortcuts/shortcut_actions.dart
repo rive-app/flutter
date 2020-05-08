@@ -37,6 +37,8 @@ class ShortcutAction {
       ShortcutAction('frame-move-prev-10');
   static const ShortcutAction moveSelectionNext10Frames =
       ShortcutAction('frame-move-next-10');
+  static TogglingShortcutAction multiSelect =
+      TogglingShortcutAction('multi-select');
   static const ShortcutAction next10Frames = ShortcutAction('frame-next-10');
   static const ShortcutAction nextFrame = ShortcutAction('frame-next');
   static const ShortcutAction nextKeyFrame = ShortcutAction('frame-next-key');
