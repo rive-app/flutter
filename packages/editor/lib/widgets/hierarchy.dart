@@ -8,7 +8,6 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
-import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
 import '../rive/hierarchy_tree_controller.dart';
@@ -28,11 +27,8 @@ class HierarchyTreeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
-    var style = TreeStyle(
-      showFirstLine: true,
-      padding: const EdgeInsets.all(10),
-      lineColor: RiveTheme.of(context).colors.darkTreeLines,
-    );
+    var style = theme.treeStyles.hierarchy;
+
     return TreeScrollView(
       padding: style.padding,
       slivers: [
