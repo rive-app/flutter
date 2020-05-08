@@ -15,8 +15,6 @@ import 'package:rive_editor/widgets/notifications.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 
-import 'package:rive_editor/main.dart';
-
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
@@ -58,6 +56,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
     final fileBrowser = rive.activeFileBrowser.value;
+    final theme = RiveTheme.of(context);
 
     return PropagatingListener(
       behavior: HitTestBehavior.deferToChild,
@@ -71,7 +70,7 @@ class Home extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 ResizePanel(
-                  hitSize: resizeEdgeSize,
+                  hitSize: theme.dimensions.resizeEdgeSize,
                   direction: ResizeDirection.horizontal,
                   side: ResizeSide.end,
                   min: 252,
@@ -83,7 +82,7 @@ class Home extends StatelessWidget {
                 ),
                 if (fileBrowser?.owner is RiveTeam)
                   ResizePanel(
-                    hitSize: resizeEdgeSize,
+                    hitSize: theme.dimensions.resizeEdgeSize,
                     direction: ResizeDirection.horizontal,
                     side: ResizeSide.start,
                     min: 252,
