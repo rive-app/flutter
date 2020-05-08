@@ -8,9 +8,11 @@ import 'package:rive_core/src/generated/backboard_base.dart';
 export 'package:rive_core/src/generated/backboard_base.dart';
 
 class Backboard extends BackboardBase {
+  // -> editor-only
   /// An event fired when the active artboard changes, this should probably be
   /// removed from the runtimes.
   final Event activeArtboardChanged = Event();
+  // <- editor-only
 
   Artboard _activeArtboard;
   Artboard get activeArtboard => _activeArtboard;
@@ -20,7 +22,9 @@ class Backboard extends BackboardBase {
     }
     _activeArtboard = value;
     activeArtboardId = value.id;
+    // -> editor-only
     activeArtboardChanged.notify();
+    // <- editor-only
   }
 
   @override

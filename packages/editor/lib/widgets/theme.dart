@@ -421,6 +421,12 @@ class TreeStyles {
         padding: EdgeInsets.only(left: 10, right: 19),
         lineColor: _darkTreeLines,
       );
+
+  TreeStyle get hierarchy => const TreeStyle(
+        showFirstLine: true,
+        padding: EdgeInsets.all(10),
+        lineColor: _darkTreeLines,
+      );
 }
 
 /// Not sure about the naming of this one. Basically a set of numerical
@@ -440,6 +446,10 @@ class _Dimensions {
   /// few places so this makes it easy to get it. Just make sure you update the
   /// value if you change the keyHalfSquare above.
   double get keyHalfBounds => 5.6568542495; //sqrt(pow(keyHalfSquare*2, 2)*2)/2;
+
+  /// The dimensionsof the click/drag resize edge on panels that support
+  /// resizing.
+  double get resizeEdgeSize => 10;
 }
 
 /// Holds instances of various sub theme classes
