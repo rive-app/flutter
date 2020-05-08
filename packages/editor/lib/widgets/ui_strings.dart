@@ -35,7 +35,7 @@ class UIStrings extends InheritedWidget {
 
   static UIStringsData of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<UIStrings>().data;
-      
+
   static UIStringsData find(BuildContext context) =>
       context.findAncestorWidgetOfExactType<UIStrings>().data;
 

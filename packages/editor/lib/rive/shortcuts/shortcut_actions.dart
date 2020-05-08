@@ -20,6 +20,11 @@ class ShortcutAction {
   static const ShortcutAction cancel = ShortcutAction('cancel');
   static const ShortcutAction copy = ShortcutAction('copy');
   static const ShortcutAction cut = ShortcutAction('cut');
+
+  /// Cycle through the currently hovered items (items below the cursor on the
+  /// stage). Helps select things when they are heavily layered.
+  static const ShortcutAction cycleHover = ShortcutAction('cycle-hover');
+
   static const ShortcutAction delete = ShortcutAction('delete');
   static const ShortcutAction deselect = ShortcutAction('deselect');
   static const ShortcutAction drawMeshTool = ShortcutAction('tool-mesh');
