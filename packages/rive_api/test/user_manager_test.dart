@@ -51,7 +51,6 @@ void main() {
       ];
 
       Plumber().getStream<Me>().listen((event) {
-        print('wat?');
         var check = checks.removeAt(0);
         if (checks.length == 0) {
           expect(check(event), true);
