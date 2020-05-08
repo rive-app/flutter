@@ -125,6 +125,17 @@ class HierarchyTreeView extends StatelessWidget {
             ),
             valueListenable: item.data.stageItem.selectionState,
           ),
+          dragItemBuilder: (context, items, style) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: items
+                .map(
+                  (item) => Text(
+                    item.data.name,
+                    style: theme.textStyles.treeDragItem,
+                  ),
+                )
+                .toList(),
+          ),
         ),
       ],
     );

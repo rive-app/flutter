@@ -22,10 +22,6 @@ import 'package:rive_api/files.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_api/models/team.dart';
 
-import 'package:rive_core/component.dart';
-import 'package:rive_core/artboard.dart';
-import 'package:rive_core/shapes/shape.dart';
-
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
@@ -571,28 +567,3 @@ class Rive {
 }
 
 enum SelectionMode { single, multi, range }
-
-/// A manager for creating the draw order hierarchy
-/// This is a temporary hack until we get the draw
-/// order implementation completed. Keeping most of
-/// the code in here so it's easy to parse and undo
-///
-/// TODO: LIST
-/// Use the selected artboard to show the items
-/// Create a custom icon from the path of the shape
-class DrawOrderManager {
-  const DrawOrderManager(this.artboards);
-  final List<Artboard> artboards;
-
-  List<Component> get drawableComponentsInOrder {
-    final components = <Component>[];
-    for (final artboard in artboards) {
-      for (final component in artboard.children) {
-        if (component is Shape) {
-          components.add(component);
-        }
-      }
-    }
-    return components;
-  }
-}

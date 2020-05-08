@@ -37,15 +37,41 @@ class _AnimationList extends FractionallyIndexedList<Animation> {
   }
 }
 
+class _DrawableList extends FractionallyIndexedList<Drawable> {
+  @override
+  FractionalIndex orderOf(Drawable drawable) {
+    return drawable.drawOrder;
+  }
+
+  @override
+  void setOrderOf(Drawable drawable, FractionalIndex order) {
+    drawable.drawOrder = order;
+  }
+}
+
 class Artboard extends ArtboardBase with ShapePaintContainer {
+  // -> editor-only
+  /// An event fired when the draw order changed,
+  final Event drawOrderChanged = Event();
+  // <- editor-only
+
   final Path path = Path();
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
-  final List<Drawable> _drawables = [];
+  final _DrawableList _drawables = _DrawableList();
   final Set<Component> _components = {};
+
+  _DrawableList get drawables => _drawables;
+
+  // -> editor-only
+  /// Event notified whenever the animations list changes.
+  final Event animationsChanged = Event();
+  // <- editor-only
   final _AnimationList _animations = _AnimationList();
+
+  /// List of animations in this artboard.
   _AnimationList get animations => _animations;
-  final animationsChanged = Event();
+
   int _dirtDepth = 0;
   int _dirt = 255;
 
@@ -70,6 +96,13 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
       }
     }
 
+    if ((_dirt & ComponentDirt.drawOrder) != 0) {
+      _drawables.sortFractional();
+      _dirt &= ~ComponentDirt.drawOrder;
+      // -> editor-only
+      drawOrderChanged.notify();
+      // <- editor-only
+    }
     if ((_dirt & ComponentDirt.components) != 0) {
       const int maxSteps = 100;
       int step = 0;
@@ -210,6 +243,18 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     if (component is Drawable) {
       assert(!_drawables.contains(component));
       _drawables.add(component);
+
+      // -> editor-only
+      if (component.drawOrder == null && !_drawables.validateFractional()) {
+        // Draw order was missing, so force validate it (change the null draw
+        // orders) and hence we re=sort. This should only happen on creation or
+        // patchup of corrupt files.
+
+        // We sort immediately in-case more null drawOrder items are added.
+        _drawables.sortFractional();
+      }
+      // <- editor-only
+      markDrawOrderDirty();
     }
   }
 
@@ -219,6 +264,15 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     _components.remove(component);
     if (component is Drawable) {
       _drawables.remove(component);
+    }
+  }
+
+  /// Let the artboard know that the drawables need to be resorted before
+  /// drawing next.
+  void markDrawOrderDirty() {
+    if ((dirt & ComponentDirt.drawOrder) == 0) {
+      context?.markNeedsAdvance();
+      _dirt |= ComponentDirt.drawOrder;
     }
   }
 

@@ -76,7 +76,11 @@ class DrawOrderTreeView extends StatelessWidget {
             builder: (context, dropState, _) =>
                 ValueListenableBuilder<SelectionState>(
               builder: (context, selectionState, _) {
-                return DropItemBackground(dropState, selectionState);
+                return DropItemBackground(
+                  dropState,
+                  selectionState,
+                  hoverColor: theme.colors.editorTreeHover,
+                );
               },
               valueListenable: item.data.stageItem?.selectionState,
             ),
@@ -84,35 +88,35 @@ class DrawOrderTreeView extends StatelessWidget {
           itemBuilder: (context, item, style) =>
               ValueListenableBuilder<SelectionState>(
             builder: (context, state, _) => Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    // Use CorePropertyBuilder to get notified when the
-                    // component's name changes.
-                    child: CorePropertyBuilder<String>(
-                      object: item.data,
-                      propertyKey: ComponentBase.namePropertyKey,
-                      builder: (context, name, _) => Renamable(
-                        name: name,
-                        color: state == SelectionState.selected
-                            ? Colors.white
-                            : Colors.grey.shade500,
-                        onRename: (name) {
-                          item.data.name = name;
-                          RiveContext.of(context)
-                              .file
-                              .value
-                              .core
-                              .captureJournalEntry();
-                        },
-                      ),
+              child: Padding(
+                  padding: const EdgeInsets.only(right: 5),
+                  child: CorePropertyBuilder<String>(
+                    object: item.data,
+                    propertyKey: ComponentBase.namePropertyKey,
+                    builder: (context, name, _) => Renamable(
+                      name: name,
+                      color: state == SelectionState.selected
+                          ? Colors.white
+                          : Colors.grey.shade500,
+                      onRename: (name) {
+                        item.data.name = name;
+                        controller.file.core.captureJournalEntry();
+                      },
                     ),
-                  ),
-                ],
-              ),
+                  )),
             ),
             valueListenable: item.data.stageItem.selectionState,
+          ),
+          dragItemBuilder: (context, items, style) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: items
+                .map(
+                  (item) => Text(
+                    item.data.name,
+                    style: theme.textStyles.treeDragItem,
+                  ),
+                )
+                .toList(),
           ),
         ),
       ],

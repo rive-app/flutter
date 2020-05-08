@@ -12,5 +12,7 @@ abstract class Drawable extends DrawableBase {
   void blendModeChanged(int from, int to) {}
 
   @override
-  void drawOrderChanged(FractionalIndex from, FractionalIndex to) {}
+  void drawOrderChanged(FractionalIndex from, FractionalIndex to) {
+    artboard?.markDrawOrderDirty();
+  }
 }
