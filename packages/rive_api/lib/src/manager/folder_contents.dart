@@ -32,18 +32,20 @@ class FolderContentsManager with Subscriptions {
     Iterable<FileDM> files;
     Iterable<FolderDM> folders;
     var owner = directory.owner;
-    
+
     if (owner is Team) {
       files = await _fileApi.teamFiles(owner.ownerId, directory.folderId);
       folders = await _folderApi.teamFolders(owner.ownerId);
     } else {
-      files = await _fileApi.myFiles(directory.folderId ?? 1);
+      files = await _fileApi.myFiles(directory.folderId);
       folders = await _folderApi.myFolders();
     }
 
-    print("Got my files & folders $files\n$folders");
+    print("Got my files & folders:\n$files\n$folders");
     // TODO: don't download them all again?
-    folders = folders.where((folder) => folder.parent == directory.folderId);
+    // Top folder has ID 1, but its children have their parent ID set to null.
+    final parentId = directory.folderId == 1 ? null : directory.folderId;
+    folders = folders.where((folder) => folder.parent == parentId);
     var contents = FolderContents(
       File.fromDMList(files.toList(growable: false)),
       Folder.fromDMList(folders.toList(growable: false)),
