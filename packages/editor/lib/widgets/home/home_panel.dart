@@ -302,10 +302,7 @@ class HomeStream extends StatelessWidget {
             child: NavigationPanelStream(),
           ),
           Expanded(
-            child: Container(
-              color: Colors.amberAccent,
-              child: FileBrowserStream(),
-            ),
+            child: FileBrowserStream(),
           ),
           if (isTeam)
             ResizePanel(
