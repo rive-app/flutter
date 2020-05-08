@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:core/field_types/core_double_type.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
+import 'package:rive_core/animation/keyframe_interpolation.dart';
 
 /// We extend the CoreFieldTypes to support Rive specific features that we're
 /// interested in per Core property, such as whether a property can be
@@ -16,7 +17,8 @@ abstract class KeyFrameGenerator<T extends KeyFrame> {
 class RiveDoubleType extends CoreDoubleType
     implements KeyFrameGenerator<KeyFrameDouble> {
   @override
-  KeyFrameDouble makeKeyFrame() => KeyFrameDouble();
+  KeyFrameDouble makeKeyFrame() =>
+      KeyFrameDouble()..interpolation = KeyFrameInterpolation.linear;
 
   RiveDoubleType._constructor();
   static RiveDoubleType instance = RiveDoubleType._constructor();

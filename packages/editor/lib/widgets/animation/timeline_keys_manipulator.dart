@@ -11,9 +11,8 @@ import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
-import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -32,17 +31,18 @@ class TimelineKeysManipulator extends StatefulWidget {
   final RiveThemeData theme;
   final ScrollController verticalScroll;
   final EditingAnimationManager animationManager;
+  final KeyFrameManager keyFrameManager;
   final OpenFileContext activeFile;
   final TimelineViewport viewport;
   final List<FlatTreeItem<KeyHierarchyViewModel>> rows;
 
-  final Widget Function(BuildContext context, HashSet<KeyFrame> selection)
-      builder;
+  final WidgetBuilder builder;
 
   const TimelineKeysManipulator({
     @required this.theme,
     @required this.verticalScroll,
     @required this.animationManager,
+    @required this.keyFrameManager,
     @required this.activeFile,
     @required this.builder,
     @required this.viewport,
@@ -71,7 +71,6 @@ class _Marquee {
 }
 
 class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
-  HashSet<KeyFrame> _selection = HashSet<KeyFrame>();
   _DragOperation _dragOperation;
   KeyFrameMoveHelper _moveHelper;
   CursorInstance _handCursor;
@@ -92,8 +91,6 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     super.initState();
     widget.verticalScroll?.addListener(_onVerticalScrollChanged);
     _onVerticalScrollChanged();
-    widget.activeFile.addActionHandler(_onAction);
-    widget.activeFile.selection.addListener(_stageSelectionChanged);
   }
 
   @override
@@ -107,12 +104,6 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
       oldWidget.verticalScroll?.removeListener(_onVerticalScrollChanged);
       widget.verticalScroll?.addListener(_onVerticalScrollChanged);
       _onVerticalScrollChanged();
-    }
-    if (oldWidget.activeFile != widget.activeFile) {
-      oldWidget.activeFile.removeActionHandler(_onAction);
-      widget.activeFile.addActionHandler(_onAction);
-      oldWidget.activeFile.selection.removeListener(_stageSelectionChanged);
-      widget.activeFile.selection.addListener(_stageSelectionChanged);
     }
   }
 
@@ -129,32 +120,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     widget.verticalScroll?.removeListener(_onVerticalScrollChanged);
     _handCursor?.remove();
     _handCursor = null;
-    widget.activeFile.selection.removeListener(_stageSelectionChanged);
-    widget.activeFile.removeActionHandler(_onAction);
     super.dispose();
-  }
-
-  void _clearSelection() {
-    setState(() {
-      _selection = HashSet<KeyFrame>();
-    });
-  }
-
-  void _stageSelectionChanged() {
-    _clearSelection();
-  }
-
-  bool _onAction(ShortcutAction action) {
-    switch (action) {
-      case ShortcutAction.delete:
-        if (_selection.isNotEmpty) {
-          widget.animationManager.deleteKeyFrames.add(_selection);
-          _clearSelection();
-          return true;
-        }
-        break;
-    }
-    return false;
   }
 
   MouseTimelineHelper makeMouseHelper() {
@@ -197,12 +163,13 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
       startVerticalOffset: min(dy, _marqueeStart.dy),
       endVerticalOffset: max(dy, _marqueeStart.dy),
     );
+
     // Compute selected items.
-    var selected = viewportHelper.framesIn(marquee);
+    widget.keyFrameManager.changeSelection
+        .add(viewportHelper.framesIn(marquee));
 
     setState(() {
       _marquee = marquee;
-      _selection = selected;
     });
 
     // Update edge scroll
@@ -246,12 +213,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           return;
         }
 
-        var selected = HashSet<KeyFrame>();
-
-        // Gotta clean this up.
-        if (widget.activeFile.rive.selectionMode.value == SelectionMode.multi) {
-          selected.addAll(_selection);
-        }
+        var toSelect = HashSet<KeyFrame>();
 
         var helper = makeMouseHelper();
 
@@ -261,11 +223,11 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           verticalOffset,
         );
         if (frame is KeyFrame) {
-          selected.add(frame);
+          toSelect.add(frame);
         } else if (frame is AllKeyFrame) {
-          selected.addAll(frame.keyframes);
+          toSelect.addAll(frame.keyframes);
         }
-        if (selected.isNotEmpty) {
+        if (toSelect.isNotEmpty) {
           // If we selected something, store the position we started this press
           // operation from. We'll use this in the drag (onPointerMove).
           _dragOperation = _DragOperation.move;
@@ -277,12 +239,9 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
               seconds, details.pointerEvent.localPosition.dy + verticalOffset);
         }
 
-        // Change the selection only if something new was selected...
-        if (selected.isEmpty || !_selection.containsAll(selected)) {
-          setState(() {
-            _selection = selected;
-          });
-        }
+        // Tell our manager to update the selection, it'll automatically handle
+        // multiselection for us.
+        widget.keyFrameManager.changeSelection.add(toSelect);
       },
       onPointerMove: (details) {
         switch (_dragOperation) {
@@ -290,7 +249,8 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
             _pan(details.pointerEvent.localDelta * -1);
             break;
           case _DragOperation.move:
-            if (_selection.isNotEmpty) {
+            var currentSelection = widget.keyFrameManager.selection.value;
+            if (currentSelection.isNotEmpty) {
               // TODO: cache viewport helpers? probably not worth it...
               var viewportHelper = makeMouseHelper();
               var seconds = viewportHelper
@@ -298,7 +258,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
               _moveHelper ??= KeyFrameMoveHelper(
                   widget.animationManager.animation,
-                  _selection.toList(),
+                  currentSelection.toList(),
                   seconds);
               _moveHelper.dragTo(seconds);
             }
@@ -313,6 +273,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         }
       },
       onPointerUp: (details) {
+        widget.keyFrameManager.completeSelection();
         _edgeScrollTimer?.cancel();
         _edgeScrollTimer = null;
         _dragOperation = null;
@@ -327,10 +288,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: widget.builder(
-              context,
-              _selection,
-            ),
+            child: widget.builder(context),
           ),
           Positioned.fill(
             child: _MarqueeRenderer(
@@ -516,7 +474,7 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
   ) {
     // First find closest row.
     var rowIndex = ((verticalScroll + position.dy) / _rowHeight).floor();
-    if(rowIndex < 0 || rowIndex >= rows.length) {
+    if (rowIndex < 0 || rowIndex >= rows.length) {
       return null;
     }
     var row = rows[rowIndex].data;

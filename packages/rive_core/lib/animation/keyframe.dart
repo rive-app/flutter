@@ -1,6 +1,7 @@
 import 'package:core/core.dart' as core;
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/animation/keyframe_interpolation.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 export 'package:rive_core/src/generated/animation/keyframe_base.dart';
@@ -11,6 +12,18 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
     implements KeyFrameInterface {
   double _timeInSeconds;
   double get seconds => _timeInSeconds;
+
+  KeyFrameInterpolation get interpolation => interpolationType == null
+      ? null
+      : KeyFrameInterpolation.values[interpolationType];
+  set interpolation(KeyFrameInterpolation value) {
+    interpolationType = value.index;
+  }
+
+  @override
+  void interpolationTypeChanged(int from, int to) {
+    keyedProperty?.internalKeyFrameInterpolationChanged();
+  }
 
   @override
   void onAdded() {

@@ -169,6 +169,8 @@ class RiveColors {
   Color get workAreaBackground => const Color(0xFF2C2C2C);
   Color get workAreaDelineator => const Color(0xFF111111);
   Color get timelineButtonBackGroundHover => const Color(0xFF323232);
+  Color get interpolationUnderline => const Color(0xFF181818);
+  Color get interpolationCurveBackground => const Color(0xFF303030);
 }
 
 /// TextStyles used in the Rive Theme

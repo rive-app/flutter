@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/widgets/animation/interpolation_panel.dart';
 import 'package:rive_editor/widgets/animation/playhead.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
@@ -153,7 +154,10 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
             ],
           ),
         ),
-        const SizedBox(width: 200),
+        SizedBox(
+          width: 200,
+          child: InterpolationPanel(),
+        ),
       ],
     );
   }

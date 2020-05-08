@@ -58,36 +58,35 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
   void frameChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
-  /// Interpolation field with key 68.
-  int _interpolation;
-  static const int interpolationPropertyKey = 68;
+  /// InterpolationType field with key 68.
+  int _interpolationType;
+  static const int interpolationTypePropertyKey = 68;
 
-  /// The type of interpolation index in KeyInterpolatorType applied to this
+  /// The type of interpolation index in KeyframeInterpolation applied to this
   /// keyframe.
-  int get interpolation => _interpolation;
+  int get interpolationType => _interpolationType;
 
-  /// Change the [_interpolation] field value.
-  /// [interpolationChanged] will be invoked only if the field's value has
+  /// Change the [_interpolationType] field value.
+  /// [interpolationTypeChanged] will be invoked only if the field's value has
   /// changed.
-  set interpolation(int value) {
-    if (_interpolation == value) {
+  set interpolationType(int value) {
+    if (_interpolationType == value) {
       return;
     }
-    int from = _interpolation;
-    _interpolation = value;
-    onPropertyChanged(interpolationPropertyKey, from, value);
-    interpolationChanged(from, value);
+    int from = _interpolationType;
+    _interpolationType = value;
+    onPropertyChanged(interpolationTypePropertyKey, from, value);
+    interpolationTypeChanged(from, value);
   }
 
-  void interpolationChanged(int from, int to);
+  void interpolationTypeChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// InterpolatorId field with key 69.
   Id _interpolatorId;
   static const int interpolatorIdPropertyKey = 69;
 
-  /// The id of the custom interpolator used when interpolation ==
-  /// KeyInterpolatorType.custom.
+  /// The id of the custom interpolator used when interpolation is Cubic.
   Id get interpolatorId => _interpolatorId;
 
   /// Change the [_interpolatorId] field value.
@@ -114,8 +113,9 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     if (frame != null) {
       onPropertyChanged(framePropertyKey, frame, frame);
     }
-    if (interpolation != null) {
-      onPropertyChanged(interpolationPropertyKey, interpolation, interpolation);
+    if (interpolationType != null) {
+      onPropertyChanged(
+          interpolationTypePropertyKey, interpolationType, interpolationType);
     }
     if (interpolatorId != null) {
       onPropertyChanged(
@@ -130,8 +130,8 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
         return keyedPropertyId as K;
       case framePropertyKey:
         return frame as K;
-      case interpolationPropertyKey:
-        return interpolation as K;
+      case interpolationTypePropertyKey:
+        return interpolationType as K;
       case interpolatorIdPropertyKey:
         return interpolatorId as K;
       default:
@@ -144,7 +144,7 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     switch (propertyKey) {
       case keyedPropertyIdPropertyKey:
       case framePropertyKey:
-      case interpolationPropertyKey:
+      case interpolationTypePropertyKey:
       case interpolatorIdPropertyKey:
         return true;
       default:

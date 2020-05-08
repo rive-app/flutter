@@ -16,11 +16,6 @@ class LinearAnimation extends LinearAnimationBase {
   Listenable get keyframesChanged => _keyframesChanged;
   Listenable get keyframeValueChanged => _keyframeValueChanged;
 
-  int _lastFrame = 0;
-
-  /// The last frame with a keyframe on it.
-  int get lastFrame => _lastFrame;
-
   /// Map objectId to KeyedObject. N.B. this is the id of the object that we
   /// want to key in core, not of the KeyedObject. It's a clear way to see if an
   /// object is keyed in this animation.
@@ -128,22 +123,11 @@ class LinearAnimation extends LinearAnimationBase {
   @override
   void workStartChanged(int from, int to) {}
 
-
   /// Should be @internal when supported.
   void internalKeyFramesChanged() {
-    _computeLastKeyFrameTime();
     _keyframesChanged.notify();
   }
 
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() => _keyframeValueChanged.notify();
-
-  void _computeLastKeyFrameTime() {
-    _lastFrame = 0;
-    for (final property in _keyedObjects.values) {
-      if (property.lastFrame > _lastFrame) {
-        _lastFrame = property.lastFrame;
-      }
-    }
-  }
 }

@@ -29,7 +29,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
   ParametricPath _path;
 
   Artboard _currentArtboard;
-  
+
   final StageToolTip _tip = StageToolTip();
 
   @override
@@ -161,7 +161,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
           ..style = PaintingStyle.stroke
           ..color = RiveThemeData().colors.shapeBounds);
 
-    _tip.paint(canvas, Offset(cursor[0]+10, cursor[1]+10));
+    _tip.paint(canvas, Offset(cursor[0] + 10, cursor[1] + 10));
   }
 
   @override

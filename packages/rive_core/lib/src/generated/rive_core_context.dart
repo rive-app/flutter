@@ -172,8 +172,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'keyedPropertyId';
       case KeyFrameBase.framePropertyKey:
         return 'frame';
-      case KeyFrameBase.interpolationPropertyKey:
-        return 'interpolation';
+      case KeyFrameBase.interpolationTypePropertyKey:
+        return 'interpolationType';
       case KeyFrameBase.interpolatorIdPropertyKey:
         return 'interpolatorId';
       case KeyFrameDoubleBase.valuePropertyKey:
@@ -338,7 +338,7 @@ abstract class RiveCoreContext extends CoreContext {
           break;
         case KeyedPropertyBase.propertyKeyPropertyKey:
         case KeyFrameBase.framePropertyKey:
-        case KeyFrameBase.interpolationPropertyKey:
+        case KeyFrameBase.interpolationTypePropertyKey:
         case LinearAnimationBase.fpsPropertyKey:
         case LinearAnimationBase.durationPropertyKey:
         case LinearAnimationBase.loopValuePropertyKey:
@@ -452,7 +452,7 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case KeyedPropertyBase.propertyKeyPropertyKey:
       case KeyFrameBase.framePropertyKey:
-      case KeyFrameBase.interpolationPropertyKey:
+      case KeyFrameBase.interpolationTypePropertyKey:
       case LinearAnimationBase.fpsPropertyKey:
       case LinearAnimationBase.durationPropertyKey:
       case LinearAnimationBase.loopValuePropertyKey:
@@ -620,9 +620,9 @@ abstract class RiveCoreContext extends CoreContext {
           object.frame = value;
         }
         break;
-      case KeyFrameBase.interpolationPropertyKey:
+      case KeyFrameBase.interpolationTypePropertyKey:
         if (object is KeyFrameBase && value is int) {
-          object.interpolation = value;
+          object.interpolationType = value;
         }
         break;
       case KeyFrameBase.interpolatorIdPropertyKey:
@@ -1087,9 +1087,9 @@ abstract class RiveCoreContext extends CoreContext {
           return object.frame;
         }
         break;
-      case KeyFrameBase.interpolationPropertyKey:
+      case KeyFrameBase.interpolationTypePropertyKey:
         if (object is KeyFrameBase) {
-          return object.interpolation;
+          return object.interpolationType;
         }
         break;
       case KeyFrameBase.interpolatorIdPropertyKey:
@@ -1385,7 +1385,7 @@ abstract class RiveCoreContext extends CoreContext {
         return idType;
       case KeyedPropertyBase.propertyKeyPropertyKey:
       case KeyFrameBase.framePropertyKey:
-      case KeyFrameBase.interpolationPropertyKey:
+      case KeyFrameBase.interpolationTypePropertyKey:
       case LinearAnimationBase.fpsPropertyKey:
       case LinearAnimationBase.durationPropertyKey:
       case LinearAnimationBase.loopValuePropertyKey:
@@ -1484,8 +1484,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as KeyedPropertyBase).propertyKey;
       case KeyFrameBase.framePropertyKey:
         return (object as KeyFrameBase).frame;
-      case KeyFrameBase.interpolationPropertyKey:
-        return (object as KeyFrameBase).interpolation;
+      case KeyFrameBase.interpolationTypePropertyKey:
+        return (object as KeyFrameBase).interpolationType;
       case LinearAnimationBase.fpsPropertyKey:
         return (object as LinearAnimationBase).fps;
       case LinearAnimationBase.durationPropertyKey:
@@ -1674,8 +1674,8 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyFrameBase.framePropertyKey:
         (object as KeyFrameBase).frame = value;
         break;
-      case KeyFrameBase.interpolationPropertyKey:
-        (object as KeyFrameBase).interpolation = value;
+      case KeyFrameBase.interpolationTypePropertyKey:
+        (object as KeyFrameBase).interpolationType = value;
         break;
       case LinearAnimationBase.fpsPropertyKey:
         (object as LinearAnimationBase).fps = value;
