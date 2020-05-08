@@ -21,7 +21,7 @@ import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
-import 'package:rive_api/src/model/model.dart';
+import 'package:rive_api/model.dart';
 
 /// Builds a TreeView styled for folders.
 class FolderTreeView extends StatelessWidget {
@@ -127,7 +127,7 @@ class FolderTreeViewStream extends StatelessWidget {
       style: style,
       controller: controller,
       expanderBuilder: (context, item, style) => StreamBuilder<bool>(
-        stream: item.data.selected.stream,
+        stream: item.data.selectedStream,
         builder: (context, selectedStream) => Container(
           child: Center(
             child: TreeExpander(
@@ -153,7 +153,7 @@ class FolderTreeViewStream extends StatelessWidget {
         ),
       ),
       iconBuilder: (context, item, style) => StreamBuilder<bool>(
-        stream: item.data.selected.stream,
+        stream: item.data.selectedStream,
         builder: (context, selectedStream) => Container(
           width: 15,
           height: 15,
@@ -171,11 +171,11 @@ class FolderTreeViewStream extends StatelessWidget {
       extraBuilder: (context, item, index) => Container(),
       backgroundBuilder: (context, item, style) {
         return StreamBuilder<bool>(
-            stream: item.data.selected.stream,
+            stream: item.data.selectedStream,
             builder: (context, selectedStream) {
               bool selected = selectedStream.hasData && selectedStream.data;
               return StreamBuilder<bool>(
-                  stream: item.data.hover.stream,
+                  stream: item.data.hoverStream,
                   builder: (context, hoverStream) {
                     bool hovered = hoverStream.hasData && hoverStream.data;
                     var _selectionState = SelectionState.none;
@@ -189,7 +189,7 @@ class FolderTreeViewStream extends StatelessWidget {
             });
       },
       itemBuilder: (context, item, style) => StreamBuilder<bool>(
-        stream: item.data.selected.stream,
+        stream: item.data.selectedStream,
         builder: (context, selectedStream) => Expanded(
           child: Container(
             child: IgnorePointer(

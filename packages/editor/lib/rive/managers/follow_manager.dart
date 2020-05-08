@@ -3,7 +3,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/api.dart';
 
 import 'package:rive_api/apis/follow.dart';
 import 'package:rive_api/models/follow.dart';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
+import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
@@ -17,7 +18,6 @@ import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 
 import 'package:rive_api/manager.dart';
-import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 
 class NavigationPanel extends StatefulWidget {
@@ -183,7 +183,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                         SliverToBoxAdapter(
                           child: Separator(
                             color: riveColors.fileLineGrey,
-                            padding: EdgeInsets.only(
+                            padding: const EdgeInsets.only(
                               left: 20,
                             ),
                           ),
@@ -341,17 +341,17 @@ class _NavigationPanelStreamState extends State<NavigationPanelStream> {
             padding: const EdgeInsets.only(top: 10),
           ),
           Expanded(
-            child: StreamBuilder<List<BehaviorSubject<FolderTree>>>(
-              stream: Plumber().getStream<List<BehaviorSubject<FolderTree>>>(),
+            child:
+                StreamBuilder<List<BehaviorSubject<FolderTreeItemController>>>(
+              stream: Plumber()
+                  .getStream<List<BehaviorSubject<FolderTreeItemController>>>(),
               builder: (context, snapshot) {
                 var slivers = <Widget>[];
                 if (snapshot.data != null) {
                   for (int i = 0; i < snapshot.data.length; i++) {
                     // TODO: rather than folderTree's we prob ably rely on this controller?
                     slivers.add(FolderTreeViewStream(
-                        style: treeStyle,
-                        controller:
-                            FolderTreeItemController(snapshot.data[i].value)));
+                        style: treeStyle, controller: snapshot.data[i].value));
 
                     /// TODO: Matt take a look at this please
                     /// This works once, but when you switch away from the tab adn back into it. it all blows up pretty badly

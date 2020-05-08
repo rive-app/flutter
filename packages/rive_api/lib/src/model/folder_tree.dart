@@ -36,12 +36,12 @@ class FolderTree {
 
 class FolderTreeItem {
   FolderTreeItem({@required this.folder, @required this.children, this.owner}) {
-    hover.add(false);
-    selected.add(false);
+    hover = false;
+    selected = false;
   }
   final Folder folder;
-  final hover = BehaviorSubject<bool>();
-  final selected = BehaviorSubject<bool>();
+  final _hover = BehaviorSubject<bool>();
+  final _selected = BehaviorSubject<bool>();
   final Owner owner;
   final List<FolderTreeItem> children;
 
@@ -51,6 +51,23 @@ class FolderTreeItem {
 
   String get name {
     return (owner == null) ? this.folder.name : owner.displayName;
+  }
+
+  BehaviorSubject<bool> get hoverStream => _hover;
+  BehaviorSubject<bool> get selectedStream => _selected;
+  get selected => _selected.value;
+  get hover => _hover.value;
+
+  set selected(bool value) {
+    if (selected != value) {
+      _selected.add(value);
+    }
+  }
+
+  set hover(bool value) {
+    if (hover != value) {
+      _hover.add(value);
+    }
   }
 
   factory FolderTreeItem.dummy(Owner owner) {

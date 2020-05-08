@@ -135,23 +135,29 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
   @override
   void onMouseEnter(
       PointerEnterEvent event, FlatTreeItem<FolderTreeItem> item) {
-    item.data.hover.add(true);
+    item.data.hover = true;
   }
 
   @override
   void onMouseExit(PointerExitEvent event, FlatTreeItem<FolderTreeItem> item) {
-    item.data.hover.add(false);
+    item.data.hover = false;
+  }
+
+  void select(CurrentDirectory currentDirectory) {
+    items.forEach((element) {
+      if (_data.first.owner == currentDirectory.owner &&
+          element.folder.id == currentDirectory.folderId) {
+        element.selected = true;
+      } else {
+        element.selected = false;
+      }
+    });
   }
 
   @override
   void onTap(FlatTreeItem<FolderTreeItem> item) {
     Plumber().message<CurrentDirectory>(
-        CurrentDirectory(item.data.owner, item.data.folder.id));
-
-    flat.forEach((element) {
-      element.data.selected.add(false);
-    });
-    item.data.selected.add(true);
+        CurrentDirectory(_data.first.owner, item.data.folder.id));
   }
 
   @override
@@ -162,4 +168,16 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
   @override
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<FolderTreeItem> item) {}
+
+  Iterable<FolderTreeItem> get items sync* {
+    if (_data.isNotEmpty) {
+      var stack = [_data.first];
+      FolderTreeItem tmpElement;
+      while (stack.isNotEmpty) {
+        tmpElement = stack.removeLast();
+        stack.addAll(tmpElement.children);
+        yield tmpElement;
+      }
+    }
+  }
 }
