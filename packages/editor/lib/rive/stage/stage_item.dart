@@ -57,6 +57,8 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   /// transform handles should always draw after other content.
   int get drawOrder => 1;
 
+  int compareDrawOrderTo(StageItem other) => drawOrder - other.drawOrder;
+
   /// Whether the system automatically handles adding and removing this item
   /// to/from the stage. Most [Component]s want the system to automatically add
   /// their corresponding StageItem (if any) when the [Component] is added to

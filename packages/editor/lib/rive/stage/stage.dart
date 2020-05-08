@@ -104,6 +104,7 @@ class Stage extends Debouncer {
   bool _mouseDownSelected = false;
   EditMode activeEditMode = EditMode.normal;
   bool _isHidingCursor = false;
+  int _hoverOffsetIndex = -1;
 
   CustomSelectionHandler customSelectionHandler;
 
@@ -344,29 +345,49 @@ class Stage extends Debouncer {
   bool get showSelection => !_isHidingCursor;
   bool get isSelectionEnabled => !_isHidingCursor;
 
-  void mouseMove(int button, double x, double y) {
-    _computeWorldMouse(x, y);
-    _updatePanIcon();
-
-    file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
-
+  void _updateHover() {
     if (isSelectionEnabled) {
-      AABB viewAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
+      AABB cursorAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
           _worldMouse[0] + 1, _worldMouse[1] + 1);
       StageItem hover;
-      visTree.query(viewAABB, (int proxyId, StageItem item) {
-        if (item.isSelectable &&
-            item.drawOrder >= (hover?.drawOrder ?? 0) &&
-            item.hitHiFi(_worldMouse)) {
-          hover = item.hoverTarget;
+      if (_hoverOffsetIndex == -1) {
+        visTree.query(cursorAABB, (int proxyId, StageItem item) {
+          if (item.isSelectable &&
+              (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
+              item.hitHiFi(_worldMouse)) {
+            hover = item.hoverTarget;
+          }
+          return true;
+        });
+      } else {
+        List<StageItem> candidates = [];
+        visTree.query(cursorAABB, (int proxyId, StageItem item) {
+          if (item.isSelectable && item.hitHiFi(_worldMouse)) {
+            candidates.add(item);
+          }
+          return true;
+        });
+        if (candidates.isNotEmpty) {
+          candidates.sort((a, b) => b.compareDrawOrderTo(a));
+          hover = candidates[_hoverOffsetIndex % candidates.length];
         }
-        return true;
-      });
+      }
       hover?.isHovered = true;
       if (hover == null) {
         hoverItem = null;
       }
     }
+  }
+
+  void mouseMove(int button, double x, double y) {
+    _hoverOffsetIndex = -1;
+    _computeWorldMouse(x, y);
+    _updatePanIcon();
+
+    file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
+
+    _updateHover();
+
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
@@ -390,7 +411,7 @@ class Stage extends Debouncer {
           final artboard = activeArtboard;
           (tool as ClickableTool)
               .onClick(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
-        } else if(isSelectionEnabled) {
+        } else if (isSelectionEnabled) {
           if (_hoverItem != null) {
             _mouseDownSelected = true;
             if (customSelectionHandler != null) {
@@ -403,8 +424,7 @@ class Stage extends Debouncer {
           } else {
             _mouseDownSelected = false;
           }
-        }
-        else {
+        } else {
           _mouseDownSelected = false;
         }
 
@@ -527,6 +547,19 @@ class Stage extends Debouncer {
       }
     }
     _isActiveSubscription = file.isActiveStream.listen(_fileActiveChanged);
+
+    file.addActionHandler(_handleAction);
+  }
+
+  bool _handleAction(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.cycleHover:
+        _hoverOffsetIndex = max(1, _hoverOffsetIndex + 1);
+        _updateHover();
+        return true;
+      default:
+        return false;
+    }
   }
 
   /// Deal with the fileContext being activate/de-activated. This happens when a
@@ -639,6 +672,7 @@ class Stage extends Debouncer {
   }
 
   void dispose() {
+    file.removeActionHandler(_handleAction);
     _isActiveSubscription.cancel();
     _fileActiveChanged(false);
     _panHandCursor?.remove();

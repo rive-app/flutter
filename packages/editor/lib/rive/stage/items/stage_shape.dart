@@ -50,4 +50,14 @@ class StageShape extends StageContourItem<Shape> {
     canvas.drawPath(worldPath, StageItem.selectedPaint);
     canvas.restore();
   }
+
+  @override
+  int compareDrawOrderTo(StageItem other) {
+    if (other is StageShape) {
+      // check drawable order
+      return component.drawOrder.compareTo(other.component.drawOrder);
+    } else {
+      return super.compareDrawOrderTo(other);
+    }
+  }
 }
