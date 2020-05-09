@@ -522,8 +522,10 @@ abstract class CoreContext implements LocalSettings {
     bool sendToCoop = true,
   }) {
     Set<Core> regeneratedObjects = {};
+
+    // First regenerate objects before changing any property key anywhere in the
+    // changeset.
     changes.entries.forEach((objectId, objectChanges) {
-      bool regenerated = false;
       var object = _objects[objectId];
       if (object == null) {
         var hydrateKey = isUndo ? removeKey : addKey;
@@ -533,11 +535,19 @@ abstract class CoreContext implements LocalSettings {
         for (final entry in objectChanges.entries) {
           if (entry.key == hydrateKey) {
             object = makeCoreInstance(entry.value.to as int);
-            regenerated = true;
+            regeneratedObjects.add(object);
+            object.id = objectId;
+            object.context = this;
+            _objects[object.id] = object;
             break entryLoop;
           }
         }
       }
+    });
+
+    // Ok all objects have been regenerated, go ahead and change properties.
+    changes.entries.forEach((objectId, objectChanges) {
+      var object = _objects[objectId];
       if (object != null) {
         objectChanges.forEach((propertyKey, change) {
           if (propertyKey == addKey) {
@@ -565,11 +575,7 @@ abstract class CoreContext implements LocalSettings {
           }
         });
       }
-      if (regenerated) {
-        regeneratedObjects.add(object);
-        object.id = objectId;
-        object.context = this;
-        _objects[object.id] = object;
+      if (regeneratedObjects.contains(object)) {
         onAddedDirty(object);
 
         // var changes = CorePropertyChanges();

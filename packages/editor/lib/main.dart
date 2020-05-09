@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/hierarchy_panel.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 
@@ -317,6 +318,13 @@ class Editor extends StatelessWidget {
                             },
                             select: (EditorMode mode) {
                               file.mode.value = mode;
+                              // If animate mode is selected, automatically
+                              // select the translate tool
+                              if (mode == EditorMode.animate) {
+                                file.rive.triggerAction(
+                                  ShortcutAction.translateTool,
+                                );
+                              }
                             },
                           ),
                         ),

@@ -24,7 +24,9 @@ class KeyFrameDouble extends KeyFrameDoubleBase {
       double currentTime, KeyFrameDouble nextFrame, double mix) {
     var f = (currentTime - seconds) / (nextFrame.seconds - seconds);
 
-    // TODO: add cubic
+    if (interpolator != null) {
+      f = interpolator.transform(f);
+    }
 
     var interpolatedValue = value + (nextFrame.value - value) * f;
 
@@ -39,9 +41,6 @@ class KeyFrameDouble extends KeyFrameDoubleBase {
               interpolatedValue * mix);
     }
   }
-
-  @override
-  void interpolatorIdChanged(Id from, Id to) {}
 
   @override
   void keyedPropertyIdChanged(Id from, Id to) {}

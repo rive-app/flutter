@@ -19,6 +19,15 @@ class KeyFrameList<T extends KeyFrameInterface> {
   Iterable<T> get keyframes => _keyframes;
   set keyframes(Iterable<T> frames) => _keyframes = frames.toList();
 
+  /// Get the keyframe immediately following the provided one.
+  T after(T keyframe) {
+    var index = _keyframes.indexOf(keyframe);
+    if (index != -1 && index + 1 < _keyframes.length) {
+      return _keyframes[index + 1];
+    }
+    return null;
+  }
+
   /// Find the index in the keyframe list of a specific time frame.
   int indexOfFrame(int frame) {
     int idx = 0;

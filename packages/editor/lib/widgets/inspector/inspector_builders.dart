@@ -2,7 +2,6 @@ import 'package:rive_editor/widgets/inspector/backboard_inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/fills_inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/alignment_inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/artboard_inspector_builder.dart';
-import 'package:rive_editor/widgets/inspector/inspect_comboboxes_example.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/strokes_inspector_builder.dart';
 
@@ -17,5 +16,4 @@ final List<InspectorBuilder> inspectorBuilders = [
   TransformInspectorBuilder(),
   FillsInspectorBuilder(),
   StrokesInspectorBuilder(),
-  InspectComboBoxExample(),
 ];

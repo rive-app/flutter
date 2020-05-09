@@ -156,7 +156,7 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant _TimelineKeysRenderObject renderObject) {
+      BuildContext context, _TimelineKeysRenderObject renderObject) {
     renderObject
       ..theme = theme
       ..verticalScrollOffset = verticalScrollOffset
@@ -165,7 +165,6 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..animation = animation
       ..selection = selection
       ..workArea = workArea;
-    ;
   }
 
   @override

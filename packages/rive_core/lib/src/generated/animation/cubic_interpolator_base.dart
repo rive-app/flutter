@@ -15,7 +15,7 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
 
   /// --------------------------------------------------------------------------
   /// X1 field with key 63.
-  double _x1;
+  double _x1 = 0.42;
   static const int x1PropertyKey = 63;
   double get x1 => _x1;
 
@@ -35,7 +35,7 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
 
   /// --------------------------------------------------------------------------
   /// Y1 field with key 64.
-  double _y1;
+  double _y1 = 0;
   static const int y1PropertyKey = 64;
   double get y1 => _y1;
 
@@ -55,7 +55,7 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
 
   /// --------------------------------------------------------------------------
   /// X2 field with key 65.
-  double _x2;
+  double _x2 = 0.58;
   static const int x2PropertyKey = 65;
   double get x2 => _x2;
 
@@ -75,7 +75,7 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
 
   /// --------------------------------------------------------------------------
   /// Y2 field with key 66.
-  double _y2;
+  double _y2 = 1;
   static const int y2PropertyKey = 66;
   double get y2 => _y2;
 

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:core/core.dart';
 import 'package:core/debounce.dart';
+import 'package:rive_core/animation/cubic_interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
@@ -11,6 +13,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
 import 'package:utilities/list_equality.dart';
+import 'package:rive_core/animation/interpolator.dart';
 
 class KeyFrameManager extends AnimationManager {
   final OpenFileContext activeFile;
@@ -20,9 +23,10 @@ class KeyFrameManager extends AnimationManager {
   Sink<HashSet<KeyFrame>> get changeSelection => _selectionController;
   ValueStream<HashSet<KeyFrame>> get selection => _selection;
 
-  final _interpolationType = BehaviorSubject<KeyFrameInterpolation>();
-  ValueStream<KeyFrameInterpolation> get interpolationType =>
-      _interpolationType;
+  final _commonInterpolation = BehaviorSubject<InterpolationViewModel>();
+  ValueStream<InterpolationViewModel> get commonInterpolation =>
+      _commonInterpolation;
+
   final _interpolationController = StreamController<KeyFrameInterpolation>();
   Sink<KeyFrameInterpolation> get changeInterpolation =>
       _interpolationController;
@@ -33,6 +37,7 @@ class KeyFrameManager extends AnimationManager {
     activeFile.selection.addListener(_stageSelectionChanged);
     _selectionController.stream.listen(_selectKeyFrames);
     _interpolationController.stream.listen(_changeInterpolation);
+    _updateCommonInterpolation();
   }
 
   void _stageSelectionChanged() => _clearSelection();
@@ -61,16 +66,53 @@ class KeyFrameManager extends AnimationManager {
   void _updateCommonInterpolation() {
     var common = equalValue(
         _selection.value, (KeyFrame keyFrame) => keyFrame.interpolation);
-    if (common != _interpolationType.value) {
-      _interpolationType.add(common);
+    Interpolator commonInterpolator;
+    switch (common) {
+      case KeyFrameInterpolation.linear:
+      case KeyFrameInterpolation.hold:
+        break;
+      default:
+        commonInterpolator = equalValue(
+          _selection.value,
+          (KeyFrame keyFrame) => keyFrame.interpolator,
+          equalityCheck: (Interpolator a, Interpolator b) =>
+              a.equalParameters(b),
+        );
+        // We were of the same type, but our parameters weren't equal, so we
+        // effectively don't have a common editable interpolation type.
+        if (commonInterpolator == null) {
+          common = null;
+        }
+        break;
+    }
+
+    var viewModel = InterpolationViewModel(common, commonInterpolator);
+    if (viewModel != _commonInterpolation.value) {
+      _commonInterpolation.add(viewModel);
     }
   }
 
   void _changeInterpolation(KeyFrameInterpolation interpolation) {
+    var file = animation.context;
     for (final keyFrame in _selection.value) {
       keyFrame.interpolation = interpolation;
+      switch (interpolation) {
+        case KeyFrameInterpolation.cubic:
+          var cubic = CubicInterpolator();
+          // Add it before setting it so that it gets an id.
+          file.add(cubic);
+          keyFrame.interpolator = cubic;
+          break;
+        default:
+          if (keyFrame.interpolator != null) {
+            file.remove(keyFrame.interpolator as Core);
+          }
+          keyFrame.interpolator = null;
+          break;
+      }
     }
-    animation.context.captureJournalEntry();
+
+    file.captureJournalEntry();
     _updateCommonInterpolation();
   }
 
@@ -119,8 +161,15 @@ class KeyFrameManager extends AnimationManager {
     activeFile.selection.removeListener(_stageSelectionChanged);
     _selection.close();
     _selectionController.close();
-    _interpolationType.close();
     _interpolationController.close();
+    _commonInterpolation.close();
     cancelDebounce(_updateCommonInterpolation);
   }
+}
+
+class InterpolationViewModel {
+  final KeyFrameInterpolation type;
+  final Interpolator interpolator;
+
+  InterpolationViewModel(this.type, this.interpolator);
 }
