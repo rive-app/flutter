@@ -18,6 +18,7 @@ class ResizePanel extends StatefulWidget {
   final ResizeSide side;
   final Widget child;
   final double hitSize;
+
   /// You can supply a dead zone to the ResizePanel at the start and the end of
   /// the axis.
   final double deadStart;
@@ -268,7 +269,7 @@ class _ResizePanelState extends State<ResizePanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.direction == ResizeDirection.horizontal ? _size : null,
       height: widget.direction == ResizeDirection.vertical ? _size : null,
       child: Stack(

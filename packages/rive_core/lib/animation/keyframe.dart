@@ -1,5 +1,6 @@
 import 'package:core/core.dart' as core;
 import 'package:logging/logging.dart';
+import 'package:rive_core/animation/interpolator.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
 import 'package:rive_core/rive_file.dart';
@@ -23,6 +24,13 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   @override
   void interpolationTypeChanged(int from, int to) {
     keyedProperty?.internalKeyFrameInterpolationChanged();
+  }
+
+  @override
+  void interpolatorIdChanged(core.Id from, core.Id to) {
+    // This might resolve to null during a load or if context isn't available
+    // yet so we also do this in onAddedDirty.
+    interpolator = context?.resolve(to);
   }
 
   @override
@@ -50,7 +58,14 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   KeyedProperty get keyedProperty => context?.resolve(keyedPropertyId);
 
   @override
-  void onAddedDirty() {}
+  void onAddedDirty() {
+    if (interpolatorId != null) {
+      interpolator = context?.resolve(interpolatorId);
+      if (interpolator == null) {
+        _log.finest("Failed to resolve interpolator with id $interpolatorId");
+      }
+    }
+  }
 
   @override
   void onRemoved() => keyedProperty?.internalRemoveKeyFrame(this);
@@ -72,4 +87,15 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   /// Set the value of this keyframe to the current value of [object]'s
   /// [propertyKey].
   void valueFrom(core.Core object, int propertyKey);
+
+  Interpolator _interpolator;
+  Interpolator get interpolator => _interpolator;
+  set interpolator(Interpolator value) {
+    if (_interpolator == value) {
+      return;
+    }
+    _interpolator = value;
+    interpolatorId = value?.id;
+    keyedProperty?.internalKeyFrameInterpolationChanged();
+  }
 }

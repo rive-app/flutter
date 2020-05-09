@@ -626,8 +626,12 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case KeyFrameBase.interpolatorIdPropertyKey:
-        if (object is KeyFrameBase && value is Id) {
-          object.interpolatorId = value;
+        if (object is KeyFrameBase) {
+          if (value is Id) {
+            object.interpolatorId = value;
+          } else if (value == null) {
+            object.interpolatorId = null;
+          }
         }
         break;
       case KeyFrameDoubleBase.valuePropertyKey:
