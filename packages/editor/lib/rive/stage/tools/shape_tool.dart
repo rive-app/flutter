@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:cursor/cursor_view.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
@@ -9,6 +10,8 @@ import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/constants.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
@@ -31,6 +34,23 @@ abstract class ShapeTool extends StageTool with DraggableTool {
   Artboard _currentArtboard;
 
   final StageToolTip _tip = StageToolTip();
+
+  CursorInstance _customCursor;
+
+  @override
+  bool activate(Stage stage) {
+    if (!super.activate(stage)) {
+      return false;
+    }
+    _customCursor = stage.showCustomCursor('cursor-add');
+    return true;
+  }
+
+  @override
+  void deactivate() {
+    _customCursor?.remove();
+    _customCursor = null;
+  }
 
   @override
   void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
@@ -131,8 +151,9 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
   @override
   void endDrag() {
-    // Intentionally empty, Stage captures journal entries for us when a drag
-    // operation ends.
+    // Stage captures journal entries for us when a drag operation ends.
+    // Ask the stage to switch back to the translate tool
+    stage.activateAction(ShortcutAction.translateTool);
   }
 
   @override

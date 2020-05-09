@@ -432,7 +432,7 @@ class Stage extends Debouncer {
       case 2:
         _isPanning = true;
         _rightClickHandCursor?.remove();
-        _rightClickHandCursor = _showCustomCursor('cursor-hand');
+        _rightClickHandCursor = showCustomCursor('cursor-hand');
         break;
       default:
     }
@@ -591,7 +591,7 @@ class Stage extends Debouncer {
     }
     // _worldMouse is null when we're hovered out of the stage
     if (_worldMouse != null && ShortcutAction.pan.value) {
-      _panHandCursor ??= _showCustomCursor('cursor-hand');
+      _panHandCursor ??= showCustomCursor('cursor-hand');
     } else {
       _panHandCursor?.remove();
       _panHandCursor = null;
@@ -829,10 +829,14 @@ class Stage extends Debouncer {
     delegate?.customCursor?.show();
   }
 
-  CursorInstance _showCustomCursor(String icon) {
+  CursorInstance showCustomCursor(String icon) {
     if (delegate?.customCursor != null) {
       return CursorIcon.build(delegate.customCursor, icon);
     }
     return null;
   }
+
+  /// Trigger an action through the stage. Used to change tool selection after
+  /// an action is completed
+  void activateAction(ShortcutAction action) => file.rive.triggerAction(action);
 }
