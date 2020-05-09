@@ -21,6 +21,7 @@ class DrawOrderTreeController extends TreeController<Component> {
   final OpenFileContext file;
   final Backboard backboard;
   Artboard activeArtboard;
+  DrawableList _drawables = DrawableList();
   DrawOrderTreeController({this.file})
       : backboard = file.core.backboard,
         super() {
@@ -32,6 +33,7 @@ class DrawOrderTreeController extends TreeController<Component> {
     activeArtboard?.drawOrderChanged?.removeListener(flatten);
     activeArtboard = backboard.activeArtboard;
     activeArtboard?.drawOrderChanged?.addListener(flatten);
+    _drawables = activeArtboard?.drawables ?? DrawableList();
     flatten();
   }
 
@@ -43,8 +45,7 @@ class DrawOrderTreeController extends TreeController<Component> {
   }
 
   @override
-  Iterable<Component> get data =>
-      file.core.backboard.activeArtboard.drawables.reversed;
+  Iterable<Component> get data => _drawables.reversed;
 
   set data(Iterable<Component> value) {
     assert(false, "not supported");
