@@ -38,8 +38,11 @@ abstract class StageTool {
   @mustCallSuper
   bool activate(Stage stage) {
     _stage = stage;
-    return true;
+    return validate(stage);
   }
+
+  /// Override this to validate if the tool is valid for the stage.
+  bool validate(Stage stage) => true;
 
   /// Cleanup anything that was setup during activation.
   void deactivate() {}
@@ -51,4 +54,13 @@ abstract class StageTool {
 
   void onEditModeChange() {}
   void draw(Canvas canvas);
+
+  /// Returns true if the stage should advance after movement.
+  bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {
+    return false;
+  }
+
+  void mouseExit(Artboard activeArtboard, Vec2D worldMouse) {}
+  void mouseEnter(Artboard activeArtboard, Vec2D worldMouse) {}
+  void click(Artboard activeArtboard, Vec2D worldMouse) {}
 }

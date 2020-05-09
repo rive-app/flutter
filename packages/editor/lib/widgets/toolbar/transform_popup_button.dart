@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -22,16 +23,18 @@ class TransformPopupButton extends StatelessWidget {
       defaultIcon: 'tool-auto',
       makeItems: (file) {
         return <PopupContextItem>[
-          PopupContextItem(
+          ToolPopupItem(
             'Select',
-            icon: 'tool-auto',
-            shortcut: ShortcutAction.autoTool,
-            select: () {},
+            icon: AutoTool.instance.icon,
+            listenable: file.stage.toolListenable,
+            isSelected: () => file.stage.tool == AutoTool.instance,
+            shortcut: ShortcutAction.translateTool,
+            select: () => file.rive.triggerAction(ShortcutAction.autoTool),
           ),
           ToolPopupItem(
             'Translate',
             icon: TranslateTool.instance.icon,
-            notifier: file.stage.toolNotifier,
+            listenable: file.stage.toolListenable,
             isSelected: () => file.stage.tool == TranslateTool.instance,
             shortcut: ShortcutAction.translateTool,
             select: () => file.rive.triggerAction(ShortcutAction.translateTool),

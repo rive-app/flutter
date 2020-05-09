@@ -21,12 +21,13 @@ import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
+import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/node_tool.dart';
-import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
+import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -182,7 +183,7 @@ class OpenFileContext with RiveFileDelegate {
 
       core.advance(0);
       makeStage();
-      _stage.tool = TranslateTool();
+      _stage.tool = AutoTool.instance;
       _resetTreeControllers();
       stateChanged.notify();
     }
@@ -274,7 +275,7 @@ class OpenFileContext with RiveFileDelegate {
   void _resetTreeControllers() {
     treeController.value?.dispose();
     drawOrderTreeController.value?.dispose();
-    
+
     treeController.value = HierarchyTreeController(this);
     drawOrderTreeController.value = DrawOrderTreeController(
       file: this,
@@ -354,6 +355,10 @@ class OpenFileContext with RiveFileDelegate {
     }
     // No one gives a F#$(C<, let's see if we can help this poor friend.
     switch (action) {
+      case ShortcutAction.autoTool:
+        stage?.tool = AutoTool.instance;
+        return true;
+
       case ShortcutAction.translateTool:
         stage?.tool = TranslateTool.instance;
         return true;
@@ -367,7 +372,7 @@ class OpenFileContext with RiveFileDelegate {
         return true;
 
       case ShortcutAction.penTool:
-        stage?.tool = PenTool.instance;
+        stage?.tool = VectorPenTool.instance;
         return true;
 
       case ShortcutAction.rectangleTool:

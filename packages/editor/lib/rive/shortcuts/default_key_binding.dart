@@ -157,6 +157,12 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
       ],
     ),
     Shortcut(
+      ShortcutAction.autoTool,
+      [
+        ShortcutKey.v,
+      ],
+    ),
+    Shortcut(
       ShortcutAction.translateTool,
       [
         ShortcutKey.t,

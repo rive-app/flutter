@@ -4,16 +4,15 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 
-class NodeTool extends StageTool with ClickableTool {
+class NodeTool extends StageTool {
   static final NodeTool instance = NodeTool._();
 
   NodeTool._();
 
   @override
-  void onClick(Artboard artboard, Vec2D worldMouse) {
+  void click(Artboard artboard, Vec2D worldMouse) {
     final file = stage.file;
     var core = file.core;
 

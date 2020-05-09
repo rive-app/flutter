@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
-import 'package:flutter/material.dart';
 
 /// Custom PopupContextItem that automatically wires itself up to respond to
 /// selected tool changes in the stage. Also automatically wires up the tool
@@ -11,13 +11,13 @@ class ToolPopupItem extends PopupContextItem {
     String name, {
     String icon,
     ShortcutAction shortcut,
-    ValueNotifier notifier,
+    ValueListenable listenable,
     bool Function() isSelected,
     Function() select,
   }) : super(
           name,
           icon: icon,
-          rebuildItem: notifier,
+          rebuildItem: listenable,
           iconColorBuilder: (isHovered) => isSelected()
               ? RiveThemeData().colors.popupIconSelected
               : isHovered
