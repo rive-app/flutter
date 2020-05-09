@@ -391,6 +391,7 @@ class Rive {
 
   void selectTab(RiveTabItem value) {
     if (value == systemTab) {
+      _changeActiveFile(null);
       fileBrowsers?.forEach((fileBrowser) => fileBrowser.load());
     } else if (value.file != null) {
       _changeActiveFile(value.file);

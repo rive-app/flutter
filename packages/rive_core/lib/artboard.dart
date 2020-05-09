@@ -37,7 +37,7 @@ class _AnimationList extends FractionallyIndexedList<Animation> {
   }
 }
 
-class _DrawableList extends FractionallyIndexedList<Drawable> {
+class DrawableList extends FractionallyIndexedList<Drawable> {
   @override
   FractionalIndex orderOf(Drawable drawable) {
     return drawable.drawOrder;
@@ -58,10 +58,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   final Path path = Path();
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
-  final _DrawableList _drawables = _DrawableList();
+  final DrawableList _drawables = DrawableList();
   final Set<Component> _components = {};
 
-  _DrawableList get drawables => _drawables;
+  DrawableList get drawables => _drawables;
 
   // -> editor-only
   /// Event notified whenever the animations list changes.
