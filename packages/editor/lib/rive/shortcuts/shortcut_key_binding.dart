@@ -6,7 +6,6 @@ import 'package:trotter/trotter.dart';
 import 'shortcut_actions.dart';
 import 'shortcut_keys.dart';
 
-
 /// A shortcut comprised of a set of keys that map to an action.
 class Shortcut {
   final ShortcutAction action;
@@ -25,8 +24,8 @@ class ShortcutKeyBinding {
   ShortcutKeyBinding(List<Shortcut> shortcuts) {
     for (final entry in shortcuts) {
       var perms = Permutations(entry.keys.length, entry.keys);
-      for (final v in perms()) {
-        _build(_mapping, 0, v, entry.action);
+      for (var i = 0; i < perms.length.toInt(); i++) {
+        _build(_mapping, 0, perms[i], entry.action);
       }
 
       _keysLookup[entry.action] = entry.keys;

@@ -18,21 +18,17 @@ class Folder {
   final String name;
 
   static List<Folder> fromDMList(List<FolderDM> folders) {
-    // TODO: hack to fix some bad data. need to fix db for this really.
-    // as this confuses things
-    var _defaultParent = folders
-        .firstWhere((element) => element.name == 'Your Files',
-            orElse: () => null)
-        ?.id;
-    return folders
-        .map((folder) => Folder.fromDM(folder, _defaultParent))
-        .toList();
+    return folders.map((folder) => Folder.fromDM(folder)).toList();
   }
 
-  factory Folder.fromDM(FolderDM folder, int defaultParent) {
+  factory Folder.fromDM(FolderDM folder) {
+    // NOTE:
+    // Lets just pretend 'deleted files' lives inside your files
+    // Your Files is id 1
+    // Deleted Files is id 0
     var _parent = folder.parent;
-    if (_parent == null && folder.id != defaultParent) {
-      _parent = defaultParent;
+    if (_parent == null && folder.id == 0) {
+      _parent = 1;
     }
     return Folder(
       ownerId: folder.ownerId,

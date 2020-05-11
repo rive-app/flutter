@@ -355,14 +355,12 @@ class _NavigationPanelStreamState extends State<NavigationPanelStream> {
 
                     /// TODO: Matt take a look at this please
                     /// This works once, but when you switch away from the tab adn back into it. it all blows up pretty badly
-                    // slivers.add(StreamBuilder<FolderTree>(
+                    // slivers.add(StreamBuilder<FolderTreeItemController>(
                     //     stream: snapshot.data[i],
                     //     builder: (context, mySnapshot) {
                     //       if (mySnapshot.hasData) {
                     //         return FolderTreeViewStream(
-                    //             style: treeStyle,
-                    //             controller:
-                    //                 FolderTreeItemController(mySnapshot.data));
+                    //             style: treeStyle, controller: mySnapshot.data);
                     //       } else {
                     //         return SliverToBoxAdapter(child: Container());
                     //       }
