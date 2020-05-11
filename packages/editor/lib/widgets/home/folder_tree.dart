@@ -11,6 +11,7 @@ import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
+import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -333,17 +334,6 @@ class SizedAvatar extends StatelessWidget {
     );
   }
 
-  Widget _networkImage(BuildContext context) {
-    return FutureBuilder<Uint8List>(
-      future: ImageCacheProvider.of(context).loadRawImageFromUrl(url),
-      builder: (context, snapshot) => CircleAvatar(
-        backgroundColor: Colors.transparent,
-        // backgroundImage: NetworkImage(item.data.owner?.avatar),
-        backgroundImage: snapshot.hasData ? MemoryImage(snapshot.data) : null,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     Widget _avatarChild;
@@ -354,7 +344,7 @@ class SizedAvatar extends StatelessWidget {
     } else if (url == null) {
       _avatarChild = _backupIcon(colors);
     } else {
-      _avatarChild = _networkImage(context);
+      _avatarChild = CachedCircleAvatar(url);
     }
     return Center(
         child: SizedBox(

@@ -6,7 +6,7 @@ import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FolderTreeManager with Subscriptions {
-  static FolderTreeManager _instance = FolderTreeManager._();
+  static final FolderTreeManager _instance = FolderTreeManager._();
   factory FolderTreeManager() => _instance;
 
   FolderTreeManager._() {
@@ -24,9 +24,9 @@ class FolderTreeManager with Subscriptions {
 
   Me _me;
   Iterable<Team> _teams;
-  Map<Owner, List<Folder>> _folderMap = Map<Owner, List<Folder>>();
+  final Map<Owner, List<Folder>> _folderMap = <Owner, List<Folder>>{};
   List<BehaviorSubject<FolderTreeItemController>> _folderTreeControllers = [];
-  Map<Owner, BehaviorSubject<FolderTreeItemController>>
+  final Map<Owner, BehaviorSubject<FolderTreeItemController>>
       _folderTreeControllerMap = {};
 
   void _handleNewMe(Me me) {
@@ -85,11 +85,31 @@ class FolderTreeManager with Subscriptions {
     final _foldersDM = await _folderApi.folders(owner.asDM);
     final _folders = Folder.fromDMList(_foldersDM.toList());
     _folderMap[owner] = _folders;
-    _folderTreeControllerMap[owner].add(
-        FolderTreeItemController(FolderTree.fromFolderList(owner, _folders)));
+
+    final _folderTree = FolderTree.fromFolderList(owner, _folders);
+
+    if (_folderTreeControllerMap[owner].value != null) {
+      // update
+      var oldFolderTreeController = _folderTreeControllerMap[owner].value;
+      // lets keep track of whats selected
+
+      // lets keep track of whats opened
+      oldFolderTreeController.data = [_folderTree.root];
+      oldFolderTreeController.refreshExpanded();
+      _folderTreeControllerMap[owner].add(oldFolderTreeController);
+    } else {
+      // create
+      _folderTreeControllerMap[owner]
+          .add(FolderTreeItemController(_folderTree));
+    }
+
     // TODO: still gotta do this which is a real shame
     // gotta sort out our drawer for this really
     _publishFolderTreeControllers();
+  }
+
+  Future<void> reload() async {
+    _folderMap.keys.forEach(loadFolders);
   }
 
   void _publishFolderTreeControllers() {

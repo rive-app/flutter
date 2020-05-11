@@ -1,12 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_core/client_side_player.dart';
+import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
-import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ConnectedUsers extends StatelessWidget {
   final Rive rive;
@@ -79,16 +77,7 @@ class AvatarView extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(1),
             child: hasImage
-                ? FutureBuilder<Uint8List>(
-                    future: ImageCacheProvider.of(context)
-                        .loadRawImageFromUrl(imageUrl),
-                    builder: (context, snapshot) {
-                      return CircleAvatar(
-                        backgroundImage: snapshot.hasData
-                            ? MemoryImage(snapshot.data)
-                            : null,
-                      );
-                    })
+                ? CachedCircleAvatar(imageUrl)
                 : Center(
                     child: Padding(
                       padding: const EdgeInsets.all(3),
