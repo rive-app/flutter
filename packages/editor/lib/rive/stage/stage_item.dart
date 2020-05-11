@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/selectable_item.dart';
@@ -30,6 +31,9 @@ extension StageItemComponent on Component {
 /// representation in the Rive hierarchy. [T] usually inherits from a
 /// [Component], but this is not a hard requirement.
 abstract class StageItem<T> extends SelectableItem with StageItemFriend {
+  final Event _onRemoved = Event();
+  Listenable get onRemoved => _onRemoved;
+
   /// The desired screen space stroke width for a selected StageItem.
   static const double strokeWidth = 2;
 
@@ -115,6 +119,7 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   @mustCallSuper
   void removedFromStage(Stage stage) {
     _stage = null;
+    _onRemoved.notify();
   }
 
   /// The cursor has either moved over or out of the hit area for this item.

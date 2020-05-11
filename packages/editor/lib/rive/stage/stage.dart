@@ -115,6 +115,7 @@ class Stage extends Debouncer {
   CursorInstance _panHandCursor;
 
   bool _isPanning = false;
+  bool get isPanning => _isPanning;
 
   // Clear the selection handler only if it was a previously set one.
   bool clearSelectionHandler(CustomSelectionHandler handler) {
@@ -737,16 +738,20 @@ class Stage extends Debouncer {
 
     double factor = min(1, elapsed * 30);
 
+    bool movedView = false;
     if (ds.abs() > 0.00001) {
       _needsAdvance = true;
+      movedView = true;
       ds *= factor;
     }
     if (dx.abs() > 0.01) {
       _needsAdvance = true;
+      movedView = true;
       dx *= factor;
     }
     if (dy.abs() > 0.01) {
       _needsAdvance = true;
+      movedView = true;
       dy *= factor;
     }
 
@@ -763,6 +768,10 @@ class Stage extends Debouncer {
     // Take this opportunity to update any stageItem paints that rely on the
     // zoom level.
     StageItem.selectedPaint.strokeWidth = StageItem.strokeWidth / _viewZoom;
+
+    if(movedView) {
+      mouseMove(1, _lastMousePosition[0], _lastMousePosition[1]);
+    }
   }
 
   void draw(PaintingContext context, Offset offset, Size size) {
@@ -877,7 +886,7 @@ class Stage extends Debouncer {
   /// Trigger an action through the stage. Used to change tool selection after
   /// an action is completed
   void activateAction(ShortcutAction action) => file.rive.triggerAction(action);
-  
+
   /// The stage has the concept of solo items. This is different from a Solo
   /// Component. When the stage is in solo mode, it means that only solo items
   /// (and their children) can be interacted with. This is useful when doing

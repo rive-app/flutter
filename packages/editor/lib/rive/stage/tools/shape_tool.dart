@@ -24,7 +24,7 @@ const Map<EditMode, DraggingMode> editModeMap = {
 
 abstract class ShapeTool extends StageTool with DraggableTool {
   Vec2D _startWorldMouse;
-  Vec2D _start = Vec2D(), _end = Vec2D(), _cursor = Vec2D();
+  Vec2D _start, _end, _cursor;
 
   Shape shape(Vec2D worldMouse);
   ParametricPath get path;
