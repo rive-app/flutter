@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_api/files.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/user.dart';
@@ -108,6 +109,101 @@ class TopNav extends StatelessWidget {
           await fileBrowser.openFile(rive, file);
         }),
         PopupContextItem('New Folder', select: fileBrowser.createFolder),
+        PopupContextItem.separator(),
+        PopupContextItem(
+          'New Team',
+          select: () => showTeamWizard<void>(context: context),
+        ),
+      ],
+    ));
+
+    return Row(children: children);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final riveColors = RiveTheme.of(context).colors;
+
+    return Underline(
+      color: riveColors.fileLineGrey,
+      child: _navControls(context),
+      offset: 18,
+      thickness: 1,
+    );
+  }
+}
+
+class TopNavStream extends StatelessWidget {
+  final Owner owner;
+
+  const TopNavStream(this.owner, {Key key}) : super(key: key);
+
+  Widget _navControls(BuildContext context) {
+    final riveColors = RiveTheme.of(context).colors;
+    final children = <Widget>[];
+    if (owner != null) {
+      children.add(SizedAvatar(
+        url: owner.avatarUrl,
+        size: const Size(30, 30),
+        addBackground: true,
+        icon: 'teams',
+      ));
+      children.add(const Padding(
+        padding: EdgeInsets.only(right: 9),
+      ));
+    }
+    children.add(Text(owner.displayName));
+    children.add(const Spacer());
+
+    if (owner is User ||
+        (owner is Team && canEditTeam((owner as Team).permission))) {
+      children.add(const SizedBox(width: 12));
+      children.add(TintedIconButton(
+        onPress: () async {
+          await showSettings(context: context);
+          var rive = RiveContext.of(context);
+
+          if (rive.isSignedIn) {
+            // Our state for Teams could be out of date now.
+            await RiveContext.of(context).reloadTeams();
+          }
+        },
+        icon: 'settings',
+        backgroundHover: riveColors.fileBackgroundLightGrey,
+        iconHover: riveColors.fileBackgroundDarkGrey,
+        tip: const Tip(label: 'Settings'),
+      ));
+    }
+    children.add(const SizedBox(width: 12));
+    children.add(PopupButton<PopupContextItem>(
+      direction: PopupDirection.bottomToLeft,
+      builder: (popupContext) {
+        return Container(
+          width: 29,
+          height: 29,
+          decoration: BoxDecoration(
+              color: riveColors.commonDarkGrey, shape: BoxShape.circle),
+          child: const Center(
+            child: SizedBox(
+              child: TintedIcon(color: Colors.white, icon: 'add'),
+            ),
+          ),
+        );
+      },
+      itemBuilder: (popupContext, item, isHovered) =>
+          item.itemBuilder(popupContext, isHovered),
+      itemsBuilder: (context) => [
+        PopupContextItem('New File', select: () async {
+          print('TODO: implement me');
+          // Add file creation & opening
+          // final file = await fileBrowser.createFile();
+          // await fileBrowser.openFile(rive, file);
+        }),
+        PopupContextItem('New Folder', select: () async {
+          print('TODO: implement me');
+          // Add file creation & opening
+          // await fileBrowser.createFolder();
+        }),
         PopupContextItem.separator(),
         PopupContextItem(
           'New Team',

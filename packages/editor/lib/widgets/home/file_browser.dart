@@ -5,6 +5,7 @@ import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/home/browser_file.dart';
 import 'package:rive_editor/widgets/home/browser_folder.dart';
+import 'package:rive_editor/widgets/home/top_nav.dart';
 
 typedef FolderContentsBuilder = Widget Function(FolderContents);
 
@@ -69,6 +70,29 @@ class FileBrowserStream extends StatelessWidget {
     );
   }
 
+  Widget _header() {
+    return StreamBuilder<CurrentDirectory>(
+      stream: Plumber().getStream<CurrentDirectory>(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 30),
+              child: TopNavStream(snapshot.data.owner),
+            ),
+          );
+        } else {
+          return const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 30),
+              child: Text('No directory selected????'),
+            ),
+          );
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return _stream(
@@ -80,6 +104,7 @@ class FileBrowserStream extends StatelessWidget {
         final hasFiles = files != null && files.isNotEmpty;
 
         final slivers = <Widget>[];
+        slivers.add(_header());
         if (hasFolders) {
           slivers.add(_folderGrid(folders));
         }
