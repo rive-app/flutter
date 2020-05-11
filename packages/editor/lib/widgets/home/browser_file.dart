@@ -1,9 +1,10 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class BrowserFile extends StatefulWidget {
-  const BrowserFile(this.fileId, {Key key}) : super(key: key);
-  final int fileId;
+  const BrowserFile(this.file, {Key key}) : super(key: key);
+  final File file;
 
   @override
   State<StatefulWidget> createState() => _FileState();
@@ -38,7 +39,7 @@ class _FileState extends State<BrowserFile> {
         children: [
           Expanded(
             child: Text(
-              '${widget.fileId}',
+              '${widget.file.name ?? 'Loading...'}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: styles.greyText,

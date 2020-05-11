@@ -17,7 +17,7 @@ class FolderContentsManager with Subscriptions {
 
     subscribe<Me>((me) {
       // Upon init, go get the current users' top folder.
-      final myFiles = CurrentDirectory(me, null);
+      final myFiles = CurrentDirectory(me, 1);
       _getFolderContents(myFiles);
     });
   }
@@ -28,9 +28,38 @@ class FolderContentsManager with Subscriptions {
   final FileApi _fileApi;
   final FolderApi _folderApi;
 
+  void _loadFileDetails(List<int> fileIds, int teamOwnerId) {
+    _fileApi.getFileDetails(fileIds, ownerId: teamOwnerId).then((fileDetails) {
+      final plumber = Plumber();
+      final fileDetailsList = File.fromDMList(fileDetails);
+      for (final file in fileDetailsList) {
+        plumber.message<File>(file, '${file.id}');
+      }
+    });
+  }
+
+  List<Folder> _filterByParent(
+      List<FolderDM> folders, CurrentDirectory directory) {
+    final parentId = directory.folderId;
+
+    return folders
+        .map((folderDM) {
+          // Add to results if:
+          // - parent id is the same
+          // - downloading top folder: we want to show 'Deleted Files' folder..
+          if (folderDM.parent == parentId ||
+              (parentId == 1 && folderDM.id == 0)) {
+            print("Adding this: $folderDM");
+            return Folder.fromDM(folderDM);
+          }
+        })
+        .where((folder) => folder != null)
+        .toList(growable: false);
+  }
+
   void _getFolderContents(CurrentDirectory directory) async {
-    Iterable<FileDM> files;
-    Iterable<FolderDM> folders;
+    List<FileDM> files;
+    List<FolderDM> folders;
     var owner = directory.owner;
 
     if (owner is Team) {
@@ -42,12 +71,17 @@ class FolderContentsManager with Subscriptions {
     }
 
     print("Got my files & folders:\n$files\n$folders");
-    // TODO: don't download them all again?
+    if (files.isNotEmpty) {
+      // Load and prepare pipes for files.
+      var fileIds = files.map((e) => e.id).toList(growable: false);
+      final directoryOwner =
+          directory.owner is Team ? directory.owner.ownerId : null;
+      _loadFileDetails(fileIds, directoryOwner);
+    }
 
-    var contents = FolderContents(
-      File.fromDMList(files.toList(growable: false)),
-      Folder.fromDMList(folders.toList(growable: false)),
-    );
+    final filteredFolders = _filterByParent(folders, directory);
+
+    var contents = FolderContents(File.fromDMList(files), filteredFolders);
 
     Plumber().message<FolderContents>(contents);
   }

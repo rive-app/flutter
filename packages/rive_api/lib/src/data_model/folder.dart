@@ -18,7 +18,7 @@ class FolderDM {
   final String name;
 
   static Iterable<FolderDM> fromDataList(List<dynamic> data) =>
-      data.map((d) => FolderDM.fromData(d));
+      data.map((d) => FolderDM.fromData(d)).toList(growable: false);
 
   factory FolderDM.fromData(
     Map<String, dynamic> data,

@@ -11,7 +11,7 @@ class FolderApi {
   FolderApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<Iterable<FolderDM>> folders(OwnerDM owner) async {
+  Future<List<FolderDM>> folders(OwnerDM owner) async {
     if (owner is MeDM) {
       return myFolders();
     } else if (owner is TeamDM) {
@@ -21,13 +21,13 @@ class FolderApi {
     }
   }
 
-  Future<Iterable<FolderDM>> myFolders() async =>
+  Future<List<FolderDM>> myFolders() async =>
       _folders('/api/my/files/folders');
 
-  Future<Iterable<FolderDM>> teamFolders(int ownerId) async =>
+  Future<List<FolderDM>> teamFolders(int ownerId) async =>
       _folders('/api/teams/$ownerId/folders');
 
-  Future<Iterable<FolderDM>> _folders(String path) async {
+  Future<List<FolderDM>> _folders(String path) async {
     final res = await api.getFromPath(path);
     try {
       final data = json.decode(res.body) as Map<String, dynamic>;

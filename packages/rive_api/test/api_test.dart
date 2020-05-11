@@ -123,7 +123,7 @@ void main() {
       final mockApi = FileApi(riveApi);
       final me = getMe();
       final folder = getFolder(me);
-      final files = await mockApi.getFiles(folder);
+      final files = await mockApi.getFiles(folder.id, ownerId: folder.ownerId);
       expect(files.length, 16);
       files.forEach((file) {
         expect(file.id != null, true);
@@ -140,7 +140,8 @@ void main() {
       final mockApi = FileApi(riveApi);
       final me = getMe();
       final folder = getFolder(me);
-      final files = await mockApi.getFileDetails(folder, [1, 2, 3]);
+      final files =
+          await mockApi.getFileDetails([1, 2, 3], ownerId: folder.ownerId);
       expect(files.length, 3);
       files.forEach((file) {
         expect(file.id != null, true);
@@ -161,7 +162,7 @@ void main() {
       final mockApi = FileApi(riveApi);
       final team = getTeam();
       final folder = getFolder(team);
-      final files = await mockApi.getFiles(folder);
+      final files = await mockApi.getFiles(folder.id, ownerId: folder.ownerId);
       expect(files.length, 16);
       files.forEach((file) {
         expect(file.id != null, true);
@@ -178,7 +179,8 @@ void main() {
       final mockApi = FileApi(riveApi);
       final team = getTeam();
       final folder = getFolder(team);
-      final files = await mockApi.getFileDetails(folder, [1, 2, 3]);
+      final files =
+          await mockApi.getFileDetails([1, 2, 3], ownerId: folder.ownerId);
       expect(files.length, 3);
       files.forEach((file) {
         expect(file.id != null, true);

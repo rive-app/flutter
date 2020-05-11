@@ -1,11 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/widgets.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
-import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
-import 'package:rive_api/teams.dart';
 import 'package:rive_api/stripe.dart';
+import 'package:rive_api/teams.dart';
 import 'package:utilities/utilities.dart';
 
 /// Billing policy URL

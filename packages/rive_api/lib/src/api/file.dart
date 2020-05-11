@@ -11,23 +11,23 @@ class FileApi {
   FileApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<Iterable<FileDM>> getFiles(FolderDM folder) async {
+  Future<List<FileDM>> getFiles(int folderId, {int ownerId = null}) async {
     // TODO: add sorting, and file type options one day.
-    if (folder.ownerId == null) {
-      return myFiles(folder.id);
+    if (ownerId == null) {
+      return myFiles(folderId);
     } else {
-      return teamFiles(folder.ownerId, folder.id);
+      return teamFiles(ownerId, folderId);
     }
   }
 
-  Future<Iterable<FileDM>> myFiles(int folderId) async =>
+  Future<List<FileDM>> myFiles(int folderId) async =>
       _files('/api/my/files/a-z/rive/${folderId}');
 
-  Future<Iterable<FileDM>> teamFiles(int teamOwnerId, int folderId) async =>
+  Future<List<FileDM>> teamFiles(int teamOwnerId, int folderId) async =>
       _files(
           '/api/teams/${teamOwnerId}/files/a-z/rive/${folderId}', teamOwnerId);
 
-  Future<Iterable<FileDM>> _files(String url, [int ownerId]) async {
+  Future<List<FileDM>> _files(String url, [int ownerId]) async {
     final res = await api.get(api.host + url);
     try {
       final data = json.decode(res.body) as List<dynamic>;
@@ -38,23 +38,23 @@ class FileApi {
     }
   }
 
-  Future<Iterable<FileDM>> getFileDetails(
-      FolderDM folder, List<int> fileIds) async {
-    if (folder.ownerId == null) {
+  Future<List<FileDM>> getFileDetails(List<int> fileIds,
+      {int ownerId = null}) async {
+    if (ownerId == null) {
       return _myFileDetails(fileIds);
     } else {
-      return _teamFileDetails(folder.ownerId, fileIds);
+      return _teamFileDetails(ownerId, fileIds);
     }
   }
 
-  Future<Iterable<FileDM>> _myFileDetails(List<int> fileIds) async =>
+  Future<List<FileDM>> _myFileDetails(List<int> fileIds) async =>
       _fileDetails('/api/my/files', fileIds);
 
-  Future<Iterable<FileDM>> _teamFileDetails(
+  Future<List<FileDM>> _teamFileDetails(
           int teamOwnerId, List<int> fileIds) async =>
       _fileDetails('/api/teams/${teamOwnerId}/files', fileIds);
 
-  Future<Iterable<FileDM>> _fileDetails(String url, List fileIds) async {
+  Future<List<FileDM>> _fileDetails(String url, List fileIds) async {
     print(jsonEncode(fileIds));
     var res = await api.post(
       api.host + url,

@@ -50,7 +50,15 @@ class FileBrowserStream extends StatelessWidget {
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var file = files.elementAt(index);
-          return BrowserFile(file.id);
+          return StreamBuilder<File>(
+              stream: Plumber().getStream<File>('${file.id}'),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                } else {
+                  return BrowserFile(snapshot.data);
+                }
+              });
         },
         childCount: files.length,
       ),
@@ -85,7 +93,7 @@ class FileBrowserStream extends StatelessWidget {
           return const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.only(bottom: 30),
-              child: Text('No directory selected????'),
+              child: Text('No directory selected?'),
             ),
           );
         }
