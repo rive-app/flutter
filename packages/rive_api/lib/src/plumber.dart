@@ -6,30 +6,33 @@ class Plumber {
   static Plumber _instance = Plumber._();
   factory Plumber() => _instance;
 
-  final Map<Type, BehaviorSubject> _pipes = {};
+  final Map<Type, Map<String, BehaviorSubject>> _pipes = {};
 
   // Retrives the pipe for the given model.
   // Lays it down if not present.
-  BehaviorSubject<T> _pipeInit<T>() {
+  BehaviorSubject<T> _pipeInit<T>([String id]) {
     if (!_pipes.containsKey(T)) {
-      print("Lay down the pipes for $T");
-      _pipes[T] = BehaviorSubject<T>();
+      _pipes[T] = {};
     }
-    return _pipes[T];
+    if (!_pipes[T].containsKey(id)) {
+      print("Lay down the pipes for $T:$id");
+      _pipes[T][id] = BehaviorSubject<T>();
+    }
+    return _pipes[T][id];
   }
 
-  ValueStream<T> getStream<T>() {
-    var pipe = _pipeInit<T>();
+  ValueStream<T> getStream<T>([String id]) {
+    var pipe = _pipeInit<T>(id);
     return pipe.stream;
   }
 
-  void message<T>(T message) {
-    var pipe = _pipeInit<T>();
+  void message<T>(T message, [String id]) {
+    var pipe = _pipeInit<T>(id);
     pipe.add(message);
   }
 
-  void clear<T>() {
-    var pipe = _pipeInit<T>();
+  void clear<T>([String id]) {
+    var pipe = _pipeInit<T>(id);
     if (pipe.value != null) {
       pipe.add(null);
     }
@@ -37,8 +40,10 @@ class Plumber {
 
   void reset() {
     // TODO: notify a few thigns to disconnect from each other?
-    _pipes.values.forEach((pipe) {
-      pipe.close();
+    _pipes.values.forEach((pipeMap) {
+      pipeMap.values.forEach((pipe) {
+        pipe.close();
+      });
     });
     _pipes.clear();
   }
