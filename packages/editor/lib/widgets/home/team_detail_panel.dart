@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rive_api/model.dart';
 
-import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_api/models/follow.dart';
 import 'package:rive_api/models/team_role.dart';
+import 'package:rive_api/plumber.dart';
 
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
@@ -20,7 +21,7 @@ import 'package:tree_widget/tree_line.dart';
 import 'package:tree_widget/tree_style.dart';
 
 class TeamDetailPanel extends StatelessWidget {
-  final RiveTeam team;
+  final Team team;
 
   const TeamDetailPanel({Key key, this.team}) : super(key: key);
 
@@ -48,7 +49,7 @@ class TeamDetailPanel extends StatelessWidget {
           children: <Widget>[
             EditableAvatar(
               avatarRadius: 15,
-              avatarPath: team.avatar,
+              avatarPath: team.avatarUrl,
               changeAvatar: null,
             ),
             Expanded(
@@ -74,10 +75,20 @@ class TeamDetailPanel extends StatelessWidget {
       Expanded(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: ListView(
-              children: team.teamMembers
-                  .map((member) => _TeamMember(user: member))
-                  .toList()),
+          child: StreamBuilder<List<TeamMember>>(
+            stream:
+                Plumber().getStream<List<TeamMember>>(team.hashCode.toString()),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView(
+                    children: snapshot.data
+                        .map((member) => _TeamMember2(teamMember: member))
+                        .toList());
+              } else {
+                return Text('loading...');
+              }
+            },
+          ),
         ),
       ),
       Padding(
@@ -179,6 +190,64 @@ class _TeamMember extends StatelessWidget {
             // Adding a follow button here temporarily
             const Spacer(flex: 1),
             FollowUnfollow(user.ownerId),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamMember2 extends StatelessWidget {
+  final TeamMember teamMember;
+
+  const _TeamMember2({@required this.teamMember, Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: SizedBox(
+        height: 20,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              child: Avatar(
+                iconBuilder: (context) {
+                  if (teamMember.avatarUrl != null) {
+                    return Image.network(teamMember.avatarUrl);
+                  }
+                  return TintedIcon(
+                      color: colors.commonDarkGrey, icon: 'your-files');
+                },
+                background: colors.fileBackgroundLightGrey,
+              ),
+            ),
+            const SizedBox(width: 5),
+            RichText(
+              text: TextSpan(
+                style: styles.fileSearchText
+                    .copyWith(color: Colors.black, fontWeight: FontWeight.w500),
+                children: <TextSpan>[
+                  if (teamMember.name != null) TextSpan(text: teamMember.name),
+                  if (teamMember.username != null && teamMember.name != null)
+                    const TextSpan(text: '  '),
+                  if (teamMember.username != null)
+                    TextSpan(
+                      style: styles.basic.copyWith(color: colors.inactiveText),
+                      text: '@${teamMember.username}',
+                    ),
+                ],
+              ),
+            ),
+            // Adding a follow button here temporarily
+            const Spacer(flex: 1),
+            FollowUnfollow(teamMember.ownerId),
           ],
         ),
       ),

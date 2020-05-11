@@ -167,3 +167,14 @@ final successFileDetailsResponse = Response("""
   }]
 }
 """, 200);
+
+final successTeamMembersResponse = Response("""
+[{
+    "ownerId":40836,
+    "username":"pollux",
+    "name":"Guido Rosso",
+    "status":"complete",
+    "permission":"Member",
+    "avatar":null
+}]
+""", 200);

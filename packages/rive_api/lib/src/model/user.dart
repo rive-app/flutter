@@ -41,3 +41,51 @@ class User extends Owner {
         avatarUrl: avatarUrl,
       );
 }
+
+class TeamMember extends Owner {
+  const TeamMember({
+    @required this.ownerId,
+    @required this.name,
+    @required this.username,
+    @required this.avatarUrl,
+    @required this.status,
+    @required this.permission,
+  });
+  final int ownerId;
+  final String name;
+  final String username;
+  final String avatarUrl;
+  final String status;
+  final String permission;
+
+  static List<TeamMember> fromDMList(List<TeamMemberDM> teamMembers) =>
+      teamMembers.map((teamMember) => TeamMember.fromDM(teamMember)).toList();
+
+  factory TeamMember.fromDM(TeamMemberDM teamMember) => TeamMember(
+        ownerId: teamMember.ownerId,
+        name: teamMember.name,
+        username: teamMember.username,
+        avatarUrl: teamMember.avatarUrl,
+        status: teamMember.status,
+        permission: teamMember.permission,
+      );
+
+  @override
+  String toString() => 'TeamMember($ownerId, $name)';
+
+  @override
+  bool operator ==(o) => o is TeamMember && o.ownerId == ownerId;
+
+  @override
+  int get hashCode => ownerId;
+
+  @override
+  TeamMemberDM get asDM => TeamMemberDM(
+        ownerId: ownerId,
+        name: name,
+        username: username,
+        avatarUrl: avatarUrl,
+        status: status,
+        permission: permission.toString(),
+      );
+}

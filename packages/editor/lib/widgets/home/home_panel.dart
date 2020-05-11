@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:rive_api/models/team.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_file.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
@@ -60,15 +61,15 @@ class Home extends StatelessWidget {
                 Expanded(
                   child: MainPanel(),
                 ),
-                if (fileBrowser?.owner is RiveTeam)
-                  ResizePanel(
-                    hitSize: theme.dimensions.resizeEdgeSize,
-                    direction: ResizeDirection.horizontal,
-                    side: ResizeSide.start,
-                    min: 252,
-                    max: 500,
-                    child: TeamDetailPanel(team: fileBrowser.owner as RiveTeam),
-                  ),
+                // if (fileBrowser?.owner is RiveTeam)
+                //   ResizePanel(
+                //     hitSize: theme.dimensions.resizeEdgeSize,
+                //     direction: ResizeDirection.horizontal,
+                //     side: ResizeSide.start,
+                //     min: 252,
+                //     max: 500,
+                //     child: TeamDetailPanel(team: fileBrowser.owner as RiveTeam),
+                //   ),
               ],
             ),
           ),
@@ -304,16 +305,23 @@ class HomeStream extends StatelessWidget {
           Expanded(
             child: FileBrowserStream(),
           ),
-          if (isTeam)
-            ResizePanel(
-                hitSize: theme.dimensions.resizeEdgeSize,
-                direction: ResizeDirection.horizontal,
-                side: ResizeSide.start,
-                min: 252,
-                max: 500,
-                child: Container(color: Colors.blueAccent)
-                // child: TeamDetailPanel(team: fileBrowser.owner as RiveTeam),
-                ),
+          StreamBuilder<CurrentDirectory>(
+            stream: Plumber().getStream<CurrentDirectory>(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data.owner is Team) {
+                return ResizePanel(
+                  hitSize: theme.dimensions.resizeEdgeSize,
+                  direction: ResizeDirection.horizontal,
+                  side: ResizeSide.start,
+                  min: 252,
+                  max: 500,
+                  child: TeamDetailPanel(team: snapshot.data.owner as Team),
+                );
+              } else {
+                return Container();
+              }
+            },
+          ),
         ],
       ),
     );

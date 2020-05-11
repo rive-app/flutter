@@ -33,3 +33,41 @@ class UserDM extends OwnerDM {
   @override
   int get hashCode => ownerId;
 }
+
+class TeamMemberDM extends OwnerDM {
+  const TeamMemberDM({
+    @required this.ownerId,
+    @required this.name,
+    @required this.username,
+    @required this.avatarUrl,
+    @required this.status,
+    @required this.permission,
+  });
+  final int ownerId;
+  final String name;
+  final String username;
+  final String avatarUrl;
+  final String status;
+  final String permission;
+
+  static Iterable<TeamMemberDM> formDataList(List<dynamic> data) =>
+      data.map((d) => TeamMemberDM.formData(d));
+
+  factory TeamMemberDM.formData(Map<String, dynamic> data) => TeamMemberDM(
+        ownerId: data.getInt('ownerId'),
+        name: data.getString('name'),
+        username: data.getString('username'),
+        avatarUrl: data.getString('avatar'),
+        permission: data.getString('permission'),
+        status: data.getString('status'),
+      );
+
+  @override
+  String toString() => 'TeamMember($ownerId, $name)';
+
+  @override
+  bool operator ==(o) => o is TeamMemberDM && o.ownerId == ownerId;
+
+  @override
+  int get hashCode => ownerId;
+}

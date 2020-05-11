@@ -44,5 +44,13 @@ class TeamManager with Subscriptions {
     final _teamsDM = await _teamApi.teams;
     _teams = Team.fromDMList(_teamsDM.toList());
     _plumber.message(_teams.toList());
+    // asynchronoously go and load in some members
+    _teams.forEach(loadTeamMembers);
+  }
+
+  void loadTeamMembers(Team team) async {
+    final _teamMembersDM = await _teamApi.teamMembers(team.ownerId);
+    final _teamMembers = TeamMember.fromDMList(_teamMembersDM.toList());
+    _plumber.message(_teamMembers.toList(), team.hashCode.toString());
   }
 }

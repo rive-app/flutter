@@ -6,7 +6,6 @@ import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_api/stripe.dart';
-import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:utilities/utilities.dart';
 
 /// Billing policy URL

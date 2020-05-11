@@ -23,6 +23,11 @@ void main() {
       riveApi = MockRiveApi();
       when(riveApi.getFromPath('/api/teams'))
           .thenAnswer((_) async => successTeamsResponse);
+      when(riveApi.getFromPath('/api/teams/41545/affiliates'))
+          .thenAnswer((_) async => successTeamMembersResponse);
+      when(riveApi.getFromPath('/api/teams/41576/affiliates'))
+          .thenAnswer((_) async => successTeamMembersResponse);
+
       mockedTeamApi = TeamApi(riveApi);
       teamManager = TeamManager.tester(mockedTeamApi);
     });
