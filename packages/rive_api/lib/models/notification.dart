@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'package:rive_api/src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 /// Different notification types that can come from the Rive back end
 /// Only showing the types currently handled by the Rive app

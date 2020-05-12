@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/profile.dart';
-import 'package:rive_api/models/team.dart';
-import 'package:rive_api/models/user.dart';
 
 /// Api for accessing the signed in users folders and files.
 class RiveProfilesApi<T extends RiveOwner> {
@@ -13,8 +12,8 @@ class RiveProfilesApi<T extends RiveOwner> {
   final log = Logger('Rive API');
   RiveProfilesApi(this.api);
 
-  Future<void> updateInfo(RiveOwner owner, {RiveProfile profile}) {
-    if (owner is RiveTeam) {
+  Future<void> updateInfo(Owner owner, {RiveProfile profile}) async {
+    if (owner is Team) {
       return _updateTeamInfo(owner, profile);
     } else {
       return _updateUserInfo(owner, profile);
@@ -22,7 +21,7 @@ class RiveProfilesApi<T extends RiveOwner> {
   }
 
   // PUT /api/teams/<teamId>
-  Future<void> _updateTeamInfo(RiveTeam team, RiveProfile profile) async {
+  Future<void> _updateTeamInfo(Team team, RiveProfile profile) async {
     var teamId = team.ownerId;
     String payload = jsonEncode({
       'name': profile.name,
@@ -53,7 +52,7 @@ class RiveProfilesApi<T extends RiveOwner> {
     }
   }
 
-  Future<void> _updateUserInfo(RiveUser team, RiveProfile profile) async {
+  Future<void> _updateUserInfo(User team, RiveProfile profile) async {
     // TODO:
     // We could use the current `/register` route,
     // but it needs some fundamental information like email that we currently
@@ -64,9 +63,9 @@ class RiveProfilesApi<T extends RiveOwner> {
 
   /// GET /api/teams/<team_id>
   /// Returns the teams info.
-  Future<RiveProfile> getInfo(RiveOwner owner) async {
+  Future<RiveProfile> getInfo(Owner owner) async {
     String url = api.host;
-    if (owner is RiveTeam) {
+    if (owner is Team) {
       url += '/api/teams/${owner.ownerId}';
     } else {
       url += '/api/profile';

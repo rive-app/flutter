@@ -5,9 +5,39 @@ import 'package:http/http.dart' as http;
 import 'package:encrypt/encrypt.dart';
 
 import 'package:local_data/local_data.dart';
-import 'package:rive_api/src/rive_http/http_interface.dart';
+import 'package:rive_api/src/http/http.dart';
+import 'package:rive_api/src/http/rive_http/http_interface.dart';
 
 import 'http_exception.dart';
+
+/// Status code classes
+/// Informational 1xx, success 2xx, redirection 3xx, clientErrors 4xx, serverErrors 5xx
+enum StatusCodeClass {
+  informational,
+  success,
+  redirection,
+  clientErrors,
+  serverErrors,
+  unofficial
+}
+
+/// Returns the class for a status code
+StatusCodeClass statusCodeClass(int statusCode) {
+  switch (statusCode ~/ 100) {
+    case 1:
+      return StatusCodeClass.informational;
+    case 2:
+      return StatusCodeClass.success;
+    case 3:
+      return StatusCodeClass.redirection;
+    case 4:
+      return StatusCodeClass.clientErrors;
+    case 5:
+      return StatusCodeClass.serverErrors;
+    default:
+      return StatusCodeClass.unofficial;
+  }
+}
 
 /// A callback for status code occurences.
 typedef void StatusCodeHandler(http.Response response);
@@ -15,9 +45,14 @@ typedef void StatusCodeHandler(http.Response response);
 /// Web Service class to help facilitate making requests that have some form
 /// of state maintained in cookies.
 class WebServiceClient {
-  final Map<String, String> headers = {"content-type": "text/json"};
+  final Map<String, String> headers = {'content-type': 'text/json'};
   final Map<String, String> cookies = {};
   final Map<int, List<StatusCodeHandler>> statusCodeHandlers = {};
+
+  /// Optional list of acceptable status codes; if not returned, then
+  /// the handler for unacceptable codes is run
+  final acceptableStatusCodes = <StatusCodeClass>{};
+  StatusCodeHandler handleUnacceptableStatusCode;
 
   /// We use this timer to schedule saving cookies locally.
   Timer _persistTimer;
@@ -43,9 +78,17 @@ class WebServiceClient {
   bool removeStatusCodeHandler(int code, StatusCodeHandler handler) =>
       statusCodeHandlers[code]?.remove(handler) ?? false;
 
-  void _processResponse(http.Response response) {
+  /// Add acceptable status codes, and what to do if they aren't received
+  void addAcceptableStatusCodes(
+      List<StatusCodeClass> classes, StatusCodeHandler handler) {
+    assert(classes != null && handler != null);
+    acceptableStatusCodes.addAll(classes);
+    handleUnacceptableStatusCode = handler;
+  }
+
+  void _processResponse(http.Response res) {
     // Update cookies.
-    String allSetCookie = response.headers['set-cookie'];
+    String allSetCookie = res.headers['set-cookie'];
 
     if (allSetCookie != null) {
       var setCookies = allSetCookie.split(',');
@@ -66,7 +109,13 @@ class WebServiceClient {
     }
 
     // Call status code handlers.
-    statusCodeHandlers[response.statusCode]?.forEach((f) => f.call(response));
+    statusCodeHandlers[res.statusCode]?.forEach((f) => f.call(res));
+
+    // Check the acceptable status codes
+    if (acceptableStatusCodes
+        .every((c) => c != statusCodeClass(res.statusCode))) {
+      handleUnacceptableStatusCode(res);
+    }
   }
 
   bool _setCookiesFromString(String cookieString) {
@@ -86,8 +135,11 @@ class WebServiceClient {
   }
 
   Future<void> clearCookies() async {
+    print('CLEARING COOKIES');
     cookies.clear();
+    print(headers);
     headers['cookie'] = _generateCookieHeader();
+    print(headers);
     await persist();
   }
 

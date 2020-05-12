@@ -273,7 +273,8 @@ class TreeView<T> extends StatelessWidget {
                       ),
                     );
                   }
-                } else if (showLines && !(depth.length == 1 && depth[0] == -1)) {
+                } else if (showLines &&
+                    !(depth.length == 1 && depth[0] == -1)) {
                   //(this.props.hideFirstHorizontalLine && depth.length === 1 && depth[0] === -1) ? null : <div className={horizontalLineStyle} style={{background:showOurLine && showLines ? null : "initial", opacity:dragOpacity}}></div>
                   lines.insert(
                     0,

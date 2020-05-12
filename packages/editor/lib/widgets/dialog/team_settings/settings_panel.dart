@@ -1,7 +1,8 @@
 import 'package:file_chooser/file_chooser.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_api/api.dart';
-import 'package:rive_api/models/owner.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/selectable_item.dart';
@@ -28,18 +29,14 @@ final Map<SettingsPanel, int> panelMap = {
   SettingsPanel.history: 3,
 };
 
-// Helper functions.
-RiveOwner _getOwner(BuildContext ctx) => RiveContext.of(ctx).currentOwner;
-
 RiveApi _getApi(BuildContext ctx) => RiveContext.of(ctx).api;
 
-Future showSettings(
+Future showSettings(Owner owner,
     {BuildContext context,
     SettingsPanel initialPanel = SettingsPanel.settings}) {
   return showRiveDialog<void>(
       context: context,
       builder: (ctx) {
-        final owner = _getOwner(ctx);
         final api = _getApi(ctx);
         if (owner is RiveTeam) {
           RiveTeamsApi(api).getAffiliates(owner.ownerId);
@@ -49,7 +46,7 @@ Future showSettings(
 }
 
 class Settings extends StatefulWidget {
-  final RiveOwner owner;
+  final Owner owner;
   final RiveApi api;
   final SettingsPanel initialPanel;
   const Settings(
@@ -67,8 +64,8 @@ class _SettingsState extends State<Settings> {
   int _selectedIndex;
   String newAvatarPath;
 
-  bool get isTeam => widget.owner is RiveTeam;
-  RiveTeam get team => isTeam ? widget.owner as RiveTeam : null;
+  bool get isTeam => widget.owner is Team;
+  Team get team => isTeam ? widget.owner as Team : null;
 
   Widget _panel(Widget child) {
     var maxWidth = riveDialogMaxWidth;
@@ -113,6 +110,7 @@ class _SettingsState extends State<Settings> {
       if (remoteAvatarPath != null) {
         setState(() {
           newAvatarPath = remoteAvatarPath;
+          TeamManager().loadTeams();
         });
       }
     }
@@ -146,7 +144,7 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
-    final screens = SettingsScreen.getScreens(isTeam);
+    final screens = SettingsScreen.getScreens(widget.owner);
 
     return _panel(Row(
       children: [
@@ -155,13 +153,14 @@ class _SettingsState extends State<Settings> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             SettingsHeader(
-                name: widget.owner.displayName,
-                // TODO: hm, we probably should store avatar with team.
-                avatarPath: (newAvatarPath == null)
-                    ? widget.owner.avatar
-                    : newAvatarPath,
-                changeAvatar: changeAvatar,
-                teamSize: team?.size ?? -1),
+              name: widget.owner.displayName,
+              // TODO: hm, we probably should store avatar with team.
+              avatarPath: (newAvatarPath == null)
+                  ? widget.owner.avatarUrl
+                  : newAvatarPath,
+              changeAvatar: changeAvatar,
+              teamSize: (widget.owner is Team) ? 1 : 0,
+            ),
             Separator(color: colors.fileLineGrey),
             Expanded(child: screens[_selectedIndex].builder(context)),
           ],
@@ -236,24 +235,22 @@ class SettingsScreen {
 
   const SettingsScreen(this.label, this.builder);
 
-  static List<SettingsScreen> getScreens(bool isTeam) {
-    if (isTeam) {
+  static List<SettingsScreen> getScreens(Owner owner) {
+    if (owner is Team) {
       return [
-        SettingsScreen('Team Settings',
-            (ctx) => ProfileSettings(_getOwner(ctx), _getApi(ctx))),
-        SettingsScreen('Members',
-            (ctx) => TeamMembers(_getOwner(ctx) as RiveTeam, _getApi(ctx))),
+        SettingsScreen(
+            'Team Settings', (ctx) => ProfileSettings(owner, _getApi(ctx))),
+        SettingsScreen('Members', (ctx) => TeamMembers(owner, _getApi(ctx))),
         // SettingsScreen('Groups', (ctx) => const SizedBox()),
         // SettingsScreen('Purchase Permissions', (ctx) => const SizedBox()),
-        SettingsScreen('Plan',
-            (ctx) => PlanSettings(_getOwner(ctx) as RiveTeam, _getApi(ctx))),
-        SettingsScreen('Billing History',
-            (ctx) => BillingHistory(_getOwner(ctx) as RiveTeam, _getApi(ctx))),
+        SettingsScreen('Plan', (ctx) => PlanSettings(owner, _getApi(ctx))),
+        SettingsScreen(
+            'Billing History', (ctx) => BillingHistory(owner, _getApi(ctx))),
       ];
     } else {
       return [
         SettingsScreen(
-            'Profile', (ctx) => ProfileSettings(_getOwner(ctx), _getApi(ctx))),
+            'Profile', (ctx) => ProfileSettings(owner, _getApi(ctx))),
         // SettingsScreen('Store'),
         // SettingsScreen('Billing History'),
       ];

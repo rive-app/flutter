@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:http/http.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/models/cdn.dart';
 import 'package:rive_api/models/file.dart';
 import 'package:rive_api/folder.dart';
-import 'package:rive_api/src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 /// Result returned by getting a list of folders and the sort options for the
 /// file contents.

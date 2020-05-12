@@ -1,7 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
+import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -144,6 +143,7 @@ class _EditableAvatarState extends State<EditableAvatar> {
     List<Widget> children = [];
     final theme = RiveTheme.of(context);
     final riveColors = theme.colors;
+
     if (widget.avatarPath == null) {
       children.addAll([
         Positioned.fill(
@@ -157,19 +157,9 @@ class _EditableAvatarState extends State<EditableAvatar> {
     } else {
       children.add(Center(
         child: SizedBox(
-          width: radius * 2,
-          height: radius * 2,
-          child: FutureBuilder<Uint8List>(
-              future: ImageCacheProvider.of(context)
-                  .loadRawImageFromUrl(widget.avatarPath),
-              builder: (context, snapshot) {
-                return CircleAvatar(
-                  backgroundColor: Colors.transparent,
-                  backgroundImage:
-                      snapshot.hasData ? MemoryImage(snapshot.data) : null,
-                );
-              }),
-        ),
+            width: radius * 2,
+            height: radius * 2,
+            child: CachedCircleAvatar(widget.avatarPath)),
       ));
     }
     if (_hover) {

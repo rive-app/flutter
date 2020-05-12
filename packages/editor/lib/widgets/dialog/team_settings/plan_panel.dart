@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
-import 'package:rive_api/models/team.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
@@ -18,7 +18,7 @@ import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class PlanSettings extends StatefulWidget {
-  final RiveTeam team;
+  final Team team;
   final RiveApi api;
   const PlanSettings(this.team, this.api);
 

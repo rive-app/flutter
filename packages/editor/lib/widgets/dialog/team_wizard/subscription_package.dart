@@ -1,11 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
-import 'package:rive_api/models/team.dart';
-import 'package:rive_api/teams.dart';
 import 'package:rive_api/stripe.dart';
-import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_api/teams.dart';
 import 'package:utilities/utilities.dart';
 
 /// Billing policy URL
@@ -173,12 +174,13 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   int get teamSize => _teamSize;
 
   static Future<PlanSubscriptionPackage> fetchData(
-      RiveApi api, RiveTeam team) async {
+      RiveApi api, Team team) async {
     var response = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
     var subscription = PlanSubscriptionPackage()
       ..option = response.plan
       ..billing = response.frequency
-      .._teamSize = team.teamMembers.length;
+      .._teamSize = 1;
+    // TODO: fix billing amount
     subscription._currentCost = subscription.calculatedCost;
 
     return subscription;
@@ -348,8 +350,13 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
             plan: _option.name,
             frequency: _billing.name,
             stripeToken: tokenResponse.token);
-        await RiveContext.of(context).reloadTeams();
-        await RiveContext.of(context).selectRiveOwner(newTeam.ownerId);
+        // TODO: try to just push the new team right into
+        // to avoid reloading all other teams
+        // TODO: select team on create
+        TeamManager().loadTeams();
+        // todo kill this once we kill old system:
+        // await RiveContext.of(context).reloadTeams();
+        // await RiveContext.of(context).selectRiveOwner(newTeam.ownerId);
         Navigator.of(context, rootNavigator: true).pop();
       } on StripeAPIError catch (error) {
         switch (error.type) {

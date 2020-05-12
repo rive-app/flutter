@@ -4,84 +4,99 @@ import 'package:flutter/material.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 
-import 'package:rive_editor/rive/file_browser/file_browser.dart';
-import 'package:rive_editor/rive/file_browser/rive_folder.dart';
-import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_api/plumber.dart';
+import 'package:rive_api/model.dart';
 
-/// TreeController for the Rive folders displayed in the FileBrowser screen.
-class FolderTreeController extends TreeController<RiveFolder> {
-  List<RiveFolder> _data;
-  final Rive rive;
-  final FileBrowser fileBrowser;
-  FolderTreeController(this._data, {this.fileBrowser, this.rive}) : super();
+class FolderTreeItemController extends TreeController<FolderTreeItem> {
+  List<FolderTreeItem> _data;
+  FolderTreeItemController(FolderTree folderTree)
+      : _data = [folderTree.root],
+        super();
 
   @override
-  Iterable<RiveFolder> get data => _data;
+  Iterable<FolderTreeItem> get data => _data;
 
-  set data(Iterable<RiveFolder> value) {
+  set data(Iterable<FolderTreeItem> value) {
     _data = value.toList();
     refreshExpanded();
   }
 
   @override
-  Iterable<RiveFolder> childrenOf(RiveFolder treeItem) =>
-      treeItem.children.cast<RiveFolder>();
+  Iterable<FolderTreeItem> childrenOf(FolderTreeItem treeItem) =>
+      treeItem.children.cast<FolderTreeItem>();
 
   @override
-  void drop(FlatTreeItem<RiveFolder> target, DropState state,
-      List<FlatTreeItem<RiveFolder>> items) {}
+  void drop(FlatTreeItem<FolderTreeItem> target, DropState state,
+      List<FlatTreeItem<FolderTreeItem>> items) {}
 
   @override
-  dynamic dataKey(RiveFolder treeItem) {
-    return treeItem.id;
+  dynamic dataKey(FolderTreeItem treeItem) {
+    return treeItem.folder.id;
   }
 
   @override
-  bool isDisabled(RiveFolder treeItem) {
+  bool isDisabled(FolderTreeItem treeItem) {
     return false;
   }
 
   @override
-  bool isProperty(RiveFolder treeItem) {
+  bool isProperty(FolderTreeItem treeItem) {
     return false;
   }
 
   @override
-  List<FlatTreeItem<RiveFolder>> onDragStart(
-      DragStartDetails details, FlatTreeItem<RiveFolder> item) {
+  List<FlatTreeItem<FolderTreeItem>> onDragStart(
+      DragStartDetails details, FlatTreeItem<FolderTreeItem> item) {
     return [item];
   }
 
   @override
-  void onMouseEnter(PointerEnterEvent event, FlatTreeItem<RiveFolder> item) {
-    item.data.isHovered = true;
+  void onMouseEnter(
+      PointerEnterEvent event, FlatTreeItem<FolderTreeItem> item) {
+    item.data.hover = true;
   }
 
   @override
-  void onMouseExit(PointerExitEvent event, FlatTreeItem<RiveFolder> item) {
-    item.data.isHovered = false;
+  void onMouseExit(PointerExitEvent event, FlatTreeItem<FolderTreeItem> item) {
+    item.data.hover = false;
   }
 
-  @override
-  void onTap(FlatTreeItem<RiveFolder> item) {
-    if (item.data != null) {
-      if (rive.activeFileBrowser.value != fileBrowser) {
-        // File browsers track their own selected states.
-        // so you have to tell them specifically that stuff not selected
-        rive.activeFileBrowser.value?.openFolder(null, false);
-        rive.setActiveFileBrowser(fileBrowser);
+  void select(CurrentDirectory currentDirectory) {
+    items.forEach((element) {
+      if (_data.first.owner == currentDirectory.owner &&
+          element.folder?.id == currentDirectory.folderId) {
+        element.selected = true;
+      } else {
+        element.selected = false;
       }
-
-      fileBrowser.openFolder(item.data, false);
-    }
+    });
   }
 
   @override
-  int spacingOf(RiveFolder treeItem) {
+  void onTap(FlatTreeItem<FolderTreeItem> item) {
+    final selectedFolder =
+        CurrentDirectory(_data.first.owner, item.data.folder.id);
+    Plumber().message<CurrentDirectory>(selectedFolder);
+  }
+
+  @override
+  int spacingOf(FolderTreeItem treeItem) {
     return 1;
   }
 
   @override
   void onRightClick(BuildContext context, PointerDownEvent event,
-      FlatTreeItem<RiveFolder> item) {}
+      FlatTreeItem<FolderTreeItem> item) {}
+
+  Iterable<FolderTreeItem> get items sync* {
+    if (_data.isNotEmpty) {
+      var stack = [_data.first];
+      FolderTreeItem tmpElement;
+      while (stack.isNotEmpty) {
+        tmpElement = stack.removeLast();
+        stack.addAll(tmpElement.children);
+        yield tmpElement;
+      }
+    }
+  }
 }

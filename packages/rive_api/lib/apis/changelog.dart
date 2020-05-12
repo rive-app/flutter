@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import 'package:rive_api/src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 /// Data class for changelogs
 class Changelog {

@@ -1,29 +1,22 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/models/owner.dart';
-
 import 'package:rive_api/models/team.dart';
-
 import 'package:rive_core/selectable_item.dart';
-
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
-import 'package:rive_editor/rive/file_browser/file_browser.dart';
-import 'package:rive_editor/rive/file_browser/rive_folder.dart';
+import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
-
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
-/// Builds a TreeView styled for folders.
 class FolderTreeView extends StatelessWidget {
-  final FolderTreeController controller;
+  final FolderTreeItemController controller;
   final TreeStyle style;
 
   const FolderTreeView({
@@ -35,123 +28,92 @@ class FolderTreeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
-    final fileBrowser = RiveContext.of(context).activeFileBrowser.value;
-    return TreeView<RiveFolder>(
+
+    return TreeView<FolderTreeItem>(
       style: style,
       controller: controller,
-      expanderBuilder: (context, item, style) => Container(
-        child: Center(
-          child: TreeExpander(
-            key: item.key,
-            iconColor: fileBrowser?.selectedFolder == item.data
-                ? Colors.white
-                : colors.fileUnselectedFolderIcon,
-            isExpanded: item.isExpanded,
+      expanderBuilder: (context, item, style) => StreamBuilder<bool>(
+        stream: item.data.selectedStream,
+        builder: (context, selectedStream) => Container(
+          child: Center(
+            child: TreeExpander(
+              key: item.key,
+              iconColor: (selectedStream.hasData && selectedStream.data)
+                  ? Colors.white
+                  : colors.fileUnselectedFolderIcon,
+              isExpanded: item.isExpanded,
+            ),
           ),
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: fileBrowser?.selectedFolder == item.data
-                ? colors.selectedTreeLines
-                : colors.filesTreeStroke,
-            width: 1.0,
-            style: BorderStyle.solid,
-          ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(7.5),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: (selectedStream.hasData && selectedStream.data)
+                  ? colors.selectedTreeLines
+                  : colors.filesTreeStroke,
+              width: 1.0,
+              style: BorderStyle.solid,
+            ),
+            borderRadius: const BorderRadius.all(
+              Radius.circular(7.5),
+            ),
           ),
         ),
       ),
-      iconBuilder: (context, item, style) => Container(
-        width: 15,
-        height: 15,
-        child: Center(
-          child: TreeRowIcon(item: item, fileBrowser: fileBrowser),
+      iconBuilder: (context, item, style) => StreamBuilder<bool>(
+        stream: item.data.selectedStream,
+        builder: (context, selectedStream) => Container(
+          width: 15,
+          height: 15,
+          child: Center(
+            child: SizedAvatar(
+              url: item.data.iconURL,
+              icon: 'folder',
+              iconColor: (selectedStream.hasData && selectedStream.data)
+                  ? colors.fileSelectedFolderIcon
+                  : colors.fileUnselectedFolderIcon,
+            ),
+          ),
         ),
       ),
       extraBuilder: (context, item, index) => Container(),
-      backgroundBuilder: (context, item, style) =>
-          ValueListenableBuilder<SelectionState>(
-        valueListenable: item.data.selectionState,
-        builder: (context, selectionState, _) {
-          // NOTE: selectionstate gets a bit confused here
-          // the tree and file browser are sharing items
-          // which means they share selection state, which
-          // isnt always what we want
-          var _selectionState = SelectionState.none;
-          if (fileBrowser?.selectedFolder == item.data) {
-            _selectionState = SelectionState.selected;
-          } else if (selectionState == SelectionState.hovered) {
-            _selectionState = SelectionState.hovered;
-          }
-          return DropItemBackground(DropState.none, _selectionState);
-        },
-      ),
-      itemBuilder: (context, item, style) => Expanded(
-        child: Container(
-          child: IgnorePointer(
-            child: Text(
-              item.data.displayName,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                color: fileBrowser?.selectedFolder == item.data
-                    ? Colors.white
-                    : colors.fileTreeText,
+      backgroundBuilder: (context, item, style) {
+        return StreamBuilder<bool>(
+            stream: item.data.selectedStream,
+            builder: (context, selectedStream) {
+              bool selected = selectedStream.hasData && selectedStream.data;
+              return StreamBuilder<bool>(
+                  stream: item.data.hoverStream,
+                  builder: (context, hoverStream) {
+                    bool hovered = hoverStream.hasData && hoverStream.data;
+                    var _selectionState = SelectionState.none;
+                    if (selected) {
+                      _selectionState = SelectionState.selected;
+                    } else if (hovered) {
+                      _selectionState = SelectionState.hovered;
+                    }
+                    return DropItemBackground(DropState.none, _selectionState);
+                  });
+            });
+      },
+      itemBuilder: (context, item, style) => StreamBuilder<bool>(
+        stream: item.data.selectedStream,
+        builder: (context, selectedStream) => Expanded(
+          child: Container(
+            child: IgnorePointer(
+              child: Text(
+                item.data.name,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: (selectedStream.hasData && selectedStream.data)
+                      ? Colors.white
+                      : colors.fileTreeText,
+                ),
               ),
             ),
           ),
         ),
       ),
     );
-  }
-}
-
-class TreeRowIcon extends StatelessWidget {
-  const TreeRowIcon({
-    @required this.item,
-    @required this.fileBrowser,
-    Key key,
-  }) : super(key: key);
-
-  final FlatTreeItem<RiveFolder> item;
-  final FileBrowser fileBrowser;
-
-  @override
-  Widget build(BuildContext context) {
-    return RiveFolderIcon(
-      folder: item.data,
-      selected: fileBrowser?.selectedFolder == item.data,
-    );
-  }
-}
-
-class RiveFolderIcon extends StatelessWidget {
-  const RiveFolderIcon({
-    @required this.folder,
-    @required this.selected,
-    Key key,
-  }) : super(key: key);
-
-  final RiveFolder folder;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    var colors = RiveTheme.of(context).colors;
-    if (folder.owner != null) {
-      return SizedAvatarOwner(
-        owner: folder.owner,
-        selected: selected,
-      );
-    } else {
-      return TintedIcon(
-        icon: 'folder',
-        color: selected
-            ? colors.fileSelectedFolderIcon
-            : colors.fileUnselectedFolderIcon,
-      );
-    }
   }
 }
 
@@ -229,17 +191,6 @@ class SizedAvatar extends StatelessWidget {
     );
   }
 
-  Widget _networkImage(BuildContext context) {
-    return FutureBuilder<Uint8List>(
-      future: ImageCacheProvider.of(context).loadRawImageFromUrl(url),
-      builder: (context, snapshot) => CircleAvatar(
-        backgroundColor: Colors.transparent,
-        // backgroundImage: NetworkImage(item.data.owner?.avatar),
-        backgroundImage: snapshot.hasData ? MemoryImage(snapshot.data) : null,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     Widget _avatarChild;
@@ -250,7 +201,7 @@ class SizedAvatar extends StatelessWidget {
     } else if (url == null) {
       _avatarChild = _backupIcon(colors);
     } else {
-      _avatarChild = _networkImage(context);
+      _avatarChild = CachedCircleAvatar(url);
     }
     return Center(
         child: SizedBox(

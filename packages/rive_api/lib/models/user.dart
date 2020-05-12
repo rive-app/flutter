@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/team_invite_status.dart';
-import 'package:rive_api/src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 class RiveUser extends RiveOwner {
   final String avatar;

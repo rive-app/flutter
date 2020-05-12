@@ -1,10 +1,10 @@
+import 'package:pedantic/pedantic.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_api/files.dart';
-import 'package:rive_api/models/team.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team_role.dart';
-import 'package:rive_api/models/user.dart';
-import 'package:rive_editor/rive/file_browser/file_browser.dart';
-import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
@@ -17,66 +17,37 @@ import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
-class TopNav extends StatelessWidget {
-  final FileBrowser fileBrowser;
+class TopNavStream extends StatelessWidget {
+  final CurrentDirectory currentDirectory;
 
-  const TopNav(this.fileBrowser, {Key key}) : super(key: key);
+  Owner get owner => currentDirectory.owner;
+  int get folderId => currentDirectory.folderId;
+
+  const TopNavStream(this.currentDirectory, {Key key}) : super(key: key);
 
   Widget _navControls(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
-    final selectedOwner = RiveContext.of(context).currentOwner;
-    final rive = RiveContext.of(context);
     final children = <Widget>[];
-    if (fileBrowser.selectedFolder.owner != null) {
-      children.add(SizedAvatarOwner(
-        owner: fileBrowser.selectedFolder.owner,
+    if (owner != null) {
+      children.add(SizedAvatar(
+        url: owner.avatarUrl,
         size: const Size(30, 30),
         addBackground: true,
-        // TODO: the user icon and the your files icon look dumb with this
-        userIcon: 'teams',
+        icon: 'teams',
       ));
       children.add(const Padding(
         padding: EdgeInsets.only(right: 9),
       ));
     }
-    children.add(Text(fileBrowser.selectedFolder.displayName));
+    children.add(Text(owner.displayName));
     children.add(const Spacer());
-    children.add(ValueListenableBuilder<RiveFileSortOption>(
-      valueListenable: fileBrowser.selectedSortOption,
-      builder: (sortBoxContext, sortOption, _) => ComboBox<RiveFileSortOption>(
-        popupWidth: 100,
-        sizing: ComboSizing.collapsed,
-        underline: false,
-        valueColor: riveColors.toolbarButton,
-        options: fileBrowser.sortOptions.value,
-        value: sortOption,
-        toLabel: (option) => option?.name ?? '',
-        change: (option) => fileBrowser.loadFileList(sortOption: option),
-      ),
-    ));
 
-    // TODO: implement your profile
-    // children.add(const SizedBox(width: 15));
-    // children.add(TintedIconButton(
-    //       onPress: () {},
-    //       icon: 'user',
-    //       backgroundHover: riveColors.fileBackgroundLightGrey,
-    //       iconHover: riveColors.fileBackgroundDarkGrey,
-    //       tip: const Tip(label: 'Your Profile'),
-    //     ));
-
-    if (selectedOwner is RiveUser ||
-        (selectedOwner is RiveTeam && canEditTeam(selectedOwner.permission))) {
+    if (owner is Me ||
+        (owner is Team && canEditTeam((owner as Team).permission))) {
       children.add(const SizedBox(width: 12));
       children.add(TintedIconButton(
         onPress: () async {
-          await showSettings(context: context);
-          var rive = RiveContext.of(context);
-
-          if (rive.isSignedIn) {
-            // Our state for Teams could be out of date now.
-            await RiveContext.of(context).reloadTeams();
-          }
+          await showSettings(owner, context: context);
         },
         icon: 'settings',
         backgroundHover: riveColors.fileBackgroundLightGrey,
@@ -104,10 +75,29 @@ class TopNav extends StatelessWidget {
           item.itemBuilder(popupContext, isHovered),
       itemsBuilder: (context) => [
         PopupContextItem('New File', select: () async {
-          final file = await fileBrowser.createFile();
-          await fileBrowser.openFile(rive, file);
+          if (owner is Team) {
+            await FileManager().createFile(folderId, owner.ownerId);
+          } else {
+            await FileManager().createFile(folderId);
+          }
+          // TODO:
+          // open file
+          unawaited(FolderTreeManager().loadFolders(owner));
+          Plumber().message(currentDirectory);
         }),
-        PopupContextItem('New Folder', select: fileBrowser.createFolder),
+        PopupContextItem('New Folder', select: () async {
+          if (owner is Team) {
+            await FileManager().createFolder(folderId, owner.ownerId);
+          } else {
+            await FileManager().createFolder(folderId);
+          }
+          // NOTE: bit funky, feels like it'd be nice
+          // to control both managers through one message
+          // pretty sure we can do that if we back onto
+          // a more generic FileManager
+          unawaited(FolderTreeManager().loadFolders(owner));
+          Plumber().message(currentDirectory);
+        }),
         PopupContextItem.separator(),
         PopupContextItem(
           'New Team',

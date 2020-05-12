@@ -1,7 +1,7 @@
 import 'dart:core';
 
 import 'package:rive_api/models/cdn.dart';
-import 'package:rive_api/src/deserialize_helper.dart';
+import 'package:utilities/deserialize.dart';
 
 /// Rive File metadata from the Api layer. Implementations should inherit from
 /// this class in order to add application specific functionality. For example,

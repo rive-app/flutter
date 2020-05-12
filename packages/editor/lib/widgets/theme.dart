@@ -137,6 +137,7 @@ class RiveColors {
   Color get animationSelected => const Color(0x24888888);
 
   Color get shadow25 => const Color(0x44000000);
+  Color get black30 => const Color(0x4D000000);
 
   Color get lightTreeLines => const Color(0x27666666);
   Color get selectedTreeLines => const Color(0xFF79B7E6);

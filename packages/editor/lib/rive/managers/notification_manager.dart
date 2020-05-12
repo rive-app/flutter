@@ -1,7 +1,8 @@
 import 'dart:async';
 
+import 'package:rive_api/rive_api.dart';
 import 'package:rive_api/teams.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/apis/notification.dart';
 import 'package:rive_api/models/notification.dart';
 

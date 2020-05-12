@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/api.dart';
-import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/profile.dart';
-import 'package:rive_api/models/team.dart';
 import 'package:rive_api/profiles.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
@@ -13,7 +13,7 @@ import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ProfileSettings extends StatefulWidget {
-  final RiveOwner owner;
+  final Owner owner;
   final RiveApi api;
   const ProfileSettings(this.owner, this.api);
 
@@ -49,9 +49,10 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
   void _onProfileChange() => setState(() {});
 
-  void _submitChanges() {
-    _profile.submitChanges(
+  void _submitChanges() async {
+    await _profile.submitChanges(
         widget.api, widget.owner); //.then((value) => /** TODO: */);
+    TeamManager().loadTeams();
   }
 
   Widget _textFieldRow(List<Widget> children) {
@@ -79,7 +80,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     }
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
-    var labelPrefix = widget.owner is RiveTeam ? 'Team ' : '';
+    var labelPrefix = widget.owner is Team ? 'Team ' : '';
 
     return Column(
       // Stretches the separators
@@ -100,8 +101,12 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                               const SizedBox(height: 3),
                               _textFieldRow([
                                 LabeledTextField(
-                                  label: '${labelPrefix}Name',
-                                  onChanged: (value) => _profile.name = value,
+                                  label: '${labelPrefix}Name asdfsd',
+                                  onChanged: (value) {
+                                    print('changing name');
+                                    return _profile.name = value;
+                                  },
+                                  // onChanged: (value) => _profile.name = value,
                                   initialValue: _profile.name,
                                   hintText: 'Pick a name',
                                 ),
@@ -327,7 +332,7 @@ class ProfilePackage with ChangeNotifier {
   ProfilePackage();
 
   // Initializer for this profile.
-  static Future<ProfilePackage> getProfile(RiveApi api, RiveOwner owner) async {
+  static Future<ProfilePackage> getProfile(RiveApi api, Owner owner) async {
     var response = await RiveProfilesApi(api).getInfo(owner);
     if (response != null) {
       return ProfilePackage().._profile = response;
@@ -335,7 +340,7 @@ class ProfilePackage with ChangeNotifier {
     return null;
   }
 
-  Future<void> submitChanges(RiveApi api, RiveOwner owner) async =>
+  Future<void> submitChanges(RiveApi api, Owner owner) async =>
       RiveProfilesApi(api).updateInfo(owner, profile: _profile);
 
   String get name => _profile.name;
