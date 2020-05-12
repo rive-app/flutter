@@ -18,7 +18,7 @@ abstract class DrawableTool extends StageTool with DraggableTool {
     if (!super.activate(stage)) {
       return false;
     }
-    onScreen();
+    _addCursor();
     return true;
   }
 
@@ -38,7 +38,12 @@ abstract class DrawableTool extends StageTool with DraggableTool {
   void offScreen() => _removeCursor();
 
   @override
-  void onScreen() => _customCursor = stage.showCustomCursor(cursorName);
+  void onScreen() => _addCursor();
+
+  void _addCursor() =>
+
+      // In weird cases, cursor can be added twice
+      _customCursor ??= stage.showCustomCursor(cursorName);
 
   void _removeCursor() {
     _customCursor?.remove();
