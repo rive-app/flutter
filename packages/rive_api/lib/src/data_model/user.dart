@@ -1,17 +1,16 @@
-import 'package:utilities/deserialize.dart';
 import 'package:meta/meta.dart';
+import 'package:utilities/deserialize.dart';
+
 import 'owner.dart';
 
 class UserDM extends OwnerDM {
   const UserDM({
-    @required this.ownerId,
-    @required this.name,
-    @required this.username,
+    @required int ownerId,
+    @required String name,
+    @required String username,
     @required this.avatarUrl,
-  });
-  final int ownerId;
-  final String name;
-  final String username;
+  }) : super(ownerId, name, username);
+
   final String avatarUrl;
 
   static Iterable<UserDM> fromSearchDataList(List<dynamic> data) =>
@@ -36,16 +35,14 @@ class UserDM extends OwnerDM {
 
 class TeamMemberDM extends OwnerDM {
   const TeamMemberDM({
-    @required this.ownerId,
-    @required this.name,
-    @required this.username,
+    @required int ownerId,
+    @required String name,
+    @required String username,
     @required this.avatarUrl,
     @required this.status,
     @required this.permission,
-  });
-  final int ownerId;
-  final String name;
-  final String username;
+  }) : super(ownerId, name, username);
+
   final String avatarUrl;
   final String status;
   final String permission;

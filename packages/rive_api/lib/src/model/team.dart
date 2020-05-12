@@ -5,16 +5,13 @@ import 'owner.dart';
 
 class Team extends Owner {
   const Team({
-    @required this.ownerId,
-    @required this.name,
-    @required this.username,
+    @required int ownerId,
+    @required String name,
+    @required String username,
     @required this.permission,
-    this.avatarUrl,
-  });
-  final int ownerId;
-  final String name;
-  final String username;
-  final String avatarUrl;
+    String avatarUrl,
+  }) : super(ownerId, name, username, avatarUrl);
+
   final TeamRole permission;
 
   static List<Team> fromDMList(List<TeamDM> teams) =>

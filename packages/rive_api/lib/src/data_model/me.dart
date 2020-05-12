@@ -1,29 +1,32 @@
-import 'package:utilities/deserialize.dart';
 import 'package:meta/meta.dart';
-import 'owner.dart';
+import 'package:utilities/deserialize.dart';
+
+import 'data_model.dart';
 
 /// Data model for a logged-in user
 
-class MeDM extends OwnerDM {
+class MeDM extends UserDM {
   const MeDM({
+    @required int ownerId,
+    @required String name,
     @required this.signedIn,
     @required this.id,
-    @required this.ownerId,
-    @required this.name,
-    this.username,
-    this.avatarUrl,
+    String username,
+    String avatarUrl,
     this.isAdmin,
     this.isPaid,
     this.notificationCount,
     this.verified,
     this.notice,
-  });
+  }) : super(
+          ownerId: ownerId,
+          name: name,
+          username: username,
+          avatarUrl: avatarUrl,
+        );
+
   final bool signedIn;
   final int id;
-  final int ownerId;
-  final String name;
-  final String username;
-  final String avatarUrl;
   final bool isAdmin;
   final bool isPaid;
   final int notificationCount;

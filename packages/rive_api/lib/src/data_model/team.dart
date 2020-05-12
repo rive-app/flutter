@@ -1,18 +1,17 @@
-import 'package:utilities/deserialize.dart';
 import 'package:meta/meta.dart';
+import 'package:utilities/deserialize.dart';
+
 import 'owner.dart';
 
 class TeamDM extends OwnerDM {
   const TeamDM({
-    @required this.ownerId,
-    @required this.name,
-    @required this.username,
+    @required int ownerId,
+    @required String name,
+    @required String username,
     @required this.permission,
     this.avatarUrl,
-  });
-  final int ownerId;
-  final String name;
-  final String username;
+  }) : super(ownerId, name, username);
+
   final String avatarUrl;
   final String permission;
 

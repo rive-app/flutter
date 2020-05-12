@@ -1,18 +1,15 @@
 import 'package:meta/meta.dart';
 import 'package:rive_api/src/data_model/data_model.dart';
+
 import 'owner.dart';
 
 class User extends Owner {
   const User({
-    @required this.ownerId,
-    @required this.name,
-    @required this.username,
-    @required this.avatarUrl,
-  });
-  final int ownerId;
-  final String name;
-  final String username;
-  final String avatarUrl;
+    @required int ownerId,
+    @required String name,
+    @required String username,
+    @required String avatarUrl,
+  }) : super(ownerId, name, username, avatarUrl);
 
   static List<User> fromDMList(List<UserDM> users) =>
       users.map((user) => User.fromDM(user)).toList();
@@ -44,17 +41,14 @@ class User extends Owner {
 
 class TeamMember extends Owner {
   const TeamMember({
-    @required this.ownerId,
-    @required this.name,
-    @required this.username,
-    @required this.avatarUrl,
+    @required int ownerId,
+    @required String name,
+    @required String username,
+    @required String avatarUrl,
     @required this.status,
     @required this.permission,
-  });
-  final int ownerId;
-  final String name;
-  final String username;
-  final String avatarUrl;
+  }) : super(ownerId, name, username, avatarUrl);
+
   final String status;
   final String permission;
 
