@@ -1,10 +1,14 @@
+import 'package:pedantic/pedantic.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/files.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/user.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
+import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
@@ -134,9 +138,12 @@ class TopNav extends StatelessWidget {
 }
 
 class TopNavStream extends StatelessWidget {
-  final Owner owner;
+  final CurrentDirectory currentDirectory;
 
-  const TopNavStream(this.owner, {Key key}) : super(key: key);
+  Owner get owner => currentDirectory.owner;
+  int get folderId => currentDirectory.folderId;
+
+  const TopNavStream(this.currentDirectory, {Key key}) : super(key: key);
 
   Widget _navControls(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
@@ -195,14 +202,28 @@ class TopNavStream extends StatelessWidget {
       itemsBuilder: (context) => [
         PopupContextItem('New File', select: () async {
           print('TODO: implement me');
-          // Add file creation & opening
-          // final file = await fileBrowser.createFile();
-          // await fileBrowser.openFile(rive, file);
+          if (owner is Team) {
+            await FileManager().createFile(folderId, owner.ownerId);
+          } else {
+            await FileManager().createFile(folderId);
+          }
+          // TODO:
+          // open file
+          unawaited(FolderTreeManager().loadFolders(owner));
+          Plumber().message(currentDirectory);
         }),
         PopupContextItem('New Folder', select: () async {
-          print('TODO: implement me');
-          // Add file creation & opening
-          // await fileBrowser.createFolder();
+          if (owner is Team) {
+            await FileManager().createFolder(folderId, owner.ownerId);
+          } else {
+            await FileManager().createFolder(folderId);
+          }
+          // NOTE: bit funky, feels like it'd be nice
+          // to control both managers through one message
+          // pretty sure we can do that if we back onto
+          // a more generic FileManager
+          unawaited(FolderTreeManager().loadFolders(owner));
+          Plumber().message(currentDirectory);
         }),
         PopupContextItem.separator(),
         PopupContextItem(

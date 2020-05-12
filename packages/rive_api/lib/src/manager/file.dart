@@ -48,6 +48,16 @@ class FileManager with Subscriptions {
     });
   }
 
+  Future<File> createFile(int folderId, [int teamId]) async {
+    final fileDM = await _fileApi.createFile(folderId, teamId);
+    return File.fromDM(fileDM);
+  }
+
+  Future<Folder> createFolder(int folderId, [int teamId]) async {
+    final folderDM = await _fileApi.createFolder(folderId, teamId);
+    return Folder.fromDM(folderDM);
+  }
+
   void loadFolders(Owner owner) async {
     final _foldersDM = await _folderApi.folders(owner.asDM);
     final _folders = Folder.fromDMList(_foldersDM.toList());

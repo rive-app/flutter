@@ -14,10 +14,16 @@ class FileDM {
   final String name;
   final String preview;
 
-  static List<FileDM> fromDataList(List<dynamic> data, CdnDM cdn) =>
+  static List<FileDM> fromDataList(
+    List<dynamic> data,
+    CdnDM cdn,
+  ) =>
       data.map((d) => FileDM.fromData(d, cdn)).toList(growable: false);
 
-  factory FileDM.fromData(Map<String, dynamic> data, CdnDM cdn) {
+  factory FileDM.fromData(
+    Map<String, dynamic> data,
+    CdnDM cdn,
+  ) {
     return FileDM(
       ownerId: data.getInt('ownerId'),
       name: data.getString('name'),
@@ -28,9 +34,23 @@ class FileDM {
     );
   }
 
-  static List<FileDM> fromIdList(List<dynamic> data, int ownerId) => data
-      .map((id) => FileDM(id: id as int, ownerId: ownerId))
-      .toList(growable: false);
+  factory FileDM.fromCreateData(
+    Map<String, dynamic> data,
+  ) {
+    return FileDM(
+      ownerId: data.getInt('oid'),
+      name: data.getString('name'),
+      id: data.getInt('id'),
+    );
+  }
+
+  static List<FileDM> fromIdList(
+    List<dynamic> data,
+    int ownerId,
+  ) =>
+      data
+          .map((id) => FileDM(id: id as int, ownerId: ownerId))
+          .toList(growable: false);
 
   @override
   String toString() =>

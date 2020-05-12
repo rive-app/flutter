@@ -86,7 +86,7 @@ class FileBrowserStream extends StatelessWidget {
           return SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 30),
-              child: TopNavStream(snapshot.data.owner),
+              child: TopNavStream(snapshot.data),
             ),
           );
         } else {

@@ -1,6 +1,7 @@
 /// API calls for a user's volumes
 
 import 'dart:convert';
+import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/src/data_model/data_model.dart';
@@ -23,9 +24,8 @@ class FileApi {
   Future<List<FileDM>> myFiles(int folderId) async =>
       _files('/api/my/files/a-z/rive/${folderId}');
 
-  Future<List<FileDM>> teamFiles(int teamOwnerId, int folderId) async =>
-      _files(
-          '/api/teams/${teamOwnerId}/files/a-z/rive/${folderId}', teamOwnerId);
+  Future<List<FileDM>> teamFiles(int teamOwnerId, int folderId) async => _files(
+      '/api/teams/${teamOwnerId}/files/a-z/rive/${folderId}', teamOwnerId);
 
   Future<List<FileDM>> _files(String url, [int ownerId]) async {
     final res = await api.get(api.host + url);
@@ -55,7 +55,6 @@ class FileApi {
       _fileDetails('/api/teams/${teamOwnerId}/files', fileIds);
 
   Future<List<FileDM>> _fileDetails(String url, List fileIds) async {
-    print(jsonEncode(fileIds));
     var res = await api.post(
       api.host + url,
       body: jsonEncode(fileIds),
@@ -69,5 +68,95 @@ class FileApi {
       _log.severe('Error formatting teams api response: $e');
       rethrow;
     }
+  }
+
+  Future<FileDM> createFile(int folderId, [int teamId]) async {
+    FileDM newFile;
+    if (teamId != null) {
+      newFile = await _createTeamFile(folderId, teamId);
+    } else {
+      newFile = await _createFile(folderId);
+    }
+    return newFile;
+  }
+
+  // /api/my/files/:product/create/:folder_id?
+  Future<FileDM> _createFile(int folderId) async {
+    var response =
+        await api.post(api.host + '/api/my/files/rive/create/$folderId');
+    return _parseFileResponse(response);
+  }
+
+  Future<FileDM> _createTeamFile(
+    int folderId,
+    int teamId,
+  ) async {
+    String payload = json.encode({
+      'data': {'fileName': 'New File'}
+    });
+    var response = await api.post(
+        api.host + '/api/teams/${teamId}/folders/${folderId}/new/rive/',
+        body: payload);
+    return _parseFileResponse(response);
+  }
+
+  FileDM _parseFileResponse(Response response) {
+    // Team response
+    // {"file":{"id":1,"oid":40846,"name":"New File","route":"/a/null/files/rive/new-file","product":"rive"},"reroute":"/a/null/files/rive/new-file"}
+
+    if (response.statusCode != 200) {
+      return null;
+    }
+    Map<String, dynamic> data;
+    try {
+      data = json.decode(response.body) as Map<String, dynamic>;
+    } on FormatException catch (_) {
+      return null;
+    }
+    dynamic fileData = data['file'];
+    if (fileData is Map<String, dynamic>) {
+      return FileDM.fromCreateData(fileData);
+    }
+    return null;
+  }
+
+  Future<FolderDM> createFolder(int folderId, [int teamId]) async {
+    FolderDM newFolder;
+    if (teamId != null) {
+      newFolder = await _createTeamFolder(folderId, teamId);
+    } else {
+      newFolder = await _createFolder(folderId);
+    }
+    return newFolder;
+  }
+
+  Future<FolderDM> _createFolder(int folderId) async {
+    String payload =
+        json.encode({'name': 'New Folder', 'order': 0, 'parent': folderId});
+
+    var response =
+        await api.post(api.host + '/api/my/files/folder', body: payload);
+    return _parseFolderResponse(response);
+  }
+
+  Future<FolderDM> _createTeamFolder(
+    int folderId,
+    int teamId,
+  ) async {
+    String payload = json.encode({
+      'data': {'folderName': 'New Folder'}
+    });
+    var response = await api.post(
+        api.host + '/api/teams/${teamId}/folders/${folderId}',
+        body: payload);
+    return _parseFolderResponse(response);
+  }
+
+  FolderDM _parseFolderResponse(Response response) {
+    if (response.statusCode == 200) {
+      var folderResponse = json.decode(response.body);
+      return FolderDM.fromData(folderResponse);
+    }
+    return null;
   }
 }
