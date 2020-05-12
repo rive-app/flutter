@@ -53,7 +53,8 @@ class OpenFileContext with RiveFileDelegate {
   final RiveFilesApi filesApi;
 
   /// File name
-  final ValueNotifier<String> name;
+  final ValueNotifier<String> _name;
+  ValueListenable<String> get name => _name;
 
   /// The Core representation of the file.
   RiveFile core;
@@ -139,7 +140,7 @@ class OpenFileContext with RiveFileDelegate {
     String fileName,
     this.api,
     this.filesApi,
-  }) : name = ValueNotifier<String>(fileName);
+  }) : _name = ValueNotifier<String>(fileName);
 
   Stage get stage => _stage;
 
@@ -429,7 +430,7 @@ class OpenFileContext with RiveFileDelegate {
 
   /// Save the file name
   void changeFileName(String name) {
-    this.name.value = name;
+    _name.value = name;
     filesApi.changeFileName(ownerId, fileId, name);
   }
 }

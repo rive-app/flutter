@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/percentage_input_converter.dart';
+import 'package:rive_editor/widgets/common/value_listenable_text_field.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
 
@@ -51,23 +50,29 @@ class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
           child: (focus, key) {
             // Focus this input right away when the popup displays.
             (_zoomFocusNode = focus).requestFocus();
-            return ValueNotifierTextField(
-              key: key,
-              focusNode: focus,
-              notifier: file.stage.zoomLevelNotifier,
-              converter: PercentageInputConverter.instance,
-              change: (double value) => file.stage.zoomLevel = value,
+            return SizedBox(
+              width: 75,
+              child: ValueListenableTextField(
+                key: key,
+                focusNode: focus,
+                listenable: file.stage.zoomLevelNotifier,
+                converter: PercentageInputConverter.instance,
+                change: (double value) => file.stage.zoomLevel = value,
+              ),
             );
           },
         ),
         PopupContextItem.focusable(
           'Resolution',
-          child: (focus, key) => ValueNotifierTextField(
-            key: key,
-            focusNode: focus,
-            notifier: file.stage.resolutionNotifier,
-            converter: PercentageInputConverter.instance,
-            change: (double value) => file.stage.resolution = value,
+          child: (focus, key) => SizedBox(
+            width: 75,
+            child: ValueListenableTextField(
+              key: key,
+              focusNode: focus,
+              listenable: file.stage.resolutionNotifier,
+              converter: PercentageInputConverter.instance,
+              change: (double value) => file.stage.resolution = value,
+            ),
           ),
           select: () {},
         ),
@@ -129,37 +134,6 @@ class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
           dismissOnSelect: false,
         ),
       ],
-    );
-  }
-}
-
-/// Text field for T values. Takes a T notifier into which the text field value
-/// will be sent.
-class ValueNotifierTextField<T> extends StatelessWidget {
-  final FocusNode focusNode;
-  const ValueNotifierTextField({
-    @required this.notifier,
-    @required this.converter,
-    @required this.change,
-    this.focusNode,
-    Key key,
-  }) : super(key: key);
-  final ValueNotifier<T> notifier;
-  final InputValueConverter<T> converter;
-  final void Function(T value) change;
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 75,
-      child: ValueListenableBuilder<T>(
-        valueListenable: notifier,
-        builder: (context, value, _) => InspectorTextField<T>(
-          focusNode: focusNode,
-          value: value,
-          change: change,
-          converter: converter,
-        ),
-      ),
     );
   }
 }

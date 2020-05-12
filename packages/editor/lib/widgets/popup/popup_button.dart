@@ -28,6 +28,7 @@ class PopupButton<T extends PopupListItem> extends StatefulWidget {
   final PopupDirection direction;
   final double directionPadding;
   final Tip tip;
+  final List<PopupDirection> fallbackDirections;
 
   const PopupButton({
     @required this.builder,
@@ -36,6 +37,7 @@ class PopupButton<T extends PopupListItem> extends StatefulWidget {
     this.itemBuilder,
     this.opened,
     this.direction = PopupDirection.bottomToRight,
+    this.fallbackDirections = PopupDirection.all,
     this.directionPadding = 16,
     this.arrowTweak = Offset.zero,
     this.width = 177,
@@ -79,6 +81,7 @@ class _PopupButtonState<T extends PopupListItem> extends State<PopupButton<T>> {
                 context,
                 direction: widget.direction,
                 directionPadding: widget.directionPadding,
+                fallbackDirections: widget.fallbackDirections,
                 items: widget.itemsBuilder(context),
                 itemBuilder: widget.itemBuilder,
                 arrowTweak: widget.arrowTweak,
