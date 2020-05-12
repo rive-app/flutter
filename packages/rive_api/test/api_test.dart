@@ -7,6 +7,14 @@ import 'fixtures/data_models.dart';
 
 class MockRiveApi extends Mock implements RiveApi {
   final host = '';
+  @override
+  Future<void> clearCookies() {
+    // TODO: implement clearCookies
+    cookiesCleared = true;
+  }
+
+  var cookiesCleared = false;
+  final Map<String, String> cookies = {};
 }
 
 void main() {
@@ -37,6 +45,16 @@ void main() {
       final mockApi = MeApi(riveApi);
       expect(mockApi.whoami, throwsException);
     });
+
+    test('signout successful', () async {
+      final riveApi = MockRiveApi();
+      expect(riveApi.cookiesCleared, false);
+      when(riveApi.getFromPath('/signout'))
+          .thenAnswer((_) async => successLogoutResponse);
+      final mockApi = MeApi(riveApi);
+      expect(await mockApi.signout(), true);
+      expect(riveApi.cookiesCleared, true);
+    });
   });
 
   group('Team', () {
@@ -59,6 +77,28 @@ void main() {
       expect(teams.last.username, 'avengers_101');
       expect(teams.last.avatarUrl, null);
       expect(teams.last.permission, 'Member');
+    });
+
+    test('load teams members', () async {
+      final riveApi = MockRiveApi();
+      when(riveApi.getFromPath('/api/teams/41545/affiliates'))
+          .thenAnswer((_) async => successTeamAffiliatesResponse);
+      final mockApi = TeamApi(riveApi);
+      final teams = await mockApi.teamMembers(41545);
+
+      expect(teams.length, 2);
+      expect(teams.first.ownerId, 40944);
+      expect(teams.first.name, null);
+      expect(teams.first.username, 'foofoo');
+      expect(teams.first.avatarUrl, null);
+      expect(teams.first.permission, 'Owner');
+      expect(teams.first.status, 'complete');
+      expect(teams.last.ownerId, 41594);
+      expect(teams.last.name, null);
+      expect(teams.last.username, 'mightymax');
+      expect(teams.last.avatarUrl, null);
+      expect(teams.last.permission, 'Member');
+      expect(teams.last.status, 'pending');
     });
   });
 
@@ -112,6 +152,37 @@ void main() {
         expect(folder.order != null, true);
         expect(folder.id != null, true);
       });
+    });
+
+    test('get create user folder', () async {
+      final riveApi = MockRiveApi();
+      when(riveApi.post('/api/my/files/folder',
+              body: '{"name":"New Folder","order":0,"parent":1}'))
+          .thenAnswer((_) async => successFolderCreationResponse);
+      final mockApi = FolderApi(riveApi);
+      final newFolder = await mockApi.createFolder(1);
+      expect(newFolder.name, 'New Folder');
+      expect(newFolder.id, 10);
+      expect(newFolder.parent, 1);
+      expect(newFolder.order, 0);
+      expect(newFolder.ownerId, null);
+    });
+
+    test('get create team folder', () async {
+      final riveApi = MockRiveApi();
+      final team = getTeam();
+      final folderId = 1;
+      when(riveApi.post('/api/teams/${team.ownerId}/folders/${folderId}',
+              body: '{"data":{"folderName":"New Folder"}}'))
+          .thenAnswer((_) async => successTeamFolderCreationResponse);
+      final mockApi = FolderApi(riveApi);
+
+      final newFolder = await mockApi.createFolder(folderId, team.ownerId);
+      expect(newFolder.name, 'New Folder');
+      expect(newFolder.id, 10);
+      expect(newFolder.parent, 1);
+      expect(newFolder.order, 1);
+      expect(newFolder.ownerId, 1);
     });
   });
 
@@ -192,6 +263,35 @@ void main() {
       expect(files.first.preview, 'http://foofo.com/<preview>?param');
       expect(files.last.name, 'New File 3');
       expect(files.last.preview, 'http://foofo.com/<preview3>?param');
+    });
+
+    test('get create user file', () async {
+      final riveApi = MockRiveApi();
+      when(riveApi.post('/api/my/files/rive/create/1'))
+          .thenAnswer((_) async => successFileCreationResponse);
+      final mockApi = FileApi(riveApi);
+      final newFile = await mockApi.createFile(1);
+      expect(newFile.name, 'New File');
+      expect(newFile.id, 10);
+      expect(newFile.preview, null);
+      expect(newFile.ownerId, 1);
+    });
+
+    test('get create team file', () async {
+      final riveApi = MockRiveApi();
+      final team = getTeam();
+      final folderId = 1;
+      when(riveApi.post(
+              '/api/teams/${team.ownerId}/folders/${folderId}/new/rive/',
+              body: '{"data":{"fileName":"New File"}}'))
+          .thenAnswer((_) async => successFileCreationResponse);
+      final mockApi = FileApi(riveApi);
+
+      final newFile = await mockApi.createFile(folderId, team.ownerId);
+      expect(newFile.name, 'New File');
+      expect(newFile.id, 10);
+      expect(newFile.preview, null);
+      expect(newFile.ownerId, 1);
     });
   });
 }

@@ -1,5 +1,7 @@
 import 'package:http/http.dart';
 
+final successLogoutResponse = Response("", 302);
+
 final successMeResponse = Response("""
 {
   "signedIn":true,
@@ -31,6 +33,23 @@ final successTeamsResponse = Response("""
     "avatar": null,
     "permission": "Member"
 }]
+""", 200);
+
+final successTeamAffiliatesResponse = Response("""
+[{
+    "ownerId":40944,
+    "username":"foofoo",
+    "name":null,
+    "status":"complete",
+    "permission":"Owner",
+    "avatar":null
+},{
+    "ownerId":41594,
+    "username":"mightymax",
+    "name":null,
+    "status":"pending",
+    "permission":"Member",
+    "avatar":null}]
 """, 200);
 
 final successSearchResponse = Response("""
@@ -256,3 +275,32 @@ final myFilesDetailsResponse = """
   ]
 }
 """;
+
+final successFileCreationResponse = Response("""
+{
+  "file": {
+    "oid": 1,
+    "name": "New File",
+    "id": 10
+  }
+}
+""", 200);
+
+final successFolderCreationResponse = Response("""
+{
+  "id": 10, 
+  "name": "New Folder", 
+  "order": 0, 
+  "parent": 1
+}
+""", 200);
+
+final successTeamFolderCreationResponse = Response("""
+{
+  "id": 10, 
+  "name": "New Folder", 
+  "project_owner_id": 1,
+  "order": 1, 
+  "parent": 1
+}
+""", 200);

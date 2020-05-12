@@ -119,44 +119,4 @@ class FileApi {
     }
     return null;
   }
-
-  Future<FolderDM> createFolder(int folderId, [int teamId]) async {
-    FolderDM newFolder;
-    if (teamId != null) {
-      newFolder = await _createTeamFolder(folderId, teamId);
-    } else {
-      newFolder = await _createFolder(folderId);
-    }
-    return newFolder;
-  }
-
-  Future<FolderDM> _createFolder(int folderId) async {
-    String payload =
-        json.encode({'name': 'New Folder', 'order': 0, 'parent': folderId});
-
-    var response =
-        await api.post(api.host + '/api/my/files/folder', body: payload);
-    return _parseFolderResponse(response);
-  }
-
-  Future<FolderDM> _createTeamFolder(
-    int folderId,
-    int teamId,
-  ) async {
-    String payload = json.encode({
-      'data': {'folderName': 'New Folder'}
-    });
-    var response = await api.post(
-        api.host + '/api/teams/${teamId}/folders/${folderId}',
-        body: payload);
-    return _parseFolderResponse(response);
-  }
-
-  FolderDM _parseFolderResponse(Response response) {
-    if (response.statusCode == 200) {
-      var folderResponse = json.decode(response.body);
-      return FolderDM.fromData(folderResponse);
-    }
-    return null;
-  }
 }

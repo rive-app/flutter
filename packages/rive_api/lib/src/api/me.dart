@@ -30,8 +30,9 @@ class MeApi {
   bool _isSignedIn(Map<String, dynamic> data) => data['signedIn'];
 
   Future<bool> signout() async {
-    var response = await api.get(api.host + '/signout');
-    if (response.statusCode == 200) {
+    var response = await api.getFromPath('/signout');
+    if (response.statusCode == 302) {
+      print('clearing cookies');
       await api.clearCookies();
       return true;
     }

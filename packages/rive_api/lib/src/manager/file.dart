@@ -54,7 +54,7 @@ class FileManager with Subscriptions {
   }
 
   Future<Folder> createFolder(int folderId, [int teamId]) async {
-    final folderDM = await _fileApi.createFolder(folderId, teamId);
+    final folderDM = await _folderApi.createFolder(folderId, teamId);
     return Folder.fromDM(folderDM);
   }
 
