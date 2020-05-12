@@ -148,6 +148,8 @@ class ShortcutAction {
 
   static TogglingShortcutAction mouseWheelZoom =
       TogglingShortcutAction('mouse-wheel-zoom');
+  static TogglingShortcutAction symmetricDraw =
+      TogglingShortcutAction('symmetric-draw');
   static const ShortcutAction confirm = ShortcutAction('action');
 
   static const ShortcutAction left = ShortcutAction('action-left');

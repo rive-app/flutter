@@ -9,6 +9,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(ShortcutAction.multiSelect, [ShortcutKey.systemCmd]),
     Shortcut(ShortcutAction.togglePlay, [ShortcutKey.space]),
     Shortcut(ShortcutAction.mouseWheelZoom, [ShortcutKey.systemCmd]),
+    Shortcut(ShortcutAction.symmetricDraw, [ShortcutKey.shift]),
     Shortcut(ShortcutAction.pan, [ShortcutKey.space]),
     Shortcut(ShortcutAction.toggleEditMode, [ShortcutKey.enter]),
     Shortcut(

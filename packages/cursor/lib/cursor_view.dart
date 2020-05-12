@@ -35,9 +35,7 @@ class CursorInstance {
 
   CursorInstance(this.builder, this.context);
 
-  void remove() {
-    context.remove(this);
-  }
+  void remove() => context.remove(this);
 }
 
 class Cursor extends ChangeNotifier {
@@ -255,7 +253,7 @@ class _CursorViewState extends State<CursorView> {
           child: PropagatingListener(
             behavior: HitTestBehavior.deferToChild,
             onPointerMove: (details) {
-              if(!mounted) {
+              if (!mounted) {
                 return;
               }
               setState(() {

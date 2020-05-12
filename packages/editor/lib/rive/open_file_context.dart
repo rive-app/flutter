@@ -274,7 +274,7 @@ class OpenFileContext with RiveFileDelegate {
   void _resetTreeControllers() {
     treeController.value?.dispose();
     drawOrderTreeController.value?.dispose();
-    
+
     treeController.value = HierarchyTreeController(this);
     drawOrderTreeController.value = DrawOrderTreeController(
       file: this,
@@ -410,7 +410,7 @@ class OpenFileContext with RiveFileDelegate {
         return true;
 
       case ShortcutAction.toggleEditMode:
-        stage?.toggleEditMode();
+        // TODO: implement
         return true;
 
       case ShortcutAction.cancel:

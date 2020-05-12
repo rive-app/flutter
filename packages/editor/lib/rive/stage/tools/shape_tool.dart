@@ -9,6 +9,8 @@ import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/constants.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
@@ -30,6 +32,23 @@ abstract class ShapeTool extends DrawableTool {
   Artboard _currentArtboard;
 
   final StageToolTip _tip = StageToolTip();
+
+  @override
+  bool activate(Stage stage) {
+    if (!super.activate(stage)) {
+      return false;
+    }
+    // Start listening for edit mode changes
+    _symmetricDrawChanged();
+    ShortcutAction.symmetricDraw.addListener(_symmetricDrawChanged);
+    return true;
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    ShortcutAction.symmetricDraw.removeListener(_symmetricDrawChanged);
+  }
 
   @override
   void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
@@ -81,38 +100,41 @@ abstract class ShapeTool extends DrawableTool {
   }
 
   @override
+  void endDrag() {
+    super.endDrag();
+    _shape = null;
+  }
+
+  @override
   void updateDrag(Vec2D worldMouse) {
-    super.updateDrag(worldMouse);
-    switch (editModeMap[editMode]) {
-      case DraggingMode.symmetric:
-        final maxChange = max(
-          (_startWorldMouse[0] - worldMouse[0]).abs(),
-          (_startWorldMouse[1] - worldMouse[1]).abs(),
-        );
-        final x1 = (_startWorldMouse[0] < worldMouse[0])
-            ? _startWorldMouse[0]
-            : _startWorldMouse[0] - maxChange;
-        final y1 = (_startWorldMouse[1] < worldMouse[1])
-            ? _startWorldMouse[1]
-            : _startWorldMouse[1] - maxChange;
-        _start = Vec2D.fromValues(
-          x1,
-          y1,
-        );
-        _end = Vec2D.fromValues(
-          _start[0] + maxChange,
-          _start[1] + maxChange,
-        );
-        break;
-      default:
-        _start = Vec2D.fromValues(
-          min(_startWorldMouse[0], worldMouse[0]),
-          min(_startWorldMouse[1], worldMouse[1]),
-        );
-        _end = Vec2D.fromValues(
-          max(_startWorldMouse[0], worldMouse[0]),
-          max(_startWorldMouse[1], worldMouse[1]),
-        );
+    if (ShortcutAction.symmetricDraw.value) {
+      final maxChange = max(
+        (_startWorldMouse[0] - worldMouse[0]).abs(),
+        (_startWorldMouse[1] - worldMouse[1]).abs(),
+      );
+      final x1 = (_startWorldMouse[0] < worldMouse[0])
+          ? _startWorldMouse[0]
+          : _startWorldMouse[0] - maxChange;
+      final y1 = (_startWorldMouse[1] < worldMouse[1])
+          ? _startWorldMouse[1]
+          : _startWorldMouse[1] - maxChange;
+      _start = Vec2D.fromValues(
+        x1,
+        y1,
+      );
+      _end = Vec2D.fromValues(
+        _start[0] + maxChange,
+        _start[1] + maxChange,
+      );
+    } else {
+      _start = Vec2D.fromValues(
+        min(_startWorldMouse[0], worldMouse[0]),
+        min(_startWorldMouse[1], worldMouse[1]),
+      );
+      _end = Vec2D.fromValues(
+        max(_startWorldMouse[0], worldMouse[0]),
+        max(_startWorldMouse[1], worldMouse[1]),
+      );
     }
 
     _cursor = Vec2D.clone(worldMouse);
@@ -158,10 +180,8 @@ abstract class ShapeTool extends DrawableTool {
     _tip.paint(canvas, Offset(cursor[0] + 10, cursor[1] + 10));
   }
 
-  @override
-  void onEditModeChange() {
-    // if the edit mode is changed lets just treat it as a fake drag.
-    if (lastWorldMouse != null) {
+  void _symmetricDrawChanged() {
+    if (lastWorldMouse != null && _shape != null) {
       updateDrag(lastWorldMouse);
     }
   }

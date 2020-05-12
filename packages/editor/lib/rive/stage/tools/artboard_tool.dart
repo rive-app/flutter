@@ -5,7 +5,8 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
-import 'package:rive_editor/constants.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 
@@ -16,6 +17,23 @@ class ArtboardTool extends DrawableTool {
   /// The artboard tool operates in stage world space.
   @override
   bool get inArtboardSpace => false;
+
+  @override
+  bool activate(Stage stage) {
+    if (!super.activate(stage)) {
+      return false;
+    }
+    // Start listening for edit mode changes
+    _symmetricDrawChanged();
+    ShortcutAction.symmetricDraw.addListener(_symmetricDrawChanged);
+    return true;
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    ShortcutAction.symmetricDraw.removeListener(_symmetricDrawChanged);
+  }
 
   @override
   void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
@@ -46,28 +64,26 @@ class ArtboardTool extends DrawableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
-    switch (editModeMap[editMode]) {
-      case DraggingMode.symmetric:
-        final maxChange = max(
-          (_startWorldMouse[0] - worldMouse[0]).abs(),
-          (_startWorldMouse[1] - worldMouse[1]).abs(),
-        );
-        var x1 = (_startWorldMouse[0] < worldMouse[0])
-            ? _startWorldMouse[0]
-            : _startWorldMouse[0] - maxChange;
-        var y1 = (_startWorldMouse[1] < worldMouse[1])
-            ? _startWorldMouse[1]
-            : _startWorldMouse[1] - maxChange;
-        _artboard.x = x1;
-        _artboard.y = y1;
-        _artboard.width = maxChange;
-        _artboard.height = maxChange;
-        break;
-      default:
-        _artboard.x = min(_startWorldMouse[0], worldMouse[0]);
-        _artboard.y = min(_startWorldMouse[1], worldMouse[1]);
-        _artboard.width = (_startWorldMouse[0] - worldMouse[0]).abs();
-        _artboard.height = (_startWorldMouse[1] - worldMouse[1]).abs();
+    if (ShortcutAction.symmetricDraw.value) {
+      final maxChange = max(
+        (_startWorldMouse[0] - worldMouse[0]).abs(),
+        (_startWorldMouse[1] - worldMouse[1]).abs(),
+      );
+      var x1 = (_startWorldMouse[0] < worldMouse[0])
+          ? _startWorldMouse[0]
+          : _startWorldMouse[0] - maxChange;
+      var y1 = (_startWorldMouse[1] < worldMouse[1])
+          ? _startWorldMouse[1]
+          : _startWorldMouse[1] - maxChange;
+      _artboard.x = x1;
+      _artboard.y = y1;
+      _artboard.width = maxChange;
+      _artboard.height = maxChange;
+    } else {
+      _artboard.x = min(_startWorldMouse[0], worldMouse[0]);
+      _artboard.y = min(_startWorldMouse[1], worldMouse[1]);
+      _artboard.width = (_startWorldMouse[0] - worldMouse[0]).abs();
+      _artboard.height = (_startWorldMouse[1] - worldMouse[1]).abs();
     }
   }
 
@@ -77,13 +93,11 @@ class ArtboardTool extends DrawableTool {
   @override
   String get icon => 'tool-artboard';
 
-  @override
-  void onEditModeChange() {
-    // if the edit mode is changed lets just treat it as a fake drag.
+  static final ArtboardTool instance = ArtboardTool();
+
+  void _symmetricDrawChanged() {
     if (lastWorldMouse != null) {
       updateDrag(lastWorldMouse);
     }
   }
-
-  static final ArtboardTool instance = ArtboardTool();
 }
