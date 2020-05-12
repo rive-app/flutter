@@ -151,17 +151,17 @@ final successFileDetailsResponse = Response("""
   },
   "files":[ {
     "id":1,
-    "ownerId":1,
+    "oid":1,
     "name":"New File",
     "preview":"<preview>"
   }, {
     "id":2,
-    "ownerId":1,
+    "oid":1,
     "name":"New File 2",
     "preview":"<preview2>"
   }, {
     "id":3,
-    "ownerId":1,
+    "oid":1,
     "name":"New File 3",
     "preview":"<preview3>"
   }]
