@@ -2,8 +2,6 @@ import 'package:admin/login.dart';
 import 'package:admin/manager.dart';
 import 'package:admin/signout.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_api/api.dart';
-import 'package:rive_api/auth.dart';
 import 'package:rive_api/models/user.dart';
 
 import 'admin_view.dart';

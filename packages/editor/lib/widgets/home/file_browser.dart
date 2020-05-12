@@ -78,21 +78,17 @@ class FileBrowser extends StatelessWidget {
     return StreamBuilder<CurrentDirectory>(
       stream: Plumber().getStream<CurrentDirectory>(),
       builder: (context, snapshot) {
+        Widget child;
         if (snapshot.hasData) {
-          return SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: TopNavStream(snapshot.data),
-            ),
-          );
+          child = TopNavStream(snapshot.data);
         } else {
-          return const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 30),
-              child: Text('No directory selected?'),
-            ),
-          );
+          child = const Text('No directory selected?');
         }
+
+        return SliverPersistentHeader(
+          pinned: true,
+          delegate: _SliverHeader(child),
+        );
       },
     );
   }
@@ -109,6 +105,12 @@ class FileBrowser extends StatelessWidget {
 
         final slivers = <Widget>[];
         slivers.add(_header());
+        // Padding below header.
+        slivers.add(
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 30),
+          ),
+        );
         if (hasFolders) {
           slivers.add(_folderGrid(folders));
         }
@@ -135,5 +137,28 @@ class FileBrowser extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _SliverHeader extends SliverPersistentHeaderDelegate {
+  _SliverHeader(this.child);
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox.expand(child: child);
+  }
+
+  final Widget child;
+
+  @override
+  double get maxExtent => 60;
+
+  @override
+  double get minExtent => 60;
+
+  @override
+  bool shouldRebuild(_SliverHeader oldDelegate) {
+    return child != oldDelegate.child;
   }
 }

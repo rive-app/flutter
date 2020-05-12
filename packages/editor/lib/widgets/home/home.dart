@@ -36,7 +36,10 @@ class Home extends StatelessWidget {
             child: const NavigationPanel(),
           ),
           const Expanded(
-            child: FileBrowser(),
+            child: ColoredBox(
+              color: Colors.white,
+              child: FileBrowser(),
+            ),
           ),
           StreamBuilder<CurrentDirectory>(
             stream: Plumber().getStream<CurrentDirectory>(),
