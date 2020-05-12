@@ -9,7 +9,6 @@ import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/constants.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
