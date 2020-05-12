@@ -7,11 +7,9 @@ import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 
-import 'stage_tool.dart';
-
-class ArtboardTool extends StageTool with DraggableTool {
+class ArtboardTool extends DrawableTool {
   Vec2D _startWorldMouse;
   Artboard _artboard;
 
@@ -88,9 +86,4 @@ class ArtboardTool extends StageTool with DraggableTool {
   }
 
   static final ArtboardTool instance = ArtboardTool();
-
-  @override
-  void endDrag() {
-    // Intentionally empty.
-  }
 }

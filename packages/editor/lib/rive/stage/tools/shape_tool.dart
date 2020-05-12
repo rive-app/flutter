@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:cursor/cursor_view.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
@@ -10,11 +9,8 @@ import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/constants.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
-import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
@@ -22,7 +18,7 @@ const Map<EditMode, DraggingMode> editModeMap = {
   EditMode.altMode1: DraggingMode.symmetric
 };
 
-abstract class ShapeTool extends StageTool with DraggableTool {
+abstract class ShapeTool extends DrawableTool {
   Vec2D _startWorldMouse;
   Vec2D _start = Vec2D(), _end = Vec2D(), _cursor = Vec2D();
 
@@ -34,23 +30,6 @@ abstract class ShapeTool extends StageTool with DraggableTool {
   Artboard _currentArtboard;
 
   final StageToolTip _tip = StageToolTip();
-
-  CursorInstance _customCursor;
-
-  @override
-  bool activate(Stage stage) {
-    if (!super.activate(stage)) {
-      return false;
-    }
-    _customCursor = stage.showCustomCursor('cursor-add');
-    return true;
-  }
-
-  @override
-  void deactivate() {
-    _customCursor?.remove();
-    _customCursor = null;
-  }
 
   @override
   void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
@@ -103,6 +82,7 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
+    super.updateDrag(worldMouse);
     switch (editModeMap[editMode]) {
       case DraggingMode.symmetric:
         final maxChange = max(
@@ -147,13 +127,6 @@ abstract class ShapeTool extends StageTool with DraggableTool {
 
     _tip.text =
         '${(_end[0] - _start[0]).round()}x${(_end[1] - _start[1]).round()}';
-  }
-
-  @override
-  void endDrag() {
-    // Stage captures journal entries for us when a drag operation ends.
-    // Ask the stage to switch back to the translate tool
-    stage.activateAction(ShortcutAction.translateTool);
   }
 
   @override

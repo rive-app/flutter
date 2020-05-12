@@ -51,4 +51,12 @@ abstract class StageTool {
 
   void onEditModeChange() {}
   void draw(Canvas canvas);
+
+  /// Called when the tool focus is considered offscreen
+  /// e.g. the mouse moves outside the stage boundaries
+  void offScreen() {}
+
+  /// Called when the tool focus is considered to have moved on screen
+  /// e.g. the mouse moves to be inside the stage boundaries
+  void onScreen() {}
 }
