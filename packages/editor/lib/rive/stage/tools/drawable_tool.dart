@@ -1,5 +1,5 @@
 import 'package:cursor/cursor_view.dart';
-import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -14,6 +14,16 @@ abstract class DrawableTool extends StageTool with DraggableTool {
   /// Custom cursor for drawing
   static const cursorName = 'cursor-add';
 
+  void initialize() =>
+      // Listen for changes to edit mode from the shortcut key
+      ShortcutAction.symmetricDraw.addListener(_symmetricDrawChanged);
+
+  void _symmetricDrawChanged() => setEditMode(
+      ShortcutAction.symmetricDraw.value ? EditMode.altMode1 : EditMode.normal);
+
+  void dispose() =>
+      ShortcutAction.symmetricDraw.removeListener(_symmetricDrawChanged);
+
   @override
   bool activate(Stage stage) {
     if (!super.activate(stage)) {
@@ -24,36 +34,22 @@ abstract class DrawableTool extends StageTool with DraggableTool {
   }
 
   @override
-  void deactivate() {
-    offScreen();
-  }
+  void deactivate() => _removeCursor();
 
   @override
-  void updateDrag(Vec2D worldMouse) {
-    // _worldMouse is null when we're hovered out of the stage
-    if (worldMouse != null) {
-      _customCursor ??= stage.showCustomCursor(cursorName);
-    } else {
-      _customCursor?.remove();
-      _customCursor = null;
-    }
-  }
+  void endDrag() =>
+      // Stage captures journal entries for us when a drag operation ends.
+      // Ask the stage to switch back to the translate tool
+      stage.activateAction(ShortcutAction.translateTool);
 
   @override
-  void endDrag() {
-    // Stage captures journal entries for us when a drag operation ends.
-    // Ask the stage to switch back to the translate tool
-    stage.activateAction(ShortcutAction.translateTool);
-  }
+  void offScreen() => _removeCursor();
 
   @override
-  void offScreen() {
+  void onScreen() => _customCursor = stage.showCustomCursor(cursorName);
+
+  void _removeCursor() {
     _customCursor?.remove();
     _customCursor = null;
-  }
-
-  @override
-  void onScreen() {
-    _customCursor = stage.showCustomCursor(cursorName);
   }
 }
