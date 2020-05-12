@@ -1,10 +1,15 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class BrowserFolder extends StatefulWidget {
-  const BrowserFolder(this.folderName, {Key key}) : super(key: key);
+  const BrowserFolder(this.folderName, this.folderId, {Key key})
+      : super(key: key);
+
   final String folderName;
+  final int folderId;
 
   @override
   State<StatefulWidget> createState() => _FolderState();
@@ -32,34 +37,45 @@ class _FolderState extends State<BrowserFolder> {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final styles = theme.textStyles;
-    return MouseRegion(
-      onEnter: (_) => setHover(true),
-      onExit: (_) => setHover(false),
-      child: Container(
-        padding: padding,
-        decoration: BoxDecoration(
-          color: colors.fileBackgroundLightGrey,
-          borderRadius: BorderRadius.circular(10),
-          border: _isHovered
-              ? Border.all(
-                  color: colors.fileSelectedBlue,
-                  width: 4,
-                )
-              : null,
-        ),
-        child: Row(
-          children: [
-            TintedIcon(icon: 'folder', color: colors.black30),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                widget.folderName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: styles.greyText,
+    return GestureDetector(
+      /** TODO: select
+       *  onTap:  ,*/
+      onDoubleTap: () {
+        final plumber = Plumber();
+        final currentDirectory = plumber.getStream<CurrentDirectory>().value;
+        final nextDirectory =
+            CurrentDirectory(currentDirectory.owner, widget.folderId);
+        plumber.message<CurrentDirectory>(nextDirectory);
+      },
+      child: MouseRegion(
+        onEnter: (_) => setHover(true),
+        onExit: (_) => setHover(false),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: colors.fileBackgroundLightGrey,
+            borderRadius: BorderRadius.circular(10),
+            border: _isHovered
+                ? Border.all(
+                    color: colors.fileSelectedBlue,
+                    width: 4,
+                  )
+                : null,
+          ),
+          child: Row(
+            children: [
+              TintedIcon(icon: 'folder', color: colors.black30),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  widget.folderName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: styles.greyText,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

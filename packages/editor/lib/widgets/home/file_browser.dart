@@ -22,7 +22,7 @@ class FileBrowserStream extends StatelessWidget {
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var folder = folders.elementAt(index);
-          return BrowserFolder(folder.name);
+          return BrowserFolder(folder.name, folder.id);
         },
         childCount: folders.length,
       ),

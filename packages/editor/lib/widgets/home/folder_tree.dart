@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/models/owner.dart';
-
 import 'package:rive_api/models/team.dart';
-
 import 'package:rive_core/selectable_item.dart';
-
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/file_browser/rive_folder.dart';
@@ -15,12 +13,9 @@ import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
-
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
-
-import 'package:rive_api/model.dart';
 
 /// Builds a TreeView styled for folders.
 class FolderTreeView extends StatelessWidget {
