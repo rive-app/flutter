@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rive_api/model.dart';
 
 import 'package:rive_core/selectable_item.dart';
 
-import 'package:rive_editor/rive/file_browser/rive_file.dart';
-import 'package:rive_editor/rive/file_browser/rive_folder.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/inspector_view.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -30,7 +29,7 @@ class ItemView extends StatelessWidget {
         const FlatIconButton(
           label: "Delete",
         ),
-        if (item is RiveFile)
+        if (item is File)
           const FlatIconButton(
             label: "Open",
             color: Colors.black,
@@ -42,8 +41,8 @@ class ItemView extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    if (item is RiveFile) {
-      final _file = item as RiveFile;
+    if (item is File) {
+      final _file = item as File;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -59,8 +58,8 @@ class ItemView extends StatelessWidget {
         ],
       );
     }
-    if (item is RiveFolder) {
-      final _folder = item as RiveFolder;
+    if (item is Folder) {
+      final _folder = item as Folder;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

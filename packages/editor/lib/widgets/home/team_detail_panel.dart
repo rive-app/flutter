@@ -7,7 +7,6 @@ import 'package:rive_api/models/follow.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
 
-import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
@@ -19,6 +18,8 @@ import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:tree_widget/tree_line.dart';
 import 'package:tree_widget/tree_style.dart';
+
+const kTreeItemHeight = 35.0;
 
 class TeamDetailPanel extends StatelessWidget {
   final Team team;

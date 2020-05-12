@@ -7,15 +7,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/models/file.dart';
 import 'package:rive_api/folder.dart';
-import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
-import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 
 import 'package:rive_api/auth.dart';
@@ -26,7 +24,6 @@ import 'package:rive_api/models/team.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
-import 'package:rive_editor/rive/file_browser/file_browser.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
@@ -83,7 +80,6 @@ class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
 class Rive {
   /// The system tab for your files and settings.
   static const systemTab = RiveTabItem(icon: 'rive', closeable: false);
-  static const homeTab = RiveTabItem(icon: 'home', closeable: false);
 
   final ValueNotifier<List<RiveTeam>> teams =
       ValueNotifier<List<RiveTeam>>(null);
@@ -101,17 +97,6 @@ class Rive {
   final ValueNotifier<HomeSection> sectionListener =
       ValueNotifier(HomeSection.files);
 
-  // HomeSection get section => sectionListener.value;
-  // set section(HomeSection value) => sectionListener.value = value;
-
-  final ValueNotifier<FileBrowser> activeFileBrowser =
-      ValueNotifier<FileBrowser>(null);
-
-  final List<FileBrowser> fileBrowsers = [];
-
-  /// Controllers for teams that are associated with our account.
-  final ValueNotifier<List<FolderTreeController>> folderTreeControllers =
-      ValueNotifier<List<FolderTreeController>>(null);
   final ScrollController treeScrollController = ScrollController();
 
   final _user = ValueNotifier<RiveUser>(null);
@@ -131,23 +116,12 @@ class Rive {
         });
 
     _filesApi = _NonUiRiveFilesApi(api);
-    // Add the home screen listener for browser changes
-    activeFileBrowser.addListener(() {
-      if (activeFileBrowser.value != null &&
-          sectionListener.value != HomeSection.files) {
-        sectionListener.value = HomeSection.files;
-        // This hack is here as we need to notify even
-        // if sectionListener's value is already files ...
-        sectionListener.notifyListeners();
-      }
-    });
   }
 
   ValueListenable<RiveUser> get user => _user;
+
   // TODO: is this a robust enough check?
   bool get isSignedIn => _user.value != null;
-
-  RiveOwner get currentOwner => activeFileBrowser.value.owner;
 
   /// Available tabs in the editor
   final List<RiveTabItem> fileTabs = [];
@@ -257,43 +231,12 @@ class Rive {
           Preferences.spectreToken, api.cookies['spectre']);
 
       selectTab(systemTab);
-      await reloadTeams();
-
-      // TODO: load last opened file list (from localdata)
-      if (fileBrowsers.first.myTreeController.value.data.isNotEmpty) {
-        activeFileBrowser.value ??= fileBrowsers.first;
-        await fileBrowsers.first.openFolder(
-            fileBrowsers.first.myTreeController.value.data.first, false);
-      }
+      print('do some init stuff');
       return me;
     } else {
       _state.value = RiveState.login;
     }
     return null;
-  }
-
-  Future<void> selectRiveOwner(int riveOwnerId) async {
-    var _desiredFileBrowser = fileBrowsers.firstWhere(
-      (FileBrowser fileBrowser) => fileBrowser.owner.ownerId == riveOwnerId,
-      orElse: () => (activeFileBrowser.value != null)
-          ? activeFileBrowser.value
-          : fileBrowsers.first,
-    );
-    if (_desiredFileBrowser.myTreeController.value.data.isNotEmpty) {
-      await setActiveFileBrowser(_desiredFileBrowser);
-      await _desiredFileBrowser.openFolder(
-          _desiredFileBrowser.myTreeController.value.data.first, false);
-    }
-  }
-
-  Future<void> setActiveFileBrowser(FileBrowser fileBrowser) async {
-    activeFileBrowser.value = fileBrowser;
-    if (fileBrowser == null) {
-      await Settings.clear(Preferences.selectedRiveOwnerId);
-    } else {
-      await Settings.setInt(
-          Preferences.selectedRiveOwnerId, fileBrowser.owner.ownerId);
-    }
   }
 
   // Tell the server that the user has signed out and remove the token from
@@ -319,46 +262,6 @@ class Rive {
     _user.value = null;
     _state.value = RiveState.login;
     return true;
-  }
-
-  Future<void> reloadTeams() async {
-    // Load the teams to which the user belongs
-
-    teams.value = await _RiveTeamApi(api).teams;
-
-    // cache the previously active file browser.
-    var oldBrowsers = fileBrowsers.sublist(0);
-    fileBrowsers.clear();
-
-    Future<FileBrowser> updateOrCreate(RiveOwner owner) async {
-      var _browser = oldBrowsers.firstWhere((fileBrowser) {
-        if (fileBrowser.owner.ownerId == owner.ownerId) {
-          // TODO: should we have a cleaner way to do this? somekinda copyWith?
-          fileBrowser.owner = owner;
-          return true;
-        }
-        return false;
-      }, orElse: () {
-        var fileBrowser = FileBrowser(owner);
-        fileBrowser.initialize(this);
-        return fileBrowser;
-      });
-      await _browser.load();
-      return _browser;
-    }
-
-    fileBrowsers.add(await updateOrCreate(user.value));
-
-    await updateOrCreate(user.value);
-    if (teams.value != null) {
-      for (var i = 0; i < teams.value.length; i++) {
-        fileBrowsers.add(await updateOrCreate(teams.value[i]));
-      }
-    }
-
-    folderTreeControllers.value = fileBrowsers
-        .map((FileBrowser fileBrowser) => fileBrowser.myTreeController.value)
-        .toList();
   }
 
   void closeTab(RiveTabItem value) {
@@ -395,7 +298,6 @@ class Rive {
   void selectTab(RiveTabItem value) {
     if (value == systemTab) {
       _changeActiveFile(null);
-      fileBrowsers?.forEach((fileBrowser) => fileBrowser.load());
     } else if (value.file != null) {
       _changeActiveFile(value.file);
       value.file.connect();

@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'package:rive_editor/rive/rive.dart';
 
-
-/// Bit of a placeholder as I didnt want to throw rive into other managers. 
+/// Bit of a placeholder as I didnt want to throw rive into other managers.
 class RiveManager {
   final Rive rive;
-  RiveManager(this.rive){
+  RiveManager(this.rive) {
     _init();
   }
-  
+
   /*
    * Inbound sinks
    */
@@ -32,9 +31,9 @@ class RiveManager {
     _teamUpdateSinkController.stream.listen(_reloadTeams);
   }
 
-  
   /// Removes a notification from the list
   void _reloadTeams(bool reload) {
-    rive.reloadTeams();
+    print('yea..... shoudl reload teams or something');
+    // rive.reloadTeams();
   }
 }

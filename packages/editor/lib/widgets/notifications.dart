@@ -465,7 +465,8 @@ class TeamInviteAcceptedNotification extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 textColor: theme.colors.commonButtonTextColorDark,
                 onTap: () {
-                  rive.selectRiveOwner(notification.teamId);
+                  print('go load & select team');
+                  // rive.selectRiveOwner(notification.teamId);
                 },
               ),
             ],
