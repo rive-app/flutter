@@ -21,8 +21,7 @@ class FolderApi {
     }
   }
 
-  Future<List<FolderDM>> myFolders() async =>
-      _folders('/api/my/files/folders');
+  Future<List<FolderDM>> myFolders() async => _folders('/api/my/files/folders');
 
   Future<List<FolderDM>> teamFolders(int ownerId) async =>
       _folders('/api/teams/$ownerId/folders');
@@ -30,7 +29,7 @@ class FolderApi {
   Future<List<FolderDM>> _folders(String path) async {
     final res = await api.getFromPath(path);
     try {
-      final data = json.decode(res.body) as Map<String, dynamic>;
+      final data = json.decode(res.body) as Map<String, Object>;
       // Check that the user's signed in
       if (!data.containsKey('folders')) {
         _log.severe('Incorrectly formatted folders json response: $res.body');

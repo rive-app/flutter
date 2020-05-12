@@ -10,6 +10,22 @@ class FolderContentsManager with Subscriptions {
   FolderContentsManager._()
       : _fileApi = FileApi(),
         _folderApi = FolderApi() {
+    _subscribe();
+  }
+
+  FolderContentsManager.tester(FileApi fileApi, FolderApi folderApi)
+      : _fileApi = fileApi,
+        _folderApi = folderApi {
+    _subscribe();
+  }
+
+  static FolderContentsManager _instance = FolderContentsManager._();
+  factory FolderContentsManager() => _instance;
+
+  final FileApi _fileApi;
+  final FolderApi _folderApi;
+
+  void _subscribe() {
     // Start listening for when a directory changes.
     subscribe<CurrentDirectory>((directory) {
       _getFolderContents(directory);
@@ -21,12 +37,6 @@ class FolderContentsManager with Subscriptions {
       _getFolderContents(myFiles);
     });
   }
-
-  static FolderContentsManager _instance = FolderContentsManager._();
-  factory FolderContentsManager() => _instance;
-
-  final FileApi _fileApi;
-  final FolderApi _folderApi;
 
   void _loadFileDetails(List<int> fileIds, int teamOwnerId) {
     _fileApi.getFileDetails(fileIds, ownerId: teamOwnerId).then((fileDetails) {

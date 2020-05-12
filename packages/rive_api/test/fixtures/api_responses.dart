@@ -178,3 +178,81 @@ final successTeamMembersResponse = Response("""
     "avatar":null
 }]
 """, 200);
+
+final myFoldersResponse = """
+{
+  "folders": [
+    {
+      "id": 1,
+      "name": "Your Files",
+      "parent": null,
+      "order": 0
+    },
+    {
+      "id": 2,
+      "name": "New Folder",
+      "parent": 1,
+      "order": 0
+    },
+    {
+      "id": 3,
+      "name": "New Folder",
+      "parent": 2,
+      "order": 0
+    },
+    {
+      "id": 4,
+      "name": "New Folder",
+      "parent": 2,
+      "order": 0
+    },
+    {
+      "id": 0,
+      "name": "Deleted Files",
+      "parent": null,
+      "order": 1
+    }
+  ],
+  "sortOptions": [
+    {
+      "name": "Recent",
+      "route": "/api/my/files/recent/"
+    },
+    {
+      "name": "Oldest",
+      "route": "/api/my/files/oldest/"
+    },
+    {
+      "name": "A - Z",
+      "route": "/api/my/files/a-z/"
+    },
+    {
+      "name": "Z - A",
+      "route": "/api/my/files/z-a/"
+    }
+  ]
+}
+""";
+
+final myFilesResponse = '[1,2]';
+
+final myFilesDetailsResponse = """
+{
+  "cdn": {
+    "base": "https://base.rive.app/",
+    "params": "riveCDNparams"
+  },
+  "files": [
+    {
+      "id": 1,
+      "oid": 12345,
+      "name": "First file"
+    },
+    {
+      "id": 2,
+      "oid": 12345,
+      "name": "Prova"
+    }
+  ]
+}
+""";
