@@ -259,8 +259,7 @@ void main() {
       files.forEach((file) {
         expect(file.id != null, true);
         expect(file.name != null, true);
-        // WE OVERWRITE THE OWNER
-        expect(file.ownerId, 3);
+        expect(file.ownerId, 1);
         expect(file.preview != null, true);
       });
       expect(files.first.name, 'New File');

@@ -44,6 +44,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
   @override
   void initState() {
     FolderTreeManager();
+    super.initState();
   }
 
   @override

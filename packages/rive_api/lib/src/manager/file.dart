@@ -81,8 +81,8 @@ class FileManager with Subscriptions {
       _files =
           File.fromDMList(await _fileApi.myFiles(owner.ownerId, folder.id));
     } else {
-      _files =
-          File.fromDMList(await _fileApi.teamFiles(owner.ownerId, folder.id));
+      _files = File.fromDMList(
+          await _fileApi.teamFiles(owner.ownerId, folder.id), owner.ownerId);
     }
 
     _fileMap[folder] = _files;

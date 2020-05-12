@@ -79,7 +79,7 @@ class _FileState extends State<BrowserFile> {
       onDoubleClick: (_) {
         final file = widget.file;
         print("let's open file: $file");
-        RiveContext.of(context).open(file.ownerId, file.id, file.name);
+        RiveContext.of(context).open(file.fileOwnerId, file.id, file.name);
       },
       child: MouseRegion(
         onEnter: (_) => setHover(true),

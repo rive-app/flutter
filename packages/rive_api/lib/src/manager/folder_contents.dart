@@ -41,7 +41,7 @@ class FolderContentsManager with Subscriptions {
   void _loadFileDetails(List<int> fileIds, int teamOwnerId) {
     _fileApi.getFileDetails(fileIds, ownerId: teamOwnerId).then((fileDetails) {
       final plumber = Plumber();
-      final fileDetailsList = File.fromDMList(fileDetails);
+      final fileDetailsList = File.fromDMList(fileDetails, teamOwnerId);
       for (final file in fileDetailsList) {
         plumber.message<File>(file, file.hashCode);
       }
@@ -91,7 +91,8 @@ class FolderContentsManager with Subscriptions {
 
     final filteredFolders = _filterByParent(folders, directory);
 
-    var contents = FolderContents(File.fromDMList(files), filteredFolders);
+    var contents =
+        FolderContents(File.fromDMList(files, owner.ownerId), filteredFolders);
 
     Plumber().message<FolderContents>(contents);
   }

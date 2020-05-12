@@ -43,12 +43,9 @@ class FileApi {
 
   Future<List<FileDM>> _teamFileDetails(
           int teamOwnerId, List<int> fileIds) async =>
-      _fileDetails('/api/teams/${teamOwnerId}/files', fileIds, teamOwnerId);
+      _fileDetails('/api/teams/${teamOwnerId}/files', fileIds);
 
-  Future<List<FileDM>> _fileDetails(String url, List fileIds,
-      [int ownerIdOverride]) async {
-    // TODO: ownerIdOverride deals with Projects vs Teams.
-
+  Future<List<FileDM>> _fileDetails(String url, List fileIds) async {
     var res = await api.post(
       api.host + url,
       body: jsonEncode(fileIds),
@@ -57,7 +54,7 @@ class FileApi {
     try {
       final data = json.decode(res.body) as Map<String, Object>;
       final cdn = CdnDM.fromData(data['cdn']);
-      return FileDM.fromDataList(data['files'], cdn, ownerIdOverride);
+      return FileDM.fromDataList(data['files'], cdn);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
       rethrow;
