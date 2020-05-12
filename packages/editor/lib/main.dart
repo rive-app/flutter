@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:rive_api/manager.dart';
+import 'package:rive_editor/alerts_display.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -541,6 +542,9 @@ class StagePanel extends StatelessWidget {
                     },
                   ),
                 ),
+        ),
+        Positioned.fill(
+          child: AlertsDisplay(),
         ),
       ],
     );

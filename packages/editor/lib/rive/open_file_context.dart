@@ -13,6 +13,7 @@ import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
+import 'package:rive_editor/rive/editor_alert.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/selection_context.dart';
@@ -29,7 +30,6 @@ import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
-import 'package:rxdart/rxdart.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
 
@@ -64,18 +64,44 @@ class OpenFileContext with RiveFileDelegate {
 
   OpenFileState _state = OpenFileState.loading;
 
-  final _isActiveStream = BehaviorSubject<bool>();
-  ValueStream<bool> get isActiveStream => _isActiveStream;
-  bool _isActive;
+  final _alerts = ValueNotifier<Iterable<EditorAlert>>([]);
+
+  /// List of alerts
+  ValueListenable<Iterable<EditorAlert>> get alerts => _alerts;
+
+  /// Add an alert to the alerts list. Returns true if it was added, false if it
+  /// was already being shown.
+  bool addAlert(EditorAlert value) {
+    var alerts = Set.of(_alerts.value);
+    if (alerts.add(value)) {
+      _alerts.value = alerts;
+      return true;
+    }
+    return false;
+  }
+
+  /// Remove an alert from the alerts list.
+  bool removeAlert(EditorAlert alert) {
+    var alerts = Set.of(_alerts.value);
+    if (alerts.remove(alert)) {
+      _alerts.value = alerts;
+      return true;
+    }
+    return false;
+  }
+
+  final _isActive = ValueNotifier<bool>(false);
+
+  /// A listenable value that gets notified when the isActive value changes.
+  ValueListenable<bool> get isActiveListenable => _isActive;
 
   /// Whether this file is the currently active file.
-  bool get isActive => _isActive;
+  bool get isActive => _isActive.value;
   set isActive(bool value) {
-    if (value == _isActive) {
+    if (value == _isActive.value) {
       return;
     }
-    _isActive = value;
-    _isActiveStream.add(value);
+    _isActive.value = value;
   }
 
   /// Controller for the hierarchy of this file.
@@ -198,7 +224,6 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   void dispose() {
-    _isActiveStream.close();
     core?.disconnect();
     _stage?.dispose();
   }

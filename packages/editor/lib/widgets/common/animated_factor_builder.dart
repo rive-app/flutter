@@ -22,7 +22,7 @@ class AnimatedFactorBuilder extends StatefulWidget {
 class AnimatedFactorBuilderState extends State<AnimatedFactorBuilder>
     with SingleTickerProviderStateMixin {
   AnimationController controller;
-  double _animatedFactor;
+  double _animatedFactor = 0;
 
   @override
   void initState() {
@@ -31,8 +31,11 @@ class AnimatedFactorBuilderState extends State<AnimatedFactorBuilder>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    controller.value = _animatedFactor = widget.factor;
+    controller.value = _animatedFactor;
     controller.addListener(_updateAnimatedFactor);
+    if (_animatedFactor != widget.factor) {
+      controller.animateTo(widget.factor);
+    }
   }
 
   void _updateAnimatedFactor() {

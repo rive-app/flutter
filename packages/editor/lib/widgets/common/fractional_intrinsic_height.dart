@@ -65,8 +65,8 @@ class _RenderFractionalIntrinsicHeight extends RenderShiftedBox {
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-
     child.layout(constraints, parentUsesSize: true);
+    print("HEIGHT: ${child.size.height} ${child.size.height*_heightFactor}");
     final BoxParentData childParentData = child.parentData as BoxParentData;
     childParentData.offset = const Offset(0, 0);
     size = constraints.constrain(Size(

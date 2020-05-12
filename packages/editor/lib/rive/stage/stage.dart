@@ -437,7 +437,11 @@ class Stage extends Debouncer {
         // to the tool.
         if (!_mouseDownSelected) {
           final artboard = activeArtboard;
-          tool.click(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
+          tool.click(
+              artboard,
+              artboard == null
+                  ? _worldMouse
+                  : tool.mouseWorldSpace(artboard, _worldMouse));
         }
         break;
       case 2:
@@ -555,7 +559,11 @@ class Stage extends Debouncer {
     }
 
     final artboard = activeArtboard;
-    tool?.mouseExit(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
+    tool?.mouseExit(
+        artboard,
+        artboard == null
+            ? _worldMouse
+            : tool.mouseWorldSpace(artboard, _worldMouse));
     _updatePanIcon();
     _worldMouse = null;
     hoverItem = null;
@@ -569,7 +577,11 @@ class Stage extends Debouncer {
     }
 
     final artboard = activeArtboard;
-    tool?.mouseEnter(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
+    tool?.mouseEnter(
+        artboard,
+        artboard == null
+            ? _worldMouse
+            : tool.mouseWorldSpace(artboard, _worldMouse));
     _updatePanIcon();
   }
 
@@ -577,15 +589,13 @@ class Stage extends Debouncer {
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 
-  StreamSubscription<bool> _isActiveSubscription;
-
   Stage(this.file) {
     for (final object in file.core.objects) {
       if (object is Component) {
         initComponent(object);
       }
     }
-    _isActiveSubscription = file.isActiveStream.listen(_fileActiveChanged);
+    file.isActiveListenable.addListener(_fileActiveChanged);
 
     file.addActionHandler(_handleAction);
   }
@@ -608,8 +618,8 @@ class Stage extends Debouncer {
   /// can be temporarily suspended should be. It can be re-activated when
   /// isActive changes to true again. Eventually the stage object will have
   /// [dispose] called when the tab has been deselected for enough time.
-  void _fileActiveChanged(bool isActive) {
-    if (isActive) {
+  void _fileActiveChanged() {
+    if (file.isActive) {
       ShortcutAction.pan.addListener(_panActionChanged);
     } else {
       ShortcutAction.pan.removeListener(_panActionChanged);
@@ -712,8 +722,8 @@ class Stage extends Debouncer {
 
   void dispose() {
     file.removeActionHandler(_handleAction);
-    _isActiveSubscription.cancel();
-    _fileActiveChanged(false);
+    file.isActiveListenable.removeListener(_fileActiveChanged);
+    ShortcutAction.pan.removeListener(_panActionChanged);
     _panHandCursor?.remove();
     _rightClickHandCursor?.remove();
   }
@@ -866,7 +876,7 @@ class Stage extends Debouncer {
 
   Cursor get _customCursor =>
       delegate?.context != null ? CustomCursor.find(delegate?.context) : null;
-      
+
   void hideCursor() {
     _isHidingCursor = true;
     markNeedsRedraw();
