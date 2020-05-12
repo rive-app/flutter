@@ -1,5 +1,4 @@
 import 'package:cursor/cursor_view.dart';
-import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -14,16 +13,6 @@ abstract class DrawableTool extends StageTool with DraggableTool {
   /// Custom cursor for drawing
   static const cursorName = 'cursor-add';
 
-  void initialize() =>
-      // Listen for changes to edit mode from the shortcut key
-      ShortcutAction.symmetricDraw.addListener(_symmetricDrawChanged);
-
-  void _symmetricDrawChanged() => setEditMode(
-      ShortcutAction.symmetricDraw.value ? EditMode.altMode1 : EditMode.normal);
-
-  void dispose() =>
-      ShortcutAction.symmetricDraw.removeListener(_symmetricDrawChanged);
-
   @override
   bool activate(Stage stage) {
     if (!super.activate(stage)) {
@@ -34,7 +23,10 @@ abstract class DrawableTool extends StageTool with DraggableTool {
   }
 
   @override
-  void deactivate() => _removeCursor();
+  void deactivate() {
+    super.deactivate();
+    _removeCursor();
+  }
 
   @override
   void endDrag() =>
