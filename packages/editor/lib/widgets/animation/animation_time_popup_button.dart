@@ -45,7 +45,6 @@ class AnimationTimePopupButton extends StatelessWidget {
                 builder: (context, snapshot) => snapshot.hasData
                     ? Text(
                         converter.toDisplayValue(snapshot.data.round()),
-                        textAlign: TextAlign.right,
                         style: theme.textStyles.basic.copyWith(
                           color: isHovered
                               ? theme.colors.toolbarButtonHover

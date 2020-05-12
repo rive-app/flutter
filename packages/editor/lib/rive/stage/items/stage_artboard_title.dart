@@ -117,9 +117,14 @@ class StageArtboardTitle extends StageItem<Artboard> {
     _lastTextColor = StageItem.backboardContrastPaint.color;
     final style = ParagraphStyle(
         textAlign: TextAlign.left, fontFamily: 'Roboto-Regular', fontSize: 11);
+
     ParagraphBuilder builder = ParagraphBuilder(style)
       ..pushStyle(
-        TextStyle(foreground: StageItem.backboardContrastPaint),
+        TextStyle(
+          color: _lastTextColor,
+          fontFamily: 'Roboto-Regular',
+          fontSize: 11,
+        ),
       );
 
     var name = component.name;
