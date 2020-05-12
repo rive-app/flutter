@@ -65,8 +65,8 @@ class _TeamMemberState extends State<TeamMembers> {
           ),
           const SizedBox(height: 20),
           StreamBuilder<List<TeamMember>>(
-            stream: Plumber()
-                .getStream<List<TeamMember>>(widget.owner.hashCode.toString()),
+            stream:
+                Plumber().getStream<List<TeamMember>>(widget.owner.hashCode),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return Column(
@@ -144,9 +144,8 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 
   Future<List<RiveUser>> _autocomplete(String input) {
-    final teamMembers = Plumber()
-        .getStream<List<TeamMember>>(widget.team.hashCode.toString())
-        .value;
+    final teamMembers =
+        Plumber().getStream<List<TeamMember>>(widget.team.hashCode).value;
     final teamMemberIds = teamMembers.map((e) => e.ownerId);
     final filterIds = _inviteIds..addAll(teamMemberIds);
     return _userApi.autocomplete(input, filterIds);

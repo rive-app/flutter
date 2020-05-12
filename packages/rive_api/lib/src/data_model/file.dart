@@ -16,16 +16,20 @@ class FileDM {
 
   static List<FileDM> fromDataList(
     List<dynamic> data,
-    CdnDM cdn,
-  ) =>
-      data.map((d) => FileDM.fromData(d, cdn)).toList(growable: false);
+    CdnDM cdn, [
+    int ownerIdOverride,
+  ]) =>
+      data
+          .map((d) => FileDM.fromData(d, cdn, ownerIdOverride))
+          .toList(growable: false);
 
   factory FileDM.fromData(
     Map<String, dynamic> data,
-    CdnDM cdn,
-  ) {
+    CdnDM cdn, [
+    int ownerIdOverride,
+  ]) {
     return FileDM(
-      ownerId: data.getInt('oid'),
+      ownerId: (ownerIdOverride == null) ? data.getInt('oid') : ownerIdOverride,
       name: data.getString('name'),
       preview: (data.getString('preview') == null)
           ? null

@@ -10,8 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
-import 'package:rive_api/folder.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/models/file.dart';
+import 'package:rive_api/folder.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/preferences.dart';
@@ -198,8 +199,10 @@ class Rive {
   }
 
   Future<RiveUser> updateUser() async {
+    UserManager().loadMe();
     var auth = RiveAuth(api);
-    // await api.clearCookies();
+    // TODO: can probably move nav control into streams
+    // and ditch everything below this.
     var me = await auth.whoami();
 
     print("whoami ready: ${me != null}");

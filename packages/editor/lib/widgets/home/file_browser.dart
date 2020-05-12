@@ -46,7 +46,7 @@ class FileBrowser extends StatelessWidget {
         (context, index) {
           var file = files.elementAt(index);
           return StreamBuilder<File>(
-              stream: Plumber().getStream<File>('${file.id}'),
+              stream: Plumber().getStream<File>(file.hashCode),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());

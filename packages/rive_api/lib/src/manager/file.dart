@@ -62,6 +62,7 @@ class FileManager with Subscriptions {
     final _foldersDM = await _folderApi.folders(owner.asDM);
     final _folders = Folder.fromDMList(_foldersDM.toList());
     _folderMap[owner] = _folders;
+    Plumber().message(_folders, owner.hashCode);
     _updateFolderList();
   }
 
@@ -74,9 +75,16 @@ class FileManager with Subscriptions {
     Plumber().flush<Map<Owner, List<Folder>>>();
   }
 
-  void loadFiles(Folder folder) async {
-    final _files = File.fromDMList(
-        await _fileApi.getFiles(folder.id, ownerId: folder.ownerId));
+  void loadFiles(Folder folder, Owner owner) async {
+    List<File> _files;
+    if (owner is Me) {
+      _files =
+          File.fromDMList(await _fileApi.myFiles(owner.ownerId, folder.id));
+    } else {
+      _files =
+          File.fromDMList(await _fileApi.teamFiles(owner.ownerId, folder.id));
+    }
+
     _fileMap[folder] = _files;
   }
 }

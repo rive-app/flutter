@@ -25,11 +25,11 @@ class Plumber {
   static Plumber _instance = Plumber._();
   factory Plumber() => _instance;
 
-  final Map<Type, Map<String, BehaviorSubject>> _pipes = {};
+  final Map<Type, Map<int, BehaviorSubject>> _pipes = {};
 
   /// Retrives the pipe for type T, and it plumbs it if not present.
   /// An optional [id] can be used to have multiple pipes of the same type.
-  BehaviorSubject<T> _pipeInit<T>([String id]) {
+  BehaviorSubject<T> _pipeInit<T>([int id]) {
     if (!_pipes.containsKey(T)) {
       _pipes[T] = {};
     }
@@ -40,22 +40,22 @@ class Plumber {
     return _pipes[T][id];
   }
 
-  ValueStream<T> getStream<T>([String id]) {
+  ValueStream<T> getStream<T>([int id]) {
     var pipe = _pipeInit<T>(id);
     return pipe.stream;
   }
 
-  T peek<T>([String id]) {
+  T peek<T>([int id]) {
     var pipe = _pipeInit<T>(id);
     return pipe.value;
   }
 
-  void message<T>(T message, [String id]) {
+  void message<T>(T message, [int id]) {
     var pipe = _pipeInit<T>(id);
     pipe.add(message);
   }
 
-  void flush<T>([String id]) {
+  void flush<T>([int id]) {
     var pipe = _pipeInit<T>(id);
     if (pipe.value != null) {
       pipe.add(null);

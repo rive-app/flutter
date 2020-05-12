@@ -16,7 +16,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 
-import 'package:rive_api/manager.dart';
 import 'package:rive_api/plumber.dart';
 
 const kTreeItemHeight = 35.0;
@@ -44,10 +43,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
 
   @override
   void initState() {
-    // TODO: burn this
-    var teamManager = TeamManager();
-    var fileManager = FileManager();
-    var folderTreeManager = FolderTreeManager();
+    FolderTreeManager();
   }
 
   @override

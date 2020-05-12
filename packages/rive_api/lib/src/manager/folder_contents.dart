@@ -43,7 +43,7 @@ class FolderContentsManager with Subscriptions {
       final plumber = Plumber();
       final fileDetailsList = File.fromDMList(fileDetails);
       for (final file in fileDetailsList) {
-        plumber.message<File>(file, '${file.id}');
+        plumber.message<File>(file, file.hashCode);
       }
     });
   }
@@ -76,7 +76,7 @@ class FolderContentsManager with Subscriptions {
       files = await _fileApi.teamFiles(owner.ownerId, directory.folderId);
       folders = await _folderApi.teamFolders(owner.ownerId);
     } else {
-      files = await _fileApi.myFiles(directory.folderId);
+      files = await _fileApi.myFiles(owner.ownerId, directory.folderId);
       folders = await _folderApi.myFolders();
     }
 

@@ -12,20 +12,11 @@ class FileApi {
   FileApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
-  Future<List<FileDM>> getFiles(int folderId, {int ownerId = null}) async {
-    // TODO: add sorting, and file type options one day.
-    if (ownerId == null) {
-      return myFiles(folderId);
-    } else {
-      return teamFiles(ownerId, folderId);
-    }
-  }
+  Future<List<FileDM>> myFiles(int ownerId, int folderId) async =>
+      _files('/api/my/files/a-z/rive/${folderId}', ownerId);
 
-  Future<List<FileDM>> myFiles(int folderId) async =>
-      _files('/api/my/files/a-z/rive/${folderId}');
-
-  Future<List<FileDM>> teamFiles(int teamOwnerId, int folderId) async => _files(
-      '/api/teams/${teamOwnerId}/files/a-z/rive/${folderId}', teamOwnerId);
+  Future<List<FileDM>> teamFiles(int ownerId, int folderId) async =>
+      _files('/api/teams/${ownerId}/files/a-z/rive/${folderId}', ownerId);
 
   Future<List<FileDM>> _files(String url, [int ownerId]) async {
     final res = await api.get(api.host + url);
@@ -52,9 +43,12 @@ class FileApi {
 
   Future<List<FileDM>> _teamFileDetails(
           int teamOwnerId, List<int> fileIds) async =>
-      _fileDetails('/api/teams/${teamOwnerId}/files', fileIds);
+      _fileDetails('/api/teams/${teamOwnerId}/files', fileIds, teamOwnerId);
 
-  Future<List<FileDM>> _fileDetails(String url, List fileIds) async {
+  Future<List<FileDM>> _fileDetails(String url, List fileIds,
+      [int ownerIdOverride]) async {
+    // TODO: ownerIdOverride deals with Projects vs Teams.
+
     var res = await api.post(
       api.host + url,
       body: jsonEncode(fileIds),
@@ -63,7 +57,7 @@ class FileApi {
     try {
       final data = json.decode(res.body) as Map<String, Object>;
       final cdn = CdnDM.fromData(data['cdn']);
-      return FileDM.fromDataList(data['files'], cdn);
+      return FileDM.fromDataList(data['files'], cdn, ownerIdOverride);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
       rethrow;

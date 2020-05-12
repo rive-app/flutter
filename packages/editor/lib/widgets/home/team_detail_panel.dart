@@ -77,8 +77,7 @@ class TeamDetailPanel extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: StreamBuilder<List<TeamMember>>(
-            stream:
-                Plumber().getStream<List<TeamMember>>(team.hashCode.toString()),
+            stream: Plumber().getStream<List<TeamMember>>(team.hashCode),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return ListView(

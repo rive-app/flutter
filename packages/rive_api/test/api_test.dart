@@ -194,7 +194,7 @@ void main() {
       final mockApi = FileApi(riveApi);
       final me = getMe();
       final folder = getFolder(me);
-      final files = await mockApi.getFiles(folder.id, ownerId: folder.ownerId);
+      final files = await mockApi.myFiles(folder.ownerId, folder.id);
       expect(files.length, 16);
       files.forEach((file) {
         expect(file.id != null, true);
@@ -233,7 +233,10 @@ void main() {
       final mockApi = FileApi(riveApi);
       final team = getTeam();
       final folder = getFolder(team);
-      final files = await mockApi.getFiles(folder.id, ownerId: folder.ownerId);
+      final files = await mockApi.teamFiles(
+        folder.ownerId,
+        folder.id,
+      );
       expect(files.length, 16);
       files.forEach((file) {
         expect(file.id != null, true);
@@ -256,7 +259,8 @@ void main() {
       files.forEach((file) {
         expect(file.id != null, true);
         expect(file.name != null, true);
-        expect(file.ownerId, 1);
+        // WE OVERWRITE THE OWNER
+        expect(file.ownerId, 3);
         expect(file.preview != null, true);
       });
       expect(files.first.name, 'New File');

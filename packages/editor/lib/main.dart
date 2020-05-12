@@ -7,22 +7,28 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:rive_api/manager.dart';
+import 'package:rive_editor/rive/managers/image_manager.dart';
+import 'package:rive_editor/rive/managers/rive_manager.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/widgets/hierarchy_panel.dart';
+import 'package:rive_editor/widgets/ui_strings.dart';
+
+import 'package:window_utils/window_utils.dart' as win_utils;
+
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
-import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
-import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/version.dart';
 import 'package:rive_editor/widgets/animation/animation_panel.dart';
 import 'package:rive_editor/widgets/catastrophe.dart';
 import 'package:rive_editor/widgets/common/active_artboard.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
-import 'package:rive_editor/widgets/hierarchy_panel.dart';
 import 'package:rive_editor/widgets/home/home.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
@@ -39,9 +45,7 @@ import 'package:rive_editor/widgets/toolbar/mode_toggle.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
-import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:rive_widgets/listenable_builder.dart';
-import 'package:window_utils/window_utils.dart' as win_utils;
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -60,6 +64,9 @@ Future<void> main() async {
   final rive = Rive(
     iconCache: iconCache,
   );
+  UserManager();
+  TeamManager();
+  FileManager();
 
   // if (await rive.initialize() != RiveState.catastrophe) {
   //   // this is just for the prototype...

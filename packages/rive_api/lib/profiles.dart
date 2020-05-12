@@ -5,8 +5,6 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/src/api/api.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/profile.dart';
-import 'package:rive_api/models/team.dart';
-import 'package:rive_api/models/user.dart';
 
 /// Api for accessing the signed in users folders and files.
 class RiveProfilesApi<T extends RiveOwner> {

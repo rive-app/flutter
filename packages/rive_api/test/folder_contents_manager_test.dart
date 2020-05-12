@@ -36,7 +36,7 @@ void main() {
       );
 
       // 'Your Files' folder.
-      when(_mockedFileApi.myFiles(1)).thenAnswer((_) async {
+      when(_mockedFileApi.myFiles(2, 1)).thenAnswer((_) async {
         final data = json.decode(myFilesResponse) as List<Object>;
         return FileDM.fromIdList(data, null);
       });
@@ -72,8 +72,9 @@ void main() {
 
     test('Load File details', () async {
       final testComplete = Completer();
-
-      _plumber.getStream<File>('1').listen((fileDetails) {
+      _plumber
+          .getStream<File>(File(id: 1, ownerId: 12345).hashCode)
+          .listen((fileDetails) {
         expect(fileDetails.ownerId, 12345);
         expect(fileDetails.id, 1);
 
