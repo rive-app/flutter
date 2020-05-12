@@ -474,7 +474,6 @@ class StagePanel extends StatelessWidget {
               : StageView(
                   file: file,
                   stage: stage,
-                  customCursor: CustomCursor.of(context),
                 ),
         ),
         Positioned.fill(

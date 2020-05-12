@@ -57,7 +57,7 @@ abstract class StageDelegate {
   void stageNeedsAdvance();
   void stageNeedsRedraw();
   Future<ui.Image> rasterize();
-  Cursor customCursor;
+  BuildContext context;
 }
 
 abstract class LateDrawViewDelegate {
@@ -769,7 +769,7 @@ class Stage extends Debouncer {
     // zoom level.
     StageItem.selectedPaint.strokeWidth = StageItem.strokeWidth / _viewZoom;
 
-    if(movedView) {
+    if (movedView) {
       mouseMove(1, _lastMousePosition[0], _lastMousePosition[1]);
     }
   }
@@ -864,21 +864,25 @@ class Stage extends Debouncer {
     // selection, and set it the current editing shape.
   }
 
+  Cursor get _customCursor =>
+      delegate?.context != null ? CustomCursor.find(delegate?.context) : null;
+      
   void hideCursor() {
     _isHidingCursor = true;
     markNeedsRedraw();
-    delegate?.customCursor?.hide();
+
+    _customCursor?.hide();
   }
 
   void showCursor() {
     _isHidingCursor = false;
     markNeedsRedraw();
-    delegate?.customCursor?.show();
+    _customCursor?.show();
   }
 
   CursorInstance showCustomCursor(String icon) {
-    if (delegate?.customCursor != null) {
-      return CursorIcon.build(delegate.customCursor, icon);
+    if (_customCursor != null) {
+      return CursorIcon.build(_customCursor, icon);
     }
     return null;
   }

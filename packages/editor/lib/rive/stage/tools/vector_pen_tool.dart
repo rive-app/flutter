@@ -27,6 +27,12 @@ class VectorPenTool extends PenTool<Path> {
       return;
     }
 
+    if (activeArtboard == null) {
+      // TODO: inform the user that they need to have an active artboard to
+      // create a new shape/path.
+      // https://2dimensions.slack.com/archives/CHMAP278R/p1589304756210700
+    }
+
     if (_createdPath == null) {
       _makePath(ghostPointWorld);
       print("MAKE A PATH");
@@ -35,17 +41,26 @@ class VectorPenTool extends PenTool<Path> {
 
   @override
   Iterable<Path> getEditingComponents(Iterable<StageItem> solo) {
+    // This gets called by the base pen tool to figure out what is currently
+    // being edited. The vector pen tool edits paths, so we need to find which
+    // paths are in the solo items.
     Set<Path> paths = {};
-    for (final item in solo) {
-      if (item is StageShape) {
-        item.component.forEachChild((child) {
-          if (child is Path) {
-            paths.add(child);
-          }
-          return true;
-        });
-      } else if (item is StagePath) {
-        paths.add(item.component);
+
+    // Solo could be null if we've just activated the tool with no selection. We
+    // still want this tool to work in this case as the first click will create
+    // a shape and path.
+    if (solo != null) {
+      for (final item in solo) {
+        if (item is StageShape) {
+          item.component.forEachChild((child) {
+            if (child is Path) {
+              paths.add(child);
+            }
+            return true;
+          });
+        } else if (item is StagePath) {
+          paths.add(item.component);
+        }
       }
     }
     return paths;
