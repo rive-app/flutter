@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
-import 'package:rive_editor/widgets/home/browser_file.dart';
-import 'package:rive_editor/widgets/home/browser_folder.dart';
+import 'package:rive_editor/widgets/home/file.dart';
+import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
 
 typedef FolderContentsBuilder = Widget Function(FolderContents);
 
-class FileBrowserStream extends StatelessWidget {
-  FileBrowserStream() {
-    // TODO: remove this.
-    UserManager().loadMe();
-    FolderContentsManager();
-  }
+class FileBrowser extends StatelessWidget {
+  const FileBrowser();
 
   Widget _folderGrid(Iterable<Folder> folders) {
     return _grid(
@@ -72,7 +67,8 @@ class FileBrowserStream extends StatelessWidget {
         if (snapshot.hasData) {
           return childBuilder(snapshot.data);
         } else {
-          return const CircularProgressIndicator();
+          print("Progress indicator");
+          return const Center(child: CircularProgressIndicator());
         }
       },
     );

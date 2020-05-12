@@ -1,51 +1,47 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:core/error_logger/error_logger.dart';
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:cursor/cursor_view.dart';
-import 'package:rive_editor/rive/managers/image_manager.dart';
-import 'package:rive_editor/rive/managers/rive_manager.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/widgets/hierarchy_panel.dart';
-import 'package:rive_editor/widgets/ui_strings.dart';
-
-import 'package:window_utils/window_utils.dart' as win_utils;
-
-import 'package:core/error_logger/error_logger.dart';
 import 'package:rive_core/event.dart';
-
-import 'package:rive_editor/version.dart';
-import 'package:rive_editor/widgets/animation/animation_panel.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
+import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
+import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/version.dart';
+import 'package:rive_editor/widgets/animation/animation_panel.dart';
 import 'package:rive_editor/widgets/catastrophe.dart';
 import 'package:rive_editor/widgets/common/active_artboard.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
-import 'package:rive_editor/widgets/home/home_panel.dart';
+import 'package:rive_editor/widgets/hierarchy_panel.dart';
+import 'package:rive_editor/widgets/home/home.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
-import 'package:rive_editor/widgets/stage_late_view.dart';
-import 'package:rive_editor/widgets/toolbar/mode_toggle.dart';
-import 'package:rive_widgets/listenable_builder.dart';
 import 'package:rive_editor/widgets/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
+import 'package:rive_editor/widgets/stage_late_view.dart';
 import 'package:rive_editor/widgets/stage_view.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/toolbar/create_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/hamburger_popup_button.dart';
+import 'package:rive_editor/widgets/toolbar/mode_toggle.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
+import 'package:rive_editor/widgets/ui_strings.dart';
+import 'package:rive_widgets/listenable_builder.dart';
+import 'package:window_utils/window_utils.dart' as win_utils;
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -406,7 +402,7 @@ class EditorScaffold extends StatelessWidget {
               builder: (context, tab, _) {
                 switch (tab) {
                   case Rive.systemTab:
-                    return const HomeStream();
+                    return Home();
                   default:
                     return const Editor();
                 }

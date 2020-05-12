@@ -1,5 +1,6 @@
 /// Tree of directories
 import 'package:meta/meta.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_api/src/model/model.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -37,7 +38,15 @@ class FolderTree {
 class FolderTreeItem {
   FolderTreeItem({@required this.folder, @required this.children, this.owner}) {
     hover = false;
-    selected = false;
+
+    final currentDirectory = Plumber().peek<CurrentDirectory>();
+    if (currentDirectory != null &&
+        (currentDirectory.folderId == folder?.id &&
+            currentDirectory.owner == owner)) {
+      selected = true;
+    } else {
+      selected = false;
+    }
   }
   final Folder folder;
   final _hover = BehaviorSubject<bool>();

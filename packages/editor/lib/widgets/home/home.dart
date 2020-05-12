@@ -2,6 +2,7 @@ import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/home/file_browser.dart';
@@ -10,8 +11,11 @@ import 'package:rive_editor/widgets/home/team_detail_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 
-class HomeStream extends StatelessWidget {
-  const HomeStream({Key key}) : super(key: key);
+class Home extends StatelessWidget {
+  Home({Key key}) : super(key: key) {
+    UserManager().loadMe();
+    FolderContentsManager();
+  }
 
   bool get isTeam => false;
 
@@ -29,10 +33,10 @@ class HomeStream extends StatelessWidget {
             side: ResizeSide.end,
             min: 252,
             max: 500,
-            child: NavigationPanelStream(),
+            child: const NavigationPanel(),
           ),
-          Expanded(
-            child: FileBrowserStream(),
+          const Expanded(
+            child: FileBrowser(),
           ),
           StreamBuilder<CurrentDirectory>(
             stream: Plumber().getStream<CurrentDirectory>(),

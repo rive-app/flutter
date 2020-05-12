@@ -8,24 +8,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
-import 'package:rive_api/models/file.dart';
-import 'package:rive_api/folder.dart';
-import 'package:rive_api/teams.dart';
-import 'package:rive_core/event.dart';
-import 'package:rive_editor/preferences.dart';
-import 'package:rive_editor/rive/open_file_context.dart';
-import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
-
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/files.dart';
+import 'package:rive_api/folder.dart';
+import 'package:rive_api/models/file.dart';
 import 'package:rive_api/models/user.dart';
-import 'package:rive_api/models/team.dart';
-
-import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
+import 'package:rive_core/event.dart';
+import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-
+import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 
 enum RiveState { init, login, editor, disconnected, catastrophe }
@@ -55,10 +50,6 @@ class _Key {
   }
 }
 
-class _RiveTeamApi extends RiveTeamsApi<RiveTeam> {
-  _RiveTeamApi(RiveApi api) : super(api);
-}
-
 /// TODO: clean this up, probably want to rework the files api.
 class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
   _NonUiRiveFilesApi(RiveApi api) : super(api);
@@ -80,9 +71,6 @@ class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
 class Rive {
   /// The system tab for your files and settings.
   static const systemTab = RiveTabItem(icon: 'rive', closeable: false);
-
-  final ValueNotifier<List<RiveTeam>> teams =
-      ValueNotifier<List<RiveTeam>>(null);
 
   final ValueNotifier<SelectionMode> selectionMode =
       ValueNotifier<SelectionMode>(SelectionMode.single);
@@ -231,7 +219,6 @@ class Rive {
           Preferences.spectreToken, api.cookies['spectre']);
 
       selectTab(systemTab);
-      print('do some init stuff');
       return me;
     } else {
       _state.value = RiveState.login;

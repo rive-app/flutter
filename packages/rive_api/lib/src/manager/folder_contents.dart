@@ -34,7 +34,7 @@ class FolderContentsManager with Subscriptions {
     subscribe<Me>((me) {
       // Upon init, go get the current users' top folder.
       final myFiles = CurrentDirectory(me, 1);
-      _getFolderContents(myFiles);
+      Plumber().message<CurrentDirectory>(myFiles);
     });
   }
 

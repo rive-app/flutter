@@ -26,14 +26,12 @@ class UserManager with Subscriptions {
     // Skip duplicates.
     if (currentMe != me) {
       _plumber.message<Me>(me);
-    } else {
-      print("I was reloading myself!");
     }
   }
 
   void logout() async {
     // killMe() ?
-    _plumber.clear<Me>();
+    _plumber.flush<Me>();
   }
 
   Future<bool> signout() async {

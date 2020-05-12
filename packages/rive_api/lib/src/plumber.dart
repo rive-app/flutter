@@ -55,7 +55,7 @@ class Plumber {
     pipe.add(message);
   }
 
-  void clear<T>([String id]) {
+  void flush<T>([String id]) {
     var pipe = _pipeInit<T>(id);
     if (pipe.value != null) {
       pipe.add(null);

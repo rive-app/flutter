@@ -52,4 +52,7 @@ class Folder {
         order: order,
         id: id,
       );
+
+  @override
+  String toString() => 'Folder: $id, $name, $ownerId';
 }

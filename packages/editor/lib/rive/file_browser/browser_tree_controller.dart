@@ -64,7 +64,7 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
   void select(CurrentDirectory currentDirectory) {
     items.forEach((element) {
       if (_data.first.owner == currentDirectory.owner &&
-          element.folder.id == currentDirectory.folderId) {
+          element.folder?.id == currentDirectory.folderId) {
         element.selected = true;
       } else {
         element.selected = false;
@@ -74,8 +74,9 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
 
   @override
   void onTap(FlatTreeItem<FolderTreeItem> item) {
-    Plumber().message<CurrentDirectory>(
-        CurrentDirectory(_data.first.owner, item.data.folder.id));
+    final selectedFolder =
+        CurrentDirectory(_data.first.owner, item.data.folder.id);
+    Plumber().message<CurrentDirectory>(selectedFolder);
   }
 
   @override

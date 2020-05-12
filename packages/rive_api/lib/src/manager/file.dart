@@ -71,7 +71,7 @@ class FileManager with Subscriptions {
 
   void _clearFolderList() {
     _folderMap.clear();
-    Plumber().clear<Map<Owner, List<Folder>>>();
+    Plumber().flush<Map<Owner, List<Folder>>>();
   }
 
   void loadFiles(Folder folder) async {

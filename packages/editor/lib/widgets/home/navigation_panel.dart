@@ -21,16 +21,16 @@ import 'package:rive_api/plumber.dart';
 
 const kTreeItemHeight = 35.0;
 
-class NavigationPanelStream extends StatefulWidget {
-  const NavigationPanelStream({
+class NavigationPanel extends StatefulWidget {
+  const NavigationPanel({
     Key key,
   }) : super(key: key);
 
   @override
-  _NavigationPanelStreamState createState() => _NavigationPanelStreamState();
+  _NavigationPanelState createState() => _NavigationPanelState();
 }
 
-class _NavigationPanelStreamState extends State<NavigationPanelStream> {
+class _NavigationPanelState extends State<NavigationPanel> {
   bool _bottomSliverDocked = false;
   bool get bottomSliverDocked => _bottomSliverDocked;
 
@@ -45,11 +45,9 @@ class _NavigationPanelStreamState extends State<NavigationPanelStream> {
   @override
   void initState() {
     // TODO: burn this
-    var userManager = UserManager();
     var teamManager = TeamManager();
     var fileManager = FileManager();
     var folderTreeManager = FolderTreeManager();
-    userManager.loadMe();
   }
 
   @override
@@ -118,7 +116,7 @@ class _NavigationPanelStreamState extends State<NavigationPanelStream> {
                 if (snapshot.data != null) {
                   for (int i = 0; i < snapshot.data.length; i++) {
                     // TODO: rather than folderTree's we prob ably rely on this controller?
-                    slivers.add(FolderTreeViewStream(
+                    slivers.add(FolderTreeView(
                         style: treeStyle, controller: snapshot.data[i].value));
 
                     /// TODO: Matt take a look at this please

@@ -15,11 +15,11 @@ import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
-class FolderTreeViewStream extends StatelessWidget {
+class FolderTreeView extends StatelessWidget {
   final FolderTreeItemController controller;
   final TreeStyle style;
 
-  const FolderTreeViewStream({
+  const FolderTreeView({
     @required this.controller,
     this.style,
     Key key,
