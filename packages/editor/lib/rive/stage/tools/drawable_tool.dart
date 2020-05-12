@@ -1,4 +1,5 @@
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -18,14 +19,24 @@ abstract class DrawableTool extends StageTool with DraggableTool {
     if (!super.activate(stage)) {
       return false;
     }
-    _customCursor = stage.showCustomCursor(cursorName);
+    onScreen();
     return true;
   }
 
   @override
   void deactivate() {
-    _customCursor?.remove();
-    _customCursor = null;
+    offScreen();
+  }
+
+  @override
+  void updateDrag(Vec2D worldMouse) {
+    // _worldMouse is null when we're hovered out of the stage
+    if (worldMouse != null) {
+      _customCursor ??= stage.showCustomCursor(cursorName);
+    } else {
+      _customCursor?.remove();
+      _customCursor = null;
+    }
   }
 
   @override
@@ -33,5 +44,16 @@ abstract class DrawableTool extends StageTool with DraggableTool {
     // Stage captures journal entries for us when a drag operation ends.
     // Ask the stage to switch back to the translate tool
     stage.activateAction(ShortcutAction.translateTool);
+  }
+
+  @override
+  void offScreen() {
+    _customCursor?.remove();
+    _customCursor = null;
+  }
+
+  @override
+  void onScreen() {
+    _customCursor = stage.showCustomCursor(cursorName);
   }
 }

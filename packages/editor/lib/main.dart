@@ -498,6 +498,11 @@ class StagePanel extends StatelessWidget {
                     var local = getBox.globalToLocal(details.position);
                     stage.mouseExit(details.buttons, local.dx, local.dy);
                   },
+                  onEnter: (details) {
+                    RenderBox getBox = context.findRenderObject() as RenderBox;
+                    var local = getBox.globalToLocal(details.position);
+                    stage.mouseEnter(details.buttons, local.dx, local.dy);
+                  },
                   onHover: (details) {
                     RenderBox getBox = context.findRenderObject() as RenderBox;
                     var local = getBox.globalToLocal(details.position);

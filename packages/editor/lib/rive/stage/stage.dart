@@ -127,9 +127,15 @@ class Stage extends Debouncer {
   LateDrawViewDelegate lateDrawDelegate;
 
   StageDelegate _delegate;
+
+  /// Currently selected tool
   final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
+
+  /// This holds the current tool only when it is active
   StageTool _activeTool;
+
   StageTool get tool => toolNotifier.value;
+
   set tool(StageTool value) {
     if (toolNotifier.value == value) {
       return;
@@ -532,6 +538,12 @@ class Stage extends Debouncer {
       (_activeTool as MoveableTool).onExit();
     }
     _updatePanIcon();
+    // Let the tool know the mouse is outside the stage
+    tool.offScreen();
+  }
+
+  void mouseEnter(int button, double x, double y) {
+    tool.onScreen();
   }
 
   Artboard get activeArtboard => file.core?.backboard?.activeArtboard;

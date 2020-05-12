@@ -82,6 +82,7 @@ abstract class ShapeTool extends DrawableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
+    super.updateDrag(worldMouse);
     switch (editModeMap[editMode]) {
       case DraggingMode.symmetric:
         final maxChange = max(
