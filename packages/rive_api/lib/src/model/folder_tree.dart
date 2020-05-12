@@ -55,8 +55,8 @@ class FolderTreeItem {
 
   BehaviorSubject<bool> get hoverStream => _hover;
   BehaviorSubject<bool> get selectedStream => _selected;
-  get selected => _selected.value;
-  get hover => _hover.value;
+  bool get selected => _selected.value == true;
+  bool get hover => _hover.value == true;
 
   set selected(bool value) {
     if (selected != value) {

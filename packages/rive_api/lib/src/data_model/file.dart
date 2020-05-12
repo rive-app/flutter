@@ -17,12 +17,16 @@ class FileDM {
   static List<FileDM> fromDataList(List<dynamic> data, CdnDM cdn) =>
       data.map((d) => FileDM.fromData(d, cdn)).toList(growable: false);
 
-  factory FileDM.fromData(Map<String, dynamic> data, CdnDM cdn) => FileDM(
-        ownerId: data.getInt('ownerId'),
-        name: data.getString('name'),
-        preview: cdn.base + data.getString('preview') + cdn.params,
-        id: data.getInt('id'),
-      );
+  factory FileDM.fromData(Map<String, dynamic> data, CdnDM cdn) {
+    return FileDM(
+      ownerId: data.getInt('ownerId'),
+      name: data.getString('name'),
+      preview: (data.getString('preview') == null)
+          ? null
+          : cdn.base + data.getString('preview') + cdn.params,
+      id: data.getInt('id'),
+    );
+  }
 
   static List<FileDM> fromIdList(List<dynamic> data, int ownerId) => data
       .map((id) => FileDM(id: id as int, ownerId: ownerId))

@@ -92,9 +92,20 @@ class FolderTreeManager with Subscriptions {
       // update
       var oldFolderTreeController = _folderTreeControllerMap[owner].value;
       // lets keep track of whats selected
+      var selected = <Folder>{};
+      oldFolderTreeController.items.forEach((element) {
+        if (element.selected) {
+          selected.add(element.folder);
+        }
+      });
 
       // lets keep track of whats opened
       oldFolderTreeController.data = [_folderTree.root];
+      oldFolderTreeController.items.forEach((element) {
+        if (selected.contains(element.folder)) {
+          element.selected = true;
+        }
+      });
       oldFolderTreeController.refreshExpanded();
       _folderTreeControllerMap[owner].add(oldFolderTreeController);
     } else {
