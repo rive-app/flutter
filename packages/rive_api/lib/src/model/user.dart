@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/src/data_model/data_model.dart';
 
 import 'owner.dart';
@@ -50,7 +51,7 @@ class TeamMember extends Owner {
   }) : super(ownerId, name, username, avatarUrl);
 
   final String status;
-  final String permission;
+  final TeamRole permission;
 
   static List<TeamMember> fromDMList(List<TeamMemberDM> teamMembers) =>
       teamMembers.map((teamMember) => TeamMember.fromDM(teamMember)).toList();
@@ -61,7 +62,7 @@ class TeamMember extends Owner {
         username: teamMember.username,
         avatarUrl: teamMember.avatarUrl,
         status: teamMember.status,
-        permission: teamMember.permission,
+        permission: TeamRoleExtension.teamRoleFromString(teamMember.permission),
       );
 
   @override

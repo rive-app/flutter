@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
-import 'package:rive_api/models/team.dart';
 import 'package:rive_api/stripe.dart';
 import 'package:rive_api/teams.dart';
 import 'package:utilities/utilities.dart';
@@ -174,12 +174,13 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   int get teamSize => _teamSize;
 
   static Future<PlanSubscriptionPackage> fetchData(
-      RiveApi api, RiveTeam team) async {
+      RiveApi api, Team team) async {
     var response = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
     var subscription = PlanSubscriptionPackage()
       ..option = response.plan
       ..billing = response.frequency
-      .._teamSize = team.teamMembers.length;
+      .._teamSize = 1;
+    // TODO: fix billing amount
     subscription._currentCost = subscription.calculatedCost;
 
     return subscription;

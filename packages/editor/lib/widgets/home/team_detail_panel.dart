@@ -118,7 +118,7 @@ class TeamDetailPanel extends StatelessWidget {
               PopupDirection.topToCenter,
             ],
           ),
-          onTap: () => showSettings(
+          onTap: () => showSettings(team,
               context: context, initialPanel: SettingsPanel.members),
         ),
       ));

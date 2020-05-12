@@ -75,13 +75,14 @@ class TopNav extends StatelessWidget {
       children.add(const SizedBox(width: 12));
       children.add(TintedIconButton(
         onPress: () async {
-          await showSettings(context: context);
-          var rive = RiveContext.of(context);
+          // this whole thign is getting delted.
+          // await showSettings(context: context);
+          // var rive = RiveContext.of(context);
 
-          if (rive.isSignedIn) {
-            // Our state for Teams could be out of date now.
-            await RiveContext.of(context).reloadTeams();
-          }
+          // if (rive.isSignedIn) {
+          //   // Our state for Teams could be out of date now.
+          //   await RiveContext.of(context).reloadTeams();
+          // }
         },
         icon: 'settings',
         backgroundHover: riveColors.fileBackgroundLightGrey,
@@ -162,12 +163,12 @@ class TopNavStream extends StatelessWidget {
     children.add(Text(owner.displayName));
     children.add(const Spacer());
 
-    if (owner is User ||
+    if (owner is Me ||
         (owner is Team && canEditTeam((owner as Team).permission))) {
       children.add(const SizedBox(width: 12));
       children.add(TintedIconButton(
         onPress: () async {
-          await showSettings(context: context);
+          await showSettings(owner, context: context);
           var rive = RiveContext.of(context);
 
           if (rive.isSignedIn) {

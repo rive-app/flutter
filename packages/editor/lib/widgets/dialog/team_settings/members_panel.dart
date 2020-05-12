@@ -1,10 +1,12 @@
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/artists.dart';
 import 'package:rive_api/teams.dart';
-import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/team_invite_status.dart';
@@ -21,7 +23,7 @@ import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
 class TeamMembers extends StatefulWidget {
   final RiveApi api;
-  final RiveTeam owner;
+  final Team owner;
 
   const TeamMembers(this.owner, this.api, {Key key})
       : assert(api != null),
@@ -34,8 +36,6 @@ class TeamMembers extends StatefulWidget {
 class _TeamMemberState extends State<TeamMembers> {
   RiveTeamsApi _api;
 
-  List<RiveUser> get _teamMembers => widget.owner.teamMembers;
-
   @override
   void initState() {
     super.initState();
@@ -44,21 +44,12 @@ class _TeamMemberState extends State<TeamMembers> {
   }
 
   void _updateAffiliates() {
-    final teamId = widget.owner.ownerId;
-    _api.getAffiliates(teamId).then((users) {
-      // TODO: use a more robust check for setState.
-      if (mounted) {
-        setState(() {
-          widget.owner.teamMembers = users;
-        });
-      }
-    });
+    TeamManager().loadTeamMembers(widget.owner);
   }
 
-  void _onRoleChanged(RiveUser user, String role) {
-    // TODO:
-    // _teamsApi.roleChanged(user.ownerId).then();
-    print('Role changed $user, $role');
+  void _onRoleChanged(TeamMember member, String role) {
+    // TODO: change team members role
+    print('Role changed $member, $role');
   }
 
   @override
@@ -73,21 +64,31 @@ class _TeamMemberState extends State<TeamMembers> {
             teamUpdated: _updateAffiliates,
           ),
           const SizedBox(height: 20),
-          // Team Members Section.
-          Column(children: [
-            for (final teamMember in _teamMembers)
-              _TeamMember(
-                user: teamMember,
-                onRoleChanged: (role) => _onRoleChanged(teamMember, role),
-              ),
-          ]),
+          StreamBuilder<List<TeamMember>>(
+            stream: Plumber()
+                .getStream<List<TeamMember>>(widget.owner.hashCode.toString()),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Column(
+                    children: snapshot.data
+                        .map((member) => _TeamMember(
+                              user: member,
+                              onRoleChanged: (role) =>
+                                  _onRoleChanged(member, role),
+                            ))
+                        .toList());
+              } else {
+                return const Text('loading...');
+              }
+            },
+          ),
         ]);
   }
 }
 
 class InvitePanel extends StatefulWidget {
   final RiveApi api;
-  final RiveTeam team;
+  final Team team;
   final VoidCallback teamUpdated;
 
   const InvitePanel(
@@ -143,7 +144,10 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 
   Future<List<RiveUser>> _autocomplete(String input) {
-    final teamMemberIds = widget.team.teamMembers.map((e) => e.ownerId);
+    final teamMembers = Plumber()
+        .getStream<List<TeamMember>>(widget.team.hashCode.toString())
+        .value;
+    final teamMemberIds = teamMembers.map((e) => e.ownerId);
     final filterIds = _inviteIds..addAll(teamMemberIds);
     return _userApi.autocomplete(input, filterIds);
   }
@@ -283,14 +287,14 @@ class _InvitePanelState extends State<InvitePanel> {
 }
 
 class _TeamMember extends StatelessWidget {
-  final RiveUser user;
+  final TeamMember user;
   final ValueChanged<String> onRoleChanged;
 
   const _TeamMember({@required this.user, this.onRoleChanged, Key key})
       : super(key: key);
 
   String _getRole() {
-    switch (user.role) {
+    switch (user.permission) {
       case TeamRole.admin:
         return describeEnum(TeamRole.admin).capsFirst;
       default:
@@ -315,8 +319,8 @@ class _TeamMember extends StatelessWidget {
             SizedBox(
               child: Avatar(
                 iconBuilder: (context) {
-                  if (user.avatar != null) {
-                    return Image.network(user.avatar);
+                  if (user.avatarUrl != null) {
+                    return Image.network(user.avatarUrl);
                   }
                   return TintedIcon(
                       color: colors.commonDarkGrey, icon: 'your-files');

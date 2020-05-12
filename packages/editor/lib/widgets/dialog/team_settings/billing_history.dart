@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/models/team.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/model.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class BillingHistory extends StatelessWidget {
-  final RiveTeam team;
+  final Team team;
   final RiveApi api;
   final billingHistory = BillingHistoryPackage();
 
