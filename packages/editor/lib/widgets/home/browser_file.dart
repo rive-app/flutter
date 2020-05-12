@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/model.dart';
+import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class BrowserFile extends StatefulWidget {
@@ -72,27 +73,36 @@ class _FileState extends State<BrowserFile> {
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
-    return MouseRegion(
-      onEnter: (_) => setHover(true),
-      onExit: (_) => setHover(false),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.fileBackgroundLightGrey,
-          borderRadius: BorderRadius.circular(10),
-          border: _isHovered
-              ? Border.all(
-                  color: colors.fileSelectedBlue,
-                  width: 4,
-                )
-              : null,
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: _screenshot,
-            ),
-            _label,
-          ],
+    return ClickListener(
+      /** TODO: Selection 
+       * onClick: , */
+      onDoubleClick: (_) {
+        final file = widget.file;
+        print("let's open file: $file");
+        RiveContext.of(context).open(file.ownerId, file.id, file.name);
+      },
+      child: MouseRegion(
+        onEnter: (_) => setHover(true),
+        onExit: (_) => setHover(false),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colors.fileBackgroundLightGrey,
+            borderRadius: BorderRadius.circular(10),
+            border: _isHovered
+                ? Border.all(
+                    color: colors.fileSelectedBlue,
+                    width: 4,
+                  )
+                : null,
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: _screenshot,
+              ),
+              _label,
+            ],
+          ),
         ),
       ),
     );

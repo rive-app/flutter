@@ -25,7 +25,7 @@ class FileDM {
     CdnDM cdn,
   ) {
     return FileDM(
-      ownerId: data.getInt('ownerId'),
+      ownerId: data.getInt('oid'),
       name: data.getString('name'),
       preview: (data.getString('preview') == null)
           ? null

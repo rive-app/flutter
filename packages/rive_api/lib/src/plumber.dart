@@ -26,6 +26,11 @@ class Plumber {
     return pipe.stream;
   }
 
+  T peek<T>([String id]) {
+    var pipe = _pipeInit<T>(id);
+    return pipe.value;
+  }
+
   void message<T>(T message, [String id]) {
     var pipe = _pipeInit<T>(id);
     pipe.add(message);

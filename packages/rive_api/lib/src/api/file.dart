@@ -61,7 +61,7 @@ class FileApi {
     );
 
     try {
-      final data = json.decode(res.body) as Map<String, dynamic>;
+      final data = json.decode(res.body) as Map<String, Object>;
       final cdn = CdnDM.fromData(data['cdn']);
       return FileDM.fromDataList(data['files'], cdn);
     } on FormatException catch (e) {

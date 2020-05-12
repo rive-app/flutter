@@ -42,7 +42,7 @@ class _FolderState extends State<BrowserFolder> {
        *  onTap:  ,*/
       onDoubleTap: () {
         final plumber = Plumber();
-        final currentDirectory = plumber.getStream<CurrentDirectory>().value;
+        final currentDirectory = plumber.peek<CurrentDirectory>();
         final nextDirectory =
             CurrentDirectory(currentDirectory.owner, widget.folderId);
         plumber.message<CurrentDirectory>(nextDirectory);

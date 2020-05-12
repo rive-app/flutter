@@ -20,11 +20,11 @@ class UserManager with Subscriptions {
   void set meApi(MeApi meApi) => _meApi = meApi;
 
   void loadMe() async {
-    var currentMe = _plumber.getStream<Me>().value;
+    var currentMe = _plumber.peek<Me>();
     var me = Me.fromDM(await _meApi.whoami);
 
-    // Skip duplicates. 
-    if (currentMe != me) { 
+    // Skip duplicates.
+    if (currentMe != me) {
       _plumber.message<Me>(me);
     } else {
       print("I was reloading myself!");

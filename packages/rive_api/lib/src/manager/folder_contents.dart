@@ -42,19 +42,19 @@ class FolderContentsManager with Subscriptions {
       List<FolderDM> folders, CurrentDirectory directory) {
     final parentId = directory.folderId;
 
-    return folders
-        .map((folderDM) {
-          // Add to results if:
-          // - parent id is the same
-          // - downloading top folder: we want to show 'Deleted Files' folder..
-          if (folderDM.parent == parentId ||
-              (parentId == 1 && folderDM.id == 0)) {
-            print("Adding this: $folderDM");
-            return Folder.fromDM(folderDM);
-          }
-        })
-        .where((folder) => folder != null)
-        .toList(growable: false);
+    return folders.fold(
+      <Folder>[],
+      (list, folderDM) {
+        // Add to results if:
+        // - parent id is the same
+        // - downloading top folder: we want to show 'Deleted Files'.
+        if (folderDM.parent == parentId ||
+            (parentId == 1 && folderDM.id == 0)) {
+          list.add(Folder.fromDM(folderDM));
+        }
+        return list;
+      },
+    ).toList(growable: false);
   }
 
   void _getFolderContents(CurrentDirectory directory) async {
