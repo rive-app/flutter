@@ -69,11 +69,16 @@ class OpenFileContext with RiveFileDelegate {
   /// List of alerts
   ValueListenable<Iterable<EditorAlert>> get alerts => _alerts;
 
+  void _alertDismissed(EditorAlert alert) {
+    removeAlert(alert);
+  }
+
   /// Add an alert to the alerts list. Returns true if it was added, false if it
   /// was already being shown.
   bool addAlert(EditorAlert value) {
     var alerts = Set.of(_alerts.value);
     if (alerts.add(value)) {
+      value.dismissed.addListener(_alertDismissed);
       _alerts.value = alerts;
       return true;
     }
@@ -82,6 +87,7 @@ class OpenFileContext with RiveFileDelegate {
 
   /// Remove an alert from the alerts list.
   bool removeAlert(EditorAlert alert) {
+    alert.dismissed.removeListener(_alertDismissed);
     var alerts = Set.of(_alerts.value);
     if (alerts.remove(alert)) {
       _alerts.value = alerts;

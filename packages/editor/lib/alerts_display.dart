@@ -1,7 +1,8 @@
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/editor_alert.dart';
 import 'package:rive_editor/widgets/common/animated_factor_builder.dart';
-import 'package:rive_editor/widgets/common/fractional_intrinsic_height.dart';
+import 'package:rive_editor/widgets/common/hit_deny.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class AlertsDisplay extends StatefulWidget {
@@ -20,22 +21,33 @@ class _AlertsDisplayState extends State<AlertsDisplay> {
       builder: (context, alerts, _) {
         var alertSet = Set<EditorAlert>.from(alerts);
         _lastAlerts.addAll(alerts);
-        return ClipRect(
-          child: Column(
-            children: [
-              for (final alert in _lastAlerts.toList().reversed)
-                AlertDisplay(
-                  alert: alert,
-                  isVisible: alertSet.contains(alert),
-                  hidden: () {
-                    setState(
-                      () {
-                        _lastAlerts.remove(alert);
-                      },
-                    );
-                  },
-                ),
-            ],
+
+        var display = _lastAlerts.toList().reversed;
+
+        return HitDeny(
+          // Hit deny to prevent clicking on scroll view (we need to hit the
+          // stage back there). Each alert display will hit allow. We need a
+          // scroll view here in case we get sooo many alerts and still want to
+          // be able to mousewheel through them.
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final alert in display)
+                  AlertDisplay(
+                    key: ValueKey(alert),
+                    alert: alert,
+                    isVisible: alertSet.contains(alert),
+                    hidden: () {
+                      setState(
+                        () {
+                          _lastAlerts.remove(alert);
+                        },
+                      );
+                    },
+                  ),
+              ],
+            ),
           ),
         );
       },
@@ -57,13 +69,25 @@ class AlertDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedFactorBuilder(
-      factor: isVisible ? 1 : 0,
-      builder: (context, factor, child) => FractionalIntrinsicHeight(
-        heightFactor: factor,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: alert.build(context),
+    return HitAllow(
+      child: PropagatingListener(
+        onPointerDown: (details) {
+          if (alert.dismissOnPress) {
+            alert.dismiss();
+          }
+        },
+        child: ClipRect(
+          child: AnimatedFactorBuilder(
+            factor: isVisible ? 1 : 0,
+            builder: (context, factor, child) => Align(
+              heightFactor: factor,
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: alert.build(context),
+              ),
+            ),
+          ),
         ),
       ),
     );
