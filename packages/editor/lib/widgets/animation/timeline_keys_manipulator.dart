@@ -332,11 +332,33 @@ class KeyFrameMoveHelper {
   }
 
   void complete() {
-    // Re-enable (and trigger) validation.
+    // The manipulator should know that your priority was the selected
+    // keyframes, so it should do a manual validation prioritizing keys that
+    // were dragged.
+    var keyframesSet = HashSet<KeyFrame>.from(keyFrames);
+
+    var context = animation.context;
+
+    for (final keyframe in keyframesSet) {
+      var keyedProperty = keyframe.keyedProperty;
+      var keyedPropertyFrames = keyedProperty.keyframes.toList(growable: false);
+      for (final frame in keyedPropertyFrames) {
+        if (keyframesSet.contains(frame)) {
+          continue;
+        }
+        if (frame.frame == keyframe.frame) {
+          // This frame collides with keyframe, remove it (prioritizes our
+          // dragged keyframe).
+          context.remove(frame);
+        }
+      }
+    }
+
+    // Re-enable (and trigger) regular validation.
     for (final keyframe in keyFrames) {
       keyframe.keyedProperty.suppressValidation = false;
     }
-    animation.context.captureJournalEntry();
+    context.captureJournalEntry();
   }
 
   void dragTo(double seconds) {

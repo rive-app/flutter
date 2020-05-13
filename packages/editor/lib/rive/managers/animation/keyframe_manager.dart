@@ -77,7 +77,7 @@ class KeyFrameManager extends AnimationManager {
           _selection.value,
           (KeyFrame keyFrame) => keyFrame.interpolator,
           equalityCheck: (Interpolator a, Interpolator b) =>
-              a.equalParameters(b),
+              a?.equalParameters(b) ?? false,
         );
         // We were of the same type, but our parameters weren't equal, so we
         // effectively don't have a common editable interpolation type.
