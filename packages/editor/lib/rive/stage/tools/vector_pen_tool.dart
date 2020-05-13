@@ -2,27 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path.dart';
-import 'package:rive_editor/rive/editor_alert.dart';
+import 'package:rive_editor/rive/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
-
-int count = 0;
-class SimpleAlert extends EditorAlert {
-  final String label;
-
-  SimpleAlert(this.label);
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 200,
-      height: 100,
-      child: Text(this.label),
-      color: const Color(0xFFFFFFFF),
-    );
-  }
-}
 
 class VectorPenTool extends PenTool<Path> {
   static final VectorPenTool instance = VectorPenTool();
@@ -41,18 +25,14 @@ class VectorPenTool extends PenTool<Path> {
 
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
-    print("CLICK?! $isShowingGhostPoint");
-    count++;
-    stage.file.addAlert(SimpleAlert('Alert number $count'));
     if (!isShowingGhostPoint) {
       return;
     }
 
     if (activeArtboard == null) {
-      stage.file.addAlert(SimpleAlert('error'));
-      // TODO: inform the user that they need to have an active artboard to
-      // create a new shape/path.
-      // https://2dimensions.slack.com/archives/CHMAP278R/p1589304756210700
+      stage.file.addAlert(
+        SimpleAlert('Pen tool requires an artboard. Create one first.'),
+      );
     }
 
     if (_createdPath == null) {
