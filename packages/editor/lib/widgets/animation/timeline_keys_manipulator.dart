@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
@@ -85,6 +86,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
   Offset _edgeScroll;
   Timer _edgeScrollTimer;
+  DateTime _lastHitTime = DateTime.now();
 
   @override
   void initState() {
@@ -227,6 +229,25 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         } else if (frame is AllKeyFrame) {
           toSelect.addAll(frame.keyframes);
         }
+
+        // Track the last time we clicked.
+        var now = DateTime.now();
+        if ((now.difference(_lastHitTime)) < doubleClickSpeed) {
+          // Move the playhead to the double clicked time.
+          var manager = widget.animationManager;
+
+          // if we hit something, move to the time of that keyframe.
+          if (toSelect.isNotEmpty) {
+            manager.changeCurrentTime
+                .add(toSelect.first.frame / manager.animation.fps);
+          } else {
+            // otherwise go to the closest frame time.
+            manager.changeCurrentTime
+                .add(helper.dxToSeconds(details.pointerEvent.localPosition.dx));
+          }
+        }
+        _lastHitTime = now;
+
         if (toSelect.isNotEmpty) {
           // If we selected something, store the position we started this press
           // operation from. We'll use this in the drag (onPointerMove).
@@ -332,11 +353,33 @@ class KeyFrameMoveHelper {
   }
 
   void complete() {
-    // Re-enable (and trigger) validation.
+    // The manipulator should know that your priority was the selected
+    // keyframes, so it should do a manual validation prioritizing keys that
+    // were dragged.
+    var keyframesSet = HashSet<KeyFrame>.from(keyFrames);
+
+    var context = animation.context;
+
+    for (final keyframe in keyframesSet) {
+      var keyedProperty = keyframe.keyedProperty;
+      var keyedPropertyFrames = keyedProperty.keyframes.toList(growable: false);
+      for (final frame in keyedPropertyFrames) {
+        if (keyframesSet.contains(frame)) {
+          continue;
+        }
+        if (frame.frame == keyframe.frame) {
+          // This frame collides with keyframe, remove it (prioritizes our
+          // dragged keyframe).
+          context.remove(frame);
+        }
+      }
+    }
+
+    // Re-enable (and trigger) regular validation.
     for (final keyframe in keyFrames) {
       keyframe.keyedProperty.suppressValidation = false;
     }
-    animation.context.captureJournalEntry();
+    context.captureJournalEntry();
   }
 
   void dragTo(double seconds) {

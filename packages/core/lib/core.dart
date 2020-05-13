@@ -759,6 +759,9 @@ abstract class CoreContext implements LocalSettings {
     _isRecording = wasRecording;
   }
 
+  /// Helper to determine if a batch add operation is in progress.
+  bool get isBatchAdding => _delayAdd != null;
+
   /// Add a set of components as a batched operation, cleaning dirt and
   /// completing after all the components have been added and parented.
   void batchAdd(BatchAddCallback addCallback) {
@@ -769,6 +772,14 @@ abstract class CoreContext implements LocalSettings {
       _deferredBatchAdd.add(addCallback);
       return;
     }
+
+    // Let's allow nesting batchAdd callbacks.
+    if(isBatchAdding) {
+      // Already in a batch add, just piggy back...
+      addCallback();
+      return;
+    }
+
     // When we're doing a batch add, we always want to be recording.
     bool wasRecording = _isRecording;
     _isRecording = true;

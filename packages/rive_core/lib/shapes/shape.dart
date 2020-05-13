@@ -81,6 +81,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
 
   @override
   void onAdded() {
+    super.onAdded();
     // Shape has been added and is clean (all artboards and ancestors of the
     // current hierarchy's components have resolved). This is a good opportunity
     // to self-heal Shapes that are missing PathComposers.

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/shape.dart';
 
@@ -11,7 +12,7 @@ import 'src/test_rive_file.dart';
 /// to make sure that deleting an item that contains more items (like fills do,
 /// as they contain paint mutators) calls [ContainerComponent.removeRecursive]
 /// and not just [Component.remove].
-/// 
+///
 /// Test for fix to: https://github.com/rive-app/rive/issues/174
 void main() {
   test('undoing fill removal works', () {
@@ -28,9 +29,14 @@ void main() {
       useSharedPreferences: false,
     );
 
+    Shape shape;
+    Artboard artboard;
     // Create the node with some name set to it.
-    var shape = file.add(Shape()..name = 'Colorful');
-
+    file.batchAdd(() {
+      artboard = file.add(Artboard());
+      shape = file.add(Shape()..name = 'Colorful');
+      artboard.appendChild(shape);
+    });
     const fillColor = Color(0xFFFF0000);
     var fill = shape.createFill(fillColor);
     file.captureJournalEntry();

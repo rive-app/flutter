@@ -73,14 +73,18 @@ abstract class ShapePaintContainer {
   Fill createFill(Color color) {
     assert(context != null);
     assert(color != null);
-    var fill = Fill()..name = 'Fill ${fills.length + 1}';
-    var solidColor = SolidColor()..color = color;
 
-    context.add(fill);
-    context.add(solidColor);
+    Fill fill;
+    context.batchAdd(() {
+      fill = Fill()..name = 'Fill ${fills.length + 1}';
+      var solidColor = SolidColor()..color = color;
 
-    fill.appendChild(solidColor);
-    appendChild(fill);
+      context.add(fill);
+      context.add(solidColor);
+
+      fill.appendChild(solidColor);
+      appendChild(fill);
+    });
     return fill;
   }
 
@@ -88,14 +92,17 @@ abstract class ShapePaintContainer {
   Stroke createStroke(Color color) {
     assert(context != null);
     assert(color != null);
-    var stroke = Stroke()..name = 'Stroke ${strokes.length + 1}';
-    var solidColor = SolidColor()..color = color;
+    Stroke stroke;
+    context.batchAdd(() {
+      stroke = Stroke()..name = 'Stroke ${strokes.length + 1}';
+      var solidColor = SolidColor()..color = color;
 
-    context.add(stroke);
-    context.add(solidColor);
+      context.add(stroke);
+      context.add(solidColor);
 
-    stroke.appendChild(solidColor);
-    appendChild(stroke);
+      stroke.appendChild(solidColor);
+      appendChild(stroke);
+    });
     return stroke;
   }
 }

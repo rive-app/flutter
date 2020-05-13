@@ -26,6 +26,7 @@ class ArtboardTool extends DrawableTool {
     // Start listening for edit mode changes
     _symmetricDrawChanged();
     ShortcutAction.symmetricDraw.addListener(_symmetricDrawChanged);
+    _artboard = null;
     return true;
   }
 
@@ -88,6 +89,12 @@ class ArtboardTool extends DrawableTool {
   }
 
   @override
+  void endDrag() {
+    _artboard = null;
+    super.endDrag();
+  }
+
+  @override
   void draw(Canvas canvas) {}
 
   @override
@@ -96,7 +103,7 @@ class ArtboardTool extends DrawableTool {
   static final ArtboardTool instance = ArtboardTool();
 
   void _symmetricDrawChanged() {
-    if (lastWorldMouse != null) {
+    if (lastWorldMouse != null && _artboard != null) {
       updateDrag(lastWorldMouse);
     }
   }
