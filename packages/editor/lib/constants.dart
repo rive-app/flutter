@@ -9,3 +9,8 @@ enum DraggingMode { symmetric }
 const Map<EditMode, DraggingMode> editModeMap = {
   EditMode.altMode1: DraggingMode.symmetric
 };
+
+
+/// This is the maximum time that can elapse between two clicks to consider them
+/// a double click.
+const doubleClickSpeed = Duration(milliseconds: 200);
