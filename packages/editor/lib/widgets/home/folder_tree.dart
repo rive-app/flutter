@@ -1,14 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/models/owner.dart';
-import 'package:rive_api/models/team.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
-import 'package:rive_editor/rive/managers/image_manager.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
 import 'package:tree_widget/flat_tree_item.dart';
@@ -61,11 +59,11 @@ class FolderTreeView extends StatelessWidget {
       iconBuilder: (context, item, style) => StreamBuilder<bool>(
         stream: item.data.selectedStream,
         builder: (context, selectedStream) => Container(
-          width: 15,
-          height: 15,
+          width: 20,
+          height: 20,
           child: Center(
-            child: SizedAvatar(
-              url: item.data.iconURL,
+            child: FolderTreeIcon(
+              owner: item.data.owner,
               icon: 'folder',
               iconColor: (selectedStream.hasData && selectedStream.data)
                   ? colors.fileSelectedFolderIcon
@@ -117,97 +115,44 @@ class FolderTreeView extends StatelessWidget {
   }
 }
 
-class SizedAvatarOwner extends StatelessWidget {
-  const SizedAvatarOwner({
-    @required this.owner,
-    this.selected = false,
-    this.size = const Size(20, 20),
-    this.teamIcon = 'teams',
-    this.userIcon = 'your-files',
-    this.addBackground = false,
-    Key key,
-  }) : super(key: key);
-
-  final RiveOwner owner;
-  final Size size;
-  final bool selected;
-  final bool addBackground;
-  final String teamIcon;
-  final String userIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    var colors = RiveTheme.of(context).colors;
-
-    return SizedAvatar(
-      url: owner.avatar,
-      icon: (owner is RiveTeam) ? teamIcon : userIcon,
-      iconColor: (selected)
-          ? colors.fileSelectedFolderIcon
-          : colors.fileUnselectedFolderIcon,
-      addBackground: addBackground,
-      size: size,
-    );
-  }
-}
-
-class SizedAvatar extends StatelessWidget {
-  const SizedAvatar({
-    this.url,
+class FolderTreeIcon extends StatelessWidget {
+  const FolderTreeIcon({
+    this.owner,
     this.iconColor,
-    this.size = const Size(20, 20),
-    this.icon = 'your-files',
-    this.addBackground = false,
+    this.size = const Size(15, 15),
+    this.icon = 'folder',
     Key key,
   }) : super(key: key);
 
-  final String url;
+  final Owner owner;
   final Size size;
-  final bool addBackground;
   final String icon;
   final Color iconColor;
 
-  Widget _backupIcon(RiveColors colors) {
-    return TintedIcon(
-        icon: icon,
-        color:
-            (iconColor == null) ? colors.fileUnselectedFolderIcon : iconColor);
-  }
-
-  Widget _backupIconWithBackground(RiveColors colors) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-                color: colors.fileBackgroundLightGrey,
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: colors.fileUnselectedFolderIcon, width: 1)),
-          ),
-        ),
-        Center(child: _backupIcon(colors)),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    Widget _avatarChild;
     var colors = RiveTheme.of(context).colors;
 
-    if (url == null && addBackground) {
-      _avatarChild = _backupIconWithBackground(colors);
-    } else if (url == null) {
-      _avatarChild = _backupIcon(colors);
+    if (owner == null) {
+      return Center(
+          child: SizedBox(
+        width: size.width,
+        height: size.height,
+        child: TintedIcon(
+            icon: icon,
+            color: (iconColor == null)
+                ? colors.fileUnselectedFolderIcon
+                : iconColor),
+      ));
     } else {
-      _avatarChild = CachedCircleAvatar(url);
+      return AvatarView(
+        diameter: 15,
+        padding: 0,
+        borderWidth: 0,
+        imageUrl: owner.avatarUrl,
+        name: owner.displayName,
+        color: StageCursor.colorFromPalette(owner.ownerId),
+      );
     }
-    return Center(
-        child: SizedBox(
-      width: size.width,
-      height: size.height,
-      child: _avatarChild,
-    ));
   }
 }

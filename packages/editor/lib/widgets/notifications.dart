@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_api/rive_api.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/home/folder_tree.dart';
@@ -11,6 +12,7 @@ import 'package:rive_api/apis/changelog.dart';
 import 'package:rive_api/models/notification.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
 enum PanelTypes { personal, announcements }
 
@@ -385,10 +387,12 @@ class TeamInviteNotification extends StatelessWidget {
           padding: const EdgeInsets.only(right: 20.0),
           child: SizedBox(
             width: 50,
-            child: SizedAvatar(
-              url: notification.avatarUrl,
-              size: const Size(50, 50),
-              addBackground: false,
+            child: AvatarView(
+              diameter: 30,
+              borderWidth: 0,
+              imageUrl: notification.avatarUrl,
+              name: notification.senderName,
+              color: StageCursor.colorFromPalette(notification.senderId),
             ),
           ),
         ),
@@ -435,10 +439,12 @@ class TeamInviteAcceptedNotification extends StatelessWidget {
           padding: const EdgeInsets.only(right: 10.0),
           child: SizedBox(
             width: 50,
-            child: SizedAvatar(
-              url: notification.avatarUrl,
-              size: const Size(50, 50),
-              addBackground: false,
+            child: AvatarView(
+              diameter: 30,
+              borderWidth: 0,
+              imageUrl: notification.avatarUrl,
+              name: notification.teamName,
+              color: StageCursor.colorFromPalette(notification.teamId),
             ),
           ),
         ),
@@ -490,10 +496,12 @@ class TeamInviteRejectedNotification extends StatelessWidget {
           padding: const EdgeInsets.only(right: 10.0),
           child: SizedBox(
             width: 50,
-            child: SizedAvatar(
-              url: notification.avatarUrl,
-              size: const Size(50, 50),
-              addBackground: false,
+            child: AvatarView(
+              diameter: 50,
+              borderWidth: 0,
+              imageUrl: notification.avatarUrl,
+              name: notification.teamName,
+              color: StageCursor.colorFromPalette(notification.teamId),
             ),
           ),
         ),
@@ -527,10 +535,12 @@ class TeamInviteRescindedNotification extends StatelessWidget {
           padding: const EdgeInsets.only(right: 10.0),
           child: SizedBox(
             width: 50,
-            child: SizedAvatar(
-              url: notification.avatarUrl,
-              size: const Size(50, 50),
-              addBackground: false,
+            child: AvatarView(
+              diameter: 50,
+              borderWidth: 0,
+              imageUrl: notification.avatarUrl,
+              name: notification.teamName,
+              color: StageCursor.colorFromPalette(notification.teamId),
             ),
           ),
         ),

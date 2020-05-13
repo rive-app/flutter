@@ -5,17 +5,18 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
-import 'package:rive_editor/widgets/home/folder_tree.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
 class TopNav extends StatelessWidget {
   final CurrentDirectory currentDirectory;
@@ -29,12 +30,15 @@ class TopNav extends StatelessWidget {
     final riveColors = RiveTheme.of(context).colors;
     final children = <Widget>[];
     if (owner != null) {
-      children.add(SizedAvatar(
-        url: owner.avatarUrl,
-        size: const Size(30, 30),
-        addBackground: true,
-        icon: 'teams',
-      ));
+      children.add(
+        AvatarView(
+          diameter: 30,
+          borderWidth: 0,
+          imageUrl: owner.avatarUrl,
+          name: owner.displayName,
+          color: StageCursor.colorFromPalette(owner.ownerId),
+        ),
+      );
       children.add(const SizedBox(width: 9));
     }
     children.add(Text(owner.displayName));
