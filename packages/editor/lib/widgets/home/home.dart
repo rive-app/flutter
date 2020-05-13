@@ -25,7 +25,7 @@ class Home extends StatelessWidget {
     return PropagatingListener(
       behavior: HitTestBehavior.deferToChild,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           ResizePanel(
             hitSize: theme.dimensions.resizeEdgeSize,

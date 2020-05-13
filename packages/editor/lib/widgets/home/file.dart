@@ -78,7 +78,6 @@ class _FileState extends State<BrowserFile> {
        * onClick: , */
       onDoubleClick: (_) {
         final file = widget.file;
-        print("let's open file: $file");
         RiveContext.of(context).open(file.fileOwnerId, file.id, file.name);
       },
       child: MouseRegion(

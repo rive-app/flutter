@@ -17,13 +17,13 @@ import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
-class TopNavStream extends StatelessWidget {
+class TopNav extends StatelessWidget {
   final CurrentDirectory currentDirectory;
 
   Owner get owner => currentDirectory.owner;
   int get folderId => currentDirectory.folderId;
 
-  const TopNavStream(this.currentDirectory, {Key key}) : super(key: key);
+  const TopNav(this.currentDirectory, {Key key}) : super(key: key);
 
   Widget _navControls(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;

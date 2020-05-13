@@ -80,7 +80,7 @@ class FileBrowser extends StatelessWidget {
       builder: (context, snapshot) {
         Widget child;
         if (snapshot.hasData) {
-          child = TopNavStream(snapshot.data);
+          child = TopNav(snapshot.data);
         } else {
           child = const Text('No directory selected?');
         }
@@ -90,6 +90,17 @@ class FileBrowser extends StatelessWidget {
           delegate: _SliverHeader(child),
         );
       },
+    );
+  }
+
+  SliverPersistentHeader makeHeader(String headerText) {
+    return SliverPersistentHeader(
+      pinned: true,
+      floating: false,
+      delegate: _SliverHeader(
+        Container(
+            color: Colors.lightBlue, child: Center(child: Text(headerText))),
+      ),
     );
   }
 
@@ -129,9 +140,8 @@ class FileBrowser extends StatelessWidget {
         }
 
         return Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: const EdgeInsets.all(30),
           child: CustomScrollView(
-            shrinkWrap: true,
             slivers: slivers,
           ),
         );
@@ -146,7 +156,12 @@ class _SliverHeader extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(child: child);
+    return Container(
+      height: double.infinity,
+      width: double.infinity,
+      color: Colors.white,
+      child: child,
+    );
   }
 
   final Widget child;

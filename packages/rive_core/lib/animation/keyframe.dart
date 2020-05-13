@@ -1,11 +1,11 @@
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/interpolator.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
+
 export 'package:rive_core/src/generated/animation/keyframe_base.dart';
 
 final _log = Logger('animation');
