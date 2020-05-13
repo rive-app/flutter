@@ -72,6 +72,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   /// List of animations in this artboard.
   _AnimationList get animations => _animations;
 
+  /// Does this artboard have animations?
+  bool get hasAnimations => _animations.isNotEmpty;
+
   int _dirtDepth = 0;
   int _dirt = 255;
 

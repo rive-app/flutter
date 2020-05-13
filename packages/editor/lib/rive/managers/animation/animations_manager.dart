@@ -71,10 +71,12 @@ class AnimationsManager {
 
     _orderController.stream.listen(_onOrder);
 
-    if(_animationStreamControllers.isEmpty) {
+    if (_animationStreamControllers.isEmpty) {
       /// Push through a null (none) selected animation if we don't have any
       /// animations at all.
       _selectedAnimationStream.add(null);
+      // Create a default animation
+      _createDefaultAnimation();
     }
   }
 
@@ -167,6 +169,7 @@ class AnimationsManager {
   // be skipped for that view model (like selecting when no previous selection
   // was available).
   void _updateAnimationSelectionState(Animation animation) {
+    // ignore: close_sinks, false positive
     var viewModelStream = _animationStreamControllers[animation.id];
     if (viewModelStream == null) {
       return;
@@ -247,6 +250,15 @@ class AnimationsManager {
     var core = activeArtboard.context;
     core.add(animation);
     core.captureJournalEntry();
+  }
+
+  /// Create a default animation if the artboard has none
+  bool _createDefaultAnimation() {
+    if (!activeArtboard.hasAnimations) {
+      _makeLinearAnimation();
+      return true;
+    }
+    return false;
   }
 
   /// Cleanup the manager.
