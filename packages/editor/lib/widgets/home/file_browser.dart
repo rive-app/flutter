@@ -61,15 +61,14 @@ class FileBrowser extends StatelessWidget {
     );
   }
 
+  bool canDisplayFolder(FolderContents folder) =>
+      folder != null && folder.isNotEmpty;
+
   Widget _stream(FolderContentsBuilder childBuilder) {
     return StreamBuilder<FolderContents>(
       stream: Plumber().getStream<FolderContents>(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return childBuilder(snapshot.data);
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
+        return childBuilder(snapshot.data);
       },
     );
   }
@@ -112,40 +111,47 @@ class FileBrowser extends StatelessWidget {
   Widget build(BuildContext context) {
     return _stream(
       (data) {
-        final folders = data.folders;
-        final hasFolders = folders != null && folders.isNotEmpty;
-
-        final files = data.files;
-        final hasFiles = files != null && files.isNotEmpty;
-
         final slivers = <Widget>[];
         slivers.add(_header());
-        // Padding below header.
-        slivers.add(
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 30),
-          ),
-        );
-        if (hasFolders) {
-          slivers.add(_folderGrid(folders));
-        }
 
-        // Padding between grids.
-        if (hasFiles && hasFolders) {
+        if (canDisplayFolder(data)) {
+          final folders = data.folders;
+          final hasFolders = folders != null && folders.isNotEmpty;
+
+          final files = data.files;
+          final hasFiles = files != null && files.isNotEmpty;
+
+          // Padding below header.
           slivers.add(
             const SliverToBoxAdapter(
               child: SizedBox(height: 30),
             ),
           );
-        }
+          if (hasFolders) {
+            slivers.add(_folderGrid(folders));
+          }
 
-        if (hasFiles) {
-          slivers.add(_fileGrid(files));
+          // Padding between grids.
+          if (hasFiles && hasFolders) {
+            slivers.add(
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 30),
+              ),
+            );
+          }
+
+          if (hasFiles) {
+            slivers.add(_fileGrid(files));
+          }
+        } else {
+          slivers.add(
+            const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator())),
+          );
         }
 
         return Padding(
           padding: const EdgeInsets.symmetric(
-            // vertical: 30,
             horizontal: 26,
           ),
           child: CustomScrollView(
