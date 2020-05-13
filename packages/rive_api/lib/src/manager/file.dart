@@ -44,7 +44,6 @@ class FileManager with Subscriptions {
       return;
     }
 
-    _clearFolderList();
     loadFolders(me);
   }
 
