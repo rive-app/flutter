@@ -14,11 +14,11 @@ mixin Subscriptions {
     subscriptions.clear();
   }
 
-  void subscribe<T>(SubscribeCallback<T> action) {
+  void subscribe<T>(SubscribeCallback<T> action, [int id]) {
     if (subscriptions == null) {
       subscriptions = [];
     }
-    var stream = Plumber().getStream<T>();
+    var stream = Plumber().getStream<T>(id);
     var subscription = stream.listen(action);
     subscriptions.add(subscription);
   }

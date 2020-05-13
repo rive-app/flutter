@@ -40,7 +40,6 @@ void main() {
       final testComplete = Completer();
 
       Plumber().getStream<List<Team>>().listen((teams) {
-        print('once?');
         expect(teams.length, 2);
         testComplete.complete();
       });

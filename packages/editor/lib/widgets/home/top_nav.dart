@@ -1,10 +1,8 @@
-import 'package:pedantic/pedantic.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
-import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
@@ -91,7 +89,7 @@ class TopNav extends StatelessWidget {
             }
             // TODO:
             // open file
-            unawaited(FolderTreeManager().loadFolders(owner));
+            FileManager().loadFolders(owner);
             Plumber().message(currentDirectory);
           },
         ),
@@ -107,7 +105,7 @@ class TopNav extends StatelessWidget {
             // to control both managers through one message
             // pretty sure we can do that if we back onto
             // a more generic FileManager
-            unawaited(FolderTreeManager().loadFolders(owner));
+            FileManager().loadFolders(owner);
             Plumber().message(currentDirectory);
           },
         ),

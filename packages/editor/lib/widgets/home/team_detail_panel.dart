@@ -82,6 +82,7 @@ class TeamDetailPanel extends StatelessWidget {
               if (snapshot.hasData) {
                 return ListView(
                     children: snapshot.data
+                        .where((element) => element.status == 'complete')
                         .map((member) => _TeamMember(teamMember: member))
                         .toList());
               } else {

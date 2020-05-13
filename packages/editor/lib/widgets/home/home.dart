@@ -65,6 +65,9 @@ class Home extends StatelessWidget {
                 case HomeSection.getStarted:
                   return Text('Build get started');
                   break;
+                default:
+                  return Text('loading...');
+                  break;
               }
             },
           ),
