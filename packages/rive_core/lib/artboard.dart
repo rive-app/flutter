@@ -55,6 +55,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   final Event drawOrderChanged = Event();
   // <- editor-only
 
+  /// Artboard are one of the few (only?) components that can be orphaned.
+  @override
+  bool get canBeOrphaned => true;
+
   final Path path = Path();
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
