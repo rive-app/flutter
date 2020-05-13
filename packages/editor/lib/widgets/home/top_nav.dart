@@ -77,30 +77,36 @@ class TopNav extends StatelessWidget {
       itemBuilder: (popupContext, item, isHovered) =>
           item.itemBuilder(popupContext, isHovered),
       itemsBuilder: (context) => [
-        PopupContextItem('New File', select: () async {
-          if (owner is Team) {
-            await FileManager().createFile(folderId, owner.ownerId);
-          } else {
-            await FileManager().createFile(folderId);
-          }
-          // TODO:
-          // open file
-          unawaited(FolderTreeManager().loadFolders(owner));
-          Plumber().message(currentDirectory);
-        }),
-        PopupContextItem('New Folder', select: () async {
-          if (owner is Team) {
-            await FileManager().createFolder(folderId, owner.ownerId);
-          } else {
-            await FileManager().createFolder(folderId);
-          }
-          // NOTE: bit funky, feels like it'd be nice
-          // to control both managers through one message
-          // pretty sure we can do that if we back onto
-          // a more generic FileManager
-          unawaited(FolderTreeManager().loadFolders(owner));
-          Plumber().message(currentDirectory);
-        }),
+        PopupContextItem(
+          'New File',
+          select: () async {
+            if (owner is Team) {
+              await FileManager().createFile(folderId, owner.ownerId);
+            } else {
+              await FileManager().createFile(folderId);
+            }
+            // TODO:
+            // open file
+            unawaited(FolderTreeManager().loadFolders(owner));
+            Plumber().message(currentDirectory);
+          },
+        ),
+        PopupContextItem(
+          'New Folder',
+          select: () async {
+            if (owner is Team) {
+              await FileManager().createFolder(folderId, owner.ownerId);
+            } else {
+              await FileManager().createFolder(folderId);
+            }
+            // NOTE: bit funky, feels like it'd be nice
+            // to control both managers through one message
+            // pretty sure we can do that if we back onto
+            // a more generic FileManager
+            unawaited(FolderTreeManager().loadFolders(owner));
+            Plumber().message(currentDirectory);
+          },
+        ),
         PopupContextItem.separator(),
         PopupContextItem(
           'New Team',

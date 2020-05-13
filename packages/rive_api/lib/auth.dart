@@ -22,31 +22,33 @@ class RiveAuth {
   RiveAuth(this.api);
 
   Future<AuthResponse> login(String username, String password) async {
-    var response = await api.post(api.host + '/signin',
-        body: jsonEncode(
-          <String, String>{
-            'username': username,
-            'password': password,
-          },
-        ));
-
-    Map<String, dynamic> responseData;
-
     try {
-      responseData = json.decode(response.body);
-      AuthResponse authResponse;
-      if (response.statusCode == 200 && responseData.containsKey('username')) {
+      var response = await api.post(api.host + '/signin',
+          body: jsonEncode(
+            <String, String>{
+              'username': username,
+              'password': password,
+            },
+          ));
+
+      final responseData = json.decode(response.body);
+      if (responseData.containsKey('username')) {
         var username = responseData['username'];
-        authResponse = AuthResponse.fromMessage(username);
-      } else if (response.statusCode == 422) {
+        return AuthResponse.fromMessage(username);
+      }
+    } on FormatException catch (err) {
+      return AuthResponse.fromError(description: err.message);
+    } on ApiException catch (apiException) {
+      final response = apiException.response;
+      if (response.statusCode == 422) {
+        final responseData = json.decode(response.body);
         if (responseData.containsKey('error')) {
           return AuthResponse.fromError(description: responseData['error']);
         }
       }
-      return authResponse ?? AuthResponse.empty();
-    } on FormatException catch (err) {
-      return AuthResponse.fromError(description: err.message);
     }
+
+    return AuthResponse.empty();
   }
 
   Future<AuthResponse> registerGoogle() =>
@@ -97,7 +99,7 @@ class RiveAuth {
       return AuthResponse.empty();
     }
 
-    Map<String, dynamic> responseData;
+    Map<String, Object> responseData;
 
     try {
       responseData = json.decode(response);
@@ -124,9 +126,9 @@ class RiveAuth {
     var response = await api.get(api.host + '/api/me');
 
     if (response.statusCode == 200) {
-      Map<String, dynamic> data;
+      Map<String, Object> data;
       try {
-        data = json.decode(response.body) as Map<String, dynamic>;
+        data = json.decode(response.body) as Map<String, Object>;
       } on FormatException catch (_) {
         return null;
       }
@@ -162,22 +164,24 @@ class RiveAuth {
         'email': email,
       },
     );
-    var response = await api.post(api.host + '/register', body: body);
-    Map<String, dynamic> responseData;
-
     try {
-      responseData = json.decode(response.body);
-      AuthResponse authResponse;
+      var response = await api.post(api.host + '/register', body: body);
+      Map<String, Object> responseData = json.decode(response.body);
+
       if (response.statusCode == 200 && responseData.containsKey('username')) {
         var username = responseData['username'];
-        authResponse = AuthResponse.fromMessage(username);
-      } else if (response.statusCode == 422) {
-        return AuthResponse.fromErrors(responseData);
+        return AuthResponse.fromMessage(username);
       }
-      return authResponse ?? AuthResponse.empty();
     } on FormatException catch (err) {
       return AuthResponse.fromError(description: err.message);
+    } on ApiException catch (apiException) {
+      final response = apiException.response;
+      Map<String, Object> responseData = json.decode(response.body);
+      if (response.statusCode == 422) {
+        return AuthResponse.fromErrors(responseData);
+      }
     }
+    return AuthResponse.empty();
   }
 }
 
@@ -188,7 +192,7 @@ class AuthResponse {
   AuthResponse.fromMessage(this.message);
   AuthResponse.fromError({String name = 'error', String description})
       : errors = {name: description};
-  AuthResponse.fromErrors(Map<String, dynamic> networkErrors) {
+  AuthResponse.fromErrors(Map<String, Object> networkErrors) {
     errors = {};
     networkErrors.forEach((key, value) {
       if (value is String) {

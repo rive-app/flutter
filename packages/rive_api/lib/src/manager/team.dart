@@ -34,7 +34,7 @@ class TeamManager with Subscriptions {
     if (_lastMe != newMe) {
       Plumber().flush<List<Team>>();
     }
-    if (newMe != null) {
+    if (!newMe.isEmpty) {
       loadTeams();
     }
     _lastMe = newMe;

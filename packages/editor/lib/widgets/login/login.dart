@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/auth.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_editor/widgets/common/editor_switch.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
@@ -125,7 +126,7 @@ class _LoginState extends State<Login> {
     registerValidator.validate(response);
 
     if (response.isMessage) {
-      await rive.updateUser();
+      UserManager().loadMe();
     } else {
       _disableButton(false);
     }
@@ -157,7 +158,7 @@ class _LoginState extends State<Login> {
     loginValidator.validate(response);
     if (response.isMessage) {
       // Everything ok, we logged in.
-      await rive.updateUser();
+      UserManager().loadMe();
     } else {
       _disableButton(false);
     }
@@ -316,15 +317,14 @@ class _LoginState extends State<Login> {
     }
   }
 
-  Future<void> _socialAuth(AuthAction auth) async {
+  Future<void> _socialLogin(AuthAction auth) async {
     if (_buttonDisabled) {
       return;
     }
     _disableButton(true);
-    final rive = RiveContext.of(context);
     final authResponse = await auth();
     if (authResponse.isMessage) {
-      await rive.updateUser();
+      UserManager().loadMe();
     } else {
       _disableButton(false);
     }
@@ -346,7 +346,7 @@ class _LoginState extends State<Login> {
                   final rive = RiveContext.of(context);
                   final api = rive.api;
                   final auth = RiveAuth(api);
-                  _socialAuth(auth.loginApple); 
+                  _socialLogin(auth.loginApple); 
                 },
         ),
         const SizedBox(width: 10),*/
@@ -358,7 +358,7 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  await _socialAuth(
+                  await _socialLogin(
                       isRegister ? auth.registerGoogle : auth.loginGoogle);
                 },
         ),
@@ -371,7 +371,7 @@ class _LoginState extends State<Login> {
               : () async {
                   final api = RiveContext.of(context).api;
                   final auth = RiveAuth(api);
-                  await _socialAuth(
+                  await _socialLogin(
                       isRegister ? auth.registerFacebook : auth.loginFacebook);
                 },
         ),
@@ -388,7 +388,7 @@ class _LoginState extends State<Login> {
                   ));
                   // final api = RiveContext.of(context).api;
                   // final auth = RiveAuth(api);
-                  // await _socialAuth(
+                  // await _socialLogin(
                   //     isRegister ? auth.registerTwitter : auth.loginTwitter);
                 },
         ), */

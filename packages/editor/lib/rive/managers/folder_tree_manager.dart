@@ -32,7 +32,7 @@ class FolderTreeManager with Subscriptions {
   void _handleNewMe(Me me) {
     _me = me;
     _clearFolderList();
-    if (me != null) {
+    if (!me.isEmpty) {
       _initFolderTree(me);
       loadFolders(me);
     }
@@ -49,7 +49,9 @@ class FolderTreeManager with Subscriptions {
     // lets ditch teams no longer reported.
     _teams = teams;
     Set<Owner> currentOwners = _folderMap.keys.toSet();
-    Set<Owner> newOwners = <Owner>{}.union(_teams?.toSet()).union({_me});
+    Set<Owner> newOwners = <Owner>{}
+        .union(_teams != null ? _teams.toSet() : {})
+        .union({if (!_me.isEmpty) _me});
     Set<Owner> removeKeys = currentOwners.difference(newOwners);
 
     removeKeys.forEach((key) {

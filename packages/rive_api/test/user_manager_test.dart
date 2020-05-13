@@ -46,8 +46,9 @@ void main() {
       final testComplete = Completer();
 
       final checks = [
+        (Me me) => me.isEmpty,
         (Me me) => me.name == 'MaxMax',
-        (Me me) => me == null,
+        (Me me) => me.isEmpty,
       ];
 
       Plumber().getStream<Me>().listen((event) {
@@ -58,7 +59,7 @@ void main() {
         }
       });
 
-      // first logout doesnt change anything
+      // Send empty user first.
       await userManager.logout();
       await userManager.loadMe();
       await userManager.logout();
@@ -71,7 +72,7 @@ void main() {
 
       final checks = [
         (Me me) => me.name == 'MaxMax',
-        (Me me) => me == null,
+        (Me me) => me.isEmpty,
         (Me me) => me.name == 'MaxMax',
       ];
 

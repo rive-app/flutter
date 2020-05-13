@@ -32,18 +32,20 @@ class Me extends User {
   final String notice;
 
   factory Me.fromDM(MeDM me) => Me(
-        signedIn: me.signedIn,
-        id: me.id,
-        ownerId: me.ownerId,
-        name: me.name,
-        username: me.username,
-        avatarUrl: me.avatarUrl,
-        isAdmin: me.isAdmin,
-        isPaid: me.isPaid,
-        notificationCount: me.notificationCount,
-        verified: me.verified,
-        notice: me.notice,
+        signedIn: me?.signedIn,
+        id: me?.id,
+        ownerId: me?.ownerId,
+        name: me?.name,
+        username: me?.username,
+        avatarUrl: me?.avatarUrl,
+        isAdmin: me?.isAdmin,
+        isPaid: me?.isPaid,
+        notificationCount: me?.notificationCount,
+        verified: me?.verified,
+        notice: me?.notice,
       );
+
+  bool get isEmpty => ownerId == null;
 
   @override
   bool operator ==(o) => o is Me && o.ownerId == ownerId;

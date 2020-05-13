@@ -23,6 +23,10 @@ class FileManager with Subscriptions {
 
   void _handleNewMe(Me me) {
     _me = me;
+    if (_me.isEmpty) {
+      return;
+    }
+
     _clearFolderList();
     loadFolders(me);
   }

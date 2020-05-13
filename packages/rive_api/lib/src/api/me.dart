@@ -17,7 +17,7 @@ class MeApi {
       final data = json.decode(res.body) as Map<String, dynamic>;
       // Check that the user's signed in
       if (!_isSignedIn(data)) {
-        throw HttpException('User is not signed in');
+        return null;
       }
       return MeDM.fromData(data);
     } on FormatException catch (e) {
@@ -27,12 +27,11 @@ class MeApi {
   }
 
   /// Checks to see if the user's signed in
-  bool _isSignedIn(Map<String, dynamic> data) => data['signedIn'];
+  bool _isSignedIn(Map<String, Object> data) => data['signedIn'];
 
   Future<bool> signout() async {
     var response = await api.getFromPath('/signout');
-    if (response.statusCode == 302) {
-      print('clearing cookies');
+    if (response.statusCode == 200) {
       await api.clearCookies();
       return true;
     }
