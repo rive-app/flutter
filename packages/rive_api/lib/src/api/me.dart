@@ -31,7 +31,7 @@ class MeApi {
 
   Future<bool> signout() async {
     var response = await api.getFromPath('/signout');
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 302) {
       await api.clearCookies();
       return true;
     }

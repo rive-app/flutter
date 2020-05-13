@@ -80,7 +80,7 @@ void main() {
       });
 
       Plumber().message(Me.fromDM(getMe()));
-      Plumber().flush<Me>();
+      Plumber().message<Me>(Me.fromDM(null)); // Empty 'Me'.
       Plumber().message(Me.fromDM(getMe()));
       Plumber().message(Me.fromDM(getMe()));
 
