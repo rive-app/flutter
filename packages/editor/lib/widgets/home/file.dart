@@ -23,19 +23,11 @@ class _FileState extends State<BrowserFile> {
     }
   }
 
-  // If we have a border, there's a 4 pixel deta.
-  double get paddingDelta => _isHovered ? 4 : 0;
-
   Widget get _label {
     final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
     return Padding(
-      padding: EdgeInsets.only(
-        top: 16,
-        bottom: 16 - paddingDelta,
-        right: 16 - paddingDelta,
-        left: 16 - paddingDelta,
-      ),
+      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(
@@ -85,15 +77,14 @@ class _FileState extends State<BrowserFile> {
         onExit: (_) => setHover(false),
         child: Container(
           decoration: BoxDecoration(
-            color: colors.fileBackgroundLightGrey,
-            borderRadius: BorderRadius.circular(10),
-            border: _isHovered
-                ? Border.all(
-                    color: colors.fileSelectedBlue,
-                    width: 4,
-                  )
-                : null,
-          ),
+              color: colors.fileBackgroundLightGrey,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _isHovered
+                    ? colors.fileSelectedBlue
+                    : colors.fileBrowserBackground,
+                width: 4,
+              )),
           child: Column(
             children: [
               Expanded(

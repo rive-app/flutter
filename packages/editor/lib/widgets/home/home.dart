@@ -13,7 +13,6 @@ import 'package:rive_editor/widgets/resize_panel.dart';
 
 class Home extends StatelessWidget {
   Home({Key key}) : super(key: key) {
-    UserManager().loadMe();
     FolderContentsManager();
   }
 

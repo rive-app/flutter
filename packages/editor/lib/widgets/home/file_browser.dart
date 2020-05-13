@@ -5,6 +5,7 @@ import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 typedef FolderContentsBuilder = Widget Function(FolderContents);
 
@@ -13,7 +14,7 @@ class FileBrowser extends StatelessWidget {
 
   Widget _folderGrid(Iterable<Folder> folders) {
     return _grid(
-      cellHeight: 50,
+      cellHeight: 58, // 50 + 8 for the border.
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var folder = folders.elementAt(index);
@@ -30,10 +31,10 @@ class FileBrowser extends StatelessWidget {
   }) {
     return SliverGrid(
       gridDelegate: SliverGridDelegateFixedSize(
-        crossAxisExtent: 187,
+        crossAxisExtent: 195, // 187 + 8 of the border.
         mainAxisExtent: cellHeight,
-        mainAxisSpacing: 30,
-        crossAxisSpacing: 30,
+        mainAxisSpacing: 22,
+        crossAxisSpacing: 22,
       ),
       delegate: cellBuilder,
     );
@@ -67,7 +68,6 @@ class FileBrowser extends StatelessWidget {
         if (snapshot.hasData) {
           return childBuilder(snapshot.data);
         } else {
-          print("Progress indicator");
           return const Center(child: CircularProgressIndicator());
         }
       },
@@ -99,7 +99,11 @@ class FileBrowser extends StatelessWidget {
       floating: false,
       delegate: _SliverHeader(
         Container(
-            color: Colors.lightBlue, child: Center(child: Text(headerText))),
+          color: Colors.lightBlue,
+          child: Center(
+            child: Text(headerText),
+          ),
+        ),
       ),
     );
   }
@@ -126,7 +130,7 @@ class FileBrowser extends StatelessWidget {
           slivers.add(_folderGrid(folders));
         }
 
-        // Padding in between grids.
+        // Padding between grids.
         if (hasFiles && hasFolders) {
           slivers.add(
             const SliverToBoxAdapter(
@@ -140,7 +144,10 @@ class FileBrowser extends StatelessWidget {
         }
 
         return Padding(
-          padding: const EdgeInsets.all(30),
+          padding: const EdgeInsets.symmetric(
+            // vertical: 30,
+            horizontal: 26,
+          ),
           child: CustomScrollView(
             slivers: slivers,
           ),
@@ -157,9 +164,10 @@ class _SliverHeader extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       height: double.infinity,
       width: double.infinity,
-      color: Colors.white,
+      color: RiveTheme.of(context).colors.fileBrowserBackground,
       child: child,
     );
   }

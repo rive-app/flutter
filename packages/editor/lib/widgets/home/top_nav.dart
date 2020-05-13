@@ -35,9 +35,7 @@ class TopNav extends StatelessWidget {
         addBackground: true,
         icon: 'teams',
       ));
-      children.add(const Padding(
-        padding: EdgeInsets.only(right: 9),
-      ));
+      children.add(const SizedBox(width: 9));
     }
     children.add(Text(owner.displayName));
     children.add(const Spacer());
@@ -45,15 +43,20 @@ class TopNav extends StatelessWidget {
     if (owner is Me ||
         (owner is Team && canEditTeam((owner as Team).permission))) {
       children.add(const SizedBox(width: 12));
-      children.add(TintedIconButton(
-        onPress: () async {
-          await showSettings(owner, context: context);
-        },
-        icon: 'settings',
-        backgroundHover: riveColors.fileBackgroundLightGrey,
-        iconHover: riveColors.fileBackgroundDarkGrey,
-        tip: const Tip(label: 'Settings'),
-      ));
+      children.add(
+        SizedBox(
+          height: 30,
+          child: TintedIconButton(
+            onPress: () async {
+              await showSettings(owner, context: context);
+            },
+            icon: 'settings',
+            backgroundHover: riveColors.fileBackgroundLightGrey,
+            iconHover: riveColors.fileBackgroundDarkGrey,
+            tip: const Tip(label: 'Settings'),
+          ),
+        ),
+      );
     }
     children.add(const SizedBox(width: 12));
     children.add(PopupButton<PopupContextItem>(
@@ -116,7 +119,6 @@ class TopNav extends StatelessWidget {
     return Underline(
       color: riveColors.fileLineGrey,
       child: _navControls(context),
-      offset: 18,
       thickness: 1,
     );
   }
