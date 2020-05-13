@@ -32,7 +32,7 @@ import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/home/home.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
-import 'package:rive_editor/widgets/login.dart';
+import 'package:rive_editor/widgets/login/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/stage_late_view.dart';
