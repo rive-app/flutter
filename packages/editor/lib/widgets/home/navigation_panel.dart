@@ -91,6 +91,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       label: 'Notifications',
                       highlight: snapshot.data == HomeSection.notifications,
                       onTap: () async {
+                        // Question: use a function on RiveManger instead or is this fine?
                         Plumber().message(HomeSection.notifications);
                       },
                     ),

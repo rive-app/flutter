@@ -69,6 +69,7 @@ Future<void> main() async {
   UserManager();
   TeamManager();
   FileManager();
+  RiveManager();
 
   // if (await rive.initialize() != RiveState.catastrophe) {
   //   // this is just for the prototype...
@@ -110,8 +111,6 @@ class RiveEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final riveManager = RiveManager(rive);
-
     return InsertInheritedWidgets(
       rive: rive,
       iconCache: iconCache,
@@ -136,9 +135,7 @@ class RiveEditorApp extends StatelessWidget {
 
                           case RiveState.editor:
                             return NotificationProvider(
-                              manager: NotificationManager(
-                                  api: rive.api,
-                                  teamUpdateSink: riveManager.teamUpdateSink),
+                              manager: NotificationManager(api: rive.api),
                               child: FollowProvider(
                                 manager: FollowManager(
                                   api: rive.api,

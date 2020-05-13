@@ -63,7 +63,9 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
 
   void select(CurrentDirectory currentDirectory) {
     items.forEach((element) {
-      if (_data.first.owner == currentDirectory.owner &&
+      if (currentDirectory == null) {
+        element.selected = false;
+      } else if (_data.first.owner == currentDirectory.owner &&
           element.folder?.id == currentDirectory.folderId) {
         element.selected = true;
       } else {

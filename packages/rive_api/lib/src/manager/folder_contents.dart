@@ -30,8 +30,11 @@ class FolderContentsManager with Subscriptions {
     subscribe<CurrentDirectory>((directory) {
       // Send an empty message right away to display an empty file browser
       // while contents are loading.
+      // TODO: caching
       Plumber().message<FolderContents>(FolderContents.empty());
-      _getFolderContents(directory);
+      if (directory != null) {
+        _getFolderContents(directory);
+      }
     });
 
     subscribe<Me>((me) {

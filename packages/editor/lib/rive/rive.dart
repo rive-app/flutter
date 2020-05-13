@@ -82,10 +82,6 @@ class Rive {
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
 
-  /// Tracking the home screen state
-  final ValueNotifier<HomeSection> sectionListener =
-      ValueNotifier(HomeSection.files);
-
   final ScrollController treeScrollController = ScrollController();
 
   Rive({this.iconCache}) : api = RiveApi() {

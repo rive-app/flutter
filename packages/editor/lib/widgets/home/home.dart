@@ -5,10 +5,12 @@ import 'package:flutter/rendering.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/home/file_browser.dart';
 import 'package:rive_editor/widgets/home/navigation_panel.dart';
 import 'package:rive_editor/widgets/home/team_detail_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/notifications.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 
 class Home extends StatelessWidget {
@@ -34,11 +36,37 @@ class Home extends StatelessWidget {
             max: 500,
             child: const NavigationPanel(),
           ),
-          const Expanded(
-            child: ColoredBox(
-              color: Colors.white,
-              child: FileBrowser(),
-            ),
+          StreamBuilder<HomeSection>(
+            stream: Plumber().getStream<HomeSection>(),
+            builder: (context, snapshot) {
+              switch (snapshot.data) {
+                case HomeSection.files:
+                  return const Expanded(
+                    child: ColoredBox(
+                      color: Colors.white,
+                      child: FileBrowser(),
+                    ),
+                  );
+                  break;
+                case HomeSection.notifications:
+                  return Expanded(
+                    child: ColoredBox(
+                      color: Colors.white,
+                      child: NotificationsPanel(),
+                    ),
+                  );
+                  break;
+                case HomeSection.community:
+                  return Text('Build community');
+                  break;
+                case HomeSection.recents:
+                  return Text('Build recents');
+                  break;
+                case HomeSection.getStarted:
+                  return Text('Build get started');
+                  break;
+              }
+            },
           ),
           StreamBuilder<CurrentDirectory>(
             stream: Plumber().getStream<CurrentDirectory>(),
@@ -56,7 +84,7 @@ class Home extends StatelessWidget {
                 return Container();
               }
             },
-          ),
+          )
         ],
       ),
     );
