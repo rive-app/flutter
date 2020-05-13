@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/cubic_interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
@@ -8,13 +9,16 @@ import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart'
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/theme.dart';
+
+const double _padding = 20;
+const double _renderPadding = _padding + 0.5;
 
 /// Draws the interpolation preview and allows interacting/changing parameters
 /// (such as cubic).
 class InterpolationPreview extends StatelessWidget {
-  static const double padding = 20;
-
   final InterpolationViewModel interpolation;
   final HashSet<KeyFrame> selection;
   final KeyFrameManager manager;
@@ -59,14 +63,18 @@ class InterpolationPreview extends StatelessWidget {
               break;
             case KeyFrameInterpolation.cubic:
               var commonInterpolator = interpolation.interpolator;
+
               if (commonInterpolator is CubicInterpolator) {
-                return _CubicPreviewRenderer(
-                  theme: RiveTheme.of(context),
-                  normalizedTime: normalizedTime,
-                  controlIn:
-                      Offset(commonInterpolator.x1, commonInterpolator.y1),
-                  controlOut:
-                      Offset(commonInterpolator.x2, commonInterpolator.y2),
+                return _CubicManipulator(
+                  interpolator: commonInterpolator,
+                  child: _CubicPreviewRenderer(
+                    theme: RiveTheme.of(context),
+                    normalizedTime: normalizedTime,
+                    controlIn:
+                        Offset(commonInterpolator.x1, commonInterpolator.y1),
+                    controlOut:
+                        Offset(commonInterpolator.x2, commonInterpolator.y2),
+                  ),
                 );
               }
               // I HATE THIS!
@@ -81,6 +89,101 @@ class InterpolationPreview extends StatelessWidget {
           }
         },
       ),
+    );
+  }
+}
+
+class _CubicManipulator extends StatefulWidget {
+  final Widget child;
+  final CubicInterpolator interpolator;
+
+  const _CubicManipulator({
+    Key key,
+    this.child,
+    this.interpolator,
+  }) : super(key: key);
+  @override
+  __CubicManipulatorState createState() => __CubicManipulatorState();
+}
+
+class __CubicManipulatorState extends State<_CubicManipulator> {
+  bool _draggingIn = false;
+
+  void _handleCursor(
+      Offset local, void Function(bool isIn, Offset controlPoint) callback) {
+    var interpolator = widget.interpolator;
+    var size = context.size;
+    var heightRange = size.height - 2 * _renderPadding;
+
+    var offsetIn = Offset(interpolator.x1 * size.width,
+        _renderPadding + heightRange - interpolator.y1 * heightRange);
+    var offsetOut = Offset(interpolator.x2 * size.width,
+        _renderPadding + heightRange - interpolator.y2 * heightRange);
+
+    var dIn = (local - offsetIn).distanceSquared;
+    var dOut = (local - offsetOut).distanceSquared;
+    callback(
+      dIn < dOut,
+      Offset(local.dx / size.width,
+          (local.dy - _renderPadding - heightRange) / -heightRange),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var interpolator = widget.interpolator;
+    return PropagatingListener(
+      onPointerDown: (details) {
+        if (details.pointerEvent.buttons == 2) {
+          double width = RiveTheme.find(context).dimensions.contextMenuWidth;
+          ListPopup<PopupContextItem>.show(
+            context,
+            showArrow: false,
+            position: details.pointerEvent.position + const Offset(0, -6),
+            width: width,
+            itemBuilder: (popupContext, item, isHovered) =>
+                item.itemBuilder(popupContext, isHovered),
+            items: [
+              PopupContextItem(
+                'Reset',
+                select: () {
+                  interpolator.x1 = 0.42;
+                  interpolator.y1 = 0.0;
+                  interpolator.x2 = 0.58;
+                  interpolator.y2 = 1;
+                  interpolator.context.captureJournalEntry();
+                },
+              ),
+            ],
+          );
+          return;
+        }
+
+        _handleCursor(details.pointerEvent.localPosition, (isIn, control) {
+          if (_draggingIn = isIn) {
+            interpolator.x1 = control.dx;
+            interpolator.y1 = control.dy;
+          } else {
+            interpolator.x2 = control.dx;
+            interpolator.y2 = control.dy;
+          }
+        });
+      },
+      onPointerMove: (details) {
+        _handleCursor(details.pointerEvent.localPosition, (_, control) {
+          if (_draggingIn) {
+            interpolator.x1 = control.dx;
+            interpolator.y1 = control.dy;
+          } else {
+            interpolator.x2 = control.dx;
+            interpolator.y2 = control.dy;
+          }
+        });
+      },
+      onPointerUp: (details) {
+        interpolator.context.captureJournalEntry();
+      },
+      child: widget.child,
     );
   }
 }
@@ -150,20 +253,21 @@ abstract class _InterpolationRenderBox extends RenderBox {
 
   void onThemeChanged() {}
 
-  double get renderPadding => InterpolationPreview.padding + 0.5;
   @override
   void paint(PaintingContext context, Offset offset) {
     var canvas = context.canvas;
 
     canvas.save();
+    canvas.clipRect(offset & size);
     canvas.translate(offset.dx, offset.dy);
+
     canvas.drawRRect(
         RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(5)),
         background);
-    canvas.drawLine(Offset(0, renderPadding), Offset(size.width, renderPadding),
-        separatorPaint);
-    canvas.drawLine(Offset(0, size.height - renderPadding),
-        Offset(size.width, size.height - renderPadding), separatorPaint);
+    canvas.drawLine(const Offset(0, _renderPadding),
+        Offset(size.width, _renderPadding), separatorPaint);
+    canvas.drawLine(Offset(0, size.height - _renderPadding),
+        Offset(size.width, size.height - _renderPadding), separatorPaint);
 
     paintInterpolation(canvas);
 
@@ -184,10 +288,12 @@ class _HoldPreviewRenderBox extends _InterpolationRenderBox {
 
   @override
   void paintInterpolation(Canvas canvas) {
-    canvas.drawLine(Offset(0, size.height - renderPadding),
-        Offset(size.width, size.height - renderPadding), interpolationPaint);
-    canvas.drawLine(Offset(size.width - 0.5, size.height - renderPadding - 0.5),
-        Offset(size.width - 0.5, renderPadding), interpolationPaint);
+    canvas.drawLine(Offset(0, size.height - _renderPadding),
+        Offset(size.width, size.height - _renderPadding), interpolationPaint);
+    canvas.drawLine(
+        Offset(size.width - 0.5, size.height - _renderPadding - 0.5),
+        Offset(size.width - 0.5, _renderPadding),
+        interpolationPaint);
   }
 }
 
@@ -220,8 +326,8 @@ class _LinearPreviewRenderBox extends _InterpolationRenderBox {
 
   @override
   void paintInterpolation(Canvas canvas) {
-    canvas.drawLine(Offset(0, size.height - renderPadding),
-        Offset(size.width, renderPadding), interpolationPaint);
+    canvas.drawLine(Offset(0, size.height - _renderPadding),
+        Offset(size.width, _renderPadding), interpolationPaint);
   }
 }
 
@@ -264,6 +370,8 @@ class _CubicPreviewRenderBox extends _InterpolationRenderBox {
     ..strokeWidth = 1
     ..style = PaintingStyle.stroke;
 
+  final Paint controlHandle = Paint();
+
   final Path cubic = Path();
   Offset _controlIn;
   Offset get controlIn => _controlIn;
@@ -288,26 +396,27 @@ class _CubicPreviewRenderBox extends _InterpolationRenderBox {
   @override
   void onThemeChanged() {
     controlLine.color = theme.colors.keyMarqueeStroke;
+    controlHandle.color = theme.colors.keyMarqueeStroke;
   }
 
   @override
   void performLayout() {
     cubic.reset();
-    cubic.moveTo(0, size.height - renderPadding);
+    cubic.moveTo(0, size.height - _renderPadding);
 
-    var heightRange = size.height - 2 * renderPadding;
+    var heightRange = size.height - 2 * _renderPadding;
 
     _renderIn = Offset(_controlIn.dx * size.width,
-        renderPadding + heightRange - _controlIn.dy * heightRange);
+        _renderPadding + heightRange - _controlIn.dy * heightRange);
     _renderOut = Offset(_controlOut.dx * size.width,
-        renderPadding + heightRange - _controlOut.dy * heightRange);
+        _renderPadding + heightRange - _controlOut.dy * heightRange);
     cubic.cubicTo(
       _renderIn.dx,
       _renderIn.dy,
       _renderOut.dx,
       _renderOut.dy,
       size.width,
-      renderPadding,
+      _renderPadding,
     );
   }
 
@@ -319,9 +428,13 @@ class _CubicPreviewRenderBox extends _InterpolationRenderBox {
     canvas.drawPath(cubic, interpolationPaint);
 
     canvas.drawLine(
-        Offset(0, size.height - renderPadding), _renderIn, controlLine);
+        Offset(0, size.height - _renderPadding), _renderIn, controlLine);
 
-    canvas.drawLine(Offset(size.width, renderPadding), _renderOut, controlLine);
+    canvas.drawLine(
+        Offset(size.width, _renderPadding), _renderOut, controlLine);
+
+    canvas.drawCircle(_renderIn, 3.5, controlHandle);
+    canvas.drawCircle(_renderOut, 3.5, controlHandle);
   }
 }
 

@@ -1,5 +1,7 @@
 import 'dart:typed_data';
+import 'package:flutter/src/foundation/change_notifier.dart';
 import 'package:rive_core/animation/interpolator.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/src/generated/animation/cubic_interpolator_base.dart';
 
 class CubicInterpolator extends CubicInterpolatorBase implements Interpolator {
@@ -32,6 +34,9 @@ class CubicInterpolator extends CubicInterpolatorBase implements Interpolator {
       return;
     }
     _ease = _CubicEase.make(x1, y1, x2, y2);
+    // -> editor-only
+    _propertiesChanged.notify();
+    // <- editor-only
   }
 
   @override
@@ -47,6 +52,12 @@ class CubicInterpolator extends CubicInterpolatorBase implements Interpolator {
     }
     return false;
   }
+
+  // -> editor-only
+  final Event _propertiesChanged = Event();
+  @override
+  ChangeNotifier get propertiesChanged => _propertiesChanged;
+  // <- editor-only
 }
 
 // Implements https://github.com/gre/bezier-easing/blob/master/src/index.js

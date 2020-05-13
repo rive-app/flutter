@@ -252,8 +252,14 @@ abstract class AnimationTimeManager extends AnimationManager {
   }
 
   void _keyframesChanged() {
-    // _controller.apply(animation.context, 0);
+    // Whenever the keyframes change, we re-apply the current animation at the
+    // current time. We do this by telling the controller to run and apply again
+    // (setting isPlaying to true activates the controller).
     _controller.isPlaying = true;
+
+    // In order to make sure anything depending on the current time also updates
+    // we pipe through the current time again. See interpolation_preview.dart.
+    _timeStream.add(_timeStream.value);
   }
 
   void _syncWorkArea() {
