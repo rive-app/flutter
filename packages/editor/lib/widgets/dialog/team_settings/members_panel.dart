@@ -11,14 +11,13 @@ import 'package:rive_api/models/user.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_core/event.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/utils.dart';
-import 'package:rive_editor/widgets/common/avatar.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/user_invite_box.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
 class TeamMembers extends StatefulWidget {
@@ -315,17 +314,12 @@ class _TeamMember extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            SizedBox(
-              child: Avatar(
-                iconBuilder: (context) {
-                  if (user.avatarUrl != null) {
-                    return Image.network(user.avatarUrl);
-                  }
-                  return TintedIcon(
-                      color: colors.commonDarkGrey, icon: 'your-files');
-                },
-                background: colors.fileBackgroundLightGrey,
-              ),
+            AvatarView(
+              diameter: 20,
+              borderWidth: 0,
+              imageUrl: user.avatarUrl,
+              name: user.displayName,
+              color: StageCursor.colorFromPalette(user.ownerId),
             ),
             const SizedBox(width: 5),
             if (user.name != null) ...[

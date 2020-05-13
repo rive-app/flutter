@@ -122,7 +122,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                     //     stream: snapshot.data[i],
                     //     builder: (context, mySnapshot) {
                     //       if (mySnapshot.hasData) {
-                    //         return FolderTreeViewStream(
+                    //         return FolderTreeView(
                     //             style: treeStyle, controller: mySnapshot.data);
                     //       } else {
                     //         return SliverToBoxAdapter(child: Container());

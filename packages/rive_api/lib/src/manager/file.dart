@@ -90,7 +90,6 @@ class FileManager with Subscriptions {
     }
 
     _fileMap[folder] = _files;
+    Plumber().message(_files, folder.hashCode);
   }
 }
-
-class SelectedFile extends File {}

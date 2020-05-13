@@ -72,7 +72,9 @@ class AvatarView extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: imageUrl == null ? color : null,
-              border: Border.all(color: color, width: borderWidth),
+              border: (borderWidth == 0)
+                  ? null
+                  : Border.all(color: color, width: borderWidth),
               borderRadius: BorderRadius.circular(diameter / 2),
             ),
             padding: const EdgeInsets.all(1),
