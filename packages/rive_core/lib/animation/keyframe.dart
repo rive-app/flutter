@@ -1,4 +1,5 @@
 import 'package:core/core.dart' as core;
+import 'package:core/core.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/interpolator.dart';
 import 'package:rive_core/animation/keyed_property.dart';
@@ -68,7 +69,11 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   }
 
   @override
-  void onRemoved() => keyedProperty?.internalRemoveKeyFrame(this);
+  void onRemoved() {
+    keyedProperty?.internalRemoveKeyFrame(this);
+    _interpolator?.propertiesChanged
+        ?.removeListener(_interpolatorPropertyChanged);
+  }
 
   @override
   void frameChanged(int from, int to) {
@@ -94,8 +99,19 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
     if (_interpolator == value) {
       return;
     }
+    // -> editor-only
+    _interpolator?.propertiesChanged
+        ?.removeListener(_interpolatorPropertyChanged);
+    value?.propertiesChanged?.addListener(_interpolatorPropertyChanged);
+    // <- editor-only
     _interpolator = value;
     interpolatorId = value?.id;
     keyedProperty?.internalKeyFrameInterpolationChanged();
   }
+
+  // -> editor-only
+  void _interpolatorPropertyChanged() {
+    keyedProperty?.internalKeyFrameInterpolationChanged();
+  }
+  // <- editor-only
 }

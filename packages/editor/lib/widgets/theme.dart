@@ -453,6 +453,9 @@ class _Dimensions {
   /// The dimensionsof the click/drag resize edge on panels that support
   /// resizing.
   double get resizeEdgeSize => 10;
+
+  /// Right click popup menu width.
+  double get contextMenuWidth => 130;
 }
 
 /// Holds instances of various sub theme classes

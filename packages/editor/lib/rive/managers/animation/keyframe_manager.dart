@@ -59,6 +59,7 @@ class KeyFrameManager extends AnimationManager {
     var oldSelection = _selection.value;
     _selection.add(HashSet<KeyFrame>());
     _onChangeSelected(oldSelection);
+    _updateCommonInterpolation();
   }
 
   void completeSelection() => _updateCommonInterpolation();

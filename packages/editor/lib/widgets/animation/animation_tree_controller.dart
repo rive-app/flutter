@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fractional/fractional.dart';
 import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rxdart/rxdart.dart';
@@ -147,7 +148,8 @@ class AnimationTreeController
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<ValueStream<AnimationViewModel>> item) {
     var viewModel = item.data.value;
-    const double width = 130;
+
+    double width = RiveTheme.find(context).dimensions.contextMenuWidth;
     ListPopup<PopupContextItem>.show(
       context,
       showArrow: false,
