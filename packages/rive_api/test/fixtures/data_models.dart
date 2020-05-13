@@ -1,3 +1,4 @@
+import 'package:rive_api/model.dart';
 import 'package:rive_api/src/data_model/data_model.dart';
 
 MeDM getMe({int ownerId = 2}) {
@@ -40,4 +41,8 @@ List<FolderDM> getFoldersDM(OwnerDM owner) {
       id: 1,
     ),
   ];
+}
+
+CurrentDirectory getCurrentDirectory(Owner owner) {
+  return CurrentDirectory(owner, 1);
 }
