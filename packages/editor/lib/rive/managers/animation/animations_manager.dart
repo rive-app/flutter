@@ -6,6 +6,9 @@ import 'package:core/debounce.dart';
 import 'package:core/id.dart';
 import 'package:meta/meta.dart';
 import 'package:rive_core/animation/animation.dart';
+import 'package:rive_core/animation/keyed_object.dart';
+import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/selectable_item.dart';
@@ -71,10 +74,12 @@ class AnimationsManager {
 
     _orderController.stream.listen(_onOrder);
 
-    if(_animationStreamControllers.isEmpty) {
+    if (_animationStreamControllers.isEmpty) {
       /// Push through a null (none) selected animation if we don't have any
       /// animations at all.
       _selectedAnimationStream.add(null);
+      // Create a default animation
+      _createDefaultAnimation();
     }
   }
 
@@ -112,14 +117,21 @@ class AnimationsManager {
   void _deleteLinearAnimation(LinearAnimation animation) {
     assert(animation.context != null);
     // delete all keyedObjects, keyedProperties, and keys themselves.
-    var file = animation.context;
-    for (final keyedObject in animation.keyedObjects) {
-      for (final keyedProperty in keyedObject.keyedProperties) {
-        keyedProperty.keyframes.forEach(file.remove);
+    final file = animation.context;
+    List<KeyedObject>.from(animation.keyedObjects, growable: false)
+        .forEach((keyedObject) {
+      List<KeyedProperty>.from(
+        keyedObject.keyedProperties,
+        growable: false,
+      ).forEach((keyedProperty) {
+        List<KeyFrame>.from(
+          keyedProperty.keyframes,
+          growable: false,
+        ).forEach(file.remove);
         file.remove(keyedProperty);
-      }
+      });
       file.remove(keyedObject);
-    }
+    });
     file.remove(animation);
     file.captureJournalEntry();
   }
@@ -167,6 +179,7 @@ class AnimationsManager {
   // be skipped for that view model (like selecting when no previous selection
   // was available).
   void _updateAnimationSelectionState(Animation animation) {
+    // ignore: close_sinks, false positive
     var viewModelStream = _animationStreamControllers[animation.id];
     if (viewModelStream == null) {
       return;
@@ -247,6 +260,15 @@ class AnimationsManager {
     var core = activeArtboard.context;
     core.add(animation);
     core.captureJournalEntry();
+  }
+
+  /// Create a default animation if the artboard has none
+  bool _createDefaultAnimation() {
+    if (!activeArtboard.hasAnimations) {
+      _makeLinearAnimation();
+      return true;
+    }
+    return false;
   }
 
   /// Cleanup the manager.
