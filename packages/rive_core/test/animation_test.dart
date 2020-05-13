@@ -12,17 +12,17 @@ import 'package:rive_core/rive_file.dart';
 
 /// A LinearAnimation has a list of KeyedObjects. The relationship looks like
 /// this:
-/// 
-// ┌───────────────┐                                   
-// │LinearAnimation│                                   
-// └───────────────┘                                   
-//         │      ┌───────────┐                        
-//         ├─────▶│KeyedObject│                        
-//         │      └───────────┘                        
-//         │            │                              
-//         │            │  ┌───────────────┐           
-//         │            ├─▶│ KeyedProperty │           
-//         │            │  └───────────────┘           
+///
+// ┌───────────────┐
+// │LinearAnimation│
+// └───────────────┘
+//         │      ┌───────────┐
+//         ├─────▶│KeyedObject│
+//         │      └───────────┘
+//         │            │
+//         │            │  ┌───────────────┐
+//         │            ├─▶│ KeyedProperty │
+//         │            │  └───────────────┘
 //         │            │          │  ┌───────────────┐
 //         │            │          ├─▶│   KeyFrame    │
 //         │            │          │  └───────────────┘
@@ -32,9 +32,9 @@ import 'package:rive_core/rive_file.dart';
 //         │            │          │  ┌───────────────┐
 //         │            │          └─▶│   KeyFrame    │
 //         │            │             └───────────────┘
-//         │            │  ┌───────────────┐           
-//         │            └─▶│ KeyedProperty │           
-//         │               └───────────────┘           
+//         │            │  ┌───────────────┐
+//         │            └─▶│ KeyedProperty │
+//         │               └───────────────┘
 //         │                       │  ┌───────────────┐
 //         │                       ├─▶│   KeyFrame    │
 //         │                       │  └───────────────┘
@@ -44,12 +44,12 @@ import 'package:rive_core/rive_file.dart';
 //         │                       │  ┌───────────────┐
 //         │                       └─▶│   KeyFrame    │
 //         │      ┌───────────┐       └───────────────┘
-//         └─────▶│KeyedObject│                        
-//                └───────────┘                        
-//                      │                              
-//                      │  ┌───────────────┐           
-//                      ├─▶│ KeyedProperty │           
-//                      │  └───────────────┘           
+//         └─────▶│KeyedObject│
+//                └───────────┘
+//                      │
+//                      │  ┌───────────────┐
+//                      ├─▶│ KeyedProperty │
+//                      │  └───────────────┘
 //                      │          │  ┌───────────────┐
 //                      │          ├─▶│   KeyFrame    │
 //                      │          │  └───────────────┘
@@ -59,9 +59,9 @@ import 'package:rive_core/rive_file.dart';
 //                      │          │  ┌───────────────┐
 //                      │          └─▶│   KeyFrame    │
 //                      │             └───────────────┘
-//                      │  ┌───────────────┐           
-//                      └─▶│ KeyedProperty │           
-//                         └───────────────┘           
+//                      │  ┌───────────────┐
+//                      └─▶│ KeyedProperty │
+//                         └───────────────┘
 //                                 │  ┌───────────────┐
 //                                 ├─▶│   KeyFrame    │
 //                                 │  └───────────────┘
@@ -102,15 +102,18 @@ void main() {
   test('apply an animation', () {
     var file = _makeFile();
 
+    Artboard artboard;
     LinearAnimation animation;
     Node node;
     KeyFrameDouble kf1, kf2;
     file.batchAdd(() {
-      node = Node()
+      artboard = file.add(Artboard());
+      node = file.add(Node()
         ..name = 'Moving Node'
         ..x = 0
-        ..y = 0;
-      file.add(node);
+        ..y = 0);
+
+      artboard.appendChild(node);
 
       animation = LinearAnimation()
         ..name = 'Test Animation'

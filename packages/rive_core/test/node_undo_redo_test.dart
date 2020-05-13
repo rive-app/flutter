@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
+import 'package:rive_core/artboard.dart';
+import 'package:rive_core/backboard.dart';
 import 'package:rive_core/node.dart';
 
 import 'src/test_rive_file.dart';
@@ -22,9 +24,23 @@ void main() {
     const String name2 = 'Second Name';
     const String name3 = 'Third Name';
 
-    // Create the node with some name set to it.
-    var node = file.add(Node()..name = name1);
+    // Objects need to be owned by an artboard, so let's make one.
+    Artboard artboard;
+    Node node;
+    file.batchAdd(() {
+      var backboard = Backboard();
+      artboard = Artboard()
+        ..name = 'My Artboard'
+        ..width = 1920
+        ..height = 1080;
 
+      file.add(backboard);
+      file.add(artboard);
+      
+      // Create the node with some name set to it.
+      node = file.add(Node()..name = name1);
+      artboard.appendChild(node);
+    });
     // capture an entry for the creation of the object.
     file.captureJournalEntry();
 

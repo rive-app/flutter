@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:core/core.dart';
+import 'package:local_data/local_data.dart';
 
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
@@ -11,15 +12,20 @@ import 'package:rive_core/rive_file.dart';
 /// https://www.notion.so/Hierarchy-Undo-9781b750356943c49818d71d5c53562e
 void main() {
   test('re-parent node', () {
-    final file = RiveFile('fake');
+    LocalDataPlatform dataPlatform = LocalDataPlatform.make();
+    final file = RiveFile('fake', localDataPlatform: dataPlatform);
 
-    // Create the node with some name set to it.
-    var node1 = file.add(Node()..name = 'Node 1');
-    var node2 = file.add(Node()..name = 'Node 2');
+    Artboard artboard1;
+    Node node1, node2;
+    file.batchAdd(() {
+      // Create the node with some name set to it.
+      node1 = file.add(Node()..name = 'Node 1');
+      node2 = file.add(Node()..name = 'Node 2');
 
-    var artboard1 = file.add(Artboard()..name = 'Artboard A')
-      ..appendChild(node1)
-      ..appendChild(node2);
+      artboard1 = file.add(Artboard()..name = 'Artboard A')
+        ..appendChild(node1)
+        ..appendChild(node2);
+    });
 
     // Expect node1 to be at 1/2 and node2 at 2/3
     expect(node1.childOrder, const FractionalIndex(1, 2));
@@ -101,26 +107,30 @@ void main() {
   //                                  └────│ f │
   //                                       └───┘
   test('re-parent complex', () {
-    final file = RiveFile("fake");
+    LocalDataPlatform dataPlatform = LocalDataPlatform.make();
+    final file = RiveFile("fake", localDataPlatform: dataPlatform);
 
-    var artboard = file.add(Artboard()..name = 'Artboard');
-    // Create the node with some name set to it.
-    var a = file.add(Node()..name = 'a');
-    var b = file.add(Node()..name = 'b');
-    var c = file.add(Node()..name = 'c');
-    var d = file.add(Node()..name = 'd');
-    var e = file.add(Node()..name = 'e');
-    var f = file.add(Node()..name = 'f');
+    Artboard artboard;
+    Node a, b, c, d, e, f;
+    file.batchAdd(() {
+      artboard = file.add(Artboard()..name = 'Artboard');
+      // Create the node with some name set to it.
+      a = file.add(Node()..name = 'a');
+      b = file.add(Node()..name = 'b');
+      c = file.add(Node()..name = 'c');
+      d = file.add(Node()..name = 'd');
+      e = file.add(Node()..name = 'e');
+      f = file.add(Node()..name = 'f');
 
-    a.appendChild(c);
-    a.appendChild(d);
+      a.appendChild(c);
+      a.appendChild(d);
 
-    b.appendChild(e);
-    b.appendChild(f);
+      b.appendChild(e);
+      b.appendChild(f);
 
-    artboard.appendChild(a);
-    artboard.appendChild(b);
-
+      artboard.appendChild(a);
+      artboard.appendChild(b);
+    });
     file.captureJournalEntry();
 
     // Expect structure to match diagram above
