@@ -27,7 +27,12 @@ class DashedPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     var path = Path();
     path.addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, appliedSize.width, appliedSize.height),
+        Rect.fromLTWH(
+          0,
+          0.5,
+          appliedSize.width,
+          appliedSize.height,
+        ),
         Radius.circular(radius)));
     path = dashPath(path, dashArray);
     canvas.drawPath(path, paint);
@@ -102,12 +107,20 @@ Path dashPath(Path source, CircularIntervalList<double> dashArray,
     return null;
   }
 
-  dashOffset ??= DashOffset.zero();
+  dashOffset ??= DashOffset.zero;
 
   final dest = Path();
-  final metrics = source.computeMetrics();
-  print('Nr of metrics: ${metrics.length}');
-  for (final metric in source.computeMetrics()) {
+
+  // Need to turn it into list, or the iterator
+  // is run, messing it up later
+  final metrics = source.computeMetrics().toList();
+
+  // TODO: temp fix here for CanvasKit; if mertics
+  // can't be computed, return the original path.
+  if (metrics.isEmpty) {
+    return source;
+  }
+  for (final metric in metrics) {
     var distance = dashOffset._calculate(metric.length);
     var draw = true;
     while (distance < metric.length) {
@@ -122,7 +135,6 @@ Path dashPath(Path source, CircularIntervalList<double> dashArray,
       draw = !draw;
     }
   }
-
   return dest;
 }
 
@@ -133,7 +145,7 @@ enum _DashOffsetType { absolute, percentage }
 ///
 /// The internal value will be guaranteed to not be null.
 class DashOffset {
-  factory DashOffset.zero() => const DashOffset.absolute(0.0);
+  static const DashOffset zero = DashOffset.absolute(0.0);
 
   /// Create a DashOffset that will be measured as a percentage of the length
   /// of the segment being dashed.
