@@ -91,6 +91,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       label: 'Notifications',
                       highlight: snapshot.data == HomeSection.notifications,
                       onTap: () async {
+                        // Question: use a function on RiveManger instead or is this fine?
                         Plumber().message(HomeSection.notifications);
                       },
                     ),
@@ -122,7 +123,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                     //     stream: snapshot.data[i],
                     //     builder: (context, mySnapshot) {
                     //       if (mySnapshot.hasData) {
-                    //         return FolderTreeViewStream(
+                    //         return FolderTreeView(
                     //             style: treeStyle, controller: mySnapshot.data);
                     //       } else {
                     //         return SliverToBoxAdapter(child: Container());

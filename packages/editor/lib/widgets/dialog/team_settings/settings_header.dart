@@ -1,5 +1,8 @@
+import 'package:core/error_logger/error_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -50,21 +53,31 @@ class _SettingsHeaderState extends State<SettingsHeader> {
         text: 'Sign Out',
         textColor:
             _isSigningOut ? colors.commonLightGrey : colors.commonDarkGrey,
-        onPressed: () async {
+        onPressed: () {
           if (_isSigningOut) return;
           setState(() {
             _isSigningOut = true;
           });
-          final rive = RiveContext.of(context);
-          var success = await rive.signout(
-              onSignout: Navigator.of(context, rootNavigator: true).pop);
-          if (!success) {
-            // TODO: signal the signout error.
-            setState(() {
-              // Let the user try again.
-              _isSigningOut = false;
-            });
-          }
+
+          UserManager().signout().then(
+            (success) {
+              if (!success) {
+                setState(() {
+                  // Let the user try again.
+                  _isSigningOut = false;
+                });
+              } else {
+                // TODO: is this the best place to do it?
+                Settings.clear(Preferences.spectreToken);
+                ErrorLogger.instance.dropCrumb(
+                  category: 'auth',
+                  message: 'signed out',
+                  severity: CrumbSeverity.info,
+                );
+                Navigator.of(context, rootNavigator: true).pop();
+              }
+            },
+          );
         },
       );
     }

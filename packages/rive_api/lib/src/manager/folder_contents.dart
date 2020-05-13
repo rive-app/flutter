@@ -28,7 +28,13 @@ class FolderContentsManager with Subscriptions {
   void _subscribe() {
     // Start listening for when a directory changes.
     subscribe<CurrentDirectory>((directory) {
-      _getFolderContents(directory);
+      // Send an empty message right away to display an empty file browser
+      // while contents are loading.
+      // TODO: caching
+      Plumber().message<FolderContents>(FolderContents.empty());
+      if (directory != null) {
+        _getFolderContents(directory);
+      }
     });
 
     subscribe<Me>((me) {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'package:rive_api/rive_api.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
-import 'package:rive_editor/widgets/home/folder_tree.dart';
+
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/utils.dart';
@@ -11,6 +13,8 @@ import 'package:rive_api/apis/changelog.dart';
 import 'package:rive_api/models/notification.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/toolbar/connected_users.dart';
+import 'package:rive_editor/rive/managers/rive_manager.dart';
 
 enum PanelTypes { personal, announcements }
 
@@ -385,10 +389,13 @@ class TeamInviteNotification extends StatelessWidget {
           padding: const EdgeInsets.only(right: 20.0),
           child: SizedBox(
             width: 50,
-            child: SizedAvatar(
-              url: notification.avatarUrl,
-              size: const Size(50, 50),
-              addBackground: false,
+            child: AvatarView(
+              diameter: 50,
+              borderWidth: 0,
+              padding: 0,
+              imageUrl: notification.avatarUrl,
+              name: notification.teamName,
+              color: StageCursor.colorFromPalette(notification.teamId),
             ),
           ),
         ),
@@ -435,10 +442,13 @@ class TeamInviteAcceptedNotification extends StatelessWidget {
           padding: const EdgeInsets.only(right: 10.0),
           child: SizedBox(
             width: 50,
-            child: SizedAvatar(
-              url: notification.avatarUrl,
-              size: const Size(50, 50),
-              addBackground: false,
+            child: AvatarView(
+              diameter: 50,
+              borderWidth: 0,
+              padding: 0,
+              imageUrl: notification.avatarUrl,
+              name: notification.teamName,
+              color: StageCursor.colorFromPalette(notification.teamId),
             ),
           ),
         ),
@@ -465,8 +475,7 @@ class TeamInviteAcceptedNotification extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 textColor: theme.colors.commonButtonTextColorDark,
                 onTap: () {
-                  print('go load & select team');
-                  // rive.selectRiveOwner(notification.teamId);
+                  RiveManager().viewTeam(notification.teamId);
                 },
               ),
             ],
@@ -490,10 +499,13 @@ class TeamInviteRejectedNotification extends StatelessWidget {
           padding: const EdgeInsets.only(right: 10.0),
           child: SizedBox(
             width: 50,
-            child: SizedAvatar(
-              url: notification.avatarUrl,
-              size: const Size(50, 50),
-              addBackground: false,
+            child: AvatarView(
+              diameter: 50,
+              borderWidth: 0,
+              padding: 0,
+              imageUrl: notification.avatarUrl,
+              name: notification.teamName,
+              color: StageCursor.colorFromPalette(notification.teamId),
             ),
           ),
         ),
@@ -527,10 +539,13 @@ class TeamInviteRescindedNotification extends StatelessWidget {
           padding: const EdgeInsets.only(right: 10.0),
           child: SizedBox(
             width: 50,
-            child: SizedAvatar(
-              url: notification.avatarUrl,
-              size: const Size(50, 50),
-              addBackground: false,
+            child: AvatarView(
+              diameter: 50,
+              borderWidth: 0,
+              padding: 0,
+              imageUrl: notification.avatarUrl,
+              name: notification.teamName,
+              color: StageCursor.colorFromPalette(notification.teamId),
             ),
           ),
         ),

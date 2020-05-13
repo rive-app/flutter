@@ -1,12 +1,17 @@
+import 'package:rive_api/model.dart';
 import 'package:rive_api/src/data_model/data_model.dart';
 
-MeDM getMe() {
-  return MeDM(id: 1, ownerId: 2, signedIn: true, name: 'Max', username: 'max');
+MeDM getMe({int ownerId = 2}) {
+  return MeDM(
+      id: 1, ownerId: ownerId, signedIn: true, name: 'Max', username: 'max');
 }
 
-TeamDM getTeam() {
+TeamDM getTeam({int ownerId = 3}) {
   return TeamDM(
-      ownerId: 3, name: 'Team Titans', username: 'titans', permission: 'Owner');
+      ownerId: ownerId,
+      name: 'Team Titans',
+      username: 'titans',
+      permission: 'Owner');
 }
 
 FolderDM getFolder(OwnerDM owner) {
@@ -17,4 +22,27 @@ FolderDM getFolder(OwnerDM owner) {
     order: 0,
     id: 1,
   );
+}
+
+List<FolderDM> getFoldersDM(OwnerDM owner) {
+  return [
+    FolderDM(
+      ownerId: (owner is MeDM) ? null : owner.ownerId,
+      name: 'Deleted Files',
+      parent: null,
+      order: 0,
+      id: 0,
+    ),
+    FolderDM(
+      ownerId: (owner is MeDM) ? null : owner.ownerId,
+      name: 'Your Files',
+      parent: null,
+      order: 0,
+      id: 1,
+    ),
+  ];
+}
+
+CurrentDirectory getCurrentDirectory(Owner owner) {
+  return CurrentDirectory(owner, 1);
 }

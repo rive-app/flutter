@@ -8,6 +8,7 @@ import 'package:rive_api/src/manager/manager.dart';
 import 'package:rive_api/src/plumber.dart';
 
 import 'fixtures/api_responses.dart';
+import 'helpers/test_helpers.dart';
 
 class MockRiveApi extends Mock implements RiveApi {
   final host = '';
@@ -43,22 +44,13 @@ void main() {
     });
 
     test('logout', () async {
-      final testComplete = Completer();
-
-      final checks = [
+      final testComplete = testStream(Plumber().getStream<Me>(), [
+        (Me me) => me.isEmpty,
         (Me me) => me.name == 'MaxMax',
-        (Me me) => me == null,
-      ];
+        (Me me) => me.isEmpty,
+      ]);
 
-      Plumber().getStream<Me>().listen((event) {
-        var check = checks.removeAt(0);
-        if (checks.length == 0) {
-          expect(check(event), true);
-          testComplete.complete();
-        }
-      });
-
-      // first logout doesnt change anything
+      // Send empty user first.
       await userManager.logout();
       await userManager.loadMe();
       await userManager.logout();
@@ -67,21 +59,11 @@ void main() {
     });
 
     test('sequence', () async {
-      final testComplete = Completer();
-
-      final checks = [
+      final testComplete = testStream(Plumber().getStream<Me>(), [
         (Me me) => me.name == 'MaxMax',
-        (Me me) => me == null,
+        (Me me) => me.isEmpty,
         (Me me) => me.name == 'MaxMax',
-      ];
-
-      Plumber().getStream<Me>().listen((event) {
-        var check = checks.removeAt(0);
-        if (checks.length == 0) {
-          expect(check(event), true);
-          testComplete.complete();
-        }
-      });
+      ]);
 
       await userManager.loadMe();
       await userManager.logout();

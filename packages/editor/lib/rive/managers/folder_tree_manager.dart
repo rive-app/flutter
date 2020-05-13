@@ -1,7 +1,6 @@
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
-import 'package:rive_api/api.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -10,16 +9,12 @@ class FolderTreeManager with Subscriptions {
   factory FolderTreeManager() => _instance;
 
   FolderTreeManager._() {
-    _folderApi = FolderApi();
     _plumber = Plumber();
 
-    // TODO: can be moved once our FileManager is more capable.
     subscribe<Me>(_handleNewMe);
     subscribe<List<Team>>(_handleNewTeams);
     subscribe<CurrentDirectory>(_handleNewCurrentDirectory);
   }
-
-  FolderApi _folderApi;
   Plumber _plumber;
 
   Me _me;
@@ -32,9 +27,9 @@ class FolderTreeManager with Subscriptions {
   void _handleNewMe(Me me) {
     _me = me;
     _clearFolderList();
-    if (me != null) {
+    if (!me.isEmpty) {
       _initFolderTree(me);
-      loadFolders(me);
+      subscribe<List<Folder>>(_handleNewTeamFolders(me), me.hashCode);
     }
     _publishFolderTreeControllers();
   }
@@ -48,8 +43,11 @@ class FolderTreeManager with Subscriptions {
   void _handleNewTeams(Iterable<Team> teams) {
     // lets ditch teams no longer reported.
     _teams = teams;
+
     Set<Owner> currentOwners = _folderMap.keys.toSet();
-    Set<Owner> newOwners = <Owner>{}.union(_teams?.toSet()).union({_me});
+    Set<Owner> newOwners = <Owner>{}
+        .union(_teams != null ? _teams.toSet() : {})
+        .union({if (!_me.isEmpty) _me});
     Set<Owner> removeKeys = currentOwners.difference(newOwners);
 
     removeKeys.forEach((key) {
@@ -60,10 +58,18 @@ class FolderTreeManager with Subscriptions {
 
     _teams?.forEach((team) {
       _initFolderTree(team);
-      loadFolders(team);
+      subscribe<List<Folder>>(_handleNewTeamFolders(team), team.hashCode);
     });
 
     _publishFolderTreeControllers();
+  }
+
+  Function(List<Folder>) _handleNewTeamFolders(Owner owner) {
+    void _handleNewFolders(List<Folder> folderList) {
+      ingestFolders(owner, folderList);
+    }
+
+    return _handleNewFolders;
   }
 
   void _initFolderTree(Owner owner) {
@@ -76,17 +82,12 @@ class FolderTreeManager with Subscriptions {
   }
 
   void _clearFolderList() {
-    _folderMap.clear();
     _folderTreeControllerMap.values.forEach((bs) => bs.close());
     _folderTreeControllerMap.clear();
   }
 
-  Future<void> loadFolders(Owner owner) async {
-    final _foldersDM = await _folderApi.folders(owner.asDM);
-    final _folders = Folder.fromDMList(_foldersDM.toList());
-    _folderMap[owner] = _folders;
-
-    final _folderTree = FolderTree.fromFolderList(owner, _folders);
+  Future<void> ingestFolders(Owner owner, List<Folder> folders) async {
+    final _folderTree = FolderTree.fromFolderList(owner, folders);
 
     if (_folderTreeControllerMap[owner].value != null) {
       // update
@@ -117,10 +118,6 @@ class FolderTreeManager with Subscriptions {
     // TODO: still gotta do this which is a real shame
     // gotta sort out our drawer for this really
     _publishFolderTreeControllers();
-  }
-
-  Future<void> reload() async {
-    _folderMap.keys.forEach(loadFolders);
   }
 
   void _publishFolderTreeControllers() {

@@ -5,6 +5,7 @@ import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 typedef FolderContentsBuilder = Widget Function(FolderContents);
 
@@ -13,7 +14,7 @@ class FileBrowser extends StatelessWidget {
 
   Widget _folderGrid(Iterable<Folder> folders) {
     return _grid(
-      cellHeight: 50,
+      cellHeight: 58, // 50 + 8 for the border.
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var folder = folders.elementAt(index);
@@ -30,10 +31,10 @@ class FileBrowser extends StatelessWidget {
   }) {
     return SliverGrid(
       gridDelegate: SliverGridDelegateFixedSize(
-        crossAxisExtent: 187,
+        crossAxisExtent: 195, // 187 + 8 of the border.
         mainAxisExtent: cellHeight,
-        mainAxisSpacing: 30,
-        crossAxisSpacing: 30,
+        mainAxisSpacing: 22,
+        crossAxisSpacing: 22,
       ),
       delegate: cellBuilder,
     );
@@ -60,16 +61,14 @@ class FileBrowser extends StatelessWidget {
     );
   }
 
+  bool canDisplayFolder(FolderContents folder) =>
+      folder != null && folder.isNotEmpty;
+
   Widget _stream(FolderContentsBuilder childBuilder) {
     return StreamBuilder<FolderContents>(
       stream: Plumber().getStream<FolderContents>(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return childBuilder(snapshot.data);
-        } else {
-          print("Progress indicator");
-          return const Center(child: CircularProgressIndicator());
-        }
+        return childBuilder(snapshot.data);
       },
     );
   }
@@ -80,7 +79,7 @@ class FileBrowser extends StatelessWidget {
       builder: (context, snapshot) {
         Widget child;
         if (snapshot.hasData) {
-          child = TopNavStream(snapshot.data);
+          child = TopNav(snapshot.data);
         } else {
           child = const Text('No directory selected?');
         }
@@ -93,45 +92,69 @@ class FileBrowser extends StatelessWidget {
     );
   }
 
+  SliverPersistentHeader makeHeader(String headerText) {
+    return SliverPersistentHeader(
+      pinned: true,
+      floating: false,
+      delegate: _SliverHeader(
+        Container(
+          color: Colors.lightBlue,
+          child: Center(
+            child: Text(headerText),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return _stream(
       (data) {
-        final folders = data.folders;
-        final hasFolders = folders != null && folders.isNotEmpty;
-
-        final files = data.files;
-        final hasFiles = files != null && files.isNotEmpty;
-
         final slivers = <Widget>[];
         slivers.add(_header());
-        // Padding below header.
-        slivers.add(
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 30),
-          ),
-        );
-        if (hasFolders) {
-          slivers.add(_folderGrid(folders));
-        }
 
-        // Padding in between grids.
-        if (hasFiles && hasFolders) {
+        if (canDisplayFolder(data)) {
+          final folders = data.folders;
+          final hasFolders = folders != null && folders.isNotEmpty;
+
+          final files = data.files;
+          final hasFiles = files != null && files.isNotEmpty;
+
+          // Padding below header.
           slivers.add(
             const SliverToBoxAdapter(
               child: SizedBox(height: 30),
             ),
           );
-        }
+          if (hasFolders) {
+            slivers.add(_folderGrid(folders));
+          }
 
-        if (hasFiles) {
-          slivers.add(_fileGrid(files));
+          // Padding between grids.
+          if (hasFiles && hasFolders) {
+            slivers.add(
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 30),
+              ),
+            );
+          }
+
+          if (hasFiles) {
+            slivers.add(_fileGrid(files));
+          }
+        } else {
+          slivers.add(
+            const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator())),
+          );
         }
 
         return Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 26,
+          ),
           child: CustomScrollView(
-            shrinkWrap: true,
             slivers: slivers,
           ),
         );
@@ -146,7 +169,13 @@ class _SliverHeader extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(child: child);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      height: double.infinity,
+      width: double.infinity,
+      color: RiveTheme.of(context).colors.fileBrowserBackground,
+      child: child,
+    );
   }
 
   final Widget child;

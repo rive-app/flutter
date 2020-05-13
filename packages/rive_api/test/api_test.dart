@@ -38,12 +38,13 @@ void main() {
       expect(me.verified, true);
     });
 
-    test('load me details api fails if not logged in', () {
+    test('load me details api fails if not logged in', () async {
       final riveApi = MockRiveApi();
       when(riveApi.getFromPath('/api/me'))
           .thenAnswer((_) async => failureMeResponse);
       final mockApi = MeApi(riveApi);
-      expect(mockApi.whoami, throwsException);
+      final nullResponse = await mockApi.whoami;
+      expect(nullResponse, null);
     });
 
     test('signout successful', () async {

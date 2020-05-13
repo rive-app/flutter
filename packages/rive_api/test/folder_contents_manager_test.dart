@@ -27,7 +27,7 @@ void main() {
       _plumber = Plumber();
 
       // Set up the 'Me' message.
-      _plumber.message(Me.fromDM(getMe()));
+      _plumber.message<Me>(Me.fromDM(getMe()));
       _mockedFileApi = MockFileApi();
       _mockedFolderApi = MockFolderApi();
       _folderContentsManager = FolderContentsManager.tester(
@@ -38,13 +38,17 @@ void main() {
       // 'Your Files' folder.
       when(_mockedFileApi.myFiles(2, 1)).thenAnswer((_) async {
         final data = json.decode(myFilesResponse) as List<Object>;
-        return FileDM.fromIdList(data, null);
+        print("Mock file api $data");
+        var res = FileDM.fromIdList(data, null);
+        print("Res $res");
+        return res;
       });
 
       // File details for the files returned above.
       when(_mockedFileApi.getFileDetails([1, 2])).thenAnswer((_) async {
         final data = json.decode(myFilesDetailsResponse);
         final cdn = CdnDM.fromData(data['cdn']);
+        print("Mock file api2 $data");
         return FileDM.fromDataList(data['files'], cdn);
       });
 
@@ -62,9 +66,17 @@ void main() {
     test('Load folder contents', () async {
       final testComplete = Completer();
 
+      final checks = [
+        (FolderContents cts) => cts.files == null && cts.folders == null,
+        (FolderContents cts) => cts.files.length == 2,
+      ];
+
       _plumber.getStream<FolderContents>().listen((contents) {
-        expect(contents.files.length, 2);
-        testComplete.complete();
+        var check = checks.removeAt(0);
+        expect(check(contents), true);
+        if (checks.isEmpty) {
+          testComplete.complete();
+        }
       });
 
       await testComplete.future;

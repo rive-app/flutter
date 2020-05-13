@@ -1,39 +1,50 @@
-import 'dart:async';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/rive.dart';
 
-/// Bit of a placeholder as I didnt want to throw rive into other managers.
-class RiveManager {
-  final Rive rive;
-  RiveManager(this.rive) {
-    _init();
+/// General manager for general ui things
+class RiveManager with Subscriptions {
+  static final RiveManager _instance = RiveManager._();
+  factory RiveManager() => _instance;
+
+  RiveManager._() {
+    _attach();
+  }
+  RiveManager.tester() {
+    _attach();
   }
 
-  /*
-   * Inbound sinks
-   */
-
-  /// Inbound acceptance of a team invite
-  final _teamUpdateSinkController = StreamController<bool>.broadcast();
-  Sink<bool> get teamUpdateSink => _teamUpdateSinkController;
-
-  /// Clean up all the stream controllers and that polling timer
-  void dispose() {
-    _teamUpdateSinkController.close();
+  void _attach() {
+    subscribe<HomeSection>(_newHomeSection);
+    subscribe<CurrentDirectory>(_newCurrentDirectory);
   }
-
-  /*
-   * State
-   */
 
   /// Initiatize the state
-  void _init() {
+  void _newHomeSection(HomeSection newHomeSection) {
     // Handle incoming team invitation acceptances
-    _teamUpdateSinkController.stream.listen(_reloadTeams);
+    if (newHomeSection != HomeSection.files) {
+      Plumber().flush<CurrentDirectory>();
+    }
   }
 
-  /// Removes a notification from the list
-  void _reloadTeams(bool reload) {
-    print('yea..... shoudl reload teams or something');
-    // rive.reloadTeams();
+  void _newCurrentDirectory(CurrentDirectory currentDirectory) {
+    // Handle incoming team invitation acceptances
+    if (currentDirectory != null) {
+      if (Plumber().peek<HomeSection>() != HomeSection.files) {
+        Plumber().message(HomeSection.files);
+      }
+    }
+  }
+
+  void viewTeam(int teamOwnerId) {
+    // NOTE: you hit this, without having loaded the team
+    // this will obviously fail.
+    var _plumber = Plumber();
+    var teams = _plumber.peek<List<Team>>();
+    var targetTeam =
+        teams.firstWhere((element) => element.ownerId == teamOwnerId);
+    // 1 is the magic base folder
+    _plumber.message(CurrentDirectory(targetTeam, 1));
   }
 }
