@@ -9,6 +9,7 @@ import 'package:rive_api/src/plumber.dart';
 
 import 'fixtures/api_responses.dart';
 import 'fixtures/data_models.dart';
+import 'helpers/test_helpers.dart';
 
 class MockRiveApi extends Mock implements RiveApi {
   final host = '';
@@ -61,23 +62,15 @@ void main() {
     });
 
     test('sequence', () async {
-      final testComplete = Completer();
-
-      final checks = [
-        (List<Team> teams) => teams?.length == 2,
-        (List<Team> teams) => teams == null,
-        (List<Team> teams) => teams?.length == 2,
-        (List<Team> teams) => teams?.length == 2,
-      ];
-
-      Plumber().getStream<List<Team>>().listen((teams) {
-        print('teams $teams');
-        var check = checks.removeAt(0);
-        if (checks.length == 0) {
-          expect(check(teams), true);
-          testComplete.complete();
-        }
-      });
+      final testComplete = testStream(
+        Plumber().getStream<List<Team>>(),
+        [
+          (List<Team> teams) => teams?.length == 2,
+          (List<Team> teams) => teams == null,
+          (List<Team> teams) => teams?.length == 2,
+          (List<Team> teams) => teams?.length == 2,
+        ],
+      );
 
       Plumber().message(Me.fromDM(getMe()));
       Plumber().message<Me>(Me.fromDM(null)); // Empty 'Me'.
