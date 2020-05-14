@@ -46,6 +46,7 @@ class InspectorPopout extends StatefulWidget {
     double width = 234,
     VoidCallback onClose,
     WidgetBuilder builder,
+    Future<bool> Function() shouldClose,
     bool autoClose = true,
   }) {
     var theme = RiveTheme.of(context);
@@ -59,6 +60,7 @@ class InspectorPopout extends StatefulWidget {
       context,
       onClose: onClose,
       autoClose: autoClose,
+      shouldClose: shouldClose,
       builder: (context) {
         return InspectorPopoutPositioner(
           top: boxOffset.dy,
