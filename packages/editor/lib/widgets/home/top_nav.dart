@@ -73,26 +73,6 @@ class TopNav extends StatelessWidget {
       children.add(Text(currentFolder.name));
     }
     children.add(const Spacer());
-
-    if (owner is Me ||
-        (owner is Team && canEditTeam((owner as Team).permission))) {
-      children.add(const SizedBox(width: 12));
-      children.add(
-        SizedBox(
-          height: 30,
-          child: TintedIconButton(
-            onPress: () async {
-              await showSettings(owner, context: context);
-            },
-            icon: 'settings',
-            backgroundHover: riveColors.fileBackgroundLightGrey,
-            iconHover: riveColors.fileBackgroundDarkGrey,
-            tip: const Tip(label: 'Settings'),
-          ),
-        ),
-      );
-    }
-    children.add(const SizedBox(width: 12));
     children.add(PopupButton<PopupContextItem>(
       direction: PopupDirection.bottomToLeft,
       builder: (popupContext) {

@@ -31,8 +31,8 @@ class TintedIconButton extends StatefulWidget {
   final Tip tip;
 
   const TintedIconButton({
-    @required this.onPress,
     @required this.icon,
+    this.onPress,
     this.background,
     this.color,
     this.backgroundHover,
@@ -58,6 +58,16 @@ class _TintedIconButtonState extends State<TintedIconButton> {
     );
   }
 
+  Widget _gesture(Widget child) {
+    if (widget.onPress == null) {
+      return child;
+    }
+    return GestureDetector(
+      onTapDown: (_) => widget.onPress(),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeColors = RiveTheme.of(context).colors;
@@ -70,9 +80,8 @@ class _TintedIconButtonState extends State<TintedIconButton> {
         ? widget.iconHover ?? themeColors.toolbarButtonHover
         : themeColors.toolbarButton;
     return _tip(
-      GestureDetector(
-        onTapDown: (_) => widget.onPress(),
-        child: MouseRegion(
+      _gesture(
+        MouseRegion(
           onEnter: (_) {
             // If there's a drag operation active, don't show the hover.
             if (RiveContext.find(context).isDragging) {

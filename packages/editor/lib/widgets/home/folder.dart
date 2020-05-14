@@ -60,7 +60,9 @@ class _FolderState extends State<BrowserFolder> {
               )),
           child: Row(
             children: [
-              TintedIcon(icon: 'folder', color: colors.black30),
+              TintedIcon(
+                  icon: (widget.folderId == 0) ? 'trash' : 'folder',
+                  color: colors.black30),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
