@@ -76,14 +76,32 @@ class NotificationManager with Subscriptions {
 
   /// Accepts a team invite
   Future<void> acceptTeamInvite(model.TeamInviteNotification n) async {
-    await _teamApi.acceptInvite(n.teamId);
+    try {
+      await _teamApi.acceptInvite(n.teamId);
+    } on ApiException catch (error) {
+      if (error.response.body.contains('no-invite-found')) {
+        // in this context we're fine with errors.
+        print('Couldnt find invite: $error');
+      } else {
+        rethrow;
+      }
+    }
     unawaited(_fetchNotifications());
     TeamManager().loadTeams();
   }
 
   /// Decline a team invite
   Future<void> declineTeamInvite(model.TeamInviteNotification n) async {
-    await _teamApi.declineInvite(n.teamId);
+    try {
+      await _teamApi.declineInvite(n.teamId);
+    } on ApiException catch (error) {
+      if (error.response.body.contains('no-invite-found')) {
+        // in this context we're fine with errors.
+        print('Couldnt find invite: $error');
+      } else {
+        rethrow;
+      }
+    }
     unawaited(_fetchNotifications());
   }
 }
