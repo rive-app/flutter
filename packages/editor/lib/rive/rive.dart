@@ -164,6 +164,10 @@ class Rive {
   void _onNewMe(Me me) {
     if (me.isEmpty) {
       // Signed out.
+      // Walk list backwards as we're removing elements.
+      for (int i = fileTabs.length - 1; i >= 0; i--) {
+        closeTab(fileTabs[i]);
+      }
       _state.value = RiveState.login;
       return;
     }
