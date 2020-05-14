@@ -14,6 +14,7 @@ import 'package:rxdart/subjects.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
 import 'package:utilities/list_equality.dart';
 import 'package:rive_core/animation/interpolator.dart';
+import 'package:meta/meta.dart';
 
 class KeyFrameManager extends AnimationManager {
   final OpenFileContext activeFile;
@@ -27,6 +28,9 @@ class KeyFrameManager extends AnimationManager {
   ValueStream<InterpolationViewModel> get commonInterpolation =>
       _commonInterpolation;
 
+  final _cubicController = StreamController<CubicInterpolationViewModel>();
+  Sink<CubicInterpolationViewModel> get changeCubic => _cubicController;
+
   final _interpolationController = StreamController<KeyFrameInterpolation>();
   Sink<KeyFrameInterpolation> get changeInterpolation =>
       _interpolationController;
@@ -37,6 +41,7 @@ class KeyFrameManager extends AnimationManager {
     activeFile.selection.addListener(_stageSelectionChanged);
     _selectionController.stream.listen(_selectKeyFrames);
     _interpolationController.stream.listen(_changeInterpolation);
+    _cubicController.stream.listen(_changeCubicInterpolation);
     _updateCommonInterpolation();
   }
 
@@ -90,6 +95,24 @@ class KeyFrameManager extends AnimationManager {
     var viewModel = InterpolationViewModel(common, commonInterpolator);
     if (viewModel != _commonInterpolation.value) {
       _commonInterpolation.add(viewModel);
+    }
+  }
+
+  void _changeCubicInterpolation(CubicInterpolationViewModel viewmodel) {
+    for (final keyFrame in _selection.value) {
+      switch (keyFrame.interpolation) {
+        case KeyFrameInterpolation.cubic:
+          var interpolator = keyFrame.interpolator;
+          if (interpolator is CubicInterpolator) {
+            interpolator.x1 = viewmodel.x1;
+            interpolator.y1 = viewmodel.y1;
+            interpolator.x2 = viewmodel.x2;
+            interpolator.y2 = viewmodel.y2;
+          }
+          break;
+        default:
+          break;
+      }
     }
   }
 
@@ -158,6 +181,7 @@ class KeyFrameManager extends AnimationManager {
       keyFrame.removeListener(KeyFrameBase.interpolationTypePropertyKey,
           _keyframeInterpolationTypeChanged);
     }
+    _cubicController.close();
     activeFile.removeActionHandler(_onAction);
     activeFile.selection.removeListener(_stageSelectionChanged);
     _selection.close();
@@ -168,9 +192,21 @@ class KeyFrameManager extends AnimationManager {
   }
 }
 
+@immutable
 class InterpolationViewModel {
   final KeyFrameInterpolation type;
   final Interpolator interpolator;
 
-  InterpolationViewModel(this.type, this.interpolator);
+  const InterpolationViewModel(this.type, this.interpolator);
+}
+
+@immutable
+class CubicInterpolationViewModel {
+  final double x1, y1, x2, y2;
+  const CubicInterpolationViewModel(
+    this.x1,
+    this.y1,
+    this.x2,
+    this.y2,
+  );
 }
