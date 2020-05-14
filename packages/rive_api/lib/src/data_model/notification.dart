@@ -33,17 +33,17 @@ NotificationType notificationTypeFromInt(int value) {
 
 /// Base notification class that has a factory that will construct
 /// the appropriate concrete notification
-class RiveNotification {
-  const RiveNotification(this.dateTime);
+class NotificationDM {
+  const NotificationDM(this.dateTime);
   final DateTime dateTime;
 
   /// Builds a list of notifications from json data
-  static List<RiveNotification> fromDataList(List<dynamic> dataList) => dataList
-      .map<RiveNotification>((data) => RiveNotification.fromData(data))
+  static List<NotificationDM> fromDataList(List<dynamic> dataList) => dataList
+      .map<NotificationDM>((data) => NotificationDM.fromData(data))
       .toList(growable: false);
 
   /// Builds the right type of notification based on json data
-  factory RiveNotification.fromData(Map<String, dynamic> data) {
+  factory NotificationDM.fromData(Map<String, dynamic> data) {
     final type = notificationTypeFromInt(data['t']);
     // Need to explicitly cast here for the extension methods to work
     final userData = data['u'] as Map<String, dynamic>;
@@ -52,7 +52,7 @@ class RiveNotification {
       case NotificationType.teamInvite:
         final teamData = data['m'] as Map<String, dynamic>;
         assert(teamData != null, 'no team data? what gives?');
-        return RiveTeamInviteNotification(
+        return TeamInviteNotificationDM(
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
           senderId: userData.getInt('oi'),
@@ -65,7 +65,7 @@ class RiveNotification {
         );
       case NotificationType.teamInviteAccepted:
         final teamData = data['m'] as Map<String, dynamic>;
-        return RiveTeamInviteAcceptedNotification(
+        return TeamInviteAcceptedNotificationDM(
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
           teamId: teamData.getInt('ti'),
@@ -74,7 +74,7 @@ class RiveNotification {
         );
       case NotificationType.teamInviteRejected:
         final teamData = data['m'] as Map<String, dynamic>;
-        return RiveTeamInviteRejectedNotification(
+        return TeamInviteRejectedNotificationDM(
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
           teamId: teamData.getInt('ti'),
@@ -83,7 +83,7 @@ class RiveNotification {
         );
       case NotificationType.teamInviteRescinded:
         final teamData = data['m'] as Map<String, dynamic>;
-        return RiveTeamInviteRescindedNotification(
+        return TeamInviteRescindedNotificationDM(
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
           teamId: teamData.getInt('ti'),
@@ -93,7 +93,7 @@ class RiveNotification {
       // New follower notification:
       // {"u":{"oi":40842,"pf":11,"un":"matt","nm":"Matt","av":null,"fl":1,"f1":1,"f2":2,"bg":null,"s1":null,"s2":null},"t":0,"w":1587171124}
       case NotificationType.follow:
-        return RiveFollowNotification(
+        return FollowNotificationDM(
           dateTime:
               DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
           followerId: userData.getInt('oi'),
@@ -103,7 +103,7 @@ class RiveNotification {
 
       case NotificationType.unknown:
       default:
-        return RiveNotification(
+        return NotificationDM(
           DateTime.fromMillisecondsSinceEpoch(data.getInt('w') * 1000),
         );
     }
@@ -112,8 +112,8 @@ class RiveNotification {
 
 /// A follow notification
 /// Contains the follower id (sendId) and name (senderName)
-class RiveFollowNotification extends RiveNotification {
-  const RiveFollowNotification({
+class FollowNotificationDM extends NotificationDM {
+  const FollowNotificationDM({
     @required this.followerId,
     @required this.followerName,
     @required this.followerUsername,
@@ -128,8 +128,8 @@ class RiveFollowNotification extends RiveNotification {
 /// A team invite notification
 /// Contains the inviter (senderId), inviter name (senderName)
 /// team id (teamId), team name (teamName), and invite id (inviteId)
-class RiveTeamInviteNotification extends RiveNotification {
-  const RiveTeamInviteNotification({
+class TeamInviteNotificationDM extends NotificationDM {
+  const TeamInviteNotificationDM({
     @required DateTime dateTime,
     @required this.senderId,
     @required this.senderName,
@@ -149,8 +149,8 @@ class RiveTeamInviteNotification extends RiveNotification {
   final String avatarUrl;
 }
 
-class RiveTeamInviteAcceptedNotification extends RiveNotification {
-  const RiveTeamInviteAcceptedNotification({
+class TeamInviteAcceptedNotificationDM extends NotificationDM {
+  const TeamInviteAcceptedNotificationDM({
     @required DateTime dateTime,
     @required this.teamId,
     @required this.teamName,
@@ -162,8 +162,8 @@ class RiveTeamInviteAcceptedNotification extends RiveNotification {
   final String avatarUrl;
 }
 
-class RiveTeamInviteRejectedNotification extends RiveNotification {
-  const RiveTeamInviteRejectedNotification({
+class TeamInviteRejectedNotificationDM extends NotificationDM {
+  const TeamInviteRejectedNotificationDM({
     @required DateTime dateTime,
     @required this.teamId,
     @required this.teamName,
@@ -175,8 +175,8 @@ class RiveTeamInviteRejectedNotification extends RiveNotification {
   final String avatarUrl;
 }
 
-class RiveTeamInviteRescindedNotification extends RiveNotification {
-  const RiveTeamInviteRescindedNotification({
+class TeamInviteRescindedNotificationDM extends NotificationDM {
+  const TeamInviteRescindedNotificationDM({
     @required DateTime dateTime,
     @required this.teamId,
     @required this.teamName,

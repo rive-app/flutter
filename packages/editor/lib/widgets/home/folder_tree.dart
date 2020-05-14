@@ -73,7 +73,9 @@ class FolderTreeView extends StatelessWidget {
           child: Center(
             child: FolderTreeIcon(
               owner: item.data.owner,
-              icon: (item.data.folder.id == 0) ? 'trash' : 'folder',
+              icon: (item.data.folder != null && item.data.folder.id == 0)
+                  ? 'trash'
+                  : 'folder',
               iconColor: (selectedStream.hasData && selectedStream.data)
                   ? colors.fileSelectedFolderIcon
                   : colors.fileUnselectedFolderIcon,

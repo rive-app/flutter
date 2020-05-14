@@ -1,21 +1,22 @@
+/// API calls for the logged-in user
+
 import 'dart:convert';
-import 'dart:core';
-
 import 'package:logging/logging.dart';
-
 import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/models/notification.dart';
+import 'package:rive_api/src/data_model/data_model.dart';
+
+final _log = Logger('Rive API Notification');
 
 final Logger log = Logger('Rive API');
 
 /// API for accessing user notifications
 class NotificationsApi {
-  const NotificationsApi(this.api);
+  NotificationsApi([RiveApi api]) : api = api ?? RiveApi();
   final RiveApi api;
 
   /// GET /api/notifications
   /// Returns the current notifications for a user
-  Future<List<RiveNotification>> get notifications async {
+  Future<List<NotificationDM>> get notifications async {
     final res = await api.get('${api.host}/api/notifications');
 
     final data = json.decode(res.body);
@@ -31,8 +32,8 @@ class NotificationsApi {
     }
 
     // Adding in a test team notification temporarily
-    final notifications = <RiveNotification>[]
-      ..addAll(RiveNotification.fromDataList(decodedData));
+    final notifications = <NotificationDM>[]
+      ..addAll(NotificationDM.fromDataList(decodedData));
     return notifications;
   }
 

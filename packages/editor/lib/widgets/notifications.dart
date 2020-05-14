@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rive_api/model.dart' as model;
+import 'package:rive_api/plumber.dart';
 
-import 'package:rive_api/rive_api.dart';
+import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
@@ -10,7 +12,6 @@ import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/utils.dart';
 
 import 'package:rive_api/apis/changelog.dart';
-import 'package:rive_api/models/notification.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
@@ -131,7 +132,7 @@ class PersonalPanel extends StatelessWidget {
   final Function(PanelTypes) onTap;
 
   List<Widget> _buildNotificationsList(
-      Iterable<RiveNotification> notifications, RiveThemeData theme) {
+      Iterable<model.Notification> notifications, RiveThemeData theme) {
     if (notifications.isEmpty) {
       return [
         const SizedBox(height: 30),
@@ -156,8 +157,8 @@ class PersonalPanel extends StatelessWidget {
     final theme = RiveTheme.of(context);
     return Column(
       children: [
-        StreamBuilder<Iterable<RiveNotification>>(
-          stream: NotificationProvider.of(context).notificationsStream,
+        StreamBuilder<List<model.Notification>>(
+          stream: Plumber().getStream<List<model.Notification>>(),
           builder: (context, snapshot) => snapshot.hasData
               ? Expanded(
                   child: ListView(
@@ -169,18 +170,6 @@ class PersonalPanel extends StatelessWidget {
                 ))
               : Expanded(child: PanelLoading(PanelTypes.personal, onTap)),
         ),
-        StreamBuilder<HttpException>(
-          stream: NotificationProvider.of(context).notificationErrorStream,
-          builder: (context, snapshot) => snapshot.hasData
-              ? Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                      'There has been an error accessing '
-                      'your notifications: ${snapshot.data}',
-                      style: theme.textStyles.textFieldInputValidationError),
-                )
-              : Container(),
-        )
       ],
     );
   }
@@ -224,7 +213,7 @@ class _AnnouncementsPanelState extends State<AnnouncementsPanel> {
 
 class NotificationCard extends StatelessWidget {
   const NotificationCard({this.notification, this.child});
-  final Notification notification;
+  final model.Notification notification;
   final Widget child;
 
   @override
@@ -279,32 +268,33 @@ class ChangelogNotification extends StatelessWidget {
 
 class NotificationContent extends StatelessWidget {
   const NotificationContent(this.notification);
-  final RiveNotification notification;
+  final model.Notification notification;
 
   @override
   Widget build(BuildContext context) {
-    if (notification is RiveFollowNotification) {
-      return FollowNotification(notification as RiveFollowNotification);
-    } else if (notification is RiveTeamInviteNotification) {
-      return TeamInviteNotification(notification as RiveTeamInviteNotification);
-    } else if (notification is RiveTeamInviteAcceptedNotification) {
-      return TeamInviteAcceptedNotification(
-          notification as RiveTeamInviteAcceptedNotification);
-    } else if (notification is RiveTeamInviteRejectedNotification) {
-      return TeamInviteRejectedNotification(
-          notification as RiveTeamInviteRejectedNotification);
-    } else if (notification is RiveTeamInviteRescindedNotification) {
-      return TeamInviteRescindedNotification(
-          notification as RiveTeamInviteRescindedNotification);
+    if (notification is model.FollowNotification) {
+      return FollowNotificationWidget(notification as model.FollowNotification);
+    } else if (notification is model.TeamInviteNotification) {
+      return TeamInviteNotificationWidget(
+          notification as model.TeamInviteNotification);
+    } else if (notification is model.TeamInviteAcceptedNotification) {
+      return TeamInviteAcceptedNotificationWidget(
+          notification as model.TeamInviteAcceptedNotification);
+    } else if (notification is model.TeamInviteRejectedNotification) {
+      return TeamInviteRejectedNotificationWidget(
+          notification as model.TeamInviteRejectedNotification);
+    } else if (notification is model.TeamInviteRescindedNotification) {
+      return TeamInviteRescindedNotificationWidget(
+          notification as model.TeamInviteRescindedNotification);
     } else {
-      return UnknownNotification(notification);
+      return UnknownNotificationWidget(notification);
     }
   }
 }
 
-class FollowNotification extends StatelessWidget {
-  const FollowNotification(this.notification);
-  final RiveFollowNotification notification;
+class FollowNotificationWidget extends StatelessWidget {
+  const FollowNotificationWidget(this.notification);
+  final model.FollowNotification notification;
 
   @override
   Widget build(BuildContext context) {
@@ -333,14 +323,13 @@ class FollowNotification extends StatelessWidget {
   }
 }
 
-class TeamInviteNotification extends StatelessWidget {
-  const TeamInviteNotification(this.notification);
-  final RiveTeamInviteNotification notification;
+class TeamInviteNotificationWidget extends StatelessWidget {
+  const TeamInviteNotificationWidget(this.notification);
+  final model.TeamInviteNotification notification;
 
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
-    final manager = NotificationProvider.of(context);
     return Row(
       children: [
         Expanded(
@@ -410,7 +399,8 @@ class TeamInviteNotification extends StatelessWidget {
                 textColor: Colors.white,
                 mainAxisAlignment: MainAxisAlignment.center,
                 elevation: flatButtonIconElevation,
-                onTap: () => manager.acceptTeamInvite.add(notification),
+                onTap: () =>
+                    NotificationManager().acceptTeamInvite(notification),
               ),
               const SizedBox(height: 10),
               FlatIconButton(
@@ -418,7 +408,8 @@ class TeamInviteNotification extends StatelessWidget {
                 color: theme.colors.buttonLight,
                 mainAxisAlignment: MainAxisAlignment.center,
                 textColor: theme.colors.commonButtonTextColorDark,
-                onTap: () => manager.declineTeamInvite.add(notification),
+                onTap: () =>
+                    NotificationManager().declineTeamInvite(notification),
               ),
             ],
           ),
@@ -428,14 +419,13 @@ class TeamInviteNotification extends StatelessWidget {
   }
 }
 
-class TeamInviteAcceptedNotification extends StatelessWidget {
-  const TeamInviteAcceptedNotification(this.notification);
-  final RiveTeamInviteAcceptedNotification notification;
+class TeamInviteAcceptedNotificationWidget extends StatelessWidget {
+  const TeamInviteAcceptedNotificationWidget(this.notification);
+  final model.TeamInviteAcceptedNotification notification;
 
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
-    final rive = RiveContext.of(context);
     return Row(
       children: [
         Padding(
@@ -486,9 +476,9 @@ class TeamInviteAcceptedNotification extends StatelessWidget {
   }
 }
 
-class TeamInviteRejectedNotification extends StatelessWidget {
-  const TeamInviteRejectedNotification(this.notification);
-  final RiveTeamInviteRejectedNotification notification;
+class TeamInviteRejectedNotificationWidget extends StatelessWidget {
+  const TeamInviteRejectedNotificationWidget(this.notification);
+  final model.TeamInviteRejectedNotification notification;
 
   @override
   Widget build(BuildContext context) {
@@ -526,9 +516,9 @@ class TeamInviteRejectedNotification extends StatelessWidget {
   }
 }
 
-class TeamInviteRescindedNotification extends StatelessWidget {
-  const TeamInviteRescindedNotification(this.notification);
-  final RiveTeamInviteRescindedNotification notification;
+class TeamInviteRescindedNotificationWidget extends StatelessWidget {
+  const TeamInviteRescindedNotificationWidget(this.notification);
+  final model.TeamInviteRescindedNotification notification;
 
   @override
   Widget build(BuildContext context) {
@@ -568,9 +558,9 @@ class TeamInviteRescindedNotification extends StatelessWidget {
   }
 }
 
-class UnknownNotification extends StatelessWidget {
-  const UnknownNotification(this.notification);
-  final RiveNotification notification;
+class UnknownNotificationWidget extends StatelessWidget {
+  const UnknownNotificationWidget(this.notification);
+  final model.Notification notification;
 
   @override
   Widget build(BuildContext context) {
