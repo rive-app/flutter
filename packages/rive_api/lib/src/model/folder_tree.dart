@@ -1,7 +1,7 @@
 /// Tree of directories
 import 'package:meta/meta.dart';
 import 'package:rive_api/plumber.dart';
-import 'package:rive_api/src/model/model.dart';
+import 'package:rive_api/model.dart';
 import 'package:rxdart/subjects.dart';
 
 class FolderTree {

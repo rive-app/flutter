@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
+import 'package:rive_api/data_model.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_api/folder.dart';
 import 'package:rive_api/manager.dart';

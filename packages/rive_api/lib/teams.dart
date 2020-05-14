@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:logging/logging.dart';
 
-import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/team_role.dart';

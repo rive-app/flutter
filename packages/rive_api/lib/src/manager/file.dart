@@ -1,7 +1,7 @@
-import 'package:rive_api/src/manager/subscriptions.dart';
-import 'package:rive_api/src/model/model.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/src/plumber.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/plumber.dart';
 
 class FileManager with Subscriptions {
   static FileManager _instance = FileManager._();

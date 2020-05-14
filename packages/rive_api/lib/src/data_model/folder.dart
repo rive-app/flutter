@@ -17,11 +17,11 @@ class FolderDM {
   final int order;
   final String name;
 
-  static Iterable<FolderDM> fromDataList(List<dynamic> data) =>
+  static List<FolderDM> fromDataList(List<Object> data) =>
       data.map((d) => FolderDM.fromData(d)).toList(growable: false);
 
   factory FolderDM.fromData(
-    Map<String, dynamic> data,
+    Map<String, Object> data,
   ) =>
       FolderDM(
         id: data.getInt('id'),

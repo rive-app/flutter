@@ -1,10 +1,8 @@
 import 'package:rive_api/api.dart';
-import 'package:rive_api/plumber.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
-import 'package:rive_api/src/manager/manager.dart';
+import 'package:rive_api/data_model.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/src/model/current_directory.dart';
-import 'package:rive_api/src/model/folder_contents.dart';
+import 'package:rive_api/plumber.dart';
 
 class FolderContentsManager with Subscriptions {
   FolderContentsManager._()

@@ -3,7 +3,7 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 

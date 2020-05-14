@@ -1,13 +1,13 @@
 @Timeout(const Duration(seconds: 1))
 import 'dart:async';
 
-import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
 
 import 'fixtures/data_models.dart';
 import 'helpers/test_helpers.dart';
