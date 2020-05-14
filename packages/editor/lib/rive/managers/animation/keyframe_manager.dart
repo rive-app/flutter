@@ -106,7 +106,7 @@ class KeyFrameManager extends AnimationManager {
           if (interpolator is CubicInterpolator) {
             interpolator.x1 = viewmodel.x1;
             interpolator.y1 = viewmodel.y1;
-            interpolator.x1 = viewmodel.x1;
+            interpolator.x2 = viewmodel.x2;
             interpolator.y2 = viewmodel.y2;
           }
           break;

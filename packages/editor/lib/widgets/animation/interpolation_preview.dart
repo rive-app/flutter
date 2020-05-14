@@ -162,13 +162,9 @@ class __CubicManipulatorState extends State<_CubicManipulator> {
         _handleCursor(details.pointerEvent.localPosition, (isIn, control) {
           CubicInterpolationViewModel cubic;
           if (_draggingIn = isIn) {
-            interpolator.x1 = control.dx;
-            interpolator.y1 = control.dy;
             cubic = CubicInterpolationViewModel(
                 control.dx, control.dy, interpolator.x2, interpolator.y2);
           } else {
-            interpolator.x2 = control.dx;
-            interpolator.y2 = control.dy;
             cubic = CubicInterpolationViewModel(
                 interpolator.x1, interpolator.y1, control.dx, control.dy);
           }
@@ -179,13 +175,9 @@ class __CubicManipulatorState extends State<_CubicManipulator> {
         _handleCursor(details.pointerEvent.localPosition, (_, control) {
           CubicInterpolationViewModel cubic;
           if (_draggingIn) {
-            interpolator.x1 = control.dx;
-            interpolator.y1 = control.dy;
             cubic = CubicInterpolationViewModel(
                 control.dx, control.dy, interpolator.x2, interpolator.y2);
           } else {
-            interpolator.x2 = control.dx;
-            interpolator.y2 = control.dy;
             cubic = CubicInterpolationViewModel(
                 interpolator.x1, interpolator.y1, control.dx, control.dy);
           }
