@@ -30,10 +30,9 @@ class AnimationToolbar extends StatelessWidget {
             },
           ),
           LoopPopupButton(),
-          const Expanded(
-            child: SizedBox(),
-          ),
+          const Spacer(),
           AnimationTimePopupButton(),
+          // AnimationTimePopupButton(),
         ],
       ),
     );

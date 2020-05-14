@@ -8,7 +8,6 @@ import 'package:rive_editor/rive/managers/animation/editing_animation_manager.da
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
-import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
