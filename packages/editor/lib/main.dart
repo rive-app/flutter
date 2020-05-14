@@ -70,6 +70,7 @@ Future<void> main() async {
   TeamManager();
   FileManager();
   RiveManager();
+  NotificationManager();
 
   // if (await rive.initialize() != RiveState.catastrophe) {
   //   // this is just for the prototype...
@@ -134,15 +135,12 @@ class RiveEditorApp extends StatelessWidget {
                             return Login();
 
                           case RiveState.editor:
-                            return NotificationProvider(
-                              manager: NotificationManager(api: rive.api),
-                              child: FollowProvider(
-                                manager: FollowManager(
-                                  api: rive.api,
-                                  ownerId: Plumber().peek<Me>().ownerId,
-                                ),
-                                child: const EditorScaffold(),
+                            return FollowProvider(
+                              manager: FollowManager(
+                                api: rive.api,
+                                ownerId: Plumber().peek<Me>().ownerId,
                               ),
+                              child: const EditorScaffold(),
                             );
                           case RiveState.disconnected:
                             return DisconnectedScreen();

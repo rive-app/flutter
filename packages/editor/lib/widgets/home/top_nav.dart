@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
-import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
-import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
@@ -24,43 +20,55 @@ class TopNav extends StatelessWidget {
 
   const TopNav(this.currentDirectory, {Key key}) : super(key: key);
 
-  Widget _navControls(BuildContext context) {
+  Widget _navControls(BuildContext context, List<Folder> folders) {
     final riveColors = RiveTheme.of(context).colors;
     final children = <Widget>[];
-    if (owner != null) {
+    final currentFolder =
+        folders.firstWhere((folder) => folder.id == currentDirectory.folderId);
+    if (owner != null && currentFolder.id == 1) {
       children.add(
         AvatarView(
           diameter: 30,
           borderWidth: 0,
+          padding: 0,
           imageUrl: owner.avatarUrl,
           name: owner.displayName,
           color: StageCursor.colorFromPalette(owner.ownerId),
         ),
       );
       children.add(const SizedBox(width: 9));
-    }
-    children.add(Text(owner.displayName));
-    children.add(const Spacer());
-
-    if (owner is Me ||
-        (owner is Team && canEditTeam((owner as Team).permission))) {
-      children.add(const SizedBox(width: 12));
+      children.add(Text(owner.displayName));
+    } else {
       children.add(
-        SizedBox(
-          height: 30,
-          child: TintedIconButton(
-            onPress: () async {
-              await showSettings(owner, context: context);
-            },
-            icon: 'settings',
-            backgroundHover: riveColors.fileBackgroundLightGrey,
-            iconHover: riveColors.fileBackgroundDarkGrey,
-            tip: const Tip(label: 'Settings'),
+        Center(
+          child: SizedBox(
+            width: 30,
+            height: 30,
+            child: GestureDetector(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: riveColors.fileBackgroundLightGrey,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Center(
+                  child: TintedIcon(
+                    icon: 'back',
+                    color: riveColors.inspectorTextColor,
+                  ),
+                ),
+              ),
+              // if the current folder has no parent, just take you back to
+              // the magic folder nbr 1. (this deals with the Deleted folder anomaly)
+              onTap: () => Plumber().message(CurrentDirectory(
+                  currentDirectory.owner, currentFolder.parent ?? 1)),
+            ),
           ),
         ),
       );
+      children.add(const SizedBox(width: 9));
+      children.add(Text(currentFolder.name));
     }
-    children.add(const SizedBox(width: 12));
+    children.add(const Spacer());
     children.add(PopupButton<PopupContextItem>(
       direction: PopupDirection.bottomToLeft,
       builder: (popupContext) {
@@ -126,7 +134,16 @@ class TopNav extends StatelessWidget {
 
     return Underline(
       color: riveColors.fileLineGrey,
-      child: _navControls(context),
+      child: StreamBuilder<List<Folder>>(
+          stream: Plumber()
+              .getStream<List<Folder>>(currentDirectory.owner.hashCode),
+          builder: (context, snapshot) {
+            if (snapshot.hasData == false) {
+              return CircularProgressIndicator();
+            } else {
+              return _navControls(context, snapshot.data);
+            }
+          }),
       thickness: 1,
     );
   }

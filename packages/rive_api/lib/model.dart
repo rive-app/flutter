@@ -7,3 +7,4 @@ export 'src/model/owner.dart';
 export 'src/model/team.dart';
 export 'src/model/user.dart';
 export 'src/model/current_directory.dart';
+export 'src/model/notification.dart';

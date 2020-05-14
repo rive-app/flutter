@@ -8,6 +8,7 @@ export 'file.dart';
 export 'folder.dart';
 export 'team.dart';
 export 'user.dart';
+export 'notification.dart';
 
 /// Now uses a singleton
 class RiveApi extends WebServiceClient {

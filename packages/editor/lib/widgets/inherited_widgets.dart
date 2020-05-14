@@ -132,58 +132,6 @@ class ActiveFile extends InheritedWidget {
   bool updateShouldNotify(ActiveFile old) => file != old.file;
 }
 
-// Notifications state manager
-
-class NotificationProvider extends StatefulWidget {
-  const NotificationProvider({@required this.manager, this.child});
-  final Widget child;
-  final NotificationManager manager;
-
-  @override
-  _NotificationProviderState createState() => _NotificationProviderState();
-
-  static NotificationManager of(BuildContext context) => context
-      .dependOnInheritedWidgetOfExactType<_InheritedNotificationProvider>()
-      .manager;
-}
-
-class _NotificationProviderState extends State<NotificationProvider> {
-  NotificationManager _manager;
-
-  @override
-  void initState() {
-    _manager = widget.manager;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _manager.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => _InheritedNotificationProvider(
-        manager: _manager,
-        child: widget.child,
-      );
-}
-
-class _InheritedNotificationProvider extends InheritedWidget {
-  const _InheritedNotificationProvider({
-    @required this.manager,
-    @required Widget child,
-    Key key,
-  })  : assert(child != null),
-        super(key: key, child: child);
-
-  final NotificationManager manager;
-
-  @override
-  bool updateShouldNotify(_InheritedNotificationProvider old) =>
-      manager != old.manager;
-}
-
 // Follow state provider
 
 class FollowProvider extends StatefulWidget {
