@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'package:pedantic/pedantic.dart';
 
+import 'package:pedantic/pedantic.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart' as model;
-import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_api/rive_api.dart';
-import 'package:rive_api/api.dart';
 
 const pollDuration = Duration(minutes: 2);
 
@@ -34,6 +33,7 @@ class NotificationManager with Subscriptions {
   TeamApi _teamApi;
 
   /// Clean up all the stream controllers and that polling timer
+  @override
   void dispose() {
     super.dispose();
     _poller?.cancel();
@@ -42,7 +42,7 @@ class NotificationManager with Subscriptions {
   /// Initiatize the state
   void _attach() {
     _fetchNotifications();
-    Plumber().getStream<Me>().listen((event) {
+    Plumber().getStream<model.Me>().listen((event) {
       _fetchNotifications();
     });
     _poller = Timer.periodic(
@@ -60,7 +60,7 @@ class NotificationManager with Subscriptions {
 
   /// Fetch a user's notifications from the back end
   Future<void> _fetchNotifications() async {
-    if (Plumber().peek<Me>() == null) {
+    if (Plumber().peek<model.Me>() == null) {
       return;
     }
     try {
