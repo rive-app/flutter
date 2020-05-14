@@ -24,22 +24,54 @@ class TopNav extends StatelessWidget {
 
   const TopNav(this.currentDirectory, {Key key}) : super(key: key);
 
-  Widget _navControls(BuildContext context) {
+  Widget _navControls(BuildContext context, List<Folder> folders) {
     final riveColors = RiveTheme.of(context).colors;
     final children = <Widget>[];
-    if (owner != null) {
+    final currentFolder =
+        folders.firstWhere((folder) => folder.id == currentDirectory.folderId);
+    if (owner != null && currentFolder.id == 1) {
       children.add(
         AvatarView(
           diameter: 30,
           borderWidth: 0,
+          padding: 0,
           imageUrl: owner.avatarUrl,
           name: owner.displayName,
           color: StageCursor.colorFromPalette(owner.ownerId),
         ),
       );
       children.add(const SizedBox(width: 9));
+      children.add(Text(owner.displayName));
+    } else {
+      children.add(
+        Center(
+          child: SizedBox(
+            width: 30,
+            height: 30,
+            child: GestureDetector(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: riveColors.fileBackgroundLightGrey,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Center(
+                  child: TintedIcon(
+                    icon: 'back',
+                    color: riveColors.inspectorTextColor,
+                  ),
+                ),
+              ),
+              // if the current folder has no parent, just take you back to
+              // the magic folder nbr 1. (this deals with the Deleted folder anomaly)
+              onTap: () => Plumber().message(CurrentDirectory(
+                  currentDirectory.owner, currentFolder.parent ?? 1)),
+            ),
+          ),
+        ),
+      );
+      children.add(const SizedBox(width: 9));
+      children.add(Text(currentFolder.name));
     }
-    children.add(Text(owner.displayName));
     children.add(const Spacer());
 
     if (owner is Me ||
@@ -126,7 +158,16 @@ class TopNav extends StatelessWidget {
 
     return Underline(
       color: riveColors.fileLineGrey,
-      child: _navControls(context),
+      child: StreamBuilder<List<Folder>>(
+          stream: Plumber()
+              .getStream<List<Folder>>(currentDirectory.owner.hashCode),
+          builder: (context, snapshot) {
+            if (snapshot.hasData == false) {
+              return CircularProgressIndicator();
+            } else {
+              return _navControls(context, snapshot.data);
+            }
+          }),
       thickness: 1,
     );
   }
