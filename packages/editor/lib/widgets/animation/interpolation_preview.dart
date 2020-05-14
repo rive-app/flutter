@@ -67,6 +67,7 @@ class InterpolationPreview extends StatelessWidget {
               if (commonInterpolator is CubicInterpolator) {
                 return _CubicManipulator(
                   interpolator: commonInterpolator,
+                  keyFrameManager: manager,
                   child: _CubicPreviewRenderer(
                     theme: RiveTheme.of(context),
                     normalizedTime: normalizedTime,
@@ -96,11 +97,13 @@ class InterpolationPreview extends StatelessWidget {
 class _CubicManipulator extends StatefulWidget {
   final Widget child;
   final CubicInterpolator interpolator;
+  final KeyFrameManager keyFrameManager;
 
   const _CubicManipulator({
     Key key,
     this.child,
     this.interpolator,
+    this.keyFrameManager,
   }) : super(key: key);
   @override
   __CubicManipulatorState createState() => __CubicManipulatorState();
@@ -147,11 +150,8 @@ class __CubicManipulatorState extends State<_CubicManipulator> {
               PopupContextItem(
                 'Reset',
                 select: () {
-                  interpolator.x1 = 0.42;
-                  interpolator.y1 = 0.0;
-                  interpolator.x2 = 0.58;
-                  interpolator.y2 = 1;
-                  interpolator.context.captureJournalEntry();
+                  widget.keyFrameManager.changeCubic
+                      .add(const CubicInterpolationViewModel(0.42, 0, 0.58, 1));
                 },
               ),
             ],
@@ -160,24 +160,36 @@ class __CubicManipulatorState extends State<_CubicManipulator> {
         }
 
         _handleCursor(details.pointerEvent.localPosition, (isIn, control) {
+          CubicInterpolationViewModel cubic;
           if (_draggingIn = isIn) {
             interpolator.x1 = control.dx;
             interpolator.y1 = control.dy;
+            cubic = CubicInterpolationViewModel(
+                control.dx, control.dy, interpolator.x2, interpolator.y2);
           } else {
             interpolator.x2 = control.dx;
             interpolator.y2 = control.dy;
+            cubic = CubicInterpolationViewModel(
+                interpolator.x1, interpolator.y1, control.dx, control.dy);
           }
+          widget.keyFrameManager.changeCubic.add(cubic);
         });
       },
       onPointerMove: (details) {
         _handleCursor(details.pointerEvent.localPosition, (_, control) {
+          CubicInterpolationViewModel cubic;
           if (_draggingIn) {
             interpolator.x1 = control.dx;
             interpolator.y1 = control.dy;
+            cubic = CubicInterpolationViewModel(
+                control.dx, control.dy, interpolator.x2, interpolator.y2);
           } else {
             interpolator.x2 = control.dx;
             interpolator.y2 = control.dy;
+            cubic = CubicInterpolationViewModel(
+                interpolator.x1, interpolator.y1, control.dx, control.dy);
           }
+          widget.keyFrameManager.changeCubic.add(cubic);
         });
       },
       onPointerUp: (details) {
