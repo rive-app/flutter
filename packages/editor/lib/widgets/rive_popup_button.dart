@@ -100,7 +100,9 @@ class _RivePopupButtonState extends State<RivePopupButton> {
                       ),
                     ],
                   )
-                : widget.iconBuilder(context, activeFile, _isHovered),
+                : Center(
+                    child: widget.iconBuilder(context, activeFile, _isHovered),
+                  ),
           ),
         ),
         itemBuilder: (context, item, isHovered) => item.itemBuilder(
