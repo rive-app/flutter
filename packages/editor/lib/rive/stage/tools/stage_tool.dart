@@ -16,6 +16,11 @@ abstract class StageTool {
   /// Most tools will want their transforms in artboard world space.
   bool get inArtboardSpace => true;
 
+  // Whether this tool wants a mouseMove event triggered immediately when it is
+  // activated, some tools will want this to sync up any internal data that is
+  // dependent on mouse coordinates.
+  bool get activateSendsMouseMove => false;
+
   /// Gets the correct mouse world space depending on whether this tool operates
   /// in stage world or artboard world. Because the artboards don't rotate or
   /// scale (at least not on the stage), this is just a simple translation

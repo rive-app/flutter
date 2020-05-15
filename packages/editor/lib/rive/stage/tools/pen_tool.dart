@@ -14,6 +14,9 @@ abstract class PenTool<T extends Component> extends StageTool {
   Iterable<T> get editing => _editing;
 
   @override
+  bool get activateSendsMouseMove => true;
+  
+  @override
   void draw(Canvas canvas) {
     if (_ghostPointScreen == null) {
       return;

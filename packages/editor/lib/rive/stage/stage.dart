@@ -141,6 +141,9 @@ class Stage extends Debouncer {
     if (value.activate(this)) {
       _toolNotifier.value?.deactivate();
       _toolNotifier.value = value;
+      if (value.activateSendsMouseMove) {
+        _sendMouseMoveToTool();
+      }
     }
 
     // Update the late draw render object to know which tool it should be
@@ -149,6 +152,14 @@ class Stage extends Debouncer {
       lateDrawDelegate?.tool = value as LateDrawStageTool;
     } else {
       lateDrawDelegate?.tool = null;
+    }
+  }
+
+  void _sendMouseMoveToTool() {
+    var artboard = activeArtboard;
+    if (artboard != null &&
+        tool.mouseMove(artboard, tool.mouseWorldSpace(artboard, _worldMouse))) {
+      markNeedsAdvance();
     }
   }
 
@@ -400,11 +411,7 @@ class Stage extends Debouncer {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
-    var artboard = activeArtboard;
-    if (artboard != null &&
-        tool.mouseMove(artboard, tool.mouseWorldSpace(artboard, _worldMouse))) {
-      markNeedsAdvance();
-    }
+    _sendMouseMoveToTool();
   }
 
   void mouseDown(int button, double x, double y) {
