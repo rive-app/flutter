@@ -2,7 +2,7 @@ import 'package:file_chooser/file_chooser.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/selectable_item.dart';

@@ -1,14 +1,21 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/models/owner.dart';
-import 'package:rive_api/models/team.dart';
+import 'package:rive_api/models/team_role.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
-import 'package:rive_editor/rive/managers/image_manager.dart';
+import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/theme.dart';
+import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/popup_button.dart';
+import 'package:rive_editor/widgets/popup/popup_direction.dart';
+import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
 import 'package:tree_widget/flat_tree_item.dart';
@@ -61,12 +68,14 @@ class FolderTreeView extends StatelessWidget {
       iconBuilder: (context, item, style) => StreamBuilder<bool>(
         stream: item.data.selectedStream,
         builder: (context, selectedStream) => Container(
-          width: 15,
-          height: 15,
+          width: 20,
+          height: 20,
           child: Center(
-            child: SizedAvatar(
-              url: item.data.iconURL,
-              icon: 'folder',
+            child: FolderTreeIcon(
+              owner: item.data.owner,
+              icon: (item.data.folder != null && item.data.folder.id == 0)
+                  ? 'trash'
+                  : 'folder',
               iconColor: (selectedStream.hasData && selectedStream.data)
                   ? colors.fileSelectedFolderIcon
                   : colors.fileUnselectedFolderIcon,
@@ -97,117 +106,156 @@ class FolderTreeView extends StatelessWidget {
       itemBuilder: (context, item, style) => StreamBuilder<bool>(
         stream: item.data.selectedStream,
         builder: (context, selectedStream) => Expanded(
-          child: Container(
-            child: IgnorePointer(
-              child: Text(
-                item.data.name,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: (selectedStream.hasData && selectedStream.data)
-                      ? Colors.white
-                      : colors.fileTreeText,
+          child: Row(children: [
+            Expanded(
+              child: Container(
+                child: IgnorePointer(
+                  child: Text(
+                    item.data.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: (selectedStream.hasData && selectedStream.data)
+                          ? Colors.white
+                          : colors.fileTreeText,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+            if (item.data.owner is Me ||
+                (item.data.owner is Team &&
+                    canEditTeam((item.data.owner as Team).permission)))
+              TintedIconButton(
+                onPress: () async {
+                  await showSettings(item.data.owner, context: context);
+                },
+                icon: 'settings-small',
+                color: (selectedStream.hasData && selectedStream.data)
+                    ? colors.fileSelectedFolderIcon
+                    : colors.fileUnselectedFolderIcon,
+                iconHover: colors.fileBackgroundDarkGrey,
+                tip: const Tip(label: 'Settings'),
+              ),
+            if (item.data.owner != null)
+              AddFileFolderButton(
+                item.data.owner,
+                (selectedStream.hasData && selectedStream.data),
+              )
+          ]),
         ),
       ),
     );
   }
 }
 
-class SizedAvatarOwner extends StatelessWidget {
-  const SizedAvatarOwner({
-    @required this.owner,
-    this.selected = false,
-    this.size = const Size(20, 20),
-    this.teamIcon = 'teams',
-    this.userIcon = 'your-files',
-    this.addBackground = false,
-    Key key,
-  }) : super(key: key);
-
-  final RiveOwner owner;
-  final Size size;
-  final bool selected;
-  final bool addBackground;
-  final String teamIcon;
-  final String userIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    var colors = RiveTheme.of(context).colors;
-
-    return SizedAvatar(
-      url: owner.avatar,
-      icon: (owner is RiveTeam) ? teamIcon : userIcon,
-      iconColor: (selected)
-          ? colors.fileSelectedFolderIcon
-          : colors.fileUnselectedFolderIcon,
-      addBackground: addBackground,
-      size: size,
-    );
-  }
-}
-
-class SizedAvatar extends StatelessWidget {
-  const SizedAvatar({
-    this.url,
+class FolderTreeIcon extends StatelessWidget {
+  const FolderTreeIcon({
+    this.owner,
     this.iconColor,
-    this.size = const Size(20, 20),
-    this.icon = 'your-files',
-    this.addBackground = false,
+    this.size = const Size(15, 15),
+    this.icon = 'folder',
     Key key,
   }) : super(key: key);
 
-  final String url;
+  final Owner owner;
   final Size size;
-  final bool addBackground;
   final String icon;
   final Color iconColor;
 
-  Widget _backupIcon(RiveColors colors) {
-    return TintedIcon(
-        icon: icon,
-        color:
-            (iconColor == null) ? colors.fileUnselectedFolderIcon : iconColor);
-  }
+  @override
+  Widget build(BuildContext context) {
+    var colors = RiveTheme.of(context).colors;
 
-  Widget _backupIconWithBackground(RiveColors colors) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-                color: colors.fileBackgroundLightGrey,
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: colors.fileUnselectedFolderIcon, width: 1)),
-          ),
-        ),
-        Center(child: _backupIcon(colors)),
-      ],
-    );
+    if (owner == null) {
+      return Center(
+          child: SizedBox(
+        width: size.width,
+        height: size.height,
+        child: TintedIcon(
+            icon: icon,
+            color: (iconColor == null)
+                ? colors.fileUnselectedFolderIcon
+                : iconColor),
+      ));
+    } else {
+      return AvatarView(
+        diameter: 15,
+        padding: 0,
+        borderWidth: 0,
+        imageUrl: owner.avatarUrl,
+        name: owner.displayName,
+        color: StageCursor.colorFromPalette(owner.ownerId),
+      );
+    }
+  }
+}
+
+class AddFileFolderButton extends StatelessWidget {
+  final Owner owner;
+  final bool selected;
+
+  const AddFileFolderButton(
+    this.owner,
+    this.selected, {
+    Key key,
+  }) : super(key: key);
+
+  void _updateCurrentDirectory() {
+    var currentDirectory = Plumber().peek<CurrentDirectory>();
+    if (currentDirectory.owner == owner && currentDirectory.folderId == 1) {
+      Plumber().message(currentDirectory);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget _avatarChild;
     var colors = RiveTheme.of(context).colors;
+    // its the magic 'your files folder'
+    const folderId = 1;
 
-    if (url == null && addBackground) {
-      _avatarChild = _backupIconWithBackground(colors);
-    } else if (url == null) {
-      _avatarChild = _backupIcon(colors);
-    } else {
-      _avatarChild = CachedCircleAvatar(url);
-    }
-    return Center(
-        child: SizedBox(
-      width: size.width,
-      height: size.height,
-      child: _avatarChild,
-    ));
+    return PopupButton<PopupContextItem>(
+      direction: PopupDirection.rightToCenter,
+      builder: (popupContext) {
+        return TintedIconButton(
+          icon: 'add',
+          color: selected
+              ? colors.fileSelectedFolderIcon
+              : colors.fileUnselectedFolderIcon,
+          iconHover: colors.fileSelectedFolderIcon,
+        );
+      },
+      itemBuilder: (popupContext, item, isHovered) =>
+          item.itemBuilder(popupContext, isHovered),
+      itemsBuilder: (context) => [
+        PopupContextItem(
+          'New File',
+          select: () async {
+            if (owner is Team) {
+              await FileManager().createFile(folderId, owner.ownerId);
+            } else {
+              await FileManager().createFile(folderId);
+            }
+            _updateCurrentDirectory();
+          },
+        ),
+        PopupContextItem(
+          'New Folder',
+          select: () async {
+            if (owner is Team) {
+              await FileManager().createFolder(folderId, owner.ownerId);
+            } else {
+              await FileManager().createFolder(folderId);
+            }
+            // NOTE: bit funky, feels like it'd be nice
+            // to control both managers through one message
+            // pretty sure we can do that if we back onto
+            // a more generic FileManager
+            FileManager().loadFolders(owner);
+            _updateCurrentDirectory();
+          },
+        )
+      ],
+    );
   }
 }

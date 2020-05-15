@@ -1,10 +1,11 @@
 /// API calls for a user's volumes
 
 import 'dart:convert';
+
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/data_model.dart';
 
 final _log = Logger('File Api');
 
@@ -21,7 +22,7 @@ class FileApi {
   Future<List<FileDM>> _files(String url, [int ownerId]) async {
     final res = await api.get(api.host + url);
     try {
-      final data = json.decode(res.body) as List<Object>;
+      final data = json.decode(res.body) as List<dynamic>;
       return FileDM.fromIdList(data, ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');

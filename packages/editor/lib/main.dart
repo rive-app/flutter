@@ -7,7 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:pedantic/pedantic.dart';
+import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_editor/alerts_display.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
@@ -18,6 +19,8 @@ import 'package:rive_editor/widgets/ui_strings.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
 
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
@@ -33,7 +36,7 @@ import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/home/home.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
-import 'package:rive_editor/widgets/login.dart';
+import 'package:rive_editor/widgets/login/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/stage_late_view.dart';
@@ -65,11 +68,15 @@ Future<void> main() async {
   final rive = Rive(
     iconCache: iconCache,
   );
+
+  unawaited(rive.initialize());
   UserManager();
   TeamManager();
   FileManager();
+  RiveManager();
+  NotificationManager();
 
-  // if (await rive.initialize() != RiveState.catastrophe) {
+  // if (await rive.initialize() != AppState.catastrophe) {
   //   // this is just for the prototype...
   //   // await rive.open('100/100');
   // }
@@ -109,8 +116,6 @@ class RiveEditorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final riveManager = RiveManager(rive);
-
     return InsertInheritedWidgets(
       rive: rive,
       iconCache: iconCache,
@@ -124,41 +129,33 @@ class RiveEditorApp extends StatelessWidget {
               home: DefaultTextStyle(
                 style: RiveTheme.of(context).textStyles.basic,
                 child: Scaffold(
-                  body: LoadingScreen(
-                    key: loadingScreenKey,
-                    rive: rive,
-                    child: Focus(
-                      focusNode: rive.focusNode,
-                      child: ValueListenableBuilder<RiveState>(
-                        valueListenable: rive.state,
-                        builder: (context, state, _) {
-                          switch (state) {
-                            case RiveState.login:
-                              return Login();
+                  body: Focus(
+                    focusNode: rive.focusNode,
+                    child: StreamBuilder<AppState>(
+                      stream: Plumber().getStream<AppState>(),
+                      builder: (context, snapshot) {
+                        switch (snapshot.data) {
+                          case AppState.login:
+                            return Login();
 
-                            case RiveState.editor:
-                              return NotificationProvider(
-                                manager: NotificationManager(
-                                    api: rive.api,
-                                    teamUpdateSink: riveManager.teamUpdateSink),
-                                child: FollowProvider(
-                                  manager: FollowManager(
-                                    api: rive.api,
-                                    ownerId: rive.user.value.ownerId,
-                                  ),
-                                  child: const EditorScaffold(),
-                                ),
-                              );
-                            case RiveState.disconnected:
-                              return DisconnectedScreen();
-                              break;
+                          case AppState.home:
+                            return FollowProvider(
+                              manager: FollowManager(
+                                api: rive.api,
+                                ownerId: Plumber().peek<Me>().ownerId,
+                              ),
+                              child: const EditorScaffold(),
+                            );
+                          case AppState.disconnected:
+                            return DisconnectedScreen();
+                            break;
 
-                            case RiveState.catastrophe:
-                            default:
-                              return Catastrophe();
-                          }
-                        },
-                      ),
+                          case AppState.catastrophe:
+                            return Catastrophe();
+                          default:
+                            return const LoadingScreen();
+                        }
+                      },
                     ),
                   ),
                 ),
@@ -552,48 +549,21 @@ class StagePanel extends StatelessWidget {
 }
 
 /// Loading screen that displays while Rive state is loading/initializing
-class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({this.rive, this.child, Key key}) : super(key: key);
-  final Rive rive;
-  final Widget child;
+class LoadingScreen extends StatelessWidget {
+  const LoadingScreen({Key key}) : super(key: key);
 
   @override
-  _LoadingScreenState createState() => _LoadingScreenState();
-}
-
-class _LoadingScreenState extends State<LoadingScreen> {
-  // Remember if Rive is initialized
-  bool _initialized = false;
-
-  @override
-  void initState() {
-    _initialize();
-    super.initState();
-  }
-
-  Future<void> _initialize() async {
-    final state = await widget.rive.initialize();
-    print('State is $state');
-    if (state == RiveState.catastrophe) {
-      throw Exception('Catastrophe initializing Rive');
-    }
-    setState(() => _initialized = true);
-  }
-
-  @override
-  Widget build(BuildContext context) => _initialized
-      ? widget.child
-      : Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text(
-                'Loading Rive 2 v$appVersion',
-                style: TextStyle(fontSize: 24),
-              ),
-              SizedBox(height: 20),
-              CircularProgressIndicator(),
-            ],
-          ),
-        );
+  Widget build(BuildContext context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Text(
+              'Loading Rive 2 v$appVersion',
+              style: TextStyle(fontSize: 24),
+            ),
+            SizedBox(height: 20),
+            CircularProgressIndicator(),
+          ],
+        ),
+      );
 }

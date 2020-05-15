@@ -304,3 +304,10 @@ final successTeamFolderCreationResponse = Response("""
   "parent": 1
 }
 """, 200);
+
+final successNotificationsResponse = Response("""
+{
+  "data": "[{\\"u\\":{\\"oi\\":41594,\\"pf\\":0,\\"un\\":\\"mightymax\\",\\"nm\\":null,\\"av\\":null,\\"fl\\":0,\\"f1\\":null,\\"f2\\":null,\\"bg\\":null,\\"s1\\":null,\\"s2\\":null},\\"t\\":21,\\"w\\":1588426218,\\"m\\":{\\"ti\\":41595,\\"tn\\":\\"bump2\\",\\"ii\\":40952,\\"pn\\":3,\\"av\\":\\"https://cdn.2dimensions.com/avatars/krypton-41595-33953877-8371-46ad-a393-24aaa9767e40\\"}},{\\"u\\":{\\"oi\\":40944,\\"pf\\":0,\\"un\\":\\"foofoo\\",\\"nm\\":null,\\"av\\":\\"https://cdn.2dimensions.com/avatars/40883-7-1585914912-krypton\\",\\"fl\\":0,\\"f1\\":null,\\"f2\\":null,\\"bg\\":null,\\"s1\\":null,\\"s2\\":null},\\"t\\":22,\\"w\\":1587739698,\\"m\\":{\\"ti\\":41576,\\"tn\\":\\"newteam\\",\\"ii\\":40949,\\"pn\\":3}}]",
+  "count":2
+}
+""", 200);

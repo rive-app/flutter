@@ -55,6 +55,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   final Event drawOrderChanged = Event();
   // <- editor-only
 
+  /// Artboard are one of the few (only?) components that can be orphaned.
+  @override
+  bool get canBeOrphaned => true;
+
   final Path path = Path();
   ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
@@ -71,6 +75,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   /// List of animations in this artboard.
   _AnimationList get animations => _animations;
+
+  /// Does this artboard have animations?
+  bool get hasAnimations => _animations.isNotEmpty;
 
   int _dirtDepth = 0;
   int _dirt = 255;
@@ -189,7 +196,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     _dependencyOrder = order;
     for (final component in _dependencyOrder) {
       component.graphOrder = graphOrder++;
-      component.dirt = 255;
+      // component.dirt = 255;
     }
 
     _dirt |= ComponentDirt.components;

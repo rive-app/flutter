@@ -116,8 +116,11 @@ void main() {
       serverFileContext.manualDrive = true;
 
       // Make a node on client 1.
-      var niceNodeOnClient1 = client1.add(Node()..name = 'nice-node');
-      artboardOnClient1.appendChild(niceNodeOnClient1);
+      Node niceNodeOnClient1;
+      client1.batchAdd(() {
+        niceNodeOnClient1 = client1.add(Node()..name = 'nice-node');
+        artboardOnClient1.appendChild(niceNodeOnClient1);
+      });
 
       // Make the change and send them to the server.
       var changes = client1.captureTestChanges();

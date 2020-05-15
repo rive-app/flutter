@@ -20,9 +20,15 @@ abstract class Component extends ComponentBase<RiveFile>
   Artboard _artboard;
   dynamic _userData;
 
+  /// Override to true if you want some object inheriting from Component to not
+  /// have a parent. Most objects will validate that they have a parent during
+  /// the onAdded callback otherwise they are considered invalid and are culled
+  /// from core.
+  bool get canBeOrphaned => false;
+
   // Used during update process.
   int graphOrder = 0;
-  int dirt = 0;
+  int dirt = 255;
 
   // This is really only for sanity and earlying out of recursive loops.
   static const int maxTreeDepth = 5000;
@@ -197,7 +203,14 @@ abstract class Component extends ComponentBase<RiveFile>
   void onDependencyRemoved(Component dependent) {}
 
   @override
-  void onAdded() {}
+  @mustCallSuper
+  void onAdded() {
+    if (!canBeOrphaned && parent == null) {
+      _log.severe('Removed component \'$name\' $runtimeType. '
+          'Did not have a parent (looked for one with id $parentId).');
+      remove();
+    }
+  }
 
   @override
   void onAddedDirty() {

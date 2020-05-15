@@ -1,10 +1,8 @@
 import 'package:rive_api/api.dart';
-import 'package:rive_api/plumber.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
-import 'package:rive_api/src/manager/manager.dart';
+import 'package:rive_api/data_model.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/src/model/current_directory.dart';
-import 'package:rive_api/src/model/folder_contents.dart';
+import 'package:rive_api/plumber.dart';
 
 class FolderContentsManager with Subscriptions {
   FolderContentsManager._()
@@ -28,7 +26,13 @@ class FolderContentsManager with Subscriptions {
   void _subscribe() {
     // Start listening for when a directory changes.
     subscribe<CurrentDirectory>((directory) {
-      _getFolderContents(directory);
+      // Send an empty message right away to display an empty file browser
+      // while contents are loading.
+      // TODO: caching
+      Plumber().message<FolderContents>(FolderContents.empty());
+      if (directory != null) {
+        _getFolderContents(directory);
+      }
     });
 
     subscribe<Me>((me) {
@@ -80,7 +84,6 @@ class FolderContentsManager with Subscriptions {
       folders = await _folderApi.myFolders();
     }
 
-    print("Got my files & folders:\n$files\n$folders");
     if (files.isNotEmpty) {
       // Load and prepare pipes for files.
       var fileIds = files.map((e) => e.id).toList(growable: false);

@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
+import 'package:rive_api/data_model.dart';
 
 /// Data model for a logged-in user
 
@@ -32,18 +32,20 @@ class Me extends User {
   final String notice;
 
   factory Me.fromDM(MeDM me) => Me(
-        signedIn: me.signedIn,
-        id: me.id,
-        ownerId: me.ownerId,
-        name: me.name,
-        username: me.username,
-        avatarUrl: me.avatarUrl,
-        isAdmin: me.isAdmin,
-        isPaid: me.isPaid,
-        notificationCount: me.notificationCount,
-        verified: me.verified,
-        notice: me.notice,
+        signedIn: me?.signedIn,
+        id: me?.id,
+        ownerId: me?.ownerId,
+        name: me?.name,
+        username: me?.username,
+        avatarUrl: me?.avatarUrl,
+        isAdmin: me?.isAdmin,
+        isPaid: me?.isPaid,
+        notificationCount: me?.notificationCount,
+        verified: me?.verified,
+        notice: me?.notice,
       );
+
+  bool get isEmpty => ownerId == null;
 
   @override
   bool operator ==(o) => o is Me && o.ownerId == ownerId;

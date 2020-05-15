@@ -1,7 +1,12 @@
-import 'package:rive_api/src/manager/subscriptions.dart';
-import 'package:rive_api/src/plumber.dart';
-import 'package:rive_api/src/model/model.dart';
-import 'package:rive_api/src/api/api.dart';
+import 'dart:async';
+import 'dart:math';
+
+import 'package:rive_api/api.dart';
+import 'package:rive_api/data_model.dart';
+import 'package:rive_api/http.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 
 class UserManager with Subscriptions {
   static UserManager _instance = UserManager._();
@@ -20,18 +25,48 @@ class UserManager with Subscriptions {
   void set meApi(MeApi meApi) => _meApi = meApi;
 
   void loadMe() async {
+    _loadWithRetry();
+  }
+
+  void _me() async {
     var currentMe = _plumber.peek<Me>();
-    var me = Me.fromDM(await _meApi.whoami);
+
+    var meMessage = Me.fromDM(await _meApi.whoami);
 
     // Skip duplicates.
-    if (currentMe != me) {
-      _plumber.message<Me>(me);
+    if (currentMe != meMessage) {
+      _plumber.message<Me>(meMessage);
     }
   }
 
-  void logout() async {
-    // killMe() ?
-    _plumber.flush<Me>();
+  Timer _reconnectTimer;
+  int _reconnectAttempt = 0;
+
+  Future<void> _loadWithRetry() async {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    try {
+      await _me();
+    } on HttpException {
+      Plumber().message<AppState>(AppState.disconnected);
+    }
+
+    if (Plumber().peek<AppState>() != AppState.disconnected) {
+      _reconnectAttempt = 0;
+      return;
+    }
+
+    if (_reconnectAttempt < 1) {
+      _reconnectAttempt = 1;
+    }
+    _reconnectAttempt *= 2;
+    var duration = Duration(milliseconds: min(10000, _reconnectAttempt * 500));
+    _reconnectTimer = Timer(duration, _loadWithRetry);
+  }
+
+  void logout() {
+    var emptyMe = Me.fromDM(null);
+    _plumber.message<Me>(emptyMe);
   }
 
   Future<bool> signout() async {

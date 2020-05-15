@@ -1,7 +1,7 @@
-import 'package:rive_api/src/manager/subscriptions.dart';
-import 'package:rive_api/src/model/model.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/src/plumber.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/plumber.dart';
 
 class FileManager with Subscriptions {
   static FileManager _instance = FileManager._();
@@ -9,21 +9,41 @@ class FileManager with Subscriptions {
 
   FileManager._()
       : _fileApi = FileApi(),
-        _folderApi = FolderApi() {
+        _folderApi = FolderApi(),
+        _plumber = Plumber() {
     subscribe<Me>(_handleNewMe);
     subscribe<List<Team>>(_handleNewTeams);
   }
 
-  final FolderApi _folderApi;
-  final FileApi _fileApi;
+  FileManager.tester(FileApi fileApi, FolderApi folderApi) {
+    _fileApi = fileApi;
+    _folderApi = folderApi;
+    _plumber = Plumber();
+    _attach();
+  }
+
+  void _attach() {
+    subscribe<Me>(_handleNewMe);
+    subscribe<List<Team>>(_handleNewTeams);
+  }
+
+  FolderApi _folderApi;
+  FileApi _fileApi;
+  Plumber _plumber;
   Me _me;
 
   final _folderMap = Map<Owner, List<Folder>>();
   final _fileMap = Map<Folder, List<File>>();
 
   void _handleNewMe(Me me) {
+    if (_me != me) {
+      _clearFolderList();
+    }
     _me = me;
-    _clearFolderList();
+    if (_me.isEmpty) {
+      return;
+    }
+
     loadFolders(me);
   }
 
@@ -39,6 +59,7 @@ class FileManager with Subscriptions {
       }
     });
     removeKeys.forEach((key) {
+      _plumber.flush<List<Folder>>(key.hashCode);
       _folderMap.remove(key);
     });
     _updateFolderList();
@@ -62,20 +83,23 @@ class FileManager with Subscriptions {
     final _foldersDM = await _folderApi.folders(owner.asDM);
     final _folders = Folder.fromDMList(_foldersDM.toList());
     _folderMap[owner] = _folders;
-    Plumber().message(_folders, owner.hashCode);
+    _plumber.message(_folders, owner.hashCode);
     _updateFolderList();
   }
 
   void _updateFolderList() {
-    Plumber().message(_folderMap);
+    _plumber.message(_folderMap);
   }
 
   void _clearFolderList() {
+    _folderMap.keys
+        .forEach((key) => _plumber.flush<List<Folder>>(key.hashCode));
     _folderMap.clear();
-    Plumber().flush<Map<Owner, List<Folder>>>();
+    _plumber.flush<Map<Owner, List<Folder>>>();
   }
 
   void loadFiles(Folder folder, Owner owner) async {
+    // currently unused.
     List<File> _files;
     if (owner is Me) {
       _files =
@@ -86,7 +110,6 @@ class FileManager with Subscriptions {
     }
 
     _fileMap[folder] = _files;
+    _plumber.message(_files, folder.hashCode);
   }
 }
-
-class SelectedFile extends File {}

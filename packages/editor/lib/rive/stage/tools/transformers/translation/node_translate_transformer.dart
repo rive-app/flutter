@@ -17,7 +17,6 @@ class NodeTranslateTransformer extends StageTransformer {
     var failedInversion = Mat2D();
 
     for (final node in _nodes) {
-
       // First assume we can use artboard level mouse move.
       var delta = details.artboardWorld.delta;
 
@@ -33,7 +32,7 @@ class NodeTranslateTransformer extends StageTransformer {
             // failed inversion so we don't attempt to re-process it.
             worldToParents[parentNode] = failedInversion;
           } else {
-            worldToParents[parentNode] = inverse;
+            worldToParents[parentNode] = parentWorldInverse = inverse;
           }
         }
 

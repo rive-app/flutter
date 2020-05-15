@@ -14,7 +14,10 @@ import 'package:rive_core/src/generated/shapes/path_composer_base.dart';
 /// If it wants both, we build both. If it wants none, we still build a world
 /// path.
 class PathComposer extends PathComposerBase {
+  // Shape we last set as the shape we're the path composer for.
   Shape _shape;
+  // First shape we find when visiting ancestors during artboard resolution.
+  // Shape _resolvedShape;
   Shape get shape => _shape;
 
   final ui.Path worldPath = ui.Path();
@@ -23,6 +26,9 @@ class PathComposer extends PathComposerBase {
   ui.Path get fillPath => _fillPath;
 
   void _changeShape(Shape value) {
+    if (value == _shape) {
+      return;
+    }
     // Clean up previous shape's path composer. This should never happen as we
     // don't let the user drag the path composer in the hierarchy, but may as
     // well be safe here in case some code moves it around
@@ -108,9 +114,14 @@ class PathComposer extends PathComposerBase {
   }
 
   @override
+  bool resolveArtboard() {
+    _changeShape(null);
+    return super.resolveArtboard();
+  }
+
+  @override
   void visitAncestor(Component ancestor) {
-    if (ancestor is Shape) {
-      _changeShape(ancestor);
+    if (_shape == null && ancestor is Shape) {      _changeShape(ancestor);
     }
   }
 }

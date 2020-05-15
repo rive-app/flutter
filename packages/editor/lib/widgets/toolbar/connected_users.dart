@@ -50,6 +50,7 @@ class AvatarView extends StatelessWidget {
     Key key,
     this.diameter = 26,
     this.borderWidth = 2,
+    this.padding = 10,
   }) : super(key: key);
 
   final String imageUrl;
@@ -57,6 +58,7 @@ class AvatarView extends StatelessWidget {
   final String name;
   final double diameter;
   final double borderWidth;
+  final double padding;
 
   @override
   Widget build(BuildContext context) {
@@ -65,14 +67,16 @@ class AvatarView extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: EdgeInsets.symmetric(horizontal: padding),
         child: SizedBox(
           width: diameter,
           height: diameter,
           child: Container(
             decoration: BoxDecoration(
               color: imageUrl == null ? color : null,
-              border: Border.all(color: color, width: borderWidth),
+              border: (borderWidth == 0)
+                  ? null
+                  : Border.all(color: color, width: borderWidth),
               borderRadius: BorderRadius.circular(diameter / 2),
             ),
             padding: const EdgeInsets.all(1),

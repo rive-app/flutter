@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:logging/logging.dart';
 
-import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/team_role.dart';
@@ -132,15 +132,5 @@ class RiveTeamsApi<T extends RiveTeam> {
     await api.post('${api.host}/api/teams/$teamId/invite', body: payload);
 
     return ownerId;
-  }
-
-  /// Accepts a team invite
-  Future<void> acceptInvite(int teamId) async {
-    await api.post('${api.host}/api/teams/$teamId/invite/accept');
-  }
-
-  /// Declines a team invite
-  Future<void> declineInvite(int teamId) async {
-    await api.post('${api.host}/api/teams/$teamId/invite/reject');
   }
 }

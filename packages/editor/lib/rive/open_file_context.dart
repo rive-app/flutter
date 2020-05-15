@@ -447,7 +447,7 @@ class OpenFileContext with RiveFileDelegate {
         return true;
 
       case ShortcutAction.toggleEditMode:
-        stage?.toggleEditMode();
+        // TODO: implement
         return true;
 
       case ShortcutAction.cancel:

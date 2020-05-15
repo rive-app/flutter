@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:logging/logging.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/profile.dart';
 

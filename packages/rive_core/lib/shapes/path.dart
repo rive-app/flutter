@@ -32,18 +32,26 @@ abstract class Path extends PathBase {
 
   Mat2D get pathTransform;
 
-
   @override
   Component get timelineParent => _shape;
 
   @override
+  bool resolveArtboard() {
+    _changeShape(null);
+    return super.resolveArtboard();
+  }
+
+  @override
   void visitAncestor(Component ancestor) {
-    if (ancestor is Shape) {
+    if (_shape == null && ancestor is Shape) {
       _changeShape(ancestor);
     }
   }
 
   void _changeShape(Shape value) {
+    if (_shape == value) {
+      return;
+    }
     _shape?.removePath(this);
     value?.addPath(this);
     _shape = value;

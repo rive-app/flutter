@@ -1,24 +1,39 @@
 import 'dart:ui';
 
+import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 /// A Node component as it's drawn on the stage.
-class StageNode extends StageItem<Node> {
+class StageNode extends StageItem<Node> with BoundsDelegate {
   @override
-  AABB get aabb => AABB
-      .fromValues(component.x - _halfNodeSize, component.y - _halfNodeSize,
-          component.x + _halfNodeSize, component.y + _halfNodeSize)
-      .translate(component.artboard.originWorld);
+  AABB get aabb {
+    var aabb = AABB
+        .fromValues(
+            component.worldTransform[4] - _halfNodeSize,
+            component.worldTransform[5] - _halfNodeSize,
+            component.worldTransform[4] + _halfNodeSize,
+            component.worldTransform[5] + _halfNodeSize)
+        .translate(component.artboard.originWorld);
+    return aabb;
+  }
 
   @override
   void draw(Canvas canvas) {
-    final origin = component.artboard.originWorld;
-    final x = component.x;
-    final y = component.y;
+    // TODO: make this efficient
+    var state = selectionState.value;
+    if (state == SelectionState.hovered ||
+        state == SelectionState.selected) {
+      _nodeStroke.color = _nodeFill.color = StageItem.selectedPaint.color;
+    } else {
+      _nodeStroke.color = _nodeFill.color = _pathColor;
+    }
     canvas.save();
-    canvas.translate(origin[0] + x, origin[1] + y);
+    final origin = component.artboard.originWorld;
+    canvas.translate(origin[0], origin[1]);
+    canvas.transform(component.worldTransform.mat4);
     canvas.drawPath(_nodeEdgePath, _nodeStroke);
     canvas.drawPath(_insidePath, _nodeFill);
     canvas.restore();
@@ -89,4 +104,9 @@ class StageNode extends StageItem<Node> {
 
     return insidePath;
   }();
+
+  @override
+  void boundsChanged() {
+    stage?.updateBounds(this);
+  }
 }

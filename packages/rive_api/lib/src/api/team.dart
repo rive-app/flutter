@@ -1,9 +1,10 @@
 /// API calls for a user's volumes
 
 import 'dart:convert';
+
 import 'package:logging/logging.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/data_model.dart';
 
 final _log = Logger('Rive API Volume');
 
@@ -33,5 +34,15 @@ class TeamApi {
       _log.severe('Error formatting teams api response: $e');
       rethrow;
     }
+  }
+
+  /// Accepts a team invite
+  Future<void> acceptInvite(int teamId) async {
+    await api.post('${api.host}/api/teams/$teamId/invite/accept');
+  }
+
+  /// Declines a team invite
+  Future<void> declineInvite(int teamId) async {
+    await api.post('${api.host}/api/teams/$teamId/invite/reject');
   }
 }

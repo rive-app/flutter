@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 
-import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 
 abstract class StageTool {
@@ -13,9 +12,6 @@ abstract class StageTool {
   Stage get stage => _stage;
 
   String get icon;
-
-  EditMode _editMode;
-  EditMode get editMode => _editMode;
 
   /// Most tools will want their transforms in artboard world space.
   bool get inArtboardSpace => true;
@@ -47,12 +43,6 @@ abstract class StageTool {
   /// Cleanup anything that was setup during activation.
   void deactivate() {}
 
-  void setEditMode(EditMode editMode) {
-    _editMode = editMode;
-    onEditModeChange();
-  }
-
-  void onEditModeChange() {}
   void draw(Canvas canvas);
 
   /// Returns true if the stage should advance after movement.

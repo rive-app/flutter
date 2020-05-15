@@ -474,7 +474,6 @@ class Stage extends Debouncer {
       if (tool is TransformingTool) {
         if (_activeTool == null) {
           activatedTool = tool;
-          activatedTool.setEditMode(activeEditMode);
           (activatedTool as TransformingTool).startTransformers(
               file.selection.items.whereType<StageItem>(), _worldMouse);
         } else {
@@ -488,7 +487,6 @@ class Stage extends Debouncer {
         // [_activeTool] is [null] before dragging operation starts.
         if (_activeTool == null) {
           activatedTool = tool;
-          activatedTool.setEditMode(activeEditMode);
           (activatedTool as DraggableTool).startDrag(
               file.selection.items.whereType<StageItem>(),
               artboard,
@@ -861,18 +859,6 @@ class Stage extends Debouncer {
 
   @override
   void onNeedsDebounce() => markNeedsAdvance();
-
-  void updateEditMode(EditMode editMode) {
-    activeEditMode = editMode;
-    if (_activeTool != null && _activeTool is DraggableTool) {
-      _activeTool.setEditMode(editMode);
-    }
-  }
-
-  void toggleEditMode() {
-    // TODO: Try to get the StagePaths or the StageShapes from the current
-    // selection, and set it the current editing shape.
-  }
 
   Cursor get _customCursor =>
       delegate?.context != null ? CustomCursor.find(delegate?.context) : null;

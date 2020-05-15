@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:math';
 
 import 'package:core/error_logger/error_logger.dart';
 import 'package:flutter/foundation.dart';
@@ -8,12 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
-import 'package:rive_api/auth.dart';
+import 'package:rive_api/data_model.dart';
 import 'package:rive_api/files.dart';
-import 'package:rive_api/manager.dart';
-import 'package:rive_api/models/file.dart';
 import 'package:rive_api/folder.dart';
-import 'package:rive_api/models/user.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/models/file.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
@@ -24,9 +23,9 @@ import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 
-enum RiveState { init, login, editor, disconnected, catastrophe }
-
 enum HomeSection { files, notifications, community, recents, getStarted }
+
+enum SelectionMode { single, multi, range }
 
 class _Key {
   final LogicalKeyboardKey logical;
@@ -82,13 +81,7 @@ class Rive {
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
 
-  /// Tracking the home screen state
-  final ValueNotifier<HomeSection> sectionListener =
-      ValueNotifier(HomeSection.files);
-
   final ScrollController treeScrollController = ScrollController();
-
-  final _user = ValueNotifier<RiveUser>(null);
 
   Rive({this.iconCache}) : api = RiveApi() {
     _focusNode = FocusNode(
@@ -106,11 +99,6 @@ class Rive {
 
     _filesApi = _NonUiRiveFilesApi(api);
   }
-
-  ValueListenable<RiveUser> get user => _user;
-
-  // TODO: is this a robust enough check?
-  bool get isSignedIn => _user.value != null;
 
   /// Available tabs in the editor
   final List<RiveTabItem> fileTabs = [];
@@ -132,23 +120,20 @@ class Rive {
   void focus() => _focusNode.requestFocus();
   FocusNode get focusNode => _focusNode;
 
-  final _state = ValueNotifier<RiveState>(RiveState.init);
-  ValueListenable<RiveState> get state => _state;
-
   /// Initial service client and determine what state the app should be in.
-  Future<RiveState> initialize() async {
-    assert(state.value == RiveState.init);
+  Future<void> initialize() async {
     bool ready = await api.initialize();
     if (!ready) {
-      return _state.value = RiveState.catastrophe;
+      Plumber().message<AppState>(AppState.catastrophe);
+      return;
     }
 
-    await _updateUserWithRetry();
+    // Deal with current user (if any), or send to login page.
+    Plumber().getStream<Me>().listen(_onNewMe);
+    UserManager().loadMe();
 
     // Start the frame callback loop.
     SchedulerBinding.instance.addPersistentFrameCallback(_drawFrame);
-
-    return _state.value;
   }
 
   int _lastFrameTime = 0;
@@ -170,88 +155,31 @@ class Rive {
     }
   }
 
-  Timer _reconnectTimer;
-  int _reconnectAttempt = 0;
+  void _onNewMe(Me me) {
+    if (me.isEmpty) {
+      // Signed out.
+      // Walk list backwards as we're removing elements.
+      for (int i = fileTabs.length - 1; i >= 0; i--) {
+        closeTab(fileTabs[i]);
+      }
 
-  /// Retry getting the current user with backoff.
-  Future<void> _updateUserWithRetry() async {
-    _reconnectTimer?.cancel();
-    _reconnectTimer = null;
-
-    try {
-      await updateUser();
-    } on HttpException {
-      _state.value = RiveState.disconnected;
-    }
-    if (_state.value != RiveState.disconnected) {
-      _reconnectAttempt = 0;
+      Plumber().message<AppState>(AppState.login);
       return;
     }
 
-    if (_reconnectAttempt < 1) {
-      _reconnectAttempt = 1;
-    }
-    _reconnectAttempt *= 2;
-    var duration = Duration(milliseconds: min(10000, _reconnectAttempt * 500));
-    print('Will retry connection in $duration.');
-    _reconnectTimer = Timer(
-        Duration(milliseconds: _reconnectAttempt * 500), _updateUserWithRetry);
-  }
+    // Logging in.
+    Plumber().message<AppState>(AppState.home);
 
-  Future<RiveUser> updateUser() async {
-    UserManager().loadMe();
-    var auth = RiveAuth(api);
-    // TODO: can probably move nav control into streams
-    // and ditch everything below this.
-    var me = await auth.whoami();
-
-    print("whoami ready: ${me != null}");
-
-    if (me != null) {
-      _user.value = me;
-      _state.value = RiveState.editor;
-
-      // Track the currently logged in user. Any error report will include the
-      // currently logged in user for context.
-      ErrorLogger.instance.user = ErrorLogUser(
-        id: me.ownerId.toString(),
-        username: me.username,
-      );
-
-      await Settings.setString(
-          Preferences.spectreToken, api.cookies['spectre']);
-
-      selectTab(systemTab);
-      return me;
-    } else {
-      _state.value = RiveState.login;
-    }
-    return null;
-  }
-
-  // Tell the server that the user has signed out and remove the token from
-  // Shared Preferences.
-  Future<bool> signout({VoidCallback onSignout}) async {
-    var result = await RiveAuth(api).signout();
-    if (!result) {
-      return false;
-    }
-
-    ErrorLogger.instance.dropCrumb(
-      category: 'auth',
-      message: 'signed out',
-      severity: CrumbSeverity.info,
+    // Track the currently logged in user. Any error report will include the
+    // currently logged in user for context.
+    ErrorLogger.instance.user = ErrorLogUser(
+      id: me.ownerId.toString(),
+      username: me.username,
     );
 
-    result = await Settings.clear(Preferences.spectreToken);
+    Settings.setString(Preferences.spectreToken, api.cookies['spectre']);
 
-    if (!result) {
-      return false;
-    }
-    onSignout?.call();
-    _user.value = null;
-    _state.value = RiveState.login;
-    return true;
+    selectTab(systemTab);
   }
 
   void closeTab(RiveTabItem value) {
@@ -461,5 +389,3 @@ class Rive {
     return openFileTab.file;
   }
 }
-
-enum SelectionMode { single, multi, range }

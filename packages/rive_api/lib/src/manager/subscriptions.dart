@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:rive_api/src/plumber.dart';
+import 'package:rive_api/plumber.dart';
 
 typedef SubscribeCallback<T> = void Function(T);
 
@@ -14,11 +14,11 @@ mixin Subscriptions {
     subscriptions.clear();
   }
 
-  void subscribe<T>(SubscribeCallback<T> action) {
+  void subscribe<T>(SubscribeCallback<T> action, [int id]) {
     if (subscriptions == null) {
       subscriptions = [];
     }
-    var stream = Plumber().getStream<T>();
+    var stream = Plumber().getStream<T>(id);
     var subscription = stream.listen(action);
     subscriptions.add(subscription);
   }

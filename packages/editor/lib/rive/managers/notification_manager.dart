@@ -1,116 +1,58 @@
 import 'dart:async';
 
+import 'package:pedantic/pedantic.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart' as model;
+import 'package:rive_api/plumber.dart';
 import 'package:rive_api/rive_api.dart';
-import 'package:rive_api/teams.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/apis/notification.dart';
-import 'package:rive_api/models/notification.dart';
 
-import 'package:rxdart/rxdart.dart';
-import 'package:meta/meta.dart';
-
-const pollDuration = Duration(minutes: 5);
+const pollDuration = Duration(minutes: 2);
 
 /// State manager for notifications
-class NotificationManager {
-  Sink<bool> teamUpdateSink;
-  NotificationManager({@required RiveApi api, this.teamUpdateSink})
-      : _api = NotificationsApi(api),
-        _teamApi = RiveTeamsApi(api) {
-    _init();
+class NotificationManager with Subscriptions {
+  static final NotificationManager _instance = NotificationManager._();
+  factory NotificationManager() => _instance;
+
+  NotificationManager._() {
+    _notificationsApi = NotificationsApi();
+    _teamApi = TeamApi();
+    _attach();
+    _poll();
   }
-  final NotificationsApi _api;
-  final RiveTeamsApi _teamApi;
 
-  /*
-   * Outbound streams
-   */
+  NotificationManager.tester(
+    NotificationsApi notificationsApi,
+    TeamApi teamApi,
+  ) {
+    _notificationsApi = notificationsApi;
+    _teamApi = teamApi;
+    _attach();
+  }
 
-  /// Outbound stream of an interable of notifications
-  final _notificationsController =
-      BehaviorSubject<Iterable<RiveNotification>>();
-  Stream<Iterable<RiveNotification>> get notificationsStream =>
-      _notificationsController.stream;
-
-  /// Outbound stream of the notifications count
-  final _notificationCountController = BehaviorSubject<int>();
-  Stream<int> get notificationCountStream =>
-      _notificationCountController.stream;
-
-  /// Outbound stream of any notification messaging errors
-  final _notificationErrorController = BehaviorSubject<HttpException>();
-  Stream<HttpException> get notificationErrorStream =>
-      _notificationErrorController.stream;
-
-  /*
-   * Inbound sinks
-   */
-
-  /// Inbound acceptance of a team invite
-  final _acceptTeamInviteController =
-      StreamController<RiveTeamInviteNotification>.broadcast();
-  Sink<RiveTeamInviteNotification> get acceptTeamInvite =>
-      _acceptTeamInviteController;
-
-  /// Inbound decline of a team invite
-  final _declineTeamInviteController =
-      StreamController<RiveTeamInviteNotification>.broadcast();
-  Sink<RiveTeamInviteNotification> get declineTeamInvite =>
-      _declineTeamInviteController;
+  NotificationsApi _notificationsApi;
+  TeamApi _teamApi;
 
   /// Clean up all the stream controllers and that polling timer
+  @override
   void dispose() {
-    _notificationsController.close();
-    _notificationCountController.close();
-    _notificationErrorController.close();
-    _acceptTeamInviteController.close();
-    _declineTeamInviteController.close();
+    super.dispose();
     _poller?.cancel();
   }
 
-  /*
-   * State
-   */
-
   /// Initiatize the state
-  void _init() {
-    // Handle incoming team invitation acceptances
-    _acceptTeamInviteController.stream.listen(_acceptTeamInvite);
-    // Handle incloing team invitation declines
-    _declineTeamInviteController.stream.listen(_declineTeamInvite);
-    // Fetch the notifications
+  void _attach() {
     _fetchNotifications();
-    // Start the polling timer to periodically pull notifications
+    Plumber().getStream<model.Me>().listen((event) {
+      _fetchNotifications();
+    });
+  }
+
+  void _poll() {
     _poller = Timer.periodic(
       pollDuration,
       (t) => _fetchNotifications(),
     );
-  }
-
-  /// Cache the notifications coming from the server
-  final __notifications = <RiveNotification>[];
-  List<RiveNotification> get _notifications => __notifications;
-  set _notifications(List<RiveNotification> values) {
-    __notifications.clear();
-    __notifications.addAll(values);
-    _notificationsController.add(__notifications);
-    _notificationCountController.add(__notifications.length);
-  }
-
-  /// Removes a notification from the list
-  void _removeNotification(RiveNotification n) {
-    _notifications.remove(n);
-    _notificationsController.add(__notifications);
-    _notificationCountController.add(__notifications.length);
-  }
-
-  HttpException __notificationError;
-  HttpException get _notificationError => __notificationError;
-  set _notificationError(HttpException exception) {
-    if (_notificationError != exception) {
-      __notificationError = exception;
-      _notificationErrorController.add(__notificationError);
-    }
   }
 
   /// Timer for polling new notifications
@@ -122,25 +64,47 @@ class NotificationManager {
 
   /// Fetch a user's notifications from the back end
   Future<void> _fetchNotifications() async {
+    var me = Plumber().peek<model.Me>();
+    if (me == null || me.isEmpty) {
+      return;
+    }
     try {
-      _notifications = await _api.notifications;
-      _notificationError = null;
+      var notifications =
+          model.Notification.fromDMList(await _notificationsApi.notifications);
+      Plumber().message(notifications);
     } on HttpException catch (e) {
-      _notificationError = e;
       print('Failed to update notifications $e');
     }
   }
 
   /// Accepts a team invite
-  Future<void> _acceptTeamInvite(RiveTeamInviteNotification n) async {
-    await _teamApi.acceptInvite(n.teamId);
-    teamUpdateSink.add(true);
-    _removeNotification(n);
+  Future<void> acceptTeamInvite(model.TeamInviteNotification n) async {
+    try {
+      await _teamApi.acceptInvite(n.teamId);
+    } on ApiException catch (error) {
+      if (error.response.body.contains('no-invite-found')) {
+        // in this context we're fine with errors.
+        print('Couldnt find invite: $error');
+      } else {
+        rethrow;
+      }
+    }
+    unawaited(_fetchNotifications());
+    TeamManager().loadTeams();
   }
 
   /// Decline a team invite
-  Future<void> _declineTeamInvite(RiveTeamInviteNotification n) async {
-    await _teamApi.declineInvite(n.teamId);
-    _removeNotification(n);
+  Future<void> declineTeamInvite(model.TeamInviteNotification n) async {
+    try {
+      await _teamApi.declineInvite(n.teamId);
+    } on ApiException catch (error) {
+      if (error.response.body.contains('no-invite-found')) {
+        // in this context we're fine with errors.
+        print('Couldnt find invite: $error');
+      } else {
+        rethrow;
+      }
+    }
+    unawaited(_fetchNotifications());
   }
 }

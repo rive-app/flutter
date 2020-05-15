@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
@@ -27,10 +28,8 @@ class _FolderState extends State<BrowserFolder> {
     }
   }
 
-  // If we have a border, remove 4 pixels of padding.
-  EdgeInsetsGeometry get padding => _isHovered
-      ? const EdgeInsets.only(left: 11, top: 13, bottom: 14, right: 11)
-      : const EdgeInsets.only(left: 15, top: 17, bottom: 18, right: 15);
+  EdgeInsetsGeometry get padding =>
+      const EdgeInsets.only(left: 15, top: 17, bottom: 18, right: 15);
 
   @override
   Widget build(BuildContext context) {
@@ -53,18 +52,17 @@ class _FolderState extends State<BrowserFolder> {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: colors.fileBackgroundLightGrey,
-            borderRadius: BorderRadius.circular(10),
-            border: _isHovered
-                ? Border.all(
-                    color: colors.fileSelectedBlue,
-                    width: 4,
-                  )
-                : null,
-          ),
+              color: colors.fileBackgroundLightGrey,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _isHovered ? colors.fileSelectedBlue : Colors.white,
+                width: 4,
+              )),
           child: Row(
             children: [
-              TintedIcon(icon: 'folder', color: colors.black30),
+              TintedIcon(
+                  icon: (widget.folderId == 0) ? 'trash' : 'folder',
+                  color: colors.black30),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

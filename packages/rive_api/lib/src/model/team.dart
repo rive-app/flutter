@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:rive_api/models/team_role.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
+import 'package:rive_api/data_model.dart';
 import 'owner.dart';
 
 class Team extends Owner {

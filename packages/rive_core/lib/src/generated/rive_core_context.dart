@@ -912,6 +912,7 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.thicknessPropertyKey:
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
+      case NodeBase.rotationPropertyKey:
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
       case NodeBase.opacityPropertyKey:
@@ -931,6 +932,9 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case NodeBase.yPropertyKey:
         return (object as NodeBase).yKeyState;
+        break;
+      case NodeBase.rotationPropertyKey:
+        return (object as NodeBase).rotationKeyState;
         break;
       case NodeBase.scaleXPropertyKey:
         return (object as NodeBase).scaleXKeyState;
@@ -961,6 +965,11 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.yPropertyKey:
         if (object is NodeBase) {
           object.yKeyState = value;
+        }
+        break;
+      case NodeBase.rotationPropertyKey:
+        if (object is NodeBase) {
+          object.rotationKeyState = value;
         }
         break;
       case NodeBase.scaleXPropertyKey:
@@ -1000,6 +1009,12 @@ abstract class RiveCoreContext extends CoreContext {
         if (object is NodeBase) {
           object.yAnimated = null;
           object.yKeyState = KeyState.none;
+        }
+        break;
+      case NodeBase.rotationPropertyKey:
+        if (object is NodeBase) {
+          object.rotationAnimated = null;
+          object.rotationKeyState = KeyState.none;
         }
         break;
       case NodeBase.scaleXPropertyKey:
@@ -1866,6 +1881,9 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case NodeBase.yPropertyKey:
         (object as NodeBase).yAnimated = value;
+        break;
+      case NodeBase.rotationPropertyKey:
+        (object as NodeBase).rotationAnimated = value;
         break;
       case NodeBase.scaleXPropertyKey:
         (object as NodeBase).scaleXAnimated = value;

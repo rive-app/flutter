@@ -91,19 +91,21 @@ class _RivePopupButtonState extends State<RivePopupButton> {
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(5),
             ),
-            child: Center(
-              child: widget.showChevron
-                  ? Row(
-                      children: [
-                        widget.iconBuilder(context, activeFile, _isHovered),
-                        TintedIcon(
-                          color: RiveTheme.of(context).colors.toolbarButton,
-                          icon: 'dropdown',
-                        ),
-                      ],
-                    )
-                  : widget.iconBuilder(context, activeFile, _isHovered),
-            ),
+            child: widget.showChevron
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      widget.iconBuilder(context, activeFile, _isHovered),
+                      TintedIcon(
+                        position: TintedIconPosition.round,
+                        color: RiveTheme.of(context).colors.toolbarButton,
+                        icon: 'dropdown',
+                      ),
+                    ],
+                  )
+                : Center(
+                    child: widget.iconBuilder(context, activeFile, _isHovered),
+                  ),
           ),
         ),
         itemBuilder: (context, item, isHovered) => item.itemBuilder(

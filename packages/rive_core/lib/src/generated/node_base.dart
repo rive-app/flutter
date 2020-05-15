@@ -135,12 +135,20 @@ abstract class NodeBase extends ContainerComponent {
   /// --------------------------------------------------------------------------
   /// Rotation field with key 15.
   double _rotation = 0;
+  double _rotationAnimated;
+  KeyState _rotationKeyState;
   static const int rotationPropertyKey = 15;
-  double get rotation => _rotation;
+
+  /// Get the [_rotation] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get rotation => _rotationAnimated ?? _rotation;
+
+  /// Get the non-animation [_rotation] field value.
+  double get rotationCore => _rotation;
 
   /// Change the [_rotation] field value.
   /// [rotationChanged] will be invoked only if the field's value has changed.
-  set rotation(double value) {
+  set rotationCore(double value) {
     if (_rotation == value) {
       return;
     }
@@ -148,6 +156,38 @@ abstract class NodeBase extends ContainerComponent {
     _rotation = value;
     onPropertyChanged(rotationPropertyKey, from, value);
     rotationChanged(from, value);
+  }
+
+  set rotation(double value) {
+    if (context != null && context.isAnimating) {
+      _rotationAnimate(value, true);
+      return;
+    }
+    rotationCore = value;
+  }
+
+  void _rotationAnimate(double value, bool autoKey) {
+    if (_rotationAnimated == value) {
+      return;
+    }
+    double from = rotation;
+    _rotationAnimated = value;
+    double to = rotation;
+    onAnimatedPropertyChanged(rotationPropertyKey, autoKey, from, to);
+    rotationChanged(from, to);
+  }
+
+  double get rotationAnimated => _rotationAnimated;
+  set rotationAnimated(double value) => _rotationAnimate(value, false);
+  KeyState get rotationKeyState => _rotationKeyState;
+  set rotationKeyState(KeyState value) {
+    if (_rotationKeyState == value) {
+      return;
+    }
+    _rotationKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        rotationPropertyKey, false, _rotationAnimated, _rotationAnimated);
   }
 
   void rotationChanged(double from, double to);

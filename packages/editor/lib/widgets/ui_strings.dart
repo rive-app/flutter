@@ -59,4 +59,5 @@ HashMap<String, String> _defaultUIStrings =
   "hold": "Hold",
   "linear": "Linear",
   "cubic": "Cubic",
+  "rotation": "Rotation",
 });

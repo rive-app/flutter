@@ -1,6 +1,8 @@
-import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/src/api/api.dart';
+import 'package:rive_api/src/data_model/data_model.dart';
 
 import 'fixtures/api_responses.dart';
 import 'fixtures/data_models.dart';
@@ -38,12 +40,13 @@ void main() {
       expect(me.verified, true);
     });
 
-    test('load me details api fails if not logged in', () {
+    test('load me details api fails if not logged in', () async {
       final riveApi = MockRiveApi();
       when(riveApi.getFromPath('/api/me'))
           .thenAnswer((_) async => failureMeResponse);
       final mockApi = MeApi(riveApi);
-      expect(mockApi.whoami, throwsException);
+      final nullResponse = await mockApi.whoami;
+      expect(nullResponse, null);
     });
 
     test('signout successful', () async {
@@ -295,6 +298,19 @@ void main() {
       expect(newFile.id, 10);
       expect(newFile.preview, null);
       expect(newFile.ownerId, 1);
+    });
+  });
+
+  group('Notifications', () {
+    test('get notifications', () async {
+      final riveApi = MockRiveApi();
+      when(riveApi.get('/api/notifications'))
+          .thenAnswer((_) async => successNotificationsResponse);
+      final mockApi = NotificationsApi(riveApi);
+      final notifications = await mockApi.notifications;
+      expect(notifications.length, 2);
+      expect(notifications.first is TeamInviteAcceptedNotificationDM, true);
+      expect(notifications.last is TeamInviteRejectedNotificationDM, true);
     });
   });
 }
