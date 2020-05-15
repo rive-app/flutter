@@ -20,6 +20,7 @@ class HamburgerPopupButton extends StatelessWidget {
             ? RiveThemeData().colors.popupIconHover
             : RiveThemeData().colors.popupIcon,
         icon: 'tool-menu',
+        position: TintedIconPosition.round,
       ),
       width: 267,
       contextItemsBuilder: (context) => [

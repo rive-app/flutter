@@ -69,6 +69,13 @@ abstract class InspectingColor {
   @protected
   void editorClosed();
 
+  // The user clicked on the close guard for the popup owning the inspecting
+  // color. Return to close. This method returns a future in case you need to
+  // debounce or wait for another action to determine if the close should occur.
+  Future<bool> shouldClickGuardClosePopup() async {
+    return true;
+  }
+
   /// Whether the inspecting color is a solid or a linear/radial gradient.
   final ValueNotifier<ColorType> type = ValueNotifier<ColorType>(null);
 
@@ -163,6 +170,17 @@ class ShapesInspectingColor extends InspectingColor {
       paint.paintMutatorChanged.addListener(_mutatorChanged);
     }
     _updatePaints();
+  }
+
+  /// We override this method to check if a stage gradient handle was clicked on
+  /// to prevent closing the popup.
+  @override
+  Future<bool> shouldClickGuardClosePopup() async {
+    return Future.delayed(const Duration(milliseconds: 20), () {
+      var didSelect = _didSelectGradientHandle;
+      _didSelectGradientHandle = false;
+      return !didSelect;
+    });
   }
 
   /// Because radial gradients inherit from linear ones, we can share some of
@@ -722,8 +740,10 @@ class ShapesInspectingColor extends InspectingColor {
   @override
   void editorOpened() => _updatePaints();
 
+  bool _didSelectGradientHandle = false;
   bool _stageSelected(StageItem item) {
     if (item is StageGradientStop) {
+      _didSelectGradientHandle = true;
       var gradient = item.component.parent as core.LinearGradient;
       var stopIndex = gradient.gradientStops.indexOf(item.component);
       changeStopIndex(stopIndex, updatePaints: false);

@@ -50,7 +50,7 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
           // already open.
           return;
         }
-        
+
         _popup = InspectorPopout.popout(
           widget.inspectorContext,
           width: 206,
@@ -61,10 +61,13 @@ class _InspectorColorSwatchState extends State<InspectorColorSwatch> {
               inspecting: color,
             );
           },
-          autoClose: false,
+          // autoClose: false,
           onClose: () {
             widget.inspectingColor.stopEditing();
             _popup = null;
+          },
+          shouldClose: () async {
+            return widget.inspectingColor.shouldClickGuardClosePopup();
           },
         );
       },

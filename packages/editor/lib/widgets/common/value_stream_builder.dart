@@ -59,7 +59,6 @@ class _ValueStreamDebounceBuilderState<T>
     widget.stream.listen((v) {
       value = v;
       _debouncer ??= Timer(widget.duration, () {
-        print('Adding $value');
         _controller.add(value);
         _debouncer = null;
       });
