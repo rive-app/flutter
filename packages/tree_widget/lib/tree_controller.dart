@@ -110,6 +110,37 @@ abstract class TreeController<T> with ChangeNotifier {
     }
   }
 
+  /// Show the item by expanding its parents
+  void expandTo(T item) {
+    for (final d in data) {
+      final parents = _findParents(null, d, item);
+      if (parents.isNotEmpty) {
+        for (final parent in parents) {
+          expand(parent);
+        }
+        break;
+      }
+    }
+  }
+
+  List<T> _findParents(T parent, T child, T searchItem) {
+    final children = childrenOf(child);
+    if (searchItem == child) {
+      return [parent];
+    } else if (children.isEmpty) {
+      return <T>[];
+    } else {
+      for (final item in children) {
+        final foundParents = _findParents(child, item, searchItem);
+        if (foundParents.isNotEmpty) {
+          return foundParents..add(parent);
+        }
+      }
+      // Not found, return an empty list
+      return <T>[];
+    }
+  }
+
   /// Flatten the structure from a hierarchical tree with parent child
   /// relationships to a linear array with indentation properties. This also
   /// generates metadata for widgets to draw lines connecting the tree and it
