@@ -16,5 +16,6 @@ class ShapePaintMutator {
   void initializePaintMutator(ShapePaintContainer container, Paint paint) {
     _shapePaintContainer = container;
     _paint = paint;
+    _shapePaintContainer?.onPaintMutatorChanged(this);
   }
 }

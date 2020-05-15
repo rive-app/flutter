@@ -11,6 +11,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/rive_animation_controller.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
+import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/transform_space.dart';
 import 'package:utilities/dependency_sorter.dart';
@@ -391,4 +392,13 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   }
 
   void _onControllerPlayingChanged() => context?.markNeedsAdvance();
+
+  @override
+  void onFillsChanged() {}
+
+  @override
+  void onPaintMutatorChanged(ShapePaintMutator mutator) {}
+
+  @override
+  void onStrokesChanged() {}
 }
