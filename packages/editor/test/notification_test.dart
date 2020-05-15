@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/src/model/model.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/model.dart';
 
 import 'package:rive_api/src/plumber.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
