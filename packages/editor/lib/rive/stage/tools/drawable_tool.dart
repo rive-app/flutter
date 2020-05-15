@@ -1,4 +1,6 @@
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_core/artboard.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -35,10 +37,10 @@ abstract class DrawableTool extends StageTool with DraggableTool {
       stage.activateAction(ShortcutAction.translateTool);
 
   @override
-  void offScreen() => _removeCursor();
+  void mouseExit(Artboard activeArtboard, Vec2D worldMouse) => _removeCursor();
 
   @override
-  void onScreen() => _addCursor();
+  void mouseEnter(Artboard activeArtboard, Vec2D worldMouse) => _addCursor();
 
   void _addCursor() =>
 

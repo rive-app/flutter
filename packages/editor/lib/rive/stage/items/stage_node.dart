@@ -24,8 +24,7 @@ class StageNode extends StageItem<Node> with BoundsDelegate {
   void draw(Canvas canvas) {
     // TODO: make this efficient
     var state = selectionState.value;
-    if (state == SelectionState.hovered ||
-        state == SelectionState.selected) {
+    if (state == SelectionState.hovered || state == SelectionState.selected) {
       _nodeStroke.color = _nodeFill.color = StageItem.selectedPaint.color;
     } else {
       _nodeStroke.color = _nodeFill.color = _pathColor;
