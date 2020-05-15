@@ -196,7 +196,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     _dependencyOrder = order;
     for (final component in _dependencyOrder) {
       component.graphOrder = graphOrder++;
-      component.dirt = 255;
+      // component.dirt = 255;
     }
 
     _dirt |= ComponentDirt.components;

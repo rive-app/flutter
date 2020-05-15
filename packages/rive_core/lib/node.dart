@@ -1,17 +1,15 @@
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/src/generated/node_base.dart';
-import 'package:rive_core/transform_delegate.dart';
 
 export 'src/generated/node_base.dart';
-
-abstract class NodeDelegate with BoundsDelegate, TransformDelegate {}
 
 class Node extends NodeBase {
   final Mat2D transform = Mat2D();
   final Mat2D worldTransform = Mat2D();
-  NodeDelegate delegate;
+  BoundsDelegate _delegate;
 
   double _renderOpacity = 0;
   double get renderOpacity => _renderOpacity;
@@ -52,9 +50,17 @@ class Node extends NodeBase {
     } else {
       Mat2D.copy(worldTransform, transform);
     }
-
-    delegate?.transformChanged();
+    _delegate?.boundsChanged();
     worldTransformed();
+  }
+
+  @override
+  void userDataChanged(dynamic from, dynamic to) {
+    if (to is BoundsDelegate) {
+      _delegate = to;
+    } else {
+      _delegate = null;
+    }
   }
 
   void calculateWorldTransform() {
@@ -84,6 +90,10 @@ class Node extends NodeBase {
     if (!addDirt(ComponentDirt.transform)) {
       return;
     }
+    markWorldTransformDirty();
+  }
+
+  void markWorldTransformDirty() {
     addDirt(ComponentDirt.worldTransform, recurse: true);
   }
 
@@ -115,5 +125,11 @@ class Node extends NodeBase {
   @override
   void opacityChanged(double from, double to) {
     markTransformDirty();
+  }
+
+  @override
+  void parentChanged(ContainerComponent from, ContainerComponent to) {
+    super.parentChanged(from, to);
+    markWorldTransformDirty();
   }
 }

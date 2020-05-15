@@ -5,12 +5,14 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
-import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 
-class NodeTool extends StageTool with ClickableTool {
+// TODO: update node translation to be in parent space.
+class NodeTool extends DrawableTool with ClickableTool {
   static final NodeTool instance = NodeTool._();
 
   NodeTool._();
+  Node _node;
 
   @override
   void onClick(Artboard artboard, Vec2D worldMouse) {
@@ -20,15 +22,19 @@ class NodeTool extends StageTool with ClickableTool {
     // final selection = rive.selection.items;
     final ContainerComponent parent = artboard;
 
-    final node = Node()
+    _node = Node()
       ..name = "Node"
       ..x = worldMouse[0]
       ..y = worldMouse[1];
 
     core.batchAdd(() {
-      core.add(node);
-      parent.appendChild(node);
+      core.add(_node);
+      parent.appendChild(_node);
     });
+
+    // TODO: capture only if the mouse up resulted in no drag (drag will auto
+    // capture on end).
+    core.captureJournalEntry();
   }
 
   @override
@@ -36,4 +42,18 @@ class NodeTool extends StageTool with ClickableTool {
 
   @override
   void draw(Canvas canvas) {}
+
+  @override
+  void updateDrag(Vec2D worldMouse) {
+    if (_node == null) {
+      return;
+    }
+    _node.x = worldMouse[0];
+    _node.y = worldMouse[1];
+  }
+
+  @override
+  void endDrag() {    _node = null;
+    super.endDrag();
+  }
 }

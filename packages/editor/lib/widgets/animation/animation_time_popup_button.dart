@@ -138,7 +138,6 @@ class AnimationTimePopupButton extends StatelessWidget {
                   duration: debounceDuration,
                   // This will rebuild whenever the time changes
                   builder: (context, snapshot) {
-                    print('Current time: ${snapshot.data}');
                     return snapshot.hasData
                         ? Text(
                             converter.toDisplayValue(snapshot.data.round()),
