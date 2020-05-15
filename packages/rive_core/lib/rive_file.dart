@@ -1,27 +1,22 @@
-import 'package:flutter/material.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:core/coop/coop_client.dart' as core;
-
-import 'package:local_data/local_data.dart';
-
 import 'package:core/coop/change.dart';
+import 'package:core/coop/coop_client.dart' as core;
 import 'package:core/coop/player.dart';
 import 'package:core/core.dart';
 import 'package:core/debounce.dart';
-
-import 'package:rive_api/src/api/api.dart';
+import 'package:flutter/material.dart';
+import 'package:local_data/local_data.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/artists.dart';
-
-import 'package:rive_core/backboard.dart';
-import 'package:rive_core/rive_core_field_type.dart';
-import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/backboard.dart';
+import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/persist/persist.dart';
+import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 export 'package:rive_core/src/generated/rive_core_context.dart';
 
 class RiveFile extends RiveCoreContext {

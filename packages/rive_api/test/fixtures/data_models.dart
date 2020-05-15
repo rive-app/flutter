@@ -1,5 +1,5 @@
+import 'package:rive_api/data_model.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
 
 MeDM getMe({int ownerId = 2}) {
   return MeDM(

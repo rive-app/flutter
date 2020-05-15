@@ -1,7 +1,12 @@
-import 'package:rive_api/src/manager/subscriptions.dart';
-import 'package:rive_api/src/plumber.dart';
-import 'package:rive_api/src/model/model.dart';
-import 'package:rive_api/src/api/api.dart';
+import 'dart:async';
+import 'dart:math';
+
+import 'package:rive_api/api.dart';
+import 'package:rive_api/data_model.dart';
+import 'package:rive_api/http.dart';
+import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 
 class UserManager with Subscriptions {
   static UserManager _instance = UserManager._();
@@ -20,11 +25,13 @@ class UserManager with Subscriptions {
   void set meApi(MeApi meApi) => _meApi = meApi;
 
   void loadMe() async {
+    _loadWithRetry();
+  }
+
+  void _me() async {
     var currentMe = _plumber.peek<Me>();
 
     var meMessage = Me.fromDM(await _meApi.whoami);
-
-    // TODO: try to reconnect.
 
     // Skip duplicates.
     if (currentMe != meMessage) {
@@ -32,68 +39,30 @@ class UserManager with Subscriptions {
     }
   }
 
-  /** TODO: reconnecting logic: needs RiveState stream.
-     
-    Future<RiveUser> updateUser() async {
-      UserManager().loadMe();
-      var auth = RiveAuth(api);
-      // TODO: can probably move nav control into streams
-      // and ditch everything below this.
-      var me = await auth.whoami();
+  Timer _reconnectTimer;
+  int _reconnectAttempt = 0;
 
-      print("whoami ready: ${me != null}");
-
-      if (me != null) {
-        _user.value = me;
-        _state.value = RiveState.editor;
-
-        // Track the currently logged in user. Any error report will include the
-        // currently logged in user for context.
-        ErrorLogger.instance.user = ErrorLogUser(
-          id: me.ownerId.toString(),
-          username: me.username,
-        );
-
-        await Settings.setString(
-            Preferences.spectreToken, api.cookies['spectre']);
-
-        selectTab(systemTab);
-        return me;
-      } else {
-        _state.value = RiveState.login;
-      }
-      return null;
+  Future<void> _loadWithRetry() async {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    try {
+      await _me();
+    } on HttpException {
+      Plumber().message<AppState>(AppState.disconnected);
     }
 
-    Timer _reconnectTimer;
-
-    int _reconnectAttempt = 0;
-
-    /// Retry getting the current user with backoff.
-    Future<void> _updateUserWithRetry() async {
-      _reconnectTimer?.cancel();
-      _reconnectTimer = null;
-
-      try {
-        // await updateUser();
-      } on HttpException {
-        _state.value = RiveState.disconnected;
-      }
-      if (_state.value != RiveState.disconnected) {
-        _reconnectAttempt = 0;
-        return;
-      }
-
-      if (_reconnectAttempt < 1) {
-        _reconnectAttempt = 1;
-      }
-      _reconnectAttempt *= 2;
-      var duration = Duration(milliseconds: min(10000, _reconnectAttempt * 500));
-      print('Will retry connection in $duration.');
-      _reconnectTimer = Timer(
-          Duration(milliseconds: _reconnectAttempt * 500), _updateUserWithRetry);
+    if (Plumber().peek<AppState>() != AppState.disconnected) {
+      _reconnectAttempt = 0;
+      return;
     }
-   */
+
+    if (_reconnectAttempt < 1) {
+      _reconnectAttempt = 1;
+    }
+    _reconnectAttempt *= 2;
+    var duration = Duration(milliseconds: min(10000, _reconnectAttempt * 500));
+    _reconnectTimer = Timer(duration, _loadWithRetry);
+  }
 
   void logout() {
     var emptyMe = Me.fromDM(null);

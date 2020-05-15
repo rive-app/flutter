@@ -1,11 +1,10 @@
 /// API calls for the logged-in user
 
 import 'dart:convert';
-import 'package:logging/logging.dart';
-import 'package:rive_api/src/api/api.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
 
-final _log = Logger('Rive API Notification');
+import 'package:logging/logging.dart';
+import 'package:rive_api/api.dart';
+import 'package:rive_api/data_model.dart';
 
 final Logger log = Logger('Rive API');
 

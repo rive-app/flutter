@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
+import 'package:rive_api/data_model.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_api/folder.dart';
 import 'package:rive_api/manager.dart';
@@ -21,8 +22,6 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
-
-enum RiveState { init, login, editor, disconnected, catastrophe }
 
 enum HomeSection { files, notifications, community, recents, getStarted }
 
@@ -121,15 +120,12 @@ class Rive {
   void focus() => _focusNode.requestFocus();
   FocusNode get focusNode => _focusNode;
 
-  final _state = ValueNotifier<RiveState>(RiveState.init);
-  ValueListenable<RiveState> get state => _state;
-
   /// Initial service client and determine what state the app should be in.
-  Future<RiveState> initialize() async {
-    assert(state.value == RiveState.init);
+  Future<void> initialize() async {
     bool ready = await api.initialize();
     if (!ready) {
-      return _state.value = RiveState.catastrophe;
+      Plumber().message<AppState>(AppState.catastrophe);
+      return;
     }
 
     // Deal with current user (if any), or send to login page.
@@ -138,8 +134,6 @@ class Rive {
 
     // Start the frame callback loop.
     SchedulerBinding.instance.addPersistentFrameCallback(_drawFrame);
-
-    return _state.value;
   }
 
   int _lastFrameTime = 0;
@@ -164,12 +158,17 @@ class Rive {
   void _onNewMe(Me me) {
     if (me.isEmpty) {
       // Signed out.
-      _state.value = RiveState.login;
+      // Walk list backwards as we're removing elements.
+      for (int i = fileTabs.length - 1; i >= 0; i--) {
+        closeTab(fileTabs[i]);
+      }
+
+      Plumber().message<AppState>(AppState.login);
       return;
     }
 
     // Logging in.
-    _state.value = RiveState.editor;
+    Plumber().message<AppState>(AppState.home);
 
     // Track the currently logged in user. Any error report will include the
     // currently logged in user for context.

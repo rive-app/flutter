@@ -1,4 +1,4 @@
-import 'package:rive_api/src/data_model/data_model.dart';
+import 'package:rive_api/data_model.dart';
 
 abstract class Owner {
   const Owner(

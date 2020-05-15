@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:rive_api/src/plumber.dart';
+import 'package:rive_api/plumber.dart';
 
 typedef SubscribeCallback<T> = void Function(T);
 

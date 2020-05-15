@@ -1,7 +1,7 @@
 @Timeout(const Duration(seconds: 1))
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rive_api/src/model/model.dart';
-import 'package:rive_api/src/plumber.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 

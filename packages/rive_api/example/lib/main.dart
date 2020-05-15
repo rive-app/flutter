@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:rive_api/src/api/api.dart' as rive;
+import 'package:rive_api/api.dart' as rive;
 import 'package:rive_api/auth.dart' as rive;
 
 void main() async {

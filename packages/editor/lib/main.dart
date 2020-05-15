@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
@@ -72,7 +73,7 @@ Future<void> main() async {
   RiveManager();
   NotificationManager();
 
-  // if (await rive.initialize() != RiveState.catastrophe) {
+  // if (await rive.initialize() != AppState.catastrophe) {
   //   // this is just for the prototype...
   //   // await rive.open('100/100');
   // }
@@ -127,14 +128,14 @@ class RiveEditorApp extends StatelessWidget {
                 child: Scaffold(
                   body: Focus(
                     focusNode: rive.focusNode,
-                    child: ValueListenableBuilder<RiveState>(
-                      valueListenable: rive.state,
-                      builder: (context, state, _) {
-                        switch (state) {
-                          case RiveState.login:
+                    child: StreamBuilder<AppState>(
+                      stream: Plumber().getStream<AppState>(),
+                      builder: (context, snapshot) {
+                        switch (snapshot.data) {
+                          case AppState.login:
                             return Login();
 
-                          case RiveState.editor:
+                          case AppState.home:
                             return FollowProvider(
                               manager: FollowManager(
                                 api: rive.api,
@@ -142,11 +143,11 @@ class RiveEditorApp extends StatelessWidget {
                               ),
                               child: const EditorScaffold(),
                             );
-                          case RiveState.disconnected:
+                          case AppState.disconnected:
                             return DisconnectedScreen();
                             break;
 
-                          case RiveState.catastrophe:
+                          case AppState.catastrophe:
                             return Catastrophe();
                           default:
                             return const LoadingScreen();

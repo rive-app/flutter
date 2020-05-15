@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:quiver/core.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
+import 'package:rive_api/data_model.dart';
 
 class File {
   File({

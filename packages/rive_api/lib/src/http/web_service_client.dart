@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:http/http.dart' as http;
-import 'package:encrypt/encrypt.dart';
 
+import 'package:encrypt/encrypt.dart';
+import 'package:http/http.dart' as http;
 import 'package:local_data/local_data.dart';
-import 'package:rive_api/src/http/http.dart';
-import 'package:rive_api/src/http/rive_http/http_interface.dart';
+import 'package:rive_api/http.dart';
 
 import 'http_exception.dart';
 
