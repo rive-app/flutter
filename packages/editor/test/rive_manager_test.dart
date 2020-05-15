@@ -1,4 +1,5 @@
-@Timeout(const Duration(seconds: 1))
+@Timeout(Duration(seconds: 1))
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';

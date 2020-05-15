@@ -19,6 +19,25 @@ Owner getOwner({int ownerId = 1}) {
   );
 }
 
+Team getTeam({int ownerId = 1}) {
+  return Team(
+    ownerId: ownerId,
+    username: 'TeamUsername',
+    name: 'Name',
+    permission: TeamRole.admin,
+  );
+}
+
+List<Team> getTeams(int number) {
+  var teams = <Team>[];
+  var count = 1;
+  while (count <= number) {
+    teams.add(getTeam(ownerId: number));
+    count++;
+  }
+  return teams;
+}
+
 Me getMe({int ownerId = 1}) {
   return Me(
     ownerId: ownerId,
