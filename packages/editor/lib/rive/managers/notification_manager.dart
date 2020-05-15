@@ -18,6 +18,7 @@ class NotificationManager with Subscriptions {
     _notificationsApi = NotificationsApi();
     _teamApi = TeamApi();
     _attach();
+    _poll();
   }
 
   NotificationManager.tester(
@@ -45,6 +46,9 @@ class NotificationManager with Subscriptions {
     Plumber().getStream<model.Me>().listen((event) {
       _fetchNotifications();
     });
+  }
+
+  void _poll() {
     _poller = Timer.periodic(
       pollDuration,
       (t) => _fetchNotifications(),
@@ -67,8 +71,6 @@ class NotificationManager with Subscriptions {
       var notifications =
           model.Notification.fromDMList(await _notificationsApi.notifications);
       Plumber().message(notifications);
-      print('fired of some notifications');
-      // _notificationError = null;
     } on HttpException catch (e) {
       print('Failed to update notifications $e');
     }

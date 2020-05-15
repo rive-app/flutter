@@ -22,7 +22,7 @@ class Notification {
     } else if (invite is FollowNotificationDM) {
       return FollowNotification.fromDM(invite);
     } else {
-      return Notification.fromDM(invite);
+      return Notification(invite.dateTime);
     }
   }
 }
