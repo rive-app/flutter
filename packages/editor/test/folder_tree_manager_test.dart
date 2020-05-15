@@ -96,10 +96,8 @@ void main() {
       // if we just fire them all in at once.
       Plumber().message(teams);
       await Future<dynamic>.delayed(const Duration(milliseconds: 10));
-      print('two');
       Plumber().message(teams.sublist(2));
       await Future<dynamic>.delayed(const Duration(milliseconds: 10));
-      print('three');
       Plumber().message(<Team>[]);
       await Future<dynamic>.delayed(const Duration(milliseconds: 10));
 
