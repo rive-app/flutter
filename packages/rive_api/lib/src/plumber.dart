@@ -82,7 +82,5 @@ class Plumber {
       pipeMap.clear();
     });
     _pipes.clear();
-    print('RE SET THE PIPE?!?!?');
-    print(_pipes);
   }
 }
