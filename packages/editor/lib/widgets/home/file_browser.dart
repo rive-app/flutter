@@ -138,6 +138,24 @@ class FileBrowser extends StatelessWidget {
                 child: SizedBox(height: 30),
               ),
             );
+          } else {
+            // Empty view.
+            slivers.add(
+              SliverFillRemaining(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset('assets/images/robot.png'),
+                    const SizedBox(height: 35),
+                    Text(
+                        'Hey, it looks like you don\'t have any files here '
+                        'yet!\nHit the plus button to create a new file!',
+                        style: RiveTheme.of(context).textStyles.fileBrowserText,
+                        textAlign: TextAlign.center),
+                  ],
+                ),
+              ),
+            );
           }
 
           if (hasFiles) {
