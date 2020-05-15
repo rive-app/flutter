@@ -36,7 +36,7 @@ void main() {
 
       // 'Your Files' folder.
       when(_mockedFileApi.myFiles(2, 1)).thenAnswer((_) async {
-        final data = json.decode(myFilesResponse) as List<Object>;
+        final data = json.decode(myFilesResponse) as List<dynamic>;
         print("Mock file api $data");
         var res = FileDM.fromIdList(data, null);
         print("Res $res");

@@ -22,7 +22,7 @@ class FileApi {
   Future<List<FileDM>> _files(String url, [int ownerId]) async {
     final res = await api.get(api.host + url);
     try {
-      final data = json.decode(res.body) as List<Object>;
+      final data = json.decode(res.body) as List<dynamic>;
       return FileDM.fromIdList(data, ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
