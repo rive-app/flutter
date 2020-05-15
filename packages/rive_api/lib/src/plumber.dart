@@ -34,7 +34,6 @@ class Plumber {
       _pipes[T] = {};
     }
     if (!_pipes[T].containsKey(id)) {
-      print('laying new pipe for $T $id');
       _pipes[T][id] = BehaviorSubject<T>();
     }
     return _pipes[T][id];

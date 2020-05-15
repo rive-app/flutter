@@ -87,7 +87,12 @@ class FolderTreeManager with Subscriptions {
 
   Function(List<Folder>) _handleNewTeamFolders(Owner owner) {
     void _handleNewFolders(List<Folder> folderList) {
-      ingestFolders(owner, folderList);
+      if (folderList == null) {
+        _plumber.shutdown<FolderTreeItemController>(owner.hashCode);
+        _publishFolderTreeControllers();
+      } else {
+        ingestFolders(owner, folderList);
+      }
     }
 
     return _handleNewFolders;

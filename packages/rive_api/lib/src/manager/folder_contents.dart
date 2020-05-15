@@ -84,7 +84,6 @@ class FolderContentsManager with Subscriptions {
       folders = await _folderApi.myFolders();
     }
 
-    print("Got my files & folders:\n$files\n$folders");
     if (files.isNotEmpty) {
       // Load and prepare pipes for files.
       var fileIds = files.map((e) => e.id).toList(growable: false);

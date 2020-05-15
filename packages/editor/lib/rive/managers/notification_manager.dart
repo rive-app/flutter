@@ -64,7 +64,8 @@ class NotificationManager with Subscriptions {
 
   /// Fetch a user's notifications from the back end
   Future<void> _fetchNotifications() async {
-    if (Plumber().peek<model.Me>() == null) {
+    var me = Plumber().peek<model.Me>();
+    if (me == null || me.isEmpty) {
       return;
     }
     try {
