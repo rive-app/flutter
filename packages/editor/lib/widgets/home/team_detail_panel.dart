@@ -11,6 +11,7 @@ import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
+import 'package:utilities/list.dart';
 
 const kTreeItemHeight = 35.0;
 
@@ -38,8 +39,9 @@ class TeamDetailPanel extends StatelessWidget {
         stream: Plumber().getStream<List<TeamMember>>(team.hashCode),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            var members =
-                snapshot.data.where((element) => element.status == 'complete');
+            var members = snapshot.data
+                .where((element) => element.status == 'complete')
+                .toList();
 
             var memberCountWidget = Container(
               // color: Colors.yellow,
@@ -50,7 +52,8 @@ class TeamDetailPanel extends StatelessWidget {
                 children: [
                   Expanded(
                       child: Text(
-                    '${members.length} Member${members.length > 1 ? 's' : ''}',
+                    '${members.length} '
+                    '${members.pluralize('Member', 'Members')}',
                     style: textStyles.fileLightGreyText,
                     textAlign: TextAlign.start,
                   )),
