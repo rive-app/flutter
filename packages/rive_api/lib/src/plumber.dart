@@ -39,6 +39,10 @@ class Plumber {
     return _pipes[T][id];
   }
 
+  bool _exists<T>([int id]) {
+    return _pipes.containsKey(T) && _pipes[T].containsKey(id);
+  }
+
   ValueStream<T> getStream<T>([int id]) {
     var pipe = _pipeInit<T>(id);
     return pipe.stream;
@@ -61,12 +65,21 @@ class Plumber {
     }
   }
 
+  void shutdown<T>([int id]) {
+    if (_exists<T>(id)) {
+      _pipeInit<T>(id).close();
+      // NOTE: potentially leaving empty map behind.
+      _pipes[T].remove(id);
+    }
+  }
+
   void reset() {
     // TODO: notify a few thigns to disconnect from each other?
     _pipes.values.forEach((pipeMap) {
       pipeMap.values.forEach((pipe) {
         pipe.close();
       });
+      pipeMap.clear();
     });
     _pipes.clear();
   }

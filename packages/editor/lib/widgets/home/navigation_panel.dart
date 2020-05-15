@@ -12,7 +12,6 @@ import 'package:rive_editor/widgets/home/sliver_inline_footer.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 
@@ -105,28 +104,28 @@ class _NavigationPanelState extends State<NavigationPanel> {
             padding: const EdgeInsets.only(top: 10),
           ),
           Expanded(
-            child:
-                StreamBuilder<List<BehaviorSubject<FolderTreeItemController>>>(
-              stream: Plumber()
-                  .getStream<List<BehaviorSubject<FolderTreeItemController>>>(),
+            child: StreamBuilder<List<FolderTreeItemController>>(
+              stream: Plumber().getStream<List<FolderTreeItemController>>(),
               builder: (context, snapshot) {
                 var slivers = <Widget>[];
                 if (snapshot.data != null) {
                   for (int i = 0; i < snapshot.data.length; i++) {
                     // TODO: rather than folderTree's we prob ably rely on this controller?
                     slivers.add(FolderTreeView(
-                        style: treeStyle, controller: snapshot.data[i].value));
+                        style: treeStyle, controller: snapshot.data[i]));
 
-                    /// TODO: Matt take a look at this please
-                    /// This works once, but when you switch away from the tab adn back into it. it all blows up pretty badly
+                    // / TODO: Matt take a look at this please
+                    // / This works once, but when you switch away from the tab adn back into it. it all blows up pretty badly
                     // slivers.add(StreamBuilder<FolderTreeItemController>(
-                    //     stream: snapshot.data[i],
+                    //     stream: Plumber().getStream<FolderTreeItemController>(
+                    //         snapshot.data[i].owner.hashCode),
                     //     builder: (context, mySnapshot) {
                     //       if (mySnapshot.hasData) {
                     //         return FolderTreeView(
                     //             style: treeStyle, controller: mySnapshot.data);
                     //       } else {
-                    //         return SliverToBoxAdapter(child: Container());
+                    //         return const SliverToBoxAdapter(
+                    //             child: Text('works if you just return this'));
                     //       }
                     //     }));
 

@@ -16,6 +16,8 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
   @override
   Iterable<FolderTreeItem> get data => _data;
 
+  Owner get owner => items.first.owner;
+
   set data(Iterable<FolderTreeItem> value) {
     _data = value.toList();
     refreshExpanded();

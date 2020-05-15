@@ -193,8 +193,6 @@ class FolderTreeIcon extends StatelessWidget {
 
 class AddFileFolderButton extends StatelessWidget {
   final Owner owner;
-  // its the magic 'your files folder'
-  final folderId = 1;
   final bool selected;
 
   const AddFileFolderButton(
@@ -203,7 +201,7 @@ class AddFileFolderButton extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
-  void updateCurrentDirectory() {
+  void _updateCurrentDirectory() {
     var currentDirectory = Plumber().peek<CurrentDirectory>();
     if (currentDirectory.owner == owner && currentDirectory.folderId == 1) {
       Plumber().message(currentDirectory);
@@ -213,6 +211,8 @@ class AddFileFolderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var colors = RiveTheme.of(context).colors;
+    // its the magic 'your files folder'
+    const folderId = 1;
 
     return PopupButton<PopupContextItem>(
       direction: PopupDirection.rightToCenter,
@@ -236,7 +236,7 @@ class AddFileFolderButton extends StatelessWidget {
             } else {
               await FileManager().createFile(folderId);
             }
-            updateCurrentDirectory();
+            _updateCurrentDirectory();
           },
         ),
         PopupContextItem(
@@ -252,7 +252,7 @@ class AddFileFolderButton extends StatelessWidget {
             // pretty sure we can do that if we back onto
             // a more generic FileManager
             FileManager().loadFolders(owner);
-            updateCurrentDirectory();
+            _updateCurrentDirectory();
           },
         )
       ],

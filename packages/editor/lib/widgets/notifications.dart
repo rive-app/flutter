@@ -165,7 +165,8 @@ class PersonalPanel extends StatelessWidget {
                   children: [
                     const SizedBox(height: 30),
                     NotificationsHeader(PanelTypes.personal, onTap),
-                    ..._buildNotificationsList(snapshot.data, theme)
+                    ..._buildNotificationsList(snapshot.data, theme),
+                    const SizedBox(height: 30),
                   ],
                 ))
               : Expanded(child: PanelLoading(PanelTypes.personal, onTap)),
