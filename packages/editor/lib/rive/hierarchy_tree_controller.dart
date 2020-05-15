@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 
@@ -21,6 +22,8 @@ class HierarchyTreeController extends TreeController<Component> {
     // custom hash (like the id of an object in this case so that it works when
     // objects are re-hydrated/instanced after an undo.
     file.core.backboard.activeArtboardChanged.addListener(_updateArtboard);
+    // Listen for selection events so tree can expand
+    file.selection.addListener(_onItemSelected);
     _updateArtboard();
   }
 
@@ -35,9 +38,10 @@ class HierarchyTreeController extends TreeController<Component> {
   @override
   void dispose() {
     super.dispose();
-
     // N.B. assumes backboard doesn't change.
     file.core.backboard.activeArtboardChanged.removeListener(_updateArtboard);
+    // Remove the item selection listener
+    file.selection.removeListener(_onItemSelected);
   }
 
   void _updateArtboard() {
@@ -177,4 +181,13 @@ class HierarchyTreeController extends TreeController<Component> {
   @override
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<Component> item) {}
+
+  /// Expand the tree to an item when selected
+  void _onItemSelected() {
+    for (final item in file.selection.items) {
+      if (item is StageShape) {
+        expandTo(item.component);
+      }
+    }
+  }
 }

@@ -6,6 +6,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:meta/meta.dart';
+import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
 import 'package:rive_core/transform_space.dart';
@@ -19,10 +20,23 @@ abstract class ShapePaintContainer {
   final Set<Stroke> strokes = {};
   final Event strokesChanged = Event();
 
+  /// Called whenever a new paint mutator is added/removed from the shape paints
+  /// (for example a linear gradient is added to a stroke).
+  void onPaintMutatorChanged(ShapePaintMutator mutator);
+
+  /// Called when a fill is added or removed.
+  @protected
+  void onFillsChanged();
+
+  /// Called when a stroke is added or remoevd.
+  @protected
+  void onStrokesChanged();
+
   @protected
   bool addFill(Fill fill) {
     if (fills.add(fill)) {
       fillsChanged.notify();
+      onFillsChanged();
       return true;
     }
     return false;
@@ -32,6 +46,7 @@ abstract class ShapePaintContainer {
   bool removeFill(Fill fill) {
     if (fills.remove(fill)) {
       fillsChanged.notify();
+      onFillsChanged();
       return true;
     }
     return false;
@@ -41,6 +56,7 @@ abstract class ShapePaintContainer {
   bool addStroke(Stroke stroke) {
     if (strokes.add(stroke)) {
       strokesChanged.notify();
+      onStrokesChanged();
       return true;
     }
     return false;
@@ -50,6 +66,7 @@ abstract class ShapePaintContainer {
   bool removeStroke(Stroke stroke) {
     if (strokes.remove(stroke)) {
       strokesChanged.notify();
+      onStrokesChanged();
       return true;
     }
     return false;

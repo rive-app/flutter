@@ -49,7 +49,8 @@ class Popup {
   }) async {
     // Copy the list so we don't modify it while closing.
     Set<Popup> close = {};
-    for (final popup in _popups) {
+    var popupsCopy = _popups.toSet();
+    for (final popup in popupsCopy) {
       if (force ||
           (popup._canAutoClose &&
               (popup.shouldClose == null || await popup.shouldClose()))) {
@@ -85,7 +86,6 @@ class Popup {
     Future<bool> Function() shouldClose,
   }) {
     OverlayState overlay = Overlay.of(context);
-
     if (_popups.isEmpty) {
       // place our catcher
       Popup firstGuard;
@@ -119,16 +119,21 @@ class Popup {
       overlay.insert(firstGuard._entry);
     }
 
+    Popup ownGuard;
     var popup = Popup(
       OverlayEntry(builder: builder),
-      onClose: onClose,
+      onClose: includeCloseGuard && autoClose
+          ? () {
+              ownGuard.close();
+              onClose?.call();
+            }
+          : onClose,
       canAutoClose: autoClose,
       shouldClose: shouldClose,
     );
     if (includeCloseGuard && autoClose) {
       // place our own catch guard for this specific popup
-      Popup guard;
-      guard = Popup(
+      ownGuard = Popup(
         OverlayEntry(
           builder: (context) {
             return Positioned(
@@ -143,7 +148,7 @@ class Popup {
                     if (popup.shouldClose == null ||
                         await popup.shouldClose()) {
                       popup.close();
-                      guard.close();
+                      ownGuard.close();
                     }
                   }, Priority.touch);
                 },
@@ -152,9 +157,9 @@ class Popup {
           },
         ),
       );
-      _closeGuards.add(popup);
-      _popups.add(guard);
-      overlay.insert(guard._entry);
+      _closeGuards.add(ownGuard);
+      _popups.add(ownGuard);
+      overlay.insert(ownGuard._entry);
     }
 
     _popups.add(popup);

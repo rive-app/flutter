@@ -121,7 +121,8 @@ class PathComposer extends PathComposerBase {
 
   @override
   void visitAncestor(Component ancestor) {
-    if (_shape == null && ancestor is Shape) {      _changeShape(ancestor);
+    if (_shape == null && ancestor is Shape) {
+      _changeShape(ancestor);
     }
   }
 }

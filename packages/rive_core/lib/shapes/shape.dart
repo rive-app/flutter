@@ -7,6 +7,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
+import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
@@ -238,5 +239,26 @@ class Shape extends ShapeBase with ShapePaintContainer {
         stroke.draw(canvas, path);
       }
     }
+  }
+
+  @override
+  void onPaintMutatorChanged(ShapePaintMutator mutator) {
+    // The transform affects stroke property may have changed as we have a new
+    // mutator.
+    transformAffectsStrokeChanged();
+  }
+
+  @override
+  void onStrokesChanged() {
+    // The transform affects stroke property may have changed as we have a new
+    // mutator.
+    transformAffectsStrokeChanged();
+  }
+
+  @override
+  void onFillsChanged() {
+    // The transform affects stroke property may have changed as we have a new
+    // mutator.
+    transformAffectsStrokeChanged();
   }
 }
