@@ -83,6 +83,7 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
                           ? RiveTheme.of(context).colors.toolbarButtonHover
                           : RiveTheme.of(context).colors.toolbarButton,
                   icon: item != null ? tool.icon : widget.defaultIcon,
+                  position: TintedIconPosition.round,
                 );
               },
         );
