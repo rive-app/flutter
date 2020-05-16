@@ -79,7 +79,7 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   /// handles). These types of items should override isAutomatic to return false
   /// and then manage calls to [Stage.addItem]/[Stage.removeItem] manually in
   /// response to events.
-  bool get isAutomatic => true;
+  bool isAutomatic(Stage stage) => true;
 
   bool initialize(T component) {
     _component = component;

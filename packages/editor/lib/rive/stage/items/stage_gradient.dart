@@ -9,6 +9,7 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 abstract class StageGradientInterface<T extends core.LinearGradient> {
@@ -47,7 +48,7 @@ class StageGradient<T extends core.LinearGradient> extends StageItem<T>
   bool get isSelectable => false;
 
   @override
-  bool get isAutomatic => false;
+  bool isAutomatic(Stage stage) => false;
 
   @override
   int get drawOrder => 2;

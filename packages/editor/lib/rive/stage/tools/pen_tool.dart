@@ -111,7 +111,6 @@ abstract class PenTool<T extends Component> extends StageTool {
     if (iterableEquals(_editing, items)) {
       return;
     }
-
     // Remove previously set listeners.
     if (_editing != null) {
       for (final editing in _editing) {

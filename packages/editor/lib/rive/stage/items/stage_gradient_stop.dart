@@ -38,7 +38,7 @@ class StageGradientStop extends StageItem<GradientStop> {
   Offset _offset;
 
   @override
-  bool get isAutomatic => false;
+  bool isAutomatic(Stage stage) => false;
 
   @override
   int get drawOrder => 3;

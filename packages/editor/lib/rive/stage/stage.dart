@@ -14,7 +14,6 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/radial_gradient.dart';
@@ -369,19 +368,13 @@ class Stage extends Debouncer {
 
   void _updateHover() {
     if (isSelectionEnabled && _worldMouse != null) {
-      var solo = soloItems;
       AABB cursorAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
           _worldMouse[0] + 1, _worldMouse[1] + 1);
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
         visTree.query(cursorAABB, (int proxyId, StageItem item) {
           if (item.isSelectable &&
-              // If we're soloing, only items that are directly soloed or have a
-              // parent that is soloed are allowed to be selected.
-              (solo == null ||
-                  solo.contains(item) ||
-                  (item.soloParent != null &&
-                      solo.contains(item.soloParent))) &&
+              (soloItems == null || isValidSoloSelection(item)) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
             hover = item.hoverTarget;
@@ -619,8 +612,30 @@ class Stage extends Debouncer {
       }
     }
     file.isActiveListenable.addListener(_fileActiveChanged);
+    file.selection.addListener(_fileSelectionChanged);
 
     file.addActionHandler(_handleAction);
+  }
+
+  void _fileSelectionChanged() {
+    if (soloItems != null) {
+      // Check that all the selected stageItems are valid for this solo. If not,
+      // break out of it.
+      for (final item in file.selection.items) {
+        if (item is StageItem && !isValidSoloSelection(item)) {
+          solo(null);
+          break;
+        }
+      }
+    }
+  }
+
+  bool isValidSoloSelection(StageItem item) {
+    var solo = soloItems;
+    // If we're soloing, only items that are directly soloed or have a
+    // parent that is soloed are allowed to be selected.
+    return solo != null && (solo.contains(item) ||
+        (item.soloParent != null && solo.contains(item.soloParent)));
   }
 
   bool _handleAction(ShortcutAction action) {
@@ -701,7 +716,7 @@ class Stage extends Debouncer {
         component.stageItem = stageItem;
 
         // Only automatically add items that are marked automatic.
-        if (stageItem.isAutomatic) {
+        if (stageItem.isAutomatic(this)) {
           addItem(stageItem);
         }
       }
@@ -741,6 +756,13 @@ class Stage extends Debouncer {
     if (item is Advancer) {
       _advancingItems.remove(item as Advancer);
     }
+
+    // Patch up solo if items are removed that were part of it.
+    var currentSolo = soloItems;
+    if (currentSolo != null && currentSolo.contains(item)) {
+      var nextSolo = HashSet<StageItem>.from(currentSolo)..remove(item);
+      solo(nextSolo.isEmpty ? null : nextSolo);
+    }
     return true;
   }
 
@@ -752,6 +774,7 @@ class Stage extends Debouncer {
   }
 
   void dispose() {
+    file.selection.removeListener(_fileSelectionChanged);
     file.removeActionHandler(_handleAction);
     file.isActiveListenable.removeListener(_fileActiveChanged);
     ShortcutAction.pan.removeListener(_panActionChanged);

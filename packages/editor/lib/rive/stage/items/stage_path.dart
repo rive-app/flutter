@@ -21,9 +21,9 @@ class StagePath extends StageContourItem<PointsPath> {
   void onSoloChanged(bool isSolo) {
     for (final vertex in component.vertices) {
       if (isSolo) {
-        stage.addItem(vertex.stageItem);
+        stage?.addItem(vertex.stageItem);
       } else {
-        stage.removeItem(vertex.stageItem);
+        stage?.removeItem(vertex.stageItem);
       }
     }
   }

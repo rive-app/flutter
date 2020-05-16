@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -38,7 +40,7 @@ class VectorPenTool extends PenTool<Path> {
     if (shape == null) {
       shape = ShapeTool.makeShape(
           activeArtboard, _editingPath = PointsPath()..name = 'Path')
-        ..name = 'ShapyMcShapeFace';
+        ..name = 'Shape';
       // We're making a new shape, so set the translation of the path to 0,0 and
       // the shape to the world translation.
       shape.x = translation[0];
@@ -68,9 +70,12 @@ class VectorPenTool extends PenTool<Path> {
       _editingPath.y = localTranslation[1];
     }
 
-    // Set the solo item as the shape we just created which will trigger
-    // updating the editing components.
-    stage.solo([shape.stageItem]);
+    // Set the solo item as the path we just created which will trigger updating
+    // the editing components.
+    var solo = stage.soloItems;
+    solo ??= HashSet<StageItem>();
+    solo.add(_editingPath.stageItem);
+    stage.solo(solo);
   }
 
   @override
@@ -95,12 +100,12 @@ class VectorPenTool extends PenTool<Path> {
       ..x = localTranslation[0]
       ..y = localTranslation[1]
       ..radius = 0;
+
     var file = _editingPath.context;
     file.batchAdd(() {
       file.add(vertex);
       _editingPath.appendChild(vertex);
     });
-
     file.captureJournalEntry();
   }
 

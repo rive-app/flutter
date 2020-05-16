@@ -9,12 +9,27 @@ import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
-  static const double _vertexRadius = 3;
-  static const double _vertexRadiusSelected = 4;
+  static const double _vertexRadius = 3.5;
+  static const double _vertexRadiusSelected = 4.5;
   static const double hitRadiusSquared =
-      _vertexRadiusSelected * _vertexRadiusSelected;
+      (_vertexRadiusSelected + 1.5) * (_vertexRadiusSelected + 1.5);
   static const double _maxWorldVertexRadius = _vertexRadius / Stage.minZoom;
-  double radiusScale = 1;
+
+  double get radiusScale =>
+      component.path.vertices.first == component ? 1.5 : 1;
+
+  static final Paint stroke = Paint()
+    ..style = PaintingStyle.stroke
+    // Stroke is 3 so 1.5 sticks out when we draw fill over it.
+    ..strokeWidth = 3
+    ..color = const Color(0x26000000);
+  static final Paint fill = Paint()..color = const Color(0xFFFFFFFF);
+
+  static final Paint selectedStroke = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3
+    ..color = const Color(0xFFFFFFFF);
+  static final Paint selectedFill = Paint()..color = const Color(0xFF00BBFF);
 
   @override
   int get drawOrder => 2;
@@ -22,7 +37,7 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
   // Stage vertices don't get automatically added to the stage. They only get
   // added when the path owning them is edited.
   @override
-  bool get isAutomatic => false;
+  bool isAutomatic(Stage stage) => stage.isValidSoloSelection(this);
 
   final Vec2D _worldTranslation = Vec2D();
 
@@ -37,8 +52,12 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
 
   @override
   bool hitHiFi(Vec2D worldMouse) {
+    var squaredRadiusScale = radiusScale;
+    squaredRadiusScale *= squaredRadiusScale;
     return Vec2D.squaredDistance(worldMouse, _worldTranslation) <=
-        hitRadiusSquared / (stage.viewZoom * stage.viewZoom);
+        hitRadiusSquared *
+            squaredRadiusScale /
+            (stage.viewZoom * stage.viewZoom);
   }
 
   @override
@@ -51,22 +70,36 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
 
   @override
   void draw(Canvas canvas) {
+    Paint drawStroke, drawFill;
     var radius = _vertexRadius;
     switch (selectionState.value) {
       case SelectionState.hovered:
+        drawStroke = stroke;
+        drawFill = fill;
+        radius = _vertexRadiusSelected;
+        break;
       case SelectionState.selected:
+        drawStroke = selectedStroke;
+        drawFill = selectedFill;
         radius = _vertexRadiusSelected;
         break;
       default:
+        drawStroke = stroke;
+        drawFill = fill;
         break;
     }
-    final scale = 1 / stage.viewZoom * radiusScale;
+    radius *=  radiusScale;
 
     canvas.save();
-    canvas.translate(_worldTranslation[0], _worldTranslation[1]);
-    canvas.scale(scale);
-    canvas.drawCircle(
-        Offset.zero, radius, Paint()..color = const Color(0xFFFFFFFF));
+    canvas.transform(stage.inverseViewTransform.mat4);
+    var screenTranslation =
+        Vec2D.transformMat2D(Vec2D(), _worldTranslation, stage.viewTransform);
+    canvas.translate(screenTranslation[0].roundToDouble() + 0.5,
+        screenTranslation[1].roundToDouble() + 0.5);
+    // canvas.scale(scale);
+    var rect = Rect.fromLTRB(-radius, -radius, radius, radius);
+    canvas.drawOval(rect, drawStroke);
+    canvas.drawOval(rect, drawFill);
     canvas.restore();
   }
 
