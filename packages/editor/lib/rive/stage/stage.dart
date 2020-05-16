@@ -14,6 +14,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/radial_gradient.dart';
@@ -132,7 +133,7 @@ class Stage extends Debouncer {
   final ValueNotifier<StageTool> _toolNotifier = ValueNotifier<StageTool>(null);
   ValueListenable<StageTool> get toolListenable => _toolNotifier;
 
-  StageTool _activeTool;
+  StageTool _dragTool;
   StageTool get tool => _toolNotifier.value;
   set tool(StageTool value) {
     if (_toolNotifier.value == value) {
@@ -141,6 +142,7 @@ class Stage extends Debouncer {
     if (value.activate(this)) {
       _toolNotifier.value?.deactivate();
       _toolNotifier.value = value;
+      _completeDrag();
       if (value.activateSendsMouseMove) {
         _sendMouseMoveToTool();
       }
@@ -169,7 +171,7 @@ class Stage extends Debouncer {
     if (tool != null && !tool.validate(this)) {
       // Deactivate any operation that was in progress if this tool is no longer
       // valid.
-      _deactivateTool();
+      _completeDrag();
       // The auto tool is always valid.
       tool = AutoTool.instance;
       return false;
@@ -366,13 +368,20 @@ class Stage extends Debouncer {
   bool get isSelectionEnabled => !_isHidingCursor;
 
   void _updateHover() {
-    if (isSelectionEnabled) {
+    if (isSelectionEnabled && _worldMouse != null) {
+      var solo = soloItems;
       AABB cursorAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
           _worldMouse[0] + 1, _worldMouse[1] + 1);
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
         visTree.query(cursorAABB, (int proxyId, StageItem item) {
           if (item.isSelectable &&
+              // If we're soloing, only items that are directly soloed or have a
+              // parent that is soloed are allowed to be selected.
+              (solo == null ||
+                  solo.contains(item) ||
+                  (item.soloParent != null &&
+                      solo.contains(item.soloParent))) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
             hover = item.hoverTarget;
@@ -464,8 +473,8 @@ class Stage extends Debouncer {
     _computeWorldMouse(x, y);
     file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
     // Store the tool that got activated by this operation separate from the
-    // _activeTool so we can know if we were already dragging.
-    StageTool activatedTool;
+    // _dragTool so we can know if we were already dragging.
+    StageTool dragTool;
     if (_isPanning) {
       double dx = x - _lastMousePosition[0];
       double dy = y - _lastMousePosition[1];
@@ -479,35 +488,44 @@ class Stage extends Debouncer {
       markNeedsAdvance();
     } else {
       if (tool is TransformingTool) {
-        if (_activeTool == null) {
-          activatedTool = tool;
-          (activatedTool as TransformingTool).startTransformers(
+        if (_dragTool == null) {
+          dragTool = tool;
+          (dragTool as TransformingTool).startTransformers(
               file.selection.items.whereType<StageItem>(), _worldMouse);
         } else {
-          (_activeTool as TransformingTool).advanceTransformers(_worldMouse);
+          (_dragTool as TransformingTool).advanceTransformers(_worldMouse);
         }
       }
       if (tool is DraggableTool) {
         var artboard = activeArtboard;
         var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
 
-        // [_activeTool] is [null] before dragging operation starts.
-        if (_activeTool == null) {
-          activatedTool = tool;
-          (activatedTool as DraggableTool).startDrag(
+        // [_dragTool] is [null] before dragging operation starts.
+        if (_dragTool == null) {
+          dragTool = tool;
+          (dragTool as DraggableTool).startDrag(
               file.selection.items.whereType<StageItem>(),
               artboard,
               worldMouse);
         } else {
-          // [_activeTool] dragging operation has already started, so we
+          // [_dragTool] dragging operation has already started, so we
           // need to progress.
-          (_activeTool as DraggableTool).drag(worldMouse);
+          (_dragTool as DraggableTool).drag(worldMouse);
         }
       }
     }
 
-    if (activatedTool != null) {
-      _activeTool = activatedTool;
+    if (dragTool != null) {
+      _dragTool = dragTool;
+    }
+
+    /// We call updateComponents here because on some platforms the mouseDrag
+    /// event happens between our frame callback and render of the StageView.
+    if (activeArtboard.updateComponents()) {
+      // If this resulted in an update, we should make sure to update at least
+      // one more time for platforms that didn't interleave the drag between
+      // advance & render.
+      markNeedsAdvance();
     }
   }
 
@@ -525,27 +543,27 @@ class Stage extends Debouncer {
 
     // If we didn't complete an operation and nothing was selected, clear
     // selections.
-    if (!_deactivateTool() && !_mouseDownSelected) {
+    if (!_completeDrag() && !_mouseDownSelected) {
       file.selection.clear();
     }
   }
 
   /// Complete any operation the active tool was performing.
-  bool _deactivateTool() {
-    if (_activeTool != null) {
+  bool _completeDrag() {
+    if (_dragTool != null) {
       bool toolCompleted = false;
 
       // See if either a drag or transform operation was in progress.
-      if (_activeTool is TransformingTool) {
-        (_activeTool as TransformingTool).completeTransformers();
+      if (_dragTool is TransformingTool) {
+        (_dragTool as TransformingTool).completeTransformers();
         toolCompleted = true;
       }
-      if (_activeTool is DraggableTool) {
-        (_activeTool as DraggableTool).endDrag();
+      if (_dragTool is DraggableTool) {
+        (_dragTool as DraggableTool).endDrag();
         toolCompleted = true;
       }
       if (toolCompleted) {
-        _activeTool = null;
+        _dragTool = null;
         file.core.captureJournalEntry();
         markNeedsAdvance();
         return true;
@@ -607,13 +625,21 @@ class Stage extends Debouncer {
 
   bool _handleAction(ShortcutAction action) {
     switch (action) {
+      case ShortcutAction.cancel:
+        // TODO: should we cancel drag operations?
+        // For now cancel solo (if there was one).
+        if (_soloNotifier.value != null) {
+          solo(null);
+          return true;
+        }
+        break;
+
       case ShortcutAction.cycleHover:
         _hoverOffsetIndex = max(1, _hoverOffsetIndex + 1);
         _updateHover();
         return true;
-      default:
-        return false;
     }
+    return false;
   }
 
   /// Deal with the fileContext being activate/de-activated. This happens when a
@@ -905,9 +931,20 @@ class Stage extends Debouncer {
     if (_soloNotifier.value == value) {
       return;
     }
+    if (_soloNotifier.value != null) {
+      for (final item in _soloNotifier.value) {
+        item.onSoloChanged(false);
+      }
+    }
+    file.selection.clear();
     _soloNotifier.value = value == null ? null : HashSet<StageItem>.from(value);
     _updateHover();
     _validateTool();
+    if (value != null) {
+      for (final item in value) {
+        item.onSoloChanged(true);
+      }
+    }
     // TODO: add darken functionality (used when connecting bones, valid
     // contraint targets, etc).
   }

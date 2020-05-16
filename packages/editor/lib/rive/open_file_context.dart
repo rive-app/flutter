@@ -19,6 +19,8 @@ import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:rive_editor/rive/stage/items/stage_path.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
@@ -447,7 +449,30 @@ class OpenFileContext with RiveFileDelegate {
         return true;
 
       case ShortcutAction.toggleEditMode:
-        // TODO: implement
+        if (stage.soloItems == null) {
+          // Stage doesn't have any solo items, see if there's a good candidate
+          // for activating edit mode.
+
+          // TODO: find out out what designers really want in regards to
+          // activating edit mode.
+          Set<StageShape> shapes = {};
+          Set<StagePath> paths = {};
+          for (final item in selection.items) {
+            if (item is StageShape) {
+              shapes.add(item);
+            } else if (item is StagePath) {
+              paths.add(item);
+            }
+          }
+
+          if (shapes.isNotEmpty) {
+            stage.solo(
+                shapes.first.component.paths.map((path) => path.stageItem));
+          } else if (paths.isNotEmpty) {
+            stage.solo([paths.first]);
+          }
+        }
+
         return true;
 
       case ShortcutAction.cancel:

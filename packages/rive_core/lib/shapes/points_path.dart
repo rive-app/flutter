@@ -1,6 +1,7 @@
-import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/src/generated/shapes/points_path_base.dart';
 
 export 'package:rive_core/src/generated/shapes/points_path_base.dart';
@@ -18,19 +19,29 @@ class PointsPath extends PointsPathBase {
   @override
   List<PathVertex> get vertices => _vertices;
 
-  void addVertex(PathVertex v) {
-    _vertices.add(v);
-    appendChild(v);
-    addDirt(ComponentDirt.path);
+  @override
+  void childAdded(Component child) {
+    super.childAdded(child);
+    switch (child.coreType) {
+      case StraightVertexBase.typeKey:
+        if (!_vertices.contains(child)) {
+          _vertices.add(child as StraightVertex);
+          markPathDirty();
+        }
+        break;
+    }
   }
 
-  void removeVertex(PathVertex v) {
-    final removed = _vertices.remove(v);
-    children.remove(v);
-    if (!removed) {
-      throw ArgumentError.value(v, "PathVertex wasn't in this Path??");
+  @override
+  void childRemoved(Component child) {
+    super.childRemoved(child);
+    switch (child.coreType) {
+      case StraightVertexBase.typeKey:
+        if (_vertices.remove(child as StraightVertex)) {
+          markPathDirty();
+        }
+        break;
     }
-    addDirt(ComponentDirt.path);
   }
 
   @override

@@ -94,22 +94,17 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
         x + width * (originX ?? 0), y + height * (originY ?? 0));
   }
 
-  /// Update any dirty components in this artboard.
-  bool advance(double elapsedSeconds) {
+  /// Walk the dependency tree and update components in order. Returns true if
+  /// any component updated.
+  bool updateComponents() {
     bool didUpdate = false;
-    for (final controller in _animationControllers) {
-      if (controller.isPlaying) {
-        controller.apply(context, elapsedSeconds);
-        didUpdate = true;
-      }
-    }
-
     if ((_dirt & ComponentDirt.drawOrder) != 0) {
       _drawables.sortFractional();
       _dirt &= ~ComponentDirt.drawOrder;
       // -> editor-only
       drawOrderChanged.notify();
       // <- editor-only
+      didUpdate = true;
     }
     if ((_dirt & ComponentDirt.components) != 0) {
       const int maxSteps = 100;
@@ -134,10 +129,21 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
         }
         step++;
       }
-
       return true;
     }
     return didUpdate;
+  }
+
+  /// Update any dirty components in this artboard.
+  bool advance(double elapsedSeconds) {
+    bool didUpdate = false;
+    for (final controller in _animationControllers) {
+      if (controller.isPlaying) {
+        controller.apply(context, elapsedSeconds);
+        didUpdate = true;
+      }
+    }
+    return updateComponents() || didUpdate;
   }
 
   @override

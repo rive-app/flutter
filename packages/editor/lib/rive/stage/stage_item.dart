@@ -37,6 +37,9 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   /// The desired screen space stroke width for a selected StageItem.
   static const double strokeWidth = 2;
 
+  // Override this if you don't want this item to show up in the hierarchy tree.
+  bool get showInHierarchy => true;
+
   /// A globally available paint object used to draw contours around selected
   /// items. The stage will mutate the strokeWidth property such that the stroke
   /// is always in screen space. The stage does this by multiplying desired
@@ -55,6 +58,10 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
 
   Stage _stage;
   Stage get stage => _stage;
+
+  /// Some StageItems can define a solo parent that makes them selectable during
+  /// solo if their parent is soloed.
+  StageItem get soloParent => null;
 
   /// StageItems are sorted by [drawOrder] before being drawn. This allows
   /// specific classification of items to draw before/after others. For example,
@@ -162,6 +169,9 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   }
 
   void draw(Canvas canvas) {}
+
+  // Called when the stage either solos or cancels solo for this item.
+  void onSoloChanged(bool isSolo) {}
 }
 
 /// Convert an AABB in object space defined by [xform] to the corresponding

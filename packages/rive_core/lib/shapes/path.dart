@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:meta/meta.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -13,7 +14,10 @@ import 'package:rive_core/src/generated/shapes/path_base.dart';
 
 export 'package:rive_core/src/generated/shapes/path_base.dart';
 
+/// An abstract low level path that gets implemented by parametric and point
+/// based paths.
 abstract class Path extends PathBase {
+  final Mat2D _inverseWorldTransform = Mat2D();
   final ui.Path _uiPath = ui.Path();
   ui.Path get uiPath {
     if (!_isValid) {
@@ -31,6 +35,7 @@ abstract class Path extends PathBase {
   Shape get shape => _shape;
 
   Mat2D get pathTransform;
+  Mat2D get inverseWorldTransform => _inverseWorldTransform;
 
   @override
   Component get timelineParent => _shape;
@@ -58,8 +63,17 @@ abstract class Path extends PathBase {
   }
 
   @override
-  void worldTransformed() {
+  void updateWorldTransform() {
+    super.updateWorldTransform();
     _shape?.pathChanged(this);
+
+    // Paths store their inverse world so that it's available for skinning and
+    // other operations that occur at runtime.
+    if (!Mat2D.invert(_inverseWorldTransform, worldTransform)) {
+      // If for some reason the inversion fails (like we have a 0 scale) just
+      // store the identity.
+      Mat2D.identity(_inverseWorldTransform);
+    }
   }
 
   @override
@@ -69,6 +83,15 @@ abstract class Path extends PathBase {
     if (dirt & ComponentDirt.path != 0) {
       _buildPath();
     }
+  }
+
+  /// Subclasses should call this whenever a parameter that affects the topology
+  /// of the path changes in order to allow the system to rebuild the parametric
+  /// path.
+  /// should @internal when supported
+  void markPathDirty() {
+    addDirt(ComponentDirt.path);
+    _shape?.pathChanged(this);
   }
 
   void _invalidatePath() {
