@@ -6,7 +6,6 @@ import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
-import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 
 /// Handles custom cursors for any tools that implements some sort of drawing
 

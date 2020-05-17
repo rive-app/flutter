@@ -30,7 +30,9 @@ class VectorPenTool extends PenTool<Path> {
   }
 
   void _creatingPathChanged() {
+    
     _creatingPath = stage.file.vertexEditor.creatingPath.value;
+    print("CREATING PATH CHANGED $_creatingPath");
   }
 
   @override
@@ -41,6 +43,7 @@ class VectorPenTool extends PenTool<Path> {
   }
 
   bool _selectionHandler(StageItem item) {
+    print("SELECT $item $_creatingPath");
     if (item is StageVertex &&
         _creatingPath?.vertices?.first == item.component) {
       stage.file.vertexEditor.closePath(_creatingPath);
@@ -107,6 +110,10 @@ class VectorPenTool extends PenTool<Path> {
 
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
+    stage.file.addAlert(
+        SimpleAlert('Pen tool requires an artboard. Create one first.'),
+      );
+      return;
     if (!isShowingGhostPoint) {
       return;
     }

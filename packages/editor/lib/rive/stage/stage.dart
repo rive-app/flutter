@@ -160,6 +160,10 @@ class Stage extends Debouncer {
   }
 
   void _sendMouseMoveToTool() {
+    if(_worldMouse == null) {
+      // Worldmouse can get set to null when we mouse out of the stage.
+      return;
+    }
     var artboard = activeArtboard;
     if (artboard != null &&
         tool.mouseMove(artboard, tool.mouseWorldSpace(artboard, _worldMouse))) {
@@ -607,7 +611,19 @@ class Stage extends Debouncer {
     _updatePanIcon();
   }
 
-  Artboard get activeArtboard => file.core?.backboard?.activeArtboard;
+  // Artboard get activeArtboard => file.core?.backboard?.activeArtboard;
+  Artboard get activeArtboard {
+    if(file.core == null) {
+      print("CORE NULL");
+    }
+    else if(file.core.backboard == null) {
+      print("BB NULL");
+    }
+    else if(file.core.backboard.activeArtboard == null) {
+      print("AA NULL");
+    }
+   return file.core?.backboard?.activeArtboard;
+  }
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 
@@ -978,6 +994,7 @@ class Stage extends Debouncer {
         item.onSoloChanged(false);
       }
     }
+    print("SOLO: $value");
     file.selection.clear();
     _soloNotifier.value = value == null ? null : HashSet<StageItem>.from(value);
     _updateHover();

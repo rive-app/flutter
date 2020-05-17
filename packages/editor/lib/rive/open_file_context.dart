@@ -209,22 +209,25 @@ class OpenFileContext with RiveFileDelegate {
         filePath,
         spectre,
       );
-      if (result == ConnectResult.connected) {
-        _state = OpenFileState.open;
-      } else {
-        _state = OpenFileState.error;
-      }
-      core.addDelegate(this);
-      selection.clear();
-
-      core.advance(0);
-      makeStage();
-      _stage.tool = AutoTool.instance;
-      _resetManagers();
-      stateChanged.notify();
+      completeConnection(result == ConnectResult.connected
+          ? OpenFileState.open
+          : OpenFileState.error);
     }
 
     return true;
+  }
+
+  @protected
+  void completeConnection(OpenFileState state) {
+    _state = state;
+    core.addDelegate(this);
+    selection.clear();
+
+    core.advance(0);
+    makeStage();
+    _stage.tool = AutoTool.instance;
+    _resetManagers();
+    stateChanged.notify();
   }
 
   @protected

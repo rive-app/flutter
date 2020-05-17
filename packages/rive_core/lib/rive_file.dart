@@ -285,7 +285,7 @@ class RiveFile extends RiveCoreContext {
   @override
   void onWipe() {
     artboards.clear();
-    delegates.forEach((delegate) => delegate.onWipe());
+    delegates.toList(growable: false).forEach((delegate) => delegate.onWipe());
     _persist.wipe();
   }
 
