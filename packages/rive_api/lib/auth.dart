@@ -77,10 +77,14 @@ class RiveAuth {
   Future<AuthResponse> _oAuth(
       {@required _RiveAuthActions action, @required String provider}) async {
     if (kIsWeb) {
-      win_utils.openWebView(_authWebViewKey, '${api.host}/signin/$provider');
+      final onlySignin = action == _RiveAuthActions.signin;
+      win_utils.openWebView(
+        _authWebViewKey,
+        '${api.host}/signin/$provider?onlySignin=$onlySignin',
+      );
       return AuthResponse.empty();
     }
-    
+
     var offset = await win_utils.getWindowOffset();
     var size = await win_utils.getWindowSize();
 
