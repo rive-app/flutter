@@ -100,6 +100,13 @@ class RiveFile extends RiveCoreContext {
     }
   }
 
+  @override
+  void editorPropertyChanged(
+      Core object, int propertyKey, Object from, Object to) {
+    delegates.forEach((delegate) =>
+        delegate.onEditorPropertyChanged(object, propertyKey, from, to));
+  }
+
   /// Add a generic operation to be called when the next clean cycle occurs.
   /// Usually use this to debounce an operation before capturing the next
   /// journal entry.
@@ -442,6 +449,8 @@ abstract class RiveFileDelegate {
   void onPlayerAdded(ClientSidePlayer player) {}
   void onPlayerRemoved(ClientSidePlayer player) {}
   void onAutoKey(Component component, int propertyKey) {}
+  void onEditorPropertyChanged(
+      Core object, int propertyKey, Object from, Object to) {}
 
   /// Called when the entire file is wiped as data is about to load/reload.
   void onWipe() {}

@@ -19,8 +19,6 @@ import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
-import 'package:rive_editor/rive/stage/items/stage_path.dart';
-import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
@@ -31,6 +29,7 @@ import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
+import 'package:rive_editor/rive/vertex_editor.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
@@ -167,6 +166,8 @@ class OpenFileContext with RiveFileDelegate {
   void startDragOperation() => rive.startDragOperation();
   void endDragOperation() => rive.endDragOperation();
 
+  VertexEditor vertexEditor;
+
   OpenFileContext(
     this.ownerId,
     this.fileId, {
@@ -219,7 +220,7 @@ class OpenFileContext with RiveFileDelegate {
       core.advance(0);
       makeStage();
       _stage.tool = AutoTool.instance;
-      _resetTreeControllers();
+      _resetManagers();
       stateChanged.notify();
     }
 
@@ -232,6 +233,7 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   void dispose() {
+    _disposeManagers();
     core?.disconnect();
     _stage?.dispose();
   }
@@ -303,17 +305,23 @@ class OpenFileContext with RiveFileDelegate {
   @override
   void onWipe() {
     _stage?.wipe();
-    _resetTreeControllers();
+    _resetManagers();
   }
 
-  void _resetTreeControllers() {
+  void _disposeManagers() {
+    vertexEditor?.dispose();
     treeController.value?.dispose();
     drawOrderTreeController.value?.dispose();
+  }
+
+  void _resetManagers() {
+    _disposeManagers();
 
     treeController.value = HierarchyTreeController(this);
     drawOrderTreeController.value = DrawOrderTreeController(
       file: this,
     );
+    vertexEditor = VertexEditor(this, stage);
   }
 
   bool select(SelectableItem item, {bool append}) {
@@ -446,33 +454,6 @@ class OpenFileContext with RiveFileDelegate {
 
       case ShortcutAction.toggleRulers:
         stage?.showRulers = !stage.showRulers;
-        return true;
-
-      case ShortcutAction.toggleEditMode:
-        if (stage.soloItems == null) {
-          // Stage doesn't have any solo items, see if there's a good candidate
-          // for activating edit mode.
-
-          // TODO: find out out what designers really want in regards to
-          // activating edit mode.
-          Set<StageShape> shapes = {};
-          Set<StagePath> paths = {};
-          for (final item in selection.items) {
-            if (item is StageShape) {
-              shapes.add(item);
-            } else if (item is StagePath) {
-              paths.add(item);
-            }
-          }
-
-          if (shapes.isNotEmpty) {
-            stage.solo(
-                shapes.first.component.paths.map((path) => path.stageItem));
-          } else if (paths.isNotEmpty) {
-            stage.solo([paths.first]);
-          }
-        }
-
         return true;
 
       case ShortcutAction.cancel:

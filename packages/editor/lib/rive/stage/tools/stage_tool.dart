@@ -6,8 +6,9 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 
-abstract class StageTool {
+abstract class StageTool implements StageDrawable {
   Stage _stage;
   Stage get stage => _stage;
 
@@ -48,7 +49,17 @@ abstract class StageTool {
   /// Cleanup anything that was setup during activation.
   void deactivate() {}
 
+  /// Set the draw order to something large as stage tools almost always draw
+  /// last. TODO: dart doesn't provide a constant for integers, find out if max
+  /// 64 bit int (9223372036854775807) transpiles nicely to js
+  @override
+  int get drawOrder => 1000;
+
+  @override
   void draw(Canvas canvas);
+
+  @override
+  bool get drawsInWorldSpace => false;
 
   /// Returns true if the stage should advance after movement.
   bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {

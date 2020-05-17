@@ -307,6 +307,9 @@ abstract class CoreContext implements LocalSettings {
     properties.add(propertyKey);
   }
 
+  void editorPropertyChanged(
+      Core object, int propertyKey, Object from, Object to);
+
   /// Method called when a journal entry is created or applied via an undo/redo.
   @protected
   void completeChanges();
@@ -658,6 +661,8 @@ abstract class CoreContext implements LocalSettings {
     // });
   }
 
+  bool isEditorOnly(int propertyKey);
+
   @protected
   ChangeSet coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
     // Client should only be null during some testing.
@@ -674,6 +679,9 @@ abstract class CoreContext implements LocalSettings {
 
       var objectInflightChanges = inflight[objectId] ??= HashMap<int, int>();
       changes.forEach((key, entry) {
+        if (isEditorOnly(key)) {
+          return;
+        }
         objectInflightChanges[key] = (objectInflightChanges[key] ??= 0) + 1;
         if (key == hydrateKey) {
           //changeProperty(object, addKey, removeKey, object.coreType);
@@ -697,7 +705,11 @@ abstract class CoreContext implements LocalSettings {
         }
       });
 
-      sendChanges.objects.add(objectChanges);
+      // Some change sets have only editor properties and result in an empty
+      // changes list, no need to send it...
+      if (objectChanges.changes.isNotEmpty) {
+        sendChanges.objects.add(objectChanges);
+      }
     });
     freshChanges[sendChanges] = FreshChange(changes, useFrom);
     _client?.queueChanges(sendChanges);
@@ -774,7 +786,7 @@ abstract class CoreContext implements LocalSettings {
     }
 
     // Let's allow nesting batchAdd callbacks.
-    if(isBatchAdding) {
+    if (isBatchAdding) {
       // Already in a batch add, just piggy back...
       addCallback();
       return;

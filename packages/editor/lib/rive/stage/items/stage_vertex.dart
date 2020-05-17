@@ -32,7 +32,7 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
   static final Paint selectedFill = Paint()..color = const Color(0xFF00BBFF);
 
   @override
-  int get drawOrder => 2;
+  int get drawOrder => 3;
 
   // Stage vertices don't get automatically added to the stage. They only get
   // added when the path owning them is edited.

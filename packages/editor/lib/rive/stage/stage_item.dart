@@ -8,6 +8,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 
 import 'stage.dart';
 
@@ -30,7 +31,8 @@ extension StageItemComponent on Component {
 /// implemented as a generic as each StageItem generally has a backing
 /// representation in the Rive hierarchy. [T] usually inherits from a
 /// [Component], but this is not a hard requirement.
-abstract class StageItem<T> extends SelectableItem with StageItemFriend {
+abstract class StageItem<T> extends SelectableItem
+    with StageItemFriend, StageDrawable {
   final Event _onRemoved = Event();
   Listenable get onRemoved => _onRemoved;
 
@@ -66,7 +68,11 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   /// StageItems are sorted by [drawOrder] before being drawn. This allows
   /// specific classification of items to draw before/after others. For example,
   /// transform handles should always draw after other content.
+  @override
   int get drawOrder => 1;
+
+  @override
+  bool get drawsInWorldSpace => true;
 
   int compareDrawOrderTo(StageItem other) => drawOrder - other.drawOrder;
 
@@ -168,6 +174,7 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
     stage?.updateBounds(this);
   }
 
+  @override
   void draw(Canvas canvas) {}
 
   // Called when the stage either solos or cancels solo for this item.

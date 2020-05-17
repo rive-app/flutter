@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -10,6 +8,8 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/rive/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
+import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
@@ -17,21 +17,46 @@ import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
 class VectorPenTool extends PenTool<Path> {
   static final VectorPenTool instance = VectorPenTool();
 
-  PointsPath _editingPath;
+  PointsPath _creatingPath;
+
+  @override
+  bool activate(Stage stage) {
+    if (super.activate(stage)) {
+      stage.addSelectionHandler(_selectionHandler);
+      stage.file.vertexEditor.creatingPath.addListener(_creatingPathChanged);
+      return true;
+    }
+    return false;
+  }
+
+  void _creatingPathChanged() {
+    _creatingPath = stage.file.vertexEditor.creatingPath.value;
+  }
+
+  @override
+  void deactivate() {
+    stage.removeSelectionHandler(_selectionHandler);
+    stage.file.vertexEditor.creatingPath.removeListener(_creatingPathChanged);
+    super.deactivate();
+  }
+
+  bool _selectionHandler(StageItem item) {
+    if (item is StageVertex &&
+        _creatingPath?.vertices?.first == item.component) {
+      stage.file.vertexEditor.closePath(_creatingPath);
+      _creatingPath = null;
+    }
+    return false;
+  }
 
   @override
   void onEditingChanged(Iterable<Path> paths) {
-    if (paths == null || !paths.contains(_editingPath)) {
-      _editingPath = null;
+    if (paths == null || !paths.contains(_creatingPath)) {
+      _creatingPath = null;
     }
   }
 
   void _makeEditingPath(Artboard activeArtboard, Vec2D translation) {
-    // See if we have an editing shape already.
-    // for(final item in editing) {
-    //   if(item)
-    // }
-
     Shape shape;
     if (editing != null && editing.isNotEmpty) {
       shape = editing.first.shape;
@@ -39,22 +64,22 @@ class VectorPenTool extends PenTool<Path> {
 
     if (shape == null) {
       shape = ShapeTool.makeShape(
-          activeArtboard, _editingPath = PointsPath()..name = 'Path')
+          activeArtboard, _creatingPath = PointsPath()..name = 'Path')
         ..name = 'Shape';
       // We're making a new shape, so set the translation of the path to 0,0 and
       // the shape to the world translation.
       shape.x = translation[0];
       shape.y = translation[1];
 
-      _editingPath.calculateWorldTransform();
+      _creatingPath.calculateWorldTransform();
     } else {
       // We already had a shape, just add this path to it.
-      _editingPath = PointsPath()..name = 'Path';
-      shape.appendChild(_editingPath);
+      _creatingPath = PointsPath()..name = 'Path';
+      shape.appendChild(_creatingPath);
 
       // Make sure the internal world transform caches are up to date for
       // anything in this chain.
-      _editingPath.calculateWorldTransform();
+      _creatingPath.calculateWorldTransform();
 
       // Set the origin of the path to the local offset of the world translation
       // relative to the shape.
@@ -66,16 +91,18 @@ class VectorPenTool extends PenTool<Path> {
 
       var localTranslation =
           Vec2D.transformMat2D(Vec2D(), translation, shapeWorldInverse);
-      _editingPath.x = localTranslation[0];
-      _editingPath.y = localTranslation[1];
+      _creatingPath.x = localTranslation[0];
+      _creatingPath.y = localTranslation[1];
     }
 
-    // Set the solo item as the path we just created which will trigger updating
-    // the editing components.
-    var solo = stage.soloItems;
-    solo ??= HashSet<StageItem>();
-    solo.add(_editingPath.stageItem);
-    stage.solo(solo);
+    stage.file.vertexEditor.startCreatingPath(_creatingPath);
+
+    // // Set the solo item as the path we just created which will trigger updating
+    // // the editing components.
+    // var solo = stage.soloItems;
+    // solo ??= HashSet<StageItem>();
+    // solo.add(_editingPath.stageItem);
+    // stage.solo(solo);
   }
 
   @override
@@ -90,21 +117,21 @@ class VectorPenTool extends PenTool<Path> {
       );
     }
 
-    if (_editingPath == null) {
+    if (_creatingPath == null) {
       _makeEditingPath(activeArtboard, ghostPointWorld);
     }
 
     var localTranslation = Vec2D.transformMat2D(
-        Vec2D(), worldMouse, _editingPath.inverseWorldTransform);
+        Vec2D(), worldMouse, _creatingPath.inverseWorldTransform);
     var vertex = StraightVertex()
       ..x = localTranslation[0]
       ..y = localTranslation[1]
       ..radius = 0;
 
-    var file = _editingPath.context;
+    var file = _creatingPath.context;
     file.batchAdd(() {
       file.add(vertex);
-      _editingPath.appendChild(vertex);
+      _creatingPath.appendChild(vertex);
     });
     file.captureJournalEntry();
   }
@@ -127,5 +154,21 @@ class VectorPenTool extends PenTool<Path> {
       }
     }
     return paths;
+  }
+
+  @override
+  void draw(Canvas canvas) {
+    canvas.save();
+    canvas.transform(stage.viewTransform.mat4);
+    for (final path in editing) {
+      canvas.save();
+      final origin = path.artboard.originWorld;
+      canvas.translate(origin[0], origin[1]);
+      canvas.transform(path.pathTransform?.mat4);
+      canvas.drawPath(path.uiPath, StageItem.selectedPaint);
+      canvas.restore();
+    }
+    canvas.restore();
+    super.draw(canvas);
   }
 }

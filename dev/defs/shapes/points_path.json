@@ -13,6 +13,15 @@
         "string": "isclosed"
       },
       "description": "If the path should close back on its first vertex."
+    },
+    "editingModeValue": {
+      "type": "int",
+      "initialValue": "0",
+      "key": {
+        "int": 74,
+        "string": "editingmode"
+      },
+      "editorOnly": true
     }
   }
 }

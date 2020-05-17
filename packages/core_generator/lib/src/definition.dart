@@ -679,6 +679,22 @@ class Definition {
     }
     ctxCode.writeln('}return null;}');
 
+    // Build a way to determine if a property is editorOnly
+    ctxCode.writeln('''
+        @override
+        bool isEditorOnly(int propertyKey) {
+          switch(propertyKey) {
+          ''');
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        if (property.editorOnly) {
+          ctxCode.write('case ${property.definition._name}Base');
+          ctxCode.write('.${property.name}PropertyKey:');
+        }
+      }
+    }
+    ctxCode.write('return true; default: return false; } }');
+
     // Build is/setter/getter for specific types.
     ctxCode.writeln('''
         CoreFieldType coreType(int propertyKey) {

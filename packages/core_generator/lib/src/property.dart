@@ -15,6 +15,8 @@ class Property {
   Key key;
   String description;
   bool isNullable = false;
+  bool editorOnly = false;
+  bool localOnly = false;
 
   factory Property(Definition type, String name, Map<String, dynamic> data) {
     var fieldType = FieldType.find(data["type"]);
@@ -46,6 +48,14 @@ class Property {
     dynamic g = data['group'];
     if (g is String) {
       group = g;
+    }
+    dynamic e = data['editorOnly'];
+    if (e is bool) {
+      editorOnly = e;
+    }
+    dynamic c = data['localOnly'];
+    if (c is bool) {
+      localOnly = c;
     }
     key = Key.fromJSON(data["key"]) ?? Key.forProperty(this);
   }
@@ -91,7 +101,12 @@ class Property {
         if(${type.equalityCheck('_$name', 'value')}) { return; }
         ${type.dartName} from = _$name;
         _$name = value;
-        onPropertyChanged($propertyKey, from, value);
+        onPropertyChanged($propertyKey, from, value);''');
+    if (editorOnly) {
+      code.writeln(
+          'context?.editorPropertyChanged(this, $propertyKey, from, value);');
+    }
+    code.writeln('''
         ${name}Changed(from, value);
       }''');
     if (animates) {
@@ -152,6 +167,12 @@ class Property {
     }
     if (isNullable) {
       data['nullable'] = true;
+    }
+    if (editorOnly) {
+      data['editorOnly'] = true;
+    }
+    if (localOnly) {
+      data['coop'] = true;
     }
     return data;
   }

@@ -139,6 +139,10 @@ abstract class PenTool<T extends Component> extends StageTool {
     super.deactivate();
   }
 
+  // Draw after most stage content, but before vertices.
+  @override
+  int get drawOrder => 2;
+  
   @override
   String get icon => 'tool-pen';
 }

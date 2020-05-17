@@ -6,6 +6,12 @@ import 'package:rive_core/src/generated/shapes/points_path_base.dart';
 
 export 'package:rive_core/src/generated/shapes/points_path_base.dart';
 
+enum PointsPathEditMode {
+  off,
+  creating,
+  editing,
+}
+
 class PointsPath extends PointsPathBase {
   final List<PathVertex> _vertices = [];
 
@@ -18,6 +24,14 @@ class PointsPath extends PointsPathBase {
 
   @override
   List<PathVertex> get vertices => _vertices;
+
+  // -> editor-only
+  PointsPathEditMode get editingMode =>
+      PointsPathEditMode.values[editingModeValue];
+  set editingMode(PointsPathEditMode value) => editingModeValue = value.index;
+  @override
+  void editingModeValueChanged(int from, int to) {}
+  // <- editor-only
 
   @override
   void childAdded(Component child) {
@@ -45,5 +59,7 @@ class PointsPath extends PointsPathBase {
   }
 
   @override
-  void isClosedChanged(bool from, bool to) {}
+  void isClosedChanged(bool from, bool to) {
+    markPathDirty();
+  }
 }

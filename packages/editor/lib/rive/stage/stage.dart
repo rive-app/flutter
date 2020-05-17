@@ -38,6 +38,7 @@ import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -94,7 +95,7 @@ class Stage extends Debouncer {
   Mat2D get viewTransform => _viewTransform;
   double get viewportWidth => _viewportWidth;
   double get viewportHeight => _viewportHeight;
-  final List<StageItem> _visibleItems = [];
+  final List<StageDrawable> _visibleItems = [];
   final Vec2D _viewTranslation = Vec2D();
   double _viewZoom = 1;
   double get viewZoom => _viewZoom;
@@ -107,7 +108,7 @@ class Stage extends Debouncer {
   bool _isHidingCursor = false;
   int _hoverOffsetIndex = -1;
 
-  CustomSelectionHandler customSelectionHandler;
+  final Set<CustomSelectionHandler> _selectionHandlers = {};
 
   /// We store these two separtely to avoid contention with how they are
   /// activated/disabled.
@@ -117,13 +118,15 @@ class Stage extends Debouncer {
   bool _isPanning = false;
   bool get isPanning => _isPanning;
 
-  // Clear the selection handler only if it was a previously set one.
-  bool clearSelectionHandler(CustomSelectionHandler handler) {
-    if (customSelectionHandler == handler) {
-      customSelectionHandler = null;
-      return true;
-    }
-    return false;
+  /// Register a selection handler that will be called back whenever an item is
+  /// clicked on the stage.
+  bool addSelectionHandler(CustomSelectionHandler handler) {
+    return _selectionHandlers.add(handler);
+  }
+
+  // Remove a previously added selection handler.
+  bool removeSelectionHandler(CustomSelectionHandler handler) {
+    return _selectionHandlers.remove(handler);
   }
 
   LateDrawViewDelegate lateDrawDelegate;
@@ -428,11 +431,14 @@ class Stage extends Debouncer {
         } else if (isSelectionEnabled) {
           if (_hoverItem != null) {
             _mouseDownSelected = true;
-            if (customSelectionHandler != null) {
-              if (customSelectionHandler(_hoverItem)) {
-                file.select(_hoverItem);
+            bool selectionHandled = false;
+            for (final handler in _selectionHandlers) {
+              if (handler(_hoverItem)) {
+                selectionHandled = true;
+                break;
               }
-            } else {
+            }
+            if (!selectionHandled) {
               file.select(_hoverItem);
             }
           } else {
@@ -634,8 +640,9 @@ class Stage extends Debouncer {
     var solo = soloItems;
     // If we're soloing, only items that are directly soloed or have a
     // parent that is soloed are allowed to be selected.
-    return solo != null && (solo.contains(item) ||
-        (item.soloParent != null && solo.contains(item.soloParent)));
+    return solo != null &&
+        (solo.contains(item) ||
+            (item.soloParent != null && solo.contains(item.soloParent)));
   }
 
   bool _handleAction(ShortcutAction action) {
@@ -885,17 +892,29 @@ class Stage extends Debouncer {
 
     // Transform to world space
     canvas.transform(viewTransform.mat4);
+    bool inWorldSpace = true;
 
-    _visibleItems.sort((StageItem a, StageItem b) => a.drawOrder - b.drawOrder);
+    _visibleItems.add(tool);
+    _visibleItems
+        .sort((StageDrawable a, StageDrawable b) => a.drawOrder - b.drawOrder);
 
-    for (final StageItem item in _visibleItems) {
+    for (final item in _visibleItems) {
+      // Some items may not draw in world space. Change between world and screen
+      // as requested by the drawable. We can't batch here as drawables of
+      // different space types might be interleaved at different draw orders.
+      if (inWorldSpace != item.drawsInWorldSpace) {
+        if (inWorldSpace = item.drawsInWorldSpace) {
+          canvas.transform(viewTransform.mat4);
+        } else {
+          canvas.restore();
+        }
+      }
       item.draw(canvas);
     }
 
-    canvas.restore();
-
-    // Widget space
-    tool?.draw(canvas);
+    if (inWorldSpace) {
+      canvas.restore();
+    }
     canvas.restore();
   }
 
