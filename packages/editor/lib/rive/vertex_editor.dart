@@ -46,14 +46,17 @@ class VertexEditor with RiveFileDelegate {
 
   void _soloChanged() {
     if (stage.soloItems == null) {
-      _mode.value = null;
-      // copy to prevent editing during iteration in onObjectRemoved.
+      if (_mode.value != VertexEditorMode.off) {
+        _mode.value = VertexEditorMode.off;
+        // copy to prevent editing during iteration in onObjectRemoved.
 
-      var pathsCopy = _editingPaths.toList(growable: false);
-      _editingPaths = null;
+        var pathsCopy = _editingPaths.toList(growable: false);
+        _editingPaths = null;
 
-      for (final path in pathsCopy) {
-        path.editingMode = PointsPathEditMode.off;
+        for (final path in pathsCopy) {
+          path.editingMode = PointsPathEditMode.off;
+        }
+        file.core.captureJournalEntry();
       }
     } else {
       switch (_mode.value) {
@@ -91,17 +94,17 @@ class VertexEditor with RiveFileDelegate {
         bool remove = false;
         switch (path.editingMode) {
           case PointsPathEditMode.creating:
-          print("EDIT MODE CREATING");
+            print("EDIT MODE CREATING");
             _creatingPath.value = path;
             break;
           case PointsPathEditMode.editing:
-          print("EDIT MODE EDITING");
+            print("EDIT MODE EDITING");
             if (path == _creatingPath.value) {
               _creatingPath.value = null;
             }
             break;
           case PointsPathEditMode.off:
-          print("EDIT MODE OFF");
+            print("EDIT MODE OFF");
             remove = true;
             if (path == _creatingPath.value) {
               _creatingPath.value = null;
@@ -118,6 +121,8 @@ class VertexEditor with RiveFileDelegate {
         // editor isn't currently editing paths. So we want to toggle it back
         // on.
         else if (_editingPaths == null) {
+          // Put us into editing path mode.
+          _mode.value = VertexEditorMode.editingPath;
           _editingPaths = HashSet<PointsPath>.from(<PointsPath>[path]);
           stage.debounce(_syncSolo);
           // We're already editing paths, just make sure this one is in the set.

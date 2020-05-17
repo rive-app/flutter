@@ -110,10 +110,6 @@ class VectorPenTool extends PenTool<Path> {
 
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
-    stage.file.addAlert(
-        SimpleAlert('Pen tool requires an artboard. Create one first.'),
-      );
-      return;
     if (!isShowingGhostPoint) {
       return;
     }
