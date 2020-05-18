@@ -2,6 +2,7 @@ import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/node_base.dart';
 
 export 'src/generated/node_base.dart';
@@ -22,6 +23,13 @@ class Node extends NodeBase {
     if (dirt & ComponentDirt.worldTransform != 0) {
       updateWorldTransform();
     }
+  }
+
+  /// Sets the position of the Node
+  // ignore: avoid_setters_without_getters
+  set pos(Vec2D pos) {
+    x = pos[0];
+    y = pos[1];
   }
 
   void worldTransformed() {}

@@ -4,47 +4,21 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 
 // TODO: update node translation to be in parent space.
 class NodeTool extends DrawableTool with ClickableTool {
   static final NodeTool instance = NodeTool._();
-
   NodeTool._();
+
+  /// Tracks the created node while a drag operation is in effect
   Node _node;
 
-  /// Disambiguate between click and end drag events
-  /// so journal entries, etc. aren't handled twice
-  bool beingDragged = false;
-
   @override
-  void onClick(Artboard artboard, Vec2D worldMouse) {
-    final file = stage.file;
-    var core = file.core;
-
-    // final selection = rive.selection.items;
-    final ContainerComponent parent = artboard;
-
-    _node = Node()
-      ..name = "Node"
-      ..x = worldMouse[0]
-      ..y = worldMouse[1];
-
-    core.batchAdd(() {
-      core.add(_node);
-      parent.appendChild(_node);
-    });
-  }
-
-  /// Handle the case where a click occurs, but a drag does not.
-  /// Basically call endDrag ensure journal captured and tool switched.
-  @override
-  void endClick() {
-    if (!beingDragged) {
-      endDrag();
-    }
-  }
+  void onClick(Artboard artboard, Vec2D worldMouse) =>
+      _node = _createNode(artboard, worldMouse);
 
   @override
   String get icon => 'tool-node';
@@ -52,20 +26,32 @@ class NodeTool extends DrawableTool with ClickableTool {
   @override
   void draw(Canvas canvas) {}
 
+  /// We handle completing the node placement operation here
+  /// as it might have been dragged around a bit before being
+  /// placed, so we can't do this in onClick
   @override
-  void updateDrag(Vec2D worldMouse) {
-    beingDragged = true;
-    if (_node == null) {
-      return;
-    }
-    _node.x = worldMouse[0];
-    _node.y = worldMouse[1];
+  void endClick() {
+    _node = null;
+    stage.activateAction(ShortcutAction.translateTool);
   }
 
   @override
-  void endDrag() {
-    beingDragged = false;
-    _node = null;
-    super.endDrag();
+  void updateDrag(Vec2D worldMouse) => _node?.pos = worldMouse;
+
+  /// Create a new node and place it in space
+  Node _createNode(ContainerComponent parent, Vec2D position) {
+    final core = stage.file.core;
+
+    final node = Node()
+      ..name = 'Node'
+      ..x = position[0]
+      ..y = position[1];
+
+    core.batchAdd(() {
+      core.add(node);
+      parent.appendChild(node);
+    });
+
+    return node;
   }
 }
