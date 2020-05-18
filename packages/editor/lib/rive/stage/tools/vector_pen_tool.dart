@@ -6,7 +6,7 @@ import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
-import 'package:rive_editor/rive/simple_alert.dart';
+import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';

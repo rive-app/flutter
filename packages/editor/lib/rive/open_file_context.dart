@@ -12,6 +12,7 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/alerts/action_alert.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/editor_alert.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
@@ -391,6 +392,27 @@ class OpenFileContext with RiveFileDelegate {
   /// Will attempt to perform the given action. If the action is not handled,
   /// [triggerAction] will return false.
   bool triggerAction(ShortcutAction action) {
+    if (action == ShortcutAction.showActions) {
+      addAlert(
+        ActionAlert(
+            // Inverted logic as the toggle happens right after this, so !value
+            // means it will be activated.
+            !ShortcutAction.showActions.value
+                ? 'Show Actions: ON'
+                : 'Show Actions: OFF'),
+      );
+    } else if (_handleAction(action)) {
+      if (ShortcutAction.showActions.value) {
+        addAlert(
+          ActionAlert('ACTION ${action.name}'),
+        );
+      }
+      return true;
+    }
+    return false;
+  }
+
+  bool _handleAction(ShortcutAction action) {
     // See if any of our handlers care.
     // https://www.youtube.com/watch?v=1o4s1KVJaVA
     for (final actionHandler in _actionHandlers.reversed) {

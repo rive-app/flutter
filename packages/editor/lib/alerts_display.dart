@@ -44,11 +44,11 @@ class _AlertsDisplayState extends State<AlertsDisplay> {
           // scroll view here in case we get sooo many alerts and still want to
           // be able to mousewheel through them.
           child: SingleChildScrollView(
-              child: DropShadow(
-            color: const Color(0x66000000),
-            offset: const Offset(0, 50),
-            blur: 100,
-            child: Column(
+            child: DropShadow(
+              color: const Color(0x66000000),
+              offset: const Offset(0, 50),
+              blur: 100,
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   for (final alert in display)
@@ -110,7 +110,8 @@ class AlertDisplay extends StatelessWidget {
                   heightFactor: factor,
                   alignment: Alignment.bottomCenter,
                   child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding:
+                        const EdgeInsets.only(left: 20, right: 20, top: 20),
                     child: alert.build(context),
                   ),
                 ),
