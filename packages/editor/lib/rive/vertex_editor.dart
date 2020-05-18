@@ -73,7 +73,66 @@ class VertexEditor with RiveFileDelegate {
     /// Called back whenever a core object is removed, use this to update the
     /// editing list if one of the items in it was removed.
     if (_editingPaths != null && object.coreType == PointsPathBase.typeKey) {
-      _editingPaths.remove(object);
+      print("PATH REMOVED");
+      var path = object as PointsPath;
+      _updatePathEditMode(path, PointsPathEditMode.off);
+    }
+  }
+
+  @override
+  void onObjectAdded(Core object) {
+    if (object.coreType == PointsPathBase.typeKey &&
+        (object as PointsPath).editingMode != PointsPathEditMode.off) {
+      var path = object as PointsPath;
+      _updatePathEditMode(path, path.editingMode);
+    }
+  }
+
+  void _updatePathEditMode(PointsPath path, PointsPathEditMode editMode) {
+    // When a path is changed to being edited/created we want to add it to
+    // the _editingPaths set. When it's set to off, we want to remove it
+    // from the set.
+    bool remove = false;
+    switch (editMode) {
+      case PointsPathEditMode.creating:
+        print("EDIT MODE CREATING");
+        _creatingPath.value = path;
+        break;
+      case PointsPathEditMode.editing:
+        print("EDIT MODE EDITING");
+        if (path == _creatingPath.value) {
+          _creatingPath.value = null;
+        }
+        break;
+      case PointsPathEditMode.off:
+        print("EDIT MODE OFF");
+        remove = true;
+        if (path == _creatingPath.value) {
+          _creatingPath.value = null;
+        }
+        break;
+    }
+
+    if (remove) {
+      if (_editingPaths?.remove(path) ?? false) {
+        if (_editingPaths.isEmpty) {
+          _editingPaths = null;
+          _mode.value = VertexEditorMode.off;
+        }
+        stage.debounce(_syncSolo);
+      }
+    }
+
+    // In this case, something is toggling editing back on but the vertex
+    // editor isn't currently editing paths. So we want to toggle it back
+    // on.
+    else if (_editingPaths == null) {
+      // Put us into editing path mode.
+      _mode.value = VertexEditorMode.editingPath;
+      _editingPaths = HashSet<PointsPath>.from(<PointsPath>[path]);
+      stage.debounce(_syncSolo);
+      // We're already editing paths, just make sure this one is in the set.
+    } else if (_editingPaths.add(path)) {
       stage.debounce(_syncSolo);
     }
   }
@@ -86,49 +145,7 @@ class VertexEditor with RiveFileDelegate {
     switch (propertyKey) {
       case PointsPathBase.editingModeValuePropertyKey:
         var path = object as PointsPath;
-
-        // When a path is changed to being edited/created we want to add it to
-        // the _editingPaths set. When it's set to off, we want to remove it
-        // from the set.
-
-        bool remove = false;
-        switch (path.editingMode) {
-          case PointsPathEditMode.creating:
-            print("EDIT MODE CREATING");
-            _creatingPath.value = path;
-            break;
-          case PointsPathEditMode.editing:
-            print("EDIT MODE EDITING");
-            if (path == _creatingPath.value) {
-              _creatingPath.value = null;
-            }
-            break;
-          case PointsPathEditMode.off:
-            print("EDIT MODE OFF");
-            remove = true;
-            if (path == _creatingPath.value) {
-              _creatingPath.value = null;
-            }
-            break;
-        }
-
-        if (remove) {
-          if (_editingPaths?.remove(path) ?? false) {
-            stage.debounce(_syncSolo);
-          }
-        }
-        // In this case, something is toggling editing back on but the vertex
-        // editor isn't currently editing paths. So we want to toggle it back
-        // on.
-        else if (_editingPaths == null) {
-          // Put us into editing path mode.
-          _mode.value = VertexEditorMode.editingPath;
-          _editingPaths = HashSet<PointsPath>.from(<PointsPath>[path]);
-          stage.debounce(_syncSolo);
-          // We're already editing paths, just make sure this one is in the set.
-        } else if (_editingPaths.add(path)) {
-          stage.debounce(_syncSolo);
-        }
+        _updatePathEditMode(path, path.editingMode);
         break;
     }
   }

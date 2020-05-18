@@ -126,6 +126,42 @@ void main() {
     expect(file.vertexEditor.mode.value, VertexEditorMode.editingPath);
     expect(editingPath.editingMode, PointsPathEditMode.creating,
         reason: 'Path should go back to creation mode.');
-    // file.advance(0);
+    expect(editingPath.vertices.length, 3);
+
+    expect(core.undo(), true);
+    expect(editingPath.vertices.length, 2);
+
+    expect(core.undo(), true);
+    expect(editingPath.vertices.length, 1);
+
+    expect(core.undo(), true);
+
+    // Expect the shape and path to no longer be in the file.
+    expect(file.core.isHolding(editingShape), false);
+    expect(file.core.isHolding(editingPath), false);
+
+    // Expect there to be no shapes, paths, or vertices as we undid all the way
+    // to the creation of th eshape.
+    expect(core.objectsOfType<Shape>().isEmpty, true);
+    expect(core.objectsOfType<PointsPath>().isEmpty, true);
+    expect(core.objectsOfType<StraightVertex>().isEmpty, true);
+
+    expect(file.vertexEditor.mode.value, VertexEditorMode.off,
+        reason: "editor mode should be off now that the path was removed");
+
+    expect(core.redo(), true);
+
+    // When we redo the creation of a shape, the references are new (we instance
+    // new objects).
+    expect(core.objectsOfType<Shape>().length, 1);
+    expect(core.objectsOfType<PointsPath>().length, 1);
+    expect(core.objectsOfType<StraightVertex>().length, 1);
+
+    // Expect vertex editor to be in editingPath mode.
+    expect(file.vertexEditor.mode.value, VertexEditorMode.editingPath);
+
+    // var reEditingPath = core.objectsOfType<PointsPath>().first;
+    // expect(reEditingPath.editingMode, PointsPathEditMode.creating,
+    //     reason: 'Path should go back to creation mode.');
   });
 }
