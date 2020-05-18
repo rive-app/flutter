@@ -509,6 +509,12 @@ class Stage extends Debouncer {
 
     bool toolCompleted = false;
 
+    // Fire an endClick to clickables
+    if (tool is ClickableTool) {
+      (tool as ClickableTool).endClick();
+      toolCompleted = true;
+    }
+
     // See if either a drag or transform operation was in progress.
     if (_activeTool is TransformingTool) {
       (_activeTool as TransformingTool).completeTransformers();

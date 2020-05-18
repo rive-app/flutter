@@ -14,6 +14,10 @@ class NodeTool extends DrawableTool with ClickableTool {
   NodeTool._();
   Node _node;
 
+  /// Disambiguate between click and end drag events
+  /// so journal entries, etc. aren't handled twice
+  bool beingDragged = false;
+
   @override
   void onClick(Artboard artboard, Vec2D worldMouse) {
     final file = stage.file;
@@ -31,10 +35,15 @@ class NodeTool extends DrawableTool with ClickableTool {
       core.add(_node);
       parent.appendChild(_node);
     });
+  }
 
-    // TODO: capture only if the mouse up resulted in no drag (drag will auto
-    // capture on end).
-    core.captureJournalEntry();
+  /// Handle the case where a click occurs, but a drag does not.
+  /// Basically call endDrag ensure journal captured and tool switched.
+  @override
+  void endClick() {
+    if (!beingDragged) {
+      endDrag();
+    }
   }
 
   @override
@@ -45,6 +54,7 @@ class NodeTool extends DrawableTool with ClickableTool {
 
   @override
   void updateDrag(Vec2D worldMouse) {
+    beingDragged = true;
     if (_node == null) {
       return;
     }
@@ -53,7 +63,9 @@ class NodeTool extends DrawableTool with ClickableTool {
   }
 
   @override
-  void endDrag() {    _node = null;
+  void endDrag() {
+    beingDragged = false;
+    _node = null;
     super.endDrag();
   }
 }
