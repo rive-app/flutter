@@ -394,8 +394,6 @@ class Definition {
 
     ctxCode.writeln('''abstract class ${config.coreContextName}
                         extends CoreContext {''');
-    ctxCode.writeln('''${config.coreContextName}(String fileId) 
-                        : super(fileId);\n''');
 
     ctxCode.writeln('''@override
     Core makeCoreInstance(int typeKey) {

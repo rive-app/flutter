@@ -59,8 +59,6 @@ import 'shapes/straight_vertex_base.dart';
 import 'shapes/triangle_base.dart';
 
 abstract class RiveCoreContext extends CoreContext {
-  RiveCoreContext(String fileId) : super(fileId);
-
   @override
   Core makeCoreInstance(int typeKey) {
     switch (typeKey) {

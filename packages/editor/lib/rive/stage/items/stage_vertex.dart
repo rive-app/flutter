@@ -117,6 +117,7 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
     stage.updateBounds(this);
   }
 
+  // TODO: component.path?.stageItem
   @override
   StageItem get soloParent => component.path.stageItem;
 }

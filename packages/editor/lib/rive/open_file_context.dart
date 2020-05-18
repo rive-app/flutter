@@ -190,12 +190,11 @@ class OpenFileContext with RiveFileDelegate {
     } else {
       // If the spectre cookie doesn't exist, then you're on the web
       // and the browser will handle cookie sending, so don't include
+
       var filePath = '$ownerId/$fileId';
       String spectre;
       if (api.cookies.containsKey('spectre')) {
         spectre = api.cookies['spectre'];
-        final urlEncodedSpectre = Uri.encodeComponent(spectre);
-        filePath += '/$urlEncodedSpectre';
       }
       LocalDataPlatform dataPlatform = LocalDataPlatform.make();
       await dataPlatform.initialize();
@@ -221,6 +220,10 @@ class OpenFileContext with RiveFileDelegate {
   @protected
   void completeConnection(OpenFileState state) {
     _state = state;
+    stateChanged.notify();
+    if (state == OpenFileState.error) {
+      return;
+    }
     core.addDelegate(this);
     selection.clear();
 
@@ -308,6 +311,7 @@ class OpenFileContext with RiveFileDelegate {
 
   @override
   void onWipe() {
+    print("WIPE");
     _stage?.wipe();
     _resetManagers();
   }

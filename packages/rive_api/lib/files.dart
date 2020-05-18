@@ -279,19 +279,15 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
 
   /// Find the socket server url to connect to for a specific file.
   Future<CoopConnectionInfo> establishCoop(int ownerId, int fileId) async {
-    var response = await api.get(api.host + '/api/files/$ownerId/$fileId/coop');
-    if (response.statusCode != 200) {
-      return null;
+    if (api.host.indexOf('https://') == 0) {
+      return CoopConnectionInfo(
+          'wss://${api.host.substring('https://'.length)}/ws/proxy');
     }
-
-    Map<String, dynamic> data;
-    try {
-      data = json.decode(response.body) as Map<String, dynamic>;
-    } on FormatException catch (_) {
-      return null;
+    else if (api.host.indexOf('http://') == 0) {
+      return CoopConnectionInfo(
+          'ws://${api.host.substring('http://'.length)}/ws/proxy');
     }
-
-    return CoopConnectionInfo(data.getString('socketHost'));
+    return null;
   }
 }
 

@@ -157,7 +157,6 @@ abstract class CoreContext implements LocalSettings {
   /// Rive).
   static const int rootDependencyKey = 1;
 
-  final String fileId;
   CoopClient _client;
   int _lastChangeId;
   // _nextObjectId has a default value that will be
@@ -217,7 +216,7 @@ abstract class CoreContext implements LocalSettings {
   @protected
   final Map<ChangeSet, FreshChange> freshChanges = {};
   // final List<ChangeSet> _unsyncedChanges = [];
-  CoreContext(this.fileId) : _lastChangeId = CoopCommand.minChangeId;
+  CoreContext() : _lastChangeId = CoopCommand.minChangeId;
 
   /// When this is set, delay calling onAdded for any object added to Core. This
   /// is helpful when applying many changes at once, knowing that further
@@ -321,7 +320,6 @@ abstract class CoreContext implements LocalSettings {
     _client = CoopClient(
       host,
       path,
-      fileId: fileId,
       clientId: clientId,
       localSettings: this,
       token: token,

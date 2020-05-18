@@ -37,11 +37,11 @@ class HierarchyTreeController extends TreeController<Component> {
 
   @override
   void dispose() {
-    super.dispose();
     // N.B. assumes backboard doesn't change.
     file.core.backboard.activeArtboardChanged.removeListener(_updateArtboard);
     // Remove the item selection listener
     file.selection.removeListener(_onItemSelected);
+    super.dispose();
   }
 
   void _updateArtboard() {
