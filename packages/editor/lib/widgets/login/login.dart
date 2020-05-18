@@ -35,16 +35,14 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
-    if (kIsWeb) {
-      // When logging in or registering with a social account, the server
-      // can redirect back to this page on error.
-      final queryParameters = Uri.base.queryParameters;
-      if (queryParameters.containsKey('errorMsg')) {
-        // Display that error right if it is present, and display it under the
-        // password error field as that is where we show errors in the
-        // 'login' page.
-        _passwordError = queryParameters['errorMsg'];
-      }
+    // When logging in or registering with a social account, the server
+    // can redirect back to this page on error.
+    final queryParameters = Uri.base.queryParameters;
+    if (queryParameters.containsKey('errorMsg')) {
+      // Display that error right if it is present, and display it under the
+      // password error field as that is where we show errors in the
+      // 'login' page.
+      _passwordError = queryParameters['errorMsg'];
     }
 
     // Register validators for the various fields.
