@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:ui';
 import 'dart:html' as html;
+import 'dart:ui';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:window_utils_platform_interface/window_utils_platform_interface.dart';
-
 import 'package:window_utils_web/browser.dart' as browser;
 
 /// The web implementation of [WindowUtilsPlatform].
@@ -39,7 +38,7 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
         browser.height.toDouble(),
       ));
 
-  /// Stubbed out for web; does nothing except return an empty string
+  /// On web: just navigate to [url] and return an empty String.
   @override
   Future<String> openWebView(
     String key,
@@ -48,9 +47,11 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
     Size size,
     String jsMessage = '',
   }) {
-    // See https://github.com/flutter/flutter/issues/51461 for reference.
+    /**See https://github.com/flutter/flutter/issues/51461 for reference.
     final target = browser.standalone ? '_top' : '';
-    html.window.open(url, target);
+    html.window.open(url, target); 
+    */
+    html.window.location.href = url;
     return Future.value('');
   }
 

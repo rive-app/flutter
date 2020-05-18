@@ -332,6 +332,13 @@ class TextStyles {
   TextStyle get fileSearchText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF999999), fontSize: 13);
 
+  TextStyle get fileBrowserText =>  const TextStyle(
+      fontFamily: 'Roboto-Regular',
+      color: Color(0xFF888888),
+      height: 1.615,
+      fontSize: 13,
+      letterSpacing: 0);
+
   // Common
   TextStyle get greyText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF333333), fontSize: 13);
