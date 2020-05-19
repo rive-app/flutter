@@ -110,6 +110,34 @@ class VectorPenTool extends PenTool<Path> {
         canvas.translate(origin[0], origin[1]);
         canvas.transform(path.pathTransform?.mat4);
         canvas.drawPath(path.uiPath, StageItem.selectedPaint);
+
+        // Draw line to ghost point from last point.
+        if (path.editingMode == PointsPathEditMode.creating &&
+            path.vertices.isNotEmpty) {
+          Offset targetOffset;
+          // Draw line to next point (note this should curve if last point is a
+          // cubic).
+          var lastVertex = path.vertices.last;
+          if (ghostPointWorld != null) {
+            // get ghost point into local
+            var inversePath = Mat2D();
+            if (!Mat2D.invert(inversePath, path.pathTransform)) {
+              Mat2D.identity(inversePath);
+            }
+            var ghostLocal =
+                Vec2D.transformMat2D(Vec2D(), ghostPointWorld, inversePath);
+            targetOffset = Offset(ghostLocal[0], ghostLocal[1]);
+          } else if (stage.hoverItem == path.vertices.first.stageItem) {
+            var target = path.vertices.first;
+            // closing the loop
+            targetOffset = Offset(target.x, target.y);
+          }
+
+          if (targetOffset != null) {
+            canvas.drawLine(Offset(lastVertex.x, lastVertex.y), targetOffset,
+                StageItem.selectedPaint);
+          }
+        }
         canvas.restore();
       }
       canvas.restore();
