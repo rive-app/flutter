@@ -66,6 +66,7 @@ class VertexEditor with RiveFileDelegate {
         stage.soloListenable.removeListener(_soloChanged);
         stage.removeSelectionHandler(_selectionHandler);
         stage.solo(null);
+        _editingPaths.value = null;
         break;
     }
   }
