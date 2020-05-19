@@ -51,7 +51,7 @@ class _ToolPopupButtonState extends State<ToolPopupButton> {
   Widget build(BuildContext context) {
     var file = ActiveFile.of(context);
     return ValueListenableBuilder<StageTool>(
-      valueListenable: file.stage.toolNotifier,
+      valueListenable: file.stage.toolListenable,
       builder: (context, tool, _) {
         // If the popup is open during a selection, close it, but debounce it so
         // the user has the opportunity to catch a flash of the change.

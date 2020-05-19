@@ -37,11 +37,11 @@ class HierarchyTreeController extends TreeController<Component> {
 
   @override
   void dispose() {
-    super.dispose();
     // N.B. assumes backboard doesn't change.
     file.core.backboard.activeArtboardChanged.removeListener(_updateArtboard);
     // Remove the item selection listener
     file.selection.removeListener(_onItemSelected);
+    super.dispose();
   }
 
   void _updateArtboard() {
@@ -57,7 +57,8 @@ class HierarchyTreeController extends TreeController<Component> {
           ? treeItem.children
               // We only want to show items in the tree which are selectable, in
               // order to be selectable they must have a stageItem.
-              .where((item) => item.stageItem != null)
+              .where((item) =>
+                  item.stageItem != null && item.stageItem.showInHierarchy)
               .toList(growable: false)
           : null;
 

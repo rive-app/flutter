@@ -175,6 +175,13 @@ class RiveColors {
   Color get interpolationCurveBackground => const Color(0xFF303030);
   Color get interpolationPreviewLine => const Color(0x8033A7FF);
   Color get interpolationPreviewSeparator => const Color(0xFF3C3C3C);
+
+  // Inspector panel pill button
+  Color get inspectorPillBackground => buttonDark;
+  Color get inspectorPillHover =>
+      const Color(0xFF666666); // TODO: Ask guido to resolve this
+  Color get inspectorPillText => const Color(0xFFB2B2B2);
+  Color get inspectorPillIcon => lightGrey;
 }
 
 /// TextStyles used in the Rive Theme

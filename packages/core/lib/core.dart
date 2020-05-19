@@ -157,7 +157,6 @@ abstract class CoreContext implements LocalSettings {
   /// Rive).
   static const int rootDependencyKey = 1;
 
-  final String fileId;
   CoopClient _client;
   int _lastChangeId;
   // _nextObjectId has a default value that will be
@@ -171,6 +170,7 @@ abstract class CoreContext implements LocalSettings {
   int _journalIndex = 0;
 
   bool _isRecording = true;
+  bool get isApplyingJournalEntry => !_isRecording;
 
   // Track which entries were changing during animation and need to be reset
   // prior to the next animation pass.
@@ -217,7 +217,7 @@ abstract class CoreContext implements LocalSettings {
   @protected
   final Map<ChangeSet, FreshChange> freshChanges = {};
   // final List<ChangeSet> _unsyncedChanges = [];
-  CoreContext(this.fileId) : _lastChangeId = CoopCommand.minChangeId;
+  CoreContext() : _lastChangeId = CoopCommand.minChangeId;
 
   /// When this is set, delay calling onAdded for any object added to Core. This
   /// is helpful when applying many changes at once, knowing that further
@@ -307,6 +307,9 @@ abstract class CoreContext implements LocalSettings {
     properties.add(propertyKey);
   }
 
+  void editorPropertyChanged(
+      Core object, int propertyKey, Object from, Object to);
+
   /// Method called when a journal entry is created or applied via an undo/redo.
   @protected
   void completeChanges();
@@ -318,7 +321,6 @@ abstract class CoreContext implements LocalSettings {
     _client = CoopClient(
       host,
       path,
-      fileId: fileId,
       clientId: clientId,
       localSettings: this,
       token: token,
@@ -658,6 +660,8 @@ abstract class CoreContext implements LocalSettings {
     // });
   }
 
+  bool isEditorOnly(int propertyKey);
+
   @protected
   ChangeSet coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
     // Client should only be null during some testing.
@@ -674,6 +678,9 @@ abstract class CoreContext implements LocalSettings {
 
       var objectInflightChanges = inflight[objectId] ??= HashMap<int, int>();
       changes.forEach((key, entry) {
+        if (isEditorOnly(key)) {
+          return;
+        }
         objectInflightChanges[key] = (objectInflightChanges[key] ??= 0) + 1;
         if (key == hydrateKey) {
           //changeProperty(object, addKey, removeKey, object.coreType);
@@ -697,7 +704,11 @@ abstract class CoreContext implements LocalSettings {
         }
       });
 
-      sendChanges.objects.add(objectChanges);
+      // Some change sets have only editor properties and result in an empty
+      // changes list, no need to send it...
+      if (objectChanges.changes.isNotEmpty) {
+        sendChanges.objects.add(objectChanges);
+      }
     });
     freshChanges[sendChanges] = FreshChange(changes, useFrom);
     _client?.queueChanges(sendChanges);
@@ -774,7 +785,7 @@ abstract class CoreContext implements LocalSettings {
     }
 
     // Let's allow nesting batchAdd callbacks.
-    if(isBatchAdding) {
+    if (isBatchAdding) {
       // Already in a batch add, just piggy back...
       addCallback();
       return;

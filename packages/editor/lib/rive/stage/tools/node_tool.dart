@@ -5,11 +5,10 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 
 // TODO: update node translation to be in parent space.
-class NodeTool extends DrawableTool with ClickableTool {
+class NodeTool extends DrawableTool {
   static final NodeTool instance = NodeTool._();
   NodeTool._();
 
@@ -17,8 +16,9 @@ class NodeTool extends DrawableTool with ClickableTool {
   Node _node;
 
   @override
-  void onClick(Artboard artboard, Vec2D worldMouse) =>
-      _node = _createNode(artboard, worldMouse);
+  void click(Artboard artboard, Vec2D worldMouse) {
+    _node = _createNode(artboard, worldMouse);
+  }
 
   @override
   String get icon => 'tool-node';
@@ -30,9 +30,10 @@ class NodeTool extends DrawableTool with ClickableTool {
   /// as it might have been dragged around a bit before being
   /// placed, so we can't do this in onClick
   @override
-  void endClick() {
+  bool endClick() {
     _node = null;
     stage.activateAction(ShortcutAction.translateTool);
+    return true;
   }
 
   @override

@@ -54,6 +54,7 @@ class _CorePropertiesBuilderState<T, K extends Core>
   }
 
   void _unbindListener(Iterable<K> objects, int propertyKey) {
+    cancelFrameDebounce(_rebuild);
     for (final object in objects) {
       object.removeListener(propertyKey, _valueChanged);
     }
@@ -92,7 +93,6 @@ class _CorePropertiesBuilderState<T, K extends Core>
   @override
   void dispose() {
     _unbindListener(widget.objects, widget.propertyKey);
-    cancelFrameDebounce(_rebuild);
     super.dispose();
   }
 
@@ -102,8 +102,10 @@ class _CorePropertiesBuilderState<T, K extends Core>
     _bindListener();
   }
 
-
   void _rebuild() {
+    if (!mounted) {
+      return;
+    }
     (context as StatefulElement).markNeedsBuild();
   }
 

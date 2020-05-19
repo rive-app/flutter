@@ -43,7 +43,7 @@ class PopupContextItem extends PopupListItem {
   final bool padIcon;
 
   @override
-  final ChangeNotifier rebuildItem;
+  final Listenable rebuildItem;
 
   @override
   final List<PopupContextItem> popup;

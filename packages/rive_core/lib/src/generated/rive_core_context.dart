@@ -59,8 +59,6 @@ import 'shapes/straight_vertex_base.dart';
 import 'shapes/triangle_base.dart';
 
 abstract class RiveCoreContext extends CoreContext {
-  RiveCoreContext(String fileId) : super(fileId);
-
   @override
   Core makeCoreInstance(int typeKey) {
     switch (typeKey) {
@@ -252,6 +250,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'radius';
       case PointsPathBase.isClosedPropertyKey:
         return 'isClosed';
+      case PointsPathBase.editingModeValuePropertyKey:
+        return 'editingModeValue';
       case ParametricPathBase.widthPropertyKey:
         return 'width';
       case ParametricPathBase.heightPropertyKey:
@@ -350,6 +350,7 @@ abstract class RiveCoreContext extends CoreContext {
         case GradientStopBase.colorValuePropertyKey:
         case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModePropertyKey:
+        case PointsPathBase.editingModeValuePropertyKey:
         case BackboardBase.colorValuePropertyKey:
           var value = intType.deserialize(reader);
           setInt(object, change.op, value);
@@ -464,6 +465,7 @@ abstract class RiveCoreContext extends CoreContext {
       case GradientStopBase.colorValuePropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
+      case PointsPathBase.editingModeValuePropertyKey:
       case BackboardBase.colorValuePropertyKey:
         if (value != null && value is int) {
           change.value = intType.serialize(value);
@@ -822,6 +824,11 @@ abstract class RiveCoreContext extends CoreContext {
       case PointsPathBase.isClosedPropertyKey:
         if (object is PointsPathBase && value is bool) {
           object.isClosed = value;
+        }
+        break;
+      case PointsPathBase.editingModeValuePropertyKey:
+        if (object is PointsPathBase && value is int) {
+          object.editingModeValue = value;
         }
         break;
       case ParametricPathBase.widthPropertyKey:
@@ -1306,6 +1313,11 @@ abstract class RiveCoreContext extends CoreContext {
           return object.isClosed;
         }
         break;
+      case PointsPathBase.editingModeValuePropertyKey:
+        if (object is PointsPathBase) {
+          return object.editingModeValue;
+        }
+        break;
       case ParametricPathBase.widthPropertyKey:
         if (object is ParametricPathBase) {
           return object.width;
@@ -1390,6 +1402,16 @@ abstract class RiveCoreContext extends CoreContext {
     return null;
   }
 
+  @override
+  bool isEditorOnly(int propertyKey) {
+    switch (propertyKey) {
+      case PointsPathBase.editingModeValuePropertyKey:
+        return true;
+      default:
+        return false;
+    }
+  }
+
   CoreFieldType coreType(int propertyKey) {
     switch (propertyKey) {
       case KeyedObjectBase.objectIdPropertyKey:
@@ -1416,6 +1438,7 @@ abstract class RiveCoreContext extends CoreContext {
       case GradientStopBase.colorValuePropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
+      case PointsPathBase.editingModeValuePropertyKey:
       case BackboardBase.colorValuePropertyKey:
         return intType;
       case AnimationBase.namePropertyKey:
@@ -1527,6 +1550,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as FillBase).fillRule;
       case DrawableBase.blendModePropertyKey:
         return (object as DrawableBase).blendMode;
+      case PointsPathBase.editingModeValuePropertyKey:
+        return (object as PointsPathBase).editingModeValue;
       case BackboardBase.colorValuePropertyKey:
         return (object as BackboardBase).colorValue;
     }
@@ -1728,6 +1753,9 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case DrawableBase.blendModePropertyKey:
         (object as DrawableBase).blendMode = value;
+        break;
+      case PointsPathBase.editingModeValuePropertyKey:
+        (object as PointsPathBase).editingModeValue = value;
         break;
       case BackboardBase.colorValuePropertyKey:
         (object as BackboardBase).colorValue = value;

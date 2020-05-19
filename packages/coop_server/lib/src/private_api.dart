@@ -99,30 +99,6 @@ class PrivateApi {
     }
   }
 
-  /// Validates that a user owns a file with a valid access token
-  Future<ValidationResult> validate(
-      int ownerId, int fileId, String token) async {
-    try {
-      var response = await http.get('$host/validate/$ownerId/$fileId/$token');
-      if (response.statusCode == 200) {
-        Map<String, dynamic> data;
-        try {
-          data = json.decode(response.body) as Map<String, dynamic>;
-        } on FormatException catch (_) {
-          return null;
-        }
-
-        return ValidationResult(
-          data['userId'] is int ? data['userId'] as int : 0,
-          data['ownerId'] is int ? data['ownerId'] as int : 0,
-        );
-      }
-      return null;
-    } on Exception catch (_) {
-      return null;
-    }
-  }
-
   Future<SaveResult> save(int ownerId, int fileId, Uint8List data) async {
     try {
       var response =

@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:core/debounce.dart';
 import 'package:cursor/cursor_view.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/artboard.dart';
@@ -36,11 +38,11 @@ import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/late_draw_stage_tool.dart';
-import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
@@ -56,7 +58,7 @@ abstract class StageDelegate {
   void stageNeedsAdvance();
   void stageNeedsRedraw();
   Future<ui.Image> rasterize();
-  Cursor customCursor;
+  BuildContext context;
 }
 
 abstract class LateDrawViewDelegate {
@@ -93,7 +95,7 @@ class Stage extends Debouncer {
   Mat2D get viewTransform => _viewTransform;
   double get viewportWidth => _viewportWidth;
   double get viewportHeight => _viewportHeight;
-  final List<StageItem> _visibleItems = [];
+  final List<StageDrawable> _visibleItems = [];
   final Vec2D _viewTranslation = Vec2D();
   double _viewZoom = 1;
   double get viewZoom => _viewZoom;
@@ -106,7 +108,7 @@ class Stage extends Debouncer {
   bool _isHidingCursor = false;
   int _hoverOffsetIndex = -1;
 
-  CustomSelectionHandler customSelectionHandler;
+  final Set<CustomSelectionHandler> _selectionHandlers = {};
 
   /// We store these two separtely to avoid contention with how they are
   /// activated/disabled.
@@ -114,45 +116,41 @@ class Stage extends Debouncer {
   CursorInstance _panHandCursor;
 
   bool _isPanning = false;
+  bool get isPanning => _isPanning;
 
-  // Clear the selection handler only if it was a previously set one.
-  bool clearSelectionHandler(CustomSelectionHandler handler) {
-    if (customSelectionHandler == handler) {
-      customSelectionHandler = null;
-      return true;
-    }
-    return false;
+  /// Register a selection handler that will be called back whenever an item is
+  /// clicked on the stage.
+  bool addSelectionHandler(CustomSelectionHandler handler) {
+    return _selectionHandlers.add(handler);
+  }
+
+  // Remove a previously added selection handler.
+  bool removeSelectionHandler(CustomSelectionHandler handler) {
+    return _selectionHandlers.remove(handler);
   }
 
   LateDrawViewDelegate lateDrawDelegate;
 
   StageDelegate _delegate;
+  final ValueNotifier<StageTool> _toolNotifier = ValueNotifier<StageTool>(null);
+  ValueListenable<StageTool> get toolListenable => _toolNotifier;
 
-  /// Currently selected tool
-  final ValueNotifier<StageTool> toolNotifier = ValueNotifier<StageTool>(null);
-
-  /// This holds the current tool only when it is active
-  StageTool _activeTool;
-
-  StageTool get tool => toolNotifier.value;
-
+  StageTool _dragTool;
+  // The tool we called ".click" on.
+  StageTool _clickTool;
+  StageTool get tool => _toolNotifier.value;
   set tool(StageTool value) {
-    if (toolNotifier.value == value) {
+    if (_toolNotifier.value == value) {
       return;
     }
     if (value.activate(this)) {
-      toolNotifier.value?.deactivate();
-      toolNotifier.value = value;
+      _toolNotifier.value?.deactivate();
+      _toolNotifier.value = value;
+      _completeDrag();
+      if (value.activateSendsMouseMove) {
+        _sendMouseMoveToTool();
+      }
     }
-    // Tools that are Moveable (e.g. PenTool) are activated as soon as
-    // they are set.
-    if (value is MoveableTool) {
-      _activeTool = value;
-      (_activeTool as MoveableTool).mousePosition = _worldMouse;
-    } else {
-      _activeTool = null;
-    }
-    _activeTool = value is MoveableTool ? value : null;
 
     // Update the late draw render object to know which tool it should be
     // delegating draw operations for (if any).
@@ -161,6 +159,32 @@ class Stage extends Debouncer {
     } else {
       lateDrawDelegate?.tool = null;
     }
+  }
+
+  void _sendMouseMoveToTool() {
+    if (_worldMouse == null) {
+      // Worldmouse can get set to null when we mouse out of the stage.
+      return;
+    }
+    var artboard = activeArtboard;
+    if (artboard != null &&
+        tool.mouseMove(artboard, tool.mouseWorldSpace(artboard, _worldMouse))) {
+      markNeedsAdvance();
+    }
+  }
+
+  /// We call this internally when the stage state changes in a way that could
+  /// cause the active tool to no longer be valid.
+  bool _validateTool() {
+    if (tool != null && !tool.validate(this)) {
+      // Deactivate any operation that was in progress if this tool is no longer
+      // valid.
+      _completeDrag();
+      // The auto tool is always valid.
+      tool = AutoTool.instance;
+      return false;
+    }
+    return true;
   }
 
   // Joints freezed flag
@@ -352,13 +376,14 @@ class Stage extends Debouncer {
   bool get isSelectionEnabled => !_isHidingCursor;
 
   void _updateHover() {
-    if (isSelectionEnabled) {
+    if (isSelectionEnabled && _worldMouse != null) {
       AABB cursorAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
           _worldMouse[0] + 1, _worldMouse[1] + 1);
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
         visTree.query(cursorAABB, (int proxyId, StageItem item) {
           if (item.isSelectable &&
+              (soloItems == null || isValidSoloSelection(item)) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
             hover = item.hoverTarget;
@@ -397,11 +422,7 @@ class Stage extends Debouncer {
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
 
-    if (_activeTool is MoveableTool &&
-        (_activeTool as MoveableTool).updateMove(_worldMouse)) {
-      // Only advance if the tool specifically requests it.
-      markNeedsAdvance();
-    }
+    _sendMouseMoveToTool();
   }
 
   void mouseDown(int button, double x, double y) {
@@ -413,18 +434,17 @@ class Stage extends Debouncer {
       case 1:
         if (_panHandCursor != null) {
           _isPanning = true;
-        } else if (tool is ClickableTool) {
-          final artboard = activeArtboard;
-          (tool as ClickableTool)
-              .onClick(artboard, tool.mouseWorldSpace(artboard, _worldMouse));
         } else if (isSelectionEnabled) {
           if (_hoverItem != null) {
             _mouseDownSelected = true;
-            if (customSelectionHandler != null) {
-              if (customSelectionHandler(_hoverItem)) {
-                file.select(_hoverItem);
+            bool selectionHandled = false;
+            for (final handler in _selectionHandlers) {
+              if (handler(_hoverItem)) {
+                selectionHandled = true;
+                break;
               }
-            } else {
+            }
+            if (!selectionHandled) {
               file.select(_hoverItem);
             }
           } else {
@@ -434,6 +454,17 @@ class Stage extends Debouncer {
           _mouseDownSelected = false;
         }
 
+        // If the click operation didn't result in a selection, pipe the click
+        // to the tool.
+        if (!_mouseDownSelected) {
+          final artboard = activeArtboard;
+          _clickTool = tool;
+          tool.click(
+              artboard,
+              artboard == null
+                  ? _worldMouse
+                  : tool.mouseWorldSpace(artboard, _worldMouse));
+        }
         break;
       case 2:
         _isPanning = true;
@@ -442,14 +473,16 @@ class Stage extends Debouncer {
         break;
       default:
     }
+
+    _updateComponents();
   }
 
   void mouseDrag(int button, double x, double y) {
     _computeWorldMouse(x, y);
     file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
     // Store the tool that got activated by this operation separate from the
-    // _activeTool so we can know if we were already dragging.
-    StageTool activatedTool;
+    // _dragTool so we can know if we were already dragging.
+    StageTool dragTool;
     if (_isPanning) {
       double dx = x - _lastMousePosition[0];
       double dy = y - _lastMousePosition[1];
@@ -463,35 +496,47 @@ class Stage extends Debouncer {
       markNeedsAdvance();
     } else {
       if (tool is TransformingTool) {
-        if (_activeTool == null) {
-          activatedTool = tool;
-          (activatedTool as TransformingTool).startTransformers(
+        if (_dragTool == null) {
+          dragTool = tool;
+          (dragTool as TransformingTool).startTransformers(
               file.selection.items.whereType<StageItem>(), _worldMouse);
         } else {
-          (_activeTool as TransformingTool).advanceTransformers(_worldMouse);
+          (_dragTool as TransformingTool).advanceTransformers(_worldMouse);
         }
       }
       if (tool is DraggableTool) {
         var artboard = activeArtboard;
         var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
 
-        // [_activeTool] is [null] before dragging operation starts.
-        if (_activeTool == null) {
-          activatedTool = tool;
-          (activatedTool as DraggableTool).startDrag(
+        // [_dragTool] is [null] before dragging operation starts.
+        if (_dragTool == null) {
+          dragTool = tool;
+          (dragTool as DraggableTool).startDrag(
               file.selection.items.whereType<StageItem>(),
               artboard,
               worldMouse);
         } else {
-          // [_activeTool] dragging operation has already started, so we
+          // [_dragTool] dragging operation has already started, so we
           // need to progress.
-          (_activeTool as DraggableTool).drag(worldMouse);
+          (_dragTool as DraggableTool).drag(worldMouse);
         }
       }
     }
 
-    if (activatedTool != null) {
-      _activeTool = activatedTool;
+    if (dragTool != null) {
+      _dragTool = dragTool;
+    }
+    _updateComponents();
+  }
+
+  void _updateComponents() {
+    /// We call updateComponents here because on some platforms the mouseDrag
+    /// event happens between our frame callback and render of the StageView.
+    if (activeArtboard.updateComponents()) {
+      // If this resulted in an update, we should make sure to update at least
+      // one more time for platforms that didn't interleave the drag between
+      // advance & render.
+      markNeedsAdvance();
     }
   }
 
@@ -507,54 +552,90 @@ class Stage extends Debouncer {
       // show a popup.
     }
 
-    bool toolCompleted = false;
-
-    // Fire an endClick to clickables
-    if (tool is ClickableTool) {
-      (tool as ClickableTool).endClick();
-      toolCompleted = true;
-    }
-
-    // See if either a drag or transform operation was in progress.
-    if (_activeTool is TransformingTool) {
-      (_activeTool as TransformingTool).completeTransformers();
-      toolCompleted = true;
-    }
-    if (_activeTool is DraggableTool) {
-      (_activeTool as DraggableTool).endDrag();
-      toolCompleted = true;
-    }
-
-    if (toolCompleted) {
-      _activeTool = null;
-      file.core.captureJournalEntry();
-      markNeedsAdvance();
-    } else if (!_mouseDownSelected) {
+    // If we didn't complete an operation and nothing was selected, clear
+    // selections.
+    if (!_completeDrag() && !_mouseDownSelected) {
       file.selection.clear();
     }
+
+    _updateComponents();
   }
 
+  /// Complete any operation the active tool was performing.
+  bool _completeDrag() {
+    bool toolCompleted = _clickTool?.endClick() ?? false;
+    _clickTool = null;
+    
+    if (_dragTool != null) {
+      // See if either a drag or transform operation was in progress.
+      if (_dragTool is TransformingTool) {
+        (_dragTool as TransformingTool).completeTransformers();
+        toolCompleted = true;
+      }
+      if (_dragTool is DraggableTool) {
+        (_dragTool as DraggableTool).endDrag();
+        toolCompleted = true;
+      }
+    }
+    if (toolCompleted) {
+      print("TOOL COMPLETED!");
+      _dragTool = null;
+      file.core.captureJournalEntry();
+      markNeedsAdvance();
+      return true;
+    }
+    return false;
+  }
+
+  bool _wasHidingCursor = false;
   void mouseExit(int button, double x, double y) {
     _computeWorldMouse(x, y);
+
+    _wasHidingCursor = _isHidingCursor;
+    if (_wasHidingCursor) {
+      showCursor();
+    }
+
+    final artboard = activeArtboard;
+    tool?.mouseExit(
+        artboard,
+        artboard == null
+            ? _worldMouse
+            : tool.mouseWorldSpace(artboard, _worldMouse));
+    _updatePanIcon();
     _worldMouse = null;
     hoverItem = null;
-    if (_activeTool is MoveableTool) {
-      (_activeTool as MoveableTool).onExit();
-    }
-    _updatePanIcon();
-    // Let the tool know the mouse is outside the stage
-    tool.offScreen();
   }
 
   void mouseEnter(int button, double x, double y) {
-    tool.onScreen();
+    _computeWorldMouse(x, y);
+
+    if (_wasHidingCursor) {
+      hideCursor();
+    }
+
+    final artboard = activeArtboard;
+    tool?.mouseEnter(
+        artboard,
+        artboard == null
+            ? _worldMouse
+            : tool.mouseWorldSpace(artboard, _worldMouse));
+    _updatePanIcon();
   }
 
-  Artboard get activeArtboard => file.core?.backboard?.activeArtboard;
+  // Artboard get activeArtboard => file.core?.backboard?.activeArtboard;
+  Artboard get activeArtboard {
+    if (file.core == null) {
+      print("CORE NULL");
+    } else if (file.core.backboard == null) {
+      print("BB NULL");
+    } else if (file.core.backboard.activeArtboard == null) {
+      print("AA NULL");
+    }
+    return file.core?.backboard?.activeArtboard;
+  }
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
-
-  StreamSubscription<bool> _isActiveSubscription;
 
   Stage(this.file) {
     for (final object in file.core.objects) {
@@ -562,20 +643,51 @@ class Stage extends Debouncer {
         initComponent(object);
       }
     }
-    _isActiveSubscription = file.isActiveStream.listen(_fileActiveChanged);
+    file.isActiveListenable.addListener(_fileActiveChanged);
+    file.selection.addListener(_fileSelectionChanged);
 
     file.addActionHandler(_handleAction);
   }
 
+  void _fileSelectionChanged() {
+    if (soloItems != null) {
+      // Check that all the selected stageItems are valid for this solo. If not,
+      // break out of it.
+      for (final item in file.selection.items) {
+        if (item is StageItem && !isValidSoloSelection(item)) {
+          solo(null);
+          break;
+        }
+      }
+    }
+  }
+
+  bool isValidSoloSelection(StageItem item) {
+    var solo = soloItems;
+    // If we're soloing, only items that are directly soloed or have a
+    // parent that is soloed are allowed to be selected.
+    return solo != null &&
+        (solo.contains(item) ||
+            (item.soloParent != null && solo.contains(item.soloParent)));
+  }
+
   bool _handleAction(ShortcutAction action) {
     switch (action) {
+      case ShortcutAction.cancel:
+        // TODO: should we cancel drag operations?
+        // For now cancel solo (if there was one).
+        if (_soloNotifier.value != null) {
+          solo(null);
+          return true;
+        }
+        break;
+
       case ShortcutAction.cycleHover:
         _hoverOffsetIndex = max(1, _hoverOffsetIndex + 1);
         _updateHover();
         return true;
-      default:
-        return false;
     }
+    return false;
   }
 
   /// Deal with the fileContext being activate/de-activated. This happens when a
@@ -585,8 +697,8 @@ class Stage extends Debouncer {
   /// can be temporarily suspended should be. It can be re-activated when
   /// isActive changes to true again. Eventually the stage object will have
   /// [dispose] called when the tab has been deselected for enough time.
-  void _fileActiveChanged(bool isActive) {
-    if (isActive) {
+  void _fileActiveChanged() {
+    if (file.isActive) {
       ShortcutAction.pan.addListener(_panActionChanged);
     } else {
       ShortcutAction.pan.removeListener(_panActionChanged);
@@ -637,7 +749,7 @@ class Stage extends Debouncer {
         component.stageItem = stageItem;
 
         // Only automatically add items that are marked automatic.
-        if (stageItem.isAutomatic) {
+        if (stageItem.isAutomatic(this)) {
           addItem(stageItem);
         }
       }
@@ -677,6 +789,13 @@ class Stage extends Debouncer {
     if (item is Advancer) {
       _advancingItems.remove(item as Advancer);
     }
+
+    // Patch up solo if items are removed that were part of it.
+    var currentSolo = soloItems;
+    if (currentSolo != null && currentSolo.contains(item)) {
+      var nextSolo = HashSet<StageItem>.from(currentSolo)..remove(item);
+      solo(nextSolo.isEmpty ? null : nextSolo);
+    }
     return true;
   }
 
@@ -688,9 +807,10 @@ class Stage extends Debouncer {
   }
 
   void dispose() {
+    file.selection.removeListener(_fileSelectionChanged);
     file.removeActionHandler(_handleAction);
-    _isActiveSubscription.cancel();
-    _fileActiveChanged(false);
+    file.isActiveListenable.removeListener(_fileActiveChanged);
+    ShortcutAction.pan.removeListener(_panActionChanged);
     _panHandCursor?.remove();
     _rightClickHandCursor?.remove();
   }
@@ -715,16 +835,20 @@ class Stage extends Debouncer {
 
     double factor = min(1, elapsed * 30);
 
+    bool movedView = false;
     if (ds.abs() > 0.00001) {
       _needsAdvance = true;
+      movedView = true;
       ds *= factor;
     }
     if (dx.abs() > 0.01) {
       _needsAdvance = true;
+      movedView = true;
       dx *= factor;
     }
     if (dy.abs() > 0.01) {
       _needsAdvance = true;
+      movedView = true;
       dy *= factor;
     }
 
@@ -741,6 +865,10 @@ class Stage extends Debouncer {
     // Take this opportunity to update any stageItem paints that rely on the
     // zoom level.
     StageItem.selectedPaint.strokeWidth = StageItem.strokeWidth / _viewZoom;
+
+    if (movedView) {
+      mouseMove(1, _lastMousePosition[0], _lastMousePosition[1]);
+    }
   }
 
   void draw(PaintingContext context, Offset offset, Size size) {
@@ -790,17 +918,29 @@ class Stage extends Debouncer {
 
     // Transform to world space
     canvas.transform(viewTransform.mat4);
+    bool inWorldSpace = true;
 
-    _visibleItems.sort((StageItem a, StageItem b) => a.drawOrder - b.drawOrder);
+    _visibleItems.add(tool);
+    _visibleItems
+        .sort((StageDrawable a, StageDrawable b) => a.drawOrder - b.drawOrder);
 
-    for (final StageItem item in _visibleItems) {
+    for (final item in _visibleItems) {
+      // Some items may not draw in world space. Change between world and screen
+      // as requested by the drawable. We can't batch here as drawables of
+      // different space types might be interleaved at different draw orders.
+      if (inWorldSpace != item.drawsInWorldSpace) {
+        if (inWorldSpace = item.drawsInWorldSpace) {
+          canvas.transform(viewTransform.mat4);
+        } else {
+          canvas.restore();
+        }
+      }
       item.draw(canvas);
     }
 
-    canvas.restore();
-
-    // Widget space
-    _activeTool?.draw(canvas);
+    if (inWorldSpace) {
+      canvas.restore();
+    }
     canvas.restore();
   }
 
@@ -821,21 +961,25 @@ class Stage extends Debouncer {
   @override
   void onNeedsDebounce() => markNeedsAdvance();
 
+  Cursor get _customCursor =>
+      delegate?.context != null ? CustomCursor.find(delegate?.context) : null;
+
   void hideCursor() {
     _isHidingCursor = true;
     markNeedsRedraw();
-    delegate?.customCursor?.hide();
+
+    _customCursor?.hide();
   }
 
   void showCursor() {
     _isHidingCursor = false;
     markNeedsRedraw();
-    delegate?.customCursor?.show();
+    _customCursor?.show();
   }
 
   CursorInstance showCustomCursor(String icon) {
-    if (delegate?.customCursor != null) {
-      return CursorIcon.build(delegate.customCursor, icon);
+    if (_customCursor != null) {
+      return CursorIcon.build(_customCursor, icon);
     }
     return null;
   }
@@ -843,4 +987,39 @@ class Stage extends Debouncer {
   /// Trigger an action through the stage. Used to change tool selection after
   /// an action is completed
   void activateAction(ShortcutAction action) => file.rive.triggerAction(action);
+
+  /// The stage has the concept of solo items. This is different from a Solo
+  /// Component. When the stage is in solo mode, it means that only solo items
+  /// (and their children) can be interacted with. This is useful when doing
+  /// complex operations on shapes, paths, meshes that require focus on only a
+  /// specific set of stage items. It's also useful when you want to ask the
+  /// user to select something of a specific type and want to only allow (and
+  /// perhaps highlight) valid selections.
+  void solo(Iterable<StageItem> value, {bool darken = false}) {
+    if (_soloNotifier.value == value) {
+      return;
+    }
+    if (_soloNotifier.value != null) {
+      for (final item in _soloNotifier.value) {
+        item.onSoloChanged(false);
+      }
+    }
+    file.selection.clear();
+    _soloNotifier.value = value == null ? null : HashSet<StageItem>.from(value);
+    _updateHover();
+    _validateTool();
+    if (value != null) {
+      for (final item in value) {
+        item.onSoloChanged(true);
+      }
+    }
+    // TODO: add darken functionality (used when connecting bones, valid
+    // contraint targets, etc).
+  }
+
+  HashSet<StageItem> get soloItems => _soloNotifier.value;
+
+  final ValueNotifier<HashSet<StageItem>> _soloNotifier =
+      ValueNotifier<HashSet<StageItem>>(null);
+  ValueListenable<HashSet<StageItem>> get soloListenable => _soloNotifier;
 }

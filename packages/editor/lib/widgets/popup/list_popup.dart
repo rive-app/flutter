@@ -34,7 +34,7 @@ abstract class PopupListItem {
 
   /// Optional change notifier that can be used to signal the item needs to be
   /// rebuilt in response to some external event.
-  ChangeNotifier get rebuildItem;
+  Listenable get rebuildItem;
 
   /// Used to track which item is currently in focus (hovered or selected via
   /// arrow keys).
@@ -482,7 +482,7 @@ class __PopupListItemShellState<T extends PopupListItem>
               color: isFocused ? const Color.fromRGBO(26, 26, 26, 1) : null,
               child: NullableListenableBuilder(
                 listenable: widget.item.rebuildItem,
-                builder: (context, ChangeNotifier value, _) =>
+                builder: (context, Listenable value, _) =>
                     widget.itemBuilder(context, widget.item, isFocused),
               ),
             );

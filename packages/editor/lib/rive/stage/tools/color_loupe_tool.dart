@@ -7,9 +7,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
-import 'package:rive_editor/rive/stage/tools/clickable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/late_draw_stage_tool.dart';
-import 'package:rive_editor/rive/stage/tools/moveable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 import 'package:rive_editor/widgets/common/converters/hex_value_converter.dart';
@@ -18,8 +16,7 @@ typedef PickColor = void Function(Color);
 
 /// A tool that allows the user to zoom into the stage and pick the color from a
 /// specific pixel.
-class ColorLoupeTool extends StageTool
-    with LateDrawStageTool, MoveableTool, ClickableTool {
+class ColorLoupeTool extends StageTool with LateDrawStageTool {
   final _whiteStroke = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1
@@ -55,9 +52,7 @@ class ColorLoupeTool extends StageTool
   }
 
   @override
-  bool updateMove(Vec2D worldMouse) {
-    super.updateMove(worldMouse);
-
+  bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {
     // We override updateMove in order to specifically return false so that the
     // stage doesn't redraw/advance (unless it needs to for some external, to
     // us, reason). Because the stage doesn't redraw, the lateDraw view won't
@@ -224,7 +219,7 @@ class ColorLoupeTool extends StageTool
   static final ColorLoupeTool instance = ColorLoupeTool();
 
   @override
-  void onClick(Artboard activeArtboard, Vec2D worldMouse) {
+  void click(Artboard activeArtboard, Vec2D worldMouse) {
     var pick = pickColor;
     pickColor = null;
     pick?.call(_currentColor);

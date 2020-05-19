@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_core/client_side_player.dart';
@@ -12,7 +13,9 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/rive/alerts/action_alert.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
+import 'package:rive_editor/rive/editor_alert.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/selection_context.dart';
@@ -21,14 +24,16 @@ import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
+import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/node_tool.dart';
-import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
+import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
+import 'package:rive_editor/rive/vertex_editor.dart';
+import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
-import 'package:rxdart/rxdart.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
 
@@ -52,7 +57,8 @@ class OpenFileContext with RiveFileDelegate {
   final RiveFilesApi filesApi;
 
   /// File name
-  final ValueNotifier<String> name;
+  final ValueNotifier<String> _name;
+  ValueListenable<String> get name => _name;
 
   /// The Core representation of the file.
   RiveFile core;
@@ -62,18 +68,50 @@ class OpenFileContext with RiveFileDelegate {
 
   OpenFileState _state = OpenFileState.loading;
 
-  final _isActiveStream = BehaviorSubject<bool>();
-  ValueStream<bool> get isActiveStream => _isActiveStream;
-  bool _isActive;
+  final _alerts = ValueNotifier<Iterable<EditorAlert>>([]);
+
+  /// List of alerts
+  ValueListenable<Iterable<EditorAlert>> get alerts => _alerts;
+
+  void _alertDismissed(EditorAlert alert) {
+    removeAlert(alert);
+  }
+
+  /// Add an alert to the alerts list. Returns true if it was added, false if it
+  /// was already being shown.
+  bool addAlert(EditorAlert value) {
+    var alerts = Set.of(_alerts.value);
+    if (alerts.add(value)) {
+      value.dismissed.addListener(_alertDismissed);
+      _alerts.value = alerts;
+      return true;
+    }
+    return false;
+  }
+
+  /// Remove an alert from the alerts list.
+  bool removeAlert(EditorAlert alert) {
+    alert.dismissed.removeListener(_alertDismissed);
+    var alerts = Set.of(_alerts.value);
+    if (alerts.remove(alert)) {
+      _alerts.value = alerts;
+      return true;
+    }
+    return false;
+  }
+
+  final _isActive = ValueNotifier<bool>(false);
+
+  /// A listenable value that gets notified when the isActive value changes.
+  ValueListenable<bool> get isActiveListenable => _isActive;
 
   /// Whether this file is the currently active file.
-  bool get isActive => _isActive;
+  bool get isActive => _isActive.value;
   set isActive(bool value) {
-    if (value == _isActive) {
+    if (value == _isActive.value) {
       return;
     }
-    _isActive = value;
-    _isActiveStream.add(value);
+    _isActive.value = value;
   }
 
   /// Controller for the hierarchy of this file.
@@ -131,6 +169,8 @@ class OpenFileContext with RiveFileDelegate {
   void startDragOperation() => rive.startDragOperation();
   void endDragOperation() => rive.endDragOperation();
 
+  VertexEditor vertexEditor;
+
   OpenFileContext(
     this.ownerId,
     this.fileId, {
@@ -138,7 +178,7 @@ class OpenFileContext with RiveFileDelegate {
     String fileName,
     this.api,
     this.filesApi,
-  }) : name = ValueNotifier<String>(fileName);
+  }) : _name = ValueNotifier<String>(fileName);
 
   Stage get stage => _stage;
 
@@ -152,12 +192,11 @@ class OpenFileContext with RiveFileDelegate {
     } else {
       // If the spectre cookie doesn't exist, then you're on the web
       // and the browser will handle cookie sending, so don't include
+
       var filePath = '$ownerId/$fileId';
       String spectre;
       if (api.cookies.containsKey('spectre')) {
         spectre = api.cookies['spectre'];
-        final urlEncodedSpectre = Uri.encodeComponent(spectre);
-        filePath += '/$urlEncodedSpectre';
       }
       LocalDataPlatform dataPlatform = LocalDataPlatform.make();
       await dataPlatform.initialize();
@@ -172,22 +211,29 @@ class OpenFileContext with RiveFileDelegate {
         filePath,
         spectre,
       );
-      if (result == ConnectResult.connected) {
-        _state = OpenFileState.open;
-      } else {
-        _state = OpenFileState.error;
-      }
-      core.addDelegate(this);
-      selection.clear();
-
-      core.advance(0);
-      makeStage();
-      _stage.tool = TranslateTool();
-      _resetTreeControllers();
-      stateChanged.notify();
+      completeConnection(result == ConnectResult.connected
+          ? OpenFileState.open
+          : OpenFileState.error);
     }
 
     return true;
+  }
+
+  @protected
+  void completeConnection(OpenFileState state) {
+    _state = state;
+    stateChanged.notify();
+    if (state == OpenFileState.error) {
+      return;
+    }
+    core.addDelegate(this);
+    selection.clear();
+
+    core.advance(0);
+    makeStage();
+    _stage.tool = AutoTool.instance;
+    _resetManagers();
+    stateChanged.notify();
   }
 
   @protected
@@ -196,7 +242,7 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   void dispose() {
-    _isActiveStream.close();
+    _disposeManagers();
     core?.disconnect();
     _stage?.dispose();
   }
@@ -268,17 +314,27 @@ class OpenFileContext with RiveFileDelegate {
   @override
   void onWipe() {
     _stage?.wipe();
-    _resetTreeControllers();
+    _resetManagers();
   }
 
-  void _resetTreeControllers() {
+  void _disposeManagers() {
+    vertexEditor?.dispose();
     treeController.value?.dispose();
     drawOrderTreeController.value?.dispose();
+  }
+
+  List<InspectorBuilder> inspectorBuilders() {
+    return vertexEditor.inspectorBuilders();
+  }
+
+  void _resetManagers() {
+    _disposeManagers();
 
     treeController.value = HierarchyTreeController(this);
     drawOrderTreeController.value = DrawOrderTreeController(
       file: this,
     );
+    vertexEditor = VertexEditor(this, stage);
   }
 
   bool select(SelectableItem item, {bool append}) {
@@ -290,6 +346,7 @@ class OpenFileContext with RiveFileDelegate {
   /// Delete the core items represented by the selected stage items.
   bool deleteSelection() {
     var toRemove = selection.items.toList();
+
     // Build up the entire set of items to remove.
     Set<Component> deathRow = {};
     for (final item in toRemove) {
@@ -345,6 +402,27 @@ class OpenFileContext with RiveFileDelegate {
   /// Will attempt to perform the given action. If the action is not handled,
   /// [triggerAction] will return false.
   bool triggerAction(ShortcutAction action) {
+    if (action == ShortcutAction.showActions) {
+      addAlert(
+        ActionAlert(
+            // Inverted logic as the toggle happens right after this, so !value
+            // means it will be activated.
+            !ShortcutAction.showActions.value
+                ? 'Show Actions: ON'
+                : 'Show Actions: OFF'),
+      );
+    } else if (_handleAction(action)) {
+      if (ShortcutAction.showActions.value) {
+        addAlert(
+          ActionAlert('ACTION ${action.name}'),
+        );
+      }
+      return true;
+    }
+    return false;
+  }
+
+  bool _handleAction(ShortcutAction action) {
     // See if any of our handlers care.
     // https://www.youtube.com/watch?v=1o4s1KVJaVA
     for (final actionHandler in _actionHandlers.reversed) {
@@ -354,6 +432,10 @@ class OpenFileContext with RiveFileDelegate {
     }
     // No one gives a F#$(C<, let's see if we can help this poor friend.
     switch (action) {
+      case ShortcutAction.autoTool:
+        stage?.tool = AutoTool.instance;
+        return true;
+
       case ShortcutAction.translateTool:
         stage?.tool = TranslateTool.instance;
         return true;
@@ -367,7 +449,7 @@ class OpenFileContext with RiveFileDelegate {
         return true;
 
       case ShortcutAction.penTool:
-        stage?.tool = PenTool.instance;
+        stage?.tool = VectorPenTool.instance;
         return true;
 
       case ShortcutAction.rectangleTool:
@@ -409,10 +491,6 @@ class OpenFileContext with RiveFileDelegate {
         stage?.showRulers = !stage.showRulers;
         return true;
 
-      case ShortcutAction.toggleEditMode:
-        // TODO: implement
-        return true;
-
       case ShortcutAction.cancel:
         Popup.closeAll();
         return true;
@@ -424,7 +502,7 @@ class OpenFileContext with RiveFileDelegate {
 
   /// Save the file name
   void changeFileName(String name) {
-    this.name.value = name;
+    _name.value = name;
     filesApi.changeFileName(ownerId, fileId, name);
   }
 }

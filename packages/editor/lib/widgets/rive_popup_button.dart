@@ -33,6 +33,7 @@ class RivePopupButton extends StatefulWidget {
   final Tip tip;
   final Offset arrowTweak;
   final PopupDirection direction;
+  final List<PopupDirection> fallbackDirections;
   final double directionPadding;
   final Color hoverColor;
 
@@ -46,6 +47,7 @@ class RivePopupButton extends StatefulWidget {
     double width,
     this.tip,
     this.direction = PopupDirection.bottomToRight,
+    this.fallbackDirections = PopupDirection.all,
     this.directionPadding = 16,
     this.hoverColor,
   })  : _width = width ?? 177,
@@ -62,6 +64,7 @@ class _RivePopupButtonState extends State<RivePopupButton> {
     return RiveBuilder(
       builder: (context, activeFile) => PopupButton<PopupContextItem>(
         direction: widget.direction,
+        fallbackDirections: widget.fallbackDirections,
         directionPadding: widget.directionPadding,
         opened: widget.opened,
         itemsBuilder: widget.contextItemsBuilder,

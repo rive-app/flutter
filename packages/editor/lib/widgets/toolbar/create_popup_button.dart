@@ -3,9 +3,9 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/node_tool.dart';
-import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/tools/triangle_tool.dart';
+import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
@@ -28,7 +28,7 @@ class CreatePopupButton extends StatelessWidget {
             ToolPopupItem(
               'Rectangle',
               icon: RectangleTool.instance.icon,
-              notifier: file.stage.toolNotifier,
+              listenable: file.stage.toolListenable,
               isSelected: () => file.stage.tool == RectangleTool.instance,
               shortcut: ShortcutAction.rectangleTool,
               select: () =>
@@ -37,7 +37,7 @@ class CreatePopupButton extends StatelessWidget {
             ToolPopupItem(
               'Ellipse',
               icon: EllipseTool.instance.icon,
-              notifier: file.stage.toolNotifier,
+              listenable: file.stage.toolListenable,
               isSelected: () => file.stage.tool == EllipseTool.instance,
               shortcut: ShortcutAction.ellipseTool,
               select: () => file.rive.triggerAction(ShortcutAction.ellipseTool),
@@ -55,7 +55,7 @@ class CreatePopupButton extends StatelessWidget {
             ToolPopupItem(
               'Triangle',
               icon: TriangleTool.instance.icon,
-              notifier: file.stage.toolNotifier,
+              listenable: file.stage.toolListenable,
               isSelected: () => file.stage.tool == TriangleTool.instance,
               select: () => file.stage.tool = TriangleTool.instance,
             ),
@@ -65,18 +65,18 @@ class CreatePopupButton extends StatelessWidget {
         ToolPopupItem(
           'Pen',
           icon: 'tool-pen',
-          notifier: file.stage.toolNotifier,
-          isSelected: () => file.stage.tool == PenTool.instance,
+          listenable: file.stage.toolListenable,
+          isSelected: () => file.stage.tool == VectorPenTool.instance,
           shortcut: ShortcutAction.penTool,
           select: () {
-            file.stage.tool = PenTool.instance;
+            file.stage.tool = VectorPenTool.instance;
           },
         ),
         PopupContextItem.separator(),
         ToolPopupItem(
           'Artboard',
           icon: ArtboardTool.instance.icon,
-          notifier: file.stage.toolNotifier,
+          listenable: file.stage.toolListenable,
           isSelected: () => file.stage.tool == ArtboardTool.instance,
           shortcut: ShortcutAction.artboardTool,
           select: () => file.rive.triggerAction(ShortcutAction.artboardTool),
@@ -90,7 +90,7 @@ class CreatePopupButton extends StatelessWidget {
         ToolPopupItem(
           'Node',
           icon: 'tool-node',
-          notifier: file.stage.toolNotifier,
+          listenable: file.stage.toolListenable,
           isSelected: () => file.stage.tool == NodeTool.instance,
           shortcut: ShortcutAction.nodeTool,
           select: () {

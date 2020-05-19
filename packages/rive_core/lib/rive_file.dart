@@ -61,8 +61,7 @@ class RiveFile extends RiveCoreContext {
     String fileId, {
     @required LocalDataPlatform localDataPlatform,
     this.api,
-  })  : _persist = RivePersist(localDataPlatform, fileId),
-        super(fileId);
+  })  : _persist = RivePersist(localDataPlatform, fileId);
 
   @override
   void abandonChanges(ChangeSet changes) {
@@ -98,6 +97,13 @@ class RiveFile extends RiveCoreContext {
       delegates
           .forEach((delegate) => delegate.onAutoKey(component, propertyKey));
     }
+  }
+
+  @override
+  void editorPropertyChanged(
+      Core object, int propertyKey, Object from, Object to) {
+    delegates.forEach((delegate) =>
+        delegate.onEditorPropertyChanged(object, propertyKey, from, to));
   }
 
   /// Add a generic operation to be called when the next clean cycle occurs.
@@ -278,7 +284,7 @@ class RiveFile extends RiveCoreContext {
   @override
   void onWipe() {
     artboards.clear();
-    delegates.forEach((delegate) => delegate.onWipe());
+    delegates.toList(growable: false).forEach((delegate) => delegate.onWipe());
     _persist.wipe();
   }
 
@@ -442,6 +448,8 @@ abstract class RiveFileDelegate {
   void onPlayerAdded(ClientSidePlayer player) {}
   void onPlayerRemoved(ClientSidePlayer player) {}
   void onAutoKey(Component component, int propertyKey) {}
+  void onEditorPropertyChanged(
+      Core object, int propertyKey, Object from, Object to) {}
 
   /// Called when the entire file is wiped as data is about to load/reload.
   void onWipe() {}

@@ -8,6 +8,7 @@ import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -22,10 +23,10 @@ const Map<EditMode, DraggingMode> editModeMap = {
 
 abstract class ShapeTool extends DrawableTool {
   Vec2D _startWorldMouse;
-  Vec2D _start = Vec2D(), _end = Vec2D(), _cursor = Vec2D();
+  Vec2D _start, _end, _cursor;
 
-  Shape shape(Vec2D worldMouse);
-  ParametricPath get path;
+  ParametricPath makePath();
+  String get shapeName;
   Shape _shape;
   ParametricPath _path;
 
@@ -59,25 +60,31 @@ abstract class ShapeTool extends DrawableTool {
     // Create a Shape and place it at the world location.
     _startWorldMouse = Vec2D.clone(worldMouse);
 
-    var file = activeArtboard.context;
-
     // Track the artboard we're using for this operation (in case it changes via
     // a shortcut or something while the drag operation is continuing).
     _currentArtboard = activeArtboard;
 
-    _shape = shape(worldMouse);
-    _path = path;
+    _shape = makeShape(activeArtboard, (_path = makePath()))
+      ..name = shapeName
+      ..x = worldMouse[0]
+      ..y = worldMouse[1];
+  }
 
+  static Shape makeShape(Artboard activeArtboard, core.Path path) {
+    var file = activeArtboard.context;
+    Shape shape;
     file.batchAdd(() {
+      shape = Shape();
+
       var composer = PathComposer();
       var solidColor = SolidColor();
       var fill = Fill();
 
-      file.add(_shape);
+      file.add(shape);
       file.add(fill);
       file.add(solidColor);
       file.add(composer);
-      file.add(_path);
+      file.add(path);
 
       // Let's build up the shape hierarchy:
       // Artboard
@@ -91,12 +98,13 @@ abstract class ShapeTool extends DrawableTool {
       //       ├─▶ PathComposer
       //       │
       //       └─▶ Path
-      _shape.appendChild(_path);
-      _shape.appendChild(composer);
-      _shape.appendChild(fill);
+      shape.appendChild(path);
+      shape.appendChild(composer);
+      shape.appendChild(fill);
       fill.appendChild(solidColor);
-      activeArtboard.appendChild(_shape);
+      activeArtboard.appendChild(shape);
     });
+    return shape;
   }
 
   @override

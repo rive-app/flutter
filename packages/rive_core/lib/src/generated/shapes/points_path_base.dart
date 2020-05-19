@@ -42,11 +42,38 @@ abstract class PointsPathBase extends Path {
 
   void isClosedChanged(bool from, bool to);
 
+  /// --------------------------------------------------------------------------
+  /// EditingModeValue field with key 74.
+  int _editingModeValue = 0;
+  static const int editingModeValuePropertyKey = 74;
+  int get editingModeValue => _editingModeValue;
+
+  /// Change the [_editingModeValue] field value.
+  /// [editingModeValueChanged] will be invoked only if the field's value has
+  /// changed.
+  set editingModeValue(int value) {
+    if (_editingModeValue == value) {
+      return;
+    }
+    int from = _editingModeValue;
+    _editingModeValue = value;
+    onPropertyChanged(editingModeValuePropertyKey, from, value);
+    context?.editorPropertyChanged(
+        this, editingModeValuePropertyKey, from, value);
+    editingModeValueChanged(from, value);
+  }
+
+  void editingModeValueChanged(int from, int to);
+
   @override
   void changeNonNull() {
     super.changeNonNull();
     if (isClosed != null) {
       onPropertyChanged(isClosedPropertyKey, isClosed, isClosed);
+    }
+    if (editingModeValue != null) {
+      onPropertyChanged(
+          editingModeValuePropertyKey, editingModeValue, editingModeValue);
     }
   }
 
@@ -55,6 +82,8 @@ abstract class PointsPathBase extends Path {
     switch (propertyKey) {
       case isClosedPropertyKey:
         return isClosed as K;
+      case editingModeValuePropertyKey:
+        return editingModeValue as K;
       default:
         return super.getProperty<K>(propertyKey);
     }
@@ -64,6 +93,7 @@ abstract class PointsPathBase extends Path {
   bool hasProperty(int propertyKey) {
     switch (propertyKey) {
       case isClosedPropertyKey:
+      case editingModeValuePropertyKey:
         return true;
       default:
         return super.hasProperty(propertyKey);

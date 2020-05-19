@@ -4,7 +4,7 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/node_base.dart';
-
+import 'package:meta/meta.dart';
 export 'src/generated/node_base.dart';
 
 class Node extends NodeBase {
@@ -32,8 +32,6 @@ class Node extends NodeBase {
     y = pos[1];
   }
 
-  void worldTransformed() {}
-
   void updateTransform() {
     if (rotation != 0) {
       Mat2D.fromRotation(transform, rotation);
@@ -49,6 +47,7 @@ class Node extends NodeBase {
   // layer effects.
   double get childOpacity => _renderOpacity;
 
+  @mustCallSuper
   void updateWorldTransform() {
     _renderOpacity = opacity;
     if (parent is Node) {
@@ -59,7 +58,6 @@ class Node extends NodeBase {
       Mat2D.copy(worldTransform, transform);
     }
     _delegate?.boundsChanged();
-    worldTransformed();
   }
 
   @override

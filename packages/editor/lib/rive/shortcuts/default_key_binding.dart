@@ -5,6 +5,8 @@ import 'shortcut_keys.dart';
 /// Default key binding for Rive.
 final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
   [
+    Shortcut(ShortcutAction.showActions,
+        [ShortcutKey.alt, ShortcutKey.shift, ShortcutKey.a]),
     Shortcut(ShortcutAction.cycleHover, [ShortcutKey.alt]),
     Shortcut(ShortcutAction.multiSelect, [ShortcutKey.systemCmd]),
     Shortcut(ShortcutAction.togglePlay, [ShortcutKey.space]),
@@ -155,6 +157,12 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
       ShortcutAction.poseTool,
       [
         ShortcutKey.x,
+      ],
+    ),
+    Shortcut(
+      ShortcutAction.autoTool,
+      [
+        ShortcutKey.v,
       ],
     ),
     Shortcut(

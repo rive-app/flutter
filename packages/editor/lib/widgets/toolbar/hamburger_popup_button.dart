@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:rive_editor/widgets/common/converters/string_notifier_value_converter.dart';
-import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
+import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
+import 'package:rive_editor/widgets/common/value_listenable_text_field.dart';
+import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -14,6 +15,10 @@ class HamburgerPopupButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RivePopupButton(
+      direction: PopupDirection.bottomToRight,
+      // Intentionally leave fallbacks empty, we only want bottomToRight on the
+      // hamburger popup.
+      fallbackDirections: const [],
       showChevron: false,
       iconBuilder: (context, rive, isHovered) => TintedIcon(
         color: isHovered
@@ -24,21 +29,28 @@ class HamburgerPopupButton extends StatelessWidget {
       ),
       width: 267,
       contextItemsBuilder: (context) => [
-        PopupContextItem('File Name',
-            child: SizedBox(
-              width: 125,
-              child: InspectorTextField<ValueNotifier<String>>(
-                value: RiveContext.of(context).file.value.name,
-                converter: StringNotifierValueConverter(
-                    RiveContext.of(context).file.value.name),
-                change: (_) {},
-                completeChange: (s) {
-                  RiveContext.of(context).file.value.changeFileName(s.value);
+        PopupContextItem.focusable(
+          'File Name',
+          child: (focus, key) {
+            // Focus this input right away when the popup displays.
+            focus.requestFocus();
+            return SizedBox(
+              width: 75,
+              child: ValueListenableTextField(
+                key: key,
+                focusNode: focus,
+                listenable: ActiveFile.of(context).name,
+                converter: StringValueConverter.instance,
+                // Required by text field, otherwise won't show up.
+                change: (String s) {},
+                completeChange: (String s) {
+                  RiveContext.of(context).file.value.changeFileName(s);
                 },
+                // change: (double value) => file.stage.zoomLevel = value,
               ),
-            ),
-            select: () {},
-            dismissOnSelect: false),
+            );
+          },
+        ),
         PopupContextItem(
           'Team Permissions',
           select: () => _showModal(context, (_) => Container()),

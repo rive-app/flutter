@@ -3,10 +3,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/selectable_item.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 
 import 'stage.dart';
 
@@ -29,9 +31,16 @@ extension StageItemComponent on Component {
 /// implemented as a generic as each StageItem generally has a backing
 /// representation in the Rive hierarchy. [T] usually inherits from a
 /// [Component], but this is not a hard requirement.
-abstract class StageItem<T> extends SelectableItem with StageItemFriend {
+abstract class StageItem<T> extends SelectableItem
+    with StageItemFriend, StageDrawable {
+  final Event _onRemoved = Event();
+  Listenable get onRemoved => _onRemoved;
+
   /// The desired screen space stroke width for a selected StageItem.
   static const double strokeWidth = 2;
+
+  // Override this if you don't want this item to show up in the hierarchy tree.
+  bool get showInHierarchy => true;
 
   /// A globally available paint object used to draw contours around selected
   /// items. The stage will mutate the strokeWidth property such that the stroke
@@ -52,10 +61,18 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   Stage _stage;
   Stage get stage => _stage;
 
+  /// Some StageItems can define a solo parent that makes them selectable during
+  /// solo if their parent is soloed.
+  StageItem get soloParent => null;
+
   /// StageItems are sorted by [drawOrder] before being drawn. This allows
   /// specific classification of items to draw before/after others. For example,
   /// transform handles should always draw after other content.
+  @override
   int get drawOrder => 1;
+
+  @override
+  bool get drawsInWorldSpace => true;
 
   int compareDrawOrderTo(StageItem other) => drawOrder - other.drawOrder;
 
@@ -68,7 +85,7 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   /// handles). These types of items should override isAutomatic to return false
   /// and then manage calls to [Stage.addItem]/[Stage.removeItem] manually in
   /// response to events.
-  bool get isAutomatic => true;
+  bool isAutomatic(Stage stage) => true;
 
   bool initialize(T component) {
     _component = component;
@@ -115,6 +132,7 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
   @mustCallSuper
   void removedFromStage(Stage stage) {
     _stage = null;
+    _onRemoved.notify();
   }
 
   /// The cursor has either moved over or out of the hit area for this item.
@@ -156,7 +174,11 @@ abstract class StageItem<T> extends SelectableItem with StageItemFriend {
     stage?.updateBounds(this);
   }
 
+  @override
   void draw(Canvas canvas) {}
+
+  // Called when the stage either solos or cancels solo for this item.
+  void onSoloChanged(bool isSolo) {}
 }
 
 /// Convert an AABB in object space defined by [xform] to the corresponding

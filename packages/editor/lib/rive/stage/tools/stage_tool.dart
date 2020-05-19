@@ -6,8 +6,9 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 
-abstract class StageTool {
+abstract class StageTool implements StageDrawable {
   Stage _stage;
   Stage get stage => _stage;
 
@@ -15,6 +16,11 @@ abstract class StageTool {
 
   /// Most tools will want their transforms in artboard world space.
   bool get inArtboardSpace => true;
+
+  // Whether this tool wants a mouseMove event triggered immediately when it is
+  // activated, some tools will want this to sync up any internal data that is
+  // dependent on mouse coordinates.
+  bool get activateSendsMouseMove => false;
 
   /// Gets the correct mouse world space depending on whether this tool operates
   /// in stage world or artboard world. Because the artboards don't rotate or
@@ -34,19 +40,34 @@ abstract class StageTool {
   @mustCallSuper
   bool activate(Stage stage) {
     _stage = stage;
-    return true;
+    return validate(stage);
   }
+
+  /// Override this to validate if the tool is valid for the stage.
+  bool validate(Stage stage) => true;
 
   /// Cleanup anything that was setup during activation.
   void deactivate() {}
 
+  /// Set the draw order to something large as stage tools almost always draw
+  /// last. TODO: dart doesn't provide a constant for integers, find out if max
+  /// 64 bit int (9223372036854775807) transpiles nicely to js
+  @override
+  int get drawOrder => 1000;
+
+  @override
   void draw(Canvas canvas);
 
-  /// Called when the tool focus is considered offscreen
-  /// e.g. the mouse moves outside the stage boundaries
-  void offScreen() {}
+  @override
+  bool get drawsInWorldSpace => false;
 
-  /// Called when the tool focus is considered to have moved on screen
-  /// e.g. the mouse moves to be inside the stage boundaries
-  void onScreen() {}
+  /// Returns true if the stage should advance after movement.
+  bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {
+    return false;
+  }
+
+  void mouseExit(Artboard activeArtboard, Vec2D worldMouse) {}
+  void mouseEnter(Artboard activeArtboard, Vec2D worldMouse) {}
+  void click(Artboard activeArtboard, Vec2D worldMouse) {}
+  bool endClick() => false;
 }

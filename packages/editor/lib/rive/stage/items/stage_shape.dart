@@ -60,4 +60,11 @@ class StageShape extends StageContourItem<Shape> {
       return super.compareDrawOrderTo(other);
     }
   }
+
+  @override
+  void onSoloChanged(bool isSolo) {
+    for (final path in component.paths) {
+      path.stageItem.onSoloChanged(isSolo);
+    }
+  }
 }

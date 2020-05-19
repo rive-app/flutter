@@ -42,13 +42,12 @@ class ShortcutAction {
       ShortcutAction('frame-move-prev-10');
   static const ShortcutAction moveSelectionNext10Frames =
       ShortcutAction('frame-move-next-10');
-  static TogglingShortcutAction multiSelect =
-      TogglingShortcutAction('multi-select');
+  static HoldShortcutAction multiSelect = HoldShortcutAction('multi-select');
   static const ShortcutAction next10Frames = ShortcutAction('frame-next-10');
   static const ShortcutAction nextFrame = ShortcutAction('frame-next');
   static const ShortcutAction nextKeyFrame = ShortcutAction('frame-next-key');
   static const ShortcutAction nodeTool = ShortcutAction('tool-node');
-  static TogglingShortcutAction pan = TogglingShortcutAction('pan');
+  static HoldShortcutAction pan = HoldShortcutAction('pan');
   static const ShortcutAction paste = ShortcutAction('paste');
 
   static const ShortcutAction poseTool = ShortcutAction('tool-pose');
@@ -146,10 +145,10 @@ class ShortcutAction {
   static const ShortcutAction freezeImagesToggle =
       ShortcutAction('freeze-images');
 
-  static TogglingShortcutAction mouseWheelZoom =
-      TogglingShortcutAction('mouse-wheel-zoom');
-  static TogglingShortcutAction symmetricDraw =
-      TogglingShortcutAction('symmetric-draw');
+  static HoldShortcutAction mouseWheelZoom =
+      HoldShortcutAction('mouse-wheel-zoom');
+  static HoldShortcutAction symmetricDraw =
+      HoldShortcutAction('symmetric-draw');
   static const ShortcutAction confirm = ShortcutAction('action');
 
   static const ShortcutAction left = ShortcutAction('action-left');
@@ -160,6 +159,8 @@ class ShortcutAction {
   static const ShortcutAction down = ShortcutAction('action-down');
 
   static const ShortcutAction closeTab = ShortcutAction('close-tab');
+  static ToggleShortcutAction showActions =
+      ToggleShortcutAction('show-actions');
 
   final String name;
   final bool repeats;
@@ -187,14 +188,32 @@ abstract class StatefulShortcutAction<T> extends ShortcutAction
   void onRelease();
 }
 
-/// A ShortcutAction with a backing boolean value toggled on/off when the key
+/// A ShortcutAction with a backing boolean value turned on/off when the key
 /// is pressed/released.
-class TogglingShortcutAction extends StatefulShortcutAction<bool> {
-  TogglingShortcutAction(String name) : super(name, false);
+class HoldShortcutAction extends StatefulShortcutAction<bool> {
+  HoldShortcutAction(String name) : super(name, false);
 
   @override
   void onPress() => _changeValue(true);
 
   @override
   void onRelease() => _changeValue(false);
+}
+
+/// A ShortcutAction with a backing boolean value toggled on/off when the key
+/// is pressed.
+class ToggleShortcutAction extends StatefulShortcutAction<bool> {
+  ToggleShortcutAction(String name) : super(name, false);
+
+  @override
+  void onPress() {
+    print("CHANGE TO ${!_value}");
+    _changeValue(!_value);
+  }
+
+  @override
+  void onRelease() {
+    print("RELEASE");
+    // intentionally empty, value only toggled on press.
+  }
 }

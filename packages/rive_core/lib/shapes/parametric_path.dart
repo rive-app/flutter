@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/src/generated/shapes/parametric_path_base.dart';
 export 'package:rive_core/src/generated/shapes/parametric_path_base.dart';
@@ -10,15 +8,6 @@ abstract class ParametricPath extends ParametricPathBase {
 
   @override
   Mat2D get pathTransform => worldTransform;
-
-  /// Subclasses should call this whenever a parameter that affects the topology
-  /// of the path changes in order to allow the system to rebuild the parametric
-  /// path.
-  @protected
-  void markPathDirty() {
-    addDirt(ComponentDirt.path);
-    shape?.pathChanged(this);
-  }
 
   @override
   void widthChanged(double from, double to) => markPathDirty();
