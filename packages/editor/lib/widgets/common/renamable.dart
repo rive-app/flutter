@@ -87,6 +87,7 @@ class _RenamableState extends State<Renamable> {
                   }
                 },
                 child: EditorTextField(
+                  allowDrag: false,
                   controller: _controller,
                   focusNode: _focusNode,
                   color: widget.color,
