@@ -136,6 +136,8 @@ class Stage extends Debouncer {
   ValueListenable<StageTool> get toolListenable => _toolNotifier;
 
   StageTool _dragTool;
+  // The tool we called ".click" on.
+  StageTool _clickTool;
   StageTool get tool => _toolNotifier.value;
   set tool(StageTool value) {
     if (_toolNotifier.value == value) {
@@ -456,6 +458,7 @@ class Stage extends Debouncer {
         // to the tool.
         if (!_mouseDownSelected) {
           final artboard = activeArtboard;
+          _clickTool = tool;
           tool.click(
               artboard,
               artboard == null
@@ -560,9 +563,10 @@ class Stage extends Debouncer {
 
   /// Complete any operation the active tool was performing.
   bool _completeDrag() {
+    bool toolCompleted = _clickTool?.endClick() ?? false;
+    _clickTool = null;
+    
     if (_dragTool != null) {
-      bool toolCompleted = false;
-
       // See if either a drag or transform operation was in progress.
       if (_dragTool is TransformingTool) {
         (_dragTool as TransformingTool).completeTransformers();
@@ -572,12 +576,13 @@ class Stage extends Debouncer {
         (_dragTool as DraggableTool).endDrag();
         toolCompleted = true;
       }
-      if (toolCompleted) {
-        _dragTool = null;
-        file.core.captureJournalEntry();
-        markNeedsAdvance();
-        return true;
-      }
+    }
+    if (toolCompleted) {
+      print("TOOL COMPLETED!");
+      _dragTool = null;
+      file.core.captureJournalEntry();
+      markNeedsAdvance();
+      return true;
     }
     return false;
   }

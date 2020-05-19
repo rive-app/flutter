@@ -76,16 +76,22 @@ class RiveAuth {
   /// supported [provider]s.
   Future<AuthResponse> _oAuth(
       {@required _RiveAuthActions action, @required String provider}) async {
-    assert(!kIsWeb, 'Shouldn\'t be authenticating from Flutter Web.');
+    if (kIsWeb) {
+      final onlySignin = action == _RiveAuthActions.signin;
+      win_utils.openWebView(
+        _authWebViewKey,
+        '${api.host}/signin/$provider?onlySignin=$onlySignin',
+      );
+      return AuthResponse.empty();
+    }
+
     var offset = await win_utils.getWindowOffset();
     var size = await win_utils.getWindowSize();
-
-    var url = api.host + '/desktop/${action.name}/$provider';
 
     var windowSize = const Size(800, 600);
     String response = await win_utils.openWebView(
       _authWebViewKey,
-      url,
+      '${api.host}/desktop/${action.name}/$provider',
       size: windowSize,
       offset: Offset(
         offset.dx + size.width / 2 - windowSize.width / 2,

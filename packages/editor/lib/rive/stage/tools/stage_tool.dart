@@ -69,4 +69,5 @@ abstract class StageTool implements StageDrawable {
   void mouseExit(Artboard activeArtboard, Vec2D worldMouse) {}
   void mouseEnter(Artboard activeArtboard, Vec2D worldMouse) {}
   void click(Artboard activeArtboard, Vec2D worldMouse) {}
+  bool endClick() => false;
 }
