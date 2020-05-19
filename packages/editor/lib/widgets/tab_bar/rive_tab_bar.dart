@@ -335,7 +335,6 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
                           },
                           color: RiveTheme.of(context).colors.activeText,
                           name: name,
-                          // overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 13,
                             color: selected
