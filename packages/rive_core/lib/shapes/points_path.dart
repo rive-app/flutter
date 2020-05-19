@@ -1,5 +1,7 @@
 import 'package:rive_core/component.dart';
+import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/src/generated/shapes/points_path_base.dart';
@@ -36,30 +38,32 @@ class PointsPath extends PointsPathBase {
   @override
   void childAdded(Component child) {
     super.childAdded(child);
-    switch (child.coreType) {
-      case StraightVertexBase.typeKey:
-        if (!_vertices.contains(child)) {
-          _vertices.add(child as StraightVertex);
-          markPathDirty();
-        }
-        break;
+    if (child is PathVertex && !_vertices.contains(child)) {
+      _vertices.add(child);
+      markPathDirty();
+      addDirt(ComponentDirt.vertices);
     }
   }
 
   @override
   void childRemoved(Component child) {
     super.childRemoved(child);
-    switch (child.coreType) {
-      case StraightVertexBase.typeKey:
-        if (_vertices.remove(child as StraightVertex)) {
-          markPathDirty();
-        }
-        break;
+    if (child is PathVertex && _vertices.remove(child)) {
+      markPathDirty();
     }
   }
 
   @override
   void isClosedChanged(bool from, bool to) {
     markPathDirty();
+  }
+
+  @override
+  void update(int dirt) {
+    // Vertices just changed, make sure they're in order.
+    if (dirt & ComponentDirt.vertices != 0) {
+      _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
+    }
+    super.update(dirt);
   }
 }

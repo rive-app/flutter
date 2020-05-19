@@ -258,6 +258,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'height';
       case RectangleBase.cornerRadiusPropertyKey:
         return 'cornerRadius';
+      case CubicVertexBase.controlTypeValuePropertyKey:
+        return 'controlTypeValue';
       case CubicVertexBase.inXPropertyKey:
         return 'inX';
       case CubicVertexBase.inYPropertyKey:
@@ -351,6 +353,7 @@ abstract class RiveCoreContext extends CoreContext {
         case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModePropertyKey:
         case PointsPathBase.editingModeValuePropertyKey:
+        case CubicVertexBase.controlTypeValuePropertyKey:
         case BackboardBase.colorValuePropertyKey:
           var value = intType.deserialize(reader);
           setInt(object, change.op, value);
@@ -466,6 +469,7 @@ abstract class RiveCoreContext extends CoreContext {
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
+      case CubicVertexBase.controlTypeValuePropertyKey:
       case BackboardBase.colorValuePropertyKey:
         if (value != null && value is int) {
           change.value = intType.serialize(value);
@@ -844,6 +848,11 @@ abstract class RiveCoreContext extends CoreContext {
       case RectangleBase.cornerRadiusPropertyKey:
         if (object is RectangleBase && value is double) {
           object.cornerRadius = value;
+        }
+        break;
+      case CubicVertexBase.controlTypeValuePropertyKey:
+        if (object is CubicVertexBase && value is int) {
+          object.controlTypeValue = value;
         }
         break;
       case CubicVertexBase.inXPropertyKey:
@@ -1333,6 +1342,11 @@ abstract class RiveCoreContext extends CoreContext {
           return object.cornerRadius;
         }
         break;
+      case CubicVertexBase.controlTypeValuePropertyKey:
+        if (object is CubicVertexBase) {
+          return object.controlTypeValue;
+        }
+        break;
       case CubicVertexBase.inXPropertyKey:
         if (object is CubicVertexBase) {
           return object.inX;
@@ -1439,6 +1453,7 @@ abstract class RiveCoreContext extends CoreContext {
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
+      case CubicVertexBase.controlTypeValuePropertyKey:
       case BackboardBase.colorValuePropertyKey:
         return intType;
       case AnimationBase.namePropertyKey:
@@ -1552,6 +1567,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as DrawableBase).blendMode;
       case PointsPathBase.editingModeValuePropertyKey:
         return (object as PointsPathBase).editingModeValue;
+      case CubicVertexBase.controlTypeValuePropertyKey:
+        return (object as CubicVertexBase).controlTypeValue;
       case BackboardBase.colorValuePropertyKey:
         return (object as BackboardBase).colorValue;
     }
@@ -1756,6 +1773,9 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case PointsPathBase.editingModeValuePropertyKey:
         (object as PointsPathBase).editingModeValue = value;
+        break;
+      case CubicVertexBase.controlTypeValuePropertyKey:
+        (object as CubicVertexBase).controlTypeValue = value;
         break;
       case BackboardBase.colorValuePropertyKey:
         (object as BackboardBase).colorValue = value;

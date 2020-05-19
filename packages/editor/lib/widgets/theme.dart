@@ -181,6 +181,9 @@ class RiveColors {
   Color get inspectorPillHover => const Color(0xFF555555);
   Color get inspectorPillText => const Color(0xFFB2B2B2);
   Color get inspectorPillIcon => lightGrey;
+
+  Color get vertexIcon => const Color(0xFF848484);
+  Color get vertexIconHover => white;
 }
 
 /// TextStyles used in the Rive Theme
@@ -400,6 +403,11 @@ class TextStyles {
 
   TextStyle get animationSubLabel => const TextStyle(
       fontFamily: 'Roboto-Regular', color: Color(0xFF686868), fontSize: 13);
+
+  TextStyle get vertexTypeLabel => const TextStyle(
+      fontFamily: 'Roboto-Regular', color: Color(0xFF989898), fontSize: 12.5);
+  TextStyle get vertexTypeSelected => const TextStyle(
+      fontFamily: 'Roboto-Regular', color: white, fontSize: 12.5);
 }
 
 /// Gradients used in the Rive Theme

@@ -15,8 +15,32 @@ abstract class CubicVertexBase extends PathVertex {
       {CubicVertexBase.typeKey, PathVertexBase.typeKey, ComponentBase.typeKey};
 
   /// --------------------------------------------------------------------------
+  /// ControlTypeValue field with key 75.
+  int _controlTypeValue = 1;
+  static const int controlTypeValuePropertyKey = 75;
+
+  /// Backing integer value for the CubicControlType enum that describes how the
+  /// handles move in relation to each other.
+  int get controlTypeValue => _controlTypeValue;
+
+  /// Change the [_controlTypeValue] field value.
+  /// [controlTypeValueChanged] will be invoked only if the field's value has
+  /// changed.
+  set controlTypeValue(int value) {
+    if (_controlTypeValue == value) {
+      return;
+    }
+    int from = _controlTypeValue;
+    _controlTypeValue = value;
+    onPropertyChanged(controlTypeValuePropertyKey, from, value);
+    controlTypeValueChanged(from, value);
+  }
+
+  void controlTypeValueChanged(int from, int to);
+
+  /// --------------------------------------------------------------------------
   /// InX field with key 27.
-  double _inX;
+  double _inX = 0;
   static const int inXPropertyKey = 27;
 
   /// In point's x value
@@ -38,7 +62,7 @@ abstract class CubicVertexBase extends PathVertex {
 
   /// --------------------------------------------------------------------------
   /// InY field with key 28.
-  double _inY;
+  double _inY = 0;
   static const int inYPropertyKey = 28;
 
   /// In point's y value
@@ -60,7 +84,7 @@ abstract class CubicVertexBase extends PathVertex {
 
   /// --------------------------------------------------------------------------
   /// OutX field with key 29.
-  double _outX;
+  double _outX = 0;
   static const int outXPropertyKey = 29;
 
   /// Out point's x value
@@ -82,7 +106,7 @@ abstract class CubicVertexBase extends PathVertex {
 
   /// --------------------------------------------------------------------------
   /// OutY field with key 30.
-  double _outY;
+  double _outY = 0;
   static const int outYPropertyKey = 30;
 
   /// Out point's y value
@@ -105,6 +129,10 @@ abstract class CubicVertexBase extends PathVertex {
   @override
   void changeNonNull() {
     super.changeNonNull();
+    if (controlTypeValue != null) {
+      onPropertyChanged(
+          controlTypeValuePropertyKey, controlTypeValue, controlTypeValue);
+    }
     if (inX != null) {
       onPropertyChanged(inXPropertyKey, inX, inX);
     }
@@ -122,6 +150,8 @@ abstract class CubicVertexBase extends PathVertex {
   @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {
+      case controlTypeValuePropertyKey:
+        return controlTypeValue as K;
       case inXPropertyKey:
         return inX as K;
       case inYPropertyKey:
@@ -138,6 +168,7 @@ abstract class CubicVertexBase extends PathVertex {
   @override
   bool hasProperty(int propertyKey) {
     switch (propertyKey) {
+      case controlTypeValuePropertyKey:
       case inXPropertyKey:
       case inYPropertyKey:
       case outXPropertyKey:

@@ -14,6 +14,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/radial_gradient.dart';
@@ -953,6 +954,7 @@ class Stage extends Debouncer {
     TriangleBase.typeKey: () => StageTriangle(),
     PointsPathBase.typeKey: () => StagePath(),
     StraightVertexBase.typeKey: () => StageVertex(),
+    CubicVertexBase.typeKey: () => StageVertex(),
     LinearGradientBase.typeKey: () => StageLinearGradient(),
     RadialGradientBase.typeKey: () => StageRadialGradient(),
     GradientStopBase.typeKey: () => StageGradientStop(),
