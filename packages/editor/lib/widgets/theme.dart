@@ -178,8 +178,7 @@ class RiveColors {
 
   // Inspector panel pill button
   Color get inspectorPillBackground => buttonDark;
-  Color get inspectorPillHover =>
-      const Color(0xFF666666); // TODO: Ask guido to resolve this
+  Color get inspectorPillHover => const Color(0xFF555555);
   Color get inspectorPillText => const Color(0xFFB2B2B2);
   Color get inspectorPillIcon => lightGrey;
 }
@@ -339,7 +338,7 @@ class TextStyles {
   TextStyle get fileSearchText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF999999), fontSize: 13);
 
-  TextStyle get fileBrowserText =>  const TextStyle(
+  TextStyle get fileBrowserText => const TextStyle(
       fontFamily: 'Roboto-Regular',
       color: Color(0xFF888888),
       height: 1.615,
