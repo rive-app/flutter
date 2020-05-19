@@ -12,6 +12,8 @@ import 'package:rive_api/plumber.dart';
 import 'fixtures/api_responses.dart';
 import 'fixtures/data_models.dart';
 
+import 'package:utilities/utilities.dart';
+
 class MockFileApi extends Mock implements FileApi {}
 
 class MockFolderApi extends Mock implements FolderApi {}

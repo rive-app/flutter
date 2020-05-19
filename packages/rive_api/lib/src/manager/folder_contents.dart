@@ -3,6 +3,7 @@ import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:utilities/utilities.dart';
 
 class FolderContentsManager with Subscriptions {
   FolderContentsManager._()
@@ -138,8 +139,7 @@ class FolderContentsManager with Subscriptions {
         _initCache(Folder.fromDMList(folders), ownerId, currentFolderId);
 
     List<File> fileList = File.fromDMList(files);
-    List<Folder> folderList =
-        folderCache.folders.toList(growable: false);
+    List<Folder> folderList = folderCache.folders.toList(growable: false);
 
     if (files.isNotEmpty) {
       _loadFileDetails(fileList, directory);

@@ -1,4 +1,5 @@
 import 'package:rive_api/model.dart';
+import 'package:utilities/utilities.dart';
 
 class CurrentDirectory {
   const CurrentDirectory(this.owner, this.folderId);
