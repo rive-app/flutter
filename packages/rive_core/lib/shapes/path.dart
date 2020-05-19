@@ -62,6 +62,14 @@ abstract class Path extends PathBase {
   }
 
   @override
+  void onRemoved() {
+    // We're no longer a child of the shape we may have been under, make sure to
+    // let it know we're gone.
+    _changeShape(null);
+    super.onRemoved();
+  }
+
+  @override
   void updateWorldTransform() {
     super.updateWorldTransform();
     _shape?.pathChanged(this);

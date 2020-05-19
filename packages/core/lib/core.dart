@@ -170,6 +170,7 @@ abstract class CoreContext implements LocalSettings {
   int _journalIndex = 0;
 
   bool _isRecording = true;
+  bool get isApplyingJournalEntry => !_isRecording;
 
   // Track which entries were changing during animation and need to be reset
   // prior to the next animation pass.

@@ -5,6 +5,7 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
 
@@ -69,6 +70,14 @@ void main() {
         reason: 'there should be one points path');
     expect(core.objectsOfType<StraightVertex>().length, 1,
         reason: 'there should be one vertex');
+
+    // give stage the chance to sync (run any debounced operations).
+    expect(file.stage.soloItems == null, true);
+    file.advance(0);
+    expect(file.stage.soloItems != null, true);
+
+    expect(file.stage.soloItems.length, 1);
+    expect(file.stage.soloItems.first is StagePath, true);
 
     // Expect vertex editor to be in editingPath mode.
     expect(file.vertexEditor.mode.value, VertexEditorMode.editingPath);
@@ -160,8 +169,8 @@ void main() {
     // Expect vertex editor to be in editingPath mode.
     expect(file.vertexEditor.mode.value, VertexEditorMode.editingPath);
 
-    // var reEditingPath = core.objectsOfType<PointsPath>().first;
-    // expect(reEditingPath.editingMode, PointsPathEditMode.creating,
-    //     reason: 'Path should go back to creation mode.');
+    var reEditingPath = core.objectsOfType<PointsPath>().first;
+    expect(reEditingPath.editingMode, PointsPathEditMode.creating,
+        reason: 'Path should go back to creation mode.');
   });
 }

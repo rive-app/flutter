@@ -311,7 +311,6 @@ class OpenFileContext with RiveFileDelegate {
 
   @override
   void onWipe() {
-    print("WIPE");
     _stage?.wipe();
     _resetManagers();
   }
@@ -341,6 +340,7 @@ class OpenFileContext with RiveFileDelegate {
   /// Delete the core items represented by the selected stage items.
   bool deleteSelection() {
     var toRemove = selection.items.toList();
+
     // Build up the entire set of items to remove.
     Set<Component> deathRow = {};
     for (final item in toRemove) {

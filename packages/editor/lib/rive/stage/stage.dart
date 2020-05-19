@@ -160,7 +160,7 @@ class Stage extends Debouncer {
   }
 
   void _sendMouseMoveToTool() {
-    if(_worldMouse == null) {
+    if (_worldMouse == null) {
       // Worldmouse can get set to null when we mouse out of the stage.
       return;
     }
@@ -470,6 +470,8 @@ class Stage extends Debouncer {
         break;
       default:
     }
+
+    _updateComponents();
   }
 
   void mouseDrag(int button, double x, double y) {
@@ -521,7 +523,10 @@ class Stage extends Debouncer {
     if (dragTool != null) {
       _dragTool = dragTool;
     }
+    _updateComponents();
+  }
 
+  void _updateComponents() {
     /// We call updateComponents here because on some platforms the mouseDrag
     /// event happens between our frame callback and render of the StageView.
     if (activeArtboard.updateComponents()) {
@@ -549,6 +554,8 @@ class Stage extends Debouncer {
     if (!_completeDrag() && !_mouseDownSelected) {
       file.selection.clear();
     }
+
+    _updateComponents();
   }
 
   /// Complete any operation the active tool was performing.
@@ -613,16 +620,14 @@ class Stage extends Debouncer {
 
   // Artboard get activeArtboard => file.core?.backboard?.activeArtboard;
   Artboard get activeArtboard {
-    if(file.core == null) {
+    if (file.core == null) {
       print("CORE NULL");
-    }
-    else if(file.core.backboard == null) {
+    } else if (file.core.backboard == null) {
       print("BB NULL");
-    }
-    else if(file.core.backboard.activeArtboard == null) {
+    } else if (file.core.backboard.activeArtboard == null) {
       print("AA NULL");
     }
-   return file.core?.backboard?.activeArtboard;
+    return file.core?.backboard?.activeArtboard;
   }
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
@@ -994,7 +999,6 @@ class Stage extends Debouncer {
         item.onSoloChanged(false);
       }
     }
-    print("SOLO: $value");
     file.selection.clear();
     _soloNotifier.value = value == null ? null : HashSet<StageItem>.from(value);
     _updateHover();

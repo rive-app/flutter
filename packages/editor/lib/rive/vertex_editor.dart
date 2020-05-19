@@ -10,6 +10,7 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
+import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
@@ -37,6 +38,7 @@ class VertexEditor with RiveFileDelegate {
   final ValueNotifier<PointsPath> _creatingPath =
       ValueNotifier<PointsPath>(null);
   ValueListenable<PointsPath> get creatingPath => _creatingPath;
+  Iterable<PointsPath> get editingPaths => _editingPaths;
 
   VertexEditor(this.file, this.stage) {
     file.core.addDelegate(this);
@@ -44,19 +46,48 @@ class VertexEditor with RiveFileDelegate {
     stage.soloListenable.addListener(_soloChanged);
   }
 
+  void _changeMode(VertexEditorMode mode) {
+    if (mode == _mode.value) {
+      return;
+    }
+    switch (_mode.value = mode) {
+      case VertexEditorMode.editingPath:
+        stage.soloListenable.addListener(_soloChanged);
+        stage.addSelectionHandler(_selectionHandler);
+        break;
+      case VertexEditorMode.off:
+      default:
+        stage.soloListenable.removeListener(_soloChanged);
+        stage.removeSelectionHandler(_selectionHandler);
+        break;
+    }
+  }
+
+  bool _selectionHandler(StageItem item) {
+    var path = _creatingPath.value;
+    if (item is StageVertex && path?.vertices?.first == item.component) {
+      path.isClosed = true;
+      path.editingMode = PointsPathEditMode.editing;
+      path.context.captureJournalEntry();
+    }
+    return false;
+  }
+
   void _soloChanged() {
     if (stage.soloItems == null) {
       if (_mode.value != VertexEditorMode.off) {
-        _mode.value = VertexEditorMode.off;
-        // copy to prevent editing during iteration in onObjectRemoved.
-
-        var pathsCopy = _editingPaths.toList(growable: false);
-        _editingPaths = null;
-
-        for (final path in pathsCopy) {
-          path.editingMode = PointsPathEditMode.off;
+        _changeMode(VertexEditorMode.off);
+        if (!file.core.isApplyingJournalEntry) {
+          // copy to prevent editing during iteration in onObjectRemoved.
+          var pathsCopy = _editingPaths.toList(growable: false);
+          _editingPaths = null;
+          // We only want to change the path's edit mode if we're not in the
+          // middle of a undo/redo.
+          for (final path in pathsCopy) {
+            path.editingMode = PointsPathEditMode.off;
+          }
+          file.core.captureJournalEntry();
         }
-        file.core.captureJournalEntry();
       }
     } else {
       switch (_mode.value) {
@@ -73,7 +104,6 @@ class VertexEditor with RiveFileDelegate {
     /// Called back whenever a core object is removed, use this to update the
     /// editing list if one of the items in it was removed.
     if (_editingPaths != null && object.coreType == PointsPathBase.typeKey) {
-      print("PATH REMOVED");
       var path = object as PointsPath;
       _updatePathEditMode(path, PointsPathEditMode.off);
     }
@@ -95,17 +125,14 @@ class VertexEditor with RiveFileDelegate {
     bool remove = false;
     switch (editMode) {
       case PointsPathEditMode.creating:
-        print("EDIT MODE CREATING");
         _creatingPath.value = path;
         break;
       case PointsPathEditMode.editing:
-        print("EDIT MODE EDITING");
         if (path == _creatingPath.value) {
           _creatingPath.value = null;
         }
         break;
       case PointsPathEditMode.off:
-        print("EDIT MODE OFF");
         remove = true;
         if (path == _creatingPath.value) {
           _creatingPath.value = null;
@@ -117,7 +144,7 @@ class VertexEditor with RiveFileDelegate {
       if (_editingPaths?.remove(path) ?? false) {
         if (_editingPaths.isEmpty) {
           _editingPaths = null;
-          _mode.value = VertexEditorMode.off;
+          _changeMode(VertexEditorMode.off);
         }
         stage.debounce(_syncSolo);
       }
@@ -128,7 +155,7 @@ class VertexEditor with RiveFileDelegate {
     // on.
     else if (_editingPaths == null) {
       // Put us into editing path mode.
-      _mode.value = VertexEditorMode.editingPath;
+      _changeMode(VertexEditorMode.editingPath);
       _editingPaths = HashSet<PointsPath>.from(<PointsPath>[path]);
       stage.debounce(_syncSolo);
       // We're already editing paths, just make sure this one is in the set.
@@ -158,28 +185,10 @@ class VertexEditor with RiveFileDelegate {
     // for now just get points paths, later flatten the others
     _editingPaths = HashSet<PointsPath>.from(paths.whereType<PointsPath>());
     _syncSolo();
-    _mode.value = VertexEditorMode.editingPath;
+    _changeMode(VertexEditorMode.editingPath);
     for (final path in _editingPaths) {
       path.editingMode = PointsPathEditMode.editing;
     }
-  }
-
-  void closePath(PointsPath path) {
-    path.isClosed = true;
-    path.editingMode = PointsPathEditMode.editing;
-    path.context.captureJournalEntry();
-  }
-
-  void startCreatingPath(PointsPath path) {
-    // Set the solo item as the path we just created which will trigger updating
-    // the editing components.
-    _editingPaths ??= HashSet<PointsPath>();
-    _editingPaths.add(path);
-    print("EDITING PATHS START: $_editingPaths");
-    path.editingMode = PointsPathEditMode.creating;
-    _mode.value = VertexEditorMode.editingPath;
-    stage.solo(_editingPaths.map((path) => path.stageItem));
-    _creatingPath.value = path;
   }
 
   bool _handleAction(ShortcutAction action) {
@@ -193,6 +202,7 @@ class VertexEditor with RiveFileDelegate {
           // activating edit mode.
           Set<StageShape> shapes = {};
           Set<StagePath> paths = {};
+
           for (final item in file.selection.items) {
             if (item is StageShape) {
               shapes.add(item);
@@ -214,9 +224,9 @@ class VertexEditor with RiveFileDelegate {
   }
 
   void dispose() {
+    _changeMode(VertexEditorMode.off);
     stage.cancelDebounce(_syncSolo);
     file.core.removeDelegate(this);
-    stage.soloListenable.removeListener(_soloChanged);
     file.removeActionHandler(_handleAction);
   }
 }
