@@ -88,7 +88,7 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
         drawFill = fill;
         break;
     }
-    radius *=  radiusScale;
+    radius *= radiusScale;
 
     canvas.save();
     canvas.transform(stage.inverseViewTransform.mat4);
@@ -109,10 +109,10 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
       return;
     }
     final origin = component.artboard.originWorld;
-    Vec2D.transformMat2D(
-        _worldTranslation,
-        Vec2D.add(Vec2D(), origin, component.translation),
+    Vec2D.transformMat2D(_worldTranslation, component.translation,
         component.path.worldTransform);
+    _worldTranslation[0] += origin[0];
+    _worldTranslation[1] += origin[1];
 
     stage.updateBounds(this);
   }
