@@ -1,13 +1,11 @@
 import 'package:rive_api/model.dart';
 
 class FolderContents {
-  FolderContents(this.files, this.folders);
-  FolderContents.empty()
-      : files = null,
-        folders = null;
+  const FolderContents({this.files, this.folders, this.isLoading = false});
 
-  final Iterable<File> files;
-  final Iterable<Folder> folders;
+  final List<File> files;
+  final List<Folder> folders;
 
-  bool get isNotEmpty => files != null && folders != null;
+  /// Flag to signal if contents are still being loaded.
+  final bool isLoading;
 }

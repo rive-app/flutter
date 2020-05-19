@@ -1,5 +1,5 @@
 import 'package:meta/meta.dart';
-import 'package:rive_api/src/data_model/data_model.dart';
+import 'package:rive_api/data_model.dart';
 
 /// Base notification class that has a factory that will construct
 /// the appropriate concrete notification

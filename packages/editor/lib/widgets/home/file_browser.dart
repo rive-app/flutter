@@ -62,13 +62,23 @@ class FileBrowser extends StatelessWidget {
   }
 
   bool canDisplayFolder(FolderContents folder) =>
-      folder != null && folder.isNotEmpty;
+      folder != null && !folder.isLoading;
 
   Widget _stream(FolderContentsBuilder childBuilder) {
-    return StreamBuilder<FolderContents>(
-      stream: Plumber().getStream<FolderContents>(),
-      builder: (context, snapshot) {
-        return childBuilder(snapshot.data);
+    return StreamBuilder<CurrentDirectory>(
+      stream: Plumber().getStream<CurrentDirectory>(),
+      builder: (context, cdSnapshot) {
+        if (cdSnapshot.hasData) {
+          final cd = cdSnapshot.data;
+          return StreamBuilder<FolderContents>(
+            stream: Plumber().getStream<FolderContents>(cd.hashId),
+            builder: (context, fcSnapshot) {
+              return childBuilder(fcSnapshot.data);
+            },
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
       },
     );
   }
@@ -138,6 +148,10 @@ class FileBrowser extends StatelessWidget {
                 child: SizedBox(height: 30),
               ),
             );
+          }
+
+          if (hasFiles) {
+            slivers.add(_fileGrid(files));
           } else {
             // Empty view.
             slivers.add(
@@ -156,10 +170,6 @@ class FileBrowser extends StatelessWidget {
                 ),
               ),
             );
-          }
-
-          if (hasFiles) {
-            slivers.add(_fileGrid(files));
           }
         } else {
           slivers.add(

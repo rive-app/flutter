@@ -41,5 +41,5 @@ class File {
   int get hashCode => hash2(id, ownerId);
 
   @override
-  String toString() => 'File: $name - Id: $id. Owner: $ownerId';
+  String toString() => '< File: $name - Id: $id. Owner: $ownerId >';
 }

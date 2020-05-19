@@ -1,4 +1,5 @@
 import 'package:rive_api/model.dart';
+import 'package:utilities/utilities.dart';
 
 class CurrentDirectory {
   const CurrentDirectory(this.owner, this.folderId);
@@ -10,6 +11,8 @@ class CurrentDirectory {
       o is CurrentDirectory &&
       o.folderId == folderId &&
       o.owner.ownerId == owner.ownerId;
+
+  int get hashId => szudzik(owner.ownerId, folderId);
 
   @override
   String toString() =>
