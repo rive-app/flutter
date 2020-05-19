@@ -179,12 +179,10 @@ class _InspectorPopoutState extends State<InspectorPopout> {
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return Padding(
-      // TODO: Top padding might need tweaking here, depends on how this widget
-      // is grouped into the inspector. Note that left padding is 15 as the
-      // popout button has a padding of 5, bringing the total left padding to
-      // 20. This is so the icon aligns at 20 but the hit area of the button
-      //     starts at 15.
-      padding: const EdgeInsets.only(top: 5, bottom: 5, left: 15, right: 15),
+      // Note that left padding is 15 as the popout button has a padding of 5,
+      // bringing the total left padding to 20. This is so the icon aligns at 20
+      // but the hit area of the button starts at 15.
+      padding: const EdgeInsets.only(top: 8, bottom: 10, left: 15, right: 15),
       child: Row(
         children: [
           IgnorePointer(
