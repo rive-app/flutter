@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/files.dart';
 import 'package:rive_core/client_side_player.dart';
@@ -31,6 +32,7 @@ import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
+import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
 
 typedef ActionHandler = bool Function(ShortcutAction action);
@@ -319,6 +321,10 @@ class OpenFileContext with RiveFileDelegate {
     vertexEditor?.dispose();
     treeController.value?.dispose();
     drawOrderTreeController.value?.dispose();
+  }
+
+  List<InspectorBuilder> inspectorBuilders() {
+    return vertexEditor.inspectorBuilders();
   }
 
   void _resetManagers() {

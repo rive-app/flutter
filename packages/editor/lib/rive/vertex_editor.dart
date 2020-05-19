@@ -13,6 +13,8 @@ import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/widgets/inspector/inspect_vertices.dart';
+import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 
 // A manager that has a sense of what's currently being edited in stage solo
 // mode. Meant to support shapes, paths, and meshes. It needs to track the set
@@ -27,9 +29,13 @@ enum VertexEditorMode {
 }
 
 class VertexEditor with RiveFileDelegate {
+  final List<InspectorBuilder> _editingPathInspectors = [VertexInspector()];
   final OpenFileContext file;
   final Stage stage;
-  HashSet<PointsPath> _editingPaths;
+  final ValueNotifier<HashSet<PointsPath>> _editingPaths =
+      ValueNotifier<HashSet<PointsPath>>(null);
+  ValueListenable<HashSet<PointsPath>> get editingPathsListenable =>
+      _editingPaths;
 
   final ValueNotifier<VertexEditorMode> _mode =
       ValueNotifier<VertexEditorMode>(VertexEditorMode.off);
@@ -38,7 +44,7 @@ class VertexEditor with RiveFileDelegate {
   final ValueNotifier<PointsPath> _creatingPath =
       ValueNotifier<PointsPath>(null);
   ValueListenable<PointsPath> get creatingPath => _creatingPath;
-  Iterable<PointsPath> get editingPaths => _editingPaths;
+  Iterable<PointsPath> get editingPaths => _editingPaths.value;
 
   VertexEditor(this.file, this.stage) {
     file.core.addDelegate(this);
@@ -59,8 +65,13 @@ class VertexEditor with RiveFileDelegate {
       default:
         stage.soloListenable.removeListener(_soloChanged);
         stage.removeSelectionHandler(_selectionHandler);
+        stage.solo(null);
         break;
     }
+  }
+
+  void doneEditing() {
+    _changeMode(VertexEditorMode.off);
   }
 
   bool _selectionHandler(StageItem item) {
@@ -79,8 +90,8 @@ class VertexEditor with RiveFileDelegate {
         _changeMode(VertexEditorMode.off);
         if (!file.core.isApplyingJournalEntry) {
           // copy to prevent editing during iteration in onObjectRemoved.
-          var pathsCopy = _editingPaths.toList(growable: false);
-          _editingPaths = null;
+          var pathsCopy = _editingPaths.value.toList(growable: false);
+          _editingPaths.value = null;
           // We only want to change the path's edit mode if we're not in the
           // middle of a undo/redo.
           for (final path in pathsCopy) {
@@ -141,9 +152,9 @@ class VertexEditor with RiveFileDelegate {
     }
 
     if (remove) {
-      if (_editingPaths?.remove(path) ?? false) {
-        if (_editingPaths.isEmpty) {
-          _editingPaths = null;
+      if (_editingPaths.value?.remove(path) ?? false) {
+        if (_editingPaths.value.isEmpty) {
+          _editingPaths.value = null;
           _changeMode(VertexEditorMode.off);
         }
         stage.debounce(_syncSolo);
@@ -153,13 +164,13 @@ class VertexEditor with RiveFileDelegate {
     // In this case, something is toggling editing back on but the vertex
     // editor isn't currently editing paths. So we want to toggle it back
     // on.
-    else if (_editingPaths == null) {
+    else if (_editingPaths.value == null) {
       // Put us into editing path mode.
       _changeMode(VertexEditorMode.editingPath);
-      _editingPaths = HashSet<PointsPath>.from(<PointsPath>[path]);
+      _editingPaths.value = HashSet<PointsPath>.from(<PointsPath>[path]);
       stage.debounce(_syncSolo);
       // We're already editing paths, just make sure this one is in the set.
-    } else if (_editingPaths.add(path)) {
+    } else if (_editingPaths.value.add(path)) {
       stage.debounce(_syncSolo);
     }
   }
@@ -178,15 +189,16 @@ class VertexEditor with RiveFileDelegate {
   }
 
   void _syncSolo() {
-    stage.solo(_editingPaths?.map((path) => path.stageItem));
+    stage.solo(_editingPaths.value?.map((path) => path.stageItem));
   }
 
   void _editPaths(Iterable<core.Path> paths) {
     // for now just get points paths, later flatten the others
-    _editingPaths = HashSet<PointsPath>.from(paths.whereType<PointsPath>());
+    _editingPaths.value =
+        HashSet<PointsPath>.from(paths.whereType<PointsPath>());
     _syncSolo();
     _changeMode(VertexEditorMode.editingPath);
-    for (final path in _editingPaths) {
+    for (final path in _editingPaths.value) {
       path.editingMode = PointsPathEditMode.editing;
     }
   }
@@ -228,5 +240,11 @@ class VertexEditor with RiveFileDelegate {
     stage.cancelDebounce(_syncSolo);
     file.core.removeDelegate(this);
     file.removeActionHandler(_handleAction);
+  }
+
+  List<InspectorBuilder> inspectorBuilders() {
+    return _mode.value == VertexEditorMode.editingPath
+        ? _editingPathInspectors
+        : null;
   }
 }

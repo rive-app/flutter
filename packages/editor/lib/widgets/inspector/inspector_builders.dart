@@ -9,7 +9,7 @@ import 'inspect_transform.dart';
 
 /// The list of possible inspector builders, these are iterated, validated, and
 /// expanded when the inspector is built from the selection set.
-final List<InspectorBuilder> inspectorBuilders = [
+final List<InspectorBuilder> defaultInspectorBuilders = [
   AlignmentInspectorBuilder(),
   BackboardInspectorBuilder(),
   ArtboardInspectorBuilder(),

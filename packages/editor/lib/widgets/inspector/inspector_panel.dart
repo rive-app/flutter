@@ -51,7 +51,9 @@ class _InspectorPanelState extends State<InspectorPanel> {
         child: ListenableBuilder<SelectionContext<SelectableItem>>(
           listenable: file.selection,
           builder: (context, selection, _) {
-            // Let the inpsection set whittle down groupings and commonly
+            List<InspectorBuilder> inspectorBuilders =
+                file.inspectorBuilders() ?? defaultInspectorBuilders;
+            // Let the inspection set whittle down groupings and commonly
             // selected coreTypes for the inspector builders to use to determine
             // if there are things they can help inspect.
             var inspectionSet = InspectionSet.fromSelection(file, selection);
