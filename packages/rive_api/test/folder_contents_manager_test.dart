@@ -70,7 +70,11 @@ void main() {
         (FolderContents cts) => cts.files.length == 2,
       ];
 
-      _plumber.getStream<FolderContents>().listen((contents) {
+      final me = _plumber.peek<Me>();
+      final firstFolderId = 1;
+      final folderContentsId = szudzik(me.ownerId, firstFolderId);
+
+      _plumber.getStream<FolderContents>(folderContentsId).listen((contents) {
         var check = checks.removeAt(0);
         expect(check(contents), true);
         if (checks.isEmpty) {

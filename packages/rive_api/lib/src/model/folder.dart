@@ -27,7 +27,7 @@ class Folder {
     // Your Files is id 1
     // Deleted Files is id 0
     var _parent = folder.parent;
-    if (_parent == null && folder.id == 0) {
+    if (_parent == null && folder.id != 1) {
       _parent = 1;
     }
     return Folder(
@@ -54,5 +54,6 @@ class Folder {
       );
 
   @override
-  String toString() => 'Folder: $id, $name, $ownerId';
+  String toString() =>
+      '< Folder: id: $id, n: $name, oid: $ownerId, pid: $parent >';
 }

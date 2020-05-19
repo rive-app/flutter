@@ -11,6 +11,8 @@ class CurrentDirectory {
       o.folderId == folderId &&
       o.owner.ownerId == owner.ownerId;
 
+  int get hashId => szudzik(owner.ownerId, folderId);
+
   @override
   String toString() =>
       'Folder: $folderId, owned by: $owner - ${owner.displayName}';

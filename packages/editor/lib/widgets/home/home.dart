@@ -57,16 +57,16 @@ class Home extends StatelessWidget {
                   );
                   break;
                 case HomeSection.community:
-                  return Text('Build community');
+                  return const Text('Build community');
                   break;
                 case HomeSection.recents:
-                  return Text('Build recents');
+                  return const Text('Build recents');
                   break;
                 case HomeSection.getStarted:
-                  return Text('Build get started');
+                  return const Text('Build get started');
                   break;
                 default:
-                  return Text('loading...');
+                  return const Text('loading...');
                   break;
               }
             },
