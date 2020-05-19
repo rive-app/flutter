@@ -1,3 +1,4 @@
+import 'package:core/debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
@@ -153,6 +154,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
 
   @override
   void dispose() {
+    cancelDebounce(_returnFocusToEditor);
     _focusNode.removeListener(_focusChange);
     if (_ownsFocusNode) {
       _focusNode.dispose();
@@ -181,14 +183,28 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
     super.didUpdateWidget(oldWidget);
   }
 
-  void _completeChange() {
+  void _completeChange({bool debounceFocus = false}) {
     if (widget.captureJournalEntry) {
       ActiveFile.find(context)?.core?.captureJournalEntry();
     }
-    // Force focus back to the main context so that we can immediately
-    // undo this change if we want to by hitting ctrl/command z.
-    RiveContext.find(context).focus();
     widget.completeChange?.call(_lastValue);
+
+    // When this gets called via onSubmitted the enter event will propagate to
+    // the editor's focus node. We want to avoid that as it'll cause the submit
+    // action and an editor bound 'enter' action to trigger (like edit
+    // vertices). So we debounce it to allow the main editor focus node to
+    // ignore the enter press.
+    if (debounceFocus) {
+      debounce(_returnFocusToEditor);
+    } else {
+      // Force focus back to the main context so that we can immediately
+      // undo this change if we want to by hitting ctrl/command z.
+      _returnFocusToEditor();
+    }
+  }
+
+  void _returnFocusToEditor() {
+    RiveContext.find(context).focus();
   }
 
   Widget _addTrailingWidget(BuildContext context, Widget child) {
@@ -246,7 +262,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
                   onSubmitted: (string) {
                     widget.change?.call(
                         _lastValue = widget.converter.fromEditingValue(string));
-                    _completeChange();
+                    _completeChange(debounceFocus: true);
                   },
                 ),
               ),

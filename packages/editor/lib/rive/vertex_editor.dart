@@ -66,6 +66,7 @@ class VertexEditor with RiveFileDelegate {
         stage.soloListenable.removeListener(_soloChanged);
         stage.removeSelectionHandler(_selectionHandler);
         stage.solo(null);
+        _editingPaths.value = null;
         break;
     }
   }
@@ -87,10 +88,12 @@ class VertexEditor with RiveFileDelegate {
   void _soloChanged() {
     if (stage.soloItems == null) {
       if (_mode.value != VertexEditorMode.off) {
+        // Copy them out before we null them.
+        var paths = _editingPaths.value;
         _changeMode(VertexEditorMode.off);
         if (!file.core.isApplyingJournalEntry) {
           // copy to prevent editing during iteration in onObjectRemoved.
-          var pathsCopy = _editingPaths.value.toList(growable: false);
+          var pathsCopy = paths.toList(growable: false);
           _editingPaths.value = null;
           // We only want to change the path's edit mode if we're not in the
           // middle of a undo/redo.
