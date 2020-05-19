@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/common/hit_deny.dart';
+import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/common/rive_scroll_view.dart';
 
 import 'package:rive_editor/widgets/icons.dart';
@@ -328,9 +329,12 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
                         ValueListenableBuilder<String>(
                       valueListenable: widget.tabs[index].file.name,
                       builder: (context, name, child) => Expanded(
-                        child: Text(
-                          name,
-                          overflow: TextOverflow.ellipsis,
+                        child: Renamable(
+                          onRename: (newName) {
+                            widget.tabs[index].file.changeFileName(newName);
+                          },
+                          color: RiveTheme.of(context).colors.activeText,
+                          name: name,
                           style: TextStyle(
                             fontSize: 13,
                             color: selected
@@ -443,8 +447,8 @@ class _RenderTabFader extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     final fadeRect =
-        Rect.fromLTWH(offset.dx+1, offset.dy, _fadeWidth-1, size.height);
-    final clipRect = Rect.fromLTWH(1, 0, size.width-1, size.height);
+        Rect.fromLTWH(offset.dx + 1, offset.dy, _fadeWidth - 1, size.height);
+    final clipRect = Rect.fromLTWH(1, 0, size.width - 1, size.height);
 
     final rect = offset & size; //Rect.lerp(offset & size, fadeRect, opacity);
 
@@ -452,7 +456,9 @@ class _RenderTabFader extends RenderProxyBox {
       context.canvas.drawLine(
         rect.topLeft.translate(1, TabDecoration.cornerRadius + 1),
         rect.bottomLeft.translate(1, -TabDecoration.cornerRadius - 1),
-        Paint()..color = _separator..isAntiAlias = false,
+        Paint()
+          ..color = _separator
+          ..isAntiAlias = false,
       );
     }
 
@@ -503,6 +509,6 @@ class _TabLayoutDelegate extends MultiChildLayoutDelegate {
     layoutChild(_Tabs.scrolling,
         BoxConstraints.tight(Size(size.width - dockedSize.width, size.height)));
     positionChild(_Tabs.docked, Offset.zero);
-    positionChild(_Tabs.scrolling, Offset(dockedSize.width-1, 0));
+    positionChild(_Tabs.scrolling, Offset(dockedSize.width - 1, 0));
   }
 }
