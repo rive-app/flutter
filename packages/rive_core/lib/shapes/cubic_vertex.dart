@@ -4,8 +4,6 @@ import 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 
 class CubicVertex extends CubicVertexBase {
-  @override
-  void update(int dirt) {}
 
   Vec2D get outPoint => Vec2D.fromValues(outX, outY);
   Vec2D get inPoint => Vec2D.fromValues(inX, inY);
@@ -39,12 +37,6 @@ class CubicVertex extends CubicVertexBase {
 
   @override
   void outYChanged(double from, double to) {}
-
-  @override
-  void xChanged(double from, double to) {}
-
-  @override
-  void yChanged(double from, double to) {}
 
   @override
   void controlTypeValueChanged(int from, int to) {}

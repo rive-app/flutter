@@ -579,7 +579,6 @@ class Stage extends Debouncer {
       }
     }
     if (toolCompleted) {
-      print("TOOL COMPLETED!");
       _dragTool = null;
       file.core.captureJournalEntry();
       markNeedsAdvance();
