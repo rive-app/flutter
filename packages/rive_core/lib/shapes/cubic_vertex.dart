@@ -1,10 +1,10 @@
+import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 
 class CubicVertex extends CubicVertexBase {
-
   Vec2D get outPoint => Vec2D.fromValues(outX, outY);
   Vec2D get inPoint => Vec2D.fromValues(inX, inY);
 
@@ -27,16 +27,28 @@ class CubicVertex extends CubicVertexBase {
   }
 
   @override
-  void inXChanged(double from, double to) {}
+  void inXChanged(double from, double to) {
+    addDirt(ComponentDirt.worldTransform);
+    path?.markPathDirty();
+  }
 
   @override
-  void inYChanged(double from, double to) {}
+  void inYChanged(double from, double to) {
+    addDirt(ComponentDirt.worldTransform);
+    path?.markPathDirty();
+  }
 
   @override
-  void outXChanged(double from, double to) {}
+  void outXChanged(double from, double to) {
+    addDirt(ComponentDirt.worldTransform);
+    path?.markPathDirty();
+  }
 
   @override
-  void outYChanged(double from, double to) {}
+  void outYChanged(double from, double to) {
+    addDirt(ComponentDirt.worldTransform);
+    path?.markPathDirty();
+  }
 
   @override
   void controlTypeValueChanged(int from, int to) {}

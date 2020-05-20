@@ -1,22 +1,25 @@
 import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/selectable_item.dart';
-import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
+/// Abstraction for any stage representation of a vertex (shared by meshes,
+/// paths, etc).
+abstract class StageVertex<T extends Component> extends StageItem<T>
+    with BoundsDelegate {
   static const double _vertexRadius = 3.5;
   static const double _vertexRadiusSelected = 4.5;
   static const double hitRadiusSquared =
       (_vertexRadiusSelected + 1.5) * (_vertexRadiusSelected + 1.5);
   static const double _maxWorldVertexRadius = _vertexRadius / Stage.minZoom;
 
-  double get radiusScale =>
-      component.path.vertices.first == component ? 1.5 : 1;
+  double get radiusScale;
 
   static final Paint stroke = Paint()
     ..style = PaintingStyle.stroke
@@ -43,6 +46,14 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
 
   @override
   bool get showInHierarchy => false;
+
+  /// Expected to be implemented by the concrete point to return the local
+  /// position.
+  Vec2D get translation;
+
+  /// Expected to be implemented by the concrete point to return the runtime
+  /// world transorm (usually artboard space) of the parent (shape/image).
+  Mat2D get worldTransform;
 
   @override
   void addedToStage(Stage stage) {
@@ -96,12 +107,12 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
         Vec2D.transformMat2D(Vec2D(), _worldTranslation, stage.viewTransform);
     canvas.translate(screenTranslation[0].roundToDouble() + 0.5,
         screenTranslation[1].roundToDouble() + 0.5);
-    // canvas.scale(scale);
     var rect = Rect.fromLTRB(-radius, -radius, radius, radius);
-    canvas.drawOval(rect, drawStroke);
-    canvas.drawOval(rect, drawFill);
+    drawPoint(canvas, rect, drawStroke, drawFill);
     canvas.restore();
   }
+
+  void drawPoint(Canvas canvas, Rect rect, Paint stroke, Paint fill);
 
   @override
   void boundsChanged() {
@@ -109,15 +120,10 @@ class StageVertex extends StageItem<PathVertex> with BoundsDelegate {
       return;
     }
     final origin = component.artboard.originWorld;
-    Vec2D.transformMat2D(_worldTranslation, component.translation,
-        component.path.worldTransform);
+    Vec2D.transformMat2D(_worldTranslation, translation, worldTransform);
     _worldTranslation[0] += origin[0];
     _worldTranslation[1] += origin[1];
 
     stage.updateBounds(this);
   }
-
-  // TODO: component.path?.stageItem
-  @override
-  StageItem get soloParent => component.path.stageItem;
 }

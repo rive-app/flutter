@@ -11,7 +11,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
-import 'package:rive_editor/rive/stage/tools/transformers/translation/vertex_translate_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/path_vertex_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
 
@@ -150,6 +150,6 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   @override
   List<StageTransformer> get transformers => [
-        VertexTranslateTransformer(),
+        PathVertexTranslateTransformer(),
       ];
 }
