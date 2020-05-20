@@ -38,7 +38,6 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
 import 'package:rive_editor/widgets/login/login.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
-import 'package:rive_editor/widgets/resize_panel.dart';
 import 'package:rive_editor/widgets/stage_late_view.dart';
 import 'package:rive_editor/widgets/stage_view.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
@@ -76,17 +75,12 @@ Future<void> main() async {
   RiveManager();
   NotificationManager();
 
-  // if (await rive.initialize() != AppState.catastrophe) {
-  //   // this is just for the prototype...
-  //   // await rive.open('100/100');
-  // }
-
   // Runs the app in a custom [Zone] (i.e. an execution context).
   // Provides a convenient way to capture all errors, so they can be reported
   // to our logger service.
   runZoned(
     () => runApp(
-      RiveEditorApp(
+      RiveEditorShell(
         rive: rive,
         iconCache: iconCache,
       ),
@@ -104,11 +98,11 @@ Future<void> main() async {
 
 GlobalKey loadingScreenKey = GlobalKey();
 
-class RiveEditorApp extends StatelessWidget {
+class RiveEditorShell extends StatelessWidget {
   final Rive rive;
   final RiveIconCache iconCache;
 
-  const RiveEditorApp({
+  const RiveEditorShell({
     Key key,
     this.rive,
     this.iconCache,
@@ -119,50 +113,62 @@ class RiveEditorApp extends StatelessWidget {
     return InsertInheritedWidgets(
       rive: rive,
       iconCache: iconCache,
-      child: Builder(
-        builder: (context) {
-          return CursorView(
-            onPointerDown: (details) => rive.focusNode.requestFocus(),
-            child: MaterialApp(
-              debugShowCheckedModeBanner: false,
-              theme: ThemeData.light(),
-              home: DefaultTextStyle(
-                style: RiveTheme.of(context).textStyles.basic,
-                child: Scaffold(
-                  body: Focus(
-                    focusNode: rive.focusNode,
-                    child: StreamBuilder<AppState>(
-                      stream: Plumber().getStream<AppState>(),
-                      builder: (context, snapshot) {
-                        switch (snapshot.data) {
-                          case AppState.login:
-                            return Login();
+      child: CursorView(
+        onPointerDown: (details) => rive.focusNode.requestFocus(),
+        child: RiveEditorApp(
+          rive: rive,
+        ),
+      ),
+    );
+  }
+}
 
-                          case AppState.home:
-                            return FollowProvider(
-                              manager: FollowManager(
-                                api: rive.api,
-                                ownerId: Plumber().peek<Me>().ownerId,
-                              ),
-                              child: const EditorScaffold(),
-                            );
-                          case AppState.disconnected:
-                            return DisconnectedScreen();
-                            break;
+class RiveEditorApp extends StatelessWidget {
+  final Rive rive;
 
-                          case AppState.catastrophe:
-                            return Catastrophe();
-                          default:
-                            return const LoadingScreen();
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ),
+  const RiveEditorApp({
+    @required this.rive,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.light(),
+      home: DefaultTextStyle(
+        style: RiveTheme.of(context).textStyles.basic,
+        child: Scaffold(
+          body: Focus(
+            focusNode: rive.focusNode,
+            child: StreamBuilder<AppState>(
+              stream: Plumber().getStream<AppState>(),
+              builder: (context, snapshot) {
+                switch (snapshot.data) {
+                  case AppState.login:
+                    return Login();
+
+                  case AppState.home:
+                    return FollowProvider(
+                      manager: FollowManager(
+                        api: rive.api,
+                        ownerId: Plumber().peek<Me>().ownerId,
+                      ),
+                      child: const EditorScaffold(),
+                    );
+                  case AppState.disconnected:
+                    return DisconnectedScreen();
+                    break;
+
+                  case AppState.catastrophe:
+                    return Catastrophe();
+                  default:
+                    return const LoadingScreen();
+                }
+              },
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -235,16 +241,9 @@ class AnimationInheritedWidgets extends StatelessWidget {
     if (activeFile == null) {
       return child;
     }
-    return ValueListenableBuilder(
-      valueListenable: activeFile.mode,
-      builder: (context, EditorMode mode, _) {
-        return mode == EditorMode.animate
-            ? AnimationsProvider(
-                activeArtboard: ActiveArtboard.of(context),
-                child: EditingAnimationProvider(child: child),
-              )
-            : child;
-      },
+    return AnimationsProvider(
+      activeArtboard: ActiveArtboard.of(context),
+      child: EditingAnimationProvider(child: child),
     );
   }
 }
@@ -340,14 +339,9 @@ class Editor extends StatelessWidget {
                       const Expanded(
                         child: StagePanel(),
                       ),
-                      ResizePanel(
-                        hitSize:
-                            RiveTheme.of(context).dimensions.resizeEdgeSize,
-                        direction: ResizeDirection.horizontal,
-                        side: ResizeSide.start,
-                        min: 235,
-                        max: 500,
-                        child: const InspectorPanel(),
+                      const SizedBox(
+                        width: 235,
+                        child: InspectorPanel(),
                       ),
                     ],
                   ),
@@ -403,15 +397,16 @@ class EditorScaffold extends StatelessWidget {
         ),
         Expanded(
           child: ValueListenableBuilder<RiveTabItem>(
-              valueListenable: rive.selectedTab,
-              builder: (context, tab, _) {
-                switch (tab) {
-                  case Rive.systemTab:
-                    return Home();
-                  default:
-                    return const Editor();
-                }
-              }),
+            valueListenable: rive.selectedTab,
+            builder: (context, tab, _) {
+              switch (tab) {
+                case Rive.systemTab:
+                  return Home();
+                default:
+                  return const Editor();
+              }
+            },
+          ),
         ),
       ],
     );
@@ -504,7 +499,6 @@ class StagePanel extends StatelessWidget {
                     RenderBox getBox = context.findRenderObject() as RenderBox;
                     var local = getBox.globalToLocal(details.position);
                     stage.mouseMove(details.buttons, local.dx, local.dy);
-                    // print('MOVE $local');
                   },
                   child: Listener(
                     behavior: HitTestBehavior.opaque,

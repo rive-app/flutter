@@ -1,13 +1,20 @@
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 
 class CubicVertex extends CubicVertexBase {
-  @override
-  void update(int dirt) {}
 
   Vec2D get outPoint => Vec2D.fromValues(outX, outY);
   Vec2D get inPoint => Vec2D.fromValues(inX, inY);
+
+  @override
+  VertexControlType get controlType =>
+      VertexControlType.values[controlTypeValue];
+  set controlType(VertexControlType value) {
+    assert(value != VertexControlType.straight);
+    controlTypeValue = value.index;
+  }
 
   set outPoint(Vec2D value) {
     outX = value[0];
@@ -32,8 +39,10 @@ class CubicVertex extends CubicVertexBase {
   void outYChanged(double from, double to) {}
 
   @override
-  void xChanged(double from, double to) {}
+  void controlTypeValueChanged(int from, int to) {}
 
   @override
-  void yChanged(double from, double to) {}
+  String toString() {
+    return 'in $inX, $inY | ${translation.toString()} | out $outX, $outY';
+  }
 }

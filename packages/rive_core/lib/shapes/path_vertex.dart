@@ -5,9 +5,19 @@ import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 
+/// How the vertex control handles relate to each other
+enum VertexControlType {
+  straight,
+  mirrored,
+  detached,
+  asymmetric,
+}
+
 abstract class PathVertex extends PathVertexBase {
   Path get path => parent as Path;
   BoundsDelegate _delegate;
+
+  VertexControlType get controlType => VertexControlType.straight;
 
   // -> editor-only
   // At runtime we don't want the vertices to depend on anything

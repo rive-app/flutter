@@ -1,4 +1,3 @@
-import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/src/generated/shapes/straight_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/straight_vertex_base.dart';
 

@@ -10,9 +10,12 @@ import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/vertex_translate_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
 
-class VectorPenTool extends PenTool<Path> {
+class VectorPenTool extends PenTool<Path> with TransformingTool {
   static final VectorPenTool instance = VectorPenTool();
 
   PointsPath _makeEditingPath(Artboard activeArtboard, Vec2D translation) {
@@ -144,4 +147,9 @@ class VectorPenTool extends PenTool<Path> {
     }
     super.draw(canvas);
   }
+
+  @override
+  List<StageTransformer> get transformers => [
+        VertexTranslateTransformer(),
+      ];
 }

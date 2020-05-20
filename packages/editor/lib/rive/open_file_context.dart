@@ -222,8 +222,8 @@ class OpenFileContext with RiveFileDelegate {
   @protected
   void completeConnection(OpenFileState state) {
     _state = state;
-    stateChanged.notify();
     if (state == OpenFileState.error) {
+      stateChanged.notify();
       return;
     }
     core.addDelegate(this);
