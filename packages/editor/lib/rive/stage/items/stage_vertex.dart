@@ -43,13 +43,15 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
   bool isAutomatic(Stage stage) => stage.isValidSoloSelection(this);
 
   final Vec2D _worldTranslation = Vec2D();
+  Vec2D get worldTranslation => _worldTranslation;
+  set worldTranslation(Vec2D value);
 
   @override
   bool get showInHierarchy => false;
 
   /// Expected to be implemented by the concrete point to return the local
   /// position.
-  Vec2D get translation;
+  Vec2D translation;
 
   /// Expected to be implemented by the concrete point to return the runtime
   /// world transorm (usually artboard space) of the parent (shape/image).
