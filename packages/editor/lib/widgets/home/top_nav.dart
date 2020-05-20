@@ -4,7 +4,6 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
-import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
@@ -57,8 +56,9 @@ class TopNav extends StatelessWidget {
                   ),
                 ),
               ),
-              // if the current folder has no parent, just take you back to
-              // the magic folder nbr 1. (this deals with the Deleted folder anomaly)
+              // if the current folder has no parent, just take you back to the
+              // magic folder nbr 1. (this deals with the Deleted folder
+              // anomaly)
               onTap: () => Plumber().message(CurrentDirectory(
                   currentDirectory.owner, currentFolder.parent ?? 1)),
             ),
@@ -95,8 +95,7 @@ class TopNav extends StatelessWidget {
             } else {
               await FileManager().createFile(folderId);
             }
-            // TODO:
-            // open file
+            // TODO: open file
             FileManager().loadFolders(owner);
             Plumber().message(currentDirectory);
           },
@@ -117,11 +116,6 @@ class TopNav extends StatelessWidget {
             Plumber().message(currentDirectory);
           },
         ),
-        PopupContextItem.separator(),
-        PopupContextItem(
-          'New Team',
-          select: () => showTeamWizard<void>(context: context),
-        ),
       ],
     ));
 
@@ -135,15 +129,12 @@ class TopNav extends StatelessWidget {
     return Underline(
       color: riveColors.fileLineGrey,
       child: StreamBuilder<List<Folder>>(
-          stream: Plumber()
-              .getStream<List<Folder>>(currentDirectory.owner.hashCode),
-          builder: (context, snapshot) {
-            if (snapshot.hasData == false) {
-              return CircularProgressIndicator();
-            } else {
-              return _navControls(context, snapshot.data);
-            }
-          }),
+        stream:
+            Plumber().getStream<List<Folder>>(currentDirectory.owner.hashCode),
+        builder: (context, snapshot) => snapshot.hasData == false
+            ? const SizedBox()
+            : _navControls(context, snapshot.data),
+      ),
       thickness: 1,
     );
   }
