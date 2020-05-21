@@ -144,6 +144,13 @@ class Vec2D {
         l2;
   }
 
+  static bool approximatelyEqual(Vec2D a, Vec2D b, {double threshold = 0.001}) {
+    var a0 = a[0], a1 = a[1];
+    var b0 = b[0], b1 = b[1];
+    return (a0 - b0).abs() <= threshold * max(1.0, max(a0.abs(), b0.abs())) &&
+        (a1 - b1).abs() <= threshold * max(1.0, max(a1.abs(), b1.abs()));
+  }
+
   @override
   String toString() {
     String v = _buffer[0].toString() + ", ";
