@@ -166,6 +166,7 @@ abstract class Path extends PathBase {
                 renderPoints.add(CubicVertex()
                   // -> editor-only
                   ..original = point
+                  ..isCornerRadius = true
                   // <- editor-only
                   ..translation = translation
                   ..inPoint = translation
@@ -176,6 +177,7 @@ abstract class Path extends PathBase {
                 previous = CubicVertex()
                   // -> editor-only
                   ..original = point
+                  ..isCornerRadius = true
                   // <- editor-only
                   ..translation = translation
                   ..inPoint = Vec2D.scaleAndAdd(

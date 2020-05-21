@@ -22,6 +22,7 @@ abstract class PathVertex extends PathVertexBase {
   // At edit time we want to have a reference to the original
   // vertex that may have created this vertex. If original is null and context
   // is not null, this is a core vertex (original).
+  bool isCornerRadius = false;
   PathVertex original;
   PathVertex get coreVertex {
     if (original != null) {

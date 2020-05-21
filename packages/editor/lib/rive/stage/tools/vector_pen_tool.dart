@@ -6,6 +6,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path.dart';
+import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
@@ -78,10 +79,11 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
     if (insertTarget != null) {
-      _split();
-      stage.file.addAlert(
-        SimpleAlert('TODO: subdivide :)'),
-      );
+      if (!_split()) {
+        stage.file.addAlert(
+          SimpleAlert('TODO: subdivide :)'),
+        );
+      }
       return;
     }
     if (!isShowingGhostPoint) {
@@ -263,9 +265,11 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     return result;
   }
 
-  void _split() {
+  bool _split() {
+    var path = insertTarget.path;
+    var file = path.context;
+
     if (insertTarget.cubic == null) {
-      var path = insertTarget.path;
       var from = insertTarget.from.coreVertex;
 
       // If our from point is the last point in the list, append to the end of
@@ -283,12 +287,65 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         ..radius = 0
         ..childOrder = index;
 
-      var file = path.context;
       file.batchAdd(() {
         file.add(vertex);
         vertex.parent = path;
       });
       file.captureJournalEntry();
+      return true;
     }
+
+    bool isNextCorner = insertTarget.to.isCornerRadius;
+    bool isPrevCorner = insertTarget.from.isCornerRadius;
+    // Both points are corner radiuses?
+    if (isNextCorner && isPrevCorner) {
+      var from = insertTarget.from as CubicVertex;
+      var to = insertTarget.to as CubicVertex;
+      // Both share the same original core vertex? Then they're the same
+      // corner...
+      if (to.coreVertex == from.coreVertex) {
+        var vertexIndex = path.vertices.indexOf(to.coreVertex);
+        FractionalIndex before = vertexIndex == 0
+            ? const FractionalIndex.min()
+            : path.vertices[vertexIndex - 1].childOrder;
+        FractionalIndex after = vertexIndex + 1 >= path.vertices.length
+            ? const FractionalIndex.max()
+            : path.vertices[vertexIndex + 1].childOrder;
+
+        file.batchAdd(() {
+          // Remove old corner point...
+          from.coreVertex.remove();
+
+          // Add the corner cubics as real core points.
+          var vertexA = CubicVertex()
+            ..controlType = VertexControlType.detached
+            ..x = from.translation[0]
+            ..y = from.translation[1]
+            ..inX = from.inX
+            ..inY = from.inY
+            ..outX = from.outX
+            ..outY = from.outY
+            ..childOrder = FractionalIndex.between(before, after);
+
+          var vertexB = CubicVertex()
+            ..controlType = VertexControlType.detached
+            ..x = to.translation[0]
+            ..y = to.translation[1]
+            ..inX = to.inX
+            ..inY = to.inY
+            ..outX = to.outX
+            ..outY = to.outY
+            ..childOrder = FractionalIndex.between(vertexA.childOrder, after);
+
+          file.add(vertexA);
+          vertexA.parent = path;
+          file.add(vertexB);
+          vertexB.parent = path;
+        });
+      }
+    }
+    file.captureJournalEntry();
+
+    return false;
   }
 }
