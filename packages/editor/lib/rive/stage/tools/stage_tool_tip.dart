@@ -33,7 +33,9 @@ class StageToolTip {
     ParagraphBuilder builder = ParagraphBuilder(style)
       ..pushStyle(
         TextStyle(
-          foreground: Paint()..color = RiveThemeData().colors.toolTipText,
+          color: RiveThemeData().colors.toolTipText,
+          fontFamily: 'Roboto-Light',
+          fontSize: 11,
         ),
       );
     builder.addText(text);
