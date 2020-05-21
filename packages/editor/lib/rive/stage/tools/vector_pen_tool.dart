@@ -1,4 +1,5 @@
 import 'package:bezier/bezier.dart';
+import 'package:core/core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -77,6 +78,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
     if (insertTarget != null) {
+      _split();
       stage.file.addAlert(
         SimpleAlert('TODO: subdivide :)'),
       );
@@ -178,9 +180,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       var vertices = path.renderVertices;
 
       double closestPathDistance = double.maxFinite;
-      Vec2D intersectionOnPath;
-      Vec2D intersectionOnPathWorld;
       Vec2D intersection;
+
+      PenToolInsertTarget pathResult;
 
       var localMouse =
           Vec2D.transformMat2D(Vec2D(), worldMouse, path.inverseWorldTransform);
@@ -191,13 +193,16 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           i++) {
         var vertex = vertices[i];
         var nextVertex = vertices[(i + 1) % vl];
+        CubicBezier cubicBezier;
 
-        Vec2D controlOut = vertex.coreType == CubicVertexBase.typeKey
+        Vec2D controlOut = vertex.coreType != CubicVertexBase.typeKey
             ? null
             : (vertex as CubicVertex).outPoint;
-        Vec2D controlIn = nextVertex.coreType == CubicVertexBase.typeKey
+        Vec2D controlIn = nextVertex.coreType != CubicVertexBase.typeKey
             ? null
             : (nextVertex as CubicVertex).inPoint;
+
+        // There are no cubic control points, this is just a linear edge.
         if (controlIn == null && controlOut == null) {
           var v1 = vertex.translation;
           var v2 = nextVertex.translation;
@@ -212,9 +217,10 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           }
           //localMouse vertex.translation, nextVertex.translation
         } else {
+          // Either in, out, or both are cubic control points.
           controlOut ??= vertex.translation;
           controlIn ??= nextVertex.translation;
-          var cubic = CubicBezier([
+          cubicBezier = CubicBezier([
             Vector2(vertex.translation[0], vertex.translation[1]),
             Vector2(controlOut[0], controlOut[1]),
             Vector2(controlIn[0], controlIn[1]),
@@ -223,8 +229,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           // TODO: if a designer complains about the cubic being too coarse, we
           // may want to compute the screen length of the cubic and change the
           // iterations passed to nearestTValue.
-          double t = cubic.nearestTValue(Vector2(localMouse[0], localMouse[1]));
-          var point = cubic.pointAt(t);
+          double t =
+              cubicBezier.nearestTValue(Vector2(localMouse[0], localMouse[1]));
+          var point = cubicBezier.pointAt(t);
           intersection = Vec2D.fromValues(point.x, point.y);
         }
 
@@ -237,19 +244,51 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         double distance = Vec2D.distance(worldMouse, intersectionWorld);
         if (distance < closestPathDistance) {
           closestPathDistance = distance;
-          intersectionOnPath = intersection;
-          intersectionOnPathWorld = intersectionWorld;
+          pathResult = PenToolInsertTarget(
+            path: path,
+            translation: intersection,
+            worldTranslation: intersectionWorld,
+            from: vertex,
+            to: nextVertex,
+            cubic: cubicBezier,
+          );
         }
       }
 
       if (closestPathDistance < closestDistance) {
-        result = PenToolInsertTarget(
-          translation: intersectionOnPath,
-          worldTranslation: intersectionOnPathWorld,
-        );
+        result = pathResult;
       }
     }
 
     return result;
+  }
+
+  void _split() {
+    if (insertTarget.cubic == null) {
+      var path = insertTarget.path;
+      var from = insertTarget.from.coreVertex;
+
+      // If our from point is the last point in the list, append to the end of
+      // the fractional indexed list, otherwise compute the inbetween fractional
+      // value of from and to.
+      var index = path.vertices.last == from
+          ? FractionalIndex.between(
+              from.childOrder, const FractionalIndex.max())
+          : FractionalIndex.between(
+              from.childOrder, insertTarget.to.coreVertex.childOrder);
+
+      var vertex = StraightVertex()
+        ..x = insertTarget.translation[0]
+        ..y = insertTarget.translation[1]
+        ..radius = 0
+        ..childOrder = index;
+
+      var file = path.context;
+      file.batchAdd(() {
+        file.add(vertex);
+        vertex.parent = path;
+      });
+      file.captureJournalEntry();
+    }
   }
 }

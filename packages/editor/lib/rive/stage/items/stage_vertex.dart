@@ -16,7 +16,7 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
   static const double _vertexRadius = 3.5;
   static const double _vertexRadiusSelected = 4.5;
   static const double hitRadiusSquared =
-      (_vertexRadiusSelected + 1.5) * (_vertexRadiusSelected + 1.5);
+      (_vertexRadiusSelected + 2.5) * (_vertexRadiusSelected + 2.5);
   static const double _maxWorldVertexRadius = _vertexRadius / Stage.minZoom;
 
   double get radiusScale;

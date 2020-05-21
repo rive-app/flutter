@@ -164,6 +164,9 @@ abstract class Path extends PathBase {
                 Vec2D translation =
                     Vec2D.scaleAndAdd(Vec2D(), pos, toPrev, renderRadius);
                 renderPoints.add(CubicVertex()
+                  // -> editor-only
+                  ..original = point
+                  // <- editor-only
                   ..translation = translation
                   ..inPoint = translation
                   ..outPoint = Vec2D.scaleAndAdd(
@@ -171,6 +174,9 @@ abstract class Path extends PathBase {
                 translation =
                     Vec2D.scaleAndAdd(Vec2D(), pos, toNext, renderRadius);
                 previous = CubicVertex()
+                  // -> editor-only
+                  ..original = point
+                  // <- editor-only
                   ..translation = translation
                   ..inPoint = Vec2D.scaleAndAdd(
                       Vec2D(), pos, toNext, iarcConstant * renderRadius)

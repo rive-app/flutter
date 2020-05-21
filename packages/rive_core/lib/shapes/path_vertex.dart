@@ -18,6 +18,20 @@ abstract class PathVertex extends PathVertexBase {
   BoundsDelegate _delegate;
 
   VertexControlType get controlType => VertexControlType.straight;
+  // -> editor-only
+  // At edit time we want to have a reference to the original
+  // vertex that may have created this vertex. If original is null and context
+  // is not null, this is a core vertex (original).
+  PathVertex original;
+  PathVertex get coreVertex {
+    if (original != null) {
+      return original.coreVertex;
+    }
+    assert(context != null,
+        'the original vertex should never have a null context');
+    return this;
+  }
+  // <- editor-only
 
   // -> editor-only
   // At runtime we don't want the vertices to depend on anything

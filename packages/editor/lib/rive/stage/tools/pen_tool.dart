@@ -1,17 +1,30 @@
 import 'dart:ui';
 
+import 'package:bezier/bezier.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 
 class PenToolInsertTarget {
   final Vec2D worldTranslation;
   final Vec2D translation;
+  final PathVertex from;
+  final PathVertex to;
+  final PointsPath path;
+
+  /// When the insert target needs to split a cubic, this will be non-null.
+  final CubicBezier cubic;
 
   PenToolInsertTarget({
+    this.path,
     this.translation,
     this.worldTranslation,
+    this.from,
+    this.to,
+    this.cubic,
   });
 }
 
