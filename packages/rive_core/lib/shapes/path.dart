@@ -113,14 +113,15 @@ abstract class Path extends PathBase {
 
   List<PathVertex> get vertices;
 
-  bool _buildPath() {
-    _isValid = true;
-    _uiPath.reset();
-    List<PathVertex> pts = vertices;
-    if (pts == null || pts.isEmpty) {
-      return false;
-    }
+  List<PathVertex> get renderVertices =>
+      // TODO: add skin deformation (bones)
+      makeRenderVertices(vertices, isClosed);
 
+  static List<PathVertex> makeRenderVertices(
+      List<PathVertex> pts, bool isClosed) {
+    if (pts == null || pts.isEmpty) {
+      return [];
+    }
     List<PathVertex> renderPoints = [];
     int pl = pts.length;
 
@@ -188,6 +189,19 @@ abstract class Path extends PathBase {
           break;
       }
     }
+    return renderPoints;
+  }
+
+  bool _buildPath() {
+    _isValid = true;
+    _uiPath.reset();
+    List<PathVertex> pts = vertices;
+    if (pts == null || pts.isEmpty) {
+      return false;
+    }
+
+    var renderPoints = makeRenderVertices(pts, isClosed);
+
     PathVertex firstPoint = renderPoints[0];
     _uiPath.moveTo(firstPoint.translation[0], firstPoint.translation[1]);
     for (int i = 0,

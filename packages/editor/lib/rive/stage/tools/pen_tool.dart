@@ -5,9 +5,23 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 
+class PenToolInsertTarget {
+  final Vec2D worldTranslation;
+  final Vec2D translation;
+
+  PenToolInsertTarget({
+    this.translation,
+    this.worldTranslation,
+  });
+}
+
 abstract class PenTool<T extends Component> extends StageTool {
   @override
   bool get activateSendsMouseMove => true;
+
+  PenToolInsertTarget _insertTarget;
+  PenToolInsertTarget get insertTarget => _insertTarget;
+  PenToolInsertTarget computeInsertTarget(Vec2D worldMouse);
 
   @override
   void draw(Canvas canvas) {
@@ -55,11 +69,11 @@ abstract class PenTool<T extends Component> extends StageTool {
   bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {
     if (stage.hoverItem != null || stage.isPanning) {
       _hideGhostPoint();
-      // TODO: mark insert target null
+      _insertTarget = null;
       return false;
     }
-    // TODO: find an insert target.
-    _showGhostPoint(worldMouse);
+    _insertTarget = computeInsertTarget(worldMouse);
+    _showGhostPoint(_insertTarget?.worldTranslation ?? worldMouse);
     return true;
   }
 

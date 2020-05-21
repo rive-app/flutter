@@ -1,7 +1,9 @@
+import 'package:bezier/bezier.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
@@ -14,6 +16,7 @@ import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart
 import 'package:rive_editor/rive/stage/tools/transformers/translation/path_vertex_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
+import 'package:vector_math/vector_math.dart';
 
 class VectorPenTool extends PenTool<Path> with TransformingTool {
   static final VectorPenTool instance = VectorPenTool();
@@ -73,6 +76,12 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
+    if (insertTarget != null) {
+      stage.file.addAlert(
+        SimpleAlert('TODO: subdivide :)'),
+      );
+      return;
+    }
     if (!isShowingGhostPoint) {
       return;
     }
@@ -152,4 +161,95 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   List<StageTransformer> get transformers => [
         PathVertexTranslateTransformer(),
       ];
+
+  static const double snapIntersectionDistance = 10;
+
+  @override
+  PenToolInsertTarget computeInsertTarget(Vec2D worldMouse) {
+    var editingPaths = vertexEditor.editingPaths;
+    if (editingPaths == null) {
+      return null;
+    }
+
+    double closestDistance = snapIntersectionDistance / stage.zoomLevel;
+    PenToolInsertTarget result;
+
+    for (final path in editingPaths) {
+      var vertices = path.renderVertices;
+
+      double closestPathDistance = double.maxFinite;
+      Vec2D intersectionOnPath;
+      Vec2D intersectionOnPathWorld;
+      Vec2D intersection;
+
+      var localMouse =
+          Vec2D.transformMat2D(Vec2D(), worldMouse, path.inverseWorldTransform);
+      for (int i = 0,
+              l = path.isClosed ? vertices.length : vertices.length - 1,
+              vl = vertices.length;
+          i < l;
+          i++) {
+        var vertex = vertices[i];
+        var nextVertex = vertices[(i + 1) % vl];
+
+        Vec2D controlOut = vertex.coreType == CubicVertexBase.typeKey
+            ? null
+            : (vertex as CubicVertex).outPoint;
+        Vec2D controlIn = nextVertex.coreType == CubicVertexBase.typeKey
+            ? null
+            : (nextVertex as CubicVertex).inPoint;
+        if (controlIn == null && controlOut == null) {
+          var v1 = vertex.translation;
+          var v2 = nextVertex.translation;
+          var t = Vec2D.onSegment(v1, v2, localMouse);
+          if (t <= 0) {
+            intersection = v1;
+          } else if (t >= 1) {
+            intersection = v2;
+          } else {
+            intersection = Vec2D.fromValues(
+                v1[0] + (v2[0] - v1[0]) * t, v1[1] + (v2[1] - v1[1]) * t);
+          }
+          //localMouse vertex.translation, nextVertex.translation
+        } else {
+          controlOut ??= vertex.translation;
+          controlIn ??= nextVertex.translation;
+          var cubic = CubicBezier([
+            Vector2(vertex.translation[0], vertex.translation[1]),
+            Vector2(controlOut[0], controlOut[1]),
+            Vector2(controlIn[0], controlIn[1]),
+            Vector2(nextVertex.translation[0], nextVertex.translation[1])
+          ]);
+          // TODO: if a designer complains about the cubic being too coarse, we
+          // may want to compute the screen length of the cubic and change the
+          // iterations passed to nearestTValue.
+          double t = cubic.nearestTValue(Vector2(localMouse[0], localMouse[1]));
+          var point = cubic.pointAt(t);
+          intersection = Vec2D.fromValues(point.x, point.y);
+        }
+
+        // Compute distance in world space in case multiple paths are edited
+        // and have different world transform. TODO: if connected bones use
+        // closest as it'll be already in world space
+        var intersectionWorld =
+            Vec2D.transformMat2D(Vec2D(), intersection, path.worldTransform);
+
+        double distance = Vec2D.distance(worldMouse, intersectionWorld);
+        if (distance < closestPathDistance) {
+          closestPathDistance = distance;
+          intersectionOnPath = intersection;
+          intersectionOnPathWorld = intersectionWorld;
+        }
+      }
+
+      if (closestPathDistance < closestDistance) {
+        result = PenToolInsertTarget(
+          translation: intersectionOnPath,
+          worldTranslation: intersectionOnPathWorld,
+        );
+      }
+    }
+
+    return result;
+  }
 }

@@ -38,6 +38,7 @@ dependencies:
 
   path_provider: ^1.6.5
   path_provider_macos: ^0.0.4
+  bezier: ^1.1.5
 
   file_chooser:
     git:
