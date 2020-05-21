@@ -17,6 +17,7 @@ class NodeTool extends DrawableTool {
 
   @override
   void click(Artboard artboard, Vec2D worldMouse) {
+    artboard.context.suppressAutoKey = true;
     _node = _createNode(artboard, worldMouse);
   }
 
@@ -31,6 +32,7 @@ class NodeTool extends DrawableTool {
   /// placed, so we can't do this in onClick
   @override
   bool endClick() {
+    _node?.context?.suppressAutoKey = false;
     _node = null;
     stage.activateAction(ShortcutAction.translateTool);
     return true;

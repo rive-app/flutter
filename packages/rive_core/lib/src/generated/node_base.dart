@@ -18,7 +18,7 @@ abstract class NodeBase extends ContainerComponent {
   /// X field with key 13.
   double _x = 0;
   double _xAnimated;
-  KeyState _xKeyState;
+  KeyState _xKeyState = KeyState.none;
   static const int xPropertyKey = 13;
 
   /// Get the [_x] field value.Note this may not match the core value if
@@ -77,7 +77,7 @@ abstract class NodeBase extends ContainerComponent {
   /// Y field with key 14.
   double _y = 0;
   double _yAnimated;
-  KeyState _yKeyState;
+  KeyState _yKeyState = KeyState.none;
   static const int yPropertyKey = 14;
 
   /// Get the [_y] field value.Note this may not match the core value if
@@ -136,7 +136,7 @@ abstract class NodeBase extends ContainerComponent {
   /// Rotation field with key 15.
   double _rotation = 0;
   double _rotationAnimated;
-  KeyState _rotationKeyState;
+  KeyState _rotationKeyState = KeyState.none;
   static const int rotationPropertyKey = 15;
 
   /// Get the [_rotation] field value.Note this may not match the core value if
@@ -196,7 +196,7 @@ abstract class NodeBase extends ContainerComponent {
   /// ScaleX field with key 16.
   double _scaleX = 1;
   double _scaleXAnimated;
-  KeyState _scaleXKeyState;
+  KeyState _scaleXKeyState = KeyState.none;
   static const int scaleXPropertyKey = 16;
 
   /// Get the [_scaleX] field value.Note this may not match the core value if
@@ -256,7 +256,7 @@ abstract class NodeBase extends ContainerComponent {
   /// ScaleY field with key 17.
   double _scaleY = 1;
   double _scaleYAnimated;
-  KeyState _scaleYKeyState;
+  KeyState _scaleYKeyState = KeyState.none;
   static const int scaleYPropertyKey = 17;
 
   /// Get the [_scaleY] field value.Note this may not match the core value if
@@ -316,7 +316,7 @@ abstract class NodeBase extends ContainerComponent {
   /// Opacity field with key 18.
   double _opacity = 1;
   double _opacityAnimated;
-  KeyState _opacityKeyState;
+  KeyState _opacityKeyState = KeyState.none;
   static const int opacityPropertyKey = 18;
 
   /// Get the [_opacity] field value.Note this may not match the core value if

@@ -72,6 +72,7 @@ abstract class ShapeTool extends DrawableTool {
 
   static Shape makeShape(Artboard activeArtboard, core.Path path) {
     var file = activeArtboard.context;
+    file.suppressAutoKey = true;
     Shape shape;
     file.batchAdd(() {
       shape = Shape();
@@ -110,6 +111,7 @@ abstract class ShapeTool extends DrawableTool {
   @override
   void endDrag() {
     super.endDrag();
+    _shape?.context?.suppressAutoKey = false;
     _shape = null;
   }
 
