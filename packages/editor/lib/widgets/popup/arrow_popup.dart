@@ -174,7 +174,11 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
   final double width;
   final Offset offset;
   final Offset arrowTweak;
+  final bool closeOnResize;
   PopupDirection bestDirection;
+
+  /// Screen size when layout is performed
+  Size layoutSize;
 
   _ListPopupMultiLayoutDelegate({
     this.from,
@@ -184,6 +188,7 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
     this.width,
     this.offset,
     this.arrowTweak,
+    this.closeOnResize = true,
   });
 
   @override
@@ -224,6 +229,15 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
+    /// Layout is performed whenever when the screen is resized
+    /// Close the popup when this happens if desired
+    if (layoutSize == null) {
+      layoutSize = size;
+    } else if (layoutSize != size && closeOnResize) {
+      // If the size has changed,close the popup
+      Popup.closeAll();
+    }
+
     bool hasArrow = hasChild(_ListPopupLayoutElement.arrow);
     Size arrowSize = Size.zero;
     if (hasArrow) {
