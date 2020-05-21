@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/math/vec2d.dart';

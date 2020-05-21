@@ -63,6 +63,7 @@ void main() {
 
     // Click on the stage and expect it to create a shape, path, and one vertex.
     stage.mouseDown(1, 100, 100);
+    stage.mouseUp(1, 100, 100);
 
     expect(core.objectsOfType<Shape>().length, 1,
         reason: 'there should be one shape after clicking the pen tool');
@@ -98,12 +99,14 @@ void main() {
         reason: 'Path should be in creation mode.');
 
     stage.mouseDown(1, 100, 200);
+    stage.mouseUp(1, 100, 200);
     expect(editingPath.vertices.length, 2,
         reason: 'after second click, path should have two points');
     expect(editingPath.vertices[1].x, 0);
     expect(editingPath.vertices[1].y, 100);
 
     stage.mouseDown(1, 200, 200);
+    stage.mouseUp(1, 200, 200);
     expect(editingPath.vertices.length, 3,
         reason: 'after second click, path should have three points');
     expect(editingPath.vertices[2].x, 100);
