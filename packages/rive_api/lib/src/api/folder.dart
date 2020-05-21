@@ -14,7 +14,7 @@ class FolderApi {
 
   Future<List<FolderDM>> folders(OwnerDM owner) async {
     if (owner is MeDM) {
-      return myFolders();
+      return myFolders(owner.ownerId);
     } else if (owner is TeamDM) {
       return teamFolders(owner.ownerId);
     } else {
@@ -22,12 +22,13 @@ class FolderApi {
     }
   }
 
-  Future<List<FolderDM>> myFolders() async => _folders('/api/my/files/folders');
+  Future<List<FolderDM>> myFolders(int ownerId) async =>
+      _folders('/api/my/files/folders', ownerId);
 
   Future<List<FolderDM>> teamFolders(int ownerId) async =>
-      _folders('/api/teams/$ownerId/folders');
+      _folders('/api/teams/$ownerId/folders', ownerId);
 
-  Future<List<FolderDM>> _folders(String path) async {
+  Future<List<FolderDM>> _folders(String path, int ownerId) async {
     final res = await api.getFromPath(path);
     try {
       final data = json.decode(res.body) as Map<String, Object>;
@@ -36,7 +37,7 @@ class FolderApi {
         _log.severe('Incorrectly formatted folders json response: $res.body');
         throw FormatException('Incorrectly formatted folders json response');
       }
-      return FolderDM.fromDataList(data['folders']);
+      return FolderDM.fromDataList(data['folders'], ownerId: ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting folder api response: $e');
       rethrow;

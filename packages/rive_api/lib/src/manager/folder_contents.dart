@@ -128,7 +128,7 @@ class FolderContentsManager with Subscriptions {
       folders = await _folderApi.teamFolders(ownerId);
     } else {
       files = await _fileApi.myFiles(ownerId, currentFolderId);
-      folders = await _folderApi.myFolders();
+      folders = await _folderApi.myFolders(ownerId);
     }
 
     // print("Files & Folders: ${directory}");

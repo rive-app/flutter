@@ -1,7 +1,7 @@
 /// Tree of directories
 import 'package:meta/meta.dart';
-import 'package:quiver/core.dart';
 import 'package:utilities/deserialize.dart';
+import 'package:utilities/utilities.dart';
 
 class FolderDM {
   FolderDM({
@@ -17,17 +17,18 @@ class FolderDM {
   final int order;
   final String name;
 
-  static List<FolderDM> fromDataList(List<dynamic> data) =>
-      data.map((d) => FolderDM.fromData(d)).toList(growable: false);
+  static List<FolderDM> fromDataList(List<dynamic> data, {int ownerId}) {
+    return data
+        .map((d) => FolderDM.fromData(d, ownerId: ownerId))
+        .toList(growable: false);
+  }
 
-  factory FolderDM.fromData(
-    Map<String, dynamic> data,
-  ) =>
+  factory FolderDM.fromData(Map<String, dynamic> data, {int ownerId}) =>
       FolderDM(
         id: data.getInt('id'),
         ownerId: data.containsKey('project_owner_id')
             ? data.getInt('project_owner_id')
-            : null,
+            : ownerId,
         name: data.getString('name'),
         order: data.getInt('order'),
         parent: data.optInt('parent'),
@@ -40,5 +41,5 @@ class FolderDM {
   bool operator ==(o) => o is FolderDM && o.id == id && o.ownerId == ownerId;
 
   @override
-  int get hashCode => hash2(id, ownerId);
+  int get hashCode => szudzik(id, ownerId);
 }

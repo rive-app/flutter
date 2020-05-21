@@ -135,7 +135,7 @@ void main() {
       final folders = await mockApi.folders(me);
       expect(folders.length, 4);
       folders.forEach((folder) {
-        expect(folder.ownerId, null);
+        expect(folder.ownerId, 2);
         expect(folder.order != null, true);
         expect(folder.id != null, true);
       });
