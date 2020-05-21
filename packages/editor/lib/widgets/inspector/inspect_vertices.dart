@@ -1,9 +1,15 @@
+import 'dart:math';
+
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
+import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/path_vertex_translate_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -230,6 +236,10 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
           for (final vertex in widget.vertices.toList()) {
             if (vertex.coreType != widget.vertexType) {
               var path = vertex.parent as PointsPath;
+
+              var index = path.vertices.indexOf(vertex);
+              var next = path.vertices[(index + 1) % path.vertices.length];
+
               selection.remove(vertex.stageItem);
               vertex.remove();
               var newVertex =
@@ -238,11 +248,19 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
               newVertex.y = vertex.y;
               newVertex.childOrder = vertex.childOrder;
               if (newVertex is CubicVertex) {
-                // TODO: figure out better control in/out
-                newVertex.inX = newVertex.x - 100;
-                newVertex.inY = newVertex.y;
-                newVertex.outX = newVertex.x + 100;
-                newVertex.outY = newVertex.y;
+                // This only happens when we're going from corner->cubic.
+                var toNext = Vec2D.subtract(
+                    Vec2D(), next.translation, vertex.translation);
+                var length = Vec2D.length(toNext);
+
+                Vec2D.normalize(toNext, toNext);
+
+                // Just align the in towards the next and mirror out.
+
+                newVertex.inX = newVertex.x - toNext[0] * length * 0.25;
+                newVertex.inY = newVertex.y - toNext[1] * length * 0.25;
+                newVertex.outX = newVertex.x + toNext[0] * length * 0.25;
+                newVertex.outY = newVertex.y + toNext[1] * length * 0.25;
                 newVertex.controlType = widget.controlType;
               }
               newVertices.add(newVertex);
@@ -254,6 +272,12 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
               // same order/index in the list.
             } else if (vertex is CubicVertex) {
               vertex.controlType = widget.controlType;
+              // 0 move it to force the control points to update.
+              var transformer = PathVertexTranslateTransformer();
+              var details = DragTransformDetails(vertex.artboard, Vec2D());
+              transformer.init(
+                  {(vertex.stageItem as StagePathVertex).controlIn}, details);
+              transformer.advance(details);
             }
           }
         });
