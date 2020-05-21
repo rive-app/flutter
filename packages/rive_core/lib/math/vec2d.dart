@@ -133,6 +133,17 @@ class Vec2D {
     return result;
   }
 
+  static double onSegment(Vec2D segmentPoint1, Vec2D segmentPoint2, Vec2D pt) {
+    double l2 = squaredDistance(segmentPoint1, segmentPoint2);
+    if (l2 == 0) {
+      return 0;
+    }
+    return ((pt[0] - segmentPoint1[0]) * (segmentPoint2[0] - segmentPoint1[0]) +
+            (pt[1] - segmentPoint1[1]) *
+                (segmentPoint2[1] - segmentPoint1[1])) /
+        l2;
+  }
+
   @override
   String toString() {
     String v = _buffer[0].toString() + ", ";

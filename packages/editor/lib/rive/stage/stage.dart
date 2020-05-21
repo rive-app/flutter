@@ -34,11 +34,11 @@ import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
+import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_radial_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
-import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
@@ -952,8 +952,8 @@ class Stage extends Debouncer {
     RectangleBase.typeKey: () => StageRectangle(),
     TriangleBase.typeKey: () => StageTriangle(),
     PointsPathBase.typeKey: () => StagePath(),
-    StraightVertexBase.typeKey: () => StageVertex(),
-    CubicVertexBase.typeKey: () => StageVertex(),
+    StraightVertexBase.typeKey: () => StagePathVertex(),
+    CubicVertexBase.typeKey: () => StagePathVertex(),
     LinearGradientBase.typeKey: () => StageLinearGradient(),
     RadialGradientBase.typeKey: () => StageRadialGradient(),
     GradientStopBase.typeKey: () => StageGradientStop(),

@@ -4,7 +4,7 @@ import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart
 import 'package:rive_editor/rive/stage/tools/transformers/translation/artboard_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/node_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/gradient_stop_translate_transformer.dart';
-import 'package:rive_editor/rive/stage/tools/transformers/translation/vertex_translate_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/path_vertex_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 
 import 'stage_tool.dart';
@@ -26,7 +26,7 @@ class TranslateTool extends StageTool with TransformingTool {
 
         NodeTranslateTransformer(),
 
-        VertexTranslateTransformer(),
+        PathVertexTranslateTransformer(),
       ];
 
   static final TranslateTool instance = TranslateTool();

@@ -68,13 +68,13 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
 
   bool validateFractional() {
     var previousIndex = _minIndex;
-    
-    for(final item in _values) {
+
+    for (final item in _values) {
       var order = orderOf(item);
-      if(order == null) {
+      if (order == null) {
         continue;
       }
-      if(order.compareTo(previousIndex) > 0) {
+      if (order.compareTo(previousIndex) > 0) {
         previousIndex = order;
       }
     }
