@@ -11,6 +11,7 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
+import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
@@ -77,12 +78,15 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   VertexEditor get vertexEditor => stage.file.vertexEditor;
 
+  StraightVertex _clickCreatedVertex;
+
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
+    _clickCreatedVertex = null;
     if (insertTarget != null) {
       if (!_split()) {
         stage.file.addAlert(
-          SimpleAlert('TODO: subdivide :)'),
+          SimpleAlert('Failed to subdivide.'),
         );
       }
       return;
@@ -102,7 +106,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
     var localTranslation =
         Vec2D.transformMat2D(Vec2D(), worldMouse, path.inverseWorldTransform);
-    var vertex = StraightVertex()
+    var vertex = _clickCreatedVertex = StraightVertex()
       ..x = localTranslation[0]
       ..y = localTranslation[1]
       ..radius = 0;
@@ -112,7 +116,12 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       file.add(vertex);
       path.appendChild(vertex);
     });
-    file.captureJournalEntry();
+  }
+
+  @override
+  bool endClick() {
+    // capture when click completes.
+    return true;
   }
 
   @override
@@ -423,7 +432,44 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     // capture undo/redo
     file.captureJournalEntry();
 
-    return false;
+    return true;
+  }
+
+  @override
+  void startTransformers(
+    Iterable<StageItem> selection,
+    Vec2D worldMouse,
+  ) {
+    if (_clickCreatedVertex != null) {
+      var vertex = _clickCreatedVertex;
+      var artboardMouse = mouseWorldSpace(vertex.artboard, worldMouse);
+      _clickCreatedVertex = null;
+      var path = vertex.path;
+      var localTranslation = Vec2D.transformMat2D(
+          Vec2D(), artboardMouse, path.inverseWorldTransform);
+      vertex.remove();
+
+      var cubicVertex = CubicVertex()
+        ..x = vertex.x
+        ..y = vertex.y
+        ..outPoint = localTranslation
+        ..childOrder = vertex.childOrder;
+
+      var file = path.context;
+      file.batchAdd(() {
+        file.add(cubicVertex);
+        path.appendChild(cubicVertex);
+      });
+
+      // Force a drag on the out with 0,0 delta to update the in.
+      var controlOut = (cubicVertex.stageItem as StagePathVertex).controlOut;
+      var transformer = PathVertexTranslateTransformer();
+      var details = DragTransformDetails(vertex.artboard, Vec2D());
+      transformer.init({controlOut}, details);
+      transformer.advance(details);
+      stage.file.select(controlOut);
+    }
+    super.startTransformers(selection, worldMouse);
   }
 }
 
