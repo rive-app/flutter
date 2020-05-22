@@ -46,8 +46,16 @@ void main() {
         return res;
       });
 
-      // File details for the files returned above.
-      when(_mockedFileApi.getFileDetails(any)).thenAnswer((_) async {
+      // Team file details for the files returned above.
+      when(_mockedFileApi.teamFileDetails(any, any)).thenAnswer((_) async {
+        final data = json.decode(myFilesDetailsResponse);
+        final cdn = CdnDM.fromData(data['cdn']);
+        // print("Mock file api2 $data");
+        return FileDM.fromDataList(data['files'], cdn);
+      });
+
+      // My file details for the files returned above.
+      when(_mockedFileApi.myFileDetails(any)).thenAnswer((_) async {
         final data = json.decode(myFilesDetailsResponse);
         final cdn = CdnDM.fromData(data['cdn']);
         // print("Mock file api2 $data");

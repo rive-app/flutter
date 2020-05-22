@@ -8,9 +8,12 @@ class FolderDM {
     @required this.id,
     @required this.ownerId,
     @required this.name,
-    @required this.parent,
     @required this.order,
-  });
+    this.parent,
+  })  : assert(id != null),
+        assert(ownerId != null),
+        assert(order != null),
+        assert(name != null);
   final int id;
   final int ownerId;
   final int parent;
