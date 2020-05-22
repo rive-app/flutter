@@ -21,7 +21,7 @@ class Backboard extends BackboardBase {
       return;
     }
     _activeArtboard = value;
-    activeArtboardId = value.id;
+    activeArtboardId = value?.id;
     // -> editor-only
     activeArtboardChanged.notify();
     // <- editor-only
