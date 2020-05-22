@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -15,18 +16,21 @@ class Playhead extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var editingAnimation = EditingAnimationProvider.of(context);
-    return ValueStreamBuilder<TimelineViewport>(
-      stream: editingAnimation.viewport,
-      builder: (context, viewportSnapshot) => ValueStreamBuilder<double>(
-        stream: editingAnimation.currentTime,
-        builder: (context, timeSnapshot) {
-          return _PlayheadRenderer(
-            theme: theme,
-            viewport: viewportSnapshot.data,
-            time: timeSnapshot.data,
-          );
-        },
+    return ValueListenableBuilder(
+      valueListenable: ActiveFile.of(context).editingAnimationManager,
+      builder: (context, EditingAnimationManager editingAnimation, _) =>
+          ValueStreamBuilder<TimelineViewport>(
+        stream: editingAnimation.viewport,
+        builder: (context, viewportSnapshot) => ValueStreamBuilder<double>(
+          stream: editingAnimation.currentTime,
+          builder: (context, timeSnapshot) {
+            return _PlayheadRenderer(
+              theme: theme,
+              viewport: viewportSnapshot.data,
+              time: timeSnapshot.data,
+            );
+          },
+        ),
       ),
     );
   }

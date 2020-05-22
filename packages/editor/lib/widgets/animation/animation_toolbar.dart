@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/animation_time_popup_button.dart';
 import 'package:rive_editor/widgets/animation/loop_popup_button.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
@@ -25,7 +26,8 @@ class AnimationToolbar extends StatelessWidget {
             icon: 'to-start',
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
             onPress: () {
-              var animationManager = EditingAnimationProvider.find(context);
+              var animationManager =
+                  ActiveFile.find(context).editingAnimationManager.value;
               animationManager.changeCurrentTime.add(0);
             },
           ),
@@ -42,23 +44,27 @@ class AnimationToolbar extends StatelessWidget {
 class _PlaybackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var animationManager = EditingAnimationProvider.of(context);
-    if (animationManager == null) {
-      return const SizedBox();
-    }
+    return ValueListenableBuilder(
+      valueListenable: ActiveFile.of(context).editingAnimationManager,
+      builder: (context, EditingAnimationManager animationManager, _) {
+        if (animationManager == null) {
+          return const SizedBox();
+        }
 
-    return ValueStreamBuilder<bool>(
-      stream: animationManager.isPlaying,
-      builder: (context, snapshot) => TintedIconButton(
-        backgroundHover:
-            RiveTheme.of(context).colors.timelineButtonBackGroundHover,
-        icon: snapshot.hasData && snapshot.data ? 'pause' : 'play',
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        onPress: () {
-          animationManager.changePlayback
-              .add(snapshot.hasData && !snapshot.data);
-        },
-      ),
+        return ValueStreamBuilder<bool>(
+          stream: animationManager.isPlaying,
+          builder: (context, snapshot) => TintedIconButton(
+            backgroundHover:
+                RiveTheme.of(context).colors.timelineButtonBackGroundHover,
+            icon: snapshot.hasData && snapshot.data ? 'pause' : 'play',
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            onPress: () {
+              animationManager.changePlayback
+                  .add(snapshot.hasData && !snapshot.data);
+            },
+          ),
+        );
+      },
     );
   }
 }

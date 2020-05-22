@@ -72,7 +72,7 @@ class Property {
     }
     if (animates) {
       code.writeln('${type.dartName} _${name}Animated;');
-      code.writeln('KeyState _${name}KeyState;');
+      code.writeln('KeyState _${name}KeyState = KeyState.none;');
     }
     code.writeln('static const int $propertyKey = ${key.intValue};');
 

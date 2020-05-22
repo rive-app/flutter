@@ -31,7 +31,6 @@ import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/version.dart';
 import 'package:rive_editor/widgets/animation/animation_panel.dart';
 import 'package:rive_editor/widgets/catastrophe.dart';
-import 'package:rive_editor/widgets/common/active_artboard.dart';
 import 'package:rive_editor/widgets/disconnected_screen.dart';
 import 'package:rive_editor/widgets/home/home.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -206,15 +205,7 @@ class InsertInheritedWidgets extends StatelessWidget {
                     builder: (context, file, child) =>
                         // Propagate down the active file so other widgets can
                         // determine it without looking for the rive context.
-                        ActiveFile(
-                      file: file,
-                      child: ActiveArtboard(
-                        file: file,
-                        child: AnimationInheritedWidgets(
-                          child: child,
-                        ),
-                      ),
-                    ),
+                        ActiveFile(file: file, child: child),
                     // Passing the child in separate from the value listenable
                     // builder as anything interested in the ActiveFile will
                     // .of() from the context anyway to trigger a rebuild.
@@ -226,24 +217,6 @@ class InsertInheritedWidgets extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class AnimationInheritedWidgets extends StatelessWidget {
-  final Widget child;
-
-  const AnimationInheritedWidgets({Key key, this.child}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var activeFile = ActiveFile.of(context);
-    if (activeFile == null) {
-      return child;
-    }
-    return AnimationsProvider(
-      activeArtboard: ActiveArtboard.of(context),
-      child: EditingAnimationProvider(child: child),
     );
   }
 }
@@ -317,7 +290,7 @@ class Editor extends StatelessWidget {
                               }
                             },
                             select: (EditorMode mode) {
-                              file.mode.value = mode;
+                              file.changeMode(mode);
                               // If animate mode is selected, automatically
                               // select the translate tool
                               if (mode == EditorMode.animate) {

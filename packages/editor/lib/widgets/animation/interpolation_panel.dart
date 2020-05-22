@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
@@ -15,28 +16,32 @@ import 'interpolation_preview.dart';
 class InterpolationPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var manager = KeyFrameManagerProvider.of(context);
-    if (manager == null) {
-      return _buildPanel(
-        context,
-        InterpolationViewModel(KeyFrameInterpolation.linear, null),
-        HashSet<KeyFrame>(),
-        null,
-      );
-    }
+    return ValueListenableBuilder(
+      valueListenable: ActiveFile.of(context).keyFrameManager,
+      builder: (context, KeyFrameManager manager, _) {
+        if (manager == null) {
+          return _buildPanel(
+            context,
+            const InterpolationViewModel(KeyFrameInterpolation.linear, null),
+            HashSet<KeyFrame>(),
+            null,
+          );
+        }
 
-    return ValueStreamBuilder<HashSet<KeyFrame>>(
-      stream: manager.selection,
-      builder: (context, selection) =>
-          ValueStreamBuilder<InterpolationViewModel>(
-        stream: manager.commonInterpolation,
-        builder: (context, interpolation) => _buildPanel(
-          context,
-          interpolation.data,
-          selection.data,
-          manager,
-        ),
-      ),
+        return ValueStreamBuilder<HashSet<KeyFrame>>(
+          stream: manager.selection,
+          builder: (context, selection) =>
+              ValueStreamBuilder<InterpolationViewModel>(
+            stream: manager.commonInterpolation,
+            builder: (context, interpolation) => _buildPanel(
+              context,
+              interpolation.data,
+              selection.data,
+              manager,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -64,7 +69,6 @@ class InterpolationPanel extends StatelessWidget {
                   options: KeyFrameInterpolation.values,
                   value: interpolation.type,
                   change: (KeyFrameInterpolation interpolation) {
-                    var manager = KeyFrameManagerProvider.find(context);
                     manager.changeInterpolation.add(interpolation);
                   },
                   toLabel: (KeyFrameInterpolation interpolation) =>
@@ -76,11 +80,15 @@ class InterpolationPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 13),
-          InterpolationPreview(
-            interpolation: interpolation,
-            selection: selection,
-            manager: manager,
-            timeManager: EditingAnimationProvider.of(context),
+          ValueListenableBuilder(
+            valueListenable: ActiveFile.of(context).editingAnimationManager,
+            builder: (context, EditingAnimationManager animationManager, _) =>
+                InterpolationPreview(
+              interpolation: interpolation,
+              selection: selection,
+              manager: manager,
+              timeManager: animationManager,
+            ),
           ),
         ],
       ),

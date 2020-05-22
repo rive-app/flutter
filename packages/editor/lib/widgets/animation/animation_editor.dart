@@ -17,15 +17,17 @@ import 'package:rive_editor/widgets/resize_panel.dart';
 /// contains the tree with animated properties and timeline with keys.
 class AnimationEditor extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    var animationManager = EditingAnimationProvider.of(context);
-    if (animationManager == null) {
-      return const SizedBox();
-    }
-    return _StatefulEditingAnimation(
-      animationManager: animationManager,
-    );
-  }
+  Widget build(BuildContext context) => ValueListenableBuilder(
+        valueListenable: ActiveFile.of(context).editingAnimationManager,
+        builder: (context, EditingAnimationManager animationManager, _) {
+          if (animationManager == null) {
+            return const SizedBox();
+          }
+          return _StatefulEditingAnimation(
+            animationManager: animationManager,
+          );
+        },
+      );
 }
 
 class _StatefulEditingAnimation extends StatefulWidget {

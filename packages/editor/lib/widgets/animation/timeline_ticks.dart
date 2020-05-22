@@ -35,106 +35,113 @@ class TimelineTicks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var editingAnimation = EditingAnimationProvider.of(context);
-    if (editingAnimation == null) {
-      return _buildEmpty(context);
-    }
-
-    return ValueStreamBuilder<TimelineViewport>(
-      stream: editingAnimation.viewport,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+    return ValueListenableBuilder(
+      valueListenable: ActiveFile.of(context).editingAnimationManager,
+      builder: (context, EditingAnimationManager editingAnimation, _) {
+        if (editingAnimation == null) {
           return _buildEmpty(context);
         }
-        var viewport = snapshot.data;
-        return PropagatingListener(
-          onPointerDown: (event) {
-            RiveContext.find(context).startDragOperation();
-            _placePlayhead(context, event.pointerEvent.localPosition, viewport,
-                editingAnimation);
-          },
-          onPointerMove: (event) => _placePlayhead(context,
-              event.pointerEvent.localPosition, viewport, editingAnimation),
-          onPointerUp: (event) {
-            RiveContext.find(context).endDragOperation();
-          },
-          child: SizedBox(
-            height: height,
-            child: ValueStreamBuilder<WorkAreaViewModel>(
-              stream: editingAnimation.workArea,
-              builder: (context, snapshot) {
-                var theme = RiveTheme.of(context);
-                return snapshot.hasData
-                    ? CustomMultiChildLayout(
-                        delegate: _WorkAreaLayoutDelegate(
-                          workArea: snapshot.data,
-                          viewport: viewport,
-                          theme: theme,
-                        ),
-                        children: [
-                          LayoutId(
-                            id: _WorkAreaLayoutPart.ticksRenderer,
-                            child: _TimelineTicksRenderer(
-                              viewport,
-                              theme,
-                              snapshot.data,
+
+        return ValueStreamBuilder<TimelineViewport>(
+          stream: editingAnimation.viewport,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return _buildEmpty(context);
+            }
+            var viewport = snapshot.data;
+            return PropagatingListener(
+              onPointerDown: (event) {
+                RiveContext.find(context).startDragOperation();
+                _placePlayhead(context, event.pointerEvent.localPosition,
+                    viewport, editingAnimation);
+              },
+              onPointerMove: (event) => _placePlayhead(context,
+                  event.pointerEvent.localPosition, viewport, editingAnimation),
+              onPointerUp: (event) {
+                RiveContext.find(context).endDragOperation();
+              },
+              child: SizedBox(
+                height: height,
+                child: ValueStreamBuilder<WorkAreaViewModel>(
+                  stream: editingAnimation.workArea,
+                  builder: (context, snapshot) {
+                    var theme = RiveTheme.of(context);
+                    return snapshot.hasData
+                        ? CustomMultiChildLayout(
+                            delegate: _WorkAreaLayoutDelegate(
+                              workArea: snapshot.data,
+                              viewport: viewport,
+                              theme: theme,
                             ),
-                          ),
-                          if (snapshot.data.active)
-                            LayoutId(
-                              id: _WorkAreaLayoutPart.start,
-                              child: OverlayHitDetect(
-                                customCursorIcon: 'cursor-resize-horizontal',
-                                dragContext: context,
-                                drag: (absolute, _) => _dragWorkAreaMarker(
-                                  context,
-                                  absolute,
-                                  theme,
+                            children: [
+                              LayoutId(
+                                id: _WorkAreaLayoutPart.ticksRenderer,
+                                child: _TimelineTicksRenderer(
                                   viewport,
-                                  (frame) {
-                                    editingAnimation.changeWorkArea.add(
-                                      WorkAreaViewModel(
-                                        start: frame
-                                            .clamp(0, snapshot.data.end - 1)
-                                            .toInt(),
-                                        end: snapshot.data.end,
-                                        active: snapshot.data.active,
-                                      ),
-                                    );
-                                  },
+                                  theme,
+                                  snapshot.data,
                                 ),
                               ),
-                            ),
-                          if (snapshot.data.active)
-                            LayoutId(
-                              id: _WorkAreaLayoutPart.end,
-                              child: OverlayHitDetect(
-                                customCursorIcon: 'cursor-resize-horizontal',
-                                dragContext: context,
-                                drag: (absolute, _) => _dragWorkAreaMarker(
-                                    context, absolute, theme, viewport,
-                                    (frame) {
-                                  editingAnimation.changeWorkArea.add(
-                                    WorkAreaViewModel(
-                                      start: snapshot.data.start,
-                                      end: frame
-                                          .clamp(
-                                            snapshot.data.start + 1,
-                                            editingAnimation.animation.duration,
-                                          )
-                                          .toInt(),
-                                      active: snapshot.data.active,
+                              if (snapshot.data.active)
+                                LayoutId(
+                                  id: _WorkAreaLayoutPart.start,
+                                  child: OverlayHitDetect(
+                                    customCursorIcon:
+                                        'cursor-resize-horizontal',
+                                    dragContext: context,
+                                    drag: (absolute, _) => _dragWorkAreaMarker(
+                                      context,
+                                      absolute,
+                                      theme,
+                                      viewport,
+                                      (frame) {
+                                        editingAnimation.changeWorkArea.add(
+                                          WorkAreaViewModel(
+                                            start: frame
+                                                .clamp(0, snapshot.data.end - 1)
+                                                .toInt(),
+                                            end: snapshot.data.end,
+                                            active: snapshot.data.active,
+                                          ),
+                                        );
+                                      },
                                     ),
-                                  );
-                                }),
-                              ),
-                            ),
-                        ],
-                      )
-                    : _buildEmpty(context);
-              },
-            ),
-          ),
+                                  ),
+                                ),
+                              if (snapshot.data.active)
+                                LayoutId(
+                                  id: _WorkAreaLayoutPart.end,
+                                  child: OverlayHitDetect(
+                                    customCursorIcon:
+                                        'cursor-resize-horizontal',
+                                    dragContext: context,
+                                    drag: (absolute, _) => _dragWorkAreaMarker(
+                                        context, absolute, theme, viewport,
+                                        (frame) {
+                                      editingAnimation.changeWorkArea.add(
+                                        WorkAreaViewModel(
+                                          start: snapshot.data.start,
+                                          end: frame
+                                              .clamp(
+                                                snapshot.data.start + 1,
+                                                editingAnimation
+                                                    .animation.duration,
+                                              )
+                                              .toInt(),
+                                          active: snapshot.data.active,
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                            ],
+                          )
+                        : _buildEmpty(context);
+                  },
+                ),
+              ),
+            );
+          },
         );
       },
     );

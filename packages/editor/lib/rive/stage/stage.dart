@@ -533,7 +533,7 @@ class Stage extends Debouncer {
   void _updateComponents() {
     /// We call updateComponents here because on some platforms the mouseDrag
     /// event happens between our frame callback and render of the StageView.
-    if (activeArtboard.updateComponents()) {
+    if (activeArtboard != null && activeArtboard.updateComponents()) {
       // If this resulted in an update, we should make sure to update at least
       // one more time for platforms that didn't interleave the drag between
       // advance & render.
@@ -566,7 +566,7 @@ class Stage extends Debouncer {
   bool _completeDrag() {
     bool toolCompleted = _clickTool?.endClick() ?? false;
     _clickTool = null;
-    
+
     if (_dragTool != null) {
       // See if either a drag or transform operation was in progress.
       if (_dragTool is TransformingTool) {
@@ -623,17 +623,7 @@ class Stage extends Debouncer {
     _updatePanIcon();
   }
 
-  // Artboard get activeArtboard => file.core?.backboard?.activeArtboard;
-  Artboard get activeArtboard {
-    if (file.core == null) {
-      print("CORE NULL");
-    } else if (file.core.backboard == null) {
-      print("BB NULL");
-    } else if (file.core.backboard.activeArtboard == null) {
-      print("AA NULL");
-    }
-    return file.core?.backboard?.activeArtboard;
-  }
+  Artboard get activeArtboard => file.core?.backboard?.activeArtboard;
 
   final AABBTree<StageItem> visTree = AABBTree<StageItem>(padding: 0);
 

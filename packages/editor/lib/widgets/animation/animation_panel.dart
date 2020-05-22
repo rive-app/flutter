@@ -31,20 +31,21 @@ class _AnimationPanelState extends State<AnimationPanel>
           factor: mode == EditorMode.animate ? 1 : 0,
           builder: (context, factor, child) => FractionalIntrinsicHeight(
             heightFactor: factor,
-            child: ResizePanel(
-              hitSize: 10,
-              direction: ResizeDirection.vertical,
-              side: ResizeSide.start,
-              min: 300,
-              max: 600,
-              child: _PanelShadow(
-                show: factor > 0,
-                // Don't add the animation panel contents (or the animations
-                // managers) to the layout if we're not showing the panel at
-                // all, save some cycles.
-                child: factor != 0 ? child : const SizedBox(),
-              ),
-            ),
+            // Don't add the animation panel contents (or the animations
+            // managers) to the layout if we're not showing the panel at all,
+            // save some cycles.
+            child: factor != 0
+                ? ResizePanel(
+                    hitSize: 10,
+                    direction: ResizeDirection.vertical,
+                    side: ResizeSide.start,
+                    min: 300,
+                    max: 600,
+                    child: _PanelShadow(
+                      child: child,
+                    ),
+                  )
+                : const SizedBox(),
           ),
         );
       },
@@ -58,12 +59,10 @@ class _AnimationPanelState extends State<AnimationPanel>
 /// visually available (if the animation panel floated above them, they'd be
 /// scrolling behind the animation panel).
 class _PanelShadow extends StatelessWidget {
-  final bool show;
   final Widget child;
 
   const _PanelShadow({
     Key key,
-    this.show,
     this.child,
   }) : super(key: key);
 
@@ -72,16 +71,15 @@ class _PanelShadow extends StatelessWidget {
     return Stack(
       overflow: Overflow.visible,
       children: [
-        if (show)
-          Positioned(
-            top: -10,
-            height: 10,
-            left: 0,
-            right: 0,
-            child: CustomPaint(
-              painter: _PanelShadowPainter(),
-            ),
+        Positioned(
+          top: -10,
+          height: 10,
+          left: 0,
+          right: 0,
+          child: CustomPaint(
+            painter: _PanelShadowPainter(),
           ),
+        ),
         Positioned.fill(
           child: child,
         ),

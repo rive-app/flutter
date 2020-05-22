@@ -24,7 +24,7 @@ abstract class StrokeBase extends ShapePaint {
   /// Thickness field with key 47.
   double _thickness = 1;
   double _thicknessAnimated;
-  KeyState _thicknessKeyState;
+  KeyState _thicknessKeyState = KeyState.none;
   static const int thicknessPropertyKey = 47;
 
   /// Get the [_thickness] field value.Note this may not match the core value if

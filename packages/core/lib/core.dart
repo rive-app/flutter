@@ -175,7 +175,9 @@ abstract class CoreContext implements LocalSettings {
   // Track which entries were changing during animation and need to be reset
   // prior to the next animation pass.
   HashMap<Id, Set<int>> _animationChanges;
-  bool get isAnimating => _animationChanges != null;
+  bool get isAnimating => !suppressAutoKey && _animationChanges != null;
+
+  bool suppressAutoKey = false;
 
   /// Start tracking changes as keyframe values instead of core property values.
   /// Returns true if animation was actived, false if it was already activated,

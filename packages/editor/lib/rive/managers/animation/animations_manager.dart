@@ -47,6 +47,7 @@ class AnimationsManager {
   AnimationsManager({
     @required this.activeArtboard,
   }) {
+    activeArtboard.context.startAnimating();
     activeArtboard.animationsChanged.addListener(_updateAnimations);
     // Initialize the list of animations.
     _updateAnimations();
@@ -273,6 +274,7 @@ class AnimationsManager {
 
   /// Cleanup the manager.
   void dispose() {
+    activeArtboard.context.stopAnimating();
     activeArtboard.animationsChanged.removeListener(_updateAnimations);
     // Make sure to close all streams and cancel any debounced methods.
     _renameController.close();
