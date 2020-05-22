@@ -57,7 +57,7 @@ void main() {
       // Get all my folders.
       when(_mockedFolderApi.myFolders(any)).thenAnswer((_) async {
         final data = json.decode(myFoldersResponse) as Map<String, Object>;
-        return FolderDM.fromDataList(data['folders'], ownerId: 40836);
+        return FolderDM.fromDataList(data['folders'], 40836);
       });
     });
 

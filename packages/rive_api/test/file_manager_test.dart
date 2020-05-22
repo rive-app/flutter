@@ -24,6 +24,7 @@ void main() {
   group('File Manager ', () {
     MockFileApi mockedFileApi;
     MockFolderApi mockedFolderApi;
+    // ignore: unused_local_variable
     FileManager fileManager;
     MeDM meDm;
     Me me;

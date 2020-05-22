@@ -17,14 +17,13 @@ class FolderDM {
   final int order;
   final String name;
 
-  static List<FolderDM> fromDataList(List<dynamic> data, {int ownerId}) {
+  static List<FolderDM> fromDataList(List<dynamic> data, int ownerId) {
     return data
-        .map((d) => FolderDM.fromData(d, ownerId: ownerId))
+        .map((d) => FolderDM.fromData(d, ownerId))
         .toList(growable: false);
   }
 
-  factory FolderDM.fromData(Map<String, dynamic> data, {int ownerId}) =>
-      FolderDM(
+  factory FolderDM.fromData(Map<String, dynamic> data, int ownerId) => FolderDM(
         id: data.getInt('id'),
         ownerId: data.containsKey('project_owner_id')
             ? data.getInt('project_owner_id')

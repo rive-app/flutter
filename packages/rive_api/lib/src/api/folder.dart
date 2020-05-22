@@ -37,33 +37,23 @@ class FolderApi {
         _log.severe('Incorrectly formatted folders json response: $res.body');
         throw FormatException('Incorrectly formatted folders json response');
       }
-      return FolderDM.fromDataList(data['folders'], ownerId: ownerId);
+      return FolderDM.fromDataList(data['folders'], ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting folder api response: $e');
       rethrow;
     }
   }
 
-  Future<FolderDM> createFolder(int folderId, [int teamId]) async {
-    FolderDM newFolder;
-    if (teamId != null) {
-      newFolder = await _createTeamFolder(folderId, teamId);
-    } else {
-      newFolder = await _createFolder(folderId);
-    }
-    return newFolder;
-  }
-
-  Future<FolderDM> _createFolder(int folderId) async {
+  Future<FolderDM> createPersonalFolder(int folderId, int ownerId) async {
     String payload =
         json.encode({'name': 'New Folder', 'order': 0, 'parent': folderId});
 
     var response =
         await api.post(api.host + '/api/my/files/folder', body: payload);
-    return _parseFolderResponse(response);
+    return _parseFolderResponse(response, ownerId);
   }
 
-  Future<FolderDM> _createTeamFolder(
+  Future<FolderDM> createTeamFolder(
     int folderId,
     int teamId,
   ) async {
@@ -73,13 +63,13 @@ class FolderApi {
     var response = await api.post(
         api.host + '/api/teams/${teamId}/folders/${folderId}',
         body: payload);
-    return _parseFolderResponse(response);
+    return _parseFolderResponse(response, teamId);
   }
 
-  FolderDM _parseFolderResponse(Response response) {
+  FolderDM _parseFolderResponse(Response response, int ownerId) {
     if (response.statusCode == 200) {
       var folderResponse = json.decode(response.body);
-      return FolderDM.fromData(folderResponse);
+      return FolderDM.fromData(folderResponse, ownerId);
     }
     return null;
   }

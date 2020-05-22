@@ -160,14 +160,16 @@ void main() {
       final riveApi = MockRiveApi();
       when(riveApi.post('/api/my/files/folder',
               body: '{"name":"New Folder","order":0,"parent":1}'))
-          .thenAnswer((_) async => successFolderCreationResponse);
+          .thenAnswer((_) async {
+        return successFolderCreationResponse;
+      });
       final mockApi = FolderApi(riveApi);
-      final newFolder = await mockApi.createFolder(1);
+      final newFolder = await mockApi.createPersonalFolder(1, 1);
       expect(newFolder.name, 'New Folder');
       expect(newFolder.id, 10);
       expect(newFolder.parent, 1);
       expect(newFolder.order, 0);
-      expect(newFolder.ownerId, null);
+      expect(newFolder.ownerId, 1);
     });
 
     test('get create team folder', () async {
@@ -179,7 +181,7 @@ void main() {
           .thenAnswer((_) async => successTeamFolderCreationResponse);
       final mockApi = FolderApi(riveApi);
 
-      final newFolder = await mockApi.createFolder(folderId, team.ownerId);
+      final newFolder = await mockApi.createTeamFolder(folderId, team.ownerId);
       expect(newFolder.name, 'New Folder');
       expect(newFolder.id, 10);
       expect(newFolder.parent, 1);
