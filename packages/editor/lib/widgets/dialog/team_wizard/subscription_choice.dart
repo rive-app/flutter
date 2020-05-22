@@ -25,6 +25,9 @@ class SubscriptionChoice extends StatefulWidget {
   // This flag enables the first mode.
   final bool showRadio;
 
+  /// Is this choice disabled?
+  final bool disabled;
+
   const SubscriptionChoice({
     this.label,
     this.costLabel,
@@ -33,6 +36,7 @@ class SubscriptionChoice extends StatefulWidget {
     this.isSelected = false,
     this.highlight = 0,
     this.showRadio = true,
+    this.disabled = false,
     Key key,
   }) : super(key: key);
 
@@ -52,13 +56,21 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
     super.dispose();
   }
 
+  Widget _insertGestureDetector({VoidCallback onTap, Widget child}) =>
+      widget.disabled
+          ? child
+          : GestureDetector(
+              onTap: widget.onTap,
+              child: child,
+            );
+
   Widget _label(double animationValue) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final textStyles = theme.textStyles;
     if (widget.showRadio) {
       return Row(children: [
-        GestureDetector(
+        _insertGestureDetector(
           onTap: widget.onTap,
           child: RiveRadio<bool>(
               groupValue: true,
@@ -88,7 +100,7 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
     final gradients = theme.gradients;
     final animationValue = widget.highlight;
 
-    return GestureDetector(
+    return _insertGestureDetector(
       onTap: widget.showRadio ? null : widget.onTap,
       child: Padding(
         padding: EdgeInsets.only(
@@ -149,7 +161,7 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
                     ),
                     child: FlatIconButton(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      label: 'Choose',
+                      label: widget.disabled ? 'Coming Soon' : 'Choose',
                       color: Color.lerp(colors.buttonLight,
                           colors.textButtonDark, animationValue),
                       textColor: Color.lerp(colors.commonButtonTextColorDark,

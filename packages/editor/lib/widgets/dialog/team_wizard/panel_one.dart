@@ -126,8 +126,8 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                   ),
                   const SizedBox(width: 24),
                   MouseRegion(
-                    onEnter: (_) => _premiumController.forward(),
-                    onExit: (_) => _premiumController.reverse(),
+                    // onEnter: (_) => _premiumController.forward(),
+                    // onExit: (_) => _premiumController.reverse(),
                     child: AnimatedBuilder(
                       animation: _premiumController,
                       builder: (_, __) {
@@ -136,6 +136,7 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                         final labelLookup = costLookup[sub?.billing];
                         return SubscriptionChoice(
                           label: 'Org',
+                          disabled: true,
                           costLabel: sub == null
                               ? ''
                               : '${labelLookup[TeamsOption.premium]}',
