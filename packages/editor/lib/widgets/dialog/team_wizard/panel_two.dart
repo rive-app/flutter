@@ -67,7 +67,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
   Widget _optionsComboBox(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
-    final teamOptions = [TeamsOption.basic, TeamsOption.premium];
+    final teamOptions = [TeamsOption.basic];
 
     return ComboBox<TeamsOption>(
       popupWidth: 100,
@@ -77,7 +77,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
       valueColor: textStyles.fileGreyTextLarge.color,
       options: teamOptions,
       value: sub.option,
-      toLabel: (option) => describeEnum(option).capsFirst,
+      toLabel: (option) => option.name.capsFirst,
       contentPadding: const EdgeInsets.only(bottom: 3),
       change: (option) => sub.option = option,
     );

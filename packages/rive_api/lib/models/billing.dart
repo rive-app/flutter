@@ -7,12 +7,11 @@ enum TeamsOption { basic, premium }
 extension PlanExtension on TeamsOption {
   String get name {
     switch (this) {
-      case TeamsOption.basic:
-        return 'normal';
       case TeamsOption.premium:
-        return 'premium';
+        return 'org';
+      case TeamsOption.basic:
       default:
-        return 'normal';
+        return 'team';
     }
   }
 }

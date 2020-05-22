@@ -39,6 +39,7 @@ class _PlanState extends State<PlanSettings>
     // Fetch current team billing data from the backend.
     PlanSubscriptionPackage.fetchData(widget.api, widget.team)
         .then((value) => setState(() {
+              print('Sub package is: ${value.option}');
               _sub = value;
               // Toggle upon receiving the new value.
               _toggleController();
@@ -134,12 +135,13 @@ class _PlanState extends State<PlanSettings>
                                       'your team can share files.',
                                   onTap: () => _sub.option = TeamsOption.basic,
                                   isSelected: isBasic,
-                                  highlight: animationValue,
+                                  highlight: 1, // animationValue,
                                   showRadio: true,
                                 ),
                                 const SizedBox(width: 30),
                                 SubscriptionChoice(
                                   label: 'Org',
+                                  disabled: true,
                                   costLabel: (_sub == null)
                                       ? ''
                                       : '${labelLookup[TeamsOption.premium]}',
