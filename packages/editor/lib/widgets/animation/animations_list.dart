@@ -24,7 +24,7 @@ class AnimationsList extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    var animationManager = AnimationsProvider.of(context);
+    var animationManager = ActiveFile.of(context).animationsManager.value;
     return animationManager == null
         ? const SizedBox()
         : _AnimationsListTree(

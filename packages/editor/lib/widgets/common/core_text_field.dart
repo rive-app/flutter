@@ -79,10 +79,12 @@ class CoreTextField<T> extends StatelessWidget {
   void _setKeys(BuildContext context) {
     // set key
     var components = objects.cast<Component>();
+    var editingAnimation =
+        ActiveFile.find(context).editingAnimationManager.value;
     assert(components != null);
-    assert(EditingAnimationProvider.find(context) != null);
+    assert(editingAnimation != null);
 
-    EditingAnimationProvider.find(context).keyComponents.add(
+    editingAnimation.keyComponents.add(
         KeyComponentsEvent(components: components, propertyKey: propertyKey));
   }
 

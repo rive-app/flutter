@@ -51,12 +51,12 @@ class _ValueStreamDebounceBuilderState<T>
   Timer _debouncer;
   T value;
   BehaviorSubject<T> _controller;
-
+  StreamSubscription<T> _subscription;
   @override
   void initState() {
     super.initState();
     _controller = BehaviorSubject<T>();
-    widget.stream.listen((v) {
+    _subscription = widget.stream.listen((v) {
       value = v;
       _debouncer ??= Timer(widget.duration, () {
         _controller.add(value);
@@ -68,6 +68,7 @@ class _ValueStreamDebounceBuilderState<T>
   @override
   void dispose() {
     super.dispose();
+    _subscription?.cancel();
     _debouncer?.cancel();
     _controller.close();
   }

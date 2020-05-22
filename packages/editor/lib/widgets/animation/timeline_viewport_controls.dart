@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/overlay_hit_detect.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
@@ -27,73 +28,77 @@ class TimelineViewportControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var editingAnimation = EditingAnimationProvider.of(context);
-    if (editingAnimation == null) {
-      return _buildEmpty(context);
-    }
-    return ValueStreamBuilder<TimelineViewport>(
-      stream: editingAnimation.viewport,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+    return ValueListenableBuilder(
+      valueListenable: ActiveFile.of(context).editingAnimationManager,
+      builder: (context, EditingAnimationManager editingAnimation, _) {
+        if (editingAnimation == null) {
           return _buildEmpty(context);
         }
-        var viewport = snapshot.data;
-        return SizedBox(
-          height: height,
-          child: CustomMultiChildLayout(
-            delegate: _ViewportControlsLayoutDelegate(viewport),
-            children: [
-              LayoutId(
-                id: _ViewportControlPart.renderer,
-                child: _TimelineViewportControlsRenderer(
-                  viewport,
-                  RiveTheme.of(context).colors,
-                ),
-              ),
-              LayoutId(
-                id: _ViewportControlPart.track,
-                child: DragListener<TimelineViewport>(
-                  startValue: viewport,
-                  dragContext: context,
-                  child: const SizedBox(),
-                  onDrag: (startViewport, startOffset, toOffset, size) {
-                    editingAnimation.changeViewport.add(startViewport.move(
-                        (toOffset.dx - startOffset.dx) /
-                            size.width *
-                            startViewport.totalSeconds));
-                  },
-                ),
-              ),
-              LayoutId(
-                id: _ViewportControlPart.left,
-                child: OverlayHitDetect(
-                  customCursorIcon: 'cursor-resize-horizontal',
-                  dragContext: context,
-                  child: const SizedBox(
-                    width: grabberHitSize,
-                    height: grabberHitSize,
+        return ValueStreamBuilder<TimelineViewport>(
+          stream: editingAnimation.viewport,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return _buildEmpty(context);
+            }
+            var viewport = snapshot.data;
+            return SizedBox(
+              height: height,
+              child: CustomMultiChildLayout(
+                delegate: _ViewportControlsLayoutDelegate(viewport),
+                children: [
+                  LayoutId(
+                    id: _ViewportControlPart.renderer,
+                    child: _TimelineViewportControlsRenderer(
+                      viewport,
+                      RiveTheme.of(context).colors,
+                    ),
                   ),
-                  drag: (_, normalized) {
-                    editingAnimation.changeViewport.add(viewport
-                        .moveStart(normalized.dx * viewport.totalSeconds));
-                  },
-                ),
+                  LayoutId(
+                    id: _ViewportControlPart.track,
+                    child: DragListener<TimelineViewport>(
+                      startValue: viewport,
+                      dragContext: context,
+                      child: const SizedBox(),
+                      onDrag: (startViewport, startOffset, toOffset, size) {
+                        editingAnimation.changeViewport.add(startViewport.move(
+                            (toOffset.dx - startOffset.dx) /
+                                size.width *
+                                startViewport.totalSeconds));
+                      },
+                    ),
+                  ),
+                  LayoutId(
+                    id: _ViewportControlPart.left,
+                    child: OverlayHitDetect(
+                      customCursorIcon: 'cursor-resize-horizontal',
+                      dragContext: context,
+                      child: const SizedBox(
+                        width: grabberHitSize,
+                        height: grabberHitSize,
+                      ),
+                      drag: (_, normalized) {
+                        editingAnimation.changeViewport.add(viewport
+                            .moveStart(normalized.dx * viewport.totalSeconds));
+                      },
+                    ),
+                  ),
+                  LayoutId(
+                    id: _ViewportControlPart.right,
+                    child: OverlayHitDetect(
+                      customCursorIcon: 'cursor-resize-horizontal',
+                      dragContext: context,
+                      child: const SizedBox(
+                          width: grabberHitSize, height: grabberHitSize),
+                      drag: (_, normalized) {
+                        editingAnimation.changeViewport.add(viewport
+                            .moveEnd(normalized.dx * viewport.totalSeconds));
+                      },
+                    ),
+                  )
+                ],
               ),
-              LayoutId(
-                id: _ViewportControlPart.right,
-                child: OverlayHitDetect(
-                  customCursorIcon: 'cursor-resize-horizontal',
-                  dragContext: context,
-                  child: const SizedBox(
-                      width: grabberHitSize, height: grabberHitSize),
-                  drag: (_, normalized) {
-                    editingAnimation.changeViewport.add(viewport
-                        .moveEnd(normalized.dx * viewport.totalSeconds));
-                  },
-                ),
-              )
-            ],
-          ),
+            );
+          },
         );
       },
     );

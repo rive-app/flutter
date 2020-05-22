@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/coop/connect_result.dart';
 import 'package:core/coop/coop_client.dart';
 import 'package:core/core.dart';
@@ -7,6 +9,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/files.dart';
+import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/backboard.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
@@ -17,6 +21,9 @@ import 'package:rive_editor/rive/alerts/action_alert.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/editor_alert.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
+import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -126,9 +133,19 @@ class OpenFileContext with RiveFileDelegate {
   final SelectionContext<SelectableItem> selection =
       SelectionContext<SelectableItem>();
 
-  /// Whether this file is currently in animate mode.
-  final ValueNotifier<EditorMode> mode =
+  final ValueNotifier<EditorMode> _mode =
       ValueNotifier<EditorMode>(EditorMode.design);
+
+  /// Whether this file is currently in animate mode.
+  ValueListenable<EditorMode> get mode => _mode;
+
+  void changeMode(EditorMode mode) {
+    if (_mode.value == mode) {
+      return;
+    }
+    _mode.value = mode;
+    _syncActiveArtboard();
+  }
 
   final List<ActionHandler> _actionHandlers = [];
   final List<ActionHandler> _releaseActionHandlers = [];
@@ -169,7 +186,22 @@ class OpenFileContext with RiveFileDelegate {
   void startDragOperation() => rive.startDragOperation();
   void endDragOperation() => rive.endDragOperation();
 
-  VertexEditor vertexEditor;
+  VertexEditor _vertexEditor;
+  VertexEditor get vertexEditor => _vertexEditor;
+
+  final ValueNotifier<AnimationsManager> _animationsManager =
+      ValueNotifier<AnimationsManager>(null);
+  ValueListenable<AnimationsManager> get animationsManager =>
+      _animationsManager;
+
+  final ValueNotifier<KeyFrameManager> _keyFrameManager =
+      ValueNotifier<KeyFrameManager>(null);
+  ValueListenable<KeyFrameManager> get keyFrameManager => _keyFrameManager;
+
+  final ValueNotifier<EditingAnimationManager> _editingAnimationManager =
+      ValueNotifier<EditingAnimationManager>(null);
+  ValueListenable<EditingAnimationManager> get editingAnimationManager =>
+      _editingAnimationManager;
 
   OpenFileContext(
     this.ownerId,
@@ -319,8 +351,15 @@ class OpenFileContext with RiveFileDelegate {
 
   void _disposeManagers() {
     vertexEditor?.dispose();
+    _selectedAnimationSubscription?.cancel();
+    _selectedAnimationSubscription = null;
+    _syncEditingAnimation(null);
+    _animationsManager.value?.dispose();
+    _animationsManager.value = null;
     treeController.value?.dispose();
     drawOrderTreeController.value?.dispose();
+    _backboard?.activeArtboardChanged?.removeListener(_syncActiveArtboard);
+    _backboard = null;
   }
 
   List<InspectorBuilder> inspectorBuilders() {
@@ -334,7 +373,24 @@ class OpenFileContext with RiveFileDelegate {
     drawOrderTreeController.value = DrawOrderTreeController(
       file: this,
     );
-    vertexEditor = VertexEditor(this, stage);
+    _vertexEditor = VertexEditor(this, stage);
+
+    // This can happen during a _wipe call during initialization, this is
+    // considered ok as when the connection succeeds this method is called
+    // again.
+    if (core.backboard == null) {
+      return;
+    }
+
+    assert(_backboard == null,
+        'Previously held reference to _backboard should\'ve cleared');
+    assert(core.backboard != null,
+        'Core must have a backboard by the time we\'re connected');
+
+    (_backboard = core.backboard)
+        .activeArtboardChanged
+        .addListener(_syncActiveArtboard);
+    _syncActiveArtboard();
   }
 
   bool select(SelectableItem item, {bool append}) {
@@ -371,6 +427,8 @@ class OpenFileContext with RiveFileDelegate {
 
   bool undo() => core.undo();
   bool redo() => core.redo();
+
+  Backboard _backboard;
 
   @override
   void onConnectionStateChanged(CoopConnectionState state) {
@@ -504,5 +562,50 @@ class OpenFileContext with RiveFileDelegate {
   void changeFileName(String name) {
     _name.value = name;
     filesApi.changeFileName(ownerId, fileId, name);
+  }
+
+  StreamSubscription<AnimationViewModel> _selectedAnimationSubscription;
+
+  // The active artboard may have changed, sync up the animation managers, or
+  // anything that depends on active artboard.
+  void _syncActiveArtboard() {
+    // The artboard being animated is determined by whether the mode is animate
+    // mode and the backboard has an active artboard.
+    var animatingArtboard =
+        mode.value == EditorMode.design || _backboard.activeArtboard == null
+            ? null
+            : _backboard.activeArtboard;
+    if (_animationsManager.value?.activeArtboard == animatingArtboard) {
+      return;
+    }
+    _selectedAnimationSubscription?.cancel();
+    _selectedAnimationSubscription = null;
+    _animationsManager.value?.dispose();
+    if (animatingArtboard == null) {
+      _animationsManager.value = null;
+      _syncEditingAnimation(null);
+      return;
+    }
+
+    var manager = _animationsManager.value =
+        AnimationsManager(activeArtboard: _backboard.activeArtboard);
+    _selectedAnimationSubscription =
+        manager.selectedAnimation.listen(_syncEditingAnimation);
+  }
+
+  void _syncEditingAnimation(AnimationViewModel model) {
+    LinearAnimation animation = model?.animation is LinearAnimation
+        ? model.animation as LinearAnimation
+        : null;
+    if (_editingAnimationManager.value?.animation == animation) {
+      return;
+    }
+    _editingAnimationManager.value?.dispose();
+    _keyFrameManager.value?.dispose();
+
+    _editingAnimationManager.value =
+        animation == null ? null : EditingAnimationManager(animation, this);
+    _keyFrameManager.value =
+        animation == null ? null : KeyFrameManager(animation, this);
   }
 }

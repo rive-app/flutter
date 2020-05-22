@@ -7,6 +7,7 @@ import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/widgets/animation/key_path_maker.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/animation/timeline_keys_manipulator.dart';
@@ -94,28 +95,31 @@ class _TimelineKeysState extends State<TimelineKeys> {
           return const SizedBox();
         }
         var viewport = snapshot.data;
-        var keyFrameManager = KeyFrameManagerProvider.of(context);
-        return TimelineKeysManipulator(
-          activeFile: ActiveFile.of(context),
-          viewport: viewport,
-          theme: widget.theme,
-          verticalScroll: widget.verticalScroll,
-          animationManager: widget.animationManager,
-          keyFrameManager: keyFrameManager,
-          rows: _rows,
-          builder: (context) => ValueStreamBuilder<WorkAreaViewModel>(
-            stream: widget.animationManager.workArea,
-            builder: (context, workArea) =>
-                ValueStreamBuilder<HashSet<KeyFrame>>(
-              stream: keyFrameManager.selection,
-              builder: (context, selection) => _TimelineKeysRenderer(
-                theme: widget.theme,
-                verticalScrollOffset: _scrollOffset,
-                rows: _rows,
-                viewport: viewport,
-                animation: widget.animationManager.animation,
-                selection: selection.data,
-                workArea: workArea.hasData ? workArea.data : null,
+        return ValueListenableBuilder(
+          valueListenable: ActiveFile.of(context).keyFrameManager,
+          builder: (context, KeyFrameManager keyFrameManager, _) =>
+              TimelineKeysManipulator(
+            activeFile: ActiveFile.of(context),
+            viewport: viewport,
+            theme: widget.theme,
+            verticalScroll: widget.verticalScroll,
+            animationManager: widget.animationManager,
+            keyFrameManager: keyFrameManager,
+            rows: _rows,
+            builder: (context) => ValueStreamBuilder<WorkAreaViewModel>(
+              stream: widget.animationManager.workArea,
+              builder: (context, workArea) =>
+                  ValueStreamBuilder<HashSet<KeyFrame>>(
+                stream: keyFrameManager.selection,
+                builder: (context, selection) => _TimelineKeysRenderer(
+                  theme: widget.theme,
+                  verticalScrollOffset: _scrollOffset,
+                  rows: _rows,
+                  viewport: viewport,
+                  animation: widget.animationManager.animation,
+                  selection: selection.data,
+                  workArea: workArea.hasData ? workArea.data : null,
+                ),
               ),
             ),
           ),
