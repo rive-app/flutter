@@ -1,9 +1,7 @@
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
-import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
-import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/src/generated/shapes/points_path_base.dart';
 
 export 'package:rive_core/src/generated/shapes/points_path_base.dart';

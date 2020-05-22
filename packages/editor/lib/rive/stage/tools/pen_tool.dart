@@ -7,7 +7,9 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+import 'package:meta/meta.dart';
 
+@immutable
 class PenToolInsertTarget {
   final Vec2D worldTranslation;
   final Vec2D translation;
@@ -17,15 +19,36 @@ class PenToolInsertTarget {
 
   /// When the insert target needs to split a cubic, this will be non-null.
   final CubicBezier cubic;
+  final double cubicSplitT;
 
-  PenToolInsertTarget({
+  const PenToolInsertTarget({
     this.path,
     this.translation,
     this.worldTranslation,
     this.from,
     this.to,
     this.cubic,
+    this.cubicSplitT,
   });
+
+  PenToolInsertTarget copyWith({
+    PointsPath path,
+    Vec2D translation,
+    Vec2D worldTranslation,
+    PathVertex from,
+    PathVertex to,
+    CubicBezier cubic,
+    double cubicSplitT,
+  }) =>
+      PenToolInsertTarget(
+        path: path ?? this.path,
+        translation: translation ?? this.translation,
+        worldTranslation: worldTranslation ?? this.worldTranslation,
+        from: from ?? this.from,
+        to: to ?? this.to,
+        cubic: cubic ?? this.cubic,
+        cubicSplitT: cubicSplitT ?? this.cubicSplitT,
+      );
 }
 
 abstract class PenTool<T extends Component> extends StageTool {

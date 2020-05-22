@@ -11,6 +11,7 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
+import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
@@ -19,6 +20,7 @@ import 'package:rive_editor/rive/stage/tools/transformers/translation/path_verte
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
 import 'package:vector_math/vector_math.dart';
+import 'package:rive_editor/math_extensions.dart';
 
 class VectorPenTool extends PenTool<Path> with TransformingTool {
   static final VectorPenTool instance = VectorPenTool();
@@ -76,12 +78,15 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   VertexEditor get vertexEditor => stage.file.vertexEditor;
 
+  StraightVertex _clickCreatedVertex;
+
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
+    _clickCreatedVertex = null;
     if (insertTarget != null) {
       if (!_split()) {
         stage.file.addAlert(
-          SimpleAlert('TODO: subdivide :)'),
+          SimpleAlert('Failed to subdivide.'),
         );
       }
       return;
@@ -101,7 +106,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
     var localTranslation =
         Vec2D.transformMat2D(Vec2D(), worldMouse, path.inverseWorldTransform);
-    var vertex = StraightVertex()
+    var vertex = _clickCreatedVertex = StraightVertex()
       ..x = localTranslation[0]
       ..y = localTranslation[1]
       ..radius = 0;
@@ -111,7 +116,12 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       file.add(vertex);
       path.appendChild(vertex);
     });
-    file.captureJournalEntry();
+  }
+
+  @override
+  bool endClick() {
+    // capture when click completes.
+    return true;
   }
 
   @override
@@ -196,6 +206,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         var vertex = vertices[i];
         var nextVertex = vertices[(i + 1) % vl];
         CubicBezier cubicBezier;
+        double cubicSplitT;
 
         Vec2D controlOut = vertex.coreType != CubicVertexBase.typeKey
             ? null
@@ -231,9 +242,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           // TODO: if a designer complains about the cubic being too coarse, we
           // may want to compute the screen length of the cubic and change the
           // iterations passed to nearestTValue.
-          double t =
+          cubicSplitT =
               cubicBezier.nearestTValue(Vector2(localMouse[0], localMouse[1]));
-          var point = cubicBezier.pointAt(t);
+          var point = cubicBezier.pointAt(cubicSplitT);
           intersection = Vec2D.fromValues(point.x, point.y);
         }
 
@@ -253,6 +264,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             from: vertex,
             to: nextVertex,
             cubic: cubicBezier,
+            cubicSplitT: cubicSplitT,
           );
         }
       }
@@ -266,26 +278,19 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   }
 
   bool _split() {
-    var path = insertTarget.path;
+    var target = insertTarget;
+    var path = target.path;
+    var vertices = path.vertices;
     var file = path.context;
 
-    if (insertTarget.cubic == null) {
-      var from = insertTarget.from.coreVertex;
-
-      // If our from point is the last point in the list, append to the end of
-      // the fractional indexed list, otherwise compute the inbetween fractional
-      // value of from and to.
-      var index = path.vertices.last == from
-          ? FractionalIndex.between(
-              from.childOrder, const FractionalIndex.max())
-          : FractionalIndex.between(
-              from.childOrder, insertTarget.to.coreVertex.childOrder);
+    if (target.cubic == null) {
+      var from = target.from.coreVertex;
 
       var vertex = StraightVertex()
-        ..x = insertTarget.translation[0]
-        ..y = insertTarget.translation[1]
+        ..x = target.translation[0]
+        ..y = target.translation[1]
         ..radius = 0
-        ..childOrder = index;
+        ..childOrder = _fractionalIndexAt(vertices, vertices.indexOf(from) + 1);
 
       file.batchAdd(() {
         file.add(vertex);
@@ -295,7 +300,8 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       return true;
     }
 
-    bool isNextCorner = insertTarget.to.isCornerRadius;
+    int insertionIndex;
+    bool isNextCorner = target.to.isCornerRadius;
     bool isPrevCorner = insertTarget.from.isCornerRadius;
     // Both points are corner radiuses?
     if (isNextCorner && isPrevCorner) {
@@ -304,13 +310,13 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       // Both share the same original core vertex? Then they're the same
       // corner...
       if (to.coreVertex == from.coreVertex) {
-        var vertexIndex = path.vertices.indexOf(to.coreVertex);
+        var vertexIndex = vertices.indexOf(to.coreVertex);
         FractionalIndex before = vertexIndex == 0
             ? const FractionalIndex.min()
-            : path.vertices[vertexIndex - 1].childOrder;
-        FractionalIndex after = vertexIndex + 1 >= path.vertices.length
+            : vertices[vertexIndex - 1].childOrder;
+        FractionalIndex after = vertexIndex + 1 >= vertices.length
             ? const FractionalIndex.max()
-            : path.vertices[vertexIndex + 1].childOrder;
+            : vertices[vertexIndex + 1].childOrder;
 
         file.batchAdd(() {
           // Remove old corner point...
@@ -341,11 +347,142 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           vertexA.parent = path;
           file.add(vertexB);
           vertexB.parent = path;
+
+          // Update our insert target to include the new vertices.
+          target = target.copyWith(
+            from: vertexA,
+            to: vertexB,
+          );
         });
+
+        // We replaced both of them with new core points so neither are
+        // corners anymore.
+        isNextCorner = isPrevCorner = false;
+      }
+      insertionIndex = vertices.indexOf(target.from.coreVertex) + 1;
+    } else if (isNextCorner) {
+      insertionIndex = vertices.indexOf(target.from.coreVertex) + 1;
+    } else if (isPrevCorner) {
+      insertionIndex = vertices.indexOf(target.to.coreVertex);
+    } else {
+      insertionIndex = vertices.indexOf(target.from.coreVertex) + 1;
+    }
+
+    var leftSplit = target.cubic.leftSubcurveAt(target.cubicSplitT);
+    var rightSplit = target.cubic.rightSubcurveAt(target.cubicSplitT);
+
+    // Patch up previous handles they belong to a cubic.
+    if (!isPrevCorner) {
+      var prev = target.from.coreVertex;
+      if (prev is CubicVertex) {
+        prev.controlType = VertexControlType.detached;
+        // TODO: accomodate for bones: https://github.com/2d-inc/2dimensions/blob/fc5a0128cb2419925f52e83e231192c645f58075/source/client/source/editors/flare/engine/Stage/Tools/VectorPenTool.jsx#L321
+        prev.outPoint = leftSplit.points[1].toVec2D();
       }
     }
+
+    // Patch up next handles if they belong to a cubic.
+    if (!isNextCorner) {
+      var pointIndex = vertices.indexOf(target.from.coreVertex);
+      var next = vertices[(pointIndex + 1) % vertices.length];
+      if (next is CubicVertex) {
+        next.controlType = VertexControlType.detached;
+        // TODO: fix bones: https://github.com/2d-inc/2dimensions/blob/fc5a0128cb2419925f52e83e231192c645f58075/source/client/source/editors/flare/engine/Stage/Tools/VectorPenTool.jsx#L338
+        next.inPoint = rightSplit.points[2].toVec2D();
+      }
+    }
+
+    file.batchAdd(() {
+      var vertex = CubicVertex()
+        ..controlType = VertexControlType.detached
+        ..x = leftSplit.points[3].x
+        ..y = leftSplit.points[3].y
+        ..inX = leftSplit.points[2].x
+        ..inY = leftSplit.points[2].y
+        ..outX = rightSplit.points[1].x
+        ..outY = rightSplit.points[1].y
+        ..childOrder = _fractionalIndexAt(vertices, insertionIndex);
+
+      file.add(vertex);
+      vertex.parent = path;
+    });
+
+    // remove duplicates...
+    bool replaced;
+    do {
+      replaced = false;
+      var length = vertices.length;
+      for (var i = 1, limit = path.isClosed ? length + 1 : length;
+          i < limit;
+          i++) {
+        var pointA = vertices[(i - 1) % length];
+        var pointB = vertices[i % length];
+
+        if (Vec2D.approximatelyEqual(pointA.translation, pointB.translation)) {
+          pointB.remove();
+          if (pointA is CubicVertex && pointB is CubicVertex) {
+            pointA.outPoint = pointB.outPoint;
+          }
+          replaced = true;
+          break;
+        }
+      }
+    } while (replaced);
+
+    // capture undo/redo
     file.captureJournalEntry();
 
-    return false;
+    return true;
   }
+
+  @override
+  void startTransformers(
+    Iterable<StageItem> selection,
+    Vec2D worldMouse,
+  ) {
+    if (_clickCreatedVertex != null) {
+      var vertex = _clickCreatedVertex;
+      var artboardMouse = mouseWorldSpace(vertex.artboard, worldMouse);
+      _clickCreatedVertex = null;
+      var path = vertex.path;
+      var localTranslation = Vec2D.transformMat2D(
+          Vec2D(), artboardMouse, path.inverseWorldTransform);
+      vertex.remove();
+
+      var cubicVertex = CubicVertex()
+        ..x = vertex.x
+        ..y = vertex.y
+        ..outPoint = localTranslation
+        ..childOrder = vertex.childOrder;
+
+      var file = path.context;
+      file.batchAdd(() {
+        file.add(cubicVertex);
+        path.appendChild(cubicVertex);
+      });
+
+      // Force a drag on the out with 0,0 delta to update the in.
+      var controlOut = (cubicVertex.stageItem as StagePathVertex).controlOut;
+      var transformer = PathVertexTranslateTransformer();
+      var details = DragTransformDetails(vertex.artboard, Vec2D());
+      transformer.init({controlOut}, details);
+      transformer.advance(details);
+      stage.file.select(controlOut);
+    }
+    super.startTransformers(selection, worldMouse);
+  }
+}
+
+FractionalIndex _fractionalIndexAt(List<PathVertex> vertices, int index) {
+  assert(index != -1);
+  if (index >= vertices.length) {
+    return FractionalIndex.between(
+        vertices.last.childOrder, const FractionalIndex.max());
+  } else if (index == 0) {
+    return FractionalIndex.between(
+        const FractionalIndex.min(), vertices.first.childOrder);
+  }
+
+  return FractionalIndex.between(
+      vertices[index - 1].childOrder, vertices[index].childOrder);
 }
