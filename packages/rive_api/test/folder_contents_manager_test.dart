@@ -24,6 +24,7 @@ void main() {
     MockFileApi _mockedFileApi;
     MockFolderApi _mockedFolderApi;
     FolderContentsManager _folderContentsManager;
+
     setUp(() {
       _plumber = Plumber();
 
@@ -39,24 +40,32 @@ void main() {
       // 'Your Files' folder.
       when(_mockedFileApi.myFiles(2, 1)).thenAnswer((_) async {
         final data = json.decode(myFilesResponse) as List<dynamic>;
-        print("Mock file api $data");
-        var res = FileDM.fromIdList(data, null);
-        print("Res $res");
+        // print("Mock file api $data");
+        var res = FileDM.fromIdList(data, 40836);
+        // print("Res $res");
         return res;
       });
 
-      // File details for the files returned above.
-      when(_mockedFileApi.getFileDetails([1, 2])).thenAnswer((_) async {
+      // Team file details for the files returned above.
+      when(_mockedFileApi.teamFileDetails(any, any)).thenAnswer((_) async {
         final data = json.decode(myFilesDetailsResponse);
         final cdn = CdnDM.fromData(data['cdn']);
-        print("Mock file api2 $data");
+        // print("Mock file api2 $data");
+        return FileDM.fromDataList(data['files'], cdn);
+      });
+
+      // My file details for the files returned above.
+      when(_mockedFileApi.myFileDetails(any)).thenAnswer((_) async {
+        final data = json.decode(myFilesDetailsResponse);
+        final cdn = CdnDM.fromData(data['cdn']);
+        // print("Mock file api2 $data");
         return FileDM.fromDataList(data['files'], cdn);
       });
 
       // Get all my folders.
-      when(_mockedFolderApi.myFolders()).thenAnswer((_) async {
+      when(_mockedFolderApi.myFolders(any)).thenAnswer((_) async {
         final data = json.decode(myFoldersResponse) as Map<String, Object>;
-        return FolderDM.fromDataList(data['folders']);
+        return FolderDM.fromDataList(data['folders'], 40836);
       });
     });
 

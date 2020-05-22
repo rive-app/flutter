@@ -104,9 +104,9 @@ class TopNav extends StatelessWidget {
           'New Folder',
           select: () async {
             if (owner is Team) {
-              await FileManager().createFolder(folderId, owner.ownerId);
+              await FileManager().createTeamFolder(folderId, owner.ownerId);
             } else {
-              await FileManager().createFolder(folderId);
+              await FileManager().createPersonalFolder(folderId, owner.ownerId);
             }
             // NOTE: bit funky, feels like it'd be nice
             // to control both managers through one message

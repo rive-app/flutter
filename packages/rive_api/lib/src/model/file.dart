@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
-import 'package:quiver/core.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:utilities/utilities.dart';
 
 class File {
   File({
@@ -38,7 +38,7 @@ class File {
   bool operator ==(o) => o is File && o.id == id && o.ownerId == ownerId;
 
   @override
-  int get hashCode => hash2(id, ownerId);
+  int get hashCode => szudzik(id, ownerId);
 
   @override
   String toString() => '< File: $name - Id: $id. Owner: $ownerId >';

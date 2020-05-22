@@ -57,7 +57,7 @@ class FolderContentsManager with Subscriptions {
     });
   }
 
-  void _loadFileDetails(List<File> files, CurrentDirectory directory) {
+  void _loadFileDetails(List<File> files, CurrentDirectory directory) async {
     final plumber = Plumber();
 
     final cache = (_cache[directory.hashId] ??= _FolderContentsCache());
@@ -74,22 +74,22 @@ class FolderContentsManager with Subscriptions {
     List<int> fileIds = files.map((file) => file.id).toList(growable: false);
 
     // Get the file details from the backend, and update the cache if needed.
-    _fileApi
-        .getFileDetails(fileIds, ownerId: teamOwnerId)
-        .then((List<FileDM> fileDetails) {
-      final fileDetailsList = File.fromDMList(fileDetails, teamOwnerId);
-      final currentDirectoryId = plumber.peek<CurrentDirectory>().folderId;
-      // Early out if we swapped folders in quick succession.
-      if (currentDirectoryId != directory.folderId) {
-        return;
+    final fileDetails = await (directory.owner is Team
+        ? _fileApi.teamFileDetails(fileIds, teamOwnerId)
+        : _fileApi.myFileDetails(fileIds));
+
+    final fileDetailsList = File.fromDMList(fileDetails, teamOwnerId);
+    final currentDirectoryId = plumber.peek<CurrentDirectory>().folderId;
+    // Early out if we swapped folders in quick succession.
+    if (currentDirectoryId != directory.folderId) {
+      return;
+    }
+    for (final file in fileDetailsList) {
+      if (cache.files.add(file)) {
+        // Only message if it changed.
+        plumber.message<File>(file, file.hashCode);
       }
-      for (final file in fileDetailsList) {
-        if (cache.files.add(file)) {
-          // Only message if it changed.
-          plumber.message<File>(file, file.hashCode);
-        }
-      }
-    });
+    }
   }
 
   _FolderContentsCache _initCache(
@@ -128,7 +128,7 @@ class FolderContentsManager with Subscriptions {
       folders = await _folderApi.teamFolders(ownerId);
     } else {
       files = await _fileApi.myFiles(ownerId, currentFolderId);
-      folders = await _folderApi.myFolders();
+      folders = await _folderApi.myFolders(ownerId);
     }
 
     // print("Files & Folders: ${directory}");

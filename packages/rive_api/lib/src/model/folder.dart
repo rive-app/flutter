@@ -1,7 +1,7 @@
 /// Tree of directories
 import 'package:meta/meta.dart';
-import 'package:quiver/core.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:utilities/utilities.dart';
 
 class Folder {
   Folder({
@@ -43,7 +43,7 @@ class Folder {
   bool operator ==(o) => o is Folder && o.id == id && o.ownerId == ownerId;
 
   @override
-  int get hashCode => hash2(id, ownerId);
+  int get hashCode => szudzik(id, ownerId);
 
   FolderDM get asDM => FolderDM(
         ownerId: ownerId,

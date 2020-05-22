@@ -30,20 +30,11 @@ class FileApi {
     }
   }
 
-  Future<List<FileDM>> getFileDetails(List<int> fileIds,
-      {int ownerId = null}) async {
-    if (ownerId == null) {
-      return _myFileDetails(fileIds);
-    } else {
-      return _teamFileDetails(ownerId, fileIds);
-    }
-  }
-
-  Future<List<FileDM>> _myFileDetails(List<int> fileIds) async =>
+  Future<List<FileDM>> myFileDetails(List<int> fileIds) async =>
       _fileDetails('/api/my/files', fileIds);
 
-  Future<List<FileDM>> _teamFileDetails(
-          int teamOwnerId, List<int> fileIds) async =>
+  Future<List<FileDM>> teamFileDetails(
+          List<int> fileIds, int teamOwnerId) async =>
       _fileDetails('/api/teams/${teamOwnerId}/files', fileIds);
 
   Future<List<FileDM>> _fileDetails(String url, List fileIds) async {

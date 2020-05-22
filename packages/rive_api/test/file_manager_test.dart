@@ -21,9 +21,10 @@ class MockFolderApi extends Mock implements FolderApi {
 }
 
 void main() {
-  group('File Manager ', () {
+  group('File Manager', () {
     MockFileApi mockedFileApi;
     MockFolderApi mockedFolderApi;
+    // ignore: unused_local_variable
     FileManager fileManager;
     MeDM meDm;
     Me me;
@@ -109,6 +110,7 @@ void main() {
       await altMeCompleter.future;
       await generalCompleter.future;
     });
+
     test('new teams', () async {
       final firstTeamCompleter =
           testStream(Plumber().getStream<List<Folder>>(teams[0].hashCode), [
