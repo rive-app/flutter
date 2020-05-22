@@ -11,7 +11,6 @@ WORKDIR /app/packages/editor
 ADD packages /app/packages
 RUN flutter pub get
 RUN flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
-WORKDIR /app/packages/editor/build/web 
-RUN zip -r build.zip . 
-ENTRYPOINT ["cp", "build.zip", "/output/build.zip"]
+WORKDIR /app/packages/editor/build 
+ENTRYPOINT ["mv", "web", "/output"]
 
