@@ -75,7 +75,7 @@ class CoopClient extends CoopReader {
     _writer = CoopWriter(write);
   }
 
-  Future<void> _reconnect() async {
+  void _reconnect() {
     _reconnectTimer?.cancel();
 
     _reconnectTimer =
@@ -84,6 +84,13 @@ class CoopClient extends CoopReader {
       _reconnectAttempt = 1;
     }
     _reconnectAttempt *= 2;
+  }
+
+  void dispose() {
+    disconnect();
+    _reconnectTimer?.cancel();
+
+    _reconnectTimer = null;
   }
 
   bool get isConnected => _connectionState == CoopConnectionState.connected;
@@ -104,7 +111,7 @@ class CoopClient extends CoopReader {
       await _channel.sink.close();
     }
     await _subscription?.cancel();
-    _disconnected();
+    await _disconnected();
     return true;
   }
 
@@ -145,8 +152,9 @@ class CoopClient extends CoopReader {
       _subscription =
           _channel.stream.listen(_onStreamData, onError: (dynamic error) {
         _disconnected();
-      }, onDone: () {
-        _disconnected();
+      }, onDone: () async {
+        await _disconnected();
+
         _connectionCompleter?.complete(ConnectResult.networkError);
         _connectionCompleter = null;
         if (_allowReconnect) {
@@ -161,7 +169,6 @@ class CoopClient extends CoopReader {
         print('Error was: $error, $stackTrace');
       }
     });
-
     return _connectionCompleter.future;
   }
 

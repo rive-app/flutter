@@ -320,6 +320,7 @@ abstract class CoreContext implements LocalSettings {
   Future<ConnectResult> connect(String host, String path,
       [String token]) async {
     int clientId = await getIntSetting('clientId');
+    _client?.dispose();
     _client = CoopClient(
       host,
       path,
