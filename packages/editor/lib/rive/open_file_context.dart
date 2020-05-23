@@ -351,13 +351,25 @@ class OpenFileContext with RiveFileDelegate {
 
   void _disposeManagers() {
     vertexEditor?.dispose();
+
     _selectedAnimationSubscription?.cancel();
     _selectedAnimationSubscription = null;
     _syncEditingAnimation(null);
     _animationsManager.value?.dispose();
     _animationsManager.value = null;
-    treeController.value?.dispose();
-    drawOrderTreeController.value?.dispose();
+
+    if (treeController.value != null) {
+      cancelDebounce(treeController.value.flatten);
+      var oldController = treeController.value;
+      treeController.value = null;
+      oldController.dispose();
+    }
+    if (drawOrderTreeController.value != null) {
+      cancelDebounce(drawOrderTreeController.value.flatten);
+      drawOrderTreeController.value.dispose();
+      drawOrderTreeController.value = null;
+    }
+
     _backboard?.activeArtboardChanged?.removeListener(_syncActiveArtboard);
     _backboard = null;
   }
@@ -368,7 +380,6 @@ class OpenFileContext with RiveFileDelegate {
 
   void _resetManagers() {
     _disposeManagers();
-
     treeController.value = HierarchyTreeController(this);
     drawOrderTreeController.value = DrawOrderTreeController(
       file: this,

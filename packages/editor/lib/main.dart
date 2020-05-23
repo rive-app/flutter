@@ -205,10 +205,11 @@ class InsertInheritedWidgets extends StatelessWidget {
                   // the ActiveFile.
                   child: ValueListenableBuilder<OpenFileContext>(
                     valueListenable: rive.file,
-                    builder: (context, file, child) =>
-                        // Propagate down the active file so other widgets can
-                        // determine it without looking for the rive context.
-                        ActiveFile(file: file, child: child),
+                    builder: (context, file, child) {
+                      // Propagate down the active file so other widgets can
+                      // determine it without looking for the rive context.
+                      return ActiveFile(file: file, child: child);
+                    },
                     // Passing the child in separate from the value listenable
                     // builder as anything interested in the ActiveFile will
                     // .of() from the context anyway to trigger a rebuild.
