@@ -16,6 +16,7 @@ import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/hierarchy_panel.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
 
@@ -155,12 +156,14 @@ class RiveEditorApp extends StatelessWidget {
                       ),
                       child: const EditorScaffold(),
                     );
+
                   case AppState.disconnected:
                     return DisconnectedScreen();
                     break;
 
                   case AppState.catastrophe:
                     return Catastrophe();
+
                   default:
                     return const LoadingScreen();
                 }
@@ -359,6 +362,10 @@ class EditorScaffold extends StatelessWidget {
                 ),
               ),
               const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: FeedbackButton(),
+              ),
+              const Padding(
                 padding: EdgeInsets.only(left: 10, right: 20),
                 child: Text(
                   'v$appVersion',
@@ -533,4 +540,28 @@ class LoadingScreen extends StatelessWidget {
           ],
         ),
       );
+}
+
+class FeedbackButton extends StatelessWidget {
+  const FeedbackButton();
+
+  Future<void> _launchUrl() async {
+    const url = 'https://rive.nolt.io/';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      child: const Text(
+        'Feedback',
+        style: TextStyle(color: Colors.grey),
+      ),
+      onPressed: _launchUrl,
+    );
+  }
 }

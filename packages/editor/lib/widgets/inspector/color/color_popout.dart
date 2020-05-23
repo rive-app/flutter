@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/stage/tools/color_loupe_tool.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/converters/alpha_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/blue_value_converter.dart';
@@ -11,7 +10,6 @@ import 'package:rive_editor/widgets/common/converters/input_value_converter.dart
 import 'package:rive_editor/widgets/common/converters/red_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/saturation_value_converter.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
-import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/color_slider.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
@@ -138,19 +136,21 @@ class ColorPopout extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      TintedIconButton(
-                        icon: 'eyedropper',
-                        color: theme.colors.popupIcon,
-                        onPress: () {
-                          var tool = ColorLoupeTool.instance;
-                          inspecting.context.stage.tool = tool;
-                          tool.pickColor = (color) {
-                            inspecting.changeColor(HSVColor.fromColor(color));
-                            inspecting.completeChange();
-                          };
-                        },
-                      ),
-                      const SizedBox(width: 20),
+                      // TODO: disabled eyedropper due to CanvasKit bug
+                      // Enable once bug is fixed.
+                      // TintedIconButton(
+                      //   icon: 'eyedropper',
+                      //   color: theme.colors.popupIcon,
+                      //   onPress: () {
+                      //     var tool = ColorLoupeTool.instance;
+                      //     inspecting.context.stage.tool = tool;
+                      //     tool.pickColor = (color) {
+                      //       inspecting.changeColor(HSVColor.fromColor(color));
+                      //       inspecting.completeChange();
+                      //     };
+                      //   },
+                      // ),
+                      // const SizedBox(width: 20),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
