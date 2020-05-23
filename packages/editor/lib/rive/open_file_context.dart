@@ -243,7 +243,7 @@ class OpenFileContext with RiveFileDelegate {
         filePath,
         spectre,
       );
-      completeConnection(result == ConnectResult.connected
+      completeInitialConnection(result == ConnectResult.connected
           ? OpenFileState.open
           : OpenFileState.error);
     }
@@ -252,7 +252,7 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   @protected
-  void completeConnection(OpenFileState state) {
+  void completeInitialConnection(OpenFileState state) {
     _state = state;
     if (state == OpenFileState.error) {
       stateChanged.notify();
@@ -345,6 +345,9 @@ class OpenFileContext with RiveFileDelegate {
 
   @override
   void onWipe() {
+    // N.B. this will only callback during a reconnect wipe, not initial wipe as
+    // our delegate isn't registered yet. So we can use this opportunity to wipe
+    // the existing stage and set ourselves up for the next set of data.
     _stage?.wipe();
     _resetManagers();
   }
@@ -445,6 +448,7 @@ class OpenFileContext with RiveFileDelegate {
   void onConnectionStateChanged(CoopConnectionState state) {
     /// We use this to handle changes that can come in during use. Right now we
     /// only handle showing the re-connecting (connecting) state.
+    print("STATE IS $state");
     switch (state) {
       case CoopConnectionState.connecting:
         _state = OpenFileState.loading;
@@ -452,6 +456,8 @@ class OpenFileContext with RiveFileDelegate {
         break;
       case CoopConnectionState.connected:
         _state = OpenFileState.open;
+        core.advance(0);
+        // _stage.tool = AutoTool.instance;
         stateChanged.notify();
         break;
       default:

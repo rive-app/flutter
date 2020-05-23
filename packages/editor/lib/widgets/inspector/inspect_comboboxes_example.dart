@@ -3,11 +3,27 @@ import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
+import 'package:rive_editor/widgets/inspector/inspector_pill_button.dart';
 
 /// Example inspector builder with combo boxes.
 class InspectComboBoxExample extends InspectorBuilder {
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) => [
+        (context) => InspectorPillButton(
+              icon: 'path-close',
+              label: 'disconnect',
+              press: () {
+                ActiveFile.of(context)?.core.disconnect();
+              },
+            ),
+        (context) => InspectorPillButton(
+              icon: 'path-close',
+              label: 'reconnect',
+              press: () {
+                print("RECONNECT!");
+                ActiveFile.of(context)?.core.forceReconnect();
+              },
+            ),
         (context) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: KILLME_ComboExamples(),

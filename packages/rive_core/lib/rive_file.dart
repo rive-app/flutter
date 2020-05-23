@@ -61,7 +61,7 @@ class RiveFile extends RiveCoreContext {
     String fileId, {
     @required LocalDataPlatform localDataPlatform,
     this.api,
-  })  : _persist = RivePersist(localDataPlatform, fileId);
+  }) : _persist = RivePersist(localDataPlatform, fileId);
 
   @override
   void abandonChanges(ChangeSet changes) {

@@ -77,12 +77,13 @@ class CoopClient extends CoopReader {
 
   Future<void> _reconnect() async {
     _reconnectTimer?.cancel();
+
+    _reconnectTimer =
+        Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
     if (_reconnectAttempt < 1) {
       _reconnectAttempt = 1;
     }
     _reconnectAttempt *= 2;
-    _reconnectTimer =
-        Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
   }
 
   bool get isConnected => _connectionState == CoopConnectionState.connected;
@@ -97,18 +98,22 @@ class CoopClient extends CoopReader {
   }
 
   Future<bool> disconnect() async {
-    await _subscription?.cancel();
     _allowReconnect = false;
     _pingTimer?.cancel();
     if (_channel != null) {
       await _channel.sink.close();
     }
+    await _subscription?.cancel();
+    _disconnected();
     return true;
   }
 
   Future<bool> forceReconnect() async {
     _allowReconnect = true;
     _pingTimer?.cancel();
+    if (_channel == null) {
+      return await connect() == ConnectResult.connected;
+    }
     await _channel?.sink?.close();
     return true;
   }
