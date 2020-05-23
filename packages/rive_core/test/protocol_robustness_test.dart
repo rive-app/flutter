@@ -299,11 +299,10 @@ void main() {
       expect(server.clientCount, 0, reason: "No one should be connected");
       expect(server.editingFileCount, 0,
           reason: "Editing file count should be 0");
-
       expect(await server.close(), true);
     },
     timeout: const Timeout(
-      Duration(seconds: 15),
+      Duration(seconds: 60),
     ),
   );
 }
