@@ -288,6 +288,8 @@ class AnimationsManager {
     for (final animationStream in _animationStreamControllers.values) {
       animationStream.close();
     }
+    _animations.clear();
+    _animationStreamControllers.clear();
     cancelDebounce(_updateAnimations);
   }
 }

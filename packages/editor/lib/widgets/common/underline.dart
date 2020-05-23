@@ -50,7 +50,9 @@ class _RenderUnderline extends RenderShiftedBox {
     _paint.color = color;
   }
 
-  final Paint _paint = Paint()..style = PaintingStyle.fill;
+  final Paint _paint = Paint()
+    ..style = PaintingStyle.fill
+    ..isAntiAlias = false;
   final double thickness;
 
   final double offset;

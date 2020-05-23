@@ -56,6 +56,5 @@ abstract class TimelineRenderBox extends RenderBox {
 
   double framesToPixels(int frames) =>
       ((frames / _viewport.fps - _secondsStart) / _secondsPerPixel)
-          .roundToDouble() +
-      0.5;
+          .roundToDouble();
 }

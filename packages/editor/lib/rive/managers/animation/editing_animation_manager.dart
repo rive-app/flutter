@@ -455,7 +455,6 @@ class _AllPropertiesHelper {
 
   void add(KeyedProperty property) {
     _all.add(property);
-
     var ko = property.keyedObject;
     if (_objects.add(ko)) {
       ko.keyframesMoved.addListener(_markDirty);
@@ -478,6 +477,7 @@ class _AllPropertiesHelper {
     }
     _objects.clear();
     _all.clear();
+    _markDirty();
   }
 
   void _markDirty() {

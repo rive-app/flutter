@@ -179,19 +179,30 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
 }
 
 class _TimelineKeysRenderObject extends TimelineRenderBox {
-  final Path keyPath = Path();
-  final Path holdKeyPath = Path();
+  final Path fillKeyPath = Path();
+  final Path strokeKeyPath = Path();
+  final Path fillHoldPath = Path();
+  final Path strokeHoldPath = Path();
   final Paint _bgPaint = Paint();
   final Paint _separatorPaint = Paint();
-  final Paint _keyPaint = Paint();
+  final Paint _keyPaintFill = Paint()..isAntiAlias = false;
+  final Paint _keyPaintStroke = Paint()
+    ..isAntiAlias = false
+    ..strokeWidth = 1
+    ..style = PaintingStyle.stroke;
   final Paint _connectKeyPaint = Paint()
     ..strokeWidth = 1
     ..style = PaintingStyle.stroke
     ..isAntiAlias = false;
-  final Paint _allkeyPaint = Paint();
-  final Paint _selectedPaint = Paint()
+  final Paint _allkeyFill = Paint()..isAntiAlias = false;
+  final Paint _allkeyStroke = Paint()
+    ..isAntiAlias = false
     ..strokeWidth = 1
     ..style = PaintingStyle.stroke;
+  final Paint _selectedPaint = Paint()
+    ..strokeWidth = 1
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = false;
   final Paint _workAreaBgPaint = Paint();
   final Paint _workAreaLinePaint = Paint()
     ..strokeWidth = 1
@@ -240,27 +251,36 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
   void onThemeChanged(RiveThemeData theme) {
     _bgPaint.color = theme.colors.timelineBackground;
     _separatorPaint.color = theme.colors.timelineLine;
-    _keyPaint.color = theme.colors.key;
+    _keyPaintFill.color = theme.colors.key;
+    _keyPaintStroke.color = theme.colors.key;
     _connectKeyPaint.color = theme.colors.keyLine;
-    _allkeyPaint.color = theme.colors.allKey;
+    _allkeyFill.color = theme.colors.allKey;
+    _allkeyStroke.color = theme.colors.allKey;
     _selectedPaint.color = theme.colors.keySelection;
     _workAreaBgPaint.color = theme.colors.workAreaBackground;
     _workAreaLinePaint.color = theme.colors.workAreaDelineator;
 
-    makeKeyPath(
-        keyPath,
+    makeStrokeKeyPath(
+        strokeKeyPath,
         theme,
-        Offset(0,
-            (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 0.5));
+        Offset(
+            0, (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 1));
+    makeFillKeyPath(
+        fillKeyPath,
+        theme,
+        Offset(
+            0, (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 1));
 
-    makeKeyPath(
-      holdKeyPath,
-      theme,
-      Offset(0.0,
-          (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 0.5),
-      rotation: 0,
-      padRadius: 0.5,
-    );
+    makeStrokeHoldKeyPath(
+        strokeHoldPath,
+        theme,
+        Offset(
+            0, (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 1));
+    makeFillHoldKeyPath(
+        fillHoldPath,
+        theme,
+        Offset(
+            0, (theme.treeStyles.timeline.itemHeight / 2).floorToDouble() - 1));
   }
 
   double get verticalScrollOffset => _verticalScrollOffset;
@@ -307,10 +327,13 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
     var rowHeight = theme.treeStyles.timeline.itemHeight;
 
+    // Round scroll offset to nearest half pixel.
+    var renderScrollOffset = _verticalScrollOffset
+        .roundToDouble(); //(_verticalScrollOffset * 2).roundToDouble()/2;
     var firstRow =
         // Can't use truncating divisor as -0.3 ~/ 34 == 0, we always want to floor.
-        (_verticalScrollOffset / rowHeight).floor();
-    var renderOffset = _verticalScrollOffset % rowHeight;
+        (renderScrollOffset / rowHeight).floor();
+    var renderOffset = renderScrollOffset % rowHeight;
     var visibleRows = (size.height / rowHeight).ceil() + 1;
     var lastRow = (firstRow + visibleRows).clamp(0, _rows.length).toInt();
 
@@ -320,15 +343,16 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
       renderOffset += firstRow * rowHeight;
       firstRow = 0;
     }
+
     canvas.translate(offset.dx, offset.dy - renderOffset);
 
     // If we draw past this x position, we can stop drawing as we're effectively
     // off screen. We offset by half the width of the key as key origin is in
     // the center of the key, so anything drawing with an origin of width + half
     // key will not be within the bounds of this widget.
-    var halfBounds = theme.dimensions.keyHalfBounds;
-    var halfSquare = theme.dimensions.keyHalfSquare;
-    var rightThreshold = size.width + halfBounds;
+    var lower = theme.dimensions.keyLower;
+    var upper = theme.dimensions.keyUpper;
+    var rightThreshold = size.width + upper;
 
     for (int i = firstRow; i < lastRow; i++) {
       var row = _rows[i].data;
@@ -344,20 +368,22 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
 
       KeyFrameList keyFrameList;
 
-      Paint keyPaint;
+      Paint keyFill;
+      Paint keyStroke;
       bool connectKeys = false;
       if (row is KeyedPropertyViewModel) {
         connectKeys = true;
         keyFrameList = row.keyedProperty;
-        keyPaint = _keyPaint;
+        keyFill = _keyPaintFill;
+        keyStroke = _keyPaintStroke;
       } else if (row is AllKeysViewModel) {
         keyFrameList = row.allProperties.cached;
-        keyPaint = _allkeyPaint;
+        keyFill = _allkeyFill;
+        keyStroke = _allkeyStroke;
       }
 
       var lineY = rowHeight / 2 - 1;
       var lastSelected = false;
-      var previousIsHold = false;
       if (keyFrameList != null) {
         List<KeyFrameInterface> frames =
             keyFrameList.keyframes as List<KeyFrameInterface>;
@@ -384,16 +410,20 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
             bool isVisible = x <= rightThreshold;
 
             var move = x - lastX;
+
             canvas.translate(move, 0);
             lastX = x;
 
             bool isSelected;
-            var renderPath = keyPath;
+            var renderStroke = strokeKeyPath;
+            var renderFill = fillKeyPath;
+
             if (keyFrame is AllKeyFrame) {
               isSelected = _selection.containsAll(keyFrame.keyframes);
             } else {
               if ((keyFrame as KeyFrameBase).interpolationType == 0) {
-                renderPath = holdKeyPath;
+                renderStroke = strokeHoldPath;
+                renderFill = fillHoldPath;
               }
               isSelected = _selection.contains(keyFrame);
             }
@@ -401,27 +431,23 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
             // Draw connecting line between keyframes.
             if (connectKeys && i != 0) {
               canvas.drawLine(
-                  Offset(
-                      -move +
-                          (previousIsHold ? halfSquare : halfBounds) +
-                          (lastSelected ? 0.5 : 0),
-                      lineY),
-                  Offset(renderPath == holdKeyPath ? -halfSquare : -halfBounds,
-                      lineY),
+                  Offset(-move + upper, lineY),
+                  Offset(lower + 1, lineY),
                   isSelected && lastSelected
                       ? _selectedPaint
                       : _connectKeyPaint);
             }
 
             // Draw the keyframe itself.
-            if (isSelected) {
-              canvas.drawPath(renderPath, _keyPaint);
-              canvas.drawPath(renderPath, _selectedPaint);
-            } else {
-              canvas.drawPath(renderPath, keyPaint);
+            if (keyFill != null) {
+              canvas.drawPath(renderFill, keyFill);
             }
 
-            previousIsHold = renderPath == holdKeyPath;
+            // we always paint stroke as we use it to fix up our fill for the
+            // weird skia antialiasing issue
+            canvas.drawPath(
+                renderStroke, isSelected ? _selectedPaint : keyStroke);
+
             if (!isVisible) {
               break;
             }
