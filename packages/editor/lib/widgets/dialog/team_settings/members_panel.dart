@@ -15,6 +15,7 @@ import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/user_invite_box.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -63,7 +64,7 @@ class _TeamMemberState extends State<TeamMembers> {
             teamUpdated: _updateAffiliates,
           ),
           const SizedBox(height: 20),
-          StreamBuilder<List<TeamMember>>(
+          ValueStreamBuilder<List<TeamMember>>(
             stream:
                 Plumber().getStream<List<TeamMember>>(widget.owner.hashCode),
             builder: (context, snapshot) {

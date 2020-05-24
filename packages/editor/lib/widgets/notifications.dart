@@ -6,6 +6,7 @@ import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
@@ -157,7 +158,7 @@ class PersonalPanel extends StatelessWidget {
     final theme = RiveTheme.of(context);
     return Column(
       children: [
-        StreamBuilder<List<model.Notification>>(
+        ValueStreamBuilder<List<model.Notification>>(
           stream: Plumber().getStream<List<model.Notification>>(),
           builder: (context, snapshot) => snapshot.hasData
               ? Expanded(

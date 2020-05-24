@@ -6,6 +6,7 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/home/file_browser.dart';
 import 'package:rive_editor/widgets/home/navigation_panel.dart';
 import 'package:rive_editor/widgets/home/team_detail_panel.dart';
@@ -36,7 +37,7 @@ class Home extends StatelessWidget {
             max: 500,
             child: const NavigationPanel(),
           ),
-          StreamBuilder<HomeSection>(
+          ValueStreamBuilder<HomeSection>(
             stream: Plumber().getStream<HomeSection>(),
             builder: (context, snapshot) {
               switch (snapshot.data) {
@@ -71,7 +72,7 @@ class Home extends StatelessWidget {
               }
             },
           ),
-          StreamBuilder<CurrentDirectory>(
+          ValueStreamBuilder<CurrentDirectory>(
             stream: Plumber().getStream<CurrentDirectory>(),
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data.owner is Team) {
