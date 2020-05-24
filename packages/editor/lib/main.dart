@@ -14,6 +14,7 @@ import 'package:rive_editor/alerts_display.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/hierarchy_panel.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -141,7 +142,7 @@ class RiveEditorApp extends StatelessWidget {
         child: Scaffold(
           body: Focus(
             focusNode: rive.focusNode,
-            child: StreamBuilder<AppState>(
+            child: ValueStreamBuilder<AppState>(
               stream: Plumber().getStream<AppState>(),
               builder: (context, snapshot) {
                 switch (snapshot.data) {

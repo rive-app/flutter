@@ -8,6 +8,7 @@ import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
@@ -35,7 +36,7 @@ class TeamDetailPanel extends StatelessWidget {
         )),
       ),
       padding: const EdgeInsets.all(20),
-      child: StreamBuilder<List<TeamMember>>(
+      child: ValueStreamBuilder<List<TeamMember>>(
         stream: Plumber().getStream<List<TeamMember>>(team.hashCode),
         builder: (context, snapshot) {
           if (snapshot.hasData) {

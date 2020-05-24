@@ -6,6 +6,7 @@ import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
 import 'package:rive_editor/widgets/home/folder_tree.dart';
 import 'package:rive_editor/widgets/home/sliver_inline_footer.dart';
@@ -80,7 +81,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-            child: StreamBuilder<HomeSection>(
+            child: ValueStreamBuilder<HomeSection>(
               stream: Plumber().getStream<HomeSection>(),
               builder: (context, snapshot) {
                 return Column(
@@ -104,7 +105,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
             padding: const EdgeInsets.only(top: 10),
           ),
           Expanded(
-            child: StreamBuilder<List<FolderTreeItemController>>(
+            child: ValueStreamBuilder<List<FolderTreeItemController>>(
               stream: Plumber().getStream<List<FolderTreeItemController>>(),
               builder: (context, snapshot) {
                 var slivers = <Widget>[];

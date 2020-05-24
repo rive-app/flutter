@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
@@ -46,7 +47,7 @@ class FileBrowser extends StatelessWidget {
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var file = files.elementAt(index);
-          return StreamBuilder<File>(
+          return ValueStreamBuilder<File>(
               stream: Plumber().getStream<File>(file.hashCode),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
@@ -65,12 +66,12 @@ class FileBrowser extends StatelessWidget {
       folder != null && !folder.isLoading;
 
   Widget _stream(FolderContentsBuilder childBuilder) {
-    return StreamBuilder<CurrentDirectory>(
+    return ValueStreamBuilder<CurrentDirectory>(
       stream: Plumber().getStream<CurrentDirectory>(),
       builder: (context, cdSnapshot) {
         if (cdSnapshot.hasData) {
           final cd = cdSnapshot.data;
-          return StreamBuilder<FolderContents>(
+          return ValueStreamBuilder<FolderContents>(
             stream: Plumber().getStream<FolderContents>(cd.hashId),
             builder: (context, fcSnapshot) {
               return childBuilder(fcSnapshot.data);
@@ -84,7 +85,7 @@ class FileBrowser extends StatelessWidget {
   }
 
   Widget _header() {
-    return StreamBuilder<CurrentDirectory>(
+    return ValueStreamBuilder<CurrentDirectory>(
       stream: Plumber().getStream<CurrentDirectory>(),
       builder: (context, snapshot) {
         Widget child;

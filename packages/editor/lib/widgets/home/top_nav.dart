@@ -4,6 +4,7 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/popup/popup_button.dart';
@@ -128,7 +129,7 @@ class TopNav extends StatelessWidget {
 
     return Underline(
       color: riveColors.fileLineGrey,
-      child: StreamBuilder<List<Folder>>(
+      child: ValueStreamBuilder<List<Folder>>(
         stream:
             Plumber().getStream<List<Folder>>(currentDirectory.owner.hashCode),
         builder: (context, snapshot) => snapshot.hasData == false
