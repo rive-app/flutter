@@ -20,8 +20,13 @@ class CoreFractionalIndexType extends CoreFieldType<FractionalIndex> {
   @override
   Uint8List serialize(FractionalIndex value) {
     var writer = BinaryWriter(alignment: 8);
+    write(writer, value);
+    return writer.uint8Buffer;
+  }
+
+  @override
+  void write(BinaryWriter writer, FractionalIndex value) {
     writer.writeVarInt(value.numerator);
     writer.writeVarInt(value.denominator);
-    return writer.uint8Buffer;
   }
 }

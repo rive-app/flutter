@@ -2,9 +2,12 @@
 /// lib/src/generated/shapes/paint/linear_gradient_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class LinearGradientBase extends ContainerComponent {
   static const int typeKey = 22;
@@ -134,6 +137,26 @@ abstract class LinearGradientBase extends ContainerComponent {
     }
     if (opacity != null) {
       onPropertyChanged(opacityPropertyKey, opacity, opacity);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_startX != null) {
+      context.doubleType.write(writer, _startX);
+    }
+    if (_startY != null) {
+      context.doubleType.write(writer, _startY);
+    }
+    if (_endX != null) {
+      context.doubleType.write(writer, _endX);
+    }
+    if (_endY != null) {
+      context.doubleType.write(writer, _endY);
+    }
+    if (_opacity != null) {
+      context.doubleType.write(writer, _opacity);
     }
   }
 

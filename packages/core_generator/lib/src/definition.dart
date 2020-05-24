@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:colorize/colorize.dart';
 import 'package:core_generator/src/field_type.dart';
+import 'package:core_generator/src/field_types/id_field_type.dart';
 import 'package:dart_style/dart_style.dart';
 
 import 'comment.dart';
@@ -144,6 +145,13 @@ class Definition {
           'import \'package:${config.packageName}/src/generated/$snakeContextName.dart\';');
     }
 
+    if (_properties.isNotEmpty) {
+      imports.add(
+          'import \'package:utilities/binary_buffer/binary_writer.dart\';');
+      imports.add('import \'dart:collection\';');
+      imports.add('import \'package:core/core.dart\';');
+    }
+
     var importList = imports.toList(growable: false)..sort();
     code.writeAll(
         importList.where((item) => item.indexOf('import \'package:') == 0),
@@ -177,6 +185,30 @@ class Definition {
           onPropertyChanged( 
           ${property.name}PropertyKey, ${property.name}, ${property.name});
         }''');
+      }
+      code.writeln('}');
+
+      // Write serializer.
+      code.writeln('''@override
+    void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {''');
+      if (_extensionOf != null) {
+        code.writeln('super.writeRuntimeProperties(writer, idLookup);');
+      }
+      for (final property in _properties) {
+        if (property.editorOnly) {
+          continue;
+        }
+        if (property.type is IdFieldType) {
+          code.writeln('''if(_${property.name} != null) {
+          var value = idLookup[_${property.name}];
+          assert(value != null);
+          context.intType.write(writer, value);
+        }''');
+        } else {
+          code.writeln('''if(_${property.name} != null) {
+          context.${property.type.uncapitalizedName}Type.write(writer, _${property.name});
+        }''');
+        }
       }
       code.writeln('}');
 

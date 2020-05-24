@@ -12,7 +12,8 @@
         "int": 3,
         "string": "dependentIds"
       },
-      "description": "List of integer ids for objects registered in the same context that depend on this object."
+      "description": "List of integer ids for objects registered in the same context that depend on this object.",
+      "editorOnly": true
     },
     "name": {
       "type": "String",
@@ -36,7 +37,8 @@
         "int": 6,
         "string": "childOrder"
       },
-      "description": "Order value for sorting child elements in ContainerComponent parent."
+      "description": "Order value for sorting child elements in ContainerComponent parent.",
+      "editorOnly": true
     }
   }
 }

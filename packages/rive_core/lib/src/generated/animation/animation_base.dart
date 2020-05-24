@@ -5,6 +5,8 @@
 import 'package:core/core.dart';
 import 'package:fractional/fractional.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 27;
@@ -89,6 +91,21 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     }
     if (order != null) {
       onPropertyChanged(orderPropertyKey, order, order);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    if (_artboardId != null) {
+      var value = idLookup[_artboardId];
+      assert(value != null);
+      context.intType.write(writer, value);
+    }
+    if (_name != null) {
+      context.stringType.write(writer, _name);
+    }
+    if (_order != null) {
+      context.fractionalIndexType.write(writer, _order);
     }
   }
 

@@ -2,9 +2,12 @@
 /// lib/src/generated/shapes/cubic_vertex_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class CubicVertexBase extends PathVertex {
   static const int typeKey = 6;
@@ -144,6 +147,26 @@ abstract class CubicVertexBase extends PathVertex {
     }
     if (outY != null) {
       onPropertyChanged(outYPropertyKey, outY, outY);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_controlTypeValue != null) {
+      context.intType.write(writer, _controlTypeValue);
+    }
+    if (_inX != null) {
+      context.doubleType.write(writer, _inX);
+    }
+    if (_inY != null) {
+      context.doubleType.write(writer, _inY);
+    }
+    if (_outX != null) {
+      context.doubleType.write(writer, _outX);
+    }
+    if (_outY != null) {
+      context.doubleType.write(writer, _outY);
     }
   }
 

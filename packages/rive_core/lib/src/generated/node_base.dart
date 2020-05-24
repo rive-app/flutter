@@ -1,10 +1,13 @@
 /// Core automatically generated lib/src/generated/node_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class NodeBase extends ContainerComponent {
   static const int typeKey = 2;
@@ -392,6 +395,29 @@ abstract class NodeBase extends ContainerComponent {
     }
     if (opacity != null) {
       onPropertyChanged(opacityPropertyKey, opacity, opacity);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_x != null) {
+      context.doubleType.write(writer, _x);
+    }
+    if (_y != null) {
+      context.doubleType.write(writer, _y);
+    }
+    if (_rotation != null) {
+      context.doubleType.write(writer, _rotation);
+    }
+    if (_scaleX != null) {
+      context.doubleType.write(writer, _scaleX);
+    }
+    if (_scaleY != null) {
+      context.doubleType.write(writer, _scaleY);
+    }
+    if (_opacity != null) {
+      context.doubleType.write(writer, _opacity);
     }
   }
 

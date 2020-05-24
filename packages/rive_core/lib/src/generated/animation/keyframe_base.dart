@@ -3,6 +3,8 @@
 
 import 'package:core/core.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 29;
@@ -120,6 +122,26 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     if (interpolatorId != null) {
       onPropertyChanged(
           interpolatorIdPropertyKey, interpolatorId, interpolatorId);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    if (_keyedPropertyId != null) {
+      var value = idLookup[_keyedPropertyId];
+      assert(value != null);
+      context.intType.write(writer, value);
+    }
+    if (_frame != null) {
+      context.intType.write(writer, _frame);
+    }
+    if (_interpolationType != null) {
+      context.intType.write(writer, _interpolationType);
+    }
+    if (_interpolatorId != null) {
+      var value = idLookup[_interpolatorId];
+      assert(value != null);
+      context.intType.write(writer, value);
     }
   }
 

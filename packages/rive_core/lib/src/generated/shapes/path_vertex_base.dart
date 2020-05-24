@@ -1,8 +1,11 @@
 /// Core automatically generated lib/src/generated/shapes/path_vertex_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class PathVertexBase extends Component {
   static const int typeKey = 14;
@@ -63,6 +66,17 @@ abstract class PathVertexBase extends Component {
     }
     if (y != null) {
       onPropertyChanged(yPropertyKey, y, y);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_x != null) {
+      context.doubleType.write(writer, _x);
+    }
+    if (_y != null) {
+      context.doubleType.write(writer, _y);
     }
   }
 

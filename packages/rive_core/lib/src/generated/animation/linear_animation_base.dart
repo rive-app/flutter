@@ -2,8 +2,11 @@
 /// lib/src/generated/animation/linear_animation_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/src/generated/animation/animation_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class LinearAnimationBase extends Animation {
   static const int typeKey = 31;
@@ -193,6 +196,32 @@ abstract class LinearAnimationBase extends Animation {
     if (enableWorkArea != null) {
       onPropertyChanged(
           enableWorkAreaPropertyKey, enableWorkArea, enableWorkArea);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_fps != null) {
+      context.intType.write(writer, _fps);
+    }
+    if (_duration != null) {
+      context.intType.write(writer, _duration);
+    }
+    if (_speed != null) {
+      context.doubleType.write(writer, _speed);
+    }
+    if (_loopValue != null) {
+      context.intType.write(writer, _loopValue);
+    }
+    if (_workStart != null) {
+      context.intType.write(writer, _workStart);
+    }
+    if (_workEnd != null) {
+      context.intType.write(writer, _workEnd);
+    }
+    if (_enableWorkArea != null) {
+      context.boolType.write(writer, _enableWorkArea);
     }
   }
 

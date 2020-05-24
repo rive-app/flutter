@@ -2,8 +2,11 @@
 /// lib/src/generated/shapes/paint/gradient_stop_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class GradientStopBase extends Component {
   static const int typeKey = 19;
@@ -60,6 +63,17 @@ abstract class GradientStopBase extends Component {
     }
     if (position != null) {
       onPropertyChanged(positionPropertyKey, position, position);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_colorValue != null) {
+      context.intType.write(writer, _colorValue);
+    }
+    if (_position != null) {
+      context.doubleType.write(writer, _position);
     }
   }
 

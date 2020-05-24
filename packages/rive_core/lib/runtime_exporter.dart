@@ -1,5 +1,7 @@
+import 'dart:collection';
 import 'dart:typed_data';
 
+import 'package:core/id.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -53,10 +55,12 @@ class RuntimeExporter {
       writer.write(info.signature);
     }
 
+    // TODO: Build up lookup table
+    HashMap<Id, int> lookup = HashMap<Id, int>();
+
     // Export artboards.
     for (final artboard in core.objectsOfType<Artboard>()) {
-      artboard.runtimeSerialize(writer);
-      // artboard
+      artboard.writeRuntime(writer, lookup);
     }
 
     return writer.uint8Buffer;

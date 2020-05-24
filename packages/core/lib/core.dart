@@ -53,9 +53,11 @@ abstract class Core<T extends CoreContext> {
   @protected
   void changeNonNull();
 
-  void runtimeSerialize(BinaryWriter writer, {int id}) {
-
+  void writeRuntime(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    writeRuntimeProperties(writer, idLookup);
   }
+
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup);
 
   /// Generated classes override this to return the value stored in the field
   /// matching the propertyKey.

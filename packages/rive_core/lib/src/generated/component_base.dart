@@ -5,7 +5,9 @@ import 'package:core/core.dart';
 import 'package:core/id.dart';
 import 'package:fractional/fractional.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:utilities/list_equality.dart';
+import 'dart:collection';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 10;
@@ -33,6 +35,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     List<Id> from = _dependentIds;
     _dependentIds = value;
     onPropertyChanged(dependentIdsPropertyKey, from, value);
+    context?.editorPropertyChanged(this, dependentIdsPropertyKey, from, value);
     dependentIdsChanged(from, value);
   }
 
@@ -100,6 +103,7 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     FractionalIndex from = _childOrder;
     _childOrder = value;
     onPropertyChanged(childOrderPropertyKey, from, value);
+    context?.editorPropertyChanged(this, childOrderPropertyKey, from, value);
     childOrderChanged(from, value);
   }
 
@@ -118,6 +122,18 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     }
     if (childOrder != null) {
       onPropertyChanged(childOrderPropertyKey, childOrder, childOrder);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    if (_name != null) {
+      context.stringType.write(writer, _name);
+    }
+    if (_parentId != null) {
+      var value = idLookup[_parentId];
+      assert(value != null);
+      context.intType.write(writer, value);
     }
   }
 

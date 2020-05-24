@@ -2,9 +2,12 @@
 /// lib/src/generated/shapes/paint/shape_paint_base.dart.
 /// Do not modify manually.
 
+import 'package:core/core.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
+import 'dart:collection';
 
 abstract class ShapePaintBase extends ContainerComponent {
   static const int typeKey = 21;
@@ -42,6 +45,14 @@ abstract class ShapePaintBase extends ContainerComponent {
     super.changeNonNull();
     if (isVisible != null) {
       onPropertyChanged(isVisiblePropertyKey, isVisible, isVisible);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_isVisible != null) {
+      context.boolType.write(writer, _isVisible);
     }
   }
 

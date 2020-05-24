@@ -14,7 +14,12 @@ class CoreIntType extends CoreFieldType<int> {
   @override
   Uint8List serialize(int value) {
     var writer = BinaryWriter(alignment: 4);
-    writer.writeVarInt(value);
+    write(writer, value);
     return writer.uint8Buffer;
+  }
+
+  @override
+  void write(BinaryWriter writer, int value) {
+    writer.writeVarInt(value);
   }
 }

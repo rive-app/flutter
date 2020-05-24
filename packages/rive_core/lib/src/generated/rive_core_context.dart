@@ -1419,6 +1419,8 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   bool isEditorOnly(int propertyKey) {
     switch (propertyKey) {
+      case ComponentBase.dependentIdsPropertyKey:
+      case ComponentBase.childOrderPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
         return true;
       default:

@@ -19,8 +19,13 @@ class CoreIdType extends CoreFieldType<Id> {
   @override
   Uint8List serialize(Id value) {
     var writer = BinaryWriter(alignment: 8);
+    write(writer, value);
+    return writer.uint8Buffer;
+  }
+
+  @override
+  void write(BinaryWriter writer, Id value) {
     writer.writeVarUint(value.client);
     writer.writeVarUint(value.object);
-    return writer.uint8Buffer;
   }
 }

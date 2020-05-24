@@ -14,7 +14,12 @@ class CoreDoubleType extends CoreFieldType<double> {
   @override
   Uint8List serialize(double value) {
     var writer = BinaryWriter(alignment: 8);
-    writer.writeFloat64(value);
+    write(writer, value);
     return writer.uint8Buffer;
+  }
+
+  @override
+  void write(BinaryWriter writer, double value) {
+    writer.writeFloat64(value);
   }
 }
