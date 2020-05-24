@@ -9,7 +9,7 @@ class TestOpenFileContext extends OpenFileContext {
     LocalDataPlatform dataPlatform = LocalDataPlatform.make();
     core = TestRiveFile('fake', localDataPlatform: dataPlatform);
     core.onConnected();
-    completeConnection(OpenFileState.open);
+    completeInitialConnection(OpenFileState.open);
     return true;
   }
 }

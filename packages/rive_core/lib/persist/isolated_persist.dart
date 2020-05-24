@@ -121,7 +121,9 @@ class IsolatedPersist implements RivePersist {
         _sendToIsolate = data;
         _initCompleter.complete();
       } else if (data is List<ChangeSet>) {
-        _fetchCompleter?.complete(data);
+        var completer = _fetchCompleter;
+        _fetchCompleter = null;
+        completer?.complete(data);
       }
     });
     Isolate.spawn(

@@ -47,6 +47,9 @@ void main() {
           ConnectResult.networkError,
           reason: 'expect network error when no private api is available');
 
+      expect(server.clientCount, 0,
+          reason: "Server should have no client connected.");
+
       // Ok now let's make a private api for the coop server to talk to.
       final privateApi = TestPrivateApi();
       expect(await privateApi.listen(privateApiPort), true,
@@ -287,20 +290,19 @@ void main() {
 
       // put server back in auto
       serverFileContext.manualDrive = false;
-
       expect(await client1.disconnect(), true);
       expect(await client2.disconnect(), true);
 
       await Future.delayed(CoopIsolate.killTimeout, () {});
       await Future.delayed(const Duration(milliseconds: 1000), () {});
 
+      expect(server.clientCount, 0, reason: "No one should be connected");
       expect(server.editingFileCount, 0,
           reason: "Editing file count should be 0");
-
       expect(await server.close(), true);
     },
     timeout: const Timeout(
-      Duration(seconds: 15),
+      Duration(seconds: 60),
     ),
   );
 }

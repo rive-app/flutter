@@ -155,6 +155,9 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   }
 
   void _updateMarquee() {
+    if(_marqueeStart == null || _marqueeEnd == null) {
+      return;
+    }
     var viewportHelper = makeMouseHelper();
     var seconds = viewportHelper.dxToSeconds(_marqueeEnd.dx);
     var dy = _marqueeEnd.dy + widget.verticalScroll.offset;
@@ -455,7 +458,7 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
   })  : _rowHeight = theme.treeStyles.timeline.itemHeight,
         super(widgetSize, theme, viewport) {
     _horizontalThreshold =
-        theme.dimensions.keyHalfBounds * secondsPerPixel * viewport.fps;
+        theme.dimensions.keyUpper * secondsPerPixel * viewport.fps;
   }
 
   HashSet<KeyFrame> framesIn(_Marquee marquee) {

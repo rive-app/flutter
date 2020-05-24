@@ -243,7 +243,7 @@ class OpenFileContext with RiveFileDelegate {
         filePath,
         spectre,
       );
-      completeConnection(result == ConnectResult.connected
+      completeInitialConnection(result == ConnectResult.connected
           ? OpenFileState.open
           : OpenFileState.error);
     }
@@ -252,7 +252,7 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   @protected
-  void completeConnection(OpenFileState state) {
+  void completeInitialConnection(OpenFileState state) {
     _state = state;
     if (state == OpenFileState.error) {
       stateChanged.notify();
@@ -345,19 +345,34 @@ class OpenFileContext with RiveFileDelegate {
 
   @override
   void onWipe() {
+    // N.B. this will only callback during a reconnect wipe, not initial wipe as
+    // our delegate isn't registered yet. So we can use this opportunity to wipe
+    // the existing stage and set ourselves up for the next set of data.
     _stage?.wipe();
     _resetManagers();
   }
 
   void _disposeManagers() {
     vertexEditor?.dispose();
+
     _selectedAnimationSubscription?.cancel();
     _selectedAnimationSubscription = null;
     _syncEditingAnimation(null);
     _animationsManager.value?.dispose();
     _animationsManager.value = null;
-    treeController.value?.dispose();
-    drawOrderTreeController.value?.dispose();
+
+    if (treeController.value != null) {
+      cancelDebounce(treeController.value.flatten);
+      var oldController = treeController.value;
+      treeController.value = null;
+      oldController.dispose();
+    }
+    if (drawOrderTreeController.value != null) {
+      cancelDebounce(drawOrderTreeController.value.flatten);
+      drawOrderTreeController.value.dispose();
+      drawOrderTreeController.value = null;
+    }
+
     _backboard?.activeArtboardChanged?.removeListener(_syncActiveArtboard);
     _backboard = null;
   }
@@ -368,7 +383,6 @@ class OpenFileContext with RiveFileDelegate {
 
   void _resetManagers() {
     _disposeManagers();
-
     treeController.value = HierarchyTreeController(this);
     drawOrderTreeController.value = DrawOrderTreeController(
       file: this,
@@ -434,6 +448,7 @@ class OpenFileContext with RiveFileDelegate {
   void onConnectionStateChanged(CoopConnectionState state) {
     /// We use this to handle changes that can come in during use. Right now we
     /// only handle showing the re-connecting (connecting) state.
+    print("STATE IS $state");
     switch (state) {
       case CoopConnectionState.connecting:
         _state = OpenFileState.loading;
@@ -441,6 +456,8 @@ class OpenFileContext with RiveFileDelegate {
         break;
       case CoopConnectionState.connected:
         _state = OpenFileState.open;
+        core.advance(0);
+        // _stage.tool = AutoTool.instance;
         stateChanged.notify();
         break;
       default:

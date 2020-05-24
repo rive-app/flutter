@@ -68,7 +68,9 @@ class _PlayheadRenderer extends LeafRenderObjectWidget {
 class _PlayheadRenderObject extends TimelineRenderBox {
   double _time;
   static const double _arrowRadius = 5;
-  final Paint _playhead = Paint()..isAntiAlias = false;
+  final Paint _playhead = Paint()
+    ..isAntiAlias = false
+    ..strokeWidth = 1;
   final Paint _arrowPaint = Paint();
   final Path _arrow = Path()
     ..moveTo(-_arrowRadius, 0)
@@ -115,7 +117,7 @@ class _PlayheadRenderObject extends TimelineRenderBox {
     canvas.translate(
         (offset.dx + x).roundToDouble() + 0.5, (offset.dy).roundToDouble());
     canvas.drawPath(_arrow, _arrowPaint);
-    canvas.drawLine(const Offset(0, 9), Offset(0, size.height), _playhead);
+    canvas.drawLine(const Offset(0, 8), Offset(0, size.height), _playhead);
     canvas.restore();
   }
 }

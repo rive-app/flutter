@@ -207,13 +207,11 @@ class ToggleShortcutAction extends StatefulShortcutAction<bool> {
 
   @override
   void onPress() {
-    print("CHANGE TO ${!_value}");
     _changeValue(!_value);
   }
 
   @override
   void onRelease() {
-    print("RELEASE");
     // intentionally empty, value only toggled on press.
   }
 }

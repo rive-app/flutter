@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:core/key_state.dart';
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
@@ -168,10 +170,15 @@ class KeyStateRenderer extends LeafRenderObjectWidget {
 }
 
 class KeyStateRenderBox extends RenderBox {
-  final Path keyPath = Path();
-  final Paint none = Paint()..style = PaintingStyle.stroke;
-  final Paint keyframe = Paint();
-  final Paint interpolated = Paint()..style = PaintingStyle.stroke;
+  final Path fillPath = Path();
+  final Path strokePath = Path();
+  final Paint none = Paint()
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = false;
+  final Paint keyframe = Paint()..isAntiAlias = false;
+  final Paint interpolated = Paint()
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = false;
 
   RiveThemeData _theme;
   RiveThemeData get theme => _theme;
@@ -182,11 +189,18 @@ class KeyStateRenderBox extends RenderBox {
     _theme = value;
     markNeedsPaint();
 
-    var pos = theme.dimensions.keyHalfBounds.roundToDouble();
-    makeKeyPath(keyPath, _theme, Offset(pos, pos));
+    var keySize = theme.dimensions.keySize;
+    var halfKeySize = keySize / 2;
+
+    makeStrokeKeyPath(strokePath, _theme,
+        Offset(halfKeySize.floorToDouble() + 1, halfKeySize.floorToDouble()));
+    makeFillKeyPath(fillPath, _theme,
+        Offset(halfKeySize.floorToDouble() + 1, halfKeySize.floorToDouble()));
     none.color = _theme.colors.keyStateEmpty;
     keyframe.color = _theme.colors.key;
     interpolated.color = _theme.colors.key;
+
+    none.strokeWidth = interpolated.strokeWidth = 1;
   }
 
   KeyState _keyState;
@@ -201,8 +215,8 @@ class KeyStateRenderBox extends RenderBox {
 
   @override
   void performLayout() {
-    size = Size(
-        theme.dimensions.keyHalfBounds * 2, theme.dimensions.keyHalfBounds * 2);
+    var keySize = theme.dimensions.keySize;
+    size = Size(keySize + 2, keySize);
   }
 
   @override
@@ -212,23 +226,29 @@ class KeyStateRenderBox extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     var canvas = context.canvas;
     Paint paint;
+    Path path;
     switch (_keyState) {
       case KeyState.none:
         paint = none;
+        path = strokePath;
         break;
       case KeyState.keyframe:
         paint = keyframe;
+        path = fillPath;
         break;
       case KeyState.interpolated:
         paint = interpolated;
+        path = strokePath;
         break;
     }
     if (paint == null) {
       return;
     }
-    // canvas.drawRect(offset & size, paint);
-    canvas.translate(offset.dx, offset.dy);
-    canvas.drawPath(keyPath, paint);
-    canvas.translate(-offset.dx, -offset.dy);
+    var x = offset.dx.roundToDouble();
+    var y = offset.dy.roundToDouble();
+
+    canvas.translate(x, y);
+    canvas.drawPath(path, paint);
+    canvas.translate(-x, -y);
   }
 }

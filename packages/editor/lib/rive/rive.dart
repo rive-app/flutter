@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:core/debounce.dart';
 import 'package:core/error_logger/error_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/models/file.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
+import 'package:rive_editor/frameDebounce.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -204,7 +206,13 @@ class Rive {
       // TODO: make this nicer, maybe select the closest tab...
       selectTab(fileTabs.isEmpty ? systemTab : fileTabs.last);
     }
-    value.file?.dispose();
+
+    // This is kind of gross, but we do this to ensure the UI has had time to
+    // unsubscribe any listeners to notifiers held by the file context.
+    var closure = value.file?.dispose;
+    if (closure != null) {
+      frameDebounce(closure);
+    }
   }
 
   void _changeActiveFile(OpenFileContext context) {
