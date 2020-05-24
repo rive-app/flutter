@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/runtime_exporter.dart';
+import 'package:rive_editor/platform/file_save.dart';
+import 'package:rive_editor/rive/alerts/simple_alert.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/modal_popup.dart';
@@ -25,7 +29,33 @@ class SharePopupButton extends StatelessWidget {
         PopupContextItem(
           'Download for Runtime',
           icon: 'download',
-          select: () => _showModal(context, (_) => Container()),
+          select: () async {
+            // Get the active file.
+            var activeFile = ActiveFile.find(context);
+            // Instance the exporter with some file meta data.
+            var exporter = RuntimeExporter(
+              core: activeFile.core,
+              info: RuntimeFileInfo(
+                fileId: activeFile.fileId,
+                ownerId: activeFile.ownerId,
+              ),
+            );
+            // Perform the export.
+            var bytes = exporter.export();
+            // Save it (desktop will popup a file dialog, web will simply
+            // download it with the provided name).
+            var filename =
+                activeFile.name.value.toLowerCase().replaceAll(' ', '_');
+            if (await FileSave.save('$filename.riv', bytes)) {
+              activeFile.addAlert(
+                SimpleAlert('File exported.'),
+              );
+            } else {
+              activeFile.addAlert(
+                SimpleAlert('Export canceled.'),
+              );
+            }
+          },
         ),
         PopupContextItem(
           'Publish to Community',

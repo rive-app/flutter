@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 import 'package:core/id.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'coop/change.dart';
 import 'coop/connect_result.dart';
 import 'coop/coop_client.dart';
@@ -51,6 +52,10 @@ abstract class Core<T extends CoreContext> {
 
   @protected
   void changeNonNull();
+
+  void runtimeSerialize(BinaryWriter writer, {int id}) {
+
+  }
 
   /// Generated classes override this to return the value stored in the field
   /// matching the propertyKey.
