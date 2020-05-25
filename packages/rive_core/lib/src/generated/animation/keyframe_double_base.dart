@@ -2,11 +2,11 @@
 /// lib/src/generated/animation/keyframe_double_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'dart:collection';
 
 abstract class KeyFrameDoubleBase extends KeyFrame {
   static const int typeKey = 30;
@@ -47,7 +47,7 @@ abstract class KeyFrameDoubleBase extends KeyFrame {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_value != null) {
-      context.doubleType.write(writer, _value);
+      context.doubleType.writeProperty(valuePropertyKey, writer, _value);
     }
   }
 

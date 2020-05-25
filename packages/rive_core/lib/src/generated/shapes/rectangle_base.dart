@@ -1,6 +1,7 @@
 /// Core automatically generated lib/src/generated/shapes/rectangle_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -9,7 +10,6 @@ import 'package:rive_core/src/generated/node_base.dart';
 import 'package:rive_core/src/generated/shapes/parametric_path_base.dart';
 import 'package:rive_core/src/generated/shapes/path_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'dart:collection';
 
 abstract class RectangleBase extends ParametricPath {
   static const int typeKey = 7;
@@ -60,7 +60,8 @@ abstract class RectangleBase extends ParametricPath {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_cornerRadius != null) {
-      context.doubleType.write(writer, _cornerRadius);
+      context.doubleType
+          .writeProperty(cornerRadiusPropertyKey, writer, _cornerRadius);
     }
   }
 

@@ -2,11 +2,11 @@
 /// lib/src/generated/animation/animation_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:fractional/fractional.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'dart:collection';
 
 abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 27;
@@ -98,14 +98,16 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     if (_artboardId != null) {
       var value = idLookup[_artboardId];
-      assert(value != null);
-      context.intType.write(writer, value);
+      if (value != null) {
+        context.intType.writeProperty(artboardIdPropertyKey, writer, value);
+      }
     }
     if (_name != null) {
-      context.stringType.write(writer, _name);
+      context.stringType.writeProperty(namePropertyKey, writer, _name);
     }
     if (_order != null) {
-      context.fractionalIndexType.write(writer, _order);
+      context.fractionalIndexType
+          .writeProperty(orderPropertyKey, writer, _order);
     }
   }
 

@@ -14,12 +14,7 @@ class CoreStringType extends CoreFieldType<String> {
   @override
   Uint8List serialize(String value) {
     var writer = BinaryWriter(alignment: 32);
-    write(writer, value);
-    return writer.uint8Buffer;
-  }
-
-  @override
-  void write(BinaryWriter writer, String value) {
     writer.writeString(value);
+    return writer.uint8Buffer;
   }
 }

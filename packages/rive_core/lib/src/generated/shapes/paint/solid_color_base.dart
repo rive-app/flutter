@@ -2,11 +2,11 @@
 /// lib/src/generated/shapes/paint/solid_color_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'dart:collection';
 
 abstract class SolidColorBase extends Component {
   static const int typeKey = 18;
@@ -47,7 +47,7 @@ abstract class SolidColorBase extends Component {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_colorValue != null) {
-      context.intType.write(writer, _colorValue);
+      context.intType.writeProperty(colorValuePropertyKey, writer, _colorValue);
     }
   }
 

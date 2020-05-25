@@ -1,10 +1,10 @@
 /// Core automatically generated lib/src/generated/animation/keyframe_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'dart:collection';
 
 abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 29;
@@ -129,19 +129,23 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     if (_keyedPropertyId != null) {
       var value = idLookup[_keyedPropertyId];
-      assert(value != null);
-      context.intType.write(writer, value);
+      if (value != null) {
+        context.intType
+            .writeProperty(keyedPropertyIdPropertyKey, writer, value);
+      }
     }
     if (_frame != null) {
-      context.intType.write(writer, _frame);
+      context.intType.writeProperty(framePropertyKey, writer, _frame);
     }
     if (_interpolationType != null) {
-      context.intType.write(writer, _interpolationType);
+      context.intType.writeProperty(
+          interpolationTypePropertyKey, writer, _interpolationType);
     }
     if (_interpolatorId != null) {
       var value = idLookup[_interpolatorId];
-      assert(value != null);
-      context.intType.write(writer, value);
+      if (value != null) {
+        context.intType.writeProperty(interpolatorIdPropertyKey, writer, value);
+      }
     }
   }
 

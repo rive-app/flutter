@@ -1,13 +1,13 @@
 /// Core automatically generated lib/src/generated/shapes/paint/fill_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/shapes/paint/shape_paint_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'dart:collection';
 
 abstract class FillBase extends ShapePaint {
   static const int typeKey = 20;
@@ -53,7 +53,7 @@ abstract class FillBase extends ShapePaint {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_fillRule != null) {
-      context.intType.write(writer, _fillRule);
+      context.intType.writeProperty(fillRulePropertyKey, writer, _fillRule);
     }
   }
 

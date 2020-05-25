@@ -14,12 +14,7 @@ class CoreBoolType extends CoreFieldType<bool> {
   @override
   Uint8List serialize(bool value) {
     var writer = BinaryWriter(alignment: 1);
-    write(writer, value);
-    return writer.uint8Buffer;
-  }
-
-  @override
-  void write(BinaryWriter writer, bool value) {
     writer.writeInt8(value ? 1 : 0);
+    return writer.uint8Buffer;
   }
 }

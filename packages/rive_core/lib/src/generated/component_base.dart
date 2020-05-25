@@ -1,13 +1,13 @@
 /// Core automatically generated lib/src/generated/component_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:core/id.dart';
 import 'package:fractional/fractional.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:utilities/list_equality.dart';
-import 'dart:collection';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 10;
@@ -128,12 +128,13 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     if (_name != null) {
-      context.stringType.write(writer, _name);
+      context.stringType.writeProperty(namePropertyKey, writer, _name);
     }
     if (_parentId != null) {
       var value = idLookup[_parentId];
-      assert(value != null);
-      context.intType.write(writer, value);
+      if (value != null) {
+        context.intType.writeProperty(parentIdPropertyKey, writer, value);
+      }
     }
   }
 

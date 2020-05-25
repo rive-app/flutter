@@ -1,12 +1,12 @@
 /// Core automatically generated lib/src/generated/artboard_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'dart:collection';
 
 abstract class ArtboardBase extends ContainerComponent {
   static const int typeKey = 1;
@@ -178,22 +178,22 @@ abstract class ArtboardBase extends ContainerComponent {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_width != null) {
-      context.doubleType.write(writer, _width);
+      context.doubleType.writeProperty(widthPropertyKey, writer, _width);
     }
     if (_height != null) {
-      context.doubleType.write(writer, _height);
+      context.doubleType.writeProperty(heightPropertyKey, writer, _height);
     }
     if (_x != null) {
-      context.doubleType.write(writer, _x);
+      context.doubleType.writeProperty(xPropertyKey, writer, _x);
     }
     if (_y != null) {
-      context.doubleType.write(writer, _y);
+      context.doubleType.writeProperty(yPropertyKey, writer, _y);
     }
     if (_originX != null) {
-      context.doubleType.write(writer, _originX);
+      context.doubleType.writeProperty(originXPropertyKey, writer, _originX);
     }
     if (_originY != null) {
-      context.doubleType.write(writer, _originY);
+      context.doubleType.writeProperty(originYPropertyKey, writer, _originY);
     }
   }
 

@@ -53,7 +53,8 @@ abstract class Core<T extends CoreContext> {
   @protected
   void changeNonNull();
 
-  void writeRuntime(BinaryWriter writer, HashMap<Id, int> idLookup) {
+  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
+    writer.writeVarUint(coreType);
     writeRuntimeProperties(writer, idLookup);
   }
 

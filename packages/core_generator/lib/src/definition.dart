@@ -153,11 +153,12 @@ class Definition {
     }
 
     var importList = imports.toList(growable: false)..sort();
-    code.writeAll(
-        importList.where((item) => item.indexOf('import \'package:') == 0),
-        '\n');
+
     code.writeAll(
         importList.where((item) => item.indexOf('import \'package:') != 0),
+        '\n');
+    code.writeAll(
+        importList.where((item) => item.indexOf('import \'package:') == 0),
         '\n');
 
     code.write(
@@ -201,12 +202,13 @@ class Definition {
         if (property.type is IdFieldType) {
           code.writeln('''if(_${property.name} != null) {
           var value = idLookup[_${property.name}];
-          assert(value != null);
-          context.intType.write(writer, value);
+          if(value != null) {
+            context.intType.writeProperty(${property.name}PropertyKey, writer, value);
+          }
         }''');
         } else {
           code.writeln('''if(_${property.name} != null) {
-          context.${property.type.uncapitalizedName}Type.write(writer, _${property.name});
+          context.${property.type.uncapitalizedName}Type.writeProperty(${property.name}PropertyKey, writer, _${property.name});
         }''');
         }
       }

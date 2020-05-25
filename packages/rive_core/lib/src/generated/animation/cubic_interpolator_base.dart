@@ -2,10 +2,10 @@
 /// lib/src/generated/animation/cubic_interpolator_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'dart:collection';
 
 abstract class CubicInterpolatorBase<T extends RiveCoreContext>
     extends Core<T> {
@@ -114,16 +114,16 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext>
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     if (_x1 != null) {
-      context.doubleType.write(writer, _x1);
+      context.doubleType.writeProperty(x1PropertyKey, writer, _x1);
     }
     if (_y1 != null) {
-      context.doubleType.write(writer, _y1);
+      context.doubleType.writeProperty(y1PropertyKey, writer, _y1);
     }
     if (_x2 != null) {
-      context.doubleType.write(writer, _x2);
+      context.doubleType.writeProperty(x2PropertyKey, writer, _x2);
     }
     if (_y2 != null) {
-      context.doubleType.write(writer, _y2);
+      context.doubleType.writeProperty(y2PropertyKey, writer, _y2);
     }
   }
 
