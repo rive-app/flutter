@@ -91,14 +91,17 @@ class TopNav extends StatelessWidget {
         PopupContextItem(
           'New File',
           select: () async {
-            if (owner is Team) {
-              await FileManager().createFile(folderId, owner.ownerId);
-            } else {
-              await FileManager().createFile(folderId);
-            }
-            // TODO: open file
+            final createdFile = (owner is Team)
+                ? await FileManager().createFile(folderId, owner.ownerId)
+                : await FileManager().createFile(folderId);
+
             FileManager().loadFolders(owner);
             Plumber().message(currentDirectory);
+            RiveContext.of(context).open(
+              createdFile.fileOwnerId,
+              createdFile.id,
+              createdFile.name,
+            );
           },
         ),
         PopupContextItem(
