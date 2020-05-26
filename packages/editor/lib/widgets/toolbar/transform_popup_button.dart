@@ -28,7 +28,7 @@ class TransformPopupButton extends StatelessWidget {
             icon: AutoTool.instance.icon,
             listenable: file.stage.toolListenable,
             isSelected: () => file.stage.tool == AutoTool.instance,
-            shortcut: ShortcutAction.translateTool,
+            shortcut: ShortcutAction.autoTool,
             select: () => file.rive.triggerAction(ShortcutAction.autoTool),
           ),
           ToolPopupItem(

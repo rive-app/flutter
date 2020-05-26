@@ -136,12 +136,6 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
       ],
     ),
     Shortcut(
-      ShortcutAction.autoTool,
-      [
-        ShortcutKey.v,
-      ],
-    ),
-    Shortcut(
       ShortcutAction.rotateTool,
       [
         ShortcutKey.r,
