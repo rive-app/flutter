@@ -17,6 +17,7 @@ class MeDM extends UserDM {
     this.notificationCount,
     this.verified,
     this.notice,
+    this.socialLink,
   }) : super(
           ownerId: ownerId,
           name: name,
@@ -31,6 +32,7 @@ class MeDM extends UserDM {
   final int notificationCount;
   final bool verified;
   final String notice;
+  final SocialLink socialLink;
 
   /// Creates a model from JSON:
   ///
@@ -48,10 +50,10 @@ class MeDM extends UserDM {
   ///    'notice':'confirm-email'
   /// }
   factory MeDM.fromData(Map<String, dynamic> data) => MeDM(
-        signedIn: data.getBool('signedIn'),
-        id: data.getInt('id'),
         ownerId: data.getInt('ownerId'),
         name: data.getString('name'),
+        signedIn: data.getBool('signedIn'),
+        id: data.getInt('id'),
         username: data.getString('username'),
         avatarUrl: data.getString('avatar'),
         isAdmin: data.getBool('isAdmin'),
@@ -61,6 +63,42 @@ class MeDM extends UserDM {
         notice: data.getString('notice'),
       );
 
+  /// Create a model from JSON data
+  ///
+  /// {
+  ///   nm: [google|facebook|twitter],
+  ///   em: user@rive.app,
+  /// }
+  /// 
+  /// This model is for a user that can connect their social account
+  /// to their Rive account. No detail other than the social network name
+  /// and the email associated with the account are provided.
+  factory MeDM.fromSocialLink(Map<String, Object> data) => MeDM(
+      ownerId: null,
+      name: null,
+      signedIn: false,
+      id: null,
+      socialLink: SocialLink(
+        socialNetwork: data['nm'],
+        email: data['em'],
+      ));
+
   @override
-  String toString() => 'MeDM($id, $name)';
+  String toString() {
+    if (socialLink == null) {
+      return 'MeDM($id, $name)';
+    } else {
+      return '<SocialLinkMe: ($socialLink)>';
+    }
+  }
+}
+
+class SocialLink {
+  const SocialLink({
+    @required this.socialNetwork,
+    @required this.email,
+  });
+
+  final String socialNetwork;
+  final String email;
 }

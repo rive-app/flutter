@@ -14,7 +14,12 @@ class MeApi {
   Future<MeDM> get whoami async {
     final res = await api.getFromPath('/api/me');
     try {
-      final data = json.decode(res.body) as Map<String, dynamic>;
+      final data = json.decode(res.body) as Map<String, Object>;
+      final extra = data['extra'];
+      if (_canLinkAccounts(extra)) {
+        return MeDM.fromSocialLink(extra);
+      }
+
       // Check that the user's signed in
       if (!_isSignedIn(data)) {
         return null;
@@ -29,6 +34,13 @@ class MeApi {
   /// Checks to see if the user's signed in
   bool _isSignedIn(Map<String, Object> data) => data['signedIn'];
 
+  bool _canLinkAccounts(Object extra) {
+    if (extra is Map<String, Object>) {
+      return extra.containsKey('nm');
+    }
+    return false;
+  }
+
   Future<bool> signout() async {
     var response = await api.getFromPath('/signout');
     if (response.statusCode == 200 || response.statusCode == 302) {
@@ -36,5 +48,35 @@ class MeApi {
       return true;
     }
     return false;
+  }
+
+  Future<MeDM> linkAccounts() async {
+    try {
+      final res = await api.getFromPath('/api/linkAccount');
+      final data = json.decode(res.body) as Map<String, Object>;
+      if (!_isSignedIn(data)) {
+        return null;
+      }
+      return MeDM.fromData(data);
+    } on FormatException catch (e) {
+      _log.severe("Error from '/api/linkAccounts': $e");
+      rethrow;
+    }
+  }
+
+  Future<void> stopLink() async {
+    try {
+      await api.getFromPath('/api/cancelLink');
+    } on FormatException catch (e) {
+      _log.severe("Error from '/api/linkAccounts': $e");
+      rethrow;
+    }
+  }
+
+  Future<void> clearError() async {
+    var response = await api.getFromPath('/api/clearError');
+    if (response.statusCode != 200) {
+      _log.severe("Couldn't clear the errors cookie.");
+    }
   }
 }

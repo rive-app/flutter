@@ -58,4 +58,29 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
   /// Stubbed out for web; does nothing except return true
   @override
   Future<bool> closeWebView(String key) => Future.value(true);
+
+  @override
+  Future<String> getErrorMessage() async {
+    var cookieString = html.window.document.cookie;
+    final cookies = <String, String>{};
+    var allCookies = cookieString.split('; ');
+
+    for (final cookie in allCookies) {
+      var kvCookie = cookie.split('=');
+      if (kvCookie.length != 2) {
+        continue;
+      }
+
+      var k = kvCookie[0];
+      var v = kvCookie[1];
+      cookies[k] = v;
+    }
+
+    var res = cookies['errorMsg'];
+    if (res != null) {
+      // Clean up error before returning.
+      res = Uri.decodeComponent(res);
+    }
+    return res;
+  }
 }
