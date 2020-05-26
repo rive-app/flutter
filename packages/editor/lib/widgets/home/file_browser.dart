@@ -12,6 +12,8 @@ import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/list_popup.dart';
 
 typedef FolderContentsBuilder = Widget Function(FolderContents, Selection);
 
@@ -26,9 +28,15 @@ const double headerHeight = 60;
 const double horizontalPadding = 26;
 const double sectionPadding = 30;
 
-class FileBrowserWrapper extends StatelessWidget {
+class FileBrowserWrapper extends StatefulWidget {
+  @override
+  _FileBrowserWrapperState createState() => _FileBrowserWrapperState();
+}
+
+class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
   final scrollController = ScrollController();
   final selectionManager = SelectionManager();
+  bool rightClick = false;
 
   void selectPosition(Offset offset, Size size) {
     final directory = Plumber().peek<CurrentDirectory>();
@@ -48,7 +56,6 @@ class FileBrowserWrapper extends StatelessWidget {
 
     // add scroll offset
     workingDy += scrollController.offset;
-    print(scrollController);
     // remove header
     workingDy -= headerHeight + sectionPadding;
     // remove padding
@@ -74,7 +81,8 @@ class FileBrowserWrapper extends StatelessWidget {
           return selectionManager.clearSelection();
         elementIndex = row * maxColumns + column;
         if (elementIndex < folderContents.folders.length) {
-          selectionManager.selectFolder(folderContents.folders[elementIndex]);
+          return selectionManager
+              .selectFolder(folderContents.folders[elementIndex]);
         }
       }
       workingDy -= foldersHeight + sectionPadding;
@@ -101,13 +109,30 @@ class FileBrowserWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return PropagatingListener(
       onPointerDown: (event) {
-        // print('down $event');
+        rightClick = false;
         if (event.pointerEvent is PointerDownEvent) {
           selectPosition(event.pointerEvent.localPosition, context.size);
+          rightClick = event.pointerEvent.buttons == 2;
         }
       },
       onPointerUp: (event) {
-        // print('up $event');
+        // TODO: wat this on mouse/ windows
+        if (rightClick && Plumber().peek<Selection>() != null) {
+          ListPopup.show(context,
+              itemBuilder: (popupContext, item, isHovered) =>
+                  item.itemBuilder(popupContext, isHovered),
+              items: [
+                PopupContextItem(
+                  'Rename (not implemented)',
+                  select: () async {},
+                ),
+                PopupContextItem(
+                  'Delete (not implemented)',
+                  select: () async {},
+                )
+              ],
+              position: event.pointerEvent.position);
+        }
       },
       onPointerCancel: (event) {
         // print('pointer cancel $event');
