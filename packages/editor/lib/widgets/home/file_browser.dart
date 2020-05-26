@@ -1,4 +1,9 @@
+import 'dart:math';
+
+import 'package:cursor/propagating_listener.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
@@ -8,18 +13,141 @@ import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
-typedef FolderContentsBuilder = Widget Function(FolderContents);
+typedef FolderContentsBuilder = Widget Function(FolderContents, Selection);
+
+// 50 + 8 for the border.
+const double folderCellHeight = 58;
+// 182 + 8 for the border.
+const double fileCellHeight = 190;
+// 187 + 8 for the border.
+const double cellWidth = 195;
+const double spacing = 22;
+const double headerHeight = 60;
+const double horizontalPadding = 26;
+const double sectionPadding = 30;
+
+class FileBrowserWrapper extends StatelessWidget {
+  final scrollController = ScrollController();
+  final selectionManager = SelectionManager();
+
+  void selectPosition(Offset offset, Size size) {
+    final directory = Plumber().peek<CurrentDirectory>();
+    if (directory == null) return selectionManager.clearSelection();
+    final folderContents = Plumber().peek<FolderContents>(directory.hashId);
+    if (folderContents == null) return selectionManager.clearSelection();
+
+    final availableWidth = size.width - horizontalPadding * 2;
+    final int maxColumns =
+        ((availableWidth + spacing) / (cellWidth + spacing)).floor();
+
+    var workingDy = offset.dy;
+    var workingDx = offset.dx;
+    int row;
+    int column;
+    int elementIndex;
+
+    // add scroll offset
+    workingDy += scrollController.offset;
+    print(scrollController);
+    // remove header
+    workingDy -= headerHeight + sectionPadding;
+    // remove padding
+    workingDx -= horizontalPadding;
+
+    if (workingDx < 0) return selectionManager.clearSelection();
+    column = (workingDx / (cellWidth + spacing)).floor();
+    // clicked to the right of the target column
+    if (workingDx - (column * (cellWidth + spacing)) > cellWidth)
+      return selectionManager.clearSelection();
+    if (workingDx < 0) return selectionManager.clearSelection();
+    if (column + 1 > maxColumns) return selectionManager.clearSelection();
+
+    if (folderContents.folders.isNotEmpty) {
+      final folderRows = (folderContents.folders.length / maxColumns).ceil();
+      final foldersHeight =
+          folderRows * folderCellHeight + (folderRows - 1) * spacing;
+      if (workingDy < foldersHeight) {
+        // clicked into folders
+        row = (workingDy / (folderCellHeight + spacing)).floor();
+        // clicked to the right of the target column
+        if (workingDy - (row * (folderCellHeight + spacing)) > folderCellHeight)
+          return selectionManager.clearSelection();
+        elementIndex = row * maxColumns + column;
+        if (elementIndex < folderContents.folders.length) {
+          selectionManager.selectFolder(folderContents.folders[elementIndex]);
+        }
+      }
+      workingDy -= foldersHeight + sectionPadding;
+    }
+    if (workingDy < 0) return selectionManager.clearSelection();
+    if (folderContents.files.isNotEmpty) {
+      final fileRows = (folderContents.files.length / maxColumns).ceil();
+      final filesHeight = fileRows * fileCellHeight + (fileRows - 1) * spacing;
+      if (workingDy < filesHeight) {
+        // clicked into files
+        row = (workingDy / (fileCellHeight + spacing)).floor();
+        if (workingDy - (row * (fileCellHeight + spacing)) > fileCellHeight)
+          return selectionManager.clearSelection();
+        elementIndex = row * maxColumns + column;
+        if (elementIndex <= folderContents.files.length) {
+          return selectionManager
+              .selectFile(folderContents.files[elementIndex]);
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PropagatingListener(
+      onPointerDown: (event) {
+        // print('down $event');
+        if (event.pointerEvent is PointerDownEvent) {
+          selectPosition(event.pointerEvent.localPosition, context.size);
+        }
+      },
+      onPointerUp: (event) {
+        // print('up $event');
+      },
+      onPointerCancel: (event) {
+        // print('pointer cancel $event');
+      },
+      onPointerMove: (event) {
+        // print('pointer move $event');
+      },
+      onPointerSignal: (event) {
+        if (event.pointerEvent is PointerScrollEvent) {
+          var scrollEvent = event.pointerEvent as PointerScrollEvent;
+          var newOffset = scrollController.offset + scrollEvent.scrollDelta.dy;
+          newOffset = max(0, min(100, newOffset));
+          scrollController.jumpTo(newOffset);
+        }
+      },
+      child: Stack(
+        children: [
+          FileBrowser(scrollController),
+          // IgnorePointer(
+          //   child: FileBrowser(scrollController),
+          // ),
+        ],
+      ),
+    );
+  }
+}
 
 class FileBrowser extends StatelessWidget {
-  const FileBrowser();
+  final ScrollController scrollController;
 
-  Widget _folderGrid(Iterable<Folder> folders) {
+  const FileBrowser(this.scrollController, {Key key}) : super(key: key);
+
+  Widget _folderGrid(Iterable<Folder> folders, Selection selection) {
     return _grid(
-      cellHeight: 58, // 50 + 8 for the border.
+      cellHeight: folderCellHeight,
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var folder = folders.elementAt(index);
-          return BrowserFolder(folder.name, folder.id);
+          return BrowserFolder(folder.name, folder.id,
+              selection?.folders?.contains(folder) == true);
         },
         childCount: folders.length,
       ),
@@ -32,18 +160,18 @@ class FileBrowser extends StatelessWidget {
   }) {
     return SliverGrid(
       gridDelegate: SliverGridDelegateFixedSize(
-        crossAxisExtent: 195, // 187 + 8 of the border.
+        crossAxisExtent: cellWidth, // 187 + 8 of the border.
         mainAxisExtent: cellHeight,
-        mainAxisSpacing: 22,
-        crossAxisSpacing: 22,
+        mainAxisSpacing: spacing,
+        crossAxisSpacing: spacing,
       ),
       delegate: cellBuilder,
     );
   }
 
-  Widget _fileGrid(Iterable<File> files) {
+  Widget _fileGrid(Iterable<File> files, Selection selection) {
     return _grid(
-      cellHeight: 190,
+      cellHeight: fileCellHeight,
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var file = files.elementAt(index);
@@ -53,7 +181,8 @@ class FileBrowser extends StatelessWidget {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return BrowserFile(snapshot.data);
+                  return BrowserFile(snapshot.data,
+                      selection?.files?.contains(snapshot.data) == true);
                 }
               });
         },
@@ -74,7 +203,12 @@ class FileBrowser extends StatelessWidget {
           return ValueStreamBuilder<FolderContents>(
             stream: Plumber().getStream<FolderContents>(cd.hashId),
             builder: (context, fcSnapshot) {
-              return childBuilder(fcSnapshot.data);
+              return ValueStreamBuilder<Selection>(
+                  stream: Plumber().getStream<Selection>(),
+                  builder: (context, selectionSnapshot) {
+                    return childBuilder(
+                        fcSnapshot.data, selectionSnapshot.data);
+                  });
             },
           );
         } else {
@@ -121,7 +255,7 @@ class FileBrowser extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _stream(
-      (data) {
+      (data, selection) {
         final slivers = <Widget>[];
         slivers.add(_header());
 
@@ -135,24 +269,24 @@ class FileBrowser extends StatelessWidget {
           // Padding below header.
           slivers.add(
             const SliverToBoxAdapter(
-              child: SizedBox(height: 30),
+              child: SizedBox(height: sectionPadding),
             ),
           );
           if (hasFolders) {
-            slivers.add(_folderGrid(folders));
+            slivers.add(_folderGrid(folders, selection));
           }
 
           // Padding between grids.
           if (hasFiles && hasFolders) {
             slivers.add(
               const SliverToBoxAdapter(
-                child: SizedBox(height: 30),
+                child: SizedBox(height: sectionPadding),
               ),
             );
           }
 
           if (hasFiles) {
-            slivers.add(_fileGrid(files));
+            slivers.add(_fileGrid(files, selection));
           } else {
             // Empty view.
             slivers.add(
@@ -181,10 +315,13 @@ class FileBrowser extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: 26,
+            horizontal: horizontalPadding,
           ),
           child: CustomScrollView(
+            primary: false,
+            controller: scrollController,
             slivers: slivers,
+            physics: NeverScrollableScrollPhysics(),
           ),
         );
       },
@@ -210,10 +347,10 @@ class _SliverHeader extends SliverPersistentHeaderDelegate {
   final Widget child;
 
   @override
-  double get maxExtent => 60;
+  double get maxExtent => headerHeight;
 
   @override
-  double get minExtent => 60;
+  double get minExtent => headerHeight;
 
   @override
   bool shouldRebuild(_SliverHeader oldDelegate) {

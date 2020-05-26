@@ -73,6 +73,7 @@ Future<void> main() async {
   UserManager();
   TeamManager();
   FileManager();
+  SelectionManager();
   RiveManager();
   NotificationManager();
 
