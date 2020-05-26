@@ -10,6 +10,7 @@ import 'package:rive_editor/widgets/common/rive_text_field.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Second and final panel in the teams wizard
@@ -68,6 +69,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
     final colors = RiveTheme.of(context).colors;
     final textStyles = RiveTheme.of(context).textStyles;
     final teamOptions = [TeamsOption.basic];
+    final uiStrings = UIStrings.of(context);
 
     return ComboBox<TeamsOption>(
       popupWidth: 100,
@@ -77,7 +79,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
       valueColor: textStyles.fileGreyTextLarge.color,
       options: teamOptions,
       value: sub.option,
-      toLabel: (option) => option.name.capsFirst,
+      toLabel: (option) => uiStrings.withKey(option.name).capsFirst,
       contentPadding: const EdgeInsets.only(bottom: 3),
       change: (option) => sub.option = option,
     );

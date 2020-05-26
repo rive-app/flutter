@@ -8,10 +8,10 @@ extension PlanExtension on TeamsOption {
   String get name {
     switch (this) {
       case TeamsOption.premium:
-        return 'org';
+        return 'premium';
       case TeamsOption.basic:
       default:
-        return 'team';
+        return 'normal';
     }
   }
 }
