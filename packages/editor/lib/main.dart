@@ -60,6 +60,10 @@ Future<void> main() async {
     (_) {
       win_utils.hideTitleBar();
       win_utils.setSize(kDefaultWIndowSize);
+      win_utils.initDropTarget();
+      win_utils.listenFilesDropped((files) {
+        print("We got $files");
+      });
     },
   );
 

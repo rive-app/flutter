@@ -729,6 +729,7 @@ class Definition {
 
     // Build is/setter/getter for specific types.
     ctxCode.writeln('''
+        @override
         CoreFieldType coreType(int propertyKey) {
           switch(propertyKey) {
           ''');

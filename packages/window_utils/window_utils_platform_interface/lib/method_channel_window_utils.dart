@@ -20,6 +20,38 @@ final _random = Random.secure();
 
 /// An implementation of [WindowUtilsPlatform] that uses method channels.
 class MethodChannelWindowUtils extends WindowUtilsPlatform {
+  MethodChannelWindowUtils() {
+    _channel.setMethodCallHandler(_channelCallHandler);
+  }
+
+  Future<dynamic> _channelCallHandler(MethodCall call) async {
+    switch (call.method) {
+      case 'filesDropped':
+        assert(
+            call.arguments is List<dynamic> &&
+                (call.arguments as List<dynamic>).cast<String>() != null,
+            'expects the plugin to callback with a list of filenames');
+        List<DroppedFile> droppedFiles = [];
+
+        for (final filename
+            in (call.arguments as List<dynamic>).cast<String>()) {
+          var finalSlash = filename.lastIndexOf('/');
+          droppedFiles.add(
+            DroppedFile(
+              finalSlash == -1 ? filename : filename.substring(finalSlash + 1),
+              File(filename).readAsBytesSync(),
+            ),
+          );
+        }
+        if (droppedFiles.isNotEmpty) {
+          filesDropped?.call(droppedFiles);
+        }
+        return true;
+      default:
+        return false;
+    }
+  }
+
   Future<String> openWebView(String key, String url,
       {Offset offset, Size size, String jsMessage = ''}) async {
     return _channel.invokeMethod<String>('openWebView', {
@@ -314,4 +346,7 @@ class MethodChannelWindowUtils extends WindowUtilsPlatform {
 
   @override
   Future<String> getErrorMessage() async => '';
+
+  Future<bool> initDropTarget() =>
+      _channel.invokeMethod<bool>('initDropTarget');
 }

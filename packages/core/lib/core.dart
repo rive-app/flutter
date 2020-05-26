@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:core/field_types/core_field_type.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 import 'package:core/id.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'coop/change.dart';
 import 'coop/connect_result.dart';
@@ -56,6 +59,8 @@ abstract class Core<T extends CoreContext> {
   void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
     writer.writeVarUint(coreType);
     writeRuntimeProperties(writer, idLookup);
+    // Writer Arnold, I mean Termy.
+    writer.writeVarUint(0);
   }
 
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup);
@@ -670,7 +675,12 @@ abstract class CoreContext implements LocalSettings {
     // });
   }
 
+  /// Returns true when a property should only be used in the editor and will not
+  /// be available at runtime.
   bool isEditorOnly(int propertyKey);
+
+  /// Returns the [CoreFieldType] mapped to the [propertyKey].
+  CoreFieldType coreType(int propertyKey);
 
   @protected
   ChangeSet coopMakeChangeSet(CorePropertyChanges changes, {bool useFrom}) {
@@ -849,6 +859,58 @@ abstract class CoreContext implements LocalSettings {
   }
 
   void connectionStateChanged(CoopConnectionState state);
+
+  T readRuntimeObject<T extends Core<CoreContext>>(BinaryReader reader,
+      [RuntimeRemapId remap]) {
+    int coreObjectKey = reader.readVarUint();
+
+    var object = makeCoreInstance(coreObjectKey);
+    if (object is! T) {
+      return null;
+    }
+
+    while (true) {
+      int propertyKey = reader.readVarUint();
+      if (propertyKey == 0) {
+        // Terminator. https://media.giphy.com/media/7TtvTUMm9mp20/giphy.gif
+        break;
+      }
+      int propertyLength = reader.readVarUint();
+      Uint8List valueBytes = reader.read(propertyLength);
+
+      var fieldType = coreType(propertyKey);
+      if (fieldType == null) {
+        // This is considered an acceptable failure. A runtime/editor may not
+        // support the same properties that were exported. The older object
+        // could still function without them, however, so it's up to the
+        // implementation to make sure that major versions are revved when
+        // breaking properties are added. Note that we intentionally first read
+        // the entire value bytes for the property so we can advance as expected
+        // even if we are skipping this value.
+        continue;
+      }
+
+      // We know what to expect, let's try to read the value. We instance a new
+      // reader here so that we don't overflow the exact length we're allowed to
+      // read.
+      var valueReader = BinaryReader.fromList(valueBytes);
+
+      if (fieldType == remap?.fieldType) {
+        // Id fields get remapped so we read them in as integers allowing an
+        // external process to then map those integers to those ids. This should
+        // be done before the batch add wrapping this entire operation
+        // completes.
+        remap.properties.add(RuntimeIdProperty(object, propertyKey,
+            remap.runtimeFieldType.deserialize(valueReader)));
+      } else {
+        // This will attempt to set the object property, but failure here is
+        // acceptable.
+        setObjectProperty(
+            object, propertyKey, fieldType.deserialize(valueReader));
+      }
+    }
+    return object as T;
+  }
 }
 
 class FreshChange {
@@ -856,4 +918,20 @@ class FreshChange {
   final bool useFrom;
 
   const FreshChange(this.change, this.useFrom);
+}
+
+class RuntimeIdProperty {
+  Core<CoreContext> object;
+  int propertyKey;
+  int value;
+  RuntimeIdProperty(this.object, this.propertyKey, this.value);
+}
+
+class RuntimeRemapId {
+  final CoreFieldType<Id> fieldType;
+  final CoreFieldType<int> runtimeFieldType;
+
+  Set<RuntimeIdProperty> properties = {};
+
+  RuntimeRemapId(this.fieldType, this.runtimeFieldType);
 }

@@ -11,7 +11,8 @@
         "int": 43,
         "string": "activeArtboardId"
       },
-      "description": "Identifier used to track the last active artboard."
+      "description": "Identifier used to track the last active artboard.",
+      "editorOnly": true
     },
     "mainArtboardId": {
       "type": "Id",
@@ -28,7 +29,8 @@
         "int": 45,
         "string": "colorValue"
       },
-      "description": "The background color."
+      "description": "The background color.",
+      "editorOnly": true
     }
   }
 }

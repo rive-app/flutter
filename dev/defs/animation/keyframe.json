@@ -12,7 +12,8 @@
         "int": 72,
         "string": "keyedpropertyid"
       },
-      "description": "The id of the KeyedProperty this KeyFrame belongs to."
+      "description": "The id of the KeyedProperty this KeyFrame belongs to.",
+      "editorOnly": true
     },
     "frame": {
       "type": "int",

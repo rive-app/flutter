@@ -32,6 +32,7 @@ abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
     Id from = _keyedObjectId;
     _keyedObjectId = value;
     onPropertyChanged(keyedObjectIdPropertyKey, from, value);
+    context?.editorPropertyChanged(this, keyedObjectIdPropertyKey, from, value);
     keyedObjectIdChanged(from, value);
   }
 
@@ -72,12 +73,6 @@ abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_keyedObjectId != null) {
-      var value = idLookup[_keyedObjectId];
-      if (value != null) {
-        context.intType.writeProperty(keyedObjectIdPropertyKey, writer, value);
-      }
-    }
     if (_propertyKey != null) {
       context.intType
           .writeProperty(propertyKeyPropertyKey, writer, _propertyKey);

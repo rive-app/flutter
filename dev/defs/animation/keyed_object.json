@@ -19,7 +19,8 @@
         "int": 52,
         "string": "animationid"
       },
-      "description": "The id of the animation this keyed object is in."
+      "description": "The id of the animation this keyed object is in.",
+      "editorOnly": true
     }
   }
 }

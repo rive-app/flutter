@@ -68,26 +68,28 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
 
   bool validateFractional() {
     var previousIndex = _minIndex;
-
+    bool wasValid = true;
     for (final item in _values) {
       var order = orderOf(item);
       if (order == null) {
+        wasValid = false;
         continue;
       }
       if (order.compareTo(previousIndex) > 0) {
         previousIndex = order;
       }
     }
-    bool wasValid = true;
+    if (wasValid) {
+      return true;
+    }
     for (final item in _values) {
       if (orderOf(item) == null) {
         var index = FractionalIndex.between(previousIndex, _maxIndex);
         setOrderOf(item, index);
         previousIndex = index;
-        wasValid = false;
       }
     }
-    return wasValid;
+    return false;
   }
 
   @override
@@ -104,6 +106,24 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
     var previousIndex = _values.isEmpty ? _minIndex : orderOf(_values.last);
     setOrderOf(item, FractionalIndex.between(previousIndex, _maxIndex));
     _values.add(item);
+  }
+
+  /// Gets the next fractional index safely, most of the other methods here
+  /// assume the index list is valid, this one does not. It'll find the best
+  /// next index. It's meant to be used to help implementations patch up their
+  /// lists as necessary.
+  FractionalIndex get nextFractionalIndex {
+    var previousIndex = _minIndex;
+    for (final item in _values) {
+      var order = orderOf(item);
+      if (order == null) {
+        continue;
+      }
+      if (order.compareTo(previousIndex) > 0) {
+        previousIndex = order;
+      }
+    }
+    return FractionalIndex.between(previousIndex, _maxIndex);
   }
 
   void prepend(T item) {

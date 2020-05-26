@@ -8,6 +8,7 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 import 'linear_animation.dart';
 export 'package:rive_core/src/generated/animation/keyed_object_base.dart';
@@ -155,4 +156,13 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() =>
       animation?.internalKeyFrameValueChanged();
+
+  @override
+  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, idLookup);
+    writer.writeVarUint(_keyedProperties.length);
+    for (final keyedProperty in _keyedProperties.values) {
+      keyedProperty.writeRuntime(writer, idLookup);
+    }
+  }
 }

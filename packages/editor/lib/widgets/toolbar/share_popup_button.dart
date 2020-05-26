@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rive_core/runtime_exporter.dart';
+import 'package:rive_core/runtime/runtime_exporter.dart';
+import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:rive_editor/platform/file_save.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -35,7 +36,7 @@ class SharePopupButton extends StatelessWidget {
             // Instance the exporter with some file meta data.
             var exporter = RuntimeExporter(
               core: activeFile.core,
-              info: RuntimeFileInfo(
+              info: RuntimeHeader(
                 fileId: activeFile.fileId,
                 ownerId: activeFile.ownerId,
               ),

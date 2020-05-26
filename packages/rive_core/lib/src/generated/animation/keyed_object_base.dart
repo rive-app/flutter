@@ -54,6 +54,7 @@ abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
     Id from = _animationId;
     _animationId = value;
     onPropertyChanged(animationIdPropertyKey, from, value);
+    context?.editorPropertyChanged(this, animationIdPropertyKey, from, value);
     animationIdChanged(from, value);
   }
 
@@ -75,12 +76,6 @@ abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
       var value = idLookup[_objectId];
       if (value != null) {
         context.intType.writeProperty(objectIdPropertyKey, writer, value);
-      }
-    }
-    if (_animationId != null) {
-      var value = idLookup[_animationId];
-      if (value != null) {
-        context.intType.writeProperty(animationIdPropertyKey, writer, value);
       }
     }
   }

@@ -31,6 +31,8 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
     Id from = _activeArtboardId;
     _activeArtboardId = value;
     onPropertyChanged(activeArtboardIdPropertyKey, from, value);
+    context?.editorPropertyChanged(
+        this, activeArtboardIdPropertyKey, from, value);
     activeArtboardIdChanged(from, value);
   }
 
@@ -77,6 +79,7 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
     int from = _colorValue;
     _colorValue = value;
     onPropertyChanged(colorValuePropertyKey, from, value);
+    context?.editorPropertyChanged(this, colorValuePropertyKey, from, value);
     colorValueChanged(from, value);
   }
 
@@ -99,21 +102,11 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_activeArtboardId != null) {
-      var value = idLookup[_activeArtboardId];
-      if (value != null) {
-        context.intType
-            .writeProperty(activeArtboardIdPropertyKey, writer, value);
-      }
-    }
     if (_mainArtboardId != null) {
       var value = idLookup[_mainArtboardId];
       if (value != null) {
         context.intType.writeProperty(mainArtboardIdPropertyKey, writer, value);
       }
-    }
-    if (_colorValue != null) {
-      context.intType.writeProperty(colorValuePropertyKey, writer, _colorValue);
     }
   }
 

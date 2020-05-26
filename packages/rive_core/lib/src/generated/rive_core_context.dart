@@ -1419,15 +1419,21 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   bool isEditorOnly(int propertyKey) {
     switch (propertyKey) {
+      case KeyedObjectBase.animationIdPropertyKey:
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
       case ComponentBase.dependentIdsPropertyKey:
       case ComponentBase.childOrderPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
+      case BackboardBase.activeArtboardIdPropertyKey:
+      case BackboardBase.colorValuePropertyKey:
         return true;
       default:
         return false;
     }
   }
 
+  @override
   CoreFieldType coreType(int propertyKey) {
     switch (propertyKey) {
       case KeyedObjectBase.objectIdPropertyKey:
