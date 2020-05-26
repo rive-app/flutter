@@ -17,6 +17,7 @@ class Me extends User {
     this.notificationCount,
     this.verified,
     this.notice,
+    this.socialLink,
   }) : super(
             ownerId: ownerId,
             name: name,
@@ -30,6 +31,7 @@ class Me extends User {
   final int notificationCount;
   final bool verified;
   final String notice;
+  final SocialLink socialLink;
 
   factory Me.fromDM(MeDM me) => Me(
         signedIn: me?.signedIn,
@@ -43,6 +45,7 @@ class Me extends User {
         notificationCount: me?.notificationCount,
         verified: me?.verified,
         notice: me?.notice,
+        socialLink: me?.socialLink,
       );
 
   bool get isEmpty => ownerId == null;
@@ -54,7 +57,13 @@ class Me extends User {
   int get hashCode => ownerId;
 
   @override
-  String toString() => 'Me($ownerId, $name)';
+  String toString() {
+    if (socialLink == null) {
+      return 'Me($ownerId, $name)';
+    } else {
+      return '<SocialLinkMe: ($socialLink)>';
+    }
+  }
 
   @override
   MeDM get asDM => MeDM(

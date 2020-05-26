@@ -3,6 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_api/auth.dart';
 import 'package:rive_api/manager.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/common/editor_switch.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
@@ -13,7 +15,7 @@ import 'package:rive_editor/widgets/login/validators.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 
-enum LoginPage { login, register, recover }
+enum LoginPage { login, register, recover, link }
 typedef AuthAction = Future<AuthResponse> Function();
 
 class Login extends StatefulWidget {
@@ -30,7 +32,7 @@ class _LoginState extends State<Login> {
 
   bool _buttonDisabled = false;
   bool _isSending = false;
-  LoginPage _currentPanel = LoginPage.login;
+  LoginPage _currentPanel;
   String _usernameError, _emailError, _passwordError;
 
   @override
@@ -72,6 +74,12 @@ class _LoginState extends State<Login> {
       emailValidator,
       passwordValidator,
     ]);
+    var currentMe = Plumber().peek<Me>();
+    if (currentMe.socialLink != null) {
+      _currentPanel = LoginPage.link;
+    } else {
+      _currentPanel = LoginPage.login;
+    }
     super.initState();
   }
 
@@ -181,10 +189,116 @@ class _LoginState extends State<Login> {
         return _recoverForm();
       case LoginPage.register:
         return _registerForm();
+      case LoginPage.link:
+        return _linkAccountsForm();
       case LoginPage.login:
       default:
         return _loginForm();
     }
+  }
+
+  Future<void> _linkAccounts(bool shouldLink) async {
+    if (_buttonDisabled) {
+      return;
+    }
+
+    _disableButton(true);
+    try {
+      await UserManager().linkAccounts(shouldLink);
+      if (!shouldLink) {
+        // If we canceled the link
+        _disableButton(false);
+        _selectPanel(LoginPage.login);
+      }
+    } on Exception catch (e) {
+      _disableButton(false);
+    }
+  }
+
+  Widget _linkAccountsForm() {
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
+
+    final socialLink = Plumber().peek<Me>().socialLink;
+    assert(socialLink != null);
+    final socialEmail = socialLink.email;
+    final socialName = socialLink.socialNetwork[0].toUpperCase() +
+        socialLink.socialNetwork.substring(1);
+
+    return Column(
+      key: const ValueKey<int>(3),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: TextSpan(
+              style: styles.loginText.copyWith(height: 1.6),
+              text: 'A Rive account associated with ',
+              children: [
+                TextSpan(
+                  text: '$socialEmail',
+                  style: styles.loginText.copyWith(
+                    height: 1.6,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textButtonDark,
+                  ),
+                ),
+                const TextSpan(
+                    text: ' already exists.'
+                        '\nDo you want to link it with your '),
+                TextSpan(
+                  text: '$socialName',
+                  style: styles.loginText.copyWith(
+                    height: 1.6,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textButtonDark,
+                  ),
+                ),
+                const TextSpan(text: ' account?'),
+              ]),
+        ),
+        const SizedBox(height: 40),
+        Row(
+          children: [
+            SizedBox(
+              width: 145,
+              child: FlatIconButton(
+                label: 'Link Account',
+                onTap: () => _linkAccounts(true),
+                color: _buttonDisabled
+                    ? colors.buttonDarkDisabled
+                    : colors.textButtonDark,
+                textColor: _buttonDisabled
+                    ? colors.buttonDarkDisabledText
+                    : Colors.white,
+                hoverColor: _buttonDisabled
+                    ? colors.buttonDarkDisabled
+                    : colors.textButtonDark,
+                hoverTextColor: Colors.white,
+                radius: 20,
+                elevation: flatButtonIconElevation,
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+            ),
+            const SizedBox(width: 30),
+            SizedBox(
+              width: 145,
+              child: FlatIconButton(
+                label: 'Cancel',
+                onTap: () => _linkAccounts(false),
+                color: colors.buttonLight,
+                textColor: colors.buttonLightText,
+                hoverColor: colors.buttonLightHover,
+                hoverTextColor: colors.buttonLightText,
+                radius: 20,
+                elevation: flatButtonIconElevation,
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _recoverForm() {
@@ -571,6 +685,9 @@ class _LoginSwitch extends StatelessWidget {
       case LoginPage.recover:
         isLogin = null;
         break;
+      case LoginPage.link:
+        // Don't show on linking page.
+        return const SizedBox();
       case LoginPage.login:
       default:
         isLogin = false;

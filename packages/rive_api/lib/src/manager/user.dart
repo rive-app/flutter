@@ -24,6 +24,16 @@ class UserManager with Subscriptions {
   // used for testing atm.
   void set meApi(MeApi meApi) => _meApi = meApi;
 
+  Future<bool> linkAccounts(bool shouldLink) async {
+    if (shouldLink) {
+      var meMessage = Me.fromDM(await _meApi.linkAccounts());
+      _plumber.message<Me>(meMessage);
+    } else {
+      await _meApi.stopLink();
+    }
+    return true;
+  }
+
   void loadMe() async {
     _loadWithRetry();
   }
@@ -32,7 +42,6 @@ class UserManager with Subscriptions {
     var currentMe = _plumber.peek<Me>();
 
     var meMessage = Me.fromDM(await _meApi.whoami);
-
     // Skip duplicates.
     if (currentMe != meMessage) {
       _plumber.message<Me>(meMessage);
