@@ -92,3 +92,6 @@ Future<bool> removeCursorFromStack() =>
 Future<int> mouseStackCount() => WindowUtilsPlatform.instance.mouseStackCount();
 
 Future<bool> resetCursor() => WindowUtilsPlatform.instance.resetCursor();
+
+Future<String> getErrorMessage() =>
+    WindowUtilsPlatform.instance.getErrorMessage();

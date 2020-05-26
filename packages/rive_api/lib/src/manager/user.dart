@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/http.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:window_utils/window_utils.dart' as win_utils;
 
 class UserManager with Subscriptions {
   static UserManager _instance = UserManager._();
@@ -84,5 +86,17 @@ class UserManager with Subscriptions {
       logout();
     }
     return res;
+  }
+
+  /// On FlutterWeb: read the error message from the cookies, if present.
+  /// On desktop: empty response.
+  Future<String> get errorMessage async {
+    if (kIsWeb) {
+      final errorMessage = await win_utils.getErrorMessage();
+      // Clear error right away.
+      await _meApi.clearError();
+      return errorMessage;
+    }
+    return '';
   }
 }

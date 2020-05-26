@@ -311,4 +311,7 @@ class MethodChannelWindowUtils extends WindowUtilsPlatform {
     }
     return 'none';
   }
+
+  @override
+  Future<String> getErrorMessage() async => '';
 }

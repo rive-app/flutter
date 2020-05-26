@@ -72,4 +72,11 @@ class MeApi {
       rethrow;
     }
   }
+
+  Future<void> clearError() async {
+    var response = await api.getFromPath('/api/clearError');
+    if (response.statusCode != 200) {
+      _log.severe("Couldn't clear the errors cookie.");
+    }
+  }
 }

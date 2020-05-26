@@ -39,13 +39,14 @@ class _LoginState extends State<Login> {
   void initState() {
     // When logging in or registering with a social account, the server
     // can redirect back to this page on error.
-    final queryParameters = Uri.base.queryParameters;
-    if (queryParameters.containsKey('errorMsg')) {
+    UserManager().errorMessage.then((error) {
       // Display that error right if it is present, and display it under the
       // password error field as that is where we show errors in the
       // 'login' page.
-      _passwordError = queryParameters['errorMsg'];
-    }
+      setState(() {
+        _passwordError = error;
+      });
+    });
 
     // Register validators for the various fields.
     final usernameValidator = NameValidator(onFieldError: (errorString) {
