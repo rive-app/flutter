@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:core/debounce.dart';
 import 'package:core/error_logger/error_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

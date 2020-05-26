@@ -3,27 +3,12 @@ import 'package:rive_api/model.dart';
 import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
-class BrowserFile extends StatefulWidget {
-  const BrowserFile(this.file, {Key key}) : super(key: key);
+class BrowserFile extends StatelessWidget {
+  const BrowserFile(this.file, this.selected, {Key key}) : super(key: key);
   final File file;
+  final bool selected;
 
-  @override
-  State<StatefulWidget> createState() => _FileState();
-}
-
-class _FileState extends State<BrowserFile> {
-  bool _isHovered = false;
-  bool _isSelected = false; // TODO:
-
-  void setHover(bool val) {
-    if (val != _isHovered) {
-      setState(() {
-        _isHovered = val;
-      });
-    }
-  }
-
-  Widget get _label {
+  Widget _label(context) {
     final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
     return Padding(
@@ -32,7 +17,7 @@ class _FileState extends State<BrowserFile> {
         children: [
           Expanded(
             child: Text(
-              '${widget.file.name ?? 'Loading...'}',
+              '${file.name ?? 'Loading...'}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: styles.greyText,
@@ -44,9 +29,9 @@ class _FileState extends State<BrowserFile> {
   }
 
   // Internal radius looks better with an extra pixel of padding.
-  double get radiusDelta => _isHovered ? 5 : 0;
+  double get radiusDelta => selected ? 5 : 0;
 
-  Widget get _screenshot {
+  Widget _screenshot(context) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     return ClipRRect(
@@ -69,18 +54,15 @@ class _FileState extends State<BrowserFile> {
       /** TODO: Selection 
        * onClick: , */
       onDoubleClick: (_) {
-        final file = widget.file;
         RiveContext.of(context).open(file.fileOwnerId, file.id, file.name);
       },
       child: MouseRegion(
-        onEnter: (_) => setHover(true),
-        onExit: (_) => setHover(false),
         child: Container(
           decoration: BoxDecoration(
               color: colors.fileBackgroundLightGrey,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: _isHovered
+                color: selected
                     ? colors.fileSelectedBlue
                     : colors.fileBrowserBackground,
                 width: 4,
@@ -88,9 +70,9 @@ class _FileState extends State<BrowserFile> {
           child: Column(
             children: [
               Expanded(
-                child: _screenshot,
+                child: _screenshot(context),
               ),
-              _label,
+              _label(context),
             ],
           ),
         ),

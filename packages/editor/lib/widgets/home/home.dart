@@ -42,10 +42,10 @@ class Home extends StatelessWidget {
             builder: (context, snapshot) {
               switch (snapshot.data) {
                 case HomeSection.files:
-                  return const Expanded(
+                  return Expanded(
                     child: ColoredBox(
                       color: Colors.white,
-                      child: FileBrowser(),
+                      child: FileBrowserWrapper(),
                     ),
                   );
                   break;

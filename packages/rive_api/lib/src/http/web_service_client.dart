@@ -177,9 +177,19 @@ class WebServiceClient {
   Future<http.Response> get(String url) async {
     try {
       final client = getClient();
-      print('getting $url');
-      final response = await client.get(url, headers: headers);
 
+      var completed = false;
+
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!completed) {
+          print("GETTING $url is taking a long time!");
+        }
+      });
+
+      final timer = new Stopwatch()..start();
+      final response = await client.get(url, headers: headers);
+      completed = true;
+      print('getting $url took: ${timer.elapsed}');
       _processResponse(response);
 
       return response;
