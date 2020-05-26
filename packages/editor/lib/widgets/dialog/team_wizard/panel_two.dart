@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/models/billing.dart';
+import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
@@ -11,7 +12,6 @@ import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Second and final panel in the teams wizard
 class TeamWizardPanelTwo extends StatelessWidget {
@@ -284,14 +284,11 @@ class TeamWizardPanelTwo extends StatelessWidget {
               text: 'You\'ll only be billed for users as'
                   ' you add them. Read more about our '),
           TextSpan(
-              text: 'fair billing policy',
-              style: textStyles.tooltipHyperlink,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () async {
-                  if (await canLaunch(billingPolicyUrl)) {
-                    await launch(billingPolicyUrl);
-                  }
-                }),
+            text: 'fair billing policy',
+            style: textStyles.tooltipHyperlink,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => launchUrl(billingPolicyUrl),
+          ),
           const TextSpan(text: '.'),
         ],
         style: textStyles.tooltipDisclaimer.copyWith(

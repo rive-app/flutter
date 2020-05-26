@@ -11,13 +11,13 @@ import 'package:pedantic/pedantic.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_editor/alerts_display.dart';
+import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/hierarchy_panel.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
 
@@ -271,7 +271,7 @@ class Editor extends StatelessWidget {
                       HamburgerPopupButton(),
                       TransformPopupButton(),
                       CreatePopupButton(),
-                      SharePopupButton(),
+                      // SharePopupButton(),
                       const Spacer(),
                       ConnectedUsers(rive: rive),
                       VisibilityPopupButton(),
@@ -548,15 +548,6 @@ class LoadingScreen extends StatelessWidget {
 class FeedbackButton extends StatelessWidget {
   const FeedbackButton();
 
-  Future<void> _launchUrl() async {
-    const url = 'https://rive.nolt.io/';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw Exception('Could not launch $url');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return FlatButton(
@@ -564,7 +555,7 @@ class FeedbackButton extends StatelessWidget {
         'Feedback',
         style: TextStyle(color: Colors.grey),
       ),
-      onPressed: _launchUrl,
+      onPressed: launchSupportUrl,
     );
   }
 }
