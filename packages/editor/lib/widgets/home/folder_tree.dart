@@ -231,12 +231,15 @@ class AddFileFolderButton extends StatelessWidget {
         PopupContextItem(
           'New File',
           select: () async {
-            if (owner is Team) {
-              await FileManager().createFile(folderId, owner.ownerId);
-            } else {
-              await FileManager().createFile(folderId);
-            }
+            final createdFile = (owner is Team)
+                ? await FileManager().createFile(folderId, owner.ownerId)
+                : await FileManager().createFile(folderId);
             _updateCurrentDirectory();
+            RiveContext.of(context).open(
+              createdFile.fileOwnerId,
+              createdFile.id,
+              createdFile.name,
+            );
           },
         ),
         PopupContextItem(

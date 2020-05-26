@@ -42,16 +42,16 @@ class CreatePopupButton extends StatelessWidget {
               shortcut: ShortcutAction.ellipseTool,
               select: () => file.rive.triggerAction(ShortcutAction.ellipseTool),
             ),
-            PopupContextItem(
-              'Polygon',
-              icon: 'tool-polygon',
-              select: () {},
-            ),
-            PopupContextItem(
-              'Star',
-              icon: 'tool-star',
-              select: () {},
-            ),
+            // PopupContextItem(
+            //   'Polygon',
+            //   icon: 'tool-polygon',
+            //   select: () {},
+            // ),
+            // PopupContextItem(
+            //   'Star',
+            //   icon: 'tool-star',
+            //   select: () {},
+            // ),
             ToolPopupItem(
               'Triangle',
               icon: TriangleTool.instance.icon,
@@ -81,12 +81,12 @@ class CreatePopupButton extends StatelessWidget {
           shortcut: ShortcutAction.artboardTool,
           select: () => file.rive.triggerAction(ShortcutAction.artboardTool),
         ),
-        PopupContextItem(
-          'Bone',
-          icon: 'tool-bone',
-          shortcut: ShortcutAction.boneTool,
-          select: () {},
-        ),
+        // PopupContextItem(
+        //   'Bone',
+        //   icon: 'tool-bone',
+        //   shortcut: ShortcutAction.boneTool,
+        //   select: () {},
+        // ),
         ToolPopupItem(
           'Node',
           icon: 'tool-node',
@@ -97,12 +97,12 @@ class CreatePopupButton extends StatelessWidget {
             file.stage.tool = NodeTool.instance;
           },
         ),
-        PopupContextItem(
-          'Solo',
-          icon: 'tool-solo',
-          shortcut: ShortcutAction.soloTool,
-          select: () {},
-        ),
+        // PopupContextItem(
+        //   'Solo',
+        //   icon: 'tool-solo',
+        //   shortcut: ShortcutAction.soloTool,
+        //   select: () {},
+        // ),
       ],
     );
   }

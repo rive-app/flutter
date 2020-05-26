@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
 import 'package:rive_editor/widgets/common/value_listenable_text_field.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
@@ -51,30 +52,32 @@ class HamburgerPopupButton extends StatelessWidget {
             );
           },
         ),
-        PopupContextItem(
-          'Team Permissions',
-          select: () => _showModal(context, (_) => Container()),
-        ),
-        PopupContextItem(
-          'Revision History',
-          select: () => _showModal(context, (_) => Container()),
-        ),
+        // PopupContextItem(
+        //   'Team Permissions',
+        //   select: () => _showModal(context, (_) => Container()),
+        // ),
+        // PopupContextItem(
+        //   'Revision History',
+        //   select: () => _showModal(context, (_) => Container()),
+        // ),
         PopupContextItem.separator(),
-        PopupContextItem(
-          'Manual',
-        ),
-        PopupContextItem(
-          'Shortcuts',
-        ),
+        // PopupContextItem(
+        //   'Manual',
+        // ),
+        // PopupContextItem(
+        //   'Shortcuts',
+        // ),
         PopupContextItem(
           'Report an Issue',
+          select: launchSupportUrl,
         ),
         PopupContextItem(
           'Request a Feature',
+          select: launchSupportUrl,
         ),
-        PopupContextItem(
-          'Work with Us!',
-        ),
+        // PopupContextItem(
+        //   'Work with Us!',
+        // ),
       ],
     );
   }

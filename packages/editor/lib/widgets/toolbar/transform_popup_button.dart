@@ -28,7 +28,7 @@ class TransformPopupButton extends StatelessWidget {
             icon: AutoTool.instance.icon,
             listenable: file.stage.toolListenable,
             isSelected: () => file.stage.tool == AutoTool.instance,
-            shortcut: ShortcutAction.translateTool,
+            shortcut: ShortcutAction.autoTool,
             select: () => file.rive.triggerAction(ShortcutAction.autoTool),
           ),
           ToolPopupItem(
@@ -39,6 +39,7 @@ class TransformPopupButton extends StatelessWidget {
             shortcut: ShortcutAction.translateTool,
             select: () => file.rive.triggerAction(ShortcutAction.translateTool),
           ),
+          /*
           PopupContextItem(
             'Rotate',
             icon: 'tool-rotate',
@@ -115,6 +116,7 @@ class TransformPopupButton extends StatelessWidget {
                 file.rive.triggerAction(ShortcutAction.freezeImagesToggle),
             dismissOnSelect: false,
           ),
+          */
         ];
       },
     );
