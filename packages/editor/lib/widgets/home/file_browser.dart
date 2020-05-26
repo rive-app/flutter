@@ -160,8 +160,8 @@ class FileBrowser extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset('assets/images/robot.png'),
-                    const SizedBox(height: 35),
+                    // Image.asset('assets/images/robot.png'),
+                    // const SizedBox(height: 35),
                     Text(
                         'Hey, it looks like you don\'t have any files here '
                         'yet!\nHit the plus button to create a new file!',
