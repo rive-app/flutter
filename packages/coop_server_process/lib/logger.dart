@@ -10,7 +10,7 @@ final _sentry = SentryClient(dsn: _dsn);
 
 /// Configure logging options
 
-void configureLogger({bool disableSentry=false}) {
+void configureLogger({bool disableSentry = false}) {
   // Set the log level from the LOG_LEVEL env variable
   final level = Platform.environment['LOG_LEVEL'];
   switch (level) {
