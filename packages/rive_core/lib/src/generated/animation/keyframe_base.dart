@@ -31,8 +31,6 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     Id from = _keyedPropertyId;
     _keyedPropertyId = value;
     onPropertyChanged(keyedPropertyIdPropertyKey, from, value);
-    context?.editorPropertyChanged(
-        this, keyedPropertyIdPropertyKey, from, value);
     keyedPropertyIdChanged(from, value);
   }
 

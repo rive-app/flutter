@@ -32,7 +32,6 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     Id from = _artboardId;
     _artboardId = value;
     onPropertyChanged(artboardIdPropertyKey, from, value);
-    context?.editorPropertyChanged(this, artboardIdPropertyKey, from, value);
     artboardIdChanged(from, value);
   }
 
@@ -77,7 +76,6 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     FractionalIndex from = _order;
     _order = value;
     onPropertyChanged(orderPropertyKey, from, value);
-    context?.editorPropertyChanged(this, orderPropertyKey, from, value);
     orderChanged(from, value);
   }
 

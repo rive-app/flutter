@@ -675,9 +675,8 @@ abstract class CoreContext implements LocalSettings {
     // });
   }
 
-  /// Returns true when a property should only be used in the editor and will not
-  /// be available at runtime.
-  bool isEditorOnly(int propertyKey);
+  bool isRuntimeProperty(int propertyKey);
+  bool isCoopProperty(int propertyKey);
 
   /// Returns the [CoreFieldType] mapped to the [propertyKey].
   CoreFieldType coreType(int propertyKey);
@@ -698,7 +697,7 @@ abstract class CoreContext implements LocalSettings {
 
       var objectInflightChanges = inflight[objectId] ??= HashMap<int, int>();
       changes.forEach((key, entry) {
-        if (isEditorOnly(key)) {
+        if (!isCoopProperty(key)) {
           return;
         }
         objectInflightChanges[key] = (objectInflightChanges[key] ??= 0) + 1;

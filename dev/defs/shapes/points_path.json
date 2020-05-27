@@ -21,7 +21,8 @@
         "int": 74,
         "string": "editingmode"
       },
-      "editorOnly": true
+      "runtime": false,
+      "coop": false
     }
   }
 }

@@ -14,7 +14,7 @@ void main() {
   Backboard backboard;
   Artboard artboard;
 
-  setUpAll(() {
+  setUp(() {
     LocalDataPlatform dataPlatform = LocalDataPlatform.make();
 
     exportFrom = RiveFile(

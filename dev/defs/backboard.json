@@ -12,7 +12,7 @@
         "string": "activeArtboardId"
       },
       "description": "Identifier used to track the last active artboard.",
-      "editorOnly": true
+      "runtime": false
     },
     "mainArtboardId": {
       "type": "Id",
@@ -30,7 +30,7 @@
         "string": "colorValue"
       },
       "description": "The background color.",
-      "editorOnly": true
+      "runtime": false
     }
   }
 }

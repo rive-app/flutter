@@ -20,7 +20,7 @@
         "string": "animationid"
       },
       "description": "The id of the animation this keyed object is in.",
-      "editorOnly": true
+      "runtime": false
     }
   }
 }

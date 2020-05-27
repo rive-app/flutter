@@ -54,7 +54,6 @@ abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
     Id from = _animationId;
     _animationId = value;
     onPropertyChanged(animationIdPropertyKey, from, value);
-    context?.editorPropertyChanged(this, animationIdPropertyKey, from, value);
     animationIdChanged(from, value);
   }
 

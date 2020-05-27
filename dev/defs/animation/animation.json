@@ -12,7 +12,7 @@
         "string": "artboardid"
       },
       "description": "Identifier used to track the artboard this animation belongs to.",
-      "editorOnly": true
+      "runtime": false
     },
     "name": {
       "type": "String",
@@ -29,7 +29,7 @@
         "string": "order"
       },
       "description": "Order this animation shows up in the animations list.",
-      "editorOnly": true
+      "runtime": false
     }
   }
 }

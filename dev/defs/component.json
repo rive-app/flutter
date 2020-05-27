@@ -13,7 +13,7 @@
         "string": "dependentIds"
       },
       "description": "List of integer ids for objects registered in the same context that depend on this object.",
-      "editorOnly": true
+      "runtime": false
     },
     "name": {
       "type": "String",
@@ -38,7 +38,7 @@
         "string": "childOrder"
       },
       "description": "Order value for sorting child elements in ContainerComponent parent.",
-      "editorOnly": true
+      "runtime": false
     }
   }
 }

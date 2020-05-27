@@ -31,8 +31,6 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
     Id from = _activeArtboardId;
     _activeArtboardId = value;
     onPropertyChanged(activeArtboardIdPropertyKey, from, value);
-    context?.editorPropertyChanged(
-        this, activeArtboardIdPropertyKey, from, value);
     activeArtboardIdChanged(from, value);
   }
 
@@ -79,7 +77,6 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
     int from = _colorValue;
     _colorValue = value;
     onPropertyChanged(colorValuePropertyKey, from, value);
-    context?.editorPropertyChanged(this, colorValuePropertyKey, from, value);
     colorValueChanged(from, value);
   }
 

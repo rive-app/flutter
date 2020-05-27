@@ -13,7 +13,7 @@
         "string": "keyedpropertyid"
       },
       "description": "The id of the KeyedProperty this KeyFrame belongs to.",
-      "editorOnly": true
+      "runtime": false
     },
     "frame": {
       "type": "int",

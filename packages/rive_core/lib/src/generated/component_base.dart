@@ -35,7 +35,6 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     List<Id> from = _dependentIds;
     _dependentIds = value;
     onPropertyChanged(dependentIdsPropertyKey, from, value);
-    context?.editorPropertyChanged(this, dependentIdsPropertyKey, from, value);
     dependentIdsChanged(from, value);
   }
 
@@ -103,7 +102,6 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     FractionalIndex from = _childOrder;
     _childOrder = value;
     onPropertyChanged(childOrderPropertyKey, from, value);
-    context?.editorPropertyChanged(this, childOrderPropertyKey, from, value);
     childOrderChanged(from, value);
   }
 

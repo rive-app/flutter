@@ -1417,7 +1417,17 @@ abstract class RiveCoreContext extends CoreContext {
   }
 
   @override
-  bool isEditorOnly(int propertyKey) {
+  bool isCoopProperty(int propertyKey) {
+    switch (propertyKey) {
+      case PointsPathBase.editingModeValuePropertyKey:
+        return false;
+      default:
+        return true;
+    }
+  }
+
+  @override
+  bool isRuntimeProperty(int propertyKey) {
     switch (propertyKey) {
       case KeyedObjectBase.animationIdPropertyKey:
       case KeyedPropertyBase.keyedObjectIdPropertyKey:
@@ -1429,9 +1439,9 @@ abstract class RiveCoreContext extends CoreContext {
       case PointsPathBase.editingModeValuePropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.colorValuePropertyKey:
-        return true;
-      default:
         return false;
+      default:
+        return true;
     }
   }
 

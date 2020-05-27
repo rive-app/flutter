@@ -12,7 +12,7 @@
         "string": "keyedobjectid"
       },
       "description": "The id of the KeyedObject this KeyedProperty belongs to.",
-      "editorOnly": true
+      "runtime": false
     },
     "propertyKey": {
       "type": "int",

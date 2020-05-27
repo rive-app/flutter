@@ -196,7 +196,7 @@ class Definition {
         code.writeln('super.writeRuntimeProperties(writer, idLookup);');
       }
       for (final property in _properties) {
-        if (property.editorOnly) {
+        if (!property.isRuntime) {
           continue;
         }
         if (property.type is IdFieldType) {
@@ -711,21 +711,48 @@ class Definition {
     }
     ctxCode.writeln('}return null;}');
 
-    // Build a way to determine if a property is editorOnly
+    // Build a way to determine if a property syncs to coop
     ctxCode.writeln('''
         @override
-        bool isEditorOnly(int propertyKey) {
+        bool isCoopProperty(int propertyKey) {
           switch(propertyKey) {
           ''');
+    bool wroteCoopCase = false;
+    
     for (final definition in definitions.values) {
       for (final property in definition._properties) {
-        if (property.editorOnly) {
+        if (!property.isCoop) {
+          wroteCoopCase = true;
           ctxCode.write('case ${property.definition._name}Base');
           ctxCode.write('.${property.name}PropertyKey:');
         }
       }
     }
-    ctxCode.write('return true; default: return false; } }');
+    if(wroteCoopCase) {
+      ctxCode.write('return false;');  
+    }
+    ctxCode.write('default: return true; } }');
+
+    // Build a way to determine if a property exports to runtime
+    ctxCode.writeln('''
+        @override
+        bool isRuntimeProperty(int propertyKey) {
+          switch(propertyKey) {
+          ''');
+    bool wroteRuntimeCase = false;
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        if (!property.isRuntime) {
+          wroteRuntimeCase = true;
+          ctxCode.write('case ${property.definition._name}Base');
+          ctxCode.write('.${property.name}PropertyKey:');
+        }
+      }
+    }
+    if (wroteRuntimeCase) {
+      ctxCode.write('return false;');
+    }
+    ctxCode.write('default: return true; } }');
 
     // Build is/setter/getter for specific types.
     ctxCode.writeln('''
