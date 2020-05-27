@@ -38,15 +38,46 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
   final selectionManager = SelectionManager();
   bool rightClick = false;
 
+  int _getMaxColumns(width, cellWidth) {
+    return ((width - horizontalPadding * 2 + spacing) / (cellWidth + spacing))
+        .floor();
+  }
+
+  double _requiredHeight(Size size) {
+    // TODO:
+    // could cache this against size & file & folder count
+    // if this becomes heavy
+    var requiredHeight = headerHeight + sectionPadding;
+    final directory = Plumber().peek<CurrentDirectory>();
+    if (directory == null) return requiredHeight;
+    final folderContents = Plumber().peek<FolderContents>(directory.hashId);
+    if (folderContents == null) return requiredHeight;
+
+    final int maxColumns = _getMaxColumns(size.width, cellWidth);
+
+    if (folderContents.folders.isNotEmpty) {
+      final folderRows = (folderContents.folders.length / maxColumns).ceil();
+      final foldersHeight =
+          folderRows * folderCellHeight + (folderRows - 1) * spacing;
+
+      requiredHeight += foldersHeight + sectionPadding;
+    }
+    if (folderContents.files.isNotEmpty) {
+      final fileRows = (folderContents.files.length / maxColumns).ceil();
+      final filesHeight = fileRows * fileCellHeight + (fileRows - 1) * spacing;
+
+      requiredHeight += filesHeight + sectionPadding;
+    }
+    return requiredHeight;
+  }
+
   void selectPosition(Offset offset, Size size) {
     final directory = Plumber().peek<CurrentDirectory>();
     if (directory == null) return selectionManager.clearSelection();
     final folderContents = Plumber().peek<FolderContents>(directory.hashId);
     if (folderContents == null) return selectionManager.clearSelection();
 
-    final availableWidth = size.width - horizontalPadding * 2;
-    final int maxColumns =
-        ((availableWidth + spacing) / (cellWidth + spacing)).floor();
+    final int maxColumns = _getMaxColumns(size.width, cellWidth);
 
     var workingDy = offset.dy;
     var workingDx = offset.dx;
@@ -123,12 +154,14 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                   item.itemBuilder(popupContext, isHovered),
               items: [
                 PopupContextItem(
-                  'Rename (not implemented)',
+                  'Rename',
                   select: () async {},
                 ),
                 PopupContextItem(
-                  'Delete (not implemented)',
-                  select: () async {},
+                  'Delete',
+                  select: () async {
+                    FolderContentsManager().delete();
+                  },
                 )
               ],
               position: event.pointerEvent.position);
@@ -144,7 +177,10 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         if (event.pointerEvent is PointerScrollEvent) {
           var scrollEvent = event.pointerEvent as PointerScrollEvent;
           var newOffset = scrollController.offset + scrollEvent.scrollDelta.dy;
-          newOffset = max(0, min(100, newOffset));
+          newOffset = max(
+              0,
+              min(_requiredHeight(context.size) - context.size.height,
+                  newOffset));
           scrollController.jumpTo(newOffset);
         }
       },

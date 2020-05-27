@@ -31,21 +31,21 @@ class FolderContentsManager with Subscriptions {
   void _subscribe() {
     // Start listening for when a directory changes.
     subscribe<CurrentDirectory>((directory) {
-      final cacheId = directory.hashId;
-      if (_cache.containsKey(cacheId)) {
-        // Send the cached contents right away. Go check if cache needs to be
-        // update right after.
-        Plumber().message<FolderContents>(
-          _cache[cacheId].getAsFolderContents(),
-          cacheId,
-        );
-      } else {
-        // Send an empty message right away to display an empty file browser
-        // while contents are loading.
-        Plumber()
-            .message<FolderContents>(FolderContents(isLoading: true), cacheId);
-      }
       if (directory != null) {
+        final cacheId = directory.hashId;
+        if (_cache.containsKey(cacheId)) {
+          // Send the cached contents right away. Go check if cache needs to be
+          // update right after.
+          Plumber().message<FolderContents>(
+            _cache[cacheId].getAsFolderContents(),
+            cacheId,
+          );
+        } else {
+          // Send an empty message right away to display an empty file browser
+          // while contents are loading.
+          Plumber().message<FolderContents>(
+              FolderContents(isLoading: true), cacheId);
+        }
         _getFolderContents(directory);
       }
     });
@@ -98,6 +98,8 @@ class FolderContentsManager with Subscriptions {
     for (final folder in folders) {
       final cacheId = szudzik(ownerId, folder.id);
       _cache[cacheId] ??= _FolderContentsCache();
+      // clear folders, the structure will get rebuilt with our folders.
+      _cache[cacheId].folders.clear();
     }
 
     // Add each folder to its parent's cache.
@@ -131,10 +133,6 @@ class FolderContentsManager with Subscriptions {
       folders = await _folderApi.myFolders(ownerId);
     }
 
-    // print("Files & Folders: ${directory}");
-    // print("$files");
-    // print("$folders");
-
     final folderCache =
         _initCache(Folder.fromDMList(folders), ownerId, currentFolderId);
 
@@ -147,6 +145,26 @@ class FolderContentsManager with Subscriptions {
 
     Plumber().message<FolderContents>(
         FolderContents(files: fileList, folders: folderList), directory.hashId);
+  }
+
+  void delete() async {
+    var selection = Plumber().peek<Selection>();
+    var currentDirectory = Plumber().peek<CurrentDirectory>();
+    if (currentDirectory.owner is Team) {
+      await FileApi().deleteTeamFiles(
+        currentDirectory.owner.ownerId,
+        selection.files.map((e) => e.id).toList(),
+        selection.folders.map((e) => e.id).toList(),
+      );
+    } else {
+      await FileApi().deleteMyFiles(
+        selection.files.map((e) => e.id).toList(),
+        selection.folders.map((e) => e.id).toList(),
+      );
+    }
+
+    _getFolderContents(currentDirectory);
+    FileManager().loadFolders(currentDirectory.owner);
   }
 }
 
