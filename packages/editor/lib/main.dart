@@ -253,14 +253,18 @@ class _EditorState extends State<Editor> {
     }
 
     List<DroppedFile> importedFiles = [];
-
+    bool imported = false;
     for (final file in files) {
       if (file.filename.indexOf('.riv') != -1) {
         var importer = RuntimeImporter(core: activeFile.core);
         if (importer.import(file.bytes)) {
           importedFiles.add(file);
+          imported = true;
         }
       }
+    }
+    if (imported) {
+      activeFile.core.captureJournalEntry();
     }
 
     activeFile.addAlert(SimpleAlert(

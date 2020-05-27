@@ -32,6 +32,7 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     Id from = _artboardId;
     _artboardId = value;
     onPropertyChanged(artboardIdPropertyKey, from, value);
+    context?.editorPropertyChanged(this, artboardIdPropertyKey, from, value);
     artboardIdChanged(from, value);
   }
 
@@ -76,6 +77,7 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
     FractionalIndex from = _order;
     _order = value;
     onPropertyChanged(orderPropertyKey, from, value);
+    context?.editorPropertyChanged(this, orderPropertyKey, from, value);
     orderChanged(from, value);
   }
 
@@ -96,18 +98,8 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_artboardId != null) {
-      var value = idLookup[_artboardId];
-      if (value != null) {
-        context.intType.writeProperty(artboardIdPropertyKey, writer, value);
-      }
-    }
     if (_name != null) {
       context.stringType.writeProperty(namePropertyKey, writer, _name);
-    }
-    if (_order != null) {
-      context.fractionalIndexType
-          .writeProperty(orderPropertyKey, writer, _order);
     }
   }
 

@@ -1421,6 +1421,8 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case KeyedObjectBase.animationIdPropertyKey:
       case KeyedPropertyBase.keyedObjectIdPropertyKey:
+      case AnimationBase.artboardIdPropertyKey:
+      case AnimationBase.orderPropertyKey:
       case KeyFrameBase.keyedPropertyIdPropertyKey:
       case ComponentBase.dependentIdsPropertyKey:
       case ComponentBase.childOrderPropertyKey:
