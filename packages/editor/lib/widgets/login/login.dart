@@ -64,16 +64,28 @@ class _LoginState extends State<Login> {
         _passwordError = errorString;
       });
     });
-    final errorValidator = ErrorValidator(onFieldError: (errorString) {
-      setState(() {
-        _passwordError = errorString;
-      });
-    });
+    final errorValidator = ErrorValidator(
+        errorField: 'error',
+        onFieldError: (errorString) {
+          setState(() {
+            _passwordError = errorString;
+          });
+        });
+
+    final inviteValidator = ErrorValidator(
+        errorField: 'invite',
+        onFieldError: (errorString) {
+          setState(() {
+            _usernameError = errorString;
+          });
+        });
+
     loginValidator = FormValidator([errorValidator]);
     registerValidator = FormValidator([
       usernameValidator,
       emailValidator,
       passwordValidator,
+      inviteValidator,
     ]);
     var currentMe = Plumber().peek<Me>();
     if (currentMe.socialLink != null) {
