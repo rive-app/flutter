@@ -66,7 +66,9 @@ class RiveColors {
 
   // Buttons
   Color get buttonLight => const Color(0xFFE3E3E3);
+  Color get textButtonLight => const Color(0xFFF1F1F1);
   Color get buttonLightHover => const Color(0xFFDEDEDE);
+  Color get textButtonLightHover => const Color(0xFFDEDEDE);
   Color get buttonLightText => const Color(0xFF666666);
   Color get buttonLightDisabled => const Color(0xFFF8F8F8);
   Color get buttonLightTextDisabled => const Color(0xFFD9D9D9);
