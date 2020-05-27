@@ -68,6 +68,8 @@ class FolderContentsManager with Subscriptions {
         plumber.message<File>(cachedFile, cachedFile.hashCode);
       }
     }
+    final fileIdSet = files.toSet();
+    cache.files.removeWhere((file) => !fileIdSet.contains(file.id));
 
     final teamOwnerId =
         directory.owner is Team ? directory.owner.ownerId : null;
@@ -84,12 +86,15 @@ class FolderContentsManager with Subscriptions {
     if (currentDirectoryId != directory.folderId) {
       return;
     }
+
     for (final file in fileDetailsList) {
-      if (cache.files.add(file)) {
-        // Only message if it changed.
-        plumber.message<File>(file, file.hashCode);
-      }
+      cache.files.add(file);
+      plumber.message<File>(file, file.hashCode);
     }
+    Plumber().message<FolderContents>(
+        FolderContents(
+            files: cache.files.toList(), folders: cache.folders.toList()),
+        directory.hashId);
   }
 
   _FolderContentsCache _initCache(
@@ -162,6 +167,25 @@ class FolderContentsManager with Subscriptions {
         selection.folders.map((e) => e.id).toList(),
       );
     }
+
+    _getFolderContents(currentDirectory);
+    FileManager().loadFolders(currentDirectory.owner);
+  }
+
+  void rename(target, String newName) async {
+    var currentDirectory = Plumber().peek<CurrentDirectory>();
+    if (target is File) {
+      if (currentDirectory.owner is User) {
+        FileApi()
+            .renameMyFile(currentDirectory.owner.ownerId, target.id, newName);
+      } else {
+        FileApi()
+            .renameTeamFile(currentDirectory.owner.ownerId, target.id, newName);
+      }
+    }
+    // if (target is Folder) {
+    //   FolderApi().renameFolder(target.ownerId, target.id, newName)
+    // }
 
     _getFolderContents(currentDirectory);
     FileManager().loadFolders(currentDirectory.owner);

@@ -6,8 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/labeled_text_field.dart';
+import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
+import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
@@ -31,6 +35,55 @@ const double sectionPadding = 30;
 class FileBrowserWrapper extends StatefulWidget {
   @override
   _FileBrowserWrapperState createState() => _FileBrowserWrapperState();
+}
+
+void editName<T extends Named>(BuildContext context, T target) {
+  final colors = RiveTheme.of(context).colors;
+  showRiveDialog<void>(
+      context: context,
+      builder: (ctx) {
+        String newName;
+        void submit() {
+          if (newName != null && newName != target.name) {
+            FolderContentsManager().rename(target, newName);
+          }
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+
+        ;
+        return SizedBox(
+          height: 200,
+          width: 400,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LabeledTextField(
+                    autofocus: true,
+                    label: 'Name',
+                    initialValue: target.name,
+                    onChanged: (value) => newName = value,
+                    onSubmit: (_) => submit(),
+                    hintText: 'New name'),
+                Expanded(child: Separator(color: colors.fileLineGrey)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FlatIconButton(
+                        label: 'Save Changes',
+                        color: colors.commonDarkGrey,
+                        textColor: Colors.white,
+                        onTap: submit)
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      });
 }
 
 class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
@@ -143,19 +196,27 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         rightClick = false;
         if (event.pointerEvent is PointerDownEvent) {
           selectPosition(event.pointerEvent.localPosition, context.size);
+
+          // TODO: wat this on mouse/ windows
           rightClick = event.pointerEvent.buttons == 2;
         }
       },
       onPointerUp: (event) {
-        // TODO: wat this on mouse/ windows
         if (rightClick && Plumber().peek<Selection>() != null) {
           ListPopup.show(context,
               itemBuilder: (popupContext, item, isHovered) =>
                   item.itemBuilder(popupContext, isHovered),
               items: [
                 PopupContextItem(
-                  'Rename',
-                  select: () async {},
+                  'Rename (file 4 now)',
+                  select: () async {
+                    final selection = Plumber().peek<Selection>();
+                    if (selection.files.isNotEmpty) {
+                      editName(context, selection.files.first);
+                    } else if (selection.folders.isNotEmpty) {
+                      editName(context, selection.folders.first);
+                    }
+                  },
                 ),
                 PopupContextItem(
                   'Delete',

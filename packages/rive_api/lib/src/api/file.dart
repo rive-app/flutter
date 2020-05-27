@@ -85,6 +85,22 @@ class FileApi {
     return newFile;
   }
 
+  Future<bool> renameMyFile(int ownerId, int fileId, String name) async {
+    return _renameFile(api.host + '/api/files/$ownerId/$fileId/name', name);
+  }
+
+  Future<bool> renameTeamFile(int ownerId, int fileId, String name) async {
+    return _renameFile(
+        api.host + '/api/teams/$ownerId/files/$fileId/name', name);
+  }
+
+  Future<bool> _renameFile(String url, String name) async {
+    assert(name != null);
+    String payload = json.encode({'name': name});
+    var response = await api.post(url, body: payload);
+    return response.statusCode == 200;
+  }
+
   // /api/my/files/:product/create/:folder_id?
   Future<FileDM> _createFile(int folderId) async {
     var response =
