@@ -57,4 +57,13 @@ class AdminManager {
     }
     return false;
   }
+
+  Future<bool> invite(String email) async {
+    var response = await api.get(api.host + '/invite/$email');
+    if (response.statusCode == 200) {
+      return true;
+    }
+    return false;
+  }
 }
+
