@@ -218,6 +218,10 @@ abstract class Component extends ComponentBase<RiveFile>
       parent = context?.resolve(parentId);
       if (parent == null) {
         _log.finest("Failed to resolve parent with id $parentId");
+      } else {
+        // Make a best guess, this is useful when importing objects that are in
+        // order as added, this ensures they'll get a valid sort order.
+        childOrder ??= parent.children.nextFractionalIndex;
       }
     }
   }

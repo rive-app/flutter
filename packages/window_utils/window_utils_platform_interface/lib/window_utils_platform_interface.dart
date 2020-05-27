@@ -1,10 +1,25 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'method_channel_window_utils.dart';
+
+/// A file dropped into the app's window.
+class DroppedFile {
+  final String filename;
+  final Uint8List bytes;
+
+  DroppedFile(this.filename, this.bytes);
+
+  String toString() => 'DroppedFile: $filename ${bytes.length}';
+}
+
+/// A callback invoked when the window gets a set of acceptable files dropped
+/// onto it.
+typedef DroppedFilesCallback = void Function(Iterable<DroppedFile> files);
 
 /// The interface that implementations of window_utils must implement.
 ///
@@ -16,6 +31,8 @@ import 'method_channel_window_utils.dart';
 abstract class WindowUtilsPlatform extends PlatformInterface {
   /// Constructs a UrlLauncherPlatform.
   WindowUtilsPlatform() : super(token: _token);
+
+  static DroppedFilesCallback filesDropped;
 
   static final Object _token = Object();
 
@@ -137,6 +154,9 @@ abstract class WindowUtilsPlatform extends PlatformInterface {
 
   Future<String> getErrorMessage() =>
       throw UnimplementedError('getErrorMessage() has not been implemented.');
+      
+  Future<bool> initDropTarget() =>
+      throw UnimplementedError('initDropTarget() has not been implemented.');
 }
 
 enum DragPosition {

@@ -11,7 +11,8 @@
         "int": 71,
         "string": "keyedobjectid"
       },
-      "description": "The id of the KeyedObject this KeyedProperty belongs to."
+      "description": "The id of the KeyedObject this KeyedProperty belongs to.",
+      "runtime": false
     },
     "propertyKey": {
       "type": "int",

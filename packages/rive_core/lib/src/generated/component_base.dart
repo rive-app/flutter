@@ -1,10 +1,12 @@
 /// Core automatically generated lib/src/generated/component_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:core/id.dart';
 import 'package:fractional/fractional.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:utilities/list_equality.dart';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
@@ -118,6 +120,19 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
     }
     if (childOrder != null) {
       onPropertyChanged(childOrderPropertyKey, childOrder, childOrder);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    if (_name != null) {
+      context.stringType.writeProperty(namePropertyKey, writer, _name);
+    }
+    if (_parentId != null) {
+      var value = idLookup[_parentId];
+      if (value != null) {
+        context.intType.writeProperty(parentIdPropertyKey, writer, value);
+      }
     }
   }
 

@@ -1,11 +1,14 @@
 /// Core automatically generated lib/src/generated/drawable_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
+import 'package:core/core.dart';
 import 'package:fractional/fractional.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class DrawableBase extends Node {
   static const int typeKey = 13;
@@ -67,6 +70,18 @@ abstract class DrawableBase extends Node {
     }
     if (blendMode != null) {
       onPropertyChanged(blendModePropertyKey, blendMode, blendMode);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_drawOrder != null) {
+      context.fractionalIndexType
+          .writeProperty(drawOrderPropertyKey, writer, _drawOrder);
+    }
+    if (_blendMode != null) {
+      context.intType.writeProperty(blendModePropertyKey, writer, _blendMode);
     }
   }
 

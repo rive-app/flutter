@@ -2,11 +2,14 @@
 /// lib/src/generated/shapes/parametric_path_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
+import 'package:core/core.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
 import 'package:rive_core/src/generated/shapes/path_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class ParametricPathBase extends Path {
   static const int typeKey = 15;
@@ -73,6 +76,17 @@ abstract class ParametricPathBase extends Path {
     }
     if (height != null) {
       onPropertyChanged(heightPropertyKey, height, height);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_width != null) {
+      context.doubleType.writeProperty(widthPropertyKey, writer, _width);
+    }
+    if (_height != null) {
+      context.doubleType.writeProperty(heightPropertyKey, writer, _height);
     }
   }
 

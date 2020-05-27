@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:js' as js;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:window_utils_platform_interface/window_utils_platform_interface.dart';
@@ -82,5 +84,30 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
       res = Uri.decodeComponent(res);
     }
     return res;
+  }
+
+  @override
+  Future<bool> initDropTarget() async {
+    js.context['filesDropped'] = (dynamic test) {
+      if (test is! js.JsArray) {
+        return;
+      }
+      List<DroppedFile> droppedFiles = [];
+      for (final item in (test as js.JsArray)) {
+        if (item is! js.JsObject) {
+          continue;
+        }
+        var object = item as js.JsObject;
+        var filename =
+            object['filename'] is String ? object['filename'] as String : null;
+        var bytes =
+            object['bytes'] is Uint8List ? object['bytes'] as Uint8List : null;
+        if (filename != null && bytes != null) {
+          droppedFiles.add(DroppedFile(filename, bytes));
+        }
+      }
+      WindowUtilsPlatform.filesDropped?.call(droppedFiles);
+    };
+    return true;
   }
 }

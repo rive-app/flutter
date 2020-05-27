@@ -2,11 +2,14 @@
 /// lib/src/generated/shapes/paint/stroke_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
+import 'package:core/core.dart';
 import 'package:core/key_state.dart';
 import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/shapes/paint/shape_paint_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class StrokeBase extends ShapePaint {
   static const int typeKey = 24;
@@ -156,6 +159,25 @@ abstract class StrokeBase extends ShapePaint {
     if (transformAffectsStroke != null) {
       onPropertyChanged(transformAffectsStrokePropertyKey,
           transformAffectsStroke, transformAffectsStroke);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_thickness != null) {
+      context.doubleType
+          .writeProperty(thicknessPropertyKey, writer, _thickness);
+    }
+    if (_cap != null) {
+      context.intType.writeProperty(capPropertyKey, writer, _cap);
+    }
+    if (_join != null) {
+      context.intType.writeProperty(joinPropertyKey, writer, _join);
+    }
+    if (_transformAffectsStroke != null) {
+      context.boolType.writeProperty(
+          transformAffectsStrokePropertyKey, writer, _transformAffectsStroke);
     }
   }
 

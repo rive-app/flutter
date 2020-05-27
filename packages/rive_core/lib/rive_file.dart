@@ -156,7 +156,7 @@ class RiveFile extends RiveCoreContext {
     }
     if (_needChildSort.isNotEmpty) {
       for (final parent in _needChildSort) {
-        parent.children.sortFractional();
+          parent.children.sortFractional();
       }
       _needChildSort.clear();
     }

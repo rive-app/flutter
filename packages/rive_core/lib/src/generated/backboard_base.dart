@@ -1,8 +1,10 @@
 /// Core automatically generated lib/src/generated/backboard_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 23;
@@ -92,6 +94,16 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
     }
     if (colorValue != null) {
       onPropertyChanged(colorValuePropertyKey, colorValue, colorValue);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    if (_mainArtboardId != null) {
+      var value = idLookup[_mainArtboardId];
+      if (value != null) {
+        context.intType.writeProperty(mainArtboardIdPropertyKey, writer, value);
+      }
     }
   }
 

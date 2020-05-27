@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:core/core.dart';
 import 'package:core/key_state.dart';
 import 'package:logging/logging.dart';
@@ -6,6 +8,7 @@ import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 export 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 
 final _log = Logger('animation');
@@ -238,4 +241,13 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() =>
       keyedObject?.internalKeyFrameValueChanged();
+
+  @override
+  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, idLookup);
+    writer.writeVarUint(_keyframes.length);
+    for (final keyframe in _keyframes) {
+      keyframe.writeRuntime(writer, idLookup);
+    }
+  }
 }

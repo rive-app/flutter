@@ -1,11 +1,14 @@
 /// Core automatically generated lib/src/generated/shapes/points_path_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
+import 'package:core/core.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
 import 'package:rive_core/src/generated/shapes/path_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class PointsPathBase extends Path {
   static const int typeKey = 16;
@@ -74,6 +77,14 @@ abstract class PointsPathBase extends Path {
     if (editingModeValue != null) {
       onPropertyChanged(
           editingModeValuePropertyKey, editingModeValue, editingModeValue);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_isClosed != null) {
+      context.boolType.writeProperty(isClosedPropertyKey, writer, _isClosed);
     }
   }
 

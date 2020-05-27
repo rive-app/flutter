@@ -11,7 +11,8 @@
         "int": 54,
         "string": "artboardid"
       },
-      "description": "Identifier used to track the artboard this animation belongs to."
+      "description": "Identifier used to track the artboard this animation belongs to.",
+      "runtime": false
     },
     "name": {
       "type": "String",
@@ -27,7 +28,8 @@
         "int": 73,
         "string": "order"
       },
-      "description": "Order this animation shows up in the animations list."
+      "description": "Order this animation shows up in the animations list.",
+      "runtime": false
     }
   }
 }

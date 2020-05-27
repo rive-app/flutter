@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:colorize/colorize.dart';
 import 'package:core_generator/src/field_type.dart';
+import 'package:core_generator/src/field_types/id_field_type.dart';
 import 'package:dart_style/dart_style.dart';
 
 import 'comment.dart';
@@ -144,12 +145,20 @@ class Definition {
           'import \'package:${config.packageName}/src/generated/$snakeContextName.dart\';');
     }
 
+    if (_properties.isNotEmpty) {
+      imports.add(
+          'import \'package:utilities/binary_buffer/binary_writer.dart\';');
+      imports.add('import \'dart:collection\';');
+      imports.add('import \'package:core/core.dart\';');
+    }
+
     var importList = imports.toList(growable: false)..sort();
-    code.writeAll(
-        importList.where((item) => item.indexOf('import \'package:') == 0),
-        '\n');
+
     code.writeAll(
         importList.where((item) => item.indexOf('import \'package:') != 0),
+        '\n');
+    code.writeAll(
+        importList.where((item) => item.indexOf('import \'package:') == 0),
         '\n');
 
     code.write(
@@ -177,6 +186,31 @@ class Definition {
           onPropertyChanged( 
           ${property.name}PropertyKey, ${property.name}, ${property.name});
         }''');
+      }
+      code.writeln('}');
+
+      // Write serializer.
+      code.writeln('''@override
+    void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {''');
+      if (_extensionOf != null) {
+        code.writeln('super.writeRuntimeProperties(writer, idLookup);');
+      }
+      for (final property in _properties) {
+        if (!property.isRuntime) {
+          continue;
+        }
+        if (property.type is IdFieldType) {
+          code.writeln('''if(_${property.name} != null) {
+          var value = idLookup[_${property.name}];
+          if(value != null) {
+            context.intType.writeProperty(${property.name}PropertyKey, writer, value);
+          }
+        }''');
+        } else {
+          code.writeln('''if(_${property.name} != null) {
+          context.${property.type.uncapitalizedName}Type.writeProperty(${property.name}PropertyKey, writer, _${property.name});
+        }''');
+        }
       }
       code.writeln('}');
 
@@ -677,24 +711,52 @@ class Definition {
     }
     ctxCode.writeln('}return null;}');
 
-    // Build a way to determine if a property is editorOnly
+    // Build a way to determine if a property syncs to coop
     ctxCode.writeln('''
         @override
-        bool isEditorOnly(int propertyKey) {
+        bool isCoopProperty(int propertyKey) {
           switch(propertyKey) {
           ''');
+    bool wroteCoopCase = false;
+    
     for (final definition in definitions.values) {
       for (final property in definition._properties) {
-        if (property.editorOnly) {
+        if (!property.isCoop) {
+          wroteCoopCase = true;
           ctxCode.write('case ${property.definition._name}Base');
           ctxCode.write('.${property.name}PropertyKey:');
         }
       }
     }
-    ctxCode.write('return true; default: return false; } }');
+    if(wroteCoopCase) {
+      ctxCode.write('return false;');  
+    }
+    ctxCode.write('default: return true; } }');
+
+    // Build a way to determine if a property exports to runtime
+    ctxCode.writeln('''
+        @override
+        bool isRuntimeProperty(int propertyKey) {
+          switch(propertyKey) {
+          ''');
+    bool wroteRuntimeCase = false;
+    for (final definition in definitions.values) {
+      for (final property in definition._properties) {
+        if (!property.isRuntime) {
+          wroteRuntimeCase = true;
+          ctxCode.write('case ${property.definition._name}Base');
+          ctxCode.write('.${property.name}PropertyKey:');
+        }
+      }
+    }
+    if (wroteRuntimeCase) {
+      ctxCode.write('return false;');
+    }
+    ctxCode.write('default: return true; } }');
 
     // Build is/setter/getter for specific types.
     ctxCode.writeln('''
+        @override
         CoreFieldType coreType(int propertyKey) {
           switch(propertyKey) {
           ''');

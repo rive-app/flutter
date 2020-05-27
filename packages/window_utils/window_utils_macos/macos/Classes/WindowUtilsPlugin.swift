@@ -2,15 +2,22 @@ import Cocoa
 import Foundation
 import FlutterMacOS
 import WebKit
+import AppKit
+
 
 public class WindowUtilsPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugins.rive.app/window_utils", binaryMessenger: registrar.messenger)
-        let instance = WindowUtilsPlugin()
+        let instance = WindowUtilsPlugin(channel: channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
     
     var mouseStackCount = 1;
+    
+    var _channel: FlutterMethodChannel;
+    init(channel flutterChannel:FlutterMethodChannel) {
+        _channel = flutterChannel;
+    }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
@@ -214,6 +221,21 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
             let window = NSApp.windows.first(where: { $0.title == _key })
             window?.setContentSize(NSSize(width: width, height: height))
             result(true)
+        case "initDropTarget":
+            if let window = NSApplication.shared.mainWindow
+            {
+                let screen = window.frame
+                let size = screen.size
+                
+                let frame:CGRect = CGRect(origin: .zero, size: size)
+                let view:DropView = DropView(frame: frame, channel: _channel)
+                
+                window.contentView?.addSubview(view)
+                
+                result(true)
+            } else {
+                result(false)
+            }
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -227,14 +249,14 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
         var messaged = false;
         _webView.closed = { (message: Any) -> Void in
             if(!messaged) {
-                messaged = true;
+                messaged = true
                 result(message)
             }
         }
         if (jsMessage != "") {
             _webView.jsResponse = { (message: Any) -> Void in
                 if(!messaged) {
-                    messaged = true;
+                    messaged = true
                     result(message)
                 }
             }
@@ -271,6 +293,58 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
     }
 }
 
+class DropView: NSView {
+    let fileTypes = ["jpg", "jpeg", "bmp", "png", "gif", "riv"]
+    
+    let NSFilenamesPboardType = NSPasteboard.PasteboardType("NSFilenamesPboardType")
+    var channel:FlutterMethodChannel?
+    
+    init(frame frameRect: NSRect, channel flutterChannel:FlutterMethodChannel) {
+        channel = flutterChannel
+        super.init(frame: frameRect)
+        self.autoresizingMask = [.width, .height]
+        registerForDraggedTypes([NSFilenamesPboardType])
+    }
+    
+    required init?(coder: NSCoder) {
+        channel = nil
+        super.init(coder: coder)
+    }
+    
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        if checkExtension(drag: sender) == true {
+            return .copy
+        } else {
+            return NSDragOperation()
+        }
+    }
+    
+    func checkExtension(drag: NSDraggingInfo) -> Bool {
+        if let board = drag.draggingPasteboard.propertyList(forType: NSFilenamesPboardType) as? NSArray, let path = board[0] as? String {
+            let url = NSURL.fileURL(withPath: path)
+            let fileExtension = url.pathExtension.lowercased()
+            return fileTypes.contains(fileExtension)
+            
+        }
+        return false
+    }
+    
+    //    override func draggingExited(_ sender: NSDraggingInfo?) {
+    //    }
+    //
+    //    override func draggingEnded(_ sender: NSDraggingInfo) {
+    //    }
+    
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let pasteboard = sender.draggingPasteboard.propertyList(forType: NSFilenamesPboardType) as? NSArray,
+            let path = pasteboard[0] as? String
+            else { return false }
+        
+        channel?.invokeMethod("filesDropped", arguments: [path])
+        
+        return true
+    }
+}
 
 class WebView: NSViewController, WKUIDelegate, WKScriptMessageHandler, WKNavigationDelegate, NSWindowDelegate {
     var webView: WKWebView!

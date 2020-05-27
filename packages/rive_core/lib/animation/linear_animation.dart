@@ -7,6 +7,7 @@ import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 export 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 
 class LinearAnimation extends LinearAnimationBase {
@@ -130,4 +131,13 @@ class LinearAnimation extends LinearAnimationBase {
 
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() => _keyframeValueChanged.notify();
+
+  @override
+  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, idLookup);
+    writer.writeVarUint(_keyedObjects.length);
+    for(final keyedObject in _keyedObjects.values) {
+      keyedObject.writeRuntime(writer, idLookup);
+    }
+  }
 }

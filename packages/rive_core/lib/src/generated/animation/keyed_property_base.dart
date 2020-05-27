@@ -2,8 +2,10 @@
 /// lib/src/generated/animation/keyed_property_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 26;
@@ -65,6 +67,14 @@ abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
     }
     if (propertyKey != null) {
       onPropertyChanged(propertyKeyPropertyKey, propertyKey, propertyKey);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    if (_propertyKey != null) {
+      context.intType
+          .writeProperty(propertyKeyPropertyKey, writer, _propertyKey);
     }
   }
 

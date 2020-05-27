@@ -1,8 +1,10 @@
 /// Core automatically generated lib/src/generated/animation/keyframe_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 29;
@@ -120,6 +122,23 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
     if (interpolatorId != null) {
       onPropertyChanged(
           interpolatorIdPropertyKey, interpolatorId, interpolatorId);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    if (_frame != null) {
+      context.intType.writeProperty(framePropertyKey, writer, _frame);
+    }
+    if (_interpolationType != null) {
+      context.intType.writeProperty(
+          interpolationTypePropertyKey, writer, _interpolationType);
+    }
+    if (_interpolatorId != null) {
+      var value = idLookup[_interpolatorId];
+      if (value != null) {
+        context.intType.writeProperty(interpolatorIdPropertyKey, writer, value);
+      }
     }
   }
 

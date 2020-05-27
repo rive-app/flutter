@@ -95,3 +95,18 @@ Future<bool> resetCursor() => WindowUtilsPlatform.instance.resetCursor();
 
 Future<String> getErrorMessage() =>
     WindowUtilsPlatform.instance.getErrorMessage();
+
+
+Future<bool> initDropTarget() => WindowUtilsPlatform.instance.initDropTarget();
+
+/// Start listening to file drops on the main window.
+void listenFilesDropped(DroppedFilesCallback callback) {
+  WindowUtilsPlatform.filesDropped = callback;
+}
+
+/// Stop listening to file drops on the main window.
+void cancelFilesDropped(DroppedFilesCallback callback) {
+  if (WindowUtilsPlatform.filesDropped == callback) {
+    WindowUtilsPlatform.filesDropped = null;
+  }
+}

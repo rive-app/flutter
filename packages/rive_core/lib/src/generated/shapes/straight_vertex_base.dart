@@ -2,9 +2,12 @@
 /// lib/src/generated/shapes/straight_vertex_base.dart.
 /// Do not modify manually.
 
+import 'dart:collection';
+import 'package:core/core.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class StraightVertexBase extends PathVertex {
   static const int typeKey = 5;
@@ -44,6 +47,14 @@ abstract class StraightVertexBase extends PathVertex {
     super.changeNonNull();
     if (radius != null) {
       onPropertyChanged(radiusPropertyKey, radius, radius);
+    }
+  }
+
+  @override
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
+    super.writeRuntimeProperties(writer, idLookup);
+    if (_radius != null) {
+      context.doubleType.writeProperty(radiusPropertyKey, writer, _radius);
     }
   }
 
