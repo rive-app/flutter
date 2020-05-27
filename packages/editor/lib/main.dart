@@ -10,13 +10,16 @@ import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
+import 'package:rive_core/runtime/runtime_importer.dart';
 import 'package:rive_editor/alerts_display.dart';
 import 'package:rive_editor/external_url.dart';
+import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/hierarchy_panel.dart';
+import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 
 import 'package:window_utils/window_utils.dart' as win_utils;
@@ -49,6 +52,7 @@ import 'package:rive_editor/widgets/toolbar/mode_toggle.dart';
 import 'package:rive_editor/widgets/toolbar/transform_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/visibility_toolbar.dart';
 import 'package:rive_widgets/listenable_builder.dart';
+import 'package:window_utils/window_utils.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -230,8 +234,50 @@ class InsertInheritedWidgets extends StatelessWidget {
   }
 }
 
-class Editor extends StatelessWidget {
+/// TODO: We converted Editor to a stateful widget so that we can easily detect
+/// at the UI layer when we're in the editor (and not plumb it in Rive or
+/// something else). This should get cleaned up when the file drop is moved into
+/// the FileBrowser and handled by the API layer instead.
+class Editor extends StatefulWidget {
   const Editor();
+
+  @override
+  _EditorState createState() => _EditorState();
+}
+
+class _EditorState extends State<Editor> {
+  void _filesDropped(Iterable<DroppedFile> files) {
+    var activeFile = ActiveFile.find(context);
+    if (activeFile == null || activeFile.state != OpenFileState.open) {
+      return;
+    }
+
+    List<DroppedFile> importedFiles = [];
+
+    for (final file in files) {
+      if (file.filename.indexOf('.riv') != -1) {
+        var importer = RuntimeImporter(core: activeFile.core);
+        if (importer.import(file.bytes)) {
+          importedFiles.add(file);
+        }
+      }
+    }
+
+    activeFile.addAlert(SimpleAlert(
+        'Imported ${importedFiles.map((file) => file.filename).join(', ')}.'));
+  }
+
+  @override
+  void initState() {
+    win_utils.listenFilesDropped(_filesDropped);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    win_utils.cancelFilesDropped(_filesDropped);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +320,7 @@ class Editor extends StatelessWidget {
                       HamburgerPopupButton(),
                       TransformPopupButton(),
                       CreatePopupButton(),
-                      // SharePopupButton(),
+                      SharePopupButton(),
                       const Spacer(),
                       ConnectedUsers(rive: rive),
                       VisibilityPopupButton(),

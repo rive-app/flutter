@@ -46,6 +46,51 @@
         event.preventDefault();
     }
   </script>
+
+  <!-- This is the counterpart to the window_utils_web.dart drop files interface. TODO: get this into Dart/plugin land.  -->
+  <script>
+    document.body.ondragover = function (event) {
+      event.stopPropagation();
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
+    };
+
+    document.body.ondragleave = function (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    };
+
+    document.body.ondrop = function (event) {
+      event.stopPropagation();
+      event.preventDefault();
+      let files = event.dataTransfer.files;
+      const fileList = [];
+      let reading = files.length;
+
+      function _decReading() {
+        reading--;
+        if (reading == 0 && fileList.length != 0) {
+          filesDropped(fileList);
+        }
+      }
+
+      for (const file of files) {
+        var fileReader = new FileReader();
+        fileReader.onload = function () {
+          const bytes = new Uint8Array(this.result);
+          fileList.push({
+            filename: file.name,
+            bytes: bytes
+          });
+          _decReading();
+        };
+        fileReader.onerror = function () {
+          _decReading();
+        };
+        fileReader.readAsArrayBuffer(file);
+      }
+    };
+  </script>
   <script src="main.dart.js?v=DEPLOYMENTVERSION" type="application/javascript"></script>
 </body>
 

@@ -44,7 +44,7 @@ class MethodChannelWindowUtils extends WindowUtilsPlatform {
           );
         }
         if (droppedFiles.isNotEmpty) {
-          filesDropped?.call(droppedFiles);
+          WindowUtilsPlatform.filesDropped?.call(droppedFiles);
         }
         return true;
       default:
