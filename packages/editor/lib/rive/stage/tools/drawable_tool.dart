@@ -1,7 +1,6 @@
 import 'package:cursor/cursor_view.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -38,10 +37,6 @@ abstract class DrawableTool extends StageTool with DraggableTool {
     if (stage.tool == this) {
       stage.tool = AutoTool.instance;
     }
-    return;
-    // Stage captures journal entries for us when a drag operation ends.
-    // Ask the stage to switch back to the translate tool
-    stage.activateAction(ShortcutAction.translateTool);
   }
 
   @override
