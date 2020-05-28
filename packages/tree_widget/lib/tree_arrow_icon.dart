@@ -6,10 +6,11 @@ class TreeArrowIcon extends CustomPainter {
   final StrokeCap strokeCap;
   final double thickness;
 
-  TreeArrowIcon(
-      {this.color = Colors.black,
-      this.strokeCap = StrokeCap.square,
-      this.thickness = 1});
+  TreeArrowIcon({
+    this.color = Colors.black,
+    this.strokeCap = StrokeCap.square,
+    this.thickness = 1,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -19,11 +20,11 @@ class TreeArrowIcon extends CustomPainter {
       ..strokeWidth = thickness
       ..isAntiAlias = true;
 
-  double scale = 1.0;
+    double scale = 1.0;
     var path = Path();
-    path.moveTo(-2*scale, -1*scale);
-    path.lineTo(0, 1*scale);
-    path.lineTo(2*scale, -1*scale);
+    path.moveTo(-2 * scale, -1 * scale);
+    path.lineTo(0, 1 * scale);
+    path.lineTo(2 * scale, -1 * scale);
     canvas.drawPath(path, paint);
   }
 

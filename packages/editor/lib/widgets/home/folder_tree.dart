@@ -10,9 +10,6 @@ import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/popup/context_popup.dart';
-import 'package:rive_editor/widgets/popup/popup_button.dart';
-import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
@@ -32,6 +29,55 @@ class FolderTreeView extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
+  bool isSelected(AsyncSnapshot<bool> selectedStream) =>
+      selectedStream.hasData && selectedStream.data;
+
+  _newFileButton(BuildContext context, FolderTreeItem itemData,
+      AsyncSnapshot<bool> selectedStream) {
+    final owner = itemData.owner;
+    if (owner == null) {
+      return const SizedBox();
+    }
+
+    // its the magic 'your files folder'
+    const yourFilesFolderId = 1;
+    final colors = RiveTheme.of(context).colors;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 7),
+      child: TintedIconButton(
+        onPress: () async {
+          final createdFile = (owner is Team)
+              ? await FileManager().createFile(yourFilesFolderId, owner.ownerId)
+              : await FileManager().createFile(yourFilesFolderId);
+
+          // Update current directory.
+          var currentDirectory = Plumber().peek<CurrentDirectory>();
+          if (currentDirectory.owner == owner && currentDirectory.folderId == 1) {
+            Plumber().message(currentDirectory);
+          }
+
+          RiveContext.of(context).open(
+            createdFile.fileOwnerId,
+            createdFile.id,
+            createdFile.name,
+          );
+        },
+        icon: 'add',
+        color: isSelected(selectedStream)
+            ? colors.fileSelectedFolderIcon
+            : colors.fileUnselectedFolderIcon,
+        iconHover: Colors.green,
+        // iconHover: colors.fileBackgroundDarkGrey,
+        backgroundHover: Colors.transparent,
+        tip: const Tip(
+          label: 'New File',
+        ),
+        onHover: (isHovered) => itemData.hover = isHovered,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
@@ -45,7 +91,7 @@ class FolderTreeView extends StatelessWidget {
           child: Center(
             child: TreeExpander(
               key: item.key,
-              iconColor: (selectedStream.hasData && selectedStream.data)
+              iconColor: isSelected(selectedStream)
                   ? Colors.white
                   : colors.fileUnselectedFolderIcon,
               isExpanded: item.isExpanded,
@@ -53,7 +99,7 @@ class FolderTreeView extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             border: Border.all(
-              color: (selectedStream.hasData && selectedStream.data)
+              color: isSelected(selectedStream)
                   ? colors.selectedTreeLines
                   : colors.filesTreeStroke,
               width: 1.0,
@@ -67,16 +113,14 @@ class FolderTreeView extends StatelessWidget {
       ),
       iconBuilder: (context, item, style) => StreamBuilder<bool>(
         stream: item.data.selectedStream,
-        builder: (context, selectedStream) => Container(
+        builder: (context, selectedStream) => SizedBox(
           width: 20,
           height: 20,
           child: Center(
             child: FolderTreeIcon(
               owner: item.data.owner,
-              icon: (item.data.folder != null && item.data.folder.id == 0)
-                  ? 'trash'
-                  : 'folder',
-              iconColor: (selectedStream.hasData && selectedStream.data)
+              icon: item.data.folder?.id == 0 ? 'trash' : 'folder',
+              iconColor: isSelected(selectedStream)
                   ? colors.fileSelectedFolderIcon
                   : colors.fileUnselectedFolderIcon,
             ),
@@ -115,7 +159,7 @@ class FolderTreeView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13,
-                      color: (selectedStream.hasData && selectedStream.data)
+                      color: isSelected(selectedStream)
                           ? Colors.white
                           : colors.fileTreeText,
                     ),
@@ -131,17 +175,18 @@ class FolderTreeView extends StatelessWidget {
                   await showSettings(item.data.owner, context: context);
                 },
                 icon: 'settings-small',
-                color: (selectedStream.hasData && selectedStream.data)
+                color: isSelected(selectedStream)
                     ? colors.fileSelectedFolderIcon
                     : colors.fileUnselectedFolderIcon,
-                iconHover: colors.fileBackgroundDarkGrey,
-                tip: const Tip(label: 'Settings'),
+                iconHover: Colors.green,
+                // iconHover: colors.fileBackgroundDarkGrey,
+                backgroundHover: Colors.transparent,
+                tip: const Tip(
+                  label: 'Settings',
+                ),
+                onHover: (isHovered) => item.data.hover = isHovered,
               ),
-            if (item.data.owner != null)
-              AddFileFolderButton(
-                item.data.owner,
-                (selectedStream.hasData && selectedStream.data),
-              )
+            _newFileButton(context, item.data, selectedStream),
           ]),
         ),
       ),
@@ -188,77 +233,5 @@ class FolderTreeIcon extends StatelessWidget {
         color: StageCursor.colorFromPalette(owner.ownerId),
       );
     }
-  }
-}
-
-class AddFileFolderButton extends StatelessWidget {
-  final Owner owner;
-  final bool selected;
-
-  const AddFileFolderButton(
-    this.owner,
-    this.selected, {
-    Key key,
-  }) : super(key: key);
-
-  void _updateCurrentDirectory() {
-    var currentDirectory = Plumber().peek<CurrentDirectory>();
-    if (currentDirectory.owner == owner && currentDirectory.folderId == 1) {
-      Plumber().message(currentDirectory);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var colors = RiveTheme.of(context).colors;
-    // its the magic 'your files folder'
-    const folderId = 1;
-
-    return PopupButton<PopupContextItem>(
-      direction: PopupDirection.rightToCenter,
-      builder: (popupContext) {
-        return TintedIconButton(
-          icon: 'add',
-          color: selected
-              ? colors.fileSelectedFolderIcon
-              : colors.fileUnselectedFolderIcon,
-          iconHover: colors.fileSelectedFolderIcon,
-        );
-      },
-      itemBuilder: (popupContext, item, isHovered) =>
-          item.itemBuilder(popupContext, isHovered),
-      itemsBuilder: (context) => [
-        PopupContextItem(
-          'New File',
-          select: () async {
-            final createdFile = (owner is Team)
-                ? await FileManager().createFile(folderId, owner.ownerId)
-                : await FileManager().createFile(folderId);
-            _updateCurrentDirectory();
-            RiveContext.of(context).open(
-              createdFile.fileOwnerId,
-              createdFile.id,
-              createdFile.name,
-            );
-          },
-        ),
-        PopupContextItem(
-          'New Folder',
-          select: () async {
-            if (owner is Team) {
-              await FileManager().createTeamFolder(folderId, owner.ownerId);
-            } else {
-              await FileManager().createPersonalFolder(folderId, owner.ownerId);
-            }
-            // NOTE: bit funky, feels like it'd be nice
-            // to control both managers through one message
-            // pretty sure we can do that if we back onto
-            // a more generic FileManager
-            FileManager().loadFolders(owner);
-            _updateCurrentDirectory();
-          },
-        )
-      ],
-    );
   }
 }
