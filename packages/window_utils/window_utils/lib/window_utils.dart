@@ -93,9 +93,8 @@ Future<int> mouseStackCount() => WindowUtilsPlatform.instance.mouseStackCount();
 
 Future<bool> resetCursor() => WindowUtilsPlatform.instance.resetCursor();
 
-Future<String> getErrorMessage() =>
-    WindowUtilsPlatform.instance.getErrorMessage();
-
+Future<Map<String, String>> getCookies() =>
+    WindowUtilsPlatform.instance.getCookies();
 
 Future<bool> initDropTarget() => WindowUtilsPlatform.instance.initDropTarget();
 
