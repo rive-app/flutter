@@ -101,7 +101,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                               const SizedBox(height: 3),
                               _textFieldRow([
                                 LabeledTextField(
-                                  label: '${labelPrefix}Name asdfsd',
+                                  label: '${labelPrefix}Name',
                                   onChanged: (value) {
                                     print('changing name');
                                     return _profile.name = value;

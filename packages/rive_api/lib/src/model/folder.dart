@@ -2,8 +2,9 @@
 import 'package:meta/meta.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:utilities/utilities.dart';
+import 'named.dart';
 
-class Folder {
+class Folder implements Named {
   Folder({
     @required this.id,
     @required this.ownerId,

@@ -1,8 +1,9 @@
 import 'package:meta/meta.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:utilities/utilities.dart';
+import 'named.dart';
 
-class File {
+class File implements Named {
   File({
     @required this.id,
     this.name,
