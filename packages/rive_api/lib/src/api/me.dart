@@ -73,10 +73,17 @@ class MeApi {
     }
   }
 
-  Future<void> clearError() async {
-    var response = await api.getFromPath('/api/clearError');
+  /**
+   * Gets the error message from the server's cookies. 
+   * Server will also clear it right away, so this error can only be used once.
+   */
+  Future<String> getErrorMessage() async {
+    var response = await api.getFromPath('/api/getError');
+    print("Error message says: ${response.body}");
     if (response.statusCode != 200) {
       _log.severe("Couldn't clear the errors cookie.");
+      return '';
     }
+    return response.body;
   }
 }
