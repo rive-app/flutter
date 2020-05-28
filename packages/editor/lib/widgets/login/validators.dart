@@ -119,11 +119,13 @@ class EmailValidator extends FieldValidator {
 }
 
 class ErrorValidator extends FieldValidator {
-  const ErrorValidator({@required ValueChanged<String> onFieldError})
-      : super(onFieldError: onFieldError);
+  const ErrorValidator({
+    @required this.errorField,
+    @required ValueChanged<String> onFieldError,
+  }) : super(onFieldError: onFieldError);
 
   @override
-  String get errorField => 'error';
+  final String errorField;
 
   @override
   void validate(AuthResponse response) {
