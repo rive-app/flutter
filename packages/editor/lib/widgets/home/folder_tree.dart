@@ -32,52 +32,6 @@ class FolderTreeView extends StatelessWidget {
   bool isSelected(AsyncSnapshot<bool> selectedStream) =>
       selectedStream.hasData && selectedStream.data;
 
-  _newFileButton(BuildContext context, FolderTreeItem itemData,
-      AsyncSnapshot<bool> selectedStream) {
-    final owner = itemData.owner;
-    if (owner == null) {
-      return const SizedBox();
-    }
-
-    // its the magic 'your files folder'
-    const yourFilesFolderId = 1;
-    final colors = RiveTheme.of(context).colors;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 7),
-      child: TintedIconButton(
-        onPress: () async {
-          final createdFile = (owner is Team)
-              ? await FileManager().createFile(yourFilesFolderId, owner.ownerId)
-              : await FileManager().createFile(yourFilesFolderId);
-
-          // Update current directory.
-          var currentDirectory = Plumber().peek<CurrentDirectory>();
-          if (currentDirectory.owner == owner && currentDirectory.folderId == 1) {
-            Plumber().message(currentDirectory);
-          }
-
-          RiveContext.of(context).open(
-            createdFile.fileOwnerId,
-            createdFile.id,
-            createdFile.name,
-          );
-        },
-        icon: 'add',
-        color: isSelected(selectedStream)
-            ? colors.fileSelectedFolderIcon
-            : colors.fileUnselectedFolderIcon,
-        iconHover: Colors.green,
-        // iconHover: colors.fileBackgroundDarkGrey,
-        backgroundHover: Colors.transparent,
-        tip: const Tip(
-          label: 'New File',
-        ),
-        onHover: (isHovered) => itemData.hover = isHovered,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
@@ -85,32 +39,12 @@ class FolderTreeView extends StatelessWidget {
     return TreeView<FolderTreeItem>(
       style: style,
       controller: controller,
-      expanderBuilder: (context, item, style) => StreamBuilder<bool>(
-        stream: item.data.selectedStream,
-        builder: (context, selectedStream) => Container(
-          child: Center(
-            child: TreeExpander(
-              key: item.key,
-              iconColor: isSelected(selectedStream)
-                  ? Colors.white
-                  : colors.fileUnselectedFolderIcon,
-              isExpanded: item.isExpanded,
-            ),
-          ),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: isSelected(selectedStream)
-                  ? colors.selectedTreeLines
-                  : colors.filesTreeStroke,
-              width: 1.0,
-              style: BorderStyle.solid,
-            ),
-            borderRadius: const BorderRadius.all(
-              Radius.circular(7.5),
-            ),
-          ),
-        ),
-      ),
+      expanderBuilder: (context, item, _) => StreamBuilder<bool>(
+          stream: item.data.selectedStream,
+          builder: (context, selectedStream) => CircleTreeExpander(
+                item: item,
+                isSelected: isSelected(selectedStream),
+              )),
       iconBuilder: (context, item, style) => StreamBuilder<bool>(
         stream: item.data.selectedStream,
         builder: (context, selectedStream) => SizedBox(
@@ -170,23 +104,45 @@ class FolderTreeView extends StatelessWidget {
             if (item.data.owner is Me ||
                 (item.data.owner is Team &&
                     canEditTeam((item.data.owner as Team).permission)))
-              TintedIconButton(
+              FolderTreeItemButton(
+                itemData: item.data,
+                isSelected: isSelected(selectedStream),
+                icon: 'settings-small',
+                tooltip: 'Settings',
                 onPress: () async {
                   await showSettings(item.data.owner, context: context);
                 },
-                icon: 'settings-small',
-                color: isSelected(selectedStream)
-                    ? colors.fileSelectedFolderIcon
-                    : colors.fileUnselectedFolderIcon,
-                iconHover: Colors.green,
-                // iconHover: colors.fileBackgroundDarkGrey,
-                backgroundHover: Colors.transparent,
-                tip: const Tip(
-                  label: 'Settings',
-                ),
-                onHover: (isHovered) => item.data.hover = isHovered,
               ),
-            _newFileButton(context, item.data, selectedStream),
+            if (item.data.owner != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 7),
+                child: FolderTreeItemButton(
+                  itemData: item.data,
+                  isSelected: isSelected(selectedStream),
+                  icon: 'add',
+                  tooltip: 'New File',
+                  onPress: () async {
+                    final createdFile = (item.data.owner is Team)
+                        // 1 is the magic 'Your Files' folder
+                        ? await FileManager()
+                            .createFile(1, item.data.owner.ownerId)
+                        : await FileManager().createFile(1);
+
+                    // Update current directory.
+                    var currentDirectory = Plumber().peek<CurrentDirectory>();
+                    if (currentDirectory.owner == item.data.owner &&
+                        currentDirectory.folderId == 1) {
+                      Plumber().message(currentDirectory);
+                    }
+
+                    RiveContext.of(context).open(
+                      createdFile.fileOwnerId,
+                      createdFile.id,
+                      createdFile.name,
+                    );
+                  },
+                ),
+              )
           ]),
         ),
       ),
@@ -233,5 +189,133 @@ class FolderTreeIcon extends StatelessWidget {
         color: StageCursor.colorFromPalette(owner.ownerId),
       );
     }
+  }
+}
+
+class CircleTreeExpander extends StatefulWidget {
+  const CircleTreeExpander({
+    @required this.item,
+    @required this.isSelected,
+    Key key,
+  }) : super(key: key);
+
+  final FlatTreeItem<FolderTreeItem> item;
+  final bool isSelected;
+
+  @override
+  State<StatefulWidget> createState() => _CircleTreeExpanderState();
+}
+
+class _CircleTreeExpanderState extends State<CircleTreeExpander> {
+  bool _isHovered = true;
+
+  Color get borderColor {
+    final colors = RiveTheme.of(context).colors;
+    if (widget.isSelected) {
+      return _isHovered ? Colors.white : colors.selectedTreeLines;
+    } else {
+      return _isHovered
+          ? colors.fileUnselectedFolderIcon
+          : colors.filesTreeStroke;
+    }
+  }
+
+  Color get arrowColor {
+    final colors = RiveTheme.of(context).colors;
+    if (widget.isSelected) {
+      return Colors.white;
+    } else {
+      return _isHovered
+          ? colors.fileBackgroundDarkGrey
+          : colors.fileUnselectedFolderIcon;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Container(
+        child: Center(
+          child: TreeExpander(
+            key: item.key,
+            iconColor: arrowColor,
+            isExpanded: item.isExpanded,
+          ),
+        ),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: borderColor,
+            width: 1.0,
+            style: BorderStyle.solid,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(7.5),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FolderTreeItemButton extends StatefulWidget {
+  const FolderTreeItemButton({
+    @required this.itemData,
+    @required this.isSelected,
+    @required this.onPress,
+    @required this.icon,
+    @required this.tooltip,
+    Key key,
+  }) : super(key: key);
+
+  final FolderTreeItem itemData;
+  final bool isSelected;
+  final VoidCallback onPress;
+  final String icon;
+  final String tooltip;
+
+  @override
+  _FolderTreeItemButtonState createState() => _FolderTreeItemButtonState();
+}
+
+class _FolderTreeItemButtonState extends State<FolderTreeItemButton> {
+  bool _isHovered = false;
+
+  Color get _rowButtonColor {
+    final isSelected = widget.isSelected;
+    final colors = RiveTheme.of(context).colors;
+
+    if (isSelected) {
+      return _isHovered
+          ? colors.treeIconSelectedHovered
+          : colors.treeIconSelectedIdle;
+    }
+
+    return _isHovered ? colors.treeIconHovered : colors.treeIconIdle;
+  }
+
+  void _setHover(bool value) {
+    if (_isHovered == value) {
+      return;
+    }
+
+    setState(() {
+      _isHovered = value;
+      widget.itemData.hover = value;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TintedIconButton(
+      onPress: widget.onPress,
+      icon: widget.icon,
+      color: _rowButtonColor,
+      backgroundHover: Colors.transparent,
+      tip: Tip(label: widget.tooltip),
+      onHover: _setHover,
+    );
   }
 }
