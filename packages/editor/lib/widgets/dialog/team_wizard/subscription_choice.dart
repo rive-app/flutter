@@ -73,11 +73,17 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
         _insertGestureDetector(
           onTap: widget.onTap,
           child: RiveRadio<bool>(
-              groupValue: true,
-              value: widget.isSelected,
-              onChanged: null, // handled above
-              backgroundColor: Color.lerp(colors.buttonLight,
-                  colors.toggleInactiveBackground, animationValue)),
+            groupValue: true,
+            value: widget.isSelected,
+            onChanged: null, // handled above
+            backgroundColor: Color.lerp(
+              colors.buttonLight,
+              colors.toggleInactiveBackground,
+              animationValue,
+            ),
+            selectedColor:
+                widget.disabled ? colors.toggleInactiveBackground : null,
+          ),
         ),
         const SizedBox(width: 10),
         Text(
@@ -117,7 +123,7 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
             margin: const EdgeInsets.all(3),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(7),
                 color: Color.lerp(colors.panelBackgroundLightGrey, Colors.white,
                     animationValue),
                 boxShadow: [

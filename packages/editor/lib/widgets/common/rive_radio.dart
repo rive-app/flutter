@@ -7,7 +7,6 @@ class RiveRadio<T> extends StatefulWidget {
   final ValueChanged<T> onChanged;
   final Color selectedColor;
   final Color backgroundColor;
-  final Color hoverColor;
 
   const RiveRadio({
     @required this.value,
@@ -15,7 +14,6 @@ class RiveRadio<T> extends StatefulWidget {
     @required this.onChanged,
     this.selectedColor,
     this.backgroundColor,
-    this.hoverColor,
     Key key,
   }) : super(key: key);
 
@@ -93,13 +91,13 @@ class _RiveRadioRenderer extends LeafRenderObjectWidget {
   final Color selectedColor;
   final Color backgroundColor;
 
-  const _RiveRadioRenderer(
-      {@required this.isSelected,
-      @required this.isFocused,
-      @required this.selectedColor,
-      @required this.backgroundColor,
-      Key key})
-      : assert(isSelected != null),
+  const _RiveRadioRenderer({
+    @required this.isSelected,
+    @required this.isFocused,
+    @required this.selectedColor,
+    @required this.backgroundColor,
+    Key key,
+  })  : assert(isSelected != null),
         assert(selectedColor != null),
         super(key: key);
 

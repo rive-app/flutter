@@ -115,8 +115,8 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                           costLabel: sub == null
                               ? ''
                               : '${labelLookup[TeamsOption.basic]}',
-                          description: 'A space where you and your team'
-                              ' can share files.',
+                          description: 'Create a space where you and '
+                              'your team can share files.',
                           onTap: () => sub.option = TeamsOption.basic,
                           showRadio: false,
                           highlight: animationValue,
@@ -140,8 +140,8 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                           costLabel: sub == null
                               ? ''
                               : '${labelLookup[TeamsOption.premium]}',
-                          description: 'Create projects that only some of '
-                              'your team has access to.',
+                          description: 'Create sub-teams with centralized '
+                              'billing',
                           onTap: () => sub.option = TeamsOption.premium,
                           showRadio: false,
                           highlight: animationValue,

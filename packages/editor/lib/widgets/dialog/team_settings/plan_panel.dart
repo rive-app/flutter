@@ -123,38 +123,41 @@ class _PlanState extends State<PlanSettings>
                             final t = _controller.value;
                             // Simple quadratic.
                             final animationValue = t * t;
-                            return Row(
-                              children: [
-                                SubscriptionChoice(
-                                  label: 'Team',
-                                  costLabel: (_sub == null)
-                                      ? ''
-                                      : '${labelLookup[TeamsOption.basic]}',
-                                  description: ''
-                                      'Create a space where you and '
-                                      'your team can share files.',
-                                  onTap: () => _sub.option = TeamsOption.basic,
-                                  isSelected: isBasic,
-                                  highlight: 1, // animationValue,
-                                  showRadio: true,
-                                ),
-                                const SizedBox(width: 30),
-                                SubscriptionChoice(
-                                  label: 'Org',
-                                  disabled: true,
-                                  costLabel: (_sub == null)
-                                      ? ''
-                                      : '${labelLookup[TeamsOption.premium]}',
-                                  description: ''
-                                      'Create projects that only some of '
-                                      'your team has access to.',
-                                  onTap: () =>
-                                      _sub.option = TeamsOption.premium,
-                                  isSelected: isPremium,
-                                  highlight: 1 - animationValue,
-                                  showRadio: true,
-                                ),
-                              ],
+                            return SizedBox(
+                              height: 179,
+                              child: Row(
+                                children: [
+                                  SubscriptionChoice(
+                                    label: 'Team',
+                                    costLabel: (_sub == null)
+                                        ? ''
+                                        : '${labelLookup[TeamsOption.basic]}',
+                                    description: ''
+                                        'Create a space where you and '
+                                        'your team can share files.',
+                                    onTap: () => _sub.option = TeamsOption.basic,
+                                    isSelected: isBasic,
+                                    highlight: animationValue,
+                                    showRadio: true,
+                                  ),
+                                  const SizedBox(width: 30),
+                                  SubscriptionChoice(
+                                    label: 'Org',
+                                    disabled: true,
+                                    costLabel: (_sub == null)
+                                        ? ''
+                                        : '${labelLookup[TeamsOption.premium]}',
+                                    description: ''
+                                        'Create sub-teams with centralized '
+                                        'billing',
+                                    onTap: () =>
+                                        _sub.option = TeamsOption.premium,
+                                    isSelected: isPremium,
+                                    highlight: 1 - animationValue,
+                                    showRadio: true,
+                                  ),
+                                ],
+                              ),
                             );
                           }),
                     ]);
