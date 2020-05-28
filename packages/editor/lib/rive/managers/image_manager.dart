@@ -10,16 +10,10 @@ class ImageManager {
   final _rawImageCache = <String, CachedRawImage>{};
 
   /// Removes expired entries in the cache
-  void _expireCaches() {
-    _rawImageCache.removeWhere((key, value) => value.expired);
-  }
+  void _expireCaches() =>
+      _rawImageCache.removeWhere((key, value) => value.expired);
 
-  Uint8List getCachedImage(String url) {
-    if (_rawImageCache.containsKey(url)) {
-      return _rawImageCache[url].rawImage;
-    }
-    return null;
-  }
+  Uint8List getCachedImage(String url) => _rawImageCache[url]?.rawImage;
 
   /// Loads an image into memory from a url
   Future<Uint8List> loadRawImageFromUrl(String url) async {
@@ -36,20 +30,21 @@ class ImageManager {
 
 class CachedCircleAvatar extends StatelessWidget {
   final String imageUrl;
+  final double diameter;
 
   const CachedCircleAvatar(
     this.imageUrl, {
     Key key,
+    this.diameter,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    Uint8List cachedImage =
-        ImageCacheProvider.of(context).getCachedImage(imageUrl);
+    final cachedImage = ImageCacheProvider.of(context).getCachedImage(imageUrl);
 
     Widget getAvatar(Uint8List imageData) {
       return CircleAvatar(
         backgroundColor: Colors.transparent,
+        maxRadius: diameter != null ? diameter / 2 : null,
         backgroundImage: (imageData != null) ? MemoryImage(imageData) : null,
       );
     }

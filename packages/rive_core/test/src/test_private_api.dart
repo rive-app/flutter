@@ -16,7 +16,7 @@ class TestPrivateApi {
 
   Future<void> startServing() async {
     await for (final request in _server) {
-      print("SEGS ${request.uri.pathSegments} ${request.method}");
+      // print("SEGS ${request.uri.pathSegments} ${request.method}");
       var segs = request.uri.pathSegments;
       if (segs.length == 3) {
         switch (segs[0]) {

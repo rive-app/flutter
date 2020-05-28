@@ -81,7 +81,7 @@ class AvatarView extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(1),
             child: hasImage
-                ? CachedCircleAvatar(imageUrl)
+                ? CachedCircleAvatar(imageUrl, diameter: diameter)
                 : Center(
                     child: Padding(
                       padding: const EdgeInsets.all(3),
