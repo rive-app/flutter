@@ -228,6 +228,28 @@ class WebServiceClient {
     }
   }
 
+  Future<http.Response> patch(String url,
+      {dynamic body, Encoding encoding}) async {
+    try {
+      final client = getClient();
+      print('patching to $url');
+      var response = await client.patch(url,
+          body: body, headers: headers, encoding: encoding);
+
+      _processResponse(response);
+      return response;
+    } on Exception catch (error) {
+      //SocketException
+      var errorString = error.toString();
+      if (errorString.startsWith('XMLHttpRequest') ||
+          errorString.startsWith('SocketException')) {
+        throw HttpException(errorString, error);
+      } else {
+        rethrow;
+      }
+    }
+  }
+
   Future<http.Response> put(String url,
       {dynamic body, Encoding encoding}) async {
     try {

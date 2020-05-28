@@ -208,7 +208,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                   item.itemBuilder(popupContext, isHovered),
               items: [
                 PopupContextItem(
-                  'Rename (file 4 now)',
+                  'Rename',
                   select: () async {
                     final selection = Plumber().peek<Selection>();
                     if (selection.files.isNotEmpty) {
