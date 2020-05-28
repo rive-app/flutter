@@ -132,8 +132,7 @@ class _PlanState extends State<PlanSettings>
                                     costLabel: (_sub == null)
                                         ? ''
                                         : '${labelLookup[TeamsOption.basic]}',
-                                    description: ''
-                                        'Create a space where you and '
+                                    description: 'Create a space where you and '
                                         'your team can share files.',
                                     onTap: () => _sub.option = TeamsOption.basic,
                                     isSelected: isBasic,

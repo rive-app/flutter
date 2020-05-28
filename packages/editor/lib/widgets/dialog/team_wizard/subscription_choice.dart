@@ -151,13 +151,20 @@ class _SubscriptionChoiceState extends State<SubscriptionChoice>
                   )
                 ])),
                 const SizedBox(height: 12),
-                Text(widget.description,
-                    overflow: TextOverflow.visible,
-                    softWrap: true,
-                    style: textStyles.fileLightGreyText.copyWith(
-                        height: 1.6,
-                        color: Color.lerp(colors.commonButtonTextColorDark,
-                            colors.commonLightGrey, animationValue))),
+                Text(
+                  widget.description,
+                  overflow: TextOverflow.visible,
+                  softWrap: true,
+                  style: textStyles.fileLightGreyText.copyWith(
+                    height: 1.6,
+                    color: Color.lerp(
+                      colors.commonButtonTextColorDark,
+                      colors.commonLightGrey,
+                      animationValue,
+                    ),
+                  ),
+                ),
+                const Spacer(),
                 if (!widget.showRadio) ...[
                   const SizedBox(height: 14),
                   Padding(
