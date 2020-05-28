@@ -115,6 +115,11 @@ class RiveColors {
   Color get filesTreeStroke => const Color(0xFFCCCCCC);
   Color get fileBrowserBackground => white;
 
+  Color get treeIconIdle => const Color(0xFFA9A9A9);
+  Color get treeIconHovered => const Color(0xFF666666);
+  Color get treeIconSelectedIdle => const Color(0xFFD5E8F7);
+  Color get treeIconSelectedHovered => white;
+
   // Common
   Color get commonLightGrey => const Color(0xFF888888);
   Color get commonDarkGrey => const Color(0xFF333333);

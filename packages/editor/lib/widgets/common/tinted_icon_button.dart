@@ -30,6 +30,9 @@ class TintedIconButton extends StatefulWidget {
   /// Optional tooltip to show when this button is hovered.
   final Tip tip;
 
+  /// Called when the hover state changes.
+  final ValueChanged<bool> onHover;
+
   const TintedIconButton({
     @required this.icon,
     this.onPress,
@@ -39,6 +42,7 @@ class TintedIconButton extends StatefulWidget {
     this.iconHover,
     this.padding,
     this.tip,
+    this.onHover,
     Key key,
   }) : super(key: key);
   @override
@@ -87,10 +91,16 @@ class _TintedIconButtonState extends State<TintedIconButton> {
             if (RiveContext.find(context).isDragging) {
               return;
             }
-            setState(() => _isHovered = true);
+            setState(() {
+              _isHovered = true;
+              widget.onHover?.call(true);
+            });
           },
           onExit: (_) {
-            setState(() => _isHovered = false);
+            setState(() {
+              _isHovered = false;
+              widget.onHover?.call(false);
+            });
           },
           child: Container(
             padding: widget.padding ?? const EdgeInsets.all(5),

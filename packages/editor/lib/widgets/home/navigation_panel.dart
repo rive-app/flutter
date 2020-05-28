@@ -112,8 +112,10 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 if (snapshot.data != null) {
                   for (int i = 0; i < snapshot.data.length; i++) {
                     // TODO: rather than folderTree's we prob ably rely on this controller?
-                    slivers.add(FolderTreeView(
-                        style: treeStyle, controller: snapshot.data[i]));
+                    slivers.add(
+                      FolderTreeView(
+                          style: treeStyle, controller: snapshot.data[i]),
+                    );
 
                     // / TODO: Matt take a look at this please
                     // / This works once, but when you switch away from the tab adn back into it. it all blows up pretty badly

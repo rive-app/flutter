@@ -76,7 +76,7 @@ class _TokenGeneratorState extends State<TokenGenerator> {
                     _showSnackBar(context, 'Success!');
                   }
                 } else {
-                  print("Cannot!");
+                  _showSnackBar(context, 'Something went wrong.');
                 }
               },
             )

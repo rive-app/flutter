@@ -152,9 +152,9 @@ abstract class WindowUtilsPlatform extends PlatformInterface {
   Future<bool> resetCursor() =>
       throw UnimplementedError('resetCursor() has not been implemented.');
 
-  Future<String> getErrorMessage() =>
-      throw UnimplementedError('getErrorMessage() has not been implemented.');
-      
+  Future<Map<String, String>> getCookies() =>
+      throw UnimplementedError('getCookies() has not been implemented.');
+
   Future<bool> initDropTarget() =>
       throw UnimplementedError('initDropTarget() has not been implemented.');
 }
