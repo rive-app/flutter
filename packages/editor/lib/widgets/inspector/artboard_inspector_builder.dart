@@ -23,7 +23,7 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ArtboardBase.yPropertyKey,
               labelA: 'X',
               labelB: 'Y',
-              converter: TranslationValueConverter.instance,
+              converter: TranslationIntegerValueConverter.instance,
             ),
         (context) => PropertyDual(
               name: 'Size',

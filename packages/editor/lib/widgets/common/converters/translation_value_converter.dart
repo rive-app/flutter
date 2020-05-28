@@ -2,8 +2,11 @@ import 'package:rive_editor/widgets/common/converters/input_value_converter.dart
 
 /// Value converter for translation values (x and y).
 class TranslationValueConverter extends InputValueConverter<double> {
-  static final DoubleFormatter displayFormatter = DoubleFormatter(1);
-  static final DoubleFormatter editFormatter = DoubleFormatter(2);
+  static final DoubleFormatter _displayFormatter = DoubleFormatter(1);
+  static final DoubleFormatter _editFormatter = DoubleFormatter(2);
+
+  DoubleFormatter get displayFormatter => _displayFormatter;
+  DoubleFormatter get editFormatter => _editFormatter;
 
   @override
   double fromEditingValue(String value) => double.parse(value);
@@ -18,4 +21,19 @@ class TranslationValueConverter extends InputValueConverter<double> {
 
   @override
   double drag(double value, double amount) => value - amount;
+}
+
+/// Value converter for translation values (x and y), to display the values
+/// in whole numbers
+class TranslationIntegerValueConverter extends TranslationValueConverter {
+  static final DoubleFormatter _displayFormatter = DoubleFormatter(0);
+  static final DoubleFormatter _editFormatter = DoubleFormatter(0);
+
+  @override
+  DoubleFormatter get displayFormatter => _displayFormatter;
+  @override
+  DoubleFormatter get editFormatter => _editFormatter;
+
+  static final TranslationIntegerValueConverter instance =
+      TranslationIntegerValueConverter();
 }
