@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard_title.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';

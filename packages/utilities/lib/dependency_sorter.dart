@@ -1,3 +1,4 @@
+// -> include-runtime
 import 'dart:collection';
 import 'package:graphs/graphs.dart';
 
@@ -112,3 +113,4 @@ class TarjansDependencySorter<T extends DependencyGraphNode<T>>
     return super.visit(n);
   }
 }
+// <- include-runtime

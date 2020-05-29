@@ -1,17 +1,19 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+// -> editor-only
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+// <- editor-only
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
+// -> editor-only
 import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
+// <- editor-only
+import 'package:rive_core/src/generated/component_base.dart';
 import 'package:utilities/dependency_sorter.dart';
-
-import 'src/generated/component_base.dart';
-
-export 'src/generated/component_base.dart';
+export 'package:rive_core/src/generated/component_base.dart';
 
 final _log = Logger('rive_core');
 
@@ -111,6 +113,7 @@ abstract class Component extends ComponentBase<RiveFile>
     parent = context?.resolve(to);
   }
 
+  // -> editor-only
   @override
   void childOrderChanged(FractionalIndex from, FractionalIndex to) {
     if (parent != null) {
@@ -118,6 +121,7 @@ abstract class Component extends ComponentBase<RiveFile>
       context?.markChildSortDirty(parent);
     }
   }
+  // <- editor-only
 
   ContainerComponent _parent;
   ContainerComponent get parent => _parent;
@@ -142,7 +146,7 @@ abstract class Component extends ComponentBase<RiveFile>
       to.childAdded(this);
     }
     // We need to resolve our artboard.
-    markDependenciesDirty();
+    markRebuildDependencies();
   }
 
   /// Components that depend on this component.
@@ -166,23 +170,27 @@ abstract class Component extends ComponentBase<RiveFile>
       return false;
     }
     dependent._dependsOn.add(this);
+    // -> editor-only
     markRebuildDependentIds();
+    // <- editor-only
     return true;
   }
 
+  // -> editor-only
   void markRebuildDependentIds() {
     context?.markDependentIdsDirty(this);
   }
+  // <- editor-only
 
   bool isValidParent(Component parent) => parent is ContainerComponent;
 
-  void markDependenciesDirty() {
+  void markRebuildDependencies() {
     if (context == null || !context.markDependenciesDirty(this)) {
       // no context, or already dirty.
       return;
     }
     for (final dependent in _dependents) {
-      dependent.markDependenciesDirty();
+      dependent.markRebuildDependencies();
     }
   }
 
@@ -190,7 +198,9 @@ abstract class Component extends ComponentBase<RiveFile>
   void buildDependencies() {
     for (final parentDep in _dependsOn) {
       parentDep._dependents.remove(this);
+      // -> editor-only
       parentDep.markRebuildDependentIds();
+      // <- editor-only
     }
     _dependsOn.clear();
     // by default a component depends on nothing (likely it will depend on the
@@ -218,11 +228,14 @@ abstract class Component extends ComponentBase<RiveFile>
       parent = context?.resolve(parentId);
       if (parent == null) {
         _log.finest("Failed to resolve parent with id $parentId");
-      } else {
+      } 
+      // -> editor-only
+      else {
         // Make a best guess, this is useful when importing objects that are in
         // order as added, this ensures they'll get a valid sort order.
         childOrder ??= parent.children.nextFractionalIndex;
       }
+      // <- editor-only
     }
   }
 
@@ -254,7 +267,11 @@ abstract class Component extends ComponentBase<RiveFile>
     // The artboard containing this component will need it's dependencies
     // re-sorted.
     if (artboard != null) {
-      context?.markDependencyOrderDirty(artboard);
+      context?.markDependencyOrderDirty(
+          // -> editor-only
+          artboard
+          // <- editor-only
+          );
       _changeArtboard(null);
     }
   }
@@ -269,8 +286,9 @@ abstract class Component extends ComponentBase<RiveFile>
   /// removal from the system and then calling [onRemoved] on the Component when
   /// it's safe to clean up references to parents and anything that depends on
   /// this component.
-  void remove() => context?.remove(this);
+  void remove() => context?.removeObject(this);
 
+  // -> editor-only
   /// Create the corresponding keyframe for the property key. Note that this
   /// doesn't add it to core, that's left up to the implementation.
   T makeKeyFrame<T extends KeyFrame>(int propertyKey) {
@@ -310,7 +328,7 @@ abstract class Component extends ComponentBase<RiveFile>
     var keyFrame = makeKeyFrame<T>(propertyKey)
       ..frame = frame
       ..keyedPropertyId = property.id;
-    context.add(keyFrame);
+    context.addObject(keyFrame);
     return keyFrame;
   }
 
@@ -319,6 +337,7 @@ abstract class Component extends ComponentBase<RiveFile>
     /// Nothing to do when dependent ids changes, this is only used to propagate
     /// the ids to coop for validation during multi-session editing.
   }
+  // <- editor-only
 
   @override
   void nameChanged(String from, String to) {

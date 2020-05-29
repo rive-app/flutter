@@ -5,8 +5,5 @@ class FractionalIndexFieldType extends FieldType {
       : super(
           "FractionalIndex",
           'CoreFractionalIndexType',
-          imports: [
-            "package:fractional/fractional.dart",
-          ],
         );
 }

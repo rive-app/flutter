@@ -11,7 +11,7 @@ import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// Animation type that can be created by the [AnimationsManager].
@@ -128,12 +128,12 @@ class AnimationsManager {
         List<KeyFrame>.from(
           keyedProperty.keyframes,
           growable: false,
-        ).forEach(file.remove);
-        file.remove(keyedProperty);
+        ).forEach(file.removeObject);
+        file.removeObject(keyedProperty);
       });
-      file.remove(keyedObject);
+      file.removeObject(keyedObject);
     });
-    file.remove(animation);
+    file.removeObject(animation);
     file.captureJournalEntry();
   }
 
@@ -259,7 +259,7 @@ class AnimationsManager {
       ..fps = 60
       ..artboardId = activeArtboard.id;
     var core = activeArtboard.context;
-    core.add(animation);
+    core.addObject(animation);
     core.captureJournalEntry();
   }
 

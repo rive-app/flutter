@@ -22,6 +22,7 @@ import 'debounce.dart';
 
 export 'package:fractional/fractional.dart';
 export 'package:core/id.dart';
+export 'package:utilities/list_equality.dart';
 
 export 'package:core/field_types/core_bool_type.dart';
 export 'package:core/field_types/core_double_type.dart';
@@ -161,7 +162,16 @@ abstract class Core<T extends CoreContext> {
   bool validate() => true;
 }
 
-abstract class CoreContext implements LocalSettings {
+/// Helper interface for something that can resolve Core objects.
+abstract class ObjectRoot {
+  T resolve<T>(Id id);
+  void markDependencyOrderDirty(covariant Core rootObject);
+  bool markDependenciesDirty(covariant Core rootObject);
+  void removeObject<T extends Core>(T object);
+  T addObject<T extends Core>(T object);
+}
+
+abstract class CoreContext implements LocalSettings, ObjectRoot {
   static const int addKey = 1;
   static const int removeKey = 2;
   static const int dependentsKey = 3;
@@ -255,7 +265,9 @@ abstract class CoreContext implements LocalSettings {
 
   /// Get all objects
   Iterable<Core<CoreContext>> get objects => _objects.values;
-  T add<T extends Core>(T object) {
+
+  @override
+  T addObject<T extends Core>(T object) {
     if (_isRecording) {
       object.id ??= _nextObjectId;
       _nextObjectId = _nextObjectId.next;
@@ -480,7 +492,8 @@ abstract class CoreContext implements LocalSettings {
     return true;
   }
 
-  void remove<T extends Core>(T object) {
+  @override
+  void removeObject<T extends Core>(T object) {
     assert(object != null, 'Attempted to delete a null object');
     _objects.remove(object.id);
     if (_isRecording) {
@@ -509,6 +522,7 @@ abstract class CoreContext implements LocalSettings {
   }
 
   /// Find a Core object by id.
+  @override
   T resolve<T>(Id id) {
     var object = _objects[id];
     if (object is T) {
@@ -570,12 +584,12 @@ abstract class CoreContext implements LocalSettings {
           if (propertyKey == addKey) {
             if (isUndo) {
               // Had an add key, this is undo, remove it.
-              remove(object);
+              removeObject(object);
             }
           } else if (propertyKey == removeKey) {
             if (!isUndo) {
               // Had an remove key, this is redo, remove it.
-              remove(object);
+              removeObject(object);
             }
           } else {
             // Need to re-write history (grab current value as the change.from).

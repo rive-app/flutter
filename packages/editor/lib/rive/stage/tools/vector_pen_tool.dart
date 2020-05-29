@@ -46,7 +46,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       var core = shape.context;
       core.batchAdd(() {
         // Make sure the path is registered with core.
-        core.add(path);
+        core.addObject(path);
 
         // We already had a shape, just add this path to it.
         shape.appendChild(path);
@@ -113,7 +113,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
     var file = path.context;
     file.batchAdd(() {
-      file.add(vertex);
+      file.addObject(vertex);
       path.appendChild(vertex);
     });
   }
@@ -293,7 +293,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         ..childOrder = _fractionalIndexAt(vertices, vertices.indexOf(from) + 1);
 
       file.batchAdd(() {
-        file.add(vertex);
+        file.addObject(vertex);
         vertex.parent = path;
       });
       file.captureJournalEntry();
@@ -343,9 +343,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             ..outY = to.outY
             ..childOrder = FractionalIndex.between(vertexA.childOrder, after);
 
-          file.add(vertexA);
+          file.addObject(vertexA);
           vertexA.parent = path;
-          file.add(vertexB);
+          file.addObject(vertexB);
           vertexB.parent = path;
 
           // Update our insert target to include the new vertices.
@@ -403,7 +403,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         ..outY = rightSplit.points[1].y
         ..childOrder = _fractionalIndexAt(vertices, insertionIndex);
 
-      file.add(vertex);
+      file.addObject(vertex);
       vertex.parent = path;
     });
 
@@ -457,7 +457,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
       var file = path.context;
       file.batchAdd(() {
-        file.add(cubicVertex);
+        file.addObject(cubicVertex);
         path.appendChild(cubicVertex);
       });
 

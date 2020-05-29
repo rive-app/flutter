@@ -16,7 +16,6 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/selectable_item.dart';
 import 'package:rive_editor/rive/alerts/action_alert.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/editor_alert.dart';
@@ -39,6 +38,7 @@ import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
 
@@ -433,7 +433,7 @@ class OpenFileContext with RiveFileDelegate {
       return false;
     }
     deathRow.forEach((item) => item.onDelete());
-    deathRow.forEach(core.remove);
+    deathRow.forEach(core.removeObject);
     selection.clear();
     core.captureJournalEntry();
     return true;

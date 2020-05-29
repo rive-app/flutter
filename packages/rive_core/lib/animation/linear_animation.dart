@@ -5,9 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/event.dart';
-import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
+// -> editor-only
 import 'package:utilities/binary_buffer/binary_writer.dart';
+// <- editor-only
 export 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 
 class LinearAnimation extends LinearAnimationBase {
@@ -20,7 +21,7 @@ class LinearAnimation extends LinearAnimationBase {
   /// Map objectId to KeyedObject. N.B. this is the id of the object that we
   /// want to key in core, not of the KeyedObject. It's a clear way to see if an
   /// object is keyed in this animation.
-  final HashMap<Id, KeyedObject> _keyedObjects = HashMap<Id, KeyedObject>();
+  final _keyedObjects = HashMap<Id, KeyedObject>();
 
   /// The metadata for the objects that are keyed in this animation.
   Iterable<KeyedObject> get keyedObjects => _keyedObjects.values;
@@ -58,6 +59,7 @@ class LinearAnimation extends LinearAnimationBase {
     return removed != null;
   }
 
+  // -> editor-only
   /// Get the keyed data for a Core object already in this animation.
   KeyedObject getKeyed(Core object) => _keyedObjects[object.id];
 
@@ -75,7 +77,7 @@ class LinearAnimation extends LinearAnimationBase {
       ..objectId = object.id
       ..animationId = id;
 
-    context.add(keyedObject);
+    context.addObject(keyedObject);
 
     // We also add it here in case we're doing a batch add (onAddedDirty will be
     // called later for the keyedObject).
@@ -86,6 +88,7 @@ class LinearAnimation extends LinearAnimationBase {
 
     return keyedObject;
   }
+  // <- editor-only
 
   /// Pass in a different [core] context if you want to apply the animation to a
   /// different instance. This isn't meant to be used yet but left as mostly a
@@ -93,7 +96,7 @@ class LinearAnimation extends LinearAnimationBase {
   /// instances. We do a nice job of not duping all that data at runtime (so
   /// animations exist once but entire Rive file can be instanced multiple times
   /// playing different positions).
-  void apply(double time, {double mix = 1, RiveCoreContext coreContext}) {
+  void apply(double time, {double mix = 1, CoreContext coreContext}) {
     coreContext ??= context;
     for (final keyedObject in _keyedObjects.values) {
       keyedObject.apply(time, mix, coreContext);
@@ -129,6 +132,7 @@ class LinearAnimation extends LinearAnimationBase {
     _keyframesChanged.notify();
   }
 
+  // -> editor-only
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() => _keyframeValueChanged.notify();
 
@@ -140,4 +144,5 @@ class LinearAnimation extends LinearAnimationBase {
       keyedObject.writeRuntime(writer, idLookup);
     }
   }
+  // <- editor-only
 }

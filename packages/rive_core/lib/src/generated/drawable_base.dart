@@ -3,7 +3,6 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
-import 'package:fractional/fractional.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';

@@ -81,11 +81,14 @@ abstract class ShapePaintContainer {
   /// a ComponentBase. This way the implementor doesn't need to cast
   /// ShapePaintContainer to ContainerComponent/Shape/Artboard/etc.
   bool addDirt(int value, {bool recurse = false});
+  // -> editor-only
   RiveFile get context;
+  // <- editor-only
   bool addDependent(Component dependent);
   void appendChild(Component child);
   Mat2D get worldTransform;
 
+  // -> editor-only
   /// Create a new color fill and add it to this shape.
   Fill createFill(Color color) {
     assert(context != null);
@@ -96,8 +99,8 @@ abstract class ShapePaintContainer {
       fill = Fill()..name = 'Fill ${fills.length + 1}';
       var solidColor = SolidColor()..color = color;
 
-      context.add(fill);
-      context.add(solidColor);
+      context.addObject(fill);
+      context.addObject(solidColor);
 
       fill.appendChild(solidColor);
       appendChild(fill);
@@ -114,12 +117,13 @@ abstract class ShapePaintContainer {
       stroke = Stroke()..name = 'Stroke ${strokes.length + 1}';
       var solidColor = SolidColor()..color = color;
 
-      context.add(stroke);
-      context.add(solidColor);
+      context.addObject(stroke);
+      context.addObject(solidColor);
 
       stroke.appendChild(solidColor);
       appendChild(stroke);
     });
     return stroke;
   }
+  // <- editor-only
 }

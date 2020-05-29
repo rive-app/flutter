@@ -262,7 +262,7 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
                 newVertex.controlType = widget.controlType;
               }
               newVertices.add(newVertex);
-              core.add(newVertex);
+              core.addObject(newVertex);
               newVertex.parent = path;
 
               // We need to replace the entire vertex with one of a different

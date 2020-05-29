@@ -1,3 +1,4 @@
+// -> editor-only
 import 'dart:typed_data';
 
 import 'package:core/core.dart';
@@ -36,7 +37,7 @@ class RuntimeImporter {
         throw const RiveFormatErrorException(
             'expected first object to be a Backboard');
       }
-      core.add(_backboard);
+      core.addObject(_backboard);
       int numArtboards = reader.readVarUint();
       for (int i = 0; i < numArtboards; i++) {
         // The properties we remap at runtime, currently only Ids. This whole
@@ -44,7 +45,7 @@ class RuntimeImporter {
         var idRemap = RuntimeRemapId(core.idType, core.intType);
 
         var artboard = core.readRuntimeObject<Artboard>(reader, idRemap);
-        core.add(artboard);
+        core.addObject(artboard);
         var numObjects = reader.readVarUint();
         var objects = List<Core<RiveCoreContext>>(numObjects);
         for (int i = 0; i < numObjects; i++) {
@@ -52,7 +53,7 @@ class RuntimeImporter {
               core.readRuntimeObject(reader, idRemap);
           objects[i] = object;
           if (object != null) {
-            core.add(object);
+            core.addObject(object);
           }
         }
 
@@ -64,9 +65,9 @@ class RuntimeImporter {
           if (animation == null) {
             continue;
           }
-          core.add(animation);
+          core.addObject(animation);
           animation.artboardId = artboard.id;
-          
+
           var numKeyedObjects = reader.readVarUint();
           for (int j = 0; j < numKeyedObjects; j++) {
             var keyedObject =
@@ -74,7 +75,7 @@ class RuntimeImporter {
             if (keyedObject == null) {
               continue;
             }
-            core.add(keyedObject);
+            core.addObject(keyedObject);
             // Because we optimized out the animationIds, we need to reset these
             // before batchAdd completes so that onAddedDirty and onAdded have
             // the id to lookup. Runtimes won't need this as we'll directly add
@@ -89,7 +90,7 @@ class RuntimeImporter {
               if (keyedProperty == null) {
                 continue;
               }
-              core.add(keyedProperty);
+              core.addObject(keyedProperty);
               keyedProperty.keyedObjectId = keyedObject.id;
 
               var numKeyframes = reader.readVarUint();
@@ -98,7 +99,7 @@ class RuntimeImporter {
                 if(keyframe == null) {
                   continue;
                 }
-                core.add(keyframe);
+                core.addObject(keyframe);
                 keyframe.keyedPropertyId = keyedProperty.id;
               }
             }
@@ -123,3 +124,4 @@ class RuntimeImporter {
     return true;
   }
 }
+// <- editor-only

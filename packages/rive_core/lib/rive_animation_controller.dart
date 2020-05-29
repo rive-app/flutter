@@ -1,7 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rive_core/src/generated/rive_core_context.dart';
-export 'package:rive_core/src/generated/rive_core_context.dart';
 
 /// Abstraction for receiving a per frame callback while isPlaying is true to
 /// apply animation based on an elapsed amount of time.
@@ -28,8 +27,8 @@ abstract class RiveAnimationController {
 
   /// Apply animation to objects registered in [core]. Note that a [core]
   /// context is specified as animations can be applied to instances.
-  void apply(RiveCoreContext core, double elapsedSeconds);
+  void apply(CoreContext core, double elapsedSeconds);
 
-  bool init(RiveCoreContext core) => true;
+  bool init(CoreContext core) => true;
   void dispose();
 }

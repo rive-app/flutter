@@ -1,5 +1,6 @@
 library fractional;
 
+// -> include-runtime
 import 'dart:collection';
 
 const _minIndex = FractionalIndex.min();
@@ -218,3 +219,4 @@ int szudzik(int a, int b) {
   int y = b.abs();
   return x >= y ? x * x + x + y : x + y * y;
 }
+// <- include-runtime

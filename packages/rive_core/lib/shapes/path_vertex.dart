@@ -46,14 +46,18 @@ abstract class PathVertex extends PathVertexBase {
     super.buildDependencies();
     parent?.addDependent(this);
   }
+  // <- editor-only
 
   @override
   void update(int dirt) {
+    // -> editor-only
     if (dirt & ComponentDirt.worldTransform != 0) {
       _delegate?.boundsChanged();
     }
+    // <- editor-only
   }
-
+  
+  // -> editor-only
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is BoundsDelegate) {

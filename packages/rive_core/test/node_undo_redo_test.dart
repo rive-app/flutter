@@ -34,11 +34,11 @@ void main() {
         ..width = 1920
         ..height = 1080;
 
-      file.add(backboard);
-      file.add(artboard);
+      file.addObject(backboard);
+      file.addObject(artboard);
       
       // Create the node with some name set to it.
-      node = file.add(Node()..name = name1);
+      node = file.addObject(Node()..name = name1);
       artboard.appendChild(node);
     });
     // capture an entry for the creation of the object.
@@ -82,7 +82,7 @@ void main() {
     expect(file.redo(), false);
 
     // Remove node from the file.
-    file.remove(node);
+    file.removeObject(node);
 
     // Expect it to no longer be held/referenced by the file.
     expect(file.isHolding(node), false);

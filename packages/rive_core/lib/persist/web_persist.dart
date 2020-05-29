@@ -1,3 +1,4 @@
+// -> editor-only
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -72,3 +73,4 @@ class IsolatedPersist implements RivePersist {
     _localData.save(_changesDataName, writer.uint8Buffer);
   }
 }
+// <- editor-only

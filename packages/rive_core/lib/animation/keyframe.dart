@@ -1,8 +1,9 @@
-import 'package:core/core.dart' as core;
+import 'package:core/core.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/interpolator.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
+import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 
@@ -24,11 +25,13 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
 
   @override
   void interpolationTypeChanged(int from, int to) {
+    // -> editor-only
     keyedProperty?.internalKeyFrameInterpolationChanged();
+    // <- editor-only
   }
 
   @override
-  void interpolatorIdChanged(core.Id from, core.Id to) {
+  void interpolatorIdChanged(Id from, Id to) {
     // This might resolve to null during a load or if context isn't available
     // yet so we also do this in onAddedDirty.
     interpolator = context?.resolve(to);
@@ -36,6 +39,7 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
 
   @override
   void onAdded() {
+    // -> editor-only
     if (keyedPropertyId != null) {
       KeyedProperty keyedProperty = context?.resolve(keyedPropertyId);
       if (keyedProperty == null) {
@@ -45,18 +49,27 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
       }
     }
     _updateSeconds();
+    // <- editor-only
   }
 
+  // -> editor-only
   void _updateSeconds() {
     var property = keyedProperty;
     if (property?.keyedObject?.animation == null) {
       return;
     }
-    _timeInSeconds = frame / property.keyedObject.animation.fps;
+    computeSeconds(property.keyedObject.animation);
     property.internalKeyFrameMoved();
   }
+  // <- editor-only
 
+  void computeSeconds(LinearAnimation animation) {
+    _timeInSeconds = frame / animation.fps;
+  }
+
+  // -> editor-only
   KeyedProperty get keyedProperty => context?.resolve(keyedPropertyId);
+  // <- editor-only
 
   @override
   void onAddedDirty() {
@@ -70,28 +83,32 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
 
   @override
   void onRemoved() {
+    // -> editor-only
     keyedProperty?.internalRemoveKeyFrame(this);
     _interpolator?.propertiesChanged
         ?.removeListener(_interpolatorPropertyChanged);
+    // <- editor-only
   }
 
   @override
   void frameChanged(int from, int to) {
+    // -> editor-only
     keyedProperty?.markKeyFrameOrderDirty();
     _updateSeconds();
+    // <- editor-only
   }
 
   /// Apply the value of this keyframe to the object's property.
-  void apply(core.Core object, int propertyKey, double mix);
+  void apply(Core object, int propertyKey, double mix);
 
   /// Interpolate the value between this keyframe and the next and apply it to
   /// the object's property.
-  void applyInterpolation(core.Core object, int propertyKey, double seconds,
+  void applyInterpolation(Core object, int propertyKey, double seconds,
       covariant KeyFrame nextFrame, double mix);
 
   /// Set the value of this keyframe to the current value of [object]'s
   /// [propertyKey].
-  void valueFrom(core.Core object, int propertyKey);
+  void valueFrom(Core object, int propertyKey);
 
   Interpolator _interpolator;
   Interpolator get interpolator => _interpolator;
@@ -106,7 +123,9 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
     // <- editor-only
     _interpolator = value;
     interpolatorId = value?.id;
+    // -> editor-only
     keyedProperty?.internalKeyFrameInterpolationChanged();
+    // <- editor-only
   }
 
   // -> editor-only

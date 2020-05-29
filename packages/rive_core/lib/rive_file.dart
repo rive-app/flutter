@@ -1,3 +1,4 @@
+// -> editor-only
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_client.dart' as core;
 import 'package:core/coop/player.dart';
@@ -156,7 +157,7 @@ class RiveFile extends RiveCoreContext {
     }
     if (_needChildSort.isNotEmpty) {
       for (final parent in _needChildSort) {
-          parent.children.sortFractional();
+        parent.children.sortFractional();
       }
       _needChildSort.clear();
     }
@@ -214,6 +215,7 @@ class RiveFile extends RiveCoreContext {
   }
 
   /// Mark a component as needing its artboard to be resolved.
+  @override
   bool markDependenciesDirty(Component component) {
     if (!_needDependenciesBuilt.add(component)) {
       return false;
@@ -251,7 +253,7 @@ class RiveFile extends RiveCoreContext {
   void onAddedClean(Core object) {
     // Remove corrupt objects immediately.
     if (!object.validate()) {
-      remove(object);
+      removeObject(object);
       return;
     }
     object.onAdded();
@@ -379,7 +381,7 @@ class RiveFile extends RiveCoreContext {
       // Don't have one? Patch up the file and make one...
       batchAdd(() {
         _backboard = Backboard();
-        add(_backboard);
+        addObject(_backboard);
       });
       // Save the creation of the backboard.
       captureJournalEntry();
@@ -388,7 +390,7 @@ class RiveFile extends RiveCoreContext {
     } else {
       if (backboards.length > 1) {
         do {
-          remove(backboards.last);
+          removeObject(backboards.last);
         } while (backboards.length > 1);
         didPatch = true;
       }
@@ -464,3 +466,4 @@ class _RiveDirt {
   static const int dependencyOrder = 1 << 2;
   static const int generic = 1 << 3;
 }
+// <- editor-only

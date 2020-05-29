@@ -42,8 +42,10 @@ class KeyFrameDouble extends KeyFrameDoubleBase {
     }
   }
 
+  // -> editor-only
   @override
   void keyedPropertyIdChanged(Id from, Id to) {}
+  // <- editor-only
 
   @override
   void valueChanged(double from, double to) {

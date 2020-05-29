@@ -373,7 +373,7 @@ class KeyFrameMoveHelper {
         if (frame.frame == keyframe.frame) {
           // This frame collides with keyframe, remove it (prioritizes our
           // dragged keyframe).
-          context.remove(frame);
+          context.removeObject(frame);
         }
       }
     }

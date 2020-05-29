@@ -36,8 +36,8 @@ void main() {
         ..width = 1920
         ..height = 1080;
 
-      exportFrom.add(backboard);
-      exportFrom.add(artboard);
+      exportFrom.addObject(backboard);
+      exportFrom.addObject(artboard);
     });
     exportFrom.captureJournalEntry();
     return exportFrom;
@@ -79,19 +79,19 @@ void main() {
     Node a, b, c, d;
     exportFrom.batchAdd(() {
       a = Node()..name = 'A';
-      exportFrom.add(a);
+      exportFrom.addObject(a);
       artboard.appendChild(a);
 
       b = Node()..name = 'B';
-      exportFrom.add(b);
+      exportFrom.addObject(b);
       a.appendChild(b);
 
       c = Node()..name = 'C';
-      exportFrom.add(c);
+      exportFrom.addObject(c);
       a.appendChild(c);
 
       d = Node()..name = 'D';
-      exportFrom.add(d);
+      exportFrom.addObject(d);
       b.appendChild(d);
     });
 

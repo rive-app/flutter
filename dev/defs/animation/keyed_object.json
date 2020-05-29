@@ -7,6 +7,7 @@
   "properties": {
     "objectId": {
       "type": "Id",
+      "typeRuntime": "int",
       "key": {
         "int": 51,
         "string": "objectid"

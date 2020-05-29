@@ -91,8 +91,8 @@ RiveFile _makeFile() {
       ..width = 1920
       ..height = 1080;
 
-    file.add(backboard);
-    file.add(artboard);
+    file.addObject(backboard);
+    file.addObject(artboard);
   });
   file.captureJournalEntry();
   return file;
@@ -107,8 +107,8 @@ void main() {
     Node node;
     KeyFrameDouble kf1, kf2;
     file.batchAdd(() {
-      artboard = file.add(Artboard());
-      node = file.add(Node()
+      artboard = file.addObject(Artboard());
+      node = file.addObject(Node()
         ..name = 'Moving Node'
         ..x = 0
         ..y = 0);
@@ -118,7 +118,7 @@ void main() {
       animation = LinearAnimation()
         ..name = 'Test Animation'
         ..fps = 60;
-      file.add(animation);
+      file.addObject(animation);
 
       expect(animation.getKeyed(node), null);
 

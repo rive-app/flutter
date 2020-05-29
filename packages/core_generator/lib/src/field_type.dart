@@ -8,9 +8,11 @@ abstract class FieldType {
   String _runtimeCoreType;
   String get runtimeCoreType => _runtimeCoreType;
 
-  final Iterable<String> imports;
-  FieldType(this.name, String runtimeCoreType,
-      {String dartName, this.imports}) {
+  FieldType(
+    this.name,
+    String runtimeCoreType, {
+    String dartName,
+  }) {
     _dartName = dartName ?? name;
     _runtimeCoreType = runtimeCoreType;
     _types[name] = this;
@@ -37,8 +39,11 @@ abstract class FieldType {
   String get uncapitalizedName => '${name[0].toLowerCase()}${name.substring(1)}'
       .replaceAll('<', '')
       .replaceAll('>', '');
-      
+
   String get capitalizedName => '${name[0].toUpperCase()}${name.substring(1)}'
       .replaceAll('<', '')
       .replaceAll('>', '');
+
+  String get snakeName => name.replaceAllMapped(RegExp('(.+?)([A-Z])'),
+      (Match m) => "${m[1].toLowerCase()}_${m[2].toLowerCase()}");
 }

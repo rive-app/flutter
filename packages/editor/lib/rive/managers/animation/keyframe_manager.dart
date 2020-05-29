@@ -124,12 +124,12 @@ class KeyFrameManager extends AnimationManager {
         case KeyFrameInterpolation.cubic:
           var cubic = CubicInterpolator();
           // Add it before setting it so that it gets an id.
-          file.add(cubic);
+          file.addObject(cubic);
           keyFrame.interpolator = cubic;
           break;
         default:
           if (keyFrame.interpolator != null) {
-            file.remove(keyFrame.interpolator as Core);
+            file.removeObject(keyFrame.interpolator as Core);
           }
           keyFrame.interpolator = null;
           break;
@@ -172,7 +172,7 @@ class KeyFrameManager extends AnimationManager {
 
   void _deleteKeyFrames(HashSet<KeyFrame> keyframes) {
     var core = animation.context;
-    keyframes.forEach(core.remove);
+    keyframes.forEach(core.removeObject);
     core.captureJournalEntry();
   }
 

@@ -1,9 +1,11 @@
+// -> editor-only
 import 'dart:ui';
 
 import 'package:core/core.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/event.dart';
+// <- editor-only
 import 'package:rive_core/src/generated/backboard_base.dart';
 export 'package:rive_core/src/generated/backboard_base.dart';
 
@@ -12,7 +14,6 @@ class Backboard extends BackboardBase {
   /// An event fired when the active artboard changes, this should probably be
   /// removed from the runtimes.
   final Event activeArtboardChanged = Event();
-  // <- editor-only
 
   Artboard _activeArtboard;
   Artboard get activeArtboard => _activeArtboard;
@@ -22,9 +23,7 @@ class Backboard extends BackboardBase {
     }
     _activeArtboard = value;
     activeArtboardId = value?.id;
-    // -> editor-only
     activeArtboardChanged.notify();
-    // <- editor-only
   }
 
   @override
@@ -52,6 +51,8 @@ class Backboard extends BackboardBase {
 
   @override
   void colorValueChanged(int from, int to) {}
+
+  // <- editor-only
 
   @override
   void onAdded() {}

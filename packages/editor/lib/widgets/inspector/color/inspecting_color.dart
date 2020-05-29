@@ -203,9 +203,9 @@ class ShapesInspectingColor extends InspectingColor {
       ..color = InspectingColor.defaultGradientColorB
       ..position = 1;
 
-    file.add(gradient);
-    file.add(gradientStopA);
-    file.add(gradientStopB);
+    file.addObject(gradient);
+    file.addObject(gradientStopA);
+    file.addObject(gradientStopB);
     gradient.appendChild(gradientStopA);
     gradient.appendChild(gradientStopB);
 
@@ -254,7 +254,7 @@ class ShapesInspectingColor extends InspectingColor {
         var gradientStop = GradientStop()
           ..color = colorAtPosition
           ..position = position;
-        file.add(gradientStop);
+        file.addObject(gradientStop);
         gradient.appendChild(gradientStop);
         gradient.update(ComponentDirt.stops);
       }
@@ -348,7 +348,7 @@ class ShapesInspectingColor extends InspectingColor {
         switch (colorType) {
           case ColorType.solid:
             colorComponent = SolidColor();
-            file.add(colorComponent);
+            file.addObject(colorComponent);
             break;
           case ColorType.linear:
             colorComponent =
@@ -444,11 +444,11 @@ class ShapesInspectingColor extends InspectingColor {
       } else {
         if (paint.paintMutator != null) {
           /// Remove the old color.
-          context.remove(paint.paintMutator as Component);
+          context.removeObject(paint.paintMutator as Component);
         }
         added = true;
         solid = SolidColor();
-        context.add(solid);
+        context.addObject(solid);
         paint.appendChild(solid);
       }
       solid.color = color;

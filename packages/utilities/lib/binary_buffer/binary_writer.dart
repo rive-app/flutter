@@ -1,5 +1,7 @@
+// -> include-runtime
 import 'dart:convert';
 import 'dart:math';
+
 import 'dart:typed_data';
 
 var _variableEncodeList = Uint8List(8);
@@ -161,3 +163,4 @@ class BinaryWriter {
     list.forEach(writeVarInt);
   }
 }
+// <- include-runtime

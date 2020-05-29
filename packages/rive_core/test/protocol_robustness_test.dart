@@ -71,8 +71,8 @@ void main() {
           ..width = 1920
           ..height = 1080;
 
-        client1.add(backboard);
-        client1.add(artboardOnClient1);
+        client1.addObject(backboard);
+        client1.addObject(artboardOnClient1);
       });
       client1.captureJournalEntry();
 
@@ -121,7 +121,7 @@ void main() {
       // Make a node on client 1.
       Node niceNodeOnClient1;
       client1.batchAdd(() {
-        niceNodeOnClient1 = client1.add(Node()..name = 'nice-node');
+        niceNodeOnClient1 = client1.addObject(Node()..name = 'nice-node');
         artboardOnClient1.appendChild(niceNodeOnClient1);
       });
 
@@ -218,8 +218,8 @@ void main() {
         Node nodeBOnClient1;
         Node nodeCOnClient1;
         client1.batchAdd(() {
-          nodeBOnClient1 = client1.add(Node()..name = 'B');
-          nodeCOnClient1 = client1.add(Node()..name = 'C');
+          nodeBOnClient1 = client1.addObject(Node()..name = 'B');
+          nodeCOnClient1 = client1.addObject(Node()..name = 'C');
           niceNodeOnClient1.appendChild(nodeBOnClient1);
           niceNodeOnClient1.appendChild(nodeCOnClient1);
         });

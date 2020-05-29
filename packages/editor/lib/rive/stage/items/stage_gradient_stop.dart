@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';

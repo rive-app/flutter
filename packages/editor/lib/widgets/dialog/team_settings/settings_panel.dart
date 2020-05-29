@@ -5,7 +5,7 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/billing_history.dart';

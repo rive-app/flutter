@@ -98,15 +98,7 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
   }
 
   @override
-  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_mainArtboardId != null) {
-      var value = idLookup[_mainArtboardId];
-      if (value != null) {
-        context.intType.writeProperty(mainArtboardIdPropertyKey, writer, value);
-      }
-    }
-  }
-
+  void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {}
   @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {

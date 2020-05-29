@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
