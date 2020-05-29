@@ -35,4 +35,8 @@ class SelectionManager with Subscriptions {
   void selectFolder(Folder folder) {
     _plumber.message(Selection(folders: <Folder>{folder}));
   }
+
+  void select(Set<Folder> folders, Set<File> files) {
+    _plumber.message(Selection(folders: folders, files: files));
+  }
 }

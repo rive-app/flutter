@@ -423,7 +423,6 @@ class __PopupListItemShellState<T extends PopupListItem>
 
   @override
   Widget build(BuildContext context) {
-    print('Building Popup Shell');
     return PropagatingListener(
       onPointerDown: (details) {
         if (!widget.item.canSelect) {

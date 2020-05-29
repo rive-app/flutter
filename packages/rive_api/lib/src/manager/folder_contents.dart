@@ -176,16 +176,26 @@ class FolderContentsManager with Subscriptions {
     var currentDirectory = Plumber().peek<CurrentDirectory>();
     if (target is File) {
       if (currentDirectory.owner is User) {
-        FileApi()
+        await FileApi()
             .renameMyFile(currentDirectory.owner.ownerId, target.id, newName);
       } else {
-        FileApi()
+        await FileApi()
             .renameTeamFile(currentDirectory.owner.ownerId, target.id, newName);
       }
     }
-    // if (target is Folder) {
-    //   FolderApi().renameFolder(target.ownerId, target.id, newName)
-    // }
+    if (target is Folder) {
+      if (currentDirectory.owner is User) {
+        await FolderApi().renameMyFolder(
+            currentDirectory.owner.ownerId, target.asDM, newName);
+      } else {
+        await FolderApi().updateTeamFolder(
+          currentDirectory.owner.ownerId,
+          target.asDM,
+          newName,
+          target.parent,
+        );
+      }
+    }
 
     _getFolderContents(currentDirectory);
     FileManager().loadFolders(currentDirectory.owner);

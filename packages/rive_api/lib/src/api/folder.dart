@@ -44,6 +44,34 @@ class FolderApi {
     }
   }
 
+  Future<void> renameMyFolder(
+      int ownerId, FolderDM folder, String newName) async {
+    return _renameFolder('/api/my/files/folder', folder, newName);
+  }
+
+  Future<void> _renameFolder(
+      String url, FolderDM folder, String newName) async {
+    assert(newName != null && newName != '');
+    String payload = json.encode({
+      'name': newName,
+      'order': folder.order,
+      'parent': folder.parent,
+      'id': folder.id
+    });
+
+    await api.post(api.host + url, body: payload);
+  }
+
+  Future<void> updateTeamFolder(
+      int teamOwnerId, FolderDM folder, String newName, int newParentId) async {
+    String payload = json.encode({
+      'data': {'folderName': newName, 'folderParentId': newParentId}
+    });
+    return await api.patch(
+        api.host + '/api/teams/${teamOwnerId}/folders/${folder.id}',
+        body: payload);
+  }
+
   Future<FolderDM> createPersonalFolder(int folderId, int ownerId) async {
     String payload =
         json.encode({'name': 'New Folder', 'order': 0, 'parent': folderId});
