@@ -45,3 +45,9 @@ class DoubleFormatter {
     return closestDecimal.toString();
   }
 }
+
+/// Formats a double to a percentage, mapping 0-1 as 0-100
+/// keeping the percentage as a whole number
+class DoubleToPercentageFormatter {
+  String format(double value) => '${(value * 100).round()}';
+}

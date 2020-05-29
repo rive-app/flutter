@@ -26,7 +26,7 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
             propertyKeyB: NodeBase.yPropertyKey,
             labelA: 'X',
             labelB: 'Y',
-            converter: TranslationValueConverter.instance,
+            converter: TranslationIntegerValueConverter.instance,
           ),
       (context) => PropertyDual(
             name: 'Scale',
@@ -41,7 +41,7 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
             propertyKeyB: NodeBase.scaleYPropertyKey,
             labelA: 'X',
             labelB: 'Y',
-            converter: ScaleValueConverter.instance,
+            converter: ScalePercentageValueConverter.instance,
           ),
       (context) => PropertySingle(
             name: 'Rotate',
