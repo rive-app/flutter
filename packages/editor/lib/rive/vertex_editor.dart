@@ -63,9 +63,11 @@ class VertexEditor with RiveFileDelegate {
         break;
       case VertexEditorMode.off:
       default:
+        // Make sure everything's turned off
+        _turnOff();
+        stage.solo(null);
         stage.soloListenable.removeListener(_soloChanged);
         stage.removeSelectionHandler(_selectionHandler);
-        stage.solo(null);
         _editingPaths.value = null;
         break;
     }
@@ -86,30 +88,30 @@ class VertexEditor with RiveFileDelegate {
   }
 
   void _soloChanged() {
-    if (stage.soloItems == null) {
-      if (_mode.value != VertexEditorMode.off) {
-        // Copy them out before we null them.
-        var paths = _editingPaths.value;
-        _changeMode(VertexEditorMode.off);
-        if (!file.core.isApplyingJournalEntry) {
-          // copy to prevent editing during iteration in onObjectRemoved.
-          var pathsCopy = paths.toList(growable: false);
-          _editingPaths.value = null;
-          // We only want to change the path's edit mode if we're not in the
-          // middle of a undo/redo.
-          for (final path in pathsCopy) {
-            path.editingMode = PointsPathEditMode.off;
-          }
-          file.core.captureJournalEntry();
-        }
+    // Stage's solo has changed and it has no solo items, we need to make sure
+    // that if our mode is not off, then we should force everything off
+    if (stage.soloItems == null && _mode.value != VertexEditorMode.off) {
+      _turnOff();
+    }
+  }
+
+  void _turnOff() {
+    // Copy them out before we null them.
+    var paths = _editingPaths.value;
+    if (paths == null) {
+      return;
+    }
+    _changeMode(VertexEditorMode.off);
+    if (!file.core.isApplyingJournalEntry) {
+      // copy to prevent editing during iteration in onObjectRemoved.
+      var pathsCopy = paths.toList(growable: false);
+      _editingPaths.value = null;
+      // We only want to change the path's edit mode if we're not in the
+      // middle of a undo/redo.
+      for (final path in pathsCopy) {
+        path.editingMode = PointsPathEditMode.off;
       }
-    } else {
-      switch (_mode.value) {
-        case VertexEditorMode.editingPath:
-          break;
-        default:
-          break;
-      }
+      file.core.captureJournalEntry();
     }
   }
 
