@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/http.dart';
