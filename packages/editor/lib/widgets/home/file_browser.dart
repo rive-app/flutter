@@ -6,8 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/labeled_text_field.dart';
+import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
+import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
@@ -33,10 +37,92 @@ class FileBrowserWrapper extends StatefulWidget {
   _FileBrowserWrapperState createState() => _FileBrowserWrapperState();
 }
 
+void editName<T extends Named>(BuildContext context, T target) {
+  final colors = RiveTheme.of(context).colors;
+  showRiveDialog<void>(
+      context: context,
+      builder: (ctx) {
+        String newName;
+        void submit() {
+          if (newName != null && newName != target.name) {
+            FolderContentsManager().rename(target, newName);
+          }
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+
+        ;
+        return SizedBox(
+          height: 200,
+          width: 400,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LabeledTextField(
+                    autofocus: true,
+                    label: 'Name',
+                    initialValue: target.name,
+                    onChanged: (value) => newName = value,
+                    onSubmit: (_) => submit(),
+                    hintText: 'New name'),
+                Expanded(child: Separator(color: colors.fileLineGrey)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FlatIconButton(
+                        label: 'Save Changes',
+                        color: colors.commonDarkGrey,
+                        textColor: Colors.white,
+                        onTap: submit)
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      });
+}
+
 class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
   final scrollController = ScrollController();
   final selectionManager = SelectionManager();
   bool rightClick = false;
+
+  int _getMaxColumns(width, cellWidth) {
+    return ((width - horizontalPadding * 2 + spacing) / (cellWidth + spacing))
+        .floor();
+  }
+
+  double _requiredHeight(Size size) {
+    // TODO:
+    // could cache this against size & file & folder count
+    // if this becomes heavy
+    var requiredHeight = headerHeight + sectionPadding;
+    final directory = Plumber().peek<CurrentDirectory>();
+    if (directory == null) return requiredHeight;
+    final folderContents = Plumber().peek<FolderContents>(directory.hashId);
+    if (folderContents == null) return requiredHeight;
+
+    final int maxColumns = _getMaxColumns(size.width, cellWidth);
+
+    if (folderContents.folders.isNotEmpty) {
+      final folderRows = (folderContents.folders.length / maxColumns).ceil();
+      final foldersHeight =
+          folderRows * folderCellHeight + (folderRows - 1) * spacing;
+
+      requiredHeight += foldersHeight + sectionPadding;
+    }
+    if (folderContents.files.isNotEmpty) {
+      final fileRows = (folderContents.files.length / maxColumns).ceil();
+      final filesHeight = fileRows * fileCellHeight + (fileRows - 1) * spacing;
+
+      requiredHeight += filesHeight + sectionPadding;
+    }
+    return requiredHeight;
+  }
 
   void selectPosition(Offset offset, Size size) {
     final directory = Plumber().peek<CurrentDirectory>();
@@ -44,9 +130,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
     final folderContents = Plumber().peek<FolderContents>(directory.hashId);
     if (folderContents == null) return selectionManager.clearSelection();
 
-    final availableWidth = size.width - horizontalPadding * 2;
-    final int maxColumns =
-        ((availableWidth + spacing) / (cellWidth + spacing)).floor();
+    final int maxColumns = _getMaxColumns(size.width, cellWidth);
 
     var workingDy = offset.dy;
     var workingDx = offset.dx;
@@ -112,23 +196,33 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         rightClick = false;
         if (event.pointerEvent is PointerDownEvent) {
           selectPosition(event.pointerEvent.localPosition, context.size);
+
+          // TODO: wat this on mouse/ windows
           rightClick = event.pointerEvent.buttons == 2;
         }
       },
       onPointerUp: (event) {
-        // TODO: wat this on mouse/ windows
         if (rightClick && Plumber().peek<Selection>() != null) {
           ListPopup.show(context,
               itemBuilder: (popupContext, item, isHovered) =>
                   item.itemBuilder(popupContext, isHovered),
               items: [
                 PopupContextItem(
-                  'Rename (not implemented)',
-                  select: () async {},
+                  'Rename (file 4 now)',
+                  select: () async {
+                    final selection = Plumber().peek<Selection>();
+                    if (selection.files.isNotEmpty) {
+                      editName(context, selection.files.first);
+                    } else if (selection.folders.isNotEmpty) {
+                      editName(context, selection.folders.first);
+                    }
+                  },
                 ),
                 PopupContextItem(
-                  'Delete (not implemented)',
-                  select: () async {},
+                  'Delete',
+                  select: () async {
+                    FolderContentsManager().delete();
+                  },
                 )
               ],
               position: event.pointerEvent.position);
@@ -144,7 +238,10 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         if (event.pointerEvent is PointerScrollEvent) {
           var scrollEvent = event.pointerEvent as PointerScrollEvent;
           var newOffset = scrollController.offset + scrollEvent.scrollDelta.dy;
-          newOffset = max(0, min(100, newOffset));
+          newOffset = max(
+              0,
+              min(_requiredHeight(context.size) - context.size.height,
+                  newOffset));
           scrollController.jumpTo(newOffset);
         }
       },

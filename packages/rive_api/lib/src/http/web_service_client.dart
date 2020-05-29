@@ -250,6 +250,33 @@ class WebServiceClient {
     }
   }
 
+  Future<http.Response> delete(String url,
+      {dynamic body, Encoding encoding}) async {
+    try {
+      final client = getClient();
+      print('deleteting $url');
+      // TODO: Matt, can we do 'injection'?
+      // would love to capture how many times the base request stuff gets called.
+      final request = http.Request('delete', Uri.parse(url));
+      request.body = body;
+      request.headers.addAll(headers);
+      // request.encoding = Encoding;
+      var stream = await client.send(request);
+      var response = await http.Response.fromStream(stream);
+      _processResponse(response);
+      return response;
+    } on Exception catch (error) {
+      //SocketException
+      var errorString = error.toString();
+      if (errorString.startsWith('XMLHttpRequest') ||
+          errorString.startsWith('SocketException')) {
+        throw HttpException(errorString, error);
+      } else {
+        rethrow;
+      }
+    }
+  }
+
   Future<bool> initialize() async {
     await localDataPlatform.initialize();
     localData = LocalData.make(localDataPlatform, context);

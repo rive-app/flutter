@@ -66,7 +66,9 @@ class RiveColors {
 
   // Buttons
   Color get buttonLight => const Color(0xFFE3E3E3);
+  Color get textButtonLight => const Color(0xFFF1F1F1);
   Color get buttonLightHover => const Color(0xFFDEDEDE);
+  Color get textButtonLightHover => const Color(0xFFDEDEDE);
   Color get buttonLightText => const Color(0xFF666666);
   Color get buttonLightDisabled => const Color(0xFFF8F8F8);
   Color get buttonLightTextDisabled => const Color(0xFFD9D9D9);
@@ -112,6 +114,11 @@ class RiveColors {
   Color get fileSearchIcon => const Color(0xFF999999);
   Color get filesTreeStroke => const Color(0xFFCCCCCC);
   Color get fileBrowserBackground => white;
+
+  Color get treeIconIdle => const Color(0xFFA9A9A9);
+  Color get treeIconHovered => const Color(0xFF666666);
+  Color get treeIconSelectedIdle => const Color(0xFFD5E8F7);
+  Color get treeIconSelectedHovered => white;
 
   // Common
   Color get commonLightGrey => const Color(0xFF888888);

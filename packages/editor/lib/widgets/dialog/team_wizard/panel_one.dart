@@ -59,7 +59,8 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: subscriptionBorderThickness),
+                horizontal: subscriptionBorderThickness,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -75,7 +76,7 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 30),
+                    padding: const EdgeInsets.only(top: 7, left: 30),
                     child: SizedBox(
                       width: 71,
                       child: ComboBox<BillingFrequency>(
@@ -97,59 +98,62 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
             ),
             Padding(
               padding: sub.nameValidationError == null
-                  ? const EdgeInsets.only(top: 25, bottom: 23)
+                  ? const EdgeInsets.only(top: 23, bottom: 23)
                   : const EdgeInsets.only(top: 5, bottom: 23),
-              child: Row(
-                children: [
-                  MouseRegion(
-                    onEnter: (_) => _basicController.forward(),
-                    onExit: (_) => _basicController.reverse(),
-                    child: AnimatedBuilder(
-                      animation: _basicController,
-                      builder: (_, __) {
-                        final t = _basicController.value;
-                        final animationValue = t * t;
-                        final labelLookup = costLookup[sub?.billing];
-                        return SubscriptionChoice(
-                          label: 'Team',
-                          costLabel: sub == null
-                              ? ''
-                              : '${labelLookup[TeamsOption.basic]}',
-                          description: 'A space where you and your team'
-                              ' can share files.',
-                          onTap: () => sub.option = TeamsOption.basic,
-                          showRadio: false,
-                          highlight: animationValue,
-                        );
-                      },
+              child: SizedBox(
+                height: 220,
+                child: Row(
+                  children: [
+                    MouseRegion(
+                      onEnter: (_) => _basicController.forward(),
+                      onExit: (_) => _basicController.reverse(),
+                      child: AnimatedBuilder(
+                        animation: _basicController,
+                        builder: (_, __) {
+                          final t = _basicController.value;
+                          final animationValue = t * t;
+                          final labelLookup = costLookup[sub?.billing];
+                          return SubscriptionChoice(
+                            label: 'Team',
+                            costLabel: sub == null
+                                ? ''
+                                : '${labelLookup[TeamsOption.basic]}',
+                            description: 'Create a space where you and '
+                                'your team can share files.',
+                            onTap: () => sub.option = TeamsOption.basic,
+                            showRadio: false,
+                            highlight: animationValue,
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 24),
-                  MouseRegion(
-                    // onEnter: (_) => _premiumController.forward(),
-                    // onExit: (_) => _premiumController.reverse(),
-                    child: AnimatedBuilder(
-                      animation: _premiumController,
-                      builder: (_, __) {
-                        final t = _premiumController.value;
-                        final animationValue = t * t;
-                        final labelLookup = costLookup[sub?.billing];
-                        return SubscriptionChoice(
-                          label: 'Org',
-                          disabled: true,
-                          costLabel: sub == null
-                              ? ''
-                              : '${labelLookup[TeamsOption.premium]}',
-                          description: 'Create projects that only some of '
-                              'your team has access to.',
-                          onTap: () => sub.option = TeamsOption.premium,
-                          showRadio: false,
-                          highlight: animationValue,
-                        );
-                      },
+                    const SizedBox(width: 24),
+                    MouseRegion(
+                      // onEnter: (_) => _premiumController.forward(),
+                      // onExit: (_) => _premiumController.reverse(),
+                      child: AnimatedBuilder(
+                        animation: _premiumController,
+                        builder: (_, __) {
+                          final t = _premiumController.value;
+                          final animationValue = t * t;
+                          final labelLookup = costLookup[sub?.billing];
+                          return SubscriptionChoice(
+                            label: 'Org',
+                            disabled: true,
+                            costLabel: sub == null
+                                ? ''
+                                : '${labelLookup[TeamsOption.premium]}',
+                            description: 'Create sub-teams with centralized '
+                                'billing',
+                            onTap: () => sub.option = TeamsOption.premium,
+                            showRadio: false,
+                            highlight: animationValue,
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             RichText(

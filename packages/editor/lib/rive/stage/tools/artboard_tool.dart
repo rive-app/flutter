@@ -9,10 +9,15 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 
 class ArtboardTool extends DrawableTool {
   Vec2D _startWorldMouse;
   Artboard _artboard;
+
+  // Required to track cursor position and disaply tool tip when dragging
+  final _tip = StageToolTip();
+  Vec2D _cursor;
 
   /// The artboard tool operates in stage world space.
   @override
@@ -86,16 +91,21 @@ class ArtboardTool extends DrawableTool {
       _artboard.width = (_startWorldMouse[0] - worldMouse[0]).abs();
       _artboard.height = (_startWorldMouse[1] - worldMouse[1]).abs();
     }
+
+    _cursor = Vec2D.clone(worldMouse);
+    _tip.text = '${_artboard.width.round()}x${_artboard.height.round()}';
   }
 
   @override
   void endDrag() {
     _artboard = null;
+    _cursor = null;
     super.endDrag();
   }
 
   @override
-  void draw(Canvas canvas) {}
+  void draw(Canvas canvas) =>
+      _tip.paint(canvas, Offset(_cursor[0] + 10, _cursor[1] + 10));
 
   @override
   String get icon => 'tool-artboard';

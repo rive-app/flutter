@@ -33,12 +33,13 @@ class BrowserFolder extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-              color: colors.fileBackgroundLightGrey,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: selected ? colors.fileSelectedBlue : Colors.white,
-                width: 4,
-              )),
+            color: colors.fileBackgroundLightGrey,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected ? colors.fileSelectedBlue : Colors.white,
+              width: 4,
+            ),
+          ),
           child: Row(
             children: [
               TintedIcon(

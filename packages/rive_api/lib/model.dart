@@ -9,3 +9,4 @@ export 'src/model/owner.dart';
 export 'src/model/selection.dart';
 export 'src/model/team.dart';
 export 'src/model/user.dart';
+export 'src/model/named.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 const double riveDialogMinWidth = 300;
 const double riveDialogMaxWidth = 880;
-const double riveDialogMinHeight = 300;
+const double riveDialogMinHeight = 200;
 
 Widget _riveDialogTransition(BuildContext context, Animation<double> animation,
     Animation<double> secondaryAnimation, Widget child) {
