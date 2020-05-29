@@ -29,7 +29,7 @@ Future<OpenFileContext> _makeFile() async {
       ..width = 1920
       ..height = 1080;
 
-    core.add(artboard);
+    core.addObject(artboard);
   });
   core.captureJournalEntry();
   return file;

@@ -80,6 +80,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return paths.add(path);
   }
 
+  // -> editor-only
   @override
   void onAdded() {
     super.onAdded();
@@ -89,11 +90,12 @@ class Shape extends ShapeBase with ShapePaintContainer {
     if (_pathComposer == null) {
       var composer = PathComposer();
       context?.batchAdd(() {
-        context.add(composer);
+        context.addObject(composer);
         appendChild(composer);
       });
     }
   }
+  // <- editor-only
 
   void pathChanged(Path path) {
     _pathComposer?.addDirt(ComponentDirt.path);

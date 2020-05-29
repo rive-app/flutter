@@ -4,7 +4,7 @@ import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';

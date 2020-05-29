@@ -19,10 +19,10 @@ void main() {
     Node node1, node2;
     file.batchAdd(() {
       // Create the node with some name set to it.
-      node1 = file.add(Node()..name = 'Node 1');
-      node2 = file.add(Node()..name = 'Node 2');
+      node1 = file.addObject(Node()..name = 'Node 1');
+      node2 = file.addObject(Node()..name = 'Node 2');
 
-      artboard1 = file.add(Artboard()..name = 'Artboard A')
+      artboard1 = file.addObject(Artboard()..name = 'Artboard A')
         ..appendChild(node1)
         ..appendChild(node2);
     });
@@ -31,7 +31,7 @@ void main() {
     expect(node1.childOrder, const FractionalIndex(1, 2));
     expect(node2.childOrder, const FractionalIndex(2, 3));
 
-    var artboard2 = file.add(Artboard()..name = 'Artboard B');
+    var artboard2 = file.addObject(Artboard()..name = 'Artboard B');
 
     // capture an entry for the default state.
     file.captureJournalEntry();
@@ -113,14 +113,14 @@ void main() {
     Artboard artboard;
     Node a, b, c, d, e, f;
     file.batchAdd(() {
-      artboard = file.add(Artboard()..name = 'Artboard');
+      artboard = file.addObject(Artboard()..name = 'Artboard');
       // Create the node with some name set to it.
-      a = file.add(Node()..name = 'a');
-      b = file.add(Node()..name = 'b');
-      c = file.add(Node()..name = 'c');
-      d = file.add(Node()..name = 'd');
-      e = file.add(Node()..name = 'e');
-      f = file.add(Node()..name = 'f');
+      a = file.addObject(Node()..name = 'a');
+      b = file.addObject(Node()..name = 'b');
+      c = file.addObject(Node()..name = 'c');
+      d = file.addObject(Node()..name = 'd');
+      e = file.addObject(Node()..name = 'e');
+      f = file.addObject(Node()..name = 'f');
 
       a.appendChild(c);
       a.appendChild(d);

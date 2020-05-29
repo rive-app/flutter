@@ -1,3 +1,4 @@
+// -> editor-only
 import 'package:core/coop/change.dart';
 import 'package:local_data/local_data.dart';
 
@@ -14,3 +15,4 @@ abstract class RivePersist {
   factory RivePersist(LocalDataPlatform localDataPlatform, String name) =>
       persist.IsolatedPersist(localDataPlatform, name);
 }
+// <- editor-only

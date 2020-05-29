@@ -1,17 +1,25 @@
+// -> editor-only
 import 'dart:collection';
+// <- editor-only
 
 import 'package:core/core.dart';
+// -> editor-only
 import 'package:core/key_state.dart';
 import 'package:logging/logging.dart';
+// <- editor-only
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
+// -> editor-only
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
+// <- editor-only
 export 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 
+// -> editor-only
 final _log = Logger('animation');
+// <- editor-only
 
 abstract class KeyFrameInterface {
   int get frame;
@@ -78,6 +86,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
 
   @override
   void onAdded() {
+    // -> editor-only
     if (keyedObjectId != null) {
       KeyedObject keyedObject = context?.resolve(keyedObjectId);
       if (keyedObject == null) {
@@ -86,15 +95,22 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
         keyedObject.internalAddKeyedProperty(this);
       }
     }
+    // <- editor-only
   }
 
+  // -> editor-only
   KeyedObject get keyedObject => context?.resolve(keyedObjectId);
+  // <- editor-only
 
   @override
   void onAddedDirty() {}
 
   @override
-  void onRemoved() => keyedObject?.internalRemoveKeyedProperty(this);
+  void onRemoved() {
+    // -> editor-only
+    keyedObject?.internalRemoveKeyedProperty(this);
+    // <- editor-only
+  }
 
   /// Called by rive_core to add a KeyFrame to this KeyedProperty. This should
   /// be @internal when it's supported.
@@ -113,12 +129,15 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
     var removed = _keyframes.remove(frame);
     if (_keyframes.isEmpty) {
       // Remove this keyed property.
-      context.remove(this);
+      context.removeObject(this);
     }
+    // -> editor-only
     context?.dirty(_notifyKeyframeRemoved);
+    // <- editor-only
     return removed;
   }
 
+  // -> editor-only
   void internalKeyFrameMoved() {
     keyedObject?.internalKeyFramesMoved();
   }
@@ -130,6 +149,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
   void _notifyKeyframeRemoved() {
     keyedObject?.internalKeyFramesChanged();
   }
+  // <- editor-only
 
   /// Called by keyframes when their time value changes. This is a pretty rare
   /// operation, usually occurs when a user moves a keyframe. Meaning: this
@@ -154,13 +174,14 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       var b = _keyframes[i + 1];
       if (a.frame == b.frame) {
         // N.B. this removes it from the list too.
-        context.remove(a);
+        context.removeObject(a);
         // Repeat current.
         i--;
       }
     }
-
+    // -> editor-only
     keyedObject?.internalKeyFramesChanged();
+    // <- editor-only
   }
 
   /// Number of keyframes for this keyed property.
@@ -198,18 +219,24 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
     int pk = propertyKey;
     if (idx == 0) {
       var first = _keyframes[0];
+      // -> editor-only
       RiveCoreContext.setKeyState(object, pk,
           first.seconds == seconds ? KeyState.keyframe : KeyState.interpolated);
+      // <- editor-only 
       first.apply(object, pk, mix);
     } else {
       if (idx < _keyframes.length) {
         KeyFrame fromFrame = _keyframes[idx - 1];
         KeyFrame toFrame = _keyframes[idx];
         if (seconds == toFrame.seconds) {
+          // -> editor-only
           RiveCoreContext.setKeyState(object, pk, KeyState.keyframe);
+          // <- editor-only
           toFrame.apply(object, pk, mix);
         } else {
+          // -> editor-only
           RiveCoreContext.setKeyState(object, pk, KeyState.interpolated);
+          // <- editor-only
 
           /// Equivalent to fromFrame.interpolation ==
           /// KeyFrameInterpolation.hold.
@@ -221,23 +248,28 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
         }
       } else {
         var last = _keyframes[idx - 1];
+        // -> editor-only
         RiveCoreContext.setKeyState(
             object,
             pk,
             last.seconds == seconds
                 ? KeyState.keyframe
                 : KeyState.interpolated);
+        // <- editor-only
         last.apply(object, pk, mix);
       }
     }
   }
 
+  // -> editor-only
   @override
   void keyedObjectIdChanged(Id from, Id to) {}
+  // <- editor-only
 
   @override
   void propertyKeyChanged(int from, int to) {}
 
+  // -> editor-only
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() =>
       keyedObject?.internalKeyFrameValueChanged();
@@ -250,4 +282,5 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       keyframe.writeRuntime(writer, idLookup);
     }
   }
+  // <- editor-only
 }

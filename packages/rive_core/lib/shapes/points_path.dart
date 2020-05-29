@@ -56,6 +56,7 @@ class PointsPath extends PointsPathBase {
     markPathDirty();
   }
 
+  // -> editor-only
   @override
   void update(int dirt) {
     // Vertices just changed, make sure they're in order.
@@ -64,4 +65,5 @@ class PointsPath extends PointsPathBase {
     }
     super.update(dirt);
   }
+  // <- editor-only
 }

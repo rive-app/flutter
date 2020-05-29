@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:rive_core/component.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 
 import 'package:tree_widget/flat_tree_item.dart';

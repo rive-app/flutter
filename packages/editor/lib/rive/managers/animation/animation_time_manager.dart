@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
@@ -57,7 +58,7 @@ class _SimpleAnimationController extends RiveAnimationController {
 
   int direction = 1;
   @override
-  void apply(RiveCoreContext core, double elapsedSeconds) {
+  void apply(CoreContext core, double elapsedSeconds) {
     // Reset all previously animated properties.
     core.resetAnimation();
     animation.apply(_time, coreContext: core);

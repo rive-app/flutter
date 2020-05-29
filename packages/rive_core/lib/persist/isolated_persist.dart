@@ -1,3 +1,4 @@
+// -> editor-only
 import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -160,3 +161,4 @@ class IsolatedPersist implements RivePersist {
 void _isolateEntry(_IsolatedPersistInitArgument arg) {
   var backgroundProcess = _IsolatedPersistBackground(arg);
 }
+// <- editor-only

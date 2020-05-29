@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 
 /// Manages a list of selected items. Allows selecting and deselecting new
 /// items.

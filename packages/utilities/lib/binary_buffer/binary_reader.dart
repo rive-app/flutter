@@ -1,3 +1,4 @@
+// -> include-runtime
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -140,3 +141,4 @@ class BinaryReader {
     return list;
   }
 }
+// <- include-runtime

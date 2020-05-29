@@ -1,3 +1,4 @@
+// -> editor-only
 import 'dart:collection';
 import 'dart:typed_data';
 
@@ -137,7 +138,7 @@ class RuntimeExporter {
 
       // Figure out which animations we're exporting.
       var artboardAnimations = artboard.animations.toSet();
-      if(animations != null) {
+      if (animations != null) {
         // We want a subset of the animations, make sure we only include the
         // requested ones that are on this artboard.
         artboardAnimations = artboardAnimations.intersection(animations);
@@ -153,3 +154,4 @@ class RuntimeExporter {
     return writer.uint8Buffer;
   }
 }
+// <- editor-only

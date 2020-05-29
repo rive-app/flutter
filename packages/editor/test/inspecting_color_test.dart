@@ -41,8 +41,8 @@ RiveFile _makeFile() {
       ..width = 1920
       ..height = 1080;
 
-    file.add(backboard);
-    file.add(artboard);
+    file.addObject(backboard);
+    file.addObject(artboard);
   });
   file.captureJournalEntry();
   return file;
@@ -60,11 +60,11 @@ Shape _makeShape(RiveFile file) {
     var solidColor = SolidColor();
     var fill = Fill();
 
-    file.add(shape);
-    file.add(fill);
-    file.add(solidColor);
-    file.add(composer);
-    file.add(path);
+    file.addObject(shape);
+    file.addObject(fill);
+    file.addObject(solidColor);
+    file.addObject(composer);
+    file.addObject(path);
 
     // Let's build up the shape hierarchy:
     // Artboard

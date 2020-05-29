@@ -51,7 +51,7 @@ class NodeTool extends DrawableTool {
       ..y = position[1];
 
     core.batchAdd(() {
-      core.add(node);
+      core.addObject(node);
       parent.appendChild(node);
     });
 

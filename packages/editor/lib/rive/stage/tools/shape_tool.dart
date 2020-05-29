@@ -81,11 +81,11 @@ abstract class ShapeTool extends DrawableTool {
       var solidColor = SolidColor();
       var fill = Fill();
 
-      file.add(shape);
-      file.add(fill);
-      file.add(solidColor);
-      file.add(composer);
-      file.add(path);
+      file.addObject(shape);
+      file.addObject(fill);
+      file.addObject(solidColor);
+      file.addObject(composer);
+      file.addObject(path);
 
       // Let's build up the shape hierarchy:
       // Artboard

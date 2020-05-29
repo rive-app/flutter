@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/node.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 /// A Node component as it's drawn on the stage.

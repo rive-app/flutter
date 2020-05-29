@@ -1,12 +1,16 @@
 import 'dart:ui';
 
 import 'package:core/core.dart';
+// -> editor-only
 import 'package:core/debounce.dart';
 import 'package:core/id.dart';
+// <- editor-only
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/drawable.dart';
+// -> editor-only
 import 'package:rive_core/event.dart';
+// <- editor-only
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/rive_animation_controller.dart';
@@ -18,15 +22,16 @@ import 'package:utilities/dependency_sorter.dart';
 
 import 'component.dart';
 import 'component_dirt.dart';
-import 'src/generated/artboard_base.dart';
+import 'package:rive_core/src/generated/artboard_base.dart';
 
-export 'src/generated/artboard_base.dart';
+export 'package:rive_core/src/generated/artboard_base.dart';
 
 abstract class ArtboardDelegate extends BoundsDelegate {
   void markNameDirty();
 }
 
-class _AnimationList extends FractionallyIndexedList<Animation> {
+// -> editor-only
+class AnimationList extends FractionallyIndexedList<Animation> {
   @override
   FractionalIndex orderOf(Animation animation) {
     return animation.order;
@@ -37,6 +42,7 @@ class _AnimationList extends FractionallyIndexedList<Animation> {
     animation.order = order;
   }
 }
+// <- editor-only
 
 class DrawableList extends FractionallyIndexedList<Drawable> {
   @override
@@ -72,10 +78,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   /// Event notified whenever the animations list changes.
   final Event animationsChanged = Event();
   // <- editor-only
-  final _AnimationList _animations = _AnimationList();
+  final AnimationList _animations = AnimationList();
 
   /// List of animations in this artboard.
-  _AnimationList get animations => _animations;
+  AnimationList get animations => _animations;
 
   /// Does this artboard have animations?
   bool get hasAnimations => _animations.isNotEmpty;
@@ -309,8 +315,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   Mat2D get worldTransform => Mat2D();
 
+  // -> editor-only
   @override
   void dependentIdsChanged(List<Id> from, List<Id> to) {}
+  // <- editor-only
 
   @override
   void originXChanged(double from, double to) {}

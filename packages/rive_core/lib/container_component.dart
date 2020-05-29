@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fractional/fractional.dart';
+import 'package:core/core.dart';
 import 'component.dart';
-import 'src/generated/container_component_base.dart';
+import 'package:rive_core/src/generated/container_component_base.dart';
 
+// -> editor-only
 class ContainerChildren extends FractionallyIndexedList<Component> {
   @override
   FractionalIndex orderOf(Component value) => value.childOrder;
@@ -12,6 +13,7 @@ class ContainerChildren extends FractionallyIndexedList<Component> {
     value.childOrder = order;
   }
 }
+// <- editor-only
 
 typedef bool DescentCallback(Component component);
 
@@ -19,7 +21,9 @@ abstract class ContainerComponent extends ContainerComponentBase {
   final ContainerChildren children = ContainerChildren();
 
   void appendChild(Component child) {
+    // -> editor-only
     children.moveToEnd(child);
+    // <- editor-only
     child.parent = this;
   }
 
@@ -54,7 +58,9 @@ abstract class ContainerComponent extends ContainerComponentBase {
 
   @mustCallSuper
   void childAdded(Component child) {
+    // -> editor-only
     context?.markChildSortDirty(this);
+    // <- editor-only
   }
 
   // bool removeChild(Component child) {
@@ -102,9 +108,9 @@ abstract class ContainerComponent extends ContainerComponentBase {
   /// multiple times on children.
   void removeRecursive() {
     assert(context != null);
-    
+
     Set<Component> deathRow = {this};
     forEachChild((child) => deathRow.add(child));
-    deathRow.forEach(context.remove);
+    deathRow.forEach(context.removeObject);
   }
 }

@@ -5,10 +5,6 @@ class IdListFieldType extends FieldType {
       : super(
           'List<Id>',
           'CoreListIdType',
-          imports: [
-            'package:core/id.dart',
-            'package:utilities/list_equality.dart',
-          ],
         );
 
   @override

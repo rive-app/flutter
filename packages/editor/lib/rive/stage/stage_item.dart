@@ -6,7 +6,7 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/animation.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
 import 'package:rive_editor/widgets/animation/animation_tree_controller.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';

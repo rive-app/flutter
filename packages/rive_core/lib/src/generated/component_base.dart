@@ -3,11 +3,8 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
-import 'package:core/id.dart';
-import 'package:fractional/fractional.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-import 'package:utilities/list_equality.dart';
 
 abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
   static const int typeKey = 10;

@@ -2,61 +2,60 @@ import 'package:core/coop/change.dart';
 import 'package:core/core.dart';
 import 'package:core/field_types/core_field_type.dart';
 import 'package:core/key_state.dart';
+import 'package:rive_core/animation/animation.dart';
+import 'package:rive_core/animation/cubic_interpolator.dart';
+import 'package:rive_core/animation/keyed_object.dart';
+import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/animation/keyframe_double.dart';
+import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/artboard.dart';
+import 'package:rive_core/backboard.dart';
+import 'package:rive_core/node.dart';
+import 'package:rive_core/shapes/cubic_vertex.dart';
+import 'package:rive_core/shapes/ellipse.dart';
+import 'package:rive_core/shapes/paint/fill.dart';
+import 'package:rive_core/shapes/paint/gradient_stop.dart';
+import 'package:rive_core/shapes/paint/linear_gradient.dart';
+import 'package:rive_core/shapes/paint/radial_gradient.dart';
+import 'package:rive_core/shapes/paint/solid_color.dart';
+import 'package:rive_core/shapes/paint/stroke.dart';
+import 'package:rive_core/shapes/path_composer.dart';
+import 'package:rive_core/shapes/points_path.dart';
+import 'package:rive_core/shapes/rectangle.dart';
+import 'package:rive_core/shapes/shape.dart';
+import 'package:rive_core/shapes/straight_vertex.dart';
+import 'package:rive_core/shapes/triangle.dart';
+import 'package:rive_core/src/generated/animation/animation_base.dart';
+import 'package:rive_core/src/generated/animation/cubic_interpolator_base.dart';
+import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
+import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
+import 'package:rive_core/src/generated/animation/keyframe_base.dart';
+import 'package:rive_core/src/generated/animation/keyframe_double_base.dart';
+import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
+import 'package:rive_core/src/generated/artboard_base.dart';
+import 'package:rive_core/src/generated/backboard_base.dart';
+import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/src/generated/drawable_base.dart';
+import 'package:rive_core/src/generated/node_base.dart';
+import 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
+import 'package:rive_core/src/generated/shapes/ellipse_base.dart';
+import 'package:rive_core/src/generated/shapes/paint/fill_base.dart';
+import 'package:rive_core/src/generated/shapes/paint/gradient_stop_base.dart';
+import 'package:rive_core/src/generated/shapes/paint/linear_gradient_base.dart';
+import 'package:rive_core/src/generated/shapes/paint/radial_gradient_base.dart';
+import 'package:rive_core/src/generated/shapes/paint/shape_paint_base.dart';
+import 'package:rive_core/src/generated/shapes/paint/solid_color_base.dart';
+import 'package:rive_core/src/generated/shapes/paint/stroke_base.dart';
+import 'package:rive_core/src/generated/shapes/parametric_path_base.dart';
+import 'package:rive_core/src/generated/shapes/path_composer_base.dart';
+import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
+import 'package:rive_core/src/generated/shapes/points_path_base.dart';
+import 'package:rive_core/src/generated/shapes/rectangle_base.dart';
+import 'package:rive_core/src/generated/shapes/shape_base.dart';
+import 'package:rive_core/src/generated/shapes/straight_vertex_base.dart';
+import 'package:rive_core/src/generated/shapes/triangle_base.dart';
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-
-import '../../animation/animation.dart';
-import '../../animation/cubic_interpolator.dart';
-import '../../animation/keyed_object.dart';
-import '../../animation/keyed_property.dart';
-import '../../animation/keyframe_double.dart';
-import '../../animation/linear_animation.dart';
-import '../../artboard.dart';
-import '../../backboard.dart';
-import '../../node.dart';
-import '../../shapes/cubic_vertex.dart';
-import '../../shapes/ellipse.dart';
-import '../../shapes/paint/fill.dart';
-import '../../shapes/paint/gradient_stop.dart';
-import '../../shapes/paint/linear_gradient.dart';
-import '../../shapes/paint/radial_gradient.dart';
-import '../../shapes/paint/solid_color.dart';
-import '../../shapes/paint/stroke.dart';
-import '../../shapes/path_composer.dart';
-import '../../shapes/points_path.dart';
-import '../../shapes/rectangle.dart';
-import '../../shapes/shape.dart';
-import '../../shapes/straight_vertex.dart';
-import '../../shapes/triangle.dart';
-import 'animation/animation_base.dart';
-import 'animation/cubic_interpolator_base.dart';
-import 'animation/keyed_object_base.dart';
-import 'animation/keyed_property_base.dart';
-import 'animation/keyframe_base.dart';
-import 'animation/keyframe_double_base.dart';
-import 'animation/linear_animation_base.dart';
-import 'artboard_base.dart';
-import 'backboard_base.dart';
-import 'component_base.dart';
-import 'drawable_base.dart';
-import 'node_base.dart';
-import 'shapes/cubic_vertex_base.dart';
-import 'shapes/ellipse_base.dart';
-import 'shapes/paint/fill_base.dart';
-import 'shapes/paint/gradient_stop_base.dart';
-import 'shapes/paint/linear_gradient_base.dart';
-import 'shapes/paint/radial_gradient_base.dart';
-import 'shapes/paint/shape_paint_base.dart';
-import 'shapes/paint/solid_color_base.dart';
-import 'shapes/paint/stroke_base.dart';
-import 'shapes/parametric_path_base.dart';
-import 'shapes/path_composer_base.dart';
-import 'shapes/path_vertex_base.dart';
-import 'shapes/points_path_base.dart';
-import 'shapes/rectangle_base.dart';
-import 'shapes/shape_base.dart';
-import 'shapes/straight_vertex_base.dart';
-import 'shapes/triangle_base.dart';
 
 abstract class RiveCoreContext extends CoreContext {
   @override
@@ -323,7 +322,7 @@ abstract class RiveCoreContext extends CoreContext {
           // changes, so we'll attempt to delete an object we ourselves have
           // already deleted.
           if (object != null) {
-            remove(object);
+            removeObject(object);
           }
           break;
         case KeyedObjectBase.objectIdPropertyKey:
@@ -423,7 +422,7 @@ abstract class RiveCoreContext extends CoreContext {
       }
     }
     if (justAdded) {
-      add(object);
+      addObject(object);
     }
   }
 
@@ -1438,6 +1437,7 @@ abstract class RiveCoreContext extends CoreContext {
       case ComponentBase.childOrderPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
+      case BackboardBase.mainArtboardIdPropertyKey:
       case BackboardBase.colorValuePropertyKey:
         return false;
       default:

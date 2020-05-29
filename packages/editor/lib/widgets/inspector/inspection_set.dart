@@ -1,6 +1,6 @@
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/selectable_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/stage.dart';

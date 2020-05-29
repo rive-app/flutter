@@ -17,6 +17,7 @@ class Property {
   bool isNullable = false;
   bool isRuntime = true;
   bool isCoop = true;
+  FieldType typeRuntime;
 
   factory Property(Definition type, String name, Map<String, dynamic> data) {
     var fieldType = FieldType.find(data["type"]);
@@ -61,21 +62,30 @@ class Property {
     if (c is bool) {
       isCoop = c;
     }
+    dynamic rt = data['typeRuntime'];
+    if (rt is String) {
+      typeRuntime = FieldType.find(rt);
+    }
     key = Key.fromJSON(data["key"]) ?? Key.forProperty(this);
   }
 
-  String generateCode() {
+  FieldType getExportType(bool forRuntime) =>
+      forRuntime ? typeRuntime ?? type : type;
+
+  String generateCode(bool forRuntime) {
+    bool exportAnimates = animates && !forRuntime;
+    var exportType = getExportType(forRuntime);
     String propertyKey = '${name}PropertyKey';
     var code = StringBuffer('  /// ${'-' * 74}\n');
     code.write(comment('${capitalize(name)} field with key ${key.intValue}.',
         indent: 1));
     if (initialValue != null) {
-      code.writeln('${type.dartName} _$name = $initialValue;');
+      code.writeln('${exportType.dartName} _$name = $initialValue;');
     } else {
-      code.writeln('${type.dartName} _$name;');
+      code.writeln('${exportType.dartName} _$name;');
     }
-    if (animates) {
-      code.writeln('${type.dartName} _${name}Animated;');
+    if (exportAnimates) {
+      code.writeln('${exportType.dartName} _${name}Animated;');
       code.writeln('KeyState _${name}KeyState = KeyState.none;');
     }
     code.writeln('static const int $propertyKey = ${key.intValue};');
@@ -83,38 +93,44 @@ class Property {
     if (description != null) {
       code.write(comment(description, indent: 1));
     }
-    if (animates) {
+    if (exportAnimates) {
       code.write(comment(
           'Get the [_$name] field value.'
           'Note this may not match the core value '
           'if animation mode is active.',
           indent: 1));
-      code.writeln('${type.dartName} get $name => _${name}Animated ?? _$name;');
+      code.writeln(
+          '${exportType.dartName} get $name => _${name}Animated ?? _$name;');
       code.write(
           comment('Get the non-animation [_$name] field value.', indent: 1));
-      code.writeln('${type.dartName} get ${name}Core => _$name;');
+      code.writeln('${exportType.dartName} get ${name}Core => _$name;');
     } else {
-      code.writeln('${type.dartName} get $name => _$name;');
+      code.writeln('${exportType.dartName} get $name => _$name;');
     }
     code.write(comment('Change the [_$name] field value.', indent: 1));
     code.write(comment(
         '[${name}Changed] will be invoked only if the '
         'field\'\s value has changed.',
         indent: 1));
-    code.writeln('''set $name${animates ? 'Core' : ''}(${type.dartName} value) {
-        if(${type.equalityCheck('_$name', 'value')}) { return; }
-        ${type.dartName} from = _$name;
-        _$name = value;
-        onPropertyChanged($propertyKey, from, value);''');
-    if (!isCoop) {
-      code.writeln(
-          'context?.editorPropertyChanged(this, $propertyKey, from, value);');
+    code.writeln(
+        '''set $name${exportAnimates ? 'Core' : ''}(${exportType.dartName} value) {
+        if(${exportType.equalityCheck('_$name', 'value')}) { return; }
+        ${exportType.dartName} from = _$name;
+        _$name = value;''');
+    // Property change callbacks to the context don't propagate at runtime.
+    if (!forRuntime) {
+      code.writeln('onPropertyChanged($propertyKey, from, value);');
+      if (!isCoop) {
+        code.writeln(
+            'context?.editorPropertyChanged(this, $propertyKey, from, value);');
+      }
     }
+    // Change callbacks do as we use those to trigger dirty states.
     code.writeln('''
         ${name}Changed(from, value);
       }''');
-    if (animates) {
-      code.writeln('''set $name(${type.dartName} value) {
+    if (exportAnimates) {
+      code.writeln('''set $name(${exportType.dartName} value) {
         if(context != null && context.isAnimating) {
           _${name}Animate(value, true);
           return;
@@ -123,19 +139,20 @@ class Property {
       }''');
 
       code.writeln(
-          '''void _${name}Animate(${type.dartName} value, bool autoKey) {
+          '''void _${name}Animate(${exportType.dartName} value, bool autoKey) {
         if (_${name}Animated == value) {
           return;
         }
-        ${type.dartName} from = ${name};
+        ${exportType.dartName} from = ${name};
         _${name}Animated = value;
-        ${type.dartName} to = ${name};
+        ${exportType.dartName} to = ${name};
         onAnimatedPropertyChanged($propertyKey, autoKey, from, to);
         ${name}Changed(from, to);
       }''');
 
-      code.writeln('${type.dartName} get ${name}Animated => _${name}Animated;');
-      code.writeln('''set ${name}Animated(${type.dartName} value) =>
+      code.writeln(
+          '${exportType.dartName} get ${name}Animated => _${name}Animated;');
+      code.writeln('''set ${name}Animated(${exportType.dartName} value) =>
                         _${name}Animate(value, false);''');
       code.writeln('KeyState get ${name}KeyState => _${name}KeyState;');
       code.writeln('''set ${name}KeyState(KeyState value) {
@@ -148,13 +165,16 @@ class Property {
       }''');
     }
     code.writeln('void ${name}Changed('
-        '${type.dartName} from, ${type.dartName} to);\n');
+        '${exportType.dartName} from, ${exportType.dartName} to);\n');
 
     return code.toString();
   }
 
   Map<String, dynamic> serialize() {
     Map<String, dynamic> data = <String, dynamic>{'type': type.name};
+    if (typeRuntime != null) {
+      data['typeRuntime'] = typeRuntime.name;
+    }
 
     if (initialValue != null) {
       data['initialValue'] = initialValue;

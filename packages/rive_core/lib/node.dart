@@ -5,7 +5,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/node_base.dart';
 import 'package:meta/meta.dart';
-export 'src/generated/node_base.dart';
+export 'package:rive_core/src/generated/node_base.dart';
 
 class Node extends NodeBase {
   final Mat2D transform = Mat2D();

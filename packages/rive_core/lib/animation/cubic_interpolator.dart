@@ -1,46 +1,46 @@
 import 'dart:typed_data';
+
+// -> editor-only
 import 'package:flutter/src/foundation/change_notifier.dart';
+// <- editor-only
 import 'package:rive_core/animation/interpolator.dart';
+// -> editor-only
 import 'package:rive_core/event.dart';
+// <- editor-only
 import 'package:rive_core/src/generated/animation/cubic_interpolator_base.dart';
 
+const int newtonIterations = 4;
+
+// Implements https://github.com/gre/bezier-easing/blob/master/src/index.js
+const double newtonMinSlope = 0.001;
+const double sampleStepSize = 1.0 / (splineTableSize - 1.0);
+const int splineTableSize = 11;
+const int subdivisionMaxIterations = 10;
+
+const double subdivisionPrecision = 0.0000001;
+double _calcBezier(double aT, double aA1, double aA2) {
+  return (((1.0 - 3.0 * aA2 + 3.0 * aA1) * aT + (3.0 * aA2 - 6.0 * aA1)) * aT +
+          (3.0 * aA1)) *
+      aT;
+}
+
+// Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+double _getSlope(double aT, double aA1, double aA2) {
+  return 3.0 * (1.0 - 3.0 * aA2 + 3.0 * aA1) * aT * aT +
+      2.0 * (3.0 * aA2 - 6.0 * aA1) * aT +
+      (3.0 * aA1);
+}
+
+// Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
 class CubicInterpolator extends CubicInterpolatorBase implements Interpolator {
   _CubicEase _ease;
-  @override
-  void onAdded() {
-    _updateStoredCubic();
-  }
+
+  // -> editor-only
+  final Event _propertiesChanged = Event();
 
   @override
-  void onAddedDirty() {}
-
-  @override
-  void onRemoved() {}
-
-  @override
-  void x1Changed(double from, double to) => _updateStoredCubic();
-
-  @override
-  void x2Changed(double from, double to) => _updateStoredCubic();
-
-  @override
-  void y1Changed(double from, double to) => _updateStoredCubic();
-
-  @override
-  void y2Changed(double from, double to) => _updateStoredCubic();
-
-  void _updateStoredCubic() {
-    if (context == null) {
-      return;
-    }
-    _ease = _CubicEase.make(x1, y1, x2, y2);
-    // -> editor-only
-    _propertiesChanged.notify();
-    // <- editor-only
-  }
-
-  @override
-  double transform(double value) => _ease.transform(value);
+  ChangeNotifier get propertiesChanged => _propertiesChanged;
+  // <- editor-only
 
   @override
   bool equalParameters(Interpolator other) {
@@ -53,65 +53,41 @@ class CubicInterpolator extends CubicInterpolatorBase implements Interpolator {
     return false;
   }
 
-  // -> editor-only
-  final Event _propertiesChanged = Event();
   @override
-  ChangeNotifier get propertiesChanged => _propertiesChanged;
-  // <- editor-only
-}
-
-// Implements https://github.com/gre/bezier-easing/blob/master/src/index.js
-const int newtonIterations = 4;
-const double newtonMinSlope = 0.001;
-const double subdivisionPrecision = 0.0000001;
-const int subdivisionMaxIterations = 10;
-
-const int splineTableSize = 11;
-const double sampleStepSize = 1.0 / (splineTableSize - 1.0);
-
-// Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
-double _calcBezier(double aT, double aA1, double aA2) {
-  return (((1.0 - 3.0 * aA2 + 3.0 * aA1) * aT + (3.0 * aA2 - 6.0 * aA1)) * aT +
-          (3.0 * aA1)) *
-      aT;
-}
-
-// Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
-double _getSlope(double aT, double aA1, double aA2) {
-  return 3.0 * (1.0 - 3.0 * aA2 + 3.0 * aA1) * aT * aT +
-      2.0 * (3.0 * aA2 - 6.0 * aA1) * aT +
-      (3.0 * aA1);
-}
-
-double _newtonRaphsonIterate(
-    double aX, double aGuessT, double mX1, double mX2) {
-  for (int i = 0; i < newtonIterations; ++i) {
-    double currentSlope = _getSlope(aGuessT, mX1, mX2);
-    if (currentSlope == 0.0) {
-      return aGuessT;
-    }
-    double currentX = _calcBezier(aGuessT, mX1, mX2) - aX;
-    aGuessT -= currentX / currentSlope;
-  }
-  return aGuessT;
-}
-
-abstract class _CubicEase {
-  static _CubicEase make(double x1, double y1, double x2, double y2) {
-    if (x1 == y1 && x2 == y2) {
-      return _LinearCubicEase();
-    } else {
-      return _Cubic(x1, y1, x2, y2);
-    }
+  void onAdded() {
+    _updateStoredCubic();
   }
 
-  double transform(double t);
-}
-
-class _LinearCubicEase extends _CubicEase {
   @override
-  double transform(double t) {
-    return t;
+  void onAddedDirty() {}
+
+  @override
+  void onRemoved() {}
+
+  @override
+  double transform(double value) => _ease.transform(value);
+
+  @override
+  void x1Changed(double from, double to) => _updateStoredCubic();
+
+  @override
+  void x2Changed(double from, double to) => _updateStoredCubic();
+
+  @override
+  void y1Changed(double from, double to) => _updateStoredCubic();
+
+  @override
+  void y2Changed(double from, double to) => _updateStoredCubic();
+  void _updateStoredCubic() {
+    // -> editor-only
+    if (context == null) {
+      return;
+    }
+    // <- editor-only
+    _ease = _CubicEase.make(x1, y1, x2, y2);
+    // -> editor-only
+    _propertiesChanged.notify();
+    // <- editor-only
   }
 }
 
@@ -177,5 +153,24 @@ class _Cubic extends _CubicEase {
   @override
   double transform(double mix) {
     return _calcBezier(getT(mix), y1, y2);
+  }
+}
+
+abstract class _CubicEase {
+  double transform(double t);
+
+  static _CubicEase make(double x1, double y1, double x2, double y2) {
+    if (x1 == y1 && x2 == y2) {
+      return _LinearCubicEase();
+    } else {
+      return _Cubic(x1, y1, x2, y2);
+    }
+  }
+}
+
+class _LinearCubicEase extends _CubicEase {
+  @override
+  double transform(double t) {
+    return t;
   }
 }

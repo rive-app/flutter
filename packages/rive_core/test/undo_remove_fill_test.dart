@@ -33,8 +33,8 @@ void main() {
     Artboard artboard;
     // Create the node with some name set to it.
     file.batchAdd(() {
-      artboard = file.add(Artboard());
-      shape = file.add(Shape()..name = 'Colorful');
+      artboard = file.addObject(Artboard());
+      shape = file.addObject(Shape()..name = 'Colorful');
       artboard.appendChild(shape);
     });
     const fillColor = Color(0xFFFF0000);

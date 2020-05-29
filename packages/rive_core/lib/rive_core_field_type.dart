@@ -1,3 +1,4 @@
+// -> editor-only
 import 'package:core/core.dart';
 import 'package:core/field_types/core_double_type.dart';
 import 'package:rive_core/animation/keyframe.dart';
@@ -54,3 +55,4 @@ class RiveFractionalIndexType extends CoreFractionalIndexType {
   static RiveFractionalIndexType instance =
       RiveFractionalIndexType._constructor();
 }
+// <- editor-only

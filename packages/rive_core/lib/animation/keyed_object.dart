@@ -6,10 +6,13 @@ import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/event.dart';
+// -> editor-only
 import 'package:rive_core/rive_file.dart';
+// <- editor-only
 import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
+// -> editor-only
 import 'package:utilities/binary_buffer/binary_writer.dart';
-
+// <- editor-only
 import 'linear_animation.dart';
 export 'package:rive_core/src/generated/animation/keyed_object_base.dart';
 
@@ -27,6 +30,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
 
   @override
   void onAdded() {
+    // -> editor-only
     if (animationId != null) {
       LinearAnimation animation = context?.resolve(animationId);
       if (animation == null) {
@@ -35,6 +39,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
         animation.internalAddKeyedObject(this);
       }
     }
+    // <- editor-only
 
     // Validate the object we're keying actually exists. By the time "onAdded"
     // is called, the file should be in a stable state.
@@ -55,19 +60,25 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     var kps = _keyedProperties.values.toList(growable: false);
     for (final keyedProperty in kps) {
       var keyframes = keyedProperty.keyframes.toList(growable: false);
-      keyframes.forEach(context.remove);
-      context.remove(keyedProperty);
+      keyframes.forEach(context.removeObject);
+      context.removeObject(keyedProperty);
     }
-    context.remove(this);
+    context.removeObject(this);
   }
 
+  // -> editor-only
   LinearAnimation get animation => context?.resolve(animationId);
+  // <- editor-only
 
   @override
   void onAddedDirty() {}
 
   @override
-  void onRemoved() => animation?.internalRemoveKeyedObject(this);
+  void onRemoved() {
+    // -> editor-only
+    animation?.internalRemoveKeyedObject(this);
+    // <- editor-only
+  }
 
   /// Called by rive_core to add a KeyedObject to the animation. This should be
   /// @internal when it's supported.
@@ -91,18 +102,21 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   /// be @internal when it's supported.
   bool internalRemoveKeyedProperty(KeyedProperty property) {
     var removed = _keyedProperties.remove(property.propertyKey);
+    // -> editor-only
     if (removed != null) {
       /// Keyed property removed, it may have contained keyframes.
       internalKeyFramesChanged();
     }
+    // <- editor-only
     if (_keyedProperties.isEmpty) {
       // Remove this keyed property.
-      context.remove(this);
+      context.removeObject(this);
     }
     assert(removed == null || removed == property);
     return removed != null;
   }
 
+  // -> editor-only
   /// Get the keyed data for a property already in this keyed object.
   KeyedProperty getKeyed(int propertyKey) => _keyedProperties[propertyKey];
 
@@ -117,7 +131,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     var keyedProperty = KeyedProperty()
       ..keyedObjectId = id
       ..propertyKey = propertyKey;
-    context.add(keyedProperty);
+    context.addObject(keyedProperty);
 
     // We also add it here in case we're doing a batch add (onAddedDirty will be
     // called later for the keyedObject).
@@ -128,8 +142,9 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
 
     return keyedProperty;
   }
+  // <- editor-only
 
-  void apply(double time, double mix, RiveCoreContext coreContext) {
+  void apply(double time, double mix, CoreContext coreContext) {
     Core object = coreContext.resolve(objectId);
     if (object == null) {
       return;
@@ -139,12 +154,15 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     }
   }
 
+  // -> editor-only
   @override
   void animationIdChanged(Id from, Id to) {}
+  // <- editor-only
 
   @override
   void objectIdChanged(Id from, Id to) {}
 
+  // -> editor-only
   // Should be @internal when supported...
   void internalKeyFramesChanged() {
     animation?.internalKeyFramesChanged();
@@ -165,4 +183,5 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       keyedProperty.writeRuntime(writer, idLookup);
     }
   }
+  // <- editor-only
 }

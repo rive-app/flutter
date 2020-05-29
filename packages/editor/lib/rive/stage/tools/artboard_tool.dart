@@ -60,9 +60,9 @@ class ArtboardTool extends DrawableTool {
         ..originY = 0
         ..width = 1
         ..height = 1;
-      core.add(_artboard);
-      core.add(fill);
-      core.add(solidColor);
+      core.addObject(_artboard);
+      core.addObject(fill);
+      core.addObject(solidColor);
       _artboard.appendChild(fill);
       fill.appendChild(solidColor);
     });
