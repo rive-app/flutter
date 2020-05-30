@@ -5,6 +5,7 @@ import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/dashed_flat_button.dart';
 import 'package:rive_editor/widgets/common/icon_tile.dart';
+import 'package:rive_editor/widgets/common/requires_admin.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/team_wizard.dart';
@@ -148,47 +149,49 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 }
                 slivers.add(
                   SliverInlineFooter(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: riveColors.fileBackgroundLightGrey,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Separator(
-                            color: riveColors.fileLineGrey,
-                            padding: EdgeInsets.only(
-                              left: bottomSliverDocked ? 0 : 20,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 20,
-                              right: 20,
-                              bottom: 20,
-                              top: 20,
-                            ),
-                            child: DashedFlatButton(
-                              label: 'New Team',
-                              icon: 'teams-button',
-                              textColor: const Color(0xFF888888),
-                              iconColor: const Color(0xFFA9A9A9),
-                              hoverTextColor: const Color(0xFF666666),
-                              hoverIconColor: const Color(0xFF888888),
-                              tip: const Tip(
-                                label: 'Create a space where you and'
-                                    '\nyour team can share files.',
-                                direction: PopupDirection.bottomToCenter,
-                                fallbackDirections: [
-                                  PopupDirection.topToCenter,
-                                ],
-                              ),
-                              onTap: () => showTeamWizard<void>(
-                                context: context,
+                    child: RequiresAdmin(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: riveColors.fileBackgroundLightGrey,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Separator(
+                              color: riveColors.fileLineGrey,
+                              padding: EdgeInsets.only(
+                                left: bottomSliverDocked ? 0 : 20,
                               ),
                             ),
-                          ),
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 20,
+                                right: 20,
+                                bottom: 20,
+                                top: 20,
+                              ),
+                              child: DashedFlatButton(
+                                label: 'New Team',
+                                icon: 'teams-button',
+                                textColor: const Color(0xFF888888),
+                                iconColor: const Color(0xFFA9A9A9),
+                                hoverTextColor: const Color(0xFF666666),
+                                hoverIconColor: const Color(0xFF888888),
+                                tip: const Tip(
+                                  label: 'Create a space where you and'
+                                      '\nyour team can share files.',
+                                  direction: PopupDirection.bottomToCenter,
+                                  fallbackDirections: [
+                                    PopupDirection.topToCenter,
+                                  ],
+                                ),
+                                onTap: () => showTeamWizard<void>(
+                                  context: context,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

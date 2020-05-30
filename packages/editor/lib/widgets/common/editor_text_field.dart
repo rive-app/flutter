@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:core/debounce.dart';
 import 'package:cursor/cursor_view.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -51,6 +52,9 @@ class _EditorTextFieldState extends State<EditorTextField>
     implements TextSelectionGestureDetectorBuilderDelegate {
   _EditorFieldGestureBuilder _selectionGestureDetectorBuilder;
   final TextSelectionControls selectionControls = materialTextSelectionControls;
+
+  // Record whether a drag is occurring
+  bool _dragOccurred;
 
   void _requestKeyboard() => editableTextKey.currentState?.requestKeyboard();
   CursorInstance _customCursor;
@@ -140,6 +144,9 @@ class _EditorTextFieldState extends State<EditorTextField>
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onVerticalDragStart: (data) {
+                // Record potential start of the drag, no drag
+                // has yet occurred
+                _dragOccurred = false;
                 activeFile.rive.focus();
                 _dragOpOnFile = activeFile;
                 _dragOpOnFile.startDragOperation();
@@ -147,6 +154,8 @@ class _EditorTextFieldState extends State<EditorTextField>
                 activeFile.addActionHandler(_dragActionHandler);
               },
               onVerticalDragUpdate: (data) {
+                // Record that dragging has occurred
+                _dragOccurred = true;
                 if (_dragOpOnFile == null) {
                   // drag was canceled
                   return;
@@ -159,10 +168,18 @@ class _EditorTextFieldState extends State<EditorTextField>
                   return;
                 }
                 _endDrag();
+                // If no actual dragging occurred, treat as select
+                if (!_dragOccurred) {
+                  widget.focusNode.requestFocus();
+                }
               },
-              onTapUp: (data) {
-                widget.focusNode.requestFocus();
-              },
+              // onTapUp will eat the start drag event until the pointer has
+              // left the widget boundary, so we need to do this in the dragging
+              // logic
+              // onTapUp: (data) {
+              //   print('Tap up');
+              //   widget.focusNode.requestFocus();
+              // },
               child: IgnorePointer(child: child),
             ),
           );
