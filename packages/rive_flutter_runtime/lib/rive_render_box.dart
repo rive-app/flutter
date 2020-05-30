@@ -88,20 +88,29 @@ abstract class RiveRenderBox extends RenderBox {
   void beforeDraw(Canvas canvas, Offset offset) {}
   void afterDraw(Canvas canvas, Offset offset) {}
 
+  double _elapsedSeconds = 0;
   void _frameCallback(Duration duration) {
+    _elapsedSeconds = _stopwatch.elapsedTicks / _stopwatch.frequency;
+    _stopwatch.reset();
     markNeedsPaint();
   }
 
-  void scheduleRepaint() =>
-      SchedulerBinding.instance.scheduleFrameCallback(_frameCallback);
-      
+  int _frameCallbackId;
+  void scheduleRepaint() {
+    if (_frameCallbackId != null) {
+      return;
+    }
+    _frameCallbackId =
+        SchedulerBinding.instance.scheduleFrameCallback(_frameCallback);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
-    var elapsedSeconds = _stopwatch.elapsedTicks / _stopwatch.frequency;
-    _stopwatch.reset();
-    if (advance(elapsedSeconds)) {
+    _frameCallbackId = null;
+    if (advance(_elapsedSeconds)) {
       scheduleRepaint();
     }
+    _elapsedSeconds = 0;
 
     final Canvas canvas = context.canvas;
 
