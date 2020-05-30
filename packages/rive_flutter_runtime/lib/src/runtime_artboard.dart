@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:rive/rive_core/artboard.dart';
+import 'package:rive/rive_core/event.dart';
 import 'package:rive/src/core/core.dart';
 import 'package:rive/rive_core/component.dart';
 
-import 'generated/rive_core_context.dart';
-
 class RuntimeArtboard extends Artboard implements CoreContext {
+  final _redraw = Event();
+  ChangeNotifier get redraw => _redraw;
+
   final List<Core> _objects = [];
 
   Iterable<Core> get objects => _objects;
@@ -30,8 +33,12 @@ class RuntimeArtboard extends Artboard implements CoreContext {
 
   @override
   bool markDependenciesDirty(covariant Core object) {
-    _needDependenciesBuilt.add(object);
-    return true;
+    if (object is Component) {
+      _needDependenciesBuilt.add(object);
+      return true;
+    }
+
+    return false;
   }
 
   void clean() {
@@ -58,10 +65,6 @@ class RuntimeArtboard extends Artboard implements CoreContext {
 
   @override
   T resolve<T>(int id) {
-    // If the id is null, resolve the artboard
-    // if(id == null && this is T) {
-    //   return this as T;
-    // }
     if (id >= _objects.length) {
       return null;
     }
@@ -79,11 +82,11 @@ class RuntimeArtboard extends Artboard implements CoreContext {
 
   @override
   void dirty(void Function() dirt) {
-    // TODO: implement dirty
+    // TODO: Schedule a debounced callback for next frame
   }
 
   @override
   void markNeedsAdvance() {
-    // TODO: implement markNeedsAdvance
+    _redraw.notify();
   }
 }

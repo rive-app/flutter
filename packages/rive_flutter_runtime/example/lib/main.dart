@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive/rive_core/animation/linear_animation.dart';
+import 'package:rive/rive_core/animation/loop.dart';
 import 'package:rive/rive_file.dart';
 import 'package:rive/rive_renderer.dart';
+import 'package:rive/src/runtime_artboard.dart';
+import 'package:rive/rive_core/rive_animation_controller.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -71,10 +80,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    rootBundle.load('assets/jet_fighter.riv').then((data) async {
+    rootBundle.load('assets/tape_deck.riv').then((data) async {
       var file = RiveFile();
-      var success = await file.import(data);
+      var success = file.import(data);
       if (success) {
+        file.mainArtboard.addController(BouncyWalkman());
         setState(() {
           _rive = file;
         });
@@ -110,5 +120,88 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+class BouncyWalkman extends RiveAnimationController<RuntimeArtboard> {
+  LinearAnimation _animation;
+  double _time = 0;
+  int _direction = 1;
+
+  @override
+  bool init(RuntimeArtboard artboard) {
+    _animation = artboard.animations.firstWhere(
+      (animation) => animation.name == 'Untitled 1',
+      orElse: () => null,
+    ) as LinearAnimation;
+    isActive = true;
+    return _animation != null;
+  }
+
+  @override
+  void apply(RuntimeArtboard artboard, double elapsedSeconds) {
+    _animation.apply(_time, coreContext: artboard);
+    
+    _time += elapsedSeconds * _animation.speed * _direction;
+
+    double frames = _time * _animation.fps;
+
+    var start = _animation.enableWorkArea ? _animation.workStart : 0;
+    var end =
+        _animation.enableWorkArea ? _animation.workEnd : _animation.duration;
+    var range = end - start;
+
+    switch (_animation.loop) {
+      case Loop.oneShot:
+        if (frames > end) {
+          isActive = false;
+          frames = end.toDouble();
+          _time = frames / _animation.fps;
+        }
+        break;
+      case Loop.loop:
+        if (frames >= end) {
+          frames = _time * _animation.fps;
+          frames = start + (frames - start) % range;
+          _time = frames / _animation.fps;
+        }
+        break;
+      case Loop.pingPong:
+        // ignore: literal_only_boolean_expressions
+        while (true) {
+          if (_direction == 1 && frames >= end) {
+            _direction = -1;
+            frames = end + (end - frames);
+            _time = frames / _animation.fps;
+          } else if (_direction == -1 && frames < start) {
+            _direction = 1;
+            frames = start + (start - frames);
+            _time = frames / _animation.fps;
+          } else {
+            // we're within the range, we can stop fixing. We do this in a
+            // loop to fix conditions when time has advanced so far that we've
+            // ping-ponged back and forth a few times in a single frame. We
+            // want to accomodate for this in cases where animations are not
+            // advanced on regular intervals.
+            break;
+          }
+        }
+        break;
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+  }
+
+  @override
+  void onActivate() {
+    // TODO: implement onActivate
+  }
+
+  @override
+  void onDeactivate() {
+    // TODO: implement onDeactivate
   }
 }

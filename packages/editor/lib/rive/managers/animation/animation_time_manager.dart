@@ -6,6 +6,7 @@ import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/loop.dart';
+import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -13,7 +14,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:meta/meta.dart';
 import 'package:rive_core/rive_animation_controller.dart';
 
-class _SimpleAnimationController extends RiveAnimationController {
+class _SimpleAnimationController
+    extends RiveAnimationController<RiveCoreContext> {
   final LinearAnimation animation;
   void Function(double) onTimeChanged;
   _SimpleAnimationController(this.animation, this.onTimeChanged);
@@ -43,7 +45,7 @@ class _SimpleAnimationController extends RiveAnimationController {
     }
 
     // Always advance/apply next frame.
-    isPlaying = true;
+    isActive = true;
   }
 
   double _time = 0;
@@ -110,11 +112,11 @@ class _SimpleAnimationController extends RiveAnimationController {
           }
           break;
       }
-      isPlaying = true;
+      isActive = true;
       onTimeChanged(frames);
     } else {
       // after apply, pause
-      isPlaying = false;
+      isActive = false;
     }
   }
 
@@ -122,10 +124,10 @@ class _SimpleAnimationController extends RiveAnimationController {
   void dispose() {}
 
   @override
-  void onPlay() {}
+  void onActivate() {}
 
   @override
-  void onStop() {}
+  void onDeactivate() {}
 }
 
 /// Time manager for the currently editing [LinearAnimation]. Allows controlling
@@ -180,7 +182,7 @@ abstract class AnimationTimeManager extends AnimationManager {
       _timeStream.add(frames.clamp(0, animation.duration).toDouble());
     });
     animation.artboard.addController(_controller);
-    _controller.isPlaying = true;
+    _controller.isActive = true;
 
     _isPlayingStream.add(false);
     _timeStream.add(0);
@@ -256,7 +258,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     // Whenever the keyframes change, we re-apply the current animation at the
     // current time. We do this by telling the controller to run and apply again
     // (setting isPlaying to true activates the controller).
-    _controller.isPlaying = true;
+    _controller.isActive = true;
 
     // In order to make sure anything depending on the current time also updates
     // we pipe through the current time again. See interpolation_preview.dart.
@@ -327,7 +329,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     var frame =
         (value * animation.fps).clamp(0, animation.duration).roundToDouble();
     _controller.time = frame / animation.fps;
-    _controller.isPlaying = true;
+    _controller.isActive = true;
     _timeStream.add(frame);
   }
 

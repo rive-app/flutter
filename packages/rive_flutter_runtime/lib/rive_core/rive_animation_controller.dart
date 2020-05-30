@@ -1,27 +1,26 @@
-import 'package:rive/src/core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-abstract class RiveAnimationController {
-  final _isPlaying = ValueNotifier<bool>(false);
-  ValueListenable<bool> get isPlayingChanged => _isPlaying;
-  bool get isPlaying => _isPlaying.value;
-  set isPlaying(bool value) {
-    if (_isPlaying.value != value) {
-      _isPlaying.value = value;
+abstract class RiveAnimationController<T> {
+  final _isActive = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isActiveChanged => _isActive;
+  bool get isActive => _isActive.value;
+  set isActive(bool value) {
+    if (_isActive.value != value) {
+      _isActive.value = value;
       if (value) {
-        onPlay();
+        onActivate();
       } else {
-        onStop();
+        onDeactivate();
       }
     }
   }
 
   @protected
-  void onPlay();
+  void onActivate();
   @protected
-  void onStop();
-  void apply(CoreContext core, double elapsedSeconds);
-  bool init(CoreContext core) => true;
+  void onDeactivate();
+  void apply(T core, double elapsedSeconds);
+  bool init(T core) => true;
   void dispose();
 }

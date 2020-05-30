@@ -144,7 +144,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   bool advance(double elapsedSeconds) {
     bool didUpdate = false;
     for (final controller in _animationControllers) {
-      if (controller.isPlaying) {
+      if (controller.isActive) {
         controller.apply(context, elapsedSeconds);
         didUpdate = true;
       }
@@ -386,9 +386,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
         !controller.init(context)) {
       return false;
     }
-    controller.isPlayingChanged.addListener(_onControllerPlayingChanged);
+    controller.isActiveChanged.addListener(_onControllerPlayingChanged);
     _animationControllers.add(controller);
-    if (controller.isPlaying) {
+    if (controller.isActive) {
       context?.markNeedsAdvance();
     }
     return true;
@@ -398,7 +398,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   bool removeController(RiveAnimationController controller) {
     assert(controller != null);
     if (_animationControllers.remove(controller)) {
-      controller.isPlayingChanged.removeListener(_onControllerPlayingChanged);
+      controller.isActiveChanged.removeListener(_onControllerPlayingChanged);
       controller.dispose();
       return true;
     }

@@ -7,10 +7,9 @@ import 'package:rive/rive_core/math/aabb.dart';
 import 'package:rive/rive_core/math/vec2d.dart';
 
 abstract class RiveRenderBox extends RenderBox {
+  final Stopwatch _stopwatch = Stopwatch();
   BoxFit _fit;
   Alignment _alignment;
-  int _frameCallbackID;
-  double _lastFrameTime = 0;
   bool _useIntrinsicSize = false;
 
   bool get useIntrinsicSize => _useIntrinsicSize;
@@ -36,24 +35,11 @@ abstract class RiveRenderBox extends RenderBox {
     }
   }
 
-  bool get isPlaying;
-
   BoxFit get fit => _fit;
   set fit(BoxFit value) {
     if (value != _fit) {
       _fit = value;
       markNeedsPaint();
-    }
-  }
-
-  void updatePlayState() {
-    if (isPlaying && attached) {
-      markNeedsPaint();
-    } else {
-      _lastFrameTime = 0;
-      if (_frameCallbackID != null) {
-        SchedulerBinding.instance.cancelFrameCallbackWithId(_frameCallbackID);
-      }
     }
   }
 
@@ -85,32 +71,14 @@ abstract class RiveRenderBox extends RenderBox {
 
   @override
   void detach() {
+    _stopwatch.stop();
     super.detach();
-    dispose();
   }
 
   @override
   void attach(PipelineOwner owner) {
+    _stopwatch.start();
     super.attach(owner);
-    updatePlayState();
-  }
-
-  void dispose() {
-    updatePlayState();
-  }
-
-  void _beginFrame(Duration timestamp) {
-    _frameCallbackID = null;
-    final double t =
-        timestamp.inMicroseconds / Duration.microsecondsPerMillisecond / 1000.0;
-    double elapsedSeconds = _lastFrameTime == 0.0 ? 0.0 : t - _lastFrameTime;
-    _lastFrameTime = t;
-
-    advance(elapsedSeconds);
-    if (!isPlaying) {
-      _lastFrameTime = 0.0;
-    }
-    markNeedsPaint();
   }
 
   /// Get the Axis Aligned Bounding Box that encompasses the world space scene
@@ -120,15 +88,19 @@ abstract class RiveRenderBox extends RenderBox {
   void beforeDraw(Canvas canvas, Offset offset) {}
   void afterDraw(Canvas canvas, Offset offset) {}
 
+  void _frameCallback(Duration duration) {
+    markNeedsPaint();
+  }
+
+  void scheduleRepaint() =>
+      SchedulerBinding.instance.scheduleFrameCallback(_frameCallback);
+      
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (isPlaying) {
-      // Paint again
-      if (_frameCallbackID != null) {
-        SchedulerBinding.instance.cancelFrameCallbackWithId(_frameCallbackID);
-      }
-      _frameCallbackID =
-          SchedulerBinding.instance.scheduleFrameCallback(_beginFrame);
+    var elapsedSeconds = _stopwatch.elapsedTicks / _stopwatch.frequency;
+    _stopwatch.reset();
+    if (advance(elapsedSeconds)) {
+      scheduleRepaint();
     }
 
     final Canvas canvas = context.canvas;
@@ -208,6 +180,7 @@ abstract class RiveRenderBox extends RenderBox {
     }
   }
 
-  /// Advance animations, physics, etc by elapsedSeconds.
-  void advance(double elapsedSeconds);
+  /// Advance animations, physics, etc by elapsedSeconds, returns true if it
+  /// wants to run again.
+  bool advance(double elapsedSeconds);
 }
