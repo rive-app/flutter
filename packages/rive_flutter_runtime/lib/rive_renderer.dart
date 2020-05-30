@@ -1,8 +1,10 @@
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive/rive_core/artboard.dart';
 import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_core/math/aabb.dart';
 import 'package:rive/rive_render_box.dart';
+import 'package:rive/src/runtime_artboard.dart';
 
 class RiveRenderer extends LeafRenderObjectWidget {
   final Artboard artboard;
@@ -10,7 +12,7 @@ class RiveRenderer extends LeafRenderObjectWidget {
   final BoxFit fit;
   final Alignment alignment;
 
-  RiveRenderer({
+  const RiveRenderer({
     @required this.artboard,
     this.useIntrinsicSize = false,
     this.fit = BoxFit.contain,
@@ -43,14 +45,21 @@ class RiveRenderer extends LeafRenderObjectWidget {
 }
 
 class RiveRenderObject extends RiveRenderBox {
-  Artboard _artboard;
-  Artboard get artboard => _artboard;
+
+  RuntimeArtboard _artboard;
+  RuntimeArtboard get artboard => _artboard;
   set artboard(Artboard value) {
     if (_artboard == value) {
       return;
     }
-    _artboard = value;
+    _artboard?.redraw?.removeListener(scheduleRepaint);
+    _artboard = value as RuntimeArtboard;
+    _artboard?.redraw?.addListener(scheduleRepaint);
     markNeedsLayout();
+  }
+
+  void dispose() {
+    _artboard?.redraw?.removeListener(scheduleRepaint);
   }
 
   @override
@@ -63,16 +72,10 @@ class RiveRenderObject extends RiveRenderBox {
   }
 
   @override
-  void advance(double elapsedSeconds) {
-    artboard?.advance(elapsedSeconds);
-  }
+  bool advance(double elapsedSeconds) => _artboard.advance(elapsedSeconds);
 
   @override
   void draw(Canvas canvas, Mat2D viewTransform) {
     artboard.draw(canvas);
   }
-
-  @override
-  // TODO: implement isPlaying
-  bool get isPlaying => true;
 }

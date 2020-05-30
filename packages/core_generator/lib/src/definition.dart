@@ -39,6 +39,7 @@ class Definition {
   Definition _extensionOf;
   Key _key;
   bool _isAbstract = false;
+  bool _exportsWithContext = false;
   factory Definition(Configuration config, String filename) {
     var definition = definitions[filename];
     if (definition != null) {
@@ -74,6 +75,10 @@ class Definition {
     dynamic abstractValue = data['abstract'];
     if (abstractValue is bool) {
       _isAbstract = abstractValue;
+    }
+    dynamic exportsWithContextValue = data['exportsWithContext'];
+    if (exportsWithContextValue is bool) {
+      _exportsWithContext = exportsWithContextValue;
     }
     _key = Key.fromJSON(data['key']) ?? Key.forDefinition(this);
 
@@ -167,6 +172,11 @@ class Definition {
       }
     }
 
+    var exportsWithContext = _exportsWithContext && !config.isRuntime;
+    if (exportsWithContext) {
+      imports.add('import \'package:core/export_rules.dart\';');
+    }
+
     var importList = imports.toList(growable: false)..sort();
 
     code.writeAll(
@@ -178,7 +188,16 @@ class Definition {
 
     code.write(
         '''abstract class ${_name}Base${defineContextExtension ? '<T extends ${config.isRuntime ? 'CoreContext' : config.coreContextName}>' : ''} 
-            extends ${_extensionOf?._name ?? 'Core<T>'} {''');
+            extends ${_extensionOf?._name ?? 'Core<T>'} ''');
+    if (exportsWithContext) {
+      code.write(' implements ExportRules ');
+    }
+    code.writeln('{');
+    if (exportsWithContext) {
+      code.writeln('''@override
+      bool get exportAsContextObject => true;
+      ''');
+    }
 
     code.write('static const int typeKey = ${_key.intValue};');
     code.write('@override int get coreType => ${_name}Base.typeKey;');
@@ -286,6 +305,9 @@ class Definition {
     }
     if (_isAbstract) {
       data['abstract'] = true;
+    }
+    if (_exportsWithContext) {
+      data['exportsWithContext'] = true;
     }
     if (_extensionOf != null) {
       data['extends'] = _extensionOf.localFilename;

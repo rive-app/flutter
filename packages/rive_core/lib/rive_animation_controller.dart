@@ -1,34 +1,33 @@
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Abstraction for receiving a per frame callback while isPlaying is true to
 /// apply animation based on an elapsed amount of time.
-abstract class RiveAnimationController {
-  final _isPlaying = ValueNotifier<bool>(false);
-  ValueListenable<bool> get isPlayingChanged => _isPlaying;
+abstract class RiveAnimationController<T> {
+  final _isActive = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isActiveChanged => _isActive;
 
-  bool get isPlaying => _isPlaying.value;
-  set isPlaying(bool value) {
-    if (_isPlaying.value != value) {
-      _isPlaying.value = value;
+  bool get isActive => _isActive.value;
+  set isActive(bool value) {
+    if (_isActive.value != value) {
+      _isActive.value = value;
       if (value) {
-        onPlay();
+        onActivate();
       } else {
-        onStop();
+        onDeactivate();
       }
     }
   }
 
   @protected
-  void onPlay();
+  void onActivate();
   @protected
-  void onStop();
+  void onDeactivate();
 
   /// Apply animation to objects registered in [core]. Note that a [core]
   /// context is specified as animations can be applied to instances.
-  void apply(CoreContext core, double elapsedSeconds);
+  void apply(T core, double elapsedSeconds);
 
-  bool init(CoreContext core) => true;
+  bool init(T core) => true;
   void dispose();
 }

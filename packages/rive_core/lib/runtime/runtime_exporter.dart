@@ -9,7 +9,7 @@ import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/export_rules.dart';
+import 'package:core/export_rules.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -115,7 +115,7 @@ class RuntimeExporter {
       // implement ExporterInfo and returning true to exportAsArtboardObject.
       artboardObjects.addAll(core
           .objectsOfType<ExportRules>()
-          .where((info) => info.exportAsArtboardObject)
+          .where((info) => info.exportAsContextObject)
           .cast<Core<RiveCoreContext>>());
 
       var artboardObjectsList = artboardObjects.toList(growable: false);

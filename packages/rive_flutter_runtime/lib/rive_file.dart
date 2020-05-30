@@ -38,6 +38,7 @@ class RiveFile {
     int numArtboards = reader.readVarUint();
     for (int i = 0; i < numArtboards; i++) {
       var artboard = readRuntimeObject(reader, RuntimeArtboard());
+      artboard?.context = artboard;
       _artboards.add(artboard);
       var numObjects = reader.readVarUint();
       // var objects = List<Core<RiveCoreContext>>(numObjects);
@@ -150,5 +151,5 @@ T readRuntimeObject<T extends Core<CoreContext>>(BinaryReader reader,
     RiveCoreContext.setObjectProperty(
         object, propertyKey, fieldType.deserialize(valueReader));
   }
-  return object as T;
+  return object;
 }
