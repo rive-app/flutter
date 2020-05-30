@@ -4,11 +4,15 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/export_rules.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
-abstract class CubicInterpolatorBase<T extends RiveCoreContext>
-    extends Core<T> {
+abstract class CubicInterpolatorBase<T extends RiveCoreContext> extends Core<T>
+    implements ExportRules {
+  @override
+  bool get exportAsContextObject => true;
+
   static const int typeKey = 28;
   @override
   int get coreType => CubicInterpolatorBase.typeKey;

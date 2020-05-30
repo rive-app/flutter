@@ -6,7 +6,6 @@ import 'package:flutter/src/foundation/change_notifier.dart';
 import 'package:rive_core/animation/interpolator.dart';
 // -> editor-only
 import 'package:rive_core/event.dart';
-import 'package:rive_core/export_rules.dart';
 // <- editor-only
 import 'package:rive_core/src/generated/animation/cubic_interpolator_base.dart';
 
@@ -33,7 +32,7 @@ double _getSlope(double aT, double aA1, double aA2) {
 }
 
 // Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
-class CubicInterpolator extends CubicInterpolatorBase implements Interpolator, ExportRules {
+class CubicInterpolator extends CubicInterpolatorBase implements Interpolator {
   _CubicEase _ease;
 
   // -> editor-only
@@ -90,10 +89,6 @@ class CubicInterpolator extends CubicInterpolatorBase implements Interpolator, E
     _propertiesChanged.notify();
     // <- editor-only
   }
-
-  /// Interpolators need to export with the artboard so they resolve at runtime.
-  @override
-  bool get exportAsArtboardObject => true;
 }
 
 class _Cubic extends _CubicEase {

@@ -8,5 +8,5 @@ class ExportRules {
   /// of objects in the parent. However objects that need to be
   /// referenced/identified by multiple other objects are better suited to be
   /// exported in the artboard's object list and referenced by index at runtime.
-  bool get exportAsArtboardObject => false;
+  bool get exportAsContextObject => false;
 }

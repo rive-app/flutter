@@ -4,6 +4,7 @@
     "int": 28,
     "string": "cubicinterpolator"
   },
+  "exportsWithContext": true,
   "properties": {
     "x1": {
       "type": "double",
