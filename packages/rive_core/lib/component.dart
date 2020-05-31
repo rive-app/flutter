@@ -1,16 +1,12 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-// -> editor-only
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
-// <- editor-only
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
-// -> editor-only
 import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
-// <- editor-only
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:utilities/dependency_sorter.dart';
 export 'package:rive_core/src/generated/component_base.dart';

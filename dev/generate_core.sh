@@ -4,3 +4,9 @@ if [[ ! -f "./core_generator_bin" || "$1" == "build" ]]; then
 fi
 ./core_generator_bin  --definitions-folder=./defs/ --core-context=RiveCoreContext --output-folder=../packages/rive_core/ --package=rive_core
 ./remove_unused_imports.sh ../packages/rive_core
+# Some core properties would take a bunch of extra code to annotate, so let's just let dartfix do this for us.
+if ! [ -x "$(command -v dartfix)" ]; then
+  pub global activate dartfix
+  exit 1
+fi
+dartfix --fix=annotate_overrides ../packages/rive_core --overwrite

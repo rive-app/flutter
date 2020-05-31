@@ -1,12 +1,8 @@
 import 'dart:typed_data';
 
-// -> editor-only
 import 'package:flutter/src/foundation/change_notifier.dart';
-// <- editor-only
 import 'package:rive_core/animation/interpolator.dart';
-// -> editor-only
 import 'package:rive_core/event.dart';
-// <- editor-only
 import 'package:rive_core/src/generated/animation/cubic_interpolator_base.dart';
 
 const int newtonIterations = 4;

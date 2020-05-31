@@ -1,20 +1,14 @@
-// -> editor-only
 import 'dart:collection';
-// <- editor-only
 
 import 'package:core/core.dart';
-// -> editor-only
 import 'package:core/key_state.dart';
 import 'package:logging/logging.dart';
-// <- editor-only
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
-// -> editor-only
 import 'package:rive_core/src/generated/rive_core_context.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
-// <- editor-only
 export 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 
 // -> editor-only
@@ -222,7 +216,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       // -> editor-only
       RiveCoreContext.setKeyState(object, pk,
           first.seconds == seconds ? KeyState.keyframe : KeyState.interpolated);
-      // <- editor-only 
+      // <- editor-only
       first.apply(object, pk, mix);
     } else {
       if (idx < _keyframes.length) {
