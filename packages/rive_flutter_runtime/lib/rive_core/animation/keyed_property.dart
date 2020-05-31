@@ -1,6 +1,5 @@
 import 'package:rive/src/core/core.dart';
 import 'package:rive/rive_core/animation/keyed_object.dart';
-import 'package:rive/rive_core/animation/keyframe.dart';
 import 'package:rive/src/generated/animation/keyed_property_base.dart';
 export 'package:rive/src/generated/animation/keyed_property_base.dart';
 

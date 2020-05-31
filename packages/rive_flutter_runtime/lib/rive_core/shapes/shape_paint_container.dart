@@ -6,7 +6,6 @@ import 'package:rive/rive_core/shapes/paint/fill.dart';
 import 'package:meta/meta.dart';
 import 'package:rive/rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive/rive_core/shapes/paint/solid_color.dart';
-import 'package:rive/rive_core/shapes/paint/stroke.dart';
 import 'package:rive/rive_core/transform_space.dart';
 
 abstract class ShapePaintContainer {

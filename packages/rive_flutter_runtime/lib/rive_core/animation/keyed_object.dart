@@ -7,7 +7,6 @@ import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/event.dart';
 import 'package:rive/src/generated/animation/keyed_object_base.dart';
 import 'linear_animation.dart';
-export 'package:rive/src/generated/animation/keyed_object_base.dart';
 
 final _log = Logger('animation');
 
