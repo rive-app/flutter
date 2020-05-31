@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive/src/core/core.dart';
-import 'component.dart';
+import 'package:rive/rive_core/component.dart';
 import 'package:rive/src/generated/container_component_base.dart';
 
 typedef bool DescentCallback(Component component);

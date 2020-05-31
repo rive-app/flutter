@@ -114,6 +114,7 @@ class BinaryWriter {
     int index = 0;
     while (more) {
       var byte = value & 0x7f;
+      //ignore: parameter_assignments
       value >>= 7;
       if (value == 0 && (byte & 0x40) == 0) {
         more = false;
@@ -136,6 +137,7 @@ class BinaryWriter {
     int i = 0;
     while (i < size) {
       int part = value & 0x7f;
+      //ignore: parameter_assignments
       value >>= 7;
       _variableEncodeList[index++] = part;
       i += 1;

@@ -21,7 +21,7 @@ void main(List<String> args) {
         continue;
       }
       var file = match[2];
-      var lineNumber = int.parse(match[3]);
+      var lineNumber = int.parse(match[3])-1;
       _changes[file] ??=
           File('$directory/$file').readAsStringSync().split("\n");
       _changes[file][lineNumber] = null;

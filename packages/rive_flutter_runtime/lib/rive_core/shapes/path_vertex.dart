@@ -1,4 +1,3 @@
-import 'package:rive/rive_core/bounds_delegate.dart';
 import 'package:rive/rive_core/component_dirt.dart';
 import 'package:rive/rive_core/math/vec2d.dart';
 import 'package:rive/rive_core/shapes/path.dart';
@@ -9,7 +8,6 @@ enum VertexControlType { straight, mirrored, detached, asymmetric }
 
 abstract class PathVertex extends PathVertexBase {
   Path get path => parent as Path;
-  BoundsDelegate _delegate;
   VertexControlType get controlType => VertexControlType.straight;
   @override
   void update(int dirt) {}

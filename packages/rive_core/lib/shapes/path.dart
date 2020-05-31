@@ -239,6 +239,8 @@ abstract class Path extends PathBase {
     return true;
   }
 
+  // -> editor-only
   @override
   bool validate() => _shape != null;
+  // <- editor-only
 }

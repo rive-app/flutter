@@ -3,7 +3,7 @@ import 'package:rive/rive_core/animation/animation.dart';
 
 // TODO: figure out how to make this cleaner.
 class AnimationList extends ListBase<Animation> {
-  final List<Animation> _values = List<Animation>();
+  final List<Animation> _values = [];
   List<Animation> get values => _values;
 
   @override

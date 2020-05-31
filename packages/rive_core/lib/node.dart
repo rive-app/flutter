@@ -25,9 +25,10 @@ class Node extends NodeBase {
     }
   }
 
+  Vec2D get translation => Vec2D.fromValues(x, y);
+
   /// Sets the position of the Node
-  // ignore: avoid_setters_without_getters
-  set pos(Vec2D pos) {
+  set translation(Vec2D pos) {
     x = pos[0];
     y = pos[1];
   }
