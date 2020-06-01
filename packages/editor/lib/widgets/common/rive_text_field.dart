@@ -60,7 +60,8 @@ class _RiveTextFieldState extends State<RiveTextField>
     _editableTextKey = widget.editableKey ?? GlobalKey<EditableTextState>();
     _textController = widget.controller ?? TextEditingController();
     _textController.text = widget.initialValue;
-    _focusNode = FocusNode(canRequestFocus: true, skipTraversal: false);
+    _focusNode = widget.focusNode ??
+        FocusNode(canRequestFocus: true, skipTraversal: false);
     _focusNode.addListener(_getFocus);
     super.initState();
   }
