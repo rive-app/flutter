@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:utilities/deserialize.dart';
 
 final _log = Logger('Rive API Me');
 
@@ -14,8 +15,8 @@ class MeApi {
   Future<MeDM> get whoami async {
     final res = await api.getFromPath('/api/me');
     try {
-      final data = json.decode(res.body) as Map<String, Object>;
-      final extra = data['extra'];
+      final data = json.decodeMap(res.body);
+      Map<String, Object> extra = data.getMap('extra');
       if (_canLinkAccounts(extra)) {
         return MeDM.fromSocialLink(extra);
       }
@@ -32,14 +33,10 @@ class MeApi {
   }
 
   /// Checks to see if the user's signed in
-  bool _isSignedIn(Map<String, Object> data) => data['signedIn'];
+  bool _isSignedIn(Map<String, Object> data) => data.getBool('signedIn');
 
-  bool _canLinkAccounts(Object extra) {
-    if (extra is Map<String, Object>) {
-      return extra.containsKey('nm');
-    }
-    return false;
-  }
+  bool _canLinkAccounts(Map<String, Object> extra) =>
+      extra?.containsKey('nm') ?? false;
 
   Future<bool> signout() async {
     var response = await api.getFromPath('/signout');

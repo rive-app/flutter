@@ -10,7 +10,9 @@ import 'package:rive_api/http.dart';
 import 'http_exception.dart';
 
 /// Status code classes
-/// Informational 1xx, success 2xx, redirection 3xx, clientErrors 4xx, serverErrors 5xx
+///
+/// Informational 1xx, success 2xx, redirection 3xx, clientErrors 4xx,
+/// serverErrors 5xx
 enum StatusCodeClass {
   informational,
   success,
@@ -50,7 +52,7 @@ class WebServiceClient {
 
   /// Optional list of acceptable status codes; if not returned, then
   /// the handler for unacceptable codes is run
-  final acceptableStatusCodes = <StatusCodeClass>{};
+  final Set<StatusCodeClass> acceptableStatusCodes = <StatusCodeClass>{};
   StatusCodeHandler handleUnacceptableStatusCode;
 
   /// We use this timer to schedule saving cookies locally.
@@ -186,7 +188,7 @@ class WebServiceClient {
         }
       });
 
-      final timer = new Stopwatch()..start();
+      final timer = Stopwatch()..start();
       final response = await client.get(url, headers: headers);
       completed = true;
       print('getting $url took: ${timer.elapsed}');
@@ -206,6 +208,7 @@ class WebServiceClient {
     }
   }
 
+  /// Post may want binary data so we leave body as dynamic.
   Future<http.Response> post(String url,
       {dynamic body, Encoding encoding}) async {
     try {
@@ -272,18 +275,21 @@ class WebServiceClient {
     }
   }
 
+  /// We define body as a String because the underlying http client doesn't
+  /// explicitly allow setting a body on the delete request. So we create a
+  /// custom http request with a delete verb in order to provide the body. In
+  /// this case the API only allows a String for the body.
   Future<http.Response> delete(String url,
-      {dynamic body, Encoding encoding}) async {
+      {String body, Encoding encoding}) async {
     try {
-      final client = getClient();
-      print('deleteting $url');
-      // TODO: Matt, can we do 'injection'?
-      // would love to capture how many times the base request stuff gets called.
+      print('deleting $url');
+      // TODO: Matt, can we do 'injection'? would love to capture how many times
+      // the base request stuff gets called.
       final request = http.Request('delete', Uri.parse(url));
       request.body = body;
       request.headers.addAll(headers);
       // request.encoding = Encoding;
-      var stream = await client.send(request);
+      var stream = await getClient().send(request);
       var response = await http.Response.fromStream(stream);
       _processResponse(response);
       return response;

@@ -13,7 +13,7 @@ class UserDM extends OwnerDM {
 
   final String avatarUrl;
 
-  static Iterable<UserDM> fromSearchDataList(List<dynamic> data) =>
+  static Iterable<UserDM> fromSearchDataList(List<Map<String, dynamic>> data) =>
       data.map((d) => UserDM.fromSearchData(d));
 
   factory UserDM.fromSearchData(Map<String, dynamic> data) => UserDM(
@@ -27,7 +27,7 @@ class UserDM extends OwnerDM {
   String toString() => 'UserDM($ownerId, $name)';
 
   @override
-  bool operator ==(o) => o is UserDM && o.ownerId == ownerId;
+  bool operator ==(Object o) => o is UserDM && o.ownerId == ownerId;
 
   @override
   int get hashCode => ownerId;
@@ -47,7 +47,7 @@ class TeamMemberDM extends OwnerDM {
   final String status;
   final String permission;
 
-  static Iterable<TeamMemberDM> formDataList(List<dynamic> data) =>
+  static Iterable<TeamMemberDM> formDataList(List<Map<String, dynamic>> data) =>
       data.map((d) => TeamMemberDM.formData(d));
 
   factory TeamMemberDM.formData(Map<String, dynamic> data) => TeamMemberDM(
@@ -63,7 +63,7 @@ class TeamMemberDM extends OwnerDM {
   String toString() => 'TeamMember($ownerId, $name)';
 
   @override
-  bool operator ==(o) => o is TeamMemberDM && o.ownerId == ownerId;
+  bool operator ==(Object o) => o is TeamMemberDM && o.ownerId == ownerId;
 
   @override
   int get hashCode => ownerId;

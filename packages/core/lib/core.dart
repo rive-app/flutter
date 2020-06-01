@@ -295,7 +295,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
 
   /// Capture the latest set of changes as a journal entry and sync them to
   /// coop. Set [record] to false if you don't want this change to be undone.
-  bool captureJournalEntry({bool record: true}) {
+  bool captureJournalEntry({bool record = true}) {
     if (_currentChanges == null) {
       return false;
     }
@@ -620,9 +620,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       coopMakeChangeSet(changes, useFrom: isUndo);
     }
     completeChanges();
-    for (final object in regeneratedObjects) {
-      onAddedClean(object);
-    }
+    regeneratedObjects.forEach(onAddedClean);
   }
 
   /// Map of inflight[objectId][propertyKey][changeCount] to track whether
@@ -666,27 +664,6 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   Future<void> changesRejected(ChangeSet changes) async {
     await _client.disconnect();
     await _client.connect();
-
-    // TODO: We should actually just reconnect here.
-    // abandonChanges(changes);
-    // // Re-apply the original value if the changed value matches the current one.
-    // var fresh = freshChanges[changes];
-    // fresh.change.entries.forEach((objectId, changes) {
-    //   var object = _objects[objectId];
-    //   if (object != null) {
-    //     changes.forEach((key, entry) {
-    //       // value is still what we had tried to change it too (nothing else has
-    //       // changed it since).
-    //       if ((fresh.useFrom ? entry.from : entry.to) ==
-    //           getObjectProperty(object, key)) {
-    //         // If so, we can reset it to the original value since this change
-    //         // got rejected.
-    //         setObjectProperty(
-    //             object, key, fresh.useFrom ? entry.to : entry.from);
-    //       }
-    //     });
-    //   }
-    // });
   }
 
   bool isRuntimeProperty(int propertyKey);
@@ -845,13 +822,10 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     journal.clear();
     freshChanges.clear();
     inflight.clear();
-
-    // TODO: rethink this
-    // _unsyncedChanges.clear();
   }
 
   /// Clear the undo stack.
-  clearJournal() {
+  void clearJournal() {
     _journalIndex = 0;
     journal.clear();
   }

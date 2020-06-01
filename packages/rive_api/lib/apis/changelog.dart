@@ -17,11 +17,12 @@ class Changelog {
       );
 
   /// Returns a list of changelogs from a JSON document
-  static List<Changelog> fromDataList(List<dynamic> dataList) => dataList
-      .map<Changelog>(
-        (data) => Changelog.fromData(data),
-      )
-      .toList(growable: false);
+  static List<Changelog> fromDataList(List<Map<String, dynamic>> dataList) =>
+      dataList
+          .map<Changelog>(
+            (data) => Changelog.fromData(data),
+          )
+          .toList(growable: false);
 
   @override
   String toString() => 'ChangelogItem($version, @$items)';
@@ -37,11 +38,13 @@ class ChangelogItem {
       description: data.getString('description'));
 
   /// Returns a list of changelog items from a JSON document
-  static List<ChangelogItem> fromDataList(List<dynamic> dataList) => dataList
-      .map<ChangelogItem>(
-        (data) => ChangelogItem.fromData(data),
-      )
-      .toList(growable: false);
+  static List<ChangelogItem> fromDataList(
+          List<Map<String, dynamic>> dataList) =>
+      dataList
+          .map<ChangelogItem>(
+            (data) => ChangelogItem.fromData(data),
+          )
+          .toList(growable: false);
 
   @override
   String toString() => 'ChangelogItem($title, @$description)';
@@ -53,7 +56,8 @@ Future<List<Changelog>> fetchChangelogs() async {
       await http.get('https://cdn.rive.app/changelogs/stryker/changelog.json');
 
   if (res.statusCode == 200) {
-    return Changelog.fromDataList(json.decode(res.body));
+    return Changelog.fromDataList(
+        json.decodeList<Map<String, dynamic>>(res.body));
   }
   throw Exception('Unable to fetch changelog');
 }

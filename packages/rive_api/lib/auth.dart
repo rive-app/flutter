@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/user.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
+import 'package:utilities/deserialize.dart';
 
 const _authWebViewKey = 'auth';
 enum _RiveAuthActions { signin, register }
@@ -31,19 +32,27 @@ class RiveAuth {
             },
           ));
 
-      final responseData = json.decode(response.body);
-      if (responseData.containsKey('username')) {
-        var username = responseData['username'];
-        return AuthResponse.fromMessage(username);
+      dynamic responseData = json.decode(response.body);
+      if (responseData is Map<String, dynamic>) {
+        if (responseData.containsKey('username')) {
+          dynamic username = responseData['username'];
+          if (username is String) {
+            return AuthResponse.fromMessage(username);
+          }
+        }
       }
     } on FormatException catch (err) {
       return AuthResponse.fromError(description: err.message);
     } on ApiException catch (apiException) {
       final response = apiException.response;
       if (response.statusCode == 422) {
-        final responseData = json.decode(response.body);
-        if (responseData.containsKey('error')) {
-          return AuthResponse.fromError(description: responseData['error']);
+        dynamic responseData = json.decode(response.body);
+        if (responseData is Map<String, dynamic>) {
+          if (responseData.containsKey('error')) {
+            dynamic error = responseData['error'];
+            return AuthResponse.fromError(
+                description: error is String ? error : 'Unknown error');
+          }
         }
       }
     }
@@ -108,18 +117,20 @@ class RiveAuth {
     Map<String, Object> responseData;
 
     try {
-      responseData = json.decode(response);
+      dynamic parsed = json.decode(response);
       AuthResponse authResponse;
-      if (responseData.containsKey('spectre')) {
-        var spectre = responseData['spectre'];
-        authResponse = AuthResponse.fromMessage(spectre);
-        api.setCookie('spectre', spectre);
-        await api.persist();
-      } else if (responseData.containsKey('error')) {
-        var error = responseData['error'];
-        authResponse = AuthResponse.fromError(description: error);
+      if (parsed is Map<String, dynamic>) {
+        responseData = parsed;
+        var spectre = responseData.getString('spectre');
+        if (spectre != null) {
+          authResponse = AuthResponse.fromMessage(spectre);
+          api.setCookie('spectre', spectre);
+          await api.persist();
+        } else if (responseData.getString('error') != null) {
+          authResponse = AuthResponse.fromError(
+              description: responseData.getString('spectre'));
+        }
       }
-
       await win_utils.closeWebView(_authWebViewKey);
       return authResponse ?? AuthResponse.empty();
     } on FormatException catch (err) {
@@ -172,17 +183,25 @@ class RiveAuth {
     );
     try {
       var response = await api.post(api.host + '/register', body: body);
-      Map<String, Object> responseData = json.decode(response.body);
+      dynamic data = json.decode(response.body);
+      Map<String, Object> responseData;
+      if (data is Map<String, Object>) {
+        responseData = data;
+      }
 
-      if (response.statusCode == 200 && responseData.containsKey('username')) {
-        var username = responseData['username'];
-        return AuthResponse.fromMessage(username);
+      if (response.statusCode == 200 &&
+          responseData.getString('username') != null) {
+        return AuthResponse.fromMessage(responseData.getString('username'));
       }
     } on FormatException catch (err) {
       return AuthResponse.fromError(description: err.message);
     } on ApiException catch (apiException) {
       final response = apiException.response;
-      Map<String, Object> responseData = json.decode(response.body);
+      dynamic data = json.decode(response.body);
+      Map<String, Object> responseData;
+      if(data is Map<String, Object>) {
+        responseData = data;
+      }
       if (response.statusCode == 422) {
         return AuthResponse.fromErrors(responseData);
       }

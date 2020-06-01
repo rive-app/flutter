@@ -8,15 +8,15 @@ class AdminView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: BoxConstraints(
+        constraints: const BoxConstraints(
           maxWidth: 500,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AdminPageButton('Impersonate'),
-            AdminPageButton('Invite'),
-            SizedBox(height: 30),
+            const AdminPageButton('Impersonate'),
+            const AdminPageButton('Invite'),
+            const SizedBox(height: 30),
             Signout(),
           ],
         ),
@@ -37,7 +37,7 @@ class AdminPageButton extends StatelessWidget {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (pageContext) => Scaffold(
                 appBar: AppBar(
                   title: Text(routeName),

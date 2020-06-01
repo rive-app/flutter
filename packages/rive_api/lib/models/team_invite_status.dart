@@ -1,9 +1,10 @@
+import 'package:utilities/deserialize.dart';
+
 enum TeamInviteStatus { accepted, pending }
 
 extension DeserializeHelper on Map<String, dynamic> {
   TeamInviteStatus getInvitationStatus() {
-    dynamic value = this['status'];
-    switch (value) {
+    switch (getString('status')) {
       case 'complete':
         return TeamInviteStatus.accepted;
       case 'pending':

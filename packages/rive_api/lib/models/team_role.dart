@@ -3,11 +3,11 @@ import 'package:utilities/utilities.dart';
 
 enum TeamRole { reader, member, purchaser, admin, owner }
 
-final adminRoles = const {TeamRole.admin, TeamRole.owner};
+const adminRoles = {TeamRole.admin, TeamRole.owner};
 
 extension DeserializeHelper on Map<String, dynamic> {
   TeamRole getTeamRole() =>
-      TeamRoleExtension.teamRoleFromString(this['permission']);
+      TeamRoleExtension.teamRoleFromString(getString('permission'));
 }
 
 bool canEditTeam(TeamRole role) => adminRoles.contains(role);

@@ -45,7 +45,7 @@ class AtlasPacker {
     _free.add(BitmapRect(width: maxWidth, height: maxHeight));
   }
 
-  void addBitmap<T>(int width, int height, int padding, Object userData) {
+  void addBitmap(int width, int height, int padding, Object userData) {
     _bitmaps.add(BitmapRect(
       userData: userData,
       width: width + padding * 2,
@@ -71,7 +71,7 @@ class AtlasPacker {
   }
 
   _Score _fitShortSide(int width, int height) {
-    BitmapRect bestRect = BitmapRect();
+    var bestRect = const BitmapRect();
     var score1 = double.maxFinite.toInt();
     var score2 = double.maxFinite.toInt();
 
@@ -118,7 +118,7 @@ class AtlasPacker {
   }
 
   _Score _fitLongSide(int width, int height) {
-    var bestRect = BitmapRect();
+    var bestRect = const BitmapRect();
     var score1 = double.maxFinite.toInt();
     var score2 = double.maxFinite.toInt();
 
@@ -165,7 +165,7 @@ class AtlasPacker {
   }
 
   _Score _fitArea(int width, int height) {
-    var bestRect = BitmapRect();
+    var bestRect = const BitmapRect();
     var score1 = double.maxFinite.toInt();
     var score2 = double.maxFinite.toInt();
 
@@ -210,7 +210,7 @@ class AtlasPacker {
   }
 
   _Score _fitBottomLeft(int width, int height) {
-    var bestRect = BitmapRect();
+    var bestRect = const BitmapRect();
     var score1 = double.maxFinite.toInt();
     var score2 = double.maxFinite.toInt();
 
@@ -268,7 +268,7 @@ class AtlasPacker {
   }
 
   _Score _fitContactPoint(int width, int height) {
-    var bestRect = BitmapRect();
+    var bestRect = const BitmapRect();
     var score1 = -1;
 
     for (final freeRect in _free) {
@@ -388,7 +388,7 @@ class AtlasPacker {
     while (bitmaps.isNotEmpty) {
       var bestScore1 = double.maxFinite.toInt();
       var bestScore2 = double.maxFinite.toInt();
-      var bestPlaceRect = null;
+      BitmapRect bestPlaceRect;
       int bestPlaceIndex = -1;
 
       for (var i = 0; i < bitmaps.length; i++) {
@@ -458,13 +458,13 @@ class AtlasPacker {
       for (int y = 0; y < rect.height; y++) {
         int rx, ry, dx, dy;
         if (rect.rotated) {
-          rx = (y - pad).clamp(0, sourceWidth - 1);
-          ry = (x - pad).clamp(0, sourceHeight - 1);
+          rx = (y - pad).clamp(0, sourceWidth - 1) as int;
+          ry = (x - pad).clamp(0, sourceHeight - 1) as int;
           // dx = rect.x + y;
           // dy = rect.y + x;
         } else {
-          rx = (x - pad).clamp(0, sourceWidth - 1);
-          ry = (y - pad).clamp(0, sourceHeight - 1);
+          rx = (x - pad).clamp(0, sourceWidth - 1) as int;
+          ry = (y - pad).clamp(0, sourceHeight - 1) as int;
         }
         dx = rect.x + x;
         dy = rect.y + y;
@@ -475,12 +475,13 @@ class AtlasPacker {
   }
 }
 
-/// Returns 0 if the two intervals i1 and i2 are disjoint, or the length of their overlap otherwise.
+/// Returns 0 if the two intervals i1 and i2 are disjoint,
+/// or the length of their overlap otherwise.
 int _commonIntervalLength(int i1start, int i1end, int i2start, int i2end) {
   if (i1end < i2start || i2end < i1start) {
     return 0;
   }
-  return min(i1end, i2end) - max(i1start, i2start);
+  return min(i1end, i2end) - max(i1start, i2start) as int;
 }
 
 bool _isContainedIn(BitmapRect a, BitmapRect b) =>

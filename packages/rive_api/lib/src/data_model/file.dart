@@ -14,7 +14,8 @@ class FileDM {
   final String name;
   final String preview;
 
-  static List<FileDM> fromDataList(List<dynamic> data, CdnDM cdn) =>
+  static List<FileDM> fromDataList(
+          List<Map<String, dynamic>> data, CdnDM cdn) =>
       data.map((d) => FileDM.fromData(d, cdn)).toList(growable: false);
 
   factory FileDM.fromData(Map<String, dynamic> data, CdnDM cdn) {
@@ -39,11 +40,11 @@ class FileDM {
   }
 
   static List<FileDM> fromIdList(
-    List<dynamic> data,
+    List<int> data,
     int ownerId,
   ) =>
       data
-          .map((id) => FileDM(id: id as int, ownerId: ownerId))
+          .map((id) => FileDM(id: id, ownerId: ownerId))
           .toList(growable: false);
 
   @override

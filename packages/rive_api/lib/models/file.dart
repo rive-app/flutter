@@ -52,7 +52,7 @@ class RiveApiFile {
   String toString() => 'RiveFile($id:$_name)';
 
   @override
-  bool operator ==(o) =>
+  bool operator ==(Object o) =>
       o is RiveApiFile &&
       id == o.id &&
       ownerId == o.ownerId &&

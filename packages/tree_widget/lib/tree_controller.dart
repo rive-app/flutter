@@ -415,10 +415,11 @@ abstract class TreeController<T> with ChangeNotifier {
     }
   }
 
-  /// Refresh what is expanded, data has changed form underneath this controller.
+  /// Refresh what is expanded, data has changed form underneath this
+  /// controller.
   void refreshExpanded() {
     // data has changed
-    final expandedKeys = Set<dynamic>();
+    final expandedKeys = <Object>{};
     flat.forEach((element) {
       if (isExpanded(element.data)) {
         expandedKeys.add(dataKey(element.data));
@@ -427,7 +428,7 @@ abstract class TreeController<T> with ChangeNotifier {
     _expanded.clear();
 
     data.forEach((_newDataRoot) {
-      _walk(_newDataRoot, (item) => childrenOf(item), (item) {
+      _walk<T>(_newDataRoot, childrenOf, (item) {
         if (expandedKeys.contains(dataKey(item))) {
           _expanded.add(item);
         }
@@ -437,7 +438,8 @@ abstract class TreeController<T> with ChangeNotifier {
   }
 }
 
-void _walk(root, children, cb) {
+void _walk<T>(
+    T root, Iterable<T> Function(T item) children, void Function(T item) cb) {
   cb(root);
   children(root).forEach((child) => _walk(child, children, cb));
 }

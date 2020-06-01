@@ -34,11 +34,11 @@ class UserManager with Subscriptions {
     return true;
   }
 
-  void loadMe() async {
-    _loadWithRetry();
+  Future<void> loadMe() async {
+    return _loadWithRetry();
   }
 
-  void _me() async {
+  Future<void> _me() async {
     var currentMe = _plumber.peek<Me>();
 
     var meMessage = Me.fromDM(await _meApi.whoami);

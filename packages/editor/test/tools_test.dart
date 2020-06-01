@@ -13,7 +13,7 @@ void main() {
 
     test('Check instance', () {
       expect(instance != null, true);
-    });
+  });
 
     test('Check for icon name', () {
       expect(instance.icon, PackedIcon.toolEllipse);

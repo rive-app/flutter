@@ -69,7 +69,7 @@ class MeDM extends UserDM {
   ///   nm: [google|facebook|twitter],
   ///   em: user@rive.app,
   /// }
-  /// 
+  ///
   /// This model is for a user that can connect their social account
   /// to their Rive account. No detail other than the social network name
   /// and the email associated with the account are provided.
@@ -79,8 +79,8 @@ class MeDM extends UserDM {
       signedIn: false,
       id: null,
       socialLink: SocialLink(
-        socialNetwork: data['nm'],
-        email: data['em'],
+        socialNetwork: data.getString('nm'),
+        email: data.getString('em'),
       ));
 
   @override

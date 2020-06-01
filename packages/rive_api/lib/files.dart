@@ -139,8 +139,7 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
   T makeFolder(Map<String, dynamic> data);
 
   Future<FoldersResult<T>> teamFolders(int teamOwnerId) async {
-    var response =
-        await api.get(api.host + '/api/teams/${teamOwnerId}/folders');
+    var response = await api.get(api.host + '/api/teams/$teamOwnerId/folders');
     return _parseFoldersReponse(response);
   }
 
@@ -248,8 +247,10 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
 
   T _parseFolderResponse(Response response) {
     if (response.statusCode == 200) {
-      var folderResponse = json.decode(response.body);
-      return makeFolder(folderResponse);
+      dynamic folderResponse = json.decode(response.body);
+      if (folderResponse is Map<String, dynamic>) {
+        return makeFolder(folderResponse);
+      }
     }
     return null;
   }
@@ -262,7 +263,7 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
       'data': {'folderName': 'New Folder'}
     });
     var response = await api.post(
-        api.host + '/api/teams/${teamOwnerId}/folders/' + (folder?.id ?? ''),
+        api.host + '/api/teams/$teamOwnerId/folders/' + (folder?.id ?? ''),
         body: payload);
     return _parseFolderResponse(response);
   }
@@ -282,8 +283,7 @@ abstract class RiveFilesApi<T extends RiveApiFolder, K extends RiveApiFile> {
     if (api.host.indexOf('https://') == 0) {
       return CoopConnectionInfo(
           'wss://${api.host.substring('https://'.length)}/ws/proxy');
-    }
-    else if (api.host.indexOf('http://') == 0) {
+    } else if (api.host.indexOf('http://') == 0) {
       return CoopConnectionInfo(
           'ws://${api.host.substring('http://'.length)}/ws/proxy');
     }

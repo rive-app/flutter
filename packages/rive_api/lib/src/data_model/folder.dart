@@ -20,7 +20,8 @@ class FolderDM {
   final int order;
   final String name;
 
-  static List<FolderDM> fromDataList(List<dynamic> data, int ownerId) {
+  static List<FolderDM> fromDataList(
+      List<Map<String, dynamic>> data, int ownerId) {
     return data
         .map((d) => FolderDM.fromData(d, ownerId))
         .toList(growable: false);
@@ -40,7 +41,8 @@ class FolderDM {
   String toString() => 'FolderDM ($id, $name). Parent: $parent';
 
   @override
-  bool operator ==(o) => o is FolderDM && o.id == id && o.ownerId == ownerId;
+  bool operator ==(Object o) =>
+      o is FolderDM && o.id == id && o.ownerId == ownerId;
 
   @override
   int get hashCode => szudzik(id, ownerId);

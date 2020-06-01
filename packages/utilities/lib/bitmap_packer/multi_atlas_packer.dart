@@ -29,7 +29,7 @@ class MultiAtlasPacker {
 
   Iterable<AtlasPacker> _pack(Iterable<BitmapRect> bitmaps,
       [List<AtlasPacker> results]) {
-    results ??= List<AtlasPacker>();
+    results ??= <AtlasPacker>[];
 
     AtlasPacker best;
     for (final method in BitmapPackingMethod.values) {
