@@ -64,11 +64,15 @@ class Tip {
   /// off-screen layout.
   final List<PopupDirection> fallbackDirections;
 
+  /// Additional parameter to customize layout position.
+  final Offset offset;
+
   const Tip({
     this.label,
     this.shortcut,
     this.direction = PopupDirection.bottomToCenter,
     this.fallbackDirections = PopupDirection.all,
+    this.offset = Offset.zero,
   });
 }
 
@@ -181,9 +185,11 @@ class TipContext {
 
         direction: _currentTip.direction,
         fallbackDirections: _currentTip.fallbackDirections,
-        
+        offset: _currentTip.offset,
+
         builder: (context) => Padding(
-          padding: const EdgeInsets.only(top:8, right:15, bottom: 13, left:15),
+          padding:
+              const EdgeInsets.only(top: 8, right: 15, bottom: 13, left: 15),
           child: _buildTip(context, _currentTip),
         ),
       );

@@ -12,12 +12,9 @@ class RequiresAdmin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueStreamBuilder<Me>(
-      stream: Plumber().getStream<Me>(),
-      builder: (context, snapshot) => (snapshot.hasData &&
-              snapshot.data?.isAdmin != null &&
-              snapshot.data.isAdmin)
-          ? child
-          : const SizedBox(),
-    );
+        stream: Plumber().getStream<Me>(),
+        builder: (context, snapshot) {
+          return snapshot.data?.isAdmin == true ? child : const SizedBox();
+        });
   }
 }

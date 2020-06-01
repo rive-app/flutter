@@ -317,7 +317,11 @@ class _FolderTreeItemButtonState extends State<FolderTreeItemButton> {
       icon: widget.icon,
       color: _rowButtonColor,
       backgroundHover: Colors.transparent,
-      tip: Tip(label: widget.tooltip),
+      tip: Tip(
+        label: widget.tooltip,
+        // Move closer to the row.
+        offset: const Offset(0, -7),
+      ),
       onHover: _setHover,
     );
   }
