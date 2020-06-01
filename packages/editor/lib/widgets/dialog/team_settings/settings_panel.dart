@@ -31,9 +31,11 @@ final Map<SettingsPanel, int> panelMap = {
 
 RiveApi _getApi(BuildContext ctx) => RiveContext.of(ctx).api;
 
-Future showSettings(Owner owner,
-    {BuildContext context,
-    SettingsPanel initialPanel = SettingsPanel.settings}) {
+Future showSettings(
+  Owner owner, {
+  BuildContext context,
+  SettingsPanel initialPanel = SettingsPanel.settings,
+}) {
   return showRiveDialog<void>(
       context: context,
       builder: (ctx) {
@@ -146,27 +148,31 @@ class _SettingsState extends State<Settings> {
     final colors = RiveTheme.of(context).colors;
     final screens = SettingsScreen.getScreens(widget.owner);
 
-    return _panel(Row(
-      children: [
-        if (isTeam) _nav(screens, colors.fileBackgroundLightGrey),
-        _contents(Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            SettingsHeader(
-              name: widget.owner.displayName,
-              // TODO: hm, we probably should store avatar with team.
-              avatarPath: (newAvatarPath == null)
-                  ? widget.owner.avatarUrl
-                  : newAvatarPath,
-              changeAvatar: changeAvatar,
-              teamSize: (widget.owner is Team) ? 1 : 0,
+    return _panel(
+      Row(
+        children: [
+          if (isTeam) _nav(screens, colors.fileBackgroundLightGrey),
+          _contents(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SettingsHeader(
+                  name: widget.owner.displayName,
+                  // TODO: hm, we probably should store avatar with team.
+                  avatarPath: (newAvatarPath == null)
+                      ? widget.owner.avatarUrl
+                      : newAvatarPath,
+                  changeAvatar: changeAvatar,
+                  teamSize: (widget.owner is Team) ? 1 : 0,
+                ),
+                Separator(color: colors.fileLineGrey),
+                Expanded(child: screens[_selectedIndex].builder(context)),
+              ],
             ),
-            Separator(color: colors.fileLineGrey),
-            Expanded(child: screens[_selectedIndex].builder(context)),
-          ],
-        )),
-      ],
-    ));
+          ),
+        ],
+      ),
+    );
   }
 }
 

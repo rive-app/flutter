@@ -38,17 +38,23 @@ class _PlanState extends State<PlanSettings>
   @override
   void initState() {
     // Fetch current team billing data from the backend.
-    PlanSubscriptionPackage.fetchData(widget.api, widget.team)
-        .then((value) => setState(() {
-              print('Sub package is: ${value.option}');
-              _sub = value;
-              // Toggle upon receiving the new value.
-              _toggleController();
-              // Listen for upcoming changes.
-              _sub.addListener(_onSubChange);
-            }));
+    PlanSubscriptionPackage.fetchData(widget.api, widget.team).then(
+      (value) => setState(
+        () {
+          print('Sub package is: ${value.option}');
+          _sub = value;
+          _controller.value = _sub.option == TeamsOption.basic ? 1 : 0;
+          // // Toggle upon receiving the new value.
+          // _toggleController();
+          // Listen for upcoming changes.
+          _sub.addListener(_onSubChange);
+        },
+      ),
+    );
     _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
     super.initState();
   }
 
@@ -76,6 +82,9 @@ class _PlanState extends State<PlanSettings>
 
   @override
   Widget build(BuildContext context) {
+    if (_sub == null) {
+      return Center(child: CircularProgressIndicator());
+    }
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final textStyles = theme.textStyles;
@@ -130,12 +139,11 @@ class _PlanState extends State<PlanSettings>
                                 children: [
                                   SubscriptionChoice(
                                     label: 'Team',
-                                    costLabel: (_sub == null)
-                                        ? ''
-                                        : '${labelLookup[TeamsOption.basic]}',
+                                    costLabel: '${labelLookup[TeamsOption.basic]}',
                                     description: 'Create a space where you and '
                                         'your team can share files.',
-                                    onTap: () => _sub.option = TeamsOption.basic,
+                                    onTap: () =>
+                                        _sub.option = TeamsOption.basic,
                                     isSelected: isBasic,
                                     highlight: animationValue,
                                     showRadio: true,
@@ -144,9 +152,7 @@ class _PlanState extends State<PlanSettings>
                                   SubscriptionChoice(
                                     label: 'Org',
                                     disabled: true,
-                                    costLabel: (_sub == null)
-                                        ? ''
-                                        : '${labelLookup[TeamsOption.premium]}',
+                                    costLabel: '${labelLookup[TeamsOption.premium]}',
                                     description: ''
                                         'Create sub-teams with centralized '
                                         'billing',
