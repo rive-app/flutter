@@ -206,17 +206,17 @@ class _TintedIconRendererObject extends RenderBox {
       // Not in the cache, load it up.
       _cache.load(filename).then((cachedImage) {
         _cachedImage = cachedImage;
-        markNeedsLayout();
+        markNeedsPaint();
       });
     } else if (cachedImage.completer.isCompleted) {
       // In the cache and ready to go.
       _cachedImage = cachedImage;
-      markNeedsLayout();
+      markNeedsPaint();
     } else {
       // In the cache but not done loading, wait for it to be ready.
       cachedImage.completer.future.then((_) {
         _cachedImage = cachedImage;
-        markNeedsLayout();
+        markNeedsPaint();
       });
     }
   }
