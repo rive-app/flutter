@@ -3,6 +3,7 @@ import 'package:utilities/deserialize.dart';
 class RiveProfile {
   String name;
   String username;
+  String email;
   String website;
   String blurb;
   String location;
@@ -19,6 +20,7 @@ class RiveProfile {
   RiveProfile({
     this.name,
     this.username,
+    this.email,
     this.website,
     this.blurb,
     this.location,
@@ -34,18 +36,20 @@ class RiveProfile {
   });
 
   factory RiveProfile.fromData(Map<String, dynamic> data) => RiveProfile(
-      name: data.getString('name'),
-      username: data.getString('username'),
-      website: data.getString('website'),
-      blurb: data.getString('blurb'),
-      location: data.getString('location'),
-      twitter: data.getString('twitter'),
-      instagram: data.getString('instagram'),
-      dribbble: data.getString('dribbble'),
-      linkedin: data.getString('linkedin'),
-      behance: data.getString('behance'),
-      vimeo: data.getString('vimeo'),
-      github: data.getString('github'),
-      medium: data.getString('medium'),
-      isForHire: data.getInt('isForHire') == 1);
+        name: data.getString('name'),
+        username: data.getString('username'),
+        email: data.getString('email'),
+        website: data.getString('website'),
+        blurb: data.getString('blurb'),
+        location: data.getString('location'),
+        twitter: data.getString('twitter'),
+        instagram: data.getString('instagram'),
+        dribbble: data.getString('dribbble'),
+        linkedin: data.getString('linkedin'),
+        behance: data.getString('behance'),
+        vimeo: data.getString('vimeo'),
+        github: data.getString('github'),
+        medium: data.getString('medium'),
+        isForHire: data.getInt('isForHire') == 1,
+      );
 }

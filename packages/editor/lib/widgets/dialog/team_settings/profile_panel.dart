@@ -25,6 +25,24 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   ProfilePackage _profile;
 
   @override
+  void initState() {
+    super.initState();
+
+    final owner = widget.owner;
+
+    ProfilePackage.getProfile(widget.api, owner).then((value) {
+      if (mounted) {
+        setState(() {
+          _profile = value;
+          _profile.addListener(_onProfileChange);
+        });
+      }
+    });
+  }
+
+  void _onProfileChange() => setState(() {});
+
+  @override
   void dispose() {
     _profile?.dispose();
     super.dispose();
@@ -55,231 +73,280 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     );
   }
 
+  Widget _list(List<Widget> children) {
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+
+    return Column(
+      // Stretches the separators
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Expanded(
+            child: ListView(
+          shrinkWrap: true,
+          physics: const ClampingScrollPhysics(),
+          padding: const EdgeInsets.all(30),
+          children: children,
+        )),
+        Separator(color: colors.fileLineGrey),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+              child: FlatIconButton(
+                label: 'Save Changes',
+                color: colors.commonDarkGrey,
+                textColor: Colors.white,
+                onTap: _submitChanges,
+              ),
+            )
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _names() {
+    var labelPrefix = widget.owner is Team ? 'Team ' : '';
+    return _textFieldRow(
+      [
+        LabeledTextField(
+          label: '${labelPrefix}Name',
+          onChanged: (value) => _profile.name = value,
+          initialValue: _profile.name,
+          hintText: 'Pick a name',
+        ),
+        LabeledTextField(
+          label: '${labelPrefix}Username',
+          onChanged: (value) => _profile.username = value,
+          initialValue: _profile.username,
+          hintText: 'Pick a username',
+        )
+      ],
+    );
+  }
+
+  List<Widget> _info() {
+    if (widget.owner is Team) {
+      return [
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Location',
+              hintText: 'Where is your team based?',
+              onChanged: (value) => _profile.location = value,
+              initialValue: _profile.location,
+            ),
+            LabeledTextField(
+              label: 'Website',
+              hintText: 'www.myteam.com',
+              onChanged: (value) => _profile.website = value,
+              initialValue: _profile.website,
+            ),
+          ],
+        ),
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Bio',
+              hintText: 'Tell users a bit about your team',
+              onChanged: (value) => _profile.blurb = value,
+              initialValue: _profile.blurb,
+            ),
+          ],
+        ),
+      ];
+    } else {
+      return [
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Email',
+              hintText: 'Enter your email',
+              onChanged: (value) => _profile.email = value,
+              initialValue: _profile.email,
+            ),
+            LabeledTextField(
+              label: 'Website',
+              hintText: 'www.mysite.com',
+              onChanged: (value) => _profile.website = value,
+              initialValue: _profile.website,
+            ),
+          ],
+        ),
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Location',
+              hintText: 'Where do you live?',
+              onChanged: (value) => _profile.blurb = value,
+              initialValue: _profile.blurb,
+            ),
+            const SizedBox(),
+          ],
+        ),
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Bio',
+              hintText: 'Tell users a bit about yourself...',
+              onChanged: (value) => _profile.blurb = value,
+              initialValue: _profile.blurb,
+            ),
+          ],
+        ),
+      ];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<ProfilePackage>(
-      future: ProfilePackage.getProfile(widget.api, widget.owner),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final theme = RiveTheme.of(context);
-          final colors = theme.colors;
-          var labelPrefix = widget.owner is Team ? 'Team ' : '';
-          _profile = snapshot.data;
-          return Column(
-            // Stretches the separators
+    if (_profile == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+
+    return _list(
+      [
+        SettingsPanelSection(
+          label: 'Account',
+          contents: (panelContext) => Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(
-                child: ListView(
-                    shrinkWrap: true,
-                    physics: const ClampingScrollPhysics(),
-                    padding: const EdgeInsets.all(30),
-                    children: [
-                      SettingsPanelSection(
-                          label: 'Account',
-                          contents: (panelContext) => Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    const SizedBox(height: 3),
-                                    _textFieldRow([
-                                      LabeledTextField(
-                                        label: '${labelPrefix}Name',
-                                        onChanged: (value) {
-                                          print('changing name');
-                                          return _profile.name = value;
-                                        },
-                                        // onChanged: (value) => _profile.name = value,
-                                        initialValue: _profile.name,
-                                        hintText: 'Pick a name',
-                                      ),
-                                      LabeledTextField(
-                                        label: '${labelPrefix}Username',
-                                        onChanged: (value) =>
-                                            _profile.username = value,
-                                        initialValue: _profile.username,
-                                        hintText: 'Pick a username',
-                                      )
-                                    ]),
-                                    const SizedBox(height: 30),
-                                    _textFieldRow(
-                                      [
-                                        LabeledTextField(
-                                          label: 'Location',
-                                          hintText: 'Where is your team based?',
-                                          onChanged: (value) =>
-                                              _profile.location = value,
-                                          initialValue: _profile.location,
-                                        ),
-                                        LabeledTextField(
-                                          label: 'Website',
-                                          hintText: 'Website',
-                                          onChanged: (value) =>
-                                              _profile.website = value,
-                                          initialValue: _profile.website,
-                                        )
-                                      ],
-                                    ),
-                                    const SizedBox(height: 30),
-                                    _textFieldRow([
-                                      LabeledTextField(
-                                        label: 'Bio',
-                                        hintText:
-                                            'Tell users a bit about your team',
-                                        onChanged: (value) =>
-                                            _profile.blurb = value,
-                                        initialValue: _profile.blurb,
-                                      )
-                                    ])
-                                  ])),
-                      const SizedBox(height: 30),
-                      Separator(color: colors.fileLineGrey),
-                      const SizedBox(height: 30),
-                      SettingsPanelSection(
-                        label: 'For Hire',
-                        contents: (panelContext) => Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              LabeledRadio(
-                                  label: 'Available For Hire',
-                                  description:
-                                      'Allow other users to message you about work'
-                                      ' opportunities. You will also show up in our'
-                                      ' list of artists for hire.',
-                                  groupValue: _profile.isForHire,
-                                  value: true,
-                                  onChanged: (value) =>
-                                      _profile.isForHire = value),
-                              const SizedBox(height: 24),
-                              LabeledRadio(
-                                  label: 'Not Available For Hire',
-                                  description:
-                                      "Don't allow other users to contact you about"
-                                      ' work opportunities.',
-                                  groupValue: _profile.isForHire,
-                                  value: false,
-                                  onChanged: (value) =>
-                                      _profile.isForHire = value),
-                            ]),
-                      ),
-                      const SizedBox(height: 30),
-                      Separator(color: colors.fileLineGrey),
-                      const SizedBox(height: 30),
-                      SettingsPanelSection(
-                        label: 'Social',
-                        contents: (panelContext) => Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SizedBox(height: 3),
-                              _textFieldRow([
-                                LabeledTextField(
-                                  label: 'Twitter',
-                                  hintText: 'Link',
-                                  onChanged: (value) =>
-                                      _profile.twitter = value,
-                                  initialValue: _profile.twitter,
-                                ),
-                                LabeledTextField(
-                                  label: 'Instagram',
-                                  hintText: 'Link',
-                                  onChanged: (value) =>
-                                      _profile.instagram = value,
-                                  initialValue: _profile.instagram,
-                                )
-                              ]),
-                              const SizedBox(height: 30),
-                              _textFieldRow([
-                                LabeledTextField(
-                                  label: 'Dribbble',
-                                  hintText: 'Link',
-                                  onChanged: (value) =>
-                                      _profile.dribbble = value,
-                                  initialValue: _profile.dribbble,
-                                ),
-                                LabeledTextField(
-                                  label: 'LinkedIn',
-                                  hintText: 'Link',
-                                  onChanged: (value) =>
-                                      _profile.linkedin = value,
-                                  initialValue: _profile.linkedin,
-                                )
-                              ]),
-                              const SizedBox(height: 30),
-                              _textFieldRow([
-                                LabeledTextField(
-                                  label: 'Behance',
-                                  hintText: 'Link',
-                                  onChanged: (value) =>
-                                      _profile.behance = value,
-                                  initialValue: _profile.behance,
-                                ),
-                                LabeledTextField(
-                                  label: 'Vimeo',
-                                  hintText: 'Link',
-                                  onChanged: (value) => _profile.vimeo = value,
-                                  initialValue: _profile.vimeo,
-                                )
-                              ]),
-                              const SizedBox(height: 30),
-                              _textFieldRow([
-                                LabeledTextField(
-                                  label: 'GitHub',
-                                  hintText: 'Link',
-                                  onChanged: (value) => _profile.github = value,
-                                  initialValue: _profile.github,
-                                ),
-                                LabeledTextField(
-                                  label: 'Medium',
-                                  hintText: 'Link',
-                                  onChanged: (value) => _profile.medium = value,
-                                  initialValue: _profile.medium,
-                                )
-                              ]),
-                            ]),
-                      ),
-                    ]),
+            children: [
+              const SizedBox(height: 3),
+              _names(),
+              ..._info(),
+            ],
+          ),
+        ),
+        const SizedBox(height: 30),
+        Separator(color: colors.fileLineGrey),
+        const SizedBox(height: 30),
+        SettingsPanelSection(
+          label: 'For Hire',
+          contents: (panelContext) => Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              LabeledRadio(
+                label: 'Available For Hire',
+                description: 'Allow other users to message you about work'
+                    ' opportunities. You will also show up in our'
+                    ' list of artists for hire.',
+                groupValue: _profile.isForHire,
+                value: true,
+                onChanged: (value) {
+                  setState(() {
+                    _profile.isForHire = value;
+                  });
+                },
               ),
-              Separator(color: colors.fileLineGrey),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 20),
-                    child: FlatIconButton(
-                      label: 'Save Changes',
-                      color: colors.commonDarkGrey,
-                      textColor: Colors.white,
-                      onTap: _submitChanges,
-                    ),
+              const SizedBox(height: 24),
+              LabeledRadio(
+                label: 'Not Available For Hire',
+                description: "Don't allow other users to contact you about"
+                    ' work opportunities.',
+                groupValue: _profile.isForHire,
+                value: false,
+                onChanged: (value) {
+                  setState(() {
+                    _profile.isForHire = value;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 30),
+        Separator(color: colors.fileLineGrey),
+        const SizedBox(height: 30),
+        SettingsPanelSection(
+          label: 'Social',
+          contents: (panelContext) => Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 3),
+              _textFieldRow(
+                [
+                  LabeledTextField(
+                    label: 'Twitter',
+                    hintText: 'Link',
+                    onChanged: (value) => _profile.twitter = value,
+                    initialValue: _profile.twitter,
+                  ),
+                  LabeledTextField(
+                    label: 'Instagram',
+                    hintText: 'Link',
+                    onChanged: (value) => _profile.instagram = value,
+                    initialValue: _profile.instagram,
                   )
                 ],
-              )
-            ],
-          );
-        } else if (snapshot.hasError) {
-          // print("Couldn't load data? ${snapshot.error}");
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
               ),
-              const SizedBox(height: 16),
-              Text('Something went wrong'),
-              // Bottom padding to make it look more centered.
-              const SizedBox(height: 90),
+              const SizedBox(height: 30),
+              _textFieldRow(
+                [
+                  LabeledTextField(
+                    label: 'Dribbble',
+                    hintText: 'Link',
+                    onChanged: (value) => _profile.dribbble = value,
+                    initialValue: _profile.dribbble,
+                  ),
+                  LabeledTextField(
+                    label: 'LinkedIn',
+                    hintText: 'Link',
+                    onChanged: (value) => _profile.linkedin = value,
+                    initialValue: _profile.linkedin,
+                  )
+                ],
+              ),
+              const SizedBox(height: 30),
+              _textFieldRow(
+                [
+                  LabeledTextField(
+                    label: 'Behance',
+                    hintText: 'Link',
+                    onChanged: (value) => _profile.behance = value,
+                    initialValue: _profile.behance,
+                  ),
+                  LabeledTextField(
+                    label: 'Vimeo',
+                    hintText: 'Link',
+                    onChanged: (value) => _profile.vimeo = value,
+                    initialValue: _profile.vimeo,
+                  )
+                ],
+              ),
+              const SizedBox(height: 30),
+              _textFieldRow(
+                [
+                  LabeledTextField(
+                    label: 'GitHub',
+                    hintText: 'Link',
+                    onChanged: (value) => _profile.github = value,
+                    initialValue: _profile.github,
+                  ),
+                  LabeledTextField(
+                    label: 'Medium',
+                    hintText: 'Link',
+                    onChanged: (value) => _profile.medium = value,
+                    initialValue: _profile.medium,
+                  )
+                ],
+              ),
             ],
-          );
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -370,6 +437,13 @@ class ProfilePackage with ChangeNotifier {
   set username(String value) {
     if (value == _profile.username) return;
     _profile.username = value;
+    notifyListeners();
+  }
+
+  String get email => _profile.email;
+  set email(String value) {
+    if (value == _profile.email) return;
+    _profile.email = value;
     notifyListeners();
   }
 
