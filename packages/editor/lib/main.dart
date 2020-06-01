@@ -144,6 +144,7 @@ class RiveEditorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: "Rive",
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       home: DefaultTextStyle(

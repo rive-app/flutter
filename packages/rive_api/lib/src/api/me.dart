@@ -76,7 +76,6 @@ class MeApi {
    */
   Future<String> getErrorMessage() async {
     var response = await api.getFromPath('/api/getError');
-    print("Error message says: ${response.body}");
     if (response.statusCode != 200) {
       _log.severe("Couldn't clear the errors cookie.");
       return '';
