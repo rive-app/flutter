@@ -185,11 +185,9 @@ class _TintedIconRendererObject extends RenderBox {
       }
     }
 
-    size = constraints.constrain(_cachedImage == null
-        ? Size.zero
-        : Size(_cachedImage.image.width.toDouble() / _bestIconSize.scale,
-            _cachedImage.image.height.toDouble() / _bestIconSize.scale));
-
+    size = constraints.constrain(Size(
+        _bestIconSize.width.toDouble() / _bestIconSize.scale,
+        _bestIconSize.height.toDouble() / _bestIconSize.scale));
     _load();
   }
 
