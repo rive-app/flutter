@@ -210,7 +210,7 @@ class CircleTreeExpander extends StatefulWidget {
 }
 
 class _CircleTreeExpanderState extends State<CircleTreeExpander> {
-  bool _isHovered = true;
+  bool _isHovered = false;
 
   Color get borderColor {
     final colors = RiveTheme.of(context).colors;
