@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -88,7 +89,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 return Column(
                   children: <Widget>[
                     IconTile(
-                      iconName: 'notification',
+                      icon: PackedIcon.notification,
                       label: 'Notifications',
                       highlight: snapshot.data == HomeSection.notifications,
                       onTap: () async {
@@ -172,7 +173,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                               ),
                               child: DashedFlatButton(
                                 label: 'New Team',
-                                icon: 'teams-button',
+                                icon: PackedIcon.teamsButton,
                                 textColor: const Color(0xFF888888),
                                 iconColor: const Color(0xFFA9A9A9),
                                 hoverTextColor: const Color(0xFF666666),

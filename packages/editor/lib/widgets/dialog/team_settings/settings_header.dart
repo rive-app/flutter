@@ -2,6 +2,7 @@ import 'package:core/error_logger/error_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
 import 'package:rive_api/manager.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
@@ -165,7 +166,8 @@ class _EditableAvatarState extends State<EditableAvatar> {
           radius: radius,
         ))),
         Center(
-            child: TintedIcon(color: riveColors.fileIconColor, icon: 'image'))
+            child: TintedIcon(
+                color: riveColors.fileIconColor, icon: PackedIcon.image))
       ]);
     } else {
       children.add(Center(

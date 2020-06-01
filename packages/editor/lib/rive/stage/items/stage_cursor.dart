@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:rive_api/models/user.dart';
 import 'package:rive_core/client_side_player.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -59,22 +60,43 @@ class StageCursor extends StageItem<ClientSidePlayer>
     return true;
   }
 
+  PackedIcon _cursor, _cursorFill;
   @override
   void addedToStage(Stage stage) {
     super.addedToStage(stage);
+    _load();
+  }
 
-    const String filename = 'assets/images/icons/cursor.png';
-    const String filenameFill = 'assets/images/icons/cursor-fill.png';
-
+  void _load() {
+    _cursor = _loadIcon(PackedIcon.cursor);
+    _cursorFill = _loadIcon(PackedIcon.cursorFill);
     // Don't necessarily care about optimizing for sync case here, legibility
     // wins.
-    _fromCache(filenameFill).then((image) {
+    _fromCache('assets/images/icon_atlases/'
+            '${_cursorFill.scale}x_${_cursorFill.index}.png')
+        .then((image) {
       _cursorFillImage = image;
     });
 
-    _fromCache(filename).then((image) {
+    _fromCache('assets/images/icon_atlases/'
+            '${_cursor.scale}x_${_cursor.index}.png')
+        .then((image) {
       _cursorImage = image;
     });
+  }
+
+  PackedIcon _loadIcon(Iterable<PackedIcon> icon) {
+    var dpr = window.devicePixelRatio.ceil();
+    var closest = 100;
+    PackedIcon best;
+    for (final iconSize in icon) {
+      var d = (iconSize.scale - dpr).abs();
+      if (d < closest) {
+        best = iconSize;
+        closest = d;
+      }
+    }
+    return best;
   }
 
   Future<CachedImage> _fromCache(String filename) async {
@@ -109,10 +131,10 @@ class StageCursor extends StageItem<ClientSidePlayer>
       return;
     }
     // Hard requirement for images to be of the same size here.
-    var width = _cursorImage.image.width.toDouble();
-    var height = _cursorImage.image.height.toDouble();
+    var width = _cursor.width.toDouble();
+    var height = _cursor.height.toDouble();
     var scale = stage.viewZoom;
-    var resolution = _cursorImage.resolution;
+    var resolution = _cursor.scale;
     var x = _x.roundToDouble();
     var y = _y.roundToDouble();
 
@@ -120,11 +142,25 @@ class StageCursor extends StageItem<ClientSidePlayer>
     canvas.translate(x, y);
     canvas.scale(1 / scale);
 
-    canvas.drawImageRect(_cursorImage.image, Rect.fromLTWH(0, 0, width, height),
-        Rect.fromLTWH(0, 0, width / resolution, height / resolution), _paint);
+    canvas.drawImageRect(
+        _cursorImage.image,
+        Rect.fromLTWH(
+          _cursor.x.toDouble(),
+          _cursor.y.toDouble(),
+          width,
+          height,
+        ),
+        Rect.fromLTWH(0, 0, width / resolution, height / resolution),
+        _paint);
+        
     canvas.drawImageRect(
         _cursorFillImage.image,
-        Rect.fromLTWH(0, 0, width, height),
+        Rect.fromLTWH(
+          _cursorFill.x.toDouble(),
+          _cursorFill.y.toDouble(),
+          width,
+          height,
+        ),
         Rect.fromLTWH(0, 0, width / resolution, height / resolution),
         _tintPaint);
 

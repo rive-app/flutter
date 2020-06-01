@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/shapes/ellipse.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
@@ -87,7 +88,7 @@ class TimelineTicks extends StatelessWidget {
                                   id: _WorkAreaLayoutPart.start,
                                   child: OverlayHitDetect(
                                     customCursorIcon:
-                                        'cursor-resize-horizontal',
+                                        PackedIcon.cursorResizeHorizontal,
                                     dragContext: context,
                                     drag: (absolute, _) => _dragWorkAreaMarker(
                                       context,
@@ -113,7 +114,7 @@ class TimelineTicks extends StatelessWidget {
                                   id: _WorkAreaLayoutPart.end,
                                   child: OverlayHitDetect(
                                     customCursorIcon:
-                                        'cursor-resize-horizontal',
+                                        PackedIcon.cursorResizeHorizontal,
                                     dragContext: context,
                                     drag: (absolute, _) => _dragWorkAreaMarker(
                                         context, absolute, theme, viewport,

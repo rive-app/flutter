@@ -4,11 +4,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 
-/// An image stored in the cache with the resolution that was selected at load
-/// time to best fit the screen the app is currently running on.
+/// An image stored in the cache and a completer to await its loading.
 class CachedImage {
   final Completer<CachedImage> completer = Completer<CachedImage>();
-  int resolution;
   ui.Image image;
 }
 
@@ -28,31 +26,29 @@ class RiveIconCache {
     var cachedImage = CachedImage();
     _cache[filename] = cachedImage;
 
-    String path = '';
-    String file = filename;
-    int lastSlash = filename.lastIndexOf('/');
-    if (lastSlash != -1) {
-      path = filename.substring(0, lastSlash);
-      file = filename.substring(lastSlash + 1);
-    }
+    // String path = '';
+    // String file = filename;
+    // int lastSlash = filename.lastIndexOf('/');
+    // if (lastSlash != -1) {
+    //   path = filename.substring(0, lastSlash);
+    //   file = filename.substring(lastSlash + 1);
+    // }
 
-    int desiredResolution = ui.window.devicePixelRatio.ceil();
-    int foundResolution;
-    ByteData data;
-    for (int i = desiredResolution; i > 1; i--) {
-      try {
-        data = await assetBundle.load('$path/$i.0x/$file');
-      } catch (_) {
-        continue;
-      }
-      foundResolution = i;
-      break;
-    }
+    // int desiredResolution = ui.window.devicePixelRatio.ceil();
+    // int foundResolution;
+    // ByteData data;
+    // for (int i = desiredResolution; i > 1; i--) {
+    //   try {
+    //     data = await assetBundle.load('$path/$i.0x/$file');
+    //   } catch (_) {
+    //     continue;
+    //   }
+    //   foundResolution = i;
+    //   break;
+    // }
 
-    if (data == null) {
-      foundResolution = 1;
-      data = await assetBundle.load(filename);
-    }
+    ByteData data = await assetBundle.load(filename);
+
     if (data == null) {
       throw FormatException('Unable to load icon asset $filename');
     }
@@ -60,7 +56,6 @@ class RiveIconCache {
     var byteBuffer = Uint8List.view(data.buffer);
     ui.decodeImageFromList(byteBuffer, (image) {
       cachedImage.image = image;
-      cachedImage.resolution = foundResolution;
       cachedImage.completer.complete(cachedImage);
     });
 

@@ -1,11 +1,12 @@
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// Helper to use Rive Icons as cursors on the CursorView.
 class CursorIcon {
   /// Show a cursor icon.
-  static CursorInstance show(BuildContext context, String icon) {
+  static CursorInstance show(BuildContext context, Iterable<PackedIcon> icon) {
     return Cursor.change(
       context,
       (context) => CustomSingleChildLayout(
@@ -19,7 +20,7 @@ class CursorIcon {
     );
   }
 
-  static CursorInstance build(Cursor cursor, String icon) {
+  static CursorInstance build(Cursor cursor, Iterable<PackedIcon> icon) {
     return cursor.withBuilder(
       (context) => CustomSingleChildLayout(
         delegate: const _CursorPositionDelegate(),

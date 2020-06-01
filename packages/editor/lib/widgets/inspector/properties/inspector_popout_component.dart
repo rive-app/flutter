@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
@@ -85,12 +86,14 @@ class InspectorPopoutComponent extends StatelessWidget {
               propertyKey: isVisiblePropertyKey,
               builder: (context, bool isVisible, _) => TintedIconButton(
                 onPress: () => _toggleVisibility(!(isVisible ?? true)),
-                icon: isVisible ?? true ? 'visibility' : 'hidden',
+                icon: isVisible ?? true
+                    ? PackedIcon.visibility
+                    : PackedIcon.hidden,
               ),
             ),
           TintedIconButton(
             onPress: _remove,
-            icon: 'delete',
+            icon: PackedIcon.delete,
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -99,7 +100,7 @@ class _RivePopupButtonState extends State<RivePopupButton> {
                       TintedIcon(
                         position: TintedIconPosition.round,
                         color: RiveTheme.of(context).colors.toolbarButton,
-                        icon: 'dropdown',
+                        icon: PackedIcon.dropdown,
                       ),
                     ],
                   )

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_editor_switch.dart';
 import 'package:rive_editor/widgets/common/core_multi_toggle.dart';
@@ -86,11 +87,11 @@ class PropertyStroke extends StatelessWidget {
                 toIcon: (StrokeCap cap) {
                   switch (cap) {
                     case StrokeCap.butt:
-                      return 'cap-none';
+                      return PackedIcon.capNone;
                     case StrokeCap.round:
-                      return 'cap-round';
+                      return PackedIcon.capRound;
                     case StrokeCap.square:
-                      return 'cap-square';
+                      return PackedIcon.capSquare;
                   }
                   return null;
                 },
@@ -122,11 +123,11 @@ class PropertyStroke extends StatelessWidget {
                 toIcon: (StrokeJoin strokeJoin) {
                   switch (strokeJoin) {
                     case StrokeJoin.bevel:
-                      return 'join-bevel';
+                      return PackedIcon.joinBevel;
                     case StrokeJoin.round:
-                      return 'join-round';
+                      return PackedIcon.joinRound;
                     case StrokeJoin.miter:
-                      return 'join-miter';
+                      return PackedIcon.joinMiter;
                   }
                   return null;
                 },

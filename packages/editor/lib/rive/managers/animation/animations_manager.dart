@@ -11,6 +11,7 @@ import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -224,8 +225,10 @@ class AnimationsManager {
           animationStream = BehaviorSubject<AnimationViewModel>();
       _animations.add(animationStream);
     }
-    animationStream
-        .add(AnimationViewModel(animation: animation, icon: 'play-small'));
+    animationStream.add(AnimationViewModel(
+      animation: animation,
+      icon: PackedIcon.playSmall,
+    ));
     return animationStream;
   }
 
@@ -300,7 +303,7 @@ class AnimationsManager {
 @immutable
 class AnimationViewModel {
   final Animation animation;
-  final String icon;
+  final Iterable<PackedIcon> icon;
   final SelectionState selectionState;
 
   const AnimationViewModel({

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:rive_editor/external_url.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
 import 'package:rive_editor/widgets/common/value_listenable_text_field.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
@@ -25,7 +26,7 @@ class HamburgerPopupButton extends StatelessWidget {
         color: isHovered
             ? RiveThemeData().colors.popupIconHover
             : RiveThemeData().colors.popupIcon,
-        icon: 'tool-menu',
+        icon: PackedIcon.toolMenu,
         position: TintedIconPosition.round,
       ),
       width: 267,

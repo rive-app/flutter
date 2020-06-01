@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 
 class AutoTool extends StageTool {
@@ -7,7 +8,7 @@ class AutoTool extends StageTool {
   void draw(Canvas canvas) {}
 
   @override
-  String get icon => 'tool-auto';
+  Iterable<PackedIcon> get icon => PackedIcon.toolAuto;
 
   static final AutoTool instance = AutoTool();
 }

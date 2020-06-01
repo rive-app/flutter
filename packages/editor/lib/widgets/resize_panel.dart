@@ -4,6 +4,7 @@ import 'package:core/debounce.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cursor/cursor_view.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/ignore_mouse.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -95,8 +96,8 @@ class _ResizePanelState extends State<ResizePanel> {
     _customCursor = CursorIcon.show(
       context,
       widget.direction == ResizeDirection.vertical
-          ? 'cursor-resize-vertical'
-          : 'cursor-resize-horizontal',
+          ? PackedIcon.cursorResizeVertical
+          : PackedIcon.cursorResizeHorizontal,
     );
     _lightTimer?.cancel();
 

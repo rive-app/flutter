@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/common/sub_label.dart';
@@ -49,7 +50,7 @@ class PropertyDual<T> extends StatelessWidget {
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (_) => toggleLink?.call(!isLinked),
                 child: TintedIcon(
-                  icon: isLinked ? 'link' : 'unlink',
+                  icon: isLinked ? PackedIcon.link : PackedIcon.unlink,
                   color: theme.textStyles.inspectorPropertySubLabel.color,
                 ),
               ),

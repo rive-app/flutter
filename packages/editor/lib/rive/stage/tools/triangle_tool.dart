@@ -1,5 +1,6 @@
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/triangle.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
 
 class TriangleTool extends ShapeTool {
@@ -14,5 +15,5 @@ class TriangleTool extends ShapeTool {
   ParametricPath makePath() => Triangle()..name = 'Triangle Path';
 
   @override
-  String get icon => 'tool-triangle';
+  Iterable<PackedIcon> get icon => PackedIcon.toolTriangle;
 }

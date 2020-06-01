@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -25,7 +26,7 @@ class TintedIconButton extends StatefulWidget {
   final EdgeInsets padding;
 
   /// The icon's name which resolves to an image in the icon assets folder.
-  final String icon;
+  final Iterable<PackedIcon> icon;
 
   /// Optional tooltip to show when this button is hovered.
   final Tip tip;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
@@ -19,11 +20,11 @@ class CreatePopupButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolPopupButton(
       tip: const Tip(label: 'Create Tools'),
-      defaultIcon: 'tool-create',
+      defaultIcon: PackedIcon.toolCreate,
       makeItems: (file) => <PopupContextItem>[
         PopupContextItem(
           'Shape',
-          icon: 'tool-shapes',
+          icon: PackedIcon.toolShapes,
           popup: [
             ToolPopupItem(
               'Rectangle',
@@ -64,7 +65,7 @@ class CreatePopupButton extends StatelessWidget {
         ),
         ToolPopupItem(
           'Pen',
-          icon: 'tool-pen',
+          icon: PackedIcon.toolPen,
           listenable: file.stage.toolListenable,
           isSelected: () => file.stage.tool == VectorPenTool.instance,
           shortcut: ShortcutAction.penTool,
@@ -89,7 +90,7 @@ class CreatePopupButton extends StatelessWidget {
         // ),
         ToolPopupItem(
           'Node',
-          icon: 'tool-node',
+          icon: PackedIcon.toolNode,
           listenable: file.stage.toolListenable,
           isSelected: () => file.stage.tool == NodeTool.instance,
           shortcut: ShortcutAction.nodeTool,

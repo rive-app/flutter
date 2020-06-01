@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -37,7 +38,7 @@ void main() {
         IconCache(
           cache: RiveIconCache(TestAssetBundle()),
           child: const TintedIcon(
-            icon: 'dont-care',
+            icon: PackedIcon.toolAuto,
             color: Color(0xFFFFFFFF),
           ),
         ),
@@ -50,7 +51,7 @@ void main() {
         IconCache(
           cache: RiveIconCache(TestPathAssetBundle()),
           child: const TintedIcon(
-            icon: 'test-image',
+            icon: PackedIcon.add,
             color: Color(0xFFFFFFFF),
           ),
         ),

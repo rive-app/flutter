@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
 
-import 'package:rive_editor/widgets/toolbar/check_popup_item.dart';
-import 'package:rive_editor/widgets/toolbar/multi_icon_popup_item.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_button.dart';
 import 'package:rive_editor/widgets/toolbar/tool_popup_item.dart';
 
@@ -20,7 +18,7 @@ class TransformPopupButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolPopupButton(
       tip: const Tip(label: 'Transform Tools'),
-      defaultIcon: 'tool-auto',
+      defaultIcon: PackedIcon.toolAuto,
       makeItems: (file) {
         return <PopupContextItem>[
           ToolPopupItem(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'dart:ui' as ui;
 
 /// How to position the icon when actually rendered to layer pixels.
 enum TintedIconPosition {
@@ -13,7 +15,7 @@ enum TintedIconPosition {
 /// Draws an icon tinted by [color].
 class TintedIcon extends StatelessWidget {
   final Color color;
-  final String icon;
+  final Iterable<PackedIcon> icon;
   final TintedIconPosition position;
 
   const TintedIcon({
@@ -28,7 +30,7 @@ class TintedIcon extends StatelessWidget {
     var cache = IconCache.of(context);
     return TintedIconRenderer(
       cache: cache,
-      filename: 'assets/images/icons/$icon.png',
+      icon: icon,
       color: color,
       position: position,
     );
@@ -37,13 +39,13 @@ class TintedIcon extends StatelessWidget {
 
 /// Draws an image with custom paint.
 class TintedIconRenderer extends LeafRenderObjectWidget {
-  final String filename;
+  final Iterable<PackedIcon> icon;
   final RiveIconCache cache;
   final Color color;
   final TintedIconPosition position;
 
   const TintedIconRenderer({
-    @required this.filename,
+    @required this.icon,
     @required this.cache,
     this.position,
     this.color,
@@ -52,7 +54,7 @@ class TintedIconRenderer extends LeafRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _TintedIconRendererObject()
-      ..filename = filename
+      ..icon = icon
       ..cache = cache
       ..color = color
       ..position = position;
@@ -68,7 +70,7 @@ class TintedIconRenderer extends LeafRenderObjectWidget {
   void updateRenderObject(
       BuildContext context, covariant _TintedIconRendererObject renderObject) {
     renderObject
-      ..filename = filename
+      ..icon = icon
       ..cache = cache
       ..color = color
       ..position = position;
@@ -77,7 +79,7 @@ class TintedIconRenderer extends LeafRenderObjectWidget {
 
 class _TintedIconRendererObject extends RenderBox {
   TintedIconPosition _position;
-  String _filename;
+  Iterable<PackedIcon> _icon;
   RiveIconCache _cache;
   Color _color;
   final Paint _paint = Paint()..isAntiAlias = false;
@@ -99,7 +101,7 @@ class _TintedIconRendererObject extends RenderBox {
       return;
     }
     _cache = value;
-    _load();
+    markNeedsLayout();
   }
 
   Color get color => _color;
@@ -115,14 +117,15 @@ class _TintedIconRendererObject extends RenderBox {
     markNeedsPaint();
   }
 
-  String get filename => _filename;
+  PackedIcon _bestIconSize;
+  Iterable<PackedIcon> get icon => _icon;
 
-  set filename(String value) {
-    if (_filename == value) {
+  set icon(Iterable<PackedIcon> value) {
+    if (_icon == value) {
       return;
     }
-    _filename = value;
-    _load();
+    _icon = value;
+    markNeedsLayout();
   }
 
   @override
@@ -130,7 +133,7 @@ class _TintedIconRendererObject extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_cachedImage == null) {
+    if (_cachedImage == null || _bestIconSize == null) {
       return;
     }
     var canvas = context.canvas;
@@ -139,7 +142,6 @@ class _TintedIconRendererObject extends RenderBox {
     Offset renderOffset;
     switch (_position) {
       case TintedIconPosition.ceil:
-        print("CEILING: ${offset.dy} ${offset.dy.ceilToDouble()}");
         renderOffset =
             Offset(offset.dx.ceilToDouble(), offset.dy.ceilToDouble());
         break;
@@ -156,26 +158,50 @@ class _TintedIconRendererObject extends RenderBox {
         renderOffset = offset;
         break;
     }
+
     canvas.drawImageRect(
         image,
-        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+        Rect.fromLTWH(
+          _bestIconSize.x.toDouble(),
+          _bestIconSize.y.toDouble(),
+          _bestIconSize.width.toDouble(),
+          _bestIconSize.height.toDouble(),
+        ),
         renderOffset & size,
         _paint);
   }
 
   @override
   void performLayout() {
+    // Pick best res icon.
+    // for now this is pretty naive, should work for our case...
+    var dpr = ui.window.devicePixelRatio.ceil();
+    var closest = 100;
+    for (final iconSize in icon) {
+      var d = (iconSize.scale - dpr).abs();
+      if (d < closest) {
+        _bestIconSize = iconSize;
+        closest = d;
+      }
+    }
+
     size = constraints.constrain(_cachedImage == null
         ? Size.zero
-        : Size(_cachedImage.image.width.toDouble() / _cachedImage.resolution,
-            _cachedImage.image.height.toDouble() / _cachedImage.resolution));
+        : Size(_cachedImage.image.width.toDouble() / _bestIconSize.scale,
+            _cachedImage.image.height.toDouble() / _bestIconSize.scale));
+
+    _load();
   }
+
+  String get filename => 'assets/images/icon_atlases/'
+      '${_bestIconSize.scale}x_${_bestIconSize.index}.png';
 
   void _load() {
     if (_cache == null) {
       return;
     }
-    var cachedImage = _cache.image(_filename);
+
+    var cachedImage = _cache.image(filename);
     if (cachedImage == null) {
       // Not in the cache, load it up.
       _cache.load(filename).then((cachedImage) {

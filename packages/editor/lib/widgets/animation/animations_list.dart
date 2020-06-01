@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/animation.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
 import 'package:rive_editor/widgets/animation/animation_tree_controller.dart';
@@ -95,7 +96,7 @@ class __AnimationsListTreeState extends State<_AnimationsListTree> {
                   ),
                 ),
                 TintedIconButton(
-                  icon: 'add',
+                  icon: PackedIcon.add,
                   onPress: () =>
                       widget.animationManager.create.add(AnimationType.linear),
                 )

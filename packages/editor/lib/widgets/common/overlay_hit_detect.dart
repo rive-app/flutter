@@ -1,5 +1,6 @@
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -19,7 +20,7 @@ class OverlayHitDetect extends StatefulWidget {
   final DragProxy drag;
   final VoidCallback endDrag;
   final VoidCallback press;
-  final String customCursorIcon;
+  final Iterable<PackedIcon> customCursorIcon;
 
   const OverlayHitDetect({
     Key key,
@@ -119,7 +120,7 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
     return MouseRegion(
       opaque: false,
       onHover: (details) {
-        if(RiveContext.find(context).isDragging) {
+        if (RiveContext.find(context).isDragging) {
           return;
         }
         if (widget.customCursorIcon != null) {
@@ -128,7 +129,7 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
         _prepHitArea();
       },
       onEnter: (details) {
-        if(RiveContext.find(context).isDragging) {
+        if (RiveContext.find(context).isDragging) {
           return;
         }
         if (widget.customCursorIcon != null) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 
 import 'package:rive_editor/widgets/inherited_widgets.dart' show RiveTheme;
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -6,7 +7,7 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 class IconTile extends StatefulWidget {
   const IconTile({
     @required this.label,
-    @required this.iconName,
+    @required this.icon,
     this.onTap,
     this.highlight = false,
     Key key,
@@ -15,7 +16,7 @@ class IconTile extends StatefulWidget {
   final String label;
   final bool highlight;
   final VoidCallback onTap;
-  final String iconName;
+  final Iterable<PackedIcon> icon;
 
   @override
   _IconTileState createState() => _IconTileState();
@@ -67,7 +68,7 @@ class _IconTileState extends State<IconTile>{
                       height: 15,
                       child: TintedIcon(
                         color: widget.highlight ? highlightIconColor : unhighlightIconColor,
-                        icon: widget.iconName,
+                        icon: widget.icon,
                       ),
                     ),
                     Container(width: 5),

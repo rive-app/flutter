@@ -1,3 +1,4 @@
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -19,7 +20,7 @@ class CheckPopupItem extends PopupContextItem {
           name,
           iconBuilder: (context, isHovered) => isChecked()
               ? TintedIcon(
-                  icon: 'popup-check',
+                  icon: PackedIcon.popupCheck,
                   color: isHovered
                       ? RiveTheme.of(context).colors.buttonHover
                       : RiveTheme.of(context).colors.buttonNoHover,

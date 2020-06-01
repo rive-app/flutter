@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_editor/external_url.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
@@ -29,7 +30,7 @@ class TeamWizardPanelTwo extends StatelessWidget {
           child: const Padding(
             padding: EdgeInsets.only(right: 20),
             child: TintedIcon(
-              icon: 'back',
+              icon: PackedIcon.back,
               color: Colors.black,
             ),
           ),
@@ -143,11 +144,11 @@ class TeamWizardPanelTwo extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         TintedIcon(
-          icon: 'card_chip',
+          icon: PackedIcon.cardchip,
           color: colors.buttonLight,
         ),
         TintedIcon(
-          icon: 'card_logo',
+          icon: PackedIcon.cardlogo,
           color: colors.buttonLight,
         ),
       ],

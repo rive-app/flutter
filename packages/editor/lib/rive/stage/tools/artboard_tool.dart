@@ -5,6 +5,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -108,7 +109,7 @@ class ArtboardTool extends DrawableTool {
       _tip.paint(canvas, Offset(_cursor[0] + 10, _cursor[1] + 10));
 
   @override
-  String get icon => 'tool-artboard';
+  Iterable<PackedIcon> get icon => PackedIcon.toolArtboard;
 
   static final ArtboardTool instance = ArtboardTool();
 

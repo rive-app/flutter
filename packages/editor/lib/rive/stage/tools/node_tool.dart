@@ -4,6 +4,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 
@@ -22,7 +23,7 @@ class NodeTool extends DrawableTool {
   }
 
   @override
-  String get icon => 'tool-node';
+  Iterable<PackedIcon> get icon => PackedIcon.toolNode;
 
   @override
   void draw(Canvas canvas) {}

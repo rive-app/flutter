@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
@@ -52,7 +53,7 @@ class TopNav extends StatelessWidget {
                 ),
                 child: Center(
                   child: TintedIcon(
-                    icon: 'back',
+                    icon: PackedIcon.back,
                     color: riveColors.inspectorTextColor,
                   ),
                 ),
@@ -80,7 +81,7 @@ class TopNav extends StatelessWidget {
               color: riveColors.commonDarkGrey, shape: BoxShape.circle),
           child: const Center(
             child: SizedBox(
-              child: TintedIcon(color: Colors.white, icon: 'add'),
+              child: TintedIcon(color: Colors.white, icon: PackedIcon.add),
             ),
           ),
         );

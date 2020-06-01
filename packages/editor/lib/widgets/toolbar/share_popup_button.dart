@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/platform/file_save.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -22,13 +23,13 @@ class SharePopupButton extends StatelessWidget {
         color: isHovered
             ? RiveThemeData().colors.toolbarButtonHover
             : RiveThemeData().colors.toolbarButton,
-        icon: 'tool-export',
+        icon: PackedIcon.toolExport,
       ),
       width: 206,
       contextItemsBuilder: (context) => [
         PopupContextItem(
           'Download for Runtime',
-          icon: 'download',
+          icon: PackedIcon.download,
           select: () async {
             // Get the active file.
             var activeFile = ActiveFile.find(context);

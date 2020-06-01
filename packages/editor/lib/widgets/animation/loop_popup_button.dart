@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/loop.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
@@ -28,16 +29,16 @@ class LoopPopupButton extends StatelessWidget {
           stream: animationManager.loop,
           builder: (context, snapshot) {
             var loop = snapshot.data;
-            String icon;
+            Iterable<PackedIcon> icon;
             switch (loop) {
               case Loop.oneShot:
-                icon = 'one-shot';
+                icon = PackedIcon.oneShot;
                 break;
               case Loop.loop:
-                icon = 'loop';
+                icon = PackedIcon.loop;
                 break;
               case Loop.pingPong:
-                icon = 'ping-pong';
+                icon = PackedIcon.pingPong;
                 break;
             }
             final themeColors = RiveTheme.of(context).colors;
@@ -59,21 +60,21 @@ class LoopPopupButton extends StatelessWidget {
               contextItemsBuilder: (context) => [
                 PopupContextItem(
                   'One Shot',
-                  icon: 'one-shot',
+                  icon: PackedIcon.oneShot,
                   select: () {
                     animationManager.changeLoop.add(Loop.oneShot);
                   },
                 ),
                 PopupContextItem(
                   'Loop',
-                  icon: 'loop',
+                  icon: PackedIcon.loop,
                   select: () {
                     animationManager.changeLoop.add(Loop.loop);
                   },
                 ),
                 PopupContextItem(
                   'Ping Pong',
-                  icon: 'ping-pong',
+                  icon: PackedIcon.pingPong,
                   select: () {
                     animationManager.changeLoop.add(Loop.pingPong);
                   },
@@ -87,7 +88,7 @@ class LoopPopupButton extends StatelessWidget {
                     propertyKey: LinearAnimationBase.enableWorkAreaPropertyKey,
                     builder: (context, bool isEnabled, _) => isEnabled
                         ? TintedIcon(
-                            icon: 'popup-check',
+                            icon: PackedIcon.popupCheck,
                             color: isHovered
                                 ? RiveTheme.of(context).colors.buttonHover
                                 : RiveTheme.of(context).colors.buttonNoHover,

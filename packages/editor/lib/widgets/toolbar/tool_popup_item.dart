@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -9,7 +10,7 @@ import 'package:rive_editor/widgets/popup/context_popup.dart';
 class ToolPopupItem extends PopupContextItem {
   ToolPopupItem(
     String name, {
-    String icon,
+    Iterable<PackedIcon> icon,
     ShortcutAction shortcut,
     ValueListenable listenable,
     bool Function() isSelected,

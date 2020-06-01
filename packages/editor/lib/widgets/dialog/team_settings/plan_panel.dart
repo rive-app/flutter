@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
@@ -343,7 +344,7 @@ class _MethodState extends State<PaymentMethod> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        TintedIcon(icon: 'date', color: iconColor),
+        TintedIcon(icon: PackedIcon.settingsSmall /*TODO: PackedIcon.date*/, color: iconColor),
         const SizedBox(width: 10),
         RichText(
           text: TextSpan(children: [
@@ -379,7 +380,7 @@ class _MethodState extends State<PaymentMethod> {
     return Column(
       children: <Widget>[
         Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          TintedIcon(icon: 'card', color: colors.commonButtonTextColor),
+          TintedIcon(icon: PackedIcon.cardchip/*TODO: PackedIcon.card*/, color: colors.commonButtonTextColor),
           const SizedBox(width: 10),
           Text('American Express 1007. Expires 10/2022',
               style:

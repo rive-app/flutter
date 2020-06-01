@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/popup_positioner.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
@@ -207,7 +208,7 @@ class _InspectorPopoutState extends State<InspectorPopout> {
                       color: _isHovered || _popup != null
                           ? theme.colors.toolbarButtonHover
                           : theme.colors.toolbarButton,
-                      icon: 'options',
+                      icon: PackedIcon.options,
                     ),
                   ),
                 ),
