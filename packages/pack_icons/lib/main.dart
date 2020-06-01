@@ -40,18 +40,17 @@ void main(List<String> args) async {
     /// Rive Figma design file. See dev/extract_icons.sh and dev/pack_icons.sh.
     class PackedIcon {
       final int x, y, width, height;
-      final bool rotated;
       final int scale;
       final int index;
 
-      const PackedIcon._(this.x, this.y, this.width, this.height, this.rotated,
+      const PackedIcon._(this.x, this.y, this.width, this.height,
           this.scale, this.index);
   ''');
   _icons.forEach((name, rects) {
     code.writeln('static const Iterable<PackedIcon> $name = [');
     for (final icon in rects) {
       code.writeln(
-          'PackedIcon._(${icon.rect.x}, ${icon.rect.y}, ${icon.rect.width}, ${icon.rect.height}, ${icon.rect.rotated}, ${icon.scale}, ${icon.index}),');
+          'PackedIcon._(${icon.rect.x}, ${icon.rect.y}, ${icon.rect.width}, ${icon.rect.height}, ${icon.scale}, ${icon.index}),');
     }
     code.writeln('];');
   });
