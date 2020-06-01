@@ -6,9 +6,7 @@ import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
-// -> editor-only
 import 'package:utilities/binary_buffer/binary_writer.dart';
-// <- editor-only
 export 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 
 class LinearAnimation extends LinearAnimationBase {

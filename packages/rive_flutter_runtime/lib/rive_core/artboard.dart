@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:rive/src/core/core.dart';
 import 'package:rive/rive_core/animation/animation.dart';
 import 'package:rive/rive_core/bounds_delegate.dart';
+import 'package:rive/rive_core/component.dart';
+import 'package:rive/rive_core/component_dirt.dart';
 import 'package:rive/rive_core/drawable.dart';
 import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_core/math/vec2d.dart';
@@ -11,8 +13,6 @@ import 'package:rive/rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive/rive_core/shapes/shape_paint_container.dart';
 import 'package:rive/rive_core/transform_space.dart';
 import 'package:rive/src/utilities/dependency_sorter.dart';
-import 'component.dart';
-import 'component_dirt.dart';
 import 'package:rive/src/generated/artboard_base.dart';
 export 'package:rive/src/generated/artboard_base.dart';
 

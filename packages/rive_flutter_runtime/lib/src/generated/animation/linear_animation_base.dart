@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:rive/rive_core/animation/animation.dart';
-import 'package:rive/src/core/core.dart';
 import 'package:rive/src/generated/animation/animation_base.dart';
 
 abstract class LinearAnimationBase extends Animation {

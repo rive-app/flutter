@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:rive/rive_core/animation/keyframe.dart';
-import 'package:rive/src/core/core.dart';
 import 'package:rive/src/generated/animation/keyframe_base.dart';
 
 abstract class KeyFrameDoubleBase extends KeyFrame {

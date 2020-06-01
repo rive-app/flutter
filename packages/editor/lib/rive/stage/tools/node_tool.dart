@@ -39,7 +39,7 @@ class NodeTool extends DrawableTool {
   }
 
   @override
-  void updateDrag(Vec2D worldMouse) => _node?.pos = worldMouse;
+  void updateDrag(Vec2D worldMouse) => _node?.translation = worldMouse;
 
   /// Create a new node and place it in space
   Node _createNode(ContainerComponent parent, Vec2D position) {

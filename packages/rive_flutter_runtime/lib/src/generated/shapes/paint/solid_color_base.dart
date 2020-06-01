@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:rive/rive_core/component.dart';
-import 'package:rive/src/core/core.dart';
 import 'package:rive/src/generated/component_base.dart';
 
 abstract class SolidColorBase extends Component {

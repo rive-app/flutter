@@ -1,11 +1,9 @@
-// -> editor-only
 import 'dart:ui';
 
 import 'package:core/core.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/event.dart';
-// <- editor-only
 import 'package:rive_core/src/generated/backboard_base.dart';
 export 'package:rive_core/src/generated/backboard_base.dart';
 

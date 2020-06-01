@@ -7,7 +7,6 @@ import 'package:rive/rive_core/event.dart';
 import 'package:rive/rive_core/math/vec2d.dart';
 import 'package:rive/rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive/rive_core/shapes/paint/shape_paint_mutator.dart';
-import 'package:rive/rive_core/shapes/shape.dart';
 import 'package:rive/src/generated/shapes/paint/linear_gradient_base.dart';
 export 'package:rive/src/generated/shapes/paint/linear_gradient_base.dart';
 

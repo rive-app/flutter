@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
-import 'component.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 
 // -> editor-only

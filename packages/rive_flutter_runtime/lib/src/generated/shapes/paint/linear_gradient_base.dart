@@ -3,7 +3,6 @@
 /// Do not modify manually.
 
 import 'package:rive/rive_core/container_component.dart';
-import 'package:rive/src/core/core.dart';
 import 'package:rive/src/generated/component_base.dart';
 import 'package:rive/src/generated/container_component_base.dart';
 

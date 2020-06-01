@@ -6,13 +6,9 @@ import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/event.dart';
-// -> editor-only
 import 'package:rive_core/rive_file.dart';
-// <- editor-only
 import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
-// -> editor-only
 import 'package:utilities/binary_buffer/binary_writer.dart';
-// <- editor-only
 import 'linear_animation.dart';
 export 'package:rive_core/src/generated/animation/keyed_object_base.dart';
 

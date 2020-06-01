@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:rive/src/core/core.dart';
 import 'package:rive/src/core/field_types/core_field_type.dart';

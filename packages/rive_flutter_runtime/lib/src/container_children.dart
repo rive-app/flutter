@@ -4,7 +4,7 @@ import 'package:rive/rive_core/component.dart';
 
 // TODO: figure out how to make this cleaner.
 class ContainerChildren extends ListBase<Component> {
-  final List<Component> _values = List<Component>();
+  final List<Component> _values = [];
   List<Component> get values => _values;
 
   @override

@@ -1,0 +1,4 @@
+name: remove_unused_imports
+
+environment:
+  sdk: '>=2.8.0 <3.0.0'

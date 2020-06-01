@@ -1,4 +1,3 @@
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive/rive_core/artboard.dart';
 import 'package:rive/rive_core/math/mat2d.dart';

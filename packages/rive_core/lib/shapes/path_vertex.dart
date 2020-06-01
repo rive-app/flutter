@@ -15,7 +15,9 @@ enum VertexControlType {
 
 abstract class PathVertex extends PathVertexBase {
   Path get path => parent as Path;
+  // -> editor-only
   BoundsDelegate _delegate;
+  // <- editor-only
 
   VertexControlType get controlType => VertexControlType.straight;
   // -> editor-only
