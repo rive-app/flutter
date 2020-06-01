@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 
@@ -15,7 +16,7 @@ void main() {
     });
 
     test('Check for icon name', () {
-      expect(instance.icon, 'tool-ellipse');
+      expect(instance.icon, PackedIcon.toolEllipse);
     });
   });
 
@@ -31,7 +32,7 @@ void main() {
     });
 
     test('Check for icon name', () {
-      expect(instance.icon, 'tool-rectangle');
+      expect(instance.icon, PackedIcon.toolRectangle);
     });
   });
 }
