@@ -11,7 +11,7 @@ class RequiresAdmin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueStreamBuilder(
+    return ValueStreamBuilder<Me>(
       stream: Plumber().getStream<Me>(),
       builder: (context, snapshot) => (snapshot.hasData &&
               snapshot.data?.isAdmin != null &&

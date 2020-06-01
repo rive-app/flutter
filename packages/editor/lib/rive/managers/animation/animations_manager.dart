@@ -314,7 +314,7 @@ class AnimationViewModel {
 
   AnimationViewModel copyWith({
     Animation animation,
-    String icon,
+    Iterable<PackedIcon> icon,
     SelectionState selectionState,
   }) =>
       AnimationViewModel(
