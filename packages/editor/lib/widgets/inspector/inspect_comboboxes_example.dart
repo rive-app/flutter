@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
@@ -10,14 +11,14 @@ class InspectComboBoxExample extends InspectorBuilder {
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) => [
         (context) => InspectorPillButton(
-              icon: 'path-close',
+              icon: PackedIcon.pathClose,
               label: 'disconnect',
               press: () {
                 ActiveFile.of(context)?.core.disconnect();
               },
             ),
         (context) => InspectorPillButton(
-              icon: 'path-close',
+              icon: PackedIcon.pathClose,
               label: 'reconnect',
               press: () {
                 print("RECONNECT!");

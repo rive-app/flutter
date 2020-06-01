@@ -10,6 +10,7 @@ import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_editor/constants.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
@@ -155,7 +156,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   }
 
   void _updateMarquee() {
-    if(_marqueeStart == null || _marqueeEnd == null) {
+    if (_marqueeStart == null || _marqueeEnd == null) {
       return;
     }
     var viewportHelper = makeMouseHelper();
@@ -212,7 +213,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
       },
       onPointerDown: (details) {
         if (details.pointerEvent.buttons == 2) {
-          _handCursor = CursorIcon.show(context, 'cursor-hand');
+          _handCursor = CursorIcon.show(context, PackedIcon.cursorHand);
           // right click to pan.
           _dragOperation = _DragOperation.pan;
           return;

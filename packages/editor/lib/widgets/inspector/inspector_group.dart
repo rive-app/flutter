@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
@@ -70,7 +71,7 @@ class InspectorGroup extends StatelessWidget {
               ? Container()
               : TintedIconButton(
                   onPress: add,
-                  icon: 'add',
+                  icon: PackedIcon.add,
                 ),
         ],
       ),

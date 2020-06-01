@@ -6,6 +6,7 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:meta/meta.dart';
 
@@ -125,5 +126,5 @@ abstract class PenTool<T extends Component> extends StageTool {
   int get drawOrder => 2;
 
   @override
-  String get icon => 'tool-pen';
+  Iterable<PackedIcon> get icon => PackedIcon.toolPen;
 }

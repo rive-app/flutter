@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 typedef ChooseOption<T> = void Function(T);
-typedef OptionToIcon<T> = String Function(T);
+typedef OptionToIcon<T> = Iterable<PackedIcon> Function(T);
 
 /// A multi toggle that displays icons in a row for each option.
 class MultiToggle<T> extends StatelessWidget {

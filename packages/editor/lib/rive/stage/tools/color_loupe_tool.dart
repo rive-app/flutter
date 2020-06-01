@@ -5,6 +5,7 @@ import 'package:core/debounce.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/late_draw_stage_tool.dart';
@@ -31,7 +32,7 @@ class ColorLoupeTool extends StageTool with LateDrawStageTool {
   ui.Image _rasterImage;
   ByteData _rasterPixels;
   @override
-  String get icon => 'none';
+  Iterable<PackedIcon> get icon => null;
   ui.Image get rasterImage => _rasterImage;
 
   ByteData get rasterPixels => _rasterPixels;

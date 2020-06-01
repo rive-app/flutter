@@ -4,6 +4,7 @@ import 'package:core/debounce.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
@@ -134,7 +135,7 @@ class _EditorTextFieldState extends State<EditorTextField>
               if (!rive.isDragging) {
                 _customCursor?.remove();
                 _customCursor =
-                    CursorIcon.show(context, 'cursor-resize-vertical');
+                    CursorIcon.show(context, PackedIcon.cursorResizeVertical);
               }
             },
             onExit: (data) {

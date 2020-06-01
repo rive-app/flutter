@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/tip.dart';
@@ -55,7 +56,7 @@ class DashedFlatButton extends StatelessWidget {
   });
 
   final String label;
-  final String icon;
+  final Iterable<PackedIcon> icon;
   final Color textColor;
   final Color iconColor;
   final Color hoverIconColor;

@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/animation_time_popup_button.dart';
 import 'package:rive_editor/widgets/animation/loop_popup_button.dart';
@@ -23,7 +24,7 @@ class AnimationToolbar extends StatelessWidget {
           TintedIconButton(
             backgroundHover:
                 RiveTheme.of(context).colors.timelineButtonBackGroundHover,
-            icon: 'to-start',
+            icon: PackedIcon.toStart,
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
             onPress: () {
               var animationManager =
@@ -56,7 +57,9 @@ class _PlaybackButton extends StatelessWidget {
           builder: (context, snapshot) => TintedIconButton(
             backgroundHover:
                 RiveTheme.of(context).colors.timelineButtonBackGroundHover,
-            icon: snapshot.hasData && snapshot.data ? 'pause' : 'play',
+            icon: snapshot.hasData && snapshot.data
+                ? PackedIcon.pause
+                : PackedIcon.play,
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
             onPress: () {
               animationManager.changePlayback

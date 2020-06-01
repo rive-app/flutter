@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -42,7 +43,7 @@ class UserInviteBox extends StatelessWidget {
                       child: Center(
                         child: TintedIcon(
                             color: colors.commonButtonTextColor,
-                            icon: 'delete'),
+                            icon: PackedIcon.delete),
                       ),
                     )),
               )

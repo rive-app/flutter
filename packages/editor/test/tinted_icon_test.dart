@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -11,7 +12,7 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 class TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    if (key.startsWith('assets/images/icons')) {
+    if (key.startsWith('assets/images/icon_atlases')) {
       return ByteData.view(
           (await File('assets/rive.png').readAsBytes()).buffer);
     }
@@ -22,7 +23,7 @@ class TestAssetBundle extends CachingAssetBundle {
 class TestPathAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'assets/images/icons/test-image.png') {
+    if (key == 'assets/images/icon_atlases/3x_0.png') {
       return ByteData.view(
           (await File('assets/rive.png').readAsBytes()).buffer);
     }
@@ -37,7 +38,7 @@ void main() {
         IconCache(
           cache: RiveIconCache(TestAssetBundle()),
           child: const TintedIcon(
-            icon: 'dont-care',
+            icon: PackedIcon.toolAuto,
             color: Color(0xFFFFFFFF),
           ),
         ),
@@ -50,7 +51,7 @@ void main() {
         IconCache(
           cache: RiveIconCache(TestPathAssetBundle()),
           child: const TintedIcon(
-            icon: 'test-image',
+            icon: PackedIcon.add,
             color: Color(0xFFFFFFFF),
           ),
         ),

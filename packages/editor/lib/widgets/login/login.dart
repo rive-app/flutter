@@ -5,6 +5,7 @@ import 'package:rive_api/auth.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/editor_switch.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
@@ -489,7 +490,7 @@ class _LoginState extends State<Login> {
         const SizedBox(width: 10),*/
         _SocialSigninButton(
           label: 'Google',
-          icon: 'signin-google',
+          icon: PackedIcon.signinGoogle,
           onTap: _buttonDisabled
               ? null
               : () async {
@@ -502,7 +503,7 @@ class _LoginState extends State<Login> {
         const SizedBox(width: 10),
         _SocialSigninButton(
           label: 'Facebook',
-          icon: 'signin-facebook',
+          icon: PackedIcon.signinFacebook,
           onTap: _buttonDisabled
               ? null
               : () async {
@@ -756,7 +757,7 @@ class _LoginSwitch extends StatelessWidget {
 
 class _SocialSigninButton extends StatelessWidget {
   final String label;
-  final String icon;
+  final Iterable<PackedIcon> icon;
   final VoidCallback onTap;
 
   const _SocialSigninButton(

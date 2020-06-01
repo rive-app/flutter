@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_api/model.dart' as model;
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/packed_icon.dart';
 
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
@@ -310,7 +311,7 @@ class FollowNotificationWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TintedIcon(
-              icon: 'tool-create',
+              icon: PackedIcon.toolCreate,
               color: theme.colors.commonButtonTextColor,
             ),
             const SizedBox(width: 10),
@@ -363,7 +364,7 @@ class TeamInviteNotificationWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TintedIcon(
-                    icon: 'tool-create',
+                    icon: PackedIcon.toolCreate,
                     color: theme.colors.commonButtonTextColor,
                   ),
                   const SizedBox(width: 10),
@@ -576,7 +577,7 @@ class UnknownNotificationWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TintedIcon(
-              icon: 'tool-create',
+              icon: PackedIcon.toolCreate,
               color: theme.colors.commonButtonTextColor,
             ),
             const SizedBox(width: 10),

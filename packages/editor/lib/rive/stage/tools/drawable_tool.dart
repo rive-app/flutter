@@ -1,6 +1,7 @@
 import 'package:cursor/cursor_view.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -13,7 +14,7 @@ abstract class DrawableTool extends StageTool with DraggableTool {
   CursorInstance _customCursor;
 
   /// Custom cursor for drawing
-  static const cursorName = 'cursor-add';
+  static Iterable<PackedIcon> cursorName = PackedIcon.cursorAdd;
 
   @override
   bool activate(Stage stage) {

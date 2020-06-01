@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -43,7 +44,7 @@ class BrowserFolder extends StatelessWidget {
           child: Row(
             children: [
               TintedIcon(
-                  icon: (folderId == 0) ? 'trash' : 'folder',
+                  icon: (folderId == 0) ? PackedIcon.trash : PackedIcon.folder,
                   color: colors.black30),
               const SizedBox(width: 8),
               Expanded(

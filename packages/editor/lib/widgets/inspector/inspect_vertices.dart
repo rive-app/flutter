@@ -5,6 +5,7 @@ import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/path_vertex_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
@@ -52,7 +53,7 @@ class VertexInspector extends ListenableInspectorBuilder {
           ),
           child: InspectorPillButton(
             label: 'Done Editing',
-            icon: 'check',
+            icon: PackedIcon.check,
             press: () {
               ActiveFile.find(context).vertexEditor.doneEditing();
             },
@@ -75,7 +76,9 @@ class VertexInspector extends ListenableInspectorBuilder {
                 bool isClosedValue = isClosed ?? false;
                 return InspectorPillButton(
                   label: isClosedValue ? 'Open Path' : 'Close Path',
-                  icon: isClosedValue ? 'path-open' : 'path-close',
+                  icon: isClosedValue
+                      ? PackedIcon.pathOpen
+                      : PackedIcon.pathClose,
                   press: () {
                     var closed = !isClosedValue;
                     for (final path in paths) {
@@ -112,7 +115,8 @@ class VertexInspector extends ListenableInspectorBuilder {
                 children: [
                   _VertexTypeButton(
                     vertexType: StraightVertexBase.typeKey,
-                    icon: 'vertex-straight',
+                    icon: PackedIcon.vertexStraight,
+                    labelKey: 'vertex-straight',
                     isActive: allowActive && controlTypeValue == null,
                     vertices: vertices,
                   ),
@@ -120,7 +124,8 @@ class VertexInspector extends ListenableInspectorBuilder {
                   _VertexTypeButton(
                     vertexType: CubicVertexBase.typeKey,
                     controlType: VertexControlType.mirrored,
-                    icon: 'vertex-mirrored',
+                    icon: PackedIcon.vertexMirrored,
+                    labelKey: 'vertex-mirrored',
                     isActive: allowActive &&
                         controlTypeValue == VertexControlType.mirrored.index,
                     vertices: vertices,
@@ -137,7 +142,8 @@ class VertexInspector extends ListenableInspectorBuilder {
                   _VertexTypeButton(
                     vertexType: CubicVertexBase.typeKey,
                     controlType: VertexControlType.detached,
-                    icon: 'vertex-detached',
+                    icon: PackedIcon.vertexDetached,
+                    labelKey: 'vertex-detached',
                     isActive: allowActive &&
                         controlTypeValue == VertexControlType.detached.index,
                     vertices: vertices,
@@ -146,7 +152,8 @@ class VertexInspector extends ListenableInspectorBuilder {
                   _VertexTypeButton(
                     vertexType: CubicVertexBase.typeKey,
                     controlType: VertexControlType.asymmetric,
-                    icon: 'vertex-assymetric',
+                    icon: PackedIcon.vertexAssymetric,
+                    labelKey: 'vertex-assymetric',
                     isActive: allowActive &&
                         controlTypeValue == VertexControlType.asymmetric.index,
                     vertices: vertices,
@@ -195,7 +202,8 @@ class _VertexButtonDual extends StatelessWidget {
 class _VertexTypeButton extends StatefulWidget {
   final int vertexType;
   final VertexControlType controlType;
-  final String icon;
+  final Iterable<PackedIcon> icon;
+  final String labelKey;
   final bool isActive;
   final Iterable<PathVertex> vertices;
 
@@ -206,6 +214,7 @@ class _VertexTypeButton extends StatefulWidget {
     this.isActive,
     this.controlType,
     this.vertices,
+    this.labelKey,
   }) : super(key: key);
 
   @override
@@ -336,7 +345,7 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
               ),
               const SizedBox(height: 7),
               Text(
-                UIStrings.of(context).withKey(widget.icon),
+                UIStrings.of(context).withKey(widget.labelKey),
                 style: !isDisabled && (_hasHover || widget.isActive)
                     ? theme.textStyles.vertexTypeSelected
                     : theme.textStyles.vertexTypeLabel,

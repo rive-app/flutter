@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
@@ -6,14 +7,14 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'inspector_builder.dart';
 
 const iconList = [
-  'distribute-horizontal',
-  'distribute-vertical',
-  'align-left',
-  'align-center',
-  'align-right',
-  'align-top',
-  'distribute-mid',
-  'align-bot',
+  PackedIcon.distributeHorizontal,
+  PackedIcon.distributeVertical,
+  PackedIcon.alignLeft,
+  PackedIcon.alignCenter,
+  PackedIcon.alignRight,
+  PackedIcon.alignTop,
+  PackedIcon.distributeMid,
+  PackedIcon.alignBot,
 ];
 
 /// Expander for the alignment inspector.

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -23,7 +24,7 @@ class ToolPopupButton extends StatefulWidget {
   /// away with caching and building their children only once.
   final MakeToolPopupItems makeItems;
   final VoidCallback open;
-  final String defaultIcon;
+  final Iterable<PackedIcon> defaultIcon;
   final double width;
   final Tip tip;
   final Widget Function(BuildContext, OpenFileContext, bool) iconBuilder;

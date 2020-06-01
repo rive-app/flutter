@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -14,10 +15,9 @@ class PopupContextItem extends PopupListItem {
   /// item. For example, the Avatar in the hamburger menu.
   final PopupItemWidgetBuilder iconBuilder;
 
-  /// Provide the string name that matches a file in the images/icons folder
-  /// without the extension. So assets/images/icons/tool-create.png would just
-  /// be 'tool-create'.
-  final String icon;
+  /// Provide the packed icon definition from PackedIcon static icon
+  /// definitions.
+  final Iterable<PackedIcon> icon;
 
   /// Icon color which works as an override. If you want to only override the
   /// color in certain conditions, use the [iconColorBuilder].
@@ -175,7 +175,7 @@ class PopupContextItem extends PopupListItem {
             color: isHovered
                 ? Colors.white
                 : const Color.fromRGBO(112, 112, 112, 1),
-            icon: 'chevron'),
+            icon: PackedIcon.chevron),
       const SizedBox(width: 20),
     ]);
     return Row(
@@ -190,7 +190,8 @@ class PopupContextItem extends PopupListItem {
   double get height => isSeparator ? 20 : 40;
 
   /// Find the context item with the specified icon (if one exists).
-  static PopupContextItem withIcon(String icon, List<PopupContextItem> list) {
+  static PopupContextItem withIcon(
+      Iterable<PackedIcon> icon, List<PopupContextItem> list) {
     for (final item in list) {
       if (item.icon == icon) {
         return item;

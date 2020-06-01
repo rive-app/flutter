@@ -4,6 +4,7 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
@@ -53,7 +54,9 @@ class FolderTreeView extends StatelessWidget {
           child: Center(
             child: FolderTreeIcon(
               owner: item.data.owner,
-              icon: item.data.folder?.id == 0 ? 'trash' : 'folder',
+              icon: item.data.folder?.id == 0
+                  ? PackedIcon.trash
+                  : PackedIcon.folder,
               iconColor: isSelected(selectedStream)
                   ? colors.fileSelectedFolderIcon
                   : colors.fileUnselectedFolderIcon,
@@ -107,7 +110,7 @@ class FolderTreeView extends StatelessWidget {
               FolderTreeItemButton(
                 itemData: item.data,
                 isSelected: isSelected(selectedStream),
-                icon: 'settings-small',
+                icon: PackedIcon.settingsSmall,
                 tooltip: 'Settings',
                 onPress: () async {
                   await showSettings(item.data.owner, context: context);
@@ -119,7 +122,7 @@ class FolderTreeView extends StatelessWidget {
                 child: FolderTreeItemButton(
                   itemData: item.data,
                   isSelected: isSelected(selectedStream),
-                  icon: 'add',
+                  icon: PackedIcon.add,
                   tooltip: 'New File',
                   onPress: () async {
                     final createdFile = (item.data.owner is Team)
@@ -155,13 +158,13 @@ class FolderTreeIcon extends StatelessWidget {
     this.owner,
     this.iconColor,
     this.size = const Size(15, 15),
-    this.icon = 'folder',
+    this.icon = PackedIcon.folder,
     Key key,
   }) : super(key: key);
 
   final Owner owner;
   final Size size;
-  final String icon;
+  final Iterable<PackedIcon> icon;
   final Color iconColor;
 
   @override
@@ -273,7 +276,7 @@ class FolderTreeItemButton extends StatefulWidget {
   final FolderTreeItem itemData;
   final bool isSelected;
   final VoidCallback onPress;
-  final String icon;
+  final Iterable<PackedIcon> icon;
   final String tooltip;
 
   @override

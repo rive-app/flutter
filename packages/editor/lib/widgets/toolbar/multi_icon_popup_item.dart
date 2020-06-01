@@ -1,3 +1,4 @@
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
@@ -10,7 +11,7 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 class MultiIconPopupItem extends PopupContextItem {
   MultiIconPopupItem(
     String name, {
-    @required String Function() iconSelector,
+    @required Iterable<PackedIcon> Function() iconSelector,
     ShortcutAction shortcut,
     List<PopupContextItem> popup,
     ValueNotifier notifier,

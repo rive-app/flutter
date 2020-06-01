@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_core/event.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -199,7 +200,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
           const SizedBox(width: 8),
           TintedIcon(
             color: theme.colors.toolbarButton,
-            icon: 'dropdown-no-space',
+            icon: PackedIcon.dropdownNoSpace,
           ),
         ],
       );

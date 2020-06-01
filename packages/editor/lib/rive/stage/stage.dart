@@ -24,6 +24,7 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_editor/constants.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
@@ -470,7 +471,7 @@ class Stage extends Debouncer {
       case 2:
         _isPanning = true;
         _rightClickHandCursor?.remove();
-        _rightClickHandCursor = showCustomCursor('cursor-hand');
+        _rightClickHandCursor = showCustomCursor(PackedIcon.cursorHand);
         break;
       default:
     }
@@ -709,7 +710,7 @@ class Stage extends Debouncer {
     }
     // _worldMouse is null when we're hovered out of the stage
     if (_worldMouse != null && ShortcutAction.pan.value) {
-      _panHandCursor ??= showCustomCursor('cursor-hand');
+      _panHandCursor ??= showCustomCursor(PackedIcon.cursorHand);
     } else {
       _panHandCursor?.remove();
       _panHandCursor = null;
@@ -968,7 +969,7 @@ class Stage extends Debouncer {
     _customCursor?.show();
   }
 
-  CursorInstance showCustomCursor(String icon) {
+  CursorInstance showCustomCursor(Iterable<PackedIcon> icon) {
     if (_customCursor != null) {
       return CursorIcon.build(_customCursor, icon);
     }

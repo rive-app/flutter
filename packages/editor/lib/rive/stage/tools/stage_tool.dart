@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/packed_icon.dart';
 
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -12,7 +13,7 @@ abstract class StageTool implements StageDrawable {
   Stage _stage;
   Stage get stage => _stage;
 
-  String get icon;
+  Iterable<PackedIcon> get icon;
 
   /// Most tools will want their transforms in artboard world space.
   bool get inArtboardSpace => true;

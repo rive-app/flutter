@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -70,7 +71,7 @@ class TimelineViewportControls extends StatelessWidget {
                   LayoutId(
                     id: _ViewportControlPart.left,
                     child: OverlayHitDetect(
-                      customCursorIcon: 'cursor-resize-horizontal',
+                      customCursorIcon: PackedIcon.cursorResizeHorizontal,
                       dragContext: context,
                       child: const SizedBox(
                         width: grabberHitSize,
@@ -85,7 +86,7 @@ class TimelineViewportControls extends StatelessWidget {
                   LayoutId(
                     id: _ViewportControlPart.right,
                     child: OverlayHitDetect(
-                      customCursorIcon: 'cursor-resize-horizontal',
+                      customCursorIcon: PackedIcon.cursorResizeVertical,
                       dragContext: context,
                       child: const SizedBox(
                           width: grabberHitSize, height: grabberHitSize),

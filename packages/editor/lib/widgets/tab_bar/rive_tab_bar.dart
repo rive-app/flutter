@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/common/hit_deny.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
@@ -22,7 +23,7 @@ class RiveTabItem {
     this.file,
   });
   final OpenFileContext file;
-  final String icon;
+  final Iterable<PackedIcon> icon;
   final bool closeable;
 }
 

@@ -56,7 +56,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
-    - assets/images/icons/
+    - assets/images/icon_atlases/
     - assets/web/
 
   uses-material-design: true

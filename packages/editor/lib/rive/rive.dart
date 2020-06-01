@@ -15,6 +15,7 @@ import 'package:rive_api/models/file.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/frameDebounce.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -71,7 +72,7 @@ class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
 /// Main context for Rive editor.
 class Rive {
   /// The system tab for your files and settings.
-  static const systemTab = RiveTabItem(icon: 'rive', closeable: false);
+  static const systemTab = RiveTabItem(icon: PackedIcon.rive, closeable: false);
 
   final ValueNotifier<SelectionMode> selectionMode =
       ValueNotifier<SelectionMode>(SelectionMode.single);
@@ -195,7 +196,6 @@ class Rive {
               "name": value.file.name.value,
             }
           : {
-              "icon": value.icon,
             },
     );
 
@@ -239,7 +239,6 @@ class Rive {
               "name": value.file.name.value,
             }
           : {
-              "icon": value.icon,
             },
     );
 

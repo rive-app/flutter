@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
@@ -17,7 +18,7 @@ class InspectorPopoutTitle extends StatelessWidget {
     return Row(
       children: [
         TintedIcon(
-          icon: 'options',
+          icon: PackedIcon.options,
           color: theme.colors.toolbarButton,
         ),
         const SizedBox(width: 10),

@@ -5,6 +5,7 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/models/follow.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 
 import 'package:rive_editor/widgets/common/tinted_icon_button.dart';
@@ -61,7 +62,7 @@ class TeamDetailPanel extends StatelessWidget {
                   if (canEditTeam(team.permission))
                     TintedIconButton(
                       // padding: EdgeInsets.zero,
-                      icon: 'add',
+                      icon: PackedIcon.add,
                       onPress: () => showSettings(team,
                           context: context,
                           initialPanel: SettingsPanel.members),
@@ -149,7 +150,7 @@ class FollowUnfollow extends StatelessWidget {
             final following = snapshot.data.any((f) => ownerId == f.ownerId);
             if (following) {
               return TintedIconButton(
-                  icon: 'delete',
+                  icon: PackedIcon.delete,
                   padding: const EdgeInsets.all(0),
                   backgroundHover: Colors.transparent,
                   iconHover: theme.colors.buttonHover,
@@ -158,7 +159,7 @@ class FollowUnfollow extends StatelessWidget {
                   });
             } else {
               return TintedIconButton(
-                  icon: 'tool-create',
+                  icon: PackedIcon.toolCreate,
                   padding: const EdgeInsets.all(0),
                   backgroundHover: Colors.transparent,
                   iconHover: theme.colors.buttonHover,
