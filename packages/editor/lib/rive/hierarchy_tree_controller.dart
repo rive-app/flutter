@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:tree_widget/flat_tree_item.dart';
@@ -111,6 +112,11 @@ class HierarchyTreeController extends TreeController<Component> {
 
           // re-parent last after changing index
           treeItem.parent = newParent;
+          if (treeItem is Node) {
+            /// Keep the node in the same position it last was at before getting
+            /// parented.
+            treeItem.compensate();
+          }
           // toSort.add(newParent.children);
         }
 
@@ -130,6 +136,11 @@ class HierarchyTreeController extends TreeController<Component> {
           // treeItem.parent = target.data;
           targetContainer.children.moveToEnd(treeItem);
           treeItem.parent = targetContainer;
+          if (treeItem is Node) {
+            /// Keep the node in the same position it last was at before getting
+            /// parented.
+            treeItem.compensate();
+          }
           // targetContainer.addChild(treeItem);
           // target.data.children.append(treeItem);
           // target.data.children.sortFractional();

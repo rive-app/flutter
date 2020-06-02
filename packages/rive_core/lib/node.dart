@@ -2,6 +2,7 @@ import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/node_base.dart';
 import 'package:meta/meta.dart';
@@ -139,4 +140,35 @@ class Node extends NodeBase {
     super.parentChanged(from, to);
     markWorldTransformDirty();
   }
+
+  // -> editor-only
+
+  /// Compensate the world transform of this Node such that we remain in the
+  /// same WorldTransform once the parent's WorldTransform updates. Basically:
+  /// the parent has moved, our WorldTransform is cached at our current
+  /// transformation. Use this to compute the inverse to the new
+  /// ParentWorldTransform to keep us in the same visual position after the
+  /// update cycle completes.
+  void compensate() {
+    assert(parent is Node, 'can\'t compensate without parents');
+    // TODO: also can't compensate if we have an overrideWorldTransform (this
+    // plays in when we get bones).
+    var nodeParent = parent as Node;
+    nodeParent.calculateWorldTransform();
+    var parentWorldInverse = Mat2D();
+    if (!Mat2D.invert(parentWorldInverse, nodeParent.worldTransform)) {
+      return;
+    }
+    var local = Mat2D();
+    Mat2D.multiply(local, parentWorldInverse, worldTransform);
+
+    var components = TransformComponents();
+    Mat2D.decompose(local, components);
+    scaleX = components.scaleX;
+    scaleY = components.scaleY;
+    rotation = components.rotation;
+    x = components.x;
+    y = components.y;
+  }
+  // <- editor-only
 }

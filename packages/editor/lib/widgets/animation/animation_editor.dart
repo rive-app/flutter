@@ -43,8 +43,32 @@ class _StatefulEditingAnimation extends StatefulWidget {
       __StatefulEditingAnimationState();
 }
 
+/// Important that this uses BouncingScrollPhysics in order to overcome the edge
+/// case when changing content size at the bottom of the scroll list:
+/// https://github.com/rive-app/rive/issues/621
+class _BouncyCustomScrollController extends ScrollController {
+
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics,
+      ScrollContext context, ScrollPosition oldPosition) {
+    return ScrollPositionWithSingleContext(
+
+      // If you change this please check issue #621 and validate that resizing
+      // the scroll content works at the bounds and syncs both key and tree
+      // views.
+      physics: const BouncingScrollPhysics(),
+      context: context,
+      initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
+      oldPosition: oldPosition,
+      debugLabel: debugLabel,
+    );
+  }
+}
+
 class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
-  final ScrollController timelineVerticalScroll = ScrollController();
+  final ScrollController timelineVerticalScroll =
+      _BouncyCustomScrollController();
   KeyedObjectTreeController _treeController;
   @override
   void initState() {
