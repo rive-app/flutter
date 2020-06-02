@@ -64,6 +64,8 @@ abstract class ShapeTool extends DrawableTool {
     // a shortcut or something while the drag operation is continuing).
     _currentArtboard = activeArtboard;
 
+    activeArtboard.context.suppressAutoKey = true;
+
     _shape = makeShape(activeArtboard, (_path = makePath()))
       ..name = shapeName
       ..x = worldMouse[0]
@@ -72,7 +74,6 @@ abstract class ShapeTool extends DrawableTool {
 
   static Shape makeShape(Artboard activeArtboard, core.Path path) {
     var file = activeArtboard.context;
-    file.suppressAutoKey = true;
     Shape shape;
     file.batchAdd(() {
       shape = Shape();
