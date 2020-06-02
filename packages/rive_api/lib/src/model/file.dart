@@ -14,7 +14,7 @@ class File implements Named {
 
   final int id;
   final int _ownerId;
-  // TODO: teams and projects play funny games wiht us here
+  // TODO: teams and projects play funny games with us here
   // teams do not own their own files, projects do.
   // once we have projects in our front end, we can hopefully
   // remove this nonsense.

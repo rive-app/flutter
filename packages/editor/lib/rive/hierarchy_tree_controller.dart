@@ -112,7 +112,7 @@ class HierarchyTreeController extends TreeController<Component> {
 
           // re-parent last after changing index
           treeItem.parent = newParent;
-          if(treeItem is Node) {
+          if (treeItem is Node) {
             /// Keep the node in the same position it last was at before getting
             /// parented.
             treeItem.compensate();
@@ -136,7 +136,7 @@ class HierarchyTreeController extends TreeController<Component> {
           // treeItem.parent = target.data;
           targetContainer.children.moveToEnd(treeItem);
           treeItem.parent = targetContainer;
-          if(treeItem is Node) {
+          if (treeItem is Node) {
             /// Keep the node in the same position it last was at before getting
             /// parented.
             treeItem.compensate();
