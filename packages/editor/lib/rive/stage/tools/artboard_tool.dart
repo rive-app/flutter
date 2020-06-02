@@ -105,8 +105,12 @@ class ArtboardTool extends DrawableTool {
   }
 
   @override
-  void draw(Canvas canvas) =>
-      _tip.paint(canvas, Offset(_cursor[0] + 10, _cursor[1] + 10));
+  void draw(Canvas canvas) {
+    if (_cursor == null) {
+      return;
+    }
+    _tip.paint(canvas, Offset(_cursor[0] + 10, _cursor[1] + 10));
+  }
 
   @override
   Iterable<PackedIcon> get icon => PackedIcon.toolArtboard;

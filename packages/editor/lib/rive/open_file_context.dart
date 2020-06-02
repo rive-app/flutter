@@ -24,6 +24,7 @@ import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
+import 'package:rive_editor/rive/managers/revision_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -599,6 +600,24 @@ class OpenFileContext with RiveFileDelegate {
         }
       }
     });
+  }
+
+  final ValueNotifier<RevisionManager> _revisionManager =
+      ValueNotifier<RevisionManager>(null);
+  ValueListenable<RevisionManager> get revisionManager => _revisionManager;
+
+  /// Show the revision history.
+  void showRevisionHistory() {
+    var old = _revisionManager.value;
+    _revisionManager.value =
+        RevisionManager(api: api, ownerId: ownerId, fileId: fileId);
+    old?.dispose();
+  }
+
+  void hideRevisionHistory() {
+    var old = _revisionManager.value;
+    _revisionManager.value = null;
+    old?.dispose();
   }
 
   StreamSubscription<AnimationViewModel> _selectedAnimationSubscription;

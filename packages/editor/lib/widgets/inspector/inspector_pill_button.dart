@@ -26,14 +26,18 @@ class InspectorPillButton extends StatelessWidget {
       hoverColor: colors.inspectorPillHover,
       textColor: colors.inspectorPillText,
       hoverTextColor: colors.activeText,
-      icon: TintedIcon(
-        icon: icon,
-        color: colors.inspectorPillIcon,
-      ),
-      hoverIcon: TintedIcon(
-        icon: icon,
-        color: colors.activeText,
-      ),
+      icon: icon == null
+          ? null
+          : TintedIcon(
+              icon: icon,
+              color: colors.inspectorPillIcon,
+            ),
+      hoverIcon: icon == null
+          ? null
+          : TintedIcon(
+              icon: icon,
+              color: colors.activeText,
+            ),
       onTap: press,
     );
   }

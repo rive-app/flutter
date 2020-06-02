@@ -57,10 +57,10 @@ class HamburgerPopupButton extends StatelessWidget {
         //   'Team Permissions',
         //   select: () => _showModal(context, (_) => Container()),
         // ),
-        // PopupContextItem(
-        //   'Revision History',
-        //   select: () => _showModal(context, (_) => Container()),
-        // ),
+        PopupContextItem(
+          'Revision History',
+          select: () => ActiveFile.find(context).showRevisionHistory(),
+        ),
         PopupContextItem.separator(),
         // PopupContextItem(
         //   'Manual',
