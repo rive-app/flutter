@@ -112,10 +112,10 @@ class RiveFile {
 }
 
 T readRuntimeObject<T extends Core<CoreContext>>(BinaryReader reader,
-    [T object]) {
+    [T instance]) {
   int coreObjectKey = reader.readVarUint();
 
-  object ??= RiveCoreContext.makeCoreInstance(coreObjectKey);
+  var object = instance ?? RiveCoreContext.makeCoreInstance(coreObjectKey);
   if (object is! T) {
     return null;
   }
@@ -151,5 +151,5 @@ T readRuntimeObject<T extends Core<CoreContext>>(BinaryReader reader,
     RiveCoreContext.setObjectProperty(
         object, propertyKey, fieldType.deserialize(valueReader));
   }
-  return object;
+  return object as T;
 }

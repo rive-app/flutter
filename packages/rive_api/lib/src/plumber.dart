@@ -5,25 +5,22 @@ import 'package:rxdart/subjects.dart';
 ///
 /// It provides a mapping between a data [Type], and a Stream for that type.
 ///
-/// E.g.:
-/// If the application wants to know the [CurrentDirectory] (i.e. the directory
-/// currently visible in the file browser), it can ask the [Plumber] to access
-/// the pipe with that type.
-/// And since the file browser will be listening for [CurrentDirectory] changes,
-/// we can swap the current directory by sending a new [CurrentDirectory] down
-/// the pipe.
+/// E.g.: If the application wants to know the [CurrentDirectory] (i.e. the
+/// directory currently visible in the file browser), it can ask the [Plumber]
+/// to access the pipe with that type. And since the file browser will be
+/// listening for [CurrentDirectory] changes, we can swap the current directory
+/// by sending a new [CurrentDirectory] down the pipe.
 ///
-/// The application can also add an (optional) id for a given type to augment the
-///  mapping and have multiple streams of the same type.
+/// The application can also add an (optional) id for a given type to augment
+///  the mapping and have multiple streams of the same type.
 ///
-/// E.g.:
-/// In the case of multiple files, the Plumber can use a [String] as an id to
-/// have a two-level mapping: first identify the type, then identify the pipe
+/// E.g.: In the case of multiple files, the Plumber can use a [String] as an id
+/// to have a two-level mapping: first identify the type, then identify the pipe
 /// with the id.
 class Plumber {
-  Plumber._();
-  static Plumber _instance = Plumber._();
   factory Plumber() => _instance;
+  Plumber._();
+  static final Plumber _instance = Plumber._();
 
   final Map<Type, Map<int, BehaviorSubject>> _pipes = {};
 
@@ -36,27 +33,20 @@ class Plumber {
     if (!_pipes[T].containsKey(id)) {
       _pipes[T][id] = BehaviorSubject<T>();
     }
-    return _pipes[T][id];
+    return _pipes[T][id] as BehaviorSubject<T>;
   }
 
   bool _exists<T>([int id]) {
     return _pipes.containsKey(T) && _pipes[T].containsKey(id);
   }
 
-  ValueStream<T> getStream<T>([int id]) {
-    var pipe = _pipeInit<T>(id);
-    return pipe.stream;
-  }
+  ValueStream<T> getStream<T>([int id]) =>_pipeInit<T>(id).stream;
 
-  T peek<T>([int id]) {
-    var pipe = _pipeInit<T>(id);
-    return pipe.value;
-  }
+  T peek<T>([int id]) => _pipeInit<T>(id).value;
 
-  void message<T>(T message, [int id]) {
-    var pipe = _pipeInit<T>(id);
-    pipe.add(message);
-  }
+
+  void message<T>(T message, [int id]) => _pipeInit<T>(id).add(message);
+
 
   void flush<T>([int id]) {
     var pipe = _pipeInit<T>(id);

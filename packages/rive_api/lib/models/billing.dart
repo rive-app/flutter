@@ -62,25 +62,31 @@ class RiveTeamBilling {
 extension DeserializeHelperHelper on Map<String, dynamic> {
   TeamsOption getPlan() {
     dynamic value = this['plan'];
-    switch (value) {
-      case 'normal':
-        return TeamsOption.basic;
-      case 'premium':
-        return TeamsOption.premium;
-      default:
-        return null;
+    if (value is String) {
+      switch (value) {
+        case 'normal':
+          return TeamsOption.basic;
+        case 'premium':
+          return TeamsOption.premium;
+        default:
+          return null;
+      }
     }
+    return null;
   }
 
   BillingFrequency getFrequency() {
     dynamic value = this['cycle'];
-    switch (value) {
-      case 'monthly':
-        return BillingFrequency.monthly;
-      case 'yearly':
-        return BillingFrequency.yearly;
-      default:
-        return null;
+    if (value is String) {
+      switch (value) {
+        case 'monthly':
+          return BillingFrequency.monthly;
+        case 'yearly':
+          return BillingFrequency.yearly;
+        default:
+          return null;
+      }
     }
+    return null;
   }
 }

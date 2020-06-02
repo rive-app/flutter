@@ -191,6 +191,9 @@ class RiveColors {
 
   Color get vertexIcon => const Color(0xFF848484);
   Color get vertexIconHover => white;
+
+  // Login colors
+  Color get loginLogo => const Color(0xFF000000);
 }
 
 /// TextStyles used in the Rive Theme

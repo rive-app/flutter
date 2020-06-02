@@ -31,14 +31,14 @@ void main() {
     });
 
     test('load me', () async {
-      final testComplete = Completer();
+      final testComplete = Completer<void>();
 
       Plumber().getStream<Me>().listen((event) {
         expect(event.name, 'MaxMax');
         testComplete.complete();
       });
 
-      userManager.loadMe();
+      await userManager.loadMe();
 
       await testComplete.future;
     });
@@ -51,9 +51,9 @@ void main() {
       ]);
 
       // Send empty user first.
-      await userManager.logout();
+      userManager.logout();
       await userManager.loadMe();
-      await userManager.logout();
+      userManager.logout();
 
       await testComplete.future;
     });
@@ -66,7 +66,7 @@ void main() {
       ]);
 
       await userManager.loadMe();
-      await userManager.logout();
+      userManager.logout();
       await userManager.loadMe();
 
       await testComplete.future;

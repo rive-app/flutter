@@ -26,7 +26,7 @@ class User extends Owner {
   String toString() => 'User($ownerId, $name)';
 
   @override
-  bool operator ==(o) => o is User && o.ownerId == ownerId;
+  bool operator ==(Object o) => o is User && o.ownerId == ownerId;
 
   @override
   int get hashCode => ownerId;
@@ -69,7 +69,7 @@ class TeamMember extends Owner {
   String toString() => 'TeamMember($ownerId, $name)';
 
   @override
-  bool operator ==(o) => o is TeamMember && o.ownerId == ownerId;
+  bool operator ==(Object o) => o is TeamMember && o.ownerId == ownerId;
 
   @override
   int get hashCode => ownerId;

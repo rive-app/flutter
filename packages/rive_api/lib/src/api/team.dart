@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:utilities/deserialize.dart';
 
 final _log = Logger('Rive API Volume');
 
@@ -16,7 +17,7 @@ class TeamApi {
     // Get the user's team volumes
     final res = await api.getFromPath('/api/teams');
     try {
-      final data = json.decode(res.body) as List<dynamic>;
+      final data = json.decodeList<Map<String, dynamic>>(res.body);
       return TeamDM.fromDataList(data);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
@@ -28,7 +29,7 @@ class TeamApi {
     // Get the user's team volumes
     final res = await api.getFromPath('/api/teams/$teamId/affiliates');
     try {
-      final data = json.decode(res.body) as List<dynamic>;
+      final data = json.decodeList<Map<String, dynamic>>(res.body);
       return TeamMemberDM.formDataList(data);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');

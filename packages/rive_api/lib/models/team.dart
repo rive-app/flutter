@@ -14,7 +14,7 @@ class RiveTeam extends RiveOwner {
       {@required this.id,
       @required int ownerId,
       @required String name,
-      @required username,
+      @required String username,
       @required this.permission,
       @required String avatar})
       : super(id: ownerId, name: name, username: username, avatar: avatar);
@@ -28,17 +28,18 @@ class RiveTeam extends RiveOwner {
       permission: data.getTeamRole());
 
   /// Returns a list of teams from a JSON document
-  static List<RiveTeam> fromDataList(List<dynamic> dataList) => dataList
-      .map<RiveTeam>(
-        (data) => RiveTeam.fromData(data),
-      )
-      .toList(growable: false);
+  static List<RiveTeam> fromDataList(List<Map<String, dynamic>> dataList) =>
+      dataList
+          .map<RiveTeam>(
+            (data) => RiveTeam.fromData(data),
+          )
+          .toList(growable: false);
 
   @override
   String get displayName => name;
 
   List<RiveUser> get teamMembers => _members;
-  void set teamMembers(List<RiveUser> members) {
+  set teamMembers(List<RiveUser> members) {
     _members
       ..clear()
       ..addAll(members);

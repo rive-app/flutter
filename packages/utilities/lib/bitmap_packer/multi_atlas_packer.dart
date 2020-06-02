@@ -12,7 +12,7 @@ class MultiAtlasPacker {
 
   MultiAtlasPacker({this.maxWidth, this.maxHeight, this.allowRotations});
 
-  void addBitmap<T>(int width, int height, int padding, Object userData) {
+  void addBitmap(int width, int height, int padding, Object userData) {
     _bitmaps.add(BitmapRect(
       userData: userData,
       width: width,
@@ -29,7 +29,7 @@ class MultiAtlasPacker {
 
   Iterable<AtlasPacker> _pack(Iterable<BitmapRect> bitmaps,
       [List<AtlasPacker> results]) {
-    results ??= List<AtlasPacker>();
+    results ??= <AtlasPacker>[];
 
     AtlasPacker best;
     for (final method in BitmapPackingMethod.values) {

@@ -8,7 +8,7 @@ class BrowserFile extends StatelessWidget {
   final File file;
   final bool selected;
 
-  Widget _label(context) {
+  Widget _label(BuildContext context) {
     final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
     return Padding(
@@ -31,7 +31,7 @@ class BrowserFile extends StatelessWidget {
   // Internal radius looks better with an extra pixel of padding.
   double get radiusDelta => selected ? 5 : 0;
 
-  Widget _screenshot(context) {
+  Widget _screenshot(BuildContext context) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     return ClipRRect(

@@ -7,12 +7,15 @@ class CurrentDirectory {
   final int folderId;
 
   @override
-  bool operator ==(o) =>
+  bool operator ==(Object o) =>
       o is CurrentDirectory &&
       o.folderId == folderId &&
       o.owner.ownerId == owner.ownerId;
 
-  int get hashId => szudzik(owner.ownerId, folderId);
+  @override
+  int get hashCode => szudzik(owner.ownerId, folderId);
+
+  int get hashId => hashCode;
 
   @override
   String toString() =>

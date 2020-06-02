@@ -12,6 +12,7 @@ class LocalDataIO extends LocalData {
   @override
   Future<bool> initialize() async {
     var dir = Directory('${platform.path}/$context');
+    // ignore: avoid_slow_async_io
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
@@ -23,6 +24,7 @@ class LocalDataIO extends LocalData {
   Future<Uint8List> load(String name) async {
     assert(_dataDirectory != null);
     var file = File('${_dataDirectory.path}/$name');
+    // ignore: avoid_slow_async_io
     if (!await file.exists()) {
       return null;
     }
@@ -37,13 +39,16 @@ class LocalDataIO extends LocalData {
   }
 }
 
-LocalData makeLocalData(LocalDataPlatform platform, String context) =>
-    LocalDataIO(platform, context);
+LocalData makeLocalData(LocalDataPlatform platform, String context) {
+  assert(platform is LocalDataIOPlatform);
+  return LocalDataIO(platform as LocalDataIOPlatform, context);
+}
 
 class LocalDataIOPlatform extends LocalDataPlatform {
   String _path;
   String get path => _path;
 
+  @override
   Future<bool> initialize() async {
     var dir = await dataDirectory('');
     _path = dir?.path;

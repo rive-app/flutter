@@ -50,7 +50,8 @@ void main(List<String> args) async {
     code.writeln('static const Iterable<PackedIcon> $name = [');
     for (final icon in rects) {
       code.writeln(
-          'PackedIcon._(${icon.rect.x}, ${icon.rect.y}, ${icon.rect.width}, ${icon.rect.height}, ${icon.scale}, ${icon.index}),');
+          'PackedIcon._(${icon.rect.x}, ${icon.rect.y}, ${icon.rect.width}, '
+          ' ${icon.rect.height}, ${icon.scale}, ${icon.index}),');
     }
     code.writeln('];');
   });
@@ -77,7 +78,10 @@ Future<void> packAtlas(int scale, String directory, String dest) async {
       name = name.substring(name.lastIndexOf('/') + 1);
       name = name.substring(0, name.lastIndexOf('.'));
       var expression = RegExp('(-|\\s|_)([^-\\s_]+)');
-      name = name.replaceAllMapped(expression, (match) => match.group(2)[0].toUpperCase() + match.group(2).substring(1));
+      name = name.replaceAllMapped(
+          expression,
+          (match) =>
+              match.group(2)[0].toUpperCase() + match.group(2).substring(1));
       name = name.replaceAll(' ', '');
       _imageNames[image] = name;
     }

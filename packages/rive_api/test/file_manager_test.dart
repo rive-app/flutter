@@ -1,4 +1,4 @@
-@Timeout(const Duration(seconds: 1))
+@Timeout(Duration(seconds: 1))
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -62,8 +62,8 @@ void main() {
     });
 
     test('new me', () async {
-      final meFolderCompleter = Completer();
-      final generalFolderCompleter = Completer();
+      final meFolderCompleter = Completer<void>();
+      final generalFolderCompleter = Completer<void>();
       Plumber().getStream<List<Folder>>(me.hashCode).listen((folders) {
         expect(folders.length, 2);
         meFolderCompleter.complete();
@@ -102,9 +102,9 @@ void main() {
 
       Plumber().message(me);
       // NOTE: gotta force a bit of an order, or its gets unpredictable
-      await new Future.delayed(const Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       Plumber().message(altMe);
-      await new Future.delayed(const Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       Plumber().message(altMe);
       await meCompleter.future;
       await altMeCompleter.future;
@@ -122,7 +122,7 @@ void main() {
       // if things happen more spaced out we'd expect to see 0,1,2,3 here
       final generalCompleter =
           testStream(Plumber().getStream<Map<Owner, List<Folder>>>(), [
-        (Map<Owner, List<Folder>> folderMap) => folderMap.keys.length == 0,
+        (Map<Owner, List<Folder>> folderMap) => folderMap.keys.isEmpty,
         (Map<Owner, List<Folder>> folderMap) => folderMap.keys.length == 3,
         (Map<Owner, List<Folder>> folderMap) => folderMap.keys.length == 3,
         (Map<Owner, List<Folder>> folderMap) => folderMap.keys.length == 3,
@@ -152,7 +152,7 @@ void main() {
       final generalCompleter =
           testStream(Plumber().getStream<Map<Owner, List<Folder>>>(), [
         // initialize list
-        (Map<Owner, List<Folder>> folderMap) => folderMap.keys.length == 0,
+        (Map<Owner, List<Folder>> folderMap) => folderMap.keys.isEmpty,
         // all 3 teams load real close together
         (Map<Owner, List<Folder>> folderMap) => folderMap.keys.length == 3,
         (Map<Owner, List<Folder>> folderMap) => folderMap.keys.length == 3,
@@ -166,7 +166,7 @@ void main() {
 
       Plumber().message(teams);
 
-      await new Future.delayed(const Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       Plumber().message(teams.sublist(1));
       await firstTeamCompleter.future;
       await generalCompleter.future;

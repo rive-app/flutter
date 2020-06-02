@@ -51,7 +51,7 @@ class Me extends User {
   bool get isEmpty => ownerId == null;
 
   @override
-  bool operator ==(o) => o is Me && o.ownerId == ownerId;
+  bool operator ==(Object o) => o is Me && o.ownerId == ownerId;
 
   @override
   int get hashCode => ownerId;

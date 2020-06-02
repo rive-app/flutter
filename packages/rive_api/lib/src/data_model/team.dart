@@ -15,7 +15,7 @@ class TeamDM extends OwnerDM {
   final String avatarUrl;
   final String permission;
 
-  static Iterable<TeamDM> fromDataList(List<dynamic> data) =>
+  static Iterable<TeamDM> fromDataList(List<Map<String, dynamic>> data) =>
       data.map((d) => TeamDM.fromData(d));
 
   factory TeamDM.fromData(Map<String, dynamic> data) => TeamDM(
@@ -30,7 +30,7 @@ class TeamDM extends OwnerDM {
   String toString() => 'TeamDM($ownerId, $name)';
 
   @override
-  bool operator ==(o) => o is TeamDM && o.ownerId == ownerId;
+  bool operator ==(Object o) => o is TeamDM && o.ownerId == ownerId;
 
   @override
   int get hashCode => ownerId;

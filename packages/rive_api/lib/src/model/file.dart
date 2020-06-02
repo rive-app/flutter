@@ -19,6 +19,7 @@ class File implements Named {
   // once we have projects in our front end, we can hopefully
   // remove this nonsense.
   final int fileOwnerId;
+  @override
   final String name;
   final String preview;
 
@@ -36,7 +37,7 @@ class File implements Named {
   int get ownerId => _ownerId ?? fileOwnerId;
 
   @override
-  bool operator ==(o) => o is File && o.id == id && o.ownerId == ownerId;
+  bool operator ==(Object o) => o is File && o.id == id && o.ownerId == ownerId;
 
   @override
   int get hashCode => szudzik(id, ownerId);

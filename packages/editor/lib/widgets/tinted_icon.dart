@@ -1,8 +1,9 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'dart:ui' as ui;
 
 /// How to position the icon when actually rendered to layer pixels.
 enum TintedIconPosition {

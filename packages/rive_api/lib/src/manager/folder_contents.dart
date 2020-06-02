@@ -6,6 +6,9 @@ import 'package:rive_api/plumber.dart';
 import 'package:utilities/utilities.dart';
 
 class FolderContentsManager with Subscriptions {
+  factory FolderContentsManager() => _instance;
+  static final  _instance = FolderContentsManager._();
+
   FolderContentsManager._()
       : _fileApi = FileApi(),
         _folderApi = FolderApi() {
@@ -17,9 +20,6 @@ class FolderContentsManager with Subscriptions {
         _folderApi = folderApi {
     _subscribe();
   }
-
-  static FolderContentsManager _instance = FolderContentsManager._();
-  factory FolderContentsManager() => _instance;
 
   final FileApi _fileApi;
   final FolderApi _folderApi;
@@ -152,7 +152,7 @@ class FolderContentsManager with Subscriptions {
         FolderContents(files: fileList, folders: folderList), directory.hashId);
   }
 
-  void delete() async {
+  Future<void> delete() async {
     var selection = Plumber().peek<Selection>();
     var currentDirectory = Plumber().peek<CurrentDirectory>();
     if (currentDirectory.owner is Team) {
@@ -172,7 +172,7 @@ class FolderContentsManager with Subscriptions {
     FileManager().loadFolders(currentDirectory.owner);
   }
 
-  void rename(target, String newName) async {
+  Future<void> rename(Object target, String newName) async {
     var currentDirectory = Plumber().peek<CurrentDirectory>();
     if (target is File) {
       if (currentDirectory.owner is User) {
@@ -205,8 +205,8 @@ class FolderContentsManager with Subscriptions {
 class _FolderContentsCache {
   /// Maps parent Folder ID to the Files/Folders it contains.
   /// Files/Folders are also mapped <id, Folder>
-  final files = <File>{};
-  final folders = <Folder>{};
+  final Set<File> files = {};
+  final Set<Folder> folders = {};
 
   List<Folder> getFoldersByParent(int parentId) => folders
       .where((folder) =>

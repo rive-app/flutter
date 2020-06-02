@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:utilities/deserialize.dart';
 
 final _log = Logger('Rive API Volume');
 
@@ -31,13 +32,14 @@ class FolderApi {
   Future<List<FolderDM>> _folders(String path, int ownerId) async {
     final res = await api.getFromPath(path);
     try {
-      final data = json.decode(res.body) as Map<String, Object>;
+      final data = json.decodeMap(res.body);
       // Check that the user's signed in
       if (!data.containsKey('folders')) {
         _log.severe('Incorrectly formatted folders json response: $res.body');
-        throw FormatException('Incorrectly formatted folders json response');
+        throw const FormatException(
+            'Incorrectly formatted folders json response');
       }
-      return FolderDM.fromDataList(data['folders'], ownerId);
+      return FolderDM.fromDataList(data.getList('folders'), ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting folder api response: $e');
       rethrow;
@@ -67,8 +69,8 @@ class FolderApi {
     String payload = json.encode({
       'data': {'folderName': newName, 'folderParentId': newParentId}
     });
-    return await api.patch(
-        api.host + '/api/teams/${teamOwnerId}/folders/${folder.id}',
+    return api.patch(
+        api.host + '/api/teams/$teamOwnerId/folders/${folder.id}',
         body: payload);
   }
 
@@ -89,14 +91,14 @@ class FolderApi {
       'data': {'folderName': 'New Folder'}
     });
     var response = await api.post(
-        api.host + '/api/teams/${teamId}/folders/${folderId}',
+        api.host + '/api/teams/$teamId/folders/$folderId',
         body: payload);
     return _parseFolderResponse(response, teamId);
   }
 
   FolderDM _parseFolderResponse(Response response, int ownerId) {
     if (response.statusCode == 200) {
-      var folderResponse = json.decode(response.body);
+      var folderResponse = json.decodeMap(response.body);
       return FolderDM.fromData(folderResponse, ownerId);
     }
     return null;

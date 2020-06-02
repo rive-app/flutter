@@ -7,6 +7,8 @@ import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 import 'package:tree_widget/tree_widget.dart';
 
+// ignore_for_file: unnecessary_getters_setters
+
 class TreeItem {
   final String name;
   final List<TreeItem> children;
@@ -20,7 +22,7 @@ class PropertyTreeItem extends TreeItem {
 }
 
 class MyTreeController extends TreeController<TreeItem> {
-  List<TreeItem> _data;
+  Iterable<TreeItem> _data;
   MyTreeController(this._data) : super();
 
   @override
@@ -147,7 +149,7 @@ void main() {
       final data = [treeRoot];
       final controller = MyTreeController(data)..flatten();
 
-      final iconWidget = Icon(Icons.block);
+      const iconWidget = Icon(Icons.block);
 
       final treeWidget = TreeView<TreeItem>(
         controller: controller,

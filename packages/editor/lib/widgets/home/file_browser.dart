@@ -56,7 +56,6 @@ void editName<T extends Named>(BuildContext context, T target) {
           Navigator.of(context, rootNavigator: true).pop();
         }
 
-        ;
         return SizedBox(
           height: 200,
           width: 400,
@@ -114,7 +113,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
     super.dispose();
   }
 
-  int _getMaxColumns(width, cellWidth) {
+  int _getMaxColumns(double width, double cellWidth) {
     return ((width - horizontalPadding * 2 + spacing) / (cellWidth + spacing))
         .floor();
   }
@@ -411,7 +410,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         var selection = Plumber().peek<Selection>();
         if (rightClick && selection != null) {
           ListPopup.show(context,
-              itemBuilder: (popupContext, item, isHovered) =>
+              itemBuilder: (popupContext, PopupContextItem item, isHovered) =>
                   item.itemBuilder(popupContext, isHovered),
               items: [
                 if (selection.files.length + selection.folders.length == 1)

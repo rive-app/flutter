@@ -4,6 +4,7 @@ import 'dart:core';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/follow.dart';
+import 'package:utilities/deserialize.dart';
 
 final Logger log = Logger('Rive API');
 
@@ -18,10 +19,15 @@ class FollowingApi {
   Future<Iterable<RiveFollowee>> followees(int ownerId) async {
     final res =
         await api.get('${api.host}/api/artists/$ownerId/following-oldest');
+
     if (res.statusCode == 200) {
-      final followees =
-          RiveFollowee.fromDataList(json.decode(res.body)['artists']);
-      return followees;
+      var artistListData =
+          json.decodeMap(res.body).getList<Map<String, dynamic>>('artists');
+      if (artistListData == null) {
+        throw Exception('Malformed response, missing artists list.');
+      } else {
+        return RiveFollowee.fromDataList(artistListData);
+      }
     } else {
       throw Exception('Error fetching followees: ${res.statusCode}');
     }

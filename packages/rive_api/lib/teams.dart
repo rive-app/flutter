@@ -11,6 +11,8 @@ import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/models/user.dart';
 
+import 'package:utilities/deserialize.dart';
+
 final Logger log = Logger('Rive API');
 
 /// Api for accessing the signed in users folders and files.
@@ -19,7 +21,7 @@ class RiveTeamsApi<T extends RiveTeam> {
   final RiveApi api;
 
   /// POST /api/teams
-  Future<T> createTeam(
+  Future<RiveTeam> createTeam(
       {@required String teamName,
       @required String plan,
       @required String frequency,
@@ -34,7 +36,7 @@ class RiveTeamsApi<T extends RiveTeam> {
       }
     });
     var response = await api.post(api.host + '/api/teams', body: payload);
-    Map<String, dynamic> data = json.decode(response.body);
+    final data = json.decodeMap(response.body);
 
     final team = RiveTeam.fromData(data);
     team.teamMembers = await getAffiliates(team.ownerId);
@@ -58,9 +60,9 @@ class RiveTeamsApi<T extends RiveTeam> {
 
   /// GET /api/teams
   /// Returns the teams for the current user
-  Future<List<T>> get teams async {
+  Future<List<RiveTeam>> get teams async {
     var response = await api.get(api.host + '/api/teams');
-    List<dynamic> data = json.decode(response.body);
+    final data = json.decodeList<Map<String, dynamic>>(response.body);
 
     var teams = RiveTeam.fromDataList(data);
     for (final team in teams) {
@@ -74,7 +76,7 @@ class RiveTeamsApi<T extends RiveTeam> {
   Future<List<RiveUser>> getAffiliates(int teamId) async {
     var response = await api.get(api.host + '/api/teams/$teamId/affiliates');
 
-    List<dynamic> data = json.decode(response.body);
+    final data = json.decodeList<Map<String, dynamic>>(response.body);
     var teamUsers = data
         .map((userData) => RiveUser.asTeamMember(userData))
         .toList(growable: false);
@@ -84,8 +86,8 @@ class RiveTeamsApi<T extends RiveTeam> {
 
   Future<RiveTeamBilling> getBillingInfo(int teamId) async {
     var response = await api.get(api.host + '/api/teams/$teamId/billing');
-    dynamic data = json.decode(response.body);
-    return RiveTeamBilling.fromData(data['data']);
+    final data = json.decodeMap(response.body);
+    return RiveTeamBilling.fromData(data.getMap<String, dynamic>('data'));
   }
 
   Future<bool> updatePlan(
@@ -102,9 +104,9 @@ class RiveTeamsApi<T extends RiveTeam> {
 
     var response = await api.post(api.host + '/api/teams/$teamId/avatar',
         body: bytes.buffer.asInt8List());
-    Map<String, dynamic> data = json.decode(response.body);
+    final data = json.decodeMap(response.body);
 
-    return data['url'];
+    return data.getString('url');
   }
 
   /// Send a list of team invites to users

@@ -20,13 +20,13 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatelessWidget {
-  MyHomePage({Key key}) : super(key: key);
+  const MyHomePage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class MyHomePage extends StatelessWidget {
       body: StreamBuilder(
         stream: AdminManager.instance.ready,
         builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data) {
+          if (snapshot.hasData && snapshot.data != null) {
             return StreamBuilder<RiveUser>(
               stream: AdminManager.instance.user,
               builder: (context, snapshot) {
@@ -47,15 +47,17 @@ class MyHomePage extends StatelessWidget {
                         ? AdminView()
                         : Center(
                             child: ConstrainedBox(
-                              constraints: BoxConstraints(
+                              constraints: const BoxConstraints(
                                 maxWidth: 500,
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  SizedBox(height: 20),
-                                  Text(
-                                      'You do not have access to use this tool.'),
+                                  const SizedBox(height: 20),
+                                  const Text(
+                                    'You do not have access '
+                                    'to use this tool.',
+                                  ),
                                   Signout(),
                                 ],
                               ),
@@ -64,7 +66,7 @@ class MyHomePage extends StatelessWidget {
               },
             );
           } else {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
         },
       ),

@@ -37,7 +37,7 @@ void main() {
     });
 
     test('load teams', () async {
-      final testComplete = Completer();
+      final testComplete = Completer<void>();
 
       Plumber().getStream<List<Team>>().listen((teams) {
         expect(teams.length, 2);
@@ -50,7 +50,7 @@ void main() {
     });
 
     test('load teams on new login', () async {
-      final testComplete = Completer();
+      final testComplete = Completer<void>();
 
       Plumber().getStream<List<Team>>().listen((teams) {
         testComplete.complete();

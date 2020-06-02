@@ -6,6 +6,7 @@ import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:utilities/deserialize.dart';
 
 final _log = Logger('File Api');
 const specialFolderIds = {0, 1};
@@ -15,10 +16,10 @@ class FileApi {
   final RiveApi api;
 
   Future<List<FileDM>> myFiles(int ownerId, int folderId) async =>
-      _files('/api/my/files/a-z/rive/${folderId}', ownerId);
+      _files('/api/my/files/a-z/rive/$folderId', ownerId);
 
   Future<List<FileDM>> teamFiles(int ownerId, int folderId) async =>
-      _files('/api/teams/${ownerId}/files/a-z/rive/${folderId}', ownerId);
+      _files('/api/teams/$ownerId/files/a-z/rive/$folderId', ownerId);
 
   Future<void> deleteMyFiles(List<int> fileIds, List<int> folderIds) async {
     return _deleteFiles('/api/my/files', fileIds, folderIds);
@@ -26,7 +27,7 @@ class FileApi {
 
   Future<void> deleteTeamFiles(
       int teamOwnerId, List<int> fileIds, List<int> folderIds) async {
-    return _deleteFiles('/api/teams/${teamOwnerId}/files', fileIds, folderIds);
+    return _deleteFiles('/api/teams/$teamOwnerId/files', fileIds, folderIds);
   }
 
   Future<void> _deleteFiles(
@@ -44,7 +45,7 @@ class FileApi {
   Future<List<FileDM>> _files(String url, [int ownerId]) async {
     final res = await api.get(api.host + url);
     try {
-      final data = json.decode(res.body) as List<dynamic>;
+      final data = json.decodeList<int>(res.body);
       return FileDM.fromIdList(data, ownerId);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
@@ -57,7 +58,7 @@ class FileApi {
 
   Future<List<FileDM>> teamFileDetails(
           List<int> fileIds, int teamOwnerId) async =>
-      _fileDetails('/api/teams/${teamOwnerId}/files', fileIds);
+      _fileDetails('/api/teams/$teamOwnerId/files', fileIds);
 
   Future<List<FileDM>> _fileDetails(String url, List fileIds) async {
     var res = await api.post(
@@ -66,9 +67,9 @@ class FileApi {
     );
 
     try {
-      final data = json.decode(res.body) as Map<String, Object>;
-      final cdn = CdnDM.fromData(data['cdn']);
-      return FileDM.fromDataList(data['files'], cdn);
+      final data = json.decodeMap(res.body);
+      final cdn = CdnDM.fromData(data.getMap<String, dynamic>('cdn'));
+      return FileDM.fromDataList(data.getList('files'), cdn);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
       rethrow;
@@ -116,7 +117,7 @@ class FileApi {
       'data': {'fileName': 'New File'}
     });
     var response = await api.post(
-        api.host + '/api/teams/${teamId}/folders/${folderId}/new/rive/',
+        api.host + '/api/teams/$teamId/folders/$folderId/new/rive/',
         body: payload);
     return _parseFileResponse(response);
   }

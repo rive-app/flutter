@@ -38,15 +38,16 @@ class NotificationDM {
   final DateTime dateTime;
 
   /// Builds a list of notifications from json data
-  static List<NotificationDM> fromDataList(List<dynamic> dataList) => dataList
-      .map<NotificationDM>((data) => NotificationDM.fromData(data))
-      .toList(growable: false);
+  static List<NotificationDM> fromDataList(
+          List<Map<String, dynamic>> dataList) =>
+      dataList
+          .map<NotificationDM>((data) => NotificationDM.fromData(data))
+          .toList(growable: false);
 
   /// Builds the right type of notification based on json data
   factory NotificationDM.fromData(Map<String, dynamic> data) {
-    final type = notificationTypeFromInt(data['t']);
-    // Need to explicitly cast here for the extension methods to work
-    final userData = data['u'] as Map<String, dynamic>;
+    final type = notificationTypeFromInt(data.getInt('t'));
+    final userData = data.getMap<String, dynamic>('u');
 
     switch (type) {
       case NotificationType.teamInvite:

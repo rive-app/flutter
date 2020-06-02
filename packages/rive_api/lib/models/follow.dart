@@ -8,7 +8,8 @@ class RiveFollowee {
   final String name;
   final String username;
 
-  static Iterable<RiveFollowee> fromDataList(List<dynamic> dataList) =>
+  static Iterable<RiveFollowee> fromDataList(
+          List<Map<String, dynamic>> dataList) =>
       dataList.map<RiveFollowee>((data) => RiveFollowee.fromData(data));
 
   factory RiveFollowee.fromData(Map<String, dynamic> data) {

@@ -5,17 +5,18 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/owner.dart';
 import 'package:rive_api/models/profile.dart';
+import 'package:utilities/deserialize.dart';
 
 /// Api for accessing the signed in users folders and files.
 class RiveProfilesApi<T extends RiveOwner> {
   final RiveApi api;
-  final log = Logger('Rive API');
+  final _log = Logger('Rive API');
   RiveProfilesApi(this.api);
 
   Future<void> updateInfo(Owner owner, {RiveProfile profile}) async {
     if (owner is Team) {
       return _updateTeamInfo(owner, profile);
-    } else {
+    } else if (owner is User) {
       return _updateUserInfo(owner, profile);
     }
   }
@@ -44,11 +45,11 @@ class RiveProfilesApi<T extends RiveOwner> {
         await api.put(api.host + '/api/teams/$teamId', body: payload);
     print("OK? ${response.statusCode}");
     if (response.statusCode != 200) {
-      // TODO: some form of error handling? also whats wrong with our error logging :D
+      // TODO: some form of error handling? also whats wrong with our error
+      // logging :D
       var message = 'Could not create new team ${response.body}';
-      log.severe(message);
+      _log.severe(message);
       print(message);
-      return null;
     }
   }
 
@@ -58,7 +59,6 @@ class RiveProfilesApi<T extends RiveOwner> {
     // but it needs some fundamental information like email that we currently
     // don't have in this context.
     // Will need a custom route to support that.
-    return null;
   }
 
   /// GET /api/teams/<team_id>
@@ -73,15 +73,15 @@ class RiveProfilesApi<T extends RiveOwner> {
     var response = await api.get(url);
     if (response.statusCode != 200) {
       var message = 'Could not get team info ${response.body}';
-      log.severe(message);
+      _log.severe(message);
       print(message);
       return null;
     }
-    dynamic data;
+    Map<String, dynamic> data;
     try {
-      data = json.decode(response.body);
+      data = json.decodeMap(response.body);
     } on FormatException catch (e) {
-      log.severe('Unable to parse response from server: $e');
+      _log.severe('Unable to parse response from server: $e');
     }
     return RiveProfile.fromData(data);
   }

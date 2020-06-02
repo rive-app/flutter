@@ -16,6 +16,7 @@ class Folder implements Named {
   final int ownerId;
   final int parent;
   final int order;
+  @override
   final String name;
 
   static List<Folder> fromDMList(List<FolderDM> folders) {
@@ -41,7 +42,8 @@ class Folder implements Named {
   }
 
   @override
-  bool operator ==(o) => o is Folder && o.id == id && o.ownerId == ownerId;
+  bool operator ==(Object o) =>
+      o is Folder && o.id == id && o.ownerId == ownerId;
 
   @override
   int get hashCode => szudzik(id, ownerId);
