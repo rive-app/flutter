@@ -13,6 +13,7 @@ import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/login/obscuring_controller.dart';
 import 'package:rive_editor/widgets/login/validators.dart';
+import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 
@@ -610,7 +611,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Widget _panelContents() {
+  Widget _panelContents(RiveColors colors) {
     return SizedBox(
         width: 473,
         height: 618,
@@ -620,7 +621,10 @@ class _LoginState extends State<Login> {
           children: [
             // Top padding.
             const SizedBox(height: 160),
-            Image.asset('assets/images/icons/rive-logo-login.png'),
+            TintedIcon(
+              icon: PackedIcon.riveLogoLogin,
+              color: colors.loginLogo,
+            ),
             const SizedBox(height: 55),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 100),
@@ -651,27 +655,41 @@ class _LoginState extends State<Login> {
             },
           ),
         ),
-        Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Expanded(
-            child: Container(
-              color: colors.commonLightGrey,
-              child: Image.asset(
-                'assets/images/mother_of_dashes.png',
-                fit: BoxFit.cover,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Container(
+                color: colors.commonLightGrey,
+                child: Image.asset(
+                  'assets/images/mother_of_dashes.png',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          Container(
+            Container(
               width: 714,
-              child: Stack(children: [
-                Positioned(
+              child: Stack(
+                children: [
+                  Positioned(
                     right: 30,
                     top: 30,
                     child: _LoginSwitch(
-                        panel: _currentPanel, onSelect: _selectPanel)),
-                Align(alignment: Alignment.center, child: _panelContents()),
-              ])),
-        ]),
+                      panel: _currentPanel,
+                      onSelect: _selectPanel,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: _panelContents(
+                      colors,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
