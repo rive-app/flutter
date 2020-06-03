@@ -141,4 +141,22 @@ class FileApi {
     }
     return null;
   }
+
+  /// Find the socket server url to connect to for a specific file.
+  Future<CoopConnectionInfo> establishCoop(int ownerId, int fileId) async {
+    if (api.host.indexOf('https://') == 0) {
+      return CoopConnectionInfo(
+          'wss://${api.host.substring('https://'.length)}/ws/proxy');
+    } else if (api.host.indexOf('http://') == 0) {
+      return CoopConnectionInfo(
+          'ws://${api.host.substring('http://'.length)}/ws/proxy');
+    }
+    return null;
+  }
+}
+
+class CoopConnectionInfo {
+  final String socketHost;
+
+  CoopConnectionInfo(this.socketHost);
 }

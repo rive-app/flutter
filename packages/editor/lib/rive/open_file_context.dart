@@ -8,7 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
-import 'package:rive_api/files.dart';
+import 'package:rive_api/model.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/client_side_player.dart';
@@ -61,7 +62,7 @@ class OpenFileContext with RiveFileDelegate {
   final RiveApi api;
 
   /// The files api.
-  final RiveFilesApi filesApi;
+  final FileApi fileApi;
 
   /// File name
   final ValueNotifier<String> _name;
@@ -209,7 +210,7 @@ class OpenFileContext with RiveFileDelegate {
     this.rive,
     String fileName,
     this.api,
-    this.filesApi,
+    this.fileApi,
   }) : _name = ValueNotifier<String>(fileName);
 
   Stage get stage => _stage;
@@ -234,7 +235,7 @@ class OpenFileContext with RiveFileDelegate {
       await dataPlatform.initialize();
       core = RiveFile(filePath, api: api, localDataPlatform: dataPlatform);
 
-      var connectionInfo = await filesApi.establishCoop(ownerId, fileId);
+      var connectionInfo = await fileApi.establishCoop(ownerId, fileId);
       if (connectionInfo == null) {
         return false;
       }
@@ -575,10 +576,29 @@ class OpenFileContext with RiveFileDelegate {
     }
   }
 
-  /// Save the file name
+  /// Save the file name. This involves not only passing the new
+  /// fiule name to the backend via the api, but also updating the
+  /// file data in the stream, allowing the file browser to update.
   void changeFileName(String name) {
     _name.value = name;
-    filesApi.changeFileName(ownerId, fileId, name);
+    fileApi.renameMyFile(ownerId, fileId, name).then((changed) {
+      final fileStreamId = szudzik(fileId, ownerId);
+      if (changed) {
+        // Update the file info in the plumber streams
+        final stream = Plumber().getStream<File>(fileStreamId);
+        if (stream.hasValue) {
+          File file = stream.value;
+          File updatedFile = File(
+            id: file.id,
+            name: name,
+            ownerId: file.ownerId,
+            fileOwnerId: file.fileOwnerId,
+            preview: file.preview,
+          );
+          Plumber().message<File>(updatedFile, fileStreamId);
+        }
+      }
+    });
   }
 
   StreamSubscription<AnimationViewModel> _selectedAnimationSubscription;

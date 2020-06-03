@@ -28,19 +28,15 @@ class BrowserFile extends StatelessWidget {
     );
   }
 
-  // Internal radius looks better with an extra pixel of padding.
-  double get radiusDelta => selected ? 5 : 0;
-
   Widget _screenshot(BuildContext context) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     return ClipRRect(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(10 - radiusDelta),
-        topRight: Radius.circular(10 - radiusDelta),
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(12),
+        topRight: Radius.circular(12),
       ),
       child: Container(
-        // TODO:
         color: colors.fileBackgroundDarkGrey,
       ),
     );
@@ -51,31 +47,41 @@ class BrowserFile extends StatelessWidget {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     return ClickListener(
-      /** TODO: Selection 
-       * onClick: , */
-      onDoubleClick: (_) {
-        RiveContext.of(context).open(file.fileOwnerId, file.id, file.name);
-      },
-      child: MouseRegion(
-        child: Container(
-          decoration: BoxDecoration(
+      onDoubleClick: (_) =>
+          RiveContext.of(context).open(file.fileOwnerId, file.id, file.name),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
               color: colors.fileBackgroundLightGrey,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: selected
-                    ? colors.fileSelectedBlue
-                    : colors.fileBrowserBackground,
-                width: 4,
-              )),
-          child: Column(
-            children: [
-              Expanded(
-                child: _screenshot(context),
-              ),
-              _label(context),
-            ],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: _screenshot(context),
+                ),
+                _label(context),
+              ],
+            ),
           ),
-        ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0x00FFFFFF),
+                borderRadius: BorderRadius.circular(10),
+                border: selected
+                    ? Border.all(
+                        color: selected
+                            ? colors.fileSelectedBlue
+                            : colors.fileBrowserBackground,
+                        width: 4,
+                      )
+                    : null,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

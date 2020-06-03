@@ -48,7 +48,7 @@ class Home extends StatelessWidget {
                       child: FileBrowserWrapper(),
                     ),
                   );
-                  break;
+
                 case HomeSection.notifications:
                   return Expanded(
                     child: ColoredBox(
@@ -56,19 +56,18 @@ class Home extends StatelessWidget {
                       child: NotificationsPanel(),
                     ),
                   );
-                  break;
+
                 case HomeSection.community:
                   return const Text('Build community');
-                  break;
+
                 case HomeSection.recents:
                   return const Text('Build recents');
-                  break;
+
                 case HomeSection.getStarted:
                   return const Text('Build get started');
-                  break;
+
                 default:
                   return const Text('loading...');
-                  break;
               }
             },
           ),

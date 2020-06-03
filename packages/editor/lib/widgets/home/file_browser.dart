@@ -24,15 +24,12 @@ import 'package:rive_editor/widgets/theme.dart';
 
 typedef FolderContentsBuilder = Widget Function(FolderContents, Selection);
 
-// 50 + 8 for the border.
-const double folderCellHeight = 58;
-// 182 + 8 for the border.
-const double fileCellHeight = 190;
-// 187 + 8 for the border.
-const double cellWidth = 195;
-const double spacing = 22;
+const double folderCellHeight = 50;
+const double fileCellHeight = 182;
+const double cellWidth = 187;
+const double spacing = 30;
 const double headerHeight = 60;
-const double horizontalPadding = 26;
+const double horizontalPadding = 30;
 const double sectionPadding = 30;
 const int scrollEdgeMilliseconds = 1000 ~/ 60;
 const double scrollSensitivity = 75;
@@ -113,10 +110,9 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
     super.dispose();
   }
 
-  int _getMaxColumns(double width, double cellWidth) {
-    return ((width - horizontalPadding * 2 + spacing) / (cellWidth + spacing))
-        .floor();
-  }
+  int _getMaxColumns(double width, double cellWidth) =>
+      ((width - horizontalPadding * 2 + spacing) / (cellWidth + spacing))
+          .floor();
 
   double _sectionHeight(Iterable items, double itemHeight, int maxColumns) {
     if (items.isNotEmpty) {
@@ -129,9 +125,6 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
   }
 
   double _requiredHeight(Size size) {
-    // TODO:
-    // could cache this against size & file & folder count
-    // if this becomes heavy
     var requiredHeight = headerHeight + sectionPadding;
     final directory = Plumber().peek<CurrentDirectory>();
     if (directory == null) return requiredHeight;
@@ -177,17 +170,17 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
     var overlappingFileRows = getOverlap(fileRowCount, fileCellHeight, spacing,
         folderRowsHeight, startDy, endDy);
 
-    var folderIndexes = [
+    var folderIndexes = {
       for (var columnIndex in overlappingColumns)
         for (var rowIndex in overlappingFolderRows)
           columnIndex + maxColumns * rowIndex
-    ].toSet();
+    };
 
-    var fileIndexes = [
+    var fileIndexes = {
       for (var columnIndex in overlappingColumns)
         for (var rowIndex in overlappingFileRows)
           columnIndex + maxColumns * rowIndex
-    ].toSet();
+    };
 
     Iterable<T> _filter<T>(Iterable<T> items, Set<int> indexes) sync* {
       var i = 0;
@@ -222,8 +215,8 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
       _offset = _offset + sequenceWidth + sequenceSpacing;
     }
     var matchedColumns = columns.where((element) =>
-        ((element[0] <= start && start <= element[1]) ||
-            (start <= element[0] && element[0] <= end)));
+        (element[0] <= start && start <= element[1]) ||
+        (start <= element[0] && element[0] <= end));
     return matchedColumns.map((e) => columns.indexOf(e)).toList();
   }
 
@@ -263,8 +256,10 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         // clicked into folders
         row = (workingDy / (folderCellHeight + spacing)).floor();
         // clicked to the right of the target column
-        if (workingDy - (row * (folderCellHeight + spacing)) > folderCellHeight)
+        if (workingDy - (row * (folderCellHeight + spacing)) >
+            folderCellHeight) {
           return null;
+        }
         elementIndex = row * maxColumns + column;
         if (elementIndex < folderContents.folders.length) {
           return folderContents.folders[elementIndex];
@@ -279,8 +274,9 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
       if (workingDy < filesHeight) {
         // clicked into files
         row = (workingDy / (fileCellHeight + spacing)).floor();
-        if (workingDy - (row * (fileCellHeight + spacing)) > fileCellHeight)
+        if (workingDy - (row * (fileCellHeight + spacing)) > fileCellHeight) {
           return null;
+        }
         elementIndex = row * maxColumns + column;
         if (elementIndex < folderContents.files.length) {
           return folderContents.files[elementIndex];
@@ -350,10 +346,8 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
     }
   }
 
-  void startTimer() {
-    scrollEdgeTimer ??= Timer.periodic(
-        Duration(milliseconds: scrollEdgeMilliseconds), scrollEdge);
-  }
+  void startTimer() => scrollEdgeTimer ??= Timer.periodic(
+      const Duration(milliseconds: scrollEdgeMilliseconds), scrollEdge);
 
   void stopTimer() {
     scrollEdgeTimer?.cancel();
@@ -391,7 +385,6 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
           selectPosition(
               event.pointerEvent.localPosition, latestSize, rightClick);
 
-          // TODO: wat this on mouse/ windows
           if (!rightClick) {
             start = event.pointerEvent.localPosition;
             startScrollOffset = scrollController.offset;
@@ -427,9 +420,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                   ),
                 PopupContextItem(
                   'Delete',
-                  select: () async {
-                    FolderContentsManager().delete();
-                  },
+                  select: () => FolderContentsManager().delete(),
                 )
               ],
               position: event.pointerEvent.position);
@@ -496,6 +487,8 @@ class Marquee {
   final double endOffset;
 
   const Marquee({this.start, this.end, this.startOffset, this.endOffset});
+
+  @override
   String toString() => 'Marquee($start, $end, $startOffset, $endOffset)';
 }
 
@@ -577,11 +570,6 @@ class MarqueeRenderObject extends RenderBox {
 
   @override
   bool get sizedByParent => true;
-
-  @override
-  void performLayout() {
-    super.performLayout();
-  }
 
   double get startX {
     return max(bounds.left, min(bounds.right, marquee.start.dx));
@@ -721,20 +709,20 @@ class FileBrowser extends StatelessWidget {
     );
   }
 
-  SliverPersistentHeader makeHeader(String headerText) {
-    return SliverPersistentHeader(
-      pinned: true,
-      floating: false,
-      delegate: _SliverHeader(
-        Container(
-          color: Colors.lightBlue,
-          child: Center(
-            child: Text(headerText),
-          ),
-        ),
-      ),
-    );
-  }
+  // SliverPersistentHeader makeHeader(String headerText) {
+  //   return SliverPersistentHeader(
+  //     pinned: true,
+  //     floating: false,
+  //     delegate: _SliverHeader(
+  //       Container(
+  //         color: Colors.lightBlue,
+  //         child: Center(
+  //           child: Text(headerText),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -756,6 +744,7 @@ class FileBrowser extends StatelessWidget {
               child: SizedBox(height: sectionPadding),
             ),
           );
+
           if (hasFolders) {
             slivers.add(_folderGrid(folders, selection));
           }
@@ -798,7 +787,10 @@ class FileBrowser extends StatelessWidget {
         } else {
           slivers.add(
             const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator())),
+              child: Center(
+                child: SizedBox(),
+              ),
+            ),
           );
         }
 
@@ -810,7 +802,7 @@ class FileBrowser extends StatelessWidget {
             primary: false,
             controller: scrollController,
             slivers: slivers,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
           ),
         );
       },
@@ -828,7 +820,6 @@ class _SliverHeader extends SliverPersistentHeaderDelegate {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       height: double.infinity,
       width: double.infinity,
-      color: RiveTheme.of(context).colors.fileBrowserBackground,
       child: child,
     );
   }
@@ -842,7 +833,5 @@ class _SliverHeader extends SliverPersistentHeaderDelegate {
   double get minExtent => headerHeight;
 
   @override
-  bool shouldRebuild(_SliverHeader oldDelegate) {
-    return child != oldDelegate.child;
-  }
+  bool shouldRebuild(_SliverHeader oldDelegate) => child != oldDelegate.child;
 }

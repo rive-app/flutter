@@ -15,7 +15,7 @@ class BrowserFolder extends StatelessWidget {
   final bool selected;
 
   EdgeInsetsGeometry get padding =>
-      const EdgeInsets.only(left: 15, top: 17, bottom: 18, right: 15);
+      const EdgeInsets.only(left: 14, top: 12, bottom: 12, right: 15);
 
   @override
   Widget build(BuildContext context) {
@@ -30,33 +30,33 @@ class BrowserFolder extends StatelessWidget {
             CurrentDirectory(currentDirectory.owner, folderId);
         plumber.message<CurrentDirectory>(nextDirectory);
       },
-      child: MouseRegion(
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: colors.fileBackgroundLightGrey,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: selected ? colors.fileSelectedBlue : Colors.white,
-              width: 4,
-            ),
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: colors.fileBackgroundLightGrey,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? colors.fileSelectedBlue
+                : colors.fileBackgroundLightGrey,
+            width: 4,
           ),
-          child: Row(
-            children: [
-              TintedIcon(
-                  icon: (folderId == 0) ? PackedIcon.trash : PackedIcon.folder,
-                  color: colors.black30),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  folderName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: styles.greyText,
-                ),
+        ),
+        child: Row(
+          children: [
+            TintedIcon(
+                icon: (folderId == 0) ? PackedIcon.trash : PackedIcon.folder,
+                color: colors.black30),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                folderName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: styles.greyText,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

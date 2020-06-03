@@ -93,7 +93,6 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       label: 'Notifications',
                       highlight: snapshot.data == HomeSection.notifications,
                       onTap: () async {
-                        // Question: use a function on RiveManger instead or is this fine?
                         Plumber().message(HomeSection.notifications);
                       },
                     ),
@@ -113,27 +112,11 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 var slivers = <Widget>[];
                 if (snapshot.data != null) {
                   for (int i = 0; i < snapshot.data.length; i++) {
-                    // TODO: rather than folderTree's we prob ably rely on this controller?
+                    // TODO: rather than folderTrees we probably rely on this controller?
                     slivers.add(
                       FolderTreeView(
                           style: treeStyle, controller: snapshot.data[i]),
                     );
-
-                    // / TODO: Matt take a look at this please
-                    // / This works once, but when you switch away from the tab adn back into it. it all blows up pretty badly
-                    // slivers.add(StreamBuilder<FolderTreeItemController>(
-                    //     stream: Plumber().getStream<FolderTreeItemController>(
-                    //         snapshot.data[i].owner.hashCode),
-                    //     builder: (context, mySnapshot) {
-                    //       if (mySnapshot.hasData) {
-                    //         return FolderTreeView(
-                    //             style: treeStyle, controller: mySnapshot.data);
-                    //       } else {
-                    //         return const SliverToBoxAdapter(
-                    //             child: Text('works if you just return this'));
-                    //       }
-                    //     }));
-
                     if (i != snapshot.data.length - 1) {
                       slivers.add(
                         SliverToBoxAdapter(
