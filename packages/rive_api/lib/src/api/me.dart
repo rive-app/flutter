@@ -71,10 +71,8 @@ class MeApi {
     }
   }
 
-  /**
-   * Gets the error message from the server's cookies. 
-   * Server will also clear it right away, so this error can only be used once.
-   */
+  /// Gets the error message from the server's cookies.
+  /// Server will also clear it right away, so this error can only be used once.
   Future<String> getErrorMessage() async {
     var response = await api.getFromPath('/api/getError');
     if (response.statusCode != 200) {
@@ -93,9 +91,8 @@ class MeApi {
       log.severe(message);
       return null;
     }
-    dynamic data;
     try {
-      data = json.decode(response.body);
+      final data = json.decode(response.body) as Map<String, Object>;
       return ProfileDM.fromData(data);
     } on FormatException catch (e) {
       log.severe('Error formatting team profile response: $e');
@@ -124,13 +121,12 @@ class MeApi {
       'isForHire': profile.isForHire
     });
 
-    var response =
-        await api.put(api.host + '/api/profile', body: payload);
+    var response = await api.put(api.host + '/api/profile', body: payload);
     if (response.statusCode != 200) {
       // TODO: relay error messages if we couldn't update.
       var message = 'Could not create new team ${response.body}';
       log.severe(message);
-      return null;
+      return;
     }
   }
 }

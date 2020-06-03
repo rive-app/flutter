@@ -57,9 +57,8 @@ class TeamApi {
       log.severe(message);
       return null;
     }
-    dynamic data;
     try {
-      data = json.decode(response.body);
+      final data = json.decode(response.body) as Map<String, Object>;
       return ProfileDM.fromData(data);
     } on FormatException catch (e) {
       log.severe('Error formatting team profile response: $e');
@@ -91,7 +90,7 @@ class TeamApi {
     if (response.statusCode != 200) {
       var message = 'Could not create new team ${response.body}';
       log.severe(message);
-      return null;
+      return;
     }
   }
 }

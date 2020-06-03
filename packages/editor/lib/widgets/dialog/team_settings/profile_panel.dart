@@ -23,21 +23,21 @@ class ProfileSettings extends StatefulWidget {
 
 class _ProfileSettingsState extends State<ProfileSettings> {
   // User info.
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _locationController = TextEditingController();
-  TextEditingController _websiteController = TextEditingController();
-  TextEditingController _bioController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _websiteController = TextEditingController();
+  final _bioController = TextEditingController();
   // Socials.
-  TextEditingController _twitterController = TextEditingController();
-  TextEditingController _instagramController = TextEditingController();
-  TextEditingController _dribbbleController = TextEditingController();
-  TextEditingController _linkedinController = TextEditingController();
-  TextEditingController _behanceController = TextEditingController();
-  TextEditingController _vimeoController = TextEditingController();
-  TextEditingController _githubController = TextEditingController();
-  TextEditingController _mediumController = TextEditingController();
+  final _twitterController = TextEditingController();
+  final _instagramController = TextEditingController();
+  final _dribbbleController = TextEditingController();
+  final _linkedinController = TextEditingController();
+  final _behanceController = TextEditingController();
+  final _vimeoController = TextEditingController();
+  final _githubController = TextEditingController();
+  final _mediumController = TextEditingController();
 
   bool _isForHire;
 
@@ -83,7 +83,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     super.dispose();
   }
 
-  void _submitChanges() async {
+  Future<void> _submitChanges() async {
     final updatedProfile = Profile(
       name: _nameController.text,
       username: _usernameController.text,
@@ -102,7 +102,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
       dribbble: _dribbbleController.text,
       isForHire: _isForHire,
     );
-    ProfileManager().updateProfile(widget.owner, updatedProfile);
+    await ProfileManager().updateProfile(widget.owner, updatedProfile);
     TeamManager().loadTeams();
   }
 
@@ -409,7 +409,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             ],
           );
         } else {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
       },
     );
