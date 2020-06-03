@@ -101,32 +101,18 @@ class MeApi {
   }
 
   // PUT
-  Future<void> updateProfile(Profile profile) async {
-    String payload = jsonEncode({
-      'name': profile.name,
-      'username': profile.username,
-      'email': profile.email,
-      'location': profile.location,
-      'avatar': profile.avatar,
-      'website': profile.website,
-      'blurb': profile.bio,
-      'twitter': profile.twitter,
-      'instagram': profile.instagram,
-      'dribbble': profile.dribbble,
-      'linkedin': profile.linkedin,
-      'behance': profile.behance,
-      'vimeo': profile.vimeo,
-      'github': profile.github,
-      'medium': profile.medium,
-      'isForHire': profile.isForHire
-    });
-
-    var response = await api.put(api.host + '/api/profile', body: payload);
-    if (response.statusCode != 200) {
-      // TODO: relay error messages if we couldn't update.
+  Future<bool> updateProfile(Profile profile) async {
+    try {
+      var response =
+          await api.put('${api.host}/api/profile', body: profile.encoded);
+      print("Response: ${response.body}, ${response.statusCode}");
+      return true;
+    } on ApiException catch (apiException) {
+      final response = apiException.response;
+      print("Response: ${response.body}, ${response.statusCode}");
       var message = 'Could not create new team ${response.body}';
       log.severe(message);
-      return;
+      return false;
     }
   }
 }

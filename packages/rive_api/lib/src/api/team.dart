@@ -67,30 +67,15 @@ class TeamApi {
   }
 
   // PUT /api/teams/<teamId>
-  Future<void> updateProfile(Team team, Profile profile) async {
+  Future<bool> updateProfile(Team team, Profile profile) async {
     var teamId = team.ownerId;
-    String payload = jsonEncode({
-      'name': profile.name,
-      'username': profile.username,
-      'location': profile.location,
-      'website': profile.website,
-      'blurb': profile.bio,
-      'twitter': profile.twitter,
-      'instagram': profile.instagram,
-      'dribbble': profile.dribbble,
-      'linkedin': profile.linkedin,
-      'behance': profile.behance,
-      'vimeo': profile.vimeo,
-      'github': profile.github,
-      'medium': profile.medium,
-    });
-
     var response =
-        await api.put(api.host + '/api/teams/$teamId', body: payload);
+        await api.put(api.host + '/api/teams/$teamId', body: profile.encoded);
     if (response.statusCode != 200) {
       var message = 'Could not create new team ${response.body}';
       log.severe(message);
-      return;
+      return false;
     }
+    return true;
   }
 }

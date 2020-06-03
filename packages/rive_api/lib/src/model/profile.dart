@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:rive_api/data_model.dart';
 
 class Profile {
@@ -74,6 +76,25 @@ class Profile {
         medium: medium,
         isForHire: isForHire,
       );
+
+  String get encoded => jsonEncode({
+      'name': name,
+      'username': username,
+      'email': email,
+      'location': location,
+      'avatar': avatar,
+      'website': website,
+      'blurb': bio,
+      'twitter': twitter,
+      'instagram': instagram,
+      'dribbble': dribbble,
+      'linkedin': linkedin,
+      'behance': behance,
+      'vimeo': vimeo,
+      'github': github,
+      'medium': medium,
+      'isForHire': isForHire
+    });
 
   @override
   String toString() => "name: $name\n"

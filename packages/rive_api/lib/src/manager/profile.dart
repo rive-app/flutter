@@ -7,12 +7,11 @@ class ProfileManager {
 
   factory ProfileManager() => _instance;
 
-  ProfileManager._() : meApi = MeApi(), teamApi = TeamApi();
+  ProfileManager._()
+      : meApi = MeApi(),
+        teamApi = TeamApi();
 
-  ProfileManager.tester(MeApi meApi, TeamApi teamApi) {
-    meApi = meApi;
-    teamApi = teamApi;
-  }
+  ProfileManager.tester(this.meApi, this.teamApi);
 
   MeApi meApi;
   TeamApi teamApi;
@@ -20,23 +19,27 @@ class ProfileManager {
 
   Future<void> loadProfile(Owner owner) async {
     final ownerId = owner.ownerId;
+    Profile profile;
     if (owner is Team) {
       // Load team profile.
-      final teamProfile = Profile.fromDM(await teamApi.getProfile(ownerId));
-      _plumber.message<Profile>(teamProfile, ownerId);
+      profile = Profile.fromDM(await teamApi.getProfile(ownerId));
     } else {
       // Load user profile
-      final userProfile = Profile.fromDM(await meApi.profile);
-      _plumber.message<Profile>(userProfile, ownerId);
+      profile = Profile.fromDM(await meApi.profile);
     }
+    _plumber.message<Profile>(profile, ownerId);
   }
-  
-  Future<void> updateProfile(Owner owner, Profile profile) async {
+
+  Future<bool> updateProfile(Owner owner, Profile profile) async {
+    bool success;
     if (owner is Team) {
-      await teamApi.updateProfile(owner, profile);
+      success = await teamApi.updateProfile(owner, profile);
     } else {
-      await meApi.updateProfile(profile);
+      success = await meApi.updateProfile(profile);
     }
-    _plumber.message<Profile>(profile, owner.ownerId);
+    if (success) {
+      _plumber.message<Profile>(profile, owner.ownerId);
+    }
+    return success;
   }
 }
