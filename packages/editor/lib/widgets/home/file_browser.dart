@@ -816,10 +816,11 @@ class _SliverHeader extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final colors = RiveTheme.of(context).colors;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
       height: double.infinity,
       width: double.infinity,
+      color: colors.fileBrowserBackground,
       child: child,
     );
   }
