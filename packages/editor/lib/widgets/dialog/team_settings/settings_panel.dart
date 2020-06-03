@@ -245,18 +245,39 @@ class SettingsScreen {
     if (owner is Team) {
       return [
         SettingsScreen(
-            'Team Settings', (ctx) => ProfileSettings(owner, _getApi(ctx))),
-        SettingsScreen('Members', (ctx) => TeamMembers(owner, _getApi(ctx))),
+          'Team Settings',
+          (ctx) => ProfileSettings(owner),
+        ),
+        SettingsScreen(
+          'Members',
+          (ctx) => TeamMembers(
+            owner,
+            _getApi(ctx),
+          ),
+        ),
+        SettingsScreen(
+          'Plan',
+          (ctx) => PlanSettings(
+            owner,
+            _getApi(ctx),
+          ),
+        ),
+        SettingsScreen(
+          'Billing History',
+          (ctx) => BillingHistory(
+            owner,
+            _getApi(ctx),
+          ),
+        ),
         // SettingsScreen('Groups', (ctx) => const SizedBox()),
         // SettingsScreen('Purchase Permissions', (ctx) => const SizedBox()),
-        SettingsScreen('Plan', (ctx) => PlanSettings(owner, _getApi(ctx))),
-        SettingsScreen(
-            'Billing History', (ctx) => BillingHistory(owner, _getApi(ctx))),
       ];
     } else {
       return [
         SettingsScreen(
-            'Profile', (ctx) => ProfileSettings(owner, _getApi(ctx))),
+          'Profile',
+          (ctx) => ProfileSettings(owner),
+        ),
         // SettingsScreen('Store'),
         // SettingsScreen('Billing History'),
       ];

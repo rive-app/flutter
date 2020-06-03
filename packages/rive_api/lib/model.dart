@@ -7,7 +7,7 @@ export 'src/model/me.dart';
 export 'src/model/named.dart';
 export 'src/model/notification.dart';
 export 'src/model/owner.dart';
-export 'src/model/revision.dart';
+export 'src/model/profile.dart';
 export 'src/model/selection.dart';
 export 'src/model/team.dart';
 export 'src/model/user.dart';

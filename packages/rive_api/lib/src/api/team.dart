@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:rive_api/model.dart';
 import 'package:utilities/deserialize.dart';
 
 final _log = Logger('Rive API Volume');
@@ -45,5 +46,52 @@ class TeamApi {
   /// Declines a team invite
   Future<void> declineInvite(int teamId) async {
     await api.post('${api.host}/api/teams/$teamId/invite/reject');
+  }
+
+  /// GET /api/teams/<team_id>
+  /// Returns the teams info.
+  Future<ProfileDM> getProfile(int ownerId) async {
+    final response = await api.get('${api.host}/api/teams/$ownerId');
+    if (response.statusCode != 200) {
+      var message = 'Could not get team info ${response.body}';
+      log.severe(message);
+      return null;
+    }
+    dynamic data;
+    try {
+      data = json.decode(response.body);
+      return ProfileDM.fromData(data);
+    } on FormatException catch (e) {
+      log.severe('Error formatting team profile response: $e');
+      rethrow;
+    }
+  }
+
+  // PUT /api/teams/<teamId>
+  Future<void> updateProfile(Team team, Profile profile) async {
+    var teamId = team.ownerId;
+    String payload = jsonEncode({
+      'name': profile.name,
+      'username': profile.username,
+      'location': profile.location,
+      'website': profile.website,
+      'blurb': profile.bio,
+      'twitter': profile.twitter,
+      'instagram': profile.instagram,
+      'dribbble': profile.dribbble,
+      'linkedin': profile.linkedin,
+      'behance': profile.behance,
+      'vimeo': profile.vimeo,
+      'github': profile.github,
+      'medium': profile.medium,
+    });
+
+    var response =
+        await api.put(api.host + '/api/teams/$teamId', body: payload);
+    if (response.statusCode != 200) {
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      return null;
+    }
   }
 }

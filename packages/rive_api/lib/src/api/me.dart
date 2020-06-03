@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:utilities/deserialize.dart';
+import 'package:rive_api/model.dart';
 
 final _log = Logger('Rive API Me');
 
@@ -81,5 +82,55 @@ class MeApi {
       return '';
     }
     return response.body;
+  }
+
+  /// GET /api/profile
+  /// Returns the user profile.
+  Future<ProfileDM> get profile async {
+    final response = await api.get('${api.host}/api/profile');
+    if (response.statusCode != 200) {
+      var message = 'Could not get user profile ${response.body}';
+      log.severe(message);
+      return null;
+    }
+    dynamic data;
+    try {
+      data = json.decode(response.body);
+      return ProfileDM.fromData(data);
+    } on FormatException catch (e) {
+      log.severe('Error formatting team profile response: $e');
+      rethrow;
+    }
+  }
+
+  // PUT
+  Future<void> updateProfile(Profile profile) async {
+    String payload = jsonEncode({
+      'name': profile.name,
+      'username': profile.username,
+      'email': profile.email,
+      'location': profile.location,
+      'avatar': profile.avatar,
+      'website': profile.website,
+      'blurb': profile.bio,
+      'twitter': profile.twitter,
+      'instagram': profile.instagram,
+      'dribbble': profile.dribbble,
+      'linkedin': profile.linkedin,
+      'behance': profile.behance,
+      'vimeo': profile.vimeo,
+      'github': profile.github,
+      'medium': profile.medium,
+      'isForHire': profile.isForHire
+    });
+
+    var response =
+        await api.put(api.host + '/api/profile', body: payload);
+    if (response.statusCode != 200) {
+      // TODO: relay error messages if we couldn't update.
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      return null;
+    }
   }
 }
