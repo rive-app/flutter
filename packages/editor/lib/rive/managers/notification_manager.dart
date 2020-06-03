@@ -11,7 +11,7 @@ const pollDuration = Duration(minutes: 2);
 
 /// State manager for notifications
 class NotificationManager with Subscriptions {
-  static final NotificationManager _instance = NotificationManager._();
+  static final _instance = NotificationManager._();
   factory NotificationManager() => _instance;
 
   NotificationManager._() {
@@ -43,9 +43,9 @@ class NotificationManager with Subscriptions {
   /// Initiatize the state
   void _attach() {
     _fetchNotifications();
-    Plumber().getStream<model.Me>().listen((event) {
-      _fetchNotifications();
-    });
+
+    /// When the logged in user is changed, fetch notifications for the new user
+    Plumber().getStream<model.Me>().listen((_) => _fetchNotifications());
   }
 
   void _poll() {
@@ -64,12 +64,12 @@ class NotificationManager with Subscriptions {
 
   /// Fetch a user's notifications from the back end
   Future<void> _fetchNotifications() async {
-    var me = Plumber().peek<model.Me>();
+    final me = Plumber().peek<model.Me>();
     if (me == null || me.isEmpty) {
       return;
     }
     try {
-      var notifications =
+      final notifications =
           model.Notification.fromDMList(await _notificationsApi.notifications);
       Plumber().message(notifications);
     } on HttpException catch (e) {
@@ -100,7 +100,7 @@ class NotificationManager with Subscriptions {
     } on ApiException catch (error) {
       if (error.response.body.contains('no-invite-found')) {
         // in this context we're fine with errors.
-        print('Couldnt find invite: $error');
+        print('Couldn\'t find invite: $error');
       } else {
         rethrow;
       }

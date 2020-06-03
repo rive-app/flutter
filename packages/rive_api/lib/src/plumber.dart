@@ -40,15 +40,14 @@ class Plumber {
     return _pipes.containsKey(T) && _pipes[T].containsKey(id);
   }
 
-  ValueStream<T> getStream<T>([int id]) =>_pipeInit<T>(id).stream;
+  ValueStream<T> getStream<T>([int id]) => _pipeInit<T>(id).stream;
 
   T peek<T>([int id]) => _pipeInit<T>(id).value;
 
-
   void message<T>(T message, [int id]) => _pipeInit<T>(id).add(message);
 
-
   void flush<T>([int id]) {
+    // ignore: close_sinks
     var pipe = _pipeInit<T>(id);
     if (pipe.value != null) {
       pipe.add(null);

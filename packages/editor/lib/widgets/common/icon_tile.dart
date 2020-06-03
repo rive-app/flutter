@@ -10,6 +10,7 @@ class IconTile extends StatefulWidget {
     @required this.icon,
     this.onTap,
     this.highlight = false,
+    this.count = 0,
     Key key,
   }) : super(key: key);
 
@@ -18,11 +19,14 @@ class IconTile extends StatefulWidget {
   final VoidCallback onTap;
   final Iterable<PackedIcon> icon;
 
+  /// An optional counter to display in the tile
+  final int count;
+
   @override
   _IconTileState createState() => _IconTileState();
 }
 
-class _IconTileState extends State<IconTile>{
+class _IconTileState extends State<IconTile> {
   bool _isHovered = false;
 
   @override
@@ -32,25 +36,28 @@ class _IconTileState extends State<IconTile>{
     final highlightIconColor = theme.colors.fileSelectedFolderIcon;
     final unhighlightTextStyle = theme.textStyles.fileLightGreyText;
     final unhighlightIconColor = theme.colors.fileIconColor;
+    final countHighlightTextStyle = theme.textStyles.fileBlueTextLight;
+    final countUnhighlightTextStyle = theme.textStyles.fileWhiteText;
+    final countHighlightIconColor = theme.colors.toolTipText;
+    final countUnhighlightIconColor = theme.colors.accentMagenta;
+
     final unselectedBackground = _isHovered
-      ? theme.colors.fileTreeBackgroundHover
-      : theme.colors.fileBackgroundLightGrey;
+        ? theme.colors.fileTreeBackgroundHover
+        : theme.colors.fileBackgroundLightGrey;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: MouseRegion(
-        onEnter: (_) {
-          setState(() => _isHovered = true);
-        },
-        onExit: (_) {
-          setState(() => _isHovered = false);
-        },
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
         child: SizedBox(
           height: 35,
           child: Center(
             child: Container(
               decoration: BoxDecoration(
-                color: widget.highlight ? theme.colors.toolbarButtonSelected : unselectedBackground,
+                color: widget.highlight
+                    ? theme.colors.toolbarButtonSelected
+                    : unselectedBackground,
                 borderRadius: const BorderRadius.all(
                   Radius.circular(5),
                 ),
@@ -67,15 +74,37 @@ class _IconTileState extends State<IconTile>{
                       width: 15,
                       height: 15,
                       child: TintedIcon(
-                        color: widget.highlight ? highlightIconColor : unhighlightIconColor,
+                        color: widget.highlight
+                            ? highlightIconColor
+                            : unhighlightIconColor,
                         icon: widget.icon,
                       ),
                     ),
-                    Container(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       widget.label,
-                      style: widget.highlight ? highlightTextStyle : unhighlightTextStyle,
+                      style: widget.highlight
+                          ? highlightTextStyle
+                          : unhighlightTextStyle,
                     ),
+                    const Spacer(),
+                    if (widget.count > 0)
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircleAvatar(
+                          backgroundColor: widget.highlight
+                              ? countHighlightIconColor
+                              : countUnhighlightIconColor,
+                          child: Text(
+                            '${_singleDigitPlus(widget.count)}',
+                            style: widget.highlight
+                                ? countHighlightTextStyle
+                                : countUnhighlightTextStyle,
+                          ),
+                        ),
+                      ),
+                    //const SizedBox(width: 7),
                   ],
                 ),
               ),
@@ -86,3 +115,6 @@ class _IconTileState extends State<IconTile>{
     );
   }
 }
+
+// Any number over 9 returns as '9+'
+String _singleDigitPlus(int num) => num > 9 ? '9+' : '$num';
