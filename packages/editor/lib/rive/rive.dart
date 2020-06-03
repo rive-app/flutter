@@ -7,11 +7,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
-import 'package:rive_api/files.dart';
-import 'package:rive_api/folder.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/models/file.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/frameDebounce.dart';
@@ -52,23 +49,6 @@ class _Key {
   }
 }
 
-/// TODO: clean this up, probably want to rework the files api.
-class _NonUiRiveFilesApi extends RiveFilesApi<RiveApiFolder, RiveApiFile> {
-  _NonUiRiveFilesApi(RiveApi api) : super(api);
-
-  @override
-  RiveApiFile makeFile(int id, {String name, int ownerId}) {
-    throw UnsupportedError(
-        '_NonUiRiveFilesApi shouldn\'t be used to load file lists.');
-  }
-
-  @override
-  RiveApiFolder makeFolder(Map<String, dynamic> data) {
-    throw UnsupportedError(
-        '_NonUiRiveFilesApi shouldn\'t be used to load folder lists.');
-  }
-}
-
 /// Main context for Rive editor.
 class Rive {
   /// The system tab for your files and settings.
@@ -99,7 +79,7 @@ class Rive {
           return false;
         });
 
-    _filesApi = _NonUiRiveFilesApi(api);
+    _filesApi = FileApi(api);
   }
 
   /// Available tabs in the editor
@@ -114,7 +94,7 @@ class Rive {
       ValueNotifier<RiveTabItem>(null);
 
   final RiveApi api;
-  _NonUiRiveFilesApi _filesApi;
+  FileApi _filesApi;
 
   final RiveIconCache iconCache;
   FocusNode _focusNode;
@@ -195,8 +175,7 @@ class Rive {
               "fileId": value.file.fileId.toString(),
               "name": value.file.name.value,
             }
-          : {
-            },
+          : {},
     );
 
     fileTabs.remove(value);
@@ -238,8 +217,7 @@ class Rive {
               "fileId": value.file.fileId.toString(),
               "name": value.file.name.value,
             }
-          : {
-            },
+          : {},
     );
 
     selectedTab.value = value;
@@ -368,7 +346,7 @@ class Rive {
         rive: this,
         fileName: name,
         api: api,
-        filesApi: _filesApi,
+        fileApi: _filesApi,
       );
       openFileTab = RiveTabItem(file: openFile);
       fileTabs.add(openFileTab);
