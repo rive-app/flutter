@@ -223,6 +223,17 @@ class _CircleTreeExpanderState extends State<CircleTreeExpander> {
     }
   }
 
+  void setHover(bool value) {
+    if (value == _isHovered) {
+      return;
+    }
+
+    setState(() {
+      _isHovered = value;
+      widget.item.data.hover = value;
+    });
+  }
+
   Color get arrowColor {
     final colors = RiveTheme.of(context).colors;
     if (widget.isSelected) {
@@ -238,8 +249,8 @@ class _CircleTreeExpanderState extends State<CircleTreeExpander> {
   Widget build(BuildContext context) {
     final item = widget.item;
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => setHover(true),
+      onExit: (_) => setHover(false),
       child: Container(
         child: Center(
           child: TreeExpander(

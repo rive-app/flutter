@@ -223,7 +223,6 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               hintText: 'Enter your email',
               controller: _emailController,
               initialValue: profile.email,
-              errorText: 'This is an error',
             ),
             LabeledTextField(
               label: 'Website',
