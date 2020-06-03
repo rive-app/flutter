@@ -15,9 +15,7 @@ mixin Subscriptions {
   }
 
   void subscribe<T>(SubscribeCallback<T> action, [int id]) {
-    if (subscriptions == null) {
-      subscriptions = [];
-    }
+    subscriptions ??= [];
     var stream = Plumber().getStream<T>(id);
     var subscription = stream.listen(action);
     subscriptions.add(subscription);

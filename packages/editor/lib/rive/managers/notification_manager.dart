@@ -45,7 +45,7 @@ class NotificationManager with Subscriptions {
     _fetchNotifications();
 
     /// When the logged in user is changed, fetch notifications for the new user
-    Plumber().getStream<model.Me>().listen((_) => _fetchNotifications());
+    subscribe<model.Me>((_) => _fetchNotifications());
   }
 
   void _poll() {
