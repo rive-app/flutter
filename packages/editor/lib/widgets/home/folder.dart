@@ -38,7 +38,7 @@ class BrowserFolder extends StatelessWidget {
           border: Border.all(
             color: selected
                 ? colors.fileSelectedBlue
-                : colors.fileBackgroundLightGrey,
+                : colors.fileBrowserBackground,
             width: 4,
           ),
         ),

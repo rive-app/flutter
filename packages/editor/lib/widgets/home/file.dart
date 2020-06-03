@@ -33,8 +33,8 @@ class BrowserFile extends StatelessWidget {
     final colors = theme.colors;
     return ClipRRect(
       borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(12),
-        topRight: Radius.circular(12),
+        topLeft: Radius.circular(5),
+        topRight: Radius.circular(5),
       ),
       child: Container(
         color: colors.fileBackgroundDarkGrey,
@@ -49,39 +49,25 @@ class BrowserFile extends StatelessWidget {
     return ClickListener(
       onDoubleClick: (_) =>
           RiveContext.of(context).open(file.fileOwnerId, file.id, file.name),
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: colors.fileBackgroundLightGrey,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  child: _screenshot(context),
-                ),
-                _label(context),
-              ],
-            ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.fileBackgroundLightGrey,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? colors.fileSelectedBlue
+                : colors.fileBrowserBackground,
+            width: 4,
           ),
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0x00FFFFFF),
-                borderRadius: BorderRadius.circular(10),
-                border: selected
-                    ? Border.all(
-                        color: selected
-                            ? colors.fileSelectedBlue
-                            : colors.fileBrowserBackground,
-                        width: 4,
-                      )
-                    : null,
-              ),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: _screenshot(context),
             ),
-          ),
-        ],
+            _label(context),
+          ],
+        ),
       ),
     );
   }
