@@ -7,6 +7,7 @@ import 'theme/theme_native.dart' if (dart.library.html) 'theme/theme_web.dart';
 // General colors
 const lightGrey = Color(0xFF8C8C8C);
 const white = Color(0xFFFFFFFF);
+const black = Color(0xFF000000);
 const red = Color(0xFFFF5678);
 const purple = Color(0xFFD041AB);
 const transparent = Color(0x00000000);
@@ -359,6 +360,13 @@ class TextStyles {
 
   TextStyle get fileSearchText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF999999), fontSize: 13);
+
+  TextStyle get fileSearchTextBold => const TextStyle(
+        fontFamily: 'Roboto-Medium',
+        color: black,
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+      );
 
   TextStyle get fileBrowserText => const TextStyle(
       fontFamily: 'Roboto-Regular',

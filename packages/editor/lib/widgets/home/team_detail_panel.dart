@@ -114,19 +114,9 @@ class _TeamMember extends StatelessWidget {
               color: StageCursor.colorFromPalette(teamMember.ownerId),
             ),
             const SizedBox(width: 5),
-            RichText(
-              text: TextSpan(
-                style: styles.fileSearchText
-                    .copyWith(color: Colors.black, fontWeight: FontWeight.w500),
-                children: <TextSpan>[
-                  if (teamMember.name != null) TextSpan(text: teamMember.name),
-                  if (teamMember.username != null && teamMember.name == null)
-                    TextSpan(
-                      style: styles.basic.copyWith(color: colors.inactiveText),
-                      text: '@${teamMember.username}',
-                    ),
-                ],
-              ),
+            Text(
+              teamMember.name ?? teamMember.username,
+              style: styles.fileSearchTextBold,
             ),
           ],
         ),
