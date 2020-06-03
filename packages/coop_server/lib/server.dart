@@ -10,7 +10,7 @@ import 'package:core/coop/coop_server.dart';
 import 'package:core/coop/coop_server_client.dart';
 import 'package:core/core.dart';
 
-import 'src/coop_file.dart';
+import 'package:core/coop/coop_file.dart';
 import 'src/private_api.dart';
 
 class RiveCoopServer extends CoopServer {

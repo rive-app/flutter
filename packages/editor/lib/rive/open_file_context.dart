@@ -73,7 +73,9 @@ class OpenFileContext with RiveFileDelegate {
   RiveFile core;
 
   /// The Stage data for this file.
-  Stage _stage;
+  final ValueNotifier<Stage> _stage = ValueNotifier<Stage>(null);
+  ValueListenable<Stage> get stageListenable => _stage;
+  Stage get stage => _stage.value;
 
   OpenFileState _state = OpenFileState.loading;
 
@@ -214,8 +216,6 @@ class OpenFileContext with RiveFileDelegate {
     this.fileApi,
   }) : _name = ValueNotifier<String>(fileName);
 
-  Stage get stage => _stage;
-
   OpenFileState get state => _state;
   final Event stateChanged = Event();
 
@@ -265,20 +265,24 @@ class OpenFileContext with RiveFileDelegate {
 
     core.advance(0);
     makeStage();
-    _stage.tool = AutoTool.instance;
+    stage.tool = AutoTool.instance;
     _resetManagers();
     stateChanged.notify();
   }
 
   @protected
   void makeStage() {
-    _stage = Stage(this);
+    _stage.value = Stage(this);
   }
 
   void dispose() {
     _disposeManagers();
     core?.disconnect();
-    _stage?.dispose();
+    _stage.value?.dispose();
+    _previewListener?.cancel();
+    _previewListener = null;
+    _selectPreviewListener?.cancel();
+    _selectPreviewListener = null;
   }
 
   @override
@@ -289,8 +293,10 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   bool advance(double elapsed) {
-    if (_stage != null && (core.advance(elapsed) || _stage.shouldAdvance)) {
-      _stage.advance(elapsed);
+    var stageValue = _stage.value;
+    if (stageValue != null &&
+        (core.advance(elapsed) || stageValue.shouldAdvance)) {
+      stageValue.advance(elapsed);
       return true;
     }
     return false;
@@ -304,13 +310,13 @@ class OpenFileContext with RiveFileDelegate {
     if (drawOrderTreeController.value != null) {
       debounce(drawOrderTreeController.value.flatten);
     }
-    _stage?.markNeedsAdvance();
+    stage?.markNeedsAdvance();
   }
 
   @override
   void onObjectAdded(Core object) {
     if (object is Component) {
-      _stage.initComponent(object);
+      stage.initComponent(object);
     }
     debounce(treeController.value.flatten);
     debounce(drawOrderTreeController.value.flatten);
@@ -320,7 +326,7 @@ class OpenFileContext with RiveFileDelegate {
   void onObjectRemoved(Core object) {
     if (object is Component && object.stageItem != null) {
       selection.deselect(object.stageItem);
-      _stage.removeItem(object.stageItem);
+      stage.removeItem(object.stageItem);
     }
   }
 
@@ -333,7 +339,7 @@ class OpenFileContext with RiveFileDelegate {
     var stageCursor = StageCursor();
     player.cursorDelegate = stageCursor;
     if (stageCursor.initialize(player)) {
-      _stage.addItem(stageCursor);
+      stage.addItem(stageCursor);
     }
   }
 
@@ -342,7 +348,7 @@ class OpenFileContext with RiveFileDelegate {
     if (player.cursorDelegate == null) {
       return;
     }
-    _stage.removeItem(player.cursorDelegate as StageCursor);
+    stage.removeItem(player.cursorDelegate as StageCursor);
   }
 
   @override
@@ -350,7 +356,7 @@ class OpenFileContext with RiveFileDelegate {
     // N.B. this will only callback during a reconnect wipe, not initial wipe as
     // our delegate isn't registered yet. So we can use this opportunity to wipe
     // the existing stage and set ourselves up for the next set of data.
-    _stage?.wipe();
+    stage?.wipe();
     _resetManagers();
   }
 
@@ -367,7 +373,8 @@ class OpenFileContext with RiveFileDelegate {
       cancelDebounce(treeController.value.flatten);
       var oldController = treeController.value;
       treeController.value = null;
-      oldController.dispose();
+      debounce(oldController.dispose, duration: const Duration(seconds: 1));
+      // oldController.dispose();
     }
     if (drawOrderTreeController.value != null) {
       cancelDebounce(drawOrderTreeController.value.flatten);
@@ -450,7 +457,6 @@ class OpenFileContext with RiveFileDelegate {
   void onConnectionStateChanged(CoopConnectionState state) {
     /// We use this to handle changes that can come in during use. Right now we
     /// only handle showing the re-connecting (connecting) state.
-    print("STATE IS $state");
     switch (state) {
       case CoopConnectionState.connecting:
         _state = OpenFileState.loading;
@@ -605,19 +611,64 @@ class OpenFileContext with RiveFileDelegate {
   final ValueNotifier<RevisionManager> _revisionManager =
       ValueNotifier<RevisionManager>(null);
   ValueListenable<RevisionManager> get revisionManager => _revisionManager;
+  StreamSubscription<RiveFile> _previewListener;
+  StreamSubscription<RevisionDM> _selectPreviewListener;
 
   /// Show the revision history.
   void showRevisionHistory() {
     var old = _revisionManager.value;
-    _revisionManager.value =
+    _previewListener?.cancel();
+    _selectPreviewListener?.cancel();
+
+    var revisionManager =
         RevisionManager(api: api, ownerId: ownerId, fileId: fileId);
+    _revisionManager.value = revisionManager;
+
+    _selectPreviewListener =
+        revisionManager.selectedRevision.listen(_revisionSelected);
+    _previewListener = revisionManager.preview.listen(_previewRevision);
     old?.dispose();
   }
 
+  void _revisionSelected(RevisionDM revision) {
+    if (revision == null) {
+      return;
+    }
+    // TODO: Figure out how we want the stage & hierarchy to look while loading
+    // a revision.
+  }
+
+  /// This gets set when a preview is currently being displayed. The Active
+  /// Revision is the revision to return to when preview mode is canceled.
+  RiveFile _activeRevision;
+  void _previewRevision(RiveFile previewFile) {
+    core.removeDelegate(this);
+    // Don't disconnect core, keep it around so we can change the revision.
+    _activeRevision = core;
+
+    _stage.value?.dispose();
+
+    core = previewFile;
+
+    completeInitialConnection(OpenFileState.open);
+  }
+
   void hideRevisionHistory() {
+    _previewListener?.cancel();
+    _selectPreviewListener?.cancel();
     var old = _revisionManager.value;
     _revisionManager.value = null;
     old?.dispose();
+
+    // Remove the preview if we were previewing.
+    if (_activeRevision == null) {
+      return;
+    }
+    core.removeDelegate(this);
+    _stage.value?.dispose();
+    core = _activeRevision;
+    _activeRevision = null;
+    completeInitialConnection(OpenFileState.open);
   }
 
   StreamSubscription<AnimationViewModel> _selectedAnimationSubscription;

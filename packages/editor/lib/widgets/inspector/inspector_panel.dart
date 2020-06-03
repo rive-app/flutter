@@ -1,7 +1,3 @@
-import 'dart:math' as math;
-
-import 'package:cursor/propagating_listener.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/managers/revision_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';

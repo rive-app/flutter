@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
@@ -15,14 +16,17 @@ import 'stage/stage_item.dart';
 class HierarchyTreeController extends TreeController<Component> {
   final OpenFileContext file;
   List<Component> _data = [];
+  final Backboard backboard;
 
-  HierarchyTreeController(this.file) : super() {
+  HierarchyTreeController(this.file)
+      : backboard = file.core.backboard,
+        super() {
     // TODO: should this controller by a RiveFileDelegate so it can remove items
     // from the expanded set when they are removed for good from the file?
     // Probably a good idea or at least optimize it to track expansion via
     // custom hash (like the id of an object in this case so that it works when
     // objects are re-hydrated/instanced after an undo.
-    file.core.backboard.activeArtboardChanged.addListener(_updateArtboard);
+    backboard.activeArtboardChanged.addListener(_updateArtboard);
     // Listen for selection events so tree can expand
     file.selection.addListener(_onItemSelected);
     _updateArtboard();
@@ -39,17 +43,14 @@ class HierarchyTreeController extends TreeController<Component> {
   @override
   void dispose() {
     // N.B. assumes backboard doesn't change.
-    file.core.backboard.activeArtboardChanged.removeListener(_updateArtboard);
+    backboard.activeArtboardChanged.removeListener(_updateArtboard);
     // Remove the item selection listener
     file.selection.removeListener(_onItemSelected);
     super.dispose();
   }
 
   void _updateArtboard() {
-    data = [
-      if (file.core.backboard.activeArtboard != null)
-        file.core.backboard.activeArtboard
-    ];
+    data = [if (backboard.activeArtboard != null) backboard.activeArtboard];
   }
 
   @override

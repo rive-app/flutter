@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
-import 'package:coop_server_library/src/coop_file.dart';
+import 'package:core/coop/coop_file.dart';
 import 'package:core/core.dart';
 import 'package:test/test.dart';
 

@@ -17,6 +17,7 @@ import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/hierarchy_panel.dart';
 import 'package:rive_editor/widgets/toolbar/share_popup_button.dart';
@@ -492,88 +493,95 @@ class StagePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final file = ActiveFile.of(context);
-    var stage = file.stage;
     var theme = RiveTheme.of(context);
     var resizeEdgeSize = theme.dimensions.resizeEdgeSize;
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: stage == null
-              ? Container()
-              : StageView(
-                  file: file,
-                  stage: stage,
-                ),
-        ),
-        Positioned.fill(
-          child: stage == null
-              ? Container()
-              : StageLateView(
-                  stage: stage,
-                ),
-        ),
-        Positioned(
-          left: resizeEdgeSize,
-          top: resizeEdgeSize,
-          bottom: resizeEdgeSize,
-          right: resizeEdgeSize,
-          child: stage == null
-              ? Container()
-              : MouseRegion(
-                  opaque: true,
-                  onExit: (details) {
-                    RenderBox getBox = context.findRenderObject() as RenderBox;
-                    var local = getBox.globalToLocal(details.position);
-                    stage.mouseExit(details.buttons, local.dx, local.dy);
-                  },
-                  onEnter: (details) {
-                    RenderBox getBox = context.findRenderObject() as RenderBox;
-                    var local = getBox.globalToLocal(details.position);
-                    stage.mouseEnter(details.buttons, local.dx, local.dy);
-                  },
-                  onHover: (details) {
-                    RenderBox getBox = context.findRenderObject() as RenderBox;
-                    var local = getBox.globalToLocal(details.position);
-                    stage.mouseMove(details.buttons, local.dx, local.dy);
-                  },
-                  child: Listener(
-                    behavior: HitTestBehavior.opaque,
-                    onPointerSignal: (details) {
-                      if (details is PointerScrollEvent) {
+    return ValueListenableBuilder(
+      valueListenable: file.stageListenable,
+      builder: (context, Stage stage, _) {
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: stage == null
+                  ? Container()
+                  : StageView(
+                      file: file,
+                      stage: stage,
+                    ),
+            ),
+            Positioned.fill(
+              child: stage == null
+                  ? Container()
+                  : StageLateView(
+                      stage: stage,
+                    ),
+            ),
+            Positioned(
+              left: resizeEdgeSize,
+              top: resizeEdgeSize,
+              bottom: resizeEdgeSize,
+              right: resizeEdgeSize,
+              child: stage == null
+                  ? Container()
+                  : MouseRegion(
+                      opaque: true,
+                      onExit: (details) {
                         RenderBox getBox =
                             context.findRenderObject() as RenderBox;
                         var local = getBox.globalToLocal(details.position);
-                        stage.mouseWheel(local.dx, local.dy,
-                            details.scrollDelta.dx, details.scrollDelta.dy);
-                      }
-                    },
-                    onPointerDown: (details) {
-                      RenderBox getBox =
-                          context.findRenderObject() as RenderBox;
-                      var local = getBox.globalToLocal(details.position);
-                      stage.mouseDown(details.buttons, local.dx, local.dy);
-                      file.rive.startDragOperation();
-                    },
-                    onPointerUp: (details) {
-                      RenderBox getBox =
-                          context.findRenderObject() as RenderBox;
-                      var local = getBox.globalToLocal(details.position);
-                      stage.mouseUp(details.buttons, local.dx, local.dy);
-                      file.rive.endDragOperation();
-                    },
-                    onPointerMove: (details) {
-                      RenderBox getBox =
-                          context.findRenderObject() as RenderBox;
-                      var local = getBox.globalToLocal(details.position);
-                      stage.mouseDrag(details.buttons, local.dx, local.dy);
-                    },
-                  ),
-                ),
-        ),
-        Positioned.fill(
-          child: AlertsDisplay(),
-        ),
-      ],
+                        stage.mouseExit(details.buttons, local.dx, local.dy);
+                      },
+                      onEnter: (details) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var local = getBox.globalToLocal(details.position);
+                        stage.mouseEnter(details.buttons, local.dx, local.dy);
+                      },
+                      onHover: (details) {
+                        RenderBox getBox =
+                            context.findRenderObject() as RenderBox;
+                        var local = getBox.globalToLocal(details.position);
+                        stage.mouseMove(details.buttons, local.dx, local.dy);
+                      },
+                      child: Listener(
+                        behavior: HitTestBehavior.opaque,
+                        onPointerSignal: (details) {
+                          if (details is PointerScrollEvent) {
+                            RenderBox getBox =
+                                context.findRenderObject() as RenderBox;
+                            var local = getBox.globalToLocal(details.position);
+                            stage.mouseWheel(local.dx, local.dy,
+                                details.scrollDelta.dx, details.scrollDelta.dy);
+                          }
+                        },
+                        onPointerDown: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseDown(details.buttons, local.dx, local.dy);
+                          file.rive.startDragOperation();
+                        },
+                        onPointerUp: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseUp(details.buttons, local.dx, local.dy);
+                          file.rive.endDragOperation();
+                        },
+                        onPointerMove: (details) {
+                          RenderBox getBox =
+                              context.findRenderObject() as RenderBox;
+                          var local = getBox.globalToLocal(details.position);
+                          stage.mouseDrag(details.buttons, local.dx, local.dy);
+                        },
+                      ),
+                    ),
+            ),
+            Positioned.fill(
+              child: AlertsDisplay(),
+            ),
+          ],
+        );
+      },
     );
   }
 }

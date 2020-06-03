@@ -194,7 +194,10 @@ class Rive {
   }
 
   void _changeActiveFile(OpenFileContext context) {
+    // Clean up old value if we had one...
     file.value?.isActive = false;
+
+    // Set and init new one...
     file.value = context;
     file.value?.isActive = true;
   }
