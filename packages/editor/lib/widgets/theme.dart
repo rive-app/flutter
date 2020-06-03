@@ -351,6 +351,11 @@ class TextStyles {
       color: white,
       fontSize: 13,
       fontWeight: FontWeight.w300);
+  TextStyle get fileBlueTextLight => const TextStyle(
+      fontFamily: 'Roboto-Regular',
+      color: Color(0xFF57A5E0),
+      fontSize: 13,
+      fontWeight: FontWeight.w300);
 
   TextStyle get fileSearchText => const TextStyle(
       fontFamily: 'Roboto-Medium', color: Color(0xFF999999), fontSize: 13);

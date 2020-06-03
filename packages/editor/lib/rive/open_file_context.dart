@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/api.dart';
+import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/plumber.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/client_side_player.dart';
@@ -583,29 +583,10 @@ class OpenFileContext with RiveFileDelegate {
     }
   }
 
-  /// Save the file name. This involves not only passing the new
-  /// fiule name to the backend via the api, but also updating the
-  /// file data in the stream, allowing the file browser to update.
+  /// Save an updated file name
   void changeFileName(String name) {
     _name.value = name;
-    fileApi.renameMyFile(ownerId, fileId, name).then((changed) {
-      final fileStreamId = szudzik(fileId, ownerId);
-      if (changed) {
-        // Update the file info in the plumber streams
-        final stream = Plumber().getStream<File>(fileStreamId);
-        if (stream.hasValue) {
-          File file = stream.value;
-          File updatedFile = File(
-            id: file.id,
-            name: name,
-            ownerId: file.ownerId,
-            fileOwnerId: file.fileOwnerId,
-            preview: file.preview,
-          );
-          Plumber().message<File>(updatedFile, fileStreamId);
-        }
-      }
-    });
+    FileManager().renameFile(ownerId, fileId, name);
   }
 
   final ValueNotifier<RevisionManager> _revisionManager =

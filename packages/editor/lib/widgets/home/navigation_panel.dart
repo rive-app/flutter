@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rive_api/model.dart' as model;
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 import 'package:rive_editor/rive/managers/folder_tree_manager.dart';
@@ -88,14 +89,23 @@ class _NavigationPanelState extends State<NavigationPanel> {
               builder: (context, snapshot) {
                 return Column(
                   children: <Widget>[
-                    IconTile(
-                      icon: PackedIcon.notification,
-                      label: 'Notifications',
-                      highlight: snapshot.data == HomeSection.notifications,
-                      onTap: () async {
-                        Plumber().message(HomeSection.notifications);
-                      },
-                    ),
+                    ValueStreamBuilder<List<model.Notification>>(
+                        stream: Plumber().getStream(),
+                        builder: (context, notificationsSnapshot) {
+                          final notificationCount =
+                              notificationsSnapshot.hasData
+                                  ? notificationsSnapshot.data.length
+                                  : 0;
+                          return IconTile(
+                            icon: PackedIcon.notification,
+                            label: 'Notifications',
+                            count: notificationCount,
+                            highlight:
+                                snapshot.data == HomeSection.notifications,
+                            onTap: () async =>
+                                Plumber().message(HomeSection.notifications),
+                          );
+                        }),
                   ],
                 );
               },

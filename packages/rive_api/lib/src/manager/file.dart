@@ -2,9 +2,10 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:utilities/utilities.dart';
 
 class FileManager with Subscriptions {
-  static FileManager _instance = FileManager._();
+  static final _instance = FileManager._();
   factory FileManager() => _instance;
 
   FileManager._()
@@ -32,8 +33,8 @@ class FileManager with Subscriptions {
   Plumber _plumber;
   Me _me;
 
-  final _folderMap = Map<Owner, List<Folder>>();
-  final _fileMap = Map<Folder, List<File>>();
+  final _folderMap = <Owner, List<Folder>>{};
+  final _fileMap = <Folder, List<File>>{};
 
   void _handleNewMe(Me me) {
     if (_me != me) {
@@ -64,9 +65,7 @@ class FileManager with Subscriptions {
     });
     _updateFolderList();
 
-    teams?.forEach((team) {
-      loadFolders(team);
-    });
+    teams?.forEach(loadFolders);
   }
 
   Future<File> createFile(int folderId, [int teamId]) async {
@@ -84,7 +83,7 @@ class FileManager with Subscriptions {
     return Folder.fromDM(folderDM);
   }
 
-  void loadFolders(Owner owner) async {
+  Future<void> loadFolders(Owner owner) async {
     final _foldersDM = await _folderApi.folders(owner.asDM);
     final _folders = Folder.fromDMList(_foldersDM.toList());
     _folderMap[owner] = _folders;
@@ -92,9 +91,7 @@ class FileManager with Subscriptions {
     _updateFolderList();
   }
 
-  void _updateFolderList() {
-    _plumber.message(_folderMap);
-  }
+  void _updateFolderList() => _plumber.message(_folderMap);
 
   void _clearFolderList() {
     _folderMap.keys
@@ -103,7 +100,7 @@ class FileManager with Subscriptions {
     _plumber.flush<Map<Owner, List<Folder>>>();
   }
 
-  void loadFiles(Folder folder, Owner owner) async {
+  Future<void> loadFiles(Folder folder, Owner owner) async {
     // currently unused.
     List<File> _files;
     if (owner is Me) {
@@ -116,5 +113,27 @@ class FileManager with Subscriptions {
 
     _fileMap[folder] = _files;
     _plumber.message(_files, folder.hashCode);
+  }
+
+  /// Save the file name. This involves not only passing the new
+  /// fiule name to the backend via the api, but also updating the
+  /// file data in the stream, allowing the file browser to update.
+  Future<void> renameFile(int ownerId, int fileId, String name) async {
+    final changed = await _fileApi.renameMyFile(ownerId, fileId, name);
+    if (changed) {
+      // Update the file info in the plumber streams
+      final fileStreamId = szudzik(fileId, ownerId);
+      final file = Plumber().peek<File>(fileStreamId);
+      if (file != null) {
+        File updatedFile = File(
+          id: file.id,
+          name: name,
+          ownerId: file.ownerId,
+          fileOwnerId: file.fileOwnerId,
+          preview: file.preview,
+        );
+        Plumber().message<File>(updatedFile, fileStreamId);
+      }
+    }
   }
 }

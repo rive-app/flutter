@@ -27,10 +27,11 @@ typedef FolderContentsBuilder = Widget Function(FolderContents, Selection);
 const double folderCellHeight = 50;
 const double fileCellHeight = 182;
 const double cellWidth = 187;
-const double spacing = 30;
+const double spacing = 22;
 const double headerHeight = 60;
 const double horizontalPadding = 30;
-const double sectionPadding = 30;
+const double sectionPadding = 22;
+const double belowHeaderPadding = 26;
 const int scrollEdgeMilliseconds = 1000 ~/ 60;
 const double scrollSensitivity = 75;
 const double scrollStrength = 6;
@@ -741,7 +742,7 @@ class FileBrowser extends StatelessWidget {
           // Padding below header.
           slivers.add(
             const SliverToBoxAdapter(
-              child: SizedBox(height: sectionPadding),
+              child: SizedBox(height: belowHeaderPadding),
             ),
           );
 
