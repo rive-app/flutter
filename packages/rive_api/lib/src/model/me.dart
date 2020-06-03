@@ -19,10 +19,11 @@ class Me extends User {
     this.notice,
     this.socialLink,
   }) : super(
-            ownerId: ownerId,
-            name: name,
-            username: username,
-            avatarUrl: avatarUrl);
+          ownerId: ownerId,
+          name: name,
+          username: username,
+          avatarUrl: avatarUrl,
+        );
 
   final bool signedIn;
   final int id;

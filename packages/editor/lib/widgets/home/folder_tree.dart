@@ -210,7 +210,7 @@ class CircleTreeExpander extends StatefulWidget {
 }
 
 class _CircleTreeExpanderState extends State<CircleTreeExpander> {
-  bool _isHovered = true;
+  bool _isHovered = false;
 
   Color get borderColor {
     final colors = RiveTheme.of(context).colors;
@@ -221,6 +221,17 @@ class _CircleTreeExpanderState extends State<CircleTreeExpander> {
           ? colors.fileUnselectedFolderIcon
           : colors.filesTreeStroke;
     }
+  }
+
+  void setHover(bool value) {
+    if (value == _isHovered) {
+      return;
+    }
+
+    setState(() {
+      _isHovered = value;
+      widget.item.data.hover = value;
+    });
   }
 
   Color get arrowColor {
@@ -238,8 +249,8 @@ class _CircleTreeExpanderState extends State<CircleTreeExpander> {
   Widget build(BuildContext context) {
     final item = widget.item;
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) => setHover(true),
+      onExit: (_) => setHover(false),
       child: Container(
         child: Center(
           child: TreeExpander(
@@ -317,7 +328,11 @@ class _FolderTreeItemButtonState extends State<FolderTreeItemButton> {
       icon: widget.icon,
       color: _rowButtonColor,
       backgroundHover: Colors.transparent,
-      tip: Tip(label: widget.tooltip),
+      tip: Tip(
+        label: widget.tooltip,
+        // Move closer to the row.
+        offset: const Offset(0, -7),
+      ),
       onHover: _setHover,
     );
   }

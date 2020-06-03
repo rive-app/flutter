@@ -733,10 +733,10 @@ class FileBrowser extends StatelessWidget {
 
         if (canDisplayFolder(data)) {
           final folders = data.folders;
-          final hasFolders = folders != null && folders.isNotEmpty;
+          final hasFolders = folders?.isNotEmpty == true;
 
           final files = data.files;
-          final hasFiles = files != null && files.isNotEmpty;
+          final hasFiles = files?.isNotEmpty == true;
 
           // Padding below header.
           slivers.add(

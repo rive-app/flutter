@@ -54,6 +54,7 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _focusNode.requestFocus,
+      onDoubleTap: _focusNode.requestFocus,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,

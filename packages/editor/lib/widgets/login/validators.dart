@@ -39,7 +39,7 @@ class NameValidator extends FieldValidator {
       var error = errors[errorField];
       switch (error) {
         case 'in-use':
-          return onFieldError('Not available');
+          return onFieldError('Not available.');
         case 'too-short':
           return onFieldError('Too short.');
         case 'bad-characters':
@@ -71,10 +71,8 @@ class PasswordValidator extends FieldValidator {
     if (response.isError && errors.containsKey(errorField)) {
       var error = errors[errorField];
       switch (error) {
-        case 'invalid':
-          return onFieldError('Must be at least 3 characters long.');
         case 'too-short':
-          return onFieldError('Too short.');
+          return onFieldError('Must be at least 3 characters long.');
         default:
           return onFieldError('Unknown error, please try again later.');
       }

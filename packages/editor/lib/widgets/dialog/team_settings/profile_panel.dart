@@ -1,57 +1,108 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/api.dart';
-import 'package:rive_api/models/profile.dart';
-import 'package:rive_api/profiles.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class ProfileSettings extends StatefulWidget {
   final Owner owner;
-  final RiveApi api;
-  const ProfileSettings(this.owner, this.api);
+  const ProfileSettings(this.owner);
 
   @override
   State<StatefulWidget> createState() => _ProfileSettingsState();
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
-  ProfilePackage _profile;
+  // User info.
+  final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _websiteController = TextEditingController();
+  final _bioController = TextEditingController();
+  // Socials.
+  final _twitterController = TextEditingController();
+  final _instagramController = TextEditingController();
+  final _dribbbleController = TextEditingController();
+  final _linkedinController = TextEditingController();
+  final _behanceController = TextEditingController();
+  final _vimeoController = TextEditingController();
+  final _githubController = TextEditingController();
+  final _mediumController = TextEditingController();
+
+  bool _isForHire;
+
+  StreamSubscription<Profile> _profileSubscription;
 
   @override
   void initState() {
     super.initState();
+    final profileId = widget.owner.ownerId;
+    _profileSubscription =
+        Plumber().getStream<Profile>(profileId).listen(_onProfile);
+    // TODO: check for errors
+    ProfileManager().loadProfile(widget.owner);
+  }
 
-    final owner = widget.owner;
-
-    ProfilePackage.getProfile(widget.api, owner).then((value) {
-      // TODO: use future builder.
-      if (mounted) {
-        setState(() {
-          _profile = value;
-          _profile.addListener(_onProfileChange);
-        });
-      }
+  void _onProfile(Profile profile) {
+    assert(profile != null);
+    setState(() {
+      _isForHire = profile.isForHire == true;
     });
   }
 
   @override
   void dispose() {
-    _profile?.dispose();
+    // Cleanup.
+    _profileSubscription.cancel();
+
+    _nameController.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _locationController.dispose();
+    _websiteController.dispose();
+    _bioController.dispose();
+    _twitterController.dispose();
+    _instagramController.dispose();
+    _dribbbleController.dispose();
+    _linkedinController.dispose();
+    _behanceController.dispose();
+    _vimeoController.dispose();
+    _githubController.dispose();
+    _mediumController.dispose();
+
     super.dispose();
   }
 
-  void _onProfileChange() => setState(() {});
-
-  void _submitChanges() async {
-    await _profile.submitChanges(
-        widget.api, widget.owner); //.then((value) => /** TODO: */);
+  Future<void> _submitChanges() async {
+    final updatedProfile = Profile(
+      name: _nameController.text,
+      username: _usernameController.text,
+      email: _emailController.text,
+      avatar: widget.owner.avatarUrl,
+      website: _websiteController.text,
+      bio: _bioController.text,
+      location: _locationController.text,
+      twitter: _twitterController.text,
+      instagram: _instagramController.text,
+      linkedin: _linkedinController.text,
+      medium: _mediumController.text,
+      github: _githubController.text,
+      behance: _behanceController.text,
+      vimeo: _vimeoController.text,
+      dribbble: _dribbbleController.text,
+      isForHire: _isForHire,
+    );
+    await ProfileManager().updateProfile(widget.owner, updatedProfile);
     TeamManager().loadTeams();
   }
 
@@ -72,198 +123,294 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // TODO: use FutureBuilder?
-    if (_profile == null) {
-      return const SizedBox();
-    }
+  Widget _list(List<Widget> children) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
-    var labelPrefix = widget.owner is Team ? 'Team ' : '';
 
     return Column(
       // Stretches the separators
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Expanded(
-          child: ListView(
-              shrinkWrap: true,
-              physics: const ClampingScrollPhysics(),
-              padding: const EdgeInsets.all(30),
-              children: [
-                SettingsPanelSection(
-                    label: 'Account',
-                    contents: (panelContext) => Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SizedBox(height: 3),
-                              _textFieldRow([
-                                LabeledTextField(
-                                  label: '${labelPrefix}Name',
-                                  onChanged: (value) {
-                                    print('changing name');
-                                    return _profile.name = value;
-                                  },
-                                  // onChanged: (value) => _profile.name = value,
-                                  initialValue: _profile.name,
-                                  hintText: 'Pick a name',
-                                ),
-                                LabeledTextField(
-                                  label: '${labelPrefix}Username',
-                                  onChanged: (value) =>
-                                      _profile.username = value,
-                                  initialValue: _profile.username,
-                                  hintText: 'Pick a username',
-                                )
-                              ]),
-                              const SizedBox(height: 30),
-                              _textFieldRow(
-                                [
-                                  LabeledTextField(
-                                    label: 'Location',
-                                    hintText: 'Where is your team based?',
-                                    onChanged: (value) =>
-                                        _profile.location = value,
-                                    initialValue: _profile.location,
-                                  ),
-                                  LabeledTextField(
-                                    label: 'Website',
-                                    hintText: 'Website',
-                                    onChanged: (value) =>
-                                        _profile.website = value,
-                                    initialValue: _profile.website,
-                                  )
-                                ],
-                              ),
-                              const SizedBox(height: 30),
-                              _textFieldRow([
-                                LabeledTextField(
-                                  label: 'Bio',
-                                  hintText: 'Tell users a bit about your team',
-                                  onChanged: (value) => _profile.blurb = value,
-                                  initialValue: _profile.blurb,
-                                )
-                              ])
-                            ])),
-                const SizedBox(height: 30),
-                Separator(color: colors.fileLineGrey),
-                const SizedBox(height: 30),
-                SettingsPanelSection(
-                  label: 'For Hire',
-                  contents: (panelContext) => Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        LabeledRadio(
-                            label: 'Available For Hire',
-                            description:
-                                'Allow other users to message you about work'
-                                ' opportunities. You will also show up in our'
-                                ' list of artists for hire.',
-                            groupValue: _profile.isForHire,
-                            value: true,
-                            onChanged: (value) => _profile.isForHire = value),
-                        const SizedBox(height: 24),
-                        LabeledRadio(
-                            label: 'Not Available For Hire',
-                            description:
-                                "Don't allow other users to contact you about"
-                                ' work opportunities.',
-                            groupValue: _profile.isForHire,
-                            value: false,
-                            onChanged: (value) => _profile.isForHire = value),
-                      ]),
-                ),
-                const SizedBox(height: 30),
-                Separator(color: colors.fileLineGrey),
-                const SizedBox(height: 30),
-                SettingsPanelSection(
-                  label: 'Social',
-                  contents: (panelContext) => Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 3),
-                        _textFieldRow([
-                          LabeledTextField(
-                            label: 'Twitter',
-                            hintText: 'Link',
-                            onChanged: (value) => _profile.twitter = value,
-                            initialValue: _profile.twitter,
-                          ),
-                          LabeledTextField(
-                            label: 'Instagram',
-                            hintText: 'Link',
-                            onChanged: (value) => _profile.instagram = value,
-                            initialValue: _profile.instagram,
-                          )
-                        ]),
-                        const SizedBox(height: 30),
-                        _textFieldRow([
-                          LabeledTextField(
-                            label: 'Dribbble',
-                            hintText: 'Link',
-                            onChanged: (value) => _profile.dribbble = value,
-                            initialValue: _profile.dribbble,
-                          ),
-                          LabeledTextField(
-                            label: 'LinkedIn',
-                            hintText: 'Link',
-                            onChanged: (value) => _profile.linkedin = value,
-                            initialValue: _profile.linkedin,
-                          )
-                        ]),
-                        const SizedBox(height: 30),
-                        _textFieldRow([
-                          LabeledTextField(
-                            label: 'Behance',
-                            hintText: 'Link',
-                            onChanged: (value) => _profile.behance = value,
-                            initialValue: _profile.behance,
-                          ),
-                          LabeledTextField(
-                            label: 'Vimeo',
-                            hintText: 'Link',
-                            onChanged: (value) => _profile.vimeo = value,
-                            initialValue: _profile.vimeo,
-                          )
-                        ]),
-                        const SizedBox(height: 30),
-                        _textFieldRow([
-                          LabeledTextField(
-                            label: 'GitHub',
-                            hintText: 'Link',
-                            onChanged: (value) => _profile.github = value,
-                            initialValue: _profile.github,
-                          ),
-                          LabeledTextField(
-                            label: 'Medium',
-                            hintText: 'Link',
-                            onChanged: (value) => _profile.medium = value,
-                            initialValue: _profile.medium,
-                          )
-                        ]),
-                      ]),
-                ),
-              ]),
-        ),
+            child: ListView(
+          shrinkWrap: true,
+          physics: const ClampingScrollPhysics(),
+          padding: const EdgeInsets.all(30),
+          children: children,
+        )),
         Separator(color: colors.fileLineGrey),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                child: FlatIconButton(
-                    label: 'Save Changes',
-                    color: colors.commonDarkGrey,
-                    textColor: Colors.white,
-                    onTap: _submitChanges))
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+              child: FlatIconButton(
+                label: 'Save Changes',
+                color: colors.commonDarkGrey,
+                textColor: Colors.white,
+                onTap: _submitChanges,
+              ),
+            )
           ],
         )
       ],
+    );
+  }
+
+  Widget _names(Profile profile) {
+    var labelPrefix = widget.owner is Team ? 'Team ' : '';
+    return _textFieldRow(
+      [
+        LabeledTextField(
+          label: '${labelPrefix}Name',
+          controller: _nameController,
+          initialValue: profile.name,
+          hintText: 'Pick a name',
+        ),
+        LabeledTextField(
+          label: '${labelPrefix}Username',
+          controller: _usernameController,
+          initialValue: profile.username,
+          hintText: 'Pick a username',
+        )
+      ],
+    );
+  }
+
+  List<Widget> _info(Profile profile) {
+    if (widget.owner is Team) {
+      return [
+        const SizedBox(height: 3),
+        _names(profile),
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Location',
+              hintText: 'Where is your team based?',
+              controller: _locationController,
+              initialValue: profile.location,
+            ),
+            LabeledTextField(
+              label: 'Website',
+              hintText: 'www.myteam.com',
+              controller: _websiteController,
+              initialValue: profile.website,
+            ),
+          ],
+        ),
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Bio',
+              hintText: 'Tell users a bit about your team',
+              controller: _bioController,
+              initialValue: profile.bio,
+            ),
+          ],
+        ),
+      ];
+    } else {
+      return [
+        const SizedBox(height: 3),
+        _names(profile),
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Email',
+              hintText: 'Enter your email',
+              controller: _emailController,
+              initialValue: profile.email,
+            ),
+            LabeledTextField(
+              label: 'Website',
+              hintText: 'www.mysite.com',
+              controller: _websiteController,
+              initialValue: profile.website,
+            ),
+          ],
+        ),
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Location',
+              hintText: 'Where do you live?',
+              controller: _locationController,
+              initialValue: profile.location,
+            ),
+            const SizedBox(),
+          ],
+        ),
+        const SizedBox(height: 30),
+        _textFieldRow(
+          [
+            LabeledTextField(
+              label: 'Bio',
+              hintText: 'Tell users a bit about yourself...',
+              controller: _bioController,
+              initialValue: profile.bio,
+            ),
+          ],
+        ),
+      ];
+    }
+  }
+
+  List<Widget> get _forHire {
+    return [
+      LabeledRadio(
+        label: 'Available For Hire',
+        description: 'Allow other users to message you about work'
+            ' opportunities. You will also show up in our'
+            ' list of artists for hire.',
+        groupValue: _isForHire,
+        value: true,
+        onChanged: (value) {
+          setState(() {
+            _isForHire = value;
+          });
+        },
+      ),
+      const SizedBox(height: 24),
+      LabeledRadio(
+        label: 'Not Available For Hire',
+        description: "Don't allow other users to contact you about"
+            ' work opportunities.',
+        groupValue: _isForHire,
+        value: false,
+        onChanged: (value) {
+          setState(() {
+            _isForHire = value;
+          });
+        },
+      ),
+    ];
+  }
+
+  List<Widget> _socials(Profile profile) {
+    return [
+      const SizedBox(height: 3),
+      _textFieldRow(
+        [
+          LabeledTextField(
+            label: 'Twitter',
+            hintText: 'Link',
+            controller: _twitterController,
+            initialValue: profile.twitter,
+          ),
+          LabeledTextField(
+            label: 'Instagram',
+            hintText: 'Link',
+            controller: _instagramController,
+            initialValue: profile.instagram,
+          )
+        ],
+      ),
+      const SizedBox(height: 30),
+      _textFieldRow(
+        [
+          LabeledTextField(
+            label: 'Dribbble',
+            hintText: 'Link',
+            controller: _dribbbleController,
+            initialValue: profile.dribbble,
+          ),
+          LabeledTextField(
+            label: 'LinkedIn',
+            hintText: 'Link',
+            controller: _linkedinController,
+            initialValue: profile.linkedin,
+          )
+        ],
+      ),
+      const SizedBox(height: 30),
+      _textFieldRow(
+        [
+          LabeledTextField(
+            label: 'Behance',
+            hintText: 'Link',
+            controller: _behanceController,
+            initialValue: profile.behance,
+          ),
+          LabeledTextField(
+            label: 'Vimeo',
+            hintText: 'Link',
+            controller: _vimeoController,
+            initialValue: profile.vimeo,
+          )
+        ],
+      ),
+      const SizedBox(height: 30),
+      _textFieldRow(
+        [
+          LabeledTextField(
+            label: 'GitHub',
+            hintText: 'Link',
+            controller: _githubController,
+            initialValue: profile.github,
+          ),
+          LabeledTextField(
+            label: 'Medium',
+            hintText: 'Link',
+            controller: _mediumController,
+            initialValue: profile.medium,
+          )
+        ],
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueStreamBuilder<Profile>(
+      stream: Plumber().getStream<Profile>(widget.owner.ownerId),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final theme = RiveTheme.of(context);
+          final colors = theme.colors;
+          final profile = snapshot.data;
+
+          return _list(
+            [
+              SettingsPanelSection(
+                label: 'Account',
+                contents: (panelContext) => Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: _info(profile),
+                ),
+              ),
+              const SizedBox(height: 30),
+              Separator(color: colors.fileLineGrey),
+              const SizedBox(height: 30),
+              SettingsPanelSection(
+                label: 'For Hire',
+                contents: (panelContext) => Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: _forHire,
+                ),
+              ),
+              const SizedBox(height: 30),
+              Separator(color: colors.fileLineGrey),
+              const SizedBox(height: 30),
+              SettingsPanelSection(
+                label: 'Social',
+                contents: (panelContext) => Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: _socials(profile),
+                ),
+              ),
+            ],
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 }
@@ -323,121 +470,5 @@ class LabeledRadio extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class ProfilePackage with ChangeNotifier {
-  RiveProfile _profile;
-
-  ProfilePackage();
-
-  // Initializer for this profile.
-  static Future<ProfilePackage> getProfile(RiveApi api, Owner owner) async {
-    var response = await RiveProfilesApi(api).getInfo(owner);
-    if (response != null) {
-      return ProfilePackage().._profile = response;
-    }
-    return null;
-  }
-
-  Future<void> submitChanges(RiveApi api, Owner owner) async =>
-      RiveProfilesApi(api).updateInfo(owner, profile: _profile);
-
-  String get name => _profile.name;
-  set name(String value) {
-    if (value == _profile.name) return;
-    _profile.name = value;
-    notifyListeners();
-  }
-
-  String get username => _profile.username;
-  set username(String value) {
-    if (value == _profile.username) return;
-    _profile.username = value;
-    notifyListeners();
-  }
-
-  String get location => _profile.location;
-  set location(String value) {
-    if (value == _profile.location) return;
-    _profile.location = value;
-    notifyListeners();
-  }
-
-  String get website => _profile.website;
-  set website(String value) {
-    if (value == _profile.website) return;
-    _profile.website = value;
-    notifyListeners();
-  }
-
-  String get blurb => _profile.blurb;
-  set blurb(String value) {
-    if (value == _profile.blurb) return;
-    _profile.blurb = value;
-    notifyListeners();
-  }
-
-  String get twitter => _profile.twitter;
-  set twitter(String value) {
-    if (value == _profile.twitter) return;
-    _profile.twitter = value;
-    notifyListeners();
-  }
-
-  String get instagram => _profile.instagram;
-  set instagram(String value) {
-    if (value == _profile.instagram) return;
-    _profile.instagram = value;
-    notifyListeners();
-  }
-
-  String get dribbble => _profile.dribbble;
-  set dribbble(String value) {
-    if (value == _profile.dribbble) return;
-    _profile.dribbble = value;
-    notifyListeners();
-  }
-
-  String get linkedin => _profile.linkedin;
-  set linkedin(String value) {
-    if (value == _profile.linkedin) return;
-    _profile.linkedin = value;
-    notifyListeners();
-  }
-
-  String get behance => _profile.behance;
-  set behance(String value) {
-    if (value == _profile.behance) return;
-    _profile.behance = value;
-    notifyListeners();
-  }
-
-  String get vimeo => _profile.vimeo;
-  set vimeo(String value) {
-    if (value == _profile.vimeo) return;
-    _profile.vimeo = value;
-    notifyListeners();
-  }
-
-  String get github => _profile.github;
-  set github(String value) {
-    if (value == _profile.github) return;
-    _profile.github = value;
-    notifyListeners();
-  }
-
-  String get medium => _profile.medium;
-  set medium(String value) {
-    if (value == _profile.medium) return;
-    _profile.medium = value;
-    notifyListeners();
-  }
-
-  bool get isForHire => _profile.isForHire;
-  set isForHire(bool value) {
-    if (value == _profile.isForHire) return;
-    _profile.isForHire = value;
-    notifyListeners();
   }
 }

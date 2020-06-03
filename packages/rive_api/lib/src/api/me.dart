@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:utilities/deserialize.dart';
+import 'package:rive_api/model.dart';
 
 final _log = Logger('Rive API Me');
 
@@ -70,17 +71,48 @@ class MeApi {
     }
   }
 
-  /**
-   * Gets the error message from the server's cookies. 
-   * Server will also clear it right away, so this error can only be used once.
-   */
+  /// Gets the error message from the server's cookies.
+  /// Server will also clear it right away, so this error can only be used once.
   Future<String> getErrorMessage() async {
     var response = await api.getFromPath('/api/getError');
-    print("Error message says: ${response.body}");
     if (response.statusCode != 200) {
       _log.severe("Couldn't clear the errors cookie.");
       return '';
     }
     return response.body;
+  }
+
+  /// GET /api/profile
+  /// Returns the user profile.
+  Future<ProfileDM> get profile async {
+    final response = await api.get('${api.host}/api/profile');
+    if (response.statusCode != 200) {
+      var message = 'Could not get user profile ${response.body}';
+      log.severe(message);
+      return null;
+    }
+    try {
+      final data = json.decode(response.body) as Map<String, Object>;
+      return ProfileDM.fromData(data);
+    } on FormatException catch (e) {
+      log.severe('Error formatting team profile response: $e');
+      rethrow;
+    }
+  }
+
+  // PUT
+  Future<bool> updateProfile(Profile profile) async {
+    try {
+      var response =
+          await api.put('${api.host}/api/profile', body: profile.encoded);
+      print("Response: ${response.body}, ${response.statusCode}");
+      return true;
+    } on ApiException catch (apiException) {
+      final response = apiException.response;
+      print("Response: ${response.body}, ${response.statusCode}");
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      return false;
+    }
   }
 }

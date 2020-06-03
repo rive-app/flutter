@@ -311,3 +311,27 @@ final successNotificationsResponse = Response("""
   "count":2
 }
 """, 200);
+
+final successProfileMeResponse = Response("""
+{
+  "name": "John Cleese",
+  "username":"mrfawlty",
+  "email": "fawlty@towers.app",
+  "location": "Torquay",
+  "avatar": "https://pbs.twimg.com/profile_images/640910812538896384/LdYOoJzZ_400x400.png",
+  "website": "www.fawlty.com",
+  "bio": "BritishRiviera",
+  "twitter": "fawltytowers_",
+  "instagram": "fawltytowers_ig",
+  "dribbble": null,
+  "linkedin": null,
+  "behance": null,
+  "vimeo": null,
+  "github": null,
+  "medium": null,
+  "isForHire": false
+}
+""", 200);
+
+final errorUpdateProfileMeResponse =
+    Response('{"username":"bad-characters"}', 422);
