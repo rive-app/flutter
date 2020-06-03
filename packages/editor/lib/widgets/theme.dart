@@ -194,6 +194,10 @@ class RiveColors {
 
   // Login colors
   Color get loginLogo => const Color(0xFF000000);
+
+  // Revision Panel colors
+  Color get selectedRevision => const Color(0xFF3E3E3E);
+  Color get hoveredRevision => inspectorPillBackground;
 }
 
 /// TextStyles used in the Rive Theme

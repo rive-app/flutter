@@ -94,9 +94,10 @@ class RuntimeImporter {
               keyedProperty.keyedObjectId = keyedObject.id;
 
               var numKeyframes = reader.readVarUint();
-              for(int l = 0; l < numKeyframes; l++) {
-                var keyframe = core.readRuntimeObject<KeyFrame>(reader, idRemap);
-                if(keyframe == null) {
+              for (int l = 0; l < numKeyframes; l++) {
+                var keyframe =
+                    core.readRuntimeObject<KeyFrame>(reader, idRemap);
+                if (keyframe == null) {
                   continue;
                 }
                 core.addObject(keyframe);

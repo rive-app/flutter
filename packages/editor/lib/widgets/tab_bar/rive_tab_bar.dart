@@ -25,6 +25,17 @@ class RiveTabItem {
   final OpenFileContext file;
   final Iterable<PackedIcon> icon;
   final bool closeable;
+
+  RiveTabItem clone({
+    Iterable<PackedIcon> icon,
+    bool closeable,
+    OpenFileContext file,
+  }) =>
+      RiveTabItem(
+        icon: icon ?? this.icon,
+        closeable: closeable ?? this.closeable,
+        file: file ?? this.file,
+      );
 }
 
 typedef TabSelectedCallback = void Function(RiveTabItem item);

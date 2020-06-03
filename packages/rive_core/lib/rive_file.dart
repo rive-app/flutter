@@ -62,11 +62,13 @@ class RiveFile extends RiveCoreContext {
     String fileId, {
     @required LocalDataPlatform localDataPlatform,
     this.api,
-  }) : _persist = RivePersist(localDataPlatform, fileId);
+  }) : _persist = localDataPlatform == null
+            ? null
+            : RivePersist(localDataPlatform, fileId);
 
   @override
   void abandonChanges(ChangeSet changes) {
-    _persist.remove(changes);
+    _persist?.remove(changes);
   }
 
   bool addDelegate(RiveFileDelegate delegate) => delegates.add(delegate);
@@ -200,7 +202,7 @@ class RiveFile extends RiveCoreContext {
   }
 
   @override
-  Future<List<ChangeSet>> getOfflineChanges() => _persist.changes();
+  Future<List<ChangeSet>> getOfflineChanges() => _persist?.changes();
 
   @override
   Future<String> getStringSetting(String key) async {
@@ -288,12 +290,12 @@ class RiveFile extends RiveCoreContext {
   void onWipe() {
     artboards.clear();
     delegates.toList(growable: false).forEach((delegate) => delegate.onWipe());
-    _persist.wipe();
+    _persist?.wipe();
   }
 
   @override
   void persistChanges(ChangeSet changes) {
-    _persist.add(changes);
+    _persist?.add(changes);
   }
 
   bool removeDelegate(RiveFileDelegate delegate) => delegates.remove(delegate);

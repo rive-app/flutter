@@ -49,9 +49,10 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
     if (_file == value) {
       return;
     }
+    _file?.stage?.clearDelegate(this);
     _file = value;
     _file?.stage?.delegateTo(this);
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   Stage _stage;
@@ -60,9 +61,10 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
     if (_stage == value) {
       return;
     }
+    _stage?.clearDelegate(this);
     _stage = value;
     stage.delegateTo(this);
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   @override
