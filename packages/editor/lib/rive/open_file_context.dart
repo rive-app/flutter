@@ -643,8 +643,11 @@ class OpenFileContext with RiveFileDelegate {
   RiveFile _activeRevision;
   void _previewRevision(RiveFile previewFile) {
     core.removeDelegate(this);
-    // Don't disconnect core, keep it around so we can change the revision.
-    _activeRevision = core;
+
+    // Don't disconnect core, keep it around so we can change the revision. But
+    // only do it if the activeRevision is null, meaning we weren't already
+    // previewing.
+    _activeRevision ??= core;
 
     _stage.value?.dispose();
 
