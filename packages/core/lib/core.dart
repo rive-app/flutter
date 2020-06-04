@@ -898,6 +898,8 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     }
     return object as T;
   }
+
+  void restoreRevision(int revisionId) => _client.restoreRevision(revisionId);
 }
 
 class FreshChange {

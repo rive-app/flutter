@@ -102,4 +102,11 @@ class CoopWriter {
     }
     write(writer.uint8Buffer);
   }
+
+  void writeRevision(int id) {
+    var writer = BinaryWriter(alignment: 2);
+    writer.writeVarUint(CoopCommand.revision);
+    writer.writeVarUint(id);
+    write(writer.uint8Buffer);
+  }
 }

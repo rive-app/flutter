@@ -8,8 +8,13 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 class SimpleAlert extends EditorAlert {
   final String label;
 
-  SimpleAlert(this.label) {
-    Timer(const Duration(seconds: 3), dismiss);
+  SimpleAlert(
+    this.label, {
+    bool autoDismiss = true,
+  }) {
+    if (autoDismiss) {
+      Timer(const Duration(seconds: 3), dismiss);
+    }
   }
 
   @override

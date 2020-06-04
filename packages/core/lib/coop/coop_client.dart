@@ -314,4 +314,12 @@ class CoopClient extends CoopReader {
   }
 
   void sendCursor(double x, double y) => _writer.writeCursor(x, y);
+
+  @override
+  Future<void> recvRevision(int id) {
+    // TODO: darken screen!!!
+    print("Client got revision: $id");
+  }
+
+  void restoreRevision(int id) => _writer.writeRevision(id);
 }

@@ -123,9 +123,25 @@ class PrivateApi {
     }
   }
 
+  /// Load the latest revision data for a file.
   Future<Uint8List> load(int ownerId, int fileId) async {
     try {
       var response = await http.get('$host/revision/$ownerId/$fileId');
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      }
+      return null;
+    } on Exception catch (_) {
+      return null;
+    }
+  }
+
+  /// Restore a revision by id for a file, and get the data for it.
+  Future<Uint8List> restoreRevision(
+      int ownerId, int fileId, int revisionId) async {
+    try {
+      var response = await http
+          .post('$host/revision/$ownerId/$fileId/$revisionId');
       if (response.statusCode == 200) {
         return response.bodyBytes;
       }

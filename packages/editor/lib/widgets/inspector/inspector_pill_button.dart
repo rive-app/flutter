@@ -9,36 +9,49 @@ class InspectorPillButton extends StatelessWidget {
   final VoidCallback press;
   final Iterable<PackedIcon> icon;
   final String label;
+  final bool accent;
 
   const InspectorPillButton({
     Key key,
     this.press,
     this.icon,
     this.label,
+    this.accent = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var colors = RiveTheme.of(context).colors;
-    return FlatIconButton(
-      label: label,
-      color: colors.inspectorPillBackground,
-      hoverColor: colors.inspectorPillHover,
-      textColor: colors.inspectorPillText,
-      hoverTextColor: colors.activeText,
-      icon: icon == null
-          ? null
-          : TintedIcon(
-              icon: icon,
-              color: colors.inspectorPillIcon,
-            ),
-      hoverIcon: icon == null
-          ? null
-          : TintedIcon(
-              icon: icon,
-              color: colors.activeText,
-            ),
-      onTap: press,
+    bool disabled = press == null;
+
+    var color =
+        accent ? colors.toolbarButtonSelected : colors.inspectorPillBackground;
+    var disabledColor = colors.inspectorPillBackground;
+
+    return IgnorePointer(
+      ignoring: disabled,
+      child: FlatIconButton(
+        label: label,
+        color: disabled ? disabledColor : color,
+        hoverColor: colors.inspectorPillHover,
+        textColor: disabled
+            ? colors.inspectorPillDisabledText
+            : colors.inspectorPillText,
+        hoverTextColor: colors.activeText,
+        icon: icon == null
+            ? null
+            : TintedIcon(
+                icon: icon,
+                color: colors.inspectorPillIcon,
+              ),
+        hoverIcon: icon == null
+            ? null
+            : TintedIcon(
+                icon: icon,
+                color: colors.activeText,
+              ),
+        onTap: press,
+      ),
     );
   }
 }

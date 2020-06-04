@@ -186,8 +186,10 @@ class RiveColors {
 
   // Inspector panel pill button
   Color get inspectorPillBackground => buttonDark;
+  Color get inspectorPillDisabledBackground => textButtonDark;
   Color get inspectorPillHover => const Color(0xFF555555);
   Color get inspectorPillText => const Color(0xFFB2B2B2);
+  Color get inspectorPillDisabledText => buttonDarkDisabledText;
   Color get inspectorPillIcon => lightGrey;
 
   Color get vertexIcon => const Color(0xFF848484);

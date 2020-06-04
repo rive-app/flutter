@@ -229,4 +229,25 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
   int nextClientId() {
     return file.nextClientId++;
   }
+
+  @override
+  Future<void> restoreRevision(int revisionId) async {
+    for (final to in clients) {
+      to.notifyChangingRevision();
+    }
+    var data = await _privateApi.restoreRevision(
+        file.ownerId, file.fileId, revisionId);
+        if(data == null) {
+          print('no data from restore?');
+          return;
+        }
+    var coopFile = CoopFile();
+    if (coopFile.deserialize(BinaryReader.fromList(data))) {
+      file = coopFile;
+
+      for (final to in clients) {
+        to.completeChangingRevision();
+      }
+    }
+  }
 }

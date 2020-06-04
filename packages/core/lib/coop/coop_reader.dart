@@ -65,6 +65,10 @@ abstract class CoopReader {
       case CoopCommand.ping:
         // do nothing with ping...
         break;
+      case CoopCommand.revision:
+        int id = reader.readVarUint();
+        await recvRevision(id);
+        break;
       default:
         recvChange(ChangeSet()..deserialize(reader, command));
         break;
@@ -82,4 +86,5 @@ abstract class CoopReader {
   Future<void> recvPlayers(List<Player> players);
   Future<void> recvCursor(double x, double y);
   Future<void> recvCursors(Map<int, PlayerCursor> cursors);
+  Future<void> recvRevision(int id);
 }

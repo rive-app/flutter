@@ -18,6 +18,7 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/alerts/action_alert.dart';
+import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/editor_alert.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
@@ -358,6 +359,8 @@ class OpenFileContext with RiveFileDelegate {
     // the existing stage and set ourselves up for the next set of data.
     stage?.wipe();
     _resetManagers();
+    _restoringAlert?.dismiss();
+    _restoringAlert = null;
   }
 
   void _disposeManagers() {
@@ -653,6 +656,16 @@ class OpenFileContext with RiveFileDelegate {
     core = _activeRevision;
     _activeRevision = null;
     completeInitialConnection(OpenFileState.open);
+  }
+
+  // TODO: remove this and do new darkening logic...
+  SimpleAlert _restoringAlert;
+  void restoreRevision(RevisionDM revision) {
+    assert(_activeRevision != null, 'not previewing a revision');
+    _activeRevision.restoreRevision(revision.id);
+    hideRevisionHistory();
+    addAlert((_restoringAlert =
+        SimpleAlert('Restoring revision...', autoDismiss: false)));
   }
 
   StreamSubscription<AnimationViewModel> _selectedAnimationSubscription;
