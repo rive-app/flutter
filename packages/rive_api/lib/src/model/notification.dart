@@ -5,7 +5,7 @@ import 'package:rive_api/data_model.dart';
 /// This simply wraps an int, but we place it in
 /// a class for uniqueness in Plumber messages
 class NotificationCount {
-  const NotificationCount(this.count) : assert(count != null && count > 0);
+  const NotificationCount(this.count) : assert(count != null && count >= 0);
   final int count;
 }
 

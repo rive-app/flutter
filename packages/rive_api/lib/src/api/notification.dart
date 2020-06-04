@@ -56,4 +56,9 @@ class NotificationsApi {
 
     return NotificationCount(data.getInt('count'));
   }
+
+  /// POST /api/notifications/read
+  /// Mark al notifications as read
+  Future<void> markNotificationsRead() =>
+      api.post('${api.host}/api/notifications/read');
 }

@@ -1,6 +1,7 @@
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 
 /// General manager for general ui things
@@ -25,6 +26,12 @@ class RiveManager with Subscriptions {
     // Handle incoming team invitation acceptances
     if (newHomeSection != HomeSection.files) {
       Plumber().flush<CurrentDirectory>();
+    }
+    // Handle marking notifications as read when
+    // the user opens the notifications panel
+    if (newHomeSection == HomeSection.notifications &&
+        Plumber().peek<NotificationCount>()?.count != 0) {
+      NotificationManager().markNotificationsRead();
     }
   }
 
