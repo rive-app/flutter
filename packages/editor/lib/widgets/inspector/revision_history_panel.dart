@@ -25,10 +25,17 @@ class RevisionHistoryPanel extends StatelessWidget {
       mainAxisSize: MainAxisSize.max,
       children: [
         const SizedBox(height: 20),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: InspectorPillButton(
-            label: 'Edit Current Revision',
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ValueStreamBuilder<RevisionDM>(
+            stream: manager.selectedRevision,
+            builder: (context, snapshot) => InspectorPillButton(
+              label: 'Edit Current Revision',
+              press: snapshot.hasData
+                  ? () => ActiveFile.find(context)
+                      .restoreRevision(manager.selectedRevision.value)
+                  : null,
+            ),
           ),
         ),
         Padding(

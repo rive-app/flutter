@@ -53,21 +53,23 @@ class _FlatIconState extends State<FlatIconButton> {
 
   @override
   Widget build(BuildContext context) {
+    var hovered = widget.onTap != null && _isHovered;
     final riveColors = RiveTheme.of(context).colors;
     final riveStyles = RiveTheme.of(context).textStyles;
     // Fall back to default color if we don't have a hover specified.
     var hoverColor = widget.hoverColor ?? widget.color;
-    var color = (_isHovered ? hoverColor : widget.color) ??
-        riveColors.commonButtonColor;
+    var color =
+        (hovered ? hoverColor : widget.color) ?? riveColors.commonButtonColor;
 
     // Fall back to default color if we don't have a hover specified.
     var hoverTextColor = widget.hoverTextColor ?? widget.textColor;
-    var textColor = _isHovered ? hoverTextColor : widget.textColor;
+    var textColor = hovered ? hoverTextColor : widget.textColor;
     var textStyle = (textColor != null)
         ? riveStyles.buttonTextStyle.copyWith(color: textColor)
         : riveStyles.buttonTextStyle;
     var _hoverIcon = widget.hoverIcon ?? widget.icon;
-    var _icon = _isHovered ? _hoverIcon : widget.icon;
+    var _icon = hovered ? _hoverIcon : widget.icon;
+
     return _tip(
       MouseRegion(
         onEnter: (_) {

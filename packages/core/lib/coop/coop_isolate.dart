@@ -272,6 +272,9 @@ abstract class CoopIsolateProcess {
   void onClientReady(CoopServerClient client) {
     propagatePlayers();
   }
+
+  /// A client is requesting to restore a revision id.
+  Future<void> restoreRevision(int revisionId);
 }
 
 class CoopServerAddClient {

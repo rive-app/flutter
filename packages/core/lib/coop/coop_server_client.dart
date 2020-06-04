@@ -123,4 +123,15 @@ class CoopServerClient extends Player with CoopReader {
   Future<void> recvCursors(Map<int, PlayerCursor> cursors) {
     throw UnsupportedError("Server should never receive cursors.");
   }
+
+  @override
+  Future<void> recvRevision(int id) => context.restoreRevision(id);
+
+  void notifyChangingRevision() {
+    _writer.writeRevision(0);
+  }
+
+  void completeChangingRevision() {
+    _writer.writeHello(clientId);
+  }
 }
