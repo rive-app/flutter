@@ -7,7 +7,6 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_api/models/team_role.dart';
-import 'package:rive_api/models/user.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
@@ -15,8 +14,8 @@ import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/invite_box.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/user_invite_box.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
@@ -92,12 +91,12 @@ class InvitePanel extends StatefulWidget {
   final Team team;
   final VoidCallback teamUpdated;
 
-  const InvitePanel(
-      {@required this.api,
-      @required this.team,
-      @required this.teamUpdated,
-      Key key})
-      : super(key: key);
+  const InvitePanel({
+    @required this.api,
+    @required this.team,
+    @required this.teamUpdated,
+    Key key,
+  }) : super(key: key);
   @override
   _InvitePanelState createState() => _InvitePanelState();
 }
@@ -148,12 +147,28 @@ class _InvitePanelState extends State<InvitePanel> {
     _openCombo.notify();
   }
 
-  Future<List<RiveUser>> _autocomplete(String input) {
-    final teamMembers =
-        Plumber().getStream<List<TeamMember>>(widget.team.hashCode).value;
+  // From here: https://stackoverflow.com/a/201378
+  final _emailRFC5322Regex = RegExp(
+      r"""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""");
+
+  Future<List<Invite>> _autocomplete(String input) async {
+    if (input.isEmpty) {
+      return null;
+    }
+    if (_emailRFC5322Regex.hasMatch(input)) {
+      return [EmailInvite(input)];
+    }
+    final teamMembers = Plumber().peek<List<TeamMember>>(widget.team.hashCode);
     final teamMemberIds = teamMembers.map((e) => e.ownerId);
     final filterIds = _inviteIds..addAll(teamMemberIds);
-    return _userApi.autocomplete(input, filterIds);
+    final autocompleteUsers = await _userApi.autocomplete(input, filterIds);
+    return autocompleteUsers
+        .map((user) => UserInvite(
+            ownerId: user.ownerId,
+            name: user.name,
+            username: user.username,
+            avatarUrl: user.avatar))
+        .toList(growable: false);
   }
 
   @override
@@ -185,12 +200,12 @@ class _InvitePanelState extends State<InvitePanel> {
                     runSpacing: 10,
                     children: [
                       ..._inviteQueue.map(
-                        (e) => UserInviteBox(
-                          e.name,
+                        (invite) => InviteBox(
+                          invite.inviteBoxLabel,
                           onRemove: () {
                             setState(
                               () {
-                                _inviteQueue.remove(e);
+                                _inviteQueue.remove(invite);
                               },
                             );
                           },
@@ -198,7 +213,7 @@ class _InvitePanelState extends State<InvitePanel> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: ComboBox<RiveUser>(
+                        child: ComboBox<Invite>(
                           trigger: _openCombo,
                           // Start with an empty value.
                           value: null,
@@ -215,38 +230,19 @@ class _InvitePanelState extends State<InvitePanel> {
                           change: (val) {
                             setState(
                               () {
-                                _inviteQueue.add(
-                                  UserInvite(val.ownerId, val.displayName),
-                                );
+                                _inviteQueue.add(val);
                                 _startTypeahead();
                               },
                             );
                           },
-                          leadingBuilder: (context, isHovered, item) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 5),
-                              child: AvatarView(
-                                diameter: 20,
-                                borderWidth: 0,
-                                imageUrl: item.avatar,
-                                name: item.name ?? item.username,
-                                color: Colors.transparent,
-                              ),
-                            );
-                          },
-                          toLabel: (user) {
-                            if (user == null) {
+                          leadingBuilder: (context, isHovered, item) =>
+                              item.leadingWidget(context),
+                          toLabel: (invite) {
+                            if (invite == null) {
                               if (_inviteQueue.isNotEmpty) return '';
                               return 'Invite a member...';
                             }
-                            var label = '';
-                            if (user.name != null) {
-                              label = '${user.name} ';
-                            }
-                            if (user.username != null) {
-                              label += '@${user.username}';
-                            }
-                            return label;
+                            return invite.label;
                           },
                         ),
                       ),
