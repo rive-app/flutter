@@ -89,12 +89,12 @@ class _NavigationPanelState extends State<NavigationPanel> {
               builder: (context, snapshot) {
                 return Column(
                   children: <Widget>[
-                    ValueStreamBuilder<List<model.Notification>>(
+                    ValueStreamBuilder<model.NotificationCount>(
                         stream: Plumber().getStream(),
-                        builder: (context, notificationsSnapshot) {
+                        builder: (context, notificationCountSnapshot) {
                           final notificationCount =
-                              notificationsSnapshot.hasData
-                                  ? notificationsSnapshot.data.length
+                              notificationCountSnapshot.hasData
+                                  ? notificationCountSnapshot.data.count
                                   : 0;
                           return IconTile(
                             icon: PackedIcon.notification,

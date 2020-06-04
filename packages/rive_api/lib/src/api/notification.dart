@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:rive_api/src/model/notification.dart';
 import 'package:utilities/deserialize.dart';
 
 final Logger log = Logger('Rive API');
@@ -45,7 +46,7 @@ class NotificationsApi {
 
   /// GET /api/notifications
   /// Returns the current notification count for a user
-  Future<int> get notificationCount async {
+  Future<NotificationCount> get notificationCount async {
     var res = await api.get('${api.host}/api/notifications');
     final data = json.decodeMap(res.body);
     assert(
@@ -53,6 +54,6 @@ class NotificationsApi {
       'Incorrect json format for notifications',
     );
 
-    return data.getInt('count');
+    return NotificationCount(data.getInt('count'));
   }
 }
