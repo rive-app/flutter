@@ -316,7 +316,8 @@ class _EditorState extends State<Editor> {
             return Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.only(
+                      top: 6, bottom: 6, left: 8, right: 6),
                   height: 42,
                   color: const Color.fromRGBO(60, 60, 60, 1),
                   child: Row(
