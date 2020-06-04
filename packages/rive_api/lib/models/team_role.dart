@@ -17,7 +17,7 @@ extension TeamRoleExtension on TeamRole {
   String get name => describeEnum(this).capsFirst;
 
   static List<String> get names =>
-      TeamRole.values.map((e) => describeEnum(e).capsFirst).toList();
+      TeamRole.values.map((e) => e.name).toList();
 
   static TeamRole teamRoleFromString(String value) {
     switch (value) {
