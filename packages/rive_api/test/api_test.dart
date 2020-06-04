@@ -311,5 +311,14 @@ void main() {
       expect(notifications.first is TeamInviteAcceptedNotificationDM, true);
       expect(notifications.last is TeamInviteRejectedNotificationDM, true);
     });
+
+    test('get notification count', () async {
+      final riveApi = MockRiveApi();
+      when(riveApi.get('/api/notifications'))
+          .thenAnswer((_) async => successNotificationsResponse);
+      final mockApi = NotificationsApi(riveApi);
+      final notificationCount = await mockApi.notificationCount;
+      expect(notificationCount.count, 2);
+    });
   });
 }

@@ -63,15 +63,20 @@ class NotificationManager with Subscriptions {
    */
 
   /// Fetch a user's notifications from the back end
+  /// Also fetches the current new notifications count
   Future<void> _fetchNotifications() async {
     final me = Plumber().peek<model.Me>();
     if (me == null || me.isEmpty) {
       return;
     }
     try {
+      // Fetch notifications
       final notifications =
           model.Notification.fromDMList(await _notificationsApi.notifications);
       Plumber().message(notifications);
+      // Fetch new notifications count
+      final count = await _notificationsApi.notificationCount;
+      Plumber().message(count);
     } on HttpException catch (e) {
       print('Failed to update notifications $e');
     }
@@ -105,6 +110,12 @@ class NotificationManager with Subscriptions {
         rethrow;
       }
     }
+    unawaited(_fetchNotifications());
+  }
+
+  /// Mark all notifications as read
+  Future<void> markNotificationsRead() async {
+    await _notificationsApi.markNotificationsRead();
     unawaited(_fetchNotifications());
   }
 }
