@@ -257,7 +257,7 @@ class _EditorState extends State<Editor> {
     List<DroppedFile> importedFiles = [];
     bool imported = false;
     for (final file in files) {
-      if (file.filename.indexOf('.riv') != -1) {
+      if (file.filename.endsWith('.riv')) {
         var importer = RuntimeImporter(core: activeFile.core);
         if (importer.import(file.bytes)) {
           importedFiles.add(file);
@@ -613,8 +613,8 @@ class FeedbackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      child: const Text(
+    return const FlatButton(
+      child: Text(
         'Feedback',
         style: TextStyle(color: Colors.grey),
       ),
