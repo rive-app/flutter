@@ -9,6 +9,7 @@
   "properties": {
     "drawOrder": {
       "type": "FractionalIndex",
+      "typeRuntime": "int",
       "key": {
         "int": 22,
         "string": "drawOrder"

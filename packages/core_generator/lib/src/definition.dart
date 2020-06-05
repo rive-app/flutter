@@ -225,6 +225,7 @@ class Definition {
       code.writeln('}');
 
       // Write serializer.
+      StringBuffer runtimeRemapDefinition = StringBuffer();
       code.writeln('''@override
     void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {''');
       if (_extensionOf != null) {
@@ -241,6 +242,14 @@ class Definition {
             context.intType.writeProperty(${property.name}PropertyKey, writer, value);
           }
         }''');
+        } else if (property.type != property.typeRuntime &&
+            property.typeRuntime != null) {
+          runtimeRemapDefinition.writeln(
+              '${property.typeRuntime.dartName} runtimeValue${property.capitalizedName}(${property.type.dartName} editorValue);');
+          code.writeln('''if(_${property.name} != null) {
+          var runtimeValue = runtimeValue${property.capitalizedName}(_${property.name});
+          context.${property.typeRuntime.uncapitalizedName}Type.writeProperty(${property.name}PropertyKey, writer, runtimeValue);
+        }''');
         } else {
           code.writeln('''if(_${property.name} != null) {
           context.${property.type.uncapitalizedName}Type.writeProperty(${property.name}PropertyKey, writer, _${property.name});
@@ -248,6 +257,10 @@ class Definition {
         }
       }
       code.writeln('}');
+
+      if (runtimeRemapDefinition.isNotEmpty) {
+        code.write(runtimeRemapDefinition.toString());
+      }
 
       code.writeln('''@override
       K getProperty<K>(int propertyKey) {

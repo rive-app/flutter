@@ -6,6 +6,9 @@ import 'package:core/core.dart';
 import 'package:rive_core/animation/keyframe_draw_order_value.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/src/generated/animation/keyframe_draw_order_base.dart';
+import 'package:rive_core/src/generated/animation/keyframe_draw_order_value_base.dart';
+import 'package:utilities/binary_buffer/binary_reader.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 class KeyFrameDrawOrder extends KeyFrameDrawOrderBase {
   final HashSet<KeyFrameDrawOrderValue> _values =
@@ -69,4 +72,69 @@ class KeyFrameDrawOrder extends KeyFrameDrawOrderBase {
       }
     });
   }
+
+  // -> editor-only
+  @override
+  void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, idLookup);
+    writer.writeVarUint(_values.length);
+
+    var list = _ExportOrderHelper();
+    list.addAll(_values);
+    list.sortFractional();
+
+    for (int i = 0; i < list.length; i++) {
+      final value = list[i];
+      int integerId = idLookup[value.drawableId];
+      assert(integerId != null);
+      writer.writeVarInt(integerId);
+    }
+  }
+
+  void readRuntimeValues(
+      CoreContext core, BinaryReader reader, RuntimeRemap<int, Id> idRemap) {
+    int numValues = reader.readVarUint();
+
+    var values = List<KeyFrameDrawOrderValue>(numValues);
+    for (int i = 0; i < numValues; i++) {
+      var valueObject =
+          core.addObject(KeyFrameDrawOrderValue()..keyframeId = id);
+      idRemap.add(valueObject, KeyFrameDrawOrderValueBase.drawableIdPropertyKey,
+          reader);
+      values[i] = valueObject;
+    }
+
+    var helper = _ImportOrderHelper(values);
+    helper.validateFractional();
+  }
+  // <- editor-only
 }
+
+// -> editor-only
+class _ExportOrderHelper
+    extends FractionallyIndexedList<KeyFrameDrawOrderValue> {
+  @override
+  FractionalIndex orderOf(KeyFrameDrawOrderValue value) => value.value;
+
+  @override
+  void setOrderOf(KeyFrameDrawOrderValue value, FractionalIndex order) {
+    assert(
+        false,
+        'should never get called we only use this '
+        'to facilitate building up the integer order');
+  }
+}
+
+class _ImportOrderHelper
+    extends FractionallyIndexedList<KeyFrameDrawOrderValue> {
+  _ImportOrderHelper(List<KeyFrameDrawOrderValue> values)
+      : super(values: values);
+  @override
+  FractionalIndex orderOf(KeyFrameDrawOrderValue value) => value.value;
+
+  @override
+  void setOrderOf(KeyFrameDrawOrderValue value, FractionalIndex order) {
+    value.value = order;
+  }
+}
+// <- editor-only
