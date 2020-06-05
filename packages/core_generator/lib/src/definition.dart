@@ -590,22 +590,35 @@ class Definition {
     void applyCoopChanges(ObjectChanges objectChanges) {
       Core<CoreContext> object = resolve(objectChanges.objectId);
       var justAdded = false;
+      if (object == null) {
+        // Only look for the addKey if the object was null, becase we propagate
+        // changes to all clients, we'll receive our own adds which will result 
+        // in duplicates if we don't do this only for null objects.
+        Change addChange = objectChanges.changes.firstWhere(
+            (change) => change.op == CoreContext.addKey,
+            orElse: () => null);
+        if(addChange == null) {
+          // Null object and no creation change.
+          return;
+        }
+        var reader = BinaryReader.fromList(addChange.value);
+        object = makeCoreInstance(reader.readVarInt());
+        if (object != null) {
+          object.id = objectChanges.objectId;
+          justAdded = true;
+        } else {
+          // object couldn't be created, don't attempt to change any properties on
+          // a null object, so return.
+          return;
+        }
+      }
       for (final change in objectChanges.changes) {
         var reader = BinaryReader.fromList(change.value);
         switch (change.op) {
           ''');
 
       ctxCode.write('''case CoreContext.addKey:
-          // make sure object doesn't exist (we propagate changes to all
-          // clients, so we'll receive our own adds which will result in
-          // duplicates if we don't check here).
-          if (object == null) {
-            object = makeCoreInstance(reader.readVarInt());
-            if(object != null) {
-              object.id = objectChanges.objectId;
-              justAdded = true;
-            }
-          }
+          // Ignore, we looked for it earlier if we needed to make the object.
           break;
         case CoreContext.removeKey:           
           // Don't remove null objects. This can happen as we acknowledge
