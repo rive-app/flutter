@@ -90,7 +90,7 @@ class ColorPopout extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           if (inspecting.canChangeType) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: 17),
             _stopEditor(
               type,
               Padding(
@@ -237,34 +237,34 @@ class ColorPopout extends StatelessWidget {
                   converterC: BlueValueConverter(hsv),
                   change: type == null ? null : inspecting.changeColor,
                 ),
-                const SizedBox(height: 15),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: _LabeledTextField(
-                          label: 'HEX',
-                          value: hsv,
-                          padRight: true,
-                          converter: HexValueConverter.instance,
-                          change: type == null ? null : inspecting.changeColor,
-                        ),
-                      ),
-                      Expanded(
-                        child: _LabeledTextField(
-                          value: hsv,
-                          label: 'A',
-                          converter: AlphaValueConverter(hsv),
-                          change: type == null ? null : inspecting.changeColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 15),
+                // const SizedBox(height: 15),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 20),
+                //   child: Row(
+                //     crossAxisAlignment: CrossAxisAlignment.end,
+                //     children: [
+                //       Expanded(
+                //         flex: 2,
+                //         child: _LabeledTextField(
+                //           label: 'HEX',
+                //           value: hsv,
+                //           padRight: true,
+                //           converter: HexValueConverter.instance,
+                //           change: type == null ? null : inspecting.changeColor,
+                //         ),
+                //       ),
+                //       Expanded(
+                //         child: _LabeledTextField(
+                //           value: hsv,
+                //           label: 'A',
+                //           converter: AlphaValueConverter(hsv),
+                //           change: type == null ? null : inspecting.changeColor,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -350,13 +350,13 @@ class _LabeledTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var labelStyle = RiveTheme.of(context).textStyles.inspectorPropertyLabel;
+    var labelStyle = RiveTheme.of(context).textStyles.inspectorPropertySubLabel;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Padding(
           padding: const EdgeInsets.only(
-            bottom: 4,
+            bottom: 5,
             right: 5,
           ),
           child: Text(

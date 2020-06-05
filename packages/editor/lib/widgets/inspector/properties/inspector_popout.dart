@@ -72,7 +72,7 @@ class InspectorPopout extends StatefulWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: theme.colors.panelBackgroundDarkGrey,
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.40),
