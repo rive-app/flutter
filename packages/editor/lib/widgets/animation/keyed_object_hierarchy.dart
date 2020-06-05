@@ -1,9 +1,11 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
+import 'package:rive_editor/widgets/common/draw_order_key_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -131,20 +133,35 @@ class KeyedObjectHierarchy extends StatelessWidget {
               UIStrings.of(context).withKey(model.subLabel),
               style: theme.textStyles.animationSubLabel,
             ),
-          Padding(
-            padding: const EdgeInsets.only(top: 2, left: 9),
-            child: SizedBox(
-              width: 69,
-              child: CoreTextField<double>(
-                underlineColor: theme.colors.timelineUnderline,
-                objects: [model.component],
-                propertyKey: model.keyedProperty.propertyKey,
-                converter: TranslationValueConverter.instance,
-              ),
-            ),
-          ),
+          _buildKeyedPropertyEditor(context, theme, model),
         ],
       ),
     );
+  }
+
+  Widget _buildKeyedPropertyEditor(
+      BuildContext context, RiveThemeData theme, KeyedPropertyViewModel model) {
+    switch (model.keyedProperty.propertyKey) {
+      case DrawableBase.drawOrderPropertyKey:
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 3),
+          child: DrawOrderKeyButton(
+              manager: ActiveFile.of(context).editingAnimationManager.value),
+        );
+        break;
+      default:
+        return Padding(
+          padding: const EdgeInsets.only(top: 2, left: 9),
+          child: SizedBox(
+            width: 69,
+            child: CoreTextField<double>(
+              underlineColor: theme.colors.timelineUnderline,
+              objects: [model.component],
+              propertyKey: model.keyedProperty.propertyKey,
+              converter: TranslationValueConverter.instance,
+            ),
+          ),
+        );
+    }
   }
 }

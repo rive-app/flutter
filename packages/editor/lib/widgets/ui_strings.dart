@@ -58,6 +58,7 @@ HashMap<String, String> _defaultUIStrings =
   'strokes': 'Strokes',
   'hold': 'Hold',
   'linear': 'Linear',
+  'drawOrder': 'Draw Order',
   'cubic': 'Cubic',
   'rotation': 'Rotation',
   'vertex-straight': 'Straight',

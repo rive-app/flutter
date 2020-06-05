@@ -5,6 +5,8 @@ import 'package:core/key_state.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_core/artboard.dart';
+import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
@@ -214,7 +216,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
     if (idx == 0) {
       var first = _keyframes[0];
       // -> editor-only
-      RiveCoreContext.setKeyState(object, pk,
+      _setKeyState(object, pk,
           first.seconds == seconds ? KeyState.keyframe : KeyState.interpolated);
       // <- editor-only
       first.apply(object, pk, mix);
@@ -224,12 +226,12 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
         KeyFrame toFrame = _keyframes[idx];
         if (seconds == toFrame.seconds) {
           // -> editor-only
-          RiveCoreContext.setKeyState(object, pk, KeyState.keyframe);
+          _setKeyState(object, pk, KeyState.keyframe);
           // <- editor-only
           toFrame.apply(object, pk, mix);
         } else {
           // -> editor-only
-          RiveCoreContext.setKeyState(object, pk, KeyState.interpolated);
+          _setKeyState(object, pk, KeyState.interpolated);
           // <- editor-only
 
           /// Equivalent to fromFrame.interpolation ==
@@ -243,7 +245,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       } else {
         var last = _keyframes[idx - 1];
         // -> editor-only
-        RiveCoreContext.setKeyState(
+        _setKeyState(
             object,
             pk,
             last.seconds == seconds
@@ -254,6 +256,22 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       }
     }
   }
+
+  // -> editor-only
+  static void _setKeyState(
+      Core<CoreContext> object, int propertyKey, KeyState state) {
+    switch (propertyKey) {
+      case DrawableBase.drawOrderPropertyKey:
+        assert(object is Artboard);
+
+        (object as Artboard).drawOrderKeyState = state;
+        break;
+      default:
+        RiveCoreContext.setKeyState(object, propertyKey, state);
+        break;
+    }
+  }
+  // <- editor-only
 
   // -> editor-only
   @override

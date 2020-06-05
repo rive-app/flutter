@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/widgets/common/draw_order_key_button.dart';
 import 'package:rive_editor/widgets/draw_order.dart';
 import 'package:rive_editor/widgets/hierarchy.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -58,12 +60,30 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
                     onExit: (_) => setState(() => drawOrderHovered = false),
                     child: GestureDetector(
                       onTap: () => setState(() => hierarchySelected = false),
-                      child: Text('DRAW ORDER',
-                          style: hierarchySelected
-                              ? drawOrderHovered
-                                  ? theme.textStyles.hierarchyTabHovered
-                                  : theme.textStyles.hierarchyTabInactive
-                              : theme.textStyles.hierarchyTabActive),
+                      child: ValueListenableBuilder(
+                        valueListenable:
+                            ActiveFile.of(context).editingAnimationManager,
+                        builder:
+                            (context, EditingAnimationManager manager, _) =>
+                                Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('DRAW ORDER',
+                                style: hierarchySelected
+                                    ? drawOrderHovered
+                                        ? theme.textStyles.hierarchyTabHovered
+                                        : theme.textStyles.hierarchyTabInactive
+                                    : theme.textStyles.hierarchyTabActive),
+                            // only show keystate if we're animating...
+
+                            if (manager != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5, top: 2),
+                                child: DrawOrderKeyButton(manager: manager),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

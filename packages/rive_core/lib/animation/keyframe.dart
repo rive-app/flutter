@@ -108,7 +108,7 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
 
   /// Set the value of this keyframe to the current value of [object]'s
   /// [propertyKey].
-  void valueFrom(Core object, int propertyKey);
+  void valueFrom(covariant Core object, int propertyKey);
 
   Interpolator _interpolator;
   Interpolator get interpolator => _interpolator;
@@ -131,6 +131,10 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   // -> editor-only
   void _interpolatorPropertyChanged() {
     keyedProperty?.internalKeyFrameInterpolationChanged();
+  }
+
+  void internalValueChanged() {
+    keyedProperty?.internalKeyFrameValueChanged();
   }
   // <- editor-only
 }

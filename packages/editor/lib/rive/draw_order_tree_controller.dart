@@ -6,6 +6,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/drawable.dart';
+import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -140,6 +141,14 @@ class DrawOrderTreeController extends TreeController<Component> {
     for (final item in items) {
       before = FractionalIndex.between(before, after);
       (item.data as Drawable).drawOrder = before;
+    }
+    var manager = file.editingAnimationManager.value;
+    if (manager != null) {
+      // If we're animating we should autokey the draw order as we just changed
+      // it.
+      manager.keyComponents.add(KeyComponentsEvent(
+          components: [manager.animation.artboard],
+          propertyKey: DrawableBase.drawOrderPropertyKey));
     }
     file.core.captureJournalEntry();
   }
