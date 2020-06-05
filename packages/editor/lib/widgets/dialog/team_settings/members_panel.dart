@@ -103,14 +103,17 @@ class InvitePanel extends StatefulWidget {
 
 class _InvitePanelState extends State<InvitePanel> {
   final _inviteQueue = <Invite>[];
+  bool _buttonDisabled = false;
 
   TeamRole _selectedInviteType = TeamRole.member;
   RiveArtists _userApi;
   RiveTeamsApi _teamApi;
   final _openCombo = Event();
 
-  Set<int> get _inviteIds =>
+  Set<int> get _userInvites =>
       Set.from(_inviteQueue.whereType<UserInvite>().map<int>((e) => e.ownerId));
+  Set<String> get _emailInvites => Set.from(
+      _inviteQueue.whereType<EmailInvite>().map<String>((e) => e.email));
 
   @override
   void initState() {
@@ -120,21 +123,29 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 
   void _sendInvites() {
+    if (_buttonDisabled) {
+      return;
+    }
+
+    setState(() {
+      _buttonDisabled = true;
+    });
     _teamApi
         .sendInvites(
       widget.team.ownerId,
-      _inviteIds,
       _selectedInviteType,
+      _userInvites,
+      _emailInvites,
     )
         .then(
-      (value) {
-        if (value.isNotEmpty) {
-          // TODO: use a more robust check for setState.
+      (success) {
+        if (success) {
           if (mounted) {
             setState(
               () {
                 _inviteQueue.clear();
                 widget.teamUpdated();
+                _buttonDisabled = false;
               },
             );
           }
@@ -151,17 +162,30 @@ class _InvitePanelState extends State<InvitePanel> {
   final _emailRFC5322Regex = RegExp(
       r"""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""");
 
+  bool _isDuplicateEmail(String input) {
+    // Search for team members that are email addresses.
+    final teamMembers = Plumber().peek<List<TeamMember>>(widget.team.hashCode);
+    final emailMembers = teamMembers
+        .where((e) => _emailRFC5322Regex.hasMatch(e.name))
+        .map((e) => e.name);
+    final alreadyInvited = _emailInvites..addAll(emailMembers);
+    return alreadyInvited.contains(input);
+  }
+
   Future<List<Invite>> _autocomplete(String input) async {
     if (input.isEmpty) {
       return null;
     }
-    if (_emailRFC5322Regex.hasMatch(input)) {
+    // Show email autocomplete.
+    if (_emailRFC5322Regex.hasMatch(input) && !_isDuplicateEmail(input)) {
       return [EmailInvite(input)];
     }
+
     final teamMembers = Plumber().peek<List<TeamMember>>(widget.team.hashCode);
     final teamMemberIds = teamMembers.map((e) => e.ownerId);
-    final filterIds = _inviteIds..addAll(teamMemberIds);
+    final filterIds = _userInvites..addAll(teamMemberIds);
     final autocompleteUsers = await _userApi.autocomplete(input, filterIds);
+    // Show users autocomplete.
     return autocompleteUsers
         .map((user) => UserInvite(
             ownerId: user.ownerId,
@@ -175,7 +199,7 @@ class _InvitePanelState extends State<InvitePanel> {
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
 
-    final canInvite = _inviteQueue.isNotEmpty;
+    final canInvite = _inviteQueue.isNotEmpty && !_buttonDisabled;
 
     return RoundedSection(
       contentBuilder: (sectionContext) => Row(
@@ -282,6 +306,7 @@ class _InvitePanelState extends State<InvitePanel> {
             textColor: canInvite ? Colors.white : colors.inactiveButtonText,
             onTap: canInvite ? _sendInvites : null,
             radius: 20,
+            mainAxisAlignment: MainAxisAlignment.center,
           )
         ],
       ),
@@ -331,12 +356,21 @@ class _TeamMember extends StatelessWidget {
             ],
             if (user.username != null)
               ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 180),
-                  child: Text(
-                    '@${user.username}',
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.basic.copyWith(color: colors.inactiveText),
-                  )),
+                constraints: const BoxConstraints(maxWidth: 180),
+                // Using this column with SizedBox to align the text baselines
+                // as they're misbehaving with the @ character.
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 2),
+                    Text(
+                      '@${user.username}',
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.basic.copyWith(color: colors.inactiveText),
+                    ),
+                  ],
+                ),
+              ),
             const Spacer(),
             if (user.status == TeamInviteStatus.pending.name)
               Text(
@@ -345,10 +379,13 @@ class _TeamMember extends StatelessWidget {
                     fontWeight: FontWeight.w300, fontStyle: FontStyle.italic),
               ),
             const SizedBox(width: 20),
-            SizedBox(
-              height: 30,
-              child: Center(
-                child: ComboBox<String>(
+            // Using this column with SizedBox to align the text baselines
+            // as they're misbehaving with the ComboBox.
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 2),
+                ComboBox<String>(
                   value: user.permission.name,
                   change: onRoleChanged,
                   alignment: Alignment.topRight,
@@ -358,7 +395,7 @@ class _TeamMember extends StatelessWidget {
                   valueColor: colors.fileBackgroundDarkGrey,
                   sizing: ComboSizing.content,
                 ),
-              ),
+              ],
             ),
           ],
         ),

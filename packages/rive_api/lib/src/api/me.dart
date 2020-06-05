@@ -109,8 +109,8 @@ class MeApi {
       return true;
     } on ApiException catch (apiException) {
       final response = apiException.response;
-      print("Response: ${response.body}, ${response.statusCode}");
-      var message = 'Could not create new team ${response.body}';
+      var message = 'Could not update profile: ${response.body}';
+      print("Response [${response.statusCode}]:\n$message");
       log.severe(message);
       return false;
     }
