@@ -67,7 +67,7 @@ class RiveArtists {
         try {
           data = json.decode(response.body) as List;
         } on FormatException catch (_) {
-          return null;
+          return [];
         }
         List<RiveUser> results = [];
         if (data != null) {
@@ -85,10 +85,12 @@ class RiveArtists {
         }
         return results;
       }
-      return null;
+      return [];
     } on Exception catch (e) {
       log.severe('Error communicating with artists endpoint: $e');
-      return null;
+      return [];
+    } on ApiException catch (err) {
+      return [];
     }
   }
 }

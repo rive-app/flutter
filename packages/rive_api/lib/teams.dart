@@ -110,29 +110,66 @@ class RiveTeamsApi<T extends RiveTeam> {
   }
 
   /// Send a list of team invites to users
-  Future<List<int>> sendInvites(
-      int teamOwnerId, Set<int> inviteIds, TeamRole permission) async {
-    var response = <int>[];
-    for (final ownerId in inviteIds) {
-      int id = await sendInvite(teamOwnerId, ownerId, permission);
-      if (id != null) {
-        response.add(id);
+  Future<bool> sendInvites(
+    int teamOwnerId,
+    TeamRole permission,
+    Set<int> userInvites,
+    Set<String> emailInvites,
+  ) async {
+    for (final ownerId in userInvites) {
+      bool success = await sendInvite(
+        teamOwnerId,
+        permission,
+        ownerId: ownerId,
+      );
+      if (!success) {
+        // Early out.
+        return false;
       }
     }
-    return response;
+    for (final email in emailInvites) {
+      bool success = await sendInvite(
+        teamOwnerId,
+        permission,
+        email: email,
+      );
+      if (!success) {
+        // Early out.
+        return false;
+      }
+    }
+    return true;
   }
 
   /// POST /api/teams/:team_owner_id/invite
-  /// Sends a team invite to a user
-  Future<int> sendInvite(int teamId, int ownerId, TeamRole permission) async {
-    String payload = json.encode({
-      'data': {
-        'ownerId': ownerId,
-        'permission': permission.name,
-      }
-    });
-    await api.post('${api.host}/api/teams/$teamId/invite', body: payload);
+  /// Sends a team invite to a user or an email address;
+  Future<bool> sendInvite(
+    int teamId,
+    TeamRole permission, {
+    int ownerId,
+    String email,
+  }) async {
+    final payload = <String, Object>{
+      'permission': permission.name,
+    };
 
-    return ownerId;
+    if (ownerId != null) {
+      payload['ownerId'] = ownerId;
+    }
+    if (email != null) {
+      payload['email'] = email;
+    }
+    try {
+      await api.post(
+        '${api.host}/api/teams/$teamId/invite',
+        body: json.encode(payload),
+      );
+      return true;
+    } on ApiException catch (apiException) {
+      final response = apiException.response;
+      var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      return false;
+    }
   }
 }

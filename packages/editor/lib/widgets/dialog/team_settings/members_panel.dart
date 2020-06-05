@@ -7,17 +7,15 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_api/models/team_role.dart';
-import 'package:rive_api/models/user.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
-import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/invite_box.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/rounded_section.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/user_invite_box.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
@@ -70,13 +68,15 @@ class _TeamMemberState extends State<TeamMembers> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return Column(
-                    children: snapshot.data
-                        .map((member) => _TeamMember(
-                              user: member,
-                              onRoleChanged: (role) =>
-                                  _onRoleChanged(member, role),
-                            ))
-                        .toList());
+                  children: snapshot.data
+                      .map(
+                        (member) => _TeamMember(
+                          user: member,
+                          onRoleChanged: (role) => _onRoleChanged(member, role),
+                        ),
+                      )
+                      .toList(),
+                );
               } else {
                 return const Text('loading...');
               }
@@ -91,26 +91,29 @@ class InvitePanel extends StatefulWidget {
   final Team team;
   final VoidCallback teamUpdated;
 
-  const InvitePanel(
-      {@required this.api,
-      @required this.team,
-      @required this.teamUpdated,
-      Key key})
-      : super(key: key);
+  const InvitePanel({
+    @required this.api,
+    @required this.team,
+    @required this.teamUpdated,
+    Key key,
+  }) : super(key: key);
   @override
   _InvitePanelState createState() => _InvitePanelState();
 }
 
 class _InvitePanelState extends State<InvitePanel> {
   final _inviteQueue = <Invite>[];
+  bool _buttonDisabled = false;
 
   TeamRole _selectedInviteType = TeamRole.member;
   RiveArtists _userApi;
   RiveTeamsApi _teamApi;
   final _openCombo = Event();
 
-  Set<int> get _inviteIds =>
+  Set<int> get _userInvites =>
       Set.from(_inviteQueue.whereType<UserInvite>().map<int>((e) => e.ownerId));
+  Set<String> get _emailInvites => Set.from(
+      _inviteQueue.whereType<EmailInvite>().map<String>((e) => e.email));
 
   @override
   void initState() {
@@ -120,168 +123,194 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 
   void _sendInvites() {
+    if (_buttonDisabled) {
+      return;
+    }
+
+    setState(() {
+      _buttonDisabled = true;
+    });
     _teamApi
         .sendInvites(
       widget.team.ownerId,
-      _inviteIds,
       _selectedInviteType,
+      _userInvites,
+      _emailInvites,
     )
-        .then((value) {
-      if (value.isNotEmpty) {
-        // TODO: use a more robust check for setState.
-        if (mounted) {
-          setState(() {
-            _inviteQueue.clear();
-            widget.teamUpdated();
-          });
+        .then(
+      (success) {
+        if (success) {
+          if (mounted) {
+            setState(
+              () {
+                _inviteQueue.clear();
+                widget.teamUpdated();
+                _buttonDisabled = false;
+              },
+            );
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   void _startTypeahead() {
     _openCombo.notify();
   }
 
-  Future<List<RiveUser>> _autocomplete(String input) {
-    final teamMembers =
-        Plumber().getStream<List<TeamMember>>(widget.team.hashCode).value;
+  // From here: https://stackoverflow.com/a/201378
+  final _emailRFC5322Regex = RegExp(
+      r"""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""");
+
+  bool _isDuplicateEmail(String input) {
+    // Search for team members that are email addresses.
+    final teamMembers = Plumber().peek<List<TeamMember>>(widget.team.hashCode);
+    final emailMembers = teamMembers
+        .where((e) => _emailRFC5322Regex.hasMatch(e.name))
+        .map((e) => e.name);
+    final alreadyInvited = _emailInvites..addAll(emailMembers);
+    return alreadyInvited.contains(input);
+  }
+
+  Future<List<Invite>> _autocomplete(String input) async {
+    if (input.isEmpty) {
+      return null;
+    }
+    // Show email autocomplete.
+    if (_emailRFC5322Regex.hasMatch(input) && !_isDuplicateEmail(input)) {
+      return [EmailInvite(input)];
+    }
+
+    final teamMembers = Plumber().peek<List<TeamMember>>(widget.team.hashCode);
     final teamMemberIds = teamMembers.map((e) => e.ownerId);
-    final filterIds = _inviteIds..addAll(teamMemberIds);
-    return _userApi.autocomplete(input, filterIds);
+    final filterIds = _userInvites..addAll(teamMemberIds);
+    final autocompleteUsers = await _userApi.autocomplete(input, filterIds);
+    // Show users autocomplete.
+    return autocompleteUsers
+        .map((user) => UserInvite(
+            ownerId: user.ownerId,
+            name: user.name,
+            username: user.username,
+            avatarUrl: user.avatar))
+        .toList(growable: false);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
 
-    final canInvite = _inviteQueue.isNotEmpty;
+    final canInvite = _inviteQueue.isNotEmpty && !_buttonDisabled;
 
     return RoundedSection(
-        contentBuilder: (sectionContext) => Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+      contentBuilder: (sectionContext) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      // Collection of invites to send that wraps when the max
-                      // width has been filled.
-                      PropagatingListener(
-                        behavior: HitTestBehavior.translucent,
-                        onPointerDown: (_) => _startTypeahead(),
-                        child: Wrap(
-                            alignment: WrapAlignment.start,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            direction: Axis.horizontal,
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: [
-                              ..._inviteQueue.map(
-                                (e) => UserInviteBox(
-                                  e.name,
-                                  onRemove: () {
-                                    setState(
-                                      () {
-                                        _inviteQueue.remove(e);
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                child: ComboBox<RiveUser>(
-                                  trigger: _openCombo,
-                                  // Start with an empty value.
-                                  value: null,
-                                  sizing: ComboSizing.collapsed,
-                                  popupSizing: ComboPopupSizing.content,
-                                  typeahead: true,
-                                  underline: false,
-                                  chevron: false,
-                                  valueColor: colors.inactiveText,
-                                  cursorColor: colors.commonButtonTextColorDark,
-                                  valueTextStyle:
-                                      RiveTheme.of(context).textStyles.basic,
-                                  retriever: _autocomplete,
-                                  change: (val) {
-                                    setState(() {
-                                      _inviteQueue.add(UserInvite(
-                                          val.ownerId, val.displayName));
-                                      _startTypeahead();
-                                    });
-                                  },
-                                  leadingBuilder: (context, isHovered, item) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(right: 5),
-                                      child: AvatarView(
-                                        diameter: 20,
-                                        borderWidth: 0,
-                                        imageUrl: item.avatar,
-                                        name: item.name ?? item.username,
-                                        color: Colors.transparent,
-                                      ),
-                                    );
-                                  },
-                                  toLabel: (user) {
-                                    if (user == null) {
-                                      if (_inviteQueue.isNotEmpty) return '';
-                                      return 'Invite a member...';
-                                    }
-                                    var label = '';
-                                    if (user.name != null) {
-                                      label = '${user.name} ';
-                                    }
-                                    if (user.username != null) {
-                                      label += '@${user.username}';
-                                    }
-                                    return label;
-                                  },
-                                ),
-                              ),
-                            ]),
+                // Collection of invites to send that wraps when the max
+                // width has been filled.
+                PropagatingListener(
+                  behavior: HitTestBehavior.translucent,
+                  onPointerDown: (_) => _startTypeahead(),
+                  child: Wrap(
+                    alignment: WrapAlignment.start,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    direction: Axis.horizontal,
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      ..._inviteQueue.map(
+                        (invite) => InviteBox(
+                          invite.inviteBoxLabel,
+                          onRemove: () {
+                            setState(
+                              () {
+                                _inviteQueue.remove(invite);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: ComboBox<Invite>(
+                          trigger: _openCombo,
+                          // Start with an empty value.
+                          value: null,
+                          sizing: ComboSizing.collapsed,
+                          popupSizing: ComboPopupSizing.content,
+                          typeahead: true,
+                          underline: false,
+                          chevron: false,
+                          valueColor: colors.inactiveText,
+                          cursorColor: colors.commonButtonTextColorDark,
+                          valueTextStyle:
+                              RiveTheme.of(context).textStyles.basic,
+                          retriever: _autocomplete,
+                          change: (val) {
+                            setState(
+                              () {
+                                _inviteQueue.add(val);
+                                _startTypeahead();
+                              },
+                            );
+                          },
+                          leadingBuilder: (context, isHovered, item) =>
+                              item.leadingWidget(context),
+                          toLabel: (invite) {
+                            if (invite == null) {
+                              if (_inviteQueue.isNotEmpty) return '';
+                              return 'Invite a member...';
+                            }
+                            return invite.label;
+                          },
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 20),
-                const Spacer(),
-                // Team Role selection.
-                SizedBox(
-                  height: 30,
-                  child: Center(
-                    child: ComboBox<TeamRole>(
-                      value: _selectedInviteType,
-                      change: (type) => setState(() {
-                        _selectedInviteType = type;
-                      }),
-                      alignment: Alignment.topRight,
-                      options: TeamRole.values,
-                      toLabel: (option) => option.name,
-                      popupWidth: 116,
-                      underline: false,
-                      valueColor: colors.fileBackgroundDarkGrey,
-                      sizing: ComboSizing.content,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20),
-                FlatIconButton(
-                  label: 'Send Invite',
-                  color: canInvite
-                      ? colors.commonDarkGrey
-                      : colors.commonButtonInactiveGrey,
-                  textColor:
-                      canInvite ? Colors.white : colors.inactiveButtonText,
-                  onTap: canInvite ? _sendInvites : null,
-                  radius: 20,
-                )
               ],
-            ));
+            ),
+          ),
+          const SizedBox(width: 20),
+          const Spacer(),
+          // Team Role selection.
+          SizedBox(
+            height: 30,
+            child: Center(
+              child: ComboBox<TeamRole>(
+                value: _selectedInviteType,
+                change: (type) => setState(() {
+                  _selectedInviteType = type;
+                }),
+                alignment: Alignment.topRight,
+                options: TeamRole.values,
+                toLabel: (option) => option.name,
+                popupWidth: 116,
+                underline: false,
+                valueColor: colors.fileBackgroundDarkGrey,
+                sizing: ComboSizing.content,
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+          FlatIconButton(
+            label: 'Send Invite',
+            color: canInvite
+                ? colors.commonDarkGrey
+                : colors.commonButtonInactiveGrey,
+            textColor: canInvite ? Colors.white : colors.inactiveButtonText,
+            onTap: canInvite ? _sendInvites : null,
+            radius: 20,
+            mainAxisAlignment: MainAxisAlignment.center,
+          )
+        ],
+      ),
+    );
   }
 }
 
@@ -291,15 +320,6 @@ class _TeamMember extends StatelessWidget {
 
   const _TeamMember({@required this.user, this.onRoleChanged, Key key})
       : super(key: key);
-
-  String _getRole() {
-    switch (user.permission) {
-      case TeamRole.admin:
-        return describeEnum(TeamRole.admin).capsFirst;
-      default:
-        return describeEnum(TeamRole.member).capsFirst;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -336,25 +356,37 @@ class _TeamMember extends StatelessWidget {
             ],
             if (user.username != null)
               ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 180),
-                  child: Text(
-                    '@${user.username}',
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.basic.copyWith(color: colors.inactiveText),
-                  )),
+                constraints: const BoxConstraints(maxWidth: 180),
+                // Using this column with SizedBox to align the text baselines
+                // as they're misbehaving with the @ character.
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 2),
+                    Text(
+                      '@${user.username}',
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.basic.copyWith(color: colors.inactiveText),
+                    ),
+                  ],
+                ),
+              ),
             const Spacer(),
-            if (user.status == TeamInviteStatus.pending)
+            if (user.status == TeamInviteStatus.pending.name)
               Text(
                 "Hasn't accepted invite",
                 style: styles.tooltipDisclaimer.copyWith(
                     fontWeight: FontWeight.w300, fontStyle: FontStyle.italic),
               ),
             const SizedBox(width: 20),
-            SizedBox(
-              height: 30,
-              child: Center(
-                child: ComboBox<String>(
-                  value: _getRole(),
+            // Using this column with SizedBox to align the text baselines
+            // as they're misbehaving with the ComboBox.
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 2),
+                ComboBox<String>(
+                  value: user.permission.name,
                   change: onRoleChanged,
                   alignment: Alignment.topRight,
                   options: TeamRoleExtension.names..add('Delete'),
@@ -363,7 +395,7 @@ class _TeamMember extends StatelessWidget {
                   valueColor: colors.fileBackgroundDarkGrey,
                   sizing: ComboSizing.content,
                 ),
-              ),
+              ],
             ),
           ],
         ),
