@@ -2,9 +2,12 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_core/animation/keyframe_draw_order.dart';
+import 'package:rive_core/animation/keyframe_interpolation.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/component_base.dart';
@@ -224,7 +227,7 @@ abstract class Component extends ComponentBase<RiveFile>
       parent = context?.resolve(parentId);
       if (parent == null) {
         _log.finest("Failed to resolve parent with id $parentId");
-      } 
+      }
       // -> editor-only
       else {
         // Make a best guess, this is useful when importing objects that are in
@@ -288,6 +291,12 @@ abstract class Component extends ComponentBase<RiveFile>
   /// Create the corresponding keyframe for the property key. Note that this
   /// doesn't add it to core, that's left up to the implementation.
   T makeKeyFrame<T extends KeyFrame>(int propertyKey) {
+    if (propertyKey == DrawableBase.drawOrderPropertyKey) {
+      assert(this is Artboard && KeyFrameDrawOrder() as T != null,
+          'DrawOrder can only be animated on the artboard');
+      return (KeyFrameDrawOrder()..interpolation = KeyFrameInterpolation.hold)
+          as T;
+    }
     var coreType = context.coreType(propertyKey);
     if (coreType is KeyFrameGenerator<T>) {
       var keyFrame = (coreType as KeyFrameGenerator<T>).makeKeyFrame();
@@ -299,9 +308,16 @@ abstract class Component extends ComponentBase<RiveFile>
   /// Add a keyframe on this object for [propertyKey] at [time].
   T addKeyFrame<T extends KeyFrame>(
       LinearAnimation animation, int propertyKey, int frame) {
+    assert(propertyKey != DrawableBase.drawOrderPropertyKey || this is Artboard,
+        'DrawOrder can only be animated on the artboard');
+
     assert(animation.artboard == artboard,
         'component is trying to key in an artboard that it doesn\'t belong to');
-    assert(hasProperty(propertyKey),
+    assert(
+        hasProperty(propertyKey) ||
+            // allow draw order on artboard even though it doesn't really store
+            // that core property
+            propertyKey == DrawableBase.drawOrderPropertyKey,
         '$this doesn\'t store a property with key $propertyKey');
     var keyedObject = animation.getKeyed(this);
     keyedObject ??= animation.makeKeyed(this);

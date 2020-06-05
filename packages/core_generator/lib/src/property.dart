@@ -205,4 +205,8 @@ class Property {
   String toString() {
     return '$name(${key.intValue})';
   }
+
+  String get capitalizedName => '${name[0].toUpperCase()}${name.substring(1)}'
+      .replaceAll('<', '')
+      .replaceAll('>', '');
 }

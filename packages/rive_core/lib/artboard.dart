@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:core/id.dart';
+import 'package:core/key_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
@@ -411,4 +413,20 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   @override
   void onStrokesChanged() {}
+
+  // -> editor-only
+
+  // Hacking in the draw order key state by emulating what animated objects do
+  // with their key state properties, but we do it for the Drawable's drawOrder
+  // property. N.B. we don't use the same core eventing for key state changing,
+  // instead we use a really simple value notifier.
+  final ValueNotifier<KeyState> _drawOrderKeyState =
+      ValueNotifier<KeyState>(KeyState.none);
+  ValueListenable<KeyState> get drawOrderKeyStateListenable =>
+      _drawOrderKeyState;
+  KeyState get drawOrderKeyState => _drawOrderKeyState.value;
+  set drawOrderKeyState(KeyState value) {
+    _drawOrderKeyState.value = value;
+  }
+  // <- editor-only
 }

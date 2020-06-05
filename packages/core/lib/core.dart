@@ -848,7 +848,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   void connectionStateChanged(CoopConnectionState state);
 
   T readRuntimeObject<T extends Core<CoreContext>>(BinaryReader reader,
-      [RuntimeRemapId remap]) {
+      [Iterable<RuntimeRemap> remaps]) {
     int coreObjectKey = reader.readVarUint();
 
     var object = makeCoreInstance(coreObjectKey);
@@ -882,14 +882,20 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       // read.
       var valueReader = BinaryReader.fromList(valueBytes);
 
-      if (fieldType == remap?.fieldType) {
-        // Id fields get remapped so we read them in as integers allowing an
-        // external process to then map those integers to those ids. This should
-        // be done before the batch add wrapping this entire operation
-        // completes.
-        remap.properties.add(RuntimeIdProperty(object, propertyKey,
-            remap.runtimeFieldType.deserialize(valueReader)));
-      } else {
+      bool remapped = false;
+      for (final remap in remaps) {
+        if (fieldType == remap?.fieldType) {
+          // Id fields get remapped so we read them in as integers allowing an
+          // external process to then map those integers to those ids. This
+          // should be done before the batch add wrapping this entire operation
+          // completes.
+          if (remap.add(object, propertyKey, valueReader)) {
+            remapped = true;
+            break;
+          }
+        }
+      }
+      if (!remapped) {
         // This will attempt to set the object property, but failure here is
         // acceptable.
         setObjectProperty(
@@ -909,18 +915,20 @@ class FreshChange {
   const FreshChange(this.change, this.useFrom);
 }
 
-class RuntimeIdProperty {
+class RuntimeRemapProperty<T> {
   Core<CoreContext> object;
   int propertyKey;
-  int value;
-  RuntimeIdProperty(this.object, this.propertyKey, this.value);
+  T value;
+  RuntimeRemapProperty(this.object, this.propertyKey, this.value);
 }
 
-class RuntimeRemapId {
-  final CoreFieldType<Id> fieldType;
-  final CoreFieldType<int> runtimeFieldType;
+abstract class RuntimeRemap<T, K> {
+  final CoreFieldType<K> fieldType;
+  final CoreFieldType<T> runtimeFieldType;
 
-  Set<RuntimeIdProperty> properties = {};
+  Set<RuntimeRemapProperty<T>> properties = {};
 
-  RuntimeRemapId(this.fieldType, this.runtimeFieldType);
+  RuntimeRemap(this.fieldType, this.runtimeFieldType);
+
+  bool add(Core<CoreContext> object, int propertyKey, BinaryReader reader);
 }

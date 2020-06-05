@@ -76,14 +76,15 @@ abstract class DrawableBase extends Node {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_drawOrder != null) {
-      context.fractionalIndexType
-          .writeProperty(drawOrderPropertyKey, writer, _drawOrder);
+      var runtimeValue = runtimeValueDrawOrder(_drawOrder);
+      context.intType.writeProperty(drawOrderPropertyKey, writer, runtimeValue);
     }
     if (_blendMode != null) {
       context.intType.writeProperty(blendModePropertyKey, writer, _blendMode);
     }
   }
 
+  int runtimeValueDrawOrder(FractionalIndex editorValue);
   @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {

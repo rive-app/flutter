@@ -15,4 +15,9 @@ abstract class Drawable extends DrawableBase {
   void drawOrderChanged(FractionalIndex from, FractionalIndex to) {
     artboard?.markDrawOrderDirty();
   }
+
+  @override
+  int runtimeValueDrawOrder(FractionalIndex editorValue) {
+    return artboard.drawables.indexOf(this);
+  }
 }
