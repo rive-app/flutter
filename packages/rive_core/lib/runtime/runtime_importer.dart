@@ -62,6 +62,9 @@ class RuntimeImporter {
           }
         }
 
+        // Store all keyed objects in the artboard...
+        List<KeyedObject> keyedObjects = [];
+
         // Animations also need to reference objects, so make sure they get read
         // in before the hierarchy resolves (batch add completes).
         var numAnimations = reader.readVarUint();
@@ -81,6 +84,8 @@ class RuntimeImporter {
               continue;
             }
             core.addObject(keyedObject);
+            keyedObjects.add(keyedObject);
+
             // Because we optimized out the animationIds, we need to reset these
             // before batchAdd completes so that onAddedDirty and onAdded have
             // the id to lookup. Runtimes won't need this as we'll directly add
@@ -99,7 +104,7 @@ class RuntimeImporter {
               keyedProperty.keyedObjectId = keyedObject.id;
 
               var numKeyframes = reader.readVarUint();
-              
+
               for (int l = 0; l < numKeyframes; l++) {
                 var keyframe = core.readRuntimeObject<KeyFrame>(reader, remaps);
                 core.addObject(keyframe);
@@ -126,6 +131,11 @@ class RuntimeImporter {
           if (object is Component && object.parentId == null) {
             object.parentId = artboard.id;
           }
+        }
+
+        // any keyed object with null objectId is referencing the artboard.
+        for (final keyedObject in keyedObjects) {
+          keyedObject.objectId ??= artboard.id;
         }
       }
     });
