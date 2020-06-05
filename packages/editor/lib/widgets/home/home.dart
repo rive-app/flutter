@@ -8,6 +8,7 @@ import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/home/file_browser.dart';
+import 'package:rive_editor/widgets/home/get_started.dart';
 import 'package:rive_editor/widgets/home/navigation_panel.dart';
 import 'package:rive_editor/widgets/home/team_detail_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -64,7 +65,12 @@ class Home extends StatelessWidget {
                   return const Text('Build recents');
 
                 case HomeSection.getStarted:
-                  return const Text('Build get started');
+                  return Expanded(
+                    child: ColoredBox(
+                      color: Colors.white,
+                      child: GetStartedPanel(),
+                    ),
+                  );
 
                 default:
                   return const Text('loading...');
