@@ -34,6 +34,7 @@ class Animation extends AnimationBase<RiveFile> {
     // -> editor-only
     if (artboardId != null) {
       artboard = context?.resolve(artboardId);
+      artboard?.whenDeleted(_remove);
     }
     // <- editor-only
   }
@@ -44,6 +45,10 @@ class Animation extends AnimationBase<RiveFile> {
   }
 
   // -> editor-only
+  void _remove() {
+    context.removeObject(this);
+  }
+
   @override
   void artboardIdChanged(Id from, Id to) {
     artboard = context?.resolve(to);
