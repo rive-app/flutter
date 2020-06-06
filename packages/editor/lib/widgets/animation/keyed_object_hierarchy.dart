@@ -95,10 +95,11 @@ class KeyedObjectHierarchy extends StatelessWidget {
   Widget _buildKeyedComponent(BuildContext context, RiveThemeData theme,
       KeyedComponentViewModel model) {
     return Text(
-      model.component.name,
+      model.component.timelineName,
       style: theme.textStyles.inspectorWhiteLabel,
     );
     // TODO: make component names renamable in the timeline
+    // Also make sure component.canRename is true.
     // return Renamable(
     //   style: theme.textStyles.inspectorWhiteLabel,
     //   name: model.component.name,

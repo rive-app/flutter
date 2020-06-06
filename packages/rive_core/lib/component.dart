@@ -21,6 +21,13 @@ abstract class Component extends ComponentBase<RiveFile>
   Artboard _artboard;
   dynamic _userData;
 
+  // -> editor-only
+  String get timelineName => name;
+  // TODO: implement this so things can be renamed in the timeline if this
+  // canRename returns true.
+  bool get canRename => true;
+  // <- editor-only
+
   /// Override to true if you want some object inheriting from Component to not
   /// have a parent. Most objects will validate that they have a parent during
   /// the onAdded callback otherwise they are considered invalid and are culled

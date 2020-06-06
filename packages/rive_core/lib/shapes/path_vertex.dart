@@ -24,7 +24,7 @@ abstract class PathVertex extends PathVertexBase {
   Component get timelineParent => parent;
 
   @override
-  String get name => 'Vertex ${path.vertices.indexOf(this)+1}';
+  String get timelineName => 'Vertex ${path.vertices.indexOf(this) + 1}';
   // <- editor-only
 
   VertexControlType get controlType => VertexControlType.straight;
