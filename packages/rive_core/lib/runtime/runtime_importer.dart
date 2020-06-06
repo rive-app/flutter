@@ -132,8 +132,9 @@ class RuntimeImporter {
               remap.object, remap.propertyKey, objects[remap.value].id);
         }
 
-        // Any component objects with no id map to the artboard.
-        for (final object in objects) {
+        // Any component objects with no id map to the artboard. Skip the first
+        // as it's the artboard itself.
+        for (final object in objects.skip(1)) {
           if (object is Component && object.parentId == null) {
             object.parentId = artboard.id;
           }

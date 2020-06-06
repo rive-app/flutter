@@ -40,9 +40,9 @@ class RiveFile {
     int numArtboards = reader.readVarUint();
     for (int i = 0; i < numArtboards; i++) {
       var numObjects = reader.readVarUint();
-      if(numObjects == 0) {
+      if (numObjects == 0) {
         throw const RiveFormatErrorException(
-          'artboards must contain at least one object (themselves)');
+            'artboards must contain at least one object (themselves)');
       }
       var artboard = readRuntimeObject(reader, RuntimeArtboard());
       // Kind of weird, but the artboard is the core context at runtime, so we
@@ -117,13 +117,17 @@ class RiveFile {
         }
       }
 
-      // Any component objects with no id map to the artboard.
-      for (final object in artboard.objects) {
+      // Any component objects with no id map to the artboard. Skip first item
+      // as it's the artboard itself.
+      for (final object in artboard.objects.skip(1)) {
         if (object is Component && object.parentId == null) {
           object.parent = artboard;
         }
         object?.onAddedDirty();
       }
+
+      assert(!artboard.children.contains(artboard),
+          'artboard should never contain itself as a child');
       for (final object in artboard.objects) {
         object?.onAdded();
       }
