@@ -50,11 +50,14 @@ class KeyFrameDrawOrder extends KeyFrameDrawOrderBase {
     apply(object, propertyKey, mix);
   }
 
+  // -> editor-only
   @override
   void keyedPropertyIdChanged(Id from, Id to) {
     // TODO: implement keyedPropertyIdChanged
   }
+  // <- editor-only
 
+  // -> editor-only
   @override
   void valueFrom(Artboard artboard, int propertyKey) {
     var core = artboard.context;
@@ -73,7 +76,6 @@ class KeyFrameDrawOrder extends KeyFrameDrawOrderBase {
     });
   }
 
-  // -> editor-only
   @override
   void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
     super.writeRuntime(writer, idLookup);
@@ -99,11 +101,12 @@ class KeyFrameDrawOrder extends KeyFrameDrawOrderBase {
     for (int i = 0; i < numValues; i++) {
       var valueObject =
           core.addObject(KeyFrameDrawOrderValue()..keyframeId = id);
+
       idRemap.add(valueObject, KeyFrameDrawOrderValueBase.drawableIdPropertyKey,
           reader);
+
       values[i] = valueObject;
     }
-
     var helper = _ImportOrderHelper(values);
     helper.validateFractional();
   }

@@ -36,21 +36,25 @@ class KeyFrameDrawOrderValue extends KeyFrameDrawOrderValueBase {
     // <- editor-only
   }
 
+  // -> editor-only
   void _remove() {
     context.removeObject(this);
   }
-
+  
   KeyFrameDrawOrder get keyFrameDrawOrder => context?.resolve(keyframeId);
+  // <- editor-only
 
   @override
   void drawableIdChanged(Id from, Id to) {
     // Should never change once created.
   }
 
+  // -> editor-only
   @override
   void keyframeIdChanged(Id from, Id to) {
     // Should never change once created.
   }
+  // <- editor-only
 
   @override
   void onAddedDirty() {
@@ -66,7 +70,9 @@ class KeyFrameDrawOrderValue extends KeyFrameDrawOrderValueBase {
 
   @override
   void valueChanged(FractionalIndex from, FractionalIndex to) {
+    // -> editor-only
     keyFrameDrawOrder?.internalValueChanged();
+    // <- editor-only
   }
 
   void apply(CoreContext context) {

@@ -16,6 +16,7 @@
     },
     "drawableId": {
       "type": "Id",
+      "typeRuntime": "int",
       "key": {
         "int": 77,
         "string": "drawableid"
@@ -24,6 +25,7 @@
     },
     "value": {
       "type": "FractionalIndex",
+      "typeRuntime": "int",
       "key": {
         "int": 78,
         "string": "value"

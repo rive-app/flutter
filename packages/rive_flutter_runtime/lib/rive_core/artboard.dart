@@ -20,18 +20,6 @@ abstract class ArtboardDelegate extends BoundsDelegate {
   void markNameDirty();
 }
 
-class DrawableList extends FractionallyIndexedList<Drawable> {
-  @override
-  FractionalIndex orderOf(Drawable drawable) {
-    return drawable.drawOrder;
-  }
-
-  @override
-  void setOrderOf(Drawable drawable, FractionalIndex order) {
-    drawable.drawOrder = order;
-  }
-}
-
 class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   bool get canBeOrphaned => true;
@@ -58,7 +46,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   bool updateComponents() {
     bool didUpdate = false;
     if ((_dirt & ComponentDirt.drawOrder) != 0) {
-      _drawables.sortFractional();
+      _drawables.sortDrawables();
       _dirt &= ~ComponentDirt.drawOrder;
       didUpdate = true;
     }

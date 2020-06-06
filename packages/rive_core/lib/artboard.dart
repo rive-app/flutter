@@ -40,7 +40,6 @@ class AnimationList extends FractionallyIndexedList<Animation> {
     animation.order = order;
   }
 }
-// <- editor-only
 
 class DrawableList extends FractionallyIndexedList<Drawable> {
   @override
@@ -52,7 +51,10 @@ class DrawableList extends FractionallyIndexedList<Drawable> {
   void setOrderOf(Drawable drawable, FractionalIndex order) {
     drawable.drawOrder = order;
   }
+
+  void sortDrawables() => sortFractional();
 }
+// <- editor-only
 
 class Artboard extends ArtboardBase with ShapePaintContainer {
   // -> editor-only
@@ -103,7 +105,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   bool updateComponents() {
     bool didUpdate = false;
     if ((_dirt & ComponentDirt.drawOrder) != 0) {
-      _drawables.sortFractional();
+      _drawables.sortDrawables();
       _dirt &= ~ComponentDirt.drawOrder;
       // -> editor-only
       drawOrderChanged.notify();
@@ -269,7 +271,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
         // patchup of corrupt files.
 
         // We sort immediately in-case more null drawOrder items are added.
-        _drawables.sortFractional();
+        _drawables.sortDrawables();
       }
       // <- editor-only
       markDrawOrderDirty();

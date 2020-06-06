@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:rive/rive_core/animation/keyframe_draw_order.dart';
+import 'package:rive/rive_core/animation/keyframe_draw_order_value.dart';
 import 'package:rive/rive_core/runtime/runtime_header.dart';
 import 'package:rive/rive_core/backboard.dart';
 import 'package:rive/src/core/core.dart';
@@ -34,15 +36,22 @@ class RiveFile {
       throw const RiveFormatErrorException(
           'expected first object to be a Backboard');
     }
-    // core.addObject(_backboard);
+
     int numArtboards = reader.readVarUint();
     for (int i = 0; i < numArtboards; i++) {
-      var artboard = readRuntimeObject(reader, RuntimeArtboard());
-      artboard?.context = artboard;
-      _artboards.add(artboard);
       var numObjects = reader.readVarUint();
+      if(numObjects == 0) {
+        throw const RiveFormatErrorException(
+          'artboards must contain at least one object (themselves)');
+      }
+      var artboard = readRuntimeObject(reader, RuntimeArtboard());
+      // Kind of weird, but the artboard is the core context at runtime, so we
+      // want other objects to be able to resolve it. It's always at the 0
+      // index.
+      artboard?.addObject(artboard);
+      _artboards.add(artboard);
       // var objects = List<Core<RiveCoreContext>>(numObjects);
-      for (int i = 0; i < numObjects; i++) {
+      for (int i = 1; i < numObjects; i++) {
         Core<CoreContext> object = readRuntimeObject(reader);
         // N.B. we add objects that don't load (null) too as we need to look
         // them up by index.
@@ -61,11 +70,13 @@ class RiveFile {
         animation.artboard = artboard;
         if (animation is LinearAnimation) {
           var numKeyedObjects = reader.readVarUint();
+          var keyedObjects = List<KeyedObject>(numKeyedObjects);
           for (int j = 0; j < numKeyedObjects; j++) {
             var keyedObject = readRuntimeObject<KeyedObject>(reader);
             if (keyedObject == null) {
               continue;
             }
+            keyedObjects[j] = keyedObject;
             artboard.addObject(keyedObject);
 
             animation.internalAddKeyedObject(keyedObject);
@@ -84,12 +95,24 @@ class RiveFile {
                 var keyframe = readRuntimeObject<KeyFrame>(reader);
                 if (keyframe == null) {
                   continue;
+                } else if (keyframe is KeyFrameDrawOrder) {
+                  int numValues = reader.readVarUint();
+                  for (int i = 0; i < numValues; i++) {
+                    var valueObject = KeyFrameDrawOrderValue();
+                    valueObject.drawableId = reader.readVarInt();
+                    valueObject.value = i;
+                    keyframe.internalAddValue(valueObject);
+                  }
                 }
                 artboard.addObject(keyframe);
                 keyedProperty.internalAddKeyFrame(keyframe);
                 keyframe.computeSeconds(animation);
               }
             }
+          }
+
+          for (final keyedObject in keyedObjects) {
+            keyedObject?.objectId ??= artboard.id;
           }
         }
       }

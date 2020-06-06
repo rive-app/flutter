@@ -89,6 +89,7 @@ void main(List<String> arguments) {
         var mutator = RuntimeMutator();
         contents = mutator.mutate(contents.toString(), [
           Mutation('Id', 'int'),
+          Mutation('FractionalIndex', 'int'),
           Mutation('animateDouble', 'setDouble'),
         ]);
 

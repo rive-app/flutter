@@ -40,6 +40,7 @@ class Definition {
   Key _key;
   bool _isAbstract = false;
   bool _exportsWithContext = false;
+  bool _editorOnly = false;
   factory Definition(Configuration config, String filename) {
     var definition = definitions[filename];
     if (definition != null) {
@@ -75,6 +76,10 @@ class Definition {
     dynamic abstractValue = data['abstract'];
     if (abstractValue is bool) {
       _isAbstract = abstractValue;
+    }
+    dynamic editorOnlyValue = data['editorOnly'];
+    if (editorOnlyValue is bool) {
+      _editorOnly = editorOnlyValue;
     }
     dynamic exportsWithContextValue = data['exportsWithContext'];
     if (exportsWithContextValue is bool) {
@@ -319,6 +324,9 @@ class Definition {
     if (_isAbstract) {
       data['abstract'] = true;
     }
+    if (_editorOnly) {
+      data['editorOnly'] = true;
+    }
     if (_exportsWithContext) {
       data['exportsWithContext'] = true;
     }
@@ -432,6 +440,8 @@ class Definition {
           front: Styles.YELLOW);
       return false;
     }
+
+    definitions.removeWhere((key, definition) => definition._editorOnly);
 
     // Generate core context.
     var snakeContextName = config.coreContextName.replaceAllMapped(

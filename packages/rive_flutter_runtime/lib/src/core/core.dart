@@ -1,6 +1,7 @@
 export 'package:rive/src/fractional/fractional.dart';
 export 'package:rive/src/animation_list.dart';
 export 'package:rive/src/container_children.dart';
+export 'package:rive/src/drawable_list.dart';
 export 'package:rive/src/runtime_artboard.dart';
 export 'package:rive/src/generated/rive_core_context.dart';
 

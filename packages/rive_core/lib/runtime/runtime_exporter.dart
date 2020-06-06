@@ -40,14 +40,6 @@ class RuntimeExporter {
     writer.writeVarUint(RuntimeHeader.minorVersion);
     writer.writeVarUint(info.ownerId);
     writer.writeVarUint(info.fileId);
-    writer.writeVarUint(info.permissions);
-    var hasSignature = info.signature != null && info.signature.isNotEmpty;
-    if (!hasSignature) {
-      writer.writeVarUint(0);
-    } else {
-      writer.writeVarUint(info.signature.length);
-      writer.write(info.signature);
-    }
 
     var backboards = core.objectsOfType<Backboard>();
     if (backboards.isEmpty) {
@@ -101,6 +93,11 @@ class RuntimeExporter {
       // parent/child relationships they will still be in order.
       artboardComponents.sort((a, b) => a.childOrder.compareTo(b.childOrder));
 
+      // The artboard is always at the start of the components list. We add it
+      // after building up the ordered components as the artboard itself may not
+      // have a fractional index for order.
+      artboardComponents.insert(0, artboard);
+
       // Components aren't the only thing that get stored in the artboard object
       // list. Interpolators and any other object that is referenced by Id that
       // may not inherit directly from Component is added to this list.
@@ -126,10 +123,7 @@ class RuntimeExporter {
         idToIndex[component.id] = i;
       }
 
-      // Write the core artboard object.
-      artboard.writeRuntime(writer, idToIndex);
       // Write the number of objects in the artboard.
-
       writer.writeVarUint(artboardObjects.length);
       // Write each object.
       for (final object in artboardObjects) {
