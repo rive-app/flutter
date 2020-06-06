@@ -127,6 +127,8 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
+      case PathVertexBase.xPropertyKey:
+      case PathVertexBase.yPropertyKey:
         return 1;
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
@@ -140,6 +142,8 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
+      case PathVertexBase.xPropertyKey:
+      case PathVertexBase.yPropertyKey:
         return 'position';
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
@@ -979,6 +983,8 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
       case NodeBase.opacityPropertyKey:
+      case PathVertexBase.xPropertyKey:
+      case PathVertexBase.yPropertyKey:
         return true;
       default:
         return false;
@@ -1007,6 +1013,12 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case NodeBase.opacityPropertyKey:
         return (object as NodeBase).opacityKeyState;
+        break;
+      case PathVertexBase.xPropertyKey:
+        return (object as PathVertexBase).xKeyState;
+        break;
+      case PathVertexBase.yPropertyKey:
+        return (object as PathVertexBase).yKeyState;
         break;
       default:
         return null;
@@ -1048,6 +1060,16 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.opacityPropertyKey:
         if (object is NodeBase) {
           object.opacityKeyState = value;
+        }
+        break;
+      case PathVertexBase.xPropertyKey:
+        if (object is PathVertexBase) {
+          object.xKeyState = value;
+        }
+        break;
+      case PathVertexBase.yPropertyKey:
+        if (object is PathVertexBase) {
+          object.yKeyState = value;
         }
         break;
     }
@@ -1096,6 +1118,18 @@ abstract class RiveCoreContext extends CoreContext {
         if (object is NodeBase) {
           object.opacityAnimated = null;
           object.opacityKeyState = KeyState.none;
+        }
+        break;
+      case PathVertexBase.xPropertyKey:
+        if (object is PathVertexBase) {
+          object.xAnimated = null;
+          object.xKeyState = KeyState.none;
+        }
+        break;
+      case PathVertexBase.yPropertyKey:
+        if (object is PathVertexBase) {
+          object.yAnimated = null;
+          object.yKeyState = KeyState.none;
         }
         break;
     }
@@ -2043,6 +2077,12 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case NodeBase.opacityPropertyKey:
         (object as NodeBase).opacityAnimated = value;
+        break;
+      case PathVertexBase.xPropertyKey:
+        (object as PathVertexBase).xAnimated = value;
+        break;
+      case PathVertexBase.yPropertyKey:
+        (object as PathVertexBase).yAnimated = value;
         break;
     }
   }

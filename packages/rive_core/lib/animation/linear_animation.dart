@@ -138,7 +138,7 @@ class LinearAnimation extends LinearAnimationBase {
   void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
     super.writeRuntime(writer, idLookup);
     writer.writeVarUint(_keyedObjects.length);
-    for(final keyedObject in _keyedObjects.values) {
+    for (final keyedObject in _keyedObjects.values) {
       keyedObject.writeRuntime(writer, idLookup);
     }
   }

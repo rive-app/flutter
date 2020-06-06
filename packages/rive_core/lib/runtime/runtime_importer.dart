@@ -50,16 +50,22 @@ class RuntimeImporter {
             DrawOrderRemap(core.fractionalIndexType, core.intType);
 
         var remaps = <RuntimeRemap>[idRemap, drawOrderRemap];
-        var artboard = core.readRuntimeObject<Artboard>(reader, remaps);
-        core.addObject(artboard);
+
         var numObjects = reader.readVarUint();
         var objects = List<Core<RiveCoreContext>>(numObjects);
+        // artboard is always at index 0
         for (int i = 0; i < numObjects; i++) {
           Core<RiveCoreContext> object = core.readRuntimeObject(reader, remaps);
           objects[i] = object;
           if (object != null) {
             core.addObject(object);
           }
+        }
+        var artboard = numObjects == 0 ? null : objects[0] as Artboard;
+        if (artboard == null) {
+          throw const RiveFormatErrorException(
+              'expected first object in the artboard list to be the '
+              'artboard itself');
         }
 
         // Store all keyed objects in the artboard...
@@ -126,17 +132,18 @@ class RuntimeImporter {
               remap.object, remap.propertyKey, objects[remap.value].id);
         }
 
-        // Any component objects with no id map to the artboard.
-        for (final object in objects) {
+        // Any component objects with no id map to the artboard. Skip the first
+        // as it's the artboard itself.
+        for (final object in objects.skip(1)) {
           if (object is Component && object.parentId == null) {
             object.parentId = artboard.id;
           }
         }
 
         // any keyed object with null objectId is referencing the artboard.
-        for (final keyedObject in keyedObjects) {
-          keyedObject.objectId ??= artboard.id;
-        }
+        // for (final keyedObject in keyedObjects) {
+        //   keyedObject?.objectId ??= artboard.id;
+        // }
       }
     });
 

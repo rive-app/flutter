@@ -3,6 +3,8 @@ import 'package:rive/rive_core/animation/cubic_interpolator.dart';
 import 'package:rive/rive_core/animation/keyed_object.dart';
 import 'package:rive/rive_core/animation/keyed_property.dart';
 import 'package:rive/rive_core/animation/keyframe_double.dart';
+import 'package:rive/rive_core/animation/keyframe_draw_order.dart';
+import 'package:rive/rive_core/animation/keyframe_draw_order_value.dart';
 import 'package:rive/rive_core/animation/linear_animation.dart';
 import 'package:rive/rive_core/artboard.dart';
 import 'package:rive/rive_core/backboard.dart';
@@ -26,7 +28,6 @@ import 'package:rive/src/core/field_types/core_String_type.dart';
 import 'package:rive/src/core/field_types/core_bool_type.dart';
 import 'package:rive/src/core/field_types/core_double_type.dart';
 import 'package:rive/src/core/field_types/core_field_type.dart';
-import 'package:rive/src/core/field_types/core_fractional_index_type.dart';
 import 'package:rive/src/core/field_types/core_int_type.dart';
 import 'package:rive/src/generated/animation/animation_base.dart';
 import 'package:rive/src/generated/animation/cubic_interpolator_base.dart';
@@ -34,6 +35,8 @@ import 'package:rive/src/generated/animation/keyed_object_base.dart';
 import 'package:rive/src/generated/animation/keyed_property_base.dart';
 import 'package:rive/src/generated/animation/keyframe_base.dart';
 import 'package:rive/src/generated/animation/keyframe_double_base.dart';
+import 'package:rive/src/generated/animation/keyframe_draw_order_base.dart';
+import 'package:rive/src/generated/animation/keyframe_draw_order_value_base.dart';
 import 'package:rive/src/generated/animation/linear_animation_base.dart';
 import 'package:rive/src/generated/artboard_base.dart';
 import 'package:rive/src/generated/backboard_base.dart';
@@ -73,6 +76,10 @@ class RiveCoreContext {
         return KeyFrameDouble();
       case LinearAnimationBase.typeKey:
         return LinearAnimation();
+      case KeyFrameDrawOrderBase.typeKey:
+        return KeyFrameDrawOrder();
+      case KeyFrameDrawOrderValueBase.typeKey:
+        return KeyFrameDrawOrderValue();
       case LinearGradientBase.typeKey:
         return LinearGradient();
       case RadialGradientBase.typeKey:
@@ -208,6 +215,16 @@ class RiveCoreContext {
           object.enableWorkArea = value;
         }
         break;
+      case KeyFrameDrawOrderValueBase.drawableIdPropertyKey:
+        if (object is KeyFrameDrawOrderValueBase && value is int) {
+          object.drawableId = value;
+        }
+        break;
+      case KeyFrameDrawOrderValueBase.valuePropertyKey:
+        if (object is KeyFrameDrawOrderValueBase && value is int) {
+          object.value = value;
+        }
+        break;
       case ComponentBase.namePropertyKey:
         if (object is ComponentBase && value is String) {
           object.name = value;
@@ -319,7 +336,7 @@ class RiveCoreContext {
         }
         break;
       case DrawableBase.drawOrderPropertyKey:
-        if (object is DrawableBase && value is FractionalIndex) {
+        if (object is DrawableBase && value is int) {
           object.drawOrder = value;
         }
         break;
@@ -425,7 +442,6 @@ class RiveCoreContext {
   static CoreFieldType stringType = CoreStringType();
   static CoreFieldType doubleType = CoreDoubleType();
   static CoreFieldType boolType = CoreBoolType();
-  static CoreFieldType fractionalIndexType = CoreFractionalIndexType();
   static CoreFieldType coreType(int propertyKey) {
     switch (propertyKey) {
       case KeyedObjectBase.objectIdPropertyKey:
@@ -438,12 +454,15 @@ class RiveCoreContext {
       case LinearAnimationBase.loopValuePropertyKey:
       case LinearAnimationBase.workStartPropertyKey:
       case LinearAnimationBase.workEndPropertyKey:
+      case KeyFrameDrawOrderValueBase.drawableIdPropertyKey:
+      case KeyFrameDrawOrderValueBase.valuePropertyKey:
       case ComponentBase.parentIdPropertyKey:
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
       case SolidColorBase.colorValuePropertyKey:
       case GradientStopBase.colorValuePropertyKey:
       case FillBase.fillRulePropertyKey:
+      case DrawableBase.drawOrderPropertyKey:
       case DrawableBase.blendModePropertyKey:
       case CubicVertexBase.controlTypeValuePropertyKey:
         return intType;
@@ -491,8 +510,6 @@ class RiveCoreContext {
       case StrokeBase.transformAffectsStrokePropertyKey:
       case PointsPathBase.isClosedPropertyKey:
         return boolType;
-      case DrawableBase.drawOrderPropertyKey:
-        return fractionalIndexType;
       default:
         return null;
     }
@@ -520,6 +537,10 @@ class RiveCoreContext {
         return (object as LinearAnimationBase).workStart;
       case LinearAnimationBase.workEndPropertyKey:
         return (object as LinearAnimationBase).workEnd;
+      case KeyFrameDrawOrderValueBase.drawableIdPropertyKey:
+        return (object as KeyFrameDrawOrderValueBase).drawableId;
+      case KeyFrameDrawOrderValueBase.valuePropertyKey:
+        return (object as KeyFrameDrawOrderValueBase).value;
       case ComponentBase.parentIdPropertyKey:
         return (object as ComponentBase).parentId;
       case StrokeBase.capPropertyKey:
@@ -532,6 +553,8 @@ class RiveCoreContext {
         return (object as GradientStopBase).colorValue;
       case FillBase.fillRulePropertyKey:
         return (object as FillBase).fillRule;
+      case DrawableBase.drawOrderPropertyKey:
+        return (object as DrawableBase).drawOrder;
       case DrawableBase.blendModePropertyKey:
         return (object as DrawableBase).blendMode;
       case CubicVertexBase.controlTypeValuePropertyKey:
@@ -640,14 +663,6 @@ class RiveCoreContext {
     return false;
   }
 
-  static FractionalIndex getFractionalIndex(Core object, int propertyKey) {
-    switch (propertyKey) {
-      case DrawableBase.drawOrderPropertyKey:
-        return (object as DrawableBase).drawOrder;
-    }
-    return null;
-  }
-
   static void setInt(Core object, int propertyKey, int value) {
     switch (propertyKey) {
       case KeyedObjectBase.objectIdPropertyKey:
@@ -680,6 +695,12 @@ class RiveCoreContext {
       case LinearAnimationBase.workEndPropertyKey:
         (object as LinearAnimationBase).workEnd = value;
         break;
+      case KeyFrameDrawOrderValueBase.drawableIdPropertyKey:
+        (object as KeyFrameDrawOrderValueBase).drawableId = value;
+        break;
+      case KeyFrameDrawOrderValueBase.valuePropertyKey:
+        (object as KeyFrameDrawOrderValueBase).value = value;
+        break;
       case ComponentBase.parentIdPropertyKey:
         (object as ComponentBase).parentId = value;
         break;
@@ -697,6 +718,9 @@ class RiveCoreContext {
         break;
       case FillBase.fillRulePropertyKey:
         (object as FillBase).fillRule = value;
+        break;
+      case DrawableBase.drawOrderPropertyKey:
+        (object as DrawableBase).drawOrder = value;
         break;
       case DrawableBase.blendModePropertyKey:
         (object as DrawableBase).blendMode = value;
@@ -841,15 +865,6 @@ class RiveCoreContext {
         break;
       case PointsPathBase.isClosedPropertyKey:
         (object as PointsPathBase).isClosed = value;
-        break;
-    }
-  }
-
-  static void setFractionalIndex(
-      Core object, int propertyKey, FractionalIndex value) {
-    switch (propertyKey) {
-      case DrawableBase.drawOrderPropertyKey:
-        (object as DrawableBase).drawOrder = value;
         break;
     }
   }

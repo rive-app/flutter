@@ -2,7 +2,6 @@
 /// Do not modify manually.
 
 import 'package:rive/rive_core/node.dart';
-import 'package:rive/src/core/core.dart';
 import 'package:rive/src/generated/component_base.dart';
 import 'package:rive/src/generated/container_component_base.dart';
 import 'package:rive/src/generated/node_base.dart';
@@ -21,22 +20,22 @@ abstract class DrawableBase extends Node {
 
   /// --------------------------------------------------------------------------
   /// DrawOrder field with key 22.
-  FractionalIndex _drawOrder;
+  int _drawOrder;
   static const int drawOrderPropertyKey = 22;
-  FractionalIndex get drawOrder => _drawOrder;
+  int get drawOrder => _drawOrder;
 
   /// Change the [_drawOrder] field value.
   /// [drawOrderChanged] will be invoked only if the field's value has changed.
-  set drawOrder(FractionalIndex value) {
+  set drawOrder(int value) {
     if (_drawOrder == value) {
       return;
     }
-    FractionalIndex from = _drawOrder;
+    int from = _drawOrder;
     _drawOrder = value;
     drawOrderChanged(from, value);
   }
 
-  void drawOrderChanged(FractionalIndex from, FractionalIndex to);
+  void drawOrderChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
   /// BlendMode field with key 23.

@@ -103,11 +103,12 @@ abstract class KeyFrameDrawOrderValueBase<T extends RiveCoreContext>
       }
     }
     if (_value != null) {
-      context.fractionalIndexType
-          .writeProperty(valuePropertyKey, writer, _value);
+      var runtimeValue = runtimeValueValue(_value);
+      context.intType.writeProperty(valuePropertyKey, writer, runtimeValue);
     }
   }
 
+  int runtimeValueValue(FractionalIndex editorValue);
   @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {

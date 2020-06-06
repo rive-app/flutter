@@ -38,8 +38,4 @@ class KeyFrameDouble extends KeyFrameDoubleBase {
 
   @override
   void valueChanged(double from, double to) {}
-  @override
-  void valueFrom(Core object, int propertyKey) {
-    value = RiveCoreContext.getDouble(object, propertyKey);
-  }
 }

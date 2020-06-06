@@ -54,8 +54,10 @@ class KeyFrameDouble extends KeyFrameDoubleBase {
     // <- editor-only
   }
 
+  // -> editor-only
   @override
   void valueFrom(Core object, int propertyKey) {
     value = RiveCoreContext.getDouble(object, propertyKey);
   }
+  // <- editor-only
 }

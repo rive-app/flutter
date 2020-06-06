@@ -54,6 +54,7 @@ HashMap<String, String> _defaultUIStrings =
   'y': 'Y',
   'scaleX': 'X',
   'scaleY': 'Y',
+  'vertices': 'Vertices',
   'thickness': 'Thickness',
   'strokes': 'Strokes',
   'hold': 'Hold',

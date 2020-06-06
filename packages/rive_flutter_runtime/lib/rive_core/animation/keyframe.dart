@@ -50,7 +50,6 @@ abstract class KeyFrame extends KeyFrameBase<RuntimeArtboard>
   void apply(Core object, int propertyKey, double mix);
   void applyInterpolation(Core object, int propertyKey, double seconds,
       covariant KeyFrame nextFrame, double mix);
-  void valueFrom(Core object, int propertyKey);
   Interpolator _interpolator;
   Interpolator get interpolator => _interpolator;
   set interpolator(Interpolator value) {

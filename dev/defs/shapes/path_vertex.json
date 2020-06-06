@@ -9,6 +9,8 @@
   "properties": {
     "x": {
       "type": "double",
+      "animates": true,
+      "group": "position",
       "key": {
         "int": 24,
         "string": "x"
@@ -17,6 +19,8 @@
     },
     "y": {
       "type": "double",
+      "animates": true,
+      "group": "position",
       "key": {
         "int": 25,
         "string": "y"

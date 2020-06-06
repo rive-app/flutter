@@ -41,13 +41,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    rootBundle.load('assets/tape_deck.riv').then(
+    rootBundle.load('assets/draworderanimation_3.riv').then(
       (data) async {
         var file = RiveFile();
         var success = file.import(data);
         if (success) {
           file.mainArtboard.addController(
-            _controller = SimpleAnimation('Untitled 1'),
+            _controller = SimpleAnimation('DrawOrder'),
           );
           setState(() => _rive = file);
         }

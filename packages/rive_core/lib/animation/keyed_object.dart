@@ -30,7 +30,11 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     if (animationId != null) {
       LinearAnimation animation = context?.resolve(animationId);
       if (animation == null) {
-        _log.finest("Failed to resolve animation with id $animationId");
+        _log.severe("Failed to resolve animation with id $animationId");
+        context?.removeObject(this);
+      } else if (objectId == null) {
+        _log.severe("Found a keyed object referenced null objectId");
+        context?.removeObject(this);
       } else {
         animation.internalAddKeyedObject(this);
       }

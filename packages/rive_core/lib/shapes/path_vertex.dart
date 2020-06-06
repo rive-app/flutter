@@ -1,4 +1,5 @@
 import 'package:rive_core/bounds_delegate.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path.dart';
@@ -17,6 +18,13 @@ abstract class PathVertex extends PathVertexBase {
   Path get path => parent as Path;
   // -> editor-only
   BoundsDelegate _delegate;
+  @override
+  String get timelineParentGroup => 'vertices';
+  @override
+  Component get timelineParent => parent;
+
+  @override
+  String get timelineName => 'Vertex ${path.vertices.indexOf(this) + 1}';
   // <- editor-only
 
   VertexControlType get controlType => VertexControlType.straight;
@@ -58,7 +66,7 @@ abstract class PathVertex extends PathVertexBase {
     }
     // <- editor-only
   }
-  
+
   // -> editor-only
   @override
   void userDataChanged(dynamic from, dynamic to) {

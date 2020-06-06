@@ -106,9 +106,11 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   void applyInterpolation(Core object, int propertyKey, double seconds,
       covariant KeyFrame nextFrame, double mix);
 
+  // -> editor-only
   /// Set the value of this keyframe to the current value of [object]'s
   /// [propertyKey].
   void valueFrom(covariant Core object, int propertyKey);
+  // <- editor-only
 
   Interpolator _interpolator;
   Interpolator get interpolator => _interpolator;
