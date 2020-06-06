@@ -40,7 +40,7 @@ class KeyFrameDrawOrderValue extends KeyFrameDrawOrderValueBase {
   void _remove() {
     context.removeObject(this);
   }
-  
+
   KeyFrameDrawOrder get keyFrameDrawOrder => context?.resolve(keyframeId);
   // <- editor-only
 
@@ -80,5 +80,16 @@ class KeyFrameDrawOrderValue extends KeyFrameDrawOrderValueBase {
     if (drawable != null) {
       drawable.drawOrder = value;
     }
+  }
+
+  @override
+  int runtimeValueValue(FractionalIndex editorValue) {
+    // This object doesn't actually get exported by core, so this will never get
+    // called. This is an issue with the object having a different runtime type,
+    // most core objects would need the remapping, but because this one is
+    // manually exported in KeyFrameDrawOrder and never has core.writeRuntime
+    // called for it, it doesn't need the remapping.
+    assert(false, 'this should never get called');
+    return 0;
   }
 }
