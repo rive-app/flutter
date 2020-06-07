@@ -39,7 +39,7 @@ class MiddlePanel extends StatelessWidget {
         SizedBox(height: 30),
         LargeCard(
           backgroundImageAsset: 'assets/images/space_man.png',
-          url: 'https://www.youtube.com/watch?v=oHg5SJYRHA0',
+          url: 'https://www.youtube.com/watch?v=GkkmU3_Gg6Y',
           heading: 'Quick Start',
           blurb: 'Watch this video to learn the basics '
               'and core concepts you need to get started',
@@ -68,7 +68,7 @@ class RightPanel extends StatelessWidget {
           UrlCard(
             icon: PackedIcon.settings,
             blurb: 'Get the desktop app!',
-            url: 'https://www.youtube.com/watch?v=oHg5SJYRHA0',
+            url: 'https://rive.app/',
           ),
           SizedBox(height: 20),
           UrlCard(
