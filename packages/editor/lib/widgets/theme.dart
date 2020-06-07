@@ -448,6 +448,12 @@ class TextStyles {
         fontSize: 11,
         height: 1.5,
       );
+
+  TextStyle get urlBlurb => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: Color(0xFF666666),
+        fontSize: 13,
+      );
 }
 
 /// Gradients used in the Rive Theme

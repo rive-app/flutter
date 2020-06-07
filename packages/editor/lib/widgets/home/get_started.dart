@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Panel showing getting started assets
@@ -9,18 +11,18 @@ class GetStartedPanel extends StatelessWidget {
     final theme = RiveTheme.of(context);
 
     return Container(
-      color: theme.colors.panelBackgroundLightGrey,
+      color: theme.colors.fileBrowserBackground,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20,
         ),
-        child: Column(
+        child: Row(
           children: const <Widget>[
-            Expanded(
-              child: Center(
-                child: MiddlePanel(),
-              ),
+            Flexible(
+              flex: 2,
+              child: MiddlePanel(),
             ),
+            Flexible(flex: 1, child: RightPanel()),
           ],
         ),
       ),
@@ -55,6 +57,56 @@ class MiddlePanel extends StatelessWidget {
   }
 }
 
+class RightPanel extends StatelessWidget {
+  const RightPanel();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, top: 30),
+      child: Column(
+        children: const [
+          UrlCard(
+            icon: PackedIcon.settings,
+            blurb: 'Get the desktop app!',
+            url: 'https://www.youtube.com/watch?v=oHg5SJYRHA0',
+          ),
+          SizedBox(height: 20),
+          UrlCard(
+            icon: PackedIcon.settings,
+            blurb: 'Get the Runtimes',
+            url: 'https://github.com/rive-app/rive-flutter',
+          ),
+          SizedBox(height: 20),
+          UrlCard(
+            icon: PackedIcon.settings,
+            blurb: 'Help Center',
+            url: 'https://docs.2dimensions.com/rive-help-center/',
+          ),
+          SizedBox(height: 20),
+          UrlCard(
+            icon: PackedIcon.settings,
+            blurb: 'Join us on Discord',
+            url: 'https://discord.gg/FGjmaTr',
+          ),
+          SizedBox(height: 20),
+          UrlCard(
+            icon: PackedIcon.settings,
+            blurb: 'Follow us on Twitter',
+            url: 'https://twitter.com/rive_app',
+          ),
+          SizedBox(height: 20),
+          UrlCard(
+            icon: PackedIcon.settings,
+            blurb: 'Send Feedback',
+            url: 'https://rive.nolt.io',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Large image cards in the middle column
 class LargeCard extends StatelessWidget {
   const LargeCard(
       {@required this.backgroundImageAsset,
@@ -81,7 +133,7 @@ class LargeCard extends StatelessWidget {
       child: Stack(
         children: [
           Container(
-            width: 685,
+            // width: 685,
             height: 384,
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -122,6 +174,56 @@ class LargeCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Links in the right column
+class UrlCard extends StatelessWidget {
+  const UrlCard({
+    @required this.icon,
+    @required this.blurb,
+    @required this.url,
+  });
+  final Iterable<PackedIcon> icon;
+  final String blurb;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+
+    return GestureDetector(
+      onTap: () async {
+        if (await canLaunch(url)) {
+          await launch(url);
+        }
+      },
+      child: Container(
+        //width: 200,
+        decoration: BoxDecoration(
+          color: theme.colors.panelBackgroundLightGrey,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(10),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              TintedIcon(color: theme.colors.fileIconColor, icon: icon),
+              const SizedBox(width: 10),
+              Text(blurb, style: theme.textStyles.urlBlurb),
+              const Spacer(),
+              TintedIcon(
+                color: theme.colors.fileIconColor,
+                icon: PackedIcon.chevron,
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
