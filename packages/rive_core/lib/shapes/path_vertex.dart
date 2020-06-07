@@ -78,7 +78,11 @@ abstract class PathVertex extends PathVertexBase {
   }
   // <- editor-only
 
-  Vec2D get translation => Vec2D.fromValues(x, y);
+  Vec2D get translation {
+    print("XY $xCore $yCore $xAnimated $yAnimated");
+    return Vec2D.fromValues(x, y);
+  }
+
   set translation(Vec2D value) {
     x = value[0];
     y = value[1];

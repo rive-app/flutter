@@ -102,12 +102,16 @@ class VertexInspector extends ListenableInspectorBuilder {
             labelB: 'Y',
             converter: TranslationValueConverter.instance,
           ),
-      (context) => PropertySingle(
-            name: 'Corner',
-            objects: inspecting.components,
-            propertyKey: StraightVertexBase.radiusPropertyKey,
-            converter: TranslationValueConverter.instance,
-          ),
+      (context) {
+        var allCorner = inspecting.intersectingCoreTypes
+            .contains(StraightVertexBase.typeKey);
+        return PropertySingle(
+          name: 'Corner',
+          objects: allCorner ? inspecting.components : [],
+          propertyKey: StraightVertexBase.radiusPropertyKey,
+          converter: TranslationValueConverter.instance,
+        );
+      },
       (context) => _VertexButtonDual(
             vertices: inspecting.components.cast<PathVertex>(),
             builder: (context, controlTypeValue, allowActive, vertices) {

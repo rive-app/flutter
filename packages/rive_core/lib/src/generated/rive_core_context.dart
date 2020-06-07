@@ -133,6 +133,12 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
         return 2;
+      case CubicVertexBase.inXPropertyKey:
+      case CubicVertexBase.inYPropertyKey:
+        return 3;
+      case CubicVertexBase.outXPropertyKey:
+      case CubicVertexBase.outYPropertyKey:
+        return 4;
       default:
         return 0;
     }
@@ -148,6 +154,12 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
         return 'scale';
+      case CubicVertexBase.inXPropertyKey:
+      case CubicVertexBase.inYPropertyKey:
+        return 'in';
+      case CubicVertexBase.outXPropertyKey:
+      case CubicVertexBase.outYPropertyKey:
+        return 'out';
       default:
         return null;
     }
@@ -974,6 +986,386 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
+  @override
+  void setObjectPropertyCore(Core object, int propertyKey, Object value) {
+    switch (propertyKey) {
+      case KeyedObjectBase.objectIdPropertyKey:
+        if (object is KeyedObjectBase && value is Id) {
+          object.objectId = value;
+        }
+        break;
+      case KeyedObjectBase.animationIdPropertyKey:
+        if (object is KeyedObjectBase && value is Id) {
+          object.animationId = value;
+        }
+        break;
+      case KeyedPropertyBase.keyedObjectIdPropertyKey:
+        if (object is KeyedPropertyBase && value is Id) {
+          object.keyedObjectId = value;
+        }
+        break;
+      case KeyedPropertyBase.propertyKeyPropertyKey:
+        if (object is KeyedPropertyBase && value is int) {
+          object.propertyKey = value;
+        }
+        break;
+      case AnimationBase.artboardIdPropertyKey:
+        if (object is AnimationBase && value is Id) {
+          object.artboardId = value;
+        }
+        break;
+      case AnimationBase.namePropertyKey:
+        if (object is AnimationBase && value is String) {
+          object.name = value;
+        }
+        break;
+      case AnimationBase.orderPropertyKey:
+        if (object is AnimationBase && value is FractionalIndex) {
+          object.order = value;
+        }
+        break;
+      case CubicInterpolatorBase.x1PropertyKey:
+        if (object is CubicInterpolatorBase && value is double) {
+          object.x1 = value;
+        }
+        break;
+      case CubicInterpolatorBase.y1PropertyKey:
+        if (object is CubicInterpolatorBase && value is double) {
+          object.y1 = value;
+        }
+        break;
+      case CubicInterpolatorBase.x2PropertyKey:
+        if (object is CubicInterpolatorBase && value is double) {
+          object.x2 = value;
+        }
+        break;
+      case CubicInterpolatorBase.y2PropertyKey:
+        if (object is CubicInterpolatorBase && value is double) {
+          object.y2 = value;
+        }
+        break;
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        if (object is KeyFrameBase && value is Id) {
+          object.keyedPropertyId = value;
+        }
+        break;
+      case KeyFrameBase.framePropertyKey:
+        if (object is KeyFrameBase && value is int) {
+          object.frame = value;
+        }
+        break;
+      case KeyFrameBase.interpolationTypePropertyKey:
+        if (object is KeyFrameBase && value is int) {
+          object.interpolationType = value;
+        }
+        break;
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        if (object is KeyFrameBase) {
+          if (value is Id) {
+            object.interpolatorId = value;
+          } else if (value == null) {
+            object.interpolatorId = null;
+          }
+        }
+        break;
+      case KeyFrameDoubleBase.valuePropertyKey:
+        if (object is KeyFrameDoubleBase && value is double) {
+          object.value = value;
+        }
+        break;
+      case LinearAnimationBase.fpsPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.fps = value;
+        }
+        break;
+      case LinearAnimationBase.durationPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.duration = value;
+        }
+        break;
+      case LinearAnimationBase.speedPropertyKey:
+        if (object is LinearAnimationBase && value is double) {
+          object.speed = value;
+        }
+        break;
+      case LinearAnimationBase.loopValuePropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.loopValue = value;
+        }
+        break;
+      case LinearAnimationBase.workStartPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.workStart = value;
+        }
+        break;
+      case LinearAnimationBase.workEndPropertyKey:
+        if (object is LinearAnimationBase && value is int) {
+          object.workEnd = value;
+        }
+        break;
+      case LinearAnimationBase.enableWorkAreaPropertyKey:
+        if (object is LinearAnimationBase && value is bool) {
+          object.enableWorkArea = value;
+        }
+        break;
+      case KeyFrameDrawOrderValueBase.keyframeIdPropertyKey:
+        if (object is KeyFrameDrawOrderValueBase && value is Id) {
+          object.keyframeId = value;
+        }
+        break;
+      case KeyFrameDrawOrderValueBase.drawableIdPropertyKey:
+        if (object is KeyFrameDrawOrderValueBase && value is Id) {
+          object.drawableId = value;
+        }
+        break;
+      case KeyFrameDrawOrderValueBase.valuePropertyKey:
+        if (object is KeyFrameDrawOrderValueBase && value is FractionalIndex) {
+          object.value = value;
+        }
+        break;
+      case ComponentBase.dependentIdsPropertyKey:
+        if (object is ComponentBase && value is List<Id>) {
+          object.dependentIds = value;
+        }
+        break;
+      case ComponentBase.namePropertyKey:
+        if (object is ComponentBase && value is String) {
+          object.name = value;
+        }
+        break;
+      case ComponentBase.parentIdPropertyKey:
+        if (object is ComponentBase && value is Id) {
+          object.parentId = value;
+        }
+        break;
+      case ComponentBase.childOrderPropertyKey:
+        if (object is ComponentBase && value is FractionalIndex) {
+          object.childOrder = value;
+        }
+        break;
+      case ShapePaintBase.isVisiblePropertyKey:
+        if (object is ShapePaintBase && value is bool) {
+          object.isVisible = value;
+        }
+        break;
+      case LinearGradientBase.startXPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.startX = value;
+        }
+        break;
+      case LinearGradientBase.startYPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.startY = value;
+        }
+        break;
+      case LinearGradientBase.endXPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.endX = value;
+        }
+        break;
+      case LinearGradientBase.endYPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.endY = value;
+        }
+        break;
+      case LinearGradientBase.opacityPropertyKey:
+        if (object is LinearGradientBase && value is double) {
+          object.opacity = value;
+        }
+        break;
+      case StrokeBase.thicknessPropertyKey:
+        if (object is StrokeBase && value is double) {
+          object.thicknessCore = value;
+        }
+        break;
+      case StrokeBase.capPropertyKey:
+        if (object is StrokeBase && value is int) {
+          object.cap = value;
+        }
+        break;
+      case StrokeBase.joinPropertyKey:
+        if (object is StrokeBase && value is int) {
+          object.join = value;
+        }
+        break;
+      case StrokeBase.transformAffectsStrokePropertyKey:
+        if (object is StrokeBase && value is bool) {
+          object.transformAffectsStroke = value;
+        }
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        if (object is SolidColorBase && value is int) {
+          object.colorValue = value;
+        }
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        if (object is GradientStopBase && value is int) {
+          object.colorValue = value;
+        }
+        break;
+      case GradientStopBase.positionPropertyKey:
+        if (object is GradientStopBase && value is double) {
+          object.position = value;
+        }
+        break;
+      case FillBase.fillRulePropertyKey:
+        if (object is FillBase && value is int) {
+          object.fillRule = value;
+        }
+        break;
+      case NodeBase.xPropertyKey:
+        if (object is NodeBase && value is double) {
+          object.xCore = value;
+        }
+        break;
+      case NodeBase.yPropertyKey:
+        if (object is NodeBase && value is double) {
+          object.yCore = value;
+        }
+        break;
+      case NodeBase.rotationPropertyKey:
+        if (object is NodeBase && value is double) {
+          object.rotationCore = value;
+        }
+        break;
+      case NodeBase.scaleXPropertyKey:
+        if (object is NodeBase && value is double) {
+          object.scaleXCore = value;
+        }
+        break;
+      case NodeBase.scaleYPropertyKey:
+        if (object is NodeBase && value is double) {
+          object.scaleYCore = value;
+        }
+        break;
+      case NodeBase.opacityPropertyKey:
+        if (object is NodeBase && value is double) {
+          object.opacityCore = value;
+        }
+        break;
+      case DrawableBase.drawOrderPropertyKey:
+        if (object is DrawableBase && value is FractionalIndex) {
+          object.drawOrder = value;
+        }
+        break;
+      case DrawableBase.blendModePropertyKey:
+        if (object is DrawableBase && value is int) {
+          object.blendMode = value;
+        }
+        break;
+      case PathVertexBase.xPropertyKey:
+        if (object is PathVertexBase && value is double) {
+          object.xCore = value;
+        }
+        break;
+      case PathVertexBase.yPropertyKey:
+        if (object is PathVertexBase && value is double) {
+          object.yCore = value;
+        }
+        break;
+      case StraightVertexBase.radiusPropertyKey:
+        if (object is StraightVertexBase && value is double) {
+          object.radiusCore = value;
+        }
+        break;
+      case PointsPathBase.isClosedPropertyKey:
+        if (object is PointsPathBase && value is bool) {
+          object.isClosed = value;
+        }
+        break;
+      case PointsPathBase.editingModeValuePropertyKey:
+        if (object is PointsPathBase && value is int) {
+          object.editingModeValue = value;
+        }
+        break;
+      case ParametricPathBase.widthPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.width = value;
+        }
+        break;
+      case ParametricPathBase.heightPropertyKey:
+        if (object is ParametricPathBase && value is double) {
+          object.height = value;
+        }
+        break;
+      case RectangleBase.cornerRadiusPropertyKey:
+        if (object is RectangleBase && value is double) {
+          object.cornerRadius = value;
+        }
+        break;
+      case CubicVertexBase.controlTypeValuePropertyKey:
+        if (object is CubicVertexBase && value is int) {
+          object.controlTypeValue = value;
+        }
+        break;
+      case CubicVertexBase.inXPropertyKey:
+        if (object is CubicVertexBase && value is double) {
+          object.inXCore = value;
+        }
+        break;
+      case CubicVertexBase.inYPropertyKey:
+        if (object is CubicVertexBase && value is double) {
+          object.inYCore = value;
+        }
+        break;
+      case CubicVertexBase.outXPropertyKey:
+        if (object is CubicVertexBase && value is double) {
+          object.outXCore = value;
+        }
+        break;
+      case CubicVertexBase.outYPropertyKey:
+        if (object is CubicVertexBase && value is double) {
+          object.outYCore = value;
+        }
+        break;
+      case ArtboardBase.widthPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.width = value;
+        }
+        break;
+      case ArtboardBase.heightPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.height = value;
+        }
+        break;
+      case ArtboardBase.xPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.x = value;
+        }
+        break;
+      case ArtboardBase.yPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.y = value;
+        }
+        break;
+      case ArtboardBase.originXPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.originX = value;
+        }
+        break;
+      case ArtboardBase.originYPropertyKey:
+        if (object is ArtboardBase && value is double) {
+          object.originY = value;
+        }
+        break;
+      case BackboardBase.activeArtboardIdPropertyKey:
+        if (object is BackboardBase && value is Id) {
+          object.activeArtboardId = value;
+        }
+        break;
+      case BackboardBase.mainArtboardIdPropertyKey:
+        if (object is BackboardBase && value is Id) {
+          object.mainArtboardId = value;
+        }
+        break;
+      case BackboardBase.colorValuePropertyKey:
+        if (object is BackboardBase && value is int) {
+          object.colorValue = value;
+        }
+        break;
+    }
+  }
+
   static bool animates(int propertyKey) {
     switch (propertyKey) {
       case StrokeBase.thicknessPropertyKey:
@@ -985,6 +1377,11 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.opacityPropertyKey:
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
+      case StraightVertexBase.radiusPropertyKey:
+      case CubicVertexBase.inXPropertyKey:
+      case CubicVertexBase.inYPropertyKey:
+      case CubicVertexBase.outXPropertyKey:
+      case CubicVertexBase.outYPropertyKey:
         return true;
       default:
         return false;
@@ -1019,6 +1416,21 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case PathVertexBase.yPropertyKey:
         return (object as PathVertexBase).yKeyState;
+        break;
+      case StraightVertexBase.radiusPropertyKey:
+        return (object as StraightVertexBase).radiusKeyState;
+        break;
+      case CubicVertexBase.inXPropertyKey:
+        return (object as CubicVertexBase).inXKeyState;
+        break;
+      case CubicVertexBase.inYPropertyKey:
+        return (object as CubicVertexBase).inYKeyState;
+        break;
+      case CubicVertexBase.outXPropertyKey:
+        return (object as CubicVertexBase).outXKeyState;
+        break;
+      case CubicVertexBase.outYPropertyKey:
+        return (object as CubicVertexBase).outYKeyState;
         break;
       default:
         return null;
@@ -1070,6 +1482,31 @@ abstract class RiveCoreContext extends CoreContext {
       case PathVertexBase.yPropertyKey:
         if (object is PathVertexBase) {
           object.yKeyState = value;
+        }
+        break;
+      case StraightVertexBase.radiusPropertyKey:
+        if (object is StraightVertexBase) {
+          object.radiusKeyState = value;
+        }
+        break;
+      case CubicVertexBase.inXPropertyKey:
+        if (object is CubicVertexBase) {
+          object.inXKeyState = value;
+        }
+        break;
+      case CubicVertexBase.inYPropertyKey:
+        if (object is CubicVertexBase) {
+          object.inYKeyState = value;
+        }
+        break;
+      case CubicVertexBase.outXPropertyKey:
+        if (object is CubicVertexBase) {
+          object.outXKeyState = value;
+        }
+        break;
+      case CubicVertexBase.outYPropertyKey:
+        if (object is CubicVertexBase) {
+          object.outYKeyState = value;
         }
         break;
     }
@@ -1130,6 +1567,36 @@ abstract class RiveCoreContext extends CoreContext {
         if (object is PathVertexBase) {
           object.yAnimated = null;
           object.yKeyState = KeyState.none;
+        }
+        break;
+      case StraightVertexBase.radiusPropertyKey:
+        if (object is StraightVertexBase) {
+          object.radiusAnimated = null;
+          object.radiusKeyState = KeyState.none;
+        }
+        break;
+      case CubicVertexBase.inXPropertyKey:
+        if (object is CubicVertexBase) {
+          object.inXAnimated = null;
+          object.inXKeyState = KeyState.none;
+        }
+        break;
+      case CubicVertexBase.inYPropertyKey:
+        if (object is CubicVertexBase) {
+          object.inYAnimated = null;
+          object.inYKeyState = KeyState.none;
+        }
+        break;
+      case CubicVertexBase.outXPropertyKey:
+        if (object is CubicVertexBase) {
+          object.outXAnimated = null;
+          object.outXKeyState = KeyState.none;
+        }
+        break;
+      case CubicVertexBase.outYPropertyKey:
+        if (object is CubicVertexBase) {
+          object.outYAnimated = null;
+          object.outYKeyState = KeyState.none;
         }
         break;
     }
@@ -1981,37 +2448,37 @@ abstract class RiveCoreContext extends CoreContext {
         (object as LinearGradientBase).opacity = value;
         break;
       case StrokeBase.thicknessPropertyKey:
-        (object as StrokeBase).thickness = value;
+        (object as StrokeBase).thicknessCore = value;
         break;
       case GradientStopBase.positionPropertyKey:
         (object as GradientStopBase).position = value;
         break;
       case NodeBase.xPropertyKey:
-        (object as NodeBase).x = value;
+        (object as NodeBase).xCore = value;
         break;
       case NodeBase.yPropertyKey:
-        (object as NodeBase).y = value;
+        (object as NodeBase).yCore = value;
         break;
       case NodeBase.rotationPropertyKey:
-        (object as NodeBase).rotation = value;
+        (object as NodeBase).rotationCore = value;
         break;
       case NodeBase.scaleXPropertyKey:
-        (object as NodeBase).scaleX = value;
+        (object as NodeBase).scaleXCore = value;
         break;
       case NodeBase.scaleYPropertyKey:
-        (object as NodeBase).scaleY = value;
+        (object as NodeBase).scaleYCore = value;
         break;
       case NodeBase.opacityPropertyKey:
-        (object as NodeBase).opacity = value;
+        (object as NodeBase).opacityCore = value;
         break;
       case PathVertexBase.xPropertyKey:
-        (object as PathVertexBase).x = value;
+        (object as PathVertexBase).xCore = value;
         break;
       case PathVertexBase.yPropertyKey:
-        (object as PathVertexBase).y = value;
+        (object as PathVertexBase).yCore = value;
         break;
       case StraightVertexBase.radiusPropertyKey:
-        (object as StraightVertexBase).radius = value;
+        (object as StraightVertexBase).radiusCore = value;
         break;
       case ParametricPathBase.widthPropertyKey:
         (object as ParametricPathBase).width = value;
@@ -2023,16 +2490,16 @@ abstract class RiveCoreContext extends CoreContext {
         (object as RectangleBase).cornerRadius = value;
         break;
       case CubicVertexBase.inXPropertyKey:
-        (object as CubicVertexBase).inX = value;
+        (object as CubicVertexBase).inXCore = value;
         break;
       case CubicVertexBase.inYPropertyKey:
-        (object as CubicVertexBase).inY = value;
+        (object as CubicVertexBase).inYCore = value;
         break;
       case CubicVertexBase.outXPropertyKey:
-        (object as CubicVertexBase).outX = value;
+        (object as CubicVertexBase).outXCore = value;
         break;
       case CubicVertexBase.outYPropertyKey:
-        (object as CubicVertexBase).outY = value;
+        (object as CubicVertexBase).outYCore = value;
         break;
       case ArtboardBase.widthPropertyKey:
         (object as ArtboardBase).width = value;
@@ -2083,6 +2550,21 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case PathVertexBase.yPropertyKey:
         (object as PathVertexBase).yAnimated = value;
+        break;
+      case StraightVertexBase.radiusPropertyKey:
+        (object as StraightVertexBase).radiusAnimated = value;
+        break;
+      case CubicVertexBase.inXPropertyKey:
+        (object as CubicVertexBase).inXAnimated = value;
+        break;
+      case CubicVertexBase.inYPropertyKey:
+        (object as CubicVertexBase).inYAnimated = value;
+        break;
+      case CubicVertexBase.outXPropertyKey:
+        (object as CubicVertexBase).outXAnimated = value;
+        break;
+      case CubicVertexBase.outYPropertyKey:
+        (object as CubicVertexBase).outYAnimated = value;
         break;
     }
   }

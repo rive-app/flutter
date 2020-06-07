@@ -108,12 +108,15 @@ class CoreTextField<T> extends StatelessWidget {
                   setKey: () => _setKeys(context),
                 )
               : null,
-          change: (T value) {
-            for (final object in objects) {
-              object.context.setObjectProperty(object, propertyKey, value);
-            }
-            change?.call(value);
-          },
+          change: objects == null || objects.isEmpty
+              ? null
+              : (T value) {
+                  for (final object in objects) {
+                    object.context
+                        .setObjectProperty(object, propertyKey, value);
+                  }
+                  change?.call(value);
+                },
         ),
       ),
     );

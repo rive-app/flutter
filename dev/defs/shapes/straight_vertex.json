@@ -8,6 +8,7 @@
   "properties": {
     "radius": {
       "type": "double",
+      "animates": true,
       "key": {
         "int": 26,
         "string": "radius"

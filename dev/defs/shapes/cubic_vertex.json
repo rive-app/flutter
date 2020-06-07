@@ -18,6 +18,8 @@
     "inX": {
       "type": "double",
       "initialValue": "0",
+      "animates": true,
+      "group": "in",
       "key": {
         "int": 27,
         "string": "inx"
@@ -27,6 +29,8 @@
     "inY": {
       "type": "double",
       "initialValue": "0",
+      "animates": true,
+      "group": "in",
       "key": {
         "int": 28,
         "string": "iny"
@@ -36,6 +40,8 @@
     "outX": {
       "type": "double",
       "initialValue": "0",
+      "animates": true,
+      "group": "out",
       "key": {
         "int": 29,
         "string": "outx"
@@ -45,6 +51,8 @@
     "outY": {
       "type": "double",
       "initialValue": "0",
+      "animates": true,
+      "group": "out",
       "key": {
         "int": 30,
         "string": "outy"

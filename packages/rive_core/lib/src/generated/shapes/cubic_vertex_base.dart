@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/key_state.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
@@ -44,14 +45,21 @@ abstract class CubicVertexBase extends PathVertex {
   /// --------------------------------------------------------------------------
   /// InX field with key 27.
   double _inX = 0;
+  double _inXAnimated;
+  KeyState _inXKeyState = KeyState.none;
   static const int inXPropertyKey = 27;
 
   /// In point's x value
-  double get inX => _inX;
+  /// Get the [_inX] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get inX => _inXAnimated ?? _inX;
+
+  /// Get the non-animation [_inX] field value.
+  double get inXCore => _inX;
 
   /// Change the [_inX] field value.
   /// [inXChanged] will be invoked only if the field's value has changed.
-  set inX(double value) {
+  set inXCore(double value) {
     if (_inX == value) {
       return;
     }
@@ -61,19 +69,58 @@ abstract class CubicVertexBase extends PathVertex {
     inXChanged(from, value);
   }
 
+  set inX(double value) {
+    if (context != null && context.isAnimating) {
+      _inXAnimate(value, true);
+      return;
+    }
+    inXCore = value;
+  }
+
+  void _inXAnimate(double value, bool autoKey) {
+    if (_inXAnimated == value) {
+      return;
+    }
+    double from = inX;
+    _inXAnimated = value;
+    double to = inX;
+    onAnimatedPropertyChanged(inXPropertyKey, autoKey, from, to);
+    inXChanged(from, to);
+  }
+
+  double get inXAnimated => _inXAnimated;
+  set inXAnimated(double value) => _inXAnimate(value, false);
+  KeyState get inXKeyState => _inXKeyState;
+  set inXKeyState(KeyState value) {
+    if (_inXKeyState == value) {
+      return;
+    }
+    _inXKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        inXPropertyKey, false, _inXAnimated, _inXAnimated);
+  }
+
   void inXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// InY field with key 28.
   double _inY = 0;
+  double _inYAnimated;
+  KeyState _inYKeyState = KeyState.none;
   static const int inYPropertyKey = 28;
 
   /// In point's y value
-  double get inY => _inY;
+  /// Get the [_inY] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get inY => _inYAnimated ?? _inY;
+
+  /// Get the non-animation [_inY] field value.
+  double get inYCore => _inY;
 
   /// Change the [_inY] field value.
   /// [inYChanged] will be invoked only if the field's value has changed.
-  set inY(double value) {
+  set inYCore(double value) {
     if (_inY == value) {
       return;
     }
@@ -83,19 +130,58 @@ abstract class CubicVertexBase extends PathVertex {
     inYChanged(from, value);
   }
 
+  set inY(double value) {
+    if (context != null && context.isAnimating) {
+      _inYAnimate(value, true);
+      return;
+    }
+    inYCore = value;
+  }
+
+  void _inYAnimate(double value, bool autoKey) {
+    if (_inYAnimated == value) {
+      return;
+    }
+    double from = inY;
+    _inYAnimated = value;
+    double to = inY;
+    onAnimatedPropertyChanged(inYPropertyKey, autoKey, from, to);
+    inYChanged(from, to);
+  }
+
+  double get inYAnimated => _inYAnimated;
+  set inYAnimated(double value) => _inYAnimate(value, false);
+  KeyState get inYKeyState => _inYKeyState;
+  set inYKeyState(KeyState value) {
+    if (_inYKeyState == value) {
+      return;
+    }
+    _inYKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        inYPropertyKey, false, _inYAnimated, _inYAnimated);
+  }
+
   void inYChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// OutX field with key 29.
   double _outX = 0;
+  double _outXAnimated;
+  KeyState _outXKeyState = KeyState.none;
   static const int outXPropertyKey = 29;
 
   /// Out point's x value
-  double get outX => _outX;
+  /// Get the [_outX] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get outX => _outXAnimated ?? _outX;
+
+  /// Get the non-animation [_outX] field value.
+  double get outXCore => _outX;
 
   /// Change the [_outX] field value.
   /// [outXChanged] will be invoked only if the field's value has changed.
-  set outX(double value) {
+  set outXCore(double value) {
     if (_outX == value) {
       return;
     }
@@ -105,19 +191,58 @@ abstract class CubicVertexBase extends PathVertex {
     outXChanged(from, value);
   }
 
+  set outX(double value) {
+    if (context != null && context.isAnimating) {
+      _outXAnimate(value, true);
+      return;
+    }
+    outXCore = value;
+  }
+
+  void _outXAnimate(double value, bool autoKey) {
+    if (_outXAnimated == value) {
+      return;
+    }
+    double from = outX;
+    _outXAnimated = value;
+    double to = outX;
+    onAnimatedPropertyChanged(outXPropertyKey, autoKey, from, to);
+    outXChanged(from, to);
+  }
+
+  double get outXAnimated => _outXAnimated;
+  set outXAnimated(double value) => _outXAnimate(value, false);
+  KeyState get outXKeyState => _outXKeyState;
+  set outXKeyState(KeyState value) {
+    if (_outXKeyState == value) {
+      return;
+    }
+    _outXKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        outXPropertyKey, false, _outXAnimated, _outXAnimated);
+  }
+
   void outXChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
   /// OutY field with key 30.
   double _outY = 0;
+  double _outYAnimated;
+  KeyState _outYKeyState = KeyState.none;
   static const int outYPropertyKey = 30;
 
   /// Out point's y value
-  double get outY => _outY;
+  /// Get the [_outY] field value.Note this may not match the core value if
+  /// animation mode is active.
+  double get outY => _outYAnimated ?? _outY;
+
+  /// Get the non-animation [_outY] field value.
+  double get outYCore => _outY;
 
   /// Change the [_outY] field value.
   /// [outYChanged] will be invoked only if the field's value has changed.
-  set outY(double value) {
+  set outYCore(double value) {
     if (_outY == value) {
       return;
     }
@@ -125,6 +250,38 @@ abstract class CubicVertexBase extends PathVertex {
     _outY = value;
     onPropertyChanged(outYPropertyKey, from, value);
     outYChanged(from, value);
+  }
+
+  set outY(double value) {
+    if (context != null && context.isAnimating) {
+      _outYAnimate(value, true);
+      return;
+    }
+    outYCore = value;
+  }
+
+  void _outYAnimate(double value, bool autoKey) {
+    if (_outYAnimated == value) {
+      return;
+    }
+    double from = outY;
+    _outYAnimated = value;
+    double to = outY;
+    onAnimatedPropertyChanged(outYPropertyKey, autoKey, from, to);
+    outYChanged(from, to);
+  }
+
+  double get outYAnimated => _outYAnimated;
+  set outYAnimated(double value) => _outYAnimate(value, false);
+  KeyState get outYKeyState => _outYKeyState;
+  set outYKeyState(KeyState value) {
+    if (_outYKeyState == value) {
+      return;
+    }
+    _outYKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        outYPropertyKey, false, _outYAnimated, _outYAnimated);
   }
 
   void outYChanged(double from, double to);

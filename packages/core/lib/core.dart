@@ -495,7 +495,10 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   @override
   void removeObject<T extends Core>(T object) {
     assert(object != null, 'Attempted to delete a null object');
-    _objects.remove(object.id);
+    if (_objects.remove(object.id) == null) {
+      // Object was already removed or not a part of this context.
+      return;
+    }
     if (_isRecording) {
       bool wasJustAdded = false;
       if (_currentChanges != null) {
@@ -532,6 +535,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   }
 
   void setObjectProperty(Core object, int propertyKey, Object value);
+  void setObjectPropertyCore(Core object, int propertyKey, Object value);
 
   @mustCallSuper
   bool undo() {
@@ -598,10 +602,10 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
             // rejected).
             if (isUndo) {
               change.to = getObjectProperty(object, propertyKey);
-              setObjectProperty(object, propertyKey, change.from);
+              setObjectPropertyCore(object, propertyKey, change.from);
             } else {
               change.from = getObjectProperty(object, propertyKey);
-              setObjectProperty(object, propertyKey, change.to);
+              setObjectPropertyCore(object, propertyKey, change.to);
             }
           }
         });
@@ -898,7 +902,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       if (!remapped) {
         // This will attempt to set the object property, but failure here is
         // acceptable.
-        setObjectProperty(
+        setObjectPropertyCore(
             object, propertyKey, fieldType.deserialize(valueReader));
       }
     }

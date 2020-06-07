@@ -48,6 +48,7 @@ class UIStrings extends InheritedWidget {
 HashMap<String, String> _defaultUIStrings =
     HashMap<String, String>.from(<String, String>{
   'position': 'Position',
+  'radius': 'Corner',
   'scale': 'Scale',
   'opacity': 'Opacity',
   'x': 'X',

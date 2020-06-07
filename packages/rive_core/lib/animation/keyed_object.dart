@@ -51,11 +51,12 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
           'resolve an object with id $objectId.');
       _removeAll();
     } else {
-      component.whenDeleted(_removeAll);
+      component.whenRemoved(_removeAll);
     }
   }
 
   void _removeAll() {
+    print("REMOVING");
     assert(context != null);
     // Copy lists to not modify them while iterating.
     var kps = _keyedProperties.values.toList(growable: false);
