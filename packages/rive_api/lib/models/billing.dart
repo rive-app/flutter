@@ -63,7 +63,7 @@ extension DeserializeHelperHelper on Map<String, dynamic> {
   TeamsOption getPlan() {
     dynamic value = this['plan'];
     if (value is String) {
-      switch (value) {
+      switch (value.toLowerCase()) {
         case 'normal':
           return TeamsOption.basic;
         case 'premium':
@@ -78,7 +78,7 @@ extension DeserializeHelperHelper on Map<String, dynamic> {
   BillingFrequency getFrequency() {
     dynamic value = this['cycle'];
     if (value is String) {
-      switch (value) {
+      switch (value.toLowerCase()) {
         case 'monthly':
           return BillingFrequency.monthly;
         case 'yearly':
