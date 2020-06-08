@@ -210,10 +210,8 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         CubicBezier cubicBezier;
         double cubicSplitT;
 
-        Vec2D controlOut =
-            vertex is CubicVertex ? (vertex as CubicVertex).outPoint : null;
-        Vec2D controlIn =
-            vertex is CubicVertex ? (nextVertex as CubicVertex).inPoint : null;
+        Vec2D controlOut = vertex is CubicVertex ? vertex.outPoint : null;
+        Vec2D controlIn = nextVertex is CubicVertex ? nextVertex.inPoint : null;
 
         // There are no cubic control points, this is just a linear edge.
         if (controlIn == null && controlOut == null) {
@@ -280,7 +278,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   bool _split() {
     var target = insertTarget;
     var path = target.path;
-    var vertices = path.vertices;
+    // Copy it in case we make changes to it (this allows indexOf to return the
+    // original index in the list before items were removed/swapped).
+    var vertices = path.vertices.toList(growable: false);
     var file = path.context;
 
     if (target.cubic == null) {
@@ -353,6 +353,10 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           );
         });
 
+        // Vertices have changed, let's recompute the list so further indexOf
+        // operations give us the right value.
+        vertices = path.vertices.toList(growable: false);
+
         // We replaced both of them with new core points so neither are
         // corners anymore.
         isNextCorner = isPrevCorner = false;
@@ -369,41 +373,40 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     var leftSplit = target.cubic.leftSubcurveAt(target.cubicSplitT);
     var rightSplit = target.cubic.rightSubcurveAt(target.cubicSplitT);
 
-    // Patch up previous handles they belong to a cubic.
-    if (!isPrevCorner) {
-      var prev = target.from.coreVertex;
-      if (prev is CubicVertex) {
-        var newVertex = CubicDetachedVertex.fromValues(
-          x: prev.x,
-          y: prev.y,
-          inPoint: prev.inPoint,
-          outPoint: prev.outPoint,
-        );
-        prev.replaceWith(newVertex);
-
-        // TODO: accomodate for bones: https://github.com/2d-inc/2dimensions/blob/fc5a0128cb2419925f52e83e231192c645f58075/source/client/source/editors/flare/engine/Stage/Tools/VectorPenTool.jsx#L321
-        prev.outPoint = leftSplit.points[1].toVec2D();
-      }
-    }
-
-    // Patch up next handles if they belong to a cubic.
-    if (!isNextCorner) {
-      var pointIndex = vertices.indexOf(target.from.coreVertex);
-      var next = vertices[(pointIndex + 1) % vertices.length];
-      if (next is CubicVertex) {
-        var newVertex = CubicDetachedVertex.fromValues(
-          x: next.x,
-          y: next.y,
-          inPoint: next.inPoint,
-          outPoint: next.outPoint,
-        );
-        next.replaceWith(newVertex);
-        // TODO: fix bones: https://github.com/2d-inc/2dimensions/blob/fc5a0128cb2419925f52e83e231192c645f58075/source/client/source/editors/flare/engine/Stage/Tools/VectorPenTool.jsx#L338
-        next.inPoint = rightSplit.points[2].toVec2D();
-      }
-    }
-
     file.batchAdd(() {
+      // Patch up previous handles they belong to a cubic.
+      if (!isPrevCorner) {
+        var prev = target.from.coreVertex;
+        if (prev is CubicVertex) {
+          var newVertex = CubicDetachedVertex.fromValues(
+            x: prev.x,
+            y: prev.y,
+            inPoint: prev.inPoint,
+            outPoint: prev.outPoint,
+          );
+          prev.replaceWith(newVertex);
+          // TODO: accomodate for bones: https://github.com/2d-inc/2dimensions/blob/fc5a0128cb2419925f52e83e231192c645f58075/source/client/source/editors/flare/engine/Stage/Tools/VectorPenTool.jsx#L321
+          newVertex.outPoint = leftSplit.points[1].toVec2D();
+        }
+      }
+
+      // Patch up next handles if they belong to a cubic.
+      if (!isNextCorner) {
+        var pointIndex = vertices.indexOf(target.from.coreVertex);
+        var next = vertices[(pointIndex + 1) % vertices.length];
+        if (next is CubicVertex) {
+          var newVertex = CubicDetachedVertex.fromValues(
+            x: next.x,
+            y: next.y,
+            inPoint: next.inPoint,
+            outPoint: next.outPoint,
+          );
+          next.replaceWith(newVertex);
+          // TODO: fix bones: https://github.com/2d-inc/2dimensions/blob/fc5a0128cb2419925f52e83e231192c645f58075/source/client/source/editors/flare/engine/Stage/Tools/VectorPenTool.jsx#L338
+          newVertex.inPoint = rightSplit.points[2].toVec2D();
+        }
+      }
+
       var vertex = CubicDetachedVertex.fromValues(
         x: leftSplit.points[3].x,
         y: leftSplit.points[3].y,
@@ -412,8 +415,8 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         outX: rightSplit.points[1].x,
         outY: rightSplit.points[1].y,
       )..childOrder = _fractionalIndexAt(vertices, insertionIndex);
-
       file.addObject(vertex);
+
       vertex.parent = path;
     });
 

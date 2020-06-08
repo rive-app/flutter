@@ -34,7 +34,7 @@ class CubicAsymmetricVertex extends CubicAsymmetricVertexBase {
             cos(rotation) * -inDistance, sin(rotation) * -inDistance));
   }
 
-  @override
+@override
   set inPoint(Vec2D value) {
     var diffIn = Vec2D.fromValues(value[0] - x, value[1] - y);
     inDistance = Vec2D.length(diffIn);
