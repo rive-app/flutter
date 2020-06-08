@@ -18,6 +18,7 @@ class Me extends User {
     this.verified,
     this.notice,
     this.socialLink,
+    this.isFirstRun,
   }) : super(
           ownerId: ownerId,
           name: name,
@@ -33,6 +34,7 @@ class Me extends User {
   final bool verified;
   final String notice;
   final SocialLink socialLink;
+  final bool isFirstRun;
 
   factory Me.fromDM(MeDM me) => Me(
         signedIn: me?.signedIn,
@@ -47,6 +49,7 @@ class Me extends User {
         verified: me?.verified,
         notice: me?.notice,
         socialLink: me?.socialLink,
+        isFirstRun: me?.isFirstRun,
       );
 
   bool get isEmpty => ownerId == null;
@@ -79,5 +82,6 @@ class Me extends User {
         notificationCount: notificationCount,
         verified: verified,
         notice: notice,
+        isFirstRun: isFirstRun,
       );
 }

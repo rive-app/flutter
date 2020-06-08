@@ -9,7 +9,7 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 
 class UserManager with Subscriptions {
-  static UserManager _instance = UserManager._();
+  static final UserManager _instance = UserManager._();
   factory UserManager() => _instance;
 
   UserManager._() : _meApi = MeApi();
@@ -92,4 +92,8 @@ class UserManager with Subscriptions {
     final errorMessage = await _meApi.getErrorMessage();
     return errorMessage.isEmpty ? null : errorMessage;
   }
+
+  /// Mark that a user has performed first run requirements
+  /// Disables the first run flag in the db
+  void markFirstRun() => _meApi.markFirstRun();
 }

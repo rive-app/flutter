@@ -115,4 +115,14 @@ class MeApi {
       return false;
     }
   }
+
+  /// Marks that the user has performed first run requirements
+  Future<void> markFirstRun() async {
+    try {
+      await api.patch('${api.host}/api/first-run');
+    } on ApiException catch (apiException) {
+      final res = apiException.response;
+      log.severe('Could not mark first run: ${res.statusCode} - ${res.body}');
+    }
+  }
 }
