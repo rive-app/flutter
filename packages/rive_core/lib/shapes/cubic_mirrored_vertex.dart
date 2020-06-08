@@ -19,7 +19,7 @@ class CubicMirroredVertex extends CubicMirroredVertexBase {
     var diffOut = Vec2D.fromValues(value[0] - x, value[1] - y);
     distance = Vec2D.length(diffOut);
     rotation = atan2(diffOut[1], diffOut[0]);
-    _inPoint = Vec2D.clone(value);
+    _outPoint = Vec2D.clone(value);
   }
 
   @override
@@ -40,6 +40,18 @@ class CubicMirroredVertex extends CubicMirroredVertexBase {
   String toString() {
     return 'in ${inPoint[0]}, ${inPoint[1]} | ${translation.toString()} '
         '| out ${outPoint[0]}, ${outPoint[1]}';
+  }
+
+  @override
+  void xChanged(double from, double to) {
+    super.xChanged(from, to);
+    _outPoint = _inPoint = null;
+  }
+
+  @override
+  void yChanged(double from, double to) {
+    super.xChanged(from, to);
+    _outPoint = _inPoint = null;
   }
 
   @override

@@ -42,6 +42,7 @@ class PropertySingle<T> extends StatelessWidget {
           const SizedBox(width: 20),
           Flexible(
             flex: 1,
+            fit: FlexFit.tight,
             child: CoreTextField(
               objects: objects,
               propertyKey: propertyKey,

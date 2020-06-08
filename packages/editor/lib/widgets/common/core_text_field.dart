@@ -108,6 +108,7 @@ class CoreTextField<T> extends StatelessWidget {
                   setKey: () => _setKeys(context),
                 )
               : null,
+          disabledText: '-',
           change: objects == null || objects.isEmpty
               ? null
               : (T value) {

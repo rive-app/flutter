@@ -794,6 +794,7 @@ class Stage extends Debouncer {
 
   /// Clear out all stage items. Normally called when the file is also wiped.
   void wipe() {
+    _soloNotifier.value = null;
     _visibleItems.clear();
     visTree.clear();
     hoverItem = null;

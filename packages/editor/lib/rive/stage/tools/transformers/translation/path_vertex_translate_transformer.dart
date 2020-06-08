@@ -49,14 +49,6 @@ class PathVertexTranslateTransformer extends StageTransformer {
           default:
             break;
         }
-      } else {
-        var stagePathVertex = stageVertex as StagePathVertex;
-        if (stagePathVertex.hasControlPoints) {
-          stagePathVertex.controlIn.worldTranslation = Vec2D.add(
-              Vec2D(), stagePathVertex.controlIn.worldTranslation, delta);
-          stagePathVertex.controlOut.worldTranslation = Vec2D.add(
-              Vec2D(), stagePathVertex.controlOut.worldTranslation, delta);
-        }
       }
     }
   }

@@ -3,5 +3,5 @@ import 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 
 abstract class CubicVertex extends CubicVertexBase {
   Vec2D outPoint;
-  Vec2D inPoint;  
+  Vec2D inPoint;
 }

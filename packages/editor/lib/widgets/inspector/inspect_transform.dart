@@ -26,7 +26,8 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
             propertyKeyB: NodeBase.yPropertyKey,
             labelA: 'X',
             labelB: 'Y',
-            converter: TranslationIntegerValueConverter.instance,
+            converterA: TranslationIntegerValueConverter.instance,
+            converterB: TranslationIntegerValueConverter.instance,
           ),
       (context) => PropertyDual(
             name: 'Scale',
@@ -41,7 +42,8 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
             propertyKeyB: NodeBase.scaleYPropertyKey,
             labelA: 'X',
             labelB: 'Y',
-            converter: ScalePercentageValueConverter.instance,
+            converterA: ScalePercentageValueConverter.instance,
+            converterB: ScalePercentageValueConverter.instance,
           ),
       (context) => PropertySingle(
             name: 'Rotate',
@@ -67,7 +69,8 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ParametricPathBase.heightPropertyKey,
               labelA: 'Width',
               labelB: 'Height',
-              converter: TranslationValueConverter.instance,
+              converterA: TranslationValueConverter.instance,
+              converterB: TranslationValueConverter.instance,
             )
 
       // TODO: this is the spot to add the EditVertices button if the

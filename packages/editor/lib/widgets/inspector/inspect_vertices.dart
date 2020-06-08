@@ -9,6 +9,7 @@ import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/widgets/common/converters/rotation_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -100,18 +101,87 @@ class VertexInspector extends ListenableInspectorBuilder {
             propertyKeyB: PathVertexBase.yPropertyKey,
             labelA: 'X',
             labelB: 'Y',
-            converter: TranslationValueConverter.instance,
+            converterA: TranslationValueConverter.instance,
+            converterB: TranslationValueConverter.instance,
           ),
-      (context) {
-        var allCorner = inspecting.intersectingCoreTypes
-            .contains(StraightVertexBase.typeKey);
-        return PropertySingle(
-          name: 'Corner',
-          objects: allCorner ? inspecting.components : [],
-          propertyKey: StraightVertexBase.radiusPropertyKey,
-          converter: TranslationValueConverter.instance,
-        );
-      },
+      if (inspecting.intersectingCoreTypes.contains(StraightVertexBase.typeKey))
+        // All straight vertices, show corner...
+        (context) {
+          return PropertySingle(
+            name: 'Corner',
+            objects: inspecting.components,
+            propertyKey: StraightVertexBase.radiusPropertyKey,
+            converter: TranslationValueConverter.instance,
+          );
+        },
+      if (inspecting.intersectingCoreTypes
+          .contains(CubicMirroredVertexBase.typeKey))
+        // All mirrored...
+        (context) {
+          return PropertyDual(
+            name: 'Control',
+            objects: inspecting.components,
+            propertyKeyA: CubicMirroredVertexBase.rotationPropertyKey,
+            propertyKeyB: CubicMirroredVertexBase.distancePropertyKey,
+            labelA: 'Angle',
+            labelB: 'Length',
+            converterA: RotationValueConverter.instance,
+            converterB: TranslationValueConverter.instance,
+          );
+        },
+      if (inspecting.intersectingCoreTypes
+          .contains(CubicAsymmetricVertexBase.typeKey))
+        // All asymmetric...
+        ...[
+        (context) {
+          return PropertySingle(
+            name: 'Control Angle',
+            objects: inspecting.components,
+            propertyKey: CubicAsymmetricVertexBase.rotationPropertyKey,
+            converter: RotationValueConverter.instance,
+          );
+        },
+        (context) {
+          return PropertyDual(
+            name: 'Control Length',
+            objects: inspecting.components,
+            propertyKeyA: CubicAsymmetricVertexBase.inDistancePropertyKey,
+            propertyKeyB: CubicAsymmetricVertexBase.outDistancePropertyKey,
+            labelA: 'In',
+            labelB: 'Out',
+            converterA: TranslationValueConverter.instance,
+            converterB: TranslationValueConverter.instance,
+          );
+        },
+      ],
+      if (inspecting.intersectingCoreTypes
+          .contains(CubicDetachedVertexBase.typeKey)) ...[
+        // All mirrored...
+        (context) {
+          return PropertyDual(
+            name: 'Control In',
+            objects: inspecting.components,
+            propertyKeyA: CubicDetachedVertexBase.inRotationPropertyKey,
+            propertyKeyB: CubicDetachedVertexBase.inDistancePropertyKey,
+            labelA: 'Angle',
+            labelB: 'Length',
+            converterA: RotationValueConverter.instance,
+            converterB: TranslationValueConverter.instance,
+          );
+        },
+        (context) {
+          return PropertyDual(
+            name: 'Control Out',
+            objects: inspecting.components,
+            propertyKeyA: CubicDetachedVertexBase.outRotationPropertyKey,
+            propertyKeyB: CubicDetachedVertexBase.outDistancePropertyKey,
+            labelA: 'Angle',
+            labelB: 'Length',
+            converterA: RotationValueConverter.instance,
+            converterB: TranslationValueConverter.instance,
+          );
+        },
+      ],
       (context) => _VertexButtonDual(
             vertices: inspecting.components.cast<PathVertex>(),
             builder: (context, controlTypeValue, allowActive, vertices) {
@@ -121,7 +191,8 @@ class VertexInspector extends ListenableInspectorBuilder {
                     vertexType: StraightVertexBase.typeKey,
                     icon: PackedIcon.vertexStraight,
                     labelKey: 'vertex-straight',
-                    isActive: allowActive && controlTypeValue == null,
+                    isActive: allowActive &&
+                        controlTypeValue == StraightVertexBase.typeKey,
                     vertices: vertices,
                   ),
                   const SizedBox(width: 10),
@@ -250,15 +321,22 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
 
               Vec2D.normalize(toNext, toNext);
 
-              // Just align the in towards the next and mirror out.
-              newVertex.inPoint = Vec2D.fromValues(
-                newVertex.x - toNext[0] * length * 0.25,
-                newVertex.y - toNext[1] * length * 0.25,
-              );
-              newVertex.outPoint = Vec2D.fromValues(
-                newVertex.x + toNext[0] * length * 0.25,
-                newVertex.y + toNext[1] * length * 0.25,
-              );
+              if (vertex is CubicVertex) {
+                // The vertex we are converting from was already cubic, try copying in/out.
+                newVertex.inPoint = vertex.inPoint;
+                newVertex.outPoint = vertex.outPoint;
+              } else {
+                // The vertex we're converting from is not cubic.
+                // Just align the in towards the next and mirror out.
+                newVertex.inPoint = Vec2D.fromValues(
+                  newVertex.x - toNext[0] * length * 0.25,
+                  newVertex.y - toNext[1] * length * 0.25,
+                );
+                newVertex.outPoint = Vec2D.fromValues(
+                  newVertex.x + toNext[0] * length * 0.25,
+                  newVertex.y + toNext[1] * length * 0.25,
+                );
+              }
             }
             newVertices.add(newVertex);
           }

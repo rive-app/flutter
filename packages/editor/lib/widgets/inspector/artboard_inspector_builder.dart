@@ -23,7 +23,8 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ArtboardBase.yPropertyKey,
               labelA: 'X',
               labelB: 'Y',
-              converter: TranslationIntegerValueConverter.instance,
+              converterA: TranslationIntegerValueConverter.instance,
+              converterB: TranslationIntegerValueConverter.instance,
             ),
         (context) => PropertyDual(
               name: 'Size',
@@ -38,7 +39,8 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ArtboardBase.heightPropertyKey,
               labelA: 'Width',
               labelB: 'Height',
-              converter: TranslationValueConverter.instance,
+              converterA: TranslationValueConverter.instance,
+              converterB: TranslationValueConverter.instance,
             ),
         (context) => PropertyDual(
               name: 'Origin',
@@ -53,7 +55,8 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ArtboardBase.originYPropertyKey,
               labelA: 'X',
               labelB: 'Y',
-              converter: TranslationValueConverter.instance,
+              converterA: TranslationValueConverter.instance,
+              converterB: TranslationValueConverter.instance,
             ),
       ];
 }

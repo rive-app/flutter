@@ -22,15 +22,8 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
   }) {
     this.x = x;
     this.y = y;
-
-    var diffIn = Vec2D.fromValues(inX ?? inPoint[0] - x, inY ?? inPoint[1] - y);
-    inDistance = Vec2D.length(diffIn);
-    inRotation = atan2(diffIn[1], diffIn[0]);
-
-    var diffOut =
-        Vec2D.fromValues(outX ?? outPoint[0] - x, outY ?? outPoint[1] - y);
-    outDistance = Vec2D.length(diffOut);
-    outRotation = atan2(diffOut[1], diffOut[0]);
+    this.inPoint = Vec2D.fromValues(inX ?? inPoint[0], inY ?? inPoint[1]);
+    this.outPoint = Vec2D.fromValues(outX ?? outPoint[0], outY ?? outPoint[1]);
   }
 
   @override
@@ -56,14 +49,14 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
         Vec2D(),
         translation,
         Vec2D.fromValues(
-            cos(inRotation) * -inDistance, sin(inRotation) * -inDistance));
+            cos(inRotation) * inDistance, sin(inRotation) * inDistance));
   }
 
   @override
   set inPoint(Vec2D value) {
     var diffIn = Vec2D.fromValues(value[0] - x, value[1] - y);
     inDistance = Vec2D.length(diffIn);
-    inRotation = atan2(diffIn[1], diffIn[0])+pi;
+    inRotation = atan2(diffIn[1], diffIn[0]);
     _inPoint = Vec2D.clone(value);
   }
 
@@ -71,6 +64,18 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
   String toString() {
     return 'in ${inPoint[0]}, ${inPoint[1]} | ${translation.toString()} '
         '| out ${outPoint[0]}, ${outPoint[1]}';
+  }
+
+  @override
+  void xChanged(double from, double to) {
+    super.xChanged(from, to);
+    _outPoint = _inPoint = null;
+  }
+
+  @override
+  void yChanged(double from, double to) {
+    super.xChanged(from, to);
+    _outPoint = _inPoint = null;
   }
 
   @override
