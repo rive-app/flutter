@@ -1,6 +1,8 @@
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
+import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
@@ -21,14 +23,14 @@ class PathVertexTranslateTransformer extends StageTransformer {
           Vec2D.add(Vec2D(), stageVertex.worldTranslation, delta);
 
       if (stageVertex is StageControlVertex) {
-        switch (stageVertex.component.controlType) {
-          case VertexControlType.mirrored:
+        switch (stageVertex.component.coreType) {
+          case CubicMirroredVertexBase.typeKey:
             var diff = Vec2D.subtract(Vec2D(),
                 stageVertex.component.translation, stageVertex.translation);
             stageVertex.sibling.translation =
                 Vec2D.add(Vec2D(), diff, stageVertex.component.translation);
             break;
-          case VertexControlType.asymmetric:
+          case CubicAsymmetricVertexBase.typeKey:
             var diff = Vec2D.subtract(Vec2D(),
                 stageVertex.component.translation, stageVertex.translation);
             var siblingDiff = Vec2D.subtract(
@@ -75,8 +77,8 @@ class PathVertexTranslateTransformer extends StageTransformer {
             // points.
             vertices.contains(vertex.stageItem) ||
                 // If the sibling is in the selection set, neither of them move.
-                ((vertex.controlType == VertexControlType.mirrored ||
-                        vertex.controlType == VertexControlType.asymmetric) &&
+                ((vertex.coreType == CubicMirroredVertexBase.typeKey ||
+                        vertex.coreType == CubicAsymmetricVertexBase.typeKey) &&
                     vertices.contains(stageVertex.sibling))) {
           continue;
         }

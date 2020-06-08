@@ -2,13 +2,13 @@ import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
+import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
+import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
+import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/packed_icon.dart';
-import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
-import 'package:rive_editor/rive/stage/tools/transformers/translation/path_vertex_translate_transformer.dart';
-import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -126,12 +126,11 @@ class VertexInspector extends ListenableInspectorBuilder {
                   ),
                   const SizedBox(width: 10),
                   _VertexTypeButton(
-                    vertexType: CubicVertexBase.typeKey,
-                    controlType: VertexControlType.mirrored,
+                    vertexType: CubicMirroredVertexBase.typeKey,
                     icon: PackedIcon.vertexMirrored,
                     labelKey: 'vertex-mirrored',
                     isActive: allowActive &&
-                        controlTypeValue == VertexControlType.mirrored.index,
+                        controlTypeValue == CubicMirroredVertexBase.typeKey,
                     vertices: vertices,
                   ),
                 ],
@@ -144,22 +143,20 @@ class VertexInspector extends ListenableInspectorBuilder {
               return Row(
                 children: [
                   _VertexTypeButton(
-                    vertexType: CubicVertexBase.typeKey,
-                    controlType: VertexControlType.detached,
+                    vertexType: CubicDetachedVertexBase.typeKey,
                     icon: PackedIcon.vertexDetached,
                     labelKey: 'vertex-detached',
                     isActive: allowActive &&
-                        controlTypeValue == VertexControlType.detached.index,
+                        controlTypeValue == CubicDetachedVertexBase.typeKey,
                     vertices: vertices,
                   ),
                   const SizedBox(width: 10),
                   _VertexTypeButton(
-                    vertexType: CubicVertexBase.typeKey,
-                    controlType: VertexControlType.asymmetric,
+                    vertexType: CubicAsymmetricVertexBase.typeKey,
                     icon: PackedIcon.vertexAssymetric,
                     labelKey: 'vertex-assymetric',
                     isActive: allowActive &&
-                        controlTypeValue == VertexControlType.asymmetric.index,
+                        controlTypeValue == CubicAsymmetricVertexBase.typeKey,
                     vertices: vertices,
                   ),
                 ],
@@ -172,7 +169,7 @@ class VertexInspector extends ListenableInspectorBuilder {
 
 class _VertexButtonDual extends StatelessWidget {
   final Iterable<PathVertex> vertices;
-  final Widget Function(BuildContext context, int controlTypeValue,
+  final Widget Function(BuildContext context, int vertexTypeValue,
       bool allowActive, Iterable<PathVertex> vertices) builder;
 
   const _VertexButtonDual({
@@ -183,29 +180,21 @@ class _VertexButtonDual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CorePropertiesBuilder(
-      propertyKey: CubicVertexBase.controlTypeValuePropertyKey,
-      objects: vertices,
-      builder: (context, int controlTypeValue, _) {
-        bool allowActive = equalValue<PathVertex, VertexControlType>(
-                vertices, (PathVertex vertex) => vertex.controlType) !=
-            null;
+    int commonType = equalValue<PathVertex, int>(
+        vertices, (PathVertex vertex) => vertex.coreType);
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 10,
-          ),
-          child: builder(context, controlTypeValue, allowActive, vertices),
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 10,
+      ),
+      child: builder(context, commonType, commonType != null, vertices),
     );
   }
 }
 
 class _VertexTypeButton extends StatefulWidget {
   final int vertexType;
-  final VertexControlType controlType;
   final Iterable<PackedIcon> icon;
   final String labelKey;
   final bool isActive;
@@ -216,7 +205,6 @@ class _VertexTypeButton extends StatefulWidget {
     this.vertexType,
     this.icon,
     this.isActive,
-    this.controlType,
     this.vertices,
     this.labelKey,
   }) : super(key: key);
@@ -245,51 +233,34 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
 
         core.batchAdd(() {
           for (final vertex in widget.vertices.toList()) {
-            if (vertex.coreType != widget.vertexType) {
-              var path = vertex.parent as PointsPath;
+            var newVertex =
+                core.makeCoreInstance(widget.vertexType) as PathVertex;
+            newVertex.x = vertex.x;
+            newVertex.y = vertex.y;
 
-              var index = path.vertices.indexOf(vertex);
-              var next = path.vertices[(index + 1) % path.vertices.length];
+            var next = vertex.replaceWith(newVertex);
 
-              selection.remove(vertex.stageItem);
-              vertex.remove();
-              var newVertex =
-                  core.makeCoreInstance(widget.vertexType) as PathVertex;
-              newVertex.x = vertex.x;
-              newVertex.y = vertex.y;
-              newVertex.childOrder = vertex.childOrder;
-              if (newVertex is CubicVertex) {
-                // This only happens when we're going from corner->cubic.
-                var toNext = Vec2D.subtract(
-                    Vec2D(), next.translation, vertex.translation);
-                var length = Vec2D.length(toNext);
+            selection.remove(vertex.stageItem);
 
-                Vec2D.normalize(toNext, toNext);
+            if (newVertex is CubicVertex) {
+              // This only happens when we're going from corner->cubic.
+              var toNext =
+                  Vec2D.subtract(Vec2D(), next.translation, vertex.translation);
+              var length = Vec2D.length(toNext);
 
-                // Just align the in towards the next and mirror out.
+              Vec2D.normalize(toNext, toNext);
 
-                newVertex.inX = newVertex.x - toNext[0] * length * 0.25;
-                newVertex.inY = newVertex.y - toNext[1] * length * 0.25;
-                newVertex.outX = newVertex.x + toNext[0] * length * 0.25;
-                newVertex.outY = newVertex.y + toNext[1] * length * 0.25;
-                newVertex.controlType = widget.controlType;
-              }
-              newVertices.add(newVertex);
-              core.addObject(newVertex);
-              newVertex.parent = path;
-
-              // We need to replace the entire vertex with one of a different
-              // type. This is messy because we also need it to maintain the
-              // same order/index in the list.
-            } else if (vertex is CubicVertex) {
-              vertex.controlType = widget.controlType;
-              // 0 move it to force the control points to update.
-              var transformer = PathVertexTranslateTransformer();
-              var details = DragTransformDetails(vertex.artboard, Vec2D());
-              transformer.init(
-                  {(vertex.stageItem as StagePathVertex).controlIn}, details);
-              transformer.advance(details);
+              // Just align the in towards the next and mirror out.
+              newVertex.inPoint = Vec2D.fromValues(
+                newVertex.x - toNext[0] * length * 0.25,
+                newVertex.y - toNext[1] * length * 0.25,
+              );
+              newVertex.outPoint = Vec2D.fromValues(
+                newVertex.x + toNext[0] * length * 0.25,
+                newVertex.y + toNext[1] * length * 0.25,
+              );
             }
+            newVertices.add(newVertex);
           }
         });
         selection.addAll(newVertices.map((vertex) => vertex.stageItem));

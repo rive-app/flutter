@@ -7,6 +7,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
+import 'package:rive_core/shapes/render_cubic_vertex.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/src/generated/shapes/path_base.dart';
@@ -163,7 +164,7 @@ abstract class Path extends PathBase {
 
                 Vec2D translation =
                     Vec2D.scaleAndAdd(Vec2D(), pos, toPrev, renderRadius);
-                renderPoints.add(CubicVertex()
+                renderPoints.add(RenderCubicVertex()
                   // -> editor-only
                   ..original = point
                   ..isCornerRadius = true
@@ -174,7 +175,7 @@ abstract class Path extends PathBase {
                       Vec2D(), pos, toPrev, iarcConstant * renderRadius));
                 translation =
                     Vec2D.scaleAndAdd(Vec2D(), pos, toNext, renderRadius);
-                previous = CubicVertex()
+                previous = RenderCubicVertex()
                   // -> editor-only
                   ..original = point
                   ..isCornerRadius = true
