@@ -437,6 +437,23 @@ class TextStyles {
       fontFamily: 'Roboto-Regular', color: Color(0xFF989898), fontSize: 12.5);
   TextStyle get vertexTypeSelected => const TextStyle(
       fontFamily: 'Roboto-Regular', color: white, fontSize: 12.5);
+
+  // Get started
+  TextStyle get cardHeading =>
+      const TextStyle(fontFamily: 'Roboto-Regular', color: white, fontSize: 16);
+
+  TextStyle get cardBlurb => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: white,
+        fontSize: 11,
+        height: 1.5,
+      );
+
+  TextStyle get urlBlurb => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: Color(0xFF666666),
+        fontSize: 13,
+      );
 }
 
 /// Gradients used in the Rive Theme
