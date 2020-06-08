@@ -84,25 +84,22 @@ class _NavigationPanelState extends State<NavigationPanel> {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-            child: ValueStreamBuilder<Object>(
-                stream: Plumber().getStream<HomeSection>(),
-                builder: (context, snapshot) {
-                  return IconTile(
-                    icon: PackedIcon.rocket,
-                    label: 'Get Started',
-                    highlight: snapshot.data == HomeSection.getStarted,
-                    onTap: () async =>
-                        Plumber().message(HomeSection.getStarted),
-                  );
-                }),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
             child: ValueStreamBuilder<HomeSection>(
               stream: Plumber().getStream<HomeSection>(),
               builder: (context, snapshot) {
                 return Column(
                   children: <Widget>[
+                    ValueStreamBuilder<Object>(
+                      stream: Plumber().getStream<HomeSection>(),
+                      builder: (context, snapshot) {
+                        return IconTile(
+                          icon: PackedIcon.rocket,
+                          label: 'Get Started',
+                          highlight: snapshot.data == HomeSection.getStarted,
+                          onTap: () async =>
+                              Plumber().message(HomeSection.getStarted),
+                        );
+                      }),
                     ValueStreamBuilder<model.NotificationCount>(
                         stream: Plumber().getStream(),
                         builder: (context, notificationCountSnapshot) {

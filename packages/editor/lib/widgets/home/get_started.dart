@@ -1,3 +1,4 @@
+import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -10,20 +11,23 @@ class GetStartedPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
 
-    return Container(
-      color: theme.colors.fileBrowserBackground,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
-        ),
-        child: Row(
-          children: const <Widget>[
-            Flexible(
-              flex: 2,
-              child: MiddlePanel(),
-            ),
-            Flexible(flex: 1, child: RightPanel()),
-          ],
+    return Center(
+      child: Container(
+        color: theme.colors.fileBrowserBackground,
+        constraints: BoxConstraints(minWidth: 800, maxWidth: 1114),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 30,
+          ),
+          child: Row(
+            children: const <Widget>[
+              Flexible(
+                flex: 2,
+                child: MiddlePanel(),
+              ),
+              Flexible(flex: 1, child: RightPanel()),
+            ],
+          ),
         ),
       ),
     );
@@ -39,7 +43,7 @@ class MiddlePanel extends StatelessWidget {
         SizedBox(height: 30),
         LargeCard(
           backgroundImageAsset: 'assets/images/space_man.png',
-          url: 'https://www.youtube.com/watch?v=GkkmU3_Gg6Y',
+          url: 'https://docs.2dimensions.com/rive-help-center/',
           heading: 'Quick Start',
           blurb: 'Watch this video to learn the basics '
               'and core concepts you need to get started',
@@ -62,7 +66,7 @@ class RightPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 20, top: 30),
+      padding: const EdgeInsets.only(left: 30, top: 30),
       child: Column(
         children: const [
           UrlCard(
@@ -209,7 +213,7 @@ class UrlCard extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(15),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
