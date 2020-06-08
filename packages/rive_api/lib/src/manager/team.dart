@@ -1,3 +1,4 @@
+import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
@@ -66,5 +67,14 @@ class TeamManager with Subscriptions {
     final _teamMembersDM = await _teamApi.teamMembers(team.ownerId);
     final _teamMembers = TeamMember.fromDMList(_teamMembersDM.toList());
     _plumber.message(_teamMembers.toList(), team.hashCode);
+  }
+
+  Future<bool> onRoleChanged(
+      int teamId, int memberOwnerId, TeamRole role) async {
+    if (role == TeamRole.delete) {
+      return _teamApi.removeFromTeam(memberOwnerId, teamId);
+    } else {
+      return _teamApi.changeRole(teamId, memberOwnerId, role);
+    }
   }
 }

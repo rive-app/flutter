@@ -32,22 +32,17 @@ class TeamMembers extends StatefulWidget {
 }
 
 class _TeamMemberState extends State<TeamMembers> {
-  RiveTeamsApi _api;
-
   @override
   void initState() {
     super.initState();
-    _api = RiveTeamsApi(widget.api);
     _updateAffiliates();
   }
 
-  void _updateAffiliates() {
-    TeamManager().loadTeamMembers(widget.owner);
-  }
+  void _updateAffiliates() => TeamManager().loadTeamMembers(widget.owner);
 
-  void _onRoleChanged(TeamMember member, String role) {
-    // TODO: change team members role
-    print('Role changed $member, $role');
+  void _onRoleChanged(TeamMember member, TeamRole role) {
+    TeamManager().onRoleChanged(widget.owner.ownerId, member.ownerId, role);
+    _updateAffiliates();
   }
 
   @override
@@ -70,7 +65,7 @@ class _TeamMemberState extends State<TeamMembers> {
                 return Column(
                   children: snapshot.data
                       .map(
-                        (member) => _TeamMember(
+                        (member) => _MemberRow(
                           user: member,
                           onRoleChanged: (role) => _onRoleChanged(member, role),
                         ),
@@ -288,7 +283,7 @@ class _InvitePanelState extends State<InvitePanel> {
                   _selectedInviteType = type;
                 }),
                 alignment: Alignment.topRight,
-                options: TeamRole.values,
+                options: TeamRoleExtension.dropdownOptions,
                 toLabel: (option) => option.name,
                 popupWidth: 116,
                 underline: false,
@@ -314,18 +309,52 @@ class _InvitePanelState extends State<InvitePanel> {
   }
 }
 
-class _TeamMember extends StatelessWidget {
+class _MemberRow extends StatefulWidget {
   final TeamMember user;
-  final ValueChanged<String> onRoleChanged;
+  final ValueChanged<TeamRole> onRoleChanged;
 
-  const _TeamMember({@required this.user, this.onRoleChanged, Key key})
+  const _MemberRow({@required this.user, this.onRoleChanged, Key key})
       : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _MemberRowState();
+}
+
+class _MemberRowState extends State<_MemberRow> {
+  TeamRole _currentRole;
+
+  @override
+  void initState() {
+    super.initState();
+    print("User: ${widget.user.displayName} ${widget.user.permission.name}");
+    _currentRole = widget.user.permission;
+  }
+
+  void _onRoleChanged(TeamRole role) {
+    if (role == _currentRole) {
+      return;
+    }
+    setState(() {
+      widget.onRoleChanged(role);
+      _currentRole = role;
+    });
+  }
+
+  List<TeamRole> get _dropdownOptions {
+    var me = Plumber().peek<Me>();
+    var options = TeamRoleExtension.dropdownOptions;
+    if (me.ownerId != widget.user.ownerId) {
+      options.add(TeamRole.delete);
+    }
+    return options;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final styles = theme.textStyles;
+    final user = widget.user;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -385,11 +414,12 @@ class _TeamMember extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 2),
-                ComboBox<String>(
-                  value: user.permission.name,
-                  change: onRoleChanged,
+                ComboBox<TeamRole>(
+                  value: _currentRole,
+                  change: _onRoleChanged,
                   alignment: Alignment.topRight,
-                  options: TeamRoleExtension.names..add('Delete'),
+                  options: _dropdownOptions,
+                  toLabel: (option) => option.name,
                   popupWidth: 116,
                   underline: false,
                   valueColor: colors.fileBackgroundDarkGrey,

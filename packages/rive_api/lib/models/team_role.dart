@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:utilities/utilities.dart';
 
-enum TeamRole { reader, member, purchaser, admin, owner }
+enum TeamRole { reader, member, purchaser, admin, owner, delete }
 
 const adminRoles = {TeamRole.admin, TeamRole.owner};
 
@@ -35,4 +35,10 @@ extension TeamRoleExtension on TeamRole {
         return null;
     }
   }
+
+  static List<TeamRole> get dropdownOptions => [
+    TeamRole.member,
+    TeamRole.admin,
+    TeamRole.owner
+  ];
 }

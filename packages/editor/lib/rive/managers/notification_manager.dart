@@ -95,7 +95,7 @@ class NotificationManager with Subscriptions {
       }
     }
     unawaited(_fetchNotifications());
-    TeamManager().loadTeams();
+    unawaited(TeamManager().loadTeams());
   }
 
   /// Decline a team invite

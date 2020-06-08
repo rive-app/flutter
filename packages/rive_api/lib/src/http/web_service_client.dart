@@ -280,7 +280,7 @@ class WebServiceClient {
   /// custom http request with a delete verb in order to provide the body. In
   /// this case the API only allows a String for the body.
   Future<http.Response> delete(String url,
-      {String body, Encoding encoding}) async {
+      {String body = '', Encoding encoding}) async {
     try {
       print('deleting $url');
       // TODO: Matt, can we do 'injection'? would love to capture how many times
