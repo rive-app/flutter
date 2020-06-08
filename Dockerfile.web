@@ -10,6 +10,7 @@ RUN flutter config --enable-web
 
 WORKDIR /app/packages/editor
 ADD packages /app/packages
+RUN flutter upgrade
 RUN flutter pub get
 RUN flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
 WORKDIR /app/packages/editor/build 
