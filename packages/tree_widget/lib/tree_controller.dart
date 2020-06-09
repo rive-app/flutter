@@ -62,6 +62,7 @@ abstract class TreeController<T> with ChangeNotifier {
   Iterable<T> get data;
 
   _TreeDragOperation<T> _dragOperation;
+  bool _needsFlattenAfterDrag = false;
 
   bool get isDragging => _dragOperation != null;
   _TreeDragOperation get dragOperation => _dragOperation;
@@ -148,6 +149,13 @@ abstract class TreeController<T> with ChangeNotifier {
   /// widget to remap rows when items get expanded and their indices inherently
   /// change.
   void flatten() {
+    // assert(!isDragging);
+    if (isDragging) {
+      _needsFlattenAfterDrag = true;
+      // Don't allow flatten during drag.
+      return;
+    }
+
     var flat = <FlatTreeItem<T>>[];
     var context = FlattenedTreeDataContext<T>(_expanded);
     var lookup = HashMap<Key, int>();
@@ -282,7 +290,12 @@ abstract class TreeController<T> with ChangeNotifier {
       drop(target, dropState, items);
     }
 
-    notifyListeners();
+    if (_needsFlattenAfterDrag) {
+      _needsFlattenAfterDrag = false;
+      flatten();
+    } else {
+      notifyListeners();
+    }
   }
 
   void updateDrag(BuildContext itemContext, DragUpdateDetails details,
@@ -321,11 +334,6 @@ abstract class TreeController<T> with ChangeNotifier {
       HashMap<Key, int> lookup,
       List<int> depth,
       FlatTreeItem<T> parent) {
-    assert(!isDragging);
-    if (isDragging) {
-      // Don't allow flatten during drag.
-      return;
-    }
     // int depthIndex = depth.length;
     // depth.add(spacing);
 
