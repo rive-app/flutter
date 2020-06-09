@@ -1,3 +1,5 @@
+import 'package:pedantic/pedantic.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +95,9 @@ class _LoginState extends State<Login> {
     if (currentMe.socialLink != null) {
       _currentPanel = LoginPage.link;
     } else {
-      _currentPanel = LoginPage.login;
+      // Defaulting to registration panel for the moment
+      // _currentPanel = LoginPage.login;
+      _currentPanel = LoginPage.register;
     }
     super.initState();
   }
@@ -160,7 +164,7 @@ class _LoginState extends State<Login> {
     registerValidator.validate(response);
 
     if (response.isMessage) {
-      UserManager().loadMe();
+      unawaited(UserManager().loadMe());
     } else {
       _disableButton(false);
     }
@@ -192,7 +196,7 @@ class _LoginState extends State<Login> {
     loginValidator.validate(response);
     if (response.isMessage) {
       // Everything ok, we logged in.
-      UserManager().loadMe();
+      unawaited(UserManager().loadMe());
     } else {
       _disableButton(false);
     }
@@ -463,7 +467,7 @@ class _LoginState extends State<Login> {
     _disableButton(true);
     final authResponse = await auth();
     if (authResponse.isMessage) {
-      UserManager().loadMe();
+      unawaited(UserManager().loadMe());
     } else {
       _disableButton(false);
     }
