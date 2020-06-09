@@ -229,7 +229,7 @@ class _LoginState extends State<Login> {
         _disableButton(false);
         _selectPanel(LoginPage.login);
       }
-    } on Exception catch (e) {
+    } on Exception catch (_) {
       _disableButton(false);
     }
   }
