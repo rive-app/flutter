@@ -8,6 +8,7 @@ import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/rive_text_field.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
@@ -452,7 +453,6 @@ class CreditCardForm extends StatelessWidget {
   Widget _creditCardNumber(BuildContext context) {
     final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
-    final colors = theme.colors;
     return Column(children: [
       Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -466,28 +466,14 @@ class CreditCardForm extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 12),
-      TextFormField(
+      RiveTextField(
         initialValue: sub.cardNumber,
-        cursorColor: colors.commonDarkGrey,
-        textAlign: TextAlign.left,
-        textAlignVertical: TextAlignVertical.center,
-        style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
-        inputFormatters: <TextInputFormatter>[
+        formatters: <TextInputFormatter>[
           WhitelistingTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(16),
           CardNumberFormatter()
         ],
-        decoration: InputDecoration(
-          isDense: true,
-          enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: colors.inputUnderline, width: 2)),
-          focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: colors.commonDarkGrey, width: 2)),
-          hintText: '0000 0000 0000 0000',
-          hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
-          errorStyle: styles.textFieldInputValidationError,
-          contentPadding: const EdgeInsets.only(bottom: 3),
-        ),
+        hintText: '0000 0000 0000 0000',
         onChanged: (cardNumber) => sub.cardNumber = cardNumber,
       )
     ]);
@@ -511,29 +497,13 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              RiveTextField(
                 initialValue: sub.ccv,
-                cursorColor: colors.commonDarkGrey,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
-                inputFormatters: <TextInputFormatter>[
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.commonDarkGrey, width: 2)),
-                  hintText: '3-4 digits',
-                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorStyle: styles.textFieldInputValidationError,
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                ),
+                hintText: '3-4 digits',
                 onChanged: (ccv) => sub.ccv = ccv,
               ),
             ],
@@ -550,31 +520,15 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              RiveTextField(
                 initialValue: sub.expiration,
-                cursorColor: colors.commonDarkGrey,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
-                inputFormatters: <TextInputFormatter>[
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                   DateTextInputFormatter(),
                   DateTextRegexCheck()
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.commonDarkGrey, width: 2)),
-                  hintText: 'MM/YY',
-                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorStyle: styles.textFieldInputValidationError,
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                ),
+                hintText: 'MM/YY',
                 onChanged: (expiration) => sub.expiration = expiration,
               ),
             ],
@@ -591,29 +545,13 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              RiveTextField(
                 initialValue: sub.zip,
-                cursorColor: colors.commonDarkGrey,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
-                inputFormatters: <TextInputFormatter>[
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(5),
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.commonDarkGrey, width: 2)),
-                  hintText: '90210',
-                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorStyle: styles.textFieldInputValidationError,
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                ),
+                hintText: '90210',
                 onChanged: (zip) => sub.zip = zip,
               )
             ],
