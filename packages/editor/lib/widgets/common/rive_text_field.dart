@@ -10,6 +10,7 @@ class RiveTextField extends StatefulWidget {
   final String errorText;
   final double fontSize;
   final double errorFontSize;
+  final int maxCharacters;
   final FocusNode focusNode;
   final ValueChanged<String> onSubmit;
   final ValueChanged<String> onChanged;
@@ -26,6 +27,7 @@ class RiveTextField extends StatefulWidget {
     this.errorText,
     this.fontSize = 13,
     this.errorFontSize = 13,
+    this.maxCharacters,
     this.focusNode,
     this.onSubmit,
     this.onChanged,
@@ -115,6 +117,7 @@ class _RiveTextFieldState extends State<RiveTextField>
           cursorColor: colors.commonDarkGrey,
           enableInteractiveSelection: false,
           showCursor: true,
+          maxLength: widget.maxCharacters,
           style:
               textStyles.fileGreyTextLarge.copyWith(fontSize: widget.fontSize),
           decoration: InputDecoration(

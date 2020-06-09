@@ -13,6 +13,10 @@ import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
+/// This is the Profile panel for an [owner].
+/// Owner can be a [Team] or a [Me] user.
+/// 
+/// Users will have fields to change their email and password.
 class ProfileSettings extends StatefulWidget {
   final Owner owner;
   const ProfileSettings(this.owner);
@@ -207,6 +211,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               hintText: 'Tell users a bit about your team',
               controller: _bioController,
               initialValue: profile.bio,
+              maxCharacters: 160,
             ),
           ],
         ),
@@ -252,6 +257,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               hintText: 'Tell users a bit about yourself...',
               controller: _bioController,
               initialValue: profile.bio,
+              maxCharacters: 160,
             ),
           ],
         ),

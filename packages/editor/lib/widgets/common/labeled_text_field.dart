@@ -9,6 +9,7 @@ class LabeledTextField extends StatefulWidget {
   final String initialValue;
   final bool enabled;
   final bool autofocus;
+  final int maxCharacters;
   final ValueChanged<String> onSubmit;
   final ValueChanged<String> onChanged;
   final TextEditingController controller;
@@ -20,6 +21,7 @@ class LabeledTextField extends StatefulWidget {
     this.initialValue,
     this.enabled = true,
     this.autofocus = false,
+    this.maxCharacters,
     this.onSubmit,
     this.onChanged,
     this.controller,
@@ -74,6 +76,7 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
             onChanged: widget.onChanged,
             onSubmit: widget.onSubmit,
             focusNode: _focusNode,
+            maxCharacters: widget.maxCharacters,
           ),
         ],
       ),
