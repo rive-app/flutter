@@ -183,33 +183,41 @@ class EditingAnimationManager extends AnimationTimeManager
       // Do the first (arguably heavier as we should have less grouped
       // properties) with regular (unstable) sort.
       properties.sort((a, b) => a.propertyOrder.compareTo(b.propertyOrder));
-      // Then use a stable sort to sort by group.
-      mergeSort<_KeyedPropertyHelper>(properties,
-          compare: (a, b) => a.groupKey.compareTo(b.groupKey));
+      // Then use a stable sort to sort by group. 
+      
+      
+      // TODO: this wasn't stable, if grouped property keys do not have adjacent
+      // integer values, there's a risk that they grouping won't work (below
+      // groupKey != lastGroupKey). In that case we need a stable sort to run
+      // here by the groupKey. mergeSort<_KeyedPropertyHelper>(properties,
+      // compare: (a, b) => a.groupKey.compareTo(b.groupKey));
 
       // Finally we can build up the children.
       int lastGroupKey = 0;
+      String groupLabel;
       for (final property in properties) {
-        String groupLabel;
+        String displayGroupLabel;
+
         if (property.groupKey != 0) {
-          groupLabel = property.groupKey == lastGroupKey
+          if (property.groupKey != lastGroupKey) {
+            groupLabel = RiveCoreContext.propertyKeyGroupName(
+                property.keyedProperty.propertyKey);
+          }
+          displayGroupLabel = property.groupKey == lastGroupKey
               // Previous property had the same group key, so let's just use an
               // empty label.
               ? ''
               // Mark the label...
-              : RiveCoreContext.propertyKeyGroupName(
-                  property.keyedProperty.propertyKey);
+              : groupLabel;
         }
-
+        var propertyKeyName =
+            RiveCoreContext.propertyKeyName(property.keyedProperty.propertyKey);
         viewModel.children.add(
           KeyedPropertyViewModel(
             keyedProperty: property.keyedProperty,
-            label: groupLabel ??
-                RiveCoreContext.propertyKeyName(
-                    property.keyedProperty.propertyKey),
-            subLabel: groupLabel != null
-                ? RiveCoreContext.propertyKeyName(
-                    property.keyedProperty.propertyKey)
+            label: displayGroupLabel ?? propertyKeyName,
+            subLabel: displayGroupLabel != null
+                ? '$groupLabel.$propertyKeyName'
                 : null,
             component: component,
           ),

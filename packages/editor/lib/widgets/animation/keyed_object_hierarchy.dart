@@ -3,7 +3,6 @@ import 'package:rive_core/drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
-import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/common/draw_order_key_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -35,6 +34,7 @@ class KeyedObjectHierarchy extends StatelessWidget {
     return TreeScrollView(
       scrollController: scrollController,
       padding: style.padding,
+      physics: const NeverScrollableScrollPhysics(),
       slivers: [
         TreeView<KeyHierarchyViewModel>(
           style: style,
@@ -159,7 +159,6 @@ class KeyedObjectHierarchy extends StatelessWidget {
               underlineColor: theme.colors.timelineUnderline,
               objects: [model.component],
               propertyKey: model.keyedProperty.propertyKey,
-              converter: TranslationValueConverter.instance,
             ),
           ),
         );

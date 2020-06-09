@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -9,38 +11,53 @@ class TreeScrollView extends StatelessWidget {
   final List<Widget> slivers;
   final ScrollController scrollController;
   final Key center;
+  final ScrollPhysics physics;
   const TreeScrollView({
     Key key,
     this.padding,
     this.slivers,
     this.scrollController,
     this.center,
+    this.physics,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      child: RepaintBoundary(
-        child: _InvertedDrawOrderScrollView(
-          // reverse: true,
-          controller: scrollController,
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerSignal: (data) {
+        var event = data as PointerScrollEvent;
+        double delta = event.scrollDelta.dy;
+        var position = scrollController.position;
+        var newPosition = min(
+            max(position.pixels + delta, position.minScrollExtent),
+            position.maxScrollExtent);
 
-          // This keeps things highly performant, we don't want any overdraw.
-          // Flutter uses this for semantics to give feedback on what's offscreen,
-          // but for now we can optimize this out.
-          cacheExtent: 0,
-          slivers: [
-            // Add top padding (can't use Sliver padding, as using one with empty
-            // sliver causes bugs with virtualization).
-            if (padding != null && padding.top != 0)
-              SliverToBoxAdapter(child: SizedBox(height: padding.top)),
+        scrollController.jumpTo(newPosition);
+      },
+      child: Scrollbar(
+        child: RepaintBoundary(
+          child: _InvertedDrawOrderScrollView(
+            physics: physics,
+            // reverse: true,
+            controller: scrollController,
+            // This keeps things highly performant, we don't want any overdraw.
+            // Flutter uses this for semantics to give feedback on what's
+            // offscreen, but for now we can optimize this out.
+            cacheExtent: 0,
+            slivers: [
+              // Add top padding (can't use Sliver padding, as using one with
+              // empty sliver causes bugs with virtualization).
+              if (padding != null && padding.top != 0)
+                SliverToBoxAdapter(child: SizedBox(height: padding.top)),
 
-            ...slivers,
+              ...slivers,
 
-            // Add bottom padding
-            if (padding != null && padding.bottom != 0)
-              SliverToBoxAdapter(child: SizedBox(height: padding.bottom)),
-          ],
+              // Add bottom padding
+              if (padding != null && padding.bottom != 0)
+                SliverToBoxAdapter(child: SizedBox(height: padding.bottom)),
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
-import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
@@ -16,17 +15,15 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
 
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) => [
-        (context) => PropertyDual(
+        (context) => PropertyDual<double>(
               name: 'Position',
               objects: inspecting.components,
               propertyKeyA: ArtboardBase.xPropertyKey,
               propertyKeyB: ArtboardBase.yPropertyKey,
               labelA: 'X',
               labelB: 'Y',
-              converterA: TranslationIntegerValueConverter.instance,
-              converterB: TranslationIntegerValueConverter.instance,
             ),
-        (context) => PropertyDual(
+        (context) => PropertyDual<double>(
               name: 'Size',
               linkable: true,
               isLinked: _isSizeLinked,
@@ -39,10 +36,8 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ArtboardBase.heightPropertyKey,
               labelA: 'Width',
               labelB: 'Height',
-              converterA: TranslationValueConverter.instance,
-              converterB: TranslationValueConverter.instance,
             ),
-        (context) => PropertyDual(
+        (context) => PropertyDual<double>(
               name: 'Origin',
               linkable: true,
               isLinked: _isOriginLinked,
@@ -55,8 +50,6 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ArtboardBase.originYPropertyKey,
               labelA: 'X',
               labelB: 'Y',
-              converterA: TranslationValueConverter.instance,
-              converterB: TranslationValueConverter.instance,
             ),
       ];
 }

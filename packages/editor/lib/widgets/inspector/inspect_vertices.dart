@@ -94,15 +94,13 @@ class VertexInspector extends ListenableInspectorBuilder {
         );
       },
       InspectorBuilder.divider,
-      (context) => PropertyDual(
+      (context) => PropertyDual<double>(
             name: 'Position',
             objects: inspecting.components,
             propertyKeyA: PathVertexBase.xPropertyKey,
             propertyKeyB: PathVertexBase.yPropertyKey,
             labelA: 'X',
             labelB: 'Y',
-            converterA: TranslationValueConverter.instance,
-            converterB: TranslationValueConverter.instance,
           ),
       if (inspecting.intersectingCoreTypes.contains(StraightVertexBase.typeKey))
         // All straight vertices, show corner...
@@ -118,15 +116,13 @@ class VertexInspector extends ListenableInspectorBuilder {
           .contains(CubicMirroredVertexBase.typeKey))
         // All mirrored...
         (context) {
-          return PropertyDual(
+          return PropertyDual<double>(
             name: 'Control',
             objects: inspecting.components,
             propertyKeyA: CubicMirroredVertexBase.rotationPropertyKey,
             propertyKeyB: CubicMirroredVertexBase.distancePropertyKey,
             labelA: 'Angle',
             labelB: 'Length',
-            converterA: RotationValueConverter.instance,
-            converterB: TranslationValueConverter.instance,
           );
         },
       if (inspecting.intersectingCoreTypes
@@ -134,23 +130,20 @@ class VertexInspector extends ListenableInspectorBuilder {
         // All asymmetric...
         ...[
         (context) {
-          return PropertySingle(
+          return PropertySingle<double>(
             name: 'Control Angle',
             objects: inspecting.components,
             propertyKey: CubicAsymmetricVertexBase.rotationPropertyKey,
-            converter: RotationValueConverter.instance,
           );
         },
         (context) {
-          return PropertyDual(
+          return PropertyDual<double>(
             name: 'Control Length',
             objects: inspecting.components,
             propertyKeyA: CubicAsymmetricVertexBase.inDistancePropertyKey,
             propertyKeyB: CubicAsymmetricVertexBase.outDistancePropertyKey,
             labelA: 'In',
             labelB: 'Out',
-            converterA: TranslationValueConverter.instance,
-            converterB: TranslationValueConverter.instance,
           );
         },
       ],
@@ -158,27 +151,23 @@ class VertexInspector extends ListenableInspectorBuilder {
           .contains(CubicDetachedVertexBase.typeKey)) ...[
         // All mirrored...
         (context) {
-          return PropertyDual(
+          return PropertyDual<double>(
             name: 'Control In',
             objects: inspecting.components,
             propertyKeyA: CubicDetachedVertexBase.inRotationPropertyKey,
             propertyKeyB: CubicDetachedVertexBase.inDistancePropertyKey,
             labelA: 'Angle',
             labelB: 'Length',
-            converterA: RotationValueConverter.instance,
-            converterB: TranslationValueConverter.instance,
           );
         },
         (context) {
-          return PropertyDual(
+          return PropertyDual<double>(
             name: 'Control Out',
             objects: inspecting.components,
             propertyKeyA: CubicDetachedVertexBase.outRotationPropertyKey,
             propertyKeyB: CubicDetachedVertexBase.outDistancePropertyKey,
             labelA: 'Angle',
             labelB: 'Length',
-            converterA: RotationValueConverter.instance,
-            converterB: TranslationValueConverter.instance,
           );
         },
       ],

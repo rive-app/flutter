@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
-import 'package:rive_editor/widgets/common/converters/rotation_value_converter.dart';
-import 'package:rive_editor/widgets/common/converters/scale_value_converter.dart';
-import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
@@ -19,17 +16,15 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) {
     return [
-      (context) => PropertyDual(
+      (context) => PropertyDual<double>(
             name: 'Position',
             objects: inspecting.components,
             propertyKeyA: NodeBase.xPropertyKey,
             propertyKeyB: NodeBase.yPropertyKey,
             labelA: 'X',
             labelB: 'Y',
-            converterA: TranslationIntegerValueConverter.instance,
-            converterB: TranslationIntegerValueConverter.instance,
           ),
-      (context) => PropertyDual(
+      (context) => PropertyDual<double>(
             name: 'Scale',
             linkable: true,
             isLinked: _isScaleLinked,
@@ -42,14 +37,11 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
             propertyKeyB: NodeBase.scaleYPropertyKey,
             labelA: 'X',
             labelB: 'Y',
-            converterA: ScalePercentageValueConverter.instance,
-            converterB: ScalePercentageValueConverter.instance,
           ),
-      (context) => PropertySingle(
+      (context) => PropertySingle<double>(
             name: 'Rotate',
             objects: inspecting.components,
             propertyKey: NodeBase.rotationPropertyKey,
-            converter: RotationValueConverter.instance,
           ),
 
       // If the inspection set has all parametric paths, show the width/height
@@ -61,7 +53,7 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
       // not be a core property, so we'll need some PropertyDual that works with
       // change callbacks and not propertyKeys
       if (inspecting.intersectingCoreTypes.contains(ParametricPathBase.typeKey))
-        (context) => PropertyDual(
+        (context) => PropertyDual<double>(
               name: 'Size',
               linkable: true,
               objects: inspecting.components,
@@ -69,8 +61,6 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: ParametricPathBase.heightPropertyKey,
               labelA: 'Width',
               labelB: 'Height',
-              converterA: TranslationValueConverter.instance,
-              converterB: TranslationValueConverter.instance,
             )
 
       // TODO: this is the spot to add the EditVertices button if the

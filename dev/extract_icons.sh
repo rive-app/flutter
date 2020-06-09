@@ -5,6 +5,7 @@ cd extract_icons
 echo "Getting icons from Figma..."
 node index.js
 if [ -f "./Rive App.zip" ]; then
+    exit 1
     unzip -o "Rive App.zip" -d ../../packages/editor/assets/images/icons
     rm -fR "./Rive App.zip"
     cd ../../packages/editor

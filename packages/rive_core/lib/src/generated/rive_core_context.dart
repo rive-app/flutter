@@ -141,6 +141,12 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
         return 2;
+      case CubicDetachedVertexBase.inRotationPropertyKey:
+      case CubicDetachedVertexBase.inDistancePropertyKey:
+        return 3;
+      case CubicDetachedVertexBase.outRotationPropertyKey:
+      case CubicDetachedVertexBase.outDistancePropertyKey:
+        return 4;
       default:
         return 0;
     }
@@ -156,6 +162,12 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
         return 'scale';
+      case CubicDetachedVertexBase.inRotationPropertyKey:
+      case CubicDetachedVertexBase.inDistancePropertyKey:
+        return 'bezier_in';
+      case CubicDetachedVertexBase.outRotationPropertyKey:
+      case CubicDetachedVertexBase.outDistancePropertyKey:
+        return 'bezier_out';
       default:
         return null;
     }

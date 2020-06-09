@@ -4,7 +4,6 @@ import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_control_vertex.dart';
-import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';

@@ -10,6 +10,7 @@
       "type": "double",
       "initialValue": "0",
       "animates": true,
+      "group": "bezier_in",
       "key": {
         "int": 84,
         "string": "inrotation"
@@ -20,6 +21,7 @@
       "type": "double",
       "initialValue": "0",
       "animates": true,
+      "group": "bezier_in",
       "key": {
         "int": 85,
         "string": "indistance"
@@ -30,6 +32,7 @@
       "type": "double",
       "initialValue": "0",
       "animates": true,
+      "group": "bezier_out",
       "key": {
         "int": 86,
         "string": "outrotation"
@@ -40,6 +43,7 @@
       "type": "double",
       "initialValue": "0",
       "animates": true,
+      "group": "bezier_out",
       "key": {
         "int": 87,
         "string": "outdistance"
