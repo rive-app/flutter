@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:bezier/bezier.dart';
 import 'package:core/core.dart';
 import 'package:flutter/widgets.dart';
@@ -143,6 +145,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         if (path.editingMode == PointsPathEditMode.creating &&
             path.vertices.isNotEmpty) {
           Offset targetOffset;
+          PathVertex closeTarget;
           // Draw line to next point (note this should curve if last point is a
           // cubic).
           var lastVertex = path.vertices.last;
@@ -156,14 +159,32 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
                 Vec2D.transformMat2D(Vec2D(), ghostPointWorld, inversePath);
             targetOffset = Offset(ghostLocal[0], ghostLocal[1]);
           } else if (stage.hoverItem == path.vertices.first.stageItem) {
-            var target = path.vertices.first;
+            closeTarget = path.vertices.first;
             // closing the loop
-            targetOffset = Offset(target.x, target.y);
+            targetOffset = Offset(closeTarget.x, closeTarget.y);
           }
 
           if (targetOffset != null) {
-            canvas.drawLine(Offset(lastVertex.x, lastVertex.y), targetOffset,
-                StageItem.selectedPaint);
+            if (lastVertex is CubicVertex) {
+              var path = ui.Path();
+              path.moveTo(lastVertex.x, lastVertex.y);
+              if (closeTarget is CubicVertex) {
+                path.cubicTo(
+                    lastVertex.outPoint[0],
+                    lastVertex.outPoint[1],
+                    closeTarget.inPoint[0],
+                    closeTarget.inPoint[1],
+                    targetOffset.dx,
+                    targetOffset.dy);
+              } else {
+                path.quadraticBezierTo(lastVertex.outPoint[0],
+                    lastVertex.outPoint[1], targetOffset.dx, targetOffset.dy);
+              }
+              canvas.drawPath(path, StageItem.selectedPaint);
+            } else {
+              canvas.drawLine(Offset(lastVertex.x, lastVertex.y), targetOffset,
+                  StageItem.selectedPaint);
+            }
           }
         }
         canvas.restore();
@@ -454,6 +475,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     Vec2D worldMouse,
   ) {
     if (_clickCreatedVertex != null) {
+      // Make sure the solo items have been updated.
+      vertexEditor.ensureSoloSync();
+
       var vertex = _clickCreatedVertex;
       var artboardMouse = mouseWorldSpace(vertex.artboard, worldMouse);
       _clickCreatedVertex = null;

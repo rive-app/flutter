@@ -32,7 +32,7 @@ class SelectionContext<T extends SelectableItem> extends ChangeNotifier {
   }
 
   bool select(T item, {bool append = false}) {
-    assert(item != null);
+    assert(item != null, 'should not select a null item');
     if (!append) {
       clear(notify: false);
     }

@@ -27,6 +27,16 @@ abstract class Debouncer {
     return false;
   }
 
+  /// Call early if it's queued.
+  bool debounceAccelerate(DebounceCallback call) {
+    if (_debounce.contains(call)) {
+      _debounce.remove(call);
+      call();
+      return true;
+    }
+    return false;
+  }
+
   bool debounceAll() {
     if (_debounce.isEmpty) {
       return false;
