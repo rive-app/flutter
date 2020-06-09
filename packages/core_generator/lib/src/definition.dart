@@ -715,6 +715,34 @@ class Definition {
       }
     }
     ctxCode.writeln('}}');
+    // We want a way to specifically set only core (non-animated) properties.
+    if (!config.isRuntime) {
+      ctxCode.writeln('''${config.isRuntime ? 'static' : '@override'}
+        void setObjectPropertyCore(Core object, int propertyKey, Object value) {
+          switch(propertyKey) {
+          ''');
+      for (final definition in definitions.values) {
+        for (final property in definition.properties) {
+          var setterName =
+              property.animates ? '${property.name}Core' : property.name;
+          ctxCode.writeln(
+              'case ${definition._name}Base.${property.name}PropertyKey:');
+          if (property.isNullable) {
+            ctxCode.writeln('''if(object is ${definition._name}Base) {
+                      if(value is ${property.getExportType(config.isRuntime).dartName}) {
+                      object.$setterName = value;
+                  } else if(value == null) {object.$setterName = null;}}''');
+          } else {
+            ctxCode.writeln('''if(object is ${definition._name}Base
+                      && value is ${property.getExportType(config.isRuntime).dartName}) {
+                      object.$setterName = value;
+                  }''');
+          }
+          ctxCode.writeln('break;');
+        }
+      }
+    }
+    ctxCode.writeln('}}');
     if (!config.isRuntime) {
       ctxCode.writeln('static bool animates(int propertyKey) {'
           'switch(propertyKey) {');
@@ -927,8 +955,16 @@ class Definition {
         }
         ctxCode.write('case ${property.definition._name}Base');
         ctxCode.write('.${property.name}PropertyKey:');
-        ctxCode.writeln(
-            '(object as ${property.definition._name}Base).${property.name} = value;break;');
+        if (!config.isRuntime && property.animates) {
+          // In the editor we want to make sure that when we're changing a core
+          // property, it's not the animated value that we're setting.
+          ctxCode.writeln('(object as ${property.definition._name}Base).'
+              '${property.name}Core = value;break;');
+        } else {
+          ctxCode.writeln(
+              '(object as ${property.definition._name}Base).${property.name}'
+              ' = value;break;');
+        }
       }
 
       ctxCode.writeln('}}');

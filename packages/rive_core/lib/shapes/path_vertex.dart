@@ -6,14 +6,6 @@ import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 
-/// How the vertex control handles relate to each other
-enum VertexControlType {
-  straight,
-  mirrored,
-  detached,
-  asymmetric,
-}
-
 abstract class PathVertex extends PathVertexBase {
   Path get path => parent as Path;
   // -> editor-only
@@ -27,7 +19,6 @@ abstract class PathVertex extends PathVertexBase {
   String get timelineName => 'Vertex ${path.vertices.indexOf(this) + 1}';
   // <- editor-only
 
-  VertexControlType get controlType => VertexControlType.straight;
   // -> editor-only
   // At edit time we want to have a reference to the original
   // vertex that may have created this vertex. If original is null and context
@@ -78,7 +69,10 @@ abstract class PathVertex extends PathVertexBase {
   }
   // <- editor-only
 
-  Vec2D get translation => Vec2D.fromValues(x, y);
+  Vec2D get translation {
+    return Vec2D.fromValues(x, y);
+  }
+
   set translation(Vec2D value) {
     x = value[0];
     y = value[1];
@@ -100,4 +94,24 @@ abstract class PathVertex extends PathVertexBase {
   String toString() {
     return translation.toString();
   }
+
+  // -> editor-only
+
+  /// Returns the vertex that will immediately follow this one after
+  /// replacement.
+  PathVertex replaceWith(PathVertex newVertex) {
+    // We need to replace the entire vertex with one of a different
+    // type. This is messy because we also need it to maintain the
+    // same order/index in the list.
+    var index = path.vertices.indexOf(this);
+    var next = path.vertices[(index + 1) % path.vertices.length];
+    remove();
+    newVertex.x = x;
+    newVertex.y = y;
+    newVertex.childOrder = childOrder;
+    context.addObject(newVertex);
+    newVertex.parent = path;
+    return next;
+  }
+  // <- editor-only
 }

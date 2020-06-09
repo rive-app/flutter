@@ -31,7 +31,7 @@ class KeyFrameDrawOrderValue extends KeyFrameDrawOrderValueBase {
           'resolve an object with id $drawableId.');
       _remove();
     } else {
-      component.whenDeleted(_remove);
+      component.whenRemoved(_remove);
     }
     // <- editor-only
   }

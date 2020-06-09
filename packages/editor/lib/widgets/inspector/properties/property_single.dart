@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:rive_editor/widgets/common/converters/convert.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -10,7 +11,22 @@ class PropertySingle<T> extends StatelessWidget {
   final String name;
   final InputValueConverter<T> converter;
 
-  const PropertySingle({
+  factory PropertySingle({
+    @required Iterable<Core> objects,
+    @required int propertyKey,
+    InputValueConverter<T> converter,
+    String name,
+    Key key,
+  }) {
+    return PropertySingle._(
+      objects: objects,
+      propertyKey: propertyKey,
+      converter: converter ?? converterForProperty(propertyKey),
+      name: name,
+      key: key,
+    );
+  }
+  const PropertySingle._({
     @required this.objects,
     @required this.propertyKey,
     this.converter,
@@ -42,6 +58,7 @@ class PropertySingle<T> extends StatelessWidget {
           const SizedBox(width: 20),
           Flexible(
             flex: 1,
+            fit: FlexFit.tight,
             child: CoreTextField(
               objects: objects,
               propertyKey: propertyKey,

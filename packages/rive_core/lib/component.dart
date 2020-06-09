@@ -253,6 +253,13 @@ abstract class Component extends ComponentBase<RiveFile>
   @override
   @mustCallSuper
   void onRemoved() {
+    // -> editor-only
+    var cbs = _whenRemoved.toList();
+    _whenRemoved.clear();
+    for (final cb in cbs) {
+      cb();
+    }
+    // <- editor-only
     for (final parentDep in _dependsOn) {
       parentDep._dependents.remove(this);
     }
@@ -363,15 +370,8 @@ abstract class Component extends ComponentBase<RiveFile>
     /// Changing name doesn't really do anything.
   }
 
-  final Set<VoidCallback> _whenDeleted = {};
-  bool whenDeleted(VoidCallback callback) => _whenDeleted.add(callback);
-
-  // Should be @internal when supported
-  void onDelete() {
-    var cbs = _whenDeleted.toList();
-    _whenDeleted.clear();
-    for (final cb in cbs) {
-      cb();
-    }
-  }
+  // -> editor-only
+  final Set<VoidCallback> _whenRemoved = {};
+  bool whenRemoved(VoidCallback callback) => _whenRemoved.add(callback);
+  // <- editor-only
 }

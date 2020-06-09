@@ -21,7 +21,8 @@ class PropertyDual<T> extends StatelessWidget {
   final bool linkable;
   final bool isLinked;
   final void Function(bool link) toggleLink;
-  final InputValueConverter<T> converter;
+  final InputValueConverter<T> converterA;
+  final InputValueConverter<T> converterB;
 
   const PropertyDual({
     @required this.objects,
@@ -34,7 +35,8 @@ class PropertyDual<T> extends StatelessWidget {
     this.toggleLink,
     this.labelA = '',
     this.labelB = '',
-    this.converter,
+    this.converterA,
+    this.converterB,
     Key key,
   }) : super(key: key);
 
@@ -61,7 +63,9 @@ class PropertyDual<T> extends StatelessWidget {
 
   /// Build the [CoreTextField] and setups up the property and linked property
   /// keys up so that they get mirrored when one changes (if linking is on).
-  Widget _buildCoreTextField(int propertyKey, int linkedKey) => CoreTextField(
+  Widget _buildCoreTextField(
+          int propertyKey, int linkedKey, InputValueConverter<T> converter) =>
+      CoreTextField(
         objects: objects,
         propertyKey: propertyKey,
         converter: converter,
@@ -101,24 +105,28 @@ class PropertyDual<T> extends StatelessWidget {
           const SizedBox(width: 20),
           Flexible(
             flex: 1,
+            fit: FlexFit.tight,
             child: SubLabel(
               label: labelA,
               style: theme.textStyles.inspectorPropertySubLabel,
               child: _buildCoreTextField(
                 propertyKeyA,
                 propertyKeyB,
+                converterA,
               ),
             ),
           ),
           const SizedBox(width: 20),
           Flexible(
             flex: 1,
+            fit: FlexFit.tight,
             child: SubLabel(
               label: labelB,
               style: theme.textStyles.inspectorPropertySubLabel,
               child: _buildCoreTextField(
                 propertyKeyB,
                 propertyKeyA,
+                converterB,
               ),
             ),
           ),

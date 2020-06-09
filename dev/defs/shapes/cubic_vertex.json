@@ -1,55 +1,9 @@
 {
   "name": "CubicVertex",
   "key": {
-    "int": 6,
+    "int": 36,
     "string": "cubicvertex"
   },
-  "extends": "shapes/path_vertex.json",
-  "properties": {
-    "controlTypeValue": {
-      "type": "int",
-      "initialValue": "1",
-      "key": {
-        "int": 75,
-        "string": "controltypevalue"
-      },
-      "description": "Backing integer value for the CubicControlType enum that describes how the handles move in relation to each other."
-    },
-    "inX": {
-      "type": "double",
-      "initialValue": "0",
-      "key": {
-        "int": 27,
-        "string": "inx"
-      },
-      "description": "In point's x value"
-    },
-    "inY": {
-      "type": "double",
-      "initialValue": "0",
-      "key": {
-        "int": 28,
-        "string": "iny"
-      },
-      "description": "In point's y value"
-    },
-    "outX": {
-      "type": "double",
-      "initialValue": "0",
-      "key": {
-        "int": 29,
-        "string": "outx"
-      },
-      "description": "Out point's x value"
-    },
-    "outY": {
-      "type": "double",
-      "initialValue": "0",
-      "key": {
-        "int": 30,
-        "string": "outy"
-      },
-      "description": "Out point's y value"
-    }
-  }
+  "abstract": true,
+  "extends": "shapes/path_vertex.json"
 }

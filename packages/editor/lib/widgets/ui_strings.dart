@@ -15,6 +15,9 @@ class UIStringsData {
   UIStringsData(this.values);
 
   String withKey(String key) {
+    if (key == null) {
+      return '???';
+    }
     var value = values[key];
     if (value == null) {
       _log.warning('Missing UIString for key \'$key\'.');
@@ -48,10 +51,26 @@ class UIStrings extends InheritedWidget {
 HashMap<String, String> _defaultUIStrings =
     HashMap<String, String>.from(<String, String>{
   'position': 'Position',
+  'radius': 'Corner',
   'scale': 'Scale',
   'opacity': 'Opacity',
   'x': 'X',
   'y': 'Y',
+  'position.x': 'X',
+  'position.y': 'Y',
+  'bezier_in': 'In',
+  'bezier_in.inRotation': 'Angle',
+  'bezier_in.inDistance': 'Length',
+  'bezier_out.outRotation': 'Angle',
+  'bezier_out.outDistance': 'Length',
+  'bezier_out': 'Out',
+  'inDistance': 'In',
+  'outDistance': 'Out',
+
+  /// Used by the mirrored cubic vertex.
+  'distance': 'Length',
+  'in': 'In',
+  'out': 'Out',
   'scaleX': 'X',
   'scaleY': 'Y',
   'vertices': 'Vertices',

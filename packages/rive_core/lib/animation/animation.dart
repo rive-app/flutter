@@ -34,7 +34,7 @@ class Animation extends AnimationBase<RiveFile> {
     // -> editor-only
     if (artboardId != null) {
       artboard = context?.resolve(artboardId);
-      artboard?.whenDeleted(_remove);
+      artboard?.whenRemoved(_remove);
     }
     // <- editor-only
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
 import 'package:rive_editor/widgets/common/converters/hex_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/percentage_input_converter.dart';
-import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
@@ -77,10 +76,9 @@ class PropertyShapePaintTextInput extends StatelessWidget {
                   flex: 10,
                   fit: FlexFit.tight,
                   child: shapePaints.isNotEmpty && shapePaints.first is Stroke
-                      ? CoreTextField(
+                      ? CoreTextField<double>(
                           objects: shapePaints,
                           propertyKey: StrokeBase.thicknessPropertyKey,
-                          converter: TranslationValueConverter.instance,
                         )
                       : const SizedBox(),
                 ),

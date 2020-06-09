@@ -3,7 +3,7 @@ import 'package:vector_math/vector_math.dart';
 
 /// Value converter for translation values (x and y).
 class RotationValueConverter extends InputValueConverter<double> {
-  static final DoubleFormatter displayFormatter = DoubleFormatter(2);
+  static final DoubleFormatter displayFormatter = DoubleFormatter(0);
   static final DoubleFormatter editFormatter = DoubleFormatter(3);
 
   @override

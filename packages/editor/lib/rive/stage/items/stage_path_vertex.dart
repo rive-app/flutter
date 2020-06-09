@@ -22,7 +22,7 @@ class StagePathVertex extends StageVertex<PathVertex> {
   double get radiusScale =>
       component.path.vertices.first == component ? 1.5 : 1;
 
-  bool get hasControlPoints => component.coreType == CubicVertexBase.typeKey;
+  bool get hasControlPoints => component is CubicVertex;
 
   @override
   void addedToStage(Stage stage) {

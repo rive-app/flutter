@@ -86,7 +86,7 @@ class TimelineViewportControls extends StatelessWidget {
                   LayoutId(
                     id: _ViewportControlPart.right,
                     child: OverlayHitDetect(
-                      customCursorIcon: PackedIcon.cursorResizeVertical,
+                      customCursorIcon: PackedIcon.cursorResizeHorizontal,
                       dragContext: context,
                       child: const SizedBox(
                           width: grabberHitSize, height: grabberHitSize),
