@@ -146,7 +146,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.15"
+    version: "0.2.16"
   typed_data:
     dependency: transitive
     description:
@@ -190,5 +190,5 @@ packages:
     source: path
     version: "0.0.1"
 sdks:
-  dart: ">=2.6.0 <3.0.0"
+  dart: ">=2.7.0 <3.0.0"
   flutter: ">=1.17.0 <2.0.0"
