@@ -5,10 +5,15 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
 class InviteBox extends StatelessWidget {
-  const InviteBox(this.name, {@required this.onRemove});
+  const InviteBox(
+    this.name, {
+    @required this.onRemove,
+    this.isSelected = false,
+  });
 
   final String name;
   final VoidCallback onRemove;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +23,11 @@ class InviteBox extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
+        color: isSelected ? colors.commonDarkGrey : null,
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: colors.commonButtonTextColor),
+        border: Border.all(
+          color: colors.commonButtonTextColor,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -32,8 +40,11 @@ class InviteBox extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 315),
                 child: Text(
                   name,
-                  style: styles.popupShortcutText
-                      .copyWith(fontFamily: 'Roboto-Regular', height: 1.15),
+                  style: styles.popupShortcutText.copyWith(
+                    fontFamily: 'Roboto-Regular',
+                    height: 1.15,
+                    color: isSelected ? Colors.white : null,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -47,7 +58,9 @@ class InviteBox extends StatelessWidget {
                   // color: Colors.transparent,
                   child: Center(
                     child: TintedIcon(
-                      color: colors.commonButtonTextColor,
+                      color: isSelected
+                          ? Colors.white
+                          : colors.commonButtonTextColor,
                       icon: PackedIcon.delete,
                     ),
                   ),

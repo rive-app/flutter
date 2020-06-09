@@ -17,6 +17,7 @@ typedef OptionToLabel<T> = String Function(T);
 typedef OptionRetriever<T> = Future<List<T>> Function(String);
 typedef OptionBuilder<T> = Widget Function(
     BuildContext context, bool isHovered, T option);
+typedef void OnKeyPress(PhysicalKeyboardKey key, String text);
 
 class _ComboOption<T> extends PopupListItem {
   final T option;
@@ -89,6 +90,10 @@ class ComboBox<T> extends StatefulWidget {
   final Event trigger;
   final TextStyle valueTextStyle;
   final bool disabled;
+
+  /// Called for typeahead ComboBoxes.
+  /// It'll be called if the textfield is empty, and backspace is pressed.
+  final OnKeyPress onKeyPress;
   static const double _chevronWidth = 5;
   static const double _horizontalPadding = 15;
 
@@ -114,6 +119,7 @@ class ComboBox<T> extends StatefulWidget {
     this.cursorColor,
     this.valueTextStyle,
     this.disabled = false,
+    this.onKeyPress,
   }) : super(key: key);
 
   @override
@@ -305,7 +311,19 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     _focusNode?.removeListener(_focusChange);
     if (widget.typeahead) {
       setState(() {
-        _focusNode = FocusNode(canRequestFocus: true);
+        _focusNode = FocusNode(
+            canRequestFocus: true,
+            onKey: (focusNode, event) {
+              if (_focusNode != focusNode) {
+                return false;
+              }
+
+              if (event is RawKeyDownEvent) {
+                widget?.onKeyPress(event.physicalKey, _controller.text);
+                return true;
+              }
+              return false;
+            });
         _focusNode.addListener(_focusChange);
         _controller = TextEditingController(text: '');
         _focusNode.requestFocus();

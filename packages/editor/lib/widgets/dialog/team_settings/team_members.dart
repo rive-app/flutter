@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/artists.dart';
 import 'package:rive_api/manager.dart';
@@ -98,6 +101,9 @@ class InvitePanel extends StatefulWidget {
 
 class _InvitePanelState extends State<InvitePanel> {
   final _inviteQueue = <Invite>[];
+  // Invites get highlighted when they are ready to be removed
+  int _inviteHighlightIndex;
+  bool _isTextEmpty = true;
   bool _buttonDisabled = false;
 
   TeamRole _selectedInviteType = TeamRole.member;
@@ -151,6 +157,63 @@ class _InvitePanelState extends State<InvitePanel> {
 
   void _startTypeahead() {
     _openCombo.notify();
+    _isTextEmpty = true;
+  }
+
+  void _highlightInvite(bool moveLeft) {
+    if (_inviteQueue.isEmpty) {
+      return;
+    }
+    if (moveLeft) {
+      setState(() {
+        // If the index is null, no invite is highlited:
+        // fall back to the last element in the list.
+        final index = (_inviteHighlightIndex ?? _inviteQueue.length) - 1;
+        _inviteHighlightIndex = max(index, 0);
+      });
+    } else {
+      setState(() {
+        // Fallback for null index.
+        final index = _inviteHighlightIndex ?? _inviteQueue.length;
+        // Moving all the way to the right should remove the invite highlight.
+        _inviteHighlightIndex =
+            index + 1 >= _inviteQueue.length ? null : index + 1;
+      });
+    }
+  }
+
+  void _onKeyPress(PhysicalKeyboardKey key, String text) {
+    if (text.isNotEmpty) {
+      _isTextEmpty = false;
+      return;
+    } else if (!_isTextEmpty) {
+      // Flag when text is empty again for the first time.
+      _isTextEmpty = true;
+      return;
+    }
+
+    if (key == PhysicalKeyboardKey.backspace) {
+      _removeHighlight();
+    } else if (key == PhysicalKeyboardKey.arrowRight) {
+      _highlightInvite(false);
+    } else if (key == PhysicalKeyboardKey.arrowLeft) {
+      _highlightInvite(true);
+    }
+  }
+
+  void _removeHighlight() {
+    if (_inviteQueue.isEmpty) {
+      return;
+    }
+    if (_inviteHighlightIndex != null) {
+      setState(() {
+        _inviteQueue.removeAt(_inviteHighlightIndex);
+        _inviteHighlightIndex = null;
+      });
+    } else {
+      // Before removing anything, highlight it first.
+      _highlightInvite(true);
+    }
   }
 
   // From here: https://stackoverflow.com/a/201378
@@ -195,7 +258,9 @@ class _InvitePanelState extends State<InvitePanel> {
     final colors = RiveTheme.of(context).colors;
 
     final canInvite = _inviteQueue.isNotEmpty && !_buttonDisabled;
-
+    final highlightedInvite = _inviteHighlightIndex != null
+        ? _inviteQueue[_inviteHighlightIndex]
+        : null;
     return RoundedSection(
       contentBuilder: (sectionContext) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,9 +286,12 @@ class _InvitePanelState extends State<InvitePanel> {
                       ..._inviteQueue.map(
                         (invite) => InviteBox(
                           invite.inviteBoxLabel,
+                          isSelected: invite == highlightedInvite,
                           onRemove: () {
                             setState(
                               () {
+                                // Reset highlight.
+                                _inviteHighlightIndex = null;
                                 _inviteQueue.remove(invite);
                               },
                             );
@@ -239,6 +307,7 @@ class _InvitePanelState extends State<InvitePanel> {
                           sizing: ComboSizing.collapsed,
                           popupSizing: ComboPopupSizing.content,
                           typeahead: true,
+                          onKeyPress: _onKeyPress,
                           underline: false,
                           chevron: false,
                           valueColor: colors.inactiveText,
