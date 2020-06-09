@@ -326,7 +326,6 @@ class _MemberRowState extends State<_MemberRow> {
   @override
   void initState() {
     super.initState();
-    print("User: ${widget.user.displayName} ${widget.user.permission.name}");
     _currentRole = widget.user.permission;
   }
 
