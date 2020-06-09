@@ -1,15 +1,15 @@
 import 'package:file_chooser/file_chooser.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/api.dart';
 import 'package:rive_api/models/team.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/billing_history.dart';
-import 'package:rive_editor/widgets/dialog/team_settings/plan_panel.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/plan.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/profile_panel.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/settings_header.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/team_members.dart';
