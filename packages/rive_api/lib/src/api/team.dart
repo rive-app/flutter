@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/model.dart';
+import 'package:rive_api/models/team_role.dart';
 import 'package:utilities/deserialize.dart';
 
 final _log = Logger('Rive API Volume');
@@ -49,7 +50,7 @@ class TeamApi {
   }
 
   /// GET /api/teams/<team_id>
-  /// Returns the teams info.
+  /// Returns the team's profile info.
   Future<ProfileDM> getProfile(int ownerId) async {
     final response = await api.get('${api.host}/api/teams/$ownerId');
     if (response.statusCode != 200) {
@@ -67,6 +68,7 @@ class TeamApi {
   }
 
   // PUT /api/teams/<teamId>
+  // This endpoint uploads the new profile info for this team.
   Future<bool> updateProfile(Team team, Profile profile) async {
     var teamId = team.ownerId;
     var response =
@@ -77,5 +79,26 @@ class TeamApi {
       return false;
     }
     return true;
+  }
+
+  Future<bool> removeFromTeam(int memberOwnerId, int teamId) async {
+    try {
+      await api.delete('${api.host}/api/teams/$teamId/members/$memberOwnerId');
+      return true;
+    } on ApiException catch (err) {
+      log.severe('Failed to remove team member: ${err.response.body}');
+      return false;
+    }
+  }
+
+  Future<bool> changeRole(int teamId, int memberOwnerId, TeamRole role) async {
+    try {
+      await api.put(
+          '${api.host}/api/teams/$teamId/members/$memberOwnerId/${role.name}');
+      return true;
+    } on ApiException catch (err) {
+      log.severe('[Error] changeRole() ${err.response.body}');
+      return false;
+    }
   }
 }

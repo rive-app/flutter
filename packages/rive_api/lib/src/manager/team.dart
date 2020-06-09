@@ -1,10 +1,11 @@
+import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/api.dart';
 
 class TeamManager with Subscriptions {
-  static TeamManager _instance = TeamManager._();
+  static final TeamManager _instance = TeamManager._();
   factory TeamManager() => _instance;
 
   TeamManager._() {
@@ -40,7 +41,7 @@ class TeamManager with Subscriptions {
     _lastMe = newMe;
   }
 
-  void loadTeams() async {
+  Future<void> loadTeams() async {
     final _teamsDM = await _teamApi.teams;
     _teams = Team.fromDMList(_teamsDM.toList());
     _plumber.message(_teams.toList());
@@ -62,9 +63,18 @@ class TeamManager with Subscriptions {
     }
   }
 
-  void loadTeamMembers(Team team) async {
+  Future<void> loadTeamMembers(Team team) async {
     final _teamMembersDM = await _teamApi.teamMembers(team.ownerId);
     final _teamMembers = TeamMember.fromDMList(_teamMembersDM.toList());
     _plumber.message(_teamMembers.toList(), team.hashCode);
+  }
+
+  Future<bool> onRoleChanged(
+      int teamId, int memberOwnerId, TeamRole role) async {
+    if (role == TeamRole.delete) {
+      return _teamApi.removeFromTeam(memberOwnerId, teamId);
+    } else {
+      return _teamApi.changeRole(teamId, memberOwnerId, role);
+    }
   }
 }
