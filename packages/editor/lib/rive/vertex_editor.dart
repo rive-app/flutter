@@ -134,6 +134,13 @@ class VertexEditor with RiveFileDelegate {
     }
   }
 
+  /// Operations that require the vertex editor to have completed syncing a
+  /// change to solo can call this to make sure debounced operations complete
+  /// synchronously.
+  void ensureSoloSync() {
+    stage.debounceAccelerate(_syncSolo);
+  }
+
   void _updatePathEditMode(PointsPath path, PointsPathEditMode editMode) {
     // When a path is changed to being edited/created we want to add it to
     // the _editingPaths set. When it's set to off, we want to remove it

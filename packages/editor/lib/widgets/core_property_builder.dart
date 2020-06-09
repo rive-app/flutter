@@ -52,7 +52,8 @@ class _CorePropertyBuilderState<T> extends State<CorePropertyBuilder<T>> {
 
     var currentPropertyValue =
         object.context.getObjectProperty(object, propertyKey);
-    assert(currentPropertyValue is T);
+    assert(currentPropertyValue == null || currentPropertyValue is T,
+        'expected $currentPropertyValue to be of type $T');
     value = currentPropertyValue as T;
     object.addListener(propertyKey, _valueChanged);
   }
