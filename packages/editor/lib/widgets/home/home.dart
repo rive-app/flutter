@@ -15,12 +15,39 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/notifications.dart';
 import 'package:rive_editor/widgets/resize_panel.dart';
 
-class Home extends StatelessWidget {
+/// This is stateful so we can decide what panel should
+/// initially be shown when the app starts up
+class Home extends StatefulWidget {
   Home({Key key}) : super(key: key) {
     FolderContentsManager();
   }
 
-  bool get isTeam => false;
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    // TODO: having this logic at the ui level seems wrong,
+    // and having it distributed amongst several managers lead
+    // to race conditions (which is why it's moved here). This
+    // should probably be centralized to a single manager,
+    // most likely RiveManager, or a new HomeManager.
+
+    // Check whether the first run flag is set for the user.
+    // If it is, show the getting started section
+    final me = Plumber().peek<Me>();
+    if (me.isFirstRun) {
+      print('First run required');
+      Plumber().message<HomeSection>(HomeSection.getStarted);
+    }
+    // If this isn't a first run, then show the user's files
+    else {
+      Plumber().message<CurrentDirectory>(CurrentDirectory(me, 1));
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

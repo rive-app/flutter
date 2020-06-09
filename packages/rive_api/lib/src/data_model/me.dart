@@ -50,6 +50,7 @@ class MeDM extends UserDM {
   ///    'notificationCount':0,
   ///    'verified':false,
   ///    'notice':'confirm-email'
+  ///    'isFirstRun': true
   /// }
   factory MeDM.fromData(Map<String, dynamic> data) => MeDM(
         ownerId: data.getInt('ownerId'),

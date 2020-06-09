@@ -253,9 +253,9 @@ final myFoldersResponse = """
 }
 """;
 
-final myFilesResponse = '[1,2]';
+const myFilesResponse = '[1,2]';
 
-final myFilesDetailsResponse = """
+const myFilesDetailsResponse = """
 {
   "cdn": {
     "base": "https://base.rive.app/",

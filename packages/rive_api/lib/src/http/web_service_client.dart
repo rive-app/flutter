@@ -184,14 +184,14 @@ class WebServiceClient {
 
       Future.delayed(const Duration(seconds: 1), () {
         if (!completed) {
-          print("GETTING $url is taking a long time!");
+          print('Getting $url took longer than a second');
         }
       });
 
-      final timer = Stopwatch()..start();
+      // final timer = Stopwatch()..start();
       final response = await client.get(url, headers: headers);
       completed = true;
-      print('getting $url took: ${timer.elapsed}');
+      // print('getting $url took: ${timer.elapsed}');
       _processResponse(response);
 
       return response;
