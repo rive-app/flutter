@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
+import 'package:rive_core/shapes/cubic_detached_vertex.dart';
+import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -27,6 +30,9 @@ abstract class StageControlVertex extends StageVertex<CubicVertex> {
 
   @override
   StageItem get soloParent => component.path.stageItem;
+
+  double get angle;
+  double get length;
 }
 
 /// Concrete stage control point for the in handle.
@@ -46,6 +52,34 @@ class StageControlIn extends StageControlVertex {
     component.inPoint = Vec2D.transformMat2D(
         Vec2D(), value, component.path.inverseWorldTransform);
   }
+
+  @override
+  double get angle {
+    switch (component.coreType) {
+      case CubicMirroredVertexBase.typeKey:
+        return (component as CubicMirroredVertex).rotation;
+      case CubicAsymmetricVertexBase.typeKey:
+        return (component as CubicAsymmetricVertex).rotation;
+      case CubicDetachedVertexBase.typeKey:
+        return (component as CubicDetachedVertex).inRotation;
+    }
+
+    return 0;
+  }
+
+  @override
+  double get length {
+    switch (component.coreType) {
+      case CubicMirroredVertexBase.typeKey:
+        return (component as CubicMirroredVertex).distance;
+      case CubicAsymmetricVertexBase.typeKey:
+        return (component as CubicAsymmetricVertex).inDistance;
+      case CubicDetachedVertexBase.typeKey:
+        return (component as CubicDetachedVertex).inDistance;
+    }
+
+    return 0;
+  }
 }
 
 /// Concrete stage control point for the out handle.
@@ -64,6 +98,34 @@ class StageControlOut extends StageControlVertex {
     component.outPoint = Vec2D.transformMat2D(
         Vec2D(), value, component.path.inverseWorldTransform);
   }
+
+  @override
+  double get angle {
+    switch (component.coreType) {
+      case CubicMirroredVertexBase.typeKey:
+        return (component as CubicMirroredVertex).rotation;
+      case CubicAsymmetricVertexBase.typeKey:
+        return (component as CubicAsymmetricVertex).rotation;
+      case CubicDetachedVertexBase.typeKey:
+        return (component as CubicDetachedVertex).outRotation;
+    }
+
+    return 0;
+  }
+
+  @override
+  double get length {
+    switch (component.coreType) {
+      case CubicMirroredVertexBase.typeKey:
+        return (component as CubicMirroredVertex).distance;
+      case CubicAsymmetricVertexBase.typeKey:
+        return (component as CubicAsymmetricVertex).outDistance;
+      case CubicDetachedVertexBase.typeKey:
+        return (component as CubicDetachedVertex).outDistance;
+    }
+
+    return 0;
+  }
 }
 
 class StagePathControlLine extends StageItem<CubicVertex> {
@@ -75,6 +137,9 @@ class StagePathControlLine extends StageItem<CubicVertex> {
 
   @override
   bool get isSelectable => false;
+
+  @override
+  int get drawOrder => 3;
 
   @override
   AABB get aabb => AABB.fromPoints([

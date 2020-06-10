@@ -19,10 +19,15 @@ class CubicAsymmetricVertex extends CubicAsymmetricVertexBase {
 
   @override
   set outPoint(Vec2D value) {
+    var lastRotation = rotation;
     var diffOut = Vec2D.fromValues(value[0] - x, value[1] - y);
     outDistance = Vec2D.length(diffOut);
     rotation = atan2(diffOut[1], diffOut[0]);
     _outPoint = Vec2D.clone(value);
+    if (accumulateAngle) {
+      rotation = lastRotation +
+          atan2(sin(rotation - lastRotation), cos(rotation - lastRotation));
+    }
   }
 
   @override
@@ -34,12 +39,19 @@ class CubicAsymmetricVertex extends CubicAsymmetricVertexBase {
             cos(rotation) * -inDistance, sin(rotation) * -inDistance));
   }
 
-@override
+  @override
   set inPoint(Vec2D value) {
+    var lastRotation = rotation;
+
     var diffIn = Vec2D.fromValues(value[0] - x, value[1] - y);
     inDistance = Vec2D.length(diffIn);
     rotation = atan2(diffIn[1], diffIn[0]) + pi;
     _inPoint = Vec2D.clone(value);
+
+    if (accumulateAngle) {
+      rotation = lastRotation +
+          atan2(sin(rotation - lastRotation), cos(rotation - lastRotation));
+    }
   }
 
   @override

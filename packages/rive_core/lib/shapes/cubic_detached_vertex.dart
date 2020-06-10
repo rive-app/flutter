@@ -37,10 +37,17 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
 
   @override
   set outPoint(Vec2D value) {
+    var lastRotation = outRotation;
     var diffOut = Vec2D.fromValues(value[0] - x, value[1] - y);
     outDistance = Vec2D.length(diffOut);
     outRotation = atan2(diffOut[1], diffOut[0]);
     _outPoint = Vec2D.clone(value);
+
+    if (accumulateAngle) {
+      outRotation = lastRotation +
+          atan2(
+              sin(outRotation - lastRotation), cos(outRotation - lastRotation));
+    }
   }
 
   @override
@@ -54,10 +61,16 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
 
   @override
   set inPoint(Vec2D value) {
+    var lastRotation = inRotation;
     var diffIn = Vec2D.fromValues(value[0] - x, value[1] - y);
     inDistance = Vec2D.length(diffIn);
     inRotation = atan2(diffIn[1], diffIn[0]);
     _inPoint = Vec2D.clone(value);
+    
+    if (accumulateAngle) {
+      inRotation = lastRotation +
+          atan2(sin(inRotation - lastRotation), cos(inRotation - lastRotation));
+    }
   }
 
   @override

@@ -8,6 +8,7 @@ export 'package:rive_core/src/generated/shapes/cubic_mirrored_vertex_base.dart';
 class CubicMirroredVertex extends CubicMirroredVertexBase {
   Vec2D _inPoint;
   Vec2D _outPoint;
+
   @override
   Vec2D get outPoint {
     return _outPoint ??= Vec2D.add(Vec2D(), translation,
@@ -16,10 +17,17 @@ class CubicMirroredVertex extends CubicMirroredVertexBase {
 
   @override
   set outPoint(Vec2D value) {
+    var lastRotation = rotation;
+
     var diffOut = Vec2D.fromValues(value[0] - x, value[1] - y);
     distance = Vec2D.length(diffOut);
     rotation = atan2(diffOut[1], diffOut[0]);
     _outPoint = Vec2D.clone(value);
+
+    if (accumulateAngle) {
+      rotation = lastRotation +
+          atan2(sin(rotation - lastRotation), cos(rotation - lastRotation));
+    }
   }
 
   @override
@@ -31,9 +39,7 @@ class CubicMirroredVertex extends CubicMirroredVertexBase {
   @override
   set inPoint(Vec2D value) {
     var diffIn = Vec2D.fromValues(value[0] - x, value[1] - y);
-    distance = Vec2D.length(diffIn);
-    rotation = atan2(diffIn[1], diffIn[0]) + pi;
-    _inPoint = Vec2D.clone(value);
+    outPoint = Vec2D.subtract(Vec2D(), translation, diffIn);
   }
 
   @override

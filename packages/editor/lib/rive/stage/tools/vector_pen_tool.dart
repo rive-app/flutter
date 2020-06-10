@@ -128,8 +128,22 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     return true;
   }
 
+  static final Paint contourShadow = Paint()
+    ..style = PaintingStyle.stroke
+    // Stroke is 3 so 1.5 sticks out when we draw fill over it.
+    ..strokeWidth = 3
+    ..color = const Color(0x26000000);
+
+  static final Paint contourLine = Paint()
+    ..style = PaintingStyle.stroke
+    // Stroke is 3 so 1.5 sticks out when we draw fill over it.
+    ..strokeWidth = 1
+    ..color = const Color(0x80FFFFFF);
+
   @override
   void draw(Canvas canvas) {
+    contourShadow.strokeWidth = StageItem.selectedPaint.strokeWidth * 3;
+    contourLine.strokeWidth = StageItem.selectedPaint.strokeWidth;
     var editingPaths = vertexEditor.editingPaths;
     if (editingPaths != null) {
       canvas.save();
@@ -139,7 +153,8 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         final origin = path.artboard.originWorld;
         canvas.translate(origin[0], origin[1]);
         canvas.transform(path.pathTransform?.mat4);
-        canvas.drawPath(path.uiPath, StageItem.selectedPaint);
+        canvas.drawPath(path.uiPath, contourShadow);
+        canvas.drawPath(path.uiPath, contourLine);
 
         // Draw line to ghost point from last point.
         if (path.editingMode == PointsPathEditMode.creating &&
@@ -192,6 +207,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       canvas.restore();
     }
     super.draw(canvas);
+    drawTransformers(canvas);
   }
 
   @override

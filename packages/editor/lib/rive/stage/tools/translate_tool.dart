@@ -12,10 +12,11 @@ import 'stage_tool.dart';
 
 class TranslateTool extends StageTool with TransformingTool {
   @override
-  void draw(Canvas canvas) {}
-
-  @override
   Iterable<PackedIcon> get icon => PackedIcon.toolTranslate;
+
+  // Draw before the vertex handles but after artboard drawables.
+  @override
+  int get drawOrder => 2;
 
   @override
   List<StageTransformer> get transformers => [
@@ -31,4 +32,9 @@ class TranslateTool extends StageTool with TransformingTool {
       ];
 
   static final TranslateTool instance = TranslateTool();
+
+  @override
+  void draw(Canvas canvas) {
+    drawTransformers(canvas);
+  }
 }
