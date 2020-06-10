@@ -1,4 +1,4 @@
-import 'package:rive/rive_core/shapes/cubic_vertex.dart';
+import 'package:rive/rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive/rive_core/shapes/path_vertex.dart';
 import 'package:rive/src/generated/shapes/ellipse_base.dart';
 export 'package:rive/src/generated/shapes/ellipse_base.dart';

@@ -1,4 +1,3 @@
-import 'package:rive_core/artboard.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';

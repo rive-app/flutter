@@ -4,7 +4,7 @@ import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/component_dirt.dart';
 import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_core/math/vec2d.dart';
-import 'package:rive/rive_core/shapes/cubic_vertex.dart';
+import 'package:rive/rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive/rive_core/shapes/path_vertex.dart';
 import 'package:rive/rive_core/shapes/shape.dart';
 import 'package:rive/rive_core/shapes/straight_vertex.dart';
