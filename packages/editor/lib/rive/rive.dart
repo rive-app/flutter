@@ -171,9 +171,9 @@ class Rive {
       severity: CrumbSeverity.info,
       data: value.file != null
           ? {
-              "ownerId": value.file.ownerId.toString(),
-              "fileId": value.file.fileId.toString(),
-              "name": value.file.name.value,
+              'ownerId': value.file.ownerId.toString(),
+              'fileId': value.file.fileId.toString(),
+              'name': value.file.name.value,
             }
           : {},
     );
@@ -336,9 +336,9 @@ class Rive {
       message: openFileTab == null ? 'open file' : 're-open file',
       severity: CrumbSeverity.info,
       data: {
-        "ownerId": ownerId.toString(),
-        "fileId": fileId.toString(),
-        "name": name,
+        'ownerId': ownerId.toString(),
+        'fileId': fileId.toString(),
+        'name': name,
       },
     );
 
@@ -367,12 +367,29 @@ class Rive {
         message: connected ? 'connected to file' : 'failed to connect to file',
         severity: connected ? CrumbSeverity.info : CrumbSeverity.warning,
         data: {
-          "ownerId": ownerId.toString(),
-          "fileId": fileId.toString(),
-          "name": name,
+          'ownerId': ownerId.toString(),
+          'fileId': fileId.toString(),
+          'name': name,
         },
       );
     }
+
+    // TODO: this should be moved to a centralized location
+    // Mark the first run flag if necessary
+    if (Plumber().peek<Me>()?.isFirstRun ?? false) {
+      ErrorLogger.instance.dropCrumb(
+        category: 'user',
+        message: 'marking first run',
+        severity: CrumbSeverity.debug,
+        data: {
+          'ownerId': ownerId.toString(),
+          'fileId': fileId.toString(),
+          'name': name,
+        },
+      );
+      UserManager().markFirstRun();
+    }
+
     return openFileTab.file;
   }
 }

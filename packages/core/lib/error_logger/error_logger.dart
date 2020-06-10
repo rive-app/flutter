@@ -1,6 +1,6 @@
+import 'package:meta/meta.dart';
 import 'native_error_logger.dart'
     if (dart.library.html) 'web_error_logger.dart';
-import 'package:meta/meta.dart';
 
 @immutable
 class ErrorLogUser {
@@ -49,7 +49,7 @@ abstract class ErrorLogger {
   ErrorLogger();
 
   @protected
-  final breadcrumbs = List<ErrorBreadcrumb>();
+  final breadcrumbs = <ErrorBreadcrumb>[];
 
   /// Use this to track the currently logged in user.
   ErrorLogUser get user;
