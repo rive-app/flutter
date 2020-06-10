@@ -164,7 +164,14 @@ abstract class Component extends ComponentBase<RiveFile>
   @override
   Set<Component> get dependents => _dependents;
 
+  /// Override this to define a parent to group this component under.
   Component get timelineParent => null;
+
+  /// Override this to bubble the properties of this component into another
+  /// component.
+  // ignore: avoid_returning_this
+  Component get timelineProxy => this;
+
   String get timelineParentGroup => null;
 
   bool addDependent(Component dependent) {

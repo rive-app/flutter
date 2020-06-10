@@ -7,8 +7,9 @@
   "extends": "component.json",
   "properties": {
     "colorValue": {
-      "type": "int",
+      "type": "Color",
       "initialValue": "0xFF747474",
+      "animates": true,
       "key": {
         "int": 37,
         "string": "color"

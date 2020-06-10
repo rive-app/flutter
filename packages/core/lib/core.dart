@@ -31,6 +31,7 @@ export 'package:core/field_types/core_id_type.dart';
 export 'package:core/field_types/core_int_type.dart';
 export 'package:core/field_types/core_list_id_type.dart';
 export 'package:core/field_types/core_string_type.dart';
+export 'package:core/field_types/core_color_type.dart';
 
 final _log = Logger('Core');
 

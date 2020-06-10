@@ -66,6 +66,7 @@ HashMap<String, String> _defaultUIStrings =
   'bezier_out': 'Out',
   'inDistance': 'In',
   'outDistance': 'Out',
+  'colorValue': 'Color',
 
   /// Used by the mirrored cubic vertex.
   'distance': 'Length',

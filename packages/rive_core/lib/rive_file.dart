@@ -439,6 +439,9 @@ class RiveFile extends RiveCoreContext {
   CoreListIdType get listIdType => RiveListIdType.instance;
 
   @override
+  CoreColorType get colorType => RiveColorType.instance;
+
+  @override
   CoreFractionalIndexType get fractionalIndexType =>
       RiveFractionalIndexType.instance;
 }

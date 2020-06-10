@@ -3,7 +3,9 @@ import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
+import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/percentage_input_converter.dart';
 import 'package:rive_editor/widgets/common/converters/rotation_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/scale_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
@@ -12,6 +14,8 @@ import 'package:rive_editor/widgets/common/converters/translation_value_converte
 /// both the inspector and the timeline.
 InputValueConverter<T> converterForProperty<T>(int propertyKey) {
   switch (propertyKey) {
+    case GradientStopBase.positionPropertyKey:
+      return PercentageInputConverter.instance as InputValueConverter<T>;
     case NodeBase.rotationPropertyKey:
     case CubicAsymmetricVertexBase.rotationPropertyKey:
     case CubicDetachedVertexBase.inRotationPropertyKey:

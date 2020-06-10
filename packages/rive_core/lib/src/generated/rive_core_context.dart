@@ -6,6 +6,7 @@ import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/animation/cubic_interpolator.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/animation/keyframe_color.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/animation/keyframe_draw_order.dart';
 import 'package:rive_core/animation/keyframe_draw_order_value.dart';
@@ -34,6 +35,7 @@ import 'package:rive_core/src/generated/animation/cubic_interpolator_base.dart';
 import 'package:rive_core/src/generated/animation/keyed_object_base.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
+import 'package:rive_core/src/generated/animation/keyframe_color_base.dart';
 import 'package:rive_core/src/generated/animation/keyframe_double_base.dart';
 import 'package:rive_core/src/generated/animation/keyframe_draw_order_base.dart';
 import 'package:rive_core/src/generated/animation/keyframe_draw_order_value_base.dart';
@@ -79,6 +81,8 @@ abstract class RiveCoreContext extends CoreContext {
         return CubicInterpolator();
       case KeyFrameDoubleBase.typeKey:
         return KeyFrameDouble();
+      case KeyFrameColorBase.typeKey:
+        return KeyFrameColor();
       case LinearAnimationBase.typeKey:
         return LinearAnimation();
       case KeyFrameDrawOrderBase.typeKey:
@@ -206,6 +210,8 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyFrameBase.interpolatorIdPropertyKey:
         return 'interpolatorId';
       case KeyFrameDoubleBase.valuePropertyKey:
+        return 'value';
+      case KeyFrameColorBase.valuePropertyKey:
         return 'value';
       case LinearAnimationBase.fpsPropertyKey:
         return 'fps';
@@ -341,6 +347,7 @@ abstract class RiveCoreContext extends CoreContext {
   CoreStringType get stringType;
   CoreFractionalIndexType get fractionalIndexType;
   CoreDoubleType get doubleType;
+  CoreColorType get colorType;
   CoreBoolType get boolType;
   CoreListIdType get listIdType;
 
@@ -408,12 +415,9 @@ abstract class RiveCoreContext extends CoreContext {
         case LinearAnimationBase.workEndPropertyKey:
         case StrokeBase.capPropertyKey:
         case StrokeBase.joinPropertyKey:
-        case SolidColorBase.colorValuePropertyKey:
-        case GradientStopBase.colorValuePropertyKey:
         case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModePropertyKey:
         case PointsPathBase.editingModeValuePropertyKey:
-        case BackboardBase.colorValuePropertyKey:
           var value = intType.deserialize(reader);
           setInt(object, change.op, value);
           break;
@@ -471,6 +475,13 @@ abstract class RiveCoreContext extends CoreContext {
         case ArtboardBase.originYPropertyKey:
           var value = doubleType.deserialize(reader);
           setDouble(object, change.op, value);
+          break;
+        case KeyFrameColorBase.valuePropertyKey:
+        case SolidColorBase.colorValuePropertyKey:
+        case GradientStopBase.colorValuePropertyKey:
+        case BackboardBase.colorValuePropertyKey:
+          var value = colorType.deserialize(reader);
+          setColor(object, change.op, value);
           break;
         case LinearAnimationBase.enableWorkAreaPropertyKey:
         case ShapePaintBase.isVisiblePropertyKey:
@@ -531,12 +542,9 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearAnimationBase.workEndPropertyKey:
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
-      case SolidColorBase.colorValuePropertyKey:
-      case GradientStopBase.colorValuePropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
-      case BackboardBase.colorValuePropertyKey:
         if (value != null && value is int) {
           change.value = intType.serialize(value);
         } else {
@@ -603,6 +611,16 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originYPropertyKey:
         if (value != null && value is double) {
           change.value = doubleType.serialize(value);
+        } else {
+          return null;
+        }
+        break;
+      case KeyFrameColorBase.valuePropertyKey:
+      case SolidColorBase.colorValuePropertyKey:
+      case GradientStopBase.colorValuePropertyKey:
+      case BackboardBase.colorValuePropertyKey:
+        if (value != null && value is int) {
+          change.value = colorType.serialize(value);
         } else {
           return null;
         }
@@ -714,6 +732,11 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case KeyFrameDoubleBase.valuePropertyKey:
         if (object is KeyFrameDoubleBase && value is double) {
+          object.value = value;
+        }
+        break;
+      case KeyFrameColorBase.valuePropertyKey:
+        if (object is KeyFrameColorBase && value is int) {
           object.value = value;
         }
         break;
@@ -1117,6 +1140,11 @@ abstract class RiveCoreContext extends CoreContext {
           object.value = value;
         }
         break;
+      case KeyFrameColorBase.valuePropertyKey:
+        if (object is KeyFrameColorBase && value is int) {
+          object.value = value;
+        }
+        break;
       case LinearAnimationBase.fpsPropertyKey:
         if (object is LinearAnimationBase && value is int) {
           object.fps = value;
@@ -1239,17 +1267,17 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case SolidColorBase.colorValuePropertyKey:
         if (object is SolidColorBase && value is int) {
-          object.colorValue = value;
+          object.colorValueCore = value;
         }
         break;
       case GradientStopBase.colorValuePropertyKey:
         if (object is GradientStopBase && value is int) {
-          object.colorValue = value;
+          object.colorValueCore = value;
         }
         break;
       case GradientStopBase.positionPropertyKey:
         if (object is GradientStopBase && value is double) {
-          object.position = value;
+          object.positionCore = value;
         }
         break;
       case FillBase.fillRulePropertyKey:
@@ -1433,6 +1461,9 @@ abstract class RiveCoreContext extends CoreContext {
   static bool animates(int propertyKey) {
     switch (propertyKey) {
       case StrokeBase.thicknessPropertyKey:
+      case SolidColorBase.colorValuePropertyKey:
+      case GradientStopBase.colorValuePropertyKey:
+      case GradientStopBase.positionPropertyKey:
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
       case NodeBase.rotationPropertyKey:
@@ -1461,6 +1492,15 @@ abstract class RiveCoreContext extends CoreContext {
     switch (propertyKey) {
       case StrokeBase.thicknessPropertyKey:
         return (object as StrokeBase).thicknessKeyState;
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        return (object as SolidColorBase).colorValueKeyState;
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        return (object as GradientStopBase).colorValueKeyState;
+        break;
+      case GradientStopBase.positionPropertyKey:
+        return (object as GradientStopBase).positionKeyState;
         break;
       case NodeBase.xPropertyKey:
         return (object as NodeBase).xKeyState;
@@ -1526,6 +1566,21 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.thicknessPropertyKey:
         if (object is StrokeBase) {
           object.thicknessKeyState = value;
+        }
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        if (object is SolidColorBase) {
+          object.colorValueKeyState = value;
+        }
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        if (object is GradientStopBase) {
+          object.colorValueKeyState = value;
+        }
+        break;
+      case GradientStopBase.positionPropertyKey:
+        if (object is GradientStopBase) {
+          object.positionKeyState = value;
         }
         break;
       case NodeBase.xPropertyKey:
@@ -1628,6 +1683,24 @@ abstract class RiveCoreContext extends CoreContext {
         if (object is StrokeBase) {
           object.thicknessAnimated = null;
           object.thicknessKeyState = KeyState.none;
+        }
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        if (object is SolidColorBase) {
+          object.colorValueAnimated = null;
+          object.colorValueKeyState = KeyState.none;
+        }
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        if (object is GradientStopBase) {
+          object.colorValueAnimated = null;
+          object.colorValueKeyState = KeyState.none;
+        }
+        break;
+      case GradientStopBase.positionPropertyKey:
+        if (object is GradientStopBase) {
+          object.positionAnimated = null;
+          object.positionKeyState = KeyState.none;
         }
         break;
       case NodeBase.xPropertyKey:
@@ -1821,6 +1894,11 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case KeyFrameDoubleBase.valuePropertyKey:
         if (object is KeyFrameDoubleBase) {
+          return object.value;
+        }
+        break;
+      case KeyFrameColorBase.valuePropertyKey:
+        if (object is KeyFrameColorBase) {
           return object.value;
         }
         break;
@@ -2194,12 +2272,9 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearAnimationBase.workEndPropertyKey:
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
-      case SolidColorBase.colorValuePropertyKey:
-      case GradientStopBase.colorValuePropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModePropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
-      case BackboardBase.colorValuePropertyKey:
         return intType;
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
@@ -2250,6 +2325,11 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originXPropertyKey:
       case ArtboardBase.originYPropertyKey:
         return doubleType;
+      case KeyFrameColorBase.valuePropertyKey:
+      case SolidColorBase.colorValuePropertyKey:
+      case GradientStopBase.colorValuePropertyKey:
+      case BackboardBase.colorValuePropertyKey:
+        return colorType;
       case LinearAnimationBase.enableWorkAreaPropertyKey:
       case ShapePaintBase.isVisiblePropertyKey:
       case StrokeBase.transformAffectsStrokePropertyKey:
@@ -2312,18 +2392,12 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as StrokeBase).cap;
       case StrokeBase.joinPropertyKey:
         return (object as StrokeBase).join;
-      case SolidColorBase.colorValuePropertyKey:
-        return (object as SolidColorBase).colorValue;
-      case GradientStopBase.colorValuePropertyKey:
-        return (object as GradientStopBase).colorValue;
       case FillBase.fillRulePropertyKey:
         return (object as FillBase).fillRule;
       case DrawableBase.blendModePropertyKey:
         return (object as DrawableBase).blendMode;
       case PointsPathBase.editingModeValuePropertyKey:
         return (object as PointsPathBase).editingModeValue;
-      case BackboardBase.colorValuePropertyKey:
-        return (object as BackboardBase).colorValue;
     }
     return 0;
   }
@@ -2438,6 +2512,20 @@ abstract class RiveCoreContext extends CoreContext {
     return 0.0;
   }
 
+  static int getColor(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case KeyFrameColorBase.valuePropertyKey:
+        return (object as KeyFrameColorBase).value;
+      case SolidColorBase.colorValuePropertyKey:
+        return (object as SolidColorBase).colorValue;
+      case GradientStopBase.colorValuePropertyKey:
+        return (object as GradientStopBase).colorValue;
+      case BackboardBase.colorValuePropertyKey:
+        return (object as BackboardBase).colorValue;
+    }
+    return 0;
+  }
+
   static bool getBool(Core object, int propertyKey) {
     switch (propertyKey) {
       case LinearAnimationBase.enableWorkAreaPropertyKey:
@@ -2530,12 +2618,6 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.joinPropertyKey:
         (object as StrokeBase).join = value;
         break;
-      case SolidColorBase.colorValuePropertyKey:
-        (object as SolidColorBase).colorValue = value;
-        break;
-      case GradientStopBase.colorValuePropertyKey:
-        (object as GradientStopBase).colorValue = value;
-        break;
       case FillBase.fillRulePropertyKey:
         (object as FillBase).fillRule = value;
         break;
@@ -2544,9 +2626,6 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case PointsPathBase.editingModeValuePropertyKey:
         (object as PointsPathBase).editingModeValue = value;
-        break;
-      case BackboardBase.colorValuePropertyKey:
-        (object as BackboardBase).colorValue = value;
         break;
     }
   }
@@ -2619,7 +2698,7 @@ abstract class RiveCoreContext extends CoreContext {
         (object as StrokeBase).thicknessCore = value;
         break;
       case GradientStopBase.positionPropertyKey:
-        (object as GradientStopBase).position = value;
+        (object as GradientStopBase).positionCore = value;
         break;
       case NodeBase.xPropertyKey:
         (object as NodeBase).xCore = value;
@@ -2710,6 +2789,9 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.thicknessPropertyKey:
         (object as StrokeBase).thicknessAnimated = value;
         break;
+      case GradientStopBase.positionPropertyKey:
+        (object as GradientStopBase).positionAnimated = value;
+        break;
       case NodeBase.xPropertyKey:
         (object as NodeBase).xAnimated = value;
         break;
@@ -2763,6 +2845,34 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case CubicDetachedVertexBase.outDistancePropertyKey:
         (object as CubicDetachedVertexBase).outDistanceAnimated = value;
+        break;
+    }
+  }
+
+  static void setColor(Core object, int propertyKey, int value) {
+    switch (propertyKey) {
+      case KeyFrameColorBase.valuePropertyKey:
+        (object as KeyFrameColorBase).value = value;
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        (object as SolidColorBase).colorValueCore = value;
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        (object as GradientStopBase).colorValueCore = value;
+        break;
+      case BackboardBase.colorValuePropertyKey:
+        (object as BackboardBase).colorValue = value;
+        break;
+    }
+  }
+
+  static void animateColor(Core object, int propertyKey, int value) {
+    switch (propertyKey) {
+      case SolidColorBase.colorValuePropertyKey:
+        (object as SolidColorBase).colorValueAnimated = value;
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        (object as GradientStopBase).colorValueAnimated = value;
         break;
     }
   }

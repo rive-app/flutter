@@ -21,6 +21,7 @@ abstract class GradientDelegate extends BoundsDelegate {
 /// foundation for the RadialGradient which is very similar but also has a
 /// radius value.
 class LinearGradient extends LinearGradientBase with ShapePaintMutator {
+
   /// Stored list of core gradient stops are in the hierarchy as children of
   /// this container.
   final List<GradientStop> gradientStops = [];

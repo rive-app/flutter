@@ -921,12 +921,9 @@ class Definition {
     // Build is/setter/getter for specific types.
 
     groups.forEach((type, properties) {
-      var capitalizedType =
-          '${type.dartName[0].toUpperCase()}${type.dartName.substring(1)}'
-              .replaceAll('<', '')
-              .replaceAll('>', '');
+      var capitalizedType = type.capitalizedName;
       ctxCode.writeln('''
-        static $type get${capitalizedType}(Core object, int propertyKey) {
+        static ${type.dartName} get$capitalizedType(Core object, int propertyKey) {
           switch(propertyKey) {
           ''');
       for (final property in properties) {
@@ -940,12 +937,9 @@ class Definition {
     });
 
     groups.forEach((type, properties) {
-      var capitalizedType =
-          '${type.dartName[0].toUpperCase()}${type.dartName.substring(1)}'
-              .replaceAll('<', '')
-              .replaceAll('>', '');
+      var capitalizedType = type.capitalizedName;
       ctxCode.writeln('''
-        static void set${capitalizedType}(Core object, int propertyKey, $type value) {
+        static void set$capitalizedType(Core object, int propertyKey, ${type.dartName} value) {
           switch(propertyKey) {
           ''');
       bool animates = false;
@@ -970,8 +964,8 @@ class Definition {
       ctxCode.writeln('}}');
       if (!config.isRuntime && animates) {
         ctxCode.writeln('''
-        static void animate${capitalizedType}(Core object, int propertyKey, 
-          $type value) {
+        static void animate$capitalizedType(Core object, int propertyKey, 
+          ${type.dartName} value) {
           switch(propertyKey) {
           ''');
         for (final property in properties) {

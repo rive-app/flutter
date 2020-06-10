@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/drawable.dart';
+import 'package:rive_core/rive_core_field_type.dart';
+import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
@@ -95,7 +97,9 @@ class KeyedObjectHierarchy extends StatelessWidget {
   Widget _buildKeyedComponent(BuildContext context, RiveThemeData theme,
       KeyedComponentViewModel model) {
     return Text(
-      model.component.timelineName,
+      // TODO: use uistrings for non user set values (user set names are in
+      // .name).
+      model.component.timelineName ?? model.component.toString(),
       style: theme.textStyles.inspectorWhiteLabel,
     );
     // TODO: make component names renamable in the timeline
@@ -142,26 +146,30 @@ class KeyedObjectHierarchy extends StatelessWidget {
 
   Widget _buildKeyedPropertyEditor(
       BuildContext context, RiveThemeData theme, KeyedPropertyViewModel model) {
-    switch (model.keyedProperty.propertyKey) {
-      case DrawableBase.drawOrderPropertyKey:
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 3),
-          child: DrawOrderKeyButton(
-              manager: ActiveFile.of(context).editingAnimationManager.value),
-        );
-        break;
-      default:
-        return Padding(
-          padding: const EdgeInsets.only(top: 2, left: 9),
-          child: SizedBox(
-            width: 69,
-            child: CoreTextField<double>(
-              underlineColor: theme.colors.timelineUnderline,
-              objects: [model.component],
-              propertyKey: model.keyedProperty.propertyKey,
-            ),
+    var coreType =
+        model.component.context.coreType(model.keyedProperty.propertyKey);
+    if (coreType == RiveColorType.instance) {
+      // TODO: add color swatch
+      return const SizedBox();
+    } else if (coreType == RiveDoubleType.instance) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 2, left: 9),
+        child: SizedBox(
+          width: 69,
+          child: CoreTextField<double>(
+            underlineColor: theme.colors.timelineUnderline,
+            objects: [model.component],
+            propertyKey: model.keyedProperty.propertyKey,
           ),
-        );
+        ),
+      );
+    } else if (model.keyedProperty.propertyKey ==
+        DrawableBase.drawOrderPropertyKey) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 3),
+        child: DrawOrderKeyButton(
+            manager: ActiveFile.of(context).editingAnimationManager.value),
+      );
     }
   }
 }
