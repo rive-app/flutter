@@ -33,6 +33,9 @@ final Map<BillingFrequency, Map<TeamsOption, int>> costLookup = {
 enum WizardPanel { one, two }
 
 abstract class SubscriptionPackage with ChangeNotifier {
+  // Bit nasty, but riveapi is context bound :/
+  RiveApi api;
+
   /// Team subscription freuqency
   BillingFrequency _billing = BillingFrequency.yearly;
   BillingFrequency get billing => _billing;
@@ -161,10 +164,26 @@ abstract class SubscriptionPackage with ChangeNotifier {
 
   String _zipError;
   String get zipError => _zipError;
+
+  /// Form Processing
+  bool _processing = false;
+  bool get processing => _processing;
+  set processing(bool value) {
+    _processing = value;
+    notifyListeners();
+  }
+
+  String get expMonth => expiration.split('/').first;
+  String get expYear => '20${expiration.split('/').last}';
 }
 
 /// Data class for managing subscription data in the Team Settings 'Plan' modal.
 class PlanSubscriptionPackage extends SubscriptionPackage {
+  PlanSubscriptionPackage(this.team);
+
+  /// The team data.
+  final Team team;
+
   // TODO: current plan expiration date.
   int _currentCost;
   int get currentCost => _currentCost;
@@ -176,10 +195,11 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   static Future<PlanSubscriptionPackage> fetchData(
       RiveApi api, Team team) async {
     var response = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
-    var subscription = PlanSubscriptionPackage()
+    var subscription = PlanSubscriptionPackage(team)
       ..option = response.plan
       ..billing = response.frequency
-      .._teamSize = 1;
+      .._teamSize = 1
+      ..api = api;
     // TODO: fix billing amount
     subscription._currentCost = subscription.calculatedCost;
 
@@ -201,13 +221,50 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     _option = value;
     notifyListeners();
   }
+
+  bool get _isCardInfoValid =>
+      isCardNrValid && isCcvValid && isExpirationValid && isZipValid;
+
+  Future<bool> updateCard(Team team) async {
+    if (processing || !_isCardInfoValid) {
+      return false;
+    }
+    // Track that everything went fine.
+    bool success = false;
+    try {
+      var publicKey = await StripeApi(api).getStripePublicKey();
+      var tokenResponse =
+          await createToken(publicKey, cardNumber, expMonth, expYear, ccv, zip);
+      success = await TeamManager().saveToken(team, tokenResponse.token);
+    } on StripeAPIError catch (error) {
+      switch (error.type) {
+        case StripeErrorTypes.cardNumber:
+          _cardValidationError = error.error;
+          break;
+        case StripeErrorTypes.cardCCV:
+          _ccvError = error.error;
+          break;
+        case StripeErrorTypes.cardExpiration:
+          _expirationError = error.error;
+          break;
+        default:
+          // todo.. fine
+          _cardValidationError = error.error;
+      }
+    } on ApiException catch (exception) {
+      // card validation error is just the most convenient
+      // place to display this
+      _cardValidationError = exception.error.message;
+    } finally {
+      processing = false;
+    }
+
+    return success;
+  }
 }
 
 /// Data class for tracking data in the team subscription widget
 class TeamSubscriptionPackage extends SubscriptionPackage {
-  // Bit nasty, but riveapi is context bound :/
-  RiveApi api;
-
   /// Team name
   String _name;
   String get name => _name;
@@ -227,14 +284,6 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
       isNameValid;
       notifyListeners();
     }
-  }
-
-  /// Form Processing
-  bool _processing = false;
-  bool get processing => _processing;
-  set processing(bool value) {
-    _processing = value;
-    notifyListeners();
   }
 
   @override
@@ -320,9 +369,6 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
 
   /// Step 2 is valid; safe to attempt team creation
   bool get isStep2Valid => isNameValid && isOptionValid && isCardInputValid;
-
-  String get expMonth => expiration.split('/').first;
-  String get expYear => '20${expiration.split('/').last}';
 
   Future checkName() async {
     if (_nameCheckDebounce?.isActive ?? false) _nameCheckDebounce.cancel();

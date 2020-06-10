@@ -1,8 +1,8 @@
-import 'package:rive_api/models/team_role.dart';
-import 'package:rive_api/plumber.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/models/team_role.dart';
+import 'package:rive_api/plumber.dart';
 
 class TeamManager with Subscriptions {
   static final TeamManager _instance = TeamManager._();
@@ -76,5 +76,14 @@ class TeamManager with Subscriptions {
     } else {
       return _teamApi.changeRole(teamId, memberOwnerId, role);
     }
+  }
+
+  Future<bool> saveToken(Team team, String token) async =>
+      _teamApi.saveToken(team.ownerId, token);
+
+  Future<void> getCustomerInfo(Team team) async {
+    var info =
+        CustomerInfo.fromDM(await _teamApi.getCustomerInfo(team.ownerId));
+    Plumber().message<CustomerInfo>(info, team.ownerId);
   }
 }

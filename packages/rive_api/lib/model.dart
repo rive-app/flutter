@@ -1,4 +1,5 @@
 export 'src/model/current_directory.dart';
+export 'src/model/customer_info.dart';
 export 'src/model/file.dart';
 export 'src/model/folder.dart';
 export 'src/model/folder_contents.dart';

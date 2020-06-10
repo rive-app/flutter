@@ -14,11 +14,10 @@ class StripeApi {
   const StripeApi(this.api);
   final RiveApi api;
 
-  /// POST /api/teams
+  /// GET /api/config/stripe
   Future<String> getStripePublicKey() async {
-    // If we start needing more here, it may be worth making a response model.
-
-    var response = await api.get(api.host + '/api/config/stripe');
+    // If we start needing more here, it may be worth making a response model
+    var response = await api.get('${api.host}/api/config/stripe');
     final data = json.decodeMap(response.body);
     return data['data']['stripe_pk'] as String;
   }

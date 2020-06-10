@@ -74,7 +74,7 @@ class TeamApi {
     var response =
         await api.put(api.host + '/api/teams/$teamId', body: profile.encoded);
     if (response.statusCode != 200) {
-      var message = 'Could not create new team ${response.body}';
+      var message = 'Could not update team profile: ${response.body}';
       log.severe(message);
       return false;
     }
@@ -99,6 +99,40 @@ class TeamApi {
     } on ApiException catch (err) {
       log.severe('[Error] changeRole() ${err.response.body}');
       return false;
+    }
+  }
+
+  /// PATCH /api/teams/:team_id/token
+  /// Sends a new token for the current team to update the current payment
+  /// method.
+  Future<bool> saveToken(int teamId, String token) async {
+    try {
+      String payload = json.encode({'token': token});
+      await api.patch(
+        '${api.host}/api/teams/$teamId/token',
+        body: payload,
+      );
+      return true;
+    } on ApiException catch (err) {
+      log.severe('[ERROR] saveToken() ${err.response.body}');
+      return false;
+    }
+  }
+
+  /// GET /api/teams/:team_id/customer
+  /// Get the credit card information for this team.
+  Future<CustomerInfoDM> getCustomerInfo(int teamId) async {
+    try {
+      final response = await api.get('${api.host}/api/teams/$teamId/customer');
+
+      final data = json.decode(response.body) as Map<String, Object>;
+      return CustomerInfoDM.fromData(data);
+    } on ApiException catch (err) {
+      log.severe('[ERROR] getCustomerInfo() API ${err.response.body}');
+      return null;
+    } on FormatException catch (err) {
+      log.severe('[Error] getCustomerInfo() formatting: $err');
+      rethrow;
     }
   }
 }

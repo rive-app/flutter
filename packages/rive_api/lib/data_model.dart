@@ -1,5 +1,6 @@
 export 'src/data_model/app_state.dart';
 export 'src/data_model/cdn.dart';
+export 'src/data_model/customer_info.dart';
 export 'src/data_model/file.dart';
 export 'src/data_model/folder.dart';
 export 'src/data_model/me.dart';
