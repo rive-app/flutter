@@ -37,6 +37,7 @@ packages/rive_api/pubspec.lock
 .pub-cache/
 .pub/
 build/
+output/
 
 
 # General plugin related 

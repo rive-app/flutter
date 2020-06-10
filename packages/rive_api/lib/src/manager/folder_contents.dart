@@ -1,3 +1,5 @@
+import 'package:pedantic/pedantic.dart';
+
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
@@ -7,7 +9,7 @@ import 'package:utilities/utilities.dart';
 
 class FolderContentsManager with Subscriptions {
   factory FolderContentsManager() => _instance;
-  static final  _instance = FolderContentsManager._();
+  static final _instance = FolderContentsManager._();
 
   FolderContentsManager._()
       : _fileApi = FileApi(),
@@ -44,23 +46,18 @@ class FolderContentsManager with Subscriptions {
           // Send an empty message right away to display an empty file browser
           // while contents are loading.
           Plumber().message<FolderContents>(
-              FolderContents(isLoading: true), cacheId);
+              const FolderContents(isLoading: true), cacheId);
         }
         _getFolderContents(directory);
       }
     });
-
-    subscribe<Me>((me) {
-      // Upon init, go get the current users' top folder.
-      final myFiles = CurrentDirectory(me, 1);
-      Plumber().message<CurrentDirectory>(myFiles);
-    });
   }
 
-  void _loadFileDetails(List<File> files, CurrentDirectory directory) async {
+  Future<void> _loadFileDetails(
+      List<File> files, CurrentDirectory directory) async {
     final plumber = Plumber();
 
-    final cache = (_cache[directory.hashId] ??= _FolderContentsCache());
+    final cache = _cache[directory.hashId] ??= _FolderContentsCache();
 
     for (final file in files) {
       final cachedFile = cache.files.lookup(file);
@@ -69,7 +66,7 @@ class FolderContentsManager with Subscriptions {
       }
     }
     final fileIdSet = files.toSet();
-    cache.files.removeWhere((file) => !fileIdSet.contains(file.id));
+    cache.files.removeWhere((file) => !fileIdSet.contains(file));
 
     final teamOwnerId =
         directory.owner is Team ? directory.owner.ownerId : null;
@@ -114,7 +111,7 @@ class FolderContentsManager with Subscriptions {
         continue;
       }
       final cacheId = szudzik(ownerId, folder.parent);
-      final cache = (_cache[cacheId] ??= _FolderContentsCache());
+      final cache = _cache[cacheId] ??= _FolderContentsCache();
       cache.folders.add(folder);
     }
 
@@ -123,7 +120,7 @@ class FolderContentsManager with Subscriptions {
     return _cache[currentCacheId];
   }
 
-  void _getFolderContents(CurrentDirectory directory) async {
+  Future<void> _getFolderContents(CurrentDirectory directory) async {
     List<FileDM> files;
     List<FolderDM> folders;
     final owner = directory.owner;
@@ -145,7 +142,7 @@ class FolderContentsManager with Subscriptions {
     List<Folder> folderList = folderCache.folders.toList(growable: false);
 
     if (files.isNotEmpty) {
-      _loadFileDetails(fileList, directory);
+      unawaited(_loadFileDetails(fileList, directory));
     }
 
     Plumber().message<FolderContents>(
@@ -168,8 +165,8 @@ class FolderContentsManager with Subscriptions {
       );
     }
 
-    _getFolderContents(currentDirectory);
-    FileManager().loadFolders(currentDirectory.owner);
+    unawaited(_getFolderContents(currentDirectory));
+    unawaited(FileManager().loadFolders(currentDirectory.owner));
   }
 
   Future<void> rename(Object target, String newName) async {
@@ -197,8 +194,8 @@ class FolderContentsManager with Subscriptions {
       }
     }
 
-    _getFolderContents(currentDirectory);
-    FileManager().loadFolders(currentDirectory.owner);
+    unawaited(_getFolderContents(currentDirectory));
+    unawaited(FileManager().loadFolders(currentDirectory.owner));
   }
 }
 

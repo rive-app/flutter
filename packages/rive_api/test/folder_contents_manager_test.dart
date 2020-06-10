@@ -9,33 +9,38 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 
+import 'package:utilities/utilities.dart';
+
 import 'fixtures/api_responses.dart';
 import 'fixtures/data_models.dart';
-
-import 'package:utilities/utilities.dart';
 
 class MockFileApi extends Mock implements FileApi {}
 
 class MockFolderApi extends Mock implements FolderApi {}
 
 void main() {
-  group('FolderContents Manager ', () {
+  group('FolderContents Manager', () {
     Plumber _plumber;
     MockFileApi _mockedFileApi;
     MockFolderApi _mockedFolderApi;
+    // ignore: unused_local_variable
     FolderContentsManager _folderContentsManager;
 
     setUp(() {
       _plumber = Plumber();
 
       // Set up the 'Me' message.
-      _plumber.message<Me>(Me.fromDM(getMe()));
+      final me = Me.fromDM(getMe());
+      _plumber.message<Me>(me);
       _mockedFileApi = MockFileApi();
       _mockedFolderApi = MockFolderApi();
       _folderContentsManager = FolderContentsManager.tester(
         _mockedFileApi,
         _mockedFolderApi,
       );
+
+      // Load the user's directory
+      _plumber.message<CurrentDirectory>(CurrentDirectory(me, 1));
 
       // 'Your Files' folder.
       when(_mockedFileApi.myFiles(2, 1)).thenAnswer((_) async {

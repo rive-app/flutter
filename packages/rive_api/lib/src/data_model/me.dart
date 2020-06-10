@@ -18,6 +18,7 @@ class MeDM extends UserDM {
     this.verified,
     this.notice,
     this.socialLink,
+    this.isFirstRun = false,
   }) : super(
           ownerId: ownerId,
           name: name,
@@ -25,12 +26,13 @@ class MeDM extends UserDM {
           avatarUrl: avatarUrl,
         );
 
-  final bool signedIn;
   final int id;
+  final bool signedIn;
   final bool isAdmin;
   final bool isPaid;
-  final int notificationCount;
   final bool verified;
+  final bool isFirstRun;
+  final int notificationCount;
   final String notice;
   final SocialLink socialLink;
 
@@ -48,6 +50,7 @@ class MeDM extends UserDM {
   ///    'notificationCount':0,
   ///    'verified':false,
   ///    'notice':'confirm-email'
+  ///    'isFirstRun': true
   /// }
   factory MeDM.fromData(Map<String, dynamic> data) => MeDM(
         ownerId: data.getInt('ownerId'),
@@ -61,6 +64,7 @@ class MeDM extends UserDM {
         notificationCount: data.getInt('notificationCount'),
         verified: data.getBool('verified'),
         notice: data.getString('notice'),
+        isFirstRun: data.getBool('isFirstRun'),
       );
 
   /// Create a model from JSON data
@@ -84,13 +88,8 @@ class MeDM extends UserDM {
       ));
 
   @override
-  String toString() {
-    if (socialLink == null) {
-      return 'MeDM($id, $name)';
-    } else {
-      return '<SocialLinkMe: ($socialLink)>';
-    }
-  }
+  String toString() =>
+      socialLink == null ? 'MeDM($id, $name)' : '<SocialLinkMe: ($socialLink)>';
 }
 
 class SocialLink {

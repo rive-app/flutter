@@ -7,7 +7,6 @@ import 'package:rive_api/models/team_invite_status.dart';
 import 'package:utilities/deserialize.dart';
 
 class RiveUser extends RiveOwner {
-  final String avatar;
   final bool isAdmin;
   final bool isPaid;
   final int notificationCount;
@@ -19,7 +18,7 @@ class RiveUser extends RiveOwner {
     @required int ownerId,
     @required String name,
     @required String username,
-    this.avatar,
+    String avatar,
     this.isAdmin = false,
     this.isPaid = false,
     this.notificationCount = 0,
@@ -28,7 +27,7 @@ class RiveUser extends RiveOwner {
     this.role,
   })  : assert(ownerId != null),
         assert(name != null || username != null),
-        super(id: ownerId, name: name, username: username);
+        super(id: ownerId, name: name, username: username, avatar: avatar);
 
   factory RiveUser.fromData(Map<String, dynamic> data,
       {bool requireSignin = true}) {

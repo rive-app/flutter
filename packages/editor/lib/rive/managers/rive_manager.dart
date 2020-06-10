@@ -12,6 +12,7 @@ class RiveManager with Subscriptions {
   RiveManager._() {
     _attach();
   }
+
   RiveManager.tester() {
     _attach();
   }
@@ -33,13 +34,19 @@ class RiveManager with Subscriptions {
         Plumber().peek<NotificationCount>()?.count != 0) {
       NotificationManager().markNotificationsRead();
     }
+    // Handle marking first run when
+    // the user opens the getting started panel
+    if (newHomeSection == HomeSection.getStarted &&
+        (Plumber().peek<Me>()?.isFirstRun ?? false)) {
+      UserManager().markFirstRun();
+    }
   }
 
   void _newCurrentDirectory(CurrentDirectory currentDirectory) {
     // Handle incoming team invitation acceptances
     if (currentDirectory != null) {
       if (Plumber().peek<HomeSection>() != HomeSection.files) {
-        Plumber().message(HomeSection.files);
+        Plumber().message<HomeSection>(HomeSection.files);
       }
     }
   }
@@ -47,9 +54,9 @@ class RiveManager with Subscriptions {
   void viewTeam(int teamOwnerId) {
     // NOTE: you hit this, without having loaded the team
     // this will obviously fail.
-    var _plumber = Plumber();
-    var teams = _plumber.peek<List<Team>>();
-    var targetTeam =
+    final _plumber = Plumber();
+    final teams = Plumber().peek<List<Team>>();
+    final targetTeam =
         teams.firstWhere((element) => element.ownerId == teamOwnerId);
     // 1 is the magic base folder
     _plumber.message(CurrentDirectory(targetTeam, 1));
