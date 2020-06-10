@@ -98,6 +98,8 @@ class TreeView<T> extends StatelessWidget {
                 var item = controller.flat[index];
                 var lines = <Widget>[];
                 var depth = item.depth;
+                var showHorizontalLine =
+                    controller.hasHorizontalLine(item.data);
 
                 if (style.showFirstLine) {
                   depth = Int8List.fromList(
@@ -109,7 +111,13 @@ class TreeView<T> extends StatelessWidget {
                 int depthCount = depth.length;
                 bool hasChildren = item.hasChildren;
                 int numberOfLines = hasChildren ? depthCount - 1 : depthCount;
-                bool shortLastLine = !hasChildren && item.isLastChild;
+                bool shortLastLine = !hasChildren &&
+                    (item.isLastChild ||
+                        // Special case for when we're hiding the last
+                        // horizontal line, we need to treat the penultimate
+                        // child as the one with the short (halfed) final line.
+                        (item.next.isLastChild &&
+                            !controller.hasHorizontalLine(item.next.data)));
                 numberOfLines--;
                 double toLineCenter = iconWidth / 2;
                 double offset =
@@ -117,6 +125,7 @@ class TreeView<T> extends StatelessWidget {
                 double indent = iconWidth + style.padIndent;
                 bool showLines = !style.hideLines;
                 int dragDepth = item.dragDepth ?? 255;
+
                 for (var i = 0; i < numberOfLines; i++) {
                   double opacity = 1.0;
                   var d = depth[i];
@@ -176,7 +185,7 @@ class TreeView<T> extends StatelessWidget {
                     // style.opacity = DragOpacity;
                   }
                   // verticalLines.push(<div className={lastLineStyle} key={numberOfLines} style={style}></div>);
-                  if (showLines) {
+                  if (showLines && (showHorizontalLine || !item.isLastChild)) {
                     lines.add(
                       Positioned(
                         left: offset,
@@ -274,7 +283,8 @@ class TreeView<T> extends StatelessWidget {
                     );
                   }
                 } else if (showLines &&
-                    !(depth.length == 1 && depth[0] == -1)) {
+                    !(depth.length == 1 && depth[0] == -1) &&
+                    showHorizontalLine) {
                   //(this.props.hideFirstHorizontalLine && depth.length === 1 && depth[0] === -1) ? null : <div className={horizontalLineStyle} style={{background:showOurLine && showLines ? null : "initial", opacity:dragOpacity}}></div>
                   lines.insert(
                     0,

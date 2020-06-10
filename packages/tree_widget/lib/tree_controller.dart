@@ -41,8 +41,7 @@ class TreeDragOperationTarget<T> {
             parentTarget = item;
             state = DropState.above;
             item = item.next;
-          }
-          else {
+          } else {
             parentTarget = item.parent;
           }
           break;
@@ -60,9 +59,7 @@ class TreeDragOperationTarget<T> {
   }
 
   @override
-  String toString() =>
-     'Drop Target: ${item.data} ${parent?.data} $state';
-  
+  String toString() => 'Drop Target: ${item.data} ${parent?.data} $state';
 
   void activate() {
     parent?.dropState?.value = DropState.parent;
@@ -491,6 +488,8 @@ abstract class TreeController<T> with ChangeNotifier {
     });
     flatten();
   }
+
+  bool hasHorizontalLine(T treeItem) => true;
 }
 
 void _walk<T>(

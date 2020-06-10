@@ -82,4 +82,12 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
   @override
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<KeyHierarchyViewModel> item) {}
+  
+  @override
+  bool hasHorizontalLine(KeyHierarchyViewModel treeItem) {
+    if(treeItem is KeyedPropertyViewModel) {
+      return treeItem.label.isNotEmpty;
+    }
+    return true;
+  }
 }
