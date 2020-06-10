@@ -8,6 +8,7 @@ import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/rive_text_field.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
@@ -83,104 +84,105 @@ class _PlanState extends State<PlanSettings>
   @override
   Widget build(BuildContext context) {
     if (_sub == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final textStyles = theme.textStyles;
     final labelLookup = costLookup[_sub?.billing];
     return ListView(
-        padding: const EdgeInsets.all(30),
-        physics: const ClampingScrollPhysics(),
-        children: [
-          SettingsPanelSection(
-              label: 'Plan',
-              contents: (panelCtx) {
-                return Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            // Align text baseline with label & button.
-                            padding: const EdgeInsets.only(top: 3),
-                            child: ComboBox<BillingFrequency>(
-                              popupWidth: 100,
-                              sizing: ComboSizing.content,
-                              underline: true,
-                              underlineColor: colors.inputUnderline,
-                              valueColor: textStyles.fileGreyTextLarge.color,
-                              options: BillingFrequency.values,
-                              value: _sub?.billing ?? BillingFrequency.monthly,
-                              toLabel: (option) =>
-                                  describeEnum(option).capsFirst,
-                              change: (billing) => _sub.billing = billing,
-                            ),
+      padding: const EdgeInsets.all(30),
+      physics: const ClampingScrollPhysics(),
+      children: [
+        SettingsPanelSection(
+          label: 'Plan',
+          contents: (panelCtx) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      // Align text baseline with label & button.
+                      padding: const EdgeInsets.only(top: 3),
+                      child: ComboBox<BillingFrequency>(
+                        popupWidth: 100,
+                        sizing: ComboSizing.content,
+                        underline: true,
+                        underlineColor: colors.inputUnderline,
+                        valueColor: textStyles.fileGreyTextLarge.color,
+                        options: BillingFrequency.values,
+                        value: _sub?.billing ?? BillingFrequency.monthly,
+                        toLabel: (option) => describeEnum(option).capsFirst,
+                        change: (billing) => _sub.billing = billing,
+                      ),
+                    ),
+                    const Spacer(),
+                    UnderlineTextButton(
+                      text: 'Cancel Plan',
+                      onPressed: () {/** TODO: cancel plan */},
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (_, __) {
+                    final t = _controller.value;
+                    // Simple quadratic.
+                    final animationValue = t * t;
+                    return SizedBox(
+                      height: 179,
+                      child: Row(
+                        children: [
+                          SubscriptionChoice(
+                            label: 'Team',
+                            costLabel: '${labelLookup[TeamsOption.basic]}',
+                            description: 'Create a space where you and '
+                                'your team can share files.',
+                            onTap: () => _sub.option = TeamsOption.basic,
+                            isSelected: isBasic,
+                            highlight: animationValue,
+                            showRadio: true,
                           ),
-                          const Spacer(),
-                          UnderlineTextButton(
-                            text: 'Cancel Plan',
-                            onPressed: () {/** TODO: cancel plan */},
+                          const SizedBox(width: 30),
+                          SubscriptionChoice(
+                            label: 'Org',
+                            // disabled: true,
+                            costLabel: '${labelLookup[TeamsOption.premium]}',
+                            description: ''
+                                'Create sub-teams with centralized '
+                                'billing',
+                            onTap: () => _sub.option = TeamsOption.premium,
+                            isSelected: isPremium,
+                            highlight: 1 - animationValue,
+                            showRadio: true,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      AnimatedBuilder(
-                          animation: _controller,
-                          builder: (_, __) {
-                            final t = _controller.value;
-                            // Simple quadratic.
-                            final animationValue = t * t;
-                            return SizedBox(
-                              height: 179,
-                              child: Row(
-                                children: [
-                                  SubscriptionChoice(
-                                    label: 'Team',
-                                    costLabel: '${labelLookup[TeamsOption.basic]}',
-                                    description: 'Create a space where you and '
-                                        'your team can share files.',
-                                    onTap: () =>
-                                        _sub.option = TeamsOption.basic,
-                                    isSelected: isBasic,
-                                    highlight: animationValue,
-                                    showRadio: true,
-                                  ),
-                                  const SizedBox(width: 30),
-                                  SubscriptionChoice(
-                                    label: 'Org',
-                                    disabled: true,
-                                    costLabel: '${labelLookup[TeamsOption.premium]}',
-                                    description: ''
-                                        'Create sub-teams with centralized '
-                                        'billing',
-                                    onTap: () =>
-                                        _sub.option = TeamsOption.premium,
-                                    isSelected: isPremium,
-                                    highlight: 1 - animationValue,
-                                    showRadio: true,
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                    ]);
-              }),
-          // Vertical padding.
-          const SizedBox(height: 30),
-          Separator(color: colors.fileLineGrey),
-          // Vertical padding.
-          const SizedBox(height: 30),
-          PaymentMethod(_sub),
-          // Vertical padding.
-          const SizedBox(height: 30),
-          Separator(color: colors.fileLineGrey),
-          // Vertical padding.
-          const SizedBox(height: 30),
-          BillCalculator(subscription: _sub, onBillChanged: _onBillChanged),
-        ]);
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+        // Vertical padding.
+        const SizedBox(height: 30),
+        Separator(color: colors.fileLineGrey),
+        // Vertical padding.
+        const SizedBox(height: 30),
+        PaymentMethod(_sub),
+        // Vertical padding.
+        const SizedBox(height: 30),
+        Separator(color: colors.fileLineGrey),
+        // Vertical padding.
+        const SizedBox(height: 30),
+        BillCalculator(subscription: _sub, onBillChanged: _onBillChanged),
+      ],
+    );
   }
 }
 
@@ -216,31 +218,36 @@ class BillCalculator extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('New ${plan.name} bill', style: light),
-                const SizedBox(height: 10),
-                Text('Pay now', style: light),
-              ]),
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('New ${plan.name} bill', style: light),
+              const SizedBox(height: 10),
+              Text('Pay now', style: light),
+            ],
+          ),
           const SizedBox(width: 10),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text('\$${subscription.calculatedCost}',
-                style: dark.copyWith(fontFamily: 'Roboto-Regular')),
-            const SizedBox(height: 10),
-            Padding(
-                padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
-                child: Text('\$0',
-                    style: dark.copyWith(fontWeight: FontWeight.bold)))
-          ]),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('\$${subscription.calculatedCost}',
+                  style: dark.copyWith(fontFamily: 'Roboto-Regular')),
+              const SizedBox(height: 10),
+              Padding(
+                  padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
+                  child: Text('\$0',
+                      style: dark.copyWith(fontWeight: FontWeight.bold)))
+            ],
+          ),
         ],
       ),
       const SizedBox(height: 25),
       FlatIconButton(
-          label: 'Confirm',
-          color: buttonColor,
-          textColor: Colors.white,
-          onTap: onBillChanged),
+        label: 'Confirm',
+        color: buttonColor,
+        textColor: Colors.white,
+        onTap: onBillChanged,
+      ),
     ];
   }
 
@@ -283,22 +290,23 @@ class BillCalculator extends StatelessWidget {
   Widget _yearlyBill(TextStyle light, TextStyle dark) {
     final plan = subscription.billing;
     return RichText(
-      text: TextSpan(children: [
-        TextSpan(
-          text: '${plan.name.capsFirst} bill\t',
-          style: light,
-        ),
-        TextSpan(
-          text: '\$${subscription?.currentCost ?? '-'}',
-          style: dark,
-        )
-      ]),
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: '${plan.name.capsFirst} bill\t',
+            style: light,
+          ),
+          TextSpan(
+            text: '\$${subscription?.currentCost ?? '-'}',
+            style: dark,
+          )
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: use FutureBuilder?
     if (subscription?.currentCost == null) {
       return const SizedBox();
     }
@@ -314,17 +322,16 @@ class BillCalculator extends StatelessWidget {
     final diff = costDifference;
 
     return SettingsPanelSection(
-        label: 'Bill',
-        contents: (ctx) => Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (diff == 0) _yearlyBill(lightGreyText, darkGreyText),
-                if (diff > 0)
-                  ..._debit(lightGreyText, darkGreyText, buttonColor),
-                if (diff < 0)
-                  ..._credit(lightGreyText, darkGreyText, buttonColor),
-              ],
-            ));
+      label: 'Bill',
+      contents: (ctx) => Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (diff == 0) _yearlyBill(lightGreyText, darkGreyText),
+          if (diff > 0) ..._debit(lightGreyText, darkGreyText, buttonColor),
+          if (diff < 0) ..._credit(lightGreyText, darkGreyText, buttonColor),
+        ],
+      ),
+    );
   }
 }
 
@@ -350,31 +357,29 @@ class _MethodState extends State<PaymentMethod> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        TintedIcon(icon: PackedIcon.settingsSmall /*TODO: PackedIcon.date*/, color: iconColor),
+        TintedIcon(
+            icon: PackedIcon.settingsSmall /*TODO: PackedIcon.date*/,
+            color: iconColor),
         const SizedBox(width: 10),
         RichText(
-          text: TextSpan(children: [
-            TextSpan(
-                text: 'Next payment due: ',
-                style: styles.hierarchyTabHovered
-                    .copyWith(fontSize: 13, height: 1.4)),
-            TextSpan(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                  text: 'Next payment due: ',
+                  style: styles.hierarchyTabHovered
+                      .copyWith(fontSize: 13, height: 1.4)),
+              TextSpan(
                 // TODO: get date from subscription.
                 text: 'Jan 20, 2021',
                 style: styles.fileGreyTextLarge.copyWith(
                   fontSize: 13,
                   height: 1.15,
-                )),
-          ]),
+                ),
+              ),
+            ],
+          ),
         )
       ],
-    );
-  }
-
-  Widget _underlineButton(String label, TextStyles styles, bool toSaved) {
-    return GestureDetector(
-      onTap: () => _changeView(toSaved),
-      child: Text(label, style: styles.buttonUnderline),
     );
   }
 
@@ -385,18 +390,26 @@ class _MethodState extends State<PaymentMethod> {
 
     return Column(
       children: <Widget>[
-        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          TintedIcon(icon: PackedIcon.cardchip/*TODO: PackedIcon.card*/, color: colors.commonButtonTextColor),
-          const SizedBox(width: 10),
-          Text('American Express 1007. Expires 10/2022',
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            TintedIcon(
+              icon: PackedIcon.cardchip /*TODO: PackedIcon.card*/,
+              color: colors.commonButtonTextColor,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'American Express 1007. Expires 10/2022',
               style:
-                  styles.fileGreyTextLarge.copyWith(fontSize: 13, height: 1.4)),
-          const Spacer(),
-          UnderlineTextButton(
-            text: 'Change',
-            onPressed: () => _changeView(false),
-          ),
-        ]),
+                  styles.fileGreyTextLarge.copyWith(fontSize: 13, height: 1.4),
+            ),
+            const Spacer(),
+            UnderlineTextButton(
+              text: 'Change',
+              onPressed: () => _changeView(false),
+            ),
+          ],
+        ),
         const SizedBox(height: 15),
         _nextPayment(colors.commonButtonTextColor, styles)
       ],
@@ -440,7 +453,6 @@ class CreditCardForm extends StatelessWidget {
   Widget _creditCardNumber(BuildContext context) {
     final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
-    final colors = theme.colors;
     return Column(children: [
       Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -454,28 +466,14 @@ class CreditCardForm extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 12),
-      TextFormField(
+      RiveTextField(
         initialValue: sub.cardNumber,
-        cursorColor: colors.commonDarkGrey,
-        textAlign: TextAlign.left,
-        textAlignVertical: TextAlignVertical.center,
-        style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
-        inputFormatters: <TextInputFormatter>[
+        formatters: <TextInputFormatter>[
           WhitelistingTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(16),
           CardNumberFormatter()
         ],
-        decoration: InputDecoration(
-          isDense: true,
-          enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: colors.inputUnderline, width: 2)),
-          focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: colors.commonDarkGrey, width: 2)),
-          hintText: '0000 0000 0000 0000',
-          hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
-          errorStyle: styles.textFieldInputValidationError,
-          contentPadding: const EdgeInsets.only(bottom: 3),
-        ),
+        hintText: '0000 0000 0000 0000',
         onChanged: (cardNumber) => sub.cardNumber = cardNumber,
       )
     ]);
@@ -499,29 +497,13 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              RiveTextField(
                 initialValue: sub.ccv,
-                cursorColor: colors.commonDarkGrey,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
-                inputFormatters: <TextInputFormatter>[
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.commonDarkGrey, width: 2)),
-                  hintText: '3-4 digits',
-                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorStyle: styles.textFieldInputValidationError,
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                ),
+                hintText: '3-4 digits',
                 onChanged: (ccv) => sub.ccv = ccv,
               ),
             ],
@@ -538,31 +520,15 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              RiveTextField(
                 initialValue: sub.expiration,
-                cursorColor: colors.commonDarkGrey,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
-                inputFormatters: <TextInputFormatter>[
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(4),
                   DateTextInputFormatter(),
                   DateTextRegexCheck()
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.commonDarkGrey, width: 2)),
-                  hintText: 'MM/YY',
-                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorStyle: styles.textFieldInputValidationError,
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                ),
+                hintText: 'MM/YY',
                 onChanged: (expiration) => sub.expiration = expiration,
               ),
             ],
@@ -579,29 +545,13 @@ class CreditCardForm extends StatelessWidget {
                 style: styles.inspectorPropertyLabel,
               ),
               const SizedBox(height: 12),
-              TextFormField(
+              RiveTextField(
                 initialValue: sub.zip,
-                cursorColor: colors.commonDarkGrey,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                style: styles.fileGreyTextLarge.copyWith(fontSize: 13),
-                inputFormatters: <TextInputFormatter>[
+                formatters: <TextInputFormatter>[
                   WhitelistingTextInputFormatter.digitsOnly,
                   LengthLimitingTextInputFormatter(5),
                 ],
-                decoration: InputDecoration(
-                  isDense: true,
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.inputUnderline, width: 2)),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: colors.commonDarkGrey, width: 2)),
-                  hintText: '90210',
-                  hintStyle: styles.textFieldInputHint.copyWith(fontSize: 13),
-                  errorStyle: styles.textFieldInputValidationError,
-                  contentPadding: const EdgeInsets.only(bottom: 3),
-                ),
+                hintText: '90210',
                 onChanged: (zip) => sub.zip = zip,
               )
             ],
