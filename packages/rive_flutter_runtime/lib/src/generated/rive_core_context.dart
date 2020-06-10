@@ -9,7 +9,7 @@ import 'package:rive/rive_core/animation/linear_animation.dart';
 import 'package:rive/rive_core/artboard.dart';
 import 'package:rive/rive_core/backboard.dart';
 import 'package:rive/rive_core/node.dart';
-import 'package:rive/rive_core/shapes/cubic_vertex.dart';
+import 'package:rive/rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive/rive_core/shapes/ellipse.dart';
 import 'package:rive/rive_core/shapes/paint/fill.dart';
 import 'package:rive/rive_core/shapes/paint/gradient_stop.dart';
