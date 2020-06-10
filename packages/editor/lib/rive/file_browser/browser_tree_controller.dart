@@ -28,7 +28,7 @@ class FolderTreeItemController extends TreeController<FolderTreeItem> {
       treeItem.children.cast<FolderTreeItem>();
 
   @override
-  void drop(FlatTreeItem<FolderTreeItem> target, DropState state,
+  void drop(TreeDragOperationTarget<FolderTreeItem> target,
       List<FlatTreeItem<FolderTreeItem>> items) {}
 
   @override

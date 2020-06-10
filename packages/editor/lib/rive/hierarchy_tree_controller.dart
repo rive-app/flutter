@@ -65,14 +65,14 @@ class HierarchyTreeController extends TreeController<Component> {
           : null;
 
   @override
-  bool allowDrop(FlatTreeItem<Component> target, DropState state,
+  bool allowDrop(TreeDragOperationTarget<Component> target,
       List<FlatTreeItem<Component>> items) {
-    if (!super.allowDrop(target, state, items)) {
+    if (!super.allowDrop(target, items)) {
       return false;
     }
 
-    var desiredParent =
-        state == DropState.into ? target.data : target.data.parent;
+    var desiredParent = target.parent?.data;
+    // state == DropState.into ? target.data : target.data.parent;
     for (final item in items) {
       if (!item.data.isValidParent(desiredParent)) {
         return false;
@@ -82,13 +82,18 @@ class HierarchyTreeController extends TreeController<Component> {
   }
 
   @override
-  void drop(FlatTreeItem<Component> target, DropState state,
+  void drop(TreeDragOperationTarget<Component> target,
       List<FlatTreeItem<Component>> items) {
+    var state = target.state;
     switch (state) {
       case DropState.above:
       case DropState.below:
         // Set<TreeItemChildren> toSort = {};
-        var newParent = target.data.parent;
+        var parentComponent = target.parent.data;
+        if (parentComponent is! ContainerComponent) {
+          return;
+        }
+        var parentContainer = parentComponent as ContainerComponent;
         // First remove from existing so that proximity is preserved
         for (final item in items) {
           var treeItem = item.data;
@@ -98,21 +103,21 @@ class HierarchyTreeController extends TreeController<Component> {
         for (final item in items) {
           var treeItem = item.data;
           if (state == DropState.above) {
-            newParent.children.move(treeItem,
-                before: target.prev?.parent == target.parent
-                    ? target.prev.data
+            parentContainer.children.move(treeItem,
+                before: target.item.prev?.parent == target.parent
+                    ? target.item.prev.data
                     : null,
-                after: target.data);
+                after: target.item.data);
           } else {
-            newParent.children.move(treeItem,
-                before: target.data,
-                after: target.next?.parent == target.parent
-                    ? target.next.data
+            parentContainer.children.move(treeItem,
+                before: target.item.data,
+                after: target.item.next?.parent == target.parent
+                    ? target.item.next.data
                     : null);
           }
 
           // re-parent last after changing index
-          treeItem.parent = newParent;
+          treeItem.parent = parentContainer;
           if (treeItem is Node) {
             /// Keep the node in the same position it last was at before getting
             /// parented.
@@ -126,7 +131,7 @@ class HierarchyTreeController extends TreeController<Component> {
         // }
         break;
       case DropState.into:
-        var targetComponent = target.data;
+        var targetComponent = target.item.data;
         if (targetComponent is! ContainerComponent) {
           return;
         }

@@ -9,7 +9,6 @@ import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/packed_icon.dart';
-import 'package:rive_editor/widgets/common/converters/rotation_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';

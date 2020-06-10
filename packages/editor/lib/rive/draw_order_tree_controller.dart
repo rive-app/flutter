@@ -106,7 +106,7 @@ class DrawOrderTreeController extends TreeController<Component> {
   }
 
   @override
-  void drop(FlatTreeItem<Component> target, DropState state,
+  void drop(TreeDragOperationTarget<Component> target,
       List<FlatTreeItem<Component>> items) {
     FractionalIndex before, after;
 
@@ -121,17 +121,18 @@ class DrawOrderTreeController extends TreeController<Component> {
     // }
 
     // return;
-
+    var state = target.state;
+    var item = target.item;
     switch (state) {
       case DropState.above:
         before =
-            (_previousExcluding(target, items)?.data as Drawable)?.drawOrder ??
+            (_previousExcluding(item, items)?.data as Drawable)?.drawOrder ??
                 const FractionalIndex.max();
-        after = (target.data as Drawable).drawOrder;
+        after = (item.data as Drawable).drawOrder;
         break;
       case DropState.below:
-        before = (target.data as Drawable).drawOrder;
-        after = (_nextExcluding(target, items)?.data as Drawable)?.drawOrder ??
+        before = (item.data as Drawable).drawOrder;
+        after = (_nextExcluding(item, items)?.data as Drawable)?.drawOrder ??
             const FractionalIndex.min();
         break;
       default:
@@ -186,13 +187,13 @@ class DrawOrderTreeController extends TreeController<Component> {
   }
 
   @override
-  bool allowDrop(FlatTreeItem<Component> target, DropState state,
+  bool allowDrop(TreeDragOperationTarget<Component> target,
       List<FlatTreeItem<Component>> items) {
-    if (!super.allowDrop(target, state, items)) {
+    if (!super.allowDrop(target, items)) {
       return false;
     }
 
-    switch (state) {
+    switch (target.state) {
       case DropState.above:
       case DropState.below:
         return true;

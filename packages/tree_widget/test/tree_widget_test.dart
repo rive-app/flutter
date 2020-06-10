@@ -53,7 +53,7 @@ class MyTreeController extends TreeController<TreeItem> {
   }
 
   @override
-  void drop(FlatTreeItem<TreeItem> target, DropState state,
+  void drop(TreeDragOperationTarget<TreeItem> target,
       List<FlatTreeItem<TreeItem>> items) {}
 
   @override

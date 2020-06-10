@@ -54,7 +54,7 @@ class FlatTreeItem<T> {
   FlatTreeItem<T> next;
 
   /// Parent [FlatTreeItem] from the hierarchy.
-  final FlatTreeItem parent;
+  final FlatTreeItem<T> parent;
 
   /// Depths stored as a Uint8List. Each entry represents a horizontal space to
   /// move right by. If the entry is positive, a solid vertical line should also
