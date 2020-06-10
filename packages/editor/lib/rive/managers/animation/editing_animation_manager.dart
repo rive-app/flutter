@@ -12,7 +12,6 @@ import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -183,9 +182,8 @@ class EditingAnimationManager extends AnimationTimeManager
       // Do the first (arguably heavier as we should have less grouped
       // properties) with regular (unstable) sort.
       properties.sort((a, b) => a.propertyOrder.compareTo(b.propertyOrder));
-      // Then use a stable sort to sort by group. 
-      
-      
+      // Then use a stable sort to sort by group.
+
       // TODO: this wasn't stable, if grouped property keys do not have adjacent
       // integer values, there's a risk that they grouping won't work (below
       // groupKey != lastGroupKey). In that case we need a stable sort to run
