@@ -243,5 +243,19 @@ abstract class Path extends PathBase {
   // -> editor-only
   @override
   bool validate() => _shape != null;
+
+  @override
+  bool isValidParent(Component parent) {
+    // A parent for the path is valid if somewhere in its direct ancestors
+    // there's a shape.
+    for (var nextParent = parent;
+        nextParent != null;
+        nextParent = nextParent.parent) {
+      if (nextParent is Shape) {
+        return true;
+      }
+    }
+    return false;
+  }
   // <- editor-only
 }

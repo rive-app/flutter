@@ -10,39 +10,84 @@ import 'package:tree_widget/tree_widget.dart';
 import 'flat_tree_item.dart';
 import 'tree_style.dart';
 
+/// The target for a drag operation comprised of an item of interest, where the
+/// interest is described by state and a parent which is hierarchical parent in
+/// the tree of the item.
+class TreeDragOperationTarget<T> {
+  final FlatTreeItem<T> item;
+  final FlatTreeItem<T> parent;
+  final DropState state;
+
+  TreeDragOperationTarget({
+    this.item,
+    this.parent,
+    this.state,
+  });
+
+  factory TreeDragOperationTarget.forItem(
+      FlatTreeItem<T> item, DropState state) {
+    if (item == null) {
+      return null;
+    }
+    FlatTreeItem<T> parentTarget;
+    if (item != null) {
+      switch (state) {
+        case DropState.below:
+          if (item.isExpanded) {
+            // The item is expanded so it becomes our parent target while the
+            // first child becomes the item and we swap the state to be above
+            // that item (as the parent is above it visually which was our
+            // original target).
+            parentTarget = item;
+            state = DropState.above;
+            item = item.next;
+          } else {
+            parentTarget = item.parent;
+          }
+          break;
+        case DropState.above:
+          parentTarget = item.parent;
+          break;
+        default:
+          parentTarget = item;
+          break;
+      }
+    }
+
+    return TreeDragOperationTarget(
+        parent: parentTarget, item: item, state: state);
+  }
+
+  @override
+  String toString() => 'Drop Target: ${item.data} ${parent?.data} $state';
+
+  void activate() {
+    parent?.dropState?.value = DropState.parent;
+    item?.dropState?.value = state;
+  }
+
+  void deactivate() {
+    item?.dropState?.value = DropState.none;
+    parent?.dropState?.value = DropState.none;
+  }
+}
+
 class _TreeDragOperation<T> {
   final FlatTreeItem<T> startItem;
   final List<FlatTreeItem<T>> items;
   OverlayEntry overlayEntry;
   final ValueNotifier<Offset> offset = ValueNotifier<Offset>(Offset.zero);
-  FlatTreeItem<T> _target;
-  FlatTreeItem<T> get target => _target;
+  TreeDragOperationTarget<T> _target;
+  TreeDragOperationTarget<T> get target => _target;
 
-  void dropTarget(FlatTreeItem<T> target, DropState state) {
-    if (_target != target) {
-      _target?.parent?.dropState?.value = DropState.none;
-      _target?.dropState?.value = DropState.none;
-    } else if (_target != null && _target.dropState.value == state) {
-      return;
-    }
+  void dropTarget(TreeDragOperationTarget<T> target) {
+    _target?.deactivate();
     _target = target;
-    if (target != null) {
-      target.dropState?.value = state;
-      switch (state) {
-        case DropState.below:
-        case DropState.above:
-          target.parent?.dropState?.value = DropState.parent;
-          break;
-        default:
-          target.parent?.dropState?.value = DropState.none;
-          break;
-      }
-    }
+    _target?.activate();
   }
 
   void dispose() {
-    _target?.dropState?.value = DropState.none;
-    _target?.parent?.dropState?.value = DropState.none;
+    _target?.deactivate();
     overlayEntry?.remove();
   }
 
@@ -62,6 +107,7 @@ abstract class TreeController<T> with ChangeNotifier {
   Iterable<T> get data;
 
   _TreeDragOperation<T> _dragOperation;
+  bool _needsFlattenAfterDrag = false;
 
   bool get isDragging => _dragOperation != null;
   _TreeDragOperation get dragOperation => _dragOperation;
@@ -148,6 +194,13 @@ abstract class TreeController<T> with ChangeNotifier {
   /// widget to remap rows when items get expanded and their indices inherently
   /// change.
   void flatten() {
+    // assert(!isDragging);
+    if (isDragging) {
+      _needsFlattenAfterDrag = true;
+      // Don't allow flatten during drag.
+      return;
+    }
+
     var flat = <FlatTreeItem<T>>[];
     var context = FlattenedTreeDataContext<T>(_expanded);
     var lookup = HashMap<Key, int>();
@@ -188,16 +241,15 @@ abstract class TreeController<T> with ChangeNotifier {
 
   /// Override this to return whether or not the drop operation is allowed.
   bool allowDrop(
-      FlatTreeItem<T> item, DropState state, List<FlatTreeItem<T>> items) {
-    if (item.isDisabled || item.dragDepth != null) {
+      TreeDragOperationTarget<T> target, List<FlatTreeItem<T>> items) {
+    if (target.item.isDisabled || target.item.dragDepth != null) {
       return false;
     }
     return true;
   }
 
   /// Perform the drop operation (re-order items/children).
-  void drop(
-      FlatTreeItem<T> target, DropState state, List<FlatTreeItem<T>> items);
+  void drop(TreeDragOperationTarget<T> target, List<FlatTreeItem<T>> items);
 
   /// Called when an item is tapped or clicked on.
   void onTap(FlatTreeItem<T> item);
@@ -269,7 +321,7 @@ abstract class TreeController<T> with ChangeNotifier {
 
   void stopDrag() {
     var target = _dragOperation.target;
-    var dropState = target?.dropState?.value;
+    var dropState = target?.state;
     var items = _dragOperation.items;
 
     _dragOperation.dispose();
@@ -279,10 +331,15 @@ abstract class TreeController<T> with ChangeNotifier {
     }
 
     if (target != null && dropState != null) {
-      drop(target, dropState, items);
+      drop(target, items);
     }
 
-    notifyListeners();
+    if (_needsFlattenAfterDrag) {
+      _needsFlattenAfterDrag = false;
+      flatten();
+    } else {
+      notifyListeners();
+    }
   }
 
   void updateDrag(BuildContext itemContext, DragUpdateDetails details,
@@ -306,11 +363,11 @@ abstract class TreeController<T> with ChangeNotifier {
             ? DropState.below
             : DropState.into;
 
-    if (dropTarget != null &&
-        allowDrop(dropTarget, state, _dragOperation.items)) {
-      _dragOperation.dropTarget(dropTarget, state);
+    var target = TreeDragOperationTarget.forItem(dropTarget, state);
+    if (target != null && allowDrop(target, _dragOperation.items)) {
+      _dragOperation.dropTarget(target);
     } else {
-      _dragOperation.dropTarget(null, null);
+      _dragOperation.dropTarget(null);
     }
   }
 
@@ -321,11 +378,6 @@ abstract class TreeController<T> with ChangeNotifier {
       HashMap<Key, int> lookup,
       List<int> depth,
       FlatTreeItem<T> parent) {
-    assert(!isDragging);
-    if (isDragging) {
-      // Don't allow flatten during drag.
-      return;
-    }
     // int depthIndex = depth.length;
     // depth.add(spacing);
 
@@ -436,6 +488,8 @@ abstract class TreeController<T> with ChangeNotifier {
     });
     flatten();
   }
+
+  bool hasHorizontalLine(T treeItem) => true;
 }
 
 void _walk<T>(

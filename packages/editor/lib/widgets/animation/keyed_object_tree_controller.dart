@@ -37,11 +37,11 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
       treeItem.children;
 
   @override
-  void drop(FlatTreeItem<KeyHierarchyViewModel> target, DropState state,
+  void drop(TreeDragOperationTarget<KeyHierarchyViewModel> target,
       List<FlatTreeItem<KeyHierarchyViewModel>> items) {}
 
   @override
-  bool allowDrop(FlatTreeItem<KeyHierarchyViewModel> item, DropState state,
+  bool allowDrop(TreeDragOperationTarget<KeyHierarchyViewModel> target,
       List<FlatTreeItem<KeyHierarchyViewModel>> items) {
     return false;
   }
@@ -82,4 +82,12 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
   @override
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<KeyHierarchyViewModel> item) {}
+  
+  @override
+  bool hasHorizontalLine(KeyHierarchyViewModel treeItem) {
+    if(treeItem is KeyedPropertyViewModel) {
+      return treeItem.label.isNotEmpty;
+    }
+    return true;
+  }
 }

@@ -30,13 +30,13 @@ class MyTreeController extends TreeController<TreeItem> {
 
   /// Move an item from one part of the tree to another.
   @override
-  void drop(FlatTreeItem<TreeItem> target, DropState state,
+  void drop(TreeDragOperationTarget<TreeItem> target,
       List<FlatTreeItem<TreeItem>> items) {
-    switch (state) {
+    switch (target.state) {
       case DropState.above:
       case DropState.below:
         Set<TreeItemChildren> toSort = {};
-        var newParent = target.data.parent;
+        var newParent = target.item.data.parent;
         // First remove from existing.
         for (final item in items) {
           var treeItem = item.data;
@@ -48,17 +48,17 @@ class MyTreeController extends TreeController<TreeItem> {
           treeItem.parent = newParent;
 
           newParent.children.add(treeItem);
-          if (state == DropState.above) {
+          if (target.state == DropState.above) {
             newParent.children.move(treeItem,
-                before: target.prev?.parent == target.parent
-                    ? target.prev.data
+                before: target.item.prev?.parent == target.parent
+                    ? target.item.prev.data
                     : null,
-                after: target.data);
+                after: target.item.data);
           } else {
             newParent.children.move(treeItem,
-                before: target.data,
-                after: target.next?.parent == target.parent
-                    ? target.next.data
+                before: target.item.data,
+                after: target.item.next?.parent == target.parent
+                    ? target.item.next.data
                     : null);
           }
           toSort.add(newParent.children);
@@ -72,9 +72,9 @@ class MyTreeController extends TreeController<TreeItem> {
         for (final item in items) {
           var treeItem = item.data;
           treeItem.parent.children.remove(treeItem);
-          treeItem.parent = target.data;
-          target.data.children.append(treeItem);
-          target.data.children.sortFractional();
+          treeItem.parent = target.item.data;
+          target.item.data.children.append(treeItem);
+          target.item.data.children.sortFractional();
         }
         break;
       default:

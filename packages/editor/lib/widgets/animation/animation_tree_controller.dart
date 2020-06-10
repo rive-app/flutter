@@ -67,22 +67,21 @@ class AnimationTreeController
       null;
 
   @override
-  void drop(
-      FlatTreeItem<ValueStream<AnimationViewModel>> target,
-      DropState state,
+  void drop(TreeDragOperationTarget<ValueStream<AnimationViewModel>> target,
       List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {
     FractionalIndex before, after;
-
+    var state = target.state;
+    var item = target.item;
     switch (state) {
       case DropState.above:
         before =
-            _previousExcluding(target, items)?.data?.value?.animation?.order ??
+            _previousExcluding(item, items)?.data?.value?.animation?.order ??
                 const FractionalIndex.min();
-        after = target.data.value.animation.order;
+        after = item.data.value.animation.order;
         break;
       case DropState.below:
-        before = target.data.value.animation.order;
-        after = _nextExcluding(target, items)?.data?.value?.animation?.order ??
+        before = item.data.value.animation.order;
+        after = _nextExcluding(item, items)?.data?.value?.animation?.order ??
             const FractionalIndex.max();
         break;
       default:
@@ -97,11 +96,10 @@ class AnimationTreeController
 
   @override
   bool allowDrop(
-      FlatTreeItem<ValueStream<AnimationViewModel>> item,
-      DropState state,
+      TreeDragOperationTarget<ValueStream<AnimationViewModel>> target,
       List<FlatTreeItem<ValueStream<AnimationViewModel>>> items) {
     // Only allow re-ordering.
-    switch (state) {
+    switch (target.state) {
       case DropState.above:
       case DropState.below:
         return true;

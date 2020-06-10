@@ -1,3 +1,4 @@
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
@@ -150,13 +151,22 @@ class Node extends NodeBase {
   /// ParentWorldTransform to keep us in the same visual position after the
   /// update cycle completes.
   void compensate() {
-    assert(parent is Node, 'can\'t compensate without parents');
-    // TODO: also can't compensate if we have an overrideWorldTransform (this
-    // plays in when we get bones).
-    var nodeParent = parent as Node;
-    nodeParent.calculateWorldTransform();
+    // TODO: can't compensate if we have an overrideWorldTransform (this plays
+    // in when we get bones).
+    assert(parent != null, 'can\'t compensate without parents');
+
+    // Default the parentWorld to the identity, this works for the Artboard case
+    // (an Artboard is not a Node and is in world space). We should be mindful
+    // of this catching other non Node parents (are there any?).
+    var parentWorld = Mat2D();
+    if (parent is Node) {
+      var nodeParent = parent as Node;
+      nodeParent.calculateWorldTransform();
+      parentWorld = nodeParent.worldTransform;
+    }
+
     var parentWorldInverse = Mat2D();
-    if (!Mat2D.invert(parentWorldInverse, nodeParent.worldTransform)) {
+    if (!Mat2D.invert(parentWorldInverse, parentWorld)) {
       return;
     }
     var local = Mat2D();
