@@ -205,6 +205,9 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   bool get _isCardInfoValid =>
       isCardNrValid && isCcvValid && isExpirationValid && isZipValid;
 
+  bool get isChanging => costDifference != 0;
+  int get costDifference => calculatedCost - currentCost;
+
   String _cardDescription;
   String get cardDescription => _cardDescription;
 
@@ -256,8 +259,8 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     return subscription;
   }
 
-  Future<bool> updatePlan(RiveApi api, int teamId) async {
-    var res = await RiveTeamsApi(api).updatePlan(teamId, option, billing);
+  Future<bool> _updatePlan() async {
+    var res = await RiveTeamsApi(api).updatePlan(team.ownerId, option, billing);
     if (res) {
       _currentCost = calculatedCost;
       notifyListeners();
@@ -274,12 +277,32 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     zip = null;
   }
 
-  Future<bool> updateCard(Team team) async {
-    if (processing || !_isCardInfoValid) {
+  Future<bool> submitChanges(bool hasNewCC) async {
+    if (processing) {
       return false;
     }
-    // Track that everything went fine.
     processing = true;
+
+    if (hasNewCC) {
+      if (!await _updateCard()) {
+        processing = false;
+        return false;
+      }
+    }
+
+    if (isChanging) {
+      if (!await _updatePlan()) {
+        processing = false;
+        return false;
+      }
+    }
+    // All good.
+    processing = false;
+    return true;
+  }
+
+  Future<bool> _updateCard() async {
+    // Track that everything went fine.
     bool success = false;
     try {
       var publicKey = await StripeApi(api).getStripePublicKey();
@@ -287,6 +310,10 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
           await createToken(publicKey, cardNumber, expMonth, expYear, ccv, zip);
       _cardCleanup();
       success = await TeamManager().saveToken(team, tokenResponse.token);
+
+      // Get the new changes.
+      var billing = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+      setDescriptions(billing);
     } on StripeAPIError catch (error) {
       switch (error.type) {
         case StripeErrorTypes.cardNumber:
@@ -306,11 +333,6 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
       // card validation error is just the most convenient
       // place to display this
       _cardValidationError = exception.error.message;
-    } finally {
-      processing = false;
-      // Get the new changes.
-      var billing = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
-      setDescriptions(billing);
     }
 
     return success;

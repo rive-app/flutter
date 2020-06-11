@@ -32,12 +32,12 @@ class PlanSettings extends StatefulWidget {
 
 class _PlanState extends State<PlanSettings>
     with SingleTickerProviderStateMixin {
-  PlanSubscriptionPackage _sub;
+  PlanSubscriptionPackage _plan;
   AnimationController _controller;
   bool _usingSavedCC = true;
 
-  bool get isBasic => _sub?.option == TeamsOption.basic;
-  bool get isPremium => _sub?.option == TeamsOption.premium;
+  bool get isBasic => _plan?.option == TeamsOption.basic;
+  bool get isPremium => _plan?.option == TeamsOption.premium;
 
   @override
   void initState() {
@@ -45,14 +45,14 @@ class _PlanState extends State<PlanSettings>
     PlanSubscriptionPackage.fetchData(widget.api, widget.team).then(
       (value) => setState(
         () {
-          _sub = value;
-          _controller.value = _sub.option == TeamsOption.basic ? 1 : 0;
+          _plan = value;
+          _controller.value = _plan.option == TeamsOption.basic ? 1 : 0;
 
           // // Toggle upon receiving the new value.
           // _toggleController();
 
           // Listen for upcoming changes.
-          _sub.addListener(_onSubChange);
+          _plan.addListener(_onSubChange);
         },
       ),
     );
@@ -68,22 +68,12 @@ class _PlanState extends State<PlanSettings>
   void _onSubChange() => setState(_toggleController);
 
   Future<void> _onBillChanged() async {
-    if (_usingSavedCC) {
-      return;
-    }
-
-    final team = widget.team;
-
-    if (await _sub.updateCard(team)) {
+    if (await _plan.submitChanges(!_usingSavedCC)) {
       setState(() {
-        // Fetch the new information.
+        // Go back to previous view.
         _usingSavedCC = true;
       });
     }
-
-    return;
-    // TODO: process payment after updating the card.
-    _sub.updatePlan(widget.api, team.ownerId);
   }
 
   void _toggleController() {
@@ -96,20 +86,20 @@ class _PlanState extends State<PlanSettings>
 
   @override
   void dispose() {
-    _sub.dispose(); // Cleans up listeners.
+    _plan.dispose(); // Cleans up listeners.
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_sub == null) {
+    if (_plan == null) {
       return const Center(child: CircularProgressIndicator());
     }
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final textStyles = theme.textStyles;
-    final labelLookup = costLookup[_sub?.billing];
+    final labelLookup = costLookup[_plan?.billing];
     return ListView(
       padding: const EdgeInsets.all(30),
       physics: const ClampingScrollPhysics(),
@@ -134,9 +124,9 @@ class _PlanState extends State<PlanSettings>
                         underlineColor: colors.inputUnderline,
                         valueColor: textStyles.fileGreyTextLarge.color,
                         options: BillingFrequency.values,
-                        value: _sub?.billing ?? BillingFrequency.monthly,
+                        value: _plan?.billing ?? BillingFrequency.monthly,
                         toLabel: (option) => describeEnum(option).capsFirst,
-                        change: (billing) => _sub.billing = billing,
+                        change: (billing) => _plan.billing = billing,
                       ),
                     ),
                     const Spacer(),
@@ -162,7 +152,7 @@ class _PlanState extends State<PlanSettings>
                             costLabel: '${labelLookup[TeamsOption.basic]}',
                             description: 'Create a space where you and '
                                 'your team can share files.',
-                            onTap: () => _sub.option = TeamsOption.basic,
+                            onTap: () => _plan.option = TeamsOption.basic,
                             isSelected: isBasic,
                             highlight: animationValue,
                             showRadio: true,
@@ -175,7 +165,7 @@ class _PlanState extends State<PlanSettings>
                             description: ''
                                 'Create sub-teams with centralized '
                                 'billing',
-                            onTap: () => _sub.option = TeamsOption.premium,
+                            onTap: () => _plan.option = TeamsOption.premium,
                             isSelected: isPremium,
                             highlight: 1 - animationValue,
                             showRadio: true,
@@ -195,7 +185,7 @@ class _PlanState extends State<PlanSettings>
         // Vertical padding.
         const SizedBox(height: 30),
         PaymentMethod(
-          _sub,
+          _plan,
           _usingSavedCC,
           onUseSaved: (isUsingSaved) {
             setState(() {
@@ -209,7 +199,7 @@ class _PlanState extends State<PlanSettings>
         // Vertical padding.
         const SizedBox(height: 30),
         BillCalculator(
-          subscription: _sub,
+          plan: _plan,
           onBillChanged: _onBillChanged,
           updatingCC: !_usingSavedCC,
         ),
@@ -220,13 +210,13 @@ class _PlanState extends State<PlanSettings>
 
 class BillCalculator extends StatefulWidget {
   final VoidCallback onBillChanged;
-  final PlanSubscriptionPackage subscription;
+  final PlanSubscriptionPackage plan;
   final bool updatingCC;
 
   const BillCalculator({
-    this.subscription,
-    this.onBillChanged,
+    this.plan,
     this.updatingCC,
+    this.onBillChanged,
     Key key,
   }) : super(key: key);
 
@@ -235,32 +225,31 @@ class BillCalculator extends StatefulWidget {
 }
 
 class _BillState extends State<BillCalculator> {
-  bool _processingPayment;
+  bool _processingPayment = false;
 
-  BillingFrequency get plan => widget.subscription.billing;
-  int get costDifference =>
-      widget.subscription.calculatedCost - widget.subscription.currentCost;
+  BillingFrequency get billingPlan => widget.plan.billing;
 
   @override
   void initState() {
-    _processingPayment = widget.subscription.processing;
-    widget.subscription.addListener(_handleProcessing);
+    var plan = widget.plan;
+    _processingPayment = plan.processing;
+    plan.addListener(_handleProcessing);
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.subscription.removeListener(_handleProcessing);
+    widget.plan.removeListener(_handleProcessing);
     super.dispose();
   }
 
   void _handleProcessing() {
-    if (_processingPayment == widget.subscription.processing) {
+    if (_processingPayment == widget.plan.processing) {
       return;
     }
 
     setState(() {
-      _processingPayment = widget.subscription.processing;
+      _processingPayment = widget.plan.processing;
     });
   }
 
@@ -270,7 +259,7 @@ class _BillState extends State<BillCalculator> {
         children: [
           TextSpan(text: 'Starting ', style: light),
           TextSpan(
-            text: widget.subscription.nextDue,
+            text: widget.plan.nextDue,
             style: dark.copyWith(fontFamily: 'Roboto-Regular'),
           ),
           TextSpan(text: ' your will be billed monthly', style: light)
@@ -297,7 +286,7 @@ class _BillState extends State<BillCalculator> {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('New ${plan.name} bill', style: lightGreyText),
+              Text('New ${billingPlan.name} bill', style: lightGreyText),
               const SizedBox(height: 10),
               Text('Pay now', style: lightGreyText),
             ],
@@ -307,7 +296,7 @@ class _BillState extends State<BillCalculator> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${widget.subscription.calculatedCost}',
+                '\$${widget.plan.calculatedCost}',
                 style: darkGreyText.copyWith(fontFamily: 'Roboto-Regular'),
               ),
               const SizedBox(height: 10),
@@ -348,7 +337,7 @@ class _BillState extends State<BillCalculator> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('New ${plan.name} bill', style: lightGreyText),
+              Text('New ${billingPlan.name} bill', style: lightGreyText),
               const SizedBox(height: 10),
               Text('Pay now (prorated)', style: lightGreyText)
             ],
@@ -358,7 +347,7 @@ class _BillState extends State<BillCalculator> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${widget.subscription.calculatedCost}',
+                '\$${widget.plan.calculatedCost}',
                 style: darkGreyText.copyWith(
                   fontFamily: 'Roboto-Regular',
                 ),
@@ -367,7 +356,7 @@ class _BillState extends State<BillCalculator> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
                 child: Text(
-                  '\$$costDifference',
+                  '\$${widget.plan.costDifference}',
                   style: darkGreyText,
                 ),
               )
@@ -402,7 +391,7 @@ class _BillState extends State<BillCalculator> {
     final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
     final darkGreyText = textStyles.notificationTitle.copyWith(height: 1.6);
 
-    final plan = widget.subscription.billing;
+    final billingPlan = widget.plan.billing;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -410,11 +399,11 @@ class _BillState extends State<BillCalculator> {
           text: TextSpan(
             children: [
               TextSpan(
-                text: '${plan.name.capsFirst} bill\t',
+                text: '${billingPlan.name.capsFirst} bill\t',
                 style: lightGreyText,
               ),
               TextSpan(
-                text: '\$${widget.subscription?.currentCost ?? '-'}',
+                text: '\$${widget.plan?.currentCost ?? '-'}',
                 style: darkGreyText,
               ),
             ],
@@ -438,10 +427,10 @@ class _BillState extends State<BillCalculator> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.subscription?.currentCost == null) {
+    if (widget.plan?.currentCost == null) {
       return const SizedBox();
     }
-    final diff = costDifference;
+    final diff = widget.plan.costDifference;
 
     return SettingsPanelSection(
       label: 'Bill',
@@ -458,12 +447,12 @@ class _BillState extends State<BillCalculator> {
 }
 
 class PaymentMethod extends StatefulWidget {
-  final PlanSubscriptionPackage subscription;
+  final PlanSubscriptionPackage plan;
   final bool useSaved;
   final BoolCallback onUseSaved;
 
   const PaymentMethod(
-    this.subscription,
+    this.plan,
     this.useSaved, {
     @required this.onUseSaved,
     Key key,
@@ -482,12 +471,12 @@ class _MethodState extends State<PaymentMethod> {
     // Get the values if they're already available.
     _onCardChange();
     // Setup a listener.
-    widget.subscription.addListener(_onCardChange);
+    widget.plan.addListener(_onCardChange);
     super.initState();
   }
 
   void _onCardChange() {
-    var sub = widget.subscription;
+    var sub = widget.plan;
     if (_cardDescription == sub.cardDescription && _nextDue == sub.nextDue) {
       return;
     }
@@ -500,7 +489,7 @@ class _MethodState extends State<PaymentMethod> {
 
   @override
   void dispose() {
-    widget.subscription.removeListener(_onCardChange);
+    widget.plan.removeListener(_onCardChange);
     super.dispose();
   }
 
@@ -571,10 +560,12 @@ class _MethodState extends State<PaymentMethod> {
     return Column(
       children: [
         CreditCardForm(
-            sub: widget.subscription,
+            sub: widget.plan,
             trailingButtonBuilder: (_) => UnderlineTextButton(
                   text: 'Use saved card instead',
-                  onPressed: () => widget.onUseSaved(true),
+                  onPressed: widget.plan.processing
+                      ? null
+                      : () => widget.onUseSaved(true),
                 )),
         const SizedBox(height: 30),
         _nextPayment(colors.commonButtonTextColor, styles)
