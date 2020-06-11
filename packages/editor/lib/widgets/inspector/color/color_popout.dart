@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_editor/widgets/common/converters/alpha_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/blue_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/brightness_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/green_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/hex_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/hue_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/converters/red_value_converter.dart';
@@ -235,33 +237,33 @@ class ColorPopout extends StatelessWidget {
                   converterC: BlueValueConverter(hsv),
                   change: type == null ? null : inspecting.changeColor,
                 ),
-                // const SizedBox(height: 15),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(horizontal: 20),
-                //   child: Row(
-                //     crossAxisAlignment: CrossAxisAlignment.end,
-                //     children: [
-                //       Expanded(
-                //         flex: 2,
-                //         child: _LabeledTextField(
-                //           label: 'HEX',
-                //           value: hsv,
-                //           padRight: true,
-                //           converter: HexValueConverter.instance,
-                //           change: type == null ? null : inspecting.changeColor,
-                //         ),
-                //       ),
-                //       Expanded(
-                //         child: _LabeledTextField(
-                //           value: hsv,
-                //           label: 'A',
-                //           converter: AlphaValueConverter(hsv),
-                //           change: type == null ? null : inspecting.changeColor,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
+                const SizedBox(height: 15),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _LabeledTextField(
+                          label: 'HEX',
+                          value: hsv,
+                          padRight: true,
+                          converter: HexValueConverter.instance,
+                          change: type == null ? null : inspecting.changeColor,
+                        ),
+                      ),
+                      Expanded(
+                        child: _LabeledTextField(
+                          value: hsv,
+                          label: 'A',
+                          converter: AlphaValueConverter(hsv),
+                          change: type == null ? null : inspecting.changeColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 20),
               ],
             ),
