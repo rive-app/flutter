@@ -117,21 +117,4 @@ class TeamApi {
       return false;
     }
   }
-
-  /// GET /api/teams/:team_id/customer
-  /// Get the credit card information for this team.
-  Future<CustomerInfoDM> getCustomerInfo(int teamId) async {
-    try {
-      final response = await api.get('${api.host}/api/teams/$teamId/customer');
-
-      final data = json.decode(response.body) as Map<String, Object>;
-      return CustomerInfoDM.fromData(data);
-    } on ApiException catch (err) {
-      log.severe('[ERROR] getCustomerInfo() API ${err.response.body}');
-      return null;
-    } on FormatException catch (err) {
-      log.severe('[Error] getCustomerInfo() formatting: $err');
-      rethrow;
-    }
-  }
 }

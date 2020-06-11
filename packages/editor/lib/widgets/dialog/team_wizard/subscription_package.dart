@@ -5,6 +5,7 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_api/stripe.dart';
 import 'package:rive_api/teams.dart';
 import 'package:utilities/utilities.dart';
@@ -169,6 +170,9 @@ abstract class SubscriptionPackage with ChangeNotifier {
   bool _processing = false;
   bool get processing => _processing;
   set processing(bool value) {
+    if (_processing == value) {
+      return;
+    }
     _processing = value;
     notifyListeners();
   }
@@ -184,7 +188,6 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   /// The team data.
   final Team team;
 
-  // TODO: current plan expiration date.
   int _currentCost;
   int get currentCost => _currentCost;
 
@@ -192,15 +195,62 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   @override
   int get teamSize => _teamSize;
 
+  @override
+  set option(TeamsOption value) {
+    if (_option == value) return;
+    _option = value;
+    notifyListeners();
+  }
+
+  bool get _isCardInfoValid =>
+      isCardNrValid && isCcvValid && isExpirationValid && isZipValid;
+
+  String _cardDescription;
+  String get cardDescription => _cardDescription;
+
+  String _nextDue;
+  String get nextDue => _nextDue;
+
+  void setDescriptions(RiveTeamBilling billing) {
+    var newDescription = billing.brand == null
+        ? 'n/a'
+        : '${billing.brand} ${billing.lastFour}. '
+            'Expires ${billing.expiryMonth}/${billing.expiryYear}';
+    if (_cardDescription != newDescription) {
+      _cardDescription = newDescription;
+      notifyListeners();
+    }
+
+    var newDue = billing.brand == null
+        ? 'n/a'
+        : '${billing.nextMonth} ${billing.nextDay}, ${billing.nextYear}';
+    if (_nextDue != newDue) {
+      _nextDue = newDue;
+      notifyListeners();
+    }
+  }
+
   static Future<PlanSubscriptionPackage> fetchData(
-      RiveApi api, Team team) async {
-    var response = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+    RiveApi api,
+    Team team,
+  ) async {
+    var billing = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+
+    // Need to compute team size.
+    var collaborators = Plumber().peek<List<TeamMember>>(team.hashCode);
+    if (collaborators != null) {
+      // If, for some reason, team was not fully loaded, force a load here.
+      await TeamManager().loadTeamMembers(team);
+      collaborators = Plumber().peek<List<TeamMember>>(team.hashCode);
+    }
+
     var subscription = PlanSubscriptionPackage(team)
-      ..option = response.plan
-      ..billing = response.frequency
-      .._teamSize = 1
-      ..api = api;
-    // TODO: fix billing amount
+      ..api = api
+      ..option = billing.plan
+      ..billing = billing.frequency
+      .._teamSize = collaborators.length
+      ..setDescriptions(billing);
+
     subscription._currentCost = subscription.calculatedCost;
 
     return subscription;
@@ -215,26 +265,27 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     return res;
   }
 
-  @override
-  set option(TeamsOption value) {
-    if (_option == value) return;
-    _option = value;
-    notifyListeners();
+  // Once we've submitted the information to the backend, clean up
+  // the form fields by resetting the values of this object.
+  void _cardCleanup() {
+    _cardNumber = null;
+    expiration = null;
+    ccv = null;
+    zip = null;
   }
-
-  bool get _isCardInfoValid =>
-      isCardNrValid && isCcvValid && isExpirationValid && isZipValid;
 
   Future<bool> updateCard(Team team) async {
     if (processing || !_isCardInfoValid) {
       return false;
     }
     // Track that everything went fine.
+    processing = true;
     bool success = false;
     try {
       var publicKey = await StripeApi(api).getStripePublicKey();
       var tokenResponse =
           await createToken(publicKey, cardNumber, expMonth, expYear, ccv, zip);
+      _cardCleanup();
       success = await TeamManager().saveToken(team, tokenResponse.token);
     } on StripeAPIError catch (error) {
       switch (error.type) {
@@ -257,6 +308,9 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
       _cardValidationError = exception.error.message;
     } finally {
       processing = false;
+      // Get the new changes.
+      var billing = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+      setDescriptions(billing);
     }
 
     return success;

@@ -2,10 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
-import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
-import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
@@ -13,7 +11,6 @@ import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/rive_text_field.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
-import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/panel_two.dart';
 import 'package:rive_editor/widgets/dialog/team_wizard/subscription_choice.dart';
@@ -65,25 +62,28 @@ class _PlanState extends State<PlanSettings>
       duration: const Duration(milliseconds: 200),
     );
 
-    TeamManager().getCustomerInfo(widget.team);
-
     super.initState();
   }
 
   void _onSubChange() => setState(_toggleController);
 
   Future<void> _onBillChanged() async {
-    if (!_usingSavedCC) {
-      if (await _sub.updateCard(widget.team)) {
-        setState(() {
-          // Check the new CC info.
-          print("Success!");
-        });
-      }
+    if (_usingSavedCC) {
+      return;
     }
+
+    final team = widget.team;
+
+    if (await _sub.updateCard(team)) {
+      setState(() {
+        // Fetch the new information.
+        _usingSavedCC = true;
+      });
+    }
+
     return;
     // TODO: process payment after updating the card.
-    _sub.updatePlan(widget.api, widget.team.ownerId);
+    _sub.updatePlan(widget.api, team.ownerId);
   }
 
   void _toggleController() {
@@ -196,6 +196,7 @@ class _PlanState extends State<PlanSettings>
         const SizedBox(height: 30),
         PaymentMethod(
           _sub,
+          _usingSavedCC,
           onUseSaved: (isUsingSaved) {
             setState(() {
               _usingSavedCC = isUsingSaved;
@@ -217,7 +218,7 @@ class _PlanState extends State<PlanSettings>
   }
 }
 
-class BillCalculator extends StatelessWidget {
+class BillCalculator extends StatefulWidget {
   final VoidCallback onBillChanged;
   final PlanSubscriptionPackage subscription;
   final bool updatingCC;
@@ -229,26 +230,65 @@ class BillCalculator extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
-  BillingFrequency get plan => subscription.billing;
+  @override
+  State<StatefulWidget> createState() => _BillState();
+}
+
+class _BillState extends State<BillCalculator> {
+  bool _processingPayment;
+
+  BillingFrequency get plan => widget.subscription.billing;
   int get costDifference =>
-      subscription.calculatedCost - subscription.currentCost;
+      widget.subscription.calculatedCost - widget.subscription.currentCost;
+
+  @override
+  void initState() {
+    _processingPayment = widget.subscription.processing;
+    widget.subscription.addListener(_handleProcessing);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.subscription.removeListener(_handleProcessing);
+    super.dispose();
+  }
+
+  void _handleProcessing() {
+    if (_processingPayment == widget.subscription.processing) {
+      return;
+    }
+
+    setState(() {
+      _processingPayment = widget.subscription.processing;
+    });
+  }
 
   Widget _nextCharge(TextStyle light, TextStyle dark) {
     return RichText(
-      text: TextSpan(children: [
-        TextSpan(text: 'Starting ', style: light),
-        // TODO: get the date from subscription.
-        TextSpan(
-            text: 'Jan 20, 2021',
-            style: dark.copyWith(fontFamily: 'Roboto-Regular')),
-        TextSpan(text: ' your will be billed monthly', style: light)
-      ]),
+      text: TextSpan(
+        children: [
+          TextSpan(text: 'Starting ', style: light),
+          TextSpan(
+            text: widget.subscription.nextDue,
+            style: dark.copyWith(fontFamily: 'Roboto-Regular'),
+          ),
+          TextSpan(text: ' your will be billed monthly', style: light)
+        ],
+      ),
     );
   }
 
-  List<Widget> _credit(TextStyle light, TextStyle dark, Color buttonColor) {
+  List<Widget> _credit() {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+
+    final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
+    final darkGreyText = textStyles.notificationTitle.copyWith(height: 1.6);
+
     return [
-      _nextCharge(light, dark),
+      _nextCharge(lightGreyText, darkGreyText),
       const SizedBox(height: 10),
       Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -257,22 +297,27 @@ class BillCalculator extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('New ${plan.name} bill', style: light),
+              Text('New ${plan.name} bill', style: lightGreyText),
               const SizedBox(height: 10),
-              Text('Pay now', style: light),
+              Text('Pay now', style: lightGreyText),
             ],
           ),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('\$${subscription.calculatedCost}',
-                  style: dark.copyWith(fontFamily: 'Roboto-Regular')),
+              Text(
+                '\$${widget.subscription.calculatedCost}',
+                style: darkGreyText.copyWith(fontFamily: 'Roboto-Regular'),
+              ),
               const SizedBox(height: 10),
               Padding(
-                  padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
-                  child: Text('\$0',
-                      style: dark.copyWith(fontWeight: FontWeight.bold)))
+                padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
+                child: Text(
+                  '\$0',
+                  style: darkGreyText.copyWith(fontWeight: FontWeight.bold),
+                ),
+              )
             ],
           ),
         ],
@@ -280,15 +325,22 @@ class BillCalculator extends StatelessWidget {
       const SizedBox(height: 25),
       FlatIconButton(
         label: 'Confirm',
-        color: buttonColor,
+        color:
+            _processingPayment ? colors.commonLightGrey : colors.commonDarkGrey,
         textColor: Colors.white,
-        onTap: onBillChanged,
-        elevation: 8,
+        onTap: widget.onBillChanged,
+        elevation: _processingPayment ? 0 : 8,
       ),
     ];
   }
 
-  List<Widget> _debit(TextStyle light, TextStyle dark, Color buttonColor) {
+  List<Widget> _debit() {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+    final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
+    final darkGreyText = textStyles.notificationTitle.copyWith(height: 1.6);
+
     return [
       Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -296,21 +348,29 @@ class BillCalculator extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('New ${plan.name} bill', style: light),
+              Text('New ${plan.name} bill', style: lightGreyText),
               const SizedBox(height: 10),
-              Text('Pay now (prorated)', style: light)
+              Text('Pay now (prorated)', style: lightGreyText)
             ],
           ),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('\$${subscription.calculatedCost}',
-                  style: dark.copyWith(fontFamily: 'Roboto-Regular')),
+              Text(
+                '\$${widget.subscription.calculatedCost}',
+                style: darkGreyText.copyWith(
+                  fontFamily: 'Roboto-Regular',
+                ),
+              ),
               const SizedBox(height: 10),
               Padding(
-                  padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
-                  child: Text('\$$costDifference', style: dark))
+                padding: const EdgeInsets.only(bottom: 2.0), // Align amount.
+                child: Text(
+                  '\$$costDifference',
+                  style: darkGreyText,
+                ),
+              )
             ],
           ),
         ],
@@ -322,18 +382,27 @@ class BillCalculator extends StatelessWidget {
         children: <Widget>[
           FlatIconButton(
             label: 'Confirm & Pay',
-            color: buttonColor,
+            color: _processingPayment
+                ? colors.commonLightGrey
+                : colors.commonDarkGrey,
             textColor: Colors.white,
-            onTap: onBillChanged,
-            elevation: 8,
+            onTap: widget.onBillChanged,
+            elevation: _processingPayment ? 0 : 8,
           ),
         ],
       ),
     ];
   }
 
-  Widget _yearlyBill(TextStyle light, TextStyle dark, Color buttonColor) {
-    final plan = subscription.billing;
+  Widget _yearlyBill() {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+
+    final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
+    final darkGreyText = textStyles.notificationTitle.copyWith(height: 1.6);
+
+    final plan = widget.subscription.billing;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -342,23 +411,25 @@ class BillCalculator extends StatelessWidget {
             children: [
               TextSpan(
                 text: '${plan.name.capsFirst} bill\t',
-                style: light,
+                style: lightGreyText,
               ),
               TextSpan(
-                text: '\$${subscription?.currentCost ?? '-'}',
-                style: dark,
+                text: '\$${widget.subscription?.currentCost ?? '-'}',
+                style: darkGreyText,
               ),
             ],
           ),
         ),
-        if (updatingCC) ...[
+        if (widget.updatingCC) ...[
           const SizedBox(height: 30),
           FlatIconButton(
             label: 'Update',
-            color: buttonColor,
+            color: _processingPayment
+                ? colors.commonLightGrey
+                : colors.commonDarkGrey,
             textColor: Colors.white,
-            onTap: onBillChanged,
-            elevation: 8,
+            onTap: widget.onBillChanged,
+            elevation: _processingPayment ? 0 : 8,
           ),
         ]
       ],
@@ -367,18 +438,9 @@ class BillCalculator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (subscription?.currentCost == null) {
+    if (widget.subscription?.currentCost == null) {
       return const SizedBox();
     }
-    final theme = RiveTheme.of(context);
-    final textStyles = theme.textStyles;
-    final colors = theme.colors;
-
-    final lightGreyText =
-        textStyles.hierarchyTabHovered.copyWith(fontSize: 13, height: 1.4);
-    final darkGreyText = textStyles.notificationTitle.copyWith(
-        fontFamily: 'Roboto-Medium', fontWeight: FontWeight.w700, height: 1.4);
-    final buttonColor = colors.commonDarkGrey;
     final diff = costDifference;
 
     return SettingsPanelSection(
@@ -386,9 +448,9 @@ class BillCalculator extends StatelessWidget {
       contents: (ctx) => Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (diff == 0) _yearlyBill(lightGreyText, darkGreyText, buttonColor),
-          if (diff > 0) ..._debit(lightGreyText, darkGreyText, buttonColor),
-          if (diff < 0) ..._credit(lightGreyText, darkGreyText, buttonColor),
+          if (diff == 0) _yearlyBill(),
+          if (diff > 0) ..._debit(),
+          if (diff < 0) ..._credit(),
         ],
       ),
     );
@@ -396,30 +458,53 @@ class BillCalculator extends StatelessWidget {
 }
 
 class PaymentMethod extends StatefulWidget {
-  final PlanSubscriptionPackage sub;
+  final PlanSubscriptionPackage subscription;
+  final bool useSaved;
   final BoolCallback onUseSaved;
 
   const PaymentMethod(
-    this.sub, {
+    this.subscription,
+    this.useSaved, {
     @required this.onUseSaved,
     Key key,
   }) : super(key: key);
 
   @override
-  _MethodState createState() => _MethodState();
+  State<StatefulWidget> createState() => _MethodState();
 }
 
 class _MethodState extends State<PaymentMethod> {
-  bool _useSaved = true;
+  String _cardDescription;
+  String _nextDue;
 
-  void _changeView(bool useSaved) {
+  @override
+  void initState() {
+    // Get the values if they're already available.
+    _onCardChange();
+    // Setup a listener.
+    widget.subscription.addListener(_onCardChange);
+    super.initState();
+  }
+
+  void _onCardChange() {
+    var sub = widget.subscription;
+    if (_cardDescription == sub.cardDescription && _nextDue == sub.nextDue) {
+      return;
+    }
+
     setState(() {
-      _useSaved = useSaved;
-      widget.onUseSaved(useSaved);
+      _cardDescription = sub.cardDescription;
+      _nextDue = sub.nextDue;
     });
   }
 
-  Widget _nextPayment(CustomerInfo info, Color iconColor, TextStyles styles) {
+  @override
+  void dispose() {
+    widget.subscription.removeListener(_onCardChange);
+    super.dispose();
+  }
+
+  Widget _nextPayment(Color iconColor, TextStyles styles) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -435,7 +520,7 @@ class _MethodState extends State<PaymentMethod> {
                   style: styles.hierarchyTabHovered
                       .copyWith(fontSize: 13, height: 1.4)),
               TextSpan(
-                text: info.nextDue,
+                text: _nextDue,
                 style: styles.fileGreyTextLarge.copyWith(
                   fontSize: 13,
                   height: 1.15,
@@ -448,8 +533,7 @@ class _MethodState extends State<PaymentMethod> {
     );
   }
 
-  Widget _savedInfo(CustomerInfo info) {
-    final theme = RiveTheme.of(context);
+  Widget _savedInfo(RiveThemeData theme) {
     final styles = theme.textStyles;
     final colors = theme.colors;
 
@@ -464,58 +548,52 @@ class _MethodState extends State<PaymentMethod> {
             ),
             const SizedBox(width: 10),
             Text(
-              info.cardDescription,
+              _cardDescription,
               style:
                   styles.fileGreyTextLarge.copyWith(fontSize: 13, height: 1.4),
             ),
             const Spacer(),
             UnderlineTextButton(
               text: 'Change',
-              onPressed: () => _changeView(false),
+              onPressed: () => widget.onUseSaved(false),
             ),
           ],
         ),
         const SizedBox(height: 15),
-        _nextPayment(info, colors.commonButtonTextColor, styles)
+        _nextPayment(colors.commonButtonTextColor, styles)
       ],
     );
   }
 
-  Widget _cardInput(CustomerInfo info) {
-    final theme = RiveTheme.of(context);
+  Widget _cardInput(RiveThemeData theme) {
     final styles = theme.textStyles;
     final colors = theme.colors;
     return Column(
       children: [
         CreditCardForm(
-            sub: widget.sub,
+            sub: widget.subscription,
             trailingButtonBuilder: (_) => UnderlineTextButton(
                   text: 'Use saved card instead',
-                  onPressed: () => _changeView(true),
+                  onPressed: () => widget.onUseSaved(true),
                 )),
         const SizedBox(height: 30),
-        _nextPayment(info, colors.commonButtonTextColor, styles)
+        _nextPayment(colors.commonButtonTextColor, styles)
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final streamId = widget.sub.team.ownerId;
-    return ValueStreamBuilder<CustomerInfo>(
-      stream: Plumber().getStream<CustomerInfo>(streamId),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return SettingsPanelSection(
-            label: 'Payment',
-            contents: (ctx) => _useSaved
-                ? _savedInfo(snapshot.data)
-                : _cardInput(snapshot.data),
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    final theme = RiveTheme.of(context);
+
+    if (_cardDescription == null || _nextDue == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return SettingsPanelSection(
+      label: 'Payment',
+      contents: (ctx) =>
+          widget.useSaved ? _savedInfo(theme) : _cardInput(theme),
     );
   }
 }
@@ -643,7 +721,6 @@ class CreditCardForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: use FutureBuilder?
     if (sub == null) {
       return const SizedBox();
     }

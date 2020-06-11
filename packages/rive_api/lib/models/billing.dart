@@ -1,3 +1,5 @@
+import 'package:utilities/deserialize.dart';
+
 /// The subscription frequency options
 enum BillingFrequency { yearly, monthly }
 
@@ -40,16 +42,39 @@ extension FrequencyExtension on BillingFrequency {
 }
 
 class RiveTeamBilling {
-  TeamsOption plan;
+  const RiveTeamBilling._({
+    this.plan,
+    this.frequency,
+    this.brand,
+    this.lastFour,
+    this.expiryMonth,
+    this.expiryYear,
+    this.nextDay,
+    this.nextMonth,
+    this.nextYear,
+  });
 
-  BillingFrequency frequency;
+  final TeamsOption plan;
+  final BillingFrequency frequency;
+  final String brand;
+  final String lastFour;
+  final String expiryMonth;
+  final String expiryYear;
+  final String nextDay;
+  final String nextMonth;
+  final String nextYear;
 
-  RiveTeamBilling({this.plan, this.frequency});
-
-  factory RiveTeamBilling.fromData(Map<String, dynamic> data) {
-    return RiveTeamBilling(
+  factory RiveTeamBilling.fromData(Map<String, Object> data) {
+    return RiveTeamBilling._(
       plan: data.getPlan(),
       frequency: data.getFrequency(),
+      brand: data.getString('brand'),
+      lastFour: data.getString('last4'),
+      expiryMonth: data.getString('expMonth'),
+      expiryYear: data.getString('expYear'),
+      nextDay: data.getString('nextDay'),
+      nextMonth: data.getString('nextMonth'),
+      nextYear: data.getString('nextYear'),
     );
   }
 
@@ -59,9 +84,9 @@ class RiveTeamBilling {
   }
 }
 
-extension DeserializeHelperHelper on Map<String, dynamic> {
+extension DeserializeHelperHelper on Map<String, Object> {
   TeamsOption getPlan() {
-    dynamic value = this['plan'];
+    Object value = this['plan'];
     if (value is String) {
       switch (value.toLowerCase()) {
         case 'normal':
@@ -76,7 +101,7 @@ extension DeserializeHelperHelper on Map<String, dynamic> {
   }
 
   BillingFrequency getFrequency() {
-    dynamic value = this['cycle'];
+    Object value = this['cycle'];
     if (value is String) {
       switch (value.toLowerCase()) {
         case 'monthly':
