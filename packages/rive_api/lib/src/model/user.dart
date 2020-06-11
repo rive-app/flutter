@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/data_model.dart';
 
@@ -50,7 +51,7 @@ class TeamMember extends Owner {
     @required this.permission,
   }) : super(ownerId, name, username, avatarUrl);
 
-  final String status;
+  final TeamInviteStatus status;
   final TeamRole permission;
 
   static List<TeamMember> fromDMList(List<TeamMemberDM> teamMembers) =>

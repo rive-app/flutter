@@ -1,8 +1,8 @@
-import 'package:rive_api/models/team_role.dart';
-import 'package:rive_api/plumber.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
-import 'package:rive_api/api.dart';
+import 'package:rive_api/models/team_role.dart';
+import 'package:rive_api/plumber.dart';
 
 class TeamManager with Subscriptions {
   static final TeamManager _instance = TeamManager._();
@@ -66,7 +66,7 @@ class TeamManager with Subscriptions {
   Future<void> loadTeamMembers(Team team) async {
     final _teamMembersDM = await _teamApi.teamMembers(team.ownerId);
     final _teamMembers = TeamMember.fromDMList(_teamMembersDM.toList());
-    _plumber.message(_teamMembers.toList(), team.hashCode);
+    _plumber.message<List<TeamMember>>(_teamMembers.toList(), team.hashCode);
   }
 
   Future<bool> onRoleChanged(
@@ -77,4 +77,7 @@ class TeamManager with Subscriptions {
       return _teamApi.changeRole(teamId, memberOwnerId, role);
     }
   }
+
+  Future<bool> saveToken(Team team, String token) async =>
+      _teamApi.saveToken(team.ownerId, token);
 }

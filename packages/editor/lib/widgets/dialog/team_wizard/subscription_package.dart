@@ -5,6 +5,7 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_api/stripe.dart';
 import 'package:rive_api/teams.dart';
 import 'package:utilities/utilities.dart';
@@ -33,6 +34,9 @@ final Map<BillingFrequency, Map<TeamsOption, int>> costLookup = {
 enum WizardPanel { one, two }
 
 abstract class SubscriptionPackage with ChangeNotifier {
+  // Bit nasty, but riveapi is context bound :/
+  RiveApi api;
+
   /// Team subscription freuqency
   BillingFrequency _billing = BillingFrequency.yearly;
   BillingFrequency get billing => _billing;
@@ -161,11 +165,29 @@ abstract class SubscriptionPackage with ChangeNotifier {
 
   String _zipError;
   String get zipError => _zipError;
+
+  /// Form Processing
+  bool _processing = false;
+  bool get processing => _processing;
+  set processing(bool value) {
+    if (_processing == value) {
+      return;
+    }
+    _processing = value;
+    notifyListeners();
+  }
+
+  String get expMonth => expiration.split('/').first;
+  String get expYear => '20${expiration.split('/').last}';
 }
 
 /// Data class for managing subscription data in the Team Settings 'Plan' modal.
 class PlanSubscriptionPackage extends SubscriptionPackage {
-  // TODO: current plan expiration date.
+  PlanSubscriptionPackage(this.team);
+
+  /// The team data.
+  final Team team;
+
   int _currentCost;
   int get currentCost => _currentCost;
 
@@ -173,21 +195,72 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   @override
   int get teamSize => _teamSize;
 
+  @override
+  set option(TeamsOption value) {
+    if (_option == value) return;
+    _option = value;
+    notifyListeners();
+  }
+
+  bool get _isCardInfoValid =>
+      isCardNrValid && isCcvValid && isExpirationValid && isZipValid;
+
+  bool get isChanging => costDifference != 0;
+  int get costDifference => calculatedCost - currentCost;
+
+  String _cardDescription;
+  String get cardDescription => _cardDescription;
+
+  String _nextDue;
+  String get nextDue => _nextDue;
+
+  void setDescriptions(RiveTeamBilling billing) {
+    var newDescription = billing.brand == null
+        ? 'n/a'
+        : '${billing.brand} ${billing.lastFour}. '
+            'Expires ${billing.expiryMonth}/${billing.expiryYear}';
+    if (_cardDescription != newDescription) {
+      _cardDescription = newDescription;
+      notifyListeners();
+    }
+
+    var newDue = billing.brand == null
+        ? 'n/a'
+        : '${billing.nextMonth} ${billing.nextDay}, ${billing.nextYear}';
+    if (_nextDue != newDue) {
+      _nextDue = newDue;
+      notifyListeners();
+    }
+  }
+
   static Future<PlanSubscriptionPackage> fetchData(
-      RiveApi api, Team team) async {
-    var response = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
-    var subscription = PlanSubscriptionPackage()
-      ..option = response.plan
-      ..billing = response.frequency
-      .._teamSize = 1;
-    // TODO: fix billing amount
+    RiveApi api,
+    Team team,
+  ) async {
+    var billing = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+
+    // Need to compute team size.
+    var collaborators = Plumber().peek<List<TeamMember>>(team.hashCode);
+    if (collaborators != null) {
+      // If, for some reason, team was not fully loaded, force a load here.
+      await TeamManager().loadTeamMembers(team);
+      collaborators = Plumber().peek<List<TeamMember>>(team.hashCode);
+    }
+
+    var subscription = PlanSubscriptionPackage(team)
+      ..api = api
+      ..option = billing.plan
+      ..billing = billing.frequency
+      .._teamSize = collaborators.length
+      ..setDescriptions(billing);
+
     subscription._currentCost = subscription.calculatedCost;
 
     return subscription;
   }
 
-  Future<bool> updatePlan(RiveApi api, int teamId) async {
-    var res = await RiveTeamsApi(api).updatePlan(teamId, option, billing);
+  Future<bool> _updatePlan() async {
+    var res = await RiveTeamsApi(api).updatePlan(team.ownerId, option, billing);
     if (res) {
       _currentCost = calculatedCost;
       notifyListeners();
@@ -195,19 +268,79 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     return res;
   }
 
-  @override
-  set option(TeamsOption value) {
-    if (_option == value) return;
-    _option = value;
-    notifyListeners();
+  // Once we've submitted the information to the backend, clean up
+  // the form fields by resetting the values of this object.
+  void _cardCleanup() {
+    _cardNumber = null;
+    expiration = null;
+    ccv = null;
+    zip = null;
+  }
+
+  Future<bool> submitChanges(bool hasNewCC) async {
+    if (processing) {
+      return false;
+    }
+    processing = true;
+
+    if (hasNewCC) {
+      if (!await _updateCard()) {
+        processing = false;
+        return false;
+      }
+    }
+
+    if (isChanging) {
+      if (!await _updatePlan()) {
+        processing = false;
+        return false;
+      }
+    }
+    // All good.
+    processing = false;
+    return true;
+  }
+
+  Future<bool> _updateCard() async {
+    // Track that everything went fine.
+    bool success = false;
+    try {
+      var publicKey = await StripeApi(api).getStripePublicKey();
+      var tokenResponse =
+          await createToken(publicKey, cardNumber, expMonth, expYear, ccv, zip);
+      _cardCleanup();
+      success = await TeamManager().saveToken(team, tokenResponse.token);
+
+      // Get the new changes.
+      var billing = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+      setDescriptions(billing);
+    } on StripeAPIError catch (error) {
+      switch (error.type) {
+        case StripeErrorTypes.cardNumber:
+          _cardValidationError = error.error;
+          break;
+        case StripeErrorTypes.cardCCV:
+          _ccvError = error.error;
+          break;
+        case StripeErrorTypes.cardExpiration:
+          _expirationError = error.error;
+          break;
+        default:
+          // todo.. fine
+          _cardValidationError = error.error;
+      }
+    } on ApiException catch (exception) {
+      // card validation error is just the most convenient
+      // place to display this
+      _cardValidationError = exception.error.message;
+    }
+
+    return success;
   }
 }
 
 /// Data class for tracking data in the team subscription widget
 class TeamSubscriptionPackage extends SubscriptionPackage {
-  // Bit nasty, but riveapi is context bound :/
-  RiveApi api;
-
   /// Team name
   String _name;
   String get name => _name;
@@ -227,14 +360,6 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
       isNameValid;
       notifyListeners();
     }
-  }
-
-  /// Form Processing
-  bool _processing = false;
-  bool get processing => _processing;
-  set processing(bool value) {
-    _processing = value;
-    notifyListeners();
   }
 
   @override
@@ -320,9 +445,6 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
 
   /// Step 2 is valid; safe to attempt team creation
   bool get isStep2Valid => isNameValid && isOptionValid && isCardInputValid;
-
-  String get expMonth => expiration.split('/').first;
-  String get expYear => '20${expiration.split('/').last}';
 
   Future checkName() async {
     if (_nameCheckDebounce?.isActive ?? false) _nameCheckDebounce.cancel();

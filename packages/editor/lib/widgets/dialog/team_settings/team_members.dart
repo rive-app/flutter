@@ -469,7 +469,7 @@ class _MemberRowState extends State<_MemberRow> {
                 ),
               ),
             const Spacer(),
-            if (user.status == TeamInviteStatus.pending.name)
+            if (user.status == TeamInviteStatus.pending)
               Text(
                 "Hasn't accepted invite",
                 style: styles.tooltipDisclaimer.copyWith(

@@ -28,7 +28,6 @@ class TeamApi {
   }
 
   Future<Iterable<TeamMemberDM>> teamMembers(int teamId) async {
-    // Get the user's team volumes
     final res = await api.getFromPath('/api/teams/$teamId/affiliates');
     try {
       final data = json.decodeList<Map<String, dynamic>>(res.body);
@@ -74,7 +73,7 @@ class TeamApi {
     var response =
         await api.put(api.host + '/api/teams/$teamId', body: profile.encoded);
     if (response.statusCode != 200) {
-      var message = 'Could not create new team ${response.body}';
+      var message = 'Could not update team profile: ${response.body}';
       log.severe(message);
       return false;
     }
@@ -98,6 +97,23 @@ class TeamApi {
       return true;
     } on ApiException catch (err) {
       log.severe('[Error] changeRole() ${err.response.body}');
+      return false;
+    }
+  }
+
+  /// PATCH /api/teams/:team_id/token
+  /// Sends a new token for the current team to update the current payment
+  /// method.
+  Future<bool> saveToken(int teamId, String token) async {
+    try {
+      String payload = json.encode({'token': token});
+      await api.patch(
+        '${api.host}/api/teams/$teamId/token',
+        body: payload,
+      );
+      return true;
+    } on ApiException catch (err) {
+      log.severe('[ERROR] saveToken() ${err.response.body}');
       return false;
     }
   }

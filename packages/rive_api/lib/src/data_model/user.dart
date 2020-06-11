@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:rive_api/models/team_invite_status.dart';
 import 'package:utilities/deserialize.dart';
 
 import 'owner.dart';
@@ -44,7 +45,7 @@ class TeamMemberDM extends OwnerDM {
   }) : super(ownerId, name, username);
 
   final String avatarUrl;
-  final String status;
+  final TeamInviteStatus status;
   final String permission;
 
   static Iterable<TeamMemberDM> formDataList(List<Map<String, dynamic>> data) =>
@@ -56,7 +57,7 @@ class TeamMemberDM extends OwnerDM {
         username: data.getString('username'),
         avatarUrl: data.getString('avatar'),
         permission: data.getString('permission'),
-        status: data.getString('status'),
+        status: data.getInvitationStatus(),
       );
 
   @override

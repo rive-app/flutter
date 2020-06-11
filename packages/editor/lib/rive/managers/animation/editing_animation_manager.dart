@@ -3,17 +3,16 @@ import 'dart:collection';
 
 import 'package:core/core.dart';
 import 'package:core/debounce.dart';
+import 'package:meta/meta.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:meta/meta.dart';
 
 @immutable
 class KeyComponentsEvent {

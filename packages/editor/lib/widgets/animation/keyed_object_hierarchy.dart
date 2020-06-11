@@ -1,15 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_core_field_type.dart';
-import 'package:rive_core/rive_file.dart';
-import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/common/draw_order_key_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
