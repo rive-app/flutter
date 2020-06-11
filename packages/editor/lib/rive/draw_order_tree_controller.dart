@@ -10,6 +10,7 @@ import 'package:rive_editor/rive/managers/animation/editing_animation_manager.da
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/component_tree_controller.dart';
 
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
@@ -18,7 +19,8 @@ import 'stage/stage_item.dart';
 
 /// Tree Controller for the draw order, requires rive context in order to
 /// propagate selections.
-class DrawOrderTreeController extends TreeController<Component> {
+class DrawOrderTreeController extends ComponentTreeController {
+  @override
   final OpenFileContext file;
   final Backboard backboard;
   Artboard activeArtboard;
@@ -74,13 +76,6 @@ class DrawOrderTreeController extends TreeController<Component> {
   @override
   void onMouseExit(PointerExitEvent event, FlatTreeItem<Component> item) =>
       item.data.stageItem.isHovered = false;
-
-  @override
-  void onTap(FlatTreeItem<Component> item) {
-    if (item.data.stageItem != null) {
-      file.select(item.data.stageItem);
-    }
-  }
 
   @override
   int spacingOf(Component treeItem) => 1;

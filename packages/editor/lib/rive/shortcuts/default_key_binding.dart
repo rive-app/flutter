@@ -5,6 +5,7 @@ import 'shortcut_keys.dart';
 /// Default key binding for Rive.
 final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
   [
+    Shortcut(ShortcutAction.deselect, [ShortcutKey.systemCmd, ShortcutKey.d]),
     Shortcut(ShortcutAction.zoomIn, [ShortcutKey.equal]),
     Shortcut(ShortcutAction.zoomOut, [ShortcutKey.minus]),
     Shortcut(ShortcutAction.zoomIn, [ShortcutKey.systemCmd, ShortcutKey.equal]),

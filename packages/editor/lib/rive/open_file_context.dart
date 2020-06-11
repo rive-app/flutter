@@ -418,6 +418,8 @@ class OpenFileContext with RiveFileDelegate {
     _syncActiveArtboard();
   }
 
+  SelectionMode get selectionMode => rive.selectionMode.value;
+
   bool select(SelectableItem item, {bool append}) {
     append ??= rive.selectionMode.value == SelectionMode.multi;
     final success = selection.select(item, append: append);
@@ -516,6 +518,9 @@ class OpenFileContext with RiveFileDelegate {
     }
     // No one gives a F#$(C<, let's see if we can help this poor friend.
     switch (action) {
+      case ShortcutAction.deselect:
+        selection.clear();
+        return true;
       case ShortcutAction.autoTool:
         stage?.tool = AutoTool.instance;
         return true;
