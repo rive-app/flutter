@@ -35,6 +35,10 @@ class AABB {
     return a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3];
   }
 
+  double get width => _buffer[2] - _buffer[0];
+
+  double get height => _buffer[3] - _buffer[1];
+
   double operator [](int idx) {
     return _buffer[idx];
   }

@@ -679,8 +679,62 @@ class Stage extends Debouncer {
         _hoverOffsetIndex = max(1, _hoverOffsetIndex + 1);
         _updateHover();
         return true;
+      case ShortcutAction.zoomIn:
+        zoomLevel *= 2;
+        break;
+      case ShortcutAction.zoomOut:
+        zoomLevel /= 2;
+        break;
+      case ShortcutAction.zoom100:
+        zoomLevel = 1;
+        break;
+      case ShortcutAction.zoomFit:
+        _zoomFit();
+        break;
     }
     return false;
+  }
+
+  void _zoomFit() {
+    AABB bounds;
+    var selection = file.selection.items.whereType<StageItem>();
+    if (selection.isNotEmpty) {
+      bounds = selection.first.aabb;
+      for (final item in selection.skip(1)) {
+        bounds = AABB.combine(AABB(), bounds, item.aabb);
+      }
+    } else {
+      var artboard = activeArtboard;
+      if (artboard == null) {
+        return;
+      }
+
+      bounds = artboard.stageItem.aabb;
+    }
+
+    if (bounds == null) {
+      // Show message?
+      return;
+    }
+
+    const double zoomFitPadding = 20;
+    var availableWidth = _viewportWidth - zoomFitPadding * 2;
+    var availableHeight = _viewportHeight - zoomFitPadding * 2;
+    var widthScale = availableWidth / bounds.width;
+    var heightScale = availableHeight / bounds.height;
+    double zoom =
+        min(widthScale, heightScale).clamp(minZoom, maxZoom).toDouble();
+
+    _viewZoomTarget = zoom;
+    zoomLevelNotifier.value = zoom;
+
+    var center = AABB.center(Vec2D(), bounds);
+
+    _viewTranslationTarget[0] =
+        zoomFitPadding + availableWidth / 2 - center[0] * zoom;
+    _viewTranslationTarget[1] =
+        zoomFitPadding + availableHeight / 2 - center[1] * zoom;
+    markNeedsAdvance();
   }
 
   /// Deal with the fileContext being activate/de-activated. This happens when a
