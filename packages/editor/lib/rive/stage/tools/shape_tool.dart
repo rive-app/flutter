@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:core/core.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
@@ -51,6 +52,7 @@ abstract class ShapeTool extends DrawableTool {
     ShortcutAction.symmetricDraw.removeListener(_symmetricDrawChanged);
   }
 
+  AutoKeySuppression _autoKeySuppression;
   @override
   void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
       Vec2D worldMouse) {
@@ -64,7 +66,7 @@ abstract class ShapeTool extends DrawableTool {
     // a shortcut or something while the drag operation is continuing).
     _currentArtboard = activeArtboard;
 
-    activeArtboard.context.suppressAutoKey = true;
+    _autoKeySuppression = activeArtboard.context.suppressAutoKey();
 
     _shape = makeShape(activeArtboard, (_path = makePath()))
       ..name = shapeName
@@ -112,7 +114,7 @@ abstract class ShapeTool extends DrawableTool {
   @override
   void endDrag() {
     super.endDrag();
-    _shape?.context?.suppressAutoKey = false;
+    _autoKeySuppression?.restore();
     _shape = null;
   }
 

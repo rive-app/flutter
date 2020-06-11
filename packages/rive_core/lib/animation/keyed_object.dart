@@ -56,7 +56,6 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   }
 
   void _removeAll() {
-    print("REMOVING");
     assert(context != null);
     // Copy lists to not modify them while iterating.
     var kps = _keyedProperties.values.toList(growable: false);
@@ -114,7 +113,8 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       // Remove this keyed property.
       context.removeObject(this);
     }
-    assert(removed == null || removed == property);
+    assert(removed == null || removed == property,
+        '$removed was not $property or null');
     return removed != null;
   }
 

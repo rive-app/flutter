@@ -172,6 +172,21 @@ abstract class ObjectRoot {
   T addObject<T extends Core>(T object);
 }
 
+/// A helper for tracking changes to auto key, will ensure restore is called
+/// only once.
+class AutoKeySuppression {
+  CoreContext _context;
+
+  AutoKeySuppression._(this._context);
+
+  /// Restore the auto key state to where it was before supress was called on
+  /// the context. Will ensure that restore on the context is only called once.
+  void restore() {
+    _context?._restoreAutoKey();
+    _context = null;
+  }
+}
+
 abstract class CoreContext implements LocalSettings, ObjectRoot {
   static const int addKey = 1;
   static const int removeKey = 2;
@@ -199,9 +214,29 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   // Track which entries were changing during animation and need to be reset
   // prior to the next animation pass.
   HashMap<Id, Set<int>> _animationChanges;
-  bool get isAnimating => !suppressAutoKey && _animationChanges != null;
+  bool get isAnimating => _suppressAutoKey == 0 && _animationChanges != null;
 
-  bool suppressAutoKey = false;
+  int _suppressAutoKey = 0;
+
+  /// Prevent the animation system from attempting to key any core changes. This
+  /// internally manages a stack that must be balanced by calling restoreAutoKey
+  /// when done suppressing in the context that you're calling it from. It also
+  /// returns an AutoKeySupression subscription which can be canceled.
+  AutoKeySuppression suppressAutoKey() {
+    _suppressAutoKey++;
+    return AutoKeySuppression._(this);
+  }
+
+  /// Restores auto key to previous setting, will return true if this result in
+  /// auto keying being re-enabled.
+  bool _restoreAutoKey() {
+    assert(
+        _suppressAutoKey > 0,
+        'called restoreAutoKey without a matching suppress, '
+        'stack is not balanced');
+    _suppressAutoKey--;
+    return _suppressAutoKey == 0;
+  }
 
   /// Start tracking changes as keyframe values instead of core property values.
   /// Returns true if animation was actived, false if it was already activated,

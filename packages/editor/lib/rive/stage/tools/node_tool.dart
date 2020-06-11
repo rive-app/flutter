@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:core/core.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -15,10 +16,11 @@ class NodeTool extends DrawableTool {
 
   /// Tracks the created node while a drag operation is in effect
   Node _node;
+  AutoKeySuppression _autoKeySuppression;
 
   @override
   void click(Artboard artboard, Vec2D worldMouse) {
-    artboard.context.suppressAutoKey = true;
+    _autoKeySuppression = artboard.context.suppressAutoKey();
     _node = _createNode(artboard, worldMouse);
   }
 
@@ -33,7 +35,7 @@ class NodeTool extends DrawableTool {
   /// placed, so we can't do this in onClick
   @override
   bool endClick() {
-    _node?.context?.suppressAutoKey = false;
+    _autoKeySuppression?.restore();
     _node = null;
     stage.activateAction(ShortcutAction.translateTool);
     return true;
