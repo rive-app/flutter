@@ -34,12 +34,6 @@ class RiveManager with Subscriptions {
         Plumber().peek<NotificationCount>()?.count != 0) {
       NotificationManager().markNotificationsRead();
     }
-    // Handle marking first run when
-    // the user opens the getting started panel
-    if (newHomeSection == HomeSection.getStarted &&
-        (Plumber().peek<Me>()?.isFirstRun ?? false)) {
-      UserManager().markFirstRun();
-    }
   }
 
   void _newCurrentDirectory(CurrentDirectory currentDirectory) {
