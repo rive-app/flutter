@@ -9,6 +9,7 @@ import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rxdart/rxdart.dart';
@@ -151,7 +152,8 @@ class EditingAnimationManager extends AnimationTimeManager
     Set<KeyHierarchyViewModel> hierarchy = {};
     List<KeyedComponentViewModel> needParenting = [];
     for (final keyedObject in keyedObjects) {
-      Component component = core.resolve(keyedObject.objectId);
+      Component component =
+          core.resolve<Component>(keyedObject.objectId).timelineProxy;
 
       var viewModel = _componentViewModels[component];
       if (viewModel == null) {

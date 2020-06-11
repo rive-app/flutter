@@ -2,6 +2,7 @@
 import 'package:core/core.dart';
 import 'package:core/field_types/core_double_type.dart';
 import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_core/animation/keyframe_color.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
 
@@ -23,6 +24,16 @@ class RiveDoubleType extends CoreDoubleType
 
   RiveDoubleType._constructor();
   static RiveDoubleType instance = RiveDoubleType._constructor();
+}
+
+class RiveColorType extends CoreColorType
+    implements KeyFrameGenerator<KeyFrameColor> {
+  RiveColorType._constructor();
+  static RiveColorType instance = RiveColorType._constructor();
+
+  @override
+  KeyFrameColor makeKeyFrame() =>
+      KeyFrameColor()..interpolation = KeyFrameInterpolation.linear;
 }
 
 class RiveIdType extends CoreIdType {

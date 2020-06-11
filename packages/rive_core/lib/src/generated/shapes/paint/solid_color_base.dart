@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/key_state.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -18,12 +19,20 @@ abstract class SolidColorBase extends Component {
   /// --------------------------------------------------------------------------
   /// ColorValue field with key 37.
   int _colorValue = 0xFF747474;
+  int _colorValueAnimated;
+  KeyState _colorValueKeyState = KeyState.none;
   static const int colorValuePropertyKey = 37;
-  int get colorValue => _colorValue;
+
+  /// Get the [_colorValue] field value.Note this may not match the core value
+  /// if animation mode is active.
+  int get colorValue => _colorValueAnimated ?? _colorValue;
+
+  /// Get the non-animation [_colorValue] field value.
+  int get colorValueCore => _colorValue;
 
   /// Change the [_colorValue] field value.
   /// [colorValueChanged] will be invoked only if the field's value has changed.
-  set colorValue(int value) {
+  set colorValueCore(int value) {
     if (_colorValue == value) {
       return;
     }
@@ -31,6 +40,38 @@ abstract class SolidColorBase extends Component {
     _colorValue = value;
     onPropertyChanged(colorValuePropertyKey, from, value);
     colorValueChanged(from, value);
+  }
+
+  set colorValue(int value) {
+    if (context != null && context.isAnimating) {
+      _colorValueAnimate(value, true);
+      return;
+    }
+    colorValueCore = value;
+  }
+
+  void _colorValueAnimate(int value, bool autoKey) {
+    if (_colorValueAnimated == value) {
+      return;
+    }
+    int from = colorValue;
+    _colorValueAnimated = value;
+    int to = colorValue;
+    onAnimatedPropertyChanged(colorValuePropertyKey, autoKey, from, to);
+    colorValueChanged(from, to);
+  }
+
+  int get colorValueAnimated => _colorValueAnimated;
+  set colorValueAnimated(int value) => _colorValueAnimate(value, false);
+  KeyState get colorValueKeyState => _colorValueKeyState;
+  set colorValueKeyState(KeyState value) {
+    if (_colorValueKeyState == value) {
+      return;
+    }
+    _colorValueKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(
+        colorValuePropertyKey, false, _colorValueAnimated, _colorValueAnimated);
   }
 
   void colorValueChanged(int from, int to);
@@ -47,7 +88,8 @@ abstract class SolidColorBase extends Component {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_colorValue != null) {
-      context.intType.writeProperty(colorValuePropertyKey, writer, _colorValue);
+      context.colorType
+          .writeProperty(colorValuePropertyKey, writer, _colorValue);
     }
   }
 

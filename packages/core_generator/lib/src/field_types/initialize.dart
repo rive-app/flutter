@@ -2,6 +2,7 @@
 
 import '../field_type.dart';
 import 'bool_field_type.dart';
+import 'color_field_type.dart';
 import 'double_field_type.dart';
 import 'fractional_index_field_type.dart';
 import 'id_field_type.dart';
@@ -20,5 +21,6 @@ void initializeFields() {
     IdListFieldType(),
     BoolFieldType(),
     IdFieldType(),
+    ColorFieldType(),
   ];
 }

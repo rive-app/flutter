@@ -24,7 +24,7 @@
       "runtime": false
     },
     "colorValue": {
-      "type": "int",
+      "type": "Color",
       "initialValue": "0xFF222222",
       "key": {
         "int": 45,

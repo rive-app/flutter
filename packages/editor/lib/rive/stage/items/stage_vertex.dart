@@ -35,7 +35,7 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
   static final Paint selectedFill = Paint()..color = const Color(0xFF00BBFF);
 
   @override
-  int get drawOrder => 3;
+  int get drawOrder => 4;
 
   // Stage vertices don't get automatically added to the stage. They only get
   // added when the path owning them is edited.

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
@@ -121,4 +123,15 @@ mixin TransformingTool {
 
   /// Not every draggable tool is required to create a transformer.
   List<StageTransformer> get transformers => [];
+
+  void drawTransformers(Canvas canvas) {
+    if(_artboardTransformSpaces == null) {
+      return;
+    }
+    for (final details in _artboardTransformSpaces.values) {
+      for (final transformer in details._transformers) {
+        transformer.draw(canvas);
+      }
+    }
+  }
 }
