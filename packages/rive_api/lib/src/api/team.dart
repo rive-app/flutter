@@ -28,7 +28,6 @@ class TeamApi {
   }
 
   Future<Iterable<TeamMemberDM>> teamMembers(int teamId) async {
-    // Get the user's team volumes
     final res = await api.getFromPath('/api/teams/$teamId/affiliates');
     try {
       final data = json.decodeList<Map<String, dynamic>>(res.body);

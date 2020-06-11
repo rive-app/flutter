@@ -2,11 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
+import 'package:rive_api/models/team_invite_status.dart';
 
 import 'fixtures/api_responses.dart';
 import 'fixtures/data_models.dart';
 
 class MockRiveApi extends Mock implements RiveApi {
+  @override
   final host = '';
   @override
   Future<void> clearCookies() {
@@ -94,13 +96,13 @@ void main() {
       expect(teams.first.username, 'foofoo');
       expect(teams.first.avatarUrl, null);
       expect(teams.first.permission, 'Owner');
-      expect(teams.first.status, 'complete');
+      expect(teams.first.status, TeamInviteStatus.accepted);
       expect(teams.last.ownerId, 41594);
       expect(teams.last.name, null);
       expect(teams.last.username, 'mightymax');
       expect(teams.last.avatarUrl, null);
       expect(teams.last.permission, 'Member');
-      expect(teams.last.status, 'pending');
+      expect(teams.last.status, TeamInviteStatus.pending);
     });
   });
 
