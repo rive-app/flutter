@@ -77,7 +77,11 @@ class _StageViewRenderObject extends RenderBox implements StageDelegate {
 
   @override
   void performLayout() {
-    _stage.setViewport(size.width, size.height);
+    // Debounce changing the dimensions as this can set value notifiers that
+    // will trigger a rebuild during this rebuild.
+    _stage.debounce(() {
+      stage.setViewport(size.width, size.height);
+    });
   }
 
   @override

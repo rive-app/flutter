@@ -318,12 +318,17 @@ class Stage extends Debouncer {
   void markNeedsRedraw() => _delegate?.stageNeedsRedraw?.call();
 
   bool setViewport(double width, double height) {
+    var isFirst = _viewportWidth == 0 && _viewportHeight == 0;
     if (width == _viewportWidth && height == _viewportHeight) {
       return false;
     }
     _viewportWidth = width;
     _viewportHeight = height;
     markNeedsAdvance();
+
+    if (isFirst) {
+      zoomFit(animate: false);
+    }
     return true;
   }
 
@@ -689,13 +694,15 @@ class Stage extends Debouncer {
         zoomLevel = 1;
         break;
       case ShortcutAction.zoomFit:
-        _zoomFit();
+        zoomFit();
         break;
     }
     return false;
   }
 
-  void _zoomFit() {
+  /// Fit the selection to the viewport bounds. If nothing is selected the
+  /// active artboard is used as the are of interest.
+  void zoomFit({bool animate = true}) {
     AABB bounds;
     var selection = file.selection.items.whereType<StageItem>();
     if (selection.isNotEmpty) {
@@ -710,6 +717,8 @@ class Stage extends Debouncer {
       }
 
       bounds = artboard.stageItem.aabb;
+      // Extra 18 pixels for title
+      bounds.values[1] -= 18;
     }
 
     if (bounds == null) {
@@ -734,6 +743,11 @@ class Stage extends Debouncer {
         zoomFitPadding + availableWidth / 2 - center[0] * zoom;
     _viewTranslationTarget[1] =
         zoomFitPadding + availableHeight / 2 - center[1] * zoom;
+
+    if (!animate) {
+      Vec2D.copy(_viewTranslation, _viewTranslationTarget);
+      _viewZoom = _viewZoomTarget;
+    }
     markNeedsAdvance();
   }
 
@@ -947,6 +961,12 @@ class Stage extends Debouncer {
         Paint()
           ..isAntiAlias = false
           ..color = backboardColor);
+
+    if(_viewportWidth == 0 || _viewportHeight == 0) {
+      // Keep this here to prevent flashing on load. Make sure we clear to
+      // backboard regardless.
+      return;
+    }
 
     // Compute backboard contrast to help us calculate a color that'll look
     // contrasty on top of it.

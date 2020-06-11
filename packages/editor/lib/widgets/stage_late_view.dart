@@ -62,7 +62,9 @@ class _LoupeRenderObject extends RenderBox implements LateDrawViewDelegate {
 
   @override
   void performLayout() {
-    _stage.setViewport(size.width, size.height);
+    _stage.debounce(() {
+      stage.setViewport(size.width, size.height);
+    });
   }
 
   @override
