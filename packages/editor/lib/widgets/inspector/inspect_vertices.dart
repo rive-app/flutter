@@ -282,14 +282,18 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
     }
     return PropagatingListener(
       onPointerDown: (_) {
-        if (widget.vertices.isEmpty) {
+        if (widget.vertices.isEmpty || widget.isActive) {
+          // Don't do anything if there's nothing selected or the option is
+          // already selected.
           return;
         }
         var file = ActiveFile.find(context);
         var core = file.core;
-        var selection = file.selection.items.toSet();
         var newVertices = <PathVertex>{};
 
+        // Don't auto key when swapping the vertex type as it changes core
+        // properties that we don't want animated in this case.
+        var suppression = core.suppressAutoKey();
         core.batchAdd(() {
           for (final vertex in widget.vertices.toList()) {
             var newVertex =
@@ -298,8 +302,6 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
             newVertex.y = vertex.y;
 
             var next = vertex.replaceWith(newVertex);
-
-            selection.remove(vertex.stageItem);
 
             if (newVertex is CubicVertex) {
               // This only happens when we're going from corner->cubic.
@@ -327,11 +329,20 @@ class __VertexTypeButtonState extends State<_VertexTypeButton> {
               }
             }
             newVertices.add(newVertex);
+            // TODO: seem to sometimes get a case related to #740 where the
+            // number of vertices in the path increases by one (doesn't remove
+            // the existing vertex that we're trying to replace with). Was
+            // printing (newVertex.parent as PointsPath).vertices.length to try
+            // to figure this out here. Can't find a repro yet and it seems to
+            // either be a fluke due to hot reloads or some super rare edge case
+            // which would be nice to fix up...
           }
         });
+        var selection = file.selection.items.toSet();
         selection.addAll(newVertices.map((vertex) => vertex.stageItem));
         file.selection.selectMultiple(selection);
         core.captureJournalEntry();
+        suppression.restore();
       },
       child: MouseRegion(
         onEnter: (_) {

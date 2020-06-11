@@ -326,7 +326,6 @@ class OpenFileContext with RiveFileDelegate {
   @override
   void onObjectRemoved(Core object) {
     if (object is Component && object.stageItem != null) {
-      selection.deselect(object.stageItem);
       stage.removeItem(object.stageItem);
     }
   }

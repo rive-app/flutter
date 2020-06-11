@@ -152,7 +152,14 @@ class EditingAnimationManager extends AnimationTimeManager
     List<KeyedComponentViewModel> needParenting = [];
     for (final keyedObject in keyedObjects) {
       Component component =
-          core.resolve<Component>(keyedObject.objectId).timelineProxy;
+          core.resolve<Component>(keyedObject.objectId)?.timelineProxy;
+      if(component == null) {
+        // Exclude this item from the hierarchy temporarily, maybe we're still
+        // loading? This shouldn't really happen, figure out why it's happening.
+        // KeyedObjects that don't resolve remove themselves, so probably the
+        // animation manager is open during a reload or something.
+        continue;
+      }
 
       var viewModel = _componentViewModels[component];
       if (viewModel == null) {

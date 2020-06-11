@@ -83,6 +83,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   VertexEditor get vertexEditor => stage.file.vertexEditor;
 
   StraightVertex _clickCreatedVertex;
+  AutoKeySuppression _autoKeySuppression;
 
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
@@ -116,6 +117,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       ..radius = 0;
 
     var file = path.context;
+    _autoKeySuppression = file.suppressAutoKey();
     file.batchAdd(() {
       file.addObject(vertex);
       path.appendChild(vertex);
@@ -124,6 +126,8 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   @override
   bool endClick() {
+    _autoKeySuppression?.restore();
+
     // capture when click completes.
     return true;
   }
@@ -319,6 +323,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     // original index in the list before items were removed/swapped).
     var vertices = path.vertices.toList(growable: false);
     var file = path.context;
+    var autoKeySuppression = file.suppressAutoKey();
 
     if (target.cubic == null) {
       var from = target.from.coreVertex;
@@ -334,6 +339,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         vertex.parent = path;
       });
       file.captureJournalEntry();
+      autoKeySuppression.restore();
       return true;
     }
 
@@ -481,6 +487,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
     // capture undo/redo
     file.captureJournalEntry();
+    autoKeySuppression.restore();
 
     return true;
   }

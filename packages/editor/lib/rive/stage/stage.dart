@@ -771,6 +771,11 @@ class Stage extends Debouncer {
 
   bool removeItem(StageItem item) {
     assert(item != null);
+
+    // Make sure items are removed from selection when they are removed from the
+    // stage.
+    file.selection.deselect(item);
+
     if (item._visTreeProxy == nullNode) {
       return false;
     }
