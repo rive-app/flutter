@@ -160,7 +160,7 @@ class _PlanState extends State<PlanSettings>
                           const SizedBox(width: 30),
                           SubscriptionChoice(
                             label: 'Org',
-                            // disabled: true,
+                            disabled: true,
                             costLabel: '${labelLookup[TeamsOption.premium]}',
                             description: ''
                                 'Create sub-teams with centralized '
