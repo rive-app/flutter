@@ -150,32 +150,6 @@ class DrawOrderTreeController extends ComponentTreeController {
   }
 
   @override
-  List<FlatTreeItem<Component>> onDragStart(
-      DragStartDetails details, FlatTreeItem<Component> item) {
-    // All items in draw order have a stage item.
-    if (!item.data.stageItem.isSelected) {
-      file.select(item.data.stageItem);
-    }
-    // Get inspection set (selected components).
-    var inspectionSet = InspectionSet.fromSelection(file, file.selection);
-
-    // Find matching tree items (N.B. that means that if they're not expanded
-    // they won't drag, probably ok for now).
-    final dragItems = <FlatTreeItem<Component>>[];
-    for (final component in inspectionSet.components) {
-      final key = ValueKey(component);
-      var found = indexLookup[key];
-      if (found != null) {
-        dragItems.add(flat[found]);
-      }
-    }
-    dragItems.sort((a, b) => (b.data as Drawable)
-        .drawOrder
-        .compareTo((a.data as Drawable).drawOrder));
-    return dragItems;
-  }
-
-  @override
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<Component> item) {
     // TODO: implement onRightClick

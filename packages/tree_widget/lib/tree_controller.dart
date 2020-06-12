@@ -276,7 +276,7 @@ abstract class TreeController<T> with ChangeNotifier {
       var key = ValueKey(selectionPivot);
       var flatPivotIndex = indexLookup[key];
       if (flatPivotIndex != null) {
-        var rangeToIndex = flat.indexOf(item);
+        var rangeToIndex = item.index;
         var startIndex = min(flatPivotIndex, rangeToIndex);
         var endIndex = max(flatPivotIndex, rangeToIndex);
 
@@ -444,6 +444,7 @@ abstract class TreeController<T> with ChangeNotifier {
 
         var meta = FlatTreeItem<T>(
           item,
+          index: flat.length,
           parent: parent,
           isProperty: true,
           prev: context.prev,
@@ -478,6 +479,7 @@ abstract class TreeController<T> with ChangeNotifier {
       var itemDepth = depth + [1];
       var meta = FlatTreeItem<T>(
         item,
+        index: flat.length,
         parent: parent,
         prev: context.prev,
         next: null,

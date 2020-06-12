@@ -1,6 +1,9 @@
+import 'package:flutter/widgets.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/widgets/inspector/inspection_set.dart';
+import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 import 'package:utilities/iterable.dart';
 
@@ -39,5 +42,31 @@ abstract class ComponentTreeController extends TreeController<Component> {
       }
     }
     return null;
+  }
+
+   @override
+  List<FlatTreeItem<Component>> onDragStart(
+      DragStartDetails details, FlatTreeItem<Component> item) {
+    // All items in draw order have a stage item.
+    if (!item.data.stageItem.isSelected) {
+      file.select(item.data.stageItem);
+    }
+    // Get inspection set (selected components).
+    var inspectionSet = InspectionSet.fromSelection(file, file.selection);
+
+    // Find matching tree items (N.B. that means that if they're not expanded
+    // they won't drag, probably ok for now).
+    final dragItems = <FlatTreeItem<Component>>[];
+    for (final component in inspectionSet.components) {
+      final key = ValueKey(component);
+      var found = indexLookup[key];
+      if (found != null) {
+        dragItems.add(flat[found]);
+      }
+    }
+
+    dragItems.sort((a, b) => a.index.compareTo(b.index));
+    
+    return dragItems;
   }
 }

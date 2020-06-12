@@ -171,12 +171,6 @@ class HierarchyTreeController extends ComponentTreeController {
   }
 
   @override
-  List<FlatTreeItem<Component>> onDragStart(
-      DragStartDetails details, FlatTreeItem<Component> item) {
-    return [item];
-  }
-
-  @override
   void onMouseEnter(PointerEnterEvent event, FlatTreeItem<Component> item) {
     item.data.stageItem.isHovered = true;
   }
