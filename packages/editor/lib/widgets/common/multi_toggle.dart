@@ -1,25 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/popup/tip.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 typedef ChooseOption<T> = void Function(T);
 typedef OptionToIcon<T> = Iterable<PackedIcon> Function(T);
+typedef OptionToTip<T> = Tip Function(T);
 
 /// A multi toggle that displays icons in a row for each option.
 class MultiToggle<T> extends StatelessWidget {
   final T value;
-  final List<T> options;
+  final Iterable<T> options;
   final ChooseOption<T> change;
   final OptionToIcon<T> toIcon;
-
+  final OptionToTip<T> toTip;
+  final bool expand;
+  final EdgeInsets padding;
   const MultiToggle({
     @required this.value,
     @required this.options,
     @required this.toIcon,
+    this.toTip,
     this.change,
+    this.expand = false,
+    this.padding = const EdgeInsets.all(5),
     Key key,
   }) : super(key: key);
+
+  Widget _expand(Widget child) {
+    if (expand) {
+      return Expanded(child: child);
+    }
+    return child;
+  }
 
   Widget _select(Widget icon, Color background) {
     return background != null
@@ -35,6 +49,14 @@ class MultiToggle<T> extends StatelessWidget {
         : icon;
   }
 
+  Widget _tip(T option, Widget child) {
+    var tip = toTip?.call(option);
+    if (tip != null) {
+      return TipRegion(tip: tip, child: child);
+    }
+    return child;
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
@@ -48,23 +70,34 @@ class MultiToggle<T> extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(2),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
           children: [
             for (final option in options)
-              _select(
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: (_) => change?.call(option),
-                  child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: TintedIcon(
-                      color: option == value
-                          ? const Color(0xFFFFFFFF)
-                          : theme.colors.inspectorTextColor,
-                      icon: toIcon(option),
+              _expand(
+                _tip(
+                  option,
+                  _select(
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (_) => change?.call(option),
+                      child: Padding(
+                        padding: padding,
+                        child: UnconstrainedBox(
+                          child: TintedIcon(
+                            color: option == value
+                                ? const Color(0xFFFFFFFF)
+                                : theme.colors.inspectorTextColor,
+                            icon: toIcon(option),
+                          ),
+                        ),
+                      ),
                     ),
+                    option == value
+                        ? theme.colors.toggleForegroundDisabled
+                        : null,
                   ),
                 ),
-                option == value ? theme.colors.toggleForegroundDisabled : null,
               ),
           ],
         ),

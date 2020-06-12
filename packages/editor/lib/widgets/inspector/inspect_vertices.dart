@@ -1,4 +1,3 @@
-import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
@@ -10,6 +9,7 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/converters/translation_value_converter.dart';
+import 'package:rive_editor/widgets/common/multi_toggle.dart';
 import 'package:rive_editor/widgets/core_properties_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
@@ -17,9 +17,9 @@ import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/inspector_pill_button.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_single.dart';
-import 'package:rive_editor/widgets/tinted_icon.dart';
-import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/widgets/popup/tip.dart';
+import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:utilities/list_equality.dart';
 
 /// TODO: this inspector should track the last selection such that when the
@@ -53,7 +53,7 @@ class VertexInspector extends ListenableInspectorBuilder {
           ),
           child: InspectorPillButton(
             label: 'Done Editing',
-            icon: PackedIcon.check,
+            icon: PackedIcon.popupCheck,
             press: () {
               ActiveFile.find(context).vertexEditor.doneEditing();
             },
@@ -93,6 +93,59 @@ class VertexInspector extends ListenableInspectorBuilder {
         );
       },
       InspectorBuilder.divider,
+      (context) {
+        const typeIcons = {
+          StraightVertexBase.typeKey: PackedIcon.vertexStraight,
+          CubicMirroredVertexBase.typeKey: PackedIcon.vertexMirrored,
+          CubicDetachedVertexBase.typeKey: PackedIcon.vertexDetached,
+          CubicAsymmetricVertexBase.typeKey: PackedIcon.vertexAsymmetric,
+        };
+        var vertices = inspecting.components.cast<PathVertex>();
+        int vertexType = equalValue<PathVertex, int>(
+            vertices, (PathVertex vertex) => vertex.coreType);
+
+        var uiStrings = UIStrings.of(context);
+        return Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
+          child: MultiToggle(
+            value: vertexType,
+            options: typeIcons.keys,
+            toIcon: (int type) => typeIcons[type],
+            toTip: (int type) {
+              switch (type) {
+                case StraightVertexBase.typeKey:
+                  return Tip.above(
+                    label: uiStrings.withKey('vertex-straight'),
+                  );
+                  break;
+                case CubicMirroredVertexBase.typeKey:
+                  return Tip.above(
+                    label: uiStrings.withKey('vertex-mirrored'),
+                  );
+                  break;
+                case CubicDetachedVertexBase.typeKey:
+                  return Tip.above(
+                    label: uiStrings.withKey('vertex-detached'),
+                  );
+                  break;
+                case CubicAsymmetricVertexBase.typeKey:
+                  return Tip.above(
+                    label: uiStrings.withKey('vertex-asymmetric'),
+                  );
+                  break;
+              }
+              return null;
+            },
+            expand: true,
+            padding: const EdgeInsets.all(3),
+            change: (int type) => _changeVertexType(
+              context,
+              type,
+              vertices,
+            ),
+          ),
+        );
+      },
       (context) => PropertyDual<double>(
             name: 'Position',
             objects: inspecting.components,
@@ -116,7 +169,7 @@ class VertexInspector extends ListenableInspectorBuilder {
         // All mirrored...
         (context) {
           return PropertyDual<double>(
-            name: 'Control',
+            name: 'Bezier',
             objects: inspecting.components,
             propertyKeyA: CubicMirroredVertexBase.rotationPropertyKey,
             propertyKeyB: CubicMirroredVertexBase.distancePropertyKey,
@@ -125,287 +178,111 @@ class VertexInspector extends ListenableInspectorBuilder {
           );
         },
       if (inspecting.intersectingCoreTypes
-          .contains(CubicAsymmetricVertexBase.typeKey))
-        // All asymmetric...
-        ...[
-        (context) {
-          return PropertySingle<double>(
-            name: 'Control Angle',
-            objects: inspecting.components,
-            propertyKey: CubicAsymmetricVertexBase.rotationPropertyKey,
-          );
-        },
-        (context) {
-          return PropertyDual<double>(
-            name: 'Control Length',
-            objects: inspecting.components,
-            propertyKeyA: CubicAsymmetricVertexBase.inDistancePropertyKey,
-            propertyKeyB: CubicAsymmetricVertexBase.outDistancePropertyKey,
-            labelA: 'In',
-            labelB: 'Out',
-          );
-        },
+          .contains(CubicAsymmetricVertexBase.typeKey)) ...[
+        (context) => PropertyDual<double>(
+              name: 'Bezier',
+              objects: inspecting.components,
+              propertyKeyA: CubicAsymmetricVertexBase.rotationPropertyKey,
+              propertyKeyB: CubicAsymmetricVertexBase.inDistancePropertyKey,
+              labelA: 'Angle',
+              labelB: 'Length In',
+            ),
+        (context) => PropertyDual<double>(
+              name: '',
+              objects: inspecting.components,
+              propertyKeyA: null,
+              propertyKeyB: CubicAsymmetricVertexBase.outDistancePropertyKey,
+              labelB: 'Length Out',
+            ),
       ],
       if (inspecting.intersectingCoreTypes
           .contains(CubicDetachedVertexBase.typeKey)) ...[
         // All mirrored...
         (context) {
           return PropertyDual<double>(
-            name: 'Control In',
+            name: 'Bezier',
             objects: inspecting.components,
             propertyKeyA: CubicDetachedVertexBase.inRotationPropertyKey,
             propertyKeyB: CubicDetachedVertexBase.inDistancePropertyKey,
-            labelA: 'Angle',
-            labelB: 'Length',
+            labelA: 'Angle In',
+            labelB: 'Length In',
           );
         },
         (context) {
           return PropertyDual<double>(
-            name: 'Control Out',
+            name: '',
             objects: inspecting.components,
             propertyKeyA: CubicDetachedVertexBase.outRotationPropertyKey,
             propertyKeyB: CubicDetachedVertexBase.outDistancePropertyKey,
-            labelA: 'Angle',
-            labelB: 'Length',
+            labelA: 'Angle Out',
+            labelB: 'Length Out',
           );
         },
       ],
-      (context) => _VertexButtonDual(
-            vertices: inspecting.components.cast<PathVertex>(),
-            builder: (context, controlTypeValue, allowActive, vertices) {
-              return Row(
-                children: [
-                  _VertexTypeButton(
-                    vertexType: StraightVertexBase.typeKey,
-                    icon: PackedIcon.vertexStraight,
-                    labelKey: 'vertex-straight',
-                    isActive: allowActive &&
-                        controlTypeValue == StraightVertexBase.typeKey,
-                    vertices: vertices,
-                  ),
-                  const SizedBox(width: 10),
-                  _VertexTypeButton(
-                    vertexType: CubicMirroredVertexBase.typeKey,
-                    icon: PackedIcon.vertexMirrored,
-                    labelKey: 'vertex-mirrored',
-                    isActive: allowActive &&
-                        controlTypeValue == CubicMirroredVertexBase.typeKey,
-                    vertices: vertices,
-                  ),
-                ],
-              );
-            },
-          ),
-      (context) => _VertexButtonDual(
-            vertices: inspecting.components.cast<PathVertex>(),
-            builder: (context, controlTypeValue, allowActive, vertices) {
-              return Row(
-                children: [
-                  _VertexTypeButton(
-                    vertexType: CubicDetachedVertexBase.typeKey,
-                    icon: PackedIcon.vertexDetached,
-                    labelKey: 'vertex-detached',
-                    isActive: allowActive &&
-                        controlTypeValue == CubicDetachedVertexBase.typeKey,
-                    vertices: vertices,
-                  ),
-                  const SizedBox(width: 10),
-                  _VertexTypeButton(
-                    vertexType: CubicAsymmetricVertexBase.typeKey,
-                    icon: PackedIcon.vertexAssymetric,
-                    labelKey: 'vertex-assymetric',
-                    isActive: allowActive &&
-                        controlTypeValue == CubicAsymmetricVertexBase.typeKey,
-                    vertices: vertices,
-                  ),
-                ],
-              );
-            },
-          ),
     ];
   }
-}
 
-class _VertexButtonDual extends StatelessWidget {
-  final Iterable<PathVertex> vertices;
-  final Widget Function(BuildContext context, int vertexTypeValue,
-      bool allowActive, Iterable<PathVertex> vertices) builder;
-
-  const _VertexButtonDual({
-    @required this.vertices,
-    @required this.builder,
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    int commonType = equalValue<PathVertex, int>(
-        vertices, (PathVertex vertex) => vertex.coreType);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 10,
-      ),
-      child: builder(context, commonType, commonType != null, vertices),
-    );
-  }
-}
-
-class _VertexTypeButton extends StatefulWidget {
-  final int vertexType;
-  final Iterable<PackedIcon> icon;
-  final String labelKey;
-  final bool isActive;
-  final Iterable<PathVertex> vertices;
-
-  const _VertexTypeButton({
-    Key key,
-    this.vertexType,
-    this.icon,
-    this.isActive,
-    this.vertices,
-    this.labelKey,
-  }) : super(key: key);
-
-  @override
-  __VertexTypeButtonState createState() => __VertexTypeButtonState();
-}
-
-class __VertexTypeButtonState extends State<_VertexTypeButton> {
-  bool _hasHover = false;
-
-  bool get isDisabled => widget.vertices.isEmpty;
-  Widget _listen(Widget child) {
-    if (isDisabled) {
-      return child;
+  void _changeVertexType(
+      BuildContext context, int vertexType, Iterable<PathVertex> vertices) {
+    if (vertices.isEmpty) {
+      // Don't do anything if there's nothing selected or the option is
+      // already selected.
+      return;
     }
-    return PropagatingListener(
-      onPointerDown: (_) {
-        if (widget.vertices.isEmpty || widget.isActive) {
-          // Don't do anything if there's nothing selected or the option is
-          // already selected.
-          return;
+    var file = ActiveFile.find(context);
+    var core = file.core;
+    var newVertices = <PathVertex>{};
+
+    // Don't auto key when swapping the vertex type as it changes core
+    // properties that we don't want animated in this case.
+    var suppression = core.suppressAutoKey();
+    core.batchAdd(() {
+      for (final vertex in vertices.toList()) {
+        var newVertex = core.makeCoreInstance(vertexType) as PathVertex;
+        newVertex.x = vertex.x;
+        newVertex.y = vertex.y;
+
+        var next = vertex.replaceWith(newVertex);
+
+        if (newVertex is CubicVertex) {
+          // This only happens when we're going from corner->cubic.
+          var toNext =
+              Vec2D.subtract(Vec2D(), next.translation, vertex.translation);
+          var length = Vec2D.length(toNext);
+
+          Vec2D.normalize(toNext, toNext);
+
+          if (vertex is CubicVertex) {
+            // The vertex we are converting from was already cubic, try copying in/out.
+            newVertex.inPoint = vertex.inPoint;
+            newVertex.outPoint = vertex.outPoint;
+          } else {
+            // The vertex we're converting from is not cubic.
+            // Just align the in towards the next and mirror out.
+            newVertex.inPoint = Vec2D.fromValues(
+              newVertex.x - toNext[0] * length * 0.25,
+              newVertex.y - toNext[1] * length * 0.25,
+            );
+            newVertex.outPoint = Vec2D.fromValues(
+              newVertex.x + toNext[0] * length * 0.25,
+              newVertex.y + toNext[1] * length * 0.25,
+            );
+          }
         }
-        var file = ActiveFile.find(context);
-        var core = file.core;
-        var newVertices = <PathVertex>{};
-
-        // Don't auto key when swapping the vertex type as it changes core
-        // properties that we don't want animated in this case.
-        var suppression = core.suppressAutoKey();
-        core.batchAdd(() {
-          for (final vertex in widget.vertices.toList()) {
-            var newVertex =
-                core.makeCoreInstance(widget.vertexType) as PathVertex;
-            newVertex.x = vertex.x;
-            newVertex.y = vertex.y;
-
-            var next = vertex.replaceWith(newVertex);
-
-            if (newVertex is CubicVertex) {
-              // This only happens when we're going from corner->cubic.
-              var toNext =
-                  Vec2D.subtract(Vec2D(), next.translation, vertex.translation);
-              var length = Vec2D.length(toNext);
-
-              Vec2D.normalize(toNext, toNext);
-
-              if (vertex is CubicVertex) {
-                // The vertex we are converting from was already cubic, try copying in/out.
-                newVertex.inPoint = vertex.inPoint;
-                newVertex.outPoint = vertex.outPoint;
-              } else {
-                // The vertex we're converting from is not cubic.
-                // Just align the in towards the next and mirror out.
-                newVertex.inPoint = Vec2D.fromValues(
-                  newVertex.x - toNext[0] * length * 0.25,
-                  newVertex.y - toNext[1] * length * 0.25,
-                );
-                newVertex.outPoint = Vec2D.fromValues(
-                  newVertex.x + toNext[0] * length * 0.25,
-                  newVertex.y + toNext[1] * length * 0.25,
-                );
-              }
-            }
-            newVertices.add(newVertex);
-            // TODO: seem to sometimes get a case related to #740 where the
-            // number of vertices in the path increases by one (doesn't remove
-            // the existing vertex that we're trying to replace with). Was
-            // printing (newVertex.parent as PointsPath).vertices.length to try
-            // to figure this out here. Can't find a repro yet and it seems to
-            // either be a fluke due to hot reloads or some super rare edge case
-            // which would be nice to fix up...
-          }
-        });
-        var selection = file.selection.items.toSet();
-        selection.addAll(newVertices.map((vertex) => vertex.stageItem));
-        file.selection.selectMultiple(selection);
-        core.captureJournalEntry();
-        suppression.restore();
-      },
-      child: MouseRegion(
-        onEnter: (_) {
-          if (widget.vertices.isEmpty) {
-            return;
-          }
-          setState(() {
-            _hasHover = true;
-          });
-        },
-        onExit: (_) {
-          if (widget.vertices.isEmpty) {
-            return;
-          }
-          setState(() {
-            _hasHover = false;
-          });
-        },
-        child: child,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var theme = RiveTheme.of(context);
-    return _listen(
-      Container(
-        width: 92,
-        height: 70,
-        decoration: widget.isActive && !isDisabled
-            ? BoxDecoration(
-                border: Border.all(
-                  color: const Color(0xFF57A5E0),
-                  width: 2,
-                  style: BorderStyle.solid,
-                ),
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              )
-            : null,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TintedIcon(
-                icon: widget.icon,
-                color: !isDisabled && (_hasHover || widget.isActive)
-                    ? theme.colors.vertexIconHover
-                    : theme.colors.vertexIcon,
-              ),
-              const SizedBox(height: 7),
-              Text(
-                UIStrings.of(context).withKey(widget.labelKey),
-                style: !isDisabled && (_hasHover || widget.isActive)
-                    ? theme.textStyles.vertexTypeSelected
-                    : theme.textStyles.vertexTypeLabel,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+        newVertices.add(newVertex);
+        // TODO: seem to sometimes get a case related to #740 where the
+        // number of vertices in the path increases by one (doesn't remove
+        // the existing vertex that we're trying to replace with). Was
+        // printing (newVertex.parent as PointsPath).vertices.length to try
+        // to figure this out here. Can't find a repro yet and it seems to
+        // either be a fluke due to hot reloads or some super rare edge case
+        // which would be nice to fix up...
+      }
+    });
+    var selection = file.selection.items.toSet();
+    selection.addAll(newVertices.map((vertex) => vertex.stageItem));
+    file.selection.selectMultiple(selection);
+    core.captureJournalEntry();
+    suppression.restore();
   }
 }

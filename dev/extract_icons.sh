@@ -5,15 +5,11 @@ cd extract_icons
 echo "Getting icons from Figma..."
 node index.js
 if [ -f "./Rive App.zip" ]; then
-    exit 1
+    rm -fR ../../packages/editor/assets/images/icons
     unzip -o "Rive App.zip" -d ../../packages/editor/assets/images/icons
     rm -fR "./Rive App.zip"
     cd ../../packages/editor
     flutter packages pub run image_res:main
-    # Cleanup unwanted icons...
-    rm "assets/images/icons/Rive App.png"
-    rm "assets/images/icons/2.0x/Rive App.png"
-    rm "assets/images/icons/3.0x/Rive App.png"
 
     # We no longer png crush here as the images get packed into an atlas.
     # for png in `find assets/images/icons -name "*.png"`;

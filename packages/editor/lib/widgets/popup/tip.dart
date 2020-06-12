@@ -74,12 +74,27 @@ class Tip {
     this.fallbackDirections = PopupDirection.all,
     this.offset = Offset.zero,
   });
+
+  factory Tip.above({
+    String label,
+    ShortcutAction shortcut,
+  }) {
+    return Tip(
+      label: label,
+      shortcut: shortcut,
+      direction: PopupDirection.topToCenter,
+      fallbackDirections: [
+        PopupDirection.topToLeft,
+        PopupDirection.topToRight,
+      ],
+    );
+  }
 }
 
 class TipContext {
   final ValueNotifier<Tip> tooltip = ValueNotifier<Tip>(null);
 
-  static const Duration delay = Duration(milliseconds: 400);
+  static const Duration delay = Duration(milliseconds: 800);
 
   BuildContext _nextContext;
   Tip _nextTip;
