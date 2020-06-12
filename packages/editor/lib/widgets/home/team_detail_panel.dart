@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_api/model.dart';
 
 import 'package:rive_api/models/follow.dart';
+import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/packed_icon.dart';
@@ -42,7 +43,7 @@ class TeamDetailPanel extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             var members = snapshot.data
-                .where((element) => element.status == 'complete')
+                .where((element) => element.status == TeamInviteStatus.accepted)
                 .toList();
 
             var memberCountWidget = Container(
