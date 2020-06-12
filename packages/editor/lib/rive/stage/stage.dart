@@ -28,6 +28,7 @@ import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
@@ -454,7 +455,10 @@ class Stage extends Debouncer {
               }
             }
             if (!selectionHandled) {
-              file.select(_hoverItem);
+              // We need to specifically use range selection for multi select as
+              // command (multi-select) becomes something else in the future...
+              file.select(_hoverItem,
+                  append: file.selectionMode == SelectionMode.range);
             }
           } else {
             _mouseDownSelected = false;
@@ -962,7 +966,7 @@ class Stage extends Debouncer {
           ..isAntiAlias = false
           ..color = backboardColor);
 
-    if(_viewportWidth == 0 || _viewportHeight == 0) {
+    if (_viewportWidth == 0 || _viewportHeight == 0) {
       // Keep this here to prevent flashing on load. Make sure we clear to
       // backboard regardless.
       return;

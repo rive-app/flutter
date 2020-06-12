@@ -13,6 +13,7 @@ import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/frameDebounce.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/platform/platform.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -24,7 +25,11 @@ import 'package:window_utils/window_utils.dart' as win_utils;
 
 enum HomeSection { files, notifications, community, recents, getStarted }
 
-enum SelectionMode { single, multi, range }
+enum SelectionMode {
+  single,
+  multi,
+  range,
+}
 
 class _Key {
   final LogicalKeyboardKey logical;
@@ -229,11 +234,19 @@ class Rive {
   final Set<_Key> _pressed = {};
   final Set<ShortcutAction> _pressedActions = {};
 
+  bool _isSystemCmdPressed;
+  // Returns true if the command on mac or control on win is pressed.
+  bool get isSystemCmdPressed => _isSystemCmdPressed;
+
   void onKeyEvent(ShortcutKeyBinding keyBinding, RawKeyEvent keyEvent,
       bool hasFocusObject) {
-    selectionMode.value = keyEvent.isMetaPressed
-        ? SelectionMode.multi
-        : keyEvent.isShiftPressed ? SelectionMode.range : SelectionMode.single;
+    _isSystemCmdPressed = Platform.instance.isMac
+        ? keyEvent.isMetaPressed
+        : keyEvent.isControlPressed;
+
+    selectionMode.value = keyEvent.isShiftPressed
+        ? SelectionMode.range
+        : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
 
     // TODO: fix this (should be tracked on rive not stage).
     // _stage?.updateEditMode(
