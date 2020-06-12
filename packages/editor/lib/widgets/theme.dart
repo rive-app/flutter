@@ -227,7 +227,11 @@ class TextStyles {
       fontFamily: 'Roboto-Regular', color: lightGrey, fontSize: 13);
 
   TextStyle get inspectorPropertySubLabel => const TextStyle(
-      fontFamily: 'Roboto-Regular', color: lightGrey, fontSize: 11);
+        fontFamily: 'Roboto-Regular', color: lightGrey, fontSize: 11,
+        // need a tiny bit of kerning inwards here to allow sublabels to not
+        // spill
+        letterSpacing: -0.1,
+      );
 
   TextStyle get inspectorPropertyValue => const TextStyle(
       fontFamily: 'Roboto-Light', color: Color(0xFFE3E3E3), fontSize: 12.5);

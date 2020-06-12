@@ -93,7 +93,9 @@ class PropertyDual<T> extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          Flexible(
+            flex: 1,
+            fit: FlexFit.tight,
             child: _link(
               Text(
                 name,
@@ -102,33 +104,37 @@ class PropertyDual<T> extends StatelessWidget {
               theme,
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 16),
           Flexible(
             flex: 1,
             fit: FlexFit.tight,
-            child: SubLabel(
-              label: labelA,
-              style: theme.textStyles.inspectorPropertySubLabel,
-              child: _buildCoreTextField(
-                propertyKeyA,
-                propertyKeyB,
-                converterA,
-              ),
-            ),
+            child: propertyKeyA == null
+                ? const SizedBox()
+                : SubLabel(
+                    label: labelA,
+                    style: theme.textStyles.inspectorPropertySubLabel,
+                    child: _buildCoreTextField(
+                      propertyKeyA,
+                      propertyKeyB,
+                      converterA,
+                    ),
+                  ),
           ),
           const SizedBox(width: 20),
           Flexible(
             flex: 1,
             fit: FlexFit.tight,
-            child: SubLabel(
-              label: labelB,
-              style: theme.textStyles.inspectorPropertySubLabel,
-              child: _buildCoreTextField(
-                propertyKeyB,
-                propertyKeyA,
-                converterB,
-              ),
-            ),
+            child: propertyKeyB == null
+                ? const SizedBox()
+                : SubLabel(
+                    label: labelB,
+                    style: theme.textStyles.inspectorPropertySubLabel,
+                    child: _buildCoreTextField(
+                      propertyKeyB,
+                      propertyKeyA,
+                      converterB,
+                    ),
+                  ),
           ),
         ],
       ),

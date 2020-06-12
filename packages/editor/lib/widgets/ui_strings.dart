@@ -85,7 +85,7 @@ HashMap<String, String> _defaultUIStrings =
   'vertex-straight': 'Straight',
   'vertex-mirrored': 'Mirrored',
   'vertex-detached': 'Detached',
-  'vertex-assymetric': 'Asymmetric',
+  'vertex-asymmetric': 'Asymmetric',
   // Billing strings
   'normal': 'team',
   'premium': 'org',
