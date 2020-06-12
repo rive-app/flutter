@@ -1,4 +1,5 @@
 export 'src/data_model/app_state.dart';
+export 'src/data_model/billing_details.dart';
 export 'src/data_model/cdn.dart';
 export 'src/data_model/file.dart';
 export 'src/data_model/folder.dart';

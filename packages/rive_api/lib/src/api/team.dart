@@ -117,4 +117,38 @@ class TeamApi {
       return false;
     }
   }
+
+  Future<BillingDetailsDM> getReceiptDetails(int teamId) async {
+    try {
+      var response =
+          await api.get('${api.host}/api/teams/$teamId/billing-details');
+      final data = json.decodeMap(response.body);
+      return BillingDetailsDM.fromData(data);
+    } on ApiException catch (apiException) {
+      final response = apiException.response;
+      var message = '[ERROR] getReceiptDetails()\n${response.body}';
+      log.severe(message);
+      return null;
+    }
+  }
+
+  Future<bool> setReceiptDetails(int teamId, BillingDetails details) async {
+    try {
+      String payload = jsonEncode(<String, String>{
+        'business_name': details.businessName,
+        'tax_id': details.taxId,
+        'business_address': details.businessAddress,
+      });
+      await api.put(
+        '${api.host}/api/teams/$teamId/billing-details',
+        body: payload,
+      );
+      return true;
+    } on ApiException catch (apiException) {
+      final response = apiException.response;
+      var message = '[ERROR] setReceiptDetails()\n${response.body}';
+      log.severe(message);
+      return false;
+    }
+  }
 }
