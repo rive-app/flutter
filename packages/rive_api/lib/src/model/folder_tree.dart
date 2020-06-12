@@ -17,7 +17,7 @@ class FolderTree {
   }
 
   factory FolderTree.fromFolderList(Owner owner, List<Folder> folders) {
-    final indexMap = Map<int, List<Folder>>();
+    final indexMap = <int, List<Folder>>{};
 
     // map em out
     folders.forEach((Folder folder) {
@@ -59,7 +59,7 @@ class FolderTreeItem {
   }
 
   String get name {
-    return (owner == null) ? this.folder.name : owner.displayName;
+    return (owner == null) ? folder.name : owner.displayName;
   }
 
   BehaviorSubject<bool> get hoverStream => _hover;
