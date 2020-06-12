@@ -132,7 +132,7 @@ class TeamApi {
     }
   }
 
-  Future<bool> setReceiptDetails(int teamId, BillingDetails details) async {
+  Future<bool> setBillingDetails(int teamId, BillingDetails details) async {
     try {
       String payload = jsonEncode(<String, String>{
         'business_name': details.businessName,
@@ -146,7 +146,7 @@ class TeamApi {
       return true;
     } on ApiException catch (apiException) {
       final response = apiException.response;
-      var message = '[ERROR] setReceiptDetails()\n${response.body}';
+      var message = '[ERROR] setBillingDetails()\n${response.body}';
       log.severe(message);
       return false;
     }

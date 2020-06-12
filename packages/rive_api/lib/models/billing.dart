@@ -41,6 +41,9 @@ extension FrequencyExtension on BillingFrequency {
   }
 }
 
+  /// Represents the Billing information for a team:
+  
+  
 class RiveTeamBilling {
   const RiveTeamBilling._({
     this.plan,
@@ -54,12 +57,19 @@ class RiveTeamBilling {
     this.nextYear,
   });
 
+
+  /// - plan type: {studio | org}
   final TeamsOption plan;
+  /// - billing cycle: {monthly | yearly}
   final BillingFrequency frequency;
+  /// - Card brand
   final String brand;
+  /// - Card last 4 digits
   final String lastFour;
+  /// - Card expiry date
   final String expiryMonth;
   final String expiryYear;
+  /// - Plan next payment date
   final String nextDay;
   final String nextMonth;
   final String nextYear;

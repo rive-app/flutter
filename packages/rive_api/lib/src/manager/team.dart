@@ -89,7 +89,7 @@ class TeamManager with Subscriptions {
   }
 
   Future<bool> setBillingDetails(Team team, BillingDetails details) async {
-    bool success = await _teamApi.setReceiptDetails(team.ownerId, details);
+    bool success = await _teamApi.setBillingDetails(team.ownerId, details);
     if (success) {
       // Update the pipes.
       _plumber.message<BillingDetails>(details, team.hashCode);

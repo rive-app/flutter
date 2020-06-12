@@ -82,10 +82,17 @@ class RiveTeamsApi<T extends RiveTeam> {
     return teamUsers;
   }
 
+  /// Retrieves for the team w/ [teamId]:
+  /// - plan type ()
+  /// - billing cycle (monthly/yearly)
+  /// - CC brand
+  /// - CC last 4 digits
+  /// - CC expiry
+  /// - Next payment date
   Future<RiveTeamBilling> getBillingInfo(int teamId) async {
     var response = await api.get(api.host + '/api/teams/$teamId/billing');
     final data = json.decodeMap(response.body);
-    return RiveTeamBilling.fromData(data.getMap<String, dynamic>('data'));
+    return RiveTeamBilling.fromData(data.getMap<String, Object>('data'));
   }
 
   Future<bool> updatePlan(
