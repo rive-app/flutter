@@ -8,12 +8,14 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
+import 'package:rive_editor/rive/component_tree_controller.dart';
 
 import 'stage/stage_item.dart';
 
 /// Tree Controller for the hierarchy, requires rive context in order to
 /// propagate selections.
-class HierarchyTreeController extends TreeController<Component> {
+class HierarchyTreeController extends ComponentTreeController {
+  @override
   final OpenFileContext file;
   List<Component> _data = [];
   final Backboard backboard;
@@ -169,12 +171,6 @@ class HierarchyTreeController extends TreeController<Component> {
   }
 
   @override
-  List<FlatTreeItem<Component>> onDragStart(
-      DragStartDetails details, FlatTreeItem<Component> item) {
-    return [item];
-  }
-
-  @override
   void onMouseEnter(PointerEnterEvent event, FlatTreeItem<Component> item) {
     item.data.stageItem.isHovered = true;
   }
@@ -182,13 +178,6 @@ class HierarchyTreeController extends TreeController<Component> {
   @override
   void onMouseExit(PointerExitEvent event, FlatTreeItem<Component> item) {
     item.data.stageItem.isHovered = false;
-  }
-
-  @override
-  void onTap(FlatTreeItem<Component> item) {
-    if (item.data.stageItem != null) {
-      file.select(item.data.stageItem);
-    }
   }
 
   @override

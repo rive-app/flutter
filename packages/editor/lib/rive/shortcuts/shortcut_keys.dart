@@ -80,6 +80,14 @@ Map<ShortcutKey, List<PhysicalKeyboardKey>> keyToPhysical = {
     PhysicalKeyboardKey.enter,
     PhysicalKeyboardKey.numpadEnter
   ],
+  ShortcutKey.equal: [
+    PhysicalKeyboardKey.equal,
+    PhysicalKeyboardKey.numpadEqual
+  ],
+  ShortcutKey.minus: [
+    PhysicalKeyboardKey.minus,
+    PhysicalKeyboardKey.numpadSubtract
+  ],
 };
 
 Map<ShortcutKey, String> _keyNames = {
@@ -219,4 +227,6 @@ enum ShortcutKey {
   up,
   down,
   semiColon,
+  equal,
+  minus,
 }

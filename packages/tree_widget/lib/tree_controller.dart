@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -134,6 +135,23 @@ abstract class TreeController<T> with ChangeNotifier {
 
   HashSet<T> get expanded => _expanded;
 
+  Set<T> recursiveChildrenOf(T treeItem) {
+    Set<T> all = {};
+    _recursiveChildrenOf(treeItem, all);
+    return all;
+  }
+
+  void _recursiveChildrenOf(T treeItem, Set<T> all) {
+    var children = childrenOf(treeItem);
+    if (children == null) {
+      return;
+    }
+    all.addAll(children);
+    for (final child in children) {
+      _recursiveChildrenOf(child, all);
+    }
+  }
+
   /// Hide the children of [item].
   void collapse(T item) {
     final expanded = _expanded;
@@ -252,7 +270,31 @@ abstract class TreeController<T> with ChangeNotifier {
   void drop(TreeDragOperationTarget<T> target, List<FlatTreeItem<T>> items);
 
   /// Called when an item is tapped or clicked on.
-  void onTap(FlatTreeItem<T> item);
+  void onTap(FlatTreeItem<T> item) {
+    T selectionPivot;
+    if (isRangeSelecting && (selectionPivot = rangeSelectionPivot) != null) {
+      var key = ValueKey(selectionPivot);
+      var flatPivotIndex = indexLookup[key];
+      if (flatPivotIndex != null) {
+        var rangeToIndex = item.index;
+        var startIndex = min(flatPivotIndex, rangeToIndex);
+        var endIndex = max(flatPivotIndex, rangeToIndex);
+
+        Set<T> toSelect = {};
+        for (int i = startIndex; i <= endIndex; i++) {
+          var flatItem = flat[i];
+          toSelect.add(flatItem.data);
+          if (!flatItem.isExpanded) {
+            recursiveChildrenOf(flatItem.data).forEach(toSelect.add);
+          }
+        }
+        selectMultipleTreeItems(toSelect);
+        return;
+      }
+    }
+
+    selectTreeItem(item.data);
+  }
 
   /// Called when a right (secondary) click is received on an item. Should we
   /// consider renaming to onRequestContextMenu? We propagate the event so that
@@ -402,6 +444,7 @@ abstract class TreeController<T> with ChangeNotifier {
 
         var meta = FlatTreeItem<T>(
           item,
+          index: flat.length,
           parent: parent,
           isProperty: true,
           prev: context.prev,
@@ -436,6 +479,7 @@ abstract class TreeController<T> with ChangeNotifier {
       var itemDepth = depth + [1];
       var meta = FlatTreeItem<T>(
         item,
+        index: flat.length,
         parent: parent,
         prev: context.prev,
         next: null,
@@ -490,6 +534,12 @@ abstract class TreeController<T> with ChangeNotifier {
   }
 
   bool hasHorizontalLine(T treeItem) => true;
+
+  bool get isRangeSelecting => false;
+
+  void selectTreeItem(T item) {}
+  void selectMultipleTreeItems(Iterable<T> items) {}
+  T get rangeSelectionPivot => null;
 }
 
 void _walk<T>(

@@ -40,6 +40,9 @@ class _DropStateValueNotifier extends ValueNotifier<DropState> {
 /// Tree data that has the hierarchy flattened, making it possible to render the
 /// tree from virtualized (one dimensional) array.
 class FlatTreeItem<T> {
+  /// Order in the flat tree.
+  final int index;
+
   /// Key used to track the widget created for this item.
   final Key key;
 
@@ -87,6 +90,7 @@ class FlatTreeItem<T> {
 
   FlatTreeItem(
     this.data, {
+    this.index,
     this.parent,
     this.next,
     this.prev,

@@ -28,6 +28,7 @@ import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
@@ -318,12 +319,17 @@ class Stage extends Debouncer {
   void markNeedsRedraw() => _delegate?.stageNeedsRedraw?.call();
 
   bool setViewport(double width, double height) {
+    var isFirst = _viewportWidth == 0 && _viewportHeight == 0;
     if (width == _viewportWidth && height == _viewportHeight) {
       return false;
     }
     _viewportWidth = width;
     _viewportHeight = height;
     markNeedsAdvance();
+
+    if (isFirst) {
+      zoomFit(animate: false);
+    }
     return true;
   }
 
@@ -449,7 +455,10 @@ class Stage extends Debouncer {
               }
             }
             if (!selectionHandled) {
-              file.select(_hoverItem);
+              // We need to specifically use range selection for multi select as
+              // command (multi-select) becomes something else in the future...
+              file.select(_hoverItem,
+                  append: file.selectionMode == SelectionMode.range);
             }
           } else {
             _mouseDownSelected = false;
@@ -679,8 +688,71 @@ class Stage extends Debouncer {
         _hoverOffsetIndex = max(1, _hoverOffsetIndex + 1);
         _updateHover();
         return true;
+      case ShortcutAction.zoomIn:
+        zoomLevel *= 2;
+        break;
+      case ShortcutAction.zoomOut:
+        zoomLevel /= 2;
+        break;
+      case ShortcutAction.zoom100:
+        zoomLevel = 1;
+        break;
+      case ShortcutAction.zoomFit:
+        zoomFit();
+        break;
     }
     return false;
+  }
+
+  /// Fit the selection to the viewport bounds. If nothing is selected the
+  /// active artboard is used as the are of interest.
+  void zoomFit({bool animate = true}) {
+    AABB bounds;
+    var selection = file.selection.items.whereType<StageItem>();
+    if (selection.isNotEmpty) {
+      bounds = selection.first.aabb;
+      for (final item in selection.skip(1)) {
+        bounds = AABB.combine(AABB(), bounds, item.aabb);
+      }
+    } else {
+      var artboard = activeArtboard;
+      if (artboard == null) {
+        return;
+      }
+
+      bounds = artboard.stageItem.aabb;
+      // Extra 18 pixels for title
+      bounds.values[1] -= 18;
+    }
+
+    if (bounds == null) {
+      // Show message?
+      return;
+    }
+
+    const double zoomFitPadding = 20;
+    var availableWidth = _viewportWidth - zoomFitPadding * 2;
+    var availableHeight = _viewportHeight - zoomFitPadding * 2;
+    var widthScale = availableWidth / bounds.width;
+    var heightScale = availableHeight / bounds.height;
+    double zoom =
+        min(widthScale, heightScale).clamp(minZoom, maxZoom).toDouble();
+
+    _viewZoomTarget = zoom;
+    zoomLevelNotifier.value = zoom;
+
+    var center = AABB.center(Vec2D(), bounds);
+
+    _viewTranslationTarget[0] =
+        zoomFitPadding + availableWidth / 2 - center[0] * zoom;
+    _viewTranslationTarget[1] =
+        zoomFitPadding + availableHeight / 2 - center[1] * zoom;
+
+    if (!animate) {
+      Vec2D.copy(_viewTranslation, _viewTranslationTarget);
+      _viewZoom = _viewZoomTarget;
+    }
+    markNeedsAdvance();
   }
 
   /// Deal with the fileContext being activate/de-activated. This happens when a
@@ -893,6 +965,12 @@ class Stage extends Debouncer {
         Paint()
           ..isAntiAlias = false
           ..color = backboardColor);
+
+    if (_viewportWidth == 0 || _viewportHeight == 0) {
+      // Keep this here to prevent flashing on load. Make sure we clear to
+      // backboard regardless.
+      return;
+    }
 
     // Compute backboard contrast to help us calculate a color that'll look
     // contrasty on top of it.

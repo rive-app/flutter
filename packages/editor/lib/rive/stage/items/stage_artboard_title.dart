@@ -92,9 +92,22 @@ class StageArtboardTitle extends StageItem<Artboard> {
     canvas.save();
     canvas.translate(originWorld[0], originWorld[1]);
     canvas.scale(1 / stage.viewZoom);
+
+    const double activeMarkerSize = 7;
+    double textPaddingLeft = 0;
+    if (stage.activeArtboard == component) {
+      textPaddingLeft = activeMarkerSize + 4;
+      canvas.drawOval(
+          Rect.fromLTWH(
+              0,
+              -namePadding - _nameSize.height / 2 - activeMarkerSize / 2 - 0.5,
+              activeMarkerSize,
+              activeMarkerSize),
+          StageItem.backboardContrastPaint);
+    }
     canvas.drawParagraph(
       _nameParagraph,
-      Offset(0, -namePadding - _nameSize.height),
+      Offset(textPaddingLeft, -namePadding - _nameSize.height),
     );
     if (selectionState.value != SelectionState.none) {
       Paint selectedPaint = Paint()
