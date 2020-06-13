@@ -100,8 +100,11 @@ abstract class InspectingColor {
 
   InspectingColor();
 
-  factory InspectingColor.forShapePaints(Iterable<ShapePaint> paints) =>
-      ShapesInspectingColor(paints);
+  factory InspectingColor.forShapePaints(
+    Iterable<ShapePaint> paints, {
+    bool canChangeType = true,
+  }) =>
+      ShapesInspectingColor(paints, canChangeType: canChangeType);
 
   factory InspectingColor.forSolidProperty(
           Iterable<core.Core> objects, int propertyKey) =>
@@ -152,7 +155,7 @@ class ShapesInspectingColor extends InspectingColor {
   final Set<StageItem> _addedToStage = {};
 
   @override
-  bool get canChangeType => true;
+  bool canChangeType;
 
   /// Track which properties we're listening to on each component. This varies
   /// depending on whether it's a solid color, gradient, etc.
@@ -165,7 +168,10 @@ class ShapesInspectingColor extends InspectingColor {
   bool _suppressUpdating = false;
 
   Iterable<ShapePaint> shapePaints;
-  ShapesInspectingColor(this.shapePaints) {
+  ShapesInspectingColor(
+    this.shapePaints, {
+    this.canChangeType = true,
+  }) {
     for (final paint in shapePaints) {
       paint.paintMutatorChanged.addListener(_mutatorChanged);
     }

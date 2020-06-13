@@ -110,14 +110,17 @@ class EditingAnimationManager extends AnimationTimeManager
     }
   }
 
-  KeyedComponentViewModel _makeComponentViewModel(Component component,
-      {KeyedObject keyedObject}) {
+  KeyedComponentViewModel _makeComponentViewModel(
+    Component timelineComponent, {
+    KeyedObject keyedObject,
+  }) {
     KeyedComponentViewModel viewModel;
     Set<KeyHierarchyViewModel> children = {};
     final allProperties = _AllPropertiesHelper(animation);
     _allPropertiesHelpers.add(allProperties);
-    _componentViewModels[component] = viewModel = KeyedComponentViewModel(
-      component: component,
+    _componentViewModels[timelineComponent] =
+        viewModel = KeyedComponentViewModel(
+      component: timelineComponent,
       keyedObject: keyedObject,
       children: children,
       allProperties: allProperties,
@@ -151,9 +154,9 @@ class EditingAnimationManager extends AnimationTimeManager
     Set<KeyHierarchyViewModel> hierarchy = {};
     List<KeyedComponentViewModel> needParenting = [];
     for (final keyedObject in keyedObjects) {
-      Component component =
-          core.resolve<Component>(keyedObject.objectId)?.timelineProxy;
-      if(component == null) {
+      var component = core.resolve<Component>(keyedObject.objectId);
+      Component timelineComponent = component?.timelineProxy;
+      if (timelineComponent == null) {
         // Exclude this item from the hierarchy temporarily, maybe we're still
         // loading? This shouldn't really happen, figure out why it's happening.
         // KeyedObjects that don't resolve remove themselves, so probably the
@@ -161,10 +164,11 @@ class EditingAnimationManager extends AnimationTimeManager
         continue;
       }
 
-      var viewModel = _componentViewModels[component];
+      var viewModel = _componentViewModels[timelineComponent];
       if (viewModel == null) {
-        _componentViewModels[component] = viewModel =
-            _makeComponentViewModel(component, keyedObject: keyedObject);
+        _componentViewModels[timelineComponent] = viewModel =
+            _makeComponentViewModel(timelineComponent,
+                keyedObject: keyedObject);
       }
 
       // Build up a list of the properties that we can sort and then build into
@@ -236,7 +240,7 @@ class EditingAnimationManager extends AnimationTimeManager
         lastGroupKey = property.groupKey;
       }
 
-      if (component.timelineParent == null) {
+      if (timelineComponent.timelineParent == null) {
         hierarchy.add(viewModel);
       } else {
         needParenting.add(viewModel);
@@ -401,6 +405,12 @@ class KeyedPropertyViewModel extends KeyHierarchyViewModel {
   final KeyedProperty keyedProperty;
   final String label;
   final String subLabel;
+
+  // /// The component in the timeline that'll show this property (may not match
+  // /// the component that stores the property).
+  // final Component timelineComponent;
+
+  /// The component that actually stores the property.
   final Component component;
 
   @override
@@ -410,6 +420,7 @@ class KeyedPropertyViewModel extends KeyHierarchyViewModel {
     this.keyedProperty,
     this.label,
     this.subLabel,
+    // this.timelineComponent,
     this.component,
   });
 }

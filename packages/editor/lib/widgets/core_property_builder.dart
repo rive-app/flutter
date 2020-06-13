@@ -10,11 +10,13 @@ class CorePropertyBuilder<T> extends StatefulWidget {
   final ValueWidgetBuilder<T> builder;
 
   final Widget child;
+  final bool frozen;
 
   const CorePropertyBuilder({
     @required this.object,
     @required this.propertyKey,
     @required this.builder,
+    this.frozen = false,
     this.child,
     Key key,
   })  : assert(object != null),
@@ -72,11 +74,14 @@ class _CorePropertyBuilderState<T> extends State<CorePropertyBuilder<T>> {
   }
 
   void _rebuild() {
+    if(widget.frozen) {
+      return;
+    }
     (context as StatefulElement).markNeedsBuild();
   }
 
   void _valueChanged(dynamic from, dynamic to) {
-    assert(to is T);
+    assert(to == null || to is T);
 
     // We debounce here to ensure that the update doesn't occur during a build
     // (this can happen if animations/changes get applied in response to some

@@ -25,6 +25,7 @@ class CoreTextField<T> extends StatelessWidget {
   final InputValueConverter<T> converter;
   final void Function(T value) change;
   final FocusNode focusNode;
+  final bool frozen;
 
   /// Color for the underline when it's not focused.
   final Color underlineColor;
@@ -40,6 +41,7 @@ class CoreTextField<T> extends StatelessWidget {
     FocusNode focusNode,
     Color underlineColor,
     Color focusedUnderlineColor,
+    bool frozen = false,
     Key key,
   }) {
     return CoreTextField._(
@@ -50,6 +52,7 @@ class CoreTextField<T> extends StatelessWidget {
       focusNode: focusNode,
       underlineColor: underlineColor,
       focusedUnderlineColor: focusedUnderlineColor,
+      frozen: frozen,
       key: key,
     );
   }
@@ -62,6 +65,7 @@ class CoreTextField<T> extends StatelessWidget {
     this.focusNode,
     this.underlineColor,
     this.focusedUnderlineColor,
+    this.frozen = false,
     Key key,
   }) : super(key: key);
 
@@ -117,6 +121,7 @@ class CoreTextField<T> extends StatelessWidget {
     return _determineEditorMode(
       context,
       (mode) => CorePropertiesBuilder(
+        frozen: frozen,
         objects: objects,
         propertyKey: propertyKey,
         builder: (context, T value, _) => InspectorTextField(

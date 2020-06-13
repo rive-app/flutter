@@ -39,6 +39,7 @@ class TimelineKeysManipulator extends StatefulWidget {
   final List<FlatTreeItem<KeyHierarchyViewModel>> rows;
 
   final WidgetBuilder builder;
+  final HashSet<KeyHierarchyViewModel> expandedRows;
 
   const TimelineKeysManipulator({
     @required this.theme,
@@ -49,6 +50,7 @@ class TimelineKeysManipulator extends StatefulWidget {
     @required this.builder,
     @required this.viewport,
     @required this.rows,
+    @required this.expandedRows,
     Key key,
   }) : super(key: key);
 
@@ -172,7 +174,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
     // Compute selected items.
     widget.keyFrameManager.changeSelection
-        .add(viewportHelper.framesIn(marquee));
+        .add(viewportHelper.framesIn(marquee, widget.expandedRows));
 
     setState(() {
       _marquee = marquee;
@@ -227,6 +229,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         var frame = helper.frameAtOffset(
           details.pointerEvent.localPosition,
           verticalOffset,
+          widget.expandedRows,
         );
         if (frame is KeyFrame) {
           toSelect.add(frame);
@@ -462,7 +465,8 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
         theme.dimensions.keyUpper * secondsPerPixel * viewport.fps;
   }
 
-  HashSet<KeyFrame> framesIn(_Marquee marquee) {
+  HashSet<KeyFrame> framesIn(
+      _Marquee marquee, HashSet<KeyHierarchyViewModel> expandedRows) {
     HashSet<KeyFrame> keyframes = HashSet<KeyFrame>();
 
     // First find closest rows.
@@ -485,6 +489,10 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
       if (row is KeyedPropertyViewModel) {
         keyFrameList = row.keyedProperty;
       } else if (row is AllKeysViewModel) {
+        if (expandedRows.contains(row)) {
+          // Row is expanded, all key is hidden and unselectable.
+          continue;
+        }
         keyFrameList = row.allProperties.cached;
       }
       List<KeyFrameInterface> frames =
@@ -518,6 +526,7 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
   KeyFrameInterface frameAtOffset(
     Offset position,
     double verticalScroll,
+    HashSet<KeyHierarchyViewModel> expandedRows,
   ) {
     // First find closest row.
     var rowIndex = ((verticalScroll + position.dy) / _rowHeight).floor();
@@ -533,6 +542,10 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
     if (row is KeyedPropertyViewModel) {
       keyFrameList = row.keyedProperty;
     } else if (row is AllKeysViewModel) {
+      if (expandedRows.contains(row)) {
+        // Row is expanded, all key is hidden and unselectable.
+        return null;
+      }
       keyFrameList = row.allProperties.cached;
     }
 
