@@ -137,20 +137,26 @@ abstract class RiveCoreContext extends CoreContext {
   /// key labels/names from.
   static int propertyKeyGroupHashCode(int propertyKey) {
     switch (propertyKey) {
+      case LinearGradientBase.startXPropertyKey:
+      case LinearGradientBase.startYPropertyKey:
+        return 1;
+      case LinearGradientBase.endXPropertyKey:
+      case LinearGradientBase.endYPropertyKey:
+        return 2;
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
-        return 1;
+        return 3;
       case NodeBase.scaleXPropertyKey:
       case NodeBase.scaleYPropertyKey:
-        return 2;
+        return 4;
       case CubicDetachedVertexBase.inRotationPropertyKey:
       case CubicDetachedVertexBase.inDistancePropertyKey:
-        return 3;
+        return 5;
       case CubicDetachedVertexBase.outRotationPropertyKey:
       case CubicDetachedVertexBase.outDistancePropertyKey:
-        return 4;
+        return 6;
       default:
         return 0;
     }
@@ -158,6 +164,12 @@ abstract class RiveCoreContext extends CoreContext {
 
   static String propertyKeyGroupName(int propertyKey) {
     switch (propertyKey) {
+      case LinearGradientBase.startXPropertyKey:
+      case LinearGradientBase.startYPropertyKey:
+        return 'start';
+      case LinearGradientBase.endXPropertyKey:
+      case LinearGradientBase.endYPropertyKey:
+        return 'end';
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
       case PathVertexBase.xPropertyKey:
@@ -1222,27 +1234,27 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case LinearGradientBase.startXPropertyKey:
         if (object is LinearGradientBase && value is double) {
-          object.startX = value;
+          object.startXCore = value;
         }
         break;
       case LinearGradientBase.startYPropertyKey:
         if (object is LinearGradientBase && value is double) {
-          object.startY = value;
+          object.startYCore = value;
         }
         break;
       case LinearGradientBase.endXPropertyKey:
         if (object is LinearGradientBase && value is double) {
-          object.endX = value;
+          object.endXCore = value;
         }
         break;
       case LinearGradientBase.endYPropertyKey:
         if (object is LinearGradientBase && value is double) {
-          object.endY = value;
+          object.endYCore = value;
         }
         break;
       case LinearGradientBase.opacityPropertyKey:
         if (object is LinearGradientBase && value is double) {
-          object.opacity = value;
+          object.opacityCore = value;
         }
         break;
       case StrokeBase.thicknessPropertyKey:
@@ -1460,6 +1472,11 @@ abstract class RiveCoreContext extends CoreContext {
 
   static bool animates(int propertyKey) {
     switch (propertyKey) {
+      case LinearGradientBase.startXPropertyKey:
+      case LinearGradientBase.startYPropertyKey:
+      case LinearGradientBase.endXPropertyKey:
+      case LinearGradientBase.endYPropertyKey:
+      case LinearGradientBase.opacityPropertyKey:
       case StrokeBase.thicknessPropertyKey:
       case SolidColorBase.colorValuePropertyKey:
       case GradientStopBase.colorValuePropertyKey:
@@ -1490,6 +1507,21 @@ abstract class RiveCoreContext extends CoreContext {
 
   static KeyState getKeyState(Core object, int propertyKey) {
     switch (propertyKey) {
+      case LinearGradientBase.startXPropertyKey:
+        return (object as LinearGradientBase).startXKeyState;
+        break;
+      case LinearGradientBase.startYPropertyKey:
+        return (object as LinearGradientBase).startYKeyState;
+        break;
+      case LinearGradientBase.endXPropertyKey:
+        return (object as LinearGradientBase).endXKeyState;
+        break;
+      case LinearGradientBase.endYPropertyKey:
+        return (object as LinearGradientBase).endYKeyState;
+        break;
+      case LinearGradientBase.opacityPropertyKey:
+        return (object as LinearGradientBase).opacityKeyState;
+        break;
       case StrokeBase.thicknessPropertyKey:
         return (object as StrokeBase).thicknessKeyState;
         break;
@@ -1563,6 +1595,31 @@ abstract class RiveCoreContext extends CoreContext {
 
   static void setKeyState(Core object, int propertyKey, KeyState value) {
     switch (propertyKey) {
+      case LinearGradientBase.startXPropertyKey:
+        if (object is LinearGradientBase) {
+          object.startXKeyState = value;
+        }
+        break;
+      case LinearGradientBase.startYPropertyKey:
+        if (object is LinearGradientBase) {
+          object.startYKeyState = value;
+        }
+        break;
+      case LinearGradientBase.endXPropertyKey:
+        if (object is LinearGradientBase) {
+          object.endXKeyState = value;
+        }
+        break;
+      case LinearGradientBase.endYPropertyKey:
+        if (object is LinearGradientBase) {
+          object.endYKeyState = value;
+        }
+        break;
+      case LinearGradientBase.opacityPropertyKey:
+        if (object is LinearGradientBase) {
+          object.opacityKeyState = value;
+        }
+        break;
       case StrokeBase.thicknessPropertyKey:
         if (object is StrokeBase) {
           object.thicknessKeyState = value;
@@ -1679,6 +1736,36 @@ abstract class RiveCoreContext extends CoreContext {
   @override
   void resetAnimated(Core object, int propertyKey) {
     switch (propertyKey) {
+      case LinearGradientBase.startXPropertyKey:
+        if (object is LinearGradientBase) {
+          object.startXAnimated = null;
+          object.startXKeyState = KeyState.none;
+        }
+        break;
+      case LinearGradientBase.startYPropertyKey:
+        if (object is LinearGradientBase) {
+          object.startYAnimated = null;
+          object.startYKeyState = KeyState.none;
+        }
+        break;
+      case LinearGradientBase.endXPropertyKey:
+        if (object is LinearGradientBase) {
+          object.endXAnimated = null;
+          object.endXKeyState = KeyState.none;
+        }
+        break;
+      case LinearGradientBase.endYPropertyKey:
+        if (object is LinearGradientBase) {
+          object.endYAnimated = null;
+          object.endYKeyState = KeyState.none;
+        }
+        break;
+      case LinearGradientBase.opacityPropertyKey:
+        if (object is LinearGradientBase) {
+          object.opacityAnimated = null;
+          object.opacityKeyState = KeyState.none;
+        }
+        break;
       case StrokeBase.thicknessPropertyKey:
         if (object is StrokeBase) {
           object.thicknessAnimated = null;
@@ -2680,19 +2767,19 @@ abstract class RiveCoreContext extends CoreContext {
         (object as LinearAnimationBase).speed = value;
         break;
       case LinearGradientBase.startXPropertyKey:
-        (object as LinearGradientBase).startX = value;
+        (object as LinearGradientBase).startXCore = value;
         break;
       case LinearGradientBase.startYPropertyKey:
-        (object as LinearGradientBase).startY = value;
+        (object as LinearGradientBase).startYCore = value;
         break;
       case LinearGradientBase.endXPropertyKey:
-        (object as LinearGradientBase).endX = value;
+        (object as LinearGradientBase).endXCore = value;
         break;
       case LinearGradientBase.endYPropertyKey:
-        (object as LinearGradientBase).endY = value;
+        (object as LinearGradientBase).endYCore = value;
         break;
       case LinearGradientBase.opacityPropertyKey:
-        (object as LinearGradientBase).opacity = value;
+        (object as LinearGradientBase).opacityCore = value;
         break;
       case StrokeBase.thicknessPropertyKey:
         (object as StrokeBase).thicknessCore = value;
@@ -2786,6 +2873,21 @@ abstract class RiveCoreContext extends CoreContext {
 
   static void animateDouble(Core object, int propertyKey, double value) {
     switch (propertyKey) {
+      case LinearGradientBase.startXPropertyKey:
+        (object as LinearGradientBase).startXAnimated = value;
+        break;
+      case LinearGradientBase.startYPropertyKey:
+        (object as LinearGradientBase).startYAnimated = value;
+        break;
+      case LinearGradientBase.endXPropertyKey:
+        (object as LinearGradientBase).endXAnimated = value;
+        break;
+      case LinearGradientBase.endYPropertyKey:
+        (object as LinearGradientBase).endYAnimated = value;
+        break;
+      case LinearGradientBase.opacityPropertyKey:
+        (object as LinearGradientBase).opacityAnimated = value;
+        break;
       case StrokeBase.thicknessPropertyKey:
         (object as StrokeBase).thicknessAnimated = value;
         break;

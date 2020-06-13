@@ -51,6 +51,9 @@ class ArrowPopup {
     /// direction this popup is docked/opened.
     double directionPadding = 16,
 
+    /// Corner radius of the decoration
+    BorderRadius borderRadius = const BorderRadius.all(Radius.circular(5.0)),
+
     /// Whether the arrow pointing to the area of interest that launched this
     /// popup should be shown.
     bool showArrow = true,
@@ -78,6 +81,10 @@ class ArrowPopup {
 
     /// Callback invoked whenver the popup is closed.
     VoidCallback onClose,
+
+    /// Callback to help determine if this popup should close when something
+    /// else has been clicked on.
+    Future<bool> Function() shouldClose,
   }) {
     var contextRect = ContextToGlobalRect()..updateRect(context);
 
@@ -87,6 +94,7 @@ class ArrowPopup {
         context,
         onClose: onClose,
         includeCloseGuard: includeCloseGuard,
+        shouldClose: shouldClose,
         builder: (context) {
           return ValueListenableBuilder<Rect>(
             valueListenable: contextRect.rect,
@@ -134,7 +142,7 @@ class ArrowPopup {
               child: Container(
                 decoration: BoxDecoration(
                   color: background,
-                  borderRadius: BorderRadius.circular(5.0),
+                  borderRadius: borderRadius,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.3473),

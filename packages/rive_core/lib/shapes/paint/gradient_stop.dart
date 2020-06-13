@@ -9,13 +9,14 @@ export 'package:rive_core/src/generated/shapes/paint/gradient_stop_base.dart';
 
 class GradientStop extends GradientStopBase {
   @override
-  Component get timelineParent=> _gradient is LinearGradient
-      ? _gradient.parent
-      : null;
+  Component get timelineParent =>
+      _gradient is LinearGradient ? _gradient.parent : null;
   @override
-  String get timelineName => 'Stop ${_gradient.gradientStops.indexOf(this)+1}';
+  String get timelineName =>
+      'Stop ${_gradient.gradientStops.indexOf(this) + 1}';
 
   LinearGradient _gradient;
+  LinearGradient get gradient => _gradient;
   ui.Color get color => ui.Color(colorValue);
   set color(ui.Color c) {
     colorValue = c.value;

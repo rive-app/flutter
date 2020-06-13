@@ -296,11 +296,11 @@ abstract class AnimationTimeManager extends AnimationManager {
       return;
     }
     _controller.sustainedPlayback = play;
-    _isPlayingStream.add(play);
     if(!play) {
       // We should round to the closest frame when we pause (fixes #469).
       _changeCurrentTime(_controller.time);
     }
+    _isPlayingStream.add(play);
   }
 
   void _changeViewport(TimelineViewport viewport) {

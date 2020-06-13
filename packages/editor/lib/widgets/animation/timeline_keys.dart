@@ -106,6 +106,7 @@ class _TimelineKeysState extends State<TimelineKeys> {
             animationManager: widget.animationManager,
             keyFrameManager: keyFrameManager,
             rows: _rows,
+            expandedRows: widget.treeController.expanded,
             builder: (context) => ValueStreamBuilder<WorkAreaViewModel>(
               stream: widget.animationManager.workArea,
               builder: (context, workArea) =>
@@ -119,6 +120,7 @@ class _TimelineKeysState extends State<TimelineKeys> {
                   animation: widget.animationManager.animation,
                   selection: selection.data,
                   workArea: workArea.hasData ? workArea.data : null,
+                  expandedRows: widget.treeController.expanded,
                 ),
               ),
             ),
@@ -137,6 +139,7 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
   final LinearAnimation animation;
   final HashSet<KeyFrame> selection;
   final WorkAreaViewModel workArea;
+  final HashSet<KeyHierarchyViewModel> expandedRows;
   const _TimelineKeysRenderer({
     @required this.theme,
     @required this.verticalScrollOffset,
@@ -145,6 +148,7 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
     @required this.animation,
     @required this.selection,
     @required this.workArea,
+    @required this.expandedRows,
   });
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -155,7 +159,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..viewport = viewport
       ..animation = animation
       ..selection = selection
-      ..workArea = workArea;
+      ..workArea = workArea
+      ..expandedRows = expandedRows;
   }
 
   @override
@@ -168,7 +173,8 @@ class _TimelineKeysRenderer extends LeafRenderObjectWidget {
       ..viewport = viewport
       ..animation = animation
       ..selection = selection
-      ..workArea = workArea;
+      ..workArea = workArea
+      ..expandedRows = expandedRows;
   }
 
   @override
@@ -219,6 +225,16 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
       return;
     }
     _workArea = value;
+    markNeedsPaint();
+  }
+
+  HashSet<KeyHierarchyViewModel> _expandedRows;
+  HashSet<KeyHierarchyViewModel> get expandedRows => _expandedRows;
+  set expandedRows(HashSet<KeyHierarchyViewModel> value) {
+    if (_expandedRows == value) {
+      return;
+    }
+    _expandedRows = value;
     markNeedsPaint();
   }
 
@@ -312,8 +328,9 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
     canvas.clipRect(offset & size);
 
     if (_workArea?.active ?? false) {
-      var xStart = framesToPixels(_workArea.start);
-      var xEnd = framesToPixels(_workArea.end);
+      // Using +0.5 as skia seems to draw a line on the half pixel...
+      var xStart = framesToPixels(_workArea.start) + 0.5;
+      var xEnd = framesToPixels(_workArea.end) + 0.5;
 
       canvas.drawRect(
           Rect.fromLTRB(xStart, offset.dy, xEnd, offset.dy + size.height),
@@ -380,6 +397,10 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
         keyFrameList = row.allProperties.cached;
         keyFill = _allkeyFill;
         keyStroke = _allkeyStroke;
+        if (_expandedRows.contains(row)) {
+          canvas.translate(0, rowHeight);
+          continue;
+        }
       }
 
       var lineY = rowHeight / 2 - 1;

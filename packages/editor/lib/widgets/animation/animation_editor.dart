@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/widgets/animation/interpolation_panel.dart';
 import 'package:rive_editor/widgets/animation/playhead.dart';
+import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
@@ -137,6 +138,7 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -152,9 +154,13 @@ class __StatefulEditingAnimationState extends State<_StatefulEditingAnimation> {
             children: [
               AnimationToolbar(),
               Expanded(
-                child: KeyedObjectHierarchy(
-                  scrollController: timelineVerticalScroll,
-                  treeController: _treeController,
+                child: ValueStreamBuilder<bool>(
+                  stream: widget.animationManager.isPlaying,
+                  builder: (context, snapshot) => KeyedObjectHierarchy(
+                    isPlaying: snapshot.data,
+                    scrollController: timelineVerticalScroll,
+                    treeController: _treeController,
+                  ),
                 ),
               ),
             ],

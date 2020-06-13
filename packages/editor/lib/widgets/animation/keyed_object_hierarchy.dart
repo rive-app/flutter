@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_core_field_type.dart';
+import 'package:rive_core/shapes/paint/gradient_stop.dart';
+import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/selectable_item.dart';
@@ -8,6 +10,7 @@ import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart'
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/common/draw_order_key_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/inspector/color/timeline_color_swatch.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
@@ -20,10 +23,12 @@ import 'package:tree_widget/tree_widget.dart';
 class KeyedObjectHierarchy extends StatelessWidget {
   final ScrollController scrollController;
   final KeyedObjectTreeController treeController;
+  final bool isPlaying;
 
   const KeyedObjectHierarchy({
     @required this.scrollController,
     @required this.treeController,
+    this.isPlaying = false,
     Key key,
   }) : super(key: key);
 
@@ -148,14 +153,32 @@ class KeyedObjectHierarchy extends StatelessWidget {
     var coreType =
         model.component.context.coreType(model.keyedProperty.propertyKey);
     if (coreType == RiveColorType.instance) {
-      // TODO: add color swatch
-      return const SizedBox();
+      switch (model.component.coreType) {
+        case SolidColorBase.typeKey:
+          return TimelineColorSwatch(
+            frozen: isPlaying,
+            component: model.component as SolidColor,
+            colorPropertyKey: SolidColorBase.colorValuePropertyKey,
+          );
+
+          break;
+
+        case GradientStopBase.typeKey:
+          return TimelineColorSwatch(
+            frozen: isPlaying,
+            component: model.component as GradientStop,
+            colorPropertyKey: GradientStopBase.colorValuePropertyKey,
+          );
+
+          break;
+      }
     } else if (coreType == RiveDoubleType.instance) {
       return Padding(
         padding: const EdgeInsets.only(top: 2, left: 9),
         child: SizedBox(
           width: 69,
           child: CoreTextField<double>(
+            frozen: isPlaying,
             underlineColor: theme.colors.timelineUnderline,
             objects: [model.component],
             propertyKey: model.keyedProperty.propertyKey,
@@ -170,5 +193,6 @@ class KeyedObjectHierarchy extends StatelessWidget {
             manager: ActiveFile.of(context).editingAnimationManager.value),
       );
     }
+    return const SizedBox();
   }
 }

@@ -17,11 +17,14 @@ class CorePropertiesBuilder<T, K extends Core> extends StatefulWidget {
 
   final Widget child;
 
+  final bool frozen;
+
   const CorePropertiesBuilder({
     @required this.objects,
     @required this.propertyKey,
     @required this.builder,
     this.child,
+    this.frozen = false,
     Key key,
   })  : assert(objects != null),
         assert(propertyKey != null),
@@ -103,7 +106,7 @@ class _CorePropertiesBuilderState<T, K extends Core>
   }
 
   void _rebuild() {
-    if (!mounted) {
+    if (!mounted || widget.frozen) {
       return;
     }
     (context as StatefulElement).markNeedsBuild();
