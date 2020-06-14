@@ -31,6 +31,10 @@ class AABB {
     _buffer = Float32List.fromList([a, b, c, d]);
   }
 
+  AABB.fromMinMax(Vec2D min, Vec2D max) {
+    _buffer = Float32List.fromList([min[0], min[1], max[0], max[1]]);
+  }
+
   static bool areEqual(AABB a, AABB b) {
     return a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3];
   }
@@ -127,6 +131,11 @@ class AABB {
   String toString() {
     return _buffer.toString();
   }
+
+  AABB transform(Mat2D matrix) => AABB.fromMinMax(
+        Vec2D.transformMat2D(Vec2D(), minimum, matrix),
+        Vec2D.transformMat2D(Vec2D(), maximum, matrix),
+      );
 
   /// Compute an AABB from a set of points with an optional [transform] to apply
   /// before computing.
