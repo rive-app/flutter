@@ -109,7 +109,9 @@ class ArtboardTool extends DrawableTool {
     if (_cursor == null) {
       return;
     }
-    _tip.paint(canvas, Offset(_cursor[0] + 10, _cursor[1] + 10));
+    var cursorScreen =
+        Vec2D.transformMat2D(Vec2D(), _cursor, stage.viewTransform);
+    _tip.paint(canvas, Offset(cursorScreen[0] + 10, cursorScreen[1] + 10));
   }
 
   @override

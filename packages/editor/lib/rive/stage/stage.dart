@@ -392,18 +392,18 @@ class Stage extends Debouncer {
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
         visTree.query(cursorAABB, (int proxyId, StageItem item) {
-          if (item.isSelectable &&
+          if (item.isHoverSelectable &&
               (soloItems == null || isValidSoloSelection(item)) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
-            hover = item.hoverTarget;
+            hover = item.selectionTarget;
           }
           return true;
         });
       } else {
         List<StageItem> candidates = [];
         visTree.query(cursorAABB, (int proxyId, StageItem item) {
-          if (item.isSelectable && item.hitHiFi(_worldMouse)) {
+          if (item.isHoverSelectable && item.hitHiFi(_worldMouse)) {
             candidates.add(item);
           }
           return true;

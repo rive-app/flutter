@@ -1,15 +1,15 @@
 import 'dart:ui';
 
-import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_core/shapes/points_path.dart';
-import 'package:rive_editor/rive/stage/stage_contour_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-class StagePath extends StageContourItem<PointsPath> {
+class StagePath extends StageItem<PointsPath> with BoundsDelegate {
   @override
-  AABB get aabb =>
-      component.shape.bounds.translate(component.artboard.originWorld);
+  void boundsChanged() {
+    aabb = component.shape.bounds.translate(component.artboard.originWorld);
+  }
 
   /// A StagePath cannot be directly clicked on in the stage. It can be selected
   /// via the hierarchy. This is because clicking over a path effectively
@@ -21,7 +21,7 @@ class StagePath extends StageContourItem<PointsPath> {
   void onSoloChanged(bool isSolo) {
     for (final vertex in component.vertices) {
       var stageItem = vertex.stageItem;
-      if(stageItem == null) {
+      if (stageItem == null) {
         continue;
       }
       if (isSolo) {

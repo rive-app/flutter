@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -15,11 +14,12 @@ class StageArtboardTitle extends StageItem<Artboard> {
   Color _lastTextColor;
 
   static const double namePadding = 7;
+  static const double activeMarkerSize = 7;
 
   StageArtboardTitle(this.stageArtboard);
 
   @override
-  StageItem get hoverTarget => stageArtboard;
+  StageItem get selectionTarget => stageArtboard;
 
   @override
   bool initialize(Artboard object) {
@@ -38,8 +38,9 @@ class StageArtboardTitle extends StageItem<Artboard> {
 
   void _updateBounds() {
     // Compute max bounds based on stage's min zoom (really broad broad-phase).
+    double textPaddingLeft = activeMarkerSize + 4;
     var textHeight = (_nameSize?.height ?? 11) + namePadding;
-    var textWidth = _nameSize?.width ?? component.width;
+    var textWidth = textPaddingLeft + (_nameSize?.width ?? component.width);
     var maxWorldTextHeight = textHeight / Stage.minZoom;
     var maxWorldTextWidth = textWidth / Stage.minZoom;
     aabb = AABB.fromValues(component.x, component.y - maxWorldTextHeight,
@@ -60,8 +61,13 @@ class StageArtboardTitle extends StageItem<Artboard> {
     var originWorld = component.originWorld;
     var scale = stage.zoomLevel;
 
+    double textPaddingLeft = 0;
+    if (stage.activeArtboard == component) {
+      textPaddingLeft = activeMarkerSize + 4;
+    }
+
     var y = originWorld[1] - (namePadding + _nameSize.height) / scale;
-    var worldWidth = _nameSize.width / stage.zoomLevel;
+    var worldWidth = (textPaddingLeft + _nameSize.width) / stage.zoomLevel;
     var worldHeight = _nameSize.height / stage.zoomLevel;
     return Rect.fromLTWH(originWorld[0], y, worldWidth, worldHeight)
         .contains(Offset(worldMouse[0], worldMouse[1]));
@@ -93,7 +99,6 @@ class StageArtboardTitle extends StageItem<Artboard> {
     canvas.translate(originWorld[0], originWorld[1]);
     canvas.scale(1 / stage.viewZoom);
 
-    const double activeMarkerSize = 7;
     double textPaddingLeft = 0;
     if (stage.activeArtboard == component) {
       textPaddingLeft = activeMarkerSize + 4;
@@ -109,16 +114,6 @@ class StageArtboardTitle extends StageItem<Artboard> {
       _nameParagraph,
       Offset(textPaddingLeft, -namePadding - _nameSize.height),
     );
-    if (selectionState.value != SelectionState.none) {
-      Paint selectedPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = StageItem.selectedPaint.color;
-      canvas.drawRect(
-        Offset(0, -_nameSize.height - namePadding) & _nameSize,
-        selectedPaint,
-      );
-    }
     canvas.restore();
   }
 

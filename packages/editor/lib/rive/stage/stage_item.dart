@@ -12,6 +12,19 @@ import 'package:rive_editor/rive/stage/stage_drawable.dart';
 
 import 'stage.dart';
 
+/// Object Bounding Box is an AABB in a specific transform space. This can be
+/// used to find more precise AABB for stageItems. Not required to be
+/// implemented but will help certain tools be more precise, and will allow
+/// selection bounds to be drawn against this more precise box.
+class OBB {
+  final AABB bounds;
+  final Mat2D transform;
+  OBB({
+    this.bounds,
+    this.transform,
+  });
+}
+
 /// A helper extension to interpret the Component's userData as a StageItem. We
 /// do this so that we can leave the userData as an abstract field for
 /// implementors to use. This allows us to keep separation between Rive runtime
@@ -96,7 +109,7 @@ abstract class StageItem<T> extends SelectableItem
   /// re-direct selection so we use this indirection to allow for that.
   ///
   /// ignore: avoid_returning_this
-  StageItem get hoverTarget => this;
+  StageItem get selectionTarget => this;
 
   /// Usually an item's inspector target is itself, sometimes some items want to
   /// re-direct the inspector so we use this indirection to allow for that.
@@ -113,8 +126,11 @@ abstract class StageItem<T> extends SelectableItem
   /// removed from the stage.
   bool get isVisible => true;
 
-  /// Override this to prevent this item from being clicked on.
+  /// Override this to prevent this item from being selected in any capacity.
   bool get isSelectable => isVisible;
+
+  /// Override this to prevent this item from being clicked on.
+  bool get isHoverSelectable => isSelectable;
 
   // ignore: use_setters_to_change_properties
   /// Invoked whenever the item has been added to the stage. This is usually
@@ -165,6 +181,8 @@ abstract class StageItem<T> extends SelectableItem
 
   AABB _aabb = AABB();
 
+  /// Get the cached AABB for this stage item. StageItems are responsible for
+  /// updating this as necessary.
   AABB get aabb => _aabb;
   set aabb(AABB value) {
     if (AABB.areEqual(value, _aabb)) {
@@ -173,6 +191,8 @@ abstract class StageItem<T> extends SelectableItem
     _aabb = value;
     stage?.updateBounds(this);
   }
+
+  OBB obb;
 
   @override
   void draw(Canvas canvas) {}

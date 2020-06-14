@@ -1,19 +1,29 @@
 import 'dart:ui';
 
+import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/transform_space.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_core/shapes/shape.dart';
-import 'package:rive_editor/rive/stage/stage_contour_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-class StageShape extends StageContourItem<Shape> {
-  // We could make an artboardBounds getter on the component, but we should try
-  // to keep the component's logic to what will actually be necessary in a
-  // runtime (this may not be entirely possible, but this one is definitely not
-  // necessary at runtime).
+class StageShape extends StageItem<Shape> with BoundsDelegate {
   @override
-  AABB get aabb => component.bounds.translate(component.artboard.originWorld);
+  void boundsChanged() {
+    // We could make an artboardBounds getter on the component, but we should
+    // try to keep the component's logic to what will actually be necessary in a
+    // runtime (this may not be entirely possible, but this one is definitely
+    // not necessary at runtime).
+    aabb = component.bounds.translate(component.artboard.originWorld);
+
+    // Let's also set the obb.
+    var rect = component.computeBounds(TransformSpace.local);
+    obb = OBB(
+      bounds: AABB.fromValues(rect.left, rect.top, rect.right, rect.bottom),
+      transform: component.worldTransform,
+    );
+  }
 
   /// Do a high fidelity hover hit check against the actual path geometry.
   @override

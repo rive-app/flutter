@@ -86,7 +86,8 @@ class AutoTool extends StageTool with DraggableTool {
     _marqueeEnd = Vec2D.clone(worldMouse);
 
     var inMarquee = HashSet<SelectableItem>();
-    stage.visTree.query(marqueeBounds, (proxyId, item) {
+    stage.visTree.query(marqueeBounds, (proxyId, hitItem) {
+      var item = hitItem.selectionTarget;
       if (item.isVisible && item.isSelectable) {
         // TODO: need to implement a hitRect.
         inMarquee.add(item);

@@ -21,7 +21,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   }
 
   @override
-  bool get isSelectable =>
+  bool get isHoverSelectable =>
       // We can't be selected if we're already the active artboard.
       component.context.backboard?.activeArtboard != component &&
       super.isSelectable;
