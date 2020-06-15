@@ -67,7 +67,8 @@ class TeamMember extends Owner {
       );
 
   @override
-  String toString() => 'TeamMember($ownerId, $name)';
+  String toString() =>
+      'TeamMember($ownerId, $name, $username, $status, $permission)';
 
   @override
   bool operator ==(Object o) => o is TeamMember && o.ownerId == ownerId;

@@ -69,13 +69,37 @@ class TeamManager with Subscriptions {
     _plumber.message<List<TeamMember>>(_teamMembers.toList(), team.hashCode);
   }
 
-  Future<bool> onRoleChanged(
-      int teamId, int memberOwnerId, TeamRole role) async {
+  Future<bool> onInviteChanged(
+      Team team, TeamMember member, TeamRole role) async {
+    bool success = false;
+    String email = member.ownerId == null ? member.name : null;
     if (role == TeamRole.delete) {
-      return _teamApi.removeFromTeam(memberOwnerId, teamId);
+      success = await _teamApi.rescindInvite(team.ownerId,
+          userId: member.ownerId, email: email);
     } else {
-      return _teamApi.changeRole(teamId, memberOwnerId, role);
+      success = await _teamApi.updateInvite(team.ownerId, role,
+          userId: member.ownerId, email: email);
     }
+    if (success) {
+      // Clean up stale data.
+      _plumber.flush<List<TeamMember>>(team.hashCode);
+    }
+    return success;
+  }
+
+  Future<bool> onRoleChanged(
+      Team team, int memberOwnerId, TeamRole role) async {
+    bool success = false;
+    if (role == TeamRole.delete) {
+      success = await _teamApi.removeFromTeam(memberOwnerId, team.ownerId);
+    } else {
+      success = await _teamApi.changeRole(team.ownerId, memberOwnerId, role);
+    }
+    if (success) {
+      // Clean up stale data.
+      _plumber.flush<List<TeamMember>>(team.hashCode);
+    }
+    return success;
   }
 
   Future<bool> saveToken(Team team, String token) async =>
