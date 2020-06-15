@@ -43,7 +43,7 @@ class MiddlePanel extends StatelessWidget {
         SizedBox(height: 30),
         LargeCard(
           backgroundImageAsset: 'assets/images/space_man.png',
-          url: 'https://docs.2dimensions.com/rive-help-center/',
+          url: 'https://help.rive.app',
           heading: 'Quick Start',
           blurb: 'Watch this video to learn the basics '
               'and core concepts you need to get started',
@@ -84,7 +84,7 @@ class RightPanel extends StatelessWidget {
           UrlCard(
             icon: PackedIcon.settings,
             blurb: 'Help Center',
-            url: 'https://docs.2dimensions.com/rive-help-center/',
+            url: 'https://help.rive.app',
           ),
           SizedBox(height: 20),
           UrlCard(
@@ -101,7 +101,7 @@ class RightPanel extends StatelessWidget {
           SizedBox(height: 20),
           UrlCard(
             icon: PackedIcon.settings,
-            blurb: 'Send Feedback',
+            blurb: 'Send feedback',
             url: 'https://rive.nolt.io',
           ),
         ],
