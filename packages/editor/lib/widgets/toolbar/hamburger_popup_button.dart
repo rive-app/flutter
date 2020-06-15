@@ -69,11 +69,11 @@ class HamburgerPopupButton extends StatelessWidget {
         //   'Shortcuts',
         // ),
         PopupContextItem(
-          'Report an Issue',
-          select: launchSupportUrl,
+          'Help Center',
+          select: launchHelpUrl,
         ),
         PopupContextItem(
-          'Request a Feature',
+          'Send feedback',
           select: launchSupportUrl,
         ),
         // PopupContextItem(

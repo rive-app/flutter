@@ -12,7 +12,7 @@ import 'package:utilities/utilities.dart';
 
 /// Billing policy URL
 const billingPolicyUrl =
-    'https://docs.2dimensions.com/rive-help-center/get-started/fair-billing-policy';
+    'https://help.rive.app/pricing/fair-billing-policy';
 
 const premiumYearlyCost = 45;
 const basicYearlyCost = 14;
