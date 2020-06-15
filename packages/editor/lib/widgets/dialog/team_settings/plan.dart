@@ -498,7 +498,7 @@ class _MethodState extends State<PaymentMethod> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         TintedIcon(
-            icon: PackedIcon.settingsSmall /*TODO: PackedIcon.date*/,
+            icon: PackedIcon.calendar,
             color: iconColor),
         const SizedBox(width: 10),
         RichText(
@@ -532,7 +532,7 @@ class _MethodState extends State<PaymentMethod> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TintedIcon(
-              icon: PackedIcon.cardchip /*TODO: PackedIcon.card*/,
+              icon: PackedIcon.creditcard,
               color: colors.commonButtonTextColor,
             ),
             const SizedBox(width: 10),

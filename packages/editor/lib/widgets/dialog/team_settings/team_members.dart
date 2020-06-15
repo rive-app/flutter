@@ -224,7 +224,7 @@ class _InvitePanelState extends State<InvitePanel> {
     // Search for team members that are email addresses.
     final teamMembers = Plumber().peek<List<TeamMember>>(widget.team.hashCode);
     final emailMembers = teamMembers
-        .where((e) => _emailRFC5322Regex.hasMatch(e.name))
+        .where((e) => e.name != null && _emailRFC5322Regex.hasMatch(e.name))
         .map((e) => e.name);
     final alreadyInvited = _emailInvites..addAll(emailMembers);
     return alreadyInvited.contains(input);

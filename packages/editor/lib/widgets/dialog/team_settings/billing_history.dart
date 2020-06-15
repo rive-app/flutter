@@ -151,8 +151,9 @@ class _BillingHistoryState extends State<BillingHistory> {
     });
   }
 
-  Iterable<PackedIcon> get _responseIcon =>
-      _response == NetworkResponse.ok ? PackedIcon.check : PackedIcon.delete;
+  Iterable<PackedIcon> get _responseIcon => _response == NetworkResponse.ok
+      ? PackedIcon.popupCheck
+      : PackedIcon.delete;
 
   Widget _receiptDetails(BillingDetails initialDetails) {
     final colors = RiveTheme.of(context).colors;
