@@ -44,7 +44,12 @@ class _TeamMemberState extends State<TeamMembers> {
   void _updateAffiliates() => TeamManager().loadTeamMembers(widget.owner);
 
   void _onRoleChanged(TeamMember member, TeamRole role) {
-    TeamManager().onRoleChanged(widget.owner.ownerId, member.ownerId, role);
+    final team = widget.owner;
+    if (member.status == TeamInviteStatus.pending) {
+      TeamManager().onInviteChanged(team, member, role);
+    } else {
+      TeamManager().onRoleChanged(team, member.ownerId, role);
+    }
     _updateAffiliates();
   }
 
@@ -69,6 +74,7 @@ class _TeamMemberState extends State<TeamMembers> {
                   children: snapshot.data
                       .map(
                         (member) => _MemberRow(
+                          key: ValueKey<int>(member.ownerId),
                           user: member,
                           onRoleChanged: (role) => _onRoleChanged(member, role),
                         ),
@@ -442,13 +448,14 @@ class _MemberRowState extends State<_MemberRow> {
             const SizedBox(width: 5),
             if (user.name != null) ...[
               ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 180),
-                  child: Text(
-                    user.name,
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.fileSearchText.copyWith(
-                        color: Colors.black, fontWeight: FontWeight.w500),
-                  )),
+                constraints: const BoxConstraints(maxWidth: 180),
+                child: Text(
+                  user.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: styles.fileSearchText.copyWith(
+                      color: Colors.black, fontWeight: FontWeight.w500),
+                ),
+              ),
               const SizedBox(width: 10)
             ],
             if (user.username != null)

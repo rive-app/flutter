@@ -48,6 +48,45 @@ class TeamApi {
     await api.post('${api.host}/api/teams/$teamId/invite/reject');
   }
 
+  Future<bool> rescindInvite(int teamId, {int userId, String email}) async {
+    String payload = json.encode({
+      if (userId != null) 'userId': userId,
+      if (email != null) 'userEmail': email,
+    });
+    try {
+      await api.delete('${api.host}/api/teams/$teamId/invite',
+          body: payload);
+      return true;
+    } on ApiException catch (err) {
+      log.severe('[Error] rescindInvite() ${err.response.body}');
+      return false;
+    }
+  }
+
+  Future<bool> updateInvite(
+    int teamId,
+    TeamRole role, {
+    int userId,
+    String email,
+  }) async {
+    final payloadMap = {
+      if (userId != null) 'userId': userId,
+      if (email != null) 'userEmail': email,
+      'role': role.name
+    };
+    String payload = json.encode(payloadMap);
+    try {
+      await api.patch(
+        '${api.host}/api/teams/$teamId/invite',
+        body: payload,
+      );
+      return true;
+    } on ApiException catch (err) {
+      log.severe('[Error] updateInvite() ${err.response.body}');
+      return false;
+    }
+  }
+
   /// GET /api/teams/<team_id>
   /// Returns the team's profile info.
   Future<ProfileDM> getProfile(int ownerId) async {
