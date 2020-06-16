@@ -109,7 +109,7 @@ class Mat2D {
     o[3] *= y;
   }
 
-  static void multiply(Mat2D o, Mat2D a, Mat2D b) {
+  static Mat2D multiply(Mat2D o, Mat2D a, Mat2D b) {
     double a0 = a[0],
         a1 = a[1],
         a2 = a[2],
@@ -128,6 +128,7 @@ class Mat2D {
     o[3] = a1 * b2 + a3 * b3;
     o[4] = a0 * b4 + a2 * b5 + a4;
     o[5] = a1 * b4 + a3 * b5 + a5;
+    return o;
   }
 
   static void cCopy(Mat2D o, Mat2D a) {

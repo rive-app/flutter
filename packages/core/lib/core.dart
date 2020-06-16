@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:core/field_types/core_field_type.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+import 'package:utilities/restorer.dart';
 
 import 'package:core/id.dart';
 import 'package:utilities/binary_buffer/binary_reader.dart';
@@ -172,21 +173,6 @@ abstract class ObjectRoot {
   T addObject<T extends Core>(T object);
 }
 
-/// A helper for tracking changes to auto key, will ensure restore is called
-/// only once.
-class AutoKeySuppression {
-  CoreContext _context;
-
-  AutoKeySuppression._(this._context);
-
-  /// Restore the auto key state to where it was before supress was called on
-  /// the context. Will ensure that restore on the context is only called once.
-  void restore() {
-    _context?._restoreAutoKey();
-    _context = null;
-  }
-}
-
 abstract class CoreContext implements LocalSettings, ObjectRoot {
   static const int addKey = 1;
   static const int removeKey = 2;
@@ -222,9 +208,9 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   /// internally manages a stack that must be balanced by calling restoreAutoKey
   /// when done suppressing in the context that you're calling it from. It also
   /// returns an AutoKeySupression subscription which can be canceled.
-  AutoKeySuppression suppressAutoKey() {
+  Restorer suppressAutoKey() {
     _suppressAutoKey++;
-    return AutoKeySuppression._(this);
+    return Restorer(_restoreAutoKey);
   }
 
   /// Restores auto key to previous setting, will return true if this result in

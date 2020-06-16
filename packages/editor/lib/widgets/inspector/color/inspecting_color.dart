@@ -7,7 +7,6 @@ import 'package:utilities/list_equality.dart' as utils;
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/shapes/shape.dart';
-import 'package:rive_core/transform_space.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
@@ -194,12 +193,13 @@ class ShapesInspectingColor extends InspectingColor {
   core.LinearGradient _initGradient(
       ShapePaintContainer shape, core.LinearGradient gradient) {
     var file = shape.context;
-    var bounds = shape.computeBounds(TransformSpace.local);
+    var bounds = shape.localBounds;
+    var rect = Rect.fromLTRB(bounds[0], bounds[1], bounds[2], bounds[3]);
     gradient
-      ..startX = bounds.left
-      ..startY = bounds.centerLeft.dy
-      ..endX = bounds.right
-      ..endY = bounds.centerLeft.dy;
+      ..startX = rect.left
+      ..startY = rect.centerLeft.dy
+      ..endX = rect.right
+      ..endY = rect.centerLeft.dy;
 
     // Add two stops.
     var gradientStopA = GradientStop()

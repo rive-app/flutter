@@ -31,6 +31,36 @@ class AABB {
     _buffer = Float32List.fromList([a, b, c, d]);
   }
 
+  AABB.empty() {
+    _buffer = Float32List.fromList([
+      double.maxFinite,
+      double.maxFinite,
+      -double.maxFinite,
+      -double.maxFinite
+    ]);
+  }
+
+  Vec2D includePoint(Vec2D point, Mat2D transform) {
+    var transformedPoint = transform == null
+        ? point
+        : Vec2D.transformMat2D(Vec2D(), point, transform);
+    var x = transformedPoint[0];
+    var y = transformedPoint[1];
+    if (x < _buffer[0]) {
+      _buffer[0] = x;
+    }
+    if (x > _buffer[2]) {
+      _buffer[2] = x;
+    }
+    if (y < _buffer[1]) {
+      _buffer[1] = y;
+    }
+    if (y > _buffer[3]) {
+      _buffer[3] = y;
+    }
+    return transformedPoint;
+  }
+
   AABB.fromMinMax(Vec2D min, Vec2D max) {
     _buffer = Float32List.fromList([min[0], min[1], max[0], max[1]]);
   }
@@ -132,10 +162,14 @@ class AABB {
     return _buffer.toString();
   }
 
-  AABB transform(Mat2D matrix) => AABB.fromMinMax(
-        Vec2D.transformMat2D(Vec2D(), minimum, matrix),
-        Vec2D.transformMat2D(Vec2D(), maximum, matrix),
-      );
+  AABB transform(Mat2D matrix) {
+    return AABB.fromPoints([
+      minimum,
+      Vec2D.fromValues(maximum[0], minimum[1]),
+      maximum,
+      Vec2D.fromValues(minimum[0], maximum[1])
+    ], transform: matrix);
+  }
 
   /// Compute an AABB from a set of points with an optional [transform] to apply
   /// before computing.

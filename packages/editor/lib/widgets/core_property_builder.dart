@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:rive_editor/frameDebounce.dart';
+import 'package:rive_editor/frame_debounce.dart';
 
 /// TODO: determine if we can commit murder
 class CorePropertyBuilder<T> extends StatefulWidget {

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -19,10 +20,28 @@ import 'stage.dart';
 class OBB {
   final AABB bounds;
   final Mat2D transform;
+  final Float32List poly = Float32List(8);
   OBB({
     this.bounds,
     this.transform,
-  });
+  }) {
+    var min = bounds.minimum;
+    var max = bounds.maximum;
+
+    var temp = Vec2D();
+    Vec2D.transformMat2D(temp, Vec2D.fromValues(min[0], min[1]), transform);
+    poly[0] = temp[0];
+    poly[1] = temp[1];
+    Vec2D.transformMat2D(temp, Vec2D.fromValues(max[0], min[1]), transform);
+    poly[2] = temp[0];
+    poly[3] = temp[1];
+    Vec2D.transformMat2D(temp, Vec2D.fromValues(max[0], max[1]), transform);
+    poly[4] = temp[0];
+    poly[5] = temp[1];
+    Vec2D.transformMat2D(temp, Vec2D.fromValues(min[0], max[1]), transform);
+    poly[6] = temp[0];
+    poly[7] = temp[1];
+  }
 }
 
 /// A helper extension to interpret the Component's userData as a StageItem. We
@@ -52,6 +71,9 @@ abstract class StageItem<T> extends SelectableItem
   /// The desired screen space stroke width for a selected StageItem.
   static const double strokeWidth = 2;
 
+  /// The desired screen space stroke width for the bounds of a StageItem.
+  static const double boundsStrokeWidth = 1;
+
   // Override this if you don't want this item to show up in the hierarchy tree.
   bool get showInHierarchy => true;
 
@@ -63,6 +85,11 @@ abstract class StageItem<T> extends SelectableItem
   static Paint selectedPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth
+    ..color = const Color(0xFF57A5E0);
+
+  static Paint boundsPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = boundsStrokeWidth
     ..color = const Color(0xFF57A5E0);
 
   static Paint backboardContrastPaint = Paint()
@@ -199,6 +226,36 @@ abstract class StageItem<T> extends SelectableItem
 
   // Called when the stage either solos or cancels solo for this item.
   void onSoloChanged(bool isSolo) {}
+
+  void drawBounds(Canvas canvas) {
+    if (obb != null) {
+      canvas.save();
+      canvas.transform(obb.transform.mat4);
+      var objectBounds = obb.bounds;
+      canvas.drawRect(
+        Rect.fromLTRB(
+          objectBounds[0],
+          objectBounds[1],
+          objectBounds[2],
+          objectBounds[3],
+        ),
+        StageItem.boundsPaint,
+      );
+      canvas.restore();
+    }
+    else
+    {
+      canvas.drawRect(
+        Rect.fromLTRB(
+          aabb[0],
+          aabb[1],
+          aabb[2],
+          aabb[3],
+        ),
+        StageItem.selectedPaint,
+      );
+    }
+  }
 }
 
 /// Convert an AABB in object space defined by [xform] to the corresponding

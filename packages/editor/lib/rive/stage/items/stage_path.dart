@@ -1,14 +1,33 @@
 import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
+import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/node.dart';
+import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_editor/selectable_item.dart';
-import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
-class StagePath extends StageItem<PointsPath> with BoundsDelegate {
+abstract class StagePath<T extends core.Path> extends StageItem<T>
+    with BoundsDelegate {
   @override
   void boundsChanged() {
-    aabb = component.shape.bounds.translate(component.artboard.originWorld);
+    var artboard = component.artboard;
+    aabb = artboard.transformBounds(component.preciseComputeBounds(
+        component.renderVertices, component.worldTransform));
+
+    var parent = component.parent as Node;
+    var toParentTransform = Mat2D();
+    if (!Mat2D.invert(toParentTransform, parent.worldTransform)) {
+      Mat2D.identity(toParentTransform);
+    }
+
+    obb = OBB(
+      bounds: component.preciseComputeBounds(
+        component.renderVertices,
+        null,
+      ),
+      transform: component.pathTransform,
+    );
   }
 
   /// A StagePath cannot be directly clicked on in the stage. It can be selected
@@ -16,21 +35,6 @@ class StagePath extends StageItem<PointsPath> with BoundsDelegate {
   /// selects the shape (in the stage).
   @override
   bool get isSelectable => false;
-
-  @override
-  void onSoloChanged(bool isSolo) {
-    for (final vertex in component.vertices) {
-      var stageItem = vertex.stageItem;
-      if (stageItem == null) {
-        continue;
-      }
-      if (isSolo) {
-        stage?.addItem(stageItem);
-      } else {
-        stage?.removeItem(stageItem);
-      }
-    }
-  }
 
   @override
   void draw(Canvas canvas) {
@@ -46,5 +50,7 @@ class StagePath extends StageItem<PointsPath> with BoundsDelegate {
 
     canvas.drawPath(path.uiPath, StageItem.selectedPaint);
     canvas.restore();
+
+    drawBounds(canvas);
   }
 }

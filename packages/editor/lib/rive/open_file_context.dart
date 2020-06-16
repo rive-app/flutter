@@ -667,8 +667,8 @@ class OpenFileContext with RiveFileDelegate {
     assert(_activeRevision != null, 'not previewing a revision');
     _activeRevision.restoreRevision(revision.id);
     hideRevisionHistory();
-    addAlert((_restoringAlert =
-        SimpleAlert('Restoring revision...', autoDismiss: false)));
+    addAlert(_restoringAlert =
+        SimpleAlert('Restoring revision...', autoDismiss: false));
   }
 
   StreamSubscription<AnimationViewModel> _selectedAnimationSubscription;

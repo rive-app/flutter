@@ -39,6 +39,7 @@ import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
+import 'package:rive_editor/rive/stage/items/stage_points_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_radial_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
@@ -52,6 +53,7 @@ import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
+import 'package:utilities/restorer.dart';
 
 typedef CustomSelectionHandler = bool Function(StageItem);
 
@@ -383,7 +385,18 @@ class Stage extends Debouncer {
   }
 
   bool get showSelection => !_isHidingCursor;
-  bool get isSelectionEnabled => !_isHidingCursor;
+  bool get isSelectionEnabled => !_isHidingCursor && _selectionSuppression == 0;
+
+  int _selectionSuppression = 0;
+  Restorer suppressSelection() {
+    _selectionSuppression++;
+    return Restorer(_restoreSelection);
+  }
+
+  bool _restoreSelection() {
+    _selectionSuppression--;
+    return _selectionSuppression == 0;
+  }
 
   void _updateHover() {
     if (isSelectionEnabled && _worldMouse != null) {
@@ -936,6 +949,8 @@ class Stage extends Debouncer {
     // Take this opportunity to update any stageItem paints that rely on the
     // zoom level.
     StageItem.selectedPaint.strokeWidth = StageItem.strokeWidth / _viewZoom;
+    StageItem.boundsPaint.strokeWidth =
+        StageItem.boundsStrokeWidth / _viewZoom;
 
     if (movedView) {
       mouseMove(1, _lastMousePosition[0], _lastMousePosition[1]);
@@ -1028,7 +1043,7 @@ class Stage extends Debouncer {
     EllipseBase.typeKey: () => StageEllipse(),
     RectangleBase.typeKey: () => StageRectangle(),
     TriangleBase.typeKey: () => StageTriangle(),
-    PointsPathBase.typeKey: () => StagePath(),
+    PointsPathBase.typeKey: () => StagePointsPath(),
     StraightVertexBase.typeKey: () => StagePathVertex(),
     CubicMirroredVertexBase.typeKey: () => StagePathVertex(),
     CubicAsymmetricVertexBase.typeKey: () => StagePathVertex(),

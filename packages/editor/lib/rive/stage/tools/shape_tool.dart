@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:core/core.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
@@ -17,6 +16,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
+import 'package:utilities/restorer.dart';
 
 const Map<EditMode, DraggingMode> editModeMap = {
   EditMode.altMode1: DraggingMode.symmetric
@@ -52,7 +52,7 @@ abstract class ShapeTool extends DrawableTool {
     ShortcutAction.symmetricDraw.removeListener(_symmetricDrawChanged);
   }
 
-  AutoKeySuppression _autoKeySuppression;
+  Restorer _restoreAutoKey;
   @override
   void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
       Vec2D worldMouse) {
@@ -66,7 +66,7 @@ abstract class ShapeTool extends DrawableTool {
     // a shortcut or something while the drag operation is continuing).
     _currentArtboard = activeArtboard;
 
-    _autoKeySuppression = activeArtboard.context.suppressAutoKey();
+    _restoreAutoKey = activeArtboard.context.suppressAutoKey();
 
     _shape = makeShape(activeArtboard, (_path = makePath()))
       ..name = shapeName
@@ -114,7 +114,8 @@ abstract class ShapeTool extends DrawableTool {
   @override
   void endDrag() {
     super.endDrag();
-    _autoKeySuppression?.restore();
+    // Don't need to null this as it protects against multiple calls internally.
+    _restoreAutoKey?.restore();
     _shape = null;
   }
 

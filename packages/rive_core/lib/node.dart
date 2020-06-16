@@ -27,6 +27,8 @@ class Node extends NodeBase {
   }
 
   Vec2D get translation => Vec2D.fromValues(x, y);
+  Vec2D get worldTranslation =>
+      Vec2D.fromValues(worldTransform[4], worldTransform[5]);
 
   /// Sets the position of the Node
   set translation(Vec2D pos) {

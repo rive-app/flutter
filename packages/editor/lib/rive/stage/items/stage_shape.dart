@@ -1,27 +1,34 @@
 import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
-import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/transform_space.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageShape extends StageItem<Shape> with BoundsDelegate {
   @override
+  void addedToStage(Stage stage) {
+    super.addedToStage(stage);
+    boundsChanged();
+  }
+
+  @override
   void boundsChanged() {
+    var artboard = component.artboard;
     // We could make an artboardBounds getter on the component, but we should
     // try to keep the component's logic to what will actually be necessary in a
     // runtime (this may not be entirely possible, but this one is definitely
     // not necessary at runtime).
-    aabb = component.bounds.translate(component.artboard.originWorld);
+    // aabb = artboard.transformBounds(component.bounds);
+
+    aabb = artboard.transformBounds(component.worldBounds);
 
     // Let's also set the obb.
-    var rect = component.computeBounds(TransformSpace.local);
     obb = OBB(
-      bounds: AABB.fromValues(rect.left, rect.top, rect.right, rect.bottom),
-      transform: component.worldTransform,
+      bounds: component.localBounds,
+      transform: artboard.transform(component.worldTransform),
     );
   }
 
@@ -58,7 +65,10 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
     final origin = component.artboard.originWorld;
     canvas.translate(origin[0], origin[1]);
     canvas.drawPath(worldPath, StageItem.selectedPaint);
+
     canvas.restore();
+
+    drawBounds(canvas);
   }
 
   @override
