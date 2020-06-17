@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -53,7 +54,7 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
           .transform(component.worldTransform.mat4);
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     if (selectionState.value == SelectionState.none || !stage.showSelection) {
       return;
     }
@@ -68,7 +69,7 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
 
     canvas.restore();
 
-    drawBounds(canvas);
+    drawBounds(canvas, drawPass.inWorldSpace);
   }
 
   @override

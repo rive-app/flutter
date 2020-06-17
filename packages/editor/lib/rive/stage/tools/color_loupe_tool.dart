@@ -8,6 +8,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/late_draw_stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
@@ -18,6 +19,10 @@ typedef PickColor = void Function(Color);
 /// A tool that allows the user to zoom into the stage and pick the color from a
 /// specific pixel.
 class ColorLoupeTool extends StageTool with LateDrawStageTool {
+  @override
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 1000, inWorldSpace: false)];
+
   final _whiteStroke = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1
@@ -38,7 +43,7 @@ class ColorLoupeTool extends StageTool with LateDrawStageTool {
   ByteData get rasterPixels => _rasterPixels;
 
   @override
-  void draw(ui.Canvas canvas) {
+  void draw(ui.Canvas canvas, StageDrawPass drawPass) {
     // Whenever the stage draws, update the color buffer.
     debounce(_updateColorBuffer);
   }
@@ -102,6 +107,7 @@ class ColorLoupeTool extends StageTool with LateDrawStageTool {
 
   @override
   void deactivate() {
+    super.deactivate();
     stage.showCursor();
   }
 

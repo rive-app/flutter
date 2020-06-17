@@ -9,6 +9,8 @@ import 'package:utilities/iterable.dart';
 /// Transformer that translates [StageItem]'s with underlying [Node] components.
 class NodeTranslateTransformer extends StageTransformer {
   Iterable<Node> _nodes;
+  final Vec2D lockAxis;
+  NodeTranslateTransformer({this.lockAxis});
 
   @override
   void advance(DragTransformDetails details) {
@@ -19,6 +21,10 @@ class NodeTranslateTransformer extends StageTransformer {
     for (final node in _nodes) {
       // First assume we can use artboard level mouse move.
       var delta = details.artboardWorld.delta;
+      if (lockAxis != null) {
+        var d = Vec2D.dot(delta, lockAxis);
+        delta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
+      }
 
       // If it's a node, we have to get into its parent's space as that's where
       // its translation lives.

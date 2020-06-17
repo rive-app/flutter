@@ -1,5 +1,4 @@
-import 'dart:ui';
-
+import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:rive_core/artboard.dart';
@@ -23,6 +22,9 @@ abstract class StageTool implements StageDrawable {
   // dependent on mouse coordinates.
   bool get activateSendsMouseMove => false;
 
+  @override
+  Iterable<StageDrawPass> get drawPasses => [];
+
   /// Gets the correct mouse world space depending on whether this tool operates
   /// in stage world or artboard world. Because the artboards don't rotate or
   /// scale (at least not on the stage), this is just a simple translation
@@ -41,34 +43,53 @@ abstract class StageTool implements StageDrawable {
   @mustCallSuper
   bool activate(Stage stage) {
     _stage = stage;
-    return validate(stage);
+    if (validate(stage)) {
+      _addCursor();
+      return true;
+    }
+    return false;
+  }
+
+  void _addCursor() {
+    if (cursorName != null) {
+      _customCursor ??= stage.showCustomCursor(cursorName);
+    }
+  }
+
+  void _removeCursor() {
+    _customCursor?.remove();
+    _customCursor = null;
   }
 
   /// Override this to validate if the tool is valid for the stage.
   bool validate(Stage stage) => true;
 
   /// Cleanup anything that was setup during activation.
-  void deactivate() {}
+  @mustCallSuper
+  void deactivate() {
+    _removeCursor();
+  }
 
-  /// Set the draw order to something large as stage tools almost always draw
-  /// last. TODO: dart doesn't provide a constant for integers, find out if max
-  /// 64 bit int (9223372036854775807) transpiles nicely to js
-  @override
-  int get drawOrder => 1000;
+  @mustCallSuper
+  void mouseExit(Artboard activeArtboard, Vec2D worldMouse) => _removeCursor();
 
-  @override
-  void draw(Canvas canvas);
-
-  @override
-  bool get drawsInWorldSpace => false;
+  @mustCallSuper
+  void mouseEnter(Artboard activeArtboard, Vec2D worldMouse) => _addCursor();
 
   /// Returns true if the stage should advance after movement.
   bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {
     return false;
   }
 
-  void mouseExit(Artboard activeArtboard, Vec2D worldMouse) {}
-  void mouseEnter(Artboard activeArtboard, Vec2D worldMouse) {}
   void click(Artboard activeArtboard, Vec2D worldMouse) {}
   bool endClick() => false;
+
+  /// Custom drawing cursor
+  CursorInstance _customCursor;
+
+  /// Custom cursor for drawing
+  Iterable<PackedIcon> get cursorName => null;
+
+  @override
+  void draw(Canvas canvas, StageDrawPass drawPass) {}
 }

@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -9,6 +11,11 @@ import 'package:meta/meta.dart';
 export 'package:rive_core/src/generated/node_base.dart';
 
 class Node extends NodeBase {
+  // -> editor-only
+  final Event _worldTransformChanged = Event();
+  Listenable get worldTransformChanged => _worldTransformChanged;
+  // <- editor-only
+
   final Mat2D transform = Mat2D();
   final Mat2D worldTransform = Mat2D();
   BoundsDelegate _delegate;
@@ -62,6 +69,9 @@ class Node extends NodeBase {
       Mat2D.copy(worldTransform, transform);
     }
     _delegate?.boundsChanged();
+    // -> editor-only
+    _worldTransformChanged?.notify();
+    // <- editor-only
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class StageArtboardTitle extends StageItem<Artboard> {
@@ -34,7 +35,8 @@ class StageArtboardTitle extends StageItem<Artboard> {
   void boundsChanged() => _updateBounds();
 
   @override
-  int get drawOrder => 0;
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 0, inWorldSpace: true)];
 
   void _updateBounds() {
     // Compute max bounds based on stage's min zoom (really broad broad-phase).
@@ -74,7 +76,7 @@ class StageArtboardTitle extends StageItem<Artboard> {
   }
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass pass) {
     // If you want to see the broadphase, comment this back in.
     // if (component.stageItem.selectionState.value != SelectionState.none) {
     //   canvas.drawRect(

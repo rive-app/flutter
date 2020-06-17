@@ -1,5 +1,6 @@
-import 'dart:ui';
-
+import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
+import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:utilities/restorer.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
@@ -7,10 +8,12 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
-import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 
 // TODO: update node translation to be in parent space.
-class NodeTool extends DrawableTool {
+class NodeTool extends StageTool with DraggableTool {
+  @override
+  Iterable<PackedIcon> get cursorName => PackedIcon.cursorAdd;
+
   static final NodeTool instance = NodeTool._();
   NodeTool._();
 
@@ -26,9 +29,6 @@ class NodeTool extends DrawableTool {
 
   @override
   Iterable<PackedIcon> get icon => PackedIcon.toolNode;
-
-  @override
-  void draw(Canvas canvas) {}
 
   /// We handle completing the node placement operation here
   /// as it might have been dragged around a bit before being
@@ -59,5 +59,14 @@ class NodeTool extends DrawableTool {
     });
 
     return node;
+  }
+
+  @override
+  void endDrag() {
+    /// Need to check if we're still the active tool (something could've
+    /// switched the active tool causing endDrag).
+    if (stage.tool == this) {
+      stage.tool = AutoTool.instance;
+    }
   }
 }

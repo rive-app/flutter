@@ -105,17 +105,6 @@ abstract class StageItem<T> extends SelectableItem
   /// solo if their parent is soloed.
   StageItem get soloParent => null;
 
-  /// StageItems are sorted by [drawOrder] before being drawn. This allows
-  /// specific classification of items to draw before/after others. For example,
-  /// transform handles should always draw after other content.
-  @override
-  int get drawOrder => 1;
-
-  @override
-  bool get drawsInWorldSpace => true;
-
-  int compareDrawOrderTo(StageItem other) => drawOrder - other.drawOrder;
-
   /// Whether the system automatically handles adding and removing this item
   /// to/from the stage. Most [Component]s want the system to automatically add
   /// their corresponding StageItem (if any) when the [Component] is added to
@@ -158,6 +147,15 @@ abstract class StageItem<T> extends SelectableItem
 
   /// Override this to prevent this item from being clicked on.
   bool get isHoverSelectable => isSelectable;
+
+  /// Use this to determine priority when both items are hovered.
+  int compareDrawOrderTo(StageItem other) => drawOrder - other.drawOrder;
+
+  /// Draw order inferred from the drawpasses. This assumes the first item in
+  /// the drawPasses list is the "primary" one. So if you register multiple draw
+  /// passes, make sure your most important/top layer is registered first and
+  /// shadows/etc are registered second (with lower drawOrder if necessary).
+  int get drawOrder => drawPasses.first.order;
 
   // ignore: use_setters_to_change_properties
   /// Invoked whenever the item has been added to the stage. This is usually
@@ -222,12 +220,25 @@ abstract class StageItem<T> extends SelectableItem
   OBB obb;
 
   @override
-  void draw(Canvas canvas) {}
+  Iterable<StageDrawPass> get drawPasses => [
+        StageDrawPass(
+          this,
+          inWorldSpace: true,
+          order: 1,
+        )
+      ];
+
+  @override
+  void draw(Canvas canvas, StageDrawPass pass) {}
 
   // Called when the stage either solos or cancels solo for this item.
   void onSoloChanged(bool isSolo) {}
 
-  void drawBounds(Canvas canvas) {
+  void drawBounds(Canvas canvas, bool inWorldSpace) {
+    if (!inWorldSpace) {
+      canvas.save();
+      canvas.transform(stage.viewTransform.mat4);
+    }
     if (obb != null) {
       canvas.save();
       canvas.transform(obb.transform.mat4);
@@ -242,9 +253,7 @@ abstract class StageItem<T> extends SelectableItem
         StageItem.boundsPaint,
       );
       canvas.restore();
-    }
-    else
-    {
+    } else {
       canvas.drawRect(
         Rect.fromLTRB(
           aabb[0],
@@ -254,6 +263,9 @@ abstract class StageItem<T> extends SelectableItem
         ),
         StageItem.selectedPaint,
       );
+    }
+    if (!inWorldSpace) {
+      canvas.restore();
     }
   }
 }

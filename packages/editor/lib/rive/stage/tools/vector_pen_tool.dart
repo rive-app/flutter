@@ -16,6 +16,7 @@ import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
@@ -146,7 +147,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     ..color = const Color(0x80FFFFFF);
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     contourShadow.strokeWidth = StageItem.selectedPaint.strokeWidth * 3;
     contourLine.strokeWidth = StageItem.selectedPaint.strokeWidth;
     var editingPaths = vertexEditor.editingPaths;
@@ -211,7 +212,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       }
       canvas.restore();
     }
-    super.draw(canvas);
+    super.draw(canvas, drawPass);
     drawTransformers(canvas);
   }
 

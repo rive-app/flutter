@@ -7,6 +7,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:meta/meta.dart';
 
@@ -53,6 +54,12 @@ class PenToolInsertTarget {
 }
 
 abstract class PenTool<T extends Component> extends StageTool {
+  // Draw after most stage content, but before vertices.
+  @override
+  Iterable<StageDrawPass> get drawPasses => [
+        StageDrawPass(this, order: 2, inWorldSpace: false),
+      ];
+
   @override
   bool get activateSendsMouseMove => true;
 
@@ -61,7 +68,7 @@ abstract class PenTool<T extends Component> extends StageTool {
   PenToolInsertTarget computeInsertTarget(Vec2D worldMouse);
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     if (_ghostPointScreen == null) {
       return;
     }
@@ -99,6 +106,7 @@ abstract class PenTool<T extends Component> extends StageTool {
 
   @override
   void mouseExit(Artboard activeArtboard, Vec2D worldMouse) {
+    super.mouseExit(activeArtboard, worldMouse);
     _hideGhostPoint();
   }
 
@@ -120,10 +128,6 @@ abstract class PenTool<T extends Component> extends StageTool {
     _hideGhostPoint();
     super.deactivate();
   }
-
-  // Draw after most stage content, but before vertices.
-  @override
-  int get drawOrder => 2;
 
   @override
   Iterable<PackedIcon> get icon => PackedIcon.toolPen;

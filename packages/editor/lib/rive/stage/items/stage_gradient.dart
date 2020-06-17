@@ -10,6 +10,7 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 abstract class StageGradientInterface<T extends core.LinearGradient> {
@@ -51,7 +52,8 @@ class StageGradient<T extends core.LinearGradient> extends StageItem<T>
   bool isAutomatic(Stage stage) => false;
 
   @override
-  int get drawOrder => 2;
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 2, inWorldSpace: true)];
 
   StageShape get stageShape =>
       (component.shapePaintContainer as Component).stageItem as StageShape;
@@ -137,7 +139,7 @@ class StageGradient<T extends core.LinearGradient> extends StageItem<T>
   }
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     border.strokeWidth = 3 / stage.viewZoom;
     line.strokeWidth = 1 / stage.viewZoom;
 

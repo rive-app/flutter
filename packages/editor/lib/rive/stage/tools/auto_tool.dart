@@ -7,14 +7,14 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
-import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:utilities/restorer.dart';
+import 'package:rive_editor/rive/stage/tools/transform_handle_tool.dart';
 
-class AutoTool extends StageTool with DraggableTool {
+class AutoTool extends TransformHandleTool {
   final Paint _stroke = Paint()
     ..strokeWidth = 1
     ..color = RiveColors().keyMarqueeStroke
@@ -23,6 +23,10 @@ class AutoTool extends StageTool with DraggableTool {
 
   Vec2D _marqueeStart;
   Vec2D _marqueeEnd;
+
+  @override
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 1000, inWorldSpace: false)];
 
   // We operate in stage space
   @override
@@ -44,7 +48,7 @@ class AutoTool extends StageTool with DraggableTool {
   AABB get viewMarqueeBounds => marqueeBounds?.transform(stage.viewTransform);
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     var marquee = viewMarqueeBounds;
     if (marquee == null) {
       return;
@@ -76,19 +80,25 @@ class AutoTool extends StageTool with DraggableTool {
   ) {
     super.startDrag(selection, activeArtboard, worldMouse);
 
-    _restoreSelect = stage.suppressSelection();
-    _marqueeStart = Vec2D.clone(worldMouse);
-    _preSelected = HashSet<SelectableItem>.of(stage.file.selection.items);
+    if (!isTransforming) {
+      _restoreSelect = stage.suppressSelection();
+      _marqueeStart = Vec2D.clone(worldMouse);
+      _preSelected = HashSet<SelectableItem>.of(stage.file.selection.items);
+    }
   }
 
   @override
   void endDrag() {
+    super.endDrag();
     _restoreSelect?.restore();
     _marqueeStart = _marqueeEnd = null;
   }
 
   @override
   void updateDrag(Vec2D worldMouse) {
+    if (isTransforming) {
+      return;
+    }
     _marqueeEnd = Vec2D.clone(worldMouse);
 
     var inMarquee = HashSet<SelectableItem>();

@@ -8,6 +8,7 @@ import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 /// Stage representation of a control point (in/out) for a cubic vertex.
@@ -138,8 +139,9 @@ class StagePathControlLine extends StageItem<CubicVertex> {
   @override
   bool get isSelectable => false;
 
-  @override
-  int get drawOrder => 3;
+    @override
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 3, inWorldSpace: true)];
 
   @override
   AABB get aabb => AABB.fromPoints([
@@ -148,7 +150,7 @@ class StagePathControlLine extends StageItem<CubicVertex> {
       ]);
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass pass) {
     var inWorld = vertex.worldTranslation;
     var outWorld = control.worldTranslation;
     canvas.drawLine(Offset(inWorld[0], inWorld[1]),

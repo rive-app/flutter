@@ -10,8 +10,10 @@ import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_editor/constants.dart';
+import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
@@ -23,6 +25,9 @@ const Map<EditMode, DraggingMode> editModeMap = {
 };
 
 abstract class ShapeTool extends DrawableTool {
+  @override
+  Iterable<PackedIcon> get cursorName => PackedIcon.cursorAdd;
+
   Vec2D _startWorldMouse;
   Vec2D _start, _end, _cursor;
 
@@ -113,7 +118,6 @@ abstract class ShapeTool extends DrawableTool {
 
   @override
   void endDrag() {
-    super.endDrag();
     // Don't need to null this as it protects against multiple calls internally.
     _restoreAutoKey?.restore();
     _shape = null;
@@ -166,7 +170,7 @@ abstract class ShapeTool extends DrawableTool {
   }
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     // happens when we first start dragging.
     if (_start == null) {
       return;

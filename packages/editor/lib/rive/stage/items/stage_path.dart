@@ -4,6 +4,7 @@ import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path.dart' as core;
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
@@ -37,7 +38,7 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
   bool get isSelectable => false;
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     if (selectionState.value == SelectionState.none || !stage.showSelection) {
       return;
     }
@@ -51,6 +52,6 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
     canvas.drawPath(path.uiPath, StageItem.selectedPaint);
     canvas.restore();
 
-    drawBounds(canvas);
+    drawBounds(canvas, drawPass.inWorldSpace);
   }
 }

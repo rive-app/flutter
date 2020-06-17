@@ -37,7 +37,6 @@ import 'package:rive_editor/rive/stage/items/stage_ellipse.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
-import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_points_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_radial_gradient.dart';
@@ -102,13 +101,14 @@ class Stage extends Debouncer {
   Mat2D get viewTransform => _viewTransform;
   double get viewportWidth => _viewportWidth;
   double get viewportHeight => _viewportHeight;
-  final List<StageDrawable> _visibleItems = [];
+  final List<StageDrawPass> _drawPasses = [];
   final Vec2D _viewTranslation = Vec2D();
   double _viewZoom = 1;
   double get viewZoom => _viewZoom;
   final Vec2D _viewTranslationTarget = Vec2D();
   double _viewZoomTarget = 1;
   Vec2D _worldMouse = Vec2D();
+  Vec2D get worldMouse => _worldMouse;
   Offset localMouse = Offset.zero;
   bool _mouseDownSelected = false;
   EditMode activeEditMode = EditMode.normal;
@@ -885,7 +885,7 @@ class Stage extends Debouncer {
   /// Clear out all stage items. Normally called when the file is also wiped.
   void wipe() {
     _soloNotifier.value = null;
-    _visibleItems.clear();
+    _drawPasses.clear();
     visTree.clear();
     hoverItem = null;
   }
@@ -949,8 +949,7 @@ class Stage extends Debouncer {
     // Take this opportunity to update any stageItem paints that rely on the
     // zoom level.
     StageItem.selectedPaint.strokeWidth = StageItem.strokeWidth / _viewZoom;
-    StageItem.boundsPaint.strokeWidth =
-        StageItem.boundsStrokeWidth / _viewZoom;
+    StageItem.boundsPaint.strokeWidth = StageItem.boundsStrokeWidth / _viewZoom;
 
     if (movedView) {
       mouseMove(1, _lastMousePosition[0], _lastMousePosition[1]);
@@ -963,10 +962,10 @@ class Stage extends Debouncer {
     var viewAABB = obbToAABB(
         AABB.fromValues(0, 0, _viewportWidth, _viewportHeight),
         _inverseViewTransform);
-    _visibleItems.clear();
+    _drawPasses.clear();
     visTree.query(viewAABB, (int proxyId, StageItem item) {
       if (item.isVisible) {
-        _visibleItems.add(item);
+        item.drawPasses.forEach(_drawPasses.add);
       }
       return true;
     });
@@ -1012,22 +1011,23 @@ class Stage extends Debouncer {
     canvas.transform(viewTransform.mat4);
     bool inWorldSpace = true;
 
-    _visibleItems.add(tool);
-    _visibleItems
-        .sort((StageDrawable a, StageDrawable b) => a.drawOrder - b.drawOrder);
+    _drawPasses.addAll(tool.drawPasses);
 
-    for (final item in _visibleItems) {
+    _drawPasses
+        .sort((StageDrawPass a, StageDrawPass b) => a.order - b.order);
+
+    for (final pass in _drawPasses) {
       // Some items may not draw in world space. Change between world and screen
       // as requested by the drawable. We can't batch here as drawables of
       // different space types might be interleaved at different draw orders.
-      if (inWorldSpace != item.drawsInWorldSpace) {
-        if (inWorldSpace = item.drawsInWorldSpace) {
+      if (inWorldSpace != pass.inWorldSpace) {
+        if (inWorldSpace = pass.inWorldSpace) {
           canvas.transform(viewTransform.mat4);
         } else {
           canvas.restore();
         }
       }
-      item.draw(canvas);
+      pass.draw(canvas);
     }
 
     if (inWorldSpace) {

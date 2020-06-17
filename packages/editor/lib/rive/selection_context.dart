@@ -47,6 +47,7 @@ class SelectionContext<T extends SelectableItem> extends ChangeNotifier {
   bool deselect(T item) {
     assert(item != null);
     if (_items.remove(item)) {
+      item.isSelected = false;
       // TODO: maybe debouce when removing a lot of items, or provide a {bool
       // notify} and track when to notify at a higher level.
       notifyListeners();

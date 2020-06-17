@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
@@ -41,7 +42,8 @@ class StageGradientStop extends StageItem<GradientStop> {
   bool isAutomatic(Stage stage) => false;
 
   @override
-  int get drawOrder => 3;
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 3, inWorldSpace: true)];
 
   @override
   void addedToStage(Stage stage) {
@@ -82,7 +84,7 @@ class StageGradientStop extends StageItem<GradientStop> {
   }
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     var zoom = stage.viewZoom;
     border.strokeWidth = 3 / zoom;
     line.strokeWidth = 1 / zoom;

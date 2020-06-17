@@ -7,6 +7,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 import '../stage.dart';
@@ -49,7 +50,8 @@ class StageCursor extends StageItem<ClientSidePlayer>
   bool get isSelectable => false;
 
   @override
-  int get drawOrder => 2;
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 2, inWorldSpace: true)];
 
   @override
   bool initialize(ClientSidePlayer object) {
@@ -126,7 +128,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
   }
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass pass) {
     if (_cursorImage == null) {
       return;
     }

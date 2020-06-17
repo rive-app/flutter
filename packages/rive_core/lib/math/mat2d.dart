@@ -178,6 +178,12 @@ class Mat2D {
     s[1] = y.sign * sqrt(x * x + y * y);
   }
 
+  static Vec2D getTranslation(Mat2D m, Vec2D t) {
+    t[0] = m[4];
+    t[1] = m[5];
+    return t;
+  }
+
   static void identity(Mat2D mat) {
     mat[0] = 1.0;
     mat[1] = 0.0;
