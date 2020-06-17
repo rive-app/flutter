@@ -5,14 +5,14 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
+import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_api/stripe.dart';
 import 'package:rive_api/teams.dart';
 import 'package:utilities/utilities.dart';
 
 /// Billing policy URL
-const billingPolicyUrl =
-    'https://help.rive.app/pricing/fair-billing-policy';
+const billingPolicyUrl = 'https://help.rive.app/pricing/fair-billing-policy';
 
 const premiumYearlyCost = 45;
 const basicYearlyCost = 14;
@@ -91,6 +91,9 @@ abstract class SubscriptionPackage with ChangeNotifier {
     _zip = value;
     notifyListeners();
   }
+
+  bool _isCanceled;
+  bool get isCanceled => _isCanceled;
 
   /// Validate the team options
   bool get isOptionValid => _option != null;
@@ -188,6 +191,7 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   /// The team data.
   final Team team;
 
+  // The current cost of this plan as it's been downloaded from the backend.
   int _currentCost;
   int get currentCost => _currentCost;
 
@@ -202,17 +206,25 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     notifyListeners();
   }
 
-  bool get _isCardInfoValid =>
-      isCardNrValid && isCcvValid && isExpirationValid && isZipValid;
-
   bool get isChanging => costDifference != 0;
   int get costDifference => calculatedCost - currentCost;
 
   String _cardDescription;
   String get cardDescription => _cardDescription;
 
-  String _nextDue;
-  String get nextDue => _nextDue;
+  DateTime _nextDue;
+  DateTime get nextDue => _nextDue;
+  set nextDue(DateTime value) {
+    if (value != _nextDue) {
+      _nextDue = value;
+      notifyListeners();
+    }
+  }
+
+  bool get isActive => _nextDue.isAfter(DateTime.now());
+
+  String _nextDueDescription;
+  String get nextDueDescription => _nextDueDescription;
 
   void setDescriptions(RiveTeamBilling billing) {
     var newDescription = billing.brand == null
@@ -224,11 +236,9 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
       notifyListeners();
     }
 
-    var newDue = billing.brand == null
-        ? 'n/a'
-        : '${billing.nextMonth} ${billing.nextDay}, ${billing.nextYear}';
-    if (_nextDue != newDue) {
-      _nextDue = newDue;
+    var newDue = billing.brand == null ? 'n/a' : '${_nextDue.description}';
+    if (_nextDueDescription != newDue) {
+      _nextDueDescription = newDue;
       notifyListeners();
     }
   }
@@ -251,7 +261,11 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
       ..api = api
       ..option = billing.plan
       ..billing = billing.frequency
-      .._teamSize = collaborators.length
+      ..nextDue = billing.nextDue
+      .._isCanceled = billing.isCanceled
+      .._teamSize = collaborators
+          .where((element) => element.status == TeamInviteStatus.accepted)
+          .length
       ..setDescriptions(billing);
 
     subscription._currentCost = subscription.calculatedCost;
@@ -265,6 +279,18 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
       _currentCost = calculatedCost;
       notifyListeners();
     }
+    return res;
+  }
+
+  Future<bool> renewPlan(bool renew) async {
+    if (processing) {
+      return false;
+    }
+    processing = true;
+
+    var res = await RiveTeamsApi(api).renewPlan(team.ownerId, renew);
+
+    processing = false;
     return res;
   }
 
@@ -336,6 +362,14 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     }
 
     return success;
+  }
+
+  Future<bool> sendFeedback(String feedback, String notes) async {
+    processing = true;
+    await RiveTeamsApi(api)
+        .sendFeedback(team.ownerId, feedback, notes);
+    processing = false;
+    return true;
   }
 }
 

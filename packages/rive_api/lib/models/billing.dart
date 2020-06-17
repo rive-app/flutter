@@ -41,50 +41,53 @@ extension FrequencyExtension on BillingFrequency {
   }
 }
 
-  /// Represents the Billing information for a team:
-  
-  
+/// Represents the Billing information for a team:
+
 class RiveTeamBilling {
   const RiveTeamBilling._({
     this.plan,
     this.frequency,
+    this.isCanceled,
     this.brand,
     this.lastFour,
     this.expiryMonth,
     this.expiryYear,
-    this.nextDay,
-    this.nextMonth,
-    this.nextYear,
+    this.nextDue,
   });
-
 
   /// - plan type: {studio | org}
   final TeamsOption plan;
+
   /// - billing cycle: {monthly | yearly}
   final BillingFrequency frequency;
+
+  /// - plan has been canceled:
+  ///   it will not renew at the end of the next billing cycle
+  final bool isCanceled;
+
   /// - Card brand
   final String brand;
+
   /// - Card last 4 digits
   final String lastFour;
+
   /// - Card expiry date
   final String expiryMonth;
   final String expiryYear;
+
   /// - Plan next payment date
-  final String nextDay;
-  final String nextMonth;
-  final String nextYear;
+  final DateTime nextDue;
 
   factory RiveTeamBilling.fromData(Map<String, Object> data) {
     return RiveTeamBilling._(
       plan: data.getPlan(),
       frequency: data.getFrequency(),
+      isCanceled: data.getBool('isCanceled'),
       brand: data.getString('brand'),
       lastFour: data.getString('last4'),
       expiryMonth: data.getString('expMonth'),
       expiryYear: data.getString('expYear'),
-      nextDay: data.getString('nextDay'),
-      nextMonth: data.getString('nextMonth'),
-      nextYear: data.getString('nextYear'),
+      nextDue: DateTime.parse(data.getString('nextDue')),
     );
   }
 

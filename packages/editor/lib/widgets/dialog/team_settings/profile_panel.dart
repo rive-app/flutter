@@ -267,7 +267,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
   List<Widget> get _forHire {
     return [
-      LabeledRadio(
+      DescriptionRadio(
         label: 'Available For Hire',
         description: 'Allow other users to message you about work'
             ' opportunities. You will also show up in our'
@@ -281,7 +281,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
         },
       ),
       const SizedBox(height: 24),
-      LabeledRadio(
+      DescriptionRadio(
         label: 'Not Available For Hire',
         description: "Don't allow other users to contact you about"
             ' work opportunities.',
@@ -421,14 +421,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   }
 }
 
-class LabeledRadio extends StatelessWidget {
+class DescriptionRadio extends StatelessWidget {
   final String label;
   final String description;
   final bool groupValue;
   final bool value;
   final ValueChanged<bool> onChanged;
 
-  const LabeledRadio({
+  const DescriptionRadio({
     @required this.label,
     @required this.groupValue,
     @required this.onChanged,
