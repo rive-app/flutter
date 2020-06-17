@@ -5,7 +5,6 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_editor/packed_icon.dart';
-import 'package:rive_editor/utils.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/rive_text_field.dart';
@@ -18,6 +17,7 @@ import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:utilities/utilities.dart';
 
 typedef void BoolCallback(bool flag);
 
@@ -76,6 +76,12 @@ class _PlanState extends State<PlanSettings>
     }
   }
 
+  Future<void> _onTeamRenew(bool renew) async {
+    if (await _plan.renewPlan(renew)) {
+      // TODO: finish this.
+    }
+  }
+
   void _toggleController() {
     if (isBasic) {
       _controller.forward();
@@ -86,8 +92,8 @@ class _PlanState extends State<PlanSettings>
 
   @override
   void dispose() {
-    _plan.dispose(); // Cleans up listeners.
-    _controller.dispose();
+    _plan?.dispose(); // Cleans up listeners.
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -106,6 +112,10 @@ class _PlanState extends State<PlanSettings>
       children: [
         SettingsPanelSection(
           label: 'Plan',
+          labelExtra: _plan.isCanceled ? ' (canceled)' : null,
+          subLabel:
+              _plan.isActive ? 'Expires ${_plan.nextDueDescription}' : null,
+          secondaryColor: colors.accentMagenta,
           contents: (panelCtx) {
             return Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -130,10 +140,11 @@ class _PlanState extends State<PlanSettings>
                       ),
                     ),
                     const Spacer(),
-                    UnderlineTextButton(
-                      text: 'Cancel Plan',
-                      onPressed: () {/** TODO: cancel plan */},
-                    ),
+                    if (!_plan.isCanceled)
+                      UnderlineTextButton(
+                        text: 'Cancel Plan',
+                        onPressed: () => _onTeamRenew(false),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -148,7 +159,7 @@ class _PlanState extends State<PlanSettings>
                       child: Row(
                         children: [
                           SubscriptionChoice(
-                            label: 'Team',
+                            label: 'Studio',
                             costLabel: '${labelLookup[TeamsOption.basic]}',
                             description: 'Create a space where you and '
                                 'your team can share files.',
@@ -160,7 +171,7 @@ class _PlanState extends State<PlanSettings>
                           const SizedBox(width: 30),
                           SubscriptionChoice(
                             label: 'Org',
-                            disabled: true,
+                            // disabled: true,
                             costLabel: '${labelLookup[TeamsOption.premium]}',
                             description: ''
                                 'Create sub-teams with centralized '
@@ -200,7 +211,10 @@ class _PlanState extends State<PlanSettings>
         const SizedBox(height: 30),
         BillCalculator(
           plan: _plan,
-          onBillChanged: _onBillChanged,
+          onBillChanged: _plan.isCanceled
+              // The button in the widget will reactivate the widget.
+              ? () => _onTeamRenew(true)
+              : _onBillChanged,
           updatingCC: !_usingSavedCC,
         ),
       ],
@@ -239,15 +253,11 @@ class _BillState extends State<BillCalculator> {
 
   @override
   void dispose() {
-    widget.plan.removeListener(_handleProcessing);
+    widget.plan?.removeListener(_handleProcessing);
     super.dispose();
   }
 
   void _handleProcessing() {
-    if (_processingPayment == widget.plan.processing) {
-      return;
-    }
-
     setState(() {
       _processingPayment = widget.plan.processing;
     });
@@ -259,7 +269,7 @@ class _BillState extends State<BillCalculator> {
         children: [
           TextSpan(text: 'Starting ', style: light),
           TextSpan(
-            text: widget.plan.nextDue,
+            text: widget.plan.nextDueDescription,
             style: dark.copyWith(fontFamily: 'Roboto-Regular'),
           ),
           TextSpan(text: ' your will be billed monthly', style: light)
@@ -425,24 +435,158 @@ class _BillState extends State<BillCalculator> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (widget.plan?.currentCost == null) {
-      return const SizedBox();
-    }
-    final diff = widget.plan.costDifference;
+  Widget _canceledPlanDue() {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
+    final darkGreyText = textStyles.notificationTitle.copyWith(height: 1.6);
 
-    return SettingsPanelSection(
-      label: 'Bill',
-      contents: (ctx) => Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+    if (widget.plan.isActive) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          if (diff == 0) _yearlyBill(),
-          if (diff > 0) ..._debit(),
-          if (diff < 0) ..._credit(),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${billingPlan.name.capsFirst} plan',
+                style: lightGreyText,
+              ),
+              Text(
+                'Due now',
+                style: lightGreyText,
+              )
+            ],
+          ),
+          const SizedBox(width: 10),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '\$${widget.plan.calculatedCost}',
+                style: darkGreyText,
+              ),
+              Padding(
+                // Align baseline
+                padding: const EdgeInsets.only(bottom: 1),
+                child: Text('\$0', style: darkGreyText),
+              )
+            ],
+          ),
+        ],
+      );
+    } else {
+      return RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '${billingPlan.name.capsFirst} bill\t',
+              style: lightGreyText,
+            ),
+            TextSpan(
+              text: '\$${widget.plan?.currentCost ?? '-'}',
+              style: darkGreyText,
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  List<Widget> _renewCanceled() {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+    final plan = widget.plan;
+    final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
+
+    return [
+      RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: 'Your plan is canceled, but you can re-activate this team '
+                  'and pick up where you left off!',
+              style: lightGreyText,
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 14),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          TintedIcon(
+            icon: PackedIcon.calendar,
+            color: colors.commonButtonTextColor,
+          ),
+          const SizedBox(width: 10),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                    text: 'Plan start date: ',
+                    style: textStyles.hierarchyTabHovered
+                        .copyWith(fontSize: 13, height: 1.4)),
+                TextSpan(
+                  text: plan.isActive
+                      ? plan.nextDueDescription
+                      : DateTime.now().description,
+                  style: textStyles.fileGreyTextLarge.copyWith(
+                    fontSize: 13,
+                    height: 1.15,
+                  ),
+                ),
+              ],
+            ),
+          )
         ],
       ),
-    );
+      const SizedBox(height: 11),
+      _canceledPlanDue(),
+      const SizedBox(height: 30),
+      FlatIconButton(
+        label: plan.isActive ? 'Re-activate' : 'Re-activate and pay now',
+        color:
+            _processingPayment ? colors.commonLightGrey : colors.commonDarkGrey,
+        textColor: Colors.white,
+        onTap: widget.onBillChanged,
+        elevation: _processingPayment ? 0 : 8,
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = widget.plan;
+    if (plan?.currentCost == null) {
+      return const SizedBox();
+    }
+    final diff = plan.costDifference;
+
+    if (plan.isCanceled) {
+      return SettingsPanelSection(
+        label: 'Re-activate',
+        contents: (ctx) => Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: _renewCanceled(),
+        ),
+      );
+    } else {
+      return SettingsPanelSection(
+        label: plan.isCanceled ? 'Re-activate' : 'Bill',
+        contents: (ctx) => Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (diff == 0) _yearlyBill(),
+            if (diff > 0) ..._debit(),
+            if (diff < 0) ..._credit(),
+          ],
+        ),
+      );
+    }
   }
 }
 
@@ -477,19 +621,20 @@ class _MethodState extends State<PaymentMethod> {
 
   void _onCardChange() {
     var sub = widget.plan;
-    if (_cardDescription == sub.cardDescription && _nextDue == sub.nextDue) {
+    if (_cardDescription == sub.cardDescription &&
+        _nextDue == sub.nextDueDescription) {
       return;
     }
 
     setState(() {
       _cardDescription = sub.cardDescription;
-      _nextDue = sub.nextDue;
+      _nextDue = sub.nextDueDescription;
     });
   }
 
   @override
   void dispose() {
-    widget.plan.removeListener(_onCardChange);
+    widget.plan?.removeListener(_onCardChange);
     super.dispose();
   }
 
@@ -497,9 +642,7 @@ class _MethodState extends State<PaymentMethod> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        TintedIcon(
-            icon: PackedIcon.calendar,
-            color: iconColor),
+        TintedIcon(icon: PackedIcon.calendar, color: iconColor),
         const SizedBox(width: 10),
         RichText(
           text: TextSpan(
@@ -548,8 +691,10 @@ class _MethodState extends State<PaymentMethod> {
             ),
           ],
         ),
-        const SizedBox(height: 15),
-        _nextPayment(colors.commonButtonTextColor, styles)
+        if (!widget.plan.isCanceled) ...[
+          const SizedBox(height: 15),
+          _nextPayment(colors.commonButtonTextColor, styles)
+        ]
       ],
     );
   }
@@ -567,8 +712,10 @@ class _MethodState extends State<PaymentMethod> {
                       ? null
                       : () => widget.onUseSaved(true),
                 )),
-        const SizedBox(height: 30),
-        _nextPayment(colors.commonButtonTextColor, styles)
+        if (!widget.plan.isCanceled) ...[
+          const SizedBox(height: 30),
+          _nextPayment(colors.commonButtonTextColor, styles)
+        ]
       ],
     );
   }

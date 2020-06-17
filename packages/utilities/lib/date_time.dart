@@ -30,4 +30,40 @@ extension DateExtensions on DateTime {
       return pluralize(durationElapsed.inDays ~/ 365, 'year');
     }
   }
+
+  String get shortMonthName {
+    switch (month) {
+      case 1:
+        return 'Jan';
+      case 2:
+        return 'Feb';
+      case 3:
+        return 'Mar';
+      case 4:
+        return 'Apr';
+      case 5:
+        return 'May';
+      case 6:
+        return 'Jun';
+      case 7:
+        return 'Jul';
+      case 8:
+        return 'Aug';
+      case 9:
+        return 'Sep';
+      case 10:
+        return 'Oct';
+      case 11:
+        return 'Nov';
+      case 12:
+        return 'Dec';
+      default:
+        throw RangeError("Month out of range [1..12]: $month");
+    }
+  }
+
+  // Returns a description of this date in the format "MMM D, YYYY"
+  // e.g. Sep 26, 1989
+  String get description => '$shortMonthName $day, $year';
+
 }

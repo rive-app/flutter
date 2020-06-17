@@ -83,8 +83,9 @@ class RiveTeamsApi<T extends RiveTeam> {
   }
 
   /// Retrieves for the team w/ [teamId]:
-  /// - plan type ()
+  /// - plan type (studio/org)
   /// - billing cycle (monthly/yearly)
+  /// - is plan canceled
   /// - CC brand
   /// - CC last 4 digits
   /// - CC expiry
@@ -173,6 +174,24 @@ class RiveTeamsApi<T extends RiveTeam> {
     } on ApiException catch (apiException) {
       final response = apiException.response;
       var message = 'Could not create new team ${response.body}';
+      log.severe(message);
+      return false;
+    }
+  }
+
+  /// PUT /api/teams/:team_owner_id/renew
+  /// If [renew] is [false] the plan will be canceled.
+  /// Otherwise it'll be set for renewal.
+  Future<bool> renewPlan(int teamId, bool renew) async {
+    try {
+      String payload = jsonEncode({
+        'renew': renew
+      });
+      await api.put('${api.host}/api/teams/$teamId/renew', body: payload);
+      return true;
+    } on ApiException catch(apiException) {
+      final response = apiException.response;
+      var message = '[Error] renewPlan()\n${response.body}';
       log.severe(message);
       return false;
     }
