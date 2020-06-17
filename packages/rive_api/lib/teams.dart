@@ -98,11 +98,17 @@ class RiveTeamsApi<T extends RiveTeam> {
 
   Future<bool> updatePlan(
       int teamId, TeamsOption plan, BillingFrequency frequency) async {
-    String payload = jsonEncode({
-      'data': {'billingPlan': plan.name, 'billingCycle': frequency.name}
-    });
-    await api.put(api.host + '/api/teams/$teamId/billing', body: payload);
-    return true;
+    try {
+      String payload = jsonEncode({
+        'data': {'billingPlan': plan.name, 'billingCycle': frequency.name}
+      });
+      await api.put(api.host + '/api/teams/$teamId/billing', body: payload);
+      return true;
+    } on ApiException catch (err) {
+      var response = err.response;
+      log.severe('[Error] updatePlan()\n${response.body}');
+      return false;
+    }
   }
 
   Future<String> uploadAvatar(int teamId, String localUrl) async {
@@ -184,12 +190,10 @@ class RiveTeamsApi<T extends RiveTeam> {
   /// Otherwise it'll be set for renewal.
   Future<bool> renewPlan(int teamId, bool renew) async {
     try {
-      String payload = jsonEncode({
-        'renew': renew
-      });
-      await api.put('${api.host}/api/teams/$teamId/renew', body: payload);
+      String payload = jsonEncode({'renew': renew});
+      await api.patch('${api.host}/api/teams/$teamId/renew', body: payload);
       return true;
-    } on ApiException catch(apiException) {
+    } on ApiException catch (apiException) {
       final response = apiException.response;
       var message = '[Error] renewPlan()\n${response.body}';
       log.severe(message);

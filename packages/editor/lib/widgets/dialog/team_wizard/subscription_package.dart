@@ -191,7 +191,9 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   /// The team data.
   final Team team;
 
-  int get currentCost => calculatedCost;
+  // The current cost of this plan as it's been downloaded from the backend.
+  int _currentCost;
+  int get currentCost => _currentCost;
 
   int _teamSize;
   @override
@@ -266,12 +268,15 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
           .length
       ..setDescriptions(billing);
 
+    subscription._currentCost = subscription.calculatedCost;
+
     return subscription;
   }
 
   Future<bool> _updatePlan() async {
     var res = await RiveTeamsApi(api).updatePlan(team.ownerId, option, billing);
     if (res) {
+      _currentCost = calculatedCost;
       notifyListeners();
     }
     return res;

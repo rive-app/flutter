@@ -106,15 +106,18 @@ class _PlanState extends State<PlanSettings>
     final colors = theme.colors;
     final textStyles = theme.textStyles;
     final labelLookup = costLookup[_plan?.billing];
+    final isPlanCanceled = _plan.isCanceled;
+
     return ListView(
       padding: const EdgeInsets.all(30),
       physics: const ClampingScrollPhysics(),
       children: [
         SettingsPanelSection(
           label: 'Plan',
-          labelExtra: _plan.isCanceled ? ' (canceled)' : null,
-          subLabel:
-              _plan.isActive ? 'Expires ${_plan.nextDueDescription}' : null,
+          labelExtra: isPlanCanceled ? ' (canceled)' : null,
+          subLabel: (isPlanCanceled && _plan.isActive)
+              ? 'Expires ${_plan.nextDueDescription}'
+              : null,
           secondaryColor: colors.accentMagenta,
           contents: (panelCtx) {
             return Column(
@@ -130,17 +133,19 @@ class _PlanState extends State<PlanSettings>
                       child: ComboBox<BillingFrequency>(
                         popupWidth: 100,
                         sizing: ComboSizing.content,
-                        underline: true,
+                        underline: !isPlanCanceled,
+                        chevron: !isPlanCanceled,
                         underlineColor: colors.inputUnderline,
                         valueColor: textStyles.fileGreyTextLarge.color,
                         options: BillingFrequency.values,
                         value: _plan?.billing ?? BillingFrequency.monthly,
                         toLabel: (option) => describeEnum(option).capsFirst,
                         change: (billing) => _plan.billing = billing,
+                        disabled: isPlanCanceled,
                       ),
                     ),
                     const Spacer(),
-                    if (!_plan.isCanceled)
+                    if (!isPlanCanceled)
                       UnderlineTextButton(
                         text: 'Cancel Plan',
                         onPressed: () => _onTeamRenew(false),
@@ -171,7 +176,7 @@ class _PlanState extends State<PlanSettings>
                           const SizedBox(width: 30),
                           SubscriptionChoice(
                             label: 'Org',
-                            // disabled: true,
+                            disabled: true,
                             costLabel: '${labelLookup[TeamsOption.premium]}',
                             description: ''
                                 'Create sub-teams with centralized '
@@ -211,7 +216,7 @@ class _PlanState extends State<PlanSettings>
         const SizedBox(height: 30),
         BillCalculator(
           plan: _plan,
-          onBillChanged: _plan.isCanceled
+          onBillChanged: isPlanCanceled
               // The button in the widget will reactivate the widget.
               ? () => _onTeamRenew(true)
               : _onBillChanged,
@@ -527,7 +532,9 @@ class _BillState extends State<BillCalculator> {
             text: TextSpan(
               children: [
                 TextSpan(
-                    text: 'Plan start date: ',
+                    text: plan.isActive
+                        ? 'Next payment due: '
+                        : 'Plan start date: ',
                     style: textStyles.hierarchyTabHovered
                         .copyWith(fontSize: 13, height: 1.4)),
                 TextSpan(
