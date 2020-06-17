@@ -365,9 +365,9 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   }
 
   Future<bool> sendFeedback(String feedback, String notes) async {
-    // TODO:
     processing = true;
-    await RiveTeamsApi(api).sendFeedback(feedback, notes);
+    await RiveTeamsApi(api)
+        .sendFeedback(team.ownerId, feedback, notes);
     processing = false;
     return true;
   }

@@ -20,6 +20,7 @@ import 'package:rive_editor/widgets/dialog/team_wizard/subscription_package.dart
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:utilities/utilities.dart';
 
 typedef void BoolCallback(bool flag);
@@ -39,36 +40,38 @@ class _PlanState extends State<PlanSettings>
   AnimationController _controller;
   bool _usingSavedCC = true;
   // Flag to activate the flow for canceling the current plan:
-  // https://www.figma.com/file/nlGengoVlxjmxLwAfWOUoU/Rive-App?node-id=11146%3A304
-  bool _cancelFlow = true;
+  bool _cancelFlow = false;
 
   bool get isBasic => _plan?.option == TeamsOption.basic;
   bool get isPremium => _plan?.option == TeamsOption.premium;
 
   @override
   void initState() {
-    // Fetch current team billing data from the backend.
-    PlanSubscriptionPackage.fetchData(widget.api, widget.team).then(
-      (value) => setState(
-        () {
-          _plan = value;
-          _controller.value = _plan.option == TeamsOption.basic ? 1 : 0;
-
-          // // Toggle upon receiving the new value.
-          // _toggleController();
-
-          // Listen for upcoming changes.
-          _plan.addListener(_onSubChange);
-        },
-      ),
-    );
-
+    _refreshData();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
 
     super.initState();
+  }
+
+  void _refreshData() {
+    // Fetch current team billing data from the backend.
+    PlanSubscriptionPackage.fetchData(widget.api, widget.team).then(
+      (value) => setState(
+        () {
+          var oldPlan = _plan;
+          _plan = value;
+          _controller.value = _plan.option == TeamsOption.basic ? 1 : 0;
+
+          // Toggle upon receiving the new value.
+          // _toggleController();
+          _plan.addListener(_onSubChange);
+          oldPlan?.dispose();
+        },
+      ),
+    );
   }
 
   void _onSubChange() => setState(_toggleController);
@@ -106,7 +109,12 @@ class _PlanState extends State<PlanSettings>
     if (_cancelFlow) {
       return _CancelPlan(
         plan: _plan,
-        onDone: () => setState(() {
+        onDone: (didChange) => setState(() {
+          if (didChange) {
+            _plan?.dispose();
+            _plan = null;
+            _refreshData();
+          }
           _cancelFlow = false;
         }),
       );
@@ -229,7 +237,11 @@ class _PlanState extends State<PlanSettings>
             plan: _plan,
             onBillChanged: isPlanCanceled
                 // The button in the widget will reactivate the widget.
-                ? () => _plan.renewPlan(true)
+                ? () async {
+                    if (await _plan.renewPlan(true)) {
+                      _refreshData();
+                    }
+                  }
                 : _onBillChanged,
             updatingCC: !_usingSavedCC,
           ),
@@ -891,7 +903,7 @@ class CreditCardForm extends StatelessWidget {
   }
 }
 
-enum _CancelFlow { cancelling, canceled }
+enum _CancelFlow { canceling, canceled }
 enum _Feedback { features, ux, support, runtimes, bugs, expensive }
 
 extension _FeedbackNames on _Feedback {
@@ -912,15 +924,14 @@ class _CancelPlan extends StatefulWidget {
   });
 
   final PlanSubscriptionPackage plan;
-  final VoidCallback onDone;
+  final ValueChanged<bool> onDone;
 
   @override
   State<StatefulWidget> createState() => _CancelPlanState();
 }
 
 class _CancelPlanState extends State<_CancelPlan> {
-  // TODO: restore
-  _CancelFlow _flow = _CancelFlow.canceled;
+  _CancelFlow _flow = _CancelFlow.canceling;
   _Feedback _feedback;
   TapGestureRecognizer _noteRecognizer;
   TextEditingController _feedbackController;
@@ -940,9 +951,11 @@ class _CancelPlanState extends State<_CancelPlan> {
     super.dispose();
   }
 
-  void _dropNote() {
-    // TODO: mailto:
-    // https://stackoverflow.com/questions/50622947/flutter-sending-form-data-to-email
+  Future<void> _dropNote() async {
+    const url = 'mailto:hello@rive.app';
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
   }
 
   void _onFeedbackChanged(_Feedback value) {
@@ -963,7 +976,7 @@ class _CancelPlanState extends State<_CancelPlan> {
   Future<void> _sendFeedback() async {
     if (await widget.plan
         .sendFeedback(_feedback.name, _feedbackController.text)) {
-      widget.onDone();
+      widget.onDone(true);
     }
   }
 
@@ -1006,7 +1019,7 @@ class _CancelPlanState extends State<_CancelPlan> {
                 color: colors.textButtonLight,
                 hoverColor: colors.textButtonLightHover,
                 textColor: colors.buttonLightText,
-                onTap: widget.onDone,
+                onTap: () => widget.onDone(false),
                 mainAxisAlignment: MainAxisAlignment.center,
               ),
             ),
@@ -1070,7 +1083,7 @@ class _CancelPlanState extends State<_CancelPlan> {
                 color: colors.textButtonLight,
                 hoverColor: colors.textButtonLightHover,
                 textColor: colors.buttonLightText,
-                onTap: widget.onDone,
+                onTap: () => widget.onDone(true),
                 mainAxisAlignment: MainAxisAlignment.center,
               ),
             ),
@@ -1078,11 +1091,11 @@ class _CancelPlanState extends State<_CancelPlan> {
             Expanded(
               child: FlatIconButton(
                 label: 'Send Feedback',
-                color: plan.processing
+                color: plan.processing || _feedback == null
                     ? colors.buttonDarkDisabled
                     : colors.textButtonDark,
                 textColor: Colors.white,
-                onTap: _sendFeedback,
+                onTap: _feedback == null ? null : _sendFeedback,
                 elevation: plan.processing ? 0 : 8,
                 mainAxisAlignment: MainAxisAlignment.center,
               ),
@@ -1094,7 +1107,7 @@ class _CancelPlanState extends State<_CancelPlan> {
   }
 
   Widget _contents() {
-    if (_flow == _CancelFlow.cancelling) {
+    if (_flow == _CancelFlow.canceling) {
       return SettingsPanelSection(
         label: 'Are you sure you want to cancel?',
         contents: _areYouSure,
