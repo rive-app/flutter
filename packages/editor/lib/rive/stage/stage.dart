@@ -1027,7 +1027,7 @@ class Stage extends Debouncer {
           canvas.restore();
         }
       }
-      pass.draw(canvas);
+      pass.draw(canvas, pass);
     }
 
     if (inWorldSpace) {

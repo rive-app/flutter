@@ -38,7 +38,7 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 4, inWorldSpace: true)];
+      [StageDrawPass(draw, order: 4, inWorldSpace: true)];
 
   // Stage vertices don't get automatically added to the stage. They only get
   // added when the path owning them is edited.

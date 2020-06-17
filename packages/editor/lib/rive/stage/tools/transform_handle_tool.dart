@@ -31,6 +31,7 @@ abstract class TransformHandleTool extends StageTool
     _selectionContext = stage.file.selection;
     _selectionContext.addListener(_selectionChanged);
     stage.addSelectionHandler(_handleStageSelection);
+    _selectionChanged();
     return true;
   }
 

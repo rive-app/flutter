@@ -141,7 +141,7 @@ class StagePathControlLine extends StageItem<CubicVertex> {
 
     @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 3, inWorldSpace: true)];
+      [StageDrawPass(draw, order: 3, inWorldSpace: true)];
 
   @override
   AABB get aabb => AABB.fromPoints([

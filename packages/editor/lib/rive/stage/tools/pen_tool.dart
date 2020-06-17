@@ -57,7 +57,7 @@ abstract class PenTool<T extends Component> extends StageTool {
   // Draw after most stage content, but before vertices.
   @override
   Iterable<StageDrawPass> get drawPasses => [
-        StageDrawPass(this, order: 2, inWorldSpace: false),
+        StageDrawPass(draw, order: 2, inWorldSpace: false),
       ];
 
   @override

@@ -222,7 +222,7 @@ abstract class StageItem<T> extends SelectableItem
   @override
   Iterable<StageDrawPass> get drawPasses => [
         StageDrawPass(
-          this,
+          draw,
           inWorldSpace: true,
           order: 1,
         )
