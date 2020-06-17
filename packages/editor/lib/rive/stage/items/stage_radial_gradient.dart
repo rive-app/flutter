@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_editor/rive/stage/items/stage_gradient.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 
 /// Concrete radial version of the stage gradient.
 class StageRadialGradient extends StageGradient<core.RadialGradient> {
@@ -11,8 +12,8 @@ class StageRadialGradient extends StageGradient<core.RadialGradient> {
     ..color = const Color(0x80FFFFFF);
 
   @override
-  void draw(Canvas canvas) {
-    super.draw(canvas);
+  void draw(Canvas canvas, StageDrawPass drawPass) {
+    super.draw(canvas, drawPass);
     // StageGradient.border.strokeWidth = 3 / stage.viewZoom;
     line.strokeWidth = 1 / stage.viewZoom;
 

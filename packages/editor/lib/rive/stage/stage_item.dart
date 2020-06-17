@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,37 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 
 import 'stage.dart';
+
+/// Object Bounding Box is an AABB in a specific transform space. This can be
+/// used to find more precise AABB for stageItems. Not required to be
+/// implemented but will help certain tools be more precise, and will allow
+/// selection bounds to be drawn against this more precise box.
+class OBB {
+  final AABB bounds;
+  final Mat2D transform;
+  final Float32List poly = Float32List(8);
+  OBB({
+    this.bounds,
+    this.transform,
+  }) {
+    var min = bounds.minimum;
+    var max = bounds.maximum;
+
+    var temp = Vec2D();
+    Vec2D.transformMat2D(temp, Vec2D.fromValues(min[0], min[1]), transform);
+    poly[0] = temp[0];
+    poly[1] = temp[1];
+    Vec2D.transformMat2D(temp, Vec2D.fromValues(max[0], min[1]), transform);
+    poly[2] = temp[0];
+    poly[3] = temp[1];
+    Vec2D.transformMat2D(temp, Vec2D.fromValues(max[0], max[1]), transform);
+    poly[4] = temp[0];
+    poly[5] = temp[1];
+    Vec2D.transformMat2D(temp, Vec2D.fromValues(min[0], max[1]), transform);
+    poly[6] = temp[0];
+    poly[7] = temp[1];
+  }
+}
 
 /// A helper extension to interpret the Component's userData as a StageItem. We
 /// do this so that we can leave the userData as an abstract field for
@@ -39,6 +71,9 @@ abstract class StageItem<T> extends SelectableItem
   /// The desired screen space stroke width for a selected StageItem.
   static const double strokeWidth = 2;
 
+  /// The desired screen space stroke width for the bounds of a StageItem.
+  static const double boundsStrokeWidth = 1;
+
   // Override this if you don't want this item to show up in the hierarchy tree.
   bool get showInHierarchy => true;
 
@@ -50,6 +85,11 @@ abstract class StageItem<T> extends SelectableItem
   static Paint selectedPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth
+    ..color = const Color(0xFF57A5E0);
+
+  static Paint boundsPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = boundsStrokeWidth
     ..color = const Color(0xFF57A5E0);
 
   static Paint backboardContrastPaint = Paint()
@@ -64,17 +104,6 @@ abstract class StageItem<T> extends SelectableItem
   /// Some StageItems can define a solo parent that makes them selectable during
   /// solo if their parent is soloed.
   StageItem get soloParent => null;
-
-  /// StageItems are sorted by [drawOrder] before being drawn. This allows
-  /// specific classification of items to draw before/after others. For example,
-  /// transform handles should always draw after other content.
-  @override
-  int get drawOrder => 1;
-
-  @override
-  bool get drawsInWorldSpace => true;
-
-  int compareDrawOrderTo(StageItem other) => drawOrder - other.drawOrder;
 
   /// Whether the system automatically handles adding and removing this item
   /// to/from the stage. Most [Component]s want the system to automatically add
@@ -96,7 +125,7 @@ abstract class StageItem<T> extends SelectableItem
   /// re-direct selection so we use this indirection to allow for that.
   ///
   /// ignore: avoid_returning_this
-  StageItem get hoverTarget => this;
+  StageItem get selectionTarget => this;
 
   /// Usually an item's inspector target is itself, sometimes some items want to
   /// re-direct the inspector so we use this indirection to allow for that.
@@ -113,8 +142,20 @@ abstract class StageItem<T> extends SelectableItem
   /// removed from the stage.
   bool get isVisible => true;
 
-  /// Override this to prevent this item from being clicked on.
+  /// Override this to prevent this item from being selected in any capacity.
   bool get isSelectable => isVisible;
+
+  /// Override this to prevent this item from being clicked on.
+  bool get isHoverSelectable => isSelectable;
+
+  /// Use this to determine priority when both items are hovered.
+  int compareDrawOrderTo(StageItem other) => drawOrder - other.drawOrder;
+
+  /// Draw order inferred from the drawpasses. This assumes the first item in
+  /// the drawPasses list is the "primary" one. So if you register multiple draw
+  /// passes, make sure your most important/top layer is registered first and
+  /// shadows/etc are registered second (with lower drawOrder if necessary).
+  int get drawOrder => drawPasses.first.order;
 
   // ignore: use_setters_to_change_properties
   /// Invoked whenever the item has been added to the stage. This is usually
@@ -165,6 +206,8 @@ abstract class StageItem<T> extends SelectableItem
 
   AABB _aabb = AABB();
 
+  /// Get the cached AABB for this stage item. StageItems are responsible for
+  /// updating this as necessary.
   AABB get aabb => _aabb;
   set aabb(AABB value) {
     if (AABB.areEqual(value, _aabb)) {
@@ -174,11 +217,57 @@ abstract class StageItem<T> extends SelectableItem
     stage?.updateBounds(this);
   }
 
+  OBB obb;
+
   @override
-  void draw(Canvas canvas) {}
+  Iterable<StageDrawPass> get drawPasses => [
+        StageDrawPass(
+          this,
+          inWorldSpace: true,
+          order: 1,
+        )
+      ];
+
+  @override
+  void draw(Canvas canvas, StageDrawPass pass) {}
 
   // Called when the stage either solos or cancels solo for this item.
   void onSoloChanged(bool isSolo) {}
+
+  void drawBounds(Canvas canvas, bool inWorldSpace) {
+    if (!inWorldSpace) {
+      canvas.save();
+      canvas.transform(stage.viewTransform.mat4);
+    }
+    if (obb != null) {
+      canvas.save();
+      canvas.transform(obb.transform.mat4);
+      var objectBounds = obb.bounds;
+      canvas.drawRect(
+        Rect.fromLTRB(
+          objectBounds[0],
+          objectBounds[1],
+          objectBounds[2],
+          objectBounds[3],
+        ),
+        StageItem.boundsPaint,
+      );
+      canvas.restore();
+    } else {
+      canvas.drawRect(
+        Rect.fromLTRB(
+          aabb[0],
+          aabb[1],
+          aabb[2],
+          aabb[3],
+        ),
+        StageItem.selectedPaint,
+      );
+    }
+    if (!inWorldSpace) {
+      canvas.restore();
+    }
+  }
 }
 
 /// Convert an AABB in object space defined by [xform] to the corresponding

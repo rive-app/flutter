@@ -11,7 +11,7 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
-import 'package:rive_editor/frameDebounce.dart';
+import 'package:rive_editor/frame_debounce.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/platform/platform.dart';
 import 'package:rive_editor/preferences.dart';

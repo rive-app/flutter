@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard_title.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -21,13 +22,14 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   }
 
   @override
-  bool get isSelectable =>
+  bool get isHoverSelectable =>
       // We can't be selected if we're already the active artboard.
       component.context.backboard?.activeArtboard != component &&
       super.isSelectable;
 
-  @override
-  int get drawOrder => 0;
+    @override
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 0, inWorldSpace: true)];
 
   @override
   void boundsChanged() => _updateBounds();
@@ -75,7 +77,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   }
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass pass) {
     if (selectionState.value != SelectionState.none) {
       canvas.drawRect(
         Rect.fromLTWH(

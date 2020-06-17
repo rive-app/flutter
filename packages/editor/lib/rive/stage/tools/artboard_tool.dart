@@ -8,11 +8,15 @@ import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 
 class ArtboardTool extends DrawableTool {
+  @override
+  Iterable<PackedIcon> get cursorName => PackedIcon.cursorAdd;
+  
   Vec2D _startWorldMouse;
   Artboard _artboard;
 
@@ -101,15 +105,16 @@ class ArtboardTool extends DrawableTool {
   void endDrag() {
     _artboard = null;
     _cursor = null;
-    super.endDrag();
   }
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     if (_cursor == null) {
       return;
     }
-    _tip.paint(canvas, Offset(_cursor[0] + 10, _cursor[1] + 10));
+    var cursorScreen =
+        Vec2D.transformMat2D(Vec2D(), _cursor, stage.viewTransform);
+    _tip.paint(canvas, Offset(cursorScreen[0] + 10, cursorScreen[1] + 10));
   }
 
   @override

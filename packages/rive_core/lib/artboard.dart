@@ -11,13 +11,13 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/event.dart';
+import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/rive_animation_controller.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
-import 'package:rive_core/transform_space.dart';
 import 'package:utilities/dependency_sorter.dart';
 
 import 'package:rive_core/src/generated/artboard_base.dart';
@@ -218,8 +218,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   void update(int dirt) {
     if (dirt & ComponentDirt.worldTransform != 0) {
+      var bounds = worldBounds;
+      var rect = Rect.fromLTWH(bounds[0], bounds[1], bounds[2], bounds[3]);
       path.reset();
-      path.addRect(computeBounds(TransformSpace.world));
+      path.addRect(rect);
       _delegate?.boundsChanged();
     }
   }
@@ -308,8 +310,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   /// Artboard bounds (whether local or world) are always origin + size.
   @override
-  Rect computeBounds(TransformSpace space) =>
-      Rect.fromLTWH(0, 0, width, height);
+  AABB get localBounds => AABB.fromValues(0, 0, width, height);
+
+  @override
+  AABB get worldBounds => localBounds;
 
   /// Our world transform is always the identity. Artboard defines world space.
   @override
@@ -430,5 +434,19 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   set drawOrderKeyState(KeyState value) {
     _drawOrderKeyState.value = value;
   }
-  // <- editor-only
+
+  /// Convert artboard space bounds into world bounds. Really only matters in
+  /// the editor, in the runtimes the world is the artboard space.
+  AABB transformBounds(AABB bounds) {
+    // TODO: handle invert y option
+    return bounds.translate(originWorld);
+  }
+
+  Mat2D transform(Mat2D mat) {
+    // TODO: handle invert y option
+    return Mat2D.translate(Mat2D(), mat, originWorld);
+  }
+
+  @override
+  Vec2D get worldTranslation => Vec2D();
 }

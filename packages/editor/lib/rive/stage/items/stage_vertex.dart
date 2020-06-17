@@ -5,6 +5,7 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -34,8 +35,10 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
     ..color = const Color(0xFFFFFFFF);
   static final Paint selectedFill = Paint()..color = const Color(0xFF00BBFF);
 
+
   @override
-  int get drawOrder => 4;
+  Iterable<StageDrawPass> get drawPasses =>
+      [StageDrawPass(this, order: 4, inWorldSpace: true)];
 
   // Stage vertices don't get automatically added to the stage. They only get
   // added when the path owning them is edited.
@@ -82,7 +85,7 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
       );
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     Paint drawStroke, drawFill;
     var radius = _vertexRadius;
     switch (selectionState.value) {

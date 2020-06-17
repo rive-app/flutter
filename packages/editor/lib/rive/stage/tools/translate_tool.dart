@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/artboard_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/node_translate_transformer.dart';
@@ -16,7 +17,9 @@ class TranslateTool extends StageTool with TransformingTool {
 
   // Draw before the vertex handles but after artboard drawables.
   @override
-  int get drawOrder => 2;
+  Iterable<StageDrawPass> get drawPasses => [
+        StageDrawPass(this, order: 2, inWorldSpace: false),
+      ];
 
   @override
   List<StageTransformer> get transformers => [
@@ -34,7 +37,7 @@ class TranslateTool extends StageTool with TransformingTool {
   static final TranslateTool instance = TranslateTool();
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     drawTransformers(canvas);
   }
 }

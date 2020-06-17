@@ -144,6 +144,24 @@ class Vec2D {
         l2;
   }
 
+  static double segmentSquaredDistance(
+      Vec2D segmentPoint1, Vec2D segmentPoint2, Vec2D pt) {
+    double t = onSegment(segmentPoint1, segmentPoint2, pt);
+    if (t <= 0) {
+      return Vec2D.squaredDistance(segmentPoint1, pt);
+    }
+    if (t >= 1) {
+      return Vec2D.squaredDistance(segmentPoint2, pt);
+    }
+
+    Vec2D ptOnSeg = Vec2D.fromValues(
+      segmentPoint1[0] + t * (segmentPoint2[0] - segmentPoint1[0]),
+      segmentPoint1[1] + t * (segmentPoint2[1] - segmentPoint1[1]),
+    );
+
+    return Vec2D.squaredDistance(ptOnSeg, pt);
+  }
+
   static bool approximatelyEqual(Vec2D a, Vec2D b, {double threshold = 0.001}) {
     var a0 = a[0], a1 = a[1];
     var b0 = b[0], b1 = b[1];

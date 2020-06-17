@@ -16,6 +16,7 @@ import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
+import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
 import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
@@ -25,6 +26,7 @@ import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
 import 'package:vector_math/vector_math.dart';
 import 'package:rive_editor/math_extensions.dart';
+import 'package:utilities/restorer.dart';
 
 class VectorPenTool extends PenTool<Path> with TransformingTool {
   static final VectorPenTool instance = VectorPenTool();
@@ -83,7 +85,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   VertexEditor get vertexEditor => stage.file.vertexEditor;
 
   StraightVertex _clickCreatedVertex;
-  AutoKeySuppression _autoKeySuppression;
+  Restorer _restoreAutoKey;
 
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
@@ -117,7 +119,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       ..radius = 0;
 
     var file = path.context;
-    _autoKeySuppression = file.suppressAutoKey();
+    _restoreAutoKey = file.suppressAutoKey();
     file.batchAdd(() {
       file.addObject(vertex);
       path.appendChild(vertex);
@@ -126,7 +128,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   @override
   bool endClick() {
-    _autoKeySuppression?.restore();
+    _restoreAutoKey?.restore();
 
     // capture when click completes.
     return true;
@@ -145,7 +147,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     ..color = const Color(0x80FFFFFF);
 
   @override
-  void draw(Canvas canvas) {
+  void draw(Canvas canvas, StageDrawPass drawPass) {
     contourShadow.strokeWidth = StageItem.selectedPaint.strokeWidth * 3;
     contourLine.strokeWidth = StageItem.selectedPaint.strokeWidth;
     var editingPaths = vertexEditor.editingPaths;
@@ -210,7 +212,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       }
       canvas.restore();
     }
-    super.draw(canvas);
+    super.draw(canvas, drawPass);
     drawTransformers(canvas);
   }
 

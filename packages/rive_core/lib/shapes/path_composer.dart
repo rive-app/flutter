@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
-import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/shapes/path_composer_base.dart';
@@ -49,7 +48,6 @@ class PathComposer extends PathComposerBase {
     var buildWorldPath = _shape.wantWorldPath || !buildLocalPath;
 
     // The fill path will be whichever one of these two is available.
-
     if (buildLocalPath) {
       localPath.reset();
       var world = _shape.worldTransform;
@@ -68,13 +66,10 @@ class PathComposer extends PathComposerBase {
             matrix4: localTransform?.mat4);
       }
 
-      // If the world path doesn't take care of setting the bounds, we should do
-      // it. But if we're computing world paths anyway, no need to do this extra
-      // transform...
+      // If the world path doesn't get built, we should mark the bounds dirty
+      // here.
       if (!buildWorldPath) {
-        ui.Rect uiBounds = localPath.transform(world.mat4).getBounds();
-        _shape.bounds = AABB.fromValues(
-            uiBounds.left, uiBounds.top, uiBounds.right, uiBounds.bottom);
+        _shape.markBoundsDirty();
       }
       _fillPath = localPath;
     }
@@ -85,9 +80,7 @@ class PathComposer extends PathComposerBase {
             matrix4: path.pathTransform?.mat4);
       }
 
-      ui.Rect uiBounds = worldPath.getBounds();
-      _shape.bounds = AABB.fromValues(
-          uiBounds.left, uiBounds.top, uiBounds.right, uiBounds.bottom);
+      _shape.markBoundsDirty();
       _fillPath = worldPath;
     }
   }
