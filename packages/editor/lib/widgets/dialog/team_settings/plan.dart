@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_api/api.dart';
@@ -7,6 +8,8 @@ import 'package:rive_api/models/billing.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
+import 'package:rive_editor/widgets/common/labeled_text_field.dart';
+import 'package:rive_editor/widgets/common/rive_radio.dart';
 import 'package:rive_editor/widgets/common/rive_text_field.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
@@ -35,6 +38,9 @@ class _PlanState extends State<PlanSettings>
   PlanSubscriptionPackage _plan;
   AnimationController _controller;
   bool _usingSavedCC = true;
+  // Flag to activate the flow for canceling the current plan:
+  // https://www.figma.com/file/nlGengoVlxjmxLwAfWOUoU/Rive-App?node-id=11146%3A304
+  bool _cancelFlow = true;
 
   bool get isBasic => _plan?.option == TeamsOption.basic;
   bool get isPremium => _plan?.option == TeamsOption.premium;
@@ -76,12 +82,6 @@ class _PlanState extends State<PlanSettings>
     }
   }
 
-  Future<void> _onTeamRenew(bool renew) async {
-    if (await _plan.renewPlan(renew)) {
-      // TODO: finish this.
-    }
-  }
-
   void _toggleController() {
     if (isBasic) {
       _controller.forward();
@@ -102,128 +102,140 @@ class _PlanState extends State<PlanSettings>
     if (_plan == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    final theme = RiveTheme.of(context);
-    final colors = theme.colors;
-    final textStyles = theme.textStyles;
-    final labelLookup = costLookup[_plan?.billing];
-    final isPlanCanceled = _plan.isCanceled;
 
-    return ListView(
-      padding: const EdgeInsets.all(30),
-      physics: const ClampingScrollPhysics(),
-      children: [
-        SettingsPanelSection(
-          label: 'Plan',
-          labelExtra: isPlanCanceled ? ' (canceled)' : null,
-          subLabel: (isPlanCanceled && _plan.isActive)
-              ? 'Expires ${_plan.nextDueDescription}'
-              : null,
-          secondaryColor: colors.accentMagenta,
-          contents: (panelCtx) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      // Align text baseline with label & button.
-                      padding: const EdgeInsets.only(top: 3),
-                      child: ComboBox<BillingFrequency>(
-                        popupWidth: 100,
-                        sizing: ComboSizing.content,
-                        underline: !isPlanCanceled,
-                        chevron: !isPlanCanceled,
-                        underlineColor: colors.inputUnderline,
-                        valueColor: textStyles.fileGreyTextLarge.color,
-                        options: BillingFrequency.values,
-                        value: _plan?.billing ?? BillingFrequency.monthly,
-                        toLabel: (option) => describeEnum(option).capsFirst,
-                        change: (billing) => _plan.billing = billing,
-                        disabled: isPlanCanceled,
+    if (_cancelFlow) {
+      return _CancelPlan(
+        plan: _plan,
+        onDone: () => setState(() {
+          _cancelFlow = false;
+        }),
+      );
+    } else {
+      final theme = RiveTheme.of(context);
+      final colors = theme.colors;
+      final textStyles = theme.textStyles;
+      final labelLookup = costLookup[_plan?.billing];
+      final isPlanCanceled = _plan.isCanceled;
+
+      return ListView(
+        padding: const EdgeInsets.all(30),
+        physics: const ClampingScrollPhysics(),
+        children: [
+          SettingsPanelSection(
+            label: 'Plan',
+            labelExtra: isPlanCanceled ? ' (canceled)' : null,
+            subLabel: (isPlanCanceled && _plan.isActive)
+                ? 'Expires ${_plan.nextDueDescription}'
+                : null,
+            secondaryColor: colors.accentMagenta,
+            contents: (panelCtx) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        // Align text baseline with label & button.
+                        padding: const EdgeInsets.only(top: 3),
+                        child: ComboBox<BillingFrequency>(
+                          popupWidth: 100,
+                          sizing: ComboSizing.content,
+                          underline: !isPlanCanceled,
+                          chevron: !isPlanCanceled,
+                          underlineColor: colors.inputUnderline,
+                          valueColor: textStyles.fileGreyTextLarge.color,
+                          options: BillingFrequency.values,
+                          value: _plan?.billing ?? BillingFrequency.monthly,
+                          toLabel: (option) => describeEnum(option).capsFirst,
+                          change: (billing) => _plan.billing = billing,
+                          disabled: isPlanCanceled,
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    if (!isPlanCanceled)
-                      UnderlineTextButton(
-                        text: 'Cancel Plan',
-                        onPressed: () => _onTeamRenew(false),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (_, __) {
-                    final t = _controller.value;
-                    // Simple quadratic.
-                    final animationValue = t * t;
-                    return SizedBox(
-                      height: 179,
-                      child: Row(
-                        children: [
-                          SubscriptionChoice(
-                            label: 'Studio',
-                            costLabel: '${labelLookup[TeamsOption.basic]}',
-                            description: 'Create a space where you and '
-                                'your team can share files.',
-                            onTap: () => _plan.option = TeamsOption.basic,
-                            isSelected: isBasic,
-                            highlight: animationValue,
-                            showRadio: true,
-                          ),
-                          const SizedBox(width: 30),
-                          SubscriptionChoice(
-                            label: 'Org',
-                            disabled: true,
-                            costLabel: '${labelLookup[TeamsOption.premium]}',
-                            description: ''
-                                'Create sub-teams with centralized '
-                                'billing',
-                            onTap: () => _plan.option = TeamsOption.premium,
-                            isSelected: isPremium,
-                            highlight: 1 - animationValue,
-                            showRadio: true,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        ),
-        // Vertical padding.
-        const SizedBox(height: 30),
-        Separator(color: colors.fileLineGrey),
-        // Vertical padding.
-        const SizedBox(height: 30),
-        PaymentMethod(
-          _plan,
-          _usingSavedCC,
-          onUseSaved: (isUsingSaved) {
-            setState(() {
-              _usingSavedCC = isUsingSaved;
-            });
-          },
-        ),
-        // Vertical padding.
-        const SizedBox(height: 30),
-        Separator(color: colors.fileLineGrey),
-        // Vertical padding.
-        const SizedBox(height: 30),
-        BillCalculator(
-          plan: _plan,
-          onBillChanged: isPlanCanceled
-              // The button in the widget will reactivate the widget.
-              ? () => _onTeamRenew(true)
-              : _onBillChanged,
-          updatingCC: !_usingSavedCC,
-        ),
-      ],
-    );
+                      const Spacer(),
+                      if (!isPlanCanceled)
+                        UnderlineTextButton(
+                          text: 'Cancel Plan',
+                          onPressed: () => setState(() {
+                            _cancelFlow = true;
+                          }),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (_, __) {
+                      final t = _controller.value;
+                      // Simple quadratic.
+                      final animationValue = t * t;
+                      return SizedBox(
+                        height: 179,
+                        child: Row(
+                          children: [
+                            SubscriptionChoice(
+                              label: 'Studio',
+                              costLabel: '${labelLookup[TeamsOption.basic]}',
+                              description: 'Create a space where you and '
+                                  'your team can share files.',
+                              onTap: () => _plan.option = TeamsOption.basic,
+                              isSelected: isBasic,
+                              highlight: animationValue,
+                              showRadio: true,
+                            ),
+                            const SizedBox(width: 30),
+                            SubscriptionChoice(
+                              label: 'Org',
+                              disabled: true,
+                              costLabel: '${labelLookup[TeamsOption.premium]}',
+                              description: ''
+                                  'Create sub-teams with centralized '
+                                  'billing',
+                              onTap: () => _plan.option = TeamsOption.premium,
+                              isSelected: isPremium,
+                              highlight: 1 - animationValue,
+                              showRadio: true,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+          // Vertical padding.
+          const SizedBox(height: 30),
+          Separator(color: colors.fileLineGrey),
+          // Vertical padding.
+          const SizedBox(height: 30),
+          PaymentMethod(
+            _plan,
+            _usingSavedCC,
+            onUseSaved: (isUsingSaved) {
+              setState(() {
+                _usingSavedCC = isUsingSaved;
+              });
+            },
+          ),
+          // Vertical padding.
+          const SizedBox(height: 30),
+          Separator(color: colors.fileLineGrey),
+          // Vertical padding.
+          const SizedBox(height: 30),
+          BillCalculator(
+            plan: _plan,
+            onBillChanged: isPlanCanceled
+                // The button in the widget will reactivate the widget.
+                ? () => _plan.renewPlan(true)
+                : _onBillChanged,
+            updatingCC: !_usingSavedCC,
+          ),
+        ],
+      );
+    }
   }
 }
 
@@ -875,6 +887,231 @@ class CreditCardForm extends StatelessWidget {
         const SizedBox(height: 30),
         _creditCardDetails(context),
       ],
+    );
+  }
+}
+
+enum _CancelFlow { cancelling, canceled }
+enum _Feedback { features, ux, support, runtimes, bugs, expensive }
+
+extension _FeedbackNames on _Feedback {
+  String get name => <_Feedback, String>{
+        _Feedback.features: 'Missing critical features',
+        _Feedback.ux: 'Poor user experience',
+        _Feedback.support: 'Poor customer support',
+        _Feedback.runtimes: 'Lack of integrations, import options, runtimes',
+        _Feedback.bugs: 'Bugs, performance, or stability issues',
+        _Feedback.expensive: 'Too expensive',
+      }[this];
+}
+
+class _CancelPlan extends StatefulWidget {
+  const _CancelPlan({
+    this.plan,
+    this.onDone,
+  });
+
+  final PlanSubscriptionPackage plan;
+  final VoidCallback onDone;
+
+  @override
+  State<StatefulWidget> createState() => _CancelPlanState();
+}
+
+class _CancelPlanState extends State<_CancelPlan> {
+  // TODO: restore
+  _CancelFlow _flow = _CancelFlow.canceled;
+  _Feedback _feedback;
+  TapGestureRecognizer _noteRecognizer;
+  TextEditingController _feedbackController;
+
+  @override
+  void initState() {
+    _noteRecognizer = TapGestureRecognizer();
+    _noteRecognizer.onTap = _dropNote;
+    _feedbackController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _noteRecognizer.dispose();
+    _feedbackController.dispose();
+    super.dispose();
+  }
+
+  void _dropNote() {
+    // TODO: mailto:
+    // https://stackoverflow.com/questions/50622947/flutter-sending-form-data-to-email
+  }
+
+  void _onFeedbackChanged(_Feedback value) {
+    if (_feedback == value) return;
+    setState(() {
+      _feedback = value;
+    });
+  }
+
+  Future<void> _onPlanCanceled() async {
+    if (await widget.plan.renewPlan(false)) {
+      setState(() {
+        _flow = _CancelFlow.canceled;
+      });
+    }
+  }
+
+  Future<void> _sendFeedback() async {
+    if (await widget.plan
+        .sendFeedback(_feedback.name, _feedbackController.text)) {
+      widget.onDone();
+    }
+  }
+
+  Widget _areYouSure(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+    final plan = widget.plan;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        RichText(
+          text: TextSpan(
+            style: textStyles.planText,
+            text: 'If you cancel, your team plan will not renew at the next '
+                'billing cycle. At that moment, team members will lose'
+                ' access to team files. The team plan can be re-activated'
+                ' at any time.\n\n',
+            children: [
+              TextSpan(
+                style: textStyles.planDarkText
+                    .copyWith(decoration: TextDecoration.underline),
+                recognizer: _noteRecognizer,
+                text: 'Drop us a note',
+              ),
+              const TextSpan(
+                text: ' if you have any questions, we’re always'
+                    ' available to help.',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: FlatIconButton(
+                label: 'No, take me back',
+                color: colors.textButtonLight,
+                hoverColor: colors.textButtonLightHover,
+                textColor: colors.buttonLightText,
+                onTap: widget.onDone,
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FlatIconButton(
+                label: 'Yes, cancel my studio plan',
+                color: plan.processing
+                    ? colors.accentMagenta.withOpacity(0.5)
+                    : colors.accentMagenta,
+                textColor:
+                    plan.processing ? colors.textButtonLight : Colors.white,
+                onTap: _onPlanCanceled,
+                elevation: plan.processing ? 0 : 8,
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _feedbackForm(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+    final plan = widget.plan;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Your team plan will not renew at the next billing cycle. '
+          'We’d love to know why you canceled and if there’s anything'
+          ' we can do to improve.',
+          style: textStyles.planText,
+        ),
+        const SizedBox(height: 24),
+        ..._Feedback.values.map((fb) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: DescriptionRadio<_Feedback>(
+                value: fb,
+                groupValue: _feedback,
+                label: fb.name,
+                onChanged: _onFeedbackChanged,
+              ),
+            )),
+        const SizedBox(height: 14),
+        LabeledTextField(
+          label: 'Anything else?',
+          controller: _feedbackController,
+          hintText: 'Your notes...',
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: FlatIconButton(
+                label: 'Skip',
+                color: colors.textButtonLight,
+                hoverColor: colors.textButtonLightHover,
+                textColor: colors.buttonLightText,
+                onTap: widget.onDone,
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FlatIconButton(
+                label: 'Send Feedback',
+                color: plan.processing
+                    ? colors.buttonDarkDisabled
+                    : colors.textButtonDark,
+                textColor: Colors.white,
+                onTap: _sendFeedback,
+                elevation: plan.processing ? 0 : 8,
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _contents() {
+    if (_flow == _CancelFlow.cancelling) {
+      return SettingsPanelSection(
+        label: 'Are you sure you want to cancel?',
+        contents: _areYouSure,
+      );
+    } else {}
+    return SettingsPanelSection(
+      label: 'Team Canceled',
+      contents: _feedbackForm,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(30),
+      physics: const ClampingScrollPhysics(),
+      children: [_contents()],
     );
   }
 }

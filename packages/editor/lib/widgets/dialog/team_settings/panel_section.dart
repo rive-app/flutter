@@ -33,32 +33,35 @@ class SettingsPanelSection extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                      text: label,
-                      style: textStyles.greyText.copyWith(fontSize: 16)),
-                  if (labelExtra != null)
+        SizedBox(
+          width: 170,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: TextSpan(
+                  children: [
                     TextSpan(
-                      text: labelExtra,
-                      style: textStyles.greyText
-                          .copyWith(color: secondaryColor, fontSize: 16),
-                    ),
-                ],
+                        text: label,
+                        style: textStyles.greyText.copyWith(fontSize: 16)),
+                    if (labelExtra != null)
+                      TextSpan(
+                        text: labelExtra,
+                        style: textStyles.greyText
+                            .copyWith(color: secondaryColor, fontSize: 16),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            if (subLabel != null) ...[
-              const SizedBox(height: 11),
-              Text(
-                subLabel,
-                style: textStyles.greyText.copyWith(color: secondaryColor),
-              ),
-            ]
-          ],
+              if (subLabel != null) ...[
+                const SizedBox(height: 11),
+                Text(
+                  subLabel,
+                  style: textStyles.greyText.copyWith(color: secondaryColor),
+                ),
+              ]
+            ],
+          ),
         ),
         const Spacer(),
         ConstrainedBox(

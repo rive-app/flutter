@@ -31,22 +31,17 @@ class _SettingsHeaderState extends State<SettingsHeader> {
     final theme = RiveTheme.of(context);
     final textStyles = theme.textStyles;
     final colors = theme.colors;
-
+    final teamSize = widget.teamSize;
     if (isTeam) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            '${widget.teamSize} members',
+            '$teamSize ${teamSize > 1 ? 'members' : 'member'}',
             style: textStyles.fileGreyTextLarge
                 .copyWith(fontSize: 13, height: 1.3),
           ),
-          const SizedBox(height: 2),
-          Text(
-            'Add More',
-            style: textStyles.hyperLinkSubtext,
-          )
         ],
       );
     } else {
@@ -111,7 +106,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
                 if (isTeam) ...[
                   const SizedBox(height: 2),
                   Text(
-                    'Team Plan',
+                    'Studio Plan',
                     style: textStyles.hyperLinkSubtext,
                   )
                 ]

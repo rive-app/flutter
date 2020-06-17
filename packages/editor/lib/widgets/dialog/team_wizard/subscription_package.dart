@@ -363,6 +363,14 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
 
     return success;
   }
+
+  Future<bool> sendFeedback(String feedback, String notes) async {
+    // TODO:
+    processing = true;
+    await RiveTeamsApi(api).sendFeedback(feedback, notes);
+    processing = false;
+    return true;
+  }
 }
 
 /// Data class for tracking data in the team subscription widget

@@ -1,5 +1,58 @@
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
+
+class DescriptionRadio<T> extends StatelessWidget {
+  const DescriptionRadio({
+    @required this.value,
+    @required this.groupValue,
+    @required this.label,
+    @required this.onChanged,
+    this.selectedColor,
+    this.backgroundColor,
+    Key key,
+  }) : super(key: key);
+
+  final T value;
+  final T groupValue;
+  final String label;
+  final ValueChanged<T> onChanged;
+  final Color selectedColor;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    final styles = theme.textStyles;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (value != groupValue) onChanged(value);
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              RiveRadio<T>(
+                groupValue: groupValue,
+                value: value,
+                onChanged: onChanged,
+                selectedColor: colors.commonDarkGrey,
+              ),
+              const SizedBox(width: 10),
+              Text(label, style: styles.greyText),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class RiveRadio<T> extends StatefulWidget {
   final T value;

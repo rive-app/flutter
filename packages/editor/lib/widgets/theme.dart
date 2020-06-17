@@ -319,6 +319,16 @@ class TextStyles {
         fontSize: 13,
       );
 
+  TextStyle get planText => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: Color(0xFF666666),
+        height: 1.6,
+        fontSize: 13,
+      );
+
+  TextStyle get planDarkText =>
+      planText.copyWith(color: const Color(0xFF333333));
+
   TextStyle get notificationHeader => const TextStyle(
         fontFamily: 'Roboto-Regular',
         color: Color(0xFF888888),
