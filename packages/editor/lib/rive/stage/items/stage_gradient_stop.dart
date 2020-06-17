@@ -43,7 +43,7 @@ class StageGradientStop extends StageItem<GradientStop> {
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 3, inWorldSpace: true)];
+      [StageDrawPass(draw, order: 3, inWorldSpace: true)];
 
   @override
   void addedToStage(Stage stage) {

@@ -6,5 +6,5 @@ import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 abstract class DrawableTool extends StageTool with DraggableTool {
   @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 1000, inWorldSpace: false)];
+      [StageDrawPass(draw, order: 1000, inWorldSpace: false)];
 }

@@ -53,7 +53,7 @@ class StageGradient<T extends core.LinearGradient> extends StageItem<T>
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 2, inWorldSpace: true)];
+      [StageDrawPass(draw, order: 2, inWorldSpace: true)];
 
   StageShape get stageShape =>
       (component.shapePaintContainer as Component).stageItem as StageShape;

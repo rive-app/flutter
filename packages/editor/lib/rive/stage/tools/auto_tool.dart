@@ -26,7 +26,7 @@ class AutoTool extends TransformHandleTool {
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 1000, inWorldSpace: false)];
+      [StageDrawPass(draw, order: 1000, inWorldSpace: false)];
 
   // We operate in stage space
   @override

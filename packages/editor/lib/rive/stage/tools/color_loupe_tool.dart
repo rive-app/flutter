@@ -21,7 +21,7 @@ typedef PickColor = void Function(Color);
 class ColorLoupeTool extends StageTool with LateDrawStageTool {
   @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 1000, inWorldSpace: false)];
+      [StageDrawPass(draw, order: 1000, inWorldSpace: false)];
 
   final _whiteStroke = Paint()
     ..style = PaintingStyle.stroke

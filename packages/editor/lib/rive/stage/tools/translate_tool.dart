@@ -18,7 +18,7 @@ class TranslateTool extends StageTool with TransformingTool {
   // Draw before the vertex handles but after artboard drawables.
   @override
   Iterable<StageDrawPass> get drawPasses => [
-        StageDrawPass(this, order: 2, inWorldSpace: false),
+        StageDrawPass(draw, order: 2, inWorldSpace: false),
       ];
 
   @override

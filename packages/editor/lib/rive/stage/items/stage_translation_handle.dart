@@ -20,13 +20,31 @@ class StageTranslationHandle extends StageItem<void> with TransformerMaker {
   final Vec2D direction;
   final Paint paint = Paint()
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
+    ..strokeWidth = 1
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
 
   final Paint hoverPaint = Paint()
     ..style = PaintingStyle.stroke
     ..color = const Color(0xFFFFFFFF)
-    ..strokeWidth = 1;
+    ..strokeWidth = 1
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
 
+  final Paint shadowPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..color = const Color(0x26000000)
+    ..strokeWidth = 3
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
+
+  final Path arrow = Path()
+    ..moveTo(0, 0)
+    ..lineTo(0, -handleLength)
+    ..moveTo(0 + arrowSize, -handleLength + arrowSize)
+    ..lineTo(0, 0 - handleLength)
+    ..lineTo(0 - arrowSize, -handleLength + arrowSize);
+  static const double arrowSize = 5;
   static const double handleLength = 100;
   static const double selectionThreshold = 10;
   static const double squaredSelectionThreshold =
@@ -38,8 +56,10 @@ class StageTranslationHandle extends StageItem<void> with TransformerMaker {
   }
 
   @override
-  Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 1000, inWorldSpace: false)];
+  Iterable<StageDrawPass> get drawPasses => [
+        StageDrawPass(draw, order: 1000, inWorldSpace: false),
+        StageDrawPass(drawShadow, order: 999, inWorldSpace: false),
+      ];
 
   @override
   bool get isSelectable => false;
@@ -94,19 +114,31 @@ class StageTranslationHandle extends StageItem<void> with TransformerMaker {
 
   Vec2D get translation => Mat2D.getTranslation(_transform, Vec2D());
 
-  @override
-  void draw(Canvas canvas, StageDrawPass drawPass) {
+  void _draw(Canvas canvas, Paint paint) {
     var screenPosition =
         Vec2D.transformMat2D(Vec2D(), translation, stage.viewTransform);
 
     var axis = Vec2D.scale(Vec2D(), computeAxis(), handleLength);
 
-    canvas.drawLine(
-      Offset(screenPosition[0], screenPosition[1]),
-      Offset(screenPosition[0] + axis[0], screenPosition[1] + axis[1]),
-      selectionState.value != SelectionState.none ? hoverPaint : paint,
+    canvas.save();
+
+    canvas.translate(screenPosition[0].roundToDouble() - 0.5,
+        screenPosition[1].roundToDouble() - 0.5);
+
+    canvas.rotate(math.atan2(axis[0], -axis[1]));
+    canvas.drawPath(
+      arrow,
+      paint,
     );
+    canvas.restore();
   }
+
+  @override
+  void draw(Canvas canvas, StageDrawPass drawPass) => _draw(
+      canvas, selectionState.value != SelectionState.none ? hoverPaint : paint);
+
+  void drawShadow(Canvas canvas, StageDrawPass drawPass) =>
+      _draw(canvas, shadowPaint);
 
   @override
   List<StageTransformer> makeTransformers() {

@@ -29,7 +29,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
 
     @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 0, inWorldSpace: true)];
+      [StageDrawPass(draw, order: 0, inWorldSpace: true)];
 
   @override
   void boundsChanged() => _updateBounds();

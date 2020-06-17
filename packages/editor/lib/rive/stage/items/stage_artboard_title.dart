@@ -36,7 +36,7 @@ class StageArtboardTitle extends StageItem<Artboard> {
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(this, order: 0, inWorldSpace: true)];
+      [StageDrawPass(draw, order: 0, inWorldSpace: true)];
 
   void _updateBounds() {
     // Compute max bounds based on stage's min zoom (really broad broad-phase).

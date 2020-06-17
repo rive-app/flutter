@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+typedef DrawCallback = void Function(Canvas, StageDrawPass);
+
 class StageDrawPass {
   /// StageItems can either draw in world space or screen space.
   final bool inWorldSpace;
@@ -10,17 +12,15 @@ class StageDrawPass {
   final int order;
 
   // The drawable to call draw on.
-  final StageDrawable drawable;
+  final DrawCallback draw;
 
   const StageDrawPass(
-    this.drawable, {
+    this.draw, {
     this.inWorldSpace,
     this.order,
   });
 
   int compareDrawOrderTo(StageDrawPass other) => order - other.order;
-
-  void draw(Canvas canvas) => drawable.draw(canvas, this);
 }
 
 /// Abstract representation of anything that can draw on the stage.
