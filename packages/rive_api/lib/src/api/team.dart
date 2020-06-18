@@ -30,7 +30,7 @@ class TeamApi {
   Future<Iterable<TeamMemberDM>> teamMembers(int teamId) async {
     final res = await api.getFromPath('/api/teams/$teamId/affiliates');
     try {
-      final data = json.decodeList<Map<String, dynamic>>(res.body);
+      final data = json.decodeList<Map<String, Object>>(res.body);
       return TeamMemberDM.formDataList(data);
     } on FormatException catch (e) {
       _log.severe('Error formatting teams api response: $e');
@@ -50,12 +50,11 @@ class TeamApi {
 
   Future<bool> rescindInvite(int teamId, {int userId, String email}) async {
     String payload = json.encode({
-      if (userId != null) 'userId': userId,
+      if (userId > 0) 'userId': userId,
       if (email != null) 'userEmail': email,
     });
     try {
-      await api.delete('${api.host}/api/teams/$teamId/invite',
-          body: payload);
+      await api.delete('${api.host}/api/teams/$teamId/invite', body: payload);
       return true;
     } on ApiException catch (err) {
       log.severe('[Error] rescindInvite() ${err.response.body}');
