@@ -43,6 +43,12 @@ class Node extends NodeBase {
     y = pos[1];
   }
 
+  Vec2D get scale => Vec2D.fromValues(scaleX, scaleY);
+  set scale(Vec2D value) {
+    scaleX = value[0];
+    scaleY = value[1];
+  }
+
   void updateTransform() {
     if (rotation != 0) {
       Mat2D.fromRotation(transform, rotation);
