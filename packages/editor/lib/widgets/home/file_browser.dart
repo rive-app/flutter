@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
+import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
@@ -14,6 +15,7 @@ import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
+import 'package:rive_editor/widgets/dialog/team_settings/settings_panel.dart';
 import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/home/folder.dart';
 import 'package:rive_editor/widgets/home/top_nav.dart';
@@ -642,7 +644,7 @@ class FileBrowser extends StatelessWidget {
     );
   }
 
-  Widget _fileGrid(Iterable<File> files, Selection selection) {
+  Widget _fileGrid(Iterable<File> files, Selection selection, bool suspended) {
     return _grid(
       cellHeight: fileCellHeight,
       cellBuilder: SliverChildBuilderDelegate(
@@ -654,8 +656,10 @@ class FileBrowser extends StatelessWidget {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 } else {
-                  return BrowserFile(snapshot.data,
-                      selection?.files?.contains(snapshot.data) == true);
+                  return BrowserFile(
+                      snapshot.data,
+                      selection?.files?.contains(snapshot.data) == true,
+                      suspended);
                 }
               });
         },
@@ -710,25 +714,39 @@ class FileBrowser extends StatelessWidget {
     );
   }
 
-  // SliverPersistentHeader makeHeader(String headerText) {
-  //   return SliverPersistentHeader(
-  //     pinned: true,
-  //     floating: false,
-  //     delegate: _SliverHeader(
-  //       Container(
-  //         color: Colors.lightBlue,
-  //         child: Center(
-  //           child: Text(headerText),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return _stream(
       (data, selection) {
+        final currentDirectory = Plumber().peek<CurrentDirectory>();
+
+        final suspended = currentDirectory.owner is Team &&
+            (currentDirectory.owner as Team).status == TeamStatus.suspended;
+
+        final failedPayment = currentDirectory.owner is Team &&
+            (currentDirectory.owner as Team).status == TeamStatus.failedPayment;
+
+        if (suspended) {
+          if (canEditTeam((currentDirectory.owner as Team).permission)) {
+            Plumber().message(GlobalMessage(
+                'Team suspended',
+                'Re-activate',
+                () => showSettings(currentDirectory.owner,
+                    context: context, initialPanel: SettingsPanel.plan)));
+          } else {
+            Plumber().message(GlobalMessage(
+                'Team suspended. Contact an admin to re-activate.'));
+          }
+        } else if (failedPayment) {
+          if (canEditTeam((currentDirectory.owner as Team).permission)) {
+            Plumber().message(GlobalMessage(
+                'There was a payment issue.',
+                'Update details',
+                () => showSettings(currentDirectory.owner,
+                    context: context, initialPanel: SettingsPanel.plan)));
+          }
+        }
+
         final slivers = <Widget>[];
         slivers.add(_header());
 
@@ -760,7 +778,7 @@ class FileBrowser extends StatelessWidget {
           }
 
           if (hasFiles) {
-            slivers.add(_fileGrid(files, selection));
+            slivers.add(_fileGrid(files, selection, suspended));
             slivers.add(
               const SliverToBoxAdapter(
                 child: SizedBox(height: sectionPadding),

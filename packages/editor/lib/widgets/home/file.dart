@@ -4,9 +4,11 @@ import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class BrowserFile extends StatelessWidget {
-  const BrowserFile(this.file, this.selected, {Key key}) : super(key: key);
+  const BrowserFile(this.file, this.selected, this.suspended, {Key key})
+      : super(key: key);
   final File file;
   final bool selected;
+  final bool suspended;
 
   Widget _label(BuildContext context) {
     final theme = RiveTheme.of(context);
@@ -47,28 +49,41 @@ class BrowserFile extends StatelessWidget {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     return ClickListener(
-      onDoubleClick: (_) =>
-          RiveContext.of(context).open(file.fileOwnerId, file.id, file.name),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.fileBackgroundLightGrey,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: selected
-                ? colors.fileSelectedBlue
-                : colors.fileBrowserBackground,
-            width: 4,
+      onDoubleClick: (_) {
+        if (!suspended) {
+          RiveContext.of(context).open(file.fileOwnerId, file.id, file.name);
+        }
+      },
+      child: Stack(children: [
+        Container(
+          decoration: BoxDecoration(
+            color: colors.fileBackgroundLightGrey,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected
+                  ? colors.fileSelectedBlue
+                  : colors.fileBrowserBackground,
+              width: 4,
+            ),
+          ),
+          child: Container(
+            foregroundDecoration: BoxDecoration(
+              color:
+                  suspended ? colors.getTransparent50 : colors.getTransparent,
+              backgroundBlendMode: BlendMode.overlay,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: _screenshot(context),
+                ),
+                _label(context),
+              ],
+            ),
           ),
         ),
-        child: Column(
-          children: [
-            Expanded(
-              child: _screenshot(context),
-            ),
-            _label(context),
-          ],
-        ),
-      ),
+      ]),
     );
   }
 }
