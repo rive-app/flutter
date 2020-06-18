@@ -1,9 +1,9 @@
-import 'dart:collection';
 import 'dart:ui';
 
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/selection_context.dart';
+import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_translation_handle.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -19,9 +19,10 @@ abstract class TransformHandleTool extends StageTool
       color: const Color(0xFF16E7B3), direction: Vec2D.fromValues(1, 0));
   final StageTranslationHandle _translateY = StageTranslationHandle(
       color: const Color(0xFFFF929F), direction: Vec2D.fromValues(0, -1));
+  final StageRotationHandle _rotation = StageRotationHandle(showAxis: false);
 
   SelectionContext<SelectableItem> _selectionContext;
-  HashSet<Node> _nodes = HashSet<Node>();
+  Set<Node> _nodes = {};
 
   @override
   bool activate(Stage stage) {
@@ -39,8 +40,8 @@ abstract class TransformHandleTool extends StageTool
   bool get isTransforming => _transformingHandle != null;
 
   bool _handleStageSelection(StageItem item) {
-    if (item is StageTranslationHandle) {
-      _transformingHandle = item;
+    if (item is TransformerMaker) {
+      _transformingHandle = item as TransformerMaker;
       return true;
     }
     return false;
@@ -54,14 +55,16 @@ abstract class TransformHandleTool extends StageTool
   void deactivate() {
     super.deactivate();
     _selectionContext.removeListener(_selectionChanged);
-    _setSelection(HashSet<Node>());
+    _setSelection({});
   }
 
   bool get hasTransformSelection =>
-      _translateX.stage != null || _translateY.stage != null;
+      _translateX.stage != null ||
+      _translateY.stage != null ||
+      _rotation != null;
 
   void _selectionChanged() {
-    var nodes = HashSet<Node>();
+    var nodes = <Node>{};
     for (final item in _selectionContext.items) {
       if (item is StageItem && item.component is Node) {
         nodes.add(item.component as Node);
@@ -70,7 +73,7 @@ abstract class TransformHandleTool extends StageTool
     _setSelection(nodes);
   }
 
-  void _setSelection(HashSet<Node> nodes) {
+  void _setSelection(Set<Node> nodes) {
     // TODO: check equals with IterableEquals to avoid recompute?
     for (final node in _nodes) {
       node.worldTransformChanged.removeListener(_selectionChanged);
@@ -80,9 +83,11 @@ abstract class TransformHandleTool extends StageTool
     if (nodes.isEmpty) {
       stage.removeItem(_translateX);
       stage.removeItem(_translateY);
+      stage.removeItem(_rotation);
     } else {
       stage.addItem(_translateX);
       stage.addItem(_translateY);
+      stage.addItem(_rotation);
 
       _computeHandleTransform();
     }
@@ -99,6 +104,7 @@ abstract class TransformHandleTool extends StageTool
     var first = _nodes.first;
     _translateX.transform = first.worldTransform;
     _translateY.transform = first.worldTransform;
+    _rotation.transform = first.worldTransform;
   }
 
   void _selectionTransformChanged() {

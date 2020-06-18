@@ -57,7 +57,7 @@ class StageTranslationHandle extends StageItem<void> with TransformerMaker {
 
   @override
   Iterable<StageDrawPass> get drawPasses => [
-        StageDrawPass(draw, order: 1000, inWorldSpace: false),
+        StageDrawPass(draw, order: 1001, inWorldSpace: false),
         StageDrawPass(drawShadow, order: 999, inWorldSpace: false),
       ];
 
