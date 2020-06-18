@@ -1059,15 +1059,17 @@ class _CancelPlanState extends State<_CancelPlan> {
           style: textStyles.planText,
         ),
         const SizedBox(height: 24),
-        ..._Feedback.values.map((fb) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: DescriptionRadio<_Feedback>(
-                value: fb,
-                groupValue: _feedback,
-                label: fb.name,
-                onChanged: _onFeedbackChanged,
-              ),
-            )),
+        ..._Feedback.values.map(
+          (fb) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: LabeledRadio<_Feedback>(
+              value: fb,
+              groupValue: _feedback,
+              label: fb.name,
+              onChanged: _onFeedbackChanged,
+            ),
+          ),
+        ),
         const SizedBox(height: 14),
         LabeledTextField(
           label: 'Anything else?',

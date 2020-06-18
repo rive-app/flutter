@@ -2,8 +2,8 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
-class DescriptionRadio<T> extends StatelessWidget {
-  const DescriptionRadio({
+class LabeledRadio<T> extends StatelessWidget {
+  const LabeledRadio({
     @required this.value,
     @required this.groupValue,
     @required this.label,
