@@ -17,15 +17,14 @@ class NodeTranslateTransformer extends StageTransformer {
     Map<Node, Mat2D> worldToParents = {};
 
     var failedInversion = Mat2D();
-
+    // First assume we can use artboard level mouse move.
+    var constraintedDelta = details.artboardWorld.delta;
+    if (lockAxis != null) {
+      var d = Vec2D.dot(constraintedDelta, lockAxis);
+      constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
+    }
     for (final node in _nodes) {
-      // First assume we can use artboard level mouse move.
-      var delta = details.artboardWorld.delta;
-      if (lockAxis != null) {
-        var d = Vec2D.dot(delta, lockAxis);
-        delta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
-      }
-
+      var delta = constraintedDelta;
       // If it's a node, we have to get into its parent's space as that's where
       // its translation lives.
       if (node.parent is Node) {

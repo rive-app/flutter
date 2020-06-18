@@ -71,9 +71,6 @@ abstract class StageItem<T> extends SelectableItem
   /// The desired screen space stroke width for a selected StageItem.
   static const double strokeWidth = 2;
 
-  /// The desired screen space stroke width for the bounds of a StageItem.
-  static const double boundsStrokeWidth = 1;
-
   // Override this if you don't want this item to show up in the hierarchy tree.
   bool get showInHierarchy => true;
 
@@ -87,9 +84,14 @@ abstract class StageItem<T> extends SelectableItem
     ..strokeWidth = strokeWidth
     ..color = const Color(0xFF57A5E0);
 
+  static Paint boundsShadow = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3
+    ..color = const Color(0x26000000);
+
   static Paint boundsPaint = Paint()
     ..style = PaintingStyle.stroke
-    ..strokeWidth = boundsStrokeWidth
+    ..strokeWidth = 1
     ..color = const Color(0xFF57A5E0);
 
   static Paint backboardContrastPaint = Paint()
@@ -225,7 +227,13 @@ abstract class StageItem<T> extends SelectableItem
           draw,
           inWorldSpace: true,
           order: 1,
-        )
+        ),
+        if (isSelected)
+          StageDrawPass(
+            drawBounds,
+            inWorldSpace: false,
+            order: 10,
+          ),
       ];
 
   @override
@@ -234,38 +242,42 @@ abstract class StageItem<T> extends SelectableItem
   // Called when the stage either solos or cancels solo for this item.
   void onSoloChanged(bool isSolo) {}
 
-  void drawBounds(Canvas canvas, bool inWorldSpace) {
-    if (!inWorldSpace) {
-      canvas.save();
-      canvas.transform(stage.viewTransform.mat4);
-    }
+  void _drawBoundingRectangle(Canvas canvas, Mat2D transform, AABB bounds) {
+    var tl = Vec2D.transformMat2D(Vec2D(), bounds.topLeft, transform);
+    var tr = Vec2D.transformMat2D(Vec2D(), bounds.topRight, transform);
+    var br = Vec2D.transformMat2D(Vec2D(), bounds.bottomRight, transform);
+    var bl = Vec2D.transformMat2D(Vec2D(), bounds.bottomLeft, transform);
+
+    Path boundsPath = Path()
+      ..moveTo(tl[0].roundToDouble() + 0.5, tl[1].roundToDouble() + 0.5)
+      ..lineTo(tr[0].roundToDouble() + 0.5, tr[1].roundToDouble() + 0.5)
+      ..lineTo(br[0].roundToDouble() + 0.5, br[1].roundToDouble() + 0.5)
+      ..lineTo(bl[0].roundToDouble() + 0.5, bl[1].roundToDouble() + 0.5)
+      ..close();
+
+    canvas.drawPath(
+      boundsPath,
+      StageItem.boundsShadow,
+    );
+    canvas.drawPath(
+      boundsPath,
+      StageItem.boundsPaint,
+    );
+  }
+
+  void drawBounds(Canvas canvas, StageDrawPass drawPass) {
     if (obb != null) {
-      canvas.save();
-      canvas.transform(obb.transform.mat4);
-      var objectBounds = obb.bounds;
-      canvas.drawRect(
-        Rect.fromLTRB(
-          objectBounds[0],
-          objectBounds[1],
-          objectBounds[2],
-          objectBounds[3],
-        ),
-        StageItem.boundsPaint,
+      _drawBoundingRectangle(
+        canvas,
+        Mat2D.multiply(Mat2D(), stage.viewTransform, obb.transform),
+        obb.bounds,
       );
-      canvas.restore();
     } else {
-      canvas.drawRect(
-        Rect.fromLTRB(
-          aabb[0],
-          aabb[1],
-          aabb[2],
-          aabb[3],
-        ),
-        StageItem.selectedPaint,
+      _drawBoundingRectangle(
+        canvas,
+        stage.viewTransform,
+        aabb,
       );
-    }
-    if (!inWorldSpace) {
-      canvas.restore();
     }
   }
 }

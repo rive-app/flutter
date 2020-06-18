@@ -949,7 +949,6 @@ class Stage extends Debouncer {
     // Take this opportunity to update any stageItem paints that rely on the
     // zoom level.
     StageItem.selectedPaint.strokeWidth = StageItem.strokeWidth / _viewZoom;
-    StageItem.boundsPaint.strokeWidth = StageItem.boundsStrokeWidth / _viewZoom;
 
     if (movedView) {
       mouseMove(1, _lastMousePosition[0], _lastMousePosition[1]);

@@ -4,6 +4,7 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
+import 'package:rive_editor/rive/stage/items/stage_scale_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_translation_handle.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -15,11 +16,25 @@ import 'package:rive_editor/selectable_item.dart';
 
 abstract class TransformHandleTool extends StageTool
     with DraggableTool, TransformingTool {
-  final StageTranslationHandle _translateX = StageTranslationHandle(
-      color: const Color(0xFF16E7B3), direction: Vec2D.fromValues(1, 0));
-  final StageTranslationHandle _translateY = StageTranslationHandle(
-      color: const Color(0xFFFF929F), direction: Vec2D.fromValues(0, -1));
-  final StageRotationHandle _rotation = StageRotationHandle(showAxis: false);
+  final _translateX = StageTranslationHandle(
+    color: const Color(0xFF16E7B3),
+    direction: Vec2D.fromValues(1, 0),
+  );
+  final _translateY = StageTranslationHandle(
+    color: const Color(0xFFFF929F),
+    direction: Vec2D.fromValues(0, -1),
+  );
+
+  final _rotation = StageRotationHandle(showAxis: false);
+
+  final _scaleX = StageScaleHandle(
+    color: const Color(0xFF16E7B3),
+    direction: Vec2D.fromValues(1, 0),
+  );
+  final _scaleY = StageScaleHandle(
+    color: const Color(0xFFFF929F),
+    direction: Vec2D.fromValues(0, -1),
+  );
 
   SelectionContext<SelectableItem> _selectionContext;
   Set<Node> _nodes = {};
@@ -61,7 +76,9 @@ abstract class TransformHandleTool extends StageTool
   bool get hasTransformSelection =>
       _translateX.stage != null ||
       _translateY.stage != null ||
-      _rotation != null;
+      _rotation != null ||
+      _scaleX.stage != null ||
+      _scaleY.stage != null;
 
   void _selectionChanged() {
     var nodes = <Node>{};
@@ -84,10 +101,14 @@ abstract class TransformHandleTool extends StageTool
       stage.removeItem(_translateX);
       stage.removeItem(_translateY);
       stage.removeItem(_rotation);
+      stage.removeItem(_scaleX);
+      stage.removeItem(_scaleY);
     } else {
       stage.addItem(_translateX);
       stage.addItem(_translateY);
       stage.addItem(_rotation);
+      stage.addItem(_scaleX);
+      stage.addItem(_scaleY);
 
       _computeHandleTransform();
     }
@@ -105,6 +126,8 @@ abstract class TransformHandleTool extends StageTool
     _translateX.transform = first.worldTransform;
     _translateY.transform = first.worldTransform;
     _rotation.transform = first.worldTransform;
+    _scaleX.transform = first.worldTransform;
+    _scaleY.transform = first.worldTransform;
   }
 
   void _selectionTransformChanged() {

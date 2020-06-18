@@ -10,6 +10,15 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 /// A Node component as it's drawn on the stage.
 class StageNode extends StageItem<Node> with BoundsDelegate {
   @override
+  Iterable<StageDrawPass> get drawPasses => [
+        StageDrawPass(
+          draw,
+          inWorldSpace: true,
+          order: 2,
+        )
+      ];
+
+  @override
   AABB get aabb {
     var aabb = AABB
         .fromValues(
@@ -48,7 +57,7 @@ class StageNode extends StageItem<Node> with BoundsDelegate {
   static final Paint _nodeStroke = Paint()
     ..isAntiAlias = false
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.0
+    ..strokeWidth = 1.5
     ..blendMode = BlendMode.srcOver
     ..color = _pathColor;
 

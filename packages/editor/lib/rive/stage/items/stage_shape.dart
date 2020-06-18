@@ -68,8 +68,6 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
     canvas.drawPath(worldPath, StageItem.selectedPaint);
 
     canvas.restore();
-
-    drawBounds(canvas, drawPass.inWorldSpace);
   }
 
   @override

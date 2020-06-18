@@ -11,6 +11,18 @@ class AABB {
     return _buffer;
   }
 
+  Vec2D get topLeft => minimum;
+
+  Vec2D get topRight {
+    return Vec2D.fromValues(_buffer[2], _buffer[1]);
+  }
+
+  Vec2D get bottomRight => maximum;
+
+  Vec2D get bottomLeft {
+    return Vec2D.fromValues(_buffer[0], _buffer[3]);
+  }
+
   Vec2D get minimum {
     return Vec2D.fromValues(_buffer[0], _buffer[1]);
   }
