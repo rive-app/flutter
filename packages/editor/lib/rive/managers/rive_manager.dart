@@ -9,11 +9,15 @@ class RiveManager with Subscriptions {
   static final RiveManager _instance = RiveManager._();
   factory RiveManager() => _instance;
 
+  NotificationManager _notificationsManager;
+
   RiveManager._() {
+    _notificationsManager = NotificationManager();
     _attach();
   }
 
-  RiveManager.tester() {
+  RiveManager.tester(NotificationManager notificationManager) {
+    _notificationsManager = notificationManager;
     _attach();
   }
 
@@ -32,7 +36,7 @@ class RiveManager with Subscriptions {
     // the user opens the notifications panel
     if (newHomeSection == HomeSection.notifications &&
         Plumber().peek<NotificationCount>()?.count != 0) {
-      NotificationManager().markNotificationsRead();
+      _notificationsManager.markNotificationsRead();
     }
   }
 

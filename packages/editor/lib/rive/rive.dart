@@ -248,10 +248,6 @@ class Rive {
         ? SelectionMode.range
         : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
 
-    // TODO: fix this (should be tracked on rive not stage).
-    // _stage?.updateEditMode(
-    //     keyEvent.isShiftPressed ? EditMode.altMode1 : EditMode.normal);
-
     if (keyEvent is RawKeyDownEvent) {
       _pressed.add(_Key(keyEvent.logicalKey, keyEvent.physicalKey));
     } else if (keyEvent is RawKeyUpEvent) {

@@ -25,7 +25,6 @@ import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
-import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -111,7 +110,6 @@ class Stage extends Debouncer {
   Vec2D get worldMouse => _worldMouse;
   Offset localMouse = Offset.zero;
   bool _mouseDownSelected = false;
-  EditMode activeEditMode = EditMode.normal;
   bool _isHidingCursor = false;
   int _hoverOffsetIndex = -1;
 
@@ -1012,8 +1010,7 @@ class Stage extends Debouncer {
 
     _drawPasses.addAll(tool.drawPasses);
 
-    _drawPasses
-        .sort((StageDrawPass a, StageDrawPass b) => a.order - b.order);
+    _drawPasses.sort((StageDrawPass a, StageDrawPass b) => a.order - b.order);
 
     for (final pass in _drawPasses) {
       // Some items may not draw in world space. Change between world and screen

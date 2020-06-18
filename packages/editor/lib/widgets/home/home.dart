@@ -39,7 +39,6 @@ class _HomeState extends State<Home> {
     // If it is, show the getting started section
     final me = Plumber().peek<Me>();
     if (me.isFirstRun) {
-      print('First run required');
       Plumber().message<HomeSection>(HomeSection.getStarted);
     }
     // If this isn't a first run, then show the user's files

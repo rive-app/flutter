@@ -9,7 +9,6 @@ import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/path.dart' as core;
-import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -19,10 +18,6 @@ import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:utilities/restorer.dart';
-
-const Map<EditMode, DraggingMode> editModeMap = {
-  EditMode.altMode1: DraggingMode.symmetric
-};
 
 abstract class ShapeTool extends DrawableTool {
   @override

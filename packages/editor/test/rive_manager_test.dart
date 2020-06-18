@@ -1,19 +1,37 @@
 @Timeout(Duration(seconds: 1))
 
+import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 
 import 'helpers/test_helpers.dart';
 import 'helpers/test_models.dart';
 
+class MockTeamApi extends Mock implements TeamApi {
+  final host = '';
+}
+
+class MockNotificationsApi extends Mock implements NotificationsApi {
+  final host = '';
+}
+
 void main() {
   group('Rive Manager ', () {
+    TeamApi mockedTeamApi;
+    NotificationsApi mockedNotificationsApi;
     RiveManager riveManager;
+    NotificationManager notificationManager;
     setUp(() {
-      riveManager = RiveManager.tester();
+      mockedTeamApi = MockTeamApi();
+      mockedNotificationsApi = MockNotificationsApi();
+      notificationManager =
+          NotificationManager.tester(mockedNotificationsApi, mockedTeamApi);
+      riveManager = RiveManager.tester(notificationManager);
     });
     tearDown(() {
       Plumber().reset();
