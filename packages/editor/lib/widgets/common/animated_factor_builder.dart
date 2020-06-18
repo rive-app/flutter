@@ -25,6 +25,12 @@ class AnimatedFactorBuilderState extends State<AnimatedFactorBuilder>
   double _animatedFactor = 0;
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     controller = AnimationController(

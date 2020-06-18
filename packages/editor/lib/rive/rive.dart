@@ -227,7 +227,7 @@ class Rive {
             }
           : {},
     );
-
+    Plumber().message(value);
     selectedTab.value = value;
   }
 

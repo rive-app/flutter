@@ -77,12 +77,14 @@ class AlertDisplay extends StatelessWidget {
   final EditorAlert alert;
   final bool isVisible;
   final VoidCallback hidden;
+  final double topPadding;
 
   const AlertDisplay({
-    Key key,
-    this.alert,
-    this.isVisible,
+    @required this.alert,
+    @required this.isVisible,
     this.hidden,
+    this.topPadding = 0,
+    Key key,
   }) : super(key: key);
 
   Widget _clip(bool clip, Widget child) =>
@@ -101,7 +103,7 @@ class AlertDisplay extends StatelessWidget {
         child: AnimatedFactorBuilder(
             factor: isVisible ? 1 : 0,
             builder: (context, factor, child) {
-              if (factor == 0) {
+              if (factor == 0 && hidden != null) {
                 hidden();
               }
               return _clip(
@@ -110,8 +112,8 @@ class AlertDisplay extends StatelessWidget {
                   heightFactor: factor,
                   alignment: Alignment.bottomCenter,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.only(left: 20, right: 20, top: 20),
+                    padding: EdgeInsets.only(
+                        left: 20, right: 20, top: 20 + topPadding),
                     child: alert.build(context),
                   ),
                 ),

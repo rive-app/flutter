@@ -13,7 +13,9 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_core/runtime/runtime_importer.dart';
 import 'package:rive_editor/alerts_display.dart';
 import 'package:rive_editor/external_url.dart';
+import 'package:rive_editor/global_messages.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
+import 'package:rive_editor/rive/managers/global_message_manager.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -84,6 +86,7 @@ Future<void> main() async {
   SelectionManager();
   RiveManager();
   NotificationManager();
+  GlobalMessageManager();
 
   // Runs the app in a custom [Zone] (i.e. an execution context).
   // Provides a convenient way to capture all errors, so they can be reported
@@ -399,7 +402,6 @@ class EditorScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rive = RiveContext.of(context);
-
     return Column(
       children: [
         Container(
@@ -435,16 +437,23 @@ class EditorScaffold extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: ValueListenableBuilder<RiveTabItem>(
-            valueListenable: rive.selectedTab,
-            builder: (context, tab, _) {
-              switch (tab) {
-                case Rive.systemTab:
-                  return Home();
-                default:
-                  return const Editor();
-              }
-            },
+          child: Stack(
+            children: [
+              ValueListenableBuilder<RiveTabItem>(
+                valueListenable: rive.selectedTab,
+                builder: (context, tab, _) {
+                  switch (tab) {
+                    case Rive.systemTab:
+                      return Home();
+                    default:
+                      return const Editor();
+                  }
+                },
+              ),
+              Positioned.fill(
+                child: GlobalMessages(),
+              ),
+            ],
           ),
         ),
       ],

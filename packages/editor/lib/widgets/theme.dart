@@ -11,6 +11,7 @@ const black = Color(0xFF000000);
 const red = Color(0xFFFF5678);
 const purple = Color(0xFFD041AB);
 const transparent = Color(0x00000000);
+const transparent50 = Color(0x88FFFFFF);
 
 const _darkTreeLines = Color(0x33FFFFFF);
 
@@ -62,6 +63,7 @@ class RiveColors {
   // Backgrounds
   Color get panelBackgroundLightGrey => const Color(0xFFF1F1F1);
   Color get panelBackgroundDarkGrey => const Color(0xFF323232);
+  Color get globalMessageBackground => const Color(0xFF111111);
   Color get stageBackground => const Color(0xFF1D1D1D);
   Color get popupBackground => const Color(0xFFF1F1F1);
 
@@ -201,6 +203,11 @@ class RiveColors {
   // Revision Panel colors
   Color get selectedRevision => const Color(0xFF3E3E3E);
   Color get hoveredRevision => inspectorPillBackground;
+
+  Color get getTransparent50 => transparent50;
+  Color get getTransparent => transparent;
+  Color get getBlack => black;
+  Color get getWhite => white;
 }
 
 /// TextStyles used in the Rive Theme
