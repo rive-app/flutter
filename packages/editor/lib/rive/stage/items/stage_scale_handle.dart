@@ -143,6 +143,7 @@ class StageScaleHandle extends StageItem<void> with TransformerMaker {
 
   @override
   List<StageTransformer> makeTransformers() {
-    return [NodeScaleTransformer(lockAxis: computeAxis(), handle: this)];
+    return [NodeScaleTransformer(
+      lockAxis: direction, handle: this)];
   }
 }

@@ -15,11 +15,17 @@ import 'package:utilities/utilities.dart';
 /// Transformer that rotates [StageItem]'s with underlying [Node] components.
 class NodeScaleTransformer extends StageTransformer {
   List<Node> _nodes;
+
+  /// The scale transform is applied to world coordinates and then decomposed
+  /// into each object's parent's transform. This means that the scale must be
+  /// applied to the X and Y directly, not the transformed (rotated) X & Y.
+  /// Scale is inherently applied last so we don't need to rotate the lock axis
+  /// into world transform space.
   final Vec2D lockAxis;
   final StageScaleHandle handle;
   final TransformComponents transformComponents = TransformComponents();
 
-  final HashMap<Node, Mat2D> _inHandleSpace = HashMap<Node, Mat2D>();
+  final _inHandleSpace = HashMap<Node, Mat2D>();
 
   NodeScaleTransformer({this.handle, this.lockAxis}) {
     Mat2D.decompose(handle.transform, transformComponents);
@@ -32,12 +38,17 @@ class NodeScaleTransformer extends StageTransformer {
       var d = Vec2D.dot(constraintedDelta, lockAxis);
       constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
     }
+
     transformComponents.scaleX += constraintedDelta[0] * 0.01;
     transformComponents.scaleY -= constraintedDelta[1] * 0.01;
 
     var transform = Mat2D();
     Mat2D.compose(transform, transformComponents);
+
     for (final node in _nodes) {
+      // Mat2D.copy(node.worldTransform, transform);
+      // node.stageItem.stage.markNeedsRedraw();
+      // continue;
       var inHandleSpace = _inHandleSpace[node];
       if (inHandleSpace == null) {
         // directly manipulate the node.
@@ -66,8 +77,12 @@ class NodeScaleTransformer extends StageTransformer {
       if (threshold(node.y, components.y)) {
         node.y = components.y;
       }
+
       if (threshold(node.scaleX, components.scaleX)) {
         node.scaleX = components.scaleX;
+      }
+      if (threshold(node.scaleY, components.scaleY)) {
+        node.scaleY = components.scaleY;
       }
 
       var lastRotation = node.rotation;
