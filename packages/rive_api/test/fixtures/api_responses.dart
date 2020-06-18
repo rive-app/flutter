@@ -25,13 +25,15 @@ final successTeamsResponse = Response("""
     "name": "Team Titans",
     "username": "team_titans",
     "avatar": "https://cdn.2dimensions.com/avatars/krypton-41545-b131305f-6aba-4fe5-b797-a10035143fa0",
-    "permission": "Owner"
+    "permission": "Owner",
+    "status": "ACTIVE"
 }, {
     "ownerId": 41576,
     "name": "Avengers",
     "username": "avengers_101",
     "avatar": null,
-    "permission": "Member"
+    "permission": "Member",
+    "status": "ACTIVE"
 }]
 """, 200);
 

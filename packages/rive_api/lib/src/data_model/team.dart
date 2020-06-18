@@ -9,11 +9,13 @@ class TeamDM extends OwnerDM {
     @required String name,
     @required String username,
     @required this.permission,
-    this.avatarUrl,
+    @required this.avatarUrl,
+    @required this.status,
   }) : super(ownerId, name, username);
 
   final String avatarUrl;
   final String permission;
+  final String status;
 
   static Iterable<TeamDM> fromDataList(List<Map<String, dynamic>> data) =>
       data.map((d) => TeamDM.fromData(d));
@@ -24,6 +26,7 @@ class TeamDM extends OwnerDM {
         username: data.getString('username'),
         avatarUrl: data.getString('avatar'),
         permission: data.getString('permission'),
+        status: data.getString('status'),
       );
 
   @override

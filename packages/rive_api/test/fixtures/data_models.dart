@@ -13,7 +13,9 @@ TeamDM getTeam({int ownerId = 3}) {
       ownerId: ownerId,
       name: 'Team Titans',
       username: 'titans',
-      permission: 'Owner');
+      permission: 'Owner',
+      avatarUrl: null,
+      status: 'ACTIVE');
 }
 
 FolderDM getFolder(OwnerDM owner) {
