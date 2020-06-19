@@ -3,6 +3,7 @@ export 'src/data_model/billing_details.dart';
 export 'src/data_model/cdn.dart';
 export 'src/data_model/file.dart';
 export 'src/data_model/folder.dart';
+export 'src/data_model/history_charge.dart';
 export 'src/data_model/me.dart';
 export 'src/data_model/notification.dart';
 export 'src/data_model/owner.dart';

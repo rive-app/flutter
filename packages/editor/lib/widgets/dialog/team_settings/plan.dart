@@ -58,20 +58,23 @@ class _PlanState extends State<PlanSettings>
 
   void _refreshData() {
     // Fetch current team billing data from the backend.
-    PlanSubscriptionPackage.fetchData(widget.api, widget.team).then(
-      (value) => setState(
-        () {
-          var oldPlan = _plan;
-          _plan = value;
-          _controller.value = _plan.option == TeamsOption.basic ? 1 : 0;
+    PlanSubscriptionPackage.fetchData(widget.api, widget.team).then((value) {
+      // Don't call if already disposed.
+      if (mounted) {
+        setState(
+          () {
+            var oldPlan = _plan;
+            _plan = value;
+            _controller.value = _plan.option == TeamsOption.basic ? 1 : 0;
 
-          // Toggle upon receiving the new value.
-          // _toggleController();
-          _plan.addListener(_onSubChange);
-          oldPlan?.dispose();
-        },
-      ),
-    );
+            // Toggle upon receiving the new value.
+            // _toggleController();
+            _plan.addListener(_onSubChange);
+            oldPlan?.dispose();
+          },
+        );
+      }
+    });
   }
 
   void _onSubChange() => setState(_toggleController);
@@ -564,7 +567,7 @@ class _BillState extends State<BillCalculator> {
                 TextSpan(
                   text: plan.isActive
                       ? plan.nextDueDescription
-                      : DateTime.now().description,
+                      : DateTime.now().shortDescription,
                   style: textStyles.fileGreyTextLarge.copyWith(
                     fontSize: 13,
                     height: 1.15,

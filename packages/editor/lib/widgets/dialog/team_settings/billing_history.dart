@@ -5,6 +5,7 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/external_url.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
@@ -13,6 +14,8 @@ import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/team_settings/panel_section.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:utilities/utilities.dart';
 
 enum NetworkResponse { ok, error }
 
@@ -27,9 +30,6 @@ class BillingHistory extends StatefulWidget {
 }
 
 class _BillingHistoryState extends State<BillingHistory> {
-  // TODO: fetch history from the backend.
-  final billingHistory = BillingHistoryPackage();
-
   BillingDetails _billingDetails;
   String _name, _tax, _address;
   bool _canUpdate = false;
@@ -37,55 +37,96 @@ class _BillingHistoryState extends State<BillingHistory> {
 
   @override
   void initState() {
-    TeamManager().getBillingDetails(widget.team).then((val) {
-      // No need to setState() as getBillingDetails() will send a message
-      // through the plumber and update the widget anyway.
-      _billingDetails = val;
-      _name = _billingDetails.businessName;
-      _tax = _billingDetails.taxId;
-      _address = _billingDetails.businessAddress;
-    });
+    // Starte fetching data.
+    TeamManager().getCharges(widget.team);
     super.initState();
   }
 
-  Widget _receiptColumn(BuildContext context, String header, List<String> rows,
-      {CrossAxisAlignment columnAlignemnt = CrossAxisAlignment.start}) {
-    final theme = RiveTheme.of(context);
-    final styles = theme.textStyles;
-
-    final headerStyle =
-        styles.notificationHeader.copyWith(fontSize: 13, height: 1.6);
-    final successStyle =
-        styles.notificationHeaderSelected.copyWith(fontSize: 13, height: 1.6);
-    final failedStyle =
-        styles.hierarchyTabActive.copyWith(fontSize: 13, height: 1.6);
+  Widget _receiptColumn(
+    String header,
+    List<Widget> rows, {
+    CrossAxisAlignment columnAlignemnt = CrossAxisAlignment.start,
+  }) {
+    final styles = RiveTheme.of(context).textStyles;
+    final headerStyle = styles.receiptHeader;
 
     return Expanded(
-        child: Column(crossAxisAlignment: columnAlignemnt, children: [
-      Text(header, style: headerStyle),
-      for (int i = 0; i < rows.length; i++)
-        Padding(
-            padding: const EdgeInsets.only(top: 24),
-            child: Text(rows[i],
-                style:
-                    billingHistory.statuses[i] ? successStyle : failedStyle)),
-    ]));
+      child: Column(
+        crossAxisAlignment: columnAlignemnt,
+        children: [
+          Text(header, style: headerStyle),
+          ...rows
+              .map<Widget>((row) => Padding(
+                    padding: const EdgeInsets.only(top: 24),
+                    child: row,
+                  ))
+              .toList(growable: false),
+        ],
+      ),
+    );
   }
 
-  Widget _billingHistory(BuildContext context) {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-      _receiptColumn(context, 'Date', billingHistory.dates),
-      _receiptColumn(context, 'Amount', billingHistory.amounts),
-      _receiptColumn(
-          context,
-          'Status',
-          billingHistory.statuses
-              .map<String>((e) => e ? 'Success' : 'Failed')
-              .toList(growable: false)),
-      _receiptColumn(context, 'Description', billingHistory.descriptions),
-      _receiptColumn(context, 'Receipts', billingHistory.receipts,
-          columnAlignemnt: CrossAxisAlignment.end),
-    ]);
+  Future<void> _launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launchUrl(url);
+    }
+  }
+
+  Widget _billingHistory(BillingDetails details) {
+    final styles = RiveTheme.of(context).textStyles;
+    final successStyle = styles.receiptRow;
+    final failedStyle = styles.receiptRowFailed;
+
+    final List<Widget> dates = [],
+        amounts = [],
+        descriptions = [],
+        urls = [],
+        statuses = [];
+
+    for (final receipt in details.receipts) {
+      final isPaid = receipt.successful;
+      final rowStyle = isPaid ? successStyle : failedStyle;
+      dates.add(Text(receipt.created.description, style: rowStyle));
+      amounts.add(
+        Text(
+          '\$${(receipt.amount / 100).toStringAsFixed(2)}',
+          style: rowStyle,
+        ),
+      );
+      statuses.add(
+        Text(isPaid ? 'Success' : 'Failed', style: rowStyle),
+      );
+      descriptions.add(Text(receipt.description ?? 'n/a', style: rowStyle));
+      urls.add(
+        isPaid
+            ? GestureDetector(
+                onTap: () =>
+                    _launchUrl('${RiveApi().host}${receipt.receiptUrl}'),
+                child: Text(
+                  'PDF',
+                  style: rowStyle.copyWith(
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              )
+            : const SizedBox(),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _receiptColumn('Date', dates),
+        _receiptColumn('Amount', amounts),
+        _receiptColumn('Status', statuses),
+        _receiptColumn('Description', descriptions),
+        _receiptColumn(
+          'Receipts',
+          urls,
+          columnAlignemnt: CrossAxisAlignment.end,
+        ),
+      ],
+    );
   }
 
   Widget _textFieldRow(List<Widget> children) {
@@ -247,7 +288,7 @@ class _BillingHistoryState extends State<BillingHistory> {
                 style: styles.fileGreyTextLarge,
               ),
               const SizedBox(height: 30),
-              _billingHistory(context)
+              _billingHistory(snapshot.data)
             ],
           );
         } else if (snapshot.hasError) {
@@ -272,23 +313,4 @@ class _BillingHistoryState extends State<BillingHistory> {
       },
     );
   }
-}
-
-class BillingHistoryPackage {
-  // TODO: connect with backend.
-  List<String> dates = [
-    'January 1, 2020',
-    'December 5, 2019',
-    'December 3, 2019',
-    'November 3, 2019',
-  ];
-  List<String> amounts = ['\$168', '\$168', '\$168', '\$168'];
-  List<bool> statuses = [true, true, false, true];
-  List<String> descriptions = [
-    'Pro (Monthly)',
-    'Pro (Monthly)',
-    'Pro (Monthly)',
-    'Pro (Monthly)',
-  ];
-  List<String> receipts = ['PDF', 'PDF', '', 'PDF'];
 }

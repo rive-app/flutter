@@ -236,7 +236,7 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
       notifyListeners();
     }
 
-    var newDue = billing.brand == null ? 'n/a' : '${_nextDue.description}';
+    var newDue = billing.brand == null ? 'n/a' : '${_nextDue.shortDescription}';
     if (_nextDueDescription != newDue) {
       _nextDueDescription = newDue;
       notifyListeners();

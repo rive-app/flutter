@@ -31,6 +31,37 @@ extension DateExtensions on DateTime {
     }
   }
 
+  String get monthName {
+    switch (month) {
+      case 1:
+        return 'January';
+      case 2:
+        return 'February';
+      case 3:
+        return 'March';
+      case 4:
+        return 'April';
+      case 5:
+        return 'May';
+      case 6:
+        return 'June';
+      case 7:
+        return 'July';
+      case 8:
+        return 'August';
+      case 9:
+        return 'September';
+      case 10:
+        return 'October';
+      case 11:
+        return 'Novemver';
+      case 12:
+        return 'December';
+      default:
+        throw RangeError("Month out of range [1..12]: $month");
+    }
+  }
+
   String get shortMonthName {
     switch (month) {
       case 1:
@@ -64,6 +95,9 @@ extension DateExtensions on DateTime {
 
   // Returns a description of this date in the format "MMM D, YYYY"
   // e.g. Sep 26, 1989
-  String get description => '$shortMonthName $day, $year';
+  String get shortDescription => '$shortMonthName $day, $year';
+  // Returns a description of this date in the format "MMMM D, YYYY"
+  // e.g. September 26, 1989
+  String get description => '$monthName $day, $year';
 
 }

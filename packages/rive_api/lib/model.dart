@@ -5,6 +5,7 @@ export 'src/model/folder.dart';
 export 'src/model/folder_contents.dart';
 export 'src/model/folder_tree.dart';
 export 'src/model/global_message.dart';
+export 'src/model/history_charge.dart';
 export 'src/model/me.dart';
 export 'src/model/named.dart';
 export 'src/model/notification.dart';

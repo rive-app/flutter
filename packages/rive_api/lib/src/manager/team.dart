@@ -105,11 +105,10 @@ class TeamManager with Subscriptions {
   Future<bool> saveToken(Team team, String token) async =>
       _teamApi.saveToken(team.ownerId, token);
 
-  Future<BillingDetails> getBillingDetails(Team team) async {
-    final detailsDM = await _teamApi.getReceiptDetails(team.ownerId);
+  Future<void> getCharges(Team team) async {
+    final detailsDM = await _teamApi.getBillingHistory(team.ownerId);
     final details = BillingDetails.fromDM(detailsDM);
     _plumber.message<BillingDetails>(details, team.hashCode);
-    return details;
   }
 
   Future<bool> setBillingDetails(Team team, BillingDetails details) async {

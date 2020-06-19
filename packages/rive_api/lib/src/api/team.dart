@@ -156,10 +156,10 @@ class TeamApi {
     }
   }
 
-  Future<BillingDetailsDM> getReceiptDetails(int teamId) async {
+  Future<BillingDetailsDM> getBillingHistory(int teamId) async {
     try {
       var response =
-          await api.get('${api.host}/api/teams/$teamId/billing-details');
+          await api.get('${api.host}/api/teams/$teamId/charges');
       final data = json.decodeMap(response.body);
       return BillingDetailsDM.fromData(data);
     } on ApiException catch (apiException) {

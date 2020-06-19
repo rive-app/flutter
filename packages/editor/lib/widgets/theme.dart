@@ -475,6 +475,22 @@ class TextStyles {
         color: Color(0xFF666666),
         fontSize: 13,
       );
+
+  // Billing History
+  TextStyle get receiptHeader => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: Color(0xFF888888),
+        fontSize: 13,
+        height: 1.6,
+      );
+
+  TextStyle get receiptRow => receiptHeader.copyWith(
+        color: const Color(0xFF333333),
+      );
+
+  TextStyle get receiptRowFailed => receiptHeader.copyWith(
+        color: const Color(0xFFAAAAAA),
+      );
 }
 
 /// Gradients used in the Rive Theme
