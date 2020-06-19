@@ -2,8 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_core/math/aabb.dart';
+import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_core/math/vec2d.dart';
 
 abstract class RiveRenderBox extends RenderBox {

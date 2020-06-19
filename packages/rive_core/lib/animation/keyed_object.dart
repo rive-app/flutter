@@ -21,7 +21,6 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
   Iterable<KeyedProperty> get keyedProperties => _keyedProperties.values;
 
   final Event _keyframesMoved = Event();
-  //component.whenDeleted(_removeAll); Dispatches whenever one or many keyframes have their time changed.
   Listenable get keyframesMoved => _keyframesMoved;
 
   @override
@@ -39,9 +38,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
         animation.internalAddKeyedObject(this);
       }
     }
-    // <- editor-only
 
-    // TODO: shouldn't this be editor only?
     // Validate the object we're keying actually exists. By the time "onAdded"
     // is called, the file should be in a stable state.
     Component component;
@@ -53,6 +50,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     } else {
       component.whenRemoved(_removeAll);
     }
+    // <- editor-only
   }
 
   void _removeAll() {

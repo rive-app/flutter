@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive/rive_core/rive_animation_controller.dart';
 import 'package:rive/rive_file.dart';
 import 'package:rive/rive_renderer.dart';
 import 'package:rive/controllers/simple_controller.dart';
-import 'package:rive/rive_core/rive_animation_controller.dart';
 
 void main() {
   runApp(MyApp());
@@ -41,13 +41,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    rootBundle.load('assets/draworderanimation_3.riv').then(
+    rootBundle.load('assets/web_&_desktop_2.riv').then(
       (data) async {
         var file = RiveFile();
         var success = file.import(data);
         if (success) {
           file.mainArtboard.addController(
-            _controller = SimpleAnimation('DrawOrder'),
+            _controller = SimpleAnimation('Untitled 1'),
           );
           setState(() => _rive = file);
         }

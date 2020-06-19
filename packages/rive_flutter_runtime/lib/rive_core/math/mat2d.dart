@@ -51,7 +51,7 @@ class Mat2D {
   Mat2D.clone(Mat2D copy) {
     _buffer = Float32List.fromList(copy.values);
   }
-  static void fromRotation(Mat2D o, double rad) {
+  static Mat2D fromRotation(Mat2D o, double rad) {
     double s = sin(rad);
     double c = cos(rad);
     o[0] = c;
@@ -60,6 +60,7 @@ class Mat2D {
     o[3] = c;
     o[4] = 0.0;
     o[5] = 0.0;
+    return o;
   }
 
   static void copy(Mat2D o, Mat2D f) {
@@ -104,7 +105,7 @@ class Mat2D {
     o[3] *= y;
   }
 
-  static void multiply(Mat2D o, Mat2D a, Mat2D b) {
+  static Mat2D multiply(Mat2D o, Mat2D a, Mat2D b) {
     double a0 = a[0],
         a1 = a[1],
         a2 = a[2],
@@ -123,6 +124,7 @@ class Mat2D {
     o[3] = a1 * b2 + a3 * b3;
     o[4] = a0 * b4 + a2 * b5 + a4;
     o[5] = a1 * b4 + a3 * b5 + a5;
+    return o;
   }
 
   static void cCopy(Mat2D o, Mat2D a) {
@@ -167,6 +169,12 @@ class Mat2D {
     x = m[2];
     y = m[3];
     s[1] = y.sign * sqrt(x * x + y * y);
+  }
+
+  static Vec2D getTranslation(Mat2D m, Vec2D t) {
+    t[0] = m[4];
+    t[1] = m[5];
+    return t;
   }
 
   static void identity(Mat2D mat) {

@@ -1,3 +1,4 @@
+import 'dart:math';
 import "dart:typed_data";
 import "vec2d.dart";
 
@@ -75,5 +76,11 @@ class TransformComponents {
 
   Vec2D get scale {
     return Vec2D.fromValues(_buffer[2], _buffer[3]);
+  }
+
+  @override
+  String toString() {
+    return 'TransformComponents(x: $x y: $y sx: $scaleX '
+        'sy: $scaleY r: ${rotation / pi * 180} s: $skew)';
   }
 }

@@ -17,6 +17,8 @@ abstract class GradientDelegate extends BoundsDelegate {
 class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   final List<GradientStop> gradientStops = [];
   GradientDelegate _delegate;
+  @override
+  Component get timelineProxy => parent;
   final Event stopsChanged = Event();
   bool _paintsInWorldSpace = true;
   bool get paintsInWorldSpace => _paintsInWorldSpace;

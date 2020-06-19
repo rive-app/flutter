@@ -107,6 +107,7 @@ abstract class Component extends ComponentBase<RuntimeArtboard>
   @override
   Set<Component> get dependents => _dependents;
   Component get timelineParent => null;
+  Component get timelineProxy => this;
   String get timelineParentGroup => null;
   bool addDependent(Component dependent) {
     assert(dependent != null, "Dependent cannot be null.");
@@ -187,13 +188,4 @@ abstract class Component extends ComponentBase<RuntimeArtboard>
   void remove() => context?.removeObject(this);
   @override
   void nameChanged(String from, String to) {}
-  final Set<VoidCallback> _whenDeleted = {};
-  bool whenDeleted(VoidCallback callback) => _whenDeleted.add(callback);
-  void onDelete() {
-    var cbs = _whenDeleted.toList();
-    _whenDeleted.clear();
-    for (final cb in cbs) {
-      cb();
-    }
-  }
 }

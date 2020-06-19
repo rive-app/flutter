@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive/rive_core/artboard.dart';
-import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_core/math/aabb.dart';
+import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_render_box.dart';
 import 'package:rive/src/runtime_artboard.dart';
 
@@ -44,7 +44,6 @@ class RiveRenderer extends LeafRenderObjectWidget {
 }
 
 class RiveRenderObject extends RiveRenderBox {
-
   RuntimeArtboard _artboard;
   RuntimeArtboard get artboard => _artboard;
   set artboard(Artboard value) {
@@ -72,6 +71,11 @@ class RiveRenderObject extends RiveRenderBox {
 
   @override
   bool advance(double elapsedSeconds) => _artboard.advance(elapsedSeconds);
+
+  @override
+  void beforeDraw(Canvas canvas, Offset offset) {
+    canvas.clipRect(offset & size);
+  }
 
   @override
   void draw(Canvas canvas, Mat2D viewTransform) {

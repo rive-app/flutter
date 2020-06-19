@@ -22,8 +22,8 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
   }) {
     this.x = x;
     this.y = y;
-    this.inPoint = Vec2D.fromValues(inX ?? inPoint[0], inY ?? inPoint[1]);
-    this.outPoint = Vec2D.fromValues(outX ?? outPoint[0], outY ?? outPoint[1]);
+    _inPoint = Vec2D.fromValues(inX ?? inPoint[0], inY ?? inPoint[1]);
+    _outPoint = Vec2D.fromValues(outX ?? outPoint[0], outY ?? outPoint[1]);
   }
 
   @override
@@ -35,6 +35,7 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
             cos(outRotation) * outDistance, sin(outRotation) * outDistance));
   }
 
+  // -> editor-only
   @override
   set outPoint(Vec2D value) {
     var lastRotation = outRotation;
@@ -49,6 +50,7 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
               sin(outRotation - lastRotation), cos(outRotation - lastRotation));
     }
   }
+  // <- editor-only
 
   @override
   Vec2D get inPoint {
@@ -59,6 +61,7 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
             cos(inRotation) * inDistance, sin(inRotation) * inDistance));
   }
 
+  // -> editor-only
   @override
   set inPoint(Vec2D value) {
     var lastRotation = inRotation;
@@ -66,12 +69,13 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
     inDistance = Vec2D.length(diffIn);
     inRotation = atan2(diffIn[1], diffIn[0]);
     _inPoint = Vec2D.clone(value);
-    
+
     if (accumulateAngle) {
       inRotation = lastRotation +
           atan2(sin(inRotation - lastRotation), cos(inRotation - lastRotation));
     }
   }
+  // <- editor-only
 
   @override
   String toString() {

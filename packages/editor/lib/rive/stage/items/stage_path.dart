@@ -51,7 +51,5 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
 
     canvas.drawPath(path.uiPath, StageItem.selectedPaint);
     canvas.restore();
-
-    drawBounds(canvas, drawPass.inWorldSpace);
   }
 }

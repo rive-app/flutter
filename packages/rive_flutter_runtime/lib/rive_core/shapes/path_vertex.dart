@@ -4,14 +4,14 @@ import 'package:rive/rive_core/shapes/path.dart';
 import 'package:rive/src/generated/shapes/path_vertex_base.dart';
 export 'package:rive/src/generated/shapes/path_vertex_base.dart';
 
-enum VertexControlType { straight, mirrored, detached, asymmetric }
-
 abstract class PathVertex extends PathVertexBase {
   Path get path => parent as Path;
-  VertexControlType get controlType => VertexControlType.straight;
   @override
   void update(int dirt) {}
-  Vec2D get translation => Vec2D.fromValues(x, y);
+  Vec2D get translation {
+    return Vec2D.fromValues(x, y);
+  }
+
   set translation(Vec2D value) {
     x = value[0];
     y = value[1];

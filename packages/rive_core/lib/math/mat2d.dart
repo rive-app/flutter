@@ -56,7 +56,7 @@ class Mat2D {
     _buffer = Float32List.fromList(copy.values);
   }
 
-  static void fromRotation(Mat2D o, double rad) {
+  static Mat2D fromRotation(Mat2D o, double rad) {
     double s = sin(rad);
     double c = cos(rad);
     o[0] = c;
@@ -65,6 +65,7 @@ class Mat2D {
     o[3] = c;
     o[4] = 0.0;
     o[5] = 0.0;
+    return o;
   }
 
   static void copy(Mat2D o, Mat2D f) {

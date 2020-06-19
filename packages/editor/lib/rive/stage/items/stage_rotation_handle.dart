@@ -42,6 +42,7 @@ class StageRotationHandle extends StageItem<void> with TransformerMaker {
 
   static const double radius = 60;
   static const double selectionThreshold = 10;
+  static const double centerRadius = 5;
   static const double hitMin = radius - selectionThreshold;
   static const double hitMax = radius + selectionThreshold;
   static const double squaredSelectionThreshold =
@@ -125,8 +126,8 @@ class StageRotationHandle extends StageItem<void> with TransformerMaker {
   @override
   void draw(Canvas canvas, StageDrawPass drawPass) {
     var slicePaint = Paint()
-    ..style = PaintingStyle.fill
-    ..color = const Color(0x80FFF1BE);
+      ..style = PaintingStyle.fill
+      ..color = const Color(0x80FFF1BE);
     if (_sliceStart != null) {
       var screenPosition =
           Vec2D.transformMat2D(Vec2D(), translation, stage.viewTransform);
@@ -135,6 +136,18 @@ class StageRotationHandle extends StageItem<void> with TransformerMaker {
 
       canvas.translate(screenPosition[0].roundToDouble() - 0.5,
           screenPosition[1].roundToDouble() - 0.5);
+
+      // Cut out the center.
+      var centerCut = Path()
+        ..fillType = PathFillType.evenOdd
+        ..addRect(Rect.fromCircle(center: Offset.zero, radius: radius + 10))
+        ..addOval(
+          Rect.fromCircle(
+            center: Offset.zero,
+            radius: centerRadius,
+          ),
+        );
+      canvas.clipPath(centerCut);
 
       // canvas.drawCircle(Offset.zero, radius, paint);
       var rect = Rect.fromCircle(center: Offset.zero, radius: radius);

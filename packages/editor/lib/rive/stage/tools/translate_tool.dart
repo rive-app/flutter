@@ -7,11 +7,15 @@ import 'package:rive_editor/rive/stage/tools/transformers/translation/artboard_t
 import 'package:rive_editor/rive/stage/tools/transformers/translation/node_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/gradient_stop_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/path_vertex_translate_transformer.dart';
-import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
+import 'package:rive_editor/rive/stage/tools/transform_handle_tool.dart';
 
-import 'stage_tool.dart';
+class TranslateTool extends TransformHandleTool {
+  TranslateTool()
+      : super(
+          hasRotationHandle: false,
+          hasScaleHandles: false,
+        );
 
-class TranslateTool extends StageTool with TransformingTool {
   @override
   Iterable<PackedIcon> get icon => PackedIcon.toolTranslate;
 
@@ -22,18 +26,26 @@ class TranslateTool extends StageTool with TransformingTool {
       ];
 
   @override
-  List<StageTransformer> get transformers => [
-        // gradient stop transformers must come before other transformers in
-        // order to allow them to cull nodes from the transformation set
-        GradientStopTranslateTransformer(),
+  bool get showRotationHandle => false;
 
-        ArtboardTranslateTransformer(),
+  @override
+  bool get showScaleHandle => false;
 
-        NodeTranslateTransformer(),
+  @override
+  List<StageTransformer> get transformers => isTransforming
+      ? super.transformers
+      : [
+          // gradient stop transformers must come before other transformers in
+          // order to allow them to cull nodes from the transformation set
+          GradientStopTranslateTransformer(),
 
-        PathVertexTranslateTransformer(),
-      ];
+          ArtboardTranslateTransformer(),
 
+          NodeTranslateTransformer(),
+
+          PathVertexTranslateTransformer(),
+        ];
+  
   static final TranslateTool instance = TranslateTool();
 
   @override

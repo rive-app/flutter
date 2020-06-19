@@ -308,6 +308,7 @@ abstract class Path extends PathBase {
 
     return bounds;
   }
+  // <- editor-only
 
   AABB preciseComputeBounds(List<PathVertex> renderPoints, Mat2D transform) {
     if (renderPoints.isEmpty) {
@@ -498,5 +499,4 @@ abstract class Path extends PathBase {
 
     return bounds;
   }
-  // <- editor-only
 }

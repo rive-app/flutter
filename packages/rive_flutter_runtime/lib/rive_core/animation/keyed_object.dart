@@ -3,7 +3,6 @@ import 'package:rive/src/core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive/rive_core/animation/keyed_property.dart';
-import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/event.dart';
 import 'package:rive/src/generated/animation/keyed_object_base.dart';
 export 'package:rive/src/generated/animation/keyed_object_base.dart';
@@ -17,18 +16,7 @@ class KeyedObject extends KeyedObjectBase<RuntimeArtboard> {
   final Event _keyframesMoved = Event();
   Listenable get keyframesMoved => _keyframesMoved;
   @override
-  void onAdded() {
-    Component component;
-    if (objectId == null ||
-        (component = context?.resolve<Component>(objectId)) == null) {
-      _log.finest('Removing KeyedObject as we couldn\'t '
-          'resolve an object with id $objectId.');
-      _removeAll();
-    } else {
-      component.whenDeleted(_removeAll);
-    }
-  }
-
+  void onAdded() {}
   void _removeAll() {
     assert(context != null);
     var kps = _keyedProperties.values.toList(growable: false);
@@ -62,7 +50,8 @@ class KeyedObject extends KeyedObjectBase<RuntimeArtboard> {
     if (_keyedProperties.isEmpty) {
       context.removeObject(this);
     }
-    assert(removed == null || removed == property);
+    assert(removed == null || removed == property,
+        '$removed was not $property or null');
     return removed != null;
   }
 

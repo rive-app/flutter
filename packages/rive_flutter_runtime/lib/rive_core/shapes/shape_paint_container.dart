@@ -1,12 +1,12 @@
-import 'dart:ui';
 import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/event.dart';
+import 'package:rive/rive_core/math/aabb.dart';
 import 'package:rive/rive_core/math/mat2d.dart';
+import 'package:rive/rive_core/math/vec2d.dart';
 import 'package:rive/rive_core/shapes/paint/fill.dart';
 import 'package:meta/meta.dart';
 import 'package:rive/rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive/rive_core/shapes/paint/stroke.dart';
-import 'package:rive/rive_core/transform_space.dart';
 
 abstract class ShapePaintContainer {
   final Set<Fill> fills = {};
@@ -58,9 +58,11 @@ abstract class ShapePaintContainer {
     return false;
   }
 
-  Rect computeBounds(TransformSpace space);
+  AABB get worldBounds;
+  AABB get localBounds;
   bool addDirt(int value, {bool recurse = false});
   bool addDependent(Component dependent);
   void appendChild(Component child);
   Mat2D get worldTransform;
+  Vec2D get worldTranslation;
 }
