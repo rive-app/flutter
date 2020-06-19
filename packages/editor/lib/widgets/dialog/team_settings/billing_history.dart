@@ -72,6 +72,14 @@ class _BillingHistoryState extends State<BillingHistory> {
     }
   }
 
+  String getReceiptAmount(int amount) {
+    double inDollars = amount / 100;
+    if (inDollars == inDollars.roundToDouble()) {
+      return '\$${inDollars.toStringAsFixed(0)}';
+    }
+    return '\$${inDollars.toStringAsFixed(2)}';
+  }
+
   Widget _billingHistory(BillingDetails details) {
     final styles = RiveTheme.of(context).textStyles;
     final successStyle = styles.receiptRow;
@@ -87,12 +95,7 @@ class _BillingHistoryState extends State<BillingHistory> {
       final isPaid = receipt.successful;
       final rowStyle = isPaid ? successStyle : failedStyle;
       dates.add(Text(receipt.created.description, style: rowStyle));
-      amounts.add(
-        Text(
-          '\$${(receipt.amount / 100).toStringAsFixed(2)}',
-          style: rowStyle,
-        ),
-      );
+      amounts.add(Text(getReceiptAmount(receipt.amount), style: rowStyle));
       statuses.add(
         Text(isPaid ? 'Success' : 'Failed', style: rowStyle),
       );
