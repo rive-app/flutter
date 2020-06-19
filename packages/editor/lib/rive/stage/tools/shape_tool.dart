@@ -14,12 +14,12 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/create_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:utilities/restorer.dart';
 
-abstract class ShapeTool extends DrawableTool {
+abstract class ShapeTool extends CreateTool {
   @override
   Iterable<PackedIcon> get cursorName => PackedIcon.cursorAdd;
 
@@ -116,6 +116,7 @@ abstract class ShapeTool extends DrawableTool {
     // Don't need to null this as it protects against multiple calls internally.
     _restoreAutoKey?.restore();
     _shape = null;
+    super.endDrag();
   }
 
   @override
