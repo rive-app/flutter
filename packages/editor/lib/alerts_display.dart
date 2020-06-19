@@ -36,7 +36,7 @@ class _AlertsDisplayState extends State<AlertsDisplay> {
 
         var display = _lastAlerts.toList().reversed;
         if (display.isEmpty) {
-          return const SizedBox(height: 0);
+          return const SizedBox();
         }
         return HitDeny(
           // Hit deny to prevent clicking on scroll view (we need to hit the

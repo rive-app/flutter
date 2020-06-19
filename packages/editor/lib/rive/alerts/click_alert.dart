@@ -36,7 +36,7 @@ class ClickAlert extends EditorAlert {
             label: buttonLabel,
             color: theme.colors.commonDarkGrey,
             textColor: theme.colors.getWhite,
-            onTap: () => {callback()},
+            onTap: callback,
           )
         ],
       ),

@@ -30,7 +30,7 @@ class _GlobalMessagesState extends State<GlobalMessages> {
       stream: Plumber().getStream<GlobalMessage>(),
       builder: (context, message) {
         if (message.data == null) {
-          return const SizedBox(height: 0);
+          return const SizedBox();
         }
 
         var alert = (message.data.callback != null)

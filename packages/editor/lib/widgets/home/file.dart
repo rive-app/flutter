@@ -54,36 +54,33 @@ class BrowserFile extends StatelessWidget {
           RiveContext.of(context).open(file.fileOwnerId, file.id, file.name);
         }
       },
-      child: Stack(children: [
-        Container(
-          decoration: BoxDecoration(
-            color: colors.fileBackgroundLightGrey,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: selected
-                  ? colors.fileSelectedBlue
-                  : colors.fileBrowserBackground,
-              width: 4,
-            ),
-          ),
-          child: Container(
-            foregroundDecoration: BoxDecoration(
-              color:
-                  suspended ? colors.getTransparent50 : colors.getTransparent,
-              backgroundBlendMode: BlendMode.overlay,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  child: _screenshot(context),
-                ),
-                _label(context),
-              ],
-            ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.fileBackgroundLightGrey,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? colors.fileSelectedBlue
+                : colors.fileBrowserBackground,
+            width: 4,
           ),
         ),
-      ]),
+        child: Container(
+          foregroundDecoration: BoxDecoration(
+            color: suspended ? colors.getTransparent50 : colors.getTransparent,
+            backgroundBlendMode: BlendMode.overlay,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: _screenshot(context),
+              ),
+              _label(context),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
