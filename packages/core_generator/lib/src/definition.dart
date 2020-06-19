@@ -741,8 +741,9 @@ class Definition {
           ctxCode.writeln('break;');
         }
       }
+      ctxCode.writeln('}}');
     }
-    ctxCode.writeln('}}');
+
     if (!config.isRuntime) {
       ctxCode.writeln('static bool animates(int propertyKey) {'
           'switch(propertyKey) {');

@@ -24,11 +24,11 @@ import 'package:rive_core/src/generated/artboard_base.dart';
 
 export 'package:rive_core/src/generated/artboard_base.dart';
 
+// -> editor-only
 abstract class ArtboardDelegate extends BoundsDelegate {
   void markNameDirty();
 }
 
-// -> editor-only
 class AnimationList extends FractionallyIndexedList<Animation> {
   @override
   FractionalIndex orderOf(Animation animation) {
@@ -60,6 +60,10 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   // -> editor-only
   /// An event fired when the draw order changed,
   final Event drawOrderChanged = Event();
+  ArtboardDelegate _delegate;
+
+  /// Event notified whenever the animations list changes.
+  final Event animationsChanged = Event();
   // <- editor-only
 
   /// Artboard are one of the few (only?) components that can be orphaned.
@@ -67,17 +71,12 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   bool get canBeOrphaned => true;
 
   final Path path = Path();
-  ArtboardDelegate _delegate;
   List<Component> _dependencyOrder = [];
   final DrawableList _drawables = DrawableList();
   final Set<Component> _components = {};
 
   DrawableList get drawables => _drawables;
 
-  // -> editor-only
-  /// Event notified whenever the animations list changes.
-  final Event animationsChanged = Event();
-  // <- editor-only
   final AnimationList _animations = AnimationList();
 
   /// List of animations in this artboard.
@@ -160,10 +159,12 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     }
   }
 
+  // -> editor-only
   @override
   void nameChanged(String from, String to) {
     _delegate?.markNameDirty();
   }
+  // <- editor-only
 
   @override
   void childRemoved(Component child) {
@@ -222,10 +223,13 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
       var rect = Rect.fromLTWH(bounds[0], bounds[1], bounds[2], bounds[3]);
       path.reset();
       path.addRect(rect);
+      // -> editor-only
       _delegate?.boundsChanged();
+      // <- editor-only
     }
   }
 
+  // -> editor-only
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is ArtboardDelegate) {
@@ -234,6 +238,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
       _delegate = null;
     }
   }
+  // <- editor-only
 
   @override
   void widthChanged(double from, double to) {
@@ -447,6 +452,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     return Mat2D.translate(Mat2D(), mat, originWorld);
   }
 
+  // <- editor-only
   @override
   Vec2D get worldTranslation => Vec2D();
 }

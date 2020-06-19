@@ -2,6 +2,7 @@ import 'package:rive/rive_core/animation/animation.dart';
 import 'package:rive/rive_core/animation/cubic_interpolator.dart';
 import 'package:rive/rive_core/animation/keyed_object.dart';
 import 'package:rive/rive_core/animation/keyed_property.dart';
+import 'package:rive/rive_core/animation/keyframe_color.dart';
 import 'package:rive/rive_core/animation/keyframe_double.dart';
 import 'package:rive/rive_core/animation/keyframe_draw_order.dart';
 import 'package:rive/rive_core/animation/keyframe_draw_order_value.dart';
@@ -9,7 +10,9 @@ import 'package:rive/rive_core/animation/linear_animation.dart';
 import 'package:rive/rive_core/artboard.dart';
 import 'package:rive/rive_core/backboard.dart';
 import 'package:rive/rive_core/node.dart';
+import 'package:rive/rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive/rive_core/shapes/cubic_detached_vertex.dart';
+import 'package:rive/rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive/rive_core/shapes/ellipse.dart';
 import 'package:rive/rive_core/shapes/paint/fill.dart';
 import 'package:rive/rive_core/shapes/paint/gradient_stop.dart';
@@ -34,6 +37,7 @@ import 'package:rive/src/generated/animation/cubic_interpolator_base.dart';
 import 'package:rive/src/generated/animation/keyed_object_base.dart';
 import 'package:rive/src/generated/animation/keyed_property_base.dart';
 import 'package:rive/src/generated/animation/keyframe_base.dart';
+import 'package:rive/src/generated/animation/keyframe_color_base.dart';
 import 'package:rive/src/generated/animation/keyframe_double_base.dart';
 import 'package:rive/src/generated/animation/keyframe_draw_order_base.dart';
 import 'package:rive/src/generated/animation/keyframe_draw_order_value_base.dart';
@@ -43,7 +47,9 @@ import 'package:rive/src/generated/backboard_base.dart';
 import 'package:rive/src/generated/component_base.dart';
 import 'package:rive/src/generated/drawable_base.dart';
 import 'package:rive/src/generated/node_base.dart';
-import 'package:rive/src/generated/shapes/cubic_vertex_base.dart';
+import 'package:rive/src/generated/shapes/cubic_asymmetric_vertex_base.dart';
+import 'package:rive/src/generated/shapes/cubic_detached_vertex_base.dart';
+import 'package:rive/src/generated/shapes/cubic_mirrored_vertex_base.dart';
 import 'package:rive/src/generated/shapes/ellipse_base.dart';
 import 'package:rive/src/generated/shapes/paint/fill_base.dart';
 import 'package:rive/src/generated/shapes/paint/gradient_stop_base.dart';
@@ -74,6 +80,8 @@ class RiveCoreContext {
         return CubicInterpolator();
       case KeyFrameDoubleBase.typeKey:
         return KeyFrameDouble();
+      case KeyFrameColorBase.typeKey:
+        return KeyFrameColor();
       case LinearAnimationBase.typeKey:
         return LinearAnimation();
       case KeyFrameDrawOrderBase.typeKey:
@@ -98,18 +106,22 @@ class RiveCoreContext {
         return Shape();
       case StraightVertexBase.typeKey:
         return StraightVertex();
+      case CubicAsymmetricVertexBase.typeKey:
+        return CubicAsymmetricVertex();
       case PointsPathBase.typeKey:
         return PointsPath();
       case RectangleBase.typeKey:
         return Rectangle();
-      case CubicVertexBase.typeKey:
-        return CubicVertex();
+      case CubicMirroredVertexBase.typeKey:
+        return CubicMirroredVertex();
       case TriangleBase.typeKey:
         return Triangle();
       case EllipseBase.typeKey:
         return Ellipse();
       case PathComposerBase.typeKey:
         return PathComposer();
+      case CubicDetachedVertexBase.typeKey:
+        return CubicDetachedVertex();
       case ArtboardBase.typeKey:
         return Artboard();
       case BackboardBase.typeKey:
@@ -177,6 +189,11 @@ class RiveCoreContext {
         break;
       case KeyFrameDoubleBase.valuePropertyKey:
         if (object is KeyFrameDoubleBase && value is double) {
+          object.value = value;
+        }
+        break;
+      case KeyFrameColorBase.valuePropertyKey:
+        if (object is KeyFrameColorBase && value is int) {
           object.value = value;
         }
         break;
@@ -360,6 +377,21 @@ class RiveCoreContext {
           object.radius = value;
         }
         break;
+      case CubicAsymmetricVertexBase.rotationPropertyKey:
+        if (object is CubicAsymmetricVertexBase && value is double) {
+          object.rotation = value;
+        }
+        break;
+      case CubicAsymmetricVertexBase.inDistancePropertyKey:
+        if (object is CubicAsymmetricVertexBase && value is double) {
+          object.inDistance = value;
+        }
+        break;
+      case CubicAsymmetricVertexBase.outDistancePropertyKey:
+        if (object is CubicAsymmetricVertexBase && value is double) {
+          object.outDistance = value;
+        }
+        break;
       case PointsPathBase.isClosedPropertyKey:
         if (object is PointsPathBase && value is bool) {
           object.isClosed = value;
@@ -380,29 +412,34 @@ class RiveCoreContext {
           object.cornerRadius = value;
         }
         break;
-      case CubicVertexBase.controlTypeValuePropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.controlTypeValue = value;
+      case CubicMirroredVertexBase.rotationPropertyKey:
+        if (object is CubicMirroredVertexBase && value is double) {
+          object.rotation = value;
         }
         break;
-      case CubicVertexBase.inXPropertyKey:
-        if (object is CubicVertexBase && value is double) {
-          object.inX = value;
+      case CubicMirroredVertexBase.distancePropertyKey:
+        if (object is CubicMirroredVertexBase && value is double) {
+          object.distance = value;
         }
         break;
-      case CubicVertexBase.inYPropertyKey:
-        if (object is CubicVertexBase && value is double) {
-          object.inY = value;
+      case CubicDetachedVertexBase.inRotationPropertyKey:
+        if (object is CubicDetachedVertexBase && value is double) {
+          object.inRotation = value;
         }
         break;
-      case CubicVertexBase.outXPropertyKey:
-        if (object is CubicVertexBase && value is double) {
-          object.outX = value;
+      case CubicDetachedVertexBase.inDistancePropertyKey:
+        if (object is CubicDetachedVertexBase && value is double) {
+          object.inDistance = value;
         }
         break;
-      case CubicVertexBase.outYPropertyKey:
-        if (object is CubicVertexBase && value is double) {
-          object.outY = value;
+      case CubicDetachedVertexBase.outRotationPropertyKey:
+        if (object is CubicDetachedVertexBase && value is double) {
+          object.outRotation = value;
+        }
+        break;
+      case CubicDetachedVertexBase.outDistancePropertyKey:
+        if (object is CubicDetachedVertexBase && value is double) {
+          object.outDistance = value;
         }
         break;
       case ArtboardBase.widthPropertyKey:
@@ -441,6 +478,7 @@ class RiveCoreContext {
   static CoreFieldType intType = CoreIntType();
   static CoreFieldType stringType = CoreStringType();
   static CoreFieldType doubleType = CoreDoubleType();
+  static CoreFieldType colorType = CoreIntType();
   static CoreFieldType boolType = CoreBoolType();
   static CoreFieldType coreType(int propertyKey) {
     switch (propertyKey) {
@@ -459,12 +497,9 @@ class RiveCoreContext {
       case ComponentBase.parentIdPropertyKey:
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
-      case SolidColorBase.colorValuePropertyKey:
-      case GradientStopBase.colorValuePropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.drawOrderPropertyKey:
       case DrawableBase.blendModePropertyKey:
-      case CubicVertexBase.controlTypeValuePropertyKey:
         return intType;
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
@@ -491,13 +526,18 @@ class RiveCoreContext {
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
       case StraightVertexBase.radiusPropertyKey:
+      case CubicAsymmetricVertexBase.rotationPropertyKey:
+      case CubicAsymmetricVertexBase.inDistancePropertyKey:
+      case CubicAsymmetricVertexBase.outDistancePropertyKey:
       case ParametricPathBase.widthPropertyKey:
       case ParametricPathBase.heightPropertyKey:
       case RectangleBase.cornerRadiusPropertyKey:
-      case CubicVertexBase.inXPropertyKey:
-      case CubicVertexBase.inYPropertyKey:
-      case CubicVertexBase.outXPropertyKey:
-      case CubicVertexBase.outYPropertyKey:
+      case CubicMirroredVertexBase.rotationPropertyKey:
+      case CubicMirroredVertexBase.distancePropertyKey:
+      case CubicDetachedVertexBase.inRotationPropertyKey:
+      case CubicDetachedVertexBase.inDistancePropertyKey:
+      case CubicDetachedVertexBase.outRotationPropertyKey:
+      case CubicDetachedVertexBase.outDistancePropertyKey:
       case ArtboardBase.widthPropertyKey:
       case ArtboardBase.heightPropertyKey:
       case ArtboardBase.xPropertyKey:
@@ -505,6 +545,10 @@ class RiveCoreContext {
       case ArtboardBase.originXPropertyKey:
       case ArtboardBase.originYPropertyKey:
         return doubleType;
+      case KeyFrameColorBase.valuePropertyKey:
+      case SolidColorBase.colorValuePropertyKey:
+      case GradientStopBase.colorValuePropertyKey:
+        return colorType;
       case LinearAnimationBase.enableWorkAreaPropertyKey:
       case ShapePaintBase.isVisiblePropertyKey:
       case StrokeBase.transformAffectsStrokePropertyKey:
@@ -547,18 +591,12 @@ class RiveCoreContext {
         return (object as StrokeBase).cap;
       case StrokeBase.joinPropertyKey:
         return (object as StrokeBase).join;
-      case SolidColorBase.colorValuePropertyKey:
-        return (object as SolidColorBase).colorValue;
-      case GradientStopBase.colorValuePropertyKey:
-        return (object as GradientStopBase).colorValue;
       case FillBase.fillRulePropertyKey:
         return (object as FillBase).fillRule;
       case DrawableBase.drawOrderPropertyKey:
         return (object as DrawableBase).drawOrder;
       case DrawableBase.blendModePropertyKey:
         return (object as DrawableBase).blendMode;
-      case CubicVertexBase.controlTypeValuePropertyKey:
-        return (object as CubicVertexBase).controlTypeValue;
     }
     return 0;
   }
@@ -619,20 +657,30 @@ class RiveCoreContext {
         return (object as PathVertexBase).y;
       case StraightVertexBase.radiusPropertyKey:
         return (object as StraightVertexBase).radius;
+      case CubicAsymmetricVertexBase.rotationPropertyKey:
+        return (object as CubicAsymmetricVertexBase).rotation;
+      case CubicAsymmetricVertexBase.inDistancePropertyKey:
+        return (object as CubicAsymmetricVertexBase).inDistance;
+      case CubicAsymmetricVertexBase.outDistancePropertyKey:
+        return (object as CubicAsymmetricVertexBase).outDistance;
       case ParametricPathBase.widthPropertyKey:
         return (object as ParametricPathBase).width;
       case ParametricPathBase.heightPropertyKey:
         return (object as ParametricPathBase).height;
       case RectangleBase.cornerRadiusPropertyKey:
         return (object as RectangleBase).cornerRadius;
-      case CubicVertexBase.inXPropertyKey:
-        return (object as CubicVertexBase).inX;
-      case CubicVertexBase.inYPropertyKey:
-        return (object as CubicVertexBase).inY;
-      case CubicVertexBase.outXPropertyKey:
-        return (object as CubicVertexBase).outX;
-      case CubicVertexBase.outYPropertyKey:
-        return (object as CubicVertexBase).outY;
+      case CubicMirroredVertexBase.rotationPropertyKey:
+        return (object as CubicMirroredVertexBase).rotation;
+      case CubicMirroredVertexBase.distancePropertyKey:
+        return (object as CubicMirroredVertexBase).distance;
+      case CubicDetachedVertexBase.inRotationPropertyKey:
+        return (object as CubicDetachedVertexBase).inRotation;
+      case CubicDetachedVertexBase.inDistancePropertyKey:
+        return (object as CubicDetachedVertexBase).inDistance;
+      case CubicDetachedVertexBase.outRotationPropertyKey:
+        return (object as CubicDetachedVertexBase).outRotation;
+      case CubicDetachedVertexBase.outDistancePropertyKey:
+        return (object as CubicDetachedVertexBase).outDistance;
       case ArtboardBase.widthPropertyKey:
         return (object as ArtboardBase).width;
       case ArtboardBase.heightPropertyKey:
@@ -647,6 +695,18 @@ class RiveCoreContext {
         return (object as ArtboardBase).originY;
     }
     return 0.0;
+  }
+
+  static int getColor(Core object, int propertyKey) {
+    switch (propertyKey) {
+      case KeyFrameColorBase.valuePropertyKey:
+        return (object as KeyFrameColorBase).value;
+      case SolidColorBase.colorValuePropertyKey:
+        return (object as SolidColorBase).colorValue;
+      case GradientStopBase.colorValuePropertyKey:
+        return (object as GradientStopBase).colorValue;
+    }
+    return 0;
   }
 
   static bool getBool(Core object, int propertyKey) {
@@ -710,12 +770,6 @@ class RiveCoreContext {
       case StrokeBase.joinPropertyKey:
         (object as StrokeBase).join = value;
         break;
-      case SolidColorBase.colorValuePropertyKey:
-        (object as SolidColorBase).colorValue = value;
-        break;
-      case GradientStopBase.colorValuePropertyKey:
-        (object as GradientStopBase).colorValue = value;
-        break;
       case FillBase.fillRulePropertyKey:
         (object as FillBase).fillRule = value;
         break;
@@ -724,9 +778,6 @@ class RiveCoreContext {
         break;
       case DrawableBase.blendModePropertyKey:
         (object as DrawableBase).blendMode = value;
-        break;
-      case CubicVertexBase.controlTypeValuePropertyKey:
-        (object as CubicVertexBase).controlTypeValue = value;
         break;
     }
   }
@@ -810,6 +861,15 @@ class RiveCoreContext {
       case StraightVertexBase.radiusPropertyKey:
         (object as StraightVertexBase).radius = value;
         break;
+      case CubicAsymmetricVertexBase.rotationPropertyKey:
+        (object as CubicAsymmetricVertexBase).rotation = value;
+        break;
+      case CubicAsymmetricVertexBase.inDistancePropertyKey:
+        (object as CubicAsymmetricVertexBase).inDistance = value;
+        break;
+      case CubicAsymmetricVertexBase.outDistancePropertyKey:
+        (object as CubicAsymmetricVertexBase).outDistance = value;
+        break;
       case ParametricPathBase.widthPropertyKey:
         (object as ParametricPathBase).width = value;
         break;
@@ -819,17 +879,23 @@ class RiveCoreContext {
       case RectangleBase.cornerRadiusPropertyKey:
         (object as RectangleBase).cornerRadius = value;
         break;
-      case CubicVertexBase.inXPropertyKey:
-        (object as CubicVertexBase).inX = value;
+      case CubicMirroredVertexBase.rotationPropertyKey:
+        (object as CubicMirroredVertexBase).rotation = value;
         break;
-      case CubicVertexBase.inYPropertyKey:
-        (object as CubicVertexBase).inY = value;
+      case CubicMirroredVertexBase.distancePropertyKey:
+        (object as CubicMirroredVertexBase).distance = value;
         break;
-      case CubicVertexBase.outXPropertyKey:
-        (object as CubicVertexBase).outX = value;
+      case CubicDetachedVertexBase.inRotationPropertyKey:
+        (object as CubicDetachedVertexBase).inRotation = value;
         break;
-      case CubicVertexBase.outYPropertyKey:
-        (object as CubicVertexBase).outY = value;
+      case CubicDetachedVertexBase.inDistancePropertyKey:
+        (object as CubicDetachedVertexBase).inDistance = value;
+        break;
+      case CubicDetachedVertexBase.outRotationPropertyKey:
+        (object as CubicDetachedVertexBase).outRotation = value;
+        break;
+      case CubicDetachedVertexBase.outDistancePropertyKey:
+        (object as CubicDetachedVertexBase).outDistance = value;
         break;
       case ArtboardBase.widthPropertyKey:
         (object as ArtboardBase).width = value;
@@ -848,6 +914,20 @@ class RiveCoreContext {
         break;
       case ArtboardBase.originYPropertyKey:
         (object as ArtboardBase).originY = value;
+        break;
+    }
+  }
+
+  static void setColor(Core object, int propertyKey, int value) {
+    switch (propertyKey) {
+      case KeyFrameColorBase.valuePropertyKey:
+        (object as KeyFrameColorBase).value = value;
+        break;
+      case SolidColorBase.colorValuePropertyKey:
+        (object as SolidColorBase).colorValue = value;
+        break;
+      case GradientStopBase.colorValuePropertyKey:
+        (object as GradientStopBase).colorValue = value;
         break;
     }
   }

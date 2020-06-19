@@ -12,7 +12,6 @@ import 'package:rive/rive_core/shapes/path.dart';
 import 'package:rive/rive_core/shapes/path_composer.dart';
 import 'package:rive/rive_core/shapes/shape_paint_container.dart';
 import 'package:rive/src/generated/shapes/shape_base.dart';
-import 'package:rive/rive_core/transform_space.dart';
 export 'package:rive/src/generated/shapes/shape_base.dart';
 
 class Shape extends ShapeBase with ShapePaintContainer {
@@ -33,15 +32,19 @@ class Shape extends ShapeBase with ShapePaintContainer {
     transformAffectsStrokeChanged();
   }
 
-  AABB _bounds = AABB();
+  AABB _worldBounds;
+  AABB _localBounds;
   BoundsDelegate _delegate;
-  AABB get bounds => _bounds;
-  set bounds(AABB bounds) {
-    if (AABB.areEqual(bounds, _bounds)) {
-      return;
-    }
-    _bounds = bounds;
+  @override
+  AABB get worldBounds => _worldBounds ??= computeWorldBounds();
+  @override
+  AABB get localBounds => _localBounds ??= computeLocalBounds();
+  void markBoundsDirty() {
+    _worldBounds = _localBounds = null;
     _delegate?.boundsChanged();
+    for (final path in paths) {
+      path.markBoundsDirty();
+    }
   }
 
   @override
@@ -130,29 +133,49 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return paths.remove(path);
   }
 
-  @override
-  Rect computeBounds(TransformSpace space) {
-    switch (space) {
-      case TransformSpace.local:
-        if (_wantLocalPath) {
-          return _pathComposer.localPath.getBounds();
-        } else {
-          var inverseShapeWorld = Mat2D();
-          if (Mat2D.invert(inverseShapeWorld, worldTransform)) {
-            return _pathComposer.worldPath
-                .transform(inverseShapeWorld.mat4)
-                .getBounds();
-          }
-        }
-        break;
-      case TransformSpace.world:
-        if (_wantWorldPath) {
-          return _pathComposer.worldPath.getBounds();
-        } else {
-          _pathComposer.localPath.transform(worldTransform.mat4).getBounds();
-        }
+  AABB computeWorldBounds() {
+    if (paths.isEmpty) {
+      return AABB.fromMinMax(worldTranslation, worldTranslation);
     }
-    return Rect.zero;
+    var path = paths.first;
+    var renderPoints = path.renderVertices;
+    if (renderPoints.isEmpty) {
+      return AABB.fromMinMax(worldTranslation, worldTranslation);
+    }
+    AABB worldBounds =
+        path.preciseComputeBounds(renderPoints, path.pathTransform);
+    for (final path in paths.skip(1)) {
+      var renderPoints = path.renderVertices;
+      AABB.combine(worldBounds, worldBounds,
+          path.preciseComputeBounds(renderPoints, path.pathTransform));
+    }
+    return worldBounds;
+  }
+
+  AABB computeLocalBounds() {
+    if (paths.isEmpty) {
+      return AABB();
+    }
+    var path = paths.first;
+    var renderPoints = path.renderVertices;
+    if (renderPoints.isEmpty) {
+      return AABB();
+    }
+    var toShapeTransform = Mat2D();
+    if (!Mat2D.invert(toShapeTransform, worldTransform)) {
+      Mat2D.identity(toShapeTransform);
+    }
+    AABB localBounds = path.preciseComputeBounds(renderPoints,
+        Mat2D.multiply(Mat2D(), toShapeTransform, path.pathTransform));
+    for (final path in paths.skip(1)) {
+      var renderPoints = path.renderVertices;
+      AABB.combine(
+          localBounds,
+          localBounds,
+          path.preciseComputeBounds(renderPoints,
+              Mat2D.multiply(Mat2D(), toShapeTransform, path.pathTransform)));
+    }
+    return localBounds;
   }
 
   @override

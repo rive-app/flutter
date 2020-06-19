@@ -27,6 +27,8 @@ dependencies:
     path: ../rive_widgets
   utilities:
     path: ../utilities
+  rive:
+    path: ../rive_flutter_runtime
 
   http: ^0.12.1
   trotter: ^1.2.0
@@ -58,6 +60,7 @@ flutter:
     - assets/images/
     - assets/images/icon_atlases/
     - assets/web/
+    - assets/animations/
 
   uses-material-design: true
   fonts:

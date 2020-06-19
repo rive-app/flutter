@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:rive/rive_core/bounds_delegate.dart';
 import 'package:rive/rive_core/component_dirt.dart';
 import 'package:rive/rive_core/container_component.dart';
@@ -24,9 +25,17 @@ class Node extends NodeBase {
   }
 
   Vec2D get translation => Vec2D.fromValues(x, y);
+  Vec2D get worldTranslation =>
+      Vec2D.fromValues(worldTransform[4], worldTransform[5]);
   set translation(Vec2D pos) {
     x = pos[0];
     y = pos[1];
+  }
+
+  Vec2D get scale => Vec2D.fromValues(scaleX, scaleY);
+  set scale(Vec2D value) {
+    scaleX = value[0];
+    scaleY = value[1];
   }
 
   void updateTransform() {

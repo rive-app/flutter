@@ -13,6 +13,7 @@ import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/login/fma.dart';
 import 'package:rive_editor/widgets/login/obscuring_controller.dart';
 import 'package:rive_editor/widgets/login/validators.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -665,10 +666,14 @@ class _LoginState extends State<Login> {
             Expanded(
               child: Container(
                 color: colors.commonLightGrey,
-                child: Image.asset(
-                  'assets/images/mother_of_dashes.png',
+                child: const FMA(
                   fit: BoxFit.cover,
                 ),
+
+                // Image.asset(
+                //   'assets/images/mother_of_dashes.png',
+                //   fit: BoxFit.cover,
+                // ),
               ),
             ),
             Container(

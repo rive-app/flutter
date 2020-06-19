@@ -91,6 +91,7 @@ void main(List<String> arguments) {
           Mutation('Id', 'int'),
           Mutation('FractionalIndex', 'int'),
           Mutation('animateDouble', 'setDouble'),
+          Mutation('animateColor', 'setColor'),
         ]);
 
         var formattedCode = formatter.format(contents.toString());

@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/component_dirt.dart';
-import 'package:rive/rive_core/math/aabb.dart';
 import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_core/shapes/shape.dart';
 import 'package:rive/src/generated/shapes/path_composer_base.dart';
@@ -45,9 +44,7 @@ class PathComposer extends PathComposerBase {
             matrix4: localTransform?.mat4);
       }
       if (!buildWorldPath) {
-        ui.Rect uiBounds = localPath.transform(world.mat4).getBounds();
-        _shape.bounds = AABB.fromValues(
-            uiBounds.left, uiBounds.top, uiBounds.right, uiBounds.bottom);
+        _shape.markBoundsDirty();
       }
       _fillPath = localPath;
     }
@@ -57,9 +54,7 @@ class PathComposer extends PathComposerBase {
         worldPath.addPath(path.uiPath, ui.Offset.zero,
             matrix4: path.pathTransform?.mat4);
       }
-      ui.Rect uiBounds = worldPath.getBounds();
-      _shape.bounds = AABB.fromValues(
-          uiBounds.left, uiBounds.top, uiBounds.right, uiBounds.bottom);
+      _shape.markBoundsDirty();
       _fillPath = worldPath;
     }
   }
