@@ -23,7 +23,8 @@ class HistoryCharge {
         amount: charge?.amount,
         successful: charge?.successful,
         receiptUrl: charge?.receiptUrl,
-        description: charge?.description,
+        description:
+            charge?.planCodes?.map((e) => e?.planName ?? 'n/a')?.join(', '),
       );
 
   @override

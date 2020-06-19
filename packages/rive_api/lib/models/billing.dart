@@ -6,7 +6,7 @@ enum BillingFrequency { yearly, monthly }
 /// The subscription team option
 enum TeamsOption { basic, premium }
 
-extension PlanExtension on TeamsOption {
+extension TeamsOptionName on TeamsOption {
   String get name {
     switch (this) {
       case TeamsOption.premium:

@@ -99,7 +99,12 @@ class _BillingHistoryState extends State<BillingHistory> {
       statuses.add(
         Text(isPaid ? 'Success' : 'Failed', style: rowStyle),
       );
-      descriptions.add(Text(receipt.description ?? 'n/a', style: rowStyle));
+      descriptions.add(
+        Text(
+          receipt.description.isNotEmpty ? receipt.description : 'n/a',
+          style: rowStyle,
+        ),
+      );
       urls.add(
         isPaid
             ? GestureDetector(
