@@ -249,13 +249,8 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
   ) async {
     var billing = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
 
-    // Need to compute team size.
-    var collaborators = Plumber().peek<List<TeamMember>>(team.hashCode);
-    if (collaborators != null) {
-      // If, for some reason, team was not fully loaded, force a load here.
-      await TeamManager().loadTeamMembers(team);
-      collaborators = Plumber().peek<List<TeamMember>>(team.hashCode);
-    }
+    await TeamManager().loadTeamMembers(team);
+    final collaborators = Plumber().peek<List<TeamMember>>(team.hashCode);
 
     var subscription = PlanSubscriptionPackage(team)
       ..api = api
@@ -366,8 +361,7 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
 
   Future<bool> sendFeedback(String feedback, String notes) async {
     processing = true;
-    await RiveTeamsApi(api)
-        .sendFeedback(team.ownerId, feedback, notes);
+    await RiveTeamsApi(api).sendFeedback(team.ownerId, feedback, notes);
     processing = false;
     return true;
   }

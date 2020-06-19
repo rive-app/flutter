@@ -17,7 +17,6 @@ class BillingDetailsDM {
 
   factory BillingDetailsDM.fromData(Map<String, Object> data) {
     final receiptsData = data['output'] as List;
-    print("This is the receiptsData I got: $receiptsData");
     final receiptsList = receiptsData.map((Object receipt) {
       if (receipt is Map<String, Object>) {
         return HistoryChargeDM.fromData(receipt);
@@ -26,10 +25,7 @@ class BillingDetailsDM {
       }
     }).toList(growable: false);
 
-    print("Got all my receipts: $receiptsList");
-
     final detailsData = data['receipt'] as Map<String, Object>;
-    print("And these are details: $detailsData");
     return BillingDetailsDM._(
       receipts: receiptsList,
       businessName: detailsData.getString('business_name'),

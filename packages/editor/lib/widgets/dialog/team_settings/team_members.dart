@@ -43,12 +43,12 @@ class _TeamMemberState extends State<TeamMembers> {
 
   void _updateAffiliates() => TeamManager().loadTeamMembers(widget.owner);
 
-  void _onRoleChanged(TeamMember member, TeamRole role) {
+  Future<void> _onRoleChanged(TeamMember member, TeamRole role) async {
     final team = widget.owner;
     if (member.status == TeamInviteStatus.pending) {
-      TeamManager().onInviteChanged(team, member, role);
+      await TeamManager().onInviteChanged(team, member, role);
     } else {
-      TeamManager().onRoleChanged(team, member.ownerId, role);
+      await TeamManager().onRoleChanged(team, member.ownerId, role);
     }
     _updateAffiliates();
   }
