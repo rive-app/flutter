@@ -110,6 +110,10 @@ class Stage extends Debouncer {
   Vec2D get worldMouse => _worldMouse;
   Offset localMouse = Offset.zero;
   bool _mouseDownSelected = false;
+
+  /// Returns true if the last click operation resulted in a selection.
+  bool get mouseDownSelected => _mouseDownSelected;
+  
   bool _isHidingCursor = false;
   int _hoverOffsetIndex = -1;
 

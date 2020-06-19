@@ -8,7 +8,8 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
-import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:utilities/restorer.dart';
@@ -23,6 +24,8 @@ class AutoTool extends TransformHandleTool {
 
   Vec2D _marqueeStart;
   Vec2D _marqueeEnd;
+
+  bool get isMarqueeing => _marqueeStart != null;
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
@@ -72,15 +75,12 @@ class AutoTool extends TransformHandleTool {
 
   HashSet<SelectableItem> _preSelected;
   Restorer _restoreSelect;
-  @override
-  void startDrag(
-    Iterable<StageItem> selection,
-    Artboard activeArtboard,
-    Vec2D worldMouse,
-  ) {
-    super.startDrag(selection, activeArtboard, worldMouse);
 
-    if (!isTransforming) {
+  @override
+  void click(Artboard activeArtboard, Vec2D worldMouse) {
+    super.click(activeArtboard, worldMouse);
+
+    if (!isTransforming && !stage.mouseDownSelected) {
       _restoreSelect = stage.suppressSelection();
       _marqueeStart = Vec2D.clone(worldMouse);
       _preSelected = HashSet<SelectableItem>.of(stage.file.selection.items);
@@ -88,25 +88,26 @@ class AutoTool extends TransformHandleTool {
   }
 
   @override
-  void endDrag() {
-    super.endDrag();
+  bool endClick() {
     _restoreSelect?.restore();
     _marqueeStart = _marqueeEnd = null;
+    return false;
   }
 
   @override
   void updateDrag(Vec2D worldMouse) {
-    if (isTransforming) {
+    if (!isMarqueeing) {
       return;
     }
     _marqueeEnd = Vec2D.clone(worldMouse);
 
     var inMarquee = HashSet<SelectableItem>();
 
-    var marqueeMinX = marqueeBounds[0];
-    var marqueeMinY = marqueeBounds[1];
-    var marqueeMaxX = marqueeBounds[2];
-    var marqueeMaxY = marqueeBounds[3];
+    var bounds = marqueeBounds;
+    var marqueeMinX = bounds[0];
+    var marqueeMinY = bounds[1];
+    var marqueeMaxX = bounds[2];
+    var marqueeMaxY = bounds[3];
 
     Float32List marqueePoly = Float32List.fromList([
       marqueeMinX,
@@ -139,6 +140,12 @@ class AutoTool extends TransformHandleTool {
 
     stage.markNeedsRedraw();
   }
+
+  // We grab the transformers from the translate tool if we're dragging an item.
+  @override
+  List<StageTransformer> get transformers => isTransforming
+      ? super.transformers
+      : isMarqueeing ? [] : TranslateTool.instance.transformers;
 }
 
 /// Tests for rectangle intersection given the polygon contour of the rects.
