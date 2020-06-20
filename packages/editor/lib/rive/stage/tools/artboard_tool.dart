@@ -10,10 +10,10 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/rive/stage/tools/drawable_tool.dart';
+import 'package:rive_editor/rive/stage/tools/create_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 
-class ArtboardTool extends DrawableTool {
+class ArtboardTool extends CreateTool {
   @override
   Iterable<PackedIcon> get cursorName => PackedIcon.cursorAdd;
   
@@ -105,6 +105,7 @@ class ArtboardTool extends DrawableTool {
   void endDrag() {
     _artboard = null;
     _cursor = null;
+    super.endDrag();
   }
 
   @override
