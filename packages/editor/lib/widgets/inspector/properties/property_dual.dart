@@ -3,6 +3,7 @@ import 'package:core/core.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
+import 'package:rive_editor/widgets/common/inspector_row.dart';
 import 'package:rive_editor/widgets/common/sub_label.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -89,54 +90,36 @@ class PropertyDual<T> extends StatelessWidget {
         top: 7,
         bottom: 10,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Flexible(
-            flex: 1,
-            fit: FlexFit.tight,
-            child: _link(
-              Text(
-                name,
-                style: textStyles.inspectorPropertyLabel,
+      child: InspectorRow(
+        label: _link(
+          Text(
+            name,
+            style: textStyles.inspectorPropertyLabel,
+          ),
+          theme,
+        ),
+        columnA: propertyKeyA == null
+            ? null
+            : SubLabel(
+                label: labelA,
+                style: theme.textStyles.inspectorPropertySubLabel,
+                child: _buildCoreTextField(
+                  propertyKeyA,
+                  propertyKeyB,
+                  converterA,
+                ),
               ),
-              theme,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Flexible(
-            flex: 1,
-            fit: FlexFit.tight,
-            child: propertyKeyA == null
-                ? const SizedBox()
-                : SubLabel(
-                    label: labelA,
-                    style: theme.textStyles.inspectorPropertySubLabel,
-                    child: _buildCoreTextField(
-                      propertyKeyA,
-                      propertyKeyB,
-                      converterA,
-                    ),
-                  ),
-          ),
-          const SizedBox(width: 20),
-          Flexible(
-            flex: 1,
-            fit: FlexFit.tight,
-            child: propertyKeyB == null
-                ? const SizedBox()
-                : SubLabel(
-                    label: labelB,
-                    style: theme.textStyles.inspectorPropertySubLabel,
-                    child: _buildCoreTextField(
-                      propertyKeyB,
-                      propertyKeyA,
-                      converterB,
-                    ),
-                  ),
-          ),
-        ],
+        columnB: propertyKeyB == null
+            ? null
+            : SubLabel(
+                label: labelB,
+                style: theme.textStyles.inspectorPropertySubLabel,
+                child: _buildCoreTextField(
+                  propertyKeyB,
+                  propertyKeyA,
+                  converterB,
+                ),
+              ),
       ),
     );
   }

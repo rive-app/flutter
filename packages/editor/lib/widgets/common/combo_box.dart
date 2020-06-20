@@ -342,7 +342,6 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
                 (widget.chevron
                     ? ComboBox._horizontalPadding + ComboBox._chevronWidth
                     : 0);
-
     // Wrap our items in PopupListItem.
     var items = widget.options == null
         ? <_ComboOption<T>>[]
@@ -358,6 +357,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         offset += Offset(p.left, -p.bottom);
       }
 
+
       _popup = ListPopup<_ComboOption<T>>.show(
         context,
         handleKeyPresses: !widget.typeahead,
@@ -367,6 +367,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         showArrow: false,
         directionPadding: 0,
         items: items,
+        fallbackDirections: [],
         itemBuilder: (context, item, isHovered) => Align(
           alignment: Alignment.centerLeft,
           child: Padding(

@@ -90,7 +90,7 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
               child: Text(
                 'Hero',
                 style: RiveTheme.of(context)
-                    .textStyles
+                  .textStyles
                     .basic
                     .copyWith(color: Colors.white),
               ),

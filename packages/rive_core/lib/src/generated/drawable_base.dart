@@ -42,24 +42,25 @@ abstract class DrawableBase extends Node {
   void drawOrderChanged(FractionalIndex from, FractionalIndex to);
 
   /// --------------------------------------------------------------------------
-  /// BlendMode field with key 23.
-  int _blendMode;
-  static const int blendModePropertyKey = 23;
-  int get blendMode => _blendMode;
+  /// BlendModeValue field with key 23.
+  int _blendModeValue;
+  static const int blendModeValuePropertyKey = 23;
+  int get blendModeValue => _blendModeValue;
 
-  /// Change the [_blendMode] field value.
-  /// [blendModeChanged] will be invoked only if the field's value has changed.
-  set blendMode(int value) {
-    if (_blendMode == value) {
+  /// Change the [_blendModeValue] field value.
+  /// [blendModeValueChanged] will be invoked only if the field's value has
+  /// changed.
+  set blendModeValue(int value) {
+    if (_blendModeValue == value) {
       return;
     }
-    int from = _blendMode;
-    _blendMode = value;
-    onPropertyChanged(blendModePropertyKey, from, value);
-    blendModeChanged(from, value);
+    int from = _blendModeValue;
+    _blendModeValue = value;
+    onPropertyChanged(blendModeValuePropertyKey, from, value);
+    blendModeValueChanged(from, value);
   }
 
-  void blendModeChanged(int from, int to);
+  void blendModeValueChanged(int from, int to);
 
   @override
   void changeNonNull() {
@@ -67,8 +68,9 @@ abstract class DrawableBase extends Node {
     if (drawOrder != null) {
       onPropertyChanged(drawOrderPropertyKey, drawOrder, drawOrder);
     }
-    if (blendMode != null) {
-      onPropertyChanged(blendModePropertyKey, blendMode, blendMode);
+    if (blendModeValue != null) {
+      onPropertyChanged(
+          blendModeValuePropertyKey, blendModeValue, blendModeValue);
     }
   }
 
@@ -79,8 +81,9 @@ abstract class DrawableBase extends Node {
       var runtimeValue = runtimeValueDrawOrder(_drawOrder);
       context.intType.writeProperty(drawOrderPropertyKey, writer, runtimeValue);
     }
-    if (_blendMode != null) {
-      context.intType.writeProperty(blendModePropertyKey, writer, _blendMode);
+    if (_blendModeValue != null) {
+      context.intType
+          .writeProperty(blendModeValuePropertyKey, writer, _blendModeValue);
     }
   }
 
@@ -90,8 +93,8 @@ abstract class DrawableBase extends Node {
     switch (propertyKey) {
       case drawOrderPropertyKey:
         return drawOrder as K;
-      case blendModePropertyKey:
-        return blendMode as K;
+      case blendModeValuePropertyKey:
+        return blendModeValue as K;
       default:
         return super.getProperty<K>(propertyKey);
     }
@@ -101,7 +104,7 @@ abstract class DrawableBase extends Node {
   bool hasProperty(int propertyKey) {
     switch (propertyKey) {
       case drawOrderPropertyKey:
-      case blendModePropertyKey:
+      case blendModeValuePropertyKey:
         return true;
       default:
         return super.hasProperty(propertyKey);

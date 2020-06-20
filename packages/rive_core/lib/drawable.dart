@@ -8,8 +8,11 @@ abstract class Drawable extends DrawableBase {
   /// Draw the contents of this drawable component in world transform space.
   void draw(Canvas canvas);
 
+  BlendMode get blendMode => BlendMode.values[blendModeValue];
+  set blendMode(BlendMode value) => blendModeValue = value.index;
+  
   @override
-  void blendModeChanged(int from, int to) {}
+  void blendModeValueChanged(int from, int to) {}
 
   @override
   void drawOrderChanged(FractionalIndex from, FractionalIndex to) {
