@@ -115,6 +115,18 @@ class FileManager with Subscriptions {
     _plumber.message(_files, folder.hashCode);
   }
 
+  /// Load in the user's recent files details
+  Future<Iterable<File>> loadRecentFilesDetails() async {
+    final fileDataModels = await _fileApi.recentFilesDetails();
+    final files = File.fromDMList(fileDataModels);
+    // Place the file details into the caching file details streams
+    // TODO: these should be hashed with the hashed id, not int
+    files.forEach((file) =>
+        Plumber().message<File>(file, szudzik(file.id, file.ownerId)));
+
+    return files;
+  }
+
   /// Save the file name. This involves not only passing the new
   /// fiule name to the backend via the api, but also updating the
   /// file data in the stream, allowing the file browser to update.
