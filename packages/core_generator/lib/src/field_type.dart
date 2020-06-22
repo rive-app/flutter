@@ -45,5 +45,5 @@ abstract class FieldType {
       .replaceAll('>', '');
 
   String get snakeName => name.replaceAllMapped(RegExp('(.+?)([A-Z])'),
-      (Match m) => "${m[1].toLowerCase()}_${m[2].toLowerCase()}");
+      (Match m) => '${m[1]}_${m[2]}').toLowerCase();
 }
