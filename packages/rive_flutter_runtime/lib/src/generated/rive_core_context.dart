@@ -27,7 +27,7 @@ import 'package:rive/rive_core/shapes/shape.dart';
 import 'package:rive/rive_core/shapes/straight_vertex.dart';
 import 'package:rive/rive_core/shapes/triangle.dart';
 import 'package:rive/src/core/core.dart';
-import 'package:rive/src/core/field_types/core_String_type.dart';
+import 'package:rive/src/core/field_types/core_string_type.dart';
 import 'package:rive/src/core/field_types/core_bool_type.dart';
 import 'package:rive/src/core/field_types/core_double_type.dart';
 import 'package:rive/src/core/field_types/core_field_type.dart';
