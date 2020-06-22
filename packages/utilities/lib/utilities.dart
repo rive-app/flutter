@@ -30,4 +30,4 @@ const _hashSalt = 'vjQ7gzOrXi';
 String encodeIds(List<int> ids) => HashIds(salt: _hashSalt).encode(ids);
 
 // Decode two integer ids from a hash
-Iterable<int> decodeIds(String hash) => HashIds(salt: _hashSalt).decode(hash);
+List<int> decodeIds(String hash) => HashIds(salt: _hashSalt).decode(hash);
