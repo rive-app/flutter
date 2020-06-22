@@ -22,60 +22,60 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
   }) {
     this.x = x;
     this.y = y;
-    _inPoint = Vec2D.fromValues(inX ?? inPoint[0], inY ?? inPoint[1]);
-    _outPoint = Vec2D.fromValues(outX ?? outPoint[0], outY ?? outPoint[1]);
+    this.inPoint = Vec2D.fromValues(inX ?? inPoint[0], inY ?? inPoint[1]);
+    this.outPoint = Vec2D.fromValues(outX ?? outPoint[0], outY ?? outPoint[1]);
   }
 
   @override
-  Vec2D get outPoint {
-    return _outPoint ??= Vec2D.add(
-        Vec2D(),
-        translation,
-        Vec2D.fromValues(
-            cos(outRotation) * outDistance, sin(outRotation) * outDistance));
-  }
+  Vec2D get outPoint => _outPoint ??= Vec2D.add(
+      Vec2D(),
+      translation,
+      Vec2D.fromValues(
+          cos(outRotation) * outDistance, sin(outRotation) * outDistance));
 
-  // -> editor-only
   @override
   set outPoint(Vec2D value) {
+    // -> editor-only
     var lastRotation = outRotation;
     var diffOut = Vec2D.fromValues(value[0] - x, value[1] - y);
     outDistance = Vec2D.length(diffOut);
     outRotation = atan2(diffOut[1], diffOut[0]);
+    // <- editor-only
     _outPoint = Vec2D.clone(value);
 
+    // -> editor-only
     if (accumulateAngle) {
       outRotation = lastRotation +
           atan2(
               sin(outRotation - lastRotation), cos(outRotation - lastRotation));
     }
+    // <- editor-only
   }
-  // <- editor-only
 
   @override
-  Vec2D get inPoint {
-    return _inPoint ??= Vec2D.add(
-        Vec2D(),
-        translation,
-        Vec2D.fromValues(
-            cos(inRotation) * inDistance, sin(inRotation) * inDistance));
-  }
+  Vec2D get inPoint => _inPoint ??= Vec2D.add(
+      Vec2D(),
+      translation,
+      Vec2D.fromValues(
+          cos(inRotation) * inDistance, sin(inRotation) * inDistance));
 
-  // -> editor-only
   @override
   set inPoint(Vec2D value) {
+    // -> editor-only
     var lastRotation = inRotation;
     var diffIn = Vec2D.fromValues(value[0] - x, value[1] - y);
     inDistance = Vec2D.length(diffIn);
     inRotation = atan2(diffIn[1], diffIn[0]);
+    // <- editor-only
     _inPoint = Vec2D.clone(value);
 
+    // -> editor-only
     if (accumulateAngle) {
       inRotation = lastRotation +
           atan2(sin(inRotation - lastRotation), cos(inRotation - lastRotation));
     }
+    // <- editor-only
   }
-  // <- editor-only
 
   @override
   String toString() {
