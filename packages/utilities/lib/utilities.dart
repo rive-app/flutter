@@ -1,3 +1,5 @@
+import 'package:hashids2/hashids2.dart';
+
 export 'date_time.dart';
 export 'deserialize.dart';
 export 'iterable.dart';
@@ -18,3 +20,14 @@ int szudzik(int a, int b) {
 bool threshold(double a, double b, [double threshold = 0.0001]) {
   return (a - b).abs() > threshold;
 }
+
+/// Salt used when hashing the ids together
+const _hashSalt = 'vjQ7gzOrXi';
+
+/// Hash a list of int ids
+
+// Encode integer ids in a hash
+String encodeIds(List<int> ids) => HashIds(salt: _hashSalt).encode(ids);
+
+// Decode two integer ids from a hash
+Iterable<int> decodeIds(String hash) => HashIds(salt: _hashSalt).decode(hash);
