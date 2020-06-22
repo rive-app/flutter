@@ -30,16 +30,31 @@ class BillingHistory extends StatefulWidget {
 }
 
 class _BillingHistoryState extends State<BillingHistory> {
-  BillingDetails _billingDetails;
   String _name, _tax, _address;
   bool _canUpdate = false;
   NetworkResponse _response;
+  StreamSubscription<BillingDetails> _detailsSubscription;
 
   @override
   void initState() {
-    // Starte fetching data.
+    _detailsSubscription = Plumber()
+        .getStream<BillingDetails>(widget.team.hashCode)
+        .listen(_onDetails);
     TeamManager().getCharges(widget.team);
     super.initState();
+  }
+
+  void _onDetails(BillingDetails details) {
+    assert(details != null);
+    _name = details.businessName;
+    _tax = details.taxId;
+    _address = details.businessAddress;
+  }
+
+  @override
+  void dispose() {
+    _detailsSubscription.cancel();
+    super.dispose();
   }
 
   Widget _receiptColumn(
@@ -154,12 +169,13 @@ class _BillingHistoryState extends State<BillingHistory> {
     );
   }
 
-  Future<void> _updateReceiptDetails() async {
+  Future<void> _updateReceiptDetails(BillingDetails details) async {
     setState(() {
       _canUpdate = false;
     });
 
     final uploadingDetails = BillingDetails(
+      receipts: details.receipts,
       businessName: _name,
       taxId: _tax,
       businessAddress: _address,
@@ -171,7 +187,6 @@ class _BillingHistoryState extends State<BillingHistory> {
 
     setState(() {
       if (success) {
-        _billingDetails = uploadingDetails;
         _response = NetworkResponse.ok;
       } else {
         _response = NetworkResponse.error;
@@ -188,13 +203,13 @@ class _BillingHistoryState extends State<BillingHistory> {
       ),
     );
 
-    _checkCanUpdate();
+    _checkCanUpdate(uploadingDetails);
   }
 
-  void _checkCanUpdate() {
-    final allSame = _name == _billingDetails.businessName &&
-        _tax == _billingDetails.taxId &&
-        _address == _billingDetails.businessAddress;
+  void _checkCanUpdate(BillingDetails details) {
+    final allSame = _name == details.businessName &&
+        _tax == details.taxId &&
+        _address == details.businessAddress;
     setState(() {
       _canUpdate = !allSame;
     });
@@ -219,7 +234,7 @@ class _BillingHistoryState extends State<BillingHistory> {
               hintText: 'Company name for receipts',
               onChanged: (value) {
                 _name = value;
-                _checkCanUpdate();
+                _checkCanUpdate(initialDetails);
               },
               initialValue: initialDetails.businessName,
             ),
@@ -228,7 +243,7 @@ class _BillingHistoryState extends State<BillingHistory> {
               hintText: 'Optional',
               onChanged: (value) {
                 _tax = value;
-                _checkCanUpdate();
+                _checkCanUpdate(initialDetails);
               },
               initialValue: initialDetails.taxId,
             )
@@ -242,7 +257,7 @@ class _BillingHistoryState extends State<BillingHistory> {
               hintText: 'Add your company address of record',
               onChanged: (value) {
                 _address = value;
-                _checkCanUpdate();
+                _checkCanUpdate(initialDetails);
               },
               initialValue: initialDetails.businessAddress,
             ),
@@ -262,7 +277,8 @@ class _BillingHistoryState extends State<BillingHistory> {
           label: 'Update',
           color: _canUpdate ? colors.commonDarkGrey : colors.commonLightGrey,
           textColor: Colors.white,
-          onTap: _canUpdate ? _updateReceiptDetails : null,
+          onTap:
+              _canUpdate ? () => _updateReceiptDetails(initialDetails) : null,
           elevation: _canUpdate ? 8 : 0,
         ),
       ],
