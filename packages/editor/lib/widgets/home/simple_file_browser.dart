@@ -17,8 +17,6 @@ import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
 import 'package:rive_editor/widgets/home/file.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
-import 'package:rive_editor/widgets/popup/context_popup.dart';
-import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/toolbar/connected_users.dart';
 
