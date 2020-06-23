@@ -92,12 +92,9 @@ class _HomeState extends State<Home> {
                   return Expanded(
                     child: ColoredBox(
                       color: Colors.white,
-                      child: FutureBuilder<Iterable<File>>(
-                          future: FileManager().loadRecentFilesDetails(),
-                          builder: (context, snapshot) => snapshot.hasData
-                              ? SimpleFileBrowserWrapper(
-                                  files: snapshot.data.toList())
-                              : const SizedBox()),
+                      child: SimpleFileBrowserWrapper(
+                        files: FileManager().loadRecentFilesDetails(),
+                      ),
                     ),
                   );
 
