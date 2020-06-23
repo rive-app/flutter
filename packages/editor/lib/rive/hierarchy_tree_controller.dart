@@ -207,7 +207,8 @@ class HierarchyTreeController extends ComponentTreeController {
     }
 
     var lastItem = file.selection.items.lastWhere(
-        (item) => item is StageItem<Component> && item.showInHierarchy);
+        (item) => item is StageItem<Component> && item.showInHierarchy,
+        orElse: () => null);
     if (lastItem is StageItem<Component>) {
       expandTo(lastItem.component);
     }
