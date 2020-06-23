@@ -352,31 +352,31 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
         endScrollOffset = null;
         startScrollOffset = null;
         updateMarquee();
-        var selection = Plumber().peek<Selection>();
-        if (rightClick && selection != null) {
-          ListPopup.show(context,
-              itemBuilder: (popupContext, PopupContextItem item, isHovered) =>
-                  item.itemBuilder(popupContext, isHovered),
-              items: [
-                if (selection.files.length + selection.folders.length == 1)
-                  PopupContextItem(
-                    'Rename',
-                    select: () async {
-                      final selection = Plumber().peek<Selection>();
-                      if (selection.files.isNotEmpty) {
-                        editName(context, selection.files.first);
-                      } else if (selection.folders.isNotEmpty) {
-                        editName(context, selection.folders.first);
-                      }
-                    },
-                  ),
-                PopupContextItem(
-                  'Delete',
-                  select: () => FolderContentsManager().delete(),
-                )
-              ],
-              position: event.pointerEvent.position);
-        }
+        // var selection = Plumber().peek<Selection>();
+        // if (rightClick && selection != null) {
+        //   ListPopup.show(context,
+        //       itemBuilder: (popupContext, PopupContextItem item, isHovered) =>
+        //           item.itemBuilder(popupContext, isHovered),
+        //       items: [
+        //         if (selection.files.length + selection.folders.length == 1)
+        //           PopupContextItem(
+        //             'Rename',
+        //             select: () async {
+        //               final selection = Plumber().peek<Selection>();
+        //               if (selection.files.isNotEmpty) {
+        //                 editName(context, selection.files.first);
+        //               } else if (selection.folders.isNotEmpty) {
+        //                 editName(context, selection.folders.first);
+        //               }
+        //             },
+        //           ),
+        //         PopupContextItem(
+        //           'Delete',
+        //           select: () => FolderContentsManager().delete(),
+        //         )
+        //       ],
+        //       position: event.pointerEvent.position);
+        // }
       },
       onPointerCancel: (event) {
         latestSize = context.size;
