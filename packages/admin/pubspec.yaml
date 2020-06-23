@@ -26,6 +26,7 @@ dependencies:
   rive_api:
     path: ../rive_api
   rxdart: ^0.24.0
+  table_sticky_headers: ^1.1.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

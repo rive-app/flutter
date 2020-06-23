@@ -1,5 +1,8 @@
 import 'package:admin/impersonate.dart';
 import 'package:admin/signout.dart';
+import 'package:admin/teams.dart';
+import 'package:admin/charges.dart';
+import 'package:admin/transactions.dart';
 import 'package:admin/token_generator.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +19,9 @@ class AdminView extends StatelessWidget {
           children: [
             const AdminPageButton('Impersonate'),
             const AdminPageButton('Invite'),
+            const AdminPageButton('Teams'),
+            const AdminPageButton('Charges'),
+            const AdminPageButton('Transactions'),
             const SizedBox(height: 30),
             Signout(),
           ],
@@ -52,5 +58,8 @@ class AdminPageButton extends StatelessWidget {
 
 final _routeNameToPage = <String, Widget>{
   'Impersonate': Impersonate(),
-  'Invite': TokenGenerator()
+  'Invite': TokenGenerator(),
+  'Teams': Teams(),
+  'Charges': Charges(),
+  'Transactions': Transactions(),
 };
