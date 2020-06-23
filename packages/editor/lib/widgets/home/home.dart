@@ -10,6 +10,7 @@ import 'package:rive_editor/widgets/common/value_stream_builder.dart';
 import 'package:rive_editor/widgets/home/file_browser.dart';
 import 'package:rive_editor/widgets/home/get_started.dart';
 import 'package:rive_editor/widgets/home/navigation_panel.dart';
+import 'package:rive_editor/widgets/home/simple_file_browser.dart';
 import 'package:rive_editor/widgets/home/team_detail_panel.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/notifications.dart';
@@ -88,7 +89,17 @@ class _HomeState extends State<Home> {
                   return const Text('Build community');
 
                 case HomeSection.recents:
-                  return const Text('Build recents');
+                  return Expanded(
+                    child: ColoredBox(
+                      color: Colors.white,
+                      child: FutureBuilder<Iterable<File>>(
+                          future: FileManager().loadRecentFilesDetails(),
+                          builder: (context, snapshot) => snapshot.hasData
+                              ? SimpleFileBrowserWrapper(
+                                  files: snapshot.data.toList())
+                              : const SizedBox()),
+                    ),
+                  );
 
                 case HomeSection.getStarted:
                   return Expanded(

@@ -90,16 +90,16 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 return Column(
                   children: <Widget>[
                     ValueStreamBuilder<Object>(
-                      stream: Plumber().getStream<HomeSection>(),
-                      builder: (context, snapshot) {
-                        return IconTile(
-                          icon: PackedIcon.rocket,
-                          label: 'Get Started',
-                          highlight: snapshot.data == HomeSection.getStarted,
-                          onTap: () async =>
-                              Plumber().message(HomeSection.getStarted),
-                        );
-                      }),
+                        stream: Plumber().getStream<HomeSection>(),
+                        builder: (context, snapshot) {
+                          return IconTile(
+                            icon: PackedIcon.rocket,
+                            label: 'Get Started',
+                            highlight: snapshot.data == HomeSection.getStarted,
+                            onTap: () async =>
+                                Plumber().message(HomeSection.getStarted),
+                          );
+                        }),
                     ValueStreamBuilder<model.NotificationCount>(
                         stream: Plumber().getStream(),
                         builder: (context, notificationCountSnapshot) {
@@ -117,6 +117,12 @@ class _NavigationPanelState extends State<NavigationPanel> {
                                 Plumber().message(HomeSection.notifications),
                           );
                         }),
+                    IconTile(
+                      icon: PackedIcon.rocket,
+                      label: 'Recents',
+                      highlight: snapshot.data == HomeSection.recents,
+                      onTap: () async => Plumber().message(HomeSection.recents),
+                    ),
                   ],
                 );
               },
