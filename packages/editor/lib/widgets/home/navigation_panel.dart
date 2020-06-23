@@ -118,7 +118,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                           );
                         }),
                     IconTile(
-                      icon: PackedIcon.rocket,
+                      icon: PackedIcon.recents,
                       label: 'Recents',
                       highlight: snapshot.data == HomeSection.recents,
                       onTap: () async => Plumber().message(HomeSection.recents),
