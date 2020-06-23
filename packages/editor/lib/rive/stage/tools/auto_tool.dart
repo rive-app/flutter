@@ -7,6 +7,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
@@ -83,7 +84,9 @@ class AutoTool extends TransformHandleTool {
     if (!isTransforming && !stage.mouseDownSelected) {
       _restoreSelect = stage.suppressSelection();
       _marqueeStart = Vec2D.clone(worldMouse);
-      _preSelected = HashSet<SelectableItem>.of(stage.file.selection.items);
+      _preSelected = stage.file.selectionMode == SelectionMode.range
+          ? HashSet<SelectableItem>.of(stage.file.selection.items)
+          : HashSet<SelectableItem>();
     }
   }
 
