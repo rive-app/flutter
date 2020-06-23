@@ -15,6 +15,7 @@ import 'package:rive_editor/rive/managers/animation/animation_time_manager.dart'
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
 import 'package:rive_editor/rive/managers/animation/keyframe_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/animation/timeline_render_box.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -83,6 +84,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   Offset _marqueeStart;
   // Stores local position so it can update during scroll/pan.
   Offset _marqueeEnd;
+  HashSet<KeyFrame> _preSelected;
 
   // Actual marquee value.
   _Marquee _marquee;
@@ -173,8 +175,11 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     );
 
     // Compute selected items.
-    widget.keyFrameManager.changeSelection
-        .add(viewportHelper.framesIn(marquee, widget.expandedRows));
+    var toSelect = viewportHelper.framesIn(marquee, widget.expandedRows);
+    if (ShortcutAction.multiSelect.value) {
+      toSelect.addAll(_preSelected);
+    }
+    widget.keyFrameManager.changeSelection.add(toSelect);
 
     setState(() {
       _marquee = marquee;
@@ -221,6 +226,8 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           return;
         }
 
+        _preSelected =
+            HashSet<KeyFrame>.from(widget.keyFrameManager.selection.value);
         var toSelect = HashSet<KeyFrame>();
 
         var helper = makeMouseHelper();
@@ -269,6 +276,9 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
         // Tell our manager to update the selection, it'll automatically handle
         // multiselection for us.
+        if (ShortcutAction.multiSelect.value) {
+          toSelect.addAll(_preSelected);
+        }
         widget.keyFrameManager.changeSelection.add(toSelect);
       },
       onPointerMove: (details) {

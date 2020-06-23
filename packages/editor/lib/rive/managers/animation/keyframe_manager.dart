@@ -141,11 +141,6 @@ class KeyFrameManager extends AnimationManager {
   }
 
   void _selectKeyFrames(HashSet<KeyFrame> keyFrames) {
-    // if we want to multiselect, we need to add the existing selection to the
-    // incoming keyframes.
-    if (ShortcutAction.multiSelect.value) {
-      keyFrames.addAll(_selection.value);
-    }
     if (keyFrames.isEmpty || !_selection.value.containsAll(keyFrames)) {
       var oldSelection = _selection.value;
       _selection.add(keyFrames);

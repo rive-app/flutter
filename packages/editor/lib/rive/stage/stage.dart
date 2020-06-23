@@ -596,7 +596,7 @@ class Stage extends Debouncer {
     if (!_completeDrag() && !_mouseDownSelectAppend) {
       if (_mouseDownHit == null) {
         file.selection.clear();
-      } else  {
+      } else {
         // just select the hit item
         file.select(_mouseDownHit);
       }
