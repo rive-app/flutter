@@ -23,10 +23,13 @@ bool threshold(double a, double b, [double threshold = 0.0001]) =>
 /// Salt used when hashing the ids together
 const _hashSalt = 'vjQ7gzOrXi';
 
-/// Hash a list of int ids
-
-// Encode integer ids in a hash
+/// Encode integer ids in a hash
 String encodeIds(Iterable<int> ids) => HashIds(salt: _hashSalt).encode(ids);
 
-// Decode two integer ids from a hash
+/// Decode two integer ids from a hash
 List<int> decodeIds(String hash) => HashIds(salt: _hashSalt).decode(hash);
+
+/// Decide on light or dark font color based on background color contrast
+/// If true, use a dark color, if false, use a light color
+bool useDarkContrast(int red, int green, int blue) =>
+    red * 0.299 + green * 0.587 + blue * 0.114 > 186;

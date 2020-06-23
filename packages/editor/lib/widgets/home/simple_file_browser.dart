@@ -674,6 +674,7 @@ class TopNav extends StatelessWidget {
   Widget _navControls(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
     final children = <Widget>[];
+    const headerName = 'Recents';
 
     children.add(
       AvatarView(
@@ -681,12 +682,12 @@ class TopNav extends StatelessWidget {
         borderWidth: 0,
         padding: 0,
         imageUrl: null,
-        name: 'Recent',
-        color: riveColors.accentBlue,
+        name: headerName,
+        color: riveColors.accentDarkMagenta,
       ),
     );
     children.add(const SizedBox(width: 9));
-    children.add(const Text('Recent'));
+    children.add(const Text(headerName));
     children.add(const Spacer());
     return Row(children: children);
   }
