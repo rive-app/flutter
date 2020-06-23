@@ -1,4 +1,4 @@
-import 'package:utilities/deserialize.dart';
+import 'package:utilities/utilities.dart';
 import 'package:meta/meta.dart';
 import 'cdn.dart';
 
@@ -46,6 +46,33 @@ class FileDM {
       data
           .map((id) => FileDM(id: id, ownerId: ownerId))
           .toList(growable: false);
+
+  /// Returns an iterable of file data models from hashed ids of
+  /// ownerId, fileId. Order is fileId, ownerId
+  static Iterable<FileDM> fromHashedIdList(List<String> hashedIds) =>
+      hashedIds.map<FileDM>((hashedId) {
+        final ids = decodeIds(hashedId);
+        assert(ids.length == 2);
+        return FileDM(id: ids[0], ownerId: ids[1]);
+      });
+
+  // Returns an iterable of files from a list of json maps
+  // representing the files, which use a hashed id
+  static Iterable<FileDM> fromHashedIdDataList(
+          List<Map<String, dynamic>> data) =>
+      data.map((d) => FileDM.fromHashedIdData(d)).toList(growable: false);
+
+  // Creates a file from json which uses a hashed id
+  factory FileDM.fromHashedIdData(Map<String, dynamic> data) {
+    final ids = decodeIds(data.getString('id'));
+    assert(ids.length == 2);
+    return FileDM(
+      id: ids[0],
+      ownerId: ids[1],
+      name: data.getString('name'),
+      preview: data.getString('preview'),
+    );
+  }
 
   @override
   String toString() =>

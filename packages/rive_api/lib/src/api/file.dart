@@ -21,6 +21,36 @@ class FileApi {
   Future<List<FileDM>> teamFiles(int ownerId, int folderId) async =>
       _files('/api/teams/$ownerId/files/a-z/rive/$folderId', ownerId);
 
+  /// Return the user's file ids in most recent order
+  /// This returns the new combo file id format.
+  /// For the moment, this will get converted by to ownerId, fileId
+  /// but in future we can update the code to handle a single file id
+  Future<Iterable<FileDM>> recentFiles() async {
+    final res = await api.get('${api.host}/api/v2/my/recents/');
+    try {
+      final data = json.decodeList<String>(res.body);
+      return FileDM.fromHashedIdList(data);
+    } on FormatException catch (e) {
+      _log.severe('Error formatting recent files api response: $e');
+      rethrow;
+    }
+  }
+
+  /// Return the user's recent files details
+  /// This uses the new combo file id format.
+  /// For the moment, this will get converted by to ownerId, fileId
+  /// but in future we can update the code to handle a single file id
+  Future<Iterable<FileDM>> recentFilesDetails() async {
+    final res = await api.get('${api.host}/api/v2/my/recents/files');
+    try {
+      final data = json.decodeList<Map<String, dynamic>>(res.body);
+      return FileDM.fromHashedIdDataList(data);
+    } on FormatException catch (e) {
+      _log.severe('Error formatting recent files details api response: $e');
+      rethrow;
+    }
+  }
+
   Future<void> deleteMyFiles(List<int> fileIds, List<int> folderIds) async {
     return _deleteFiles('/api/my/files', fileIds, folderIds);
   }

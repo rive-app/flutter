@@ -10,14 +10,18 @@ import 'fixtures/data_models.dart';
 class MockRiveApi extends Mock implements RiveApi {
   @override
   final host = '';
+
   @override
   Future<void> clearCookies() {
     // TODO: implement clearCookies
     cookiesCleared = true;
+    return Future.value();
   }
 
-  var cookiesCleared = false;
-  final Map<String, String> cookies = {};
+  bool cookiesCleared = false;
+
+  @override
+  final cookies = <String, String>{};
 }
 
 void main() {
@@ -177,8 +181,8 @@ void main() {
     test('get create team folder', () async {
       final riveApi = MockRiveApi();
       final team = getTeam();
-      final folderId = 1;
-      when(riveApi.post('/api/teams/${team.ownerId}/folders/${folderId}',
+      const folderId = 1;
+      when(riveApi.post('/api/teams/${team.ownerId}/folders/$folderId',
               body: '{"data":{"folderName":"New Folder"}}'))
           .thenAnswer((_) async => successTeamFolderCreationResponse);
       final mockApi = FolderApi(riveApi);
@@ -215,8 +219,8 @@ void main() {
       when(riveApi.post('/api/my/files', body: '[1,2,3]'))
           .thenAnswer((_) async => successFileDetailsResponse);
       final mockApi = FileApi(riveApi);
-      final me = getMe();
-      final folder = getFolder(me);
+      // final me = getMe();
+      // final folder = getFolder(me);
       final files = await mockApi.myFileDetails([1, 2, 3]);
       expect(files.length, 3);
       files.forEach((file) {
@@ -287,9 +291,9 @@ void main() {
     test('get create team file', () async {
       final riveApi = MockRiveApi();
       final team = getTeam();
-      final folderId = 1;
+      const folderId = 1;
       when(riveApi.post(
-              '/api/teams/${team.ownerId}/folders/${folderId}/new/rive/',
+              '/api/teams/${team.ownerId}/folders/$folderId/new/rive/',
               body: '{"data":{"fileName":"New File"}}'))
           .thenAnswer((_) async => successFileCreationResponse);
       final mockApi = FileApi(riveApi);
@@ -299,6 +303,33 @@ void main() {
       expect(newFile.id, 10);
       expect(newFile.preview, null);
       expect(newFile.ownerId, 1);
+    });
+
+    test('get user recent file ids', () async {
+      final riveApi = MockRiveApi();
+      when(riveApi.get('/api/v2/my/recents/'))
+          .thenAnswer((_) async => successRecentFilesResponse);
+      final mockApi = FileApi(riveApi);
+      final recentFiles = (await mockApi.recentFiles()).toList();
+      expect(recentFiles.length, 3);
+      expect(recentFiles[0].id, 2);
+      expect(recentFiles[1].id, 1);
+      expect(recentFiles[2].id, 43);
+    });
+
+    test('get user recent file details', () async {
+      final riveApi = MockRiveApi();
+      when(riveApi.get('/api/v2/my/recents/files'))
+          .thenAnswer((_) async => successRecentFilesDetailsResponse);
+      final mockApi = FileApi(riveApi);
+      final recentFiles = (await mockApi.recentFilesDetails()).toList();
+      expect(recentFiles.length, 2);
+      expect(recentFiles.first.id, 43);
+      expect(recentFiles.first.ownerId, 40842);
+      expect(recentFiles.first.name, 'Bill');
+      expect(recentFiles.last.id, 40);
+      expect(recentFiles.last.ownerId, 40842);
+      expect(recentFiles.last.name, 'july');
     });
   });
 

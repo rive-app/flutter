@@ -96,9 +96,9 @@ class TopNav extends StatelessWidget {
                 ? await FileManager().createFile(folderId, owner.ownerId)
                 : await FileManager().createFile(folderId);
 
-            FileManager().loadFolders(owner);
+            await FileManager().loadFolders(owner);
             Plumber().message(currentDirectory);
-            RiveContext.of(context).open(
+            await RiveContext.of(context).open(
               createdFile.fileOwnerId,
               createdFile.id,
               createdFile.name,
@@ -117,7 +117,7 @@ class TopNav extends StatelessWidget {
             // to control both managers through one message
             // pretty sure we can do that if we back onto
             // a more generic FileManager
-            FileManager().loadFolders(owner);
+            await FileManager().loadFolders(owner);
             Plumber().message(currentDirectory);
           },
         ),

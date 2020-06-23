@@ -23,7 +23,7 @@ class File implements Named {
   final String name;
   final String preview;
 
-  static List<File> fromDMList(List<FileDM> files, [int altOwnerId]) =>
+  static List<File> fromDMList(Iterable<FileDM> files, [int altOwnerId]) =>
       files.map((file) => File.fromDM(file, altOwnerId)).toList();
 
   factory File.fromDM(FileDM file, [int altOwnerId]) => File(
