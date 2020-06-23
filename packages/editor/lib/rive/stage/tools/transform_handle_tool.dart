@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/selection_context.dart';
+import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_scale_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_translation_handle.dart';
@@ -72,12 +73,12 @@ abstract class TransformHandleTool extends StageTool
     return true;
   }
 
-  TransformerMaker _transformingHandle;
+  StageHandle _transformingHandle;
   bool get isTransforming => _transformingHandle != null;
 
   bool _handleStageSelection(StageItem item) {
-    if (item is TransformerMaker) {
-      _transformingHandle = item as TransformerMaker;
+    if (item is StageHandle) {
+      _transformingHandle = item;
       return true;
     }
     return false;
@@ -152,11 +153,13 @@ abstract class TransformHandleTool extends StageTool
       return;
     }
     var first = _nodes.first;
-    _translateX?.transform = first.worldTransform;
-    _translateY?.transform = first.worldTransform;
-    _rotation?.transform = first.worldTransform;
-    _scaleX?.transform = first.worldTransform;
-    _scaleY?.transform = first.worldTransform;
+    var transform = first.worldTransform;
+    var renderTransform = first.artboard.transform(transform);
+    _translateX?.setTransform(transform, renderTransform);
+    _translateY?.setTransform(transform, renderTransform);
+    _rotation?.setTransform(transform, renderTransform);
+    _scaleX?.setTransform(transform, renderTransform);
+    _scaleY?.setTransform(transform, renderTransform);
   }
 
   void _selectionTransformChanged() {

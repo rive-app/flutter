@@ -19,25 +19,29 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
       Vec2D outPoint}) {
     this.x = x;
     this.y = y;
-    _inPoint = Vec2D.fromValues(inX ?? inPoint[0], inY ?? inPoint[1]);
-    _outPoint = Vec2D.fromValues(outX ?? outPoint[0], outY ?? outPoint[1]);
+    this.inPoint = Vec2D.fromValues(inX ?? inPoint[0], inY ?? inPoint[1]);
+    this.outPoint = Vec2D.fromValues(outX ?? outPoint[0], outY ?? outPoint[1]);
   }
   @override
-  Vec2D get outPoint {
-    return _outPoint ??= Vec2D.add(
-        Vec2D(),
-        translation,
-        Vec2D.fromValues(
-            cos(outRotation) * outDistance, sin(outRotation) * outDistance));
+  Vec2D get outPoint => _outPoint ??= Vec2D.add(
+      Vec2D(),
+      translation,
+      Vec2D.fromValues(
+          cos(outRotation) * outDistance, sin(outRotation) * outDistance));
+  @override
+  set outPoint(Vec2D value) {
+    _outPoint = Vec2D.clone(value);
   }
 
   @override
-  Vec2D get inPoint {
-    return _inPoint ??= Vec2D.add(
-        Vec2D(),
-        translation,
-        Vec2D.fromValues(
-            cos(inRotation) * inDistance, sin(inRotation) * inDistance));
+  Vec2D get inPoint => _inPoint ??= Vec2D.add(
+      Vec2D(),
+      translation,
+      Vec2D.fromValues(
+          cos(inRotation) * inDistance, sin(inRotation) * inDistance));
+  @override
+  set inPoint(Vec2D value) {
+    _inPoint = Vec2D.clone(value);
   }
 
   @override

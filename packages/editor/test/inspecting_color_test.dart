@@ -1,6 +1,5 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:local_data/local_data.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/rive_file.dart';
@@ -12,27 +11,23 @@ import 'package:rive_core/shapes/paint/radial_gradient.dart' as core;
 import 'package:rive_core/shapes/path_composer.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/widgets/inspector/color/color_popout.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
 
-class TestFileContext extends OpenFileContext {
-  TestFileContext(RiveFile file) : super(123, 456) {
-    this.core = file;
-    makeStage();
-  }
-}
+import 'helpers/inspector_helper.dart';
+import 'helpers/test_open_file_context.dart';
 
-RiveFile _makeFile() {
-  LocalDataPlatform dataPlatform = LocalDataPlatform.make();
-
-  final file = RiveFile(
-    'fake',
-    localDataPlatform: dataPlatform,
-  );
+Future<OpenFileContext> _makeFile() async {
+  var file = TestOpenFileContext();
+  expect(await file.fakeConnect(), true);
 
   // Make a somewhat sane file.
   Artboard artboard;
-  file.batchAdd(() {
+  var core = file.core;
+  core.batchAdd(() {
     var backboard = Backboard();
     artboard = Artboard()
       ..name = 'My Artboard'
@@ -41,10 +36,10 @@ RiveFile _makeFile() {
       ..width = 1920
       ..height = 1080;
 
-    file.addObject(backboard);
-    file.addObject(artboard);
+    core.addObject(backboard);
+    core.addObject(artboard);
   });
-  file.captureJournalEntry();
+  core.captureJournalEntry();
   return file;
 }
 
@@ -88,14 +83,25 @@ Shape _makeShape(RiveFile file) {
 }
 
 void main() {
-  test('change color of a shape', () {
-    var file = _makeFile();
-    var shape = _makeShape(file);
+
+  OpenFileContext file;
+  Shape shape;
+
+  setUp(() async {
+     file = await _makeFile();
+     shape = _makeShape(file.core);
+  });
+
+  tearDown(() {
+    file.dispose();
+  });
+
+  test('change color of a shape', () async {
+
 
     var inspectingColor = InspectingColor.forShapePaints([shape.fills.first]);
 
-    var fileContext = TestFileContext(file);
-    inspectingColor.startEditing(fileContext);
+    inspectingColor.startEditing(file);
 
     expect(inspectingColor.type.value, ColorType.solid);
 
@@ -111,5 +117,34 @@ void main() {
 
     inspectingColor.changeType(ColorType.radial);
     expect(shape.fills.first.paintMutator is core.RadialGradient, true);
+  });
+
+  testWidgets('enter and exit color picker works', (tester) async {
+
+    file.select(shape.stageItem);
+
+    await tester.pumpWidget(TestInspector(file: file));
+    await tester.pumpAndSettle();
+    var colorSwatch = find.byType(InspectorColorSwatch);
+    await tester.tap(colorSwatch.first);
+    await tester.pumpAndSettle();
+    var colorPopout = find.byType(ColorPopout);
+
+    expect(colorPopout, findsOneWidget);
+
+    var mousePos = const Offset(2000, 2000);
+
+    file.stage.mouseMove(0, mousePos.dx, mousePos.dy);
+    file.stage.mouseDown(0, mousePos.dx, mousePos.dy);
+    file.stage.mouseUp(0, mousePos.dx, mousePos.dy);
+
+    expect(file.selection.isEmpty, true,
+        reason: 'clicking on an empty spot on the stage '
+            'should\'ve cleared the selection');
+    file.advance(0);
+    await tester.pumpAndSettle();
+
+    await tester.pumpAndSettle();
+
   });
 }

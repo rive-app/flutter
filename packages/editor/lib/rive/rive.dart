@@ -199,7 +199,9 @@ class Rive {
   }
 
   void _changeActiveFile(OpenFileContext context) {
-    // Clean up old value if we had one...
+    // Clean up old value if we had one. Important to call this before
+    // activating the incoming file to ensure stage and file context cleanup any
+    // singletons referencing them or objects owned by them.
     file.value?.isActive = false;
 
     // Set and init new one...

@@ -4,16 +4,14 @@ import 'dart:ui';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_editor/rive/stage/items/stage_translation_handle.dart';
+import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
-import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/node_rotate_transformer.dart';
 import 'package:rive_editor/selectable_item.dart';
 
-class StageRotationHandle extends StageItem<void> with TransformerMaker {
-  final Mat2D _transform = Mat2D();
+class StageRotationHandle extends StageHandle {
   final bool showAxis;
   final Paint paint = Paint()
     ..style = PaintingStyle.stroke
@@ -59,34 +57,24 @@ class StageRotationHandle extends StageItem<void> with TransformerMaker {
       ];
 
   @override
-  bool get isSelectable => false;
-
-  @override
-  bool get isHoverSelectable => isVisible;
-
-  @override
   bool hitHiFi(Vec2D worldMouse) {
     var hitRadiusMax = hitMax / stage.viewZoom;
     var hitRadiusMin = hitMin / stage.viewZoom;
-    var distanceSquared = Vec2D.squaredDistance(worldMouse, translation);
+    var distanceSquared = Vec2D.squaredDistance(worldMouse, renderTranslation);
     return distanceSquared < hitRadiusMax * hitRadiusMax &&
         distanceSquared > hitRadiusMin * hitRadiusMin;
   }
 
   Vec2D computeAxis() {
     var value =
-        Vec2D.transformMat2(Vec2D(), Vec2D.fromValues(1, 0), _transform);
+        Vec2D.transformMat2(Vec2D(), Vec2D.fromValues(1, 0), renderTransform);
     Vec2D.normalize(value, value);
     return value;
   }
 
-  Mat2D get transform => _transform;
-  set transform(Mat2D transform) {
-    if (Mat2D.areEqual(transform, _transform)) {
-      return;
-    }
-    Mat2D.copy(_transform, transform);
-    var origin = Mat2D.getTranslation(_transform, Vec2D());
+  @override
+  void transformChanged() {
+    var origin = Mat2D.getTranslation(renderTransform, Vec2D());
 
     var scaledRadius = radius * minScaleCorrection;
     var r = Vec2D.fromValues(scaledRadius, scaledRadius);
@@ -96,11 +84,9 @@ class StageRotationHandle extends StageItem<void> with TransformerMaker {
     );
   }
 
-  Vec2D get translation => Mat2D.getTranslation(_transform, Vec2D());
-
   void _draw(Canvas canvas, Paint paint) {
     var screenPosition =
-        Vec2D.transformMat2D(Vec2D(), translation, stage.viewTransform);
+        Vec2D.transformMat2D(Vec2D(), renderTranslation, stage.viewTransform);
 
     canvas.save();
 
@@ -130,7 +116,7 @@ class StageRotationHandle extends StageItem<void> with TransformerMaker {
       ..color = const Color(0x80FFF1BE);
     if (_sliceStart != null) {
       var screenPosition =
-          Vec2D.transformMat2D(Vec2D(), translation, stage.viewTransform);
+          Vec2D.transformMat2D(Vec2D(), renderTranslation, stage.viewTransform);
 
       canvas.save();
 

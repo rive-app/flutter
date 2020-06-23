@@ -1,5 +1,10 @@
+import 'dart:math';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
@@ -8,7 +13,9 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
-
+import 'package:rive_editor/widgets/common/multi_toggle.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'helpers/inspector_helper.dart';
 import 'helpers/test_open_file_context.dart';
 
 Future<OpenFileContext> _makeFile() async {
@@ -175,5 +182,121 @@ void main() {
     var reEditingPath = core.objectsOfType<PointsPath>().first;
     expect(reEditingPath.editingMode, PointsPathEditMode.creating,
         reason: 'Path should go back to creation mode.');
+  });
+
+  testWidgets('subdivide a path', (tester) async {
+    /// Test for issue #800.
+    var file = await _makeFile();
+    var core = file.core;
+    expect(core.backboard != null, true);
+    expect(core.backboard.activeArtboard != null, true);
+
+    var stage = file.stage;
+    expect(stage != null, true);
+
+    // Select the pen tool and expect it to validate.
+    stage.tool = VectorPenTool.instance;
+    expect(stage.tool, VectorPenTool.instance);
+
+    stage.mouseMove(1, 100, 100);
+    stage.mouseDown(1, 100, 100);
+    stage.mouseUp(1, 100, 100);
+
+    stage.mouseMove(1, 200, 100);
+    stage.mouseDown(1, 200, 100);
+    stage.mouseUp(1, 200, 100);
+
+    expect(core.objectsOfType<PointsPath>().length, 1);
+
+    var pointsPath = core.objectsOfType<PointsPath>().first;
+    expect(pointsPath.vertices.length, 2);
+
+    var vtx1 = pointsPath.vertices[0];
+    expect(vtx1.x, 0);
+    expect(vtx1.y, 0);
+    var vtx2 = pointsPath.vertices[1];
+    expect(vtx2.x, 100);
+    expect(vtx2.y, 0);
+
+    stage.mouseMove(1, 150, 100);
+    stage.mouseDown(1, 150, 100);
+    stage.mouseUp(1, 150, 100);
+
+    expect(pointsPath.vertices.length, 3);
+
+    // vtx2 should now be the third vertex
+    expect(pointsPath.vertices[2], vtx2);
+    var insertedVertex = pointsPath.vertices[1];
+    expect(insertedVertex.x, 50);
+    expect(insertedVertex.y, 0);
+
+    insertedVertex.remove();
+    file.core.captureJournalEntry();
+    expect(pointsPath.vertices.length, 2);
+
+    // Make an instance of the vertex inspector to test changing the vertices to
+    // cubics.
+    file.select(vtx1.stageItem);
+    file.select(vtx2.stageItem, append: true);
+
+    await tester.pumpWidget(TestInspector(file: file));
+
+    var multiToggle = find.byType(MultiToggle<int>().runtimeType);
+
+    var detectors = find.descendant(
+        of: multiToggle, matching: find.byType(GestureDetector));
+
+    expect(detectors.evaluate().length, 4,
+        reason:
+            'Expect 4 vertex type options to click on inside the multitoggle.');
+
+    // Click on the 2nd one which is type mirrored.
+    await tester.tap(detectors.at(1));
+    await tester.pumpAndSettle();
+    file.advance(0);
+
+    vtx1 = pointsPath.vertices[0];
+    vtx2 = pointsPath.vertices[1];
+    expect(vtx1.runtimeType, CubicMirroredVertex);
+    expect(vtx2.runtimeType, CubicMirroredVertex);
+
+    if (vtx1 is CubicMirroredVertex) {
+      vtx1.rotation = -pi / 2;
+      vtx1.distance = 10;
+    }
+    if (vtx2 is CubicMirroredVertex) {
+      vtx2.rotation = -pi * 1.5;
+      vtx2.distance = 10;
+    }
+
+    // Move to 50, -7
+    // origin is at 100, 100
+    stage.mouseMove(1, 150, 93);
+    stage.mouseDown(1, 150, 93);
+    stage.mouseUp(1, 150, 93);
+
+    // Wait for any debounced logic the mouseMove may trigger to settle. Note we
+    // don't do this earlier because we have no UI but once we pump a widget the
+    // FakeTimers  activate and need to settle otherwise they'll throw.
+    await tester.pumpAndSettle();
+
+    file.core.captureJournalEntry();
+    expect(pointsPath.vertices.length, 3,
+        reason: 'moving to 150, 93 should\'ve snapped and subdivided');
+
+    // Expect the click to have created a cubic detached vertex
+    insertedVertex = pointsPath.vertices[1];
+    expect(insertedVertex.runtimeType, CubicDetachedVertex);
+
+    if (insertedVertex is CubicDetachedVertex) {
+      // Expect it to be placed between the two on the curve with appropriate
+      // rotation and length for the in and out.
+      expect(insertedVertex.translation[0], 50);
+      expect(insertedVertex.translation[1], -7.5);
+      expect(insertedVertex.inRotation, pi);
+      expect(insertedVertex.outRotation, 0);
+      expect(insertedVertex.inDistance, 25);
+      expect(insertedVertex.outDistance, 25);
+    }
   });
 }

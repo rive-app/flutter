@@ -54,8 +54,10 @@ abstract class ShapePaintInspectorBuilder extends ListenableInspectorBuilder {
     if (_isExpanded) {
       // We iterate in reverse as designers expect these in reverse order as
       // opposed to how we store them: https://github.com/rive-app/rive/issues/173
-      for (int i = listOfCommonPaints.length - 1; i >= 0; i--) {
-        var shapePaints = listOfCommonPaints[i];
+      var paintsInDisplayOrder =
+          listOfCommonPaints.reversed.toList(growable: false);
+      for (int i = 0, l = paintsInDisplayOrder.length; i < l; i++) {
+        var shapePaints = paintsInDisplayOrder[i];
         ShapesInspectingColor inspectingColor;
         if (i < _inspectingColors.length) {
           inspectingColor = _inspectingColors[i];
