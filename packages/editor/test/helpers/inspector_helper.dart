@@ -46,22 +46,22 @@ class _TestInspectorState extends State<TestInspector> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: UIStrings(
-          child: RiveTheme(
-            child: RiveContext(
-              rive: _rive,
-              child: TipRoot(
-                context: TipContext(),
-                child: ImageCacheProvider(
-                  manager: ImageManager(),
-                  child: IconCache(
-                    cache: _iconCache,
-                    child: PropagatingListenerRoot(
-                      child: ActiveFile(
-                        file: widget.file,
-                        child: const InspectorPanel(),
+    return UIStrings(
+      child: RiveTheme(
+        child: RiveContext(
+          rive: _rive,
+          child: TipRoot(
+            context: TipContext(),
+            child: ImageCacheProvider(
+              manager: ImageManager(),
+              child: IconCache(
+                cache: _iconCache,
+                child: PropagatingListenerRoot(
+                  child: ActiveFile(
+                    file: widget.file,
+                    child: const MaterialApp(
+                      home: Scaffold(
+                        body: InspectorPanel(),
                       ),
                     ),
                   ),

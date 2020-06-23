@@ -531,20 +531,6 @@ class ShapesInspectingColor extends InspectingColor {
           preview.value = color == null ? [] : [color];
         }
 
-        for (final shapePaint in shapePaints) {
-          // Make sure solid colors are selected on stage.
-          if (context != null &&
-              !(shapePaint.paintMutator.shapePaintContainer as Component)
-                  .stageItem
-                  .isSelected) {
-            context.select(
-              (shapePaint.paintMutator.shapePaintContainer as Component)
-                  .stageItem,
-              append: true,
-            );
-          }
-        }
-
         break;
       case ColorType.linear:
       case ColorType.radial:

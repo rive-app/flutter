@@ -113,7 +113,7 @@ class Stage extends Debouncer {
 
   /// Returns true if the last click operation resulted in a selection.
   bool get mouseDownSelected => _mouseDownSelected;
-  
+
   bool _isHidingCursor = false;
   int _hoverOffsetIndex = -1;
 
@@ -779,8 +779,10 @@ class Stage extends Debouncer {
   /// [dispose] called when the tab has been deselected for enough time.
   void _fileActiveChanged() {
     if (file.isActive) {
+      tool?.activate(this);
       ShortcutAction.pan.addListener(_panActionChanged);
     } else {
+      tool?.deactivate();
       ShortcutAction.pan.removeListener(_panActionChanged);
     }
   }
@@ -893,6 +895,10 @@ class Stage extends Debouncer {
   }
 
   void dispose() {
+    var tool = _toolNotifier.value;
+    _toolNotifier.value = null;
+    tool?.deactivate();
+
     file.selection.removeListener(_fileSelectionChanged);
     file.removeActionHandler(_handleAction);
     file.isActiveListenable.removeListener(_fileActiveChanged);
