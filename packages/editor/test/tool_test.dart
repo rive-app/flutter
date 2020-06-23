@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/ellipse.dart';
@@ -12,24 +13,19 @@ import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'helpers/test_helpers.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
   group('EllipseTool', () {
     EllipseTool instance;
 
-    setUp(() {
-      instance = EllipseTool.instance;
-    });
+    setUp(() => instance = EllipseTool.instance);
 
-    test('Check instance', () {
-      expect(instance != null, true);
-    });
+    test('Check instance', () => expect(instance != null, true));
 
-    test('Check for icon name', () {
-      expect(instance.icon, PackedIcon.toolEllipse);
-    });
+    test('Check for icon name',
+        () => expect(instance.icon, PackedIcon.toolEllipse));
 
     test('create ellipse test', () async {
+      // TestWidgetsFlutterBinding.ensureInitialized();
+
       var file = await makeFile();
       var core = file.core;
       var stage = file.stage;
@@ -93,16 +89,11 @@ void main() {
   group('RectangleTool', () {
     RectangleTool instance;
 
-    setUp(() {
-      instance = RectangleTool.instance;
-    });
+    setUp(() => instance = RectangleTool.instance);
 
-    test('Check instance', () {
-      expect(instance != null, true);
-    });
+    test('Check instance', () => expect(instance != null, true));
 
-    test('Check for icon name', () {
-      expect(instance.icon, PackedIcon.toolRectangle);
-    });
+    test('Check for icon name',
+        () => expect(instance.icon, PackedIcon.toolRectangle));
   });
 }

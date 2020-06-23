@@ -31,21 +31,24 @@ Completer testStream<T>(
   return completer;
 }
 
-Future<OpenFileContext> makeFile() async {
+Future<OpenFileContext> makeFile({bool addArtboard = true}) async {
   var file = TestOpenFileContext();
   expect(await file.fakeConnect(), true);
-  Artboard artboard;
-  final core = file.core;
-  core.batchAdd(() {
-    artboard = Artboard()
-      ..name = 'My Artboard'
-      ..x = 0
-      ..y = 0
-      ..width = 1920
-      ..height = 1080;
+  if (addArtboard) {
+    Artboard artboard;
+    final core = file.core;
+    core.batchAdd(() {
+      artboard = Artboard()
+        ..name = 'My Artboard'
+        ..x = 0
+        ..y = 0
+        ..width = 1920
+        ..height = 1080;
 
-    core.addObject(artboard);
-  });
-  core.captureJournalEntry();
+      core.addObject(artboard);
+    });
+
+    core.captureJournalEntry();
+  }
   return file;
 }
