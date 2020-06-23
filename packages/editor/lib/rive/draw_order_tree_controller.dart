@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:core/debounce.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
@@ -26,10 +27,14 @@ class DrawOrderTreeController extends ComponentTreeController {
       : backboard = file.core.backboard,
         super() {
     backboard.activeArtboardChanged.addListener(_activeArtboardChanged);
-    _activeArtboardChanged();
+    _updateActiveArtboard();
   }
 
   void _activeArtboardChanged() {
+    debounce(_updateActiveArtboard);
+  }
+
+  void _updateActiveArtboard() {
     activeArtboard?.drawOrderChanged?.removeListener(flatten);
     activeArtboard = backboard.activeArtboard;
     activeArtboard?.drawOrderChanged?.addListener(flatten);
@@ -39,6 +44,7 @@ class DrawOrderTreeController extends ComponentTreeController {
 
   @override
   void dispose() {
+    cancelDebounce(_updateActiveArtboard);
     activeArtboard?.drawOrderChanged?.removeListener(flatten);
     backboard.activeArtboardChanged.removeListener(_activeArtboardChanged);
     super.dispose();

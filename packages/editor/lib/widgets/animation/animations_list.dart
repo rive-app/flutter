@@ -10,10 +10,10 @@ import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 import 'package:rive_editor/widgets/tree_view/drop_item_background.dart';
+import 'package:rive_editor/widgets/tree_view/rive_tree_view.dart';
 import 'package:rive_editor/widgets/tree_view/tree_expander.dart';
 import 'package:rxdart/streams.dart';
 import 'package:tree_widget/flat_tree_item.dart';
-import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_style.dart';
 import 'package:tree_widget/tree_widget.dart';
 
@@ -76,7 +76,7 @@ class __AnimationsListTreeState extends State<_AnimationsListTree> {
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       lineColor: RiveTheme.of(context).colors.darkTreeLines,
     );
-    return TreeScrollView(
+    return RiveTreeView(
       padding: style.padding,
       slivers: [
         SliverToBoxAdapter(

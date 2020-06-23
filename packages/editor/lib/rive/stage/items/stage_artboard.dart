@@ -48,7 +48,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
   }
 
   @override
-  void onSelectedChanged(bool selected) {
+  void onSelectedChanged(bool selected, bool notify) {
     if (selected) {
       assert(component.context.backboard != null,
           'backboard should already exist');

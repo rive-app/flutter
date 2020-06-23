@@ -87,12 +87,26 @@ class AutoTool extends TransformHandleTool {
       _preSelected = stage.file.selectionMode == SelectionMode.range
           ? HashSet<SelectableItem>.of(stage.file.selection.items)
           : HashSet<SelectableItem>();
+
+      // Immediately clear the selection so we can see an empty selected set in
+      // the hierarchy (which doesn't update while marqueeing, so an empty
+      // selection state is at least less confusing).
+      if (_preSelected.isEmpty) {
+        stage.file.selection.clear();
+      }
     }
   }
 
   @override
   bool endClick() {
     _restoreSelect?.restore();
+    if (isMarqueeing) {
+      // Notify any stage items and listeners of their selection change. We
+      // suppress this during marqueeing to keep it snappy and rebuild UI
+      // minimally.
+      stage.file.selection.notifySelection();
+    }
+
     _marqueeStart = _marqueeEnd = null;
     return false;
   }
@@ -126,12 +140,13 @@ class AutoTool extends TransformHandleTool {
     stage.visTree.query(marqueeBounds, (proxyId, hitItem) {
       var item = hitItem.selectionTarget;
       if (item.isVisible && item.isSelectable) {
+        // Items are required to have an OBB to be selectable by the marquee. If
+        // further refinement is necessary, consider adding an
+        // isMarqueeSelectable getter to StageItem.
         if (item.obb != null) {
           if (_doRectsIntersect(marqueePoly, item.obb.poly)) {
             inMarquee.add(item);
           }
-        } else {
-          inMarquee.add(item);
         }
       }
       return true;
@@ -139,6 +154,7 @@ class AutoTool extends TransformHandleTool {
 
     stage.file.selection.selectMultiple(
       HashSet<SelectableItem>.of(_preSelected)..addAll(inMarquee),
+      notify: false,
     );
 
     stage.markNeedsRedraw();
