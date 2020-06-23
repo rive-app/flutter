@@ -10,43 +10,33 @@ CurrentDirectory getCurrentDirectory({Owner owner, int folderId = 1}) {
   return CurrentDirectory(_owner, folderId);
 }
 
-Owner getOwner({int ownerId = 1}) {
-  return Team(
-    ownerId: ownerId,
-    username: 'TeamUsername',
-    name: 'Name',
-    permission: TeamRole.admin,
-  );
-}
+Owner getOwner({int ownerId = 1}) => Team(
+      ownerId: ownerId,
+      username: 'TeamUsername',
+      name: 'Name',
+      permission: TeamRole.admin,
+      status: TeamStatus.active,
+    );
 
-Team getTeam({int ownerId = 1}) {
-  return Team(
-    ownerId: ownerId,
-    username: 'TeamUsername',
-    name: 'Name',
-    permission: TeamRole.admin,
-  );
-}
+Team getTeam({int ownerId = 1}) => Team(
+      ownerId: ownerId,
+      username: 'TeamUsername',
+      name: 'Name',
+      permission: TeamRole.admin,
+      status: TeamStatus.active,
+    );
 
-List<Team> getTeams(int number) {
-  var teams = <Team>[];
-  var count = 1;
-  while (count <= number) {
-    teams.add(getTeam(ownerId: number));
-    count++;
-  }
-  return teams;
-}
+List<Team> getTeams(int number) =>
+    List<Team>.generate(number, (i) => getTeam(ownerId: i + 1),
+        growable: false);
 
-Me getMe({int ownerId = 1}) {
-  return Me(
-    ownerId: ownerId,
-    username: 'TeamUsername',
-    name: 'Name',
-    id: ownerId,
-    signedIn: true,
-  );
-}
+Me getMe({int ownerId = 1}) => Me(
+      ownerId: ownerId,
+      username: 'TeamUsername',
+      name: 'Name',
+      id: ownerId,
+      signedIn: true,
+    );
 
 List<NotificationDM> getTestNotifications() {
   final now = DateTime.now();

@@ -1,7 +1,5 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rive_core/artboard.dart';
-import 'package:rive_core/backboard.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
@@ -18,30 +16,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
 
 import 'helpers/inspector_helper.dart';
-import 'helpers/test_open_file_context.dart';
-
-Future<OpenFileContext> _makeFile() async {
-  var file = TestOpenFileContext();
-  expect(await file.fakeConnect(), true);
-
-  // Make a somewhat sane file.
-  Artboard artboard;
-  var core = file.core;
-  core.batchAdd(() {
-    var backboard = Backboard();
-    artboard = Artboard()
-      ..name = 'My Artboard'
-      ..x = 0
-      ..y = 0
-      ..width = 1920
-      ..height = 1080;
-
-    core.addObject(backboard);
-    core.addObject(artboard);
-  });
-  core.captureJournalEntry();
-  return file;
-}
+import 'helpers/test_helpers.dart';
 
 Shape _makeShape(RiveFile file) {
   var shape = Shape()..name = 'Ellipse';
@@ -83,13 +58,12 @@ Shape _makeShape(RiveFile file) {
 }
 
 void main() {
-
   OpenFileContext file;
   Shape shape;
 
   setUp(() async {
-     file = await _makeFile();
-     shape = _makeShape(file.core);
+    file = await makeFile();
+    shape = _makeShape(file.core);
   });
 
   tearDown(() {
@@ -97,8 +71,6 @@ void main() {
   });
 
   test('change color of a shape', () async {
-
-
     var inspectingColor = InspectingColor.forShapePaints([shape.fills.first]);
 
     inspectingColor.startEditing(file);
@@ -120,7 +92,6 @@ void main() {
   });
 
   testWidgets('enter and exit color picker works', (tester) async {
-
     file.select(shape.stageItem);
 
     await tester.pumpWidget(TestInspector(file: file));
@@ -145,6 +116,5 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.pumpAndSettle();
-
   });
 }
