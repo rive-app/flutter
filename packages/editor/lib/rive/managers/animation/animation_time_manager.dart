@@ -169,11 +169,6 @@ abstract class AnimationTimeManager extends AnimationManager {
   final _isPlayingStream = BehaviorSubject<bool>();
   final _playbackController = StreamController<bool>();
 
-  // When was the play action pressed down? We track this to only trigger play
-  // after a brief tap of the action to disambiguate with other actions (like
-  // pan).
-  DateTime _pressPlayTime = DateTime.now();
-
   _SimpleAnimationController _controller;
   AnimationTimeManager(LinearAnimation animation, this.activeFile)
       : super(animation) {
@@ -212,7 +207,6 @@ abstract class AnimationTimeManager extends AnimationManager {
     _syncWorkArea();
     _syncLoop();
 
-    activeFile.addActionHandler(_handleAction);
     activeFile.addReleaseActionHandler(_releaseAction);
 
     _workAreaController.stream.listen(_changeWorkArea);
@@ -380,7 +374,6 @@ abstract class AnimationTimeManager extends AnimationManager {
         LinearAnimationBase.loopValuePropertyKey, _loopPropertyChanged);
     _loop.close();
     _loopController.close();
-    activeFile.removeActionHandler(_handleAction);
     activeFile.removeReleaseActionHandler(_releaseAction);
     animation.artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
@@ -401,25 +394,9 @@ abstract class AnimationTimeManager extends AnimationManager {
     _fpsPreviewController.close();
   }
 
-  bool _handleAction(ShortcutAction action) {
-    switch (action) {
-      case ShortcutAction.togglePlay:
-        _pressPlayTime = DateTime.now();
-        return true;
-    }
-    return false;
-  }
-
   bool _releaseAction(ShortcutAction action) {
     switch (action) {
       case ShortcutAction.togglePlay:
-
-        // Trigger play if we had only pressed it for a brief time.
-        // Fixes: https://github.com/rive-app/rive/issues/415
-        if (DateTime.now().difference(_pressPlayTime).inMilliseconds >
-            _playPressThresholdMs) {
-          return false;
-        }
         bool play = !_isPlayingStream.value;
         var start = animation.enableWorkArea ? animation.workStart : 0;
         var end =

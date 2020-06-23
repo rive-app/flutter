@@ -235,10 +235,21 @@ class Rive {
 
   final Set<_Key> _pressed = {};
   final Set<ShortcutAction> _pressedActions = {};
+  final Set<ShortcutAction> _canceledActions = {};
 
   bool _isSystemCmdPressed;
   // Returns true if the command on mac or control on win is pressed.
   bool get isSystemCmdPressed => _isSystemCmdPressed;
+
+  /// Prevent a pressed action from triggering its release. We need to track it
+  /// as a cancel in order to maintain our sync group for pressed (we can't
+  /// simply remove it from pressed as that'd trigger a re-press with repeat).
+  bool cancelPress(ShortcutAction action) {
+    if (_pressedActions.contains(action)) {
+      return _canceledActions.add(action);
+    }
+    return false;
+  }
 
   void onKeyEvent(ShortcutKeyBinding keyBinding, RawKeyEvent keyEvent,
       bool hasFocusObject) {
@@ -274,6 +285,11 @@ class Rive {
 
     var released = _pressedActions.difference(actions);
     for (final action in released) {
+      // If this action had been canceled, skip calling release for it.
+      if (_canceledActions.contains(action)) {
+        _canceledActions.remove(action);
+        continue;
+      }
       if (action is StatefulShortcutAction) {
         action.onRelease();
       }
