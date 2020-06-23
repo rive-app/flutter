@@ -59,26 +59,30 @@ class SelectionContext<T extends SelectableItem> extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool select(T item, {bool append = false}) {
+  bool select(T item, {bool append = false, bool notify = true}) {
     assert(item != null, 'should not select a null item');
     if (!append) {
       clear(notify: false);
     }
     if (_items.add(item)) {
-      item.isSelected = true;
-      notifyListeners();
+      item.select(true, notify: notify);
+      if (notify) {
+        notifySelection();
+      }
       return true;
     }
     return false;
   }
 
-  bool deselect(T item) {
+  bool deselect(T item, {bool notify = true}) {
     assert(item != null);
     if (_items.remove(item)) {
-      item.isSelected = false;
-      // TODO: maybe debouce when removing a lot of items, or provide a {bool
-      // notify} and track when to notify at a higher level.
-      notifyListeners();
+      item.select(false, notify: notify);
+      if (notify) {
+        notifySelection();
+      } else {
+        _notifyDeselect.add(item);
+      }
       return true;
     }
     return false;

@@ -81,7 +81,7 @@ class AutoTool extends TransformHandleTool {
   void click(Artboard activeArtboard, Vec2D worldMouse) {
     super.click(activeArtboard, worldMouse);
 
-    if (!isTransforming && !stage.mouseDownSelected) {
+    if (!isTransforming && stage.mouseDownHit == null) {
       _restoreSelect = stage.suppressSelection();
       _marqueeStart = Vec2D.clone(worldMouse);
       _preSelected = stage.file.selectionMode == SelectionMode.range
