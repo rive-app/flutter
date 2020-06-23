@@ -438,9 +438,14 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
             bool isSelected;
             var renderStroke = strokeKeyPath;
             var renderFill = fillKeyPath;
+            var fillPaint = keyFill;
 
             if (keyFrame is AllKeyFrame) {
-              isSelected = _selection.containsAll(keyFrame.keyframes);
+              if (isSelected = _selection.containsAll(keyFrame.keyframes)) {
+                // When an all key is selected, it should fill like a regular
+                // key. #809
+                fillPaint = _keyPaintFill;
+              }
             } else {
               if ((keyFrame as KeyFrameBase).interpolationType == 0) {
                 renderStroke = strokeHoldPath;
@@ -460,8 +465,8 @@ class _TimelineKeysRenderObject extends TimelineRenderBox {
             }
 
             // Draw the keyframe itself.
-            if (keyFill != null) {
-              canvas.drawPath(renderFill, keyFill);
+            if (fillPaint != null) {
+              canvas.drawPath(renderFill, fillPaint);
             }
 
             // we always paint stroke as we use it to fix up our fill for the
