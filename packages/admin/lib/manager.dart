@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:rive_api/api.dart';
 import 'package:rive_api/auth.dart';
@@ -65,5 +66,36 @@ class AdminManager {
     }
     return false;
   }
-}
 
+  Future<dynamic> listTeams() async {
+    var response = await api.get(api.host + '/api/admin/teams');
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['data'];
+    }
+    return false;
+  }
+
+  Future<dynamic> listCharges() async {
+    var response = await api.get(api.host + '/api/admin/charges');
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['data'];
+    }
+    return false;
+  }
+
+  Future<dynamic> listTransactions() async {
+    var response = await api.get(api.host + '/api/admin/transactions');
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['data'];
+    }
+    return false;
+  }
+
+  Future<dynamic> chargeTeam(int ownerId) async {
+    var response = await api.post(api.host + '/api/admin/charges/$ownerId');
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    }
+    return false;
+  }
+}
