@@ -98,4 +98,39 @@ class AdminManager {
     }
     return false;
   }
+
+  Future<dynamic> reissueBillAndEmail(int ownerId, int chargeId) async {
+    var response = await api
+        .post(api.host + '/api/admin/charges/$ownerId/notify/$chargeId');
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    }
+    return false;
+  }
+
+  Future<dynamic> createTransaction(
+      {int ownerId,
+      String unitCode,
+      int unitCount,
+      int unitCost,
+      String headline,
+      String serviceTime,
+      String detail}) async {
+    String payload = jsonEncode({
+      "data": {
+        "unitCode": unitCode,
+        "unitCount": unitCount,
+        "unitCost": unitCost,
+        "headline": headline,
+        "serviceTime": serviceTime,
+        "detail": detail,
+      }
+    });
+    var response = await api.post(api.host + '/api/admin/transactions/$ownerId',
+        body: payload);
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    }
+    return false;
+  }
 }

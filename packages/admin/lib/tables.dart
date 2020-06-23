@@ -55,9 +55,9 @@ class DataTableView extends StatelessWidget {
             cellContents,
             onTap: callbacks[header](row),
           ));
+        } else {
+          _cells.add(StickyTableCell.content(cellContents));
         }
-
-        _cells.add(StickyTableCell.content(cellContents));
       });
       cells.add(_cells);
     });

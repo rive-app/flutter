@@ -1,6 +1,7 @@
 import 'package:admin/manager.dart';
 import 'package:flutter/material.dart';
 import 'package:admin/tables.dart';
+import 'package:flutter/services.dart';
 
 class Charges extends StatelessWidget {
   final int ownerId;
@@ -79,6 +80,7 @@ class ChargeFormState extends State<ChargeForm> {
   // Note: This is a GlobalKey<FormState>,
   // not a GlobalKey<ChargeFormState>.
   final _formKey = GlobalKey<FormState>();
+  final chargeIdController = TextEditingController();
   bool enabled = true;
 
   void setEnable(bool _enabled) {
@@ -108,11 +110,24 @@ class ChargeFormState extends State<ChargeForm> {
               return null;
             },
           ),
+          TextFormField(
+            controller: chargeIdController,
+            decoration: const InputDecoration(labelText: 'Charge id e.g 1.'),
+            inputFormatters: <TextInputFormatter>[
+              WhitelistingTextInputFormatter.digitsOnly
+            ],
+            validator: (String value) {
+              if (value.isEmpty) {
+                return 'Cannot be empty';
+              }
+              return null;
+            },
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: RaisedButton(
               onPressed: enabled
-                  ? () {
+                  ? () async {
                       setEnable(false);
                       // Validate returns true if the form is valid, or false
                       // otherwise.
@@ -120,13 +135,13 @@ class ChargeFormState extends State<ChargeForm> {
                         // If the form is valid, display a Snackbar.
                         Scaffold.of(context).showSnackBar(
                             const SnackBar(content: Text('Processing Data')));
-                        setEnable(true);
-                        print(widget.ownerId);
-                        AdminManager.instance.chargeTeam(widget.ownerId);
+                        await AdminManager.instance.reissueBillAndEmail(
+                            widget.ownerId, int.parse(chargeIdController.text));
                       }
+                      setEnable(true);
                     }
                   : null,
-              child: const Text('Charge Now!'),
+              child: const Text('Re issue bill!'),
             ),
           ),
         ],
