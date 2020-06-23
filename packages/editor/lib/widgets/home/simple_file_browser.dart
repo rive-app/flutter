@@ -36,7 +36,7 @@ const double scrollStrength = 6;
 
 class SimpleFileBrowserWrapper extends StatefulWidget {
   const SimpleFileBrowserWrapper({this.files});
-  final List<File> files;
+  final Future<Iterable<File>> files;
 
   @override
   _SimpleFileBrowserWrapperState createState() =>
@@ -106,6 +106,13 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
   Offset start;
   Offset end;
   Timer scrollEdgeTimer;
+  final _files = <File>[];
+
+  @override
+  void initState() {
+    widget.files.then((fileList) => setState(() => _files.addAll(fileList)));
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -117,9 +124,9 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
       ((width - horizontalPadding * 2 + spacing) / (cellWidth + spacing))
           .floor();
 
-  double _sectionHeight(Iterable items, double itemHeight, int maxColumns) {
-    if (items.isNotEmpty) {
-      final rows = (items.length / maxColumns).ceil();
+  double _sectionHeight(int nrItems, double itemHeight, int maxColumns) {
+    if (nrItems > 0) {
+      final rows = (nrItems / maxColumns).ceil();
       final height = rows * itemHeight + (rows - 1) * spacing;
       return height + sectionPadding;
     } else {
@@ -127,11 +134,10 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
     }
   }
 
-  double _requiredHeight(Size size) {
+  double _requiredHeight(Size size, int nrItems) {
     var requiredHeight = headerHeight + sectionPadding;
     final int maxColumns = _getMaxColumns(size.width, cellWidth);
-    return requiredHeight +
-        _sectionHeight(widget.files, fileCellHeight, maxColumns);
+    return requiredHeight + _sectionHeight(nrItems, fileCellHeight, maxColumns);
   }
 
   void selectMarquee() {
@@ -151,7 +157,7 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
     var overlappingColumns =
         getOverlap(maxColumns, cellWidth, spacing, 0, startDx, endDx);
 
-    var fileRowCount = (widget.files.length / maxColumns).ceil();
+    var fileRowCount = (_files.length / maxColumns).ceil();
     var overlappingFileRows =
         getOverlap(fileRowCount, fileCellHeight, spacing, 0, startDy, endDy);
 
@@ -173,7 +179,7 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
 
     return selectionManager.select(
       {},
-      _filter(widget.files, fileIndexes).toSet(),
+      _filter(_files, fileIndexes).toSet(),
     );
   }
 
@@ -220,8 +226,8 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
     if (workingDx < 0) return null;
     if (column + 1 > maxColumns) return null;
 
-    if (widget.files.isNotEmpty) {
-      final fileRows = (widget.files.length / maxColumns).ceil();
+    if (_files.isNotEmpty) {
+      final fileRows = (_files.length / maxColumns).ceil();
       final filesHeight = fileRows * fileCellHeight + (fileRows - 1) * spacing;
       if (workingDy < filesHeight) {
         // clicked into files
@@ -230,8 +236,8 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
           return null;
         }
         elementIndex = row * maxColumns + column;
-        if (elementIndex < widget.files.length) {
-          return widget.files[elementIndex];
+        if (elementIndex < _files.length) {
+          return _files[elementIndex];
         }
       }
     }
@@ -277,7 +283,8 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
           marquee.end.dy, bounds.top, scrollSensitivity, scrollStrength);
       var offsetDown = _offset(
           bounds.bottom, marquee.end.dy, scrollSensitivity, scrollStrength);
-      maxOffset = _requiredHeight(context.size) - context.size.height;
+      maxOffset =
+          _requiredHeight(context.size, _files.length) - context.size.height;
       if (offsetUp != 0) {
         edgeOffset = -offsetUp;
         startTimer();
@@ -345,31 +352,31 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
         endScrollOffset = null;
         startScrollOffset = null;
         updateMarquee();
-        var selection = Plumber().peek<Selection>();
-        if (rightClick && selection != null) {
-          ListPopup.show(context,
-              itemBuilder: (popupContext, PopupContextItem item, isHovered) =>
-                  item.itemBuilder(popupContext, isHovered),
-              items: [
-                if (selection.files.length + selection.folders.length == 1)
-                  PopupContextItem(
-                    'Rename',
-                    select: () async {
-                      final selection = Plumber().peek<Selection>();
-                      if (selection.files.isNotEmpty) {
-                        editName(context, selection.files.first);
-                      } else if (selection.folders.isNotEmpty) {
-                        editName(context, selection.folders.first);
-                      }
-                    },
-                  ),
-                PopupContextItem(
-                  'Delete',
-                  select: () => FolderContentsManager().delete(),
-                )
-              ],
-              position: event.pointerEvent.position);
-        }
+        // var selection = Plumber().peek<Selection>();
+        // if (rightClick && selection != null) {
+        //   ListPopup.show(context,
+        //       itemBuilder: (popupContext, PopupContextItem item, isHovered) =>
+        //           item.itemBuilder(popupContext, isHovered),
+        //       items: [
+        //         if (selection.files.length + selection.folders.length == 1)
+        //           PopupContextItem(
+        //             'Rename',
+        //             select: () async {
+        //               final selection = Plumber().peek<Selection>();
+        //               if (selection.files.isNotEmpty) {
+        //                 editName(context, selection.files.first);
+        //               } else if (selection.folders.isNotEmpty) {
+        //                 editName(context, selection.folders.first);
+        //               }
+        //             },
+        //           ),
+        //         PopupContextItem(
+        //           'Delete',
+        //           select: () => FolderContentsManager().delete(),
+        //         )
+        //       ],
+        //       position: event.pointerEvent.position);
+        // }
       },
       onPointerCancel: (event) {
         latestSize = context.size;
@@ -396,7 +403,10 @@ class _SimpleFileBrowserWrapperState extends State<SimpleFileBrowserWrapper> {
           var newOffset = scrollController.offset + scrollEvent.scrollDelta.dy;
           newOffset = max(
             0,
-            min(_requiredHeight(context.size) - context.size.height, newOffset),
+            min(
+                _requiredHeight(context.size, _files.length) -
+                    context.size.height,
+                newOffset),
           );
           scrollController.jumpTo(newOffset);
           updateMarquee();
@@ -561,7 +571,7 @@ class SimpleFileBrowser extends StatelessWidget {
     this.scrollController,
     Key key,
   }) : super(key: key);
-  final List<File> files;
+  final Future<Iterable<File>> files;
   final ScrollController scrollController;
 
   Widget _grid({
@@ -585,21 +595,11 @@ class SimpleFileBrowser extends StatelessWidget {
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var file = files.elementAt(index);
-          return ValueStreamBuilder<File>(
-              stream: Plumber().getStream<File>(file.hashCode),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else {
-                  return BrowserFile(
-                    snapshot.data,
-                    selection?.files?.contains(snapshot.data) == true,
-                    false,
-                  );
-                }
-              });
+          return BrowserFile(
+            file,
+            selection?.files?.contains(file) == true,
+            false,
+          );
         },
         childCount: files.length,
       ),
@@ -608,34 +608,41 @@ class SimpleFileBrowser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueStreamBuilder<Selection>(
-        stream: Plumber().getStream<Selection>(),
-        builder: (context, snapshot) {
-          final slivers = <Widget>[];
-          // Add header
-          slivers.add(SliverPersistentHeader(
-            pinned: true,
-            delegate: _SliverHeader(const TopNav()),
-          ));
+    return FutureBuilder<Iterable<File>>(
+        future: files,
+        builder: (context, filesSnapshot) {
+          return ValueStreamBuilder<Selection>(
+              stream: Plumber().getStream<Selection>(),
+              builder: (context, snapshot) {
+                final slivers = <Widget>[];
+                // Add header
+                slivers.add(SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _SliverHeader(const TopNav()),
+                ));
 
-          slivers.add(
-            const SliverToBoxAdapter(
-              child: SizedBox(height: belowHeaderPadding),
-            ),
-          );
-          slivers.add(_fileGrid(files, snapshot.data));
+                slivers.add(
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: belowHeaderPadding),
+                  ),
+                );
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-            ),
-            child: CustomScrollView(
-              primary: false,
-              controller: scrollController,
-              slivers: slivers,
-              physics: const NeverScrollableScrollPhysics(),
-            ),
-          );
+                filesSnapshot.hasData
+                    ? slivers.add(_fileGrid(filesSnapshot.data, snapshot.data))
+                    : const SliverToBoxAdapter(child: SizedBox());
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                  ),
+                  child: CustomScrollView(
+                    primary: false,
+                    controller: scrollController,
+                    slivers: slivers,
+                    physics: const NeverScrollableScrollPhysics(),
+                  ),
+                );
+              });
         });
   }
 }
@@ -674,6 +681,7 @@ class TopNav extends StatelessWidget {
   Widget _navControls(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
     final children = <Widget>[];
+    const headerName = 'Recents';
 
     children.add(
       AvatarView(
@@ -681,12 +689,12 @@ class TopNav extends StatelessWidget {
         borderWidth: 0,
         padding: 0,
         imageUrl: null,
-        name: 'Recent',
-        color: riveColors.accentBlue,
+        name: headerName,
+        color: riveColors.accentDarkMagenta,
       ),
     );
     children.add(const SizedBox(width: 9));
-    children.add(const Text('Recent'));
+    children.add(const Text(headerName));
     children.add(const Spacer());
     return Row(children: children);
   }

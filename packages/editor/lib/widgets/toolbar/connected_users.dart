@@ -5,6 +5,7 @@ import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/stage/items/stage_cursor.dart';
+import 'package:utilities/utilities.dart';
 
 class ConnectedUsers extends StatelessWidget {
   final Rive rive;
@@ -64,6 +65,7 @@ class AvatarView extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
     final hasName = name != null && name.isNotEmpty;
+    final darkFont = useDarkContrast(color.red, color.green, color.blue);
 
     return Center(
       child: Padding(
@@ -90,6 +92,9 @@ class AvatarView extends StatelessWidget {
                         style: TextStyle(
                           fontSize: diameter / 2,
                           height: 1,
+                          color: darkFont
+                              ? const Color(0xFF000000)
+                              : const Color(0xFFFFFFFF),
                         ),
                       ),
                     ),
