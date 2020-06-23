@@ -8,9 +8,8 @@ import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 
-import 'helpers/test_helpers.dart';
+import '../helpers/test_helpers.dart';
 
 void main() {
   group('EllipseTool', () {
@@ -18,12 +17,12 @@ void main() {
 
     setUp(() => instance = EllipseTool.instance);
 
-    test('Check instance', () => expect(instance != null, true));
+    test('Ellispse tool instances', () => expect(instance != null, true));
 
     test('Check for icon name',
         () => expect(instance.icon, PackedIcon.toolEllipse));
 
-    test('create ellipse test', () async {
+    test('Ellipses can be created on stage', () async {
       // TestWidgetsFlutterBinding.ensureInitialized();
 
       var file = await makeFile();
@@ -84,16 +83,5 @@ void main() {
           reason:
               'expect the shape to have moved 50 pixels from 100 to 150 on x');
     });
-  });
-
-  group('RectangleTool', () {
-    RectangleTool instance;
-
-    setUp(() => instance = RectangleTool.instance);
-
-    test('Check instance', () => expect(instance != null, true));
-
-    test('Check for icon name',
-        () => expect(instance.icon, PackedIcon.toolRectangle));
   });
 }

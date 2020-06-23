@@ -37,7 +37,7 @@ void main() {
     expect(core.objectsOfType<Artboard>().length, 1,
         reason: 'there should be one artboard');
 
-    var artboard = core.objectsOfType<Artboard>().elementAt(0);
+    var artboard = core.objectsOfType<Artboard>().first;
     expect(artboard.x, 100);
     expect(artboard.y, 100);
     expect(artboard.width, 400);
@@ -55,7 +55,7 @@ void main() {
     expect(core.objectsOfType<Artboard>().length, 2,
         reason: 'there should be one artboard');
 
-    artboard = core.objectsOfType<Artboard>().elementAt(0);
+    artboard = core.objectsOfType<Artboard>().first;
     expect(artboard.x, 250);
     expect(artboard.y, 250);
     expect(artboard.width, 250);
