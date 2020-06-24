@@ -127,7 +127,13 @@ class RiveEditorShell extends StatelessWidget {
       rive: rive,
       iconCache: iconCache,
       child: CursorView(
-        onPointerDown: (details) => rive.focusNode.requestFocus(),
+        onPointerDown: (details) {
+          // If we click anywhere, suppress any ShortcutAction.togglePlay that
+          // may be pressed. #811
+          rive.cancelPress(ShortcutAction.togglePlay);
+
+          rive.focusNode.requestFocus();
+        },
         child: RiveEditorApp(
           rive: rive,
         ),

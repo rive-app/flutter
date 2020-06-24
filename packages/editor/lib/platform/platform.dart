@@ -3,6 +3,7 @@ import 'src/platform_native.dart'
 
 abstract class Platform {
   bool get isMac;
+  bool get isTouchDevice;
 
   static final Platform instance = makePlatform();
 }

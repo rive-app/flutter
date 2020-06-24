@@ -172,9 +172,9 @@ class ShortcutAction {
 abstract class StatefulShortcutAction<T> extends ShortcutAction
     with ChangeNotifier {
   T _value;
-  StatefulShortcutAction(String name, T defaultValue)
+  StatefulShortcutAction(String name, T defaultValue, {bool repeats = true})
       : _value = defaultValue,
-        super(name);
+        super(name, repeats: repeats);
   T get value => _value;
 
   void _changeValue(T change) {
@@ -191,7 +191,7 @@ abstract class StatefulShortcutAction<T> extends ShortcutAction
 /// A ShortcutAction with a backing boolean value turned on/off when the key
 /// is pressed/released.
 class HoldShortcutAction extends StatefulShortcutAction<bool> {
-  HoldShortcutAction(String name) : super(name, false);
+  HoldShortcutAction(String name) : super(name, false, repeats: false);
 
   @override
   void onPress() => _changeValue(true);

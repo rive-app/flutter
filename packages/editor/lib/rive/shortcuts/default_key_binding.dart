@@ -16,7 +16,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(ShortcutAction.showActions,
         [ShortcutKey.alt, ShortcutKey.shift, ShortcutKey.a]),
     Shortcut(ShortcutAction.cycleHover, [ShortcutKey.alt]),
-    Shortcut(ShortcutAction.multiSelect, [ShortcutKey.systemCmd]),
+    Shortcut(ShortcutAction.multiSelect, [ShortcutKey.shift]),
     Shortcut(ShortcutAction.togglePlay, [ShortcutKey.space]),
     Shortcut(ShortcutAction.mouseWheelZoom, [ShortcutKey.systemCmd]),
     Shortcut(ShortcutAction.symmetricDraw, [ShortcutKey.shift]),

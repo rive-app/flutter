@@ -1,11 +1,12 @@
+import 'package:core/debounce.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
-import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 import 'package:rive_editor/rive/component_tree_controller.dart';
@@ -19,6 +20,7 @@ class HierarchyTreeController extends ComponentTreeController {
   final OpenFileContext file;
   List<Component> _data = [];
   final Backboard backboard;
+  Artboard _showingArtboard;
 
   HierarchyTreeController(this.file)
       : backboard = file.core.backboard,
@@ -28,10 +30,10 @@ class HierarchyTreeController extends ComponentTreeController {
     // Probably a good idea or at least optimize it to track expansion via
     // custom hash (like the id of an object in this case so that it works when
     // objects are re-hydrated/instanced after an undo.
-    backboard.activeArtboardChanged.addListener(_updateArtboard);
+    backboard.activeArtboardChanged.addListener(_activeArtboardChanged);
     // Listen for selection events so tree can expand
     file.selection.addListener(_onItemSelected);
-    _updateArtboard();
+    _updateActiveArtboard();
   }
 
   @override
@@ -44,15 +46,23 @@ class HierarchyTreeController extends ComponentTreeController {
 
   @override
   void dispose() {
+    cancelDebounce(_updateActiveArtboard);
     // N.B. assumes backboard doesn't change.
-    backboard.activeArtboardChanged.removeListener(_updateArtboard);
+    backboard.activeArtboardChanged.removeListener(_activeArtboardChanged);
     // Remove the item selection listener
     file.selection.removeListener(_onItemSelected);
     super.dispose();
   }
 
-  void _updateArtboard() {
-    data = [if (backboard.activeArtboard != null) backboard.activeArtboard];
+  void _activeArtboardChanged() {
+    debounce(_updateActiveArtboard);
+  }
+
+  void _updateActiveArtboard() {
+    if (_showingArtboard != backboard.activeArtboard) {
+      _showingArtboard = backboard.activeArtboard;
+      data = [if (_showingArtboard != null) _showingArtboard];
+    }
   }
 
   @override
@@ -191,10 +201,16 @@ class HierarchyTreeController extends ComponentTreeController {
 
   /// Expand the tree to an item when selected
   void _onItemSelected() {
-    for (final item in file.selection.items) {
-      if (item is StageShape) {
-        expandTo(item.component);
-      }
+    /// Expand to the last selected item:
+    if (file.selection.items.isEmpty) {
+      return;
+    }
+
+    var lastItem = file.selection.items.lastWhere(
+        (item) => item is StageItem<Component> && item.showInHierarchy,
+        orElse: () => null);
+    if (lastItem is StageItem<Component>) {
+      expandTo(lastItem.component);
     }
   }
 }

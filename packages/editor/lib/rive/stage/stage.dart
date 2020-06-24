@@ -109,10 +109,11 @@ class Stage extends Debouncer {
   Vec2D _worldMouse = Vec2D();
   Vec2D get worldMouse => _worldMouse;
   Offset localMouse = Offset.zero;
-  bool _mouseDownSelected = false;
+  StageItem _mouseDownHit;
+  bool _mouseDownSelectAppend = false;
 
   /// Returns true if the last click operation resulted in a selection.
-  bool get mouseDownSelected => _mouseDownSelected;
+  StageItem get mouseDownHit => _mouseDownHit;
 
   bool _isHidingCursor = false;
   int _hoverOffsetIndex = -1;
@@ -461,7 +462,11 @@ class Stage extends Debouncer {
           _isPanning = true;
         } else if (isSelectionEnabled) {
           if (_hoverItem != null) {
-            _mouseDownSelected = true;
+            _mouseDownHit = _hoverItem;
+            // We need to specifically use range selection for multi select as
+            // command (multi-select) becomes something else in the future...
+            _mouseDownSelectAppend = file.selectionMode == SelectionMode.range;
+
             bool selectionHandled = false;
             for (final handler in _selectionHandlers) {
               if (handler(_hoverItem)) {
@@ -470,21 +475,27 @@ class Stage extends Debouncer {
               }
             }
             if (!selectionHandled) {
-              // We need to specifically use range selection for multi select as
-              // command (multi-select) becomes something else in the future...
-              file.select(_hoverItem,
-                  append: file.selectionMode == SelectionMode.range);
+              if (_hoverItem.isSelected) {
+                if (_mouseDownSelectAppend) {
+                  // If the hover item is already selected and we're holding
+                  // multi-select, then we need to toggle selection off for the
+                  // hoveritem.
+                  file.selection.deselect(_hoverItem);
+                }
+              } else {
+                file.select(_hoverItem, append: _mouseDownSelectAppend);
+              }
             }
           } else {
-            _mouseDownSelected = false;
+            _mouseDownHit = null;
           }
         } else {
-          _mouseDownSelected = false;
+          _mouseDownHit = null;
         }
 
-        // If the click operation didn't result in a selection, pipe the click
-        // to the tool.
-        if (!_mouseDownSelected) {
+        // If the click operation didn't hit anything, pipe the click to the
+        // tool.
+        if (_mouseDownHit == null) {
           final artboard = activeArtboard;
           _clickTool = tool;
           tool.click(
@@ -582,8 +593,13 @@ class Stage extends Debouncer {
 
     // If we didn't complete an operation and nothing was selected, clear
     // selections.
-    if (!_completeDrag() && !_mouseDownSelected) {
-      file.selection.clear();
+    if (!_completeDrag() && !_mouseDownSelectAppend) {
+      if (_mouseDownHit == null) {
+        file.selection.clear();
+      } else {
+        // just select the hit item
+        file.select(_mouseDownHit);
+      }
     }
 
     _updateComponents();

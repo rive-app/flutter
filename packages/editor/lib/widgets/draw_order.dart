@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 
 import 'package:rive_core/component.dart';
 import 'package:rive_editor/selectable_item.dart';
+import 'package:rive_editor/widgets/tree_view/rive_tree_view.dart';
 import 'package:rive_editor/widgets/tree_view/stage_item_icon.dart';
 
 import 'package:tree_widget/flat_tree_item.dart';
-import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_widget.dart';
 
 import 'package:rive_editor/widgets/common/renamable.dart';
@@ -31,7 +31,7 @@ class DrawOrderTreeView extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     var style = theme.treeStyles.hierarchy;
-    return TreeScrollView(
+    return RiveTreeView(
       padding: style.padding,
       slivers: [
         TreeView<Component>(
