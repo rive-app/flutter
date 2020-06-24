@@ -74,16 +74,10 @@ class TopNav extends StatelessWidget {
     children.add(PopupButton<PopupContextItem>(
       direction: PopupDirection.bottomToLeft,
       builder: (popupContext) {
-        return Container(
+        return SizedBox(
           width: 29,
           height: 29,
-          decoration: BoxDecoration(
-              color: riveColors.commonDarkGrey, shape: BoxShape.circle),
-          child: const Center(
-            child: SizedBox(
-              child: TintedIcon(color: Colors.white, icon: PackedIcon.add),
-            ),
-          ),
+          child: PlusIcon(),
         );
       },
       itemBuilder: (popupContext, item, isHovered) =>
@@ -143,4 +137,53 @@ class TopNav extends StatelessWidget {
       thickness: 1,
     );
   }
+}
+
+/// A plus icon that uses a custom painter.
+/// Using a tinted icon here causes the icon
+/// to swim. Painter gets around that.
+class PlusIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final riveColors = RiveTheme.of(context).colors;
+    return Container(
+      decoration: BoxDecoration(
+        color: riveColors.commonDarkGrey,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: SizedBox(
+          width: 15,
+          height: 15,
+          child: CustomPaint(
+            painter: PlusIconPainter(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A custom paintor to paint a cross
+class PlusIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    const color = Color(0xFFFFFFFF);
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+    canvas.drawLine(
+      Offset(size.width / 2, 0 + 0.5),
+      Offset(size.width / 2, size.height + 0.5),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(0, size.height / 2 + 0.5),
+      Offset(size.width, size.height / 2 + 0.5),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(PlusIconPainter oldDelegate) => false;
 }

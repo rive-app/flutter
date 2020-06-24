@@ -39,7 +39,7 @@ class _ApiChoserState extends State<ApiChoser> {
           },
         ),
         RaisedButton(
-            child: Text('update'),
+            child: const Text('update'),
             onPressed: () {
               if (_formKey.currentState.validate()) {
                 updateHost();
