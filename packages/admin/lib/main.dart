@@ -1,3 +1,4 @@
+import 'package:admin/api_choser.dart';
 import 'package:admin/login.dart';
 import 'package:admin/manager.dart';
 import 'package:admin/signout.dart';
@@ -41,7 +42,12 @@ class MyHomePage extends StatelessWidget {
                 var user = snapshot.hasData ? snapshot.data : null;
                 return user == null
                     ? Center(
-                        child: Login(),
+                        child: Column(
+                          children: [
+                            Expanded(child: Login()),
+                            Expanded(child: ApiChoser()),
+                          ],
+                        ),
                       )
                     : user.isAdmin
                         ? AdminView()
