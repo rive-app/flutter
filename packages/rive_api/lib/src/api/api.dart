@@ -49,10 +49,19 @@ class ApiException implements Exception {
 /// Now uses a singleton
 class RiveApi extends WebServiceClient {
   static final RiveApi _instance = RiveApi._();
-  final String host = 'https://stryker.rive.app';
   factory RiveApi() => _instance;
 
-  // final host = 'http://localhost:3000';
+  String _host = 'https://stryker.rive.app';
+
+  String get host => _host;
+  set host(String host) {
+    if (host.startsWith('https://') || host.startsWith('http://')) {
+      _host = host;
+    } else {
+      _host = 'https://${host}';
+    }
+  }
+
   RiveApi._() : super('rive-api') {
     addAcceptableStatusCodes([StatusCodeClass.success], handleException);
   }

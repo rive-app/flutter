@@ -1,3 +1,4 @@
+import 'package:admin/api_choser.dart';
 import 'package:admin/impersonate.dart';
 import 'package:admin/signout.dart';
 import 'package:admin/teams.dart';
@@ -24,6 +25,7 @@ class AdminView extends StatelessWidget {
             const AdminPageButton('Transactions'),
             const SizedBox(height: 30),
             Signout(),
+            Expanded(child: ApiChoser())
           ],
         ),
       ),
