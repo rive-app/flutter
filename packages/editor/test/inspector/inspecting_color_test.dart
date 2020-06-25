@@ -15,9 +15,10 @@ import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
+import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
 
-import 'helpers/inspector_helper.dart';
-import 'helpers/test_helpers.dart';
+import '../helpers/inspector_helper.dart';
+import '../helpers/test_helpers.dart';
 
 Shape _makeShape(RiveFile file) {
   var shape = Shape()..name = 'Ellipse';
@@ -67,9 +68,7 @@ void main() {
     shape = _makeShape(file.core);
   });
 
-  tearDown(() {
-    file.dispose();
-  });
+  tearDown(() => file.dispose());
 
   test('change color of a shape', () async {
     var inspectingColor = InspectingColor.forShapePaints([shape.fills.first]);
@@ -97,14 +96,22 @@ void main() {
 
     await tester.pumpWidget(TestInspector(file: file));
     await tester.pumpAndSettle();
+
+    // Expect that the inspector ui is displaying options for a shape
+    await expectLater(
+      find.byType(InspectorPanel),
+      matchesGoldenFile('../assets/goldens/inspecting_color_shape_test.png'),
+    );
+
     var colorSwatch = find.byType(InspectorColorSwatch);
     await tester.tap(colorSwatch.first);
     await tester.pumpAndSettle();
+
     var colorPopout = find.byType(ColorPopout);
 
     expect(colorPopout, findsOneWidget);
 
-    var mousePos = const Offset(2000, 2000);
+    const mousePos = Offset(2000, 2000);
 
     file.stage.mouseMove(0, mousePos.dx, mousePos.dy);
     file.stage.mouseDown(0, mousePos.dx, mousePos.dy);
@@ -115,5 +122,11 @@ void main() {
             'should\'ve cleared the selection');
     file.advance(0);
     await tester.pumpAndSettle();
+
+    // Expect that the inspector ui is back to it's default state
+    await expectLater(
+      find.byType(InspectorPanel),
+      matchesGoldenFile('../assets/goldens/inspecting_color_default_test.png'),
+    );
   });
 }
