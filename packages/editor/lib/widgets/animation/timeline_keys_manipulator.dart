@@ -326,7 +326,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
               _moveHelper ??= KeyFrameMoveHelper(
                   widget.animationManager.animation,
-                  currentSelection.toList(),
+                  List<KeyFrame>.from(currentSelection, growable: false),
                   seconds);
               _moveHelper.dragTo(seconds);
             }
@@ -443,10 +443,9 @@ class KeyFrameMoveHelper {
 
     int offsetFrames = (amount * animation.fps).round();
 
-    // First pass: clamp to edges
-    int idx = 0;
-    for (final keyframe in keyFrames) {
-      var origin = _origins[idx++];
+    // First pass: clamp offset to edges, do not apply
+    for (int i = 0; i < _origins.length; i++) {
+      var origin = _origins[i];
       var frame = origin + offsetFrames;
       if (frame < 0) {
         offsetFrames += -frame;
@@ -454,15 +453,12 @@ class KeyFrameMoveHelper {
       if (frame > animation.duration) {
         offsetFrames -= frame - animation.duration;
       }
-      keyframe.frame = origin + offsetFrames;
     }
-    if (offsetFrames != 0) {
-      // Second pass, apply.
-      int idx = 0;
-      for (final keyframe in keyFrames) {
-        var origin = _origins[idx++];
-        keyframe.frame = origin + offsetFrames;
-      }
+    // Second pass, apply.
+    int idx = 0;
+    for (final keyframe in keyFrames) {
+      var origin = _origins[idx++];
+      keyframe.frame = origin + offsetFrames;
     }
   }
 }
