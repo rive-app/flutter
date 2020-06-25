@@ -64,6 +64,8 @@ HashMap<String, String> _defaultUIStrings =
   'start': 'Gradient Start',
   'start.startX': 'X',
   'start.startY': 'Y',
+  'scale.scaleX': 'X',
+  'scale.scaleY': 'Y',
   'bezier_in': 'In',
   'bezier_in.inRotation': 'Angle',
   'bezier_in.inDistance': 'Length',
