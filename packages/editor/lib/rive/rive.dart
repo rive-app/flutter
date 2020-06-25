@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:core/debounce.dart';
 import 'package:core/error_logger/error_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -104,8 +105,14 @@ class Rive {
   final RiveIconCache iconCache;
   FocusNode _focusNode;
 
+  /// Immediately return focus to the root level.
   void focus() => _focusNode.requestFocus();
   FocusNode get focusNode => _focusNode;
+
+  /// Call to focus on the next frame. This is helpful when there are race
+  /// conditions with events propagating in the same event cycle once already
+  /// handled.
+  void debounceFocus() => debounce(focus);
 
   /// Initial service client and determine what state the app should be in.
   Future<void> initialize() async {
