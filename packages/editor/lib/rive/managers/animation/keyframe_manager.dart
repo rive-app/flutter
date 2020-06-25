@@ -20,8 +20,6 @@ class KeyFrameManager extends AnimationManager {
   final OpenFileContext activeFile;
   final _selection =
       BehaviorSubject<HashSet<KeyFrame>>.seeded(HashSet<KeyFrame>());
-  final _selectionController = StreamController<HashSet<KeyFrame>>();
-  Sink<HashSet<KeyFrame>> get changeSelection => _selectionController;
   ValueStream<HashSet<KeyFrame>> get selection => _selection;
 
   final _commonInterpolation = BehaviorSubject<InterpolationViewModel>();
@@ -39,7 +37,7 @@ class KeyFrameManager extends AnimationManager {
       : super(animation) {
     activeFile.addActionHandler(_onAction);
     activeFile.selection.addListener(_stageSelectionChanged);
-    _selectionController.stream.listen(_selectKeyFrames);
+
     _interpolationController.stream.listen(_changeInterpolation);
     _cubicController.stream.listen(_changeCubicInterpolation);
     _updateCommonInterpolation();
@@ -140,9 +138,14 @@ class KeyFrameManager extends AnimationManager {
     _updateCommonInterpolation();
   }
 
-  void _selectKeyFrames(HashSet<KeyFrame> keyFrames) {
+  void changeSelection(HashSet<KeyFrame> keyFrames) {
     var oldSelection = _selection.value;
-    _selection.add(keyFrames);
+
+    // Selection should always have a valid set, even if requesting null
+    // selection.
+    _selection.add(keyFrames != null
+        ? HashSet<KeyFrame>.from(keyFrames)
+        : HashSet<KeyFrame>());
     _onChangeSelected(oldSelection);
   }
 
@@ -178,7 +181,6 @@ class KeyFrameManager extends AnimationManager {
     activeFile.removeActionHandler(_onAction);
     activeFile.selection.removeListener(_stageSelectionChanged);
     _selection.close();
-    _selectionController.close();
     _interpolationController.close();
     _commonInterpolation.close();
     cancelDebounce(_updateCommonInterpolation);

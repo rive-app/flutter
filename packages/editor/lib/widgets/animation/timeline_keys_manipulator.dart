@@ -79,12 +79,14 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   _DragOperation _dragOperation;
   KeyFrameMoveHelper _moveHelper;
   CursorInstance _handCursor;
+  bool _didDrag = false;
 
   // Stores time & offset
   Offset _marqueeStart;
   // Stores local position so it can update during scroll/pan.
   Offset _marqueeEnd;
   HashSet<KeyFrame> _preSelected;
+  HashSet<KeyFrame> _downHit;
 
   // Actual marquee value.
   _Marquee _marquee;
@@ -179,14 +181,17 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
     // Compute selected items.
     var toSelect = viewportHelper.framesIn(marquee, widget.expandedRows);
 
-    var fullSelection = HashSet<KeyFrame>.of(_preSelected);
+    var preSelect = _downHit.isEmpty && !ShortcutAction.multiSelect.value
+        ? HashSet<KeyFrame>()
+        : _preSelected;
+    var fullSelection = HashSet<KeyFrame>.of(preSelect);
     fullSelection.addAll(toSelect);
 
     if (ShortcutAction.multiSelect.value) {
       // When multi-selecting, remove intersection from the set.
-      fullSelection.removeAll(_preSelected.intersection(toSelect));
+      fullSelection.removeAll(preSelect.intersection(toSelect));
     }
-    widget.keyFrameManager.changeSelection.add(fullSelection);
+    widget.keyFrameManager.changeSelection(fullSelection);
 
     setState(() {
       _marquee = marquee;
@@ -226,6 +231,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         }
       },
       onPointerDown: (details) {
+        _didDrag = false;
         if (details.pointerEvent.buttons == 2) {
           _handCursor = CursorIcon.show(context, PackedIcon.cursorHand);
           // right click to pan.
@@ -233,9 +239,8 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           return;
         }
 
-        _preSelected = ShortcutAction.multiSelect.value
-            ? HashSet<KeyFrame>.from(widget.keyFrameManager.selection.value)
-            : HashSet<KeyFrame>();
+        _preSelected =
+            HashSet<KeyFrame>.from(widget.keyFrameManager.selection.value);
 
         var toSelect = HashSet<KeyFrame>();
 
@@ -285,15 +290,28 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
         var fullSelection = HashSet<KeyFrame>.of(_preSelected);
         fullSelection.addAll(toSelect);
+        _downHit = toSelect;
 
-        if (ShortcutAction.multiSelect.value) {
-          // When multi-selecting, remove intersection from the set.
-          fullSelection.removeAll(_preSelected.intersection(toSelect));
+        bool isReselect = _preSelected.containsAll(toSelect);
+
+        if (ShortcutAction.multiSelect.value && isReselect) {
+          // We're holding multiselect and we're clicking on something already
+          // selected, so remove the already selected set from the selection
+          // (toggle it off).
+          fullSelection.removeAll(toSelect);
+        } else if (!ShortcutAction.multiSelect.value && !isReselect) {
+          // We're not holding multiselect and this is a new selection, so we
+          // want the selection to only be the new stuff we selected. Remove the
+          // preselect.
+          fullSelection.removeAll(_preSelected);
+        } else if (_downHit.isEmpty) {
+          fullSelection.clear();
         }
 
-        widget.keyFrameManager.changeSelection.add(fullSelection);
+        widget.keyFrameManager.changeSelection(fullSelection);
       },
       onPointerMove: (details) {
+        _didDrag = true;
         switch (_dragOperation) {
           case _DragOperation.pan:
             _pan(details.pointerEvent.localDelta * -1);
@@ -323,6 +341,11 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         }
       },
       onPointerUp: (details) {
+        if (!_didDrag && !ShortcutAction.multiSelect.value) {
+          // We didn't drag and we're not multi selecting so change the
+          // selection to what was hit on down.
+          widget.keyFrameManager.changeSelection(_downHit);
+        }
         widget.keyFrameManager.completeSelection();
         _edgeScrollTimer?.cancel();
         _edgeScrollTimer = null;
