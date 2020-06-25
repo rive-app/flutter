@@ -422,6 +422,14 @@ class OpenFileContext with RiveFileDelegate {
 
   bool select(SelectableItem item, {bool append}) {
     append ??= rive.selectionMode.value == SelectionMode.multi;
+
+    /// When appending, toggle selection in the set, so already selected items
+    /// should be removed from the set. TODO: consider moving to
+    /// [SelectionContext]? https://github.com/rive-app/rive/issues/823
+    if (append && selection.items.contains(item)) {
+      return selection.deselect(item);
+    }
+
     final success = selection.select(item, append: append);
     return success;
   }

@@ -27,7 +27,7 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
         component.renderVertices,
         null,
       ),
-      transform: component.pathTransform,
+      transform: artboard.transform(component.pathTransform),
     );
   }
 
@@ -42,14 +42,21 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
     if (selectionState.value == SelectionState.none || !stage.showSelection) {
       return;
     }
+    var path = component;
+    if (path.pathTransform == null) {
+      return;
+    }
+
     canvas.save();
     final origin = component.artboard.originWorld;
     canvas.translate(origin[0], origin[1]);
 
-    var path = component;
-    canvas.transform(path.pathTransform?.mat4);
+    // when drawing a path's selection bounds, copy the path so we can transform
+    // each point to world such that the stroke isn't deformed by the world
+    // transform.
 
-    canvas.drawPath(path.uiPath, StageItem.selectedPaint);
+    canvas.drawPath(path.uiPath.transform(path.pathTransform.mat4),
+        StageItem.selectedPaint);
     canvas.restore();
   }
 }
