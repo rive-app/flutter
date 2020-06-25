@@ -74,7 +74,7 @@ class TopNav extends StatelessWidget {
     children.add(PopupButton<PopupContextItem>(
       direction: PopupDirection.bottomToLeft,
       builder: (popupContext) {
-        return SizedBox(
+        return const SizedBox(
           width: 29,
           height: 29,
           child: PlusIcon(),
@@ -143,6 +143,7 @@ class TopNav extends StatelessWidget {
 /// Using a tinted icon here causes the icon
 /// to swim. Painter gets around that.
 class PlusIcon extends StatelessWidget {
+  const PlusIcon({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
