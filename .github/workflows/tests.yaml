@@ -24,7 +24,7 @@ jobs:
 
       - name: Setup flutter
         run: |
-          flutter channel dev
+          flutter channel master
           flutter doctor
 
       # Run the utilities tests
