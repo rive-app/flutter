@@ -141,11 +141,9 @@ class KeyFrameManager extends AnimationManager {
   }
 
   void _selectKeyFrames(HashSet<KeyFrame> keyFrames) {
-    if (keyFrames.isEmpty || !_selection.value.containsAll(keyFrames)) {
-      var oldSelection = _selection.value;
-      _selection.add(keyFrames);
-      _onChangeSelected(oldSelection);
-    }
+    var oldSelection = _selection.value;
+    _selection.add(keyFrames);
+    _onChangeSelected(oldSelection);
   }
 
   void _onChangeSelected(HashSet<KeyFrame> previous) {

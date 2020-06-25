@@ -8,6 +8,8 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/rive.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/translate_tool.dart';
@@ -78,13 +80,31 @@ class AutoTool extends TransformHandleTool {
   Restorer _restoreSelect;
 
   @override
+  bool activate(Stage stage) {
+    ShortcutAction.multiSelect.addListener(_toggleMultiSelect);
+    return super.activate(stage);
+  }
+
+  @override
+  void deactivate() {
+    ShortcutAction.multiSelect.removeListener(_toggleMultiSelect);
+    super.deactivate();
+  }
+
+  void _toggleMultiSelect() {
+    if (isMarqueeing) {
+      _updateMarquee();
+    }
+  }
+
+  @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
     super.click(activeArtboard, worldMouse);
 
     if (!isTransforming && stage.mouseDownHit == null) {
       _restoreSelect = stage.suppressSelection();
       _marqueeStart = Vec2D.clone(worldMouse);
-      _preSelected = stage.file.selectionMode == SelectionMode.range
+      _preSelected = ShortcutAction.multiSelect.value
           ? HashSet<SelectableItem>.of(stage.file.selection.items)
           : HashSet<SelectableItem>();
 
@@ -111,13 +131,7 @@ class AutoTool extends TransformHandleTool {
     return false;
   }
 
-  @override
-  void updateDrag(Vec2D worldMouse) {
-    if (!isMarqueeing) {
-      return;
-    }
-    _marqueeEnd = Vec2D.clone(worldMouse);
-
+  void _updateMarquee() {
     var inMarquee = HashSet<SelectableItem>();
 
     var bounds = marqueeBounds;
@@ -152,12 +166,30 @@ class AutoTool extends TransformHandleTool {
       return true;
     });
 
+    var fullSelection = HashSet<SelectableItem>.of(_preSelected);
+    fullSelection.addAll(inMarquee);
+
+    if (ShortcutAction.multiSelect.value) {
+      // When multi-selecting, remove intersection from the set.
+      fullSelection.removeAll(_preSelected.intersection(inMarquee));
+    }
+
     stage.file.selection.selectMultiple(
-      HashSet<SelectableItem>.of(_preSelected)..addAll(inMarquee),
+      fullSelection,
       notify: false,
     );
 
     stage.markNeedsRedraw();
+  }
+
+  @override
+  void updateDrag(Vec2D worldMouse) {
+    if (!isMarqueeing) {
+      return;
+    }
+    _marqueeEnd = Vec2D.clone(worldMouse);
+
+    _updateMarquee();
   }
 
   // We grab the transformers from the translate tool if we're dragging an item.

@@ -96,6 +96,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
   @override
   void initState() {
     super.initState();
+    ShortcutAction.multiSelect.addListener(_updateMarquee);
     widget.verticalScroll?.addListener(_onVerticalScrollChanged);
     _onVerticalScrollChanged();
   }
@@ -123,6 +124,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
   @override
   void dispose() {
+    ShortcutAction.multiSelect.removeListener(_updateMarquee);
     _edgeScrollTimer?.cancel();
     widget.verticalScroll?.removeListener(_onVerticalScrollChanged);
     _handCursor?.remove();
@@ -176,10 +178,15 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
 
     // Compute selected items.
     var toSelect = viewportHelper.framesIn(marquee, widget.expandedRows);
+
+    var fullSelection = HashSet<KeyFrame>.of(_preSelected);
+    fullSelection.addAll(toSelect);
+
     if (ShortcutAction.multiSelect.value) {
-      toSelect.addAll(_preSelected);
+      // When multi-selecting, remove intersection from the set.
+      fullSelection.removeAll(_preSelected.intersection(toSelect));
     }
-    widget.keyFrameManager.changeSelection.add(toSelect);
+    widget.keyFrameManager.changeSelection.add(fullSelection);
 
     setState(() {
       _marquee = marquee;
@@ -226,8 +233,10 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
           return;
         }
 
-        _preSelected =
-            HashSet<KeyFrame>.from(widget.keyFrameManager.selection.value);
+        _preSelected = ShortcutAction.multiSelect.value
+            ? HashSet<KeyFrame>.from(widget.keyFrameManager.selection.value)
+            : HashSet<KeyFrame>();
+
         var toSelect = HashSet<KeyFrame>();
 
         var helper = makeMouseHelper();
@@ -274,12 +283,15 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
               seconds, details.pointerEvent.localPosition.dy + verticalOffset);
         }
 
-        // Tell our manager to update the selection, it'll automatically handle
-        // multiselection for us.
+        var fullSelection = HashSet<KeyFrame>.of(_preSelected);
+        fullSelection.addAll(toSelect);
+
         if (ShortcutAction.multiSelect.value) {
-          toSelect.addAll(_preSelected);
+          // When multi-selecting, remove intersection from the set.
+          fullSelection.removeAll(_preSelected.intersection(toSelect));
         }
-        widget.keyFrameManager.changeSelection.add(toSelect);
+
+        widget.keyFrameManager.changeSelection.add(fullSelection);
       },
       onPointerMove: (details) {
         switch (_dragOperation) {
@@ -315,6 +327,7 @@ class _TimelineKeysManipulatorState extends State<TimelineKeysManipulator> {
         _edgeScrollTimer?.cancel();
         _edgeScrollTimer = null;
         _dragOperation = null;
+        _marqueeStart = _marqueeEnd = null;
         setState(() {
           _marquee = null;
         });
