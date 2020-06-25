@@ -150,6 +150,17 @@ class OpenFileContext with RiveFileDelegate {
     }
     _mode.value = mode;
     _syncActiveArtboard();
+    // If animate mode is selected, automatically
+    // select the auto tool
+
+    if (mode == EditorMode.animate) {
+      var tool = stage.tool;
+      // Add other tools here when we have them like rotate and scale:
+      // https://github.com/rive-app/rive/issues/820
+      if (tool != TranslateTool.instance) {
+        stage.tool = AutoTool.instance;
+      }
+    }
   }
 
   final List<ActionHandler> _actionHandlers = [];
