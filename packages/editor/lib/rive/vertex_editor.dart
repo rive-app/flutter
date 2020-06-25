@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -205,9 +206,43 @@ class VertexEditor with RiveFileDelegate {
   }
 
   void _editPaths(Iterable<core.Path> paths) {
-    // for now just get points paths, later flatten the others
-    _editingPaths.value =
-        HashSet<PointsPath>.from(paths.whereType<PointsPath>());
+    var pathsToEdit = HashSet<core.Path>.from(paths);
+
+    // If we have any parametric paths, convert them to points paths (flatten
+    // them).
+    var parametricPaths = pathsToEdit.whereType<ParametricPath>();
+    if (parametricPaths.isNotEmpty) {
+      var pathsWithoutParametric = HashSet<core.Path>.from(paths);
+      pathsWithoutParametric.removeAll(parametricPaths);
+      pathsToEdit = pathsWithoutParametric;
+
+      file.core.batchAdd(() {
+        for (final parametricPath in parametricPaths) {
+          var parent = parametricPath.parent;
+          parametricPath.remove();
+          var pointsPath = PointsPath()
+            ..name = parametricPath.name
+            ..translation = parametricPath.translation
+            ..rotation = parametricPath.rotation
+            ..scale = parametricPath.scale
+            ..childOrder = parametricPath.childOrder
+            ..isClosed = parametricPath.isClosed;
+          file.core.addObject(pointsPath);
+          pointsPath.parent = parent;
+
+          var vertices = parametricPath.vertices;
+          for (final vertex in vertices) {
+            file.core.addObject(vertex);
+            vertex.parent = pointsPath;
+          }
+
+          pathsWithoutParametric.add(pointsPath);
+        }
+      });
+      file.core.captureJournalEntry();
+    }
+
+    _editingPaths.value = HashSet<PointsPath>.from(pathsToEdit);
     _syncSolo();
     _changeMode(VertexEditorMode.editingPath);
     for (final path in _editingPaths.value) {
