@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
@@ -29,6 +30,9 @@ class StageNode extends StageItem<Node> with BoundsDelegate {
         .translate(component.artboard.originWorld);
     return aabb;
   }
+
+  @override
+  bool intersectsRect(Float32List rectPoly) => true;
 
   @override
   void draw(Canvas canvas, StageDrawPass pass) {

@@ -139,6 +139,12 @@ abstract class StageItem<T> extends SelectableItem
   /// have a narrow-phase hit detection, just return true to use the AABB.
   bool hitHiFi(Vec2D worldMouse) => true;
 
+  /// Perform a high fidelity rectangle intersection test. The rectangle is
+  /// provided as interleaved x/y coordinates for the four contour points of the
+  /// rectangle.
+  bool intersectsRect(Float32List rectPoly) =>
+      obb != null && _doRectsIntersect(rectPoly, obb.poly);
+
   /// Override this to temporarily hide items. This shouldn't be used to
   /// permanently hide an item. If an item is no longer necessary it should be
   /// removed from the stage.
@@ -302,4 +308,71 @@ AABB obbToAABB(AABB obb, Mat2D xform) {
       min(p1[1], min(p2[1], min(p3[1], p4[1]))),
       max(p1[0], max(p2[0], max(p3[0], p4[0]))),
       max(p1[1], max(p2[1], max(p3[1], p4[1]))));
+}
+
+/// Tests for rectangle intersection given the polygon contour of the rects.
+/// This can be changed into a more general polygon intersector by removing
+/// length/2 in each of the outer for loops. We can get away with projecting to
+/// only two axes if we know we're dealing with rectangles.
+bool _doRectsIntersect(Float32List a, Float32List b) {
+  var al = a.length;
+  var bl = b.length;
+  for (int i = 0, l = a.length ~/ 2; i < l; i += 2) {
+    // Finds a line perpendicular to the edge. normal = x: p2.y - p1.y, y: p1.x
+    // - p2.x
+    var x = a[(i + 3) % al] - a[i + 1];
+    var y = a[i] - a[(i + 2) % al];
+
+    // Project each point in a to the perpendicular edge.
+    var projectA = _projectToEdge(a, x, y);
+    var projectB = _projectToEdge(b, x, y);
+
+    // if there is no overlap between the projects, the edge we are looking at
+    // separates the two polygons, and we know there is no overlap
+    if (projectA.max < projectB.min || projectB.max < projectA.min) {
+      return false;
+    }
+  }
+  for (int i = 0, l = b.length ~/ 2; i < l; i += 2) {
+    // Finds a line perpendicular to the edge. normal = x: p2.y - p1.y, y: p1.x
+    // - p2.x
+    var x = b[(i + 3) % bl] - b[i + 1];
+    var y = b[i] - b[(i + 2) % bl];
+
+    // Project each point in a to the perpendicular edge.
+    var projectA = _projectToEdge(a, x, y);
+    var projectB = _projectToEdge(b, x, y);
+
+    // if there is no overlap between the projects, the edge we are looking at
+    // separates the two polygons, and we know there is no overlap
+    if (projectA.max < projectB.min || projectB.max < projectA.min) {
+      return false;
+    }
+  }
+  return true;
+}
+
+class _Projection {
+  final double min;
+  final double max;
+
+  _Projection(this.min, this.max);
+}
+
+/// Return results contains min/max.
+_Projection _projectToEdge(Float32List points, double edgeX, double edgeY) {
+// Project each point in a to the perpendicular edge.
+  double min = double.maxFinite, max = -double.maxFinite;
+  var pl = points.length;
+  for (int j = 0; j < pl; j += 2) {
+    var projection = edgeX * points[j] + edgeY * points[j + 1];
+    if (projection < min) {
+      min = projection;
+    }
+    if (projection > max) {
+      max = projection;
+    }
+  }
+
+  return _Projection(min, max);
 }

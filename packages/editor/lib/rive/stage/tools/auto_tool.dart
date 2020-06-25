@@ -152,16 +152,12 @@ class AutoTool extends TransformHandleTool {
 
     stage.visTree.query(marqueeBounds, (proxyId, hitItem) {
       var item = hitItem.selectionTarget;
-      if (item.isVisible && item.isSelectable) {
-        // Items are required to have an OBB to be selectable by the marquee. If
-        // further refinement is necessary, consider adding an
-        // isMarqueeSelectable getter to StageItem.
-        if (item.obb != null) {
-          if (_doRectsIntersect(marqueePoly, item.obb.poly)) {
-            inMarquee.add(item);
-          }
-        }
+      if (item.isVisible &&
+          item.isSelectable &&
+          item.intersectsRect(marqueePoly)) {
+        inMarquee.add(item);
       }
+
       return true;
     });
 
@@ -196,71 +192,4 @@ class AutoTool extends TransformHandleTool {
   List<StageTransformer> get transformers => isTransforming
       ? super.transformers
       : isMarqueeing ? [] : TranslateTool.instance.transformers;
-}
-
-/// Tests for rectangle intersection given the polygon contour of the rects.
-/// This can be changed into a more general polygon intersector by removing
-/// length/2 in each of the outer for loops. We can get away with projecting to
-/// only two axes if we know we're dealing with rectangles.
-bool _doRectsIntersect(Float32List a, Float32List b) {
-  var al = a.length;
-  var bl = b.length;
-  for (int i = 0, l = a.length ~/ 2; i < l; i += 2) {
-    // Finds a line perpendicular to the edge. normal = x: p2.y - p1.y, y: p1.x
-    // - p2.x
-    var x = a[(i + 3) % al] - a[i + 1];
-    var y = a[i] - a[(i + 2) % al];
-
-    // Project each point in a to the perpendicular edge.
-    var projectA = _projectToEdge(a, x, y);
-    var projectB = _projectToEdge(b, x, y);
-
-    // if there is no overlap between the projects, the edge we are looking at
-    // separates the two polygons, and we know there is no overlap
-    if (projectA.max < projectB.min || projectB.max < projectA.min) {
-      return false;
-    }
-  }
-  for (int i = 0, l = b.length ~/ 2; i < l; i += 2) {
-    // Finds a line perpendicular to the edge. normal = x: p2.y - p1.y, y: p1.x
-    // - p2.x
-    var x = b[(i + 3) % bl] - b[i + 1];
-    var y = b[i] - b[(i + 2) % bl];
-
-    // Project each point in a to the perpendicular edge.
-    var projectA = _projectToEdge(a, x, y);
-    var projectB = _projectToEdge(b, x, y);
-
-    // if there is no overlap between the projects, the edge we are looking at
-    // separates the two polygons, and we know there is no overlap
-    if (projectA.max < projectB.min || projectB.max < projectA.min) {
-      return false;
-    }
-  }
-  return true;
-}
-
-class _Projection {
-  final double min;
-  final double max;
-
-  _Projection(this.min, this.max);
-}
-
-/// Return results contains min/max.
-_Projection _projectToEdge(Float32List points, double edgeX, double edgeY) {
-// Project each point in a to the perpendicular edge.
-  double min = double.maxFinite, max = -double.maxFinite;
-  var pl = points.length;
-  for (int j = 0; j < pl; j += 2) {
-    var projection = edgeX * points[j] + edgeY * points[j + 1];
-    if (projection < min) {
-      min = projection;
-    }
-    if (projection > max) {
-      max = projection;
-    }
-  }
-
-  return _Projection(min, max);
 }
