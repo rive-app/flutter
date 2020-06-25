@@ -15,7 +15,7 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 /// This is the Profile panel for an [owner].
 /// Owner can be a [Team] or a [Me] user.
-/// 
+///
 /// Users will have fields to change their email and password.
 class ProfileSettings extends StatefulWidget {
   final Owner owner;
@@ -107,7 +107,9 @@ class _ProfileSettingsState extends State<ProfileSettings> {
       isForHire: _isForHire,
     );
     await ProfileManager().updateProfile(widget.owner, updatedProfile);
-    TeamManager().loadTeams();
+    await TeamManager().loadTeams();
+    // Close the popup
+    Navigator.of(context).pop();
   }
 
   Widget _textFieldRow(List<Widget> children) {
