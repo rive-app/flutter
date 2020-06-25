@@ -57,7 +57,7 @@ void main() {
       expect(ellipse.width, 200);
       expect(ellipse.height, 100);
 
-      file.advance(0);
+      // file.advance(0);
 
       stage.tool = AutoTool.instance;
       // Move mouse to trigger hover...
@@ -74,7 +74,8 @@ void main() {
       // move 50 pixels on x
       stage.mouseDrag(1, 200, 150);
       stage.mouseUp(1, 200, 150);
-      file.advance(0);
+
+      //file.advance(0);
 
       expect(
           Mat2D.areEqual(shape.worldTransform,

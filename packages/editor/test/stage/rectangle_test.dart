@@ -49,7 +49,7 @@ void main() {
       expect(core.objectsOfType<Shape>().length, 1,
           reason: 'there should be one shape after clicking the pen tool');
       expect(core.objectsOfType<Rectangle>().length, 1,
-          reason: 'there should be one ellipse');
+          reason: 'there should be one rectangle');
 
       var shape = core.objectsOfType<Shape>().first;
       Rectangle rectangle = core.objectsOfType<Rectangle>().first;
@@ -58,7 +58,8 @@ void main() {
       expect(rectangle.shape.x, 100);
       expect(rectangle.shape.y, 100);
 
-      // What are these?
+      // The position of the origin of the rectangle
+      // This is the rectangle's midpoint
       expect(rectangle.x, 100);
       expect(rectangle.y, 50);
 
@@ -88,7 +89,7 @@ void main() {
       expect(rectangle.shape.x, 150);
       expect(rectangle.shape.y, 100);
 
-      // What are these?
+      // Check the midpoint
       expect(rectangle.x, 100);
       expect(rectangle.y, 50);
 

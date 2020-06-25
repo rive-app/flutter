@@ -1,5 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
@@ -113,8 +114,6 @@ void main() {
         reason: 'clicking on an empty spot on the stage '
             'should\'ve cleared the selection');
     file.advance(0);
-    await tester.pumpAndSettle();
-
     await tester.pumpAndSettle();
   });
 }
