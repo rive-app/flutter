@@ -855,6 +855,9 @@ class Stage extends Debouncer {
   }
 
   void updateBounds(StageItem item) {
+    assert(item._visTreeProxy != null,
+        'Attempting to place an item on the stage after it has been removed.');
+
     visTree.placeProxy(item._visTreeProxy, item.aabb);
     markNeedsAdvance();
   }
@@ -876,6 +879,11 @@ class Stage extends Debouncer {
 
   bool removeItem(StageItem item) {
     assert(item != null);
+
+    // If this item didn't belong to this stage, don't try to remove it.
+    if (item.stage != this) {
+      return false;
+    }
 
     // Make sure items are removed from selection when they are removed from the
     // stage.
@@ -906,6 +914,15 @@ class Stage extends Debouncer {
   void wipe() {
     _soloNotifier.value = null;
     _drawPasses.clear();
+
+    // Make sure that all StageItems in this Stage have their tree proxy nodes
+    // set to null before we call visTree.clear so that any further operation
+    // peformed on the tree with those nodes is discarded.
+    visTree.all((proxyId, item) {
+      item._visTreeProxy = nullNode;
+      return true;
+    });
+
     visTree.clear();
     hoverItem = null;
   }

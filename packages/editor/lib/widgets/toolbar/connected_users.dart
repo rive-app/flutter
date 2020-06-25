@@ -25,7 +25,7 @@ class ConnectedUsers extends StatelessWidget {
         builder: (context, users, _) {
           return Row(
             children: [
-              for (var connectedUser in users) ...[
+              for (var connectedUser in users)
                 ValueListenableBuilder<RiveUser>(
                   valueListenable: connectedUser.userNotifier,
                   builder: (context, user, chld) => AvatarView(
@@ -34,7 +34,6 @@ class ConnectedUsers extends StatelessWidget {
                     name: user?.name ?? user?.username,
                   ),
                 ),
-              ],
             ],
           );
         },
