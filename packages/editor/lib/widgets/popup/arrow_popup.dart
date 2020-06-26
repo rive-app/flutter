@@ -446,9 +446,7 @@ class _PositionedPopupDelegate extends SingleChildLayoutDelegate {
   Size getSize(BoxConstraints constraints) => constraints.smallest;
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
-      constraints
-          .heightConstraints()
-          .copyWith(minWidth: width, maxWidth: width);
+      BoxConstraints(minWidth: width, maxWidth: width);
 
   @override
   Offset getPositionForChild(Size size, Size bodySize) {
