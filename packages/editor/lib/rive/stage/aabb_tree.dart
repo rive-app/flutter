@@ -726,7 +726,7 @@ class AABBTree<T> {
     return _nodes[proxyId].aabb;
   }
 
-  void all(QueryCallback callback) {
+  void all(QueryCallback<T> callback) {
     var stack = ListQueue<int>();
     stack.addLast(_root);
 

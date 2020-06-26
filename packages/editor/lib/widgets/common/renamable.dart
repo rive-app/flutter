@@ -103,7 +103,7 @@ class _RenamableState extends State<Renamable> {
                     // Force focus back to the main context so that we can
                     // immediately undo this change if we want to by hitting
                     // ctrl/comamnd z.
-                    RiveContext.of(context).focus();
+                    RiveContext.of(context).debounceFocus();
                   },
                 ),
               )

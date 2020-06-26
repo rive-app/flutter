@@ -28,7 +28,11 @@ class ScalePercentageValueConverter extends InputValueConverter<double> {
       ScalePercentageValueConverter();
 
   @override
-  double fromEditingValue(String value) => double.parse(value) / 100;
+  double fromEditingValue(String value) {
+    var matchString = RegExp('([0-9]+([\.][0-9])*)').stringMatch(value);
+    var dv = double.parse(matchString);
+    return dv / 100;
+  }
 
   @override
   String toDisplayValue(double value) => '${formatter.format(value)}%';

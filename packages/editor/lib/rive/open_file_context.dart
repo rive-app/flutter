@@ -150,6 +150,17 @@ class OpenFileContext with RiveFileDelegate {
     }
     _mode.value = mode;
     _syncActiveArtboard();
+    // If animate mode is selected, automatically
+    // select the auto tool
+
+    if (mode == EditorMode.animate) {
+      var tool = stage.tool;
+      // Add other tools here when we have them like rotate and scale:
+      // https://github.com/rive-app/rive/issues/820
+      if (tool != TranslateTool.instance) {
+        stage.tool = AutoTool.instance;
+      }
+    }
   }
 
   final List<ActionHandler> _actionHandlers = [];
@@ -353,6 +364,16 @@ class OpenFileContext with RiveFileDelegate {
 
   @override
   void onWipe() {
+    
+    // Make sure to remove any stage items so they don't stick around after
+    // wiping the stage.
+    for (final player in core.players.cast<ClientSidePlayer>()) {
+      if (player.cursorDelegate is StageCursor) {
+        stage?.removeItem(player.cursorDelegate as StageCursor);
+        // Set it to null so it can be re-added.
+        player.cursorDelegate = null;
+      }
+    }
     // N.B. this will only callback during a reconnect wipe, not initial wipe as
     // our delegate isn't registered yet. So we can use this opportunity to wipe
     // the existing stage and set ourselves up for the next set of data.

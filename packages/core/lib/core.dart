@@ -843,6 +843,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
 
   void _wipe() {
     onWipe();
+    _players.clear();
     _objects.clear();
     _journalIndex = 0;
     journal.clear();

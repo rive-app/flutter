@@ -362,13 +362,6 @@ class _EditorState extends State<Editor> {
                             },
                             select: (EditorMode mode) {
                               file.changeMode(mode);
-                              // If animate mode is selected, automatically
-                              // select the translate tool
-                              if (mode == EditorMode.animate) {
-                                file.rive.triggerAction(
-                                  ShortcutAction.translateTool,
-                                );
-                              }
                             },
                           ),
                         ),
