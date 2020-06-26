@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cursor/propagating_listener.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

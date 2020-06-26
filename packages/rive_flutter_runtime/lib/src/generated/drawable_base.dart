@@ -38,21 +38,22 @@ abstract class DrawableBase extends Node {
   void drawOrderChanged(int from, int to);
 
   /// --------------------------------------------------------------------------
-  /// BlendMode field with key 23.
-  int _blendMode;
-  static const int blendModePropertyKey = 23;
-  int get blendMode => _blendMode;
+  /// BlendModeValue field with key 23.
+  int _blendModeValue = 3;
+  static const int blendModeValuePropertyKey = 23;
+  int get blendModeValue => _blendModeValue;
 
-  /// Change the [_blendMode] field value.
-  /// [blendModeChanged] will be invoked only if the field's value has changed.
-  set blendMode(int value) {
-    if (_blendMode == value) {
+  /// Change the [_blendModeValue] field value.
+  /// [blendModeValueChanged] will be invoked only if the field's value has
+  /// changed.
+  set blendModeValue(int value) {
+    if (_blendModeValue == value) {
       return;
     }
-    int from = _blendMode;
-    _blendMode = value;
-    blendModeChanged(from, value);
+    int from = _blendModeValue;
+    _blendModeValue = value;
+    blendModeValueChanged(from, value);
   }
 
-  void blendModeChanged(int from, int to);
+  void blendModeValueChanged(int from, int to);
 }

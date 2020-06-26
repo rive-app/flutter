@@ -273,8 +273,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
   }
 
-  @override
-  void blendModeValueChanged(int from, int to) {
+  void _syncBlendMode() {
     for (final fill in fills) {
       fill.blendMode = blendMode;
     }
@@ -282,6 +281,9 @@ class Shape extends ShapeBase with ShapePaintContainer {
       stroke.blendMode = blendMode;
     }
   }
+
+  @override
+  void blendModeValueChanged(int from, int to) => _syncBlendMode();
 
   @override
   void draw(Canvas canvas) {
@@ -334,6 +336,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     // The transform affects stroke property may have changed as we have a new
     // mutator.
     transformAffectsStrokeChanged();
+    _syncBlendMode();
   }
 
   @override
@@ -341,5 +344,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
     // The transform affects stroke property may have changed as we have a new
     // mutator.
     transformAffectsStrokeChanged();
+    _syncBlendMode();
   }
 }

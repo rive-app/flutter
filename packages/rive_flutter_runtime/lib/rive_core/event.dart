@@ -32,3 +32,28 @@ class DetailedEvent<T> implements DetailListenable<T> {
     }
   }
 }
+
+class SuppressableValueNotifier<T> extends ChangeNotifier
+    implements ValueListenable<T> {
+  SuppressableValueNotifier(this._value);
+  @override
+  T get value => _value;
+  T _value;
+  set value(T newValue) {
+    changeValue(newValue, notify: true);
+  }
+
+  void changeValue(T newValue, {bool notify = false}) {
+    if (_value == newValue) {
+      return;
+    }
+    _value = newValue;
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
+  void notify() => notifyListeners();
+  @override
+  String toString() => '${describeIdentity(this)}($value)';
+}

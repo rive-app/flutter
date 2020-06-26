@@ -357,9 +357,9 @@ class RiveCoreContext {
           object.drawOrder = value;
         }
         break;
-      case DrawableBase.blendModePropertyKey:
+      case DrawableBase.blendModeValuePropertyKey:
         if (object is DrawableBase && value is int) {
-          object.blendMode = value;
+          object.blendModeValue = value;
         }
         break;
       case PathVertexBase.xPropertyKey:
@@ -499,7 +499,7 @@ class RiveCoreContext {
       case StrokeBase.joinPropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.drawOrderPropertyKey:
-      case DrawableBase.blendModePropertyKey:
+      case DrawableBase.blendModeValuePropertyKey:
         return intType;
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
@@ -595,8 +595,8 @@ class RiveCoreContext {
         return (object as FillBase).fillRule;
       case DrawableBase.drawOrderPropertyKey:
         return (object as DrawableBase).drawOrder;
-      case DrawableBase.blendModePropertyKey:
-        return (object as DrawableBase).blendMode;
+      case DrawableBase.blendModeValuePropertyKey:
+        return (object as DrawableBase).blendModeValue;
     }
     return 0;
   }
@@ -776,8 +776,8 @@ class RiveCoreContext {
       case DrawableBase.drawOrderPropertyKey:
         (object as DrawableBase).drawOrder = value;
         break;
-      case DrawableBase.blendModePropertyKey:
-        (object as DrawableBase).blendMode = value;
+      case DrawableBase.blendModeValuePropertyKey:
+        (object as DrawableBase).blendModeValue = value;
         break;
     }
   }
