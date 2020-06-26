@@ -289,7 +289,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
   }
 
   void selectPosition(Offset offset, Size size, bool rightClick) {
-    var selection = Plumber().peek<Selection>();
+    var selection = Plumber().peek<Selection>() ?? Selection();
     dynamic fileFolder = getPosition(offset, size);
 
     if (fileFolder is File) {

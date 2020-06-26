@@ -2,11 +2,22 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:rive/rive_core/shapes/shape_paint_container.dart';
 
-class ShapePaintMutator {
+abstract class ShapePaintMutator {
   ShapePaintContainer _shapePaintContainer;
   Paint _paint;
   ShapePaintContainer get shapePaintContainer => _shapePaintContainer;
   Paint get paint => _paint;
+  double _renderOpacity = 1;
+  double get renderOpacity => _renderOpacity;
+  set renderOpacity(double value) {
+    if (_renderOpacity != value) {
+      _renderOpacity = value;
+      syncColor();
+    }
+  }
+
+  @protected
+  void syncColor();
   @mustCallSuper
   void initializePaintMutator(ShapePaintContainer container, Paint paint) {
     _shapePaintContainer = container;

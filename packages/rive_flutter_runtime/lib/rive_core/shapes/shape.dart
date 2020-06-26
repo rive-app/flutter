@@ -102,6 +102,14 @@ class Shape extends ShapeBase with ShapePaintContainer {
   @override
   void update(int dirt) {
     super.update(dirt);
+    if (dirt & ComponentDirt.worldTransform != 0) {
+      for (final fill in fills) {
+        fill.renderOpacity = renderOpacity;
+      }
+      for (final stroke in strokes) {
+        stroke.renderOpacity = renderOpacity;
+      }
+    }
     if (dirt & ComponentDirt.path != 0) {
       _wantWorldPath = false;
       _wantLocalPath = false;
@@ -187,6 +195,17 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
   }
 
+  void _syncBlendMode() {
+    for (final fill in fills) {
+      fill.blendMode = blendMode;
+    }
+    for (final stroke in strokes) {
+      stroke.blendMode = blendMode;
+    }
+  }
+
+  @override
+  void blendModeValueChanged(int from, int to) => _syncBlendMode();
   @override
   void draw(Canvas canvas) {
     assert(_pathComposer != null);
@@ -226,10 +245,12 @@ class Shape extends ShapeBase with ShapePaintContainer {
   @override
   void onStrokesChanged() {
     transformAffectsStrokeChanged();
+    _syncBlendMode();
   }
 
   @override
   void onFillsChanged() {
     transformAffectsStrokeChanged();
+    _syncBlendMode();
   }
 }
