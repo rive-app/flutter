@@ -43,7 +43,7 @@ abstract class DrawableBase extends Node {
 
   /// --------------------------------------------------------------------------
   /// BlendModeValue field with key 23.
-  int _blendModeValue;
+  int _blendModeValue = 3;
   static const int blendModeValuePropertyKey = 23;
   int get blendModeValue => _blendModeValue;
 

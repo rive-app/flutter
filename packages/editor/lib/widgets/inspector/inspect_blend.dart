@@ -11,6 +11,30 @@ import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_dual.dart';
 import 'package:rive_editor/widgets/ui_strings.dart';
 
+List<BlendMode> displayBlendModes = [
+  BlendMode.srcOver,
+  null,
+  BlendMode.darken,
+  BlendMode.multiply,
+  BlendMode.colorBurn,
+  null,
+  BlendMode.lighten,
+  BlendMode.screen,
+  BlendMode.colorDodge,
+  null,
+  BlendMode.overlay,
+  BlendMode.softLight,
+  BlendMode.hardLight,
+  null,
+  BlendMode.difference,
+  BlendMode.exclusion,
+  null,
+  BlendMode.hue,
+  BlendMode.saturation,
+  BlendMode.color,
+  BlendMode.luminosity,
+];
+
 /// Returns the inspector for Artboard selections.
 class BlendInspectorBuilder extends ListenableInspectorBuilder {
   @override
@@ -45,10 +69,10 @@ class BlendInspectorBuilder extends ListenableInspectorBuilder {
               typeahead: true,
               objects: inspecting.components,
               propertyKey: DrawableBase.blendModeValuePropertyKey,
-              options: BlendMode.values,
+              options: displayBlendModes,
               change: (BlendMode value) {},
               toLabel: (BlendMode value) => value == null
-                  ? 'none'
+                  ? null
                   : UIStrings.find(context).withKey(describeEnum(value)),
               toCoreValue: (BlendMode value) => value.index,
               fromCoreValue: (int value) => BlendMode.values[value],

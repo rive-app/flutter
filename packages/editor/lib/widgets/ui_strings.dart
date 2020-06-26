@@ -97,4 +97,22 @@ HashMap<String, String> _defaultUIStrings =
   // Billing strings
   'normal': 'team',
   'premium': 'org',
+
+  // Blend Modes,
+  'srcOver': 'Normal',
+  'darken': 'Darken',
+  'multiply': 'Multiply',
+  'colorBurn': 'Color Burn',
+  'lighten': 'Lighten',
+  'screen': 'Screen',
+  'colorDodge': 'Color Dodge',
+  'overlay': 'Overlay',
+  'softLight': 'Soft Light',
+  'hardLight': 'Hard Light',
+  'difference': 'Difference',
+  'exclusion': 'Exclusion',
+  'hue': 'Hue',
+  'saturation': 'Saturation',
+  'color': 'Color',
+  'luminosity': 'Luminosity'
 });

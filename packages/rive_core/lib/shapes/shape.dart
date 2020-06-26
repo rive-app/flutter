@@ -54,7 +54,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
   void markBoundsDirty() {
     _worldBounds = _localBounds = null;
     _delegate?.boundsChanged();
-    for(final path in paths) {
+    for (final path in paths) {
       path.markBoundsDirty();
     }
   }
@@ -132,6 +132,14 @@ class Shape extends ShapeBase with ShapePaintContainer {
   @override
   void update(int dirt) {
     super.update(dirt);
+    if (dirt & ComponentDirt.worldTransform != 0) {
+      for (final fill in fills) {
+        fill.renderOpacity = renderOpacity;
+      }
+      for (final stroke in strokes) {
+        stroke.renderOpacity = renderOpacity;
+      }
+    }
     // We update before the path composer so let's get our ducks in a row, what
     // do we want? PathComposer depends on us so we're safe to update our
     // desires here.
@@ -262,6 +270,16 @@ class Shape extends ShapeBase with ShapePaintContainer {
       _delegate = to;
     } else {
       _delegate = null;
+    }
+  }
+
+  @override
+  void blendModeValueChanged(int from, int to) {
+    for (final fill in fills) {
+      fill.blendMode = blendMode;
+    }
+    for (final stroke in strokes) {
+      stroke.blendMode = blendMode;
     }
   }
 
