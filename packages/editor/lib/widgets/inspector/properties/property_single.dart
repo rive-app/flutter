@@ -3,6 +3,7 @@ import 'package:core/core.dart';
 import 'package:rive_editor/widgets/common/converters/convert.dart';
 import 'package:rive_editor/widgets/common/converters/input_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
+import 'package:rive_editor/widgets/common/inspector_row.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 class PropertySingle<T> extends StatelessWidget {
@@ -10,12 +11,14 @@ class PropertySingle<T> extends StatelessWidget {
   final int propertyKey;
   final String name;
   final InputValueConverter<T> converter;
+  final bool multiColumn;
 
   factory PropertySingle({
     @required Iterable<Core> objects,
     @required int propertyKey,
     InputValueConverter<T> converter,
     String name,
+    bool multiColumn = false,
     Key key,
   }) {
     return PropertySingle._(
@@ -23,6 +26,7 @@ class PropertySingle<T> extends StatelessWidget {
       propertyKey: propertyKey,
       converter: converter ?? converterForProperty(propertyKey),
       name: name,
+      multiColumn: multiColumn,
       key: key,
     );
   }
@@ -31,6 +35,7 @@ class PropertySingle<T> extends StatelessWidget {
     @required this.propertyKey,
     this.converter,
     this.name,
+    this.multiColumn = false,
     Key key,
   }) : super(key: key);
 
@@ -45,29 +50,17 @@ class PropertySingle<T> extends StatelessWidget {
         top: 7,
         bottom: 10,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Text(
-              name,
-              style: textStyles.inspectorPropertyLabel,
-            ),
-          ),
-          const SizedBox(width: 20),
-          Flexible(
-            flex: 1,
-            fit: FlexFit.tight,
-            child: CoreTextField(
-              objects: objects,
-              propertyKey: propertyKey,
-              converter: converter,
-            ),
-          ),
-          const SizedBox(width: 20),
-          Flexible(flex: 1, child: Container()),
-        ],
+      child: InspectorRow(
+        expandColumnA: multiColumn,
+        label: Text(
+          name,
+          style: textStyles.inspectorPropertyLabel,
+        ),
+        columnA: CoreTextField(
+          objects: objects,
+          propertyKey: propertyKey,
+          converter: converter,
+        ),
       ),
     );
   }

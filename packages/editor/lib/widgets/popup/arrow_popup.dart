@@ -215,6 +215,8 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
     return should;
   }
 
+  // static Offset positionFor(PopupDirection direction, Size bodySize)
+
   Offset _computeBodyPosition(PopupDirection direction, Size bodySize) =>
       from.topLeft +
       // Align to target of interest/dock position (from)
@@ -255,11 +257,24 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
       );
     }
 
+    // Make sure to subtract the bottom of the rectangle we're popping out from
+    // the height to have a best guess of max available height. Note that this
+    // will break for directions that pop upwards. We may want to detect that
+    // and do a best guess here for those cases. If they fail and we have to
+    // resort to a fallback, all best are off, the size we constrained here is
+    // what we'll have to work with because we're not allowed to relayout the
+    // child with new constraints.
+    var maxHeight = size.height - from.bottom;
+
     Size bodySize = layoutChild(
       _ListPopupLayoutElement.body,
       width == null
-          ? const BoxConstraints()
-          : BoxConstraints.tightFor(width: width),
+          ? BoxConstraints(maxHeight: maxHeight)
+          : BoxConstraints(
+              maxHeight: maxHeight,
+              minWidth: width,
+              maxWidth: width,
+            ),
     );
 
     Offset bodyPosition = _computeBodyPosition(direction, bodySize);
@@ -431,7 +446,9 @@ class _PositionedPopupDelegate extends SingleChildLayoutDelegate {
   Size getSize(BoxConstraints constraints) => constraints.smallest;
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
-      BoxConstraints.tightFor(width: width);
+      constraints
+          .heightConstraints()
+          .copyWith(minWidth: width, maxWidth: width);
 
   @override
   Offset getPositionForChild(Size size, Size bodySize) {

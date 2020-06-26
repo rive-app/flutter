@@ -295,8 +295,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'opacity';
       case DrawableBase.drawOrderPropertyKey:
         return 'drawOrder';
-      case DrawableBase.blendModePropertyKey:
-        return 'blendMode';
+      case DrawableBase.blendModeValuePropertyKey:
+        return 'blendModeValue';
       case PathVertexBase.xPropertyKey:
         return 'x';
       case PathVertexBase.yPropertyKey:
@@ -428,7 +428,7 @@ abstract class RiveCoreContext extends CoreContext {
         case StrokeBase.capPropertyKey:
         case StrokeBase.joinPropertyKey:
         case FillBase.fillRulePropertyKey:
-        case DrawableBase.blendModePropertyKey:
+        case DrawableBase.blendModeValuePropertyKey:
         case PointsPathBase.editingModeValuePropertyKey:
           var value = intType.deserialize(reader);
           setInt(object, change.op, value);
@@ -555,7 +555,7 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
       case FillBase.fillRulePropertyKey:
-      case DrawableBase.blendModePropertyKey:
+      case DrawableBase.blendModeValuePropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
         if (value != null && value is int) {
           change.value = intType.serialize(value);
@@ -927,9 +927,9 @@ abstract class RiveCoreContext extends CoreContext {
           object.drawOrder = value;
         }
         break;
-      case DrawableBase.blendModePropertyKey:
+      case DrawableBase.blendModeValuePropertyKey:
         if (object is DrawableBase && value is int) {
-          object.blendMode = value;
+          object.blendModeValue = value;
         }
         break;
       case PathVertexBase.xPropertyKey:
@@ -1332,9 +1332,9 @@ abstract class RiveCoreContext extends CoreContext {
           object.drawOrder = value;
         }
         break;
-      case DrawableBase.blendModePropertyKey:
+      case DrawableBase.blendModeValuePropertyKey:
         if (object is DrawableBase && value is int) {
-          object.blendMode = value;
+          object.blendModeValue = value;
         }
         break;
       case PathVertexBase.xPropertyKey:
@@ -2164,9 +2164,9 @@ abstract class RiveCoreContext extends CoreContext {
           return object.drawOrder;
         }
         break;
-      case DrawableBase.blendModePropertyKey:
+      case DrawableBase.blendModeValuePropertyKey:
         if (object is DrawableBase) {
-          return object.blendMode;
+          return object.blendModeValue;
         }
         break;
       case PathVertexBase.xPropertyKey:
@@ -2360,7 +2360,7 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.capPropertyKey:
       case StrokeBase.joinPropertyKey:
       case FillBase.fillRulePropertyKey:
-      case DrawableBase.blendModePropertyKey:
+      case DrawableBase.blendModeValuePropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
         return intType;
       case AnimationBase.namePropertyKey:
@@ -2481,8 +2481,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as StrokeBase).join;
       case FillBase.fillRulePropertyKey:
         return (object as FillBase).fillRule;
-      case DrawableBase.blendModePropertyKey:
-        return (object as DrawableBase).blendMode;
+      case DrawableBase.blendModeValuePropertyKey:
+        return (object as DrawableBase).blendModeValue;
       case PointsPathBase.editingModeValuePropertyKey:
         return (object as PointsPathBase).editingModeValue;
     }
@@ -2708,8 +2708,8 @@ abstract class RiveCoreContext extends CoreContext {
       case FillBase.fillRulePropertyKey:
         (object as FillBase).fillRule = value;
         break;
-      case DrawableBase.blendModePropertyKey:
-        (object as DrawableBase).blendMode = value;
+      case DrawableBase.blendModeValuePropertyKey:
+        (object as DrawableBase).blendModeValue = value;
         break;
       case PointsPathBase.editingModeValuePropertyKey:
         (object as PointsPathBase).editingModeValue = value;

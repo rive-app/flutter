@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/underline.dart';
 import 'package:rive_editor/widgets/theme.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -27,13 +28,15 @@ class _ComboOption<T> extends PopupListItem {
       : select = (() => choose?.call(option));
 
   @override
-  bool get canSelect => true;
+  bool get canSelect => !isSeparator;
 
   @override
   bool get dismissAll => false;
 
+  bool get isSeparator => option == null;
+
   @override
-  double get height => 35;
+  double get height => isSeparator ? 15 : 35;
 
   @override
   List<PopupListItem> get popup => null;
@@ -319,7 +322,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
               }
 
               if (event is RawKeyDownEvent) {
-                widget?.onKeyPress(event.physicalKey, _controller.text);
+                widget?.onKeyPress?.call(event.physicalKey, _controller.text);
                 return true;
               }
               return false;
@@ -342,7 +345,6 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
                 (widget.chevron
                     ? ComboBox._horizontalPadding + ComboBox._chevronWidth
                     : 0);
-
     // Wrap our items in PopupListItem.
     var items = widget.options == null
         ? <_ComboOption<T>>[]
@@ -367,30 +369,42 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         showArrow: false,
         directionPadding: 0,
         items: items,
-        itemBuilder: (context, item, isHovered) => Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: ComboBox._horizontalPadding,
-            ),
-            child: widget.leadingBuilder != null
-                ? Row(
-                    children: [
-                      widget.leadingBuilder(context, isHovered, item.option),
-                      _optionItemText(
-                        item.option,
-                        isHovered,
-                        theme.textStyles.basic,
-                      ),
-                    ],
-                  )
-                : _optionItemText(
-                    item.option,
-                    isHovered,
-                    theme.textStyles.basic,
+        fallbackDirections: [],
+        itemBuilder: (context, item, isHovered) => item.isSeparator
+            ? Separator(
+                padding: const EdgeInsets.only(
+                  left: 0,
+                  top: 7.5,
+                  bottom: 0,
+                  right: 0,
+                ),
+                color: theme.colors.separator,
+              )
+            : Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: ComboBox._horizontalPadding,
                   ),
-          ),
-        ),
+                  child: widget.leadingBuilder != null
+                      ? Row(
+                          children: [
+                            widget.leadingBuilder(
+                                context, isHovered, item.option),
+                            _optionItemText(
+                              item.option,
+                              isHovered,
+                              theme.textStyles.basic,
+                            ),
+                          ],
+                        )
+                      : _optionItemText(
+                          item.option,
+                          isHovered,
+                          theme.textStyles.basic,
+                        ),
+                ),
+              ),
         width: width,
       );
       _opened();
@@ -452,10 +466,22 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
     if (widget.retriever != null) {
       return widget.retriever(value);
     }
-    return widget.options
+    var filtered = widget.options
         .where((item) =>
+            item == null ||
             itemLabel(item).contains(RegExp(value, caseSensitive: false)))
         .toList(growable: false);
+
+    var results = <T>[];
+    for (final item in filtered) {
+      if (item != null || (results.isNotEmpty && results.last != null)) {
+        results.add(item);
+      }
+    }
+    if (results.last == null) {
+      results.removeLast();
+    }
+    return results;
   }
 
   String itemLabel(T item) =>
@@ -482,7 +508,7 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
               _padding(
                 _typeahead(
                   Text(
-                    label,
+                    label ?? '-',
                     style: (widget.valueTextStyle ?? theme.textStyles.basic)
                         .copyWith(color: widget.valueColor),
                   ),

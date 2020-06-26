@@ -15,11 +15,12 @@
         "string": "drawOrder"
       }
     },
-    "blendMode": {
+    "blendModeValue": {
       "type": "int",
+      "initialValue": "3",
       "key": {
         "int": 23,
-        "string": "blendMode"
+        "string": "blendModeValue"
       }
     }
   }

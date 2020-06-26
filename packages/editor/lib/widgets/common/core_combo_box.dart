@@ -30,6 +30,7 @@ class CoreComboBox<T, K> extends StatefulWidget {
   final K Function(T value) toCoreValue;
   final T Function(K value) fromCoreValue;
   final bool typeahead;
+  final bool disabled;
 
   const CoreComboBox({
     @required this.objects,
@@ -45,6 +46,7 @@ class CoreComboBox<T, K> extends StatefulWidget {
     this.change,
     this.toLabel,
     this.typeahead = false,
+    this.disabled = false,
     Key key,
   }) : super(key: key);
 
@@ -87,6 +89,7 @@ class _CoreComboBoxState<T, K> extends State<CoreComboBox<T, K>> {
         },
         toLabel: widget.toLabel,
         typeahead: widget.typeahead,
+        disabled: widget.disabled,
       ),
     );
   }

@@ -23,7 +23,7 @@ class SolidColor extends SolidColorBase with ShapePaintMutator {
     // this whenever it changes as it's such a lightweight operation. We don't
     // need to schedule it for the next update cycle, which saves us from adding
     // SolidColor to the dependencies graph.
-    paint?.color = color;
+    syncColor();
 
     // Since we're not in the dependency tree, chuck dirt onto the shape, which
     // is. This just ensures we'll paint as soon as possible to show the updated
@@ -40,6 +40,12 @@ class SolidColor extends SolidColorBase with ShapePaintMutator {
   @override
   void initializePaintMutator(ShapePaintContainer paintContainer, Paint paint) {
     super.initializePaintMutator(paintContainer, paint);
-    paint?.color = color;
+    syncColor();
+  }
+
+  @override
+  void syncColor() {
+    paint?.color = color
+        .withOpacity((color.opacity * renderOpacity).clamp(0, 1).toDouble());
   }
 }

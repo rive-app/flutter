@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:cursor/propagating_listener.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -326,6 +329,7 @@ class ListPopup<T extends PopupListItem> {
             // tall.
             var height = values.fold<double>(0, (v, item) => v + item.height) +
                 margin * 2;
+
             return values.isEmpty
                 ? const SizedBox()
 
@@ -375,7 +379,7 @@ class ListPopup<T extends PopupListItem> {
                                     itemCount: values.length,
                                     itemBuilder: (context, index) {
                                       var item = values[index];
-                                      return Container(
+                                      return SizedBox(
                                         height: item.height,
                                         child: _PopupListItemShell<T>(
                                           list,
