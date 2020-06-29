@@ -14,6 +14,7 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/create_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -25,6 +26,7 @@ abstract class ShapeTool extends CreateTool {
 
   Vec2D _startWorldMouse;
   Vec2D _start, _end, _cursor;
+  bool _dragging = false;
 
   ParametricPath makePath();
   String get shapeName;
@@ -43,6 +45,7 @@ abstract class ShapeTool extends CreateTool {
     // Start listening for edit mode changes
     _symmetricDrawChanged();
     ShortcutAction.symmetricDraw.addListener(_symmetricDrawChanged);
+    stage.file.addActionHandler(_handleAction);
     return true;
   }
 
@@ -50,6 +53,7 @@ abstract class ShapeTool extends CreateTool {
   void deactivate() {
     super.deactivate();
     ShortcutAction.symmetricDraw.removeListener(_symmetricDrawChanged);
+    stage.file.removeActionHandler(_handleAction);
   }
 
   Restorer _restoreAutoKey;
@@ -58,6 +62,7 @@ abstract class ShapeTool extends CreateTool {
       Vec2D worldMouse) {
     super.startDrag(selection, activeArtboard, worldMouse);
     assert(activeArtboard != null, 'Shape tool must have an active artboard.');
+    _dragging = true;
     _end = _start = null;
     // Create a Shape and place it at the world location.
     _startWorldMouse = Vec2D.clone(worldMouse);
@@ -116,6 +121,7 @@ abstract class ShapeTool extends CreateTool {
     // Don't need to null this as it protects against multiple calls internally.
     _restoreAutoKey?.restore();
     _shape = null;
+    _dragging = false;
     super.endDrag();
   }
 
@@ -197,6 +203,20 @@ abstract class ShapeTool extends CreateTool {
   void _symmetricDrawChanged() {
     if (lastWorldMouse != null && _shape != null) {
       updateDrag(lastWorldMouse);
+    }
+  }
+
+  bool _handleAction(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.cancel:
+        // Ignore cancel if in the middle of a drag
+        if (!_dragging) {
+          // Switch to the auto tool
+          stage.tool = AutoTool.instance;
+        }
+        return true;
+      default:
+        return false;
     }
   }
 }
