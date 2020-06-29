@@ -206,6 +206,9 @@ abstract class ShapeTool extends CreateTool {
     }
   }
 
+  /// Handle any shortcuts that affect the auto tool
+  /// In this case, if escape is hit before dragging starts,
+  /// then switch to the auto tool
   bool _handleAction(ShortcutAction action) {
     switch (action) {
       case ShortcutAction.cancel:
