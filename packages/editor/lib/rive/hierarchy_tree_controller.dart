@@ -199,10 +199,18 @@ class HierarchyTreeController extends ComponentTreeController {
   void onRightClick(BuildContext context, PointerDownEvent event,
       FlatTreeItem<Component> item) {}
 
+  bool _suppressExpandSelected = false;
+  @override
+  void onTap(FlatTreeItem<Component> item) {
+    _suppressExpandSelected = true;
+    super.onTap(item);
+    _suppressExpandSelected = false;
+  }
+
   /// Expand the tree to an item when selected
   void _onItemSelected() {
     /// Expand to the last selected item:
-    if (file.selection.items.isEmpty) {
+    if (file.selection.items.isEmpty || _suppressExpandSelected) {
       return;
     }
 
@@ -212,5 +220,27 @@ class HierarchyTreeController extends ComponentTreeController {
     if (lastItem is StageItem<Component>) {
       expandTo(lastItem.component);
     }
+  }
+
+  @override
+  List<FlatTreeItem<Component>> onDragStart(
+      DragStartDetails details, FlatTreeItem<Component> item) {
+    // Get the list of selected items.
+    var items = super.onDragStart(details, item).toSet();
+
+    // Build up a set of the top level ones (items which don't have a parent in
+    // the items list).
+    var dragItems = <FlatTreeItem<Component>>{};
+    outerLoop:
+    for (final item in items) {
+      for (var parent = item.parent; parent != null; parent = parent.parent) {
+        if (items.contains(parent)) {
+          continue outerLoop;
+        }
+      }
+      dragItems.add(item);
+    }
+
+    return dragItems.toList(growable: false);
   }
 }
