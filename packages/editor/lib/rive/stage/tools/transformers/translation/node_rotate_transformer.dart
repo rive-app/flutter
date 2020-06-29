@@ -48,11 +48,6 @@ class NodeRotateTransformer extends StageTransformer {
 
     for (final node in _nodes) {
       var inHandleSpace = _inHandleSpace[node];
-      if (inHandleSpace == null) {
-        // directly manipulate the node.
-        node.rotation = rotatedComponents.rotation;
-        continue;
-      }
       var nodeWorld = Mat2D.multiply(Mat2D(), transform, inHandleSpace);
 
       var toParent = Mat2D();
@@ -126,12 +121,6 @@ class NodeRotateTransformer extends StageTransformer {
           continue outerLoop;
         }
         parent = parent.parent;
-      }
-
-      if (Mat2D.areEqual(handleTransform, node.worldTransform)) {
-        // The node and handle have the same transform, we can optimize by
-        // directly manipulating the transform components of the node.
-        continue;
       }
 
       // Compute node's world in handle world space
