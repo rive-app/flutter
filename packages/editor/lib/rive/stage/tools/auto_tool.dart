@@ -195,7 +195,9 @@ class AutoTool extends TransformHandleTool {
       ? super.transformers
       : isMarqueeing ? [] : TranslateTool.instance.transformers;
 
-  /// Handle any shortcuts that affect the auto tool
+  /// Handle any shortcuts that affect the auto tool.
+  /// In this case, if escape is pressed, deselect all
+  /// selected items.
   bool _handleAction(ShortcutAction action) {
     switch (action) {
       case ShortcutAction.cancel:
