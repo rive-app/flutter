@@ -166,6 +166,7 @@ class MultiColorSlider extends StatelessWidget {
             for (int i = 0; i < values.length; i++)
               CustomSingleChildLayout(
                 child: OverlayHitDetect(
+                  debouncePress: true,
                   dragContext: context,
                   press: () => changeIndex(i),
                   drag: (position, _) => changeValue?.call(
