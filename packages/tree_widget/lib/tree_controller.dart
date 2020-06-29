@@ -179,9 +179,7 @@ abstract class TreeController<T> with ChangeNotifier {
     for (final d in data) {
       final parents = _findParents(null, d, item);
       if (parents.isNotEmpty) {
-        for (final parent in parents) {
-          expand(parent);
-        }
+        parents.forEach(expand);
         break;
       }
     }

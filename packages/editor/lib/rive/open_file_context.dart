@@ -364,7 +364,6 @@ class OpenFileContext with RiveFileDelegate {
 
   @override
   void onWipe() {
-    
     // Make sure to remove any stage items so they don't stick around after
     // wiping the stage.
     for (final player in core.players.cast<ClientSidePlayer>()) {
@@ -610,6 +609,8 @@ class OpenFileContext with RiveFileDelegate {
         return true;
 
       case ShortcutAction.cancel:
+        // Default back to the select tool
+        stage?.tool = AutoTool.instance;
         Popup.closeAll();
         return true;
 

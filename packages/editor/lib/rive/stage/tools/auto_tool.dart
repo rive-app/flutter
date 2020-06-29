@@ -81,12 +81,14 @@ class AutoTool extends TransformHandleTool {
   @override
   bool activate(Stage stage) {
     ShortcutAction.multiSelect.addListener(_toggleMultiSelect);
+    stage.file.addActionHandler(_handleAction);
     return super.activate(stage);
   }
 
   @override
   void deactivate() {
     ShortcutAction.multiSelect.removeListener(_toggleMultiSelect);
+    stage.file.removeActionHandler(_handleAction);
     super.deactivate();
   }
 
@@ -192,4 +194,20 @@ class AutoTool extends TransformHandleTool {
   List<StageTransformer> get transformers => isTransforming
       ? super.transformers
       : isMarqueeing ? [] : TranslateTool.instance.transformers;
+
+  /// Handle any shortcuts that affect the auto tool.
+  /// In this case, if escape is pressed, deselect all
+  /// selected items.
+  bool _handleAction(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.cancel:
+        // Clear the selection
+        stage.file.selection.clear();
+        // Cancel the marqueeing
+        _marqueeStart = _marqueeEnd = null;
+        return true;
+      default:
+        return false;
+    }
+  }
 }
