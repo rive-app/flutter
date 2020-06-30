@@ -73,18 +73,17 @@ class __AnimationsListTreeState extends State<_AnimationsListTree> {
     var theme = RiveTheme.of(context);
     var style = TreeStyle(
       showFirstLine: false,
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
       lineColor: RiveTheme.of(context).colors.darkTreeLines,
     );
     return RiveTreeView(
-      padding: style.padding,
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(
               left: 20,
               right: 20,
-              bottom: 3,
+              top: 12
             ),
             child: Row(
               children: [
