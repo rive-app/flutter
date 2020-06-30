@@ -14,7 +14,7 @@ import 'package:rive_editor/widgets/popup/popup.dart';
 import 'package:rive_editor/widgets/rive_popup_button.dart';
 
 /// Debounce duration for updating the display time when an animation is playing
-const debounceDuration = Duration(milliseconds: 1000);
+const debounceDuration = Duration(milliseconds: 33);
 
 /// Popup button showing time options for the animation.
 class AnimationTimePopupButton extends StatelessWidget {
