@@ -36,7 +36,7 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
             Row(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.only(left: 20, top: 20),
+                  padding: const EdgeInsets.only(left: 20, top: 17),
                   child: MouseRegion(
                     onEnter: (_) => setState(() => hierarchyHovered = true),
                     onExit: (_) => setState(() => hierarchyHovered = false),
@@ -54,7 +54,7 @@ class _HierarchyPanelState extends State<HierarchyPanel> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 20, top: 20),
+                  padding: const EdgeInsets.only(left: 18, top: 17),
                   child: MouseRegion(
                     onEnter: (_) => setState(() => drawOrderHovered = true),
                     onExit: (_) => setState(() => drawOrderHovered = false),
