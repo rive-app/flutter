@@ -345,7 +345,6 @@ class _ScrollingTabListState extends State<ScrollingTabList> {
                           onRename: (newName) {
                             widget.tabs[index].file.changeFileName(newName);
                           },
-                          color: RiveTheme.of(context).colors.activeText,
                           name: name,
                           style: TextStyle(
                             fontSize: 13,
