@@ -80,14 +80,14 @@ abstract class ShapeTool extends CreateTool {
   }
 
   static Shape makeShape(Artboard activeArtboard, core.Path path) {
-    var file = activeArtboard.context;
+    final file = activeArtboard.context;
     Shape shape;
     file.batchAdd(() {
       shape = Shape();
 
-      var composer = PathComposer();
-      var solidColor = SolidColor();
-      var fill = Fill();
+      final composer = PathComposer();
+      final solidColor = SolidColor();
+      final fill = Fill()..name = 'Fill 1';
 
       file.addObject(shape);
       file.addObject(fill);
