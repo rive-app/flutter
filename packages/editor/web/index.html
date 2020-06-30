@@ -39,9 +39,20 @@
       event.preventDefault();
     });
   </script>
-  <!-- Disable backspace navigation in Firefox -->
+  <!-- Handle keyboard input events -->
   <script>
     window.onkeydown = function (event) {
+      if (event.metaKey || event.ctrlKey) {
+        // When ctrl or meta is pressed we want to suppress some default bound
+        // browser actions (like CMD+Plus/Minus to zoom).
+        switch (event.keyCode) {
+          case 187:
+          case 189:
+            event.preventDefault();
+            break;
+        }
+      }
+      // Suppress backspace triggering a navigate back action.
       if (event.keyCode == 8 && event.target == document.body)
         event.preventDefault();
     }

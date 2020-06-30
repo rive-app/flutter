@@ -38,7 +38,7 @@ class NodeScaleTransformer extends StageTransformer {
       var d = Vec2D.dot(constraintedDelta, lockAxis);
       constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
     }
-
+    
     transformComponents.scaleX += constraintedDelta[0] * 0.01;
     transformComponents.scaleY -= constraintedDelta[1] * 0.01;
 
@@ -46,16 +46,7 @@ class NodeScaleTransformer extends StageTransformer {
     Mat2D.compose(transform, transformComponents);
 
     for (final node in _nodes) {
-      // Mat2D.copy(node.worldTransform, transform);
-      // node.stageItem.stage.markNeedsRedraw();
-      // continue;
       var inHandleSpace = _inHandleSpace[node];
-      if (inHandleSpace == null) {
-        // directly manipulate the node.
-        node.scaleX = transformComponents.scaleX;
-        node.scaleY = transformComponents.scaleY;
-        continue;
-      }
       var nodeWorld = Mat2D.multiply(Mat2D(), transform, inHandleSpace);
 
       var toParent = Mat2D();
@@ -127,12 +118,6 @@ class NodeScaleTransformer extends StageTransformer {
           continue outerLoop;
         }
         parent = parent.parent;
-      }
-
-      if (Mat2D.areEqual(handleTransform, node.worldTransform)) {
-        // The node and handle have the same transform, we can optimize by
-        // directly manipulating the transform components of the node.
-        continue;
       }
 
       // Compute node's world in handle world space

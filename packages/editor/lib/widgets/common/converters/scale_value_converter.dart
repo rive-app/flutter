@@ -23,13 +23,14 @@ class ScaleValueConverter extends InputValueConverter<double> {
 /// Value converter for scale values (x and y) in percentages.
 class ScalePercentageValueConverter extends InputValueConverter<double> {
   static final formatter = DoubleToPercentageFormatter();
+  static final editFormatter = DoubleToPercentageFormatter(2);
 
   static final ScalePercentageValueConverter instance =
       ScalePercentageValueConverter();
 
   @override
   double fromEditingValue(String value) {
-    var matchString = RegExp('([0-9]+([\.][0-9])*)').stringMatch(value);
+    var matchString = RegExp('(\-?[0-9]+([\.]?[0-9]*))').stringMatch(value);
     var dv = double.parse(matchString);
     return dv / 100;
   }
@@ -38,7 +39,7 @@ class ScalePercentageValueConverter extends InputValueConverter<double> {
   String toDisplayValue(double value) => '${formatter.format(value)}%';
 
   @override
-  String toEditingValue(double value) => '${formatter.format(value)}%';
+  String toEditingValue(double value) => '${editFormatter.format(value)}%';
 
   @override
   double drag(double value, double amount) => value - (amount / 10);

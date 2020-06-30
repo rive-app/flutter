@@ -1,3 +1,4 @@
+import 'package:core/debounce.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_editor/packed_icon.dart';
@@ -21,6 +22,7 @@ class OverlayHitDetect extends StatefulWidget {
   final VoidCallback endDrag;
   final VoidCallback press;
   final Iterable<PackedIcon> customCursorIcon;
+  final bool debouncePress;
 
   const OverlayHitDetect({
     Key key,
@@ -30,6 +32,7 @@ class OverlayHitDetect extends StatefulWidget {
     this.endDrag,
     this.press,
     this.customCursorIcon,
+    this.debouncePress = false,
   }) : super(key: key);
 
   @override
@@ -47,6 +50,9 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
 
   @override
   void dispose() {
+    if (widget.press != null) {
+      cancelDebounce(widget.press);
+    }
     _customCursor?.remove();
     super.dispose();
   }
@@ -81,7 +87,9 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
                 _customCursor ??=
                     CursorIcon.show(context, widget.customCursorIcon);
               }
-              widget.press?.call();
+              if (widget.press != null) {
+                widget.debouncePress ? debounce(widget.press) : widget.press();
+              }
             },
             onPointerMove: (details) {
               var pos = dragRenderBox.globalToLocal(details.position);

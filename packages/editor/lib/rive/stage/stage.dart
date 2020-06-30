@@ -333,7 +333,7 @@ class Stage extends Debouncer {
     markNeedsAdvance();
 
     if (isFirst) {
-      zoomFit(animate: false);
+      zoomFit(animate: false, forceZoom100: true);
     }
     return true;
   }
@@ -737,7 +737,7 @@ class Stage extends Debouncer {
 
   /// Fit the selection to the viewport bounds. If nothing is selected the
   /// active artboard is used as the are of interest.
-  void zoomFit({bool animate = true}) {
+  void zoomFit({bool animate = true, bool forceZoom100 = false}) {
     AABB bounds;
     var selection = file.selection.items.whereType<StageItem>();
     if (selection.isNotEmpty) {
@@ -766,8 +766,9 @@ class Stage extends Debouncer {
     var availableHeight = _viewportHeight - zoomFitPadding * 2;
     var widthScale = availableWidth / bounds.width;
     var heightScale = availableHeight / bounds.height;
-    double zoom =
-        min(widthScale, heightScale).clamp(minZoom, maxZoom).toDouble();
+    double zoom = forceZoom100
+        ? 1
+        : min(widthScale, heightScale).clamp(minZoom, maxZoom).toDouble();
 
     _viewZoomTarget = zoom;
     zoomLevelNotifier.value = zoom;

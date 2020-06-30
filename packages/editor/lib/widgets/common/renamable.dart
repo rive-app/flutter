@@ -33,6 +33,7 @@ class _RenamableState extends State<Renamable> {
   bool _isEditing = false;
   TextEditingController _controller;
   final FocusNode _focusNode = FocusNode(canRequestFocus: true);
+  bool _submitOnLoseFocus = true;
 
   @override
   void initState() {
@@ -48,6 +49,9 @@ class _RenamableState extends State<Renamable> {
 
   void _focusChange() {
     if (!_focusNode.hasPrimaryFocus) {
+      if (_submitOnLoseFocus) {
+        widget.onRename?.call(_controller.text);
+      }
       setState(() {
         _isEditing = false;
       });
@@ -67,6 +71,7 @@ class _RenamableState extends State<Renamable> {
           return;
         }
         setState(() {
+          _submitOnLoseFocus = true;
           _controller = TextEditingController(text: widget.name ?? '');
           _isEditing = true;
           _focusNode.requestFocus();
@@ -76,7 +81,7 @@ class _RenamableState extends State<Renamable> {
         alignment: const Alignment(-1, 0),
         child: _isEditing
             ? RawKeyboardListener(
-                focusNode: FocusNode(),
+                focusNode: FocusNode(skipTraversal: true),
                 onKey: (event) {
                   // Seems like the EditableText doesn't internally lose focus
                   // when esc is pressed, so we handle this manually here.
@@ -98,6 +103,7 @@ class _RenamableState extends State<Renamable> {
                       ),
                   editingColor: widget.editingColor,
                   onSubmitted: (text) {
+                    _submitOnLoseFocus = false;
                     widget.onRename?.call(text);
 
                     // Force focus back to the main context so that we can

@@ -250,7 +250,11 @@ class ColorPopout extends StatelessWidget {
                           value: hsv,
                           padRight: true,
                           converter: HexValueConverter.instance,
-                          change: type == null ? null : inspecting.changeColor,
+                          change: type == null
+                              ? null
+                              : (changedHSV) => inspecting.changeColor(
+                                    changedHSV.withAlpha(hsv.alpha),
+                                  ),
                         ),
                       ),
                       Expanded(

@@ -27,6 +27,8 @@ class _ConvertingTextEditingController<T> extends TextEditingController {
     _update();
   }
 
+  void reset() => _update();
+
   void _update() {
     text = _rawValue == null
         ? ''
@@ -129,6 +131,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   bool _ownsFocusNode = false;
   T _lastValue;
   T _startDragValue;
+  bool _submitOnLoseFocus = true;
 
   @override
   void initState() {
@@ -139,12 +142,24 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   }
 
   void _focusChange() {
+    bool hasFocus = _focusNode.hasFocus;
+    if (!hasFocus && _submitOnLoseFocus) {
+      // Before changing state, try to submit the value.
+      widget.change?.call(
+          _lastValue = widget.converter.fromEditingValue(_controller.text));
+      if (widget.captureJournalEntry) {
+        ActiveFile.find(context)?.core?.captureJournalEntry();
+      }
+      widget.completeChange?.call(_lastValue);
+    }
+
     setState(() {
-      _hasFocus = _focusNode.hasFocus;
+      _hasFocus = hasFocus;
     });
-    if (!_focusNode.hasFocus) {
+    if (!hasFocus) {
       return;
     }
+    _submitOnLoseFocus = true;
     // Select all.
     _controller.selection = TextSelection(
       baseOffset: 0,
@@ -173,21 +188,38 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
     _focusNode.addListener(_focusChange);
   }
 
+  bool get isDragging => _startDragValue != null;
+
   @override
   void didUpdateWidget(InspectorTextField<T> oldWidget) {
     if (oldWidget.focusNode != widget.focusNode) {
       _updateFocusNode();
     }
-    _lastValue = _controller.rawValue = widget.value;
-    _controller.converter = widget.converter;
+    if (isDragging) {
+      // If we're actively dragging, don't change our accumulating _lastValue
+      // from under our (or the controller's) feet, let it keep updating the
+      // drag until it completes which will inherently change the value and
+      // re-trigger a didUpdateWidget.
+      super.didUpdateWidget(oldWidget);
+      return;
+    }
+    _syncWithWidgetValue();
     super.didUpdateWidget(oldWidget);
   }
 
+  void _syncWithWidgetValue() {
+    _lastValue = _controller.rawValue = widget.value;
+    _controller.converter = widget.converter;
+  }
+
   void _completeChange({bool debounceFocus = false}) {
+    _startDragValue = null;
+
     if (widget.captureJournalEntry) {
       ActiveFile.find(context)?.core?.captureJournalEntry();
     }
     widget.completeChange?.call(_lastValue);
+    _syncWithWidgetValue();
 
     // When this gets called via onSubmitted the enter event will propagate to
     // the editor's focus node. We want to avoid that as it'll cause the submit
@@ -236,12 +268,15 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
                 style: theme.textStyles.inspectorPropertyLabel,
               )
             : RawKeyboardListener(
-                focusNode: FocusNode(),
+                focusNode: FocusNode(skipTraversal: true),
                 onKey: (event) {
                   if (event is RawKeyDownEvent) {
                     // lose focus if escape is hit
                     if (event.isKeyPressed(LogicalKeyboardKey.escape)) {
+                      _controller.reset();
+                      _submitOnLoseFocus = false;
                       _focusNode.unfocus();
+                      debounce(_returnFocusToEditor);
                     }
                   }
                 },
@@ -256,10 +291,14 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
                     widget.change?.call(_lastValue = _startDragValue);
                     _completeChange();
                   },
-                  drag: (amount) => widget.change(
-                      _lastValue = widget.converter.drag(widget.value, amount)),
+                  drag: (amount) {
+                    widget.change(
+                        _lastValue = widget.converter.drag(_lastValue, amount));
+                    _controller.rawValue = _lastValue;
+                  },
                   completeDrag: _completeChange,
                   onSubmitted: (string) {
+                    _submitOnLoseFocus = false;
                     widget.change?.call(
                         _lastValue = widget.converter.fromEditingValue(string));
                     _completeChange(debounceFocus: true);
