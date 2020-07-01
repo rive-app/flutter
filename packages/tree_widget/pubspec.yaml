@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   rive_widgets:
     path: ../rive_widgets
+  utilities:
+    path: ../utilities
     
 dev_dependencies:
   flutter_test:

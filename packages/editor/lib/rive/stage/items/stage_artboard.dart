@@ -27,7 +27,7 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
       component.context.backboard?.activeArtboard != component &&
       super.isSelectable;
 
-    @override
+  @override
   Iterable<StageDrawPass> get drawPasses =>
       [StageDrawPass(draw, order: 0, inWorldSpace: true)];
 
@@ -105,6 +105,11 @@ class StageArtboard extends StageItem<Artboard> implements ArtboardDelegate {
     canvas.save();
 
     canvas.translate(originWorld[0], originWorld[1]);
+
+    // To mitigate Flutter race conditions between advance and paint, we force a
+    // component update here (usually this results in a no-op unless advance
+    // couldn't be called prior to the stage.draw).
+    component.updateComponents();
 
     // Now draw the actual drawables.
     component.draw(canvas);

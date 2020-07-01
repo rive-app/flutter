@@ -3,12 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
-import 'package:rive_core/artboard.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
-import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
@@ -16,36 +14,12 @@ import 'package:rive_editor/rive/vertex_editor.dart';
 import 'package:rive_editor/widgets/common/multi_toggle.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'helpers/inspector_helper.dart';
-import 'helpers/test_open_file_context.dart';
-
-Future<OpenFileContext> _makeFile() async {
-  var file = TestOpenFileContext();
-  expect(await file.fakeConnect(), true);
-
-  // file will already have a backboard for us, adding an artboard will
-  // automatically make it the active one.
-
-  // Make a somewhat sane file.
-  Artboard artboard;
-  var core = file.core;
-  core.batchAdd(() {
-    artboard = Artboard()
-      ..name = 'My Artboard'
-      ..x = 0
-      ..y = 0
-      ..width = 1920
-      ..height = 1080;
-
-    core.addObject(artboard);
-  });
-  core.captureJournalEntry();
-  return file;
-}
+import 'helpers/test_helpers.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   test('enter and exit vertex editor', () async {
-    var file = await _makeFile();
+    var file = await makeFile();
     var core = file.core;
     expect(core.backboard != null, true);
     expect(core.backboard.activeArtboard != null, true);
@@ -186,7 +160,7 @@ void main() {
 
   testWidgets('subdivide a path', (tester) async {
     /// Test for issue #800.
-    var file = await _makeFile();
+    var file = await makeFile();
     var core = file.core;
     expect(core.backboard != null, true);
     expect(core.backboard.activeArtboard != null, true);
