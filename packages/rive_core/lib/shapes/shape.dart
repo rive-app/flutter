@@ -159,7 +159,21 @@ class Shape extends ShapeBase with ShapePaintContainer {
       // the path we'll be feeding that at draw time is in world or local space.
       // This is a good opportunity to do it as gradients depend on us so
       // they'll update after us.
+
+      // We optmistically first fill in the space we know the stroke will be in.
       _fillInWorld = _wantWorldPath || !_wantLocalPath;
+
+      // Gradients almost always fill in local space, unless they are bound to
+      // bones.
+      var mustFillLocal = fills.firstWhere(
+            (fill) => fill.paintMutator is core.LinearGradient,
+            orElse: () => null,
+          ) !=
+          null;
+      if (mustFillLocal) {
+        _fillInWorld = false;
+        _wantLocalPath = true;
+      }
 
       for (final fill in fills) {
         var mutator = fill.paintMutator;
