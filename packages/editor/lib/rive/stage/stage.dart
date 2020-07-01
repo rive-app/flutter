@@ -240,7 +240,6 @@ class Stage extends Debouncer {
   set resolution(double value) {
     if (resolutionNotifier.value != value) {
       resolutionNotifier.value = value;
-      print('Setting resolution to $value');
     }
   }
 
@@ -800,17 +799,14 @@ class Stage extends Debouncer {
   void _fileActiveChanged() {
     if (file.isActive) {
       tool?.activate(this);
-      print('Listening for pan action');
       ShortcutAction.pan.addListener(_panActionChanged);
     } else {
       tool?.deactivate();
-      print('NOT listening for pan action');
       ShortcutAction.pan.removeListener(_panActionChanged);
     }
   }
 
   void _panActionChanged() {
-    print('Pan action changed');
     if (!ShortcutAction.pan.value) {
       // No longer panning? Break us out of a drag operation if we were in one.
       _isPanning = false;
