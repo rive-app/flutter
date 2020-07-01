@@ -41,10 +41,10 @@ class SelectionContext<T extends SelectableItem> extends ChangeNotifier {
     }
     _items.addAll(items);
     for (final item in _items) {
-      item.select(true, notify: notify);
+      item.select(true, notify: false);
     }
     if (notify) {
-      notifyListeners();
+      notifySelection();
     }
   }
 

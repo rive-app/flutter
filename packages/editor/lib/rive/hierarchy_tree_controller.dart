@@ -10,6 +10,7 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 import 'package:rive_editor/rive/component_tree_controller.dart';
+import 'package:utilities/utilities.dart';
 
 import 'stage/stage_item.dart';
 
@@ -214,11 +215,17 @@ class HierarchyTreeController extends ComponentTreeController {
       return;
     }
 
-    var lastItem = file.selection.items.lastWhere(
-        (item) => item is StageItem<Component> && item.showInHierarchy,
-        orElse: () => null);
-    if (lastItem is StageItem<Component>) {
-      expandTo(lastItem.component);
+    var topComponents = tops(file.selection.items
+        .where(
+          (item) =>
+              item is StageItem<Component> &&
+              item.showInHierarchy &&
+              item.component != null,
+        )
+        .map((item) => (item as StageItem<Component>).component));
+
+    if (topComponents.isNotEmpty) {
+      expandTo(topComponents.first);
     }
   }
 
@@ -228,19 +235,6 @@ class HierarchyTreeController extends ComponentTreeController {
     // Get the list of selected items.
     var items = super.onDragStart(details, item).toSet();
 
-    // Build up a set of the top level ones (items which don't have a parent in
-    // the items list).
-    var dragItems = <FlatTreeItem<Component>>{};
-    outerLoop:
-    for (final item in items) {
-      for (var parent = item.parent; parent != null; parent = parent.parent) {
-        if (items.contains(parent)) {
-          continue outerLoop;
-        }
-      }
-      dragItems.add(item);
-    }
-
-    return dragItems.toList(growable: false);
+    return tops(items).toList(growable: false);
   }
 }

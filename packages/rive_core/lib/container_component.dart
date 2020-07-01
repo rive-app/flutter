@@ -77,7 +77,7 @@ abstract class ContainerComponent extends ContainerComponentBase {
 
   // Make sure that the current function can be applied to the current
   // [Component], before descending onto all the children.
-  bool applyToAll(DescentCallback cb) {
+  bool forAll(DescentCallback cb) {
     if (cb(this) == false) {
       return false;
     }

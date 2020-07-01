@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -9,7 +10,6 @@ import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
-import 'package:utilities/iterable.dart';
 import 'package:utilities/utilities.dart';
 
 /// Transformer that rotates [StageItem]'s with underlying [Node] components.
@@ -109,21 +109,11 @@ class NodeRotateTransformer extends StageTransformer {
       Mat2D.identity(toHandle);
     }
 
-    outerLoop:
-    for (int i = 0; i < _nodes.length; i++) {
-      var node = _nodes[i];
+    _nodes =
+        // ignore: unnecessary_cast
+        tops(_nodes as List<Component>).cast<Node>().toList(growable: false);
 
-      var parent = node.parent;
-      while (parent is Node) {
-        if (_nodes.contains(parent)) {
-          _nodes.removeAt(i);
-          i--;
-          continue outerLoop;
-        }
-        parent = parent.parent;
-      }
-
-      // Compute node's world in handle world space
+    for (final node in _nodes) {
       _inHandleSpace[node] =
           Mat2D.multiply(Mat2D(), toHandle, node.worldTransform);
     }

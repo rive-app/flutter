@@ -128,8 +128,10 @@ class RuntimeImporter {
 
         // Perform the id remapping.
         for (final remap in idRemap.properties) {
-          core.setObjectProperty(
-              remap.object, remap.propertyKey, objects[remap.value].id);
+          var id = objects[remap.value]?.id;
+          if (id != null) {
+            core.setObjectProperty(remap.object, remap.propertyKey, id);
+          }
         }
 
         // Any component objects with no id map to the artboard. Skip the first
@@ -178,19 +180,26 @@ class DrawOrderRemap extends RuntimeRemap<int, FractionalIndex> {
     return true;
   }
 
-  void remap(RiveCoreContext core) {
+  void remap(RiveCoreContext core, [FractionalIndex minimum]) {
     var list = properties.toList(growable: false);
     list.sort((a, b) => a.value.compareTo(b.value));
-    _ImportDrawOrderHelper helper = _ImportDrawOrderHelper(list
-        .map((item) => item.object)
-        .toList(growable: false)
-        .cast<Drawable>());
-    helper.validateFractional();
+    _ImportDrawOrderHelper helper = _ImportDrawOrderHelper(
+      values: list
+          .map((item) => item.object)
+          .toList(growable: false)
+          .cast<Drawable>(),
+      initOrder: minimum == null,
+    );
+    helper.validateFractional(minimum);
   }
 }
 
 class _ImportDrawOrderHelper extends FractionallyIndexedList<Drawable> {
-  _ImportDrawOrderHelper(List<Drawable> values) : super(values: values);
+  _ImportDrawOrderHelper({List<Drawable> values, bool initOrder})
+      : super(
+          values: values,
+          initOrder: initOrder,
+        );
   @override
   FractionalIndex orderOf(Drawable value) => value.drawOrder;
 

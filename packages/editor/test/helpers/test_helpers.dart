@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/runtime/runtime_importer.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 
 import 'test_open_file_context.dart';
@@ -51,4 +53,17 @@ Future<OpenFileContext> makeFile({bool addArtboard = true}) async {
     core.captureJournalEntry();
   }
   return file;
+}
+
+/// Load an OpenFileContext from a runtime .riv file.
+Future<OpenFileContext> loadFile(String filename,
+    {bool addArtboard = true}) async {
+  var file = await makeFile(addArtboard: false);
+  var bytes = await File(filename).readAsBytes();
+  var importer = RuntimeImporter(core: file.core);
+  if (importer.import(bytes)) {
+    file.core.captureJournalEntry();
+    return file;
+  }
+  return null;
 }

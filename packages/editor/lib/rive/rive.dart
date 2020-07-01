@@ -18,6 +18,7 @@ import 'package:rive_editor/platform/platform.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/rive/rive_clipboard.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
@@ -68,6 +69,7 @@ class Rive {
   bool get isDragging => isDragOperationActive.value;
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
+  RiveClipboard _clipboard;
 
   final ScrollController treeScrollController = ScrollController();
 
@@ -344,8 +346,20 @@ class Rive {
           if (selectedTab.value == systemTab) {
             win_utils.closeWindow();
           } else {
-            closeTab(selectedTab.value);
+            closeTab(selectedTab.value); 
           }
+          break;
+        case ShortcutAction.copy:
+          if (fileContext != null) {
+            _clipboard = RiveClipboard(fileContext);
+          }
+          break;
+        case ShortcutAction.paste:
+          if (fileContext != null && _clipboard != null) {
+            _clipboard.paste(fileContext);
+            fileContext.core.captureJournalEntry();
+          }
+          break;
       }
     }
   }

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:utilities/tops.dart';
 
 /// Context used internally to flatten the tree.
 class FlattenedTreeDataContext<T> {
@@ -39,7 +40,7 @@ class _DropStateValueNotifier extends ValueNotifier<DropState> {
 
 /// Tree data that has the hierarchy flattened, making it possible to render the
 /// tree from virtualized (one dimensional) array.
-class FlatTreeItem<T> {
+class FlatTreeItem<T> implements Parentable<FlatTreeItem<T>> {
   /// Order in the flat tree.
   final int index;
 
@@ -57,6 +58,7 @@ class FlatTreeItem<T> {
   FlatTreeItem<T> next;
 
   /// Parent [FlatTreeItem] from the hierarchy.
+  @override
   final FlatTreeItem<T> parent;
 
   /// Depths stored as a Uint8List. Each entry represents a horizontal space to

@@ -444,6 +444,16 @@ class RiveFile extends RiveCoreContext {
   @override
   CoreFractionalIndexType get fractionalIndexType =>
       RiveFractionalIndexType.instance;
+
+  /// Helper to find Component of type T with name.
+  T componentNamed<T extends Component>(String name) {
+    for (final object in objects) {
+      if (object is T && object.name == name) {
+        return object;
+      }
+    }
+    return null;
+  }
 }
 
 /// Delegate type that can be passed to [RiveFile] to listen to events.

@@ -12,12 +12,13 @@ import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:utilities/dependency_sorter.dart';
+import 'package:utilities/utilities.dart';
 export 'package:rive_core/src/generated/component_base.dart';
 
 final _log = Logger('rive_core');
 
 abstract class Component extends ComponentBase<RiveFile>
-    implements DependencyGraphNode<Component> {
+    implements DependencyGraphNode<Component>, Parentable<Component> {
   Artboard _artboard;
   dynamic _userData;
 
@@ -130,6 +131,7 @@ abstract class Component extends ComponentBase<RiveFile>
   // <- editor-only
 
   ContainerComponent _parent;
+  @override
   ContainerComponent get parent => _parent;
   set parent(ContainerComponent value) {
     if (_parent == value) {

@@ -5,6 +5,7 @@ export 'deserialize.dart';
 export 'iterable.dart';
 export 'string.dart';
 export 'stripe.dart';
+export 'tops.dart';
 
 /// Szudzik's function for hashing two ints together
 int szudzik(int a, int b) {
