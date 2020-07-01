@@ -451,6 +451,9 @@ class Stage extends Debouncer {
   }
 
   void mouseDown(int button, double x, double y) {
+    // Assume nothing was hit, we'll compute if something was below...
+    _mouseDownHit = null;
+
     _computeWorldMouse(x, y);
     _lastMousePosition[0] = x;
     _lastMousePosition[1] = y;
@@ -485,11 +488,7 @@ class Stage extends Debouncer {
                 file.select(_hoverItem, append: _mouseDownSelectAppend);
               }
             }
-          } else {
-            _mouseDownHit = null;
           }
-        } else {
-          _mouseDownHit = null;
         }
 
         // If the click operation didn't hit anything, pipe the click to the
@@ -899,6 +898,11 @@ class Stage extends Debouncer {
     // Make sure items are removed from selection when they are removed from the
     // stage.
     file.selection.deselect(item);
+
+    // Make sure to remove any cached references.
+    if (_mouseDownHit == item) {
+      _mouseDownHit = null;
+    }
 
     if (item._visTreeProxy == nullNode) {
       return false;
