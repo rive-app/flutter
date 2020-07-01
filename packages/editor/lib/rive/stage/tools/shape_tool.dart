@@ -18,7 +18,6 @@ import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/create_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 import 'package:rive_editor/widgets/theme.dart';
-import 'package:utilities/restorer.dart';
 
 abstract class ShapeTool extends CreateTool {
   @override
@@ -56,7 +55,6 @@ abstract class ShapeTool extends CreateTool {
     stage.file.removeActionHandler(_handleAction);
   }
 
-  Restorer _restoreAutoKey;
   @override
   void startDrag(Iterable<StageItem> selection, Artboard activeArtboard,
       Vec2D worldMouse) {
@@ -70,8 +68,6 @@ abstract class ShapeTool extends CreateTool {
     // Track the artboard we're using for this operation (in case it changes via
     // a shortcut or something while the drag operation is continuing).
     _currentArtboard = activeArtboard;
-
-    _restoreAutoKey = activeArtboard.context.suppressAutoKey();
 
     _shape = makeShape(activeArtboard, (_path = makePath()))
       ..name = shapeName
@@ -118,11 +114,9 @@ abstract class ShapeTool extends CreateTool {
 
   @override
   void endDrag() {
-    // Don't need to null this as it protects against multiple calls internally.
-    _restoreAutoKey?.restore();
     _shape = null;
     _dragging = false;
-    super.endDrag();
+    _end = _start = null;
   }
 
   @override

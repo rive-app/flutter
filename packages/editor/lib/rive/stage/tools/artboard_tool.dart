@@ -105,7 +105,6 @@ class ArtboardTool extends CreateTool {
   void endDrag() {
     _artboard = null;
     _cursor = null;
-    super.endDrag();
   }
 
   @override
