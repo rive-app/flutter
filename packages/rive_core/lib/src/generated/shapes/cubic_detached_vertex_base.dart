@@ -51,7 +51,7 @@ abstract class CubicDetachedVertexBase extends CubicVertex {
   }
 
   set inRotation(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && inRotation != value) {
       _inRotationAnimate(value, true);
       return;
     }
@@ -112,7 +112,7 @@ abstract class CubicDetachedVertexBase extends CubicVertex {
   }
 
   set inDistance(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && inDistance != value) {
       _inDistanceAnimate(value, true);
       return;
     }
@@ -174,7 +174,7 @@ abstract class CubicDetachedVertexBase extends CubicVertex {
   }
 
   set outRotation(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && outRotation != value) {
       _outRotationAnimate(value, true);
       return;
     }
@@ -236,7 +236,7 @@ abstract class CubicDetachedVertexBase extends CubicVertex {
   }
 
   set outDistance(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && outDistance != value) {
       _outDistanceAnimate(value, true);
       return;
     }

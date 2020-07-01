@@ -50,7 +50,7 @@ abstract class StrokeBase extends ShapePaint {
   }
 
   set thickness(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && thickness != value) {
       _thicknessAnimate(value, true);
       return;
     }

@@ -51,7 +51,7 @@ abstract class CubicAsymmetricVertexBase extends CubicVertex {
   }
 
   set rotation(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && rotation != value) {
       _rotationAnimate(value, true);
       return;
     }
@@ -112,7 +112,7 @@ abstract class CubicAsymmetricVertexBase extends CubicVertex {
   }
 
   set inDistance(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && inDistance != value) {
       _inDistanceAnimate(value, true);
       return;
     }
@@ -174,7 +174,7 @@ abstract class CubicAsymmetricVertexBase extends CubicVertex {
   }
 
   set outDistance(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && outDistance != value) {
       _outDistanceAnimate(value, true);
       return;
     }

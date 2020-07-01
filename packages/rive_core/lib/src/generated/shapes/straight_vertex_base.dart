@@ -49,7 +49,7 @@ abstract class StraightVertexBase extends PathVertex {
   }
 
   set radius(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && radius != value) {
       _radiusAnimate(value, true);
       return;
     }

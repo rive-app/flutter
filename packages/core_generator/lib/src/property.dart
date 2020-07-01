@@ -131,7 +131,7 @@ class Property {
       }''');
     if (exportAnimates) {
       code.writeln('''set $name(${exportType.dartName} value) {
-        if(context != null && context.isAnimating) {
+        if(context != null && context.isAnimating && $name != value) {
           _${name}Animate(value, true);
           return;
         }
@@ -143,9 +143,9 @@ class Property {
         if (_${name}Animated == value) {
           return;
         }
-        ${exportType.dartName} from = ${name};
+        ${exportType.dartName} from = $name;
         _${name}Animated = value;
-        ${exportType.dartName} to = ${name};
+        ${exportType.dartName} to = $name;
         onAnimatedPropertyChanged($propertyKey, autoKey, from, to);
         ${name}Changed(from, to);
       }''');

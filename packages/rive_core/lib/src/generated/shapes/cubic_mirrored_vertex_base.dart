@@ -51,7 +51,7 @@ abstract class CubicMirroredVertexBase extends CubicVertex {
   }
 
   set rotation(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && rotation != value) {
       _rotationAnimate(value, true);
       return;
     }
@@ -112,7 +112,7 @@ abstract class CubicMirroredVertexBase extends CubicVertex {
   }
 
   set distance(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && distance != value) {
       _distanceAnimate(value, true);
       return;
     }
