@@ -677,6 +677,9 @@ class Stage extends Debouncer {
       }
     }
     file.isActiveListenable.addListener(_fileActiveChanged);
+    // Ensure stuff that _fileActiveChanged sets up is et up
+    _fileActiveChanged();
+
     file.selection.addListener(_fileSelectionChanged);
 
     file.addActionHandler(_handleAction);
@@ -797,19 +800,30 @@ class Stage extends Debouncer {
   void _fileActiveChanged() {
     if (file.isActive) {
       tool?.activate(this);
+      print('Listening for pan action');
       ShortcutAction.pan.addListener(_panActionChanged);
     } else {
       tool?.deactivate();
+      print('NOT listening for pan action');
       ShortcutAction.pan.removeListener(_panActionChanged);
     }
   }
 
   void _panActionChanged() {
+    print('Pan action changed');
     if (!ShortcutAction.pan.value) {
       // No longer panning? Break us out of a drag operation if we were in one.
       _isPanning = false;
+      // Immediately update the icon
+      _updatePanIcon();
+    } else {
+      // debounce showing the icon to stop the icon from showing up when someone
+      // taps the pan key to start an animation
+      debounce(
+        _updatePanIcon,
+        duration: const Duration(milliseconds: 200),
+      );
     }
-    _updatePanIcon();
   }
 
   void _updatePanIcon() {
