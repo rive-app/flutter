@@ -18,7 +18,7 @@ InputValueConverter<T> converterForProperty<T>(int propertyKey) {
     case GradientStopBase.positionPropertyKey:
     case LinearGradientBase.opacityPropertyKey:
     case NodeBase.opacityPropertyKey:
-      return PercentageInputConverter.instance as InputValueConverter<T>;
+      return ClampedPercentageInputConverter.instance as InputValueConverter<T>;
     case NodeBase.rotationPropertyKey:
     case CubicAsymmetricVertexBase.rotationPropertyKey:
     case CubicDetachedVertexBase.inRotationPropertyKey:

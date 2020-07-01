@@ -20,3 +20,15 @@ class PercentageInputConverter extends InputValueConverter<double> {
   @override
   double drag(double value, double amount) => (value ?? 1) - amount / 100;
 }
+
+class ClampedPercentageInputConverter extends PercentageInputConverter {
+  ClampedPercentageInputConverter(int significantDigits)
+      : super(significantDigits);
+
+  static final ClampedPercentageInputConverter instance =
+      ClampedPercentageInputConverter(2);
+
+  @override
+  double drag(double value, double amount) =>
+      ((value ?? 1) - amount / 100).clamp(0, 1).toDouble();
+}
