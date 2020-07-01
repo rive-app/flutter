@@ -42,9 +42,10 @@ class _HomeState extends State<Home> {
     if (me.isFirstRun) {
       Plumber().message<HomeSection>(HomeSection.getStarted);
     }
-    // If this isn't a first run, then show the user's files
+    // If this isn't a first run, then show the user's recent files
     else {
-      Plumber().message<CurrentDirectory>(CurrentDirectory(me, 1));
+      Plumber().message<HomeSection>(HomeSection.recents);
+      // Plumber().message<CurrentDirectory>(CurrentDirectory(me, 1));
     }
     super.initState();
   }

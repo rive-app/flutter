@@ -240,7 +240,6 @@ class Stage extends Debouncer {
   set resolution(double value) {
     if (resolutionNotifier.value != value) {
       resolutionNotifier.value = value;
-      print('Setting resolution to $value');
     }
   }
 
@@ -677,6 +676,9 @@ class Stage extends Debouncer {
       }
     }
     file.isActiveListenable.addListener(_fileActiveChanged);
+    // Ensure stuff that _fileActiveChanged sets up is et up
+    _fileActiveChanged();
+
     file.selection.addListener(_fileSelectionChanged);
 
     file.addActionHandler(_handleAction);
@@ -808,8 +810,16 @@ class Stage extends Debouncer {
     if (!ShortcutAction.pan.value) {
       // No longer panning? Break us out of a drag operation if we were in one.
       _isPanning = false;
+      // Immediately update the icon
+      _updatePanIcon();
+    } else {
+      // debounce showing the icon to stop the icon from showing up when someone
+      // taps the pan key to start an animation
+      debounce(
+        _updatePanIcon,
+        duration: const Duration(milliseconds: 200),
+      );
     }
-    _updatePanIcon();
   }
 
   void _updatePanIcon() {
