@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -14,7 +13,7 @@ import 'package:utilities/utilities.dart';
 
 /// Transformer that rotates [StageItem]'s with underlying [Node] components.
 class NodeRotateTransformer extends StageTransformer {
-  List<Node> _nodes;
+  Iterable<Node> _nodes;
   final StageRotationHandle handle;
   final TransformComponents transformComponents = TransformComponents();
 
@@ -109,9 +108,7 @@ class NodeRotateTransformer extends StageTransformer {
       Mat2D.identity(toHandle);
     }
 
-    _nodes =
-        // ignore: unnecessary_cast
-        tops(_nodes as List<Component>).cast<Node>().toList(growable: false);
+    _nodes = topComponents(_nodes);
 
     for (final node in _nodes) {
       _inHandleSpace[node] =
