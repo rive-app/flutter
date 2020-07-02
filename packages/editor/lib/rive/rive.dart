@@ -22,6 +22,7 @@ import 'package:rive_editor/rive/rive_clipboard.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 
@@ -283,8 +284,6 @@ class Rive {
         ? SelectionMode.range
         : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
 
-    // Set<_Key> lastPressed = Set.from(_pressed);
-
     if (keyEvent is RawKeyDownEvent) {
       _pressed.add(_Key(keyEvent.logicalKey, keyEvent.physicalKey));
     } else if (keyEvent is RawKeyUpEvent) {
@@ -302,10 +301,22 @@ class Rive {
     if (hasFocusObject) {
       return;
     }
-    var actions = (keyBinding.lookupAction(
+    var probableActions = (keyBinding.lookupAction(
                 _pressed.map((key) => key.physical).toList(growable: false)) ??
             [])
         .toSet();
+
+    var actions = <ShortcutAction>{};
+    // Filter the actions such that only the ones with their last binding key
+    // matches the last pressed key.
+    for (final action in probableActions) {
+      var keys = keyBinding.lookupKeys(action);
+      var physicalLastKey = keyToPhysical[keys.last];
+
+      if (physicalLastKey.contains(keyEvent.physicalKey)) {
+        actions.add(action);
+      }
+    }
 
     var released = _pressedActions.difference(actions);
     for (final action in released) {
