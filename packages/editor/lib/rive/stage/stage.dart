@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:core/debounce.dart';
+import 'package:core/debouncer.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -460,6 +460,9 @@ class Stage extends Debouncer {
 
     switch (button) {
       case 1:
+        // If the user clicks while an updatePanIcon is scheduled, accelerate it
+        // so we get the pan action.
+        debounceAccelerate(_updatePanIcon);
         if (_panHandCursor != null) {
           _isPanning = true;
         } else if (isSelectionEnabled) {
@@ -810,6 +813,7 @@ class Stage extends Debouncer {
       // No longer panning? Break us out of a drag operation if we were in one.
       _isPanning = false;
       // Immediately update the icon
+      cancelDebounce(_updatePanIcon);
       _updatePanIcon();
     } else {
       // debounce showing the icon to stop the icon from showing up when someone
