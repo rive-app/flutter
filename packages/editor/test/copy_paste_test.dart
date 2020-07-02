@@ -41,9 +41,9 @@ void main() {
     expect(core.backboard.activeArtboard.drawables.length, 3,
         reason: 'the artboard should now have two drawables');
 
-    for (final drawable in core.backboard.activeArtboard.drawables) {
-      print("DRAWABLE: ${drawable.name} ${drawable.drawOrder} ");
-    }
+    // for (final drawable in core.backboard.activeArtboard.drawables) {
+    //   print("DRAWABLE: ${drawable.name} ${drawable.drawOrder} ");
+    // }
     expect(core.backboard.activeArtboard.drawables[0].drawOrder,
         const FractionalIndex(1, 3));
     expect(core.backboard.activeArtboard.drawables[0], ellipse);
