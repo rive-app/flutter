@@ -118,4 +118,8 @@ class NotificationManager with Subscriptions {
     await _notificationsApi.markNotificationsRead();
     unawaited(_fetchNotifications());
   }
+
+  Future<void> update() async {
+    unawaited(_fetchNotifications());
+  }
 }
