@@ -87,8 +87,10 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
       KeyedObject keyedObject = context?.resolve(keyedObjectId);
       if (keyedObject == null) {
         _log.finest("Failed to resolve KeyedObject with id $keyedObjectId");
-      } else {
-        keyedObject.internalAddKeyedProperty(this);
+      } else if (!keyedObject.internalAddKeyedProperty(this)) {
+        // Somehow had a duplicate keyed property for this property in the
+        // animation referenced.
+        context?.removeObject(this);
       }
     }
     // <- editor-only
@@ -291,6 +293,15 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
     super.writeRuntime(writer, idLookup);
     writer.writeVarUint(_keyframes.length);
     for (final keyframe in _keyframes) {
+      keyframe.writeRuntime(writer, idLookup);
+    }
+  }
+
+  void writeRuntimeSubset(BinaryWriter writer, HashSet<KeyFrame> keyframes,
+      [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, idLookup);
+    writer.writeVarUint(keyframes.length);
+    for (final keyframe in keyframes) {
       keyframe.writeRuntime(writer, idLookup);
     }
   }

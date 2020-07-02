@@ -2,12 +2,17 @@ import 'dart:collection';
 
 import 'package:core/core.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 export 'package:rive_core/src/generated/animation/linear_animation_base.dart';
+
+// -> editor-only
+final _log = Logger('animation');
+// <- editor-only
 
 class LinearAnimation extends LinearAnimationBase {
   final Event _keyframesChanged = Event();
@@ -35,10 +40,8 @@ class LinearAnimation extends LinearAnimationBase {
 
     // If the object is already keyed, that's ok just make sure the KeyedObject
     // matches.
-    if (value != null) {
-      assert(
-          value == object,
-          'Trying to add a KeyedObject for an object'
+    if (value != null && value != object) {
+      _log.severe('Trying to add a KeyedObject for an object'
           'that\'s already keyed in this Animation?!');
       return false;
     }
@@ -53,7 +56,7 @@ class LinearAnimation extends LinearAnimationBase {
     if (removed != null) {
       internalKeyFramesChanged();
     }
-    assert(removed == null || removed == object);
+    // assert(removed == null || removed == object);
     return removed != null;
   }
 
