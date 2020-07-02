@@ -201,11 +201,14 @@ class AutoTool extends TransformHandleTool {
   bool _handleAction(ShortcutAction action) {
     switch (action) {
       case ShortcutAction.cancel:
-        // Clear the selection
-        stage.file.selection.clear();
-        // Cancel the marqueeing
-        _marqueeStart = _marqueeEnd = null;
-        return true;
+        if (stage.file.selection.isNotEmpty || isMarqueeing) {
+          // Clear the selection
+          stage.file.selection.clear();
+          // Cancel the marqueeing
+          _marqueeStart = _marqueeEnd = null;
+          return true;
+        }
+        return false;
       default:
         return false;
     }

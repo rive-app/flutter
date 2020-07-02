@@ -56,7 +56,7 @@ class ShortcutAction {
   static const ShortcutAction previousFrame = ShortcutAction('frame-prev');
   static const ShortcutAction previousKeyFrame =
       ShortcutAction('frame-prev-key');
-  static const ShortcutAction redo = ShortcutAction('redo');
+  static const ShortcutAction redo = ShortcutAction('redo', repeats: true);
   static const ShortcutAction rotateTool = ShortcutAction('tool-rotate');
 
   static const ShortcutAction scaleTool = ShortcutAction('tool-scale');
@@ -73,7 +73,7 @@ class ShortcutAction {
   static const ShortcutAction timelineStart = ShortcutAction('timeline-start');
   static const ShortcutAction togglePlay = ShortcutAction('play');
   static const ShortcutAction translateTool = ShortcutAction('tool-translate');
-  static const ShortcutAction undo = ShortcutAction('undo');
+  static const ShortcutAction undo = ShortcutAction('undo', repeats: true);
   static const ShortcutAction paintWeightTool = ShortcutAction('tool-weight');
   static const ShortcutAction zoom100 = ShortcutAction('zoom-100');
   static const ShortcutAction zoomFit = ShortcutAction('zoom-fit');
