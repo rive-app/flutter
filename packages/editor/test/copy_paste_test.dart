@@ -29,7 +29,7 @@ void main() {
       ellipsePath.stageItem,
     ]);
 
-    var clipboard = RiveClipboard(file);
+    var clipboard = RiveClipboard.copy(file);
     expect(clipboard.paste(file), true);
     core.captureJournalEntry();
 

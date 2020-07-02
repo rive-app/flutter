@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_property.dart';
+import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
@@ -34,8 +35,9 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       } else if (objectId == null) {
         _log.severe("Found a keyed object referenced null objectId");
         context?.removeObject(this);
-      } else {
-        animation.internalAddKeyedObject(this);
+      } else if (!animation.internalAddKeyedObject(this)) {
+        // Somehow had a duplicate keyed object in the animation referenced.
+        context?.removeObject(this);
       }
     }
 
@@ -79,17 +81,15 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     // <- editor-only
   }
 
-  /// Called by rive_core to add a KeyedObject to the animation. This should be
-  /// @internal when it's supported.
+  /// Called by rive_core to add a KeyedProperty to the animation. This should
+  /// be @internal when it's supported.
   bool internalAddKeyedProperty(KeyedProperty property) {
     var value = _keyedProperties[property.propertyKey];
 
     // If the property is already keyed, that's ok just make sure the
     // KeyedObject matches.
-    if (value != null) {
-      assert(
-          value == property,
-          'Trying to add a KeyedProperty for a property'
+    if (value != null && value != property) {
+      _log.severe('Trying to add a KeyedProperty for a property'
           'that\'s already keyed in this LinearAnimation?!');
       return false;
     }
@@ -111,8 +111,8 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
       // Remove this keyed property.
       context.removeObject(this);
     }
-    assert(removed == null || removed == property,
-        '$removed was not $property or null');
+    // assert(removed == null || removed == property,
+    //     '$removed was not $property or null');
     return removed != null;
   }
 
@@ -181,6 +181,18 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     writer.writeVarUint(_keyedProperties.length);
     for (final keyedProperty in _keyedProperties.values) {
       keyedProperty.writeRuntime(writer, idLookup);
+    }
+  }
+
+  // Write only a specific set of keyed properties and keyframes for this keyed
+  // object (helpful when copy pasting).
+  void writeRuntimeSubset(
+      BinaryWriter writer, HashMap<KeyedProperty, HashSet<KeyFrame>> subset,
+      [HashMap<Id, int> idLookup]) {
+    super.writeRuntime(writer, idLookup);
+    writer.writeVarUint(subset.keys.length);
+    for (final keyedProperty in subset.keys) {
+      keyedProperty.writeRuntimeSubset(writer, subset[keyedProperty], idLookup);
     }
   }
   // <- editor-only

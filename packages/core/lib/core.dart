@@ -880,6 +880,9 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
 
     var object = makeCoreInstance(coreObjectKey);
     if (object is! T) {
+      // TODO: If this check fails, make sure to read the remaining properties
+      // to avoid an overflow. Basically do what happens below but skip the
+      // setObjectProperty call.
       return null;
     }
 

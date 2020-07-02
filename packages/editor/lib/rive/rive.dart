@@ -351,7 +351,7 @@ class Rive {
           break;
         case ShortcutAction.copy:
           if (fileContext != null) {
-            _clipboard = RiveClipboard(fileContext);
+            _clipboard = RiveClipboard.copy(fileContext);
           }
           break;
         case ShortcutAction.paste:
