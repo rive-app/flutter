@@ -22,18 +22,3 @@ class TranslationValueConverter extends InputValueConverter<double> {
   @override
   double drag(double value, double amount) => value - amount;
 }
-
-/// Value converter for translation values (x and y), to display the values
-/// in whole numbers
-class TranslationIntegerValueConverter extends TranslationValueConverter {
-  static final DoubleFormatter _displayFormatter = DoubleFormatter(0);
-  static final DoubleFormatter _editFormatter = DoubleFormatter(0);
-
-  @override
-  DoubleFormatter get displayFormatter => _displayFormatter;
-  @override
-  DoubleFormatter get editFormatter => _editFormatter;
-
-  static final TranslationIntegerValueConverter instance =
-      TranslationIntegerValueConverter();
-}

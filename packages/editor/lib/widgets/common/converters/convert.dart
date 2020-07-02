@@ -29,14 +29,14 @@ InputValueConverter<T> converterForProperty<T>(int propertyKey) {
     case ArtboardBase.yPropertyKey:
     case NodeBase.xPropertyKey:
     case NodeBase.yPropertyKey:
-      return TranslationIntegerValueConverter.instance
+      return TranslationValueConverter.instance
           as InputValueConverter<T>;
     case NodeBase.scaleXPropertyKey:
     case NodeBase.scaleYPropertyKey:
       return ScalePercentageValueConverter.instance as InputValueConverter<T>;
 
     default:
-      return TranslationIntegerValueConverter.instance
+      return TranslationValueConverter.instance
           as InputValueConverter<T>;
   }
 }

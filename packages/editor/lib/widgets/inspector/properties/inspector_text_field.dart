@@ -132,6 +132,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
   T _lastValue;
   T _startDragValue;
   bool _submitOnLoseFocus = true;
+  String _stringValueOnFocus;
 
   @override
   void initState() {
@@ -143,7 +144,9 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
 
   void _focusChange() {
     bool hasFocus = _focusNode.hasFocus;
-    if (!hasFocus && _submitOnLoseFocus) {
+    if (!hasFocus &&
+        _submitOnLoseFocus &&
+        _stringValueOnFocus != _controller.text) {
       // Before changing state, try to submit the value.
       widget.change?.call(
           _lastValue = widget.converter.fromEditingValue(_controller.text));
@@ -165,6 +168,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
       baseOffset: 0,
       extentOffset: _controller.text.length,
     );
+    _stringValueOnFocus = _controller.text;
   }
 
   @override

@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -14,7 +13,7 @@ import 'package:utilities/utilities.dart';
 
 /// Transformer that rotates [StageItem]'s with underlying [Node] components.
 class NodeScaleTransformer extends StageTransformer {
-  List<Node> _nodes;
+  Iterable<Node> _nodes;
 
   /// The scale transform is applied to world coordinates and then decomposed
   /// into each object's parent's transform. This means that the scale must be
@@ -38,7 +37,7 @@ class NodeScaleTransformer extends StageTransformer {
       var d = Vec2D.dot(constraintedDelta, lockAxis);
       constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
     }
-    
+
     transformComponents.scaleX += constraintedDelta[0] * 0.01;
     transformComponents.scaleY -= constraintedDelta[1] * 0.01;
 
@@ -106,15 +105,13 @@ class NodeScaleTransformer extends StageTransformer {
       Mat2D.identity(toHandle);
     }
 
-    _nodes =
-        // ignore: unnecessary_cast
-        tops(_nodes as List<Component>).cast<Node>().toList(growable: false);
+    _nodes = topComponents(_nodes);
 
     for (final node in _nodes) {
       _inHandleSpace[node] =
           Mat2D.multiply(Mat2D(), toHandle, node.worldTransform);
     }
-    
+
     return _nodes.isNotEmpty;
   }
 }

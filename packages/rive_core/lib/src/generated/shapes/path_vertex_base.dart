@@ -43,7 +43,7 @@ abstract class PathVertexBase extends Component {
   }
 
   set x(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && x != value) {
       _xAnimate(value, true);
       return;
     }
@@ -103,7 +103,7 @@ abstract class PathVertexBase extends Component {
   }
 
   set y(double value) {
-    if (context != null && context.isAnimating) {
+    if (context != null && context.isAnimating && y != value) {
       _yAnimate(value, true);
       return;
     }

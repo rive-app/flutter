@@ -132,6 +132,21 @@ class Shape extends ShapeBase with ShapePaintContainer {
   @override
   void update(int dirt) {
     super.update(dirt);
+
+    // When the paint gets marked dirty, we need to sync the blend mode with the
+    // paints.
+    if (dirt & ComponentDirt.paint != 0) {
+      for (final fill in fills) {
+        fill.blendMode = blendMode;
+      }
+      for (final stroke in strokes) {
+        stroke.blendMode = blendMode;
+      }
+    }
+
+    // RenderOpacity gets updated with the worldTransform (accumulates through
+    // hierarchy), so if we see worldTransform is dirty, update our internal
+    // render opacities.
     if (dirt & ComponentDirt.worldTransform != 0) {
       for (final fill in fills) {
         fill.renderOpacity = renderOpacity;
@@ -159,7 +174,21 @@ class Shape extends ShapeBase with ShapePaintContainer {
       // the path we'll be feeding that at draw time is in world or local space.
       // This is a good opportunity to do it as gradients depend on us so
       // they'll update after us.
+
+      // We optmistically first fill in the space we know the stroke will be in.
       _fillInWorld = _wantWorldPath || !_wantLocalPath;
+
+      // Gradients almost always fill in local space, unless they are bound to
+      // bones.
+      var mustFillLocal = fills.firstWhere(
+            (fill) => fill.paintMutator is core.LinearGradient,
+            orElse: () => null,
+          ) !=
+          null;
+      if (mustFillLocal) {
+        _fillInWorld = false;
+        _wantLocalPath = true;
+      }
 
       for (final fill in fills) {
         var mutator = fill.paintMutator;
@@ -273,17 +302,8 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
   }
 
-  void _syncBlendMode() {
-    for (final fill in fills) {
-      fill.blendMode = blendMode;
-    }
-    for (final stroke in strokes) {
-      stroke.blendMode = blendMode;
-    }
-  }
-
   @override
-  void blendModeValueChanged(int from, int to) => _syncBlendMode();
+  void blendModeValueChanged(int from, int to) => _markBlendModeDirty();
 
   @override
   void draw(Canvas canvas) {
@@ -324,11 +344,14 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
   }
 
+  void _markBlendModeDirty() => addDirt(ComponentDirt.paint);
+
   @override
   void onPaintMutatorChanged(ShapePaintMutator mutator) {
     // The transform affects stroke property may have changed as we have a new
     // mutator.
     transformAffectsStrokeChanged();
+    _markBlendModeDirty();
   }
 
   @override
@@ -336,7 +359,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     // The transform affects stroke property may have changed as we have a new
     // mutator.
     transformAffectsStrokeChanged();
-    _syncBlendMode();
+    _markBlendModeDirty();
   }
 
   @override
@@ -344,6 +367,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
     // The transform affects stroke property may have changed as we have a new
     // mutator.
     transformAffectsStrokeChanged();
-    _syncBlendMode();
+    _markBlendModeDirty();
   }
 }

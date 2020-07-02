@@ -60,7 +60,8 @@ class NodeTranslateTransformer extends StageTransformer {
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
-    _nodes = items.mapWhereType<Node>((element) => element.component);
+    _nodes =
+        topComponents(items.mapWhereType<Node>((element) => element.component));
     return _nodes.isNotEmpty;
   }
 }
