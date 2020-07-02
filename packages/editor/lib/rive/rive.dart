@@ -242,8 +242,21 @@ class Rive {
     selectedTab.value = value;
   }
 
+  // Keys that we think are currently pressed. Note that on platforms like web
+  // releasing some keys results in a key press of another key. One such example
+  // is the command key when pressed with another key. So if you are pressing
+  // Command + 1 and you release Command, the browser effectively triggers two
+  // keypresses for 1, first with metakey=true and second with metakey=false.
+  // Flutter also will interpret this as two presses so we do some work to see
+  // if we thought it was already pressed.
   final Set<_Key> _pressed = {};
+
+  // Actions that the pressed keys are triggering. These get updated as keys are
+  // released.
   final Set<ShortcutAction> _pressedActions = {};
+
+  // Actions the system has requested to ignore a release event for. This is
+  // cleared when the action is released.
   final Set<ShortcutAction> _canceledActions = {};
 
   bool _isSystemCmdPressed;
@@ -270,6 +283,8 @@ class Rive {
         ? SelectionMode.range
         : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
 
+    // Set<_Key> lastPressed = Set.from(_pressed);
+
     if (keyEvent is RawKeyDownEvent) {
       _pressed.add(_Key(keyEvent.logicalKey, keyEvent.physicalKey));
     } else if (keyEvent is RawKeyUpEvent) {
@@ -280,8 +295,8 @@ class Rive {
     // seems to have an issue where certain keys don't get removed when pressing
     // multiple keys and cmd tabbing.
     _pressed.removeWhere((key) => !keyEvent.isKeyPressed(key.logical));
-    // print("PRESSED IS $_pressed ${RawKeyboard.instance.keysPressed}");
 
+    bool isPress = keyEvent is RawKeyDownEvent;
     // If something else has focus, don't process actions (usually when a text
     // field is focused somewhere).
     if (hasFocusObject) {
@@ -310,15 +325,18 @@ class Rive {
     // to determine if this keydown is a repeat, Flutter does this only for
     // Android so we have to do it ourselves here.
     Set<ShortcutAction> toTrigger = {};
-    for (final action in actions) {
-      if (action.repeats) {
-        toTrigger.add(action);
-      } else if (!_pressedActions.contains(action)) {
-        // Action is not a repeating action, however it wasn't previously
-        // pressed so this is the first press down.
-        toTrigger.add(action);
+    if (isPress) {
+      for (final action in actions) {
+        if (action.repeats) {
+          toTrigger.add(action);
+        } else if (!_pressedActions.contains(action)) {
+          // Action is not a repeating action, however it wasn't previously
+          // pressed so this is the first press down.
+          toTrigger.add(action);
+        } else {}
       }
     }
+
     _pressedActions.clear();
     _pressedActions.addAll(actions);
 
@@ -346,7 +364,7 @@ class Rive {
           if (selectedTab.value == systemTab) {
             win_utils.closeWindow();
           } else {
-            closeTab(selectedTab.value); 
+            closeTab(selectedTab.value);
           }
           break;
         case ShortcutAction.copy:
