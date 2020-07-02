@@ -88,10 +88,8 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
 
     // If the property is already keyed, that's ok just make sure the
     // KeyedObject matches.
-    if (value != null) {
-      _log.severe(
-          value == property,
-          'Trying to add a KeyedProperty for a property'
+    if (value != null && value != property) {
+      _log.severe('Trying to add a KeyedProperty for a property'
           'that\'s already keyed in this LinearAnimation?!');
       return false;
     }
