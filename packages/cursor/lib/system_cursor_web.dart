@@ -10,9 +10,11 @@ class CursorPlugin extends SystemCursorPlatform {
     SystemCursorPlatform.instance = CursorPlugin();
   }
 
-  Future<void> hide() async =>
-      html.document.querySelector('html')..style.cursor = 'none';
+  @override
+  Future<void> hide() async => html.document.querySelector('flt-glass-pane')
+    ..style.cursor = 'none';
 
+  @override
   Future<void> show() async =>
-      html.document.querySelector('html')..style.cursor = 'default';
+      html.document.querySelector('flt-glass-pane').style.cursor = 'default';
 }
