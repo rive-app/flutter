@@ -752,7 +752,7 @@ class Stage extends Debouncer {
         return;
       }
 
-      bounds = artboard.stageItem.aabb;
+      bounds = AABB.clone(artboard.stageItem.aabb);
       // Extra 18 pixels for title
       bounds.values[1] -= 18;
     }
