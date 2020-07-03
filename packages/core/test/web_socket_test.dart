@@ -21,7 +21,7 @@ class DummyServer {
       ws.listen(
         (dynamic data) {
           dataList.add(data);
-          print(data);
+
           if (data as String == 'killme') {
             ws.close();
           }
