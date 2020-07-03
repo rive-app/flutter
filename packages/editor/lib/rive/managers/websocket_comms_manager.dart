@@ -29,8 +29,7 @@ class WebsocketCommsManager with Subscriptions {
     if (me == null || me.isEmpty) {
       return;
     }
-    _client = CommsWebsocketClient(
-        'wss://slimer-web.rive.app/max_test', handleAction);
+    _client = CommsWebsocketClient(handleAction);
     await _client.connect();
   }
 
@@ -42,14 +41,22 @@ class WebsocketCommsManager with Subscriptions {
     }
   }
 
+  @override
+  Future<void> dispose() async {
+    super.dispose();
+    _client?.dispose();
+  }
+
   ReconnectingWebsocketClient _client;
 }
 
 class CommsWebsocketClient extends ReconnectingWebsocketClient {
   MeApi _meAPI;
+  ConfigApi _configAPI;
   Function(PushAction) callback;
-  CommsWebsocketClient(String url, this.callback) : super(url) {
+  CommsWebsocketClient(this.callback) : super() {
     _meAPI = MeApi();
+    _configAPI = ConfigApi();
   }
 
   @override
@@ -80,5 +87,11 @@ class CommsWebsocketClient extends ReconnectingWebsocketClient {
   @override
   void onStateChange(ConnectionState state) {
     print('Websockets $state');
+  }
+
+  @override
+  Future<String> getUrl() async {
+    var config = await _configAPI.appConfig();
+    return config.websocketUrl;
   }
 }

@@ -39,8 +39,8 @@ class DummyServer {
 class DummyClient extends ReconnectingWebsocketClient {
   var dataList = <dynamic>[];
   var states = <ConnectionState>[];
-  DummyClient(String url, {Duration pingInterval = const Duration(seconds: 2)})
-      : super(url, pingInterval: pingInterval);
+  DummyClient({Duration pingInterval = const Duration(seconds: 2)})
+      : super(pingInterval: pingInterval);
 
   @override
   Future<void> handleData(dynamic data) async {
@@ -60,6 +60,11 @@ class DummyClient extends ReconnectingWebsocketClient {
   @override
   String pingMessage() {
     return 'ping';
+  }
+
+  @override
+  Future<String> getUrl() async {
+    return 'ws://127.0.0.1:7777';
   }
 }
 
@@ -87,7 +92,7 @@ void main() {
       await client.disconnect();
     });
     test('basics can connect & disconnect', () async {
-      client = DummyClient('ws://127.0.0.1:7777');
+      client = DummyClient();
       await client.connect();
       await Future<dynamic>.delayed(const Duration(milliseconds: 100));
       expect(server.dataList.first, 'connect');
@@ -104,8 +109,7 @@ void main() {
       expect(client.isReconnecting, false);
     });
     test('ping does ping stuff', () async {
-      client = DummyClient('ws://127.0.0.1:7777',
-          pingInterval: const Duration(milliseconds: 10));
+      client = DummyClient(pingInterval: const Duration(milliseconds: 10));
       await client.connect();
       await Future<dynamic>.delayed(const Duration(milliseconds: 100));
       expect(server.dataList.first, 'connect');
@@ -114,7 +118,7 @@ void main() {
     });
 
     test('will reconnect', () async {
-      client = DummyClient('ws://127.0.0.1:7777');
+      client = DummyClient();
       await client.connect();
       await Future<dynamic>.delayed(const Duration(milliseconds: 100));
       expect(client.isReconnecting, false);

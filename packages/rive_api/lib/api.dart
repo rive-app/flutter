@@ -1,4 +1,5 @@
 export 'src/api/api.dart';
+export 'src/api/config.dart';
 export 'src/api/file.dart';
 export 'src/api/folder.dart';
 export 'src/api/me.dart';
