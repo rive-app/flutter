@@ -2,6 +2,7 @@
 packages/core/pubspec.lock
 packages/rive_api/example/pubspec.lock
 packages/rive_api/pubspec.lock
+dev/bin/
 
 # Miscellaneous
 *.class

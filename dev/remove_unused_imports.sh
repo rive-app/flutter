@@ -1,4 +1,5 @@
-if [[ ! -f "./remove_unused_imports_bin" || "$1" == "build" ]]; then
-    dart2native ../packages/remove_unused_imports/lib/main.dart -o remove_unused_imports_bin
+if [[ ! -f "./bin/remove_unused_imports" || "$1" == "build" ]]; then
+    mkdir -p ./bin
+    dart2native ../packages/remove_unused_imports/lib/main.dart -o ./bin/remove_unused_imports
 fi
-./remove_unused_imports_bin $1
+./bin/remove_unused_imports $1
