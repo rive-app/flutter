@@ -5,7 +5,6 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
-import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
 
 import '../helpers/inspector_helper.dart';
 import '../helpers/test_helpers.dart';

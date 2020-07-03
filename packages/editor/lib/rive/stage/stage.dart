@@ -888,6 +888,10 @@ class Stage extends Debouncer {
     if (item is Advancer) {
       _advancingItems.add(item as Advancer);
     }
+
+    // Whenever an item is added to the stage, make sure we update the mouse
+    // move in case the item was added under the cursor.
+    debounce(_updateHover);
     return true;
   }
 
@@ -906,6 +910,9 @@ class Stage extends Debouncer {
     // Make sure to remove any cached references.
     if (_mouseDownHit == item) {
       _mouseDownHit = null;
+    }
+    if (_hoverItem == item) {
+      _hoverItem = null;
     }
 
     if (item._visTreeProxy == nullNode) {

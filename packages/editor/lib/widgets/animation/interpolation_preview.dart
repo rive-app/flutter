@@ -12,6 +12,7 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/popup/context_popup.dart';
 import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:rive_editor/widgets/theme.dart';
+import 'package:utilities/list_equality.dart';
 
 const double _padding = 20;
 const double _renderPadding = _padding + 0.5;
@@ -39,16 +40,16 @@ class InterpolationPreview extends StatelessWidget {
       child: ValueStreamBuilder<double>(
         stream: timeManager.currentTime,
         builder: (context, snapshot) {
-          double normalizedTime = -1;
-          if (selection.length == 1) {
-            var key = selection.first;
-            var keyedProperty = key.keyedProperty;
-            var next = keyedProperty.after(key);
-            if (next != null) {
-              normalizedTime =
-                  (snapshot.data - key.frame) / (next.frame - key.frame);
-            }
-          }
+          var frame = snapshot.data;
+          double normalizedTime =
+              equalValue<KeyFrame, double>(selection, (key) {
+                    var keyedProperty = key.keyedProperty;
+                    var next = keyedProperty.after(key);
+                    return next == null
+                        ? -1
+                        : (frame - key.frame) / (next.frame - key.frame);
+                  }) ??
+                  -1;
           switch (interpolation.type) {
             case KeyFrameInterpolation.hold:
               return _HoldPreviewRenderer(
@@ -60,7 +61,6 @@ class InterpolationPreview extends StatelessWidget {
                 theme: RiveTheme.of(context),
                 normalizedTime: normalizedTime,
               );
-              break;
             case KeyFrameInterpolation.cubic:
               var commonInterpolator = interpolation.interpolator;
 

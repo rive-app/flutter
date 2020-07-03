@@ -2,92 +2,92 @@ import 'package:flutter/services.dart';
 import 'package:rive_editor/platform/platform.dart';
 
 /// Map shortcut key to a list of physical keys.
-Map<ShortcutKey, List<PhysicalKeyboardKey>> keyToPhysical = {
-  ShortcutKey.comma: [PhysicalKeyboardKey.comma],
-  ShortcutKey.period: [
+Map<ShortcutKey, Set<PhysicalKeyboardKey>> keyToPhysical = {
+  ShortcutKey.comma: {PhysicalKeyboardKey.comma},
+  ShortcutKey.period: {
     PhysicalKeyboardKey.period,
     PhysicalKeyboardKey.numpadComma
-  ],
-  ShortcutKey.alt: [PhysicalKeyboardKey.altLeft, PhysicalKeyboardKey.altRight],
-  ShortcutKey.shift: [
+  },
+  ShortcutKey.alt: {PhysicalKeyboardKey.altLeft, PhysicalKeyboardKey.altRight},
+  ShortcutKey.shift: {
     PhysicalKeyboardKey.shiftLeft,
     PhysicalKeyboardKey.shiftRight
-  ],
-  ShortcutKey.meta: [
+  },
+  ShortcutKey.meta: {
     PhysicalKeyboardKey.metaLeft,
     PhysicalKeyboardKey.metaRight
-  ],
-  ShortcutKey.cmd: [
+  },
+  ShortcutKey.cmd: {
     PhysicalKeyboardKey.metaLeft,
     PhysicalKeyboardKey.metaRight
-  ],
+  },
   ShortcutKey.systemCmd: Platform.instance.isMac
-      ? [PhysicalKeyboardKey.metaLeft, PhysicalKeyboardKey.metaRight]
-      : [PhysicalKeyboardKey.controlLeft, PhysicalKeyboardKey.controlRight],
-  ShortcutKey.a: [PhysicalKeyboardKey.keyA],
-  ShortcutKey.b: [PhysicalKeyboardKey.keyB],
-  ShortcutKey.c: [PhysicalKeyboardKey.keyC],
-  ShortcutKey.d: [PhysicalKeyboardKey.keyD],
-  ShortcutKey.e: [PhysicalKeyboardKey.keyE],
-  ShortcutKey.f: [PhysicalKeyboardKey.keyF],
-  ShortcutKey.g: [PhysicalKeyboardKey.keyG],
-  ShortcutKey.h: [PhysicalKeyboardKey.keyH],
-  ShortcutKey.i: [PhysicalKeyboardKey.keyI],
-  ShortcutKey.j: [PhysicalKeyboardKey.keyJ],
-  ShortcutKey.k: [PhysicalKeyboardKey.keyK],
-  ShortcutKey.l: [PhysicalKeyboardKey.keyL],
-  ShortcutKey.m: [PhysicalKeyboardKey.keyM],
-  ShortcutKey.n: [PhysicalKeyboardKey.keyN],
-  ShortcutKey.o: [PhysicalKeyboardKey.keyO],
-  ShortcutKey.p: [PhysicalKeyboardKey.keyP],
-  ShortcutKey.q: [PhysicalKeyboardKey.keyQ],
-  ShortcutKey.r: [PhysicalKeyboardKey.keyR],
-  ShortcutKey.s: [PhysicalKeyboardKey.keyS],
-  ShortcutKey.t: [PhysicalKeyboardKey.keyT],
-  ShortcutKey.u: [PhysicalKeyboardKey.keyU],
-  ShortcutKey.v: [PhysicalKeyboardKey.keyV],
-  ShortcutKey.w: [PhysicalKeyboardKey.keyW],
-  ShortcutKey.x: [PhysicalKeyboardKey.keyX],
-  ShortcutKey.y: [PhysicalKeyboardKey.keyY],
-  ShortcutKey.z: [PhysicalKeyboardKey.keyZ],
-  ShortcutKey.zero: [PhysicalKeyboardKey.digit0, PhysicalKeyboardKey.numpad0],
-  ShortcutKey.one: [PhysicalKeyboardKey.digit1, PhysicalKeyboardKey.numpad1],
-  ShortcutKey.two: [PhysicalKeyboardKey.digit2, PhysicalKeyboardKey.numpad2],
-  ShortcutKey.three: [PhysicalKeyboardKey.digit3, PhysicalKeyboardKey.numpad3],
-  ShortcutKey.four: [PhysicalKeyboardKey.digit4, PhysicalKeyboardKey.numpad4],
-  ShortcutKey.five: [PhysicalKeyboardKey.digit5, PhysicalKeyboardKey.numpad5],
-  ShortcutKey.six: [PhysicalKeyboardKey.digit6, PhysicalKeyboardKey.numpad6],
-  ShortcutKey.seven: [PhysicalKeyboardKey.digit7, PhysicalKeyboardKey.numpad7],
-  ShortcutKey.eight: [PhysicalKeyboardKey.digit8, PhysicalKeyboardKey.numpad8],
-  ShortcutKey.nine: [PhysicalKeyboardKey.digit9, PhysicalKeyboardKey.numpad9],
-  ShortcutKey.backquote: [PhysicalKeyboardKey.backquote],
-  ShortcutKey.backspace: [PhysicalKeyboardKey.backspace],
-  ShortcutKey.delete: [PhysicalKeyboardKey.delete],
-  ShortcutKey.esc: [PhysicalKeyboardKey.escape],
-  ShortcutKey.space: [PhysicalKeyboardKey.space],
-  ShortcutKey.home: [PhysicalKeyboardKey.home],
-  ShortcutKey.end: [PhysicalKeyboardKey.end],
-  ShortcutKey.bracketLeft: [PhysicalKeyboardKey.bracketLeft],
-  ShortcutKey.bracketRight: [PhysicalKeyboardKey.bracketRight],
-  ShortcutKey.slash: [PhysicalKeyboardKey.slash],
-  ShortcutKey.backslash: [PhysicalKeyboardKey.backslash],
-  ShortcutKey.right: [PhysicalKeyboardKey.arrowRight],
-  ShortcutKey.left: [PhysicalKeyboardKey.arrowLeft],
-  ShortcutKey.up: [PhysicalKeyboardKey.arrowUp],
-  ShortcutKey.down: [PhysicalKeyboardKey.arrowDown],
-  ShortcutKey.semiColon: [PhysicalKeyboardKey.semicolon],
-  ShortcutKey.enter: [
+      ? {PhysicalKeyboardKey.metaLeft, PhysicalKeyboardKey.metaRight}
+      : {PhysicalKeyboardKey.controlLeft, PhysicalKeyboardKey.controlRight},
+  ShortcutKey.a: {PhysicalKeyboardKey.keyA},
+  ShortcutKey.b: {PhysicalKeyboardKey.keyB},
+  ShortcutKey.c: {PhysicalKeyboardKey.keyC},
+  ShortcutKey.d: {PhysicalKeyboardKey.keyD},
+  ShortcutKey.e: {PhysicalKeyboardKey.keyE},
+  ShortcutKey.f: {PhysicalKeyboardKey.keyF},
+  ShortcutKey.g: {PhysicalKeyboardKey.keyG},
+  ShortcutKey.h: {PhysicalKeyboardKey.keyH},
+  ShortcutKey.i: {PhysicalKeyboardKey.keyI},
+  ShortcutKey.j: {PhysicalKeyboardKey.keyJ},
+  ShortcutKey.k: {PhysicalKeyboardKey.keyK},
+  ShortcutKey.l: {PhysicalKeyboardKey.keyL},
+  ShortcutKey.m: {PhysicalKeyboardKey.keyM},
+  ShortcutKey.n: {PhysicalKeyboardKey.keyN},
+  ShortcutKey.o: {PhysicalKeyboardKey.keyO},
+  ShortcutKey.p: {PhysicalKeyboardKey.keyP},
+  ShortcutKey.q: {PhysicalKeyboardKey.keyQ},
+  ShortcutKey.r: {PhysicalKeyboardKey.keyR},
+  ShortcutKey.s: {PhysicalKeyboardKey.keyS},
+  ShortcutKey.t: {PhysicalKeyboardKey.keyT},
+  ShortcutKey.u: {PhysicalKeyboardKey.keyU},
+  ShortcutKey.v: {PhysicalKeyboardKey.keyV},
+  ShortcutKey.w: {PhysicalKeyboardKey.keyW},
+  ShortcutKey.x: {PhysicalKeyboardKey.keyX},
+  ShortcutKey.y: {PhysicalKeyboardKey.keyY},
+  ShortcutKey.z: {PhysicalKeyboardKey.keyZ},
+  ShortcutKey.zero: {PhysicalKeyboardKey.digit0, PhysicalKeyboardKey.numpad0},
+  ShortcutKey.one: {PhysicalKeyboardKey.digit1, PhysicalKeyboardKey.numpad1},
+  ShortcutKey.two: {PhysicalKeyboardKey.digit2, PhysicalKeyboardKey.numpad2},
+  ShortcutKey.three: {PhysicalKeyboardKey.digit3, PhysicalKeyboardKey.numpad3},
+  ShortcutKey.four: {PhysicalKeyboardKey.digit4, PhysicalKeyboardKey.numpad4},
+  ShortcutKey.five: {PhysicalKeyboardKey.digit5, PhysicalKeyboardKey.numpad5},
+  ShortcutKey.six: {PhysicalKeyboardKey.digit6, PhysicalKeyboardKey.numpad6},
+  ShortcutKey.seven: {PhysicalKeyboardKey.digit7, PhysicalKeyboardKey.numpad7},
+  ShortcutKey.eight: {PhysicalKeyboardKey.digit8, PhysicalKeyboardKey.numpad8},
+  ShortcutKey.nine: {PhysicalKeyboardKey.digit9, PhysicalKeyboardKey.numpad9},
+  ShortcutKey.backquote: {PhysicalKeyboardKey.backquote},
+  ShortcutKey.backspace: {PhysicalKeyboardKey.backspace},
+  ShortcutKey.delete: {PhysicalKeyboardKey.delete},
+  ShortcutKey.esc: {PhysicalKeyboardKey.escape},
+  ShortcutKey.space: {PhysicalKeyboardKey.space},
+  ShortcutKey.home: {PhysicalKeyboardKey.home},
+  ShortcutKey.end: {PhysicalKeyboardKey.end},
+  ShortcutKey.bracketLeft: {PhysicalKeyboardKey.bracketLeft},
+  ShortcutKey.bracketRight: {PhysicalKeyboardKey.bracketRight},
+  ShortcutKey.slash: {PhysicalKeyboardKey.slash},
+  ShortcutKey.backslash: {PhysicalKeyboardKey.backslash},
+  ShortcutKey.right: {PhysicalKeyboardKey.arrowRight},
+  ShortcutKey.left: {PhysicalKeyboardKey.arrowLeft},
+  ShortcutKey.up: {PhysicalKeyboardKey.arrowUp},
+  ShortcutKey.down: {PhysicalKeyboardKey.arrowDown},
+  ShortcutKey.semiColon: {PhysicalKeyboardKey.semicolon},
+  ShortcutKey.enter: {
     PhysicalKeyboardKey.enter,
     PhysicalKeyboardKey.numpadEnter
-  ],
-  ShortcutKey.equal: [
+  },
+  ShortcutKey.equal: {
     PhysicalKeyboardKey.equal,
     PhysicalKeyboardKey.numpadEqual
-  ],
-  ShortcutKey.minus: [
+  },
+  ShortcutKey.minus: {
     PhysicalKeyboardKey.minus,
     PhysicalKeyboardKey.numpadSubtract
-  ],
+  },
 };
 
 Map<ShortcutKey, String> _keyNames = {

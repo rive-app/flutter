@@ -22,7 +22,6 @@ import 'package:rive_editor/rive/rive_clipboard.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 
@@ -127,7 +126,7 @@ class Rive {
 
     // Deal with current user (if any), or send to login page.
     Plumber().getStream<Me>().listen(_onNewMe);
-    UserManager().loadMe();
+    await UserManager().loadMe();
 
     // Start the frame callback loop.
     SchedulerBinding.instance.addPersistentFrameCallback(_drawFrame);
@@ -296,25 +295,35 @@ class Rive {
     _pressed.removeWhere((key) => !keyEvent.isKeyPressed(key.logical));
 
     bool isPress = keyEvent is RawKeyDownEvent;
+
     // If something else has focus, don't process actions (usually when a text
     // field is focused somewhere).
     if (hasFocusObject) {
       return;
     }
-    var probableActions = (keyBinding.lookupAction(
-                _pressed.map((key) => key.physical).toList(growable: false)) ??
-            [])
-        .toSet();
 
     var actions = <ShortcutAction>{};
-    // Filter the actions such that only the ones with their last binding key
-    // matches the last pressed key.
-    for (final action in probableActions) {
-      var keys = keyBinding.lookupKeys(action);
-      var physicalLastKey = keyToPhysical[keys.last];
+    var toTrigger = <ShortcutAction>{};
+    if (isPress) {
+      // Only trigger actions if a key was pressed.
+      actions = keyBinding.lookupAction(
+          _pressed.map((key) => key.physical).toList(growable: false),
+          keyEvent.physicalKey);
+      // Some actions don't repeat, so remove them from the trigger list if
+      // they've already triggered for press. N.B. most platforms give  us a way
+      // to determine if this keydown is a repeat, Flutter does this only for
+      // Android so we have to do it ourselves here.
 
-      if (physicalLastKey.contains(keyEvent.physicalKey)) {
-        actions.add(action);
+      if (isPress) {
+        for (final action in actions) {
+          if (action.repeats) {
+            toTrigger.add(action);
+          } else if (!_pressedActions.contains(action)) {
+            // Action is not a repeating action, however it wasn't previously
+            // pressed so this is the first press down.
+            toTrigger.add(action);
+          }
+        }
       }
     }
 
@@ -329,23 +338,6 @@ class Rive {
         action.onRelease();
       }
       releaseAction(action);
-    }
-
-    // Some actions don't repeat, so remove them from the trigger list if
-    // they've already triggered for press. N.B. most platforms give  us a way
-    // to determine if this keydown is a repeat, Flutter does this only for
-    // Android so we have to do it ourselves here.
-    Set<ShortcutAction> toTrigger = {};
-    if (isPress) {
-      for (final action in actions) {
-        if (action.repeats) {
-          toTrigger.add(action);
-        } else if (!_pressedActions.contains(action)) {
-          // Action is not a repeating action, however it wasn't previously
-          // pressed so this is the first press down.
-          toTrigger.add(action);
-        } else {}
-      }
     }
 
     _pressedActions.clear();

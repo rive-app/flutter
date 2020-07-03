@@ -15,8 +15,6 @@ import 'package:rive_editor/widgets/inspector/color/color_type.dart';
 import 'package:rive_editor/widgets/inspector/color/inspecting_color.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/inspector_color_swatch.dart';
-import 'package:rive_editor/widgets/inspector/inspector_panel.dart';
-
 import '../helpers/inspector_helper.dart';
 import '../helpers/test_helpers.dart';
 
