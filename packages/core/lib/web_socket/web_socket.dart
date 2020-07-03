@@ -29,11 +29,11 @@ class RiveWebSocketChannel extends WebSocketChannel {
 Map<String, String> createCookieHeader(String token) =>
     {'Cookie': 'spectre=$token'};
 
-enum ConnectionState { disconnected, connecting, connected }
+enum ConnectionState { disconnected, connected }
 
 abstract class ReconnectingWebsocketClient {
   final String url;
-  final int pingInterval = 120;
+  final Duration pingInterval;
   WebSocketChannel _channel;
 
   ConnectionState get connectionState => _connectionState;
@@ -52,7 +52,11 @@ abstract class ReconnectingWebsocketClient {
 
   bool _allowReconnect = true;
 
-  ReconnectingWebsocketClient(this.url);
+  bool get isReconnecting => _reconnectTimer?.isActive ?? false;
+  bool get isPinging => _pingTimer?.isActive ?? false;
+
+  ReconnectingWebsocketClient(this.url,
+      {this.pingInterval = const Duration(seconds: 120)});
 
   void _ping() {
     if (!isConnected) {
@@ -60,7 +64,7 @@ abstract class ReconnectingWebsocketClient {
     }
     write(pingMessage());
     _pingTimer?.cancel();
-    _pingTimer = Timer(Duration(seconds: pingInterval), _ping);
+    _pingTimer = Timer(pingInterval, _ping);
   }
 
   void _reconnect() {
