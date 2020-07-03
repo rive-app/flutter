@@ -1,6 +1,6 @@
 name: rive_editor
 description: The Rive editor written in Flutter.
-version: 0.2.23
+version: 0.2.24
 
 environment:
   sdk: ">=2.8.0 <3.0.0"
@@ -31,7 +31,6 @@ dependencies:
     path: ../rive_flutter_runtime
 
   http: ^0.12.1
-  trotter: ^1.2.0
   dotted_border: ^1.0.5
   flutter_widgets: ^0.1.12
   url_launcher: ^5.4.11

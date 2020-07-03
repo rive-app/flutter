@@ -65,19 +65,7 @@ void main() {
           systemCommandKeyLeft,
           PhysicalKeyboardKey.keyC,
         ],
-      ),
-      [
-        ShortcutAction.copy,
-      ],
-    );
-
-    // Out of order works too
-    expect(
-      keyBinding.lookupAction(
-        [
-          PhysicalKeyboardKey.keyC,
-          systemCommandKeyLeft,
-        ],
+        PhysicalKeyboardKey.keyC,
       ),
       [
         ShortcutAction.copy,
@@ -91,23 +79,10 @@ void main() {
           systemCommandKeyRight,
           PhysicalKeyboardKey.keyC,
         ],
+        PhysicalKeyboardKey.keyC,
       ),
       [
         ShortcutAction.copy,
-      ],
-    );
-
-    // Out of order works too
-    expect(
-      keyBinding.lookupAction(
-        [
-          PhysicalKeyboardKey.shiftLeft,
-          systemCommandKeyRight,
-          PhysicalKeyboardKey.keyZ,
-        ],
-      ),
-      [
-        ShortcutAction.redo,
       ],
     );
   });
