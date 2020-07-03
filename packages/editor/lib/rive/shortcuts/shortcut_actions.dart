@@ -56,7 +56,7 @@ class ShortcutAction {
   static const ShortcutAction previousFrame = ShortcutAction('frame-prev');
   static const ShortcutAction previousKeyFrame =
       ShortcutAction('frame-prev-key');
-  static const ShortcutAction redo = ShortcutAction('redo');
+  static const ShortcutAction redo = ShortcutAction('redo', repeats: true);
   static const ShortcutAction rotateTool = ShortcutAction('tool-rotate');
 
   static const ShortcutAction scaleTool = ShortcutAction('tool-scale');
@@ -71,17 +71,15 @@ class ShortcutAction {
   static const ShortcutAction ellipseTool = ShortcutAction('tool-ellipse');
   static const ShortcutAction timelineEnd = ShortcutAction('timeline-end');
   static const ShortcutAction timelineStart = ShortcutAction('timeline-start');
-  static const ShortcutAction togglePlay = ShortcutAction(
-    'play',
-    repeats: false,
-  );
+  static const ShortcutAction togglePlay = ShortcutAction('play');
   static const ShortcutAction translateTool = ShortcutAction('tool-translate');
-  static const ShortcutAction undo = ShortcutAction('undo');
+  static const ShortcutAction undo = ShortcutAction('undo', repeats: true);
   static const ShortcutAction paintWeightTool = ShortcutAction('tool-weight');
   static const ShortcutAction zoom100 = ShortcutAction('zoom-100');
   static const ShortcutAction zoomFit = ShortcutAction('zoom-fit');
-  static const ShortcutAction zoomIn = ShortcutAction('zoom-in');
-  static const ShortcutAction zoomOut = ShortcutAction('zoom-out');
+  static const ShortcutAction zoomIn = ShortcutAction('zoom-in', repeats: true);
+  static const ShortcutAction zoomOut =
+      ShortcutAction('zoom-out', repeats: true);
   static const ShortcutAction item1 = ShortcutAction('item-1');
   static const ShortcutAction item10 = ShortcutAction('item-10');
 
@@ -151,12 +149,14 @@ class ShortcutAction {
       HoldShortcutAction('symmetric-draw');
   static const ShortcutAction confirm = ShortcutAction('action');
 
-  static const ShortcutAction left = ShortcutAction('action-left');
-
   // UI related
-  static const ShortcutAction right = ShortcutAction('action-right');
-  static const ShortcutAction up = ShortcutAction('action-up');
-  static const ShortcutAction down = ShortcutAction('action-down');
+  static const ShortcutAction left =
+      ShortcutAction('action-left', repeats: true);
+  static const ShortcutAction right =
+      ShortcutAction('action-right', repeats: true);
+  static const ShortcutAction up = ShortcutAction('action-up', repeats: true);
+  static const ShortcutAction down =
+      ShortcutAction('action-down', repeats: true);
 
   static const ShortcutAction closeTab = ShortcutAction('close-tab');
   static ToggleShortcutAction showActions =
@@ -164,7 +164,7 @@ class ShortcutAction {
 
   final String name;
   final bool repeats;
-  const ShortcutAction(this.name, {this.repeats = true});
+  const ShortcutAction(this.name, {this.repeats = false});
 }
 
 /// A ShortcutAction that somehow mutates its value when it is pressed or

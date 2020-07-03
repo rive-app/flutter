@@ -95,7 +95,7 @@ class _RenamableState extends State<Renamable> {
                   allowDrag: false,
                   controller: _controller,
                   focusNode: _focusNode,
-                  color: widget.color,
+                  color: widget.color ?? widget.style?.color,
                   style: widget.style ??
                       const TextStyle(
                         fontFamily: 'Roboto-Regular',
