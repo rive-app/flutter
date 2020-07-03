@@ -10,4 +10,5 @@ export 'src/data_model/owner.dart';
 export 'src/data_model/profile.dart';
 export 'src/data_model/push_action.dart';
 export 'src/data_model/team.dart';
+export 'src/data_model/token.dart';
 export 'src/data_model/user.dart';

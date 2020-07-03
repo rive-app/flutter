@@ -15,4 +15,5 @@ export 'src/model/push_action.dart';
 export 'src/model/revision.dart';
 export 'src/model/selection.dart';
 export 'src/model/team.dart';
+export 'src/model/token.dart';
 export 'src/model/user.dart';

@@ -55,7 +55,7 @@ class CommsWebsocketClient extends ReconnectingWebsocketClient {
   @override
   Future<void> onConnect() async {
     var token = await _meAPI.token;
-    write(json.encode({"action": "register", "token": token}));
+    write(json.encode({"action": "register", "token": token.token}));
   }
 
   @override
@@ -74,7 +74,6 @@ class CommsWebsocketClient extends ReconnectingWebsocketClient {
 
   @override
   String pingMessage() {
-    // TODO: implement pingMessage
     return json.encode({"action": "ping"});
   }
 

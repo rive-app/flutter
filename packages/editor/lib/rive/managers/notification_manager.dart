@@ -94,8 +94,10 @@ class NotificationManager with Subscriptions {
         rethrow;
       }
     }
+
+    // unawaited so we can load teams and fetch notifications `together`
     unawaited(_fetchNotifications());
-    unawaited(TeamManager().loadTeams());
+    await TeamManager().loadTeams();
   }
 
   /// Decline a team invite
@@ -110,16 +112,16 @@ class NotificationManager with Subscriptions {
         rethrow;
       }
     }
-    unawaited(_fetchNotifications());
+    await _fetchNotifications();
   }
 
   /// Mark all notifications as read
   Future<void> markNotificationsRead() async {
     await _notificationsApi.markNotificationsRead();
-    unawaited(_fetchNotifications());
+    await _fetchNotifications();
   }
 
   Future<void> update() async {
-    unawaited(_fetchNotifications());
+    await _fetchNotifications();
   }
 }

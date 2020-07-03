@@ -102,7 +102,7 @@ class MeApi {
 
   /// GET /api/profile
   /// Returns the user profile.
-  Future<String> get token async {
+  Future<TokenDM> get token async {
     final response = await api.get('${api.host}/auth/token');
     if (response.statusCode != 200) {
       var message = 'Could not get user profile ${response.body}';
@@ -110,8 +110,8 @@ class MeApi {
       return null;
     }
     try {
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      return data['token'] as String;
+      final data = json.decode(response.body) as Map<String, Object>;
+      return TokenDM.fromData(data);
     } on FormatException catch (e) {
       log.severe('Error formatting team profile response: $e');
       rethrow;
