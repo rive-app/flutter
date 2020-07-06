@@ -131,7 +131,10 @@ class Property {
       }''');
     if (exportAnimates) {
       code.writeln('''set $name(${exportType.dartName} value) {
-        if(context != null && context.isAnimating && $name != value) {
+        if($name == value) {
+          return;
+        }
+        if(context != null && context.isAnimating) {
           _${name}Animate(value, true);
           return;
         }

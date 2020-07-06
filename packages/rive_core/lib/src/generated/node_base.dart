@@ -44,7 +44,10 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   set x(double value) {
-    if (context != null && context.isAnimating && x != value) {
+    if (x == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _xAnimate(value, true);
       return;
     }
@@ -103,7 +106,10 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   set y(double value) {
-    if (context != null && context.isAnimating && y != value) {
+    if (y == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _yAnimate(value, true);
       return;
     }
@@ -162,7 +168,10 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   set rotation(double value) {
-    if (context != null && context.isAnimating && rotation != value) {
+    if (rotation == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _rotationAnimate(value, true);
       return;
     }
@@ -222,7 +231,10 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   set scaleX(double value) {
-    if (context != null && context.isAnimating && scaleX != value) {
+    if (scaleX == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _scaleXAnimate(value, true);
       return;
     }
@@ -282,7 +294,10 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   set scaleY(double value) {
-    if (context != null && context.isAnimating && scaleY != value) {
+    if (scaleY == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _scaleYAnimate(value, true);
       return;
     }
@@ -342,7 +357,10 @@ abstract class NodeBase extends ContainerComponent {
   }
 
   set opacity(double value) {
-    if (context != null && context.isAnimating && opacity != value) {
+    if (opacity == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _opacityAnimate(value, true);
       return;
     }

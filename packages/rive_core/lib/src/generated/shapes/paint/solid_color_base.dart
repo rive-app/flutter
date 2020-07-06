@@ -43,7 +43,10 @@ abstract class SolidColorBase extends Component {
   }
 
   set colorValue(int value) {
-    if (context != null && context.isAnimating && colorValue != value) {
+    if (colorValue == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _colorValueAnimate(value, true);
       return;
     }

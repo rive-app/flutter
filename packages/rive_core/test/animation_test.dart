@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:core/key_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_data/local_data.dart';
+import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/artboard.dart';
@@ -166,5 +167,51 @@ void main() {
     // Expect undo to work with animations too.
     file.undo();
     expect(kf1.seconds, 0, reason: 'seconds should have resolved to 0');
+  });
+
+  test('change in animation mode shouldn\'t affect design mode', () {
+    var file = _makeFile();
+
+    Artboard artboard;
+    LinearAnimation animation;
+    Node node;
+    KeyFrameDouble kf1, kf2;
+    KeyedProperty keyedProperty;
+    file.batchAdd(() {
+      artboard = file.addObject(Artboard());
+      node = file.addObject(Node()
+        ..name = 'Moving Node'
+        ..x = 0
+        ..y = 0);
+
+      artboard.appendChild(node);
+
+      animation = LinearAnimation()
+        ..name = 'Test Animation'
+        ..fps = 60;
+      file.addObject(animation);
+
+      var keyedObject = animation.makeKeyed(node);
+      keyedProperty = keyedObject.makeKeyed(NodeBase.xPropertyKey);
+      kf1 = node.addKeyFrame(animation, NodeBase.xPropertyKey, 0)..value = 34;
+      kf2 = node.addKeyFrame(animation, NodeBase.xPropertyKey, 60)..value = 40;
+    });
+    // start animation
+    file.startAnimating();
+    animation.apply(0.5);
+
+    var value = lerpDouble(34, 40, 0.5);
+    expect(node.x, value);
+    // Setting X to the current animated value should not change anything.
+    node.x = value;
+    expect(node.xCore, 0,
+        reason: 'design time x property should not have changed');
+
+    // Changing x should set xAnimated (if it changes) and not xCore.
+    node.x = -22;
+    expect(node.xCore, 0,
+        reason: 'design time x property should not have changed');
+    expect(node.x, -22);
+    expect(node.xAnimated, -22);
   });
 }

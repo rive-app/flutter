@@ -43,7 +43,10 @@ abstract class GradientStopBase extends Component {
   }
 
   set colorValue(int value) {
-    if (context != null && context.isAnimating && colorValue != value) {
+    if (colorValue == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _colorValueAnimate(value, true);
       return;
     }
@@ -103,7 +106,10 @@ abstract class GradientStopBase extends Component {
   }
 
   set position(double value) {
-    if (context != null && context.isAnimating && position != value) {
+    if (position == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _positionAnimate(value, true);
       return;
     }
