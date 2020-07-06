@@ -132,13 +132,14 @@ class FolderTreeView extends StatelessWidget {
                         : await FileManager().createFile(1);
 
                     // Update current directory.
-                    var currentDirectory = Plumber().peek<CurrentDirectory>();
-                    if (currentDirectory.owner == item.data.owner &&
+                    final currentDirectory = Plumber().peek<CurrentDirectory>();
+                    if (currentDirectory != null &&
+                        currentDirectory.owner == item.data.owner &&
                         currentDirectory.folderId == 1) {
                       Plumber().message(currentDirectory);
                     }
 
-                    RiveContext.of(context).open(
+                    await RiveContext.of(context).open(
                       createdFile.fileOwnerId,
                       createdFile.id,
                       createdFile.name,
