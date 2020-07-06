@@ -48,7 +48,10 @@ abstract class LinearGradientBase extends ContainerComponent {
   }
 
   set startX(double value) {
-    if (context != null && context.isAnimating && startX != value) {
+    if (startX == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _startXAnimate(value, true);
       return;
     }
@@ -108,7 +111,10 @@ abstract class LinearGradientBase extends ContainerComponent {
   }
 
   set startY(double value) {
-    if (context != null && context.isAnimating && startY != value) {
+    if (startY == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _startYAnimate(value, true);
       return;
     }
@@ -168,7 +174,10 @@ abstract class LinearGradientBase extends ContainerComponent {
   }
 
   set endX(double value) {
-    if (context != null && context.isAnimating && endX != value) {
+    if (endX == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _endXAnimate(value, true);
       return;
     }
@@ -228,7 +237,10 @@ abstract class LinearGradientBase extends ContainerComponent {
   }
 
   set endY(double value) {
-    if (context != null && context.isAnimating && endY != value) {
+    if (endY == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _endYAnimate(value, true);
       return;
     }
@@ -288,7 +300,10 @@ abstract class LinearGradientBase extends ContainerComponent {
   }
 
   set opacity(double value) {
-    if (context != null && context.isAnimating && opacity != value) {
+    if (opacity == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
       _opacityAnimate(value, true);
       return;
     }

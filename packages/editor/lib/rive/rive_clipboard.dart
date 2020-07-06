@@ -275,10 +275,13 @@ class _RiveHierarchyClipboard extends RiveClipboard {
       }
     });
 
-    // Finally select the newly added items...
+    // Finally select the newly added items.
     var selection = <StageItem>{};
     for (final component in objects) {
-      if (component == null || component.stageItem == null) {
+      // Select only stageItems that have been added to the stage.
+      if (component == null ||
+          component.stageItem == null ||
+          component.stageItem.stage == null) {
         continue;
       }
       selection.add(component.stageItem);
