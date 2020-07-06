@@ -78,6 +78,10 @@ class _InspectorPanelState extends State<InspectorPanel> {
 
               // Expand the builders and interleave dividers.
               List<WidgetBuilder> builders = [];
+
+              // Add the top padding
+              builders.add(InspectorBuilder.padding);
+
               for (int i = 0, builderCount = inspectorBuilders.length;
                   i < builderCount;
                   i++) {

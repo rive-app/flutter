@@ -29,6 +29,13 @@ abstract class InspectorBuilder {
         ),
         color: RiveTheme.of(context).colors.inspectorSeparator,
       );
+
+  /// Builder for the top padding
+  static Widget padding(BuildContext context) => const Padding(
+        padding: EdgeInsets.only(
+          top: 20,
+        ),
+      );
 }
 
 /// A listening ispector builder which will rebuild when any of the items it's
