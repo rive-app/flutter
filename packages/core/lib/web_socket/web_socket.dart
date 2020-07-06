@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:core/error_logger/error_logger.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -25,3 +28,131 @@ class RiveWebSocketChannel extends WebSocketChannel {
 /// Creates a valid cooke header
 Map<String, String> createCookieHeader(String token) =>
     {'Cookie': 'spectre=$token'};
+
+enum ConnectionState { disconnected, connecting, connected }
+
+abstract class ReconnectingWebsocketClient {
+  final String url;
+  final int pingInterval = 120;
+  WebSocketChannel _channel;
+
+  ConnectionState get connectionState => _connectionState;
+  ConnectionState _connectionState = ConnectionState.disconnected;
+
+  void _changeState(ConnectionState state) {
+    if (_connectionState != state) {
+      _connectionState = state;
+      onStateChange(_connectionState);
+    }
+  }
+
+  int _reconnectAttempt = 0;
+  Timer _reconnectTimer;
+  Timer _pingTimer;
+
+  bool _allowReconnect = true;
+
+  ReconnectingWebsocketClient(this.url);
+
+  void _ping() {
+    if (!isConnected) {
+      return;
+    }
+    write(pingMessage());
+    _pingTimer?.cancel();
+    _pingTimer = Timer(Duration(seconds: pingInterval), _ping);
+  }
+
+  void _reconnect() {
+    _reconnectTimer?.cancel();
+    _pingTimer?.cancel();
+    _reconnectTimer =
+        Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
+    if (_reconnectAttempt < 1) {
+      _reconnectAttempt = 1;
+    }
+    _reconnectAttempt *= 2;
+  }
+
+  void dispose() {
+    disconnect();
+    _reconnectTimer?.cancel();
+    _pingTimer?.cancel();
+    _reconnectTimer = null;
+  }
+
+  bool get isConnected => _connectionState == ConnectionState.connected;
+
+  Future<bool> disconnect() async {
+    _allowReconnect = false;
+    if (_channel != null) {
+      await _channel.sink.close();
+    }
+    await _subscription?.cancel();
+    _pingTimer?.cancel();
+    await _disconnected();
+    return true;
+  }
+
+  StreamSubscription _subscription;
+
+  Future<void> _onStreamData(dynamic data) async {
+    // we got data, we're connected might as well reset the reconnect attempt.
+
+    _reconnectAttempt = 0;
+    // We pause and resume the stream once our read has fully completed. This
+    // allows us to avoid race conditions with processing events that are
+    // expected to happen in order.
+    _subscription.pause();
+
+    await handleData(data);
+
+    _subscription.resume();
+  }
+
+  Future<void> onConnect();
+  Future<void> handleData(dynamic data);
+  void onStateChange(ConnectionState state);
+  String pingMessage();
+
+  Future<void> connect() async {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    _channel = RiveWebSocketChannel.connect(Uri.parse(url));
+    _changeState(ConnectionState.connected);
+    await onConnect();
+    _ping();
+
+    runZoned(() {
+      _subscription =
+          _channel.stream.listen(_onStreamData, onError: (dynamic error) {
+        _disconnected();
+      }, onDone: () async {
+        await _disconnected();
+        if (_allowReconnect) {
+          _reconnect();
+        }
+      });
+    }, onError: (Object error, StackTrace stackTrace) {
+      try {
+        ErrorLogger.instance.reportException(error, stackTrace);
+      } on Exception catch (e) {
+        print('Failed to report: $e');
+        print('Error was: $error, $stackTrace');
+      }
+    });
+  }
+
+  Future<void> _disconnected() async {
+    _changeState(ConnectionState.disconnected);
+    if (_channel != null && _channel.sink != null) {
+      await _channel.sink.close();
+    }
+    _channel = null;
+  }
+
+  void write(dynamic data) {
+    assert(_connectionState == ConnectionState.connected);
+    _channel?.sink?.add(data);
+  }
+}

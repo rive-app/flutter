@@ -18,6 +18,7 @@ import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/managers/global_message_manager.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
+import 'package:rive_editor/rive/managers/websocket_comms_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
@@ -86,6 +87,7 @@ Future<void> main() async {
   SelectionManager();
   RiveManager();
   NotificationManager();
+  WebsocketCommsManager();
   GlobalMessageManager();
 
   // Runs the app in a custom [Zone] (i.e. an execution context).
