@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
+import 'package:rive_editor/widgets/common/overflowing_mouse_region.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 /// A drag callback with local and local normalized (0-1) coordinates.
@@ -18,21 +19,29 @@ typedef DragProxy = void Function(Offset local, Offset localNormalized);
 class OverlayHitDetect extends StatefulWidget {
   final Widget child;
   final BuildContext dragContext;
+  final DragProxy startDrag;
   final DragProxy drag;
   final VoidCallback endDrag;
   final VoidCallback press;
   final Iterable<PackedIcon> customCursorIcon;
   final bool debouncePress;
+  final VoidCallback enter;
+  final VoidCallback exit;
+  final bool dragGlobal;
 
   const OverlayHitDetect({
     Key key,
     this.child,
     this.dragContext,
+    this.startDrag,
     this.drag,
     this.endDrag,
     this.press,
     this.customCursorIcon,
     this.debouncePress = false,
+    this.enter,
+    this.exit,
+    this.dragGlobal = false,
   }) : super(key: key);
 
   @override
@@ -40,7 +49,6 @@ class OverlayHitDetect extends StatefulWidget {
 }
 
 class _OverlayHitDetectState extends State<OverlayHitDetect> {
-  OverlayEntry _resizeOverlay;
   CursorInstance _customCursor;
   bool _isDragging = false;
   // Need to store this otherwise it can cause a context lookup during pointerUp
@@ -57,84 +65,48 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
     super.dispose();
   }
 
-  void _prepHitArea([Offset checkPosition]) {
-    RenderBox dragRenderBox =
-        widget.dragContext.findRenderObject() as RenderBox;
-    RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-    final offset = renderBox.localToGlobal(Offset.zero);
-
-    // If checkPosition was supplied, make sure our offset is within the bounds.
-    if (checkPosition != null && !(offset & size).contains(checkPosition)) {
+  void _dragCallback(DragProxy cb, Offset position, RenderBox dragRenderBox) {
+    if (cb == null) {
       return;
     }
 
-    _resizeOverlay?.remove();
-    _resizeOverlay = OverlayEntry(
-      maintainState: true,
-      builder: (context) {
-        return Positioned(
-          left: offset.dx,
-          top: offset.dy,
-          width: size.width,
-          height: size.height,
-          child: Listener(
-            onPointerDown: (details) {
-              (_dragOperationOn = RiveContext.find(context))
-                  .startDragOperation();
-              _isDragging = true;
-              if (widget.customCursorIcon != null) {
-                _customCursor ??=
-                    CursorIcon.show(context, widget.customCursorIcon);
-              }
-              if (widget.press != null) {
-                widget.debouncePress ? debounce(widget.press) : widget.press();
-              }
-            },
-            onPointerMove: (details) {
-              var pos = dragRenderBox.globalToLocal(details.position);
+    if (widget.dragGlobal) {
+      cb.call(
+        position,
+        Offset(
+          (position.dx / context.size.width).clamp(0, 1).toDouble(),
+          (position.dy / context.size.height).clamp(0, 1).toDouble(),
+        ),
+      );
+      return;
+    }
+    var pos = dragRenderBox.globalToLocal(position);
 
-              widget.drag?.call(
-                  pos,
-                  Offset(
-                      (pos.dx / dragRenderBox.size.width)
-                          .clamp(0, 1)
-                          .toDouble(),
-                      (pos.dy / dragRenderBox.size.height)
-                          .clamp(0, 1)
-                          .toDouble()));
-            },
-            onPointerUp: (details) {
-              _dragOperationOn?.endDragOperation();
-              _isDragging = false;
-              _customCursor?.remove();
-              _customCursor = null;
-              _resizeOverlay?.remove();
-              _resizeOverlay = null;
-              _prepHitArea(details.position);
-              widget.endDrag?.call();
-            },
-            child: Container(color: Colors.transparent),
-          ),
-        );
-      },
+    cb.call(
+      pos,
+      Offset(
+        (pos.dx / dragRenderBox.size.width).clamp(0, 1).toDouble(),
+        (pos.dy / dragRenderBox.size.height).clamp(0, 1).toDouble(),
+      ),
     );
-
-    Overlay.of(context).insert(_resizeOverlay);
   }
+
+  RenderBox _draggingRenderBox;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      opaque: false,
+    return OverflowingMouseRegion(
       onHover: (details) {
         if (RiveContext.find(context).isDragging) {
           return;
         }
         if (widget.customCursorIcon != null) {
-          _customCursor ??= CursorIcon.show(context, widget.customCursorIcon);
+          if (_customCursor == null) {
+            _customCursor = CursorIcon.show(context, widget.customCursorIcon);
+            widget.enter?.call();
+          }
         }
-        _prepHitArea();
+        // _prepHitArea();
       },
       onEnter: (details) {
         if (RiveContext.find(context).isDragging) {
@@ -143,17 +115,45 @@ class _OverlayHitDetectState extends State<OverlayHitDetect> {
         if (widget.customCursorIcon != null) {
           _customCursor ??= CursorIcon.show(context, widget.customCursorIcon);
         }
-        _prepHitArea();
+        // _prepHitArea();
+        widget.enter?.call();
       },
       onExit: (_) {
         if (!_isDragging) {
           _customCursor?.remove();
           _customCursor = null;
         }
-        _resizeOverlay?.remove();
-        _resizeOverlay = null;
+        widget.exit?.call();
       },
       child: widget.child,
+      helperChild: Listener(
+        behavior: HitTestBehavior.opaque,
+        child: const SizedBox(),
+        onPointerDown: (details) {
+          (_dragOperationOn = RiveContext.find(context)).startDragOperation();
+          _isDragging = true;
+          if (widget.customCursorIcon != null) {
+            _customCursor ??= CursorIcon.show(context, widget.customCursorIcon);
+          }
+          if (widget.press != null) {
+            widget.debouncePress ? debounce(widget.press) : widget.press();
+          }
+
+          _draggingRenderBox =
+              widget.dragContext.findRenderObject() as RenderBox;
+
+          _dragCallback(widget.startDrag, details.position, _draggingRenderBox);
+        },
+        onPointerMove: (details) =>
+            _dragCallback(widget.drag, details.position, _draggingRenderBox),
+        onPointerUp: (details) {
+          _dragOperationOn?.endDragOperation();
+          _isDragging = false;
+          _customCursor?.remove();
+          _customCursor = null;
+          widget.endDrag?.call();
+        },
+      ),
     );
   }
 }
