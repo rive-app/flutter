@@ -2,7 +2,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Utilities for launching external urls
 
-void launchSupportUrl() => launchUrl('https://rive.nolt.io/');
+void launchSupportUrl() => launchUrl('https://feedback.rive.app/');
 void launchHelpUrl() => launchUrl('https://help.rive.app/');
 
 Future<void> launchUrl(final String url) async {

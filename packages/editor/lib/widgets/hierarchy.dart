@@ -107,19 +107,19 @@ class HierarchyTreeView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: const Alignment(-1, 0),
-                    child: Text(
-                      "lock",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: state == SelectionState.selected
-                            ? Colors.white
-                            : Colors.grey.shade500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 5)
+                  // Align(
+                  //   alignment: const Alignment(-1, 0),
+                  //   child: Text(
+                  //     "lock",
+                  //     style: TextStyle(
+                  //       fontSize: 13,
+                  //       color: state == SelectionState.selected
+                  //           ? Colors.white
+                  //           : Colors.grey.shade500,
+                  //     ),
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 5)
                 ],
               ),
             ),

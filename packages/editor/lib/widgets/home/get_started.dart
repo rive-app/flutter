@@ -102,7 +102,7 @@ class RightPanel extends StatelessWidget {
           UrlCard(
             icon: PackedIcon.settings,
             blurb: 'Send feedback',
-            url: 'https://rive.nolt.io',
+            url: 'https://feedback.rive.app',
           ),
         ],
       ),
