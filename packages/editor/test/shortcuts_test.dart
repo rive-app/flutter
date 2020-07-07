@@ -11,39 +11,39 @@ void main() {
       [
         Shortcut(
           ShortcutAction.copy,
-          [
+          {
             ShortcutKey.systemCmd,
             ShortcutKey.c,
-          ],
+          },
         ),
         Shortcut(
           ShortcutAction.paste,
-          [
+          {
             ShortcutKey.systemCmd,
             ShortcutKey.v,
-          ],
+          },
         ),
         Shortcut(
           ShortcutAction.cut,
-          [
+          {
             ShortcutKey.systemCmd,
             ShortcutKey.x,
-          ],
+          },
         ),
         Shortcut(
           ShortcutAction.undo,
-          [
+          {
             ShortcutKey.systemCmd,
             ShortcutKey.z,
-          ],
+          },
         ),
         Shortcut(
           ShortcutAction.redo,
-          [
+          {
             ShortcutKey.shift,
             ShortcutKey.systemCmd,
             ShortcutKey.z,
-          ],
+          },
         ),
       ],
     );

@@ -162,6 +162,68 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
+  static String objectName(int typeKey) {
+    switch (typeKey) {
+      case KeyedObjectBase.typeKey:
+        return 'KeyedObject';
+      case KeyedPropertyBase.typeKey:
+        return 'KeyedProperty';
+      case AnimationBase.typeKey:
+        return 'Animation';
+      case CubicInterpolatorBase.typeKey:
+        return 'CubicInterpolator';
+      case KeyFrameDoubleBase.typeKey:
+        return 'KeyFrameDouble';
+      case KeyFrameColorBase.typeKey:
+        return 'KeyFrameColor';
+      case LinearAnimationBase.typeKey:
+        return 'LinearAnimation';
+      case KeyFrameDrawOrderBase.typeKey:
+        return 'KeyFrameDrawOrder';
+      case KeyFrameDrawOrderValueBase.typeKey:
+        return 'KeyFrameDrawOrderValue';
+      case LinearGradientBase.typeKey:
+        return 'LinearGradient';
+      case RadialGradientBase.typeKey:
+        return 'RadialGradient';
+      case StrokeBase.typeKey:
+        return 'Stroke';
+      case SolidColorBase.typeKey:
+        return 'SolidColor';
+      case GradientStopBase.typeKey:
+        return 'GradientStop';
+      case FillBase.typeKey:
+        return 'Fill';
+      case NodeBase.typeKey:
+        return 'Node';
+      case ShapeBase.typeKey:
+        return 'Shape';
+      case StraightVertexBase.typeKey:
+        return 'StraightVertex';
+      case CubicAsymmetricVertexBase.typeKey:
+        return 'CubicAsymmetricVertex';
+      case PointsPathBase.typeKey:
+        return 'PointsPath';
+      case RectangleBase.typeKey:
+        return 'Rectangle';
+      case CubicMirroredVertexBase.typeKey:
+        return 'CubicMirroredVertex';
+      case TriangleBase.typeKey:
+        return 'Triangle';
+      case EllipseBase.typeKey:
+        return 'Ellipse';
+      case PathComposerBase.typeKey:
+        return 'PathComposer';
+      case CubicDetachedVertexBase.typeKey:
+        return 'CubicDetachedVertex';
+      case ArtboardBase.typeKey:
+        return 'Artboard';
+      case BackboardBase.typeKey:
+        return 'Backboard';
+    }
+    return null;
+  }
+
   static String propertyKeyGroupName(int propertyKey) {
     switch (propertyKey) {
       case LinearGradientBase.startXPropertyKey:

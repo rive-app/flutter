@@ -566,6 +566,17 @@ class Definition {
       });
       ctxCode.writeln('default: return 0; }}');
 
+      ctxCode.writeln('''static String objectName(int typeKey) {
+      switch (typeKey) {''');
+      for (final definition in definitions.values) {
+        if (definition._isAbstract) {
+          continue;
+        }
+        ctxCode.writeln('case ${definition._name}Base.typeKey:');
+        ctxCode.writeln('return \'${definition._name}\';');
+      }
+      ctxCode.writeln('}return null;}');
+
       ctxCode.writeln('''static String propertyKeyGroupName(int propertyKey) {
       switch (propertyKey) {''');
       propertyGroupToKey.forEach((name, list) {

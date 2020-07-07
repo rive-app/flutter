@@ -64,6 +64,7 @@ class RiveColors {
   Color get panelBackgroundLightGrey => const Color(0xFFF1F1F1);
   Color get panelBackgroundDarkGrey => const Color(0xFF323232);
   Color get globalMessageBackground => const Color(0xFF111111);
+  Color get globalMessageBorder => const Color(0xFF3E3E3E);
   Color get stageBackground => const Color(0xFF1D1D1D);
   Color get popupBackground => const Color(0xFFF1F1F1);
 
@@ -532,7 +533,7 @@ class TreeStyles {
 
   TreeStyle get hierarchy => const TreeStyle(
         showFirstLine: true,
-        padding: EdgeInsets.only(left:10, right:10, top:5),
+        padding: EdgeInsets.only(left: 10, right: 10, top: 5),
         lineColor: _darkTreeLines,
       );
 }

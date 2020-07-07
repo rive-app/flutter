@@ -10,7 +10,6 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
-import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -259,25 +258,22 @@ class VertexEditor with RiveFileDelegate {
 
           // TODO: find out out what designers really want in regards to
           // activating edit mode.
-          Set<StageShape> shapes = {};
           Set<StagePath> paths = {};
 
           for (final item in file.selection.items) {
-            if (item is StageShape) {
-              shapes.add(item);
-            } else if (item is StagePath) {
+            if (item is StagePath) {
               paths.add(item);
             }
           }
 
-          if (shapes.isNotEmpty) {
-            _editPaths(shapes.first.component.paths);
-          } else if (paths.isNotEmpty) {
-            _editPaths([paths.first.component]);
+          if (paths.isNotEmpty) {
+            _editPaths(paths.map((stagePath) => stagePath.component).toList());
           }
         }
 
-        return true;
+        // swallow the event if we started editing paths (solo gets set to the
+        // paths).
+        return stage.soloItems != null;
     }
     return false;
   }

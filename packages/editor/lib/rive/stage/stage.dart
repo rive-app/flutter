@@ -26,6 +26,8 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/alerts/simple_alert.dart';
+import 'package:rive_editor/rive/editor_alert.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -714,10 +716,13 @@ class Stage extends Debouncer {
         // TODO: should we cancel drag operations?
         // For now cancel solo (if there was one).
         if (_soloNotifier.value != null) {
+          var items = _soloNotifier.value.toList(growable: false);
           solo(null);
+
+          file.selection.selectMultiple(items);
           return true;
         }
-        break;
+        return false;
 
       case ShortcutAction.cycleHover:
         _hoverOffsetIndex = max(1, _hoverOffsetIndex + 1);

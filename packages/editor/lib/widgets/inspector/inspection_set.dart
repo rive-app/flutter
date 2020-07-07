@@ -2,7 +2,6 @@ import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
-import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
@@ -26,15 +25,15 @@ class InspectionSet {
   );
 
   factory InspectionSet.fromSelection(
-      OpenFileContext fileContext, SelectionContext<SelectableItem> selection) {
+      OpenFileContext fileContext, Iterable<SelectableItem> selection) {
     // Get stageItems from selections.
     final stageItems = <StageItem>{};
-    for (final item in selection.items) {
+    for (final item in selection) {
       if (item is StageItem) {
         stageItems.add(item.inspectorItem);
       }
     }
-    selection.items.whereType<StageItem>().toList(growable: false);
+    selection.whereType<StageItem>().toList(growable: false);
 
     // Get all components from stageItems.
     var components = Set<Component>.from(stageItems

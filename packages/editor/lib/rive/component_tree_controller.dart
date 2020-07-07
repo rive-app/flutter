@@ -44,7 +44,7 @@ abstract class ComponentTreeController extends TreeController<Component> {
     return null;
   }
 
-   @override
+  @override
   List<FlatTreeItem<Component>> onDragStart(
       DragStartDetails details, FlatTreeItem<Component> item) {
     // All items in draw order have a stage item.
@@ -52,7 +52,7 @@ abstract class ComponentTreeController extends TreeController<Component> {
       file.select(item.data.stageItem);
     }
     // Get inspection set (selected components).
-    var inspectionSet = InspectionSet.fromSelection(file, file.selection);
+    var inspectionSet = InspectionSet.fromSelection(file, file.selection.items);
 
     // Find matching tree items (N.B. that means that if they're not expanded
     // they won't drag, probably ok for now).
@@ -66,7 +66,7 @@ abstract class ComponentTreeController extends TreeController<Component> {
     }
 
     dragItems.sort((a, b) => a.index.compareTo(b.index));
-    
+
     return dragItems;
   }
 }

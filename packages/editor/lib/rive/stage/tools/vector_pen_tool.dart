@@ -39,6 +39,18 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       shape = vertexEditor.editingPaths.first.shape;
     }
 
+    if (shape == null) {
+      // No shape, see if there's a single selection and whether it's a path.
+      // Use the shape if so. #893
+      var selection = stage.file.selection.items.length == 1
+          ? stage.file.selection.items.first
+          : null;
+      if (selection is StageItem && selection.component is Path) {
+        var path = selection.component as Path;
+        shape = path.shape;
+      }
+    }
+
     var path = PointsPath()..name = 'Path';
     if (shape == null) {
       shape = ShapeTool.makeShape(activeArtboard, path)..name = 'Shape';
