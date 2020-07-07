@@ -15,7 +15,7 @@ Completer testStream<T>(
 ]) {
   final completer = Completer<dynamic>();
   int checkNumber = 1;
-  stream.listen((streamData) {
+  var subscription = stream.listen((streamData) {
     expect(checks.isEmpty, false,
         reason: 'More unexpected data coming in for $T');
     var check = checks.removeAt(0);
@@ -30,6 +30,19 @@ Completer testStream<T>(
     }
     checkNumber += 1;
   });
+
+  Future.delayed(const Duration(milliseconds: 500), () {
+    // Here you can write your code
+
+    subscription.cancel();
+    expect(checks.isEmpty, true,
+        reason: 'Did not complete all checks, missing completion for $checks');
+    completer.complete();
+    if (callback != null) {
+      callback();
+    }
+  });
+
   return completer;
 }
 

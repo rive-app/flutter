@@ -58,7 +58,8 @@ class WebsocketCommsManager with Subscriptions {
     } else if (action is model.FolderNotification) {
       // reload if we're currently here
       var currentDirectory = Plumber().peek<CurrentDirectory>();
-      if (currentDirectory.owner.ownerId == action.folderOwnerId &&
+      if (currentDirectory != null &&
+          currentDirectory.owner.ownerId == action.folderOwnerId &&
           currentDirectory.folderId == action.folderId) {
         Plumber().message(currentDirectory);
       }
