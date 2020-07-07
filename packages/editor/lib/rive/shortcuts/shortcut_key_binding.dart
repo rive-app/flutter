@@ -8,7 +8,8 @@ import 'shortcut_keys.dart';
 /// A shortcut comprised of a set of keys that map to an action.
 class Shortcut {
   final ShortcutAction action;
-  final List<ShortcutKey> keys;
+  final Set<ShortcutKey> keys;
+  bool strictMatch = false;
 
   Shortcut(this.action, this.keys);
 }
@@ -23,10 +24,36 @@ class ShortcutKeyBinding {
   /// Instance a key binding with a specific set of shortcuts that map
   ShortcutKeyBinding(List<Shortcut> shortcuts) {
     for (final shortcut in shortcuts) {
+      (_keysLookup[shortcut.action] ??= []).addAll(shortcut.keys);
+
       var physicalKeys = keyToPhysical[shortcut.keys.last];
       for (final key in physicalKeys) {
         var list = _finalKeyToShortcuts[key] ??= [];
         list.add(shortcut);
+      }
+
+      // See if the binding needs to be strict, meaning that all keys must be
+      // pressed. This is necessary as in the web the metakey hides when other
+      // keys are released. This causes Flutter to assume those keys are still
+      // pressed and send them again.
+
+      // First check only if this binding includes the meta key. Similarly check
+      // only other bindings that have meta.
+
+      if (shortcut.keys.length > 1 &&
+          shortcut.keys.contains(ShortcutKey.systemCmd)) {
+        for (final otherShortcut in shortcuts) {
+          if (otherShortcut == shortcut) {
+            continue;
+          }
+
+          if (otherShortcut.keys.length > shortcut.keys.length &&
+              otherShortcut.keys.intersection(shortcut.keys).length ==
+                  shortcut.keys.length) {
+            shortcut.strictMatch = true;
+            break;
+          }
+        }
       }
     }
   }
@@ -51,7 +78,8 @@ class ShortcutKeyBinding {
     if (shortcuts != null) {
       outerLoop:
       for (final shortcut in shortcuts) {
-        if (shortcut.keys.length != pressedKeySet.length) {
+        if (shortcut.strictMatch &&
+            shortcut.keys.length != pressedKeySet.length) {
           continue;
         }
         for (final key in shortcut.keys) {
