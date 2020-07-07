@@ -710,23 +710,6 @@ class Stage extends Debouncer {
             (item.soloParent != null && solo.contains(item.soloParent)));
   }
 
-  LabeledAlert _labeledAlert;
-  void _alertDismissed(EditorAlert alert) {
-    alert.dismissed.removeListener(_alertDismissed);
-    if (alert == _labeledAlert) {
-      _labeledAlert = null;
-    }
-  }
-
-  void _showSelectionAlert(String label) {
-    if (_labeledAlert == null) {
-      file.addAlert(_labeledAlert = LabeledAlert(label, autoDismiss: true));
-      _labeledAlert.dismissed.addListener(_alertDismissed);
-    } else {
-      _labeledAlert.label = label;
-    }
-  }
-
   bool _handleAction(ShortcutAction action) {
     switch (action) {
       case ShortcutAction.cancel:
@@ -976,7 +959,6 @@ class Stage extends Debouncer {
   }
 
   void dispose() {
-    _labeledAlert?.dismissed?.removeListener(_alertDismissed);
     var tool = _toolNotifier.value;
     _toolNotifier.value = null;
     tool?.deactivate();

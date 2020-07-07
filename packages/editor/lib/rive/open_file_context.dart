@@ -292,6 +292,7 @@ class OpenFileContext with RiveFileDelegate {
   }
 
   void dispose() {
+    _labeledAlert?.dismissed?.removeListener(_alertDismissed);
     _disposeManagers();
     core?.disconnect();
     _stage.value?.dispose();
@@ -751,6 +752,9 @@ class OpenFileContext with RiveFileDelegate {
     _editingAnimationManager.value?.dispose();
     _keyFrameManager.value?.dispose();
 
+
+
+
     _editingAnimationManager.value =
         animation == null ? null : EditingAnimationManager(animation, this);
     _keyFrameManager.value =
@@ -782,7 +786,8 @@ class OpenFileContext with RiveFileDelegate {
       for (final child in highest.children) {
         if (child.stageItem != null && child.stageItem.stage != null) {
           selection.select(child.stageItem);
-          _showSelectionAlert('Selected ${child.name}.');
+          _showSelectionAlert('Selected ${child.name} '
+              '(${RiveCoreContext.objectName(child.coreType)})');
           break;
         }
       }
@@ -814,20 +819,27 @@ class OpenFileContext with RiveFileDelegate {
     }
     if (highest != null) {
       selection.select(highest.stageItem);
-      _showSelectionAlert('Selected ${highest.name}.');
+      _showSelectionAlert('Selected ${highest.name} '
+          '(${RiveCoreContext.objectName(highest.coreType)})');
       return true;
     } else if (selection.isNotEmpty) {
-      _showSelectionAlert('Selection cleared.');
+      _showSelectionAlert('Selection cleared');
       selection.clear();
       return true;
     }
     return false;
   }
 
+  void _labelAlertDismissed(EditorAlert alert) {
+    alert.dismissed.removeListener(_labelAlertDismissed);
+    if (alert == _labeledAlert) {
+      _labeledAlert = null;
+    }
+  }
   void _showSelectionAlert(String label) {
     if (_labeledAlert == null) {
       addAlert(_labeledAlert = LabeledAlert(label, autoDismiss: true));
-      _labeledAlert.dismissed.addListener(_alertDismissed);
+      _labeledAlert.dismissed.addListener(_labelAlertDismissed);
     } else {
       _labeledAlert.label = label;
     }
