@@ -29,11 +29,10 @@ class RiveWebSocketChannel extends WebSocketChannel {
 Map<String, String> createCookieHeader(String token) =>
     {'Cookie': 'spectre=$token'};
 
-enum ConnectionState { disconnected, connecting, connected }
+enum ConnectionState { disconnected, connected }
 
 abstract class ReconnectingWebsocketClient {
-  final String url;
-  final int pingInterval = 120;
+  final Duration pingInterval;
   WebSocketChannel _channel;
 
   ConnectionState get connectionState => _connectionState;
@@ -52,7 +51,11 @@ abstract class ReconnectingWebsocketClient {
 
   bool _allowReconnect = true;
 
-  ReconnectingWebsocketClient(this.url);
+  bool get isReconnecting => _reconnectTimer?.isActive ?? false;
+  bool get isPinging => _pingTimer?.isActive ?? false;
+
+  ReconnectingWebsocketClient(
+      {this.pingInterval = const Duration(seconds: 120)});
 
   void _ping() {
     if (!isConnected) {
@@ -60,7 +63,7 @@ abstract class ReconnectingWebsocketClient {
     }
     write(pingMessage());
     _pingTimer?.cancel();
-    _pingTimer = Timer(Duration(seconds: pingInterval), _ping);
+    _pingTimer = Timer(pingInterval, _ping);
   }
 
   void _reconnect() {
@@ -112,35 +115,45 @@ abstract class ReconnectingWebsocketClient {
 
   Future<void> onConnect();
   Future<void> handleData(dynamic data);
+  Future<String> getUrl();
+
   void onStateChange(ConnectionState state);
   String pingMessage();
 
   Future<void> connect() async {
-    _reconnectTimer?.cancel();
-    _reconnectTimer = null;
-    _channel = RiveWebSocketChannel.connect(Uri.parse(url));
-    _changeState(ConnectionState.connected);
-    await onConnect();
-    _ping();
-
-    runZoned(() {
-      _subscription =
-          _channel.stream.listen(_onStreamData, onError: (dynamic error) {
-        _disconnected();
-      }, onDone: () async {
-        await _disconnected();
-        if (_allowReconnect) {
-          _reconnect();
+    try {
+      String url = await getUrl();
+      _reconnectTimer?.cancel();
+      _reconnectTimer = null;
+      _channel = RiveWebSocketChannel.connect(Uri.parse(url));
+      _changeState(ConnectionState.connected);
+      await onConnect();
+      _ping();
+      runZoned(() {
+        _subscription =
+            _channel.stream.listen(_onStreamData, onError: (dynamic error) {
+          _disconnected();
+        }, onDone: () async {
+          await _disconnected();
+          if (_allowReconnect) {
+            _reconnect();
+          }
+        });
+      }, onError: (Object error, StackTrace stackTrace) {
+        try {
+          ErrorLogger.instance.reportException(error, stackTrace);
+        } on Exception catch (e) {
+          print('Failed to report: $e');
+          print('Error was: $error, $stackTrace');
         }
       });
-    }, onError: (Object error, StackTrace stackTrace) {
-      try {
-        ErrorLogger.instance.reportException(error, stackTrace);
-      } on Exception catch (e) {
-        print('Failed to report: $e');
-        print('Error was: $error, $stackTrace');
+    } on Exception catch (e) {
+      print('Failed to establish a websocket connection: $e');
+      await _disconnected();
+      if (_allowReconnect) {
+        _reconnect();
       }
-    });
+    }
   }
 
   Future<void> _disconnected() async {

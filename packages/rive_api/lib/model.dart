@@ -1,4 +1,5 @@
 export 'src/model/billing_details.dart';
+export 'src/model/config.dart';
 export 'src/model/current_directory.dart';
 export 'src/model/file.dart';
 export 'src/model/folder.dart';
@@ -15,4 +16,5 @@ export 'src/model/push_action.dart';
 export 'src/model/revision.dart';
 export 'src/model/selection.dart';
 export 'src/model/team.dart';
+export 'src/model/token.dart';
 export 'src/model/user.dart';
