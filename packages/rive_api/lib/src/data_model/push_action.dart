@@ -29,9 +29,10 @@ class FolderNotificationDM extends PushActionDM {
   FolderNotificationDM({this.folderOwnerId, this.folderId});
 
   factory FolderNotificationDM.fromData(Map<String, dynamic> data) {
+    var params = data.getMap<String, Object>('params');
     return FolderNotificationDM(
-      folderOwnerId: data.getInt('folderOwnerId'),
-      folderId: data.getInt('folderId'),
+      folderOwnerId: params.getInt('folderOwnerId'),
+      folderId: params.getInt('folderId'),
     );
   }
 }

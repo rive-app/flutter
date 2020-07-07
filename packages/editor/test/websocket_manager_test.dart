@@ -97,7 +97,7 @@ void main() {
         <Function(CurrentDirectory)>[],
       );
       await client.handleData(
-          '{"action": "FolderChange", "folderOwnerId": 1, "folderId": 1}');
+          '{"action": "FolderChange", "params": {"folderOwnerId": 1, "folderId": 1}}');
       await testComplete.future;
     });
 
@@ -110,9 +110,9 @@ void main() {
         [(CurrentDirectory d) => d.folderId == 2],
       );
       await client.handleData(
-          '{"action": "FolderChange", "folderOwnerId": 1, "folderId": 1}');
+          '{"action": "FolderChange", "params":{"folderOwnerId": 1, "folderId": 1}}');
       await client.handleData(
-          '{"action": "FolderChange", "folderOwnerId": 2, "folderId": 2}');
+          '{"action": "FolderChange", "params":{"folderOwnerId": 2, "folderId": 2}}');
       await testComplete.future;
     });
 
@@ -129,7 +129,7 @@ void main() {
         ],
       );
       await client.handleData(
-          '{"action": "FolderChange", "folderOwnerId": 1, "folderId": 1}');
+          '{"action": "FolderChange", "params":{"folderOwnerId": 1, "folderId": 1}}');
       await testComplete.future;
     });
   });
