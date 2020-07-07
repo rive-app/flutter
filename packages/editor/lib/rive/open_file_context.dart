@@ -42,6 +42,7 @@ import 'package:local_data/local_data.dart';
 import 'package:rive_editor/rive/stage/tools/vector_pen_tool.dart';
 import 'package:rive_editor/rive/vertex_editor.dart';
 import 'package:rive_editor/selectable_item.dart';
+import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/popup/base_popup.dart';
 
@@ -104,10 +105,13 @@ class OpenFileContext with RiveFileDelegate {
   /// Remove an alert from the alerts list.
   bool removeAlert(EditorAlert alert) {
     alert.dismissed.removeListener(_alertDismissed);
-    var alerts = Set.of(_alerts.value);
+    final alerts = Set.of(_alerts.value);
     if (alerts.remove(alert)) {
       _alerts.value = alerts;
       return true;
+    }
+    if (alert == _labeledAlert) {
+      _labeledAlert = null;
     }
     return false;
   }
@@ -610,9 +614,14 @@ class OpenFileContext with RiveFileDelegate {
 
       case ShortcutAction.cancel:
         // Default back to the select tool
-        stage?.tool = AutoTool.instance;
-        Popup.closeAll();
+        if (_upTheRabbitHole()) {
+          stage?.tool = AutoTool.instance;
+          Popup.closeAll();
+        }
         return true;
+
+      case ShortcutAction.toggleEditMode:
+        return _downTheRabbitHole();
 
       default:
         return false;
@@ -691,8 +700,10 @@ class OpenFileContext with RiveFileDelegate {
     completeInitialConnection(OpenFileState.open);
   }
 
-  // TODO: remove this and do new darkening logic...
+  // TODO: remove these and do new darkening logic...
   SimpleAlert _restoringAlert;
+  LabeledAlert _labeledAlert;
+
   void restoreRevision(RevisionDM revision) {
     assert(_activeRevision != null, 'not previewing a revision');
     _activeRevision.restoreRevision(revision.id);
@@ -744,5 +755,81 @@ class OpenFileContext with RiveFileDelegate {
         animation == null ? null : EditingAnimationManager(animation, this);
     _keyFrameManager.value =
         animation == null ? null : KeyFrameManager(animation, this);
+  }
+
+  bool _downTheRabbitHole() {
+    var inspectionSet = InspectionSet.fromSelection(this, selection.items);
+    int depth = double.maxFinite.toInt();
+    ContainerComponent highest;
+    for (final component in inspectionSet.components) {
+      if (component is! ContainerComponent) {
+        continue;
+      }
+      var currentDepth = component.computeDepth();
+      if (
+          // Component is highest we've found so far
+          currentDepth < depth ||
+              // or it's at the same level but its child order is lower
+              currentDepth == depth &&
+                  highest.childOrder.compareTo(component.childOrder) > 0) {
+        depth = currentDepth;
+        highest = component as ContainerComponent;
+      }
+    }
+
+    // Find first child with valid stage item and select it.
+    if (highest != null) {
+      for (final child in highest.children) {
+        if (child.stageItem != null && child.stageItem.stage != null) {
+          selection.select(child.stageItem);
+          _showSelectionAlert('Selected ${child.name}.');
+          break;
+        }
+      }
+    }
+    return true;
+  }
+
+  bool _upTheRabbitHole() {
+    var inspectionSet = InspectionSet.fromSelection(this, selection.items);
+    int depth = double.maxFinite.toInt();
+    ContainerComponent highest;
+    for (final component in inspectionSet.components) {
+      var possibleSelection = component.parent;
+      if (possibleSelection == null ||
+          possibleSelection.stageItem == null ||
+          possibleSelection.stageItem.stage == null) {
+        // parent is either null, has no stage item, or isn't on the stage
+        continue;
+      }
+
+      var currentDepth = possibleSelection.computeDepth();
+      if (currentDepth < depth ||
+          // or it's at the same level but its child order is lower
+          currentDepth == depth &&
+              highest.childOrder.compareTo(possibleSelection.childOrder) > 0) {
+        depth = currentDepth;
+        highest = possibleSelection;
+      }
+    }
+    if (highest != null) {
+      selection.select(highest.stageItem);
+      _showSelectionAlert('Selected ${highest.name}.');
+      return true;
+    } else if (selection.isNotEmpty) {
+      _showSelectionAlert('Selection cleared.');
+      selection.clear();
+      return true;
+    }
+    return false;
+  }
+
+  void _showSelectionAlert(String label) {
+    if (_labeledAlert == null) {
+      addAlert(_labeledAlert = LabeledAlert(label, autoDismiss: true));
+      _labeledAlert.dismissed.addListener(_alertDismissed);
+    } else {
+      _labeledAlert.label = label;
+    }
   }
 }

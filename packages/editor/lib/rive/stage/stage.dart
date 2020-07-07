@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -54,7 +53,6 @@ import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
-import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:utilities/restorer.dart';
 
 typedef CustomSelectionHandler = bool Function(StageItem);
@@ -731,38 +729,6 @@ class Stage extends Debouncer {
 
   bool _handleAction(ShortcutAction action) {
     switch (action) {
-      case ShortcutAction.toggleEditMode:
-        var inspectionSet =
-            InspectionSet.fromSelection(file, file.selection.items);
-        int depth = double.maxFinite.toInt();
-        ContainerComponent highest;
-        for (final component in inspectionSet.components) {
-          if (component is! ContainerComponent) {
-            continue;
-          }
-          var currentDepth = component.computeDepth();
-          if (
-              // Component is highest we've found so far
-              currentDepth < depth ||
-                  // or it's at the same level but its child order is lower
-                  currentDepth == depth &&
-                      highest.childOrder.compareTo(component.childOrder) > 0) {
-            depth = currentDepth;
-            highest = component as ContainerComponent;
-          }
-        }
-
-        // Find first child with valid stage item and select it.
-        if (highest != null) {
-          for (final child in highest.children) {
-            if (child.stageItem != null && child.stageItem.stage != null) {
-              file.selection.select(child.stageItem);
-              _showSelectionAlert('Selected ${child.name}.');
-              break;
-            }
-          }
-        }
-        return true;
       case ShortcutAction.cancel:
         // TODO: should we cancel drag operations?
         // For now cancel solo (if there was one).
@@ -773,39 +739,6 @@ class Stage extends Debouncer {
           file.selection.selectMultiple(items);
           return true;
         }
-        var inspectionSet =
-            InspectionSet.fromSelection(file, file.selection.items);
-        int depth = double.maxFinite.toInt();
-        ContainerComponent highest;
-        for (final component in inspectionSet.components) {
-          var possibleSelection = component.parent;
-          if (possibleSelection == null ||
-              possibleSelection.stageItem == null ||
-              possibleSelection.stageItem.stage == null) {
-            // parent is either null, has no stage item, or isn't on the stage
-            continue;
-          }
-
-          var currentDepth = possibleSelection.computeDepth();
-          if (currentDepth < depth ||
-              // or it's at the same level but its child order is lower
-              currentDepth == depth &&
-                  highest.childOrder.compareTo(possibleSelection.childOrder) >
-                      0) {
-            depth = currentDepth;
-            highest = possibleSelection;
-          }
-        }
-        if (highest != null) {
-          file.selection.select(highest.stageItem);
-          _showSelectionAlert('Selected ${highest.name}.');
-          return true;
-        } else if (file.selection.isNotEmpty) {
-          _showSelectionAlert('Selection cleared.');
-          file.selection.clear();
-          return true;
-        }
-
         return false;
 
       case ShortcutAction.cycleHover:
