@@ -13,12 +13,30 @@ class WebsocketCommsManager with Subscriptions {
   static final WebsocketCommsManager _instance = WebsocketCommsManager._();
   factory WebsocketCommsManager() => _instance;
 
+  // would be nice to turn the comswebsocket
+  CommsWebsocketClient _client;
+  NotificationManager _notificationManager;
+
   WebsocketCommsManager._() {
+    _notificationManager = NotificationManager();
+    _client = CommsWebsocketClient();
+    _attach();
+  }
+
+  WebsocketCommsManager.tester(
+    NotificationManager notificationsManager,
+    CommsWebsocketClient client,
+  ) {
+    _notificationManager = notificationsManager;
+    _client = client;
     _attach();
   }
 
   /// Initiatize the state
   void _attach() {
+    // make sure our coms client is handling the right action (here to make testing easier)
+    _client.callback = handleAction;
+
     /// When the logged in user is changed, fetch notifications for the new user
     subscribe<model.Me>((_) => _connect());
   }
@@ -29,15 +47,21 @@ class WebsocketCommsManager with Subscriptions {
     if (me == null || me.isEmpty) {
       return;
     }
-    _client = CommsWebsocketClient(handleAction);
     await _client.connect();
   }
 
   void handleAction(PushAction action) {
     if (action is model.NewNotification) {
-      NotificationManager().update();
+      _notificationManager.update();
     } else if (action is model.PingNotification) {
       print('We were pinged');
+    } else if (action is model.FolderNotification) {
+      // reload if we're currently here
+      var currentDirectory = Plumber().peek<CurrentDirectory>();
+      if (currentDirectory.owner.ownerId == action.folderOwnerId &&
+          currentDirectory.folderId == action.folderId) {
+        Plumber().message(currentDirectory);
+      }
     }
   }
 
@@ -46,18 +70,18 @@ class WebsocketCommsManager with Subscriptions {
     super.dispose();
     _client?.dispose();
   }
-
-  ReconnectingWebsocketClient _client;
 }
 
 class CommsWebsocketClient extends ReconnectingWebsocketClient {
   MeApi _meAPI;
   ConfigApi _configAPI;
   Function(PushAction) callback;
-  CommsWebsocketClient(this.callback) : super() {
+  CommsWebsocketClient() : super() {
     _meAPI = MeApi();
     _configAPI = ConfigApi();
   }
+  final _raiseErrors = false;
+  bool get raiseErrors => _raiseErrors;
 
   @override
   Future<void> onConnect() async {
@@ -76,6 +100,9 @@ class CommsWebsocketClient extends ReconnectingWebsocketClient {
     } on Exception catch (e) {
       print('Failed parse message from upstream, error $e');
       print(data);
+      if (raiseErrors) {
+        rethrow;
+      }
     }
   }
 

@@ -1,3 +1,5 @@
+import 'package:utilities/deserialize.dart';
+
 abstract class PushActionDM {
   static PushActionDM fromData(Map<String, dynamic> data) {
     if (!data.containsKey("action")) {
@@ -8,6 +10,8 @@ abstract class PushActionDM {
         return NewNotificationDM();
       case 'Ping':
         return PingNotificationDM();
+      case 'FolderChange':
+        return FolderNotificationDM.fromData(data);
       default:
         throw Exception('Unknown action $data');
     }
@@ -17,3 +21,17 @@ abstract class PushActionDM {
 class NewNotificationDM extends PushActionDM {}
 
 class PingNotificationDM extends PushActionDM {}
+
+class FolderNotificationDM extends PushActionDM {
+  final int folderOwnerId;
+  final int folderId;
+
+  FolderNotificationDM({this.folderOwnerId, this.folderId});
+
+  factory FolderNotificationDM.fromData(Map<String, dynamic> data) {
+    return FolderNotificationDM(
+      folderOwnerId: data.getInt('folderOwnerId'),
+      folderId: data.getInt('folderId'),
+    );
+  }
+}

@@ -22,14 +22,12 @@ void main() {
   group('Notification Manager ', () {
     TeamApi mockedTeamApi;
     NotificationsApi mockedNotificationsApi;
-    NotificationManager notificationManager;
     setUp(() {
       mockedTeamApi = MockTeamApi();
       mockedNotificationsApi = MockNotificationsApi();
       when(mockedNotificationsApi.notifications)
           .thenAnswer((_) async => getTestNotifications());
-      notificationManager =
-          NotificationManager.tester(mockedNotificationsApi, mockedTeamApi);
+      NotificationManager.tester(mockedNotificationsApi, mockedTeamApi);
     });
     tearDown(() {
       Plumber().reset();
