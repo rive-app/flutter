@@ -31,6 +31,14 @@ class _TipRegionState extends State<TipRegion> {
   }
 
   @override
+  void didUpdateWidget(TipRegion oldWidget) {
+    if (oldWidget.tip != widget.tip) {
+      _tipContext?.hide(oldWidget.tip);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onHover: (_) {
@@ -121,8 +129,8 @@ class TipContext {
   /// is already up in which case it'll replace the existing tooltip with the
   /// new one.
   void show(BuildContext context, Tip data) {
-    if (_nextContext == context && _nextTip == data) {
-      // already scheduled
+    if (_currentTip == data || (_nextContext == context && _nextTip == data)) {
+      // already showing or scheduled
       return;
     }
     _nextContext = context;
@@ -136,7 +144,6 @@ class TipContext {
       _timer?.cancel();
       _timer = Timer(delay, _showNext);
     }
-    // _nextTipRect = renderBox.localToGlobal(Offset.zero) & renderBox.size;
   }
 
   void hide(Tip data) {
@@ -147,7 +154,7 @@ class TipContext {
       _nextContext = null;
     }
     if (_currentTip == data) {
-      // Only set the hide timer if we're not already schedule to show another
+      // Only set the hide timer if we're not already scheduled to show another
       // tooltip.
       _timer ??= Timer(delay, _hideCurrent);
     }
@@ -197,6 +204,9 @@ class TipContext {
         // need to just make everything that wants to have a width specify
         // it...leaving it unaddressed for now.
         width: null,
+
+        // Don't allow clicking on the tip.
+        ignorePointer: true,
 
         direction: _currentTip.direction,
         fallbackDirections: _currentTip.fallbackDirections,
