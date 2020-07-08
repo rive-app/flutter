@@ -366,7 +366,7 @@ class RiveFile extends RiveCoreContext {
 
   @override
   void onPlayersChanged() {
-    allPlayers.value = players.cast<ClientSidePlayer>();
+    allPlayers.value = players.cast<ClientSidePlayer>().toList(growable:false);
 
     // Loading the active player list is low priority compared to other stuff
     // happening (like loading assets or content for the file) so we debounce it
