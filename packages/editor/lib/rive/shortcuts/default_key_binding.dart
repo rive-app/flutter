@@ -214,7 +214,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(
       ShortcutAction.artboardTool,
       {
-        ShortcutKey.f,
+        ShortcutKey.m,
       },
     ),
     Shortcut(
