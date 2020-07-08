@@ -19,8 +19,8 @@ class BillingDetails {
   factory BillingDetails.fromDM(BillingDetailsDM billingDetails) =>
       BillingDetails(
         receipts: HistoryCharge.fromDMList(billingDetails.receipts),
-        businessName: billingDetails.businessName,
-        taxId: billingDetails.taxId,
-        businessAddress: billingDetails.businessAddress,
+        businessName: billingDetails.businessName ?? '',
+        taxId: billingDetails.taxId ?? '',
+        businessAddress: billingDetails.businessAddress ?? '',
       );
 }
