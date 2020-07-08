@@ -2,14 +2,23 @@ import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path.dart' as core;
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 abstract class StagePath<T extends core.Path> extends StageItem<T>
     with BoundsDelegate {
+  @override
+  void addedToStage(Stage stage) {
+    super.addedToStage(stage);
+    boundsChanged();
+  }
+
   @override
   void boundsChanged() {
     var artboard = component.artboard;
@@ -31,11 +40,23 @@ abstract class StagePath<T extends core.Path> extends StageItem<T>
     );
   }
 
+  /// Do a high fidelity hover hit check against the actual path geometry.
+  @override
+  bool hitHiFi(Vec2D worldMouse) {
+    final origin = component.artboard.originWorld;
+    Vec2D localMouse = Vec2D.transformMat2D(
+        Vec2D(),
+        Vec2D.fromValues(worldMouse[0] - origin[0], worldMouse[1] - origin[1]),
+        component.inversePathTransform);
+
+    return component.uiPath.contains(Offset(localMouse[0], localMouse[1]));
+  }
+
   /// A StagePath cannot be directly clicked on in the stage. It can be selected
   /// via the hierarchy. This is because clicking over a path effectively
   /// selects the shape (in the stage).
   @override
-  bool get isSelectable => false;
+  bool get isSelectable => ShortcutAction.deepClick.value;
 
   @override
   void draw(Canvas canvas, StageDrawPass drawPass) {

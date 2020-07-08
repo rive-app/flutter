@@ -145,9 +145,18 @@ class ShortcutAction {
 
   static HoldShortcutAction mouseWheelZoom =
       HoldShortcutAction('mouse-wheel-zoom');
+  static HoldShortcutAction deepClick = HoldShortcutAction('deep-click');
   static HoldShortcutAction symmetricDraw =
       HoldShortcutAction('symmetric-draw');
   static const ShortcutAction confirm = ShortcutAction('action');
+
+  static const ShortcutAction navigateTreeUp = ShortcutAction('nav-tree-up');
+  static const ShortcutAction navigateTreeDown =
+      ShortcutAction('nav-tree-down');
+  static const ShortcutAction navigateTreeLeft =
+      ShortcutAction('nav-tree-left');
+  static const ShortcutAction navigateTreeRight =
+      ShortcutAction('nav-tree-right');
 
   // UI related
   static const ShortcutAction left =

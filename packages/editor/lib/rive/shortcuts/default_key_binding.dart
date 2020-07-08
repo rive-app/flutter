@@ -19,6 +19,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(ShortcutAction.multiSelect, {ShortcutKey.shift}),
     Shortcut(ShortcutAction.togglePlay, {ShortcutKey.space}),
     Shortcut(ShortcutAction.mouseWheelZoom, {ShortcutKey.systemCmd}),
+    Shortcut(ShortcutAction.deepClick, {ShortcutKey.systemCmd}),
     Shortcut(ShortcutAction.symmetricDraw, {ShortcutKey.shift}),
     Shortcut(ShortcutAction.pan, {ShortcutKey.space}),
     Shortcut(ShortcutAction.toggleEditMode, {ShortcutKey.enter}),
@@ -149,12 +150,12 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.r,
       },
     ),
-    Shortcut(
-      ShortcutAction.scaleTool,
-      {
-        ShortcutKey.s,
-      },
-    ),
+    // Shortcut(
+    //   ShortcutAction.scaleTool,
+    //   {
+    //     ShortcutKey.s,
+    //   },
+    // ),
     Shortcut(
       ShortcutAction.poseTool,
       {
@@ -186,12 +187,12 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.c,
       },
     ),
-    Shortcut(
-      ShortcutAction.paintWeightTool,
-      {
-        ShortcutKey.w,
-      },
-    ),
+    // Shortcut(
+    //   ShortcutAction.paintWeightTool,
+    //   {
+    //     ShortcutKey.w,
+    //   },
+    // ),
     Shortcut(
       ShortcutAction.ellipseTool,
       {
@@ -213,7 +214,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(
       ShortcutAction.artboardTool,
       {
-        ShortcutKey.a,
+        ShortcutKey.m,
       },
     ),
     Shortcut(
@@ -266,5 +267,9 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.w,
       },
     ),
+    Shortcut(ShortcutAction.navigateTreeUp, {ShortcutKey.w}),
+    Shortcut(ShortcutAction.navigateTreeLeft, {ShortcutKey.a}),
+    Shortcut(ShortcutAction.navigateTreeDown, {ShortcutKey.s}),
+    Shortcut(ShortcutAction.navigateTreeRight, {ShortcutKey.d}),
   ],
 );

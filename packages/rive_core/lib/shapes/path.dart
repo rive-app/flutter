@@ -36,6 +36,7 @@ abstract class Path extends PathBase {
   Shape get shape => _shape;
 
   Mat2D get pathTransform;
+  Mat2D get inversePathTransform;
   Mat2D get inverseWorldTransform => _inverseWorldTransform;
 
   @override

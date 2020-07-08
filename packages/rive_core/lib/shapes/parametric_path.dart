@@ -8,6 +8,9 @@ abstract class ParametricPath extends ParametricPathBase {
 
   @override
   Mat2D get pathTransform => worldTransform;
+  
+  @override
+  Mat2D get inversePathTransform => inverseWorldTransform;
 
   @override
   void widthChanged(double from, double to) => markPathDirty();
