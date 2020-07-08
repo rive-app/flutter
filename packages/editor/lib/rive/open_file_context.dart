@@ -628,9 +628,9 @@ class OpenFileContext with RiveFileDelegate {
         return _downTheRabbitHole();
 
       case ShortcutAction.navigateTreeDown:
-        return _strafeRabitts(1);
+        return _strafeRabbits(1);
       case ShortcutAction.navigateTreeUp:
-        return _strafeRabitts(-1);
+        return _strafeRabbits(-1);
 
       default:
         return false;
@@ -788,7 +788,7 @@ class OpenFileContext with RiveFileDelegate {
     return highest;
   }
 
-  bool _strafeRabitts(int direction) {
+  bool _strafeRabbits(int direction) {
     var highest = _highestSelection();
     if (highest != null) {
       // Pick valid siblings (that are on the stage and hence selectable).
