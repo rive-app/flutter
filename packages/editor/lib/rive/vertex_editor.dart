@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rive/rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path.dart' as core;
@@ -269,8 +270,10 @@ class VertexEditor with RiveFileDelegate {
             _editPaths(paths.map((stagePath) => stagePath.component).toList());
 
             if (paths.length == 1) {
+              final type =
+                  RiveCoreContext.objectName(paths.first.component.coreType);
               file.showSelectionAlert('Editing ${paths.first.component.name} '
-                  '(${RiveCoreContext.objectName(paths.first.component.coreType)})');
+                  '($type)');
             } else {
               file.showSelectionAlert('Editing multiple paths.');
             }
@@ -285,15 +288,19 @@ class VertexEditor with RiveFileDelegate {
         // paths.
         var editingPaths = _editingPaths.value;
         if (editingPaths != null && editingPaths.isNotEmpty) {
-          var toSelect = editingPaths.map((path) => path.stageItem).toList();
+          var toSelect = editingPaths
+              .map<StageItem<Component>>(
+                  (path) => path.stageItem as StageItem<Component>)
+              .toList();
           doneEditing();
 
           file.selection.selectMultiple(toSelect);
 
           if (toSelect.length == 1) {
+            final type =
+                RiveCoreContext.objectName(toSelect.first.component.coreType);
             file.showSelectionAlert(
-                'Done editing ${toSelect.first.component.name} '
-                '(${RiveCoreContext.objectName(toSelect.first.component.coreType)})');
+                'Done editing ${toSelect.first.component.name} ($type)');
           } else {
             file.showSelectionAlert('Done editing paths.');
           }
