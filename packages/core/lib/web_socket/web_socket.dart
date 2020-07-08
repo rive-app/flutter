@@ -69,7 +69,7 @@ abstract class ReconnectingWebsocketClient {
   void _reconnect() {
     _reconnectTimer?.cancel();
     _pingTimer?.cancel();
-    print('reconnectig in $_reconnectAttempt seconds');
+    print('reconnecting in $_reconnectAttempt seconds');
     _reconnectTimer =
         Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
     if (_reconnectAttempt < 1) {
