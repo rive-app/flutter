@@ -129,8 +129,8 @@ class TipContext {
   /// is already up in which case it'll replace the existing tooltip with the
   /// new one.
   void show(BuildContext context, Tip data) {
-    if (_nextContext == context && _nextTip == data) {
-      // already scheduled
+    if (_currentTip == data || (_nextContext == context && _nextTip == data)) {
+      // already showing or scheduled
       return;
     }
     _nextContext = context;
@@ -204,6 +204,9 @@ class TipContext {
         // need to just make everything that wants to have a width specify
         // it...leaving it unaddressed for now.
         width: null,
+
+        // Don't allow clicking on the tip.
+        ignorePointer: true,
 
         direction: _currentTip.direction,
         fallbackDirections: _currentTip.fallbackDirections,

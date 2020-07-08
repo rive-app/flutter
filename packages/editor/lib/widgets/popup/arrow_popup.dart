@@ -1,4 +1,6 @@
+import 'package:core/debounce.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_editor/widgets/popup/popup_direction.dart';
 import 'base_popup.dart';
 
@@ -46,6 +48,9 @@ class ArrowPopup {
 
     /// Specify global position to use instead of direction.
     Offset position,
+
+    /// Whether this popup can be touched.
+    bool ignorePointer = false,
 
     /// Spacing applied between the area of interest and the popup in the
     /// direction this popup is docked/opened.
@@ -96,62 +101,65 @@ class ArrowPopup {
         includeCloseGuard: includeCloseGuard,
         shouldClose: shouldClose,
         builder: (context) {
-          return ValueListenableBuilder<Rect>(
-            valueListenable: contextRect.rect,
-            builder: (context, contextRect, child) {
-              if (position != null) {
-                // Use a layout system for a global cursor position.
-                return CustomSingleChildLayout(
-                  delegate: _PositionedPopupDelegate(position, width),
-                  child: child,
-                );
-              } else {
-                _ListPopupMultiLayoutDelegate _layoutDelegate =
-                    _ListPopupMultiLayoutDelegate(
-                  from: contextRect,
-                  direction: direction,
-                  fallbackDirections: fallbackDirections,
-                  width: width,
-                  offset: offset,
-                  directionPadding: directionPadding,
-                  arrowTweak: arrowTweak,
-                );
-                return CustomMultiChildLayout(
-                  delegate: _layoutDelegate,
-                  children: [
-                    if (showArrow)
-                      LayoutId(
-                        id: _ListPopupLayoutElement.arrow,
-                        child: CustomPaint(
-                          painter: _ArrowPathPainter(
-                            background,
-                            _layoutDelegate,
+          return IgnorePointer(
+            ignoring: ignorePointer,
+            child: ValueListenableBuilder<Rect>(
+              valueListenable: contextRect.rect,
+              builder: (context, contextRect, child) {
+                if (position != null) {
+                  // Use a layout system for a global cursor position.
+                  return CustomSingleChildLayout(
+                    delegate: _PositionedPopupDelegate(position, width),
+                    child: child,
+                  );
+                } else {
+                  _ListPopupMultiLayoutDelegate _layoutDelegate =
+                      _ListPopupMultiLayoutDelegate(
+                    from: contextRect,
+                    direction: direction,
+                    fallbackDirections: fallbackDirections,
+                    width: width,
+                    offset: offset,
+                    directionPadding: directionPadding,
+                    arrowTweak: arrowTweak,
+                  );
+                  return CustomMultiChildLayout(
+                    delegate: _layoutDelegate,
+                    children: [
+                      if (showArrow)
+                        LayoutId(
+                          id: _ListPopupLayoutElement.arrow,
+                          child: CustomPaint(
+                            painter: _ArrowPathPainter(
+                              background,
+                              _layoutDelegate,
+                            ),
                           ),
                         ),
+                      LayoutId(
+                        id: _ListPopupLayoutElement.body,
+                        child: child,
                       ),
-                    LayoutId(
-                      id: _ListPopupLayoutElement.body,
-                      child: child,
-                    ),
-                  ],
-                );
-              }
-            },
-            child: Material(
-              type: MaterialType.transparency,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: background,
-                  borderRadius: borderRadius,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3473),
-                      offset: const Offset(0.0, 30.0),
-                      blurRadius: 30,
-                    )
-                  ],
+                    ],
+                  );
+                }
+              },
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: background,
+                    borderRadius: borderRadius,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3473),
+                        offset: const Offset(0.0, 30.0),
+                        blurRadius: 30,
+                      )
+                    ],
+                  ),
+                  child: builder(context),
                 ),
-                child: builder(context),
               ),
             ),
           );
@@ -172,9 +180,19 @@ Offset _wholePixels(Offset offset) =>
 // Amount to pad from screen edges.
 const double _edgePad = 10;
 
+// We use this hacky relayout delegate to allow our multi child layout delegate
+// to re-layout if we find the best direction has changed (this lets us use the
+// appropriate constraints depending on the direction of expansion).
+abstract class _RelayoutMultiLayoutDelegate extends MultiChildLayoutDelegate {
+  final Event layoutEvent;
+  _RelayoutMultiLayoutDelegate(this.layoutEvent) : super(relayout: layoutEvent);
+
+  void relayout() => debounce(layoutEvent.notify);
+}
+
 /// A custom layout module for list popup which handles aligning the arrow and
 /// content to the desired region of interest and expansion direction.
-class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
+class _ListPopupMultiLayoutDelegate extends _RelayoutMultiLayoutDelegate {
   final Rect from;
   final PopupDirection direction;
   final List<PopupDirection> fallbackDirections;
@@ -197,7 +215,7 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
     this.offset,
     this.arrowTweak,
     this.closeOnResize = true,
-  });
+  }) : super(Event());
 
   @override
   bool shouldRelayout(_ListPopupMultiLayoutDelegate oldDelegate) {
@@ -261,10 +279,14 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
     // the height to have a best guess of max available height. Note that this
     // will break for directions that pop upwards. We may want to detect that
     // and do a best guess here for those cases. If they fail and we have to
-    // resort to a fallback, all best are off, the size we constrained here is
+    // resort to a fallback, all bets are off, the size we constrained here is
     // what we'll have to work with because we're not allowed to relayout the
     // child with new constraints.
-    var maxHeight = size.height - from.bottom;
+
+    var previousBest = bestDirection;
+    var maxHeight = bestDirection != null && bestDirection.from.y < 0
+        ? from.top
+        : size.height - from.bottom;
 
     Size bodySize = layoutChild(
       _ListPopupLayoutElement.body,
@@ -276,6 +298,17 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
               maxWidth: width,
             ),
     );
+
+    // bodySize = layoutChild(
+    //   _ListPopupLayoutElement.body,
+    //   width == null
+    //       ? BoxConstraints(maxHeight: maxHeight)
+    //       : BoxConstraints(
+    //           maxHeight: maxHeight,
+    //           minWidth: width,
+    //           maxWidth: width,
+    //         ),
+    // );
 
     Offset bodyPosition = _computeBodyPosition(direction, bodySize);
     bestDirection = direction;
@@ -353,6 +386,9 @@ class _ListPopupMultiLayoutDelegate extends MultiChildLayoutDelegate {
     }
 
     positionChild(_ListPopupLayoutElement.body, _wholePixels(bodyPosition));
+    if (previousBest != bestDirection) {
+      relayout();
+    }
   }
 }
 
