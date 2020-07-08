@@ -1,6 +1,6 @@
 import 'dart:collection';
-
 import 'package:rive/rive_core/component.dart';
+
 
 // TODO: figure out how to make this cleaner.
 class ContainerChildren extends ListBase<Component> {

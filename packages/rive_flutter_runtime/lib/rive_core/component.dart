@@ -1,16 +1,14 @@
 import 'package:rive/src/core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:logging/logging.dart';
 import 'package:rive/rive_core/artboard.dart';
 import 'package:rive/rive_core/container_component.dart';
 import 'package:rive/src/generated/component_base.dart';
 import 'package:rive/src/utilities/dependency_sorter.dart';
+import 'package:rive/src/utilities/tops.dart';
 export 'package:rive/src/generated/component_base.dart';
 
-final _log = Logger('rive_core');
-
 abstract class Component extends ComponentBase<RuntimeArtboard>
-    implements DependencyGraphNode<Component> {
+    implements DependencyGraphNode<Component>, Parentable<Component> {
   Artboard _artboard;
   dynamic _userData;
   bool get canBeOrphaned => false;
@@ -78,6 +76,7 @@ abstract class Component extends ComponentBase<RuntimeArtboard>
   }
 
   ContainerComponent _parent;
+  @override
   ContainerComponent get parent => _parent;
   set parent(ContainerComponent value) {
     if (_parent == value) {
@@ -106,9 +105,6 @@ abstract class Component extends ComponentBase<RuntimeArtboard>
   final Set<Component> _dependsOn = {};
   @override
   Set<Component> get dependents => _dependents;
-  Component get timelineParent => null;
-  Component get timelineProxy => this;
-  String get timelineParentGroup => null;
   bool addDependent(Component dependent) {
     assert(dependent != null, "Dependent cannot be null.");
     assert(artboard == dependent.artboard,
@@ -143,8 +139,6 @@ abstract class Component extends ComponentBase<RuntimeArtboard>
   @mustCallSuper
   void onAdded() {
     if (!canBeOrphaned && parent == null) {
-      _log.severe('Removed component \'$name\' $runtimeType. '
-          'Did not have a parent (looked for one with id $parentId).');
       remove();
     }
   }
@@ -153,9 +147,6 @@ abstract class Component extends ComponentBase<RuntimeArtboard>
   void onAddedDirty() {
     if (parentId != null) {
       parent = context?.resolve(parentId);
-      if (parent == null) {
-        _log.finest("Failed to resolve parent with id $parentId");
-      }
     }
   }
 

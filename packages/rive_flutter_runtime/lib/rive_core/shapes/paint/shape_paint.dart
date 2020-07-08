@@ -3,7 +3,6 @@ import 'package:meta/meta.dart';
 import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/component_dirt.dart';
 import 'package:rive/rive_core/container_component.dart';
-import 'package:rive/rive_core/event.dart';
 import 'package:rive/rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive/rive_core/shapes/shape_paint_container.dart';
 import 'package:rive/src/generated/shapes/paint/shape_paint_base.dart';
@@ -25,11 +24,9 @@ abstract class ShapePaint extends ShapePaintBase {
   @override
   Component get timelineParent => _shapePaintContainer as Component;
   ShapePaintMutator get paintMutator => _paintMutator;
-  final Event paintMutatorChanged = Event();
   void _changeMutator(ShapePaintMutator mutator) {
     _paint = makePaint();
     _paintMutator = mutator;
-    paintMutatorChanged?.notify();
   }
 
   @protected

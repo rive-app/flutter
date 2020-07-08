@@ -29,6 +29,7 @@ abstract class Path extends PathBase {
   Shape _shape;
   Shape get shape => _shape;
   Mat2D get pathTransform;
+  Mat2D get inversePathTransform;
   Mat2D get inverseWorldTransform => _inverseWorldTransform;
   @override
   Component get timelineParent => _shape;

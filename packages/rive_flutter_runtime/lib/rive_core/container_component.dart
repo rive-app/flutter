@@ -14,7 +14,7 @@ abstract class ContainerComponent extends ContainerComponentBase {
   @mustCallSuper
   void childAdded(Component child) {}
   void childRemoved(Component child) {}
-  bool applyToAll(DescentCallback cb) {
+  bool forAll(DescentCallback cb) {
     if (cb(this) == false) {
       return false;
     }

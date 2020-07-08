@@ -102,6 +102,14 @@ class Shape extends ShapeBase with ShapePaintContainer {
   @override
   void update(int dirt) {
     super.update(dirt);
+    if (dirt & ComponentDirt.paint != 0) {
+      for (final fill in fills) {
+        fill.blendMode = blendMode;
+      }
+      for (final stroke in strokes) {
+        stroke.blendMode = blendMode;
+      }
+    }
     if (dirt & ComponentDirt.worldTransform != 0) {
       for (final fill in fills) {
         fill.renderOpacity = renderOpacity;
@@ -121,6 +129,14 @@ class Shape extends ShapeBase with ShapePaintContainer {
         }
       }
       _fillInWorld = _wantWorldPath || !_wantLocalPath;
+      var mustFillLocal = fills.firstWhere(
+              (fill) => fill.paintMutator is core.LinearGradient,
+              orElse: () => null) !=
+          null;
+      if (mustFillLocal) {
+        _fillInWorld = false;
+        _wantLocalPath = true;
+      }
       for (final fill in fills) {
         var mutator = fill.paintMutator;
         if (mutator is core.LinearGradient) {
@@ -195,17 +211,8 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
   }
 
-  void _syncBlendMode() {
-    for (final fill in fills) {
-      fill.blendMode = blendMode;
-    }
-    for (final stroke in strokes) {
-      stroke.blendMode = blendMode;
-    }
-  }
-
   @override
-  void blendModeValueChanged(int from, int to) => _syncBlendMode();
+  void blendModeValueChanged(int from, int to) => _markBlendModeDirty();
   @override
   void draw(Canvas canvas) {
     assert(_pathComposer != null);
@@ -237,20 +244,22 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
   }
 
+  void _markBlendModeDirty() => addDirt(ComponentDirt.paint);
   @override
   void onPaintMutatorChanged(ShapePaintMutator mutator) {
     transformAffectsStrokeChanged();
+    _markBlendModeDirty();
   }
 
   @override
   void onStrokesChanged() {
     transformAffectsStrokeChanged();
-    _syncBlendMode();
+    _markBlendModeDirty();
   }
 
   @override
   void onFillsChanged() {
     transformAffectsStrokeChanged();
-    _syncBlendMode();
+    _markBlendModeDirty();
   }
 }

@@ -15,11 +15,13 @@ final _log = Logger('animation');
 // <- editor-only
 
 class LinearAnimation extends LinearAnimationBase {
+  // -> editor-only
   final Event _keyframesChanged = Event();
   final Event _keyframeValueChanged = Event();
 
   Listenable get keyframesChanged => _keyframesChanged;
   Listenable get keyframeValueChanged => _keyframeValueChanged;
+  // <- editor-only
 
   /// Map objectId to KeyedObject. N.B. this is the id of the object that we
   /// want to key in core, not of the KeyedObject. It's a clear way to see if an
@@ -41,14 +43,17 @@ class LinearAnimation extends LinearAnimationBase {
     // If the object is already keyed, that's ok just make sure the KeyedObject
     // matches.
     if (value != null && value != object) {
+      // -> editor-only
       _log.severe('Trying to add a KeyedObject for an object'
           'that\'s already keyed in this Animation?!');
+      // <- editor-only
       return false;
     }
     _keyedObjects[object.objectId] = object;
     return true;
   }
 
+  // -> editor-only
   /// Called by rive_core to remove a KeyedObject from the animation. This
   /// should be @internal when it's supported.
   bool internalRemoveKeyedObject(KeyedObject object) {
@@ -60,7 +65,6 @@ class LinearAnimation extends LinearAnimationBase {
     return removed != null;
   }
 
-  // -> editor-only
   /// Get the keyed data for a Core object already in this animation.
   KeyedObject getKeyed(Core object) => _keyedObjects[object.id];
 
@@ -128,12 +132,12 @@ class LinearAnimation extends LinearAnimationBase {
   @override
   void workStartChanged(int from, int to) {}
 
+  // -> editor-only
   /// Should be @internal when supported.
   void internalKeyFramesChanged() {
     _keyframesChanged.notify();
   }
 
-  // -> editor-only
   /// Should be @internal when supported.
   void internalKeyFrameValueChanged() => _keyframeValueChanged.notify();
 

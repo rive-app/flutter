@@ -15,6 +15,8 @@ class PointsPath extends PointsPathBase {
   @override
   Mat2D get pathTransform => worldTransform;
   @override
+  Mat2D get inversePathTransform => inverseWorldTransform;
+  @override
   List<PathVertex> get vertices => _vertices;
   @override
   void childAdded(Component child) {

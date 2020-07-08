@@ -46,7 +46,6 @@ class PathComposer extends PathComposerBase {
       if (!buildWorldPath) {
         _shape.markBoundsDirty();
       }
-      _fillPath = localPath;
     }
     if (buildWorldPath) {
       worldPath.reset();
@@ -55,8 +54,8 @@ class PathComposer extends PathComposerBase {
             matrix4: path.pathTransform?.mat4);
       }
       _shape.markBoundsDirty();
-      _fillPath = worldPath;
     }
+    _fillPath = _shape.fillInWorld ? worldPath : localPath;
   }
 
   @override

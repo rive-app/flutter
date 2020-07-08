@@ -187,9 +187,12 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     for (final fill in fills) {
       fill.draw(canvas, path);
     }
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, width, height));
     for (final drawable in _drawables) {
       drawable.draw(canvas);
     }
+    canvas.restore();
   }
 
   @override

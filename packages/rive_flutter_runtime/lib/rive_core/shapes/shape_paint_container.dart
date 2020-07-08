@@ -1,5 +1,4 @@
 import 'package:rive/rive_core/component.dart';
-import 'package:rive/rive_core/event.dart';
 import 'package:rive/rive_core/math/aabb.dart';
 import 'package:rive/rive_core/math/mat2d.dart';
 import 'package:rive/rive_core/math/vec2d.dart';
@@ -10,9 +9,7 @@ import 'package:rive/rive_core/shapes/paint/stroke.dart';
 
 abstract class ShapePaintContainer {
   final Set<Fill> fills = {};
-  final Event fillsChanged = Event();
   final Set<Stroke> strokes = {};
-  final Event strokesChanged = Event();
   void onPaintMutatorChanged(ShapePaintMutator mutator);
   @protected
   void onFillsChanged();
@@ -21,7 +18,6 @@ abstract class ShapePaintContainer {
   @protected
   bool addFill(Fill fill) {
     if (fills.add(fill)) {
-      fillsChanged.notify();
       onFillsChanged();
       return true;
     }
@@ -31,7 +27,6 @@ abstract class ShapePaintContainer {
   @protected
   bool removeFill(Fill fill) {
     if (fills.remove(fill)) {
-      fillsChanged.notify();
       onFillsChanged();
       return true;
     }
@@ -41,7 +36,6 @@ abstract class ShapePaintContainer {
   @protected
   bool addStroke(Stroke stroke) {
     if (strokes.add(stroke)) {
-      strokesChanged.notify();
       onStrokesChanged();
       return true;
     }
@@ -51,7 +45,6 @@ abstract class ShapePaintContainer {
   @protected
   bool removeStroke(Stroke stroke) {
     if (strokes.remove(stroke)) {
-      strokesChanged.notify();
       onStrokesChanged();
       return true;
     }

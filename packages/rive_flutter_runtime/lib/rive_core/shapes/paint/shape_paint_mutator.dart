@@ -23,5 +23,6 @@ abstract class ShapePaintMutator {
     _shapePaintContainer = container;
     _paint = paint;
     _shapePaintContainer?.onPaintMutatorChanged(this);
+    syncColor();
   }
 }

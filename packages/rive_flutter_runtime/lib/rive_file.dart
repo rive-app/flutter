@@ -2,12 +2,12 @@ import 'dart:typed_data';
 
 import 'package:rive/rive_core/animation/keyframe_draw_order.dart';
 import 'package:rive/rive_core/animation/keyframe_draw_order_value.dart';
+import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/runtime/runtime_header.dart';
 import 'package:rive/rive_core/backboard.dart';
 import 'package:rive/src/core/core.dart';
 import 'package:rive/src/utilities/binary_buffer/binary_reader.dart';
 import 'package:rive/rive_core/runtime/exceptions/rive_format_error_exception.dart';
-import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/animation/animation.dart';
 import 'package:rive/rive_core/animation/keyed_object.dart';
 import 'package:rive/rive_core/animation/keyed_property.dart';

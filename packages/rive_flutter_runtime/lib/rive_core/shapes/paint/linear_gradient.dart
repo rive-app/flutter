@@ -1,25 +1,17 @@
 import 'dart:ui' as ui;
 import 'package:meta/meta.dart';
-import 'package:rive/rive_core/bounds_delegate.dart';
 import 'package:rive/rive_core/component.dart';
 import 'package:rive/rive_core/component_dirt.dart';
-import 'package:rive/rive_core/event.dart';
 import 'package:rive/rive_core/math/vec2d.dart';
 import 'package:rive/rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive/rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive/src/generated/shapes/paint/linear_gradient_base.dart';
 export 'package:rive/src/generated/shapes/paint/linear_gradient_base.dart';
 
-abstract class GradientDelegate extends BoundsDelegate {
-  void stopsChanged();
-}
-
 class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   final List<GradientStop> gradientStops = [];
-  GradientDelegate _delegate;
   @override
   Component get timelineProxy => parent;
-  final Event stopsChanged = Event();
   bool _paintsInWorldSpace = true;
   bool get paintsInWorldSpace => _paintsInWorldSpace;
   set paintsInWorldSpace(bool value) {
@@ -45,7 +37,6 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     super.childAdded(child);
     if (child is GradientStop && !gradientStops.contains(child)) {
       gradientStops.add(child);
-      stopsChanged.notify();
       markStopsDirty();
     }
   }
@@ -55,7 +46,6 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     super.childRemoved(child);
     if (child is GradientStop && gradientStops.contains(child)) {
       gradientStops.remove(child);
-      stopsChanged.notify();
       markStopsDirty();
     }
   }
@@ -91,26 +81,12 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
             makeGradient(startOffset, endOffset, colors, colorPositions);
       }
     }
-    if (worldTransformed || localTransformed) {
-      _delegate?.boundsChanged();
-    } else if (stopsChanged) {
-      _delegate?.stopsChanged();
-    }
   }
 
   @protected
   ui.Gradient makeGradient(ui.Offset start, ui.Offset end,
           List<ui.Color> colors, List<double> colorPositions) =>
       ui.Gradient.linear(start, end, colors, colorPositions);
-  @override
-  void userDataChanged(dynamic from, dynamic to) {
-    if (to is GradientDelegate) {
-      _delegate = to;
-    } else {
-      _delegate = null;
-    }
-  }
-
   @override
   void startXChanged(double from, double to) {
     addDirt(ComponentDirt.transform);

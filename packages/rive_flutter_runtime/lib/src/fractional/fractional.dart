@@ -20,10 +20,14 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
   @override
   void operator []=(int index, T value) => _values[index] = value;
 
-  FractionallyIndexedList({List<T> values}) : _values = values ?? <T>[] {
-    if (_values.isEmpty) {
+  FractionallyIndexedList({
+    List<T> values,
+    bool initOrder = true,
+  }) : _values = values ?? <T>[] {
+    if (_values.isEmpty || !initOrder) {
       return;
     }
+    // Otherwise spread them evenly across our range using 1/2 as the midpoint.
     int mid = _values.length ~/ 2;
     var midIndex = const FractionalIndex(1, 2);
     setOrderOf(_values[mid], midIndex);
@@ -42,6 +46,8 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
       lastIndex = index;
     }
   }
+
+  FractionallyIndexedList.raw(List<T> values) : _values = values ?? <T>[];
 
   void setOrderOf(T value, FractionalIndex order);
 
@@ -64,8 +70,9 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
 
   void sortFractional() => _values.sort(_compareIndex);
 
-  bool validateFractional() {
-    var previousIndex = _minIndex;
+  bool validateFractional([FractionalIndex minimum]) {
+    var previousIndex = minimum ?? _minIndex;
+
     bool wasValid = true;
     for (final item in _values) {
       var order = orderOf(item);
@@ -80,6 +87,7 @@ abstract class FractionallyIndexedList<T> extends ListBase<T> {
     if (wasValid) {
       return true;
     }
+
     for (final item in _values) {
       if (orderOf(item) == null) {
         var index = FractionalIndex.between(previousIndex, _maxIndex);

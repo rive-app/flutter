@@ -16,10 +16,14 @@ import 'package:rive_core/shapes/paint/stroke.dart';
 /// fills and strokes.
 abstract class ShapePaintContainer {
   final Set<Fill> fills = {};
+  // -> editor-only
   final Event fillsChanged = Event();
+  // <- editor-only
 
   final Set<Stroke> strokes = {};
+  // -> editor-only
   final Event strokesChanged = Event();
+  // <- editor-only
 
   /// Called whenever a new paint mutator is added/removed from the shape paints
   /// (for example a linear gradient is added to a stroke).
@@ -36,7 +40,9 @@ abstract class ShapePaintContainer {
   @protected
   bool addFill(Fill fill) {
     if (fills.add(fill)) {
+      // -> editor-only
       fillsChanged.notify();
+      // <- editor-only
       onFillsChanged();
       return true;
     }
@@ -46,7 +52,9 @@ abstract class ShapePaintContainer {
   @protected
   bool removeFill(Fill fill) {
     if (fills.remove(fill)) {
+      // -> editor-only
       fillsChanged.notify();
+      // <- editor-only
       onFillsChanged();
       return true;
     }
@@ -56,7 +64,9 @@ abstract class ShapePaintContainer {
   @protected
   bool addStroke(Stroke stroke) {
     if (strokes.add(stroke)) {
+      // -> editor-only
       strokesChanged.notify();
+      // <- editor-only
       onStrokesChanged();
       return true;
     }
@@ -66,7 +76,9 @@ abstract class ShapePaintContainer {
   @protected
   bool removeStroke(Stroke stroke) {
     if (strokes.remove(stroke)) {
+      // -> editor-only
       strokesChanged.notify();
+      // <- editor-only
       onStrokesChanged();
       return true;
     }
