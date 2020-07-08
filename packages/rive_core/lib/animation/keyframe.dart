@@ -9,7 +9,9 @@ import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 
 export 'package:rive_core/src/generated/animation/keyframe_base.dart';
 
+// -> editor-only
 final _log = Logger('animation');
+// <- editor-only
 
 abstract class KeyFrame extends KeyFrameBase<RiveFile>
     implements KeyFrameInterface {
@@ -75,9 +77,11 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   void onAddedDirty() {
     if (interpolatorId != null) {
       interpolator = context?.resolve(interpolatorId);
+      // -> editor-only
       if (interpolator == null) {
         _log.finest("Failed to resolve interpolator with id $interpolatorId");
       }
+      // <- editor-only
     }
   }
 

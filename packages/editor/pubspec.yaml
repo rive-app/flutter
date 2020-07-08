@@ -27,8 +27,7 @@ dependencies:
     path: ../rive_widgets
   utilities:
     path: ../utilities
-  rive:
-    path: ../rive_flutter_runtime
+  rive: ^0.0.1+1
 
   http: ^0.12.1
   dotted_border: ^1.0.5

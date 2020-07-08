@@ -112,7 +112,7 @@ void main(List<String> arguments) {
       }
     }, onDone: () {
       for (final package in movePackages) {
-        movePackage('${config.output}../$package/lib',
+        movePackage('${config.packagesFolder}/$package/lib',
             '${config.output}lib/src/$package');
       }
     });
