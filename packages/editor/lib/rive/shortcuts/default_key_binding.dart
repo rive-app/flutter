@@ -150,12 +150,12 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.r,
       },
     ),
-    Shortcut(
-      ShortcutAction.scaleTool,
-      {
-        ShortcutKey.s,
-      },
-    ),
+    // Shortcut(
+    //   ShortcutAction.scaleTool,
+    //   {
+    //     ShortcutKey.s,
+    //   },
+    // ),
     Shortcut(
       ShortcutAction.poseTool,
       {
@@ -187,12 +187,12 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.c,
       },
     ),
-    Shortcut(
-      ShortcutAction.paintWeightTool,
-      {
-        ShortcutKey.w,
-      },
-    ),
+    // Shortcut(
+    //   ShortcutAction.paintWeightTool,
+    //   {
+    //     ShortcutKey.w,
+    //   },
+    // ),
     Shortcut(
       ShortcutAction.ellipseTool,
       {
@@ -214,7 +214,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(
       ShortcutAction.artboardTool,
       {
-        ShortcutKey.a,
+        ShortcutKey.f,
       },
     ),
     Shortcut(
@@ -267,5 +267,9 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
         ShortcutKey.w,
       },
     ),
+    Shortcut(ShortcutAction.navigateTreeUp, {ShortcutKey.w}),
+    Shortcut(ShortcutAction.navigateTreeLeft, {ShortcutKey.a}),
+    Shortcut(ShortcutAction.navigateTreeDown, {ShortcutKey.s}),
+    Shortcut(ShortcutAction.navigateTreeRight, {ShortcutKey.d}),
   ],
 );

@@ -620,9 +620,17 @@ class OpenFileContext with RiveFileDelegate {
           Popup.closeAll();
         }
         return true;
+      case ShortcutAction.navigateTreeLeft:
+        return _upTheRabbitHole();
 
+      case ShortcutAction.navigateTreeRight:
       case ShortcutAction.toggleEditMode:
         return _downTheRabbitHole();
+
+      case ShortcutAction.navigateTreeDown:
+        return _strafeRabitts(1);
+      case ShortcutAction.navigateTreeUp:
+        return _strafeRabitts(-1);
 
       default:
         return false;
@@ -752,16 +760,13 @@ class OpenFileContext with RiveFileDelegate {
     _editingAnimationManager.value?.dispose();
     _keyFrameManager.value?.dispose();
 
-
-
-
     _editingAnimationManager.value =
         animation == null ? null : EditingAnimationManager(animation, this);
     _keyFrameManager.value =
         animation == null ? null : KeyFrameManager(animation, this);
   }
 
-  bool _downTheRabbitHole() {
+  ContainerComponent _highestSelection() {
     var inspectionSet = InspectionSet.fromSelection(this, selection.items);
     int depth = double.maxFinite.toInt();
     ContainerComponent highest;
@@ -780,6 +785,34 @@ class OpenFileContext with RiveFileDelegate {
         highest = component as ContainerComponent;
       }
     }
+    return highest;
+  }
+
+  bool _strafeRabitts(int direction) {
+    var highest = _highestSelection();
+    if (highest != null) {
+      // Pick valid siblings (that are on the stage and hence selectable).
+      var siblings = highest.parent.children
+          .where((sibling) =>
+              sibling.stageItem != null && sibling.stageItem.stage != null)
+          .toList(growable: false);
+
+      if (siblings.length <= 1) {
+        return false;
+      }
+      var sibling = siblings[
+          ((siblings.indexOf(highest) + direction) + siblings.length) %
+              siblings.length];
+      selection.select(sibling.stageItem);
+      showSelectionAlert('Selected ${sibling.name} '
+          '(${RiveCoreContext.objectName(sibling.coreType)})');
+      return true;
+    }
+    return false;
+  }
+
+  bool _downTheRabbitHole() {
+    var highest = _highestSelection();
 
     // Find first child with valid stage item and select it.
     if (highest != null) {
@@ -836,6 +869,7 @@ class OpenFileContext with RiveFileDelegate {
       _labeledAlert = null;
     }
   }
+
   void showSelectionAlert(String label) {
     if (_labeledAlert == null) {
       addAlert(_labeledAlert = LabeledAlert(label, autoDismiss: true));
