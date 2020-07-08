@@ -52,9 +52,9 @@ class VertexEditor with RiveFileDelegate {
     stage.soloListenable.addListener(_soloChanged);
   }
 
-  void _changeMode(VertexEditorMode mode) {
+  bool _changeMode(VertexEditorMode mode) {
     if (mode == _mode.value) {
-      return;
+      return false;
     }
     switch (_mode.value = mode) {
       case VertexEditorMode.editingPath:
@@ -71,11 +71,10 @@ class VertexEditor with RiveFileDelegate {
         _editingPaths.value = null;
         break;
     }
+    return true;
   }
 
-  void doneEditing() {
-    _changeMode(VertexEditorMode.off);
-  }
+  bool doneEditing() => _changeMode(VertexEditorMode.off);
 
   bool _selectionHandler(StageItem item) {
     var path = _creatingPath.value;
@@ -268,12 +267,38 @@ class VertexEditor with RiveFileDelegate {
 
           if (paths.isNotEmpty) {
             _editPaths(paths.map((stagePath) => stagePath.component).toList());
+
+            if (paths.length == 1) {
+              file.showSelectionAlert('Editing ${paths.first.component.name} '
+                  '(${RiveCoreContext.objectName(paths.first.component.coreType)})');
+            } else {
+              file.showSelectionAlert('Editing multiple paths.');
+            }
           }
+
+          // swallow the event if we started editing paths (solo gets set to the
+          // paths).
+          return stage.soloItems != null;
         }
 
-        // swallow the event if we started editing paths (solo gets set to the
-        // paths).
-        return stage.soloItems != null;
+        // If we were editing, enter exits vertex editing mode and selects the
+        // paths.
+        var editingPaths = _editingPaths.value;
+        if (editingPaths != null && editingPaths.isNotEmpty) {
+          var toSelect = editingPaths.map((path) => path.stageItem).toList();
+          doneEditing();
+
+          file.selection.selectMultiple(toSelect);
+
+          if (toSelect.length == 1) {
+            file.showSelectionAlert(
+                'Done editing ${toSelect.first.component.name} '
+                '(${RiveCoreContext.objectName(toSelect.first.component.coreType)})');
+          } else {
+            file.showSelectionAlert('Done editing paths.');
+          }
+          return true;
+        }
     }
     return false;
   }

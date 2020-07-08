@@ -19,8 +19,14 @@ class PointsPath extends PointsPathBase {
     isClosed = false;
   }
 
+  // When bound to bones pathTransform should be the identity as it'll already
+  // be in world space.
   @override
   Mat2D get pathTransform => worldTransform;
+
+  // When bound to bones inversePathTransform should be the identity.
+  @override
+  Mat2D get inversePathTransform => inverseWorldTransform;
 
   @override
   List<PathVertex> get vertices => _vertices;

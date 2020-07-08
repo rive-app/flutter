@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
@@ -86,4 +87,7 @@ class StageShape extends StageItem<Shape> with BoundsDelegate {
       path.stageItem.onSoloChanged(isSolo);
     }
   }
+
+  @override
+  bool get isSelectable => !ShortcutAction.deepClick.value;
 }

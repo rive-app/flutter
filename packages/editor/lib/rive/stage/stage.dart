@@ -598,8 +598,11 @@ class Stage extends Debouncer {
       if (_mouseDownHit == null) {
         file.selection.clear();
       } else {
+        // TODO: what's the case where we needed this? Luigi removed this for
+        // Node UX (command click was clearing).
+
         // just select the hit item
-        file.select(_mouseDownHit);
+        // file.select(_mouseDownHit);
       }
     }
 
@@ -804,12 +807,16 @@ class Stage extends Debouncer {
   void _fileActiveChanged() {
     if (file.isActive) {
       tool?.activate(this);
+      ShortcutAction.deepClick.addListener(_deepClickChanged);
       ShortcutAction.pan.addListener(_panActionChanged);
     } else {
       tool?.deactivate();
       ShortcutAction.pan.removeListener(_panActionChanged);
+      ShortcutAction.deepClick.removeListener(_deepClickChanged);
     }
   }
+
+  void _deepClickChanged() => _updateHover();
 
   void _panActionChanged() {
     if (!ShortcutAction.pan.value) {
@@ -965,6 +972,7 @@ class Stage extends Debouncer {
     file.removeActionHandler(_handleAction);
     file.isActiveListenable.removeListener(_fileActiveChanged);
     ShortcutAction.pan.removeListener(_panActionChanged);
+    ShortcutAction.deepClick.removeListener(_deepClickChanged);
     _panHandCursor?.remove();
     _rightClickHandCursor?.remove();
   }

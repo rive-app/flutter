@@ -786,7 +786,7 @@ class OpenFileContext with RiveFileDelegate {
       for (final child in highest.children) {
         if (child.stageItem != null && child.stageItem.stage != null) {
           selection.select(child.stageItem);
-          _showSelectionAlert('Selected ${child.name} '
+          showSelectionAlert('Selected ${child.name} '
               '(${RiveCoreContext.objectName(child.coreType)})');
           break;
         }
@@ -819,11 +819,11 @@ class OpenFileContext with RiveFileDelegate {
     }
     if (highest != null) {
       selection.select(highest.stageItem);
-      _showSelectionAlert('Selected ${highest.name} '
+      showSelectionAlert('Selected ${highest.name} '
           '(${RiveCoreContext.objectName(highest.coreType)})');
       return true;
     } else if (selection.isNotEmpty) {
-      _showSelectionAlert('Selection cleared');
+      showSelectionAlert('Selection cleared');
       selection.clear();
       return true;
     }
@@ -836,7 +836,7 @@ class OpenFileContext with RiveFileDelegate {
       _labeledAlert = null;
     }
   }
-  void _showSelectionAlert(String label) {
+  void showSelectionAlert(String label) {
     if (_labeledAlert == null) {
       addAlert(_labeledAlert = LabeledAlert(label, autoDismiss: true));
       _labeledAlert.dismissed.addListener(_labelAlertDismissed);

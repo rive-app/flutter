@@ -145,6 +145,8 @@ class ShortcutAction {
 
   static HoldShortcutAction mouseWheelZoom =
       HoldShortcutAction('mouse-wheel-zoom');
+  static HoldShortcutAction deepClick =
+      HoldShortcutAction('deep-click');
   static HoldShortcutAction symmetricDraw =
       HoldShortcutAction('symmetric-draw');
   static const ShortcutAction confirm = ShortcutAction('action');
