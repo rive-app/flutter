@@ -4,6 +4,8 @@ import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team.dart';
+import 'package:rive_api/models/team_invite_status.dart';
+import 'package:rive_api/plumber.dart';
 import 'package:rive_api/teams.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
@@ -143,6 +145,17 @@ class _SettingsState extends State<Settings> {
         child: child);
   }
 
+  int get teamSize {
+    if (widget.owner is Team) {
+      final teamMembers = Plumber().peek<List<TeamMember>>(team.hashCode);
+      return teamMembers
+          .where((element) => element.status == TeamInviteStatus.accepted)
+          .length;
+    }
+
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = RiveTheme.of(context).colors;
@@ -163,7 +176,7 @@ class _SettingsState extends State<Settings> {
                       ? widget.owner.avatarUrl
                       : newAvatarPath,
                   changeAvatar: changeAvatar,
-                  teamSize: (widget.owner is Team) ? 1 : 0,
+                  teamSize: teamSize,
                 ),
                 Separator(color: colors.fileLineGrey),
                 Expanded(child: screens[_selectedIndex].builder(context)),
