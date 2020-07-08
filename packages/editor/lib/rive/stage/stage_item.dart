@@ -207,7 +207,7 @@ abstract class StageItem<T> extends SelectableItem
     /// manipulates is on. Should we move this to a ComponentStageItem class?
     /// This is safer as it ensures all StageItems will have this logic, so for
     /// now it lives here.
-    if (notify && c != null && c is Component && c.artboard != null) {
+    if (value && notify && c != null && c is Component && c.artboard != null) {
       c.context.backboard.activeArtboard = c.artboard;
     }
   }
