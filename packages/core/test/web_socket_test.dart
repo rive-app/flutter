@@ -94,7 +94,7 @@ void main() {
     test('basics can connect & disconnect', () async {
       client = DummyClient();
       await client.connect();
-      await Future<dynamic>.delayed(const Duration(milliseconds: 100));
+      await Future<dynamic>.delayed(const Duration(milliseconds: 200));
       expect(server.dataList.first, 'connect');
       expect(server.dataList[1], 'ping');
       expect(server.dataList.length, 2);
@@ -111,7 +111,7 @@ void main() {
     test('ping does ping stuff', () async {
       client = DummyClient(pingInterval: const Duration(milliseconds: 10));
       await client.connect();
-      await Future<dynamic>.delayed(const Duration(milliseconds: 100));
+      await Future<dynamic>.delayed(const Duration(milliseconds: 200));
       expect(server.dataList.first, 'connect');
       // I dunno pings lots of times.
       expect(server.dataList.length > 5, true);
@@ -120,18 +120,18 @@ void main() {
     test('will reconnect', () async {
       client = DummyClient();
       await client.connect();
-      await Future<dynamic>.delayed(const Duration(milliseconds: 100));
+      await Future<dynamic>.delayed(const Duration(milliseconds: 200));
       expect(client.isReconnecting, false);
       expect(server.dataList.length, 2);
       client.write("killme");
-      await Future<dynamic>.delayed(const Duration(milliseconds: 100));
+      await Future<dynamic>.delayed(const Duration(milliseconds: 200));
       // first reconnect is wicket fast
 
       expect(client.states.last, ConnectionState.connected);
       expect(server.dataList.length, 5);
       expect(server.dataList[2], 'killme');
       client.write("killme");
-      await Future<dynamic>.delayed(const Duration(milliseconds: 100));
+      await Future<dynamic>.delayed(const Duration(milliseconds: 200));
       expect(client.states.last, ConnectionState.disconnected);
       // first reconnect is wicked fast
       expect(client.isReconnecting, true);
