@@ -69,6 +69,7 @@ abstract class ReconnectingWebsocketClient {
   void _reconnect() {
     _reconnectTimer?.cancel();
     _pingTimer?.cancel();
+    print('reconnectig in $_reconnectAttempt seconds');
     _reconnectTimer =
         Timer(Duration(milliseconds: _reconnectAttempt * 8000), connect);
     if (_reconnectAttempt < 1) {
@@ -87,6 +88,7 @@ abstract class ReconnectingWebsocketClient {
   bool get isConnected => _connectionState == ConnectionState.connected;
 
   Future<bool> disconnect() async {
+    // if we decide to disconnect, we do not want to reconnect
     _allowReconnect = false;
     if (_channel != null) {
       await _channel.sink.close();
@@ -122,6 +124,8 @@ abstract class ReconnectingWebsocketClient {
 
   Future<void> connect() async {
     try {
+      // if we decide to connect, we are happy to reconnect again
+      _allowReconnect = true;
       String url = await getUrl();
       _reconnectTimer?.cancel();
       _reconnectTimer = null;
