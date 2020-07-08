@@ -2,11 +2,11 @@
 /// lib/src/generated/shapes/parametric_path_base.dart.
 /// Do not modify manually.
 
-import 'package:rive/rive_core/shapes/path.dart';
 import 'package:rive/src/generated/component_base.dart';
 import 'package:rive/src/generated/container_component_base.dart';
 import 'package:rive/src/generated/node_base.dart';
 import 'package:rive/src/generated/shapes/path_base.dart';
+import 'package:rive/src/rive_core/shapes/path.dart';
 
 abstract class ParametricPathBase extends Path {
   static const int typeKey = 15;

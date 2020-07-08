@@ -2,8 +2,8 @@
 /// lib/src/generated/animation/keyframe_draw_order_base.dart.
 /// Do not modify manually.
 
-import 'package:rive/rive_core/animation/keyframe.dart';
 import 'package:rive/src/generated/animation/keyframe_base.dart';
+import 'package:rive/src/rive_core/animation/keyframe.dart';
 
 abstract class KeyFrameDrawOrderBase extends KeyFrame {
   static const int typeKey = 32;

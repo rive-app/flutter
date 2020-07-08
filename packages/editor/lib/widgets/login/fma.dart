@@ -2,9 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rive/rive_file.dart';
-import 'package:rive/rive_renderer.dart';
-import 'package:rive/controllers/simple_controller.dart';
+import 'package:rive/rive.dart';
 
 const _animationFiles = [
   'ping_pong.riv',

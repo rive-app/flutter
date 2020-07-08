@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive/rive_core/rive_animation_controller.dart';
-import 'package:rive/rive_file.dart';
-import 'package:rive/rive_renderer.dart';
-import 'package:rive/controllers/simple_controller.dart';
+import 'package:rive/rive.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,21 +32,33 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() => _controller.isActive = !_controller.isActive);
   }
 
-  RiveFile _rive;
+  /// We track if the animation is playing by whether or not the controller is
+  /// running.
+  bool get isPlaying => _controller?.isActive ?? false;
+
+  Artboard _riveArtboard;
   RiveAnimationController _controller;
   @override
   void initState() {
     super.initState();
 
-    rootBundle.load('assets/web_&_desktop_2.riv').then(
+    // Load the animation file from the bundle, note that you could also
+    // download this. The RiveFile just expects a list of bytes.
+    rootBundle.load('assets/colors_juice.riv').then(
       (data) async {
         var file = RiveFile();
+        // Load the RiveFile from the binary data.
         var success = file.import(data);
         if (success) {
-          file.mainArtboard.addController(
-            _controller = SimpleAnimation('Untitled 1'),
+          // The artboard is the root of the animation and is what gets drawn
+          // into the Rive widget.
+          var artboard = file.mainArtboard;
+          // Add a controller to play back a known animation on the main/default
+          // artboard.We store a reference to it so we can toggle playback.
+          artboard.addController(
+            _controller = SimpleAnimation('walk'),
           );
-          setState(() => _rive = file);
+          setState(() => _riveArtboard = artboard);
         }
       },
     );
@@ -59,15 +68,15 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _rive == null
+        child: _riveArtboard == null
             ? const SizedBox()
-            : RiveRenderer(artboard: _rive.mainArtboard),
+            : Rive(artboard: _riveArtboard),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _togglePlay,
-        tooltip: _controller?.isActive ?? false ? 'Pause' : 'Play',
+        tooltip: isPlaying ? 'Pause' : 'Play',
         child: Icon(
-          _controller?.isActive ?? false ? Icons.pause : Icons.play_arrow,
+          isPlaying ? Icons.pause : Icons.play_arrow,
         ),
       ),
     );

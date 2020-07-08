@@ -1,10 +1,10 @@
 /// Core automatically generated lib/src/generated/shapes/paint/fill_base.dart.
 /// Do not modify manually.
 
-import 'package:rive/rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive/src/generated/component_base.dart';
 import 'package:rive/src/generated/container_component_base.dart';
 import 'package:rive/src/generated/shapes/paint/shape_paint_base.dart';
+import 'package:rive/src/rive_core/shapes/paint/shape_paint.dart';
 
 abstract class FillBase extends ShapePaint {
   static const int typeKey = 20;

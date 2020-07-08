@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:rive/rive_core/drawable.dart';
+import 'package:rive/src/rive_core/drawable.dart';
 
 // TODO: figure out how to make this cleaner.
 class DrawableList extends ListBase<Drawable> {

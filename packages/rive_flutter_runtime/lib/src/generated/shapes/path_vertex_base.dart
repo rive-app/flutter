@@ -1,8 +1,8 @@
 /// Core automatically generated lib/src/generated/shapes/path_vertex_base.dart.
 /// Do not modify manually.
 
-import 'package:rive/rive_core/component.dart';
 import 'package:rive/src/generated/component_base.dart';
+import 'package:rive/src/rive_core/component.dart';
 
 abstract class PathVertexBase extends Component {
   static const int typeKey = 14;

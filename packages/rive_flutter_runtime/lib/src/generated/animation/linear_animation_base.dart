@@ -2,8 +2,8 @@
 /// lib/src/generated/animation/linear_animation_base.dart.
 /// Do not modify manually.
 
-import 'package:rive/rive_core/animation/animation.dart';
 import 'package:rive/src/generated/animation/animation_base.dart';
+import 'package:rive/src/rive_core/animation/animation.dart';
 
 abstract class LinearAnimationBase extends Animation {
   static const int typeKey = 31;

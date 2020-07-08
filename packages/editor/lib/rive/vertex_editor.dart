@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rive/rive_core/component.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_core/shapes/path.dart' as core;

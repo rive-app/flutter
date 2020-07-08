@@ -2,9 +2,9 @@
 /// lib/src/generated/shapes/straight_vertex_base.dart.
 /// Do not modify manually.
 
-import 'package:rive/rive_core/shapes/path_vertex.dart';
 import 'package:rive/src/generated/component_base.dart';
 import 'package:rive/src/generated/shapes/path_vertex_base.dart';
+import 'package:rive/src/rive_core/shapes/path_vertex.dart';
 
 abstract class StraightVertexBase extends PathVertex {
   static const int typeKey = 5;

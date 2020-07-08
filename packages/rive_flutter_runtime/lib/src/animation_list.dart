@@ -1,5 +1,5 @@
 import 'dart:collection';
-import 'package:rive/rive_core/animation/animation.dart';
+import 'package:rive/src/rive_core/animation/animation.dart';
 
 // TODO: figure out how to make this cleaner.
 class AnimationList extends ListBase<Animation> {

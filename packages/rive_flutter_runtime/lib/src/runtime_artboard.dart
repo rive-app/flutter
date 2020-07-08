@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:rive/rive_core/artboard.dart';
-import 'package:rive/rive_core/component.dart';
-import 'package:rive/rive_core/event.dart';
+import 'package:rive/src/rive_core/artboard.dart';
+import 'package:rive/src/rive_core/component.dart';
+import 'package:rive/src/rive_core/event.dart';
 import 'package:rive/src/core/core.dart';
 
 class RuntimeArtboard extends Artboard implements CoreContext {

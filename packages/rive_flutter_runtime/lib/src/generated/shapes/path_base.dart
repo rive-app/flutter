@@ -1,10 +1,10 @@
 /// Core automatically generated lib/src/generated/shapes/path_base.dart.
 /// Do not modify manually.
 
-import 'package:rive/rive_core/node.dart';
 import 'package:rive/src/generated/component_base.dart';
 import 'package:rive/src/generated/container_component_base.dart';
 import 'package:rive/src/generated/node_base.dart';
+import 'package:rive/src/rive_core/node.dart';
 
 abstract class PathBase extends Node {
   static const int typeKey = 12;
