@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_core_field_type.dart';
+import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_editor/rive/managers/animation/editing_animation_manager.dart';
@@ -9,6 +11,8 @@ import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/common/draw_order_key_button.dart';
+import 'package:rive_editor/widgets/common/renamable.dart';
+import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/color/timeline_color_swatch.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -100,20 +104,32 @@ class KeyedObjectHierarchy extends StatelessWidget {
 
   Widget _buildKeyedComponent(BuildContext context, RiveThemeData theme,
       KeyedComponentViewModel model) {
-    return Text(
-      // TODO: use uistrings for non user set values (user set names are in
-      // .name).
-      model.component.timelineName ?? model.component.toString(),
-      style: theme.textStyles.inspectorWhiteLabel,
-    );
-    // TODO: make component names renamable in the timeline
-    // Also make sure component.canRename is true.
-    // return Renamable(
-    //   style: theme.textStyles.inspectorWhiteLabel,
-    //   name: model.component.name,
-    //   color: theme.colors.inspectorTextColor,
-    //   onRename: (name) {},
-    // );
+    var component = model.component;
+    var displayName = component.timelineName ??
+        // TODO: uistring this name?
+        RiveCoreContext.objectName(component.coreType);
+
+    if (!component.canRename) {
+      return Text(
+        displayName,
+        style: theme.textStyles.inspectorPropertyLabel,
+      );
+    }
+
+    return Expanded(child:CorePropertyBuilder<String>(
+      object: component,
+      propertyKey: ComponentBase.namePropertyKey,
+      builder: (context, name, _) => Renamable(
+        style: theme.textStyles.inspectorPropertyLabel,
+        name: name,
+        color: theme.colors.hierarchyText,
+        editingColor: theme.colors.selectedText,
+        onRename: (name) {
+          component.name = name;
+          component.context.captureJournalEntry();
+        },
+      ),
+    ),);
   }
 
   Widget _buildKeyedGroup(

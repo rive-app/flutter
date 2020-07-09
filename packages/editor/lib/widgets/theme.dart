@@ -138,6 +138,7 @@ class RiveColors {
 
   // TextField
   Color get textSelection => lightGrey;
+  Color get selectedText => white;
   Color get inputUnderline => const Color(0xFFCCCCCC);
   Color get input => const Color(0xFFBBBBBB);
 
@@ -147,6 +148,7 @@ class RiveColors {
   // Hierarchy
   Color get editorTreeHover => const Color(0x20AAAAAA);
   Color get animationSelected => const Color(0x24888888);
+  Color get hierarchyText => lightGrey;
 
   Color get shadow25 => const Color(0x44000000);
   Color get black30 => const Color(0x4D000000);
