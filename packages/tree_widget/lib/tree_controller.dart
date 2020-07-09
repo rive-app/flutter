@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:tree_widget/tree_widget.dart';
 
 import 'flat_tree_item.dart';
@@ -386,28 +387,54 @@ abstract class TreeController<T> with ChangeNotifier {
       FlatTreeItem<T> draggedItem, TreeStyle style) {
     _dragOperation.offset.value = details.globalPosition;
 
-    RenderBox getBox = itemContext.findRenderObject() as RenderBox;
-    var local = getBox.globalToLocal(details.globalPosition);
-    var index =
-        _flat.indexOf(draggedItem) + (local.dy / style.itemHeight).floor();
-    var localOffset = local.dy % style.itemHeight;
-    // var pos = localOffset < 10
-    //     ? "above"
-    //     : localOffset > style.itemHeight - 10 ? "below" : "in";
+    // First find the fixed extent list renderer.
+    RenderSliverFixedExtentList extentList;
+    for (var p = itemContext.findRenderObject();
+        p != null;
+        p = p is RenderObject ? p.parent as RenderObject : null) {
+      if (p is RenderSliverFixedExtentList) {
+        extentList = p;
+        break;
+      }
+    }
+    if (extentList == null) {
+      // We failed.
+      return;
+    }
 
-    var dropTarget = index >= 0 && index < _flat.length ? _flat[index] : null;
+    // Ok we've got an extent list. Get the first child and find its top.
+    var first = extentList.firstChild;
+    // We should always have children but maybe the list is fully collapsed?
+    if (first != null) {
+      // Compute the scroll offset of the first visible item (N.B. this is not
+      // the first item in the list, it's the first one that's probably
+      // visible).
+      var offsetOfFirst = extentList.childScrollOffset(first);
+      // We know this item's in the tree, so we can call globalToLocal on it.
+      var local = first.globalToLocal(details.globalPosition);
+      // Now we know where our cursor is relative to the first visible item.
+      var y = offsetOfFirst + local.dy;
+      // Compute index of item the cursor is over.
+      var index = (y / style.itemHeight).floor();
+      // Compute offset over that row (how close are we to the top of the row
+      // we're hovering).
+      var localOffset = y % style.itemHeight;
 
-    var state = localOffset < 10
-        ? DropState.above
-        : localOffset > style.itemHeight - 10
-            ? DropState.below
-            : DropState.into;
+      // The rest is the same as before, use index to compute drop target.
+      var dropTarget = index >= 0 && index < _flat.length ? _flat[index] : null;
 
-    var target = TreeDragOperationTarget.forItem(dropTarget, state);
-    if (target != null && allowDrop(target, _dragOperation.items)) {
-      _dragOperation.dropTarget(target);
-    } else {
-      _dragOperation.dropTarget(null);
+      var state = localOffset < 10
+          ? DropState.above
+          : localOffset > style.itemHeight - 10
+              ? DropState.below
+              : DropState.into;
+
+      var target = TreeDragOperationTarget.forItem(dropTarget, state);
+      if (target != null && allowDrop(target, _dragOperation.items)) {
+        _dragOperation.dropTarget(target);
+      } else {
+        _dragOperation.dropTarget(null);
+      }
     }
   }
 
