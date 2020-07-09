@@ -132,10 +132,10 @@ void main() {
     expect(artboards.first.width, 1920);
     expect(artboards.first.height, 1080);
 
-    expect(artboards.first.children.first.name, 'A');
-    expect(artboards.first.children.first is Node, true);
-    expect((artboards.first.children.first as Node).children.length, 2);
-    expect((artboards.first.children.first as Node).children[1].name, 'C');
+    expect(artboards.first.children[1].name, 'A');
+    expect(artboards.first.children[1] is Node, true);
+    expect((artboards.first.children[1] as Node).children.length, 2);
+    expect((artboards.first.children[1] as Node).children[1].name, 'C');
   });
 
   test('Can generate a simple animated file', () {
