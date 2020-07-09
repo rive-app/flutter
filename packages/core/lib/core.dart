@@ -911,25 +911,26 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       // reader here so that we don't overflow the exact length we're allowed to
       // read.
       var valueReader = BinaryReader.fromList(valueBytes);
-
-      bool remapped = false;
-      for (final remap in remaps) {
-        if (fieldType == remap?.fieldType) {
-          // Id fields get remapped so we read them in as integers allowing an
-          // external process to then map those integers to those ids. This
-          // should be done before the batch add wrapping this entire operation
-          // completes.
-          if (remap.add(object, propertyKey, valueReader)) {
-            remapped = true;
-            break;
+      if (remaps != null) {
+        bool remapped = false;
+        for (final remap in remaps) {
+          if (fieldType == remap?.fieldType) {
+            // Id fields get remapped so we read them in as integers allowing an
+            // external process to then map those integers to those ids. This
+            // should be done before the batch add wrapping this entire
+            // operation completes.
+            if (remap.add(object, propertyKey, valueReader)) {
+              remapped = true;
+              break;
+            }
           }
         }
-      }
-      if (!remapped) {
-        // This will attempt to set the object property, but failure here is
-        // acceptable.
-        setObjectPropertyCore(
-            object, propertyKey, fieldType.deserialize(valueReader));
+        if (!remapped) {
+          // This will attempt to set the object property, but failure here is
+          // acceptable.
+          setObjectPropertyCore(
+              object, propertyKey, fieldType.deserialize(valueReader));
+        }
       }
     }
     return object as T;
