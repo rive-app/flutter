@@ -47,6 +47,6 @@ class _FMAState extends State<FMA> {
   Widget build(BuildContext context) {
     return _rive == null
         ? const SizedBox()
-        : RiveRenderer(artboard: _rive.mainArtboard, fit: widget.fit);
+        : Rive(artboard: _rive.mainArtboard, fit: widget.fit);
   }
 }
