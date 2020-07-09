@@ -32,8 +32,7 @@ class CreatePopupButton extends StatelessWidget {
               listenable: file.stage.toolListenable,
               isSelected: () => file.stage.tool == RectangleTool.instance,
               shortcut: ShortcutAction.rectangleTool,
-              select: () =>
-                  file.rive.triggerAction(ShortcutAction.rectangleTool),
+              select: () => file.stage.tool = RectangleTool.instance,
             ),
             ToolPopupItem(
               'Ellipse',
@@ -41,7 +40,7 @@ class CreatePopupButton extends StatelessWidget {
               listenable: file.stage.toolListenable,
               isSelected: () => file.stage.tool == EllipseTool.instance,
               shortcut: ShortcutAction.ellipseTool,
-              select: () => file.rive.triggerAction(ShortcutAction.ellipseTool),
+              select: () => file.stage.tool = EllipseTool.instance,
             ),
             // PopupContextItem(
             //   'Polygon',
@@ -74,14 +73,12 @@ class CreatePopupButton extends StatelessWidget {
           },
         ),
         PopupContextItem.separator(),
-        ToolPopupItem(
-          'Artboard',
-          icon: ArtboardTool.instance.icon,
-          listenable: file.stage.toolListenable,
-          isSelected: () => file.stage.tool == ArtboardTool.instance,
-          shortcut: ShortcutAction.artboardTool,
-          select: () => file.rive.triggerAction(ShortcutAction.artboardTool),
-        ),
+        ToolPopupItem('Artboard',
+            icon: ArtboardTool.instance.icon,
+            listenable: file.stage.toolListenable,
+            isSelected: () => file.stage.tool == ArtboardTool.instance,
+            shortcut: ShortcutAction.artboardTool,
+            select: () => file.stage.tool = ArtboardTool.instance),
         // PopupContextItem(
         //   'Bone',
         //   icon: 'tool-bone',
