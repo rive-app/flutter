@@ -17,6 +17,8 @@ abstract class PathVertex extends PathVertexBase {
 
   @override
   String get timelineName => 'Vertex ${path.vertices.indexOf(this) + 1}';
+  @override
+  bool get canRename => false;
   // <- editor-only
 
   // -> editor-only
