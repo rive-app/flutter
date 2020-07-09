@@ -29,12 +29,10 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
 
   // -> editor-only
   GradientDelegate _delegate;
-  // <- editor-only
 
   @override
   Component get timelineProxy => parent;
 
-  // -> editor-only
   /// Event triggered whenever a stops property changes.
   final Event stopsChanged = Event();
   // <- editor-only

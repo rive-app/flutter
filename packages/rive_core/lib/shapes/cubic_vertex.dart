@@ -5,9 +5,10 @@ abstract class CubicVertex extends CubicVertexBase {
   Vec2D get outPoint;
   Vec2D get inPoint;
 
-  // -> editor-only
   set outPoint(Vec2D value);
   set inPoint(Vec2D value);
+  
+  // -> editor-only
   bool accumulateAngle = false;
   // <- editor-only
 }

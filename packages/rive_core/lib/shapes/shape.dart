@@ -41,7 +41,9 @@ class Shape extends ShapeBase with ShapePaintContainer {
   // with constraints eventually).
   AABB _worldBounds;
   AABB _localBounds;
+  // -> editor-only
   BoundsDelegate _delegate;
+  // <- editor-only
 
   @override
   AABB get worldBounds => _worldBounds ??= computeWorldBounds();
@@ -53,10 +55,12 @@ class Shape extends ShapeBase with ShapePaintContainer {
   /// need to rebuild the cached bounds.
   void markBoundsDirty() {
     _worldBounds = _localBounds = null;
+    // -> editor-only
     _delegate?.boundsChanged();
     for (final path in paths) {
       path.markBoundsDirty();
     }
+    // <- editor-only
   }
 
   @override
@@ -293,6 +297,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return localBounds;
   }
 
+  // -> editor-only
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is BoundsDelegate) {
@@ -301,6 +306,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
       _delegate = null;
     }
   }
+  // <- editor-only
 
   @override
   void blendModeValueChanged(int from, int to) => _markBlendModeDirty();

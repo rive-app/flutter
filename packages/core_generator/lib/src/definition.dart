@@ -522,7 +522,8 @@ class Definition {
           ..sort());
 
     if (config.isRuntime) {
-      ctxCode.writeln('''class ${config.coreContextName} {''');
+      ctxCode.writeln('// ignore: avoid_classes_with_only_static_members');
+      ctxCode.writeln('class ${config.coreContextName} {');
     } else {
       ctxCode.writeln('''abstract class ${config.coreContextName}
                         extends CoreContext {''');

@@ -18,7 +18,9 @@ class Node extends NodeBase {
 
   final Mat2D transform = Mat2D();
   final Mat2D worldTransform = Mat2D();
+  // -> editor-only
   BoundsDelegate _delegate;
+  // <- editor-only
 
   double _renderOpacity = 0;
   double get renderOpacity => _renderOpacity;
@@ -74,12 +76,13 @@ class Node extends NodeBase {
     } else {
       Mat2D.copy(worldTransform, transform);
     }
-    _delegate?.boundsChanged();
     // -> editor-only
+    _delegate?.boundsChanged();
     _worldTransformChanged?.notify();
     // <- editor-only
   }
 
+  // -> editor-only
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is BoundsDelegate) {
@@ -88,6 +91,7 @@ class Node extends NodeBase {
       _delegate = null;
     }
   }
+  // <- editor-only
 
   void calculateWorldTransform() {
     var parent = this.parent;

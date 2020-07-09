@@ -39,8 +39,10 @@ abstract class Path extends PathBase {
   Mat2D get inversePathTransform;
   Mat2D get inverseWorldTransform => _inverseWorldTransform;
 
+  // -> editor-only
   @override
   Component get timelineParent => _shape;
+  // <- editor-only
 
   @override
   bool resolveArtboard() {
@@ -48,6 +50,7 @@ abstract class Path extends PathBase {
     return super.resolveArtboard();
   }
 
+  // -> editor-only
   BoundsDelegate _delegate;
 
   void markBoundsDirty() {
@@ -62,6 +65,7 @@ abstract class Path extends PathBase {
       _delegate = null;
     }
   }
+  // <- editor-only
 
   @override
   void visitAncestor(Component ancestor) {

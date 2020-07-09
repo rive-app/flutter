@@ -17,21 +17,22 @@ class CubicAsymmetricVertex extends CubicAsymmetricVertexBase {
             cos(rotation) * outDistance, sin(rotation) * outDistance));
   }
 
-  // -> editor-only
   @override
   set outPoint(Vec2D value) {
+    // -> editor-only
     var lastRotation = rotation;
     var diffOut = Vec2D.fromValues(value[0] - x, value[1] - y);
     outDistance = Vec2D.length(diffOut);
     rotation = atan2(diffOut[1], diffOut[0]);
+    // <- editor-only
     _outPoint = Vec2D.clone(value);
-    
+    // -> editor-only
     if (accumulateAngle) {
       rotation = lastRotation +
           atan2(sin(rotation - lastRotation), cos(rotation - lastRotation));
     }
+    // <- editor-only
   }
-  // <- editor-only
 
   @override
   Vec2D get inPoint {
@@ -42,22 +43,22 @@ class CubicAsymmetricVertex extends CubicAsymmetricVertexBase {
             cos(rotation) * -inDistance, sin(rotation) * -inDistance));
   }
 
-  // -> editor-only
   @override
   set inPoint(Vec2D value) {
+    // -> editor-only
     var lastRotation = rotation;
-
     var diffIn = Vec2D.fromValues(value[0] - x, value[1] - y);
     inDistance = Vec2D.length(diffIn);
     rotation = atan2(diffIn[1], diffIn[0]) + pi;
+    // <- editor-only
     _inPoint = Vec2D.clone(value);
-
+    // -> editor-only
     if (accumulateAngle) {
       rotation = lastRotation +
           atan2(sin(rotation - lastRotation), cos(rotation - lastRotation));
     }
+    // <- editor-only
   }
-  // <- editor-only
 
   @override
   String toString() {

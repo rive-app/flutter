@@ -30,12 +30,12 @@ abstract class ShapePaint extends ShapePaintBase {
   double get renderOpacity => _paintMutator.renderOpacity;
   set renderOpacity(double value) => _paintMutator.renderOpacity = value;
 
-  @override
-  Component get timelineParent => _shapePaintContainer as Component;
-
   ShapePaintMutator get paintMutator => _paintMutator;
   // -> editor-only
   final Event paintMutatorChanged = Event();
+
+  @override
+  Component get timelineParent => _shapePaintContainer as Component;
   // <- editor-only
 
   void _changeMutator(ShapePaintMutator mutator) {
