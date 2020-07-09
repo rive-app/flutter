@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class Event extends ChangeNotifier {
   void notify() => notifyListeners();
 }
-
+// -> editor-only
 /// A listenable with details of type [T].
 abstract class DetailListenable<T> {
   bool addListener(void Function(T) callback);
@@ -75,3 +75,4 @@ class SuppressableValueNotifier<T> extends ChangeNotifier
   @override
   String toString() => '${describeIdentity(this)}($value)';
 }
+// <- editor-only

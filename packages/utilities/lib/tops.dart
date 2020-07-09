@@ -1,3 +1,4 @@
+// -> include-runtime
 abstract class Parentable<T> {
   T get parent;
 }
@@ -17,3 +18,4 @@ Set<T> tops<T extends Parentable<T>>(Iterable<T> parentables) {
   }
   return tips;
 }
+// <- include-runtime

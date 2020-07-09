@@ -35,7 +35,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   bezier:
     dependency: "direct main"
     description:
@@ -441,10 +441,10 @@ packages:
   rive:
     dependency: "direct main"
     description:
-      path: "../rive_flutter_runtime"
-      relative: true
-    source: path
-    version: "0.0.1"
+      name: rive
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1+2"
   rive_api:
     dependency: "direct main"
     description:
@@ -568,7 +568,7 @@ packages:
       name: stack_trace
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.9.3"
+    version: "1.9.5"
   stream_channel:
     dependency: transitive
     description:

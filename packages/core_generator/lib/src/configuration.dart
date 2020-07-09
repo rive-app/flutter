@@ -8,6 +8,7 @@ const String _coreContext = 'core-context';
 const String _regenKeys = 'regen-keys';
 const String _runtime = 'runtime';
 const String _runtimeCoreFolder = 'runtime-core-folder';
+const String _packagesFolder = 'packages-folder';
 
 /// Configuration for running the Core generator.
 class Configuration {
@@ -19,6 +20,7 @@ class Configuration {
   final bool isVerbose;
   final bool isRuntime;
   final String runtimeCoreFolder;
+  final String packagesFolder;
 
   Configuration({
     this.path,
@@ -29,6 +31,7 @@ class Configuration {
     this.isVerbose,
     this.isRuntime,
     this.runtimeCoreFolder,
+    this.packagesFolder,
   });
 
   factory Configuration.fromArguments(List<String> arguments) {
@@ -40,7 +43,8 @@ class Configuration {
       ..addOption(_coreContext, abbr: 'c')
       ..addFlag(_regenKeys, negatable: false, abbr: 'k')
       ..addFlag(_runtime, negatable: false, abbr: 'r')
-      ..addOption(_runtimeCoreFolder, abbr: 'i');
+      ..addOption(_runtimeCoreFolder, abbr: 'i')
+      ..addOption(_packagesFolder, abbr: 'f');
 
     var argResults = parser.parse(arguments);
 
@@ -53,6 +57,7 @@ class Configuration {
       isVerbose: argResults[_verbose] as bool,
       isRuntime: argResults[_runtime] as bool,
       runtimeCoreFolder: argResults[_runtimeCoreFolder] as String,
+      packagesFolder: argResults[_packagesFolder] as String,
     );
   }
 }

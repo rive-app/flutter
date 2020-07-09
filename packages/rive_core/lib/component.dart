@@ -12,10 +12,12 @@ import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:utilities/dependency_sorter.dart';
-import 'package:utilities/utilities.dart';
+import 'package:utilities/tops.dart';
 export 'package:rive_core/src/generated/component_base.dart';
 
+// -> editor-only
 final _log = Logger('rive_core');
+// <- editor-only
 
 abstract class Component extends ComponentBase<RiveFile>
     implements DependencyGraphNode<Component>, Parentable<Component> {
@@ -166,6 +168,7 @@ abstract class Component extends ComponentBase<RiveFile>
   @override
   Set<Component> get dependents => _dependents;
 
+  // -> editor-only
   /// Override this to define a parent to group this component under.
   Component get timelineParent => null;
 
@@ -175,6 +178,7 @@ abstract class Component extends ComponentBase<RiveFile>
   Component get timelineProxy => this;
 
   String get timelineParentGroup => null;
+  // <- editor-only
 
   bool addDependent(Component dependent) {
     assert(dependent != null, "Dependent cannot be null.");
@@ -231,8 +235,10 @@ abstract class Component extends ComponentBase<RiveFile>
   @mustCallSuper
   void onAdded() {
     if (!canBeOrphaned && parent == null) {
+      // -> editor-only
       _log.severe('Removed component \'$name\' $runtimeType. '
           'Did not have a parent (looked for one with id $parentId).');
+      // <- editor-only
       remove();
     }
   }
@@ -241,11 +247,10 @@ abstract class Component extends ComponentBase<RiveFile>
   void onAddedDirty() {
     if (parentId != null) {
       parent = context?.resolve(parentId);
+      // -> editor-only
       if (parent == null) {
         _log.finest("Failed to resolve parent with id $parentId");
-      }
-      // -> editor-only
-      else {
+      } else {
         // Make a best guess, this is useful when importing objects that are in
         // order as added, this ensures they'll get a valid sort order.
         childOrder ??= parent.children.nextFractionalIndex;

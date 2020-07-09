@@ -12,9 +12,11 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/src/generated/shapes/paint/linear_gradient_base.dart';
 export 'package:rive_core/src/generated/shapes/paint/linear_gradient_base.dart';
 
+// -> editor-only
 abstract class GradientDelegate extends BoundsDelegate {
   void stopsChanged();
 }
+// <- editor-only
 
 /// A core linear gradient. Can be added as a child to a [Shape]'s [Fill] or
 /// [Stroke] to paint that Fill or Stroke with a gradient. This is the
@@ -25,13 +27,17 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
   /// this container.
   final List<GradientStop> gradientStops = [];
 
+  // -> editor-only
   GradientDelegate _delegate;
+  // <- editor-only
 
   @override
   Component get timelineProxy => parent;
 
+  // -> editor-only
   /// Event triggered whenever a stops property changes.
   final Event stopsChanged = Event();
+  // <- editor-only
 
   bool _paintsInWorldSpace = true;
   bool get paintsInWorldSpace => _paintsInWorldSpace;
@@ -61,7 +67,9 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     super.childAdded(child);
     if (child is GradientStop && !gradientStops.contains(child)) {
       gradientStops.add(child);
+      // -> editor-only
       stopsChanged.notify();
+      // <- editor-only
       markStopsDirty();
     }
   }
@@ -71,7 +79,9 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     super.childRemoved(child);
     if (child is GradientStop && gradientStops.contains(child)) {
       gradientStops.remove(child);
+      // -> editor-only
       stopsChanged.notify();
+      // <- editor-only
       markStopsDirty();
     }
   }
@@ -124,7 +134,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
             makeGradient(startOffset, endOffset, colors, colorPositions);
       }
     }
-
+    // -> editor-only
     // Regardless of rebuild, if the world transformed, let's notify the
     // delegate.
     if (worldTransformed || localTransformed) {
@@ -132,6 +142,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     } else if (stopsChanged) {
       _delegate?.stopsChanged();
     }
+    // <- editor-only
   }
 
   @protected
@@ -139,6 +150,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
           List<ui.Color> colors, List<double> colorPositions) =>
       ui.Gradient.linear(start, end, colors, colorPositions);
 
+  // -> editor-only
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is GradientDelegate) {
@@ -147,6 +159,7 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
       _delegate = null;
     }
   }
+  // <- editor-only
 
   @override
   void startXChanged(double from, double to) {

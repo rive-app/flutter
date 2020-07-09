@@ -28,7 +28,7 @@ class Definition {
   final List<Property> _properties = [];
 
   String get packageName => '${config.packageName}'
-      '${config.isRuntime ? '/' + config.packageName + '_core' : ''}';
+      '${config.isRuntime ? '/src/' + config.packageName + '_core' : ''}';
 
   List<Property> get properties => config.isRuntime
       ? _properties

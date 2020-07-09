@@ -31,7 +31,7 @@ void main(List<String> arguments) {
 
     var fromFolder = '${config.runtimeCoreFolder}lib/';
     var subLength = fromFolder.length;
-    var base = '${config.output}lib/${config.packageName}_core/';
+    var base = '${config.output}lib/src/${config.packageName}_core/';
     if (Directory(base).existsSync()) {
       Directory(base).deleteSync(recursive: true);
     }
@@ -78,7 +78,7 @@ void main(List<String> arguments) {
             ' \'package:${package}_core/src/generated',
             ' \'package:${package}/src/generated');
         contents = contents.replaceAll(' \'package:${package}_core/',
-            ' \'package:${package}/${package}_core/');
+            ' \'package:${package}/src/${package}_core/');
         contents = contents.replaceAll(
             ' \'package:core/', ' \'package:${package}/src/core/');
         for (final moved in movePackages) {
@@ -101,7 +101,7 @@ void main(List<String> arguments) {
         }
 
         var file =
-            File('${config.output}lib/${config.packageName}_core/$subPath');
+            File('${config.output}lib/src/${config.packageName}_core/$subPath');
         file.createSync(recursive: true);
         file.writeAsStringSync(formattedCode);
 
@@ -112,7 +112,7 @@ void main(List<String> arguments) {
       }
     }, onDone: () {
       for (final package in movePackages) {
-        movePackage('${config.output}../$package/lib',
+        movePackage('${config.packagesFolder}/$package/lib',
             '${config.output}lib/src/$package');
       }
     });

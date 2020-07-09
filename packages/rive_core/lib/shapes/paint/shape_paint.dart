@@ -34,12 +34,16 @@ abstract class ShapePaint extends ShapePaintBase {
   Component get timelineParent => _shapePaintContainer as Component;
 
   ShapePaintMutator get paintMutator => _paintMutator;
+  // -> editor-only
   final Event paintMutatorChanged = Event();
+  // <- editor-only
 
   void _changeMutator(ShapePaintMutator mutator) {
     _paint = makePaint();
     _paintMutator = mutator;
+    // -> editor-only
     paintMutatorChanged?.notify();
+    // <- editor-only
   }
 
   /// Implementing classes are expected to override this to create a paint

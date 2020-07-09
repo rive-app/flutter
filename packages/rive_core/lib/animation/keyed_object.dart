@@ -13,7 +13,9 @@ import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'linear_animation.dart';
 export 'package:rive_core/src/generated/animation/keyed_object_base.dart';
 
+// -> editor-only
 final _log = Logger('animation');
+// <- editor-only
 
 class KeyedObject extends KeyedObjectBase<RiveFile> {
   final HashMap<int, KeyedProperty> _keyedProperties =
@@ -21,8 +23,10 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
 
   Iterable<KeyedProperty> get keyedProperties => _keyedProperties.values;
 
+  // -> editor-only
   final Event _keyframesMoved = Event();
   Listenable get keyframesMoved => _keyframesMoved;
+  // <- editor-only
 
   @override
   void onAdded() {
@@ -55,6 +59,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     // <- editor-only
   }
 
+  // -> editor-only
   void _removeAll() {
     assert(context != null);
     // Copy lists to not modify them while iterating.
@@ -67,7 +72,6 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     context.removeObject(this);
   }
 
-  // -> editor-only
   LinearAnimation get animation => context?.resolve(animationId);
   // <- editor-only
 
@@ -89,8 +93,10 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     // If the property is already keyed, that's ok just make sure the
     // KeyedObject matches.
     if (value != null && value != property) {
+      // -> editor-only
       _log.severe('Trying to add a KeyedProperty for a property'
           'that\'s already keyed in this LinearAnimation?!');
+      // <- editor-only
       return false;
     }
     _keyedProperties[property.propertyKey] = property;
@@ -168,6 +174,7 @@ class KeyedObject extends KeyedObjectBase<RiveFile> {
     animation?.internalKeyFramesChanged();
   }
 
+  // -> editor-only
   // Should be @internal when supported...
   void internalKeyFramesMoved() => _keyframesMoved.notify();
 
