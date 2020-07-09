@@ -13,8 +13,10 @@ class Stroke extends StrokeBase {
     ..strokeJoin = strokeJoin
     ..strokeWidth = thickness;
 
+  // -> editor-only
   @override
   String get timelineParentGroup => 'strokes';
+  // <- editor-only
 
   StrokeCap get strokeCap => StrokeCap.values[cap];
   set strokeCap(StrokeCap value) => cap = value.index;

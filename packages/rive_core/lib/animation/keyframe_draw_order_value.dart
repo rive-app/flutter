@@ -82,6 +82,7 @@ class KeyFrameDrawOrderValue extends KeyFrameDrawOrderValueBase {
     }
   }
 
+  // -> editor-only
   @override
   int runtimeValueValue(FractionalIndex editorValue) {
     // This object doesn't actually get exported by core, so this will never get
@@ -92,4 +93,5 @@ class KeyFrameDrawOrderValue extends KeyFrameDrawOrderValueBase {
     assert(false, 'this should never get called');
     return 0;
   }
+  // <- editor-only
 }

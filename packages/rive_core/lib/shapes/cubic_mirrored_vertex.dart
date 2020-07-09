@@ -15,22 +15,22 @@ class CubicMirroredVertex extends CubicMirroredVertexBase {
         Vec2D.fromValues(cos(rotation) * distance, sin(rotation) * distance));
   }
 
-  // -> editor-only
   @override
   set outPoint(Vec2D value) {
+    // -> editor-only
     var lastRotation = rotation;
-    
     var diffOut = Vec2D.fromValues(value[0] - x, value[1] - y);
     distance = Vec2D.length(diffOut);
     rotation = atan2(diffOut[1], diffOut[0]);
+    // <- editor-only
     _outPoint = Vec2D.clone(value);
-
+    // -> editor-only
     if (accumulateAngle) {
       rotation = lastRotation +
           atan2(sin(rotation - lastRotation), cos(rotation - lastRotation));
     }
+    // <- editor-only
   }
-  // <- editor-only
 
   @override
   Vec2D get inPoint {
@@ -38,13 +38,11 @@ class CubicMirroredVertex extends CubicMirroredVertexBase {
         Vec2D.fromValues(cos(rotation) * -distance, sin(rotation) * -distance));
   }
 
-  // -> editor-only
   @override
   set inPoint(Vec2D value) {
     var diffIn = Vec2D.fromValues(value[0] - x, value[1] - y);
     outPoint = Vec2D.subtract(Vec2D(), translation, diffIn);
   }
-  // <- editor-only
 
   @override
   String toString() {

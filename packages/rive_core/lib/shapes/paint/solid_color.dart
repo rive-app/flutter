@@ -9,8 +9,10 @@ export 'package:rive_core/src/generated/shapes/paint/solid_color_base.dart';
 
 /// A solid color painter for a shape. Works for both Fill and Stroke.
 class SolidColor extends SolidColorBase with ShapePaintMutator {
+  // -> editor-only
   @override
   Component get timelineProxy => parent;
+  // <- editor-only
 
   Color get color => Color(colorValue);
   set color(Color c) {

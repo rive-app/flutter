@@ -6,8 +6,10 @@ import 'package:utilities/binary_buffer/binary_writer.dart';
 
 /// Not actually a core path vertex, just used to build up the render path.
 class RenderCubicVertex extends CubicVertex {
+  // -> editor-only
   @override
   void changeNonNull() {}
+  // <- editor-only
 
   @override
   Vec2D inPoint;
@@ -17,6 +19,8 @@ class RenderCubicVertex extends CubicVertex {
   @override
   void onAddedDirty() {}
 
+  // -> editor-only
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {}
+  // <- editor-only
 }
