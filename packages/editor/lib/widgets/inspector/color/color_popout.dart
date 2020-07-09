@@ -130,145 +130,149 @@ class ColorPopout extends StatelessWidget {
                     complete: inspecting.completeChange,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(
-                    20,
-                  ),
-                  child: Row(
-                    children: [
-                      // TODO: disabled eyedropper due to CanvasKit bug
-                      // Enable once bug is fixed.
-                      // TintedIconButton(
-                      //   icon: 'eyedropper',
-                      //   color: theme.colors.popupIcon,
-                      //   onPress: () {
-                      //     var tool = ColorLoupeTool.instance;
-                      //     inspecting.context.stage.tool = tool;
-                      //     tool.pickColor = (color) {
-                      //       inspecting.changeColor(HSVColor.fromColor(color));
-                      //       inspecting.completeChange();
-                      //     };
-                      //   },
-                      // ),
-                      // const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            ColorSlider(
-                              color:
-                                  HSVColor.fromAHSV(1, hsv.hue, 1, 1).toColor(),
-                              value: hsv.hue / 360,
-                              changeValue: type == null
-                                  ? null
-                                  : (value) {
-                                      inspecting.changeColor(
-                                        HSVColor.fromAHSV(
-                                          hsv.alpha,
-                                          value * 360,
-                                          hsv.saturation,
-                                          hsv.value,
-                                        ),
-                                      );
-                                    },
-                              completeChange: inspecting.completeChange,
-                              background: (context) => Container(
-                                child: const CustomPaint(
-                                  painter: HueSliderBackground(),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            ColorSlider(
-                              color: hsv.toColor(),
-                              value: hsv.alpha,
-                              changeValue: type == null
-                                  ? null
-                                  : (value) {
-                                      inspecting.changeColor(
-                                        HSVColor.fromAHSV(
-                                          value,
-                                          hsv.hue,
-                                          hsv.saturation,
-                                          hsv.value,
-                                        ),
-                                      );
-                                    },
-                              completeChange: inspecting.completeChange,
-                              background: (context) => Container(
-                                child: CustomPaint(
-                                  painter: OpacitySliderBackground(
-                                    color: HSVColor.fromAHSV(
-                                      1,
-                                      hsv.hue,
-                                      hsv.saturation,
-                                      hsv.value,
-                                    ).toColor(),
-                                    background:
-                                        RiveTheme.of(context).colors.popupIcon,
+                if (inspecting.canChangeType) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(
+                      20,
+                    ),
+                    child: Row(
+                      children: [
+                        // TODO: disabled eyedropper due to CanvasKit bug
+                        // Enable once bug is fixed.
+                        // TintedIconButton(
+                        //   icon: 'eyedropper',
+                        //   color: theme.colors.popupIcon,
+                        //   onPress: () {
+                        //     var tool = ColorLoupeTool.instance;
+                        //     inspecting.context.stage.tool = tool;
+                        //     tool.pickColor = (color) {
+                        //       inspecting.changeColor(HSVColor.fromColor(color));
+                        //       inspecting.completeChange();
+                        //     };
+                        //   },
+                        // ),
+                        // const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ColorSlider(
+                                color: HSVColor.fromAHSV(1, hsv.hue, 1, 1)
+                                    .toColor(),
+                                value: hsv.hue / 360,
+                                changeValue: type == null
+                                    ? null
+                                    : (value) {
+                                        inspecting.changeColor(
+                                          HSVColor.fromAHSV(
+                                            hsv.alpha,
+                                            value * 360,
+                                            hsv.saturation,
+                                            hsv.value,
+                                          ),
+                                        );
+                                      },
+                                completeChange: inspecting.completeChange,
+                                background: (context) => Container(
+                                  child: const CustomPaint(
+                                    painter: HueSliderBackground(),
                                   ),
                                 ),
                               ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _ColorTriplet(
-                  value: hsv,
-                  labelA: 'H',
-                  labelB: 'S',
-                  labelC: 'B',
-                  converterA: HueValueConverter(hsv),
-                  converterB: SaturationValueConverter(hsv),
-                  converterC: BrightnessValueConverter(hsv),
-                  change: type == null ? null : inspecting.changeColor,
-                ),
-                const SizedBox(height: 15),
-                _ColorTriplet(
-                  value: hsv,
-                  labelA: 'R',
-                  labelB: 'G',
-                  labelC: 'B',
-                  converterA: RedValueConverter(hsv),
-                  converterB: GreenValueConverter(hsv),
-                  converterC: BlueValueConverter(hsv),
-                  change: type == null ? null : inspecting.changeColor,
-                ),
-                const SizedBox(height: 15),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: _LabeledTextField(
-                          label: 'HEX',
-                          value: hsv,
-                          padRight: true,
-                          converter: HexValueConverter.instance,
-                          change: type == null
-                              ? null
-                              : (changedHSV) => inspecting.changeColor(
-                                    changedHSV.withAlpha(hsv.alpha),
+                              const SizedBox(height: 20),
+                              ColorSlider(
+                                color: hsv.toColor(),
+                                value: hsv.alpha,
+                                changeValue: type == null
+                                    ? null
+                                    : (value) {
+                                        inspecting.changeColor(
+                                          HSVColor.fromAHSV(
+                                            value,
+                                            hsv.hue,
+                                            hsv.saturation,
+                                            hsv.value,
+                                          ),
+                                        );
+                                      },
+                                completeChange: inspecting.completeChange,
+                                background: (context) => Container(
+                                  child: CustomPaint(
+                                    painter: OpacitySliderBackground(
+                                      color: HSVColor.fromAHSV(
+                                        1,
+                                        hsv.hue,
+                                        hsv.saturation,
+                                        hsv.value,
+                                      ).toColor(),
+                                      background: RiveTheme.of(context)
+                                          .colors
+                                          .popupIcon,
+                                    ),
                                   ),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: _LabeledTextField(
-                          value: hsv,
-                          label: 'A',
-                          converter: AlphaValueConverter(hsv),
-                          change: type == null ? null : inspecting.changeColor,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  _ColorTriplet(
+                    value: hsv,
+                    labelA: 'H',
+                    labelB: 'S',
+                    labelC: 'B',
+                    converterA: HueValueConverter(hsv),
+                    converterB: SaturationValueConverter(hsv),
+                    converterC: BrightnessValueConverter(hsv),
+                    change: type == null ? null : inspecting.changeColor,
+                  ),
+                  const SizedBox(height: 15),
+                  _ColorTriplet(
+                    value: hsv,
+                    labelA: 'R',
+                    labelB: 'G',
+                    labelC: 'B',
+                    converterA: RedValueConverter(hsv),
+                    converterB: GreenValueConverter(hsv),
+                    converterC: BlueValueConverter(hsv),
+                    change: type == null ? null : inspecting.changeColor,
+                  ),
+                  const SizedBox(height: 15),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: _LabeledTextField(
+                            label: 'HEX',
+                            value: hsv,
+                            padRight: true,
+                            converter: HexValueConverter.instance,
+                            change: type == null
+                                ? null
+                                : (changedHSV) => inspecting.changeColor(
+                                      changedHSV.withAlpha(hsv.alpha),
+                                    ),
+                          ),
+                        ),
+                        Expanded(
+                          child: _LabeledTextField(
+                            value: hsv,
+                            label: 'A',
+                            converter: AlphaValueConverter(hsv),
+                            change:
+                                type == null ? null : inspecting.changeColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ],
             ),
           ),
