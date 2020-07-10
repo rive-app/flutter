@@ -315,6 +315,9 @@ abstract class Path extends PathBase {
   }
   // <- editor-only
 
+  @override
+  AABB get localBounds => preciseComputeBounds(renderVertices, Mat2D());
+
   AABB preciseComputeBounds(List<PathVertex> renderPoints, Mat2D transform) {
     if (renderPoints.isEmpty) {
       return AABB();

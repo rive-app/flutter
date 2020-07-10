@@ -10,9 +10,16 @@ import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe_draw_order.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/node.dart';
 import 'package:rive_core/runtime/runtime_importer.dart';
+import 'package:rive_core/shapes/path.dart';
+import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/shape_tool.dart';
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 import 'package:utilities/utilities.dart';
@@ -176,20 +183,30 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
   }
 }
 
+Set<Component> _topSelection(OpenFileContext file) {
+  var components = <Component>{};
+  for (final item in file.selection.items) {
+    if (item is StageItem && item.component is Component) {
+      components.add(item.component as Component);
+    }
+  }
+
+  return tops(components);
+}
+
 class _RiveHierarchyClipboard extends RiveClipboard {
   Uint8List bytes;
-  Set<Component> copiedComponents;
+  final Set<Component> copiedComponents = {};
+
+  /// Store a mapping of exported component to original parent it was exported
+  /// from. Note that components that don't turn up in this mapping are parented
+  /// to something else that was exported.
+  final Map<int, Component> originalParent = {};
 
   _RiveHierarchyClipboard(OpenFileContext file) : super._() {
-    var components = <Component>{};
-    for (final item in file.selection.items) {
-      if (item is StageItem && item.component is Component) {
-        components.add(item.component as Component);
-      }
-    }
-    copiedComponents = <Component>{};
+    var topComponents = _topSelection(file);
 
-    for (final component in tops(components)) {
+    for (final component in topComponents) {
       // This is a top level component, add it and any of its children to the
       // copy set.
       copiedComponents.add(component);
@@ -204,6 +221,9 @@ class _RiveHierarchyClipboard extends RiveClipboard {
     HashMap<Id, int> idToIndex = HashMap<Id, int>();
     int index = 0;
     for (final component in copiedComponents) {
+      if (topComponents.contains(component)) {
+        originalParent[index] = component.parent;
+      }
       idToIndex[component.id] = index++;
     }
 
@@ -217,16 +237,30 @@ class _RiveHierarchyClipboard extends RiveClipboard {
 
   @override
   bool paste(OpenFileContext file) {
-    var selectedItems = file.selection.items;
-    var selectedItem = selectedItems.isNotEmpty ? selectedItems.last : null;
-    Component pasteDestination;
-    if (selectedItem is StageItem &&
-        selectedItem.component is Component &&
-        !copiedComponents.contains(selectedItem.component)) {
-      pasteDestination = selectedItem.component as Component;
-    } else {
-      pasteDestination = file.core.backboard.activeArtboard;
+    var originalParents = originalParent.values.toSet();
+    var topSelectedComponents = _topSelection(file);
+
+    var topParentsOfSelection = <Component>{};
+    for (final component in topSelectedComponents) {
+      topParentsOfSelection.add(component.parent);
     }
+
+    var pasteToOriginalParents =
+        originalParents.difference(topParentsOfSelection).isEmpty;
+
+    Component pasteDestination = topSelectedComponents.isEmpty
+        ? file.backboard.activeArtboard
+        : topSelectedComponents
+            .first; // topParentsOfSelection.first ?? topSelectedComponents.first;
+    var pasteDestinationParent =
+        pasteDestination.parent ?? file.backboard.activeArtboard;
+    // if (selectedItem is StageItem &&
+    //     selectedItem.component is Component &&
+    //     !copiedComponents.contains(selectedItem.component)) {
+    //   pasteDestination = selectedItem.component as Component;
+    // } else {
+    //   pasteDestination = file.core.backboard.activeArtboard;
+    // }
 
     var reader = BinaryReader.fromList(bytes);
     var numObjects = reader.readVarUint();
@@ -236,8 +270,11 @@ class _RiveHierarchyClipboard extends RiveClipboard {
     var drawOrderRemap = DrawOrderRemap(core.fractionalIndexType, core.intType);
     var remaps = <RuntimeRemap>[idRemap, drawOrderRemap];
 
-    var targetArtboard = pasteDestination.artboard;
+    var targetArtboard = file.backboard.activeArtboard;
     var objects = List<Component>(numObjects);
+
+    Map<Node, Vec2D> needsCentering = {};
+
     core.batchAdd(() {
       for (int i = 0; i < numObjects; i++) {
         var component = core.readRuntimeObject<Component>(reader, remaps);
@@ -268,12 +305,86 @@ class _RiveHierarchyClipboard extends RiveClipboard {
       }
 
       // Any component objects with no id map to the pasteDestination.
-      for (final object in objects) {
+      for (int i = 0; i < objects.length; i++) {
+        final object = objects[i];
         if (object is Component && object.parentId == null) {
-          object.parentId = pasteDestination.id;
+          if (pasteToOriginalParents) {
+            // Go look up the parent..
+            object.parentId = (originalParent[i] ?? pasteDestination).id;
+          } else {
+            // At some point we need to move this logic into the class hierarchy
+            // so components can more generally handle their pasting rules.
+            // We're keeping it here for now to SIP the clipboard logic which is
+            // very much in flux.
+            var toCenter = object;
+            if (object is PathBase) {
+              if (pasteDestination is ShapeBase) {
+                object.parentId = pasteDestination.id;
+              } else if (pasteDestination is PathBase) {
+                object.parentId = pasteDestinationParent.id;
+              } else {
+                var shape = ShapeTool.makeShape(targetArtboard, object as Path,
+                    appendToArtboard: false);
+                shape.parentId = pasteDestinationParent.id;
+                var niceName = object.name
+                    .replaceAll(RegExp('path', caseSensitive: false), '')
+                    .trim();
+                shape.name = '$niceName Shape';
+                toCenter = shape;
+              }
+            } else {
+              object.parentId = pasteDestinationParent.id;
+            }
+            if (toCenter is Node && pasteDestination is Node) {
+              // Get world center of paste target before any new objects get
+              // used to recompute bounds (basically bounds at paste).
+              var localCenter =
+                  AABB.center(Vec2D(), pasteDestination.localBounds);
+              // Store the world center with the item that later needs to be
+              // centered at that world coordinate.
+              needsCentering[toCenter] = Vec2D.transformMat2D(
+                  Vec2D(),
+                  localCenter,
+                  pasteDestination.worldTransform);
+              
+            }
+          }
         }
       }
     });
+
+    // Advance so we have valid bounds.
+    targetArtboard.advance(0);
+
+    // Iterate all objects that need centering.
+    for (final node in needsCentering.keys) {
+
+      // Get the target (center in world space) of this object.
+      var target = needsCentering[node];
+
+      // Get target center in local space.
+      var toLocal = Mat2D();
+      if (!Mat2D.invert(toLocal, (node.parent as Node).worldTransform)) {
+        Mat2D.identity(toLocal);
+      }
+
+      // This is our center in local space.
+      Vec2D center = Vec2D.transformMat2D(Vec2D(), target, toLocal);
+      
+      
+      // Compute our local bounds.
+      var nodeTransformedBounds = node.localBounds.transform(node.transform);
+      // Get our individual center in local bounds.
+      var nodeCenterTransformed = AABB.center(Vec2D(), nodeTransformedBounds);
+      // Compute offset to transformed local center.
+      var toNodeCenter =
+          Vec2D.subtract(Vec2D(), nodeCenterTransformed, node.translation);
+
+      // Move node to the local center, minus the computed offset to our
+      // individual center.
+      node.x = center[0] - toNodeCenter[0];
+      node.y = center[1] - toNodeCenter[1];
+    }
 
     // Finally select the newly added items.
     var selection = <StageItem>{};
