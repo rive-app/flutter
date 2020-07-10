@@ -10,3 +10,16 @@ services:
       - "8000:8000"
     environment:
       - PRIVATE_API=$PRIVATE_API
+  peon:
+    container_name: peon
+    build: 
+        context: "."
+        dockerfile: Dockerfile.peon
+    volumes:
+        - "./source:/app/source"
+    environment:
+        - AWS_ACCESS_KEY=$AWS_ACCESS_KEY
+        - AWS_SECRET_KEY=$AWS_SECRET_KEY
+        - AWS_QUEUE=$AWS_QUEUE
+    stdin_open: true
+    tty: true 
