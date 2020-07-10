@@ -156,6 +156,7 @@ class AutoTool extends TransformHandleTool {
       var item = hitItem.selectionTarget;
       if (item.isVisible &&
           item.isSelectable &&
+          (stage.soloItems == null || stage.isValidSoloSelection(item)) && 
           item.intersectsRect(marqueePoly)) {
         inMarquee.add(item);
       }
