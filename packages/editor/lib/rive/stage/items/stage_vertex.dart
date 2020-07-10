@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
@@ -34,7 +35,6 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
     ..strokeWidth = 3
     ..color = const Color(0xFFFFFFFF);
   static final Paint selectedFill = Paint()..color = const Color(0xFF00BBFF);
-
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
@@ -130,5 +130,16 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
     _worldTranslation[1] += origin[1];
 
     stage.updateBounds(this);
+  }
+
+  @override
+  bool intersectsRect(Float32List rectPoly) {
+    var minX = rectPoly[0];
+    var minY = rectPoly[1];
+    var maxX = rectPoly[4];
+    var maxY = rectPoly[5];
+    var x = worldTranslation[0];
+    var y = worldTranslation[1];
+    return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
 }
