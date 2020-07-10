@@ -15,8 +15,10 @@ class GradientStop extends GradientStopBase {
   @override
   String get timelineName =>
       'Stop ${_gradient.gradientStops.indexOf(this) + 1}';
+  @override
+  bool get canRename => false;
   // <- editor-only
-  
+
   LinearGradient _gradient;
   LinearGradient get gradient => _gradient;
   ui.Color get color => ui.Color(colorValue);

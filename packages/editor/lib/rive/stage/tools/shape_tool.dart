@@ -75,7 +75,8 @@ abstract class ShapeTool extends CreateTool {
       ..y = worldMouse[1];
   }
 
-  static Shape makeShape(Artboard activeArtboard, core.Path path) {
+  static Shape makeShape(Artboard activeArtboard, core.Path path,
+      {bool appendToArtboard = true}) {
     final file = activeArtboard.context;
     Shape shape;
     file.batchAdd(() {
@@ -89,7 +90,9 @@ abstract class ShapeTool extends CreateTool {
       file.addObject(fill);
       file.addObject(solidColor);
       file.addObject(composer);
-      file.addObject(path);
+      if (path.context == null) {
+        file.addObject(path);
+      }
 
       // Let's build up the shape hierarchy:
       // Artboard
@@ -107,7 +110,9 @@ abstract class ShapeTool extends CreateTool {
       shape.appendChild(composer);
       shape.appendChild(fill);
       fill.appendChild(solidColor);
-      activeArtboard.appendChild(shape);
+      if (appendToArtboard) {
+        activeArtboard.appendChild(shape);
+      }
     });
     return shape;
   }

@@ -488,6 +488,7 @@ class OpenFileContext with RiveFileDelegate {
   bool redo() => core.redo();
 
   Backboard _backboard;
+  Backboard get backboard => _backboard;
 
   @override
   void onConnectionStateChanged(CoopConnectionState state) {

@@ -27,7 +27,7 @@ class TransformPopupButton extends StatelessWidget {
             listenable: file.stage.toolListenable,
             isSelected: () => file.stage.tool == AutoTool.instance,
             shortcut: ShortcutAction.autoTool,
-            select: () => file.rive.triggerAction(ShortcutAction.autoTool),
+            select: () => file.stage.tool = AutoTool.instance,
           ),
           ToolPopupItem(
             'Translate',
@@ -35,7 +35,7 @@ class TransformPopupButton extends StatelessWidget {
             listenable: file.stage.toolListenable,
             isSelected: () => file.stage.tool == TranslateTool.instance,
             shortcut: ShortcutAction.translateTool,
-            select: () => file.rive.triggerAction(ShortcutAction.translateTool),
+            select: () => file.stage.tool = TranslateTool.instance,
           ),
           /*
           PopupContextItem(

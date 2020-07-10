@@ -922,6 +922,7 @@ class Stage extends Debouncer {
       _mouseDownHit = null;
     }
     if (_hoverItem == item) {
+      item.isHovered = false;
       _hoverItem = null;
     }
 
