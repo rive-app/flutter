@@ -18,6 +18,7 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/color/color_type.dart';
+import 'package:utilities/restorer.dart';
 
 /// Color change callback used by the various color picker components.
 typedef ChangeColor = void Function(HSVColor);
@@ -718,19 +719,28 @@ class ShapesInspectingColor extends InspectingColor {
     return true;
   }
 
+  Restorer _hiddenHandles;
+
   @override
   void stopEditing() {
     context?.stage?.removeSelectionHandler(_stageSelected);
     context?.removeActionHandler(_handleShortcut);
 
+    _hiddenHandles?.restore();
     super.stopEditing();
   }
 
+  // N.B. this may not be called if it's canceled during dispose, so do all
+  // cleanup in stopEditing.
   @override
   void editorClosed() => _updatePaints();
 
   @override
-  void editorOpened() => _updatePaints();
+  void editorOpened() {
+    _hiddenHandles?.restore();
+    _hiddenHandles = context?.stage?.hideHandles();
+    _updatePaints();
+  }
 
   bool _didSelectGradientHandle = false;
   bool _stageSelected(StageItem item) {
