@@ -41,11 +41,11 @@ class _TokenGeneratorState extends State<TokenGenerator> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Invite someone via email.\n'
+            const Text('Invite someone via email.\n'
                 'An email will be sent to the email address input below '
                 'with a link to sign-up'),
             TextFormField(
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
               controller: _email,
               onChanged: (_) => _clearError,
               validator: (value) {
@@ -61,9 +61,11 @@ class _TokenGeneratorState extends State<TokenGenerator> {
                 return null;
               },
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
+            Text('Inviting to: ${AdminManager.instance.api.host}'),
+            const SizedBox(height: 30),
             RaisedButton(
-              child: Text('Generate'),
+              child: const Text('Generate'),
               onPressed: () async {
                 _showSnackBar(context, 'Generating...');
                 if (_formKey.currentState.validate()) {
