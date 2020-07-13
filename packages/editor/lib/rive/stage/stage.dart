@@ -397,7 +397,33 @@ class Stage extends Debouncer {
 
   bool _restoreSelection() {
     _selectionSuppression--;
+    assert(_selectionSuppression >= 0);
     return _selectionSuppression == 0;
+  }
+
+  final ValueNotifier<bool> _isHidingHandlesNotifier =
+      ValueNotifier<bool>(false);
+  ValueListenable<bool> get isHidingHandlesChanged => _isHidingHandlesNotifier;
+  bool get isHidingHandles => _isHidingHandlesNotifier.value;
+
+  int _handleSuppression = 0;
+
+  /// General setting for hiding/showing handles on the stage. Can be used  by
+  /// things like the transform tools and the color inspector to hide the
+  /// transform handles when the color inspector is opened.
+  Restorer hideHandles() {
+    _handleSuppression++;
+    _isHidingHandlesNotifier.value = true;
+    return Restorer(_restoreHandles);
+  }
+
+  bool _restoreHandles() {
+    _handleSuppression--;
+    assert(_handleSuppression >= 0);
+    if (_handleSuppression == 0) {
+      _isHidingHandlesNotifier.value = false;
+    }
+    return _handleSuppression == 0;
   }
 
   void _updateHover() {
@@ -915,7 +941,11 @@ class Stage extends Debouncer {
 
     // Make sure items are removed from selection when they are removed from the
     // stage.
-    file.selection.deselect(item);
+    if(file.selection.deselect(item, notify: false)) {
+      // Debounce selection notification in case this happens during a widget
+      // update cycle.
+      debounce(file.selection.notifySelection);
+    }
 
     // Make sure to remove any cached references.
     if (_mouseDownHit == item) {

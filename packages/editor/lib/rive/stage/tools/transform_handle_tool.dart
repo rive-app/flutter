@@ -69,6 +69,8 @@ abstract class TransformHandleTool extends StageTool
     _selectionContext = stage.file.selection;
     _selectionContext.addListener(_selectionChanged);
     stage.addSelectionHandler(_handleStageSelection);
+    // Sync the selection whenver the show handles value changes.
+    stage.isHidingHandlesChanged.addListener(_selectionChanged);
     _selectionChanged();
     return true;
   }
@@ -93,6 +95,7 @@ abstract class TransformHandleTool extends StageTool
     super.deactivate();
     _selectionContext.removeListener(_selectionChanged);
     stage.removeSelectionHandler(_handleStageSelection);
+    stage.isHidingHandlesChanged.removeListener(_selectionChanged);
     _setSelection({});
   }
 
@@ -127,7 +130,7 @@ abstract class TransformHandleTool extends StageTool
     }
 
     _nodes = nodes;
-    if (nodes.isEmpty) {
+    if (nodes.isEmpty || stage.isHidingHandles) {
       _removeHandle(_translateX);
       _removeHandle(_translateY);
       _removeHandle(_rotation);
