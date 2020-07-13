@@ -13,6 +13,22 @@ class _LoginState extends State<Login> {
 
   bool _credentialsFailed = false;
 
+  Future<void> _login() async {
+    if (_formKey.currentState.validate()) {
+      Scaffold.of(context)
+          .showSnackBar(const SnackBar(content: Text('Logging in...')));
+      var result =
+          await AdminManager.instance.login(_username.text, _password.text);
+      if (result.isError) {
+        // Hack it up! Re-rerun but this time our username will show
+        // there was a credential error.
+        _credentialsFailed = true;
+        _formKey.currentState.validate();
+        _credentialsFailed = false;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -23,7 +39,7 @@ class _LoginState extends State<Login> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextFormField(
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: const InputDecoration(labelText: 'Username'),
               controller: _username,
               validator: (value) {
                 if (_credentialsFailed) {
@@ -35,13 +51,14 @@ class _LoginState extends State<Login> {
                 }
                 return null;
               },
+              onEditingComplete: _login,
             ),
             TextFormField(
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
               controller: _password,
               obscureText: true,
               validator: (value) {
-                if (_credentialsFailed) { 
+                if (_credentialsFailed) {
                   return '';
                 }
                 if (value.isEmpty) {
@@ -49,26 +66,13 @@ class _LoginState extends State<Login> {
                 }
                 return null;
               },
+              onEditingComplete: _login,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: RaisedButton(
-                onPressed: () async {
-                  if (_formKey.currentState.validate()) {
-                    Scaffold.of(context)
-                        .showSnackBar(SnackBar(content: Text('Logging in...')));
-                    var result = await AdminManager.instance
-                        .login(_username.text, _password.text);
-                    if (result.isError) {
-                      // Hack it up! Re-rerun but this time our username will show
-                      // there was a credential error.
-                      _credentialsFailed = true;
-                      _formKey.currentState.validate();
-                      _credentialsFailed = false;
-                    }
-                  }
-                },
-                child: Text('Submit'),
+                onPressed: _login,
+                child: const Text('Submit'),
               ),
             ),
           ],

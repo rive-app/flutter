@@ -21,31 +21,34 @@ class _ApiChoserState extends State<ApiChoser> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: ListView(children: [
-        const Text('CurrentServer'),
-        Text(RiveApi().host),
-        TextFormField(
-          decoration: const InputDecoration(
-              labelText:
-                  "New Server e.g 'https://slimer.rive.app', 'http://127.0.0.1:3000'"),
-          controller: hostController,
-          validator: (value) {
-            if (value.isEmpty) {
-              return 'Enter new value';
-            }
-            return null;
-          },
-        ),
-        RaisedButton(
-            child: const Text('update'),
-            onPressed: () {
-              if (_formKey.currentState.validate()) {
-                updateHost();
+    return Padding(
+      padding: const EdgeInsets.all(30),
+      child: Form(
+        key: _formKey,
+        child: ListView(children: [
+          const Text('Current Server'),
+          Text(RiveApi().host),
+          TextFormField(
+            decoration: const InputDecoration(
+                labelText:
+                    "New Server e.g 'https://slimer.rive.app', 'http://127.0.0.1:3000'"),
+            controller: hostController,
+            validator: (value) {
+              if (value.isEmpty) {
+                return 'Enter new value';
               }
-            })
-      ]),
+              return null;
+            },
+          ),
+          RaisedButton(
+              child: const Text('update'),
+              onPressed: () {
+                if (_formKey.currentState.validate()) {
+                  updateHost();
+                }
+              })
+        ]),
+      ),
     );
   }
 }

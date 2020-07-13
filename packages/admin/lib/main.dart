@@ -21,13 +21,25 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyHomePage(),
+      home: AdminHome(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key key}) : super(key: key);
+class AdminHome extends StatefulWidget {
+  @override
+  _AdminHomeState createState() => _AdminHomeState();
+}
+
+class _AdminHomeState extends State<AdminHome> {
+  static const defaultHost = 'https://homelander.rive.app';
+
+  @override
+  void initState() {
+    // Init admin manager and default to Homelander.
+    AdminManager.instance.api.host = defaultHost;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
