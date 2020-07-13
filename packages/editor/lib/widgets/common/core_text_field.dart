@@ -23,7 +23,7 @@ class CoreTextField<T> extends StatelessWidget {
   final Iterable<Core> objects;
   final int propertyKey;
   final InputValueConverter<T> converter;
-  final void Function(T value) change;
+  final void Function(List<T> originalValues, T newValue) change;
   final FocusNode focusNode;
   final bool frozen;
 
@@ -37,7 +37,7 @@ class CoreTextField<T> extends StatelessWidget {
     @required Iterable<Core> objects,
     @required int propertyKey,
     InputValueConverter<T> converter,
-    void Function(T value) change,
+    void Function(List<T> originalValues, T value) change,
     FocusNode focusNode,
     Color underlineColor,
     Color focusedUnderlineColor,
@@ -140,11 +140,14 @@ class CoreTextField<T> extends StatelessWidget {
           change: objects == null || objects.isEmpty
               ? null
               : (T value) {
+                  final originalValues = <T>[];
                   for (final object in objects) {
+                    // Record the property's original value
+                    originalValues.add(object.getProperty<T>(propertyKey));
                     object.context
                         .setObjectProperty(object, propertyKey, value);
                   }
-                  change?.call(value);
+                  change?.call(originalValues, value);
                 },
         ),
       ),
