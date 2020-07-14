@@ -1,6 +1,11 @@
+import 'dart:ui';
+
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_editor/rive/stage/items/stage_node.dart';
+import 'package:rive_editor/rive/stage/items/stage_shape.dart';
+import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
@@ -10,10 +15,14 @@ import 'package:utilities/iterable.dart';
 class NodeTranslateTransformer extends StageTransformer {
   Iterable<Node> _nodes;
   final Vec2D lockAxis;
+  Snapper _snapper;
+
   NodeTranslateTransformer({this.lockAxis});
 
   @override
   void advance(DragTransformDetails details) {
+    _snapper.advance(details.world.current);
+    return;
     Map<Node, Mat2D> worldToParents = {};
 
     var failedInversion = Mat2D();
@@ -62,6 +71,18 @@ class NodeTranslateTransformer extends StageTransformer {
   bool init(Set<StageItem> items, DragTransformDetails details) {
     _nodes =
         topComponents(items.mapWhereType<Node>((element) => element.component));
-    return _nodes.isNotEmpty;
+    if (_nodes.isNotEmpty) {
+      _snapper = Snapper.build(details.world.current, _nodes, (item) {
+        return item is StageShape || item is StageNode;
+        ;
+      });
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  void draw(Canvas canvas) {
+    _snapper?.draw(canvas);
   }
 }

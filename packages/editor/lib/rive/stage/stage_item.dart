@@ -21,6 +21,12 @@ class OBB {
   final AABB bounds;
   final Mat2D transform;
   final Float32List poly = Float32List(8);
+
+  Vec2D get center {
+    var center = AABB.center(Vec2D(), bounds);
+    return Vec2D.transformMat2D(center, center, transform);
+  }
+
   OBB({
     this.bounds,
     this.transform,
