@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
@@ -21,7 +22,7 @@ class NodeTranslateTransformer extends StageTransformer {
 
   @override
   void advance(DragTransformDetails details) {
-    _snapper.advance(details.world.current);
+    _snapper.advance(details.world.current, lockAxis);
     return;
     Map<Node, Mat2D> worldToParents = {};
 
@@ -74,7 +75,6 @@ class NodeTranslateTransformer extends StageTransformer {
     if (_nodes.isNotEmpty) {
       _snapper = Snapper.build(details.world.current, _nodes, (item) {
         return item is StageShape || item is StageNode;
-        ;
       });
       return true;
     }

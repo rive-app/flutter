@@ -22,7 +22,7 @@ class TranslateTool extends TransformHandleTool {
   // Draw before the vertex handles but after artboard drawables.
   @override
   Iterable<StageDrawPass> get drawPasses => [
-        StageDrawPass(draw, order: 2, inWorldSpace: false),
+        StageDrawPass(draw, order: 1000, inWorldSpace: false),
       ];
 
   @override

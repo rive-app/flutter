@@ -30,7 +30,7 @@ class Segment2D {
   Segment2D(this.start, this.end);
 
   /// Find where the given [point] lies on this segment.
-  ProjectionResult projectPoint(Vec2D point) {
+  ProjectionResult projectPoint(Vec2D point, {bool clamp = true}) {
     // We cache these internally so we can call projectPoint multiple times in
     // succession performantly.
     if (diff == null) {
@@ -44,12 +44,14 @@ class Segment2D {
             (point[1] - start[1]) * (end[1] - start[1])) /
         lengthSquared;
 
-    // Clamp at edges.
-    if (t < 0.0) {
-      return ProjectionResult(0, start);
-    }
-    if (t > 1.0) {
-      return ProjectionResult(1, end);
+    if (clamp) {
+      // Clamp at edges.
+      if (t < 0.0) {
+        return ProjectionResult(0, start);
+      }
+      if (t > 1.0) {
+        return ProjectionResult(1, end);
+      }
     }
 
     return ProjectionResult(
