@@ -54,6 +54,7 @@ class AutoTool extends TransformHandleTool {
 
   @override
   void draw(Canvas canvas, StageDrawPass drawPass) {
+    drawTransformers(canvas);
     var marquee = viewMarqueeBounds;
     if (marquee == null) {
       return;
@@ -156,7 +157,7 @@ class AutoTool extends TransformHandleTool {
       var item = hitItem.selectionTarget;
       if (item.isVisible &&
           item.isSelectable &&
-          (stage.soloItems == null || stage.isValidSoloSelection(item)) && 
+          (stage.soloItems == null || stage.isValidSoloSelection(item)) &&
           item.intersectsRect(marqueePoly)) {
         inMarquee.add(item);
       }
