@@ -72,6 +72,7 @@ class VertexEditor with RiveFileDelegate {
         _editingPaths.value = null;
         break;
     }
+
     return true;
   }
 
@@ -169,7 +170,6 @@ class VertexEditor with RiveFileDelegate {
           _editingPaths.value = null;
           _changeMode(VertexEditorMode.off);
         }
-        stage.debounce(_syncSolo);
       }
     }
 
@@ -180,11 +180,8 @@ class VertexEditor with RiveFileDelegate {
       // Put us into editing path mode.
       _changeMode(VertexEditorMode.editingPath);
       _editingPaths.value = HashSet<PointsPath>.from(<PointsPath>[path]);
-      stage.debounce(_syncSolo);
-      // We're already editing paths, just make sure this one is in the set.
-    } else if (_editingPaths.value.add(path)) {
-      stage.debounce(_syncSolo);
     }
+    stage.debounce(_syncSolo);
   }
 
   // This is called back whenever a property registered as being editorOnly in
@@ -201,6 +198,11 @@ class VertexEditor with RiveFileDelegate {
   }
 
   void _syncSolo() {
+    // Capture journal entry to ensure any changes to edit mode are captured.
+    stage.file.core.captureJournalEntry();
+
+    // Sync solo. It's ok if this is called "too often" as stage.solo does a
+    // iterable equality check.
     stage.solo(_editingPaths.value?.map((path) => path.stageItem));
   }
 

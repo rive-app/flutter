@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:core/core.dart';
 import 'package:core/debouncer.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
@@ -941,7 +942,7 @@ class Stage extends Debouncer {
 
     // Make sure items are removed from selection when they are removed from the
     // stage.
-    if(file.selection.deselect(item, notify: false)) {
+    if (file.selection.deselect(item, notify: false)) {
       // Debounce selection notification in case this happens during a widget
       // update cycle.
       debounce(file.selection.notifySelection);
@@ -1198,7 +1199,7 @@ class Stage extends Debouncer {
   /// user to select something of a specific type and want to only allow (and
   /// perhaps highlight) valid selections.
   void solo(Iterable<StageItem> value, {bool darken = false}) {
-    if (_soloNotifier.value == value) {
+    if (iterableEquals(_soloNotifier.value, value)) {
       return;
     }
     if (_soloNotifier.value != null) {
