@@ -155,8 +155,8 @@ abstract class WindowUtilsPlatform extends PlatformInterface {
   Future<Map<String, String>> getCookies() =>
       throw UnimplementedError('getCookies() has not been implemented.');
 
-  Future<bool> initDropTarget() =>
-      throw UnimplementedError('initDropTarget() has not been implemented.');
+  Future<bool> initInputHelper() =>
+      throw UnimplementedError('initInputHelper() has not been implemented.');
 }
 
 enum DragPosition {

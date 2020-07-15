@@ -14,7 +14,6 @@ import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/frame_debounce.dart';
 import 'package:rive_editor/packed_icon.dart';
-import 'package:rive_editor/platform/platform.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -22,6 +21,7 @@ import 'package:rive_editor/rive/rive_clipboard.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
 import 'package:rive_editor/widgets/tab_bar/rive_tab_bar.dart';
 import 'package:window_utils/window_utils.dart' as win_utils;
 
@@ -73,6 +73,8 @@ class Rive {
 
   final ScrollController treeScrollController = ScrollController();
 
+  final eventChannel = const EventChannel('plugins.rive.app/key_press');
+
   Rive({this.iconCache}) : api = RiveApi() {
     _focusNode = FocusNode(
         canRequestFocus: true,
@@ -88,6 +90,25 @@ class Rive {
         });
 
     _filesApi = FileApi(api);
+    eventChannel.receiveBroadcastStream().listen(_onKeyEvent);
+  }
+
+  void _onKeyEvent(dynamic event) {
+    assert(event is int);
+    var code = event as int;
+    var isRelease = (code & (1 << 31)) != 0;
+    var isRepeat = (code & (1 << 30)) != 0;
+    var keyCode = code & ~(1 << 31 | 1 << 30);
+    // print('KEY: ${keyForCode(keyCode)}');
+    // if (isRelease) {
+    //   print('Released: $keyCode');
+    // } else {
+    //   print('Pressed: $keyCode $isRepeat');
+    // }
+    var key = keyForCode(keyCode);
+    if (key != null) {
+      onRawKeyPress(key, !isRelease, isRepeat);
+    }
   }
 
   /// Available tabs in the editor
@@ -259,7 +280,7 @@ class Rive {
   // cleared when the action is released.
   final Set<ShortcutAction> _canceledActions = {};
 
-  bool _isSystemCmdPressed;
+  bool _isSystemCmdPressed = false;
   // Returns true if the command on mac or control on win is pressed.
   bool get isSystemCmdPressed => _isSystemCmdPressed;
 
@@ -273,42 +294,38 @@ class Rive {
     return false;
   }
 
-  void onKeyEvent(ShortcutKeyBinding keyBinding, RawKeyEvent keyEvent,
-      bool hasFocusObject) {
-    _isSystemCmdPressed = Platform.instance.isMac
-        ? keyEvent.isMetaPressed
-        : keyEvent.isControlPressed;
-
-    selectionMode.value = keyEvent.isShiftPressed
-        ? SelectionMode.range
-        : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
-
-    if (keyEvent is RawKeyDownEvent) {
-      _pressed.add(_Key(keyEvent.logicalKey, keyEvent.physicalKey));
-    } else if (keyEvent is RawKeyUpEvent) {
-      _pressed.remove(_Key(keyEvent.logicalKey, keyEvent.physicalKey));
+  final Set<ShortcutKey> _pressedKeys = {};
+  void onRawKeyPress(ShortcutKey key, bool isPress, bool isRepeat) {
+    // First update our pressed set.
+    if (isPress) {
+      _pressedKeys.add(key);
+    } else {
+      _pressedKeys.remove(key);
     }
 
-    // Attempt to synchronize with Flutter's tracked keyset, unfortunately this
-    // seems to have an issue where certain keys don't get removed when pressing
-    // multiple keys and cmd tabbing.
-    _pressed.removeWhere((key) => !keyEvent.isKeyPressed(key.logical));
-
-    bool isPress = keyEvent is RawKeyDownEvent;
+    if (key == ShortcutKey.systemCmd) {
+      _isSystemCmdPressed = isPress;
+    }
+    // Always update whether we're multi selecting.
+    if (key == ShortcutKey.shift) {
+      selectionMode.value = isPress
+          ? SelectionMode.range
+          : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
+    }
 
     // If something else has focus, don't process actions (usually when a text
     // field is focused somewhere).
+    var hasFocusObject = _focusNode != FocusManager.instance.primaryFocus;
     if (hasFocusObject) {
       return;
     }
 
+    ShortcutKeyBinding keyBinding = defaultKeyBinding;
     var actions = <ShortcutAction>{};
     var toTrigger = <ShortcutAction>{};
     if (isPress) {
       // Only trigger actions if a key was pressed.
-      actions = keyBinding.lookupAction(
-          _pressed.map((key) => key.physical).toList(growable: false),
-          keyEvent.physicalKey);
+      actions = keyBinding.lookupAction(_pressedKeys, key);
       // Some actions don't repeat, so remove them from the trigger list if
       // they've already triggered for press. N.B. most platforms give  us a way
       // to determine if this keydown is a repeat, Flutter does this only for
@@ -345,6 +362,10 @@ class Rive {
 
     toTrigger.forEach(triggerAction);
   }
+
+  /// This is the old path attempting to handle Flutter key bindings.
+  void onKeyEvent(ShortcutKeyBinding keyBinding, RawKeyEvent keyEvent,
+      bool hasFocusObject) {}
 
   void releaseAction(ShortcutAction action) {
     var fileContext = file.value;

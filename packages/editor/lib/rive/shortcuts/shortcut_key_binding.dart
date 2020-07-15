@@ -15,8 +15,8 @@ class Shortcut {
 }
 
 class ShortcutKeyBinding {
-  final HashMap<PhysicalKeyboardKey, List<Shortcut>> _finalKeyToShortcuts =
-      HashMap<PhysicalKeyboardKey, List<Shortcut>>();
+  final HashMap<ShortcutKey, List<Shortcut>> _finalKeyToShortcuts =
+      HashMap<ShortcutKey, List<Shortcut>>();
 
   final HashMap<ShortcutAction, List<ShortcutKey>> _keysLookup =
       HashMap<ShortcutAction, List<ShortcutKey>>();
@@ -26,11 +26,8 @@ class ShortcutKeyBinding {
     for (final shortcut in shortcuts) {
       (_keysLookup[shortcut.action] ??= []).addAll(shortcut.keys);
 
-      var physicalKeys = keyToPhysical[shortcut.keys.last];
-      for (final key in physicalKeys) {
-        var list = _finalKeyToShortcuts[key] ??= [];
-        list.add(shortcut);
-      }
+      var list = _finalKeyToShortcuts[shortcut.keys.last] ??= [];
+      list.add(shortcut);
 
       // See if the binding needs to be strict, meaning that all keys must be
       // pressed. This is necessary as in the web the metakey hides when other
@@ -60,8 +57,8 @@ class ShortcutKeyBinding {
 
   /// Find an action triggered by a specific set of keys.
   Set<ShortcutAction> lookupAction(
-    List<PhysicalKeyboardKey> keys,
-    PhysicalKeyboardKey lastPressed,
+    Iterable<ShortcutKey> keys,
+    ShortcutKey lastPressed,
   ) {
     assert(
         keys.contains(lastPressed),
@@ -76,17 +73,15 @@ class ShortcutKeyBinding {
     var pressedKeySet = keys.toSet();
     var shortcuts = _finalKeyToShortcuts[lastPressed];
     if (shortcuts != null) {
-      outerLoop:
       for (final shortcut in shortcuts) {
         if (shortcut.strictMatch &&
             shortcut.keys.length != pressedKeySet.length) {
           continue;
         }
-        for (final key in shortcut.keys) {
-          var physicalKeys = keyToPhysical[key];
-          if (physicalKeys.intersection(pressedKeySet).isEmpty) {
-            continue outerLoop;
-          }
+        if (shortcut.keys.intersection(pressedKeySet).length !=
+            shortcut.keys.length) {
+          // if not all keys are pressed, then this action doesn't trigger
+          continue;
         }
         // this shortcut was triggered
         actions.add(shortcut.action);

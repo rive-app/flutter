@@ -6,6 +6,7 @@ import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:rive_api/data_model.dart';
@@ -64,16 +65,6 @@ Future<void> main() async {
   };
 
   WidgetsFlutterBinding.ensureInitialized();
-  WidgetsBinding.instance.addPostFrameCallback(
-    (_) {
-      win_utils.hideTitleBar();
-      win_utils.setSize(kDefaultWIndowSize);
-      win_utils.initDropTarget();
-      win_utils.listenFilesDropped((files) {
-        print("We got $files");
-      });
-    },
-  );
 
   final iconCache = RiveIconCache(rootBundle);
   final rive = Rive(
@@ -95,9 +86,11 @@ Future<void> main() async {
   // to our logger service.
   runZoned(
     () => runApp(
-      RiveEditorShell(
-        rive: rive,
-        iconCache: iconCache,
+      InitWindowWidget(
+        child: RiveEditorShell(
+          rive: rive,
+          iconCache: iconCache,
+        ),
       ),
     ),
     onError: (Object error, StackTrace stackTrace) {
@@ -109,6 +102,44 @@ Future<void> main() async {
       }
     },
   );
+}
+
+class InitWindowWidget extends StatefulWidget {
+  final Widget child;
+
+  const InitWindowWidget({Key key, this.child}) : super(key: key);
+  @override
+  _InitWindowWidgetState createState() => _InitWindowWidgetState();
+}
+
+class _InitWindowWidgetState extends State<InitWindowWidget> {
+  // Wait for this timing count to finally register things.
+  int _timingsCount = 5;
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addTimingsCallback(_onFirstTimings);
+  }
+
+  void _onFirstTimings(List<FrameTiming> times) {
+    _timingsCount--;
+    if (_timingsCount != 0) {
+      return;
+    }
+    SchedulerBinding.instance.removeTimingsCallback(_onFirstTimings);
+    print("INIT!");
+    win_utils.hideTitleBar();
+    win_utils.setSize(kDefaultWIndowSize);
+    win_utils.initInputHelper();
+    win_utils.listenFilesDropped((files) {
+      print("We got $files");
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }
 
 GlobalKey loadingScreenKey = GlobalKey();

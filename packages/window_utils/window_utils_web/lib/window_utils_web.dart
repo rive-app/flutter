@@ -82,7 +82,7 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
   }
 
   @override
-  Future<bool> initDropTarget() async {
+  Future<bool> initInputHelper() async {
     js.context['filesDropped'] = (dynamic test) {
       if (test is! js.JsArray) {
         return;

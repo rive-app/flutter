@@ -17,9 +17,9 @@ Map<ShortcutKey, Set<PhysicalKeyboardKey>> keyToPhysical = {
     PhysicalKeyboardKey.metaLeft,
     PhysicalKeyboardKey.metaRight
   },
-  ShortcutKey.cmd: {
-    PhysicalKeyboardKey.metaLeft,
-    PhysicalKeyboardKey.metaRight
+  ShortcutKey.ctrl: {
+    PhysicalKeyboardKey.controlLeft,
+    PhysicalKeyboardKey.controlRight
   },
   ShortcutKey.systemCmd: Platform.instance.isMac
       ? {PhysicalKeyboardKey.metaLeft, PhysicalKeyboardKey.metaRight}
@@ -95,7 +95,7 @@ Map<ShortcutKey, String> _keyNames = {
   ShortcutKey.enter: 'enter',
   ShortcutKey.shift: 'shift',
   ShortcutKey.meta: 'meta',
-  ShortcutKey.cmd: 'cmd',
+  ShortcutKey.ctrl: 'ctrl',
   ShortcutKey.a: 'a',
   ShortcutKey.b: 'b',
   ShortcutKey.c: 'c',
@@ -164,12 +164,140 @@ String keyname(ShortcutKey key) {
   }
 }
 
+ShortcutKey keyForCode(int code) {
+  switch (code) {
+    case 0x12:
+      return ShortcutKey.alt;
+    case 0x0D:
+      return ShortcutKey.enter;
+    case 0x10:
+      return ShortcutKey.shift;
+    case 0x5B:
+      return Platform.instance.isMac ? ShortcutKey.systemCmd : ShortcutKey.meta;
+    case 0x11:
+      return Platform.instance.isMac ? ShortcutKey.ctrl : ShortcutKey.systemCmd;
+    case 0xBC:
+      return ShortcutKey.comma;
+    case 0xBE:
+      return ShortcutKey.period;
+    case 0x41:
+      return ShortcutKey.a;
+    case 0x42:
+      return ShortcutKey.b;
+    case 0x43:
+      return ShortcutKey.c;
+    case 0x44:
+      return ShortcutKey.d;
+    case 0x45:
+      return ShortcutKey.e;
+    case 0x46:
+      return ShortcutKey.f;
+    case 0x47:
+      return ShortcutKey.g;
+    case 0x48:
+      return ShortcutKey.h;
+    case 0x49:
+      return ShortcutKey.i;
+    case 0x4A:
+      return ShortcutKey.j;
+    case 0x4B:
+      return ShortcutKey.k;
+    case 0x4C:
+      return ShortcutKey.l;
+    case 0x4D:
+      return ShortcutKey.m;
+    case 0x4E:
+      return ShortcutKey.n;
+    case 0x4F:
+      return ShortcutKey.o;
+    case 0x50:
+      return ShortcutKey.p;
+    case 0x51:
+      return ShortcutKey.q;
+    case 0x52:
+      return ShortcutKey.r;
+    case 0x53:
+      return ShortcutKey.s;
+    case 0x54:
+      return ShortcutKey.t;
+    case 0x55:
+      return ShortcutKey.u;
+    case 0x56:
+      return ShortcutKey.v;
+    case 0x57:
+      return ShortcutKey.w;
+    case 0x58:
+      return ShortcutKey.x;
+    case 0x59:
+      return ShortcutKey.y;
+    case 0x5A:
+      return ShortcutKey.z;
+    case 0x30:
+      return ShortcutKey.zero;
+    case 0x31:
+      return ShortcutKey.one;
+    case 0x32:
+      return ShortcutKey.two;
+    case 0x33:
+      return ShortcutKey.three;
+    case 0x34:
+      return ShortcutKey.four;
+    case 0x35:
+      return ShortcutKey.five;
+    case 0x36:
+      return ShortcutKey.six;
+    case 0x37:
+      return ShortcutKey.seven;
+    case 0x38:
+      return ShortcutKey.eight;
+    case 0x39:
+      return ShortcutKey.nine;
+    case 0xC0:
+      return ShortcutKey.backquote;
+    case 0x08:
+      return ShortcutKey.backspace;
+    case 0x2E:
+      return ShortcutKey.delete;
+    case 0x1B:
+      return ShortcutKey.esc;
+    case 0x20:
+      return ShortcutKey.space;
+    case 0x24:
+      return ShortcutKey.home;
+    case 0x23:
+      return ShortcutKey.end;
+    case 0xDB:
+      return ShortcutKey.bracketLeft;
+    case 0xDD:
+      return ShortcutKey.bracketRight;
+    case 0xBF:
+      return ShortcutKey.slash;
+    case 0xDC:
+      return ShortcutKey.backslash;
+    case 0x27:
+      return ShortcutKey.right;
+    case 0x25:
+      return ShortcutKey.left;
+    case 0x26:
+      return ShortcutKey.up;
+    case 0x28:
+      return ShortcutKey.down;
+    case 0xBA:
+      return ShortcutKey.semiColon;
+    case 0xBB:
+      return ShortcutKey.equal;
+    case 0xBD:
+      return ShortcutKey.minus;
+  }
+  return null;
+}
+
 enum ShortcutKey {
   alt,
   enter,
   shift,
   meta,
-  cmd,
+  ctrl,
   systemCmd,
   comma,
   period,
@@ -218,8 +346,6 @@ enum ShortcutKey {
   end,
   bracketLeft,
   bracketRight,
-  braceLeft,
-  braceRight,
   slash,
   backslash,
   right,

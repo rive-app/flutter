@@ -96,7 +96,8 @@ Future<bool> resetCursor() => WindowUtilsPlatform.instance.resetCursor();
 Future<Map<String, String>> getCookies() =>
     WindowUtilsPlatform.instance.getCookies();
 
-Future<bool> initDropTarget() => WindowUtilsPlatform.instance.initDropTarget();
+Future<bool> initInputHelper() =>
+    WindowUtilsPlatform.instance.initInputHelper();
 
 /// Start listening to file drops on the main window.
 void listenFilesDropped(DroppedFilesCallback callback) {
