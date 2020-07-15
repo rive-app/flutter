@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/mat2d.dart';
-import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
