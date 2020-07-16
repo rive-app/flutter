@@ -41,21 +41,22 @@
   </script>
   <!-- Handle keyboard input events -->
   <script>
-    window.onkeydown = function (event) {
+    window.addEventListener("keydown", function (event) {
       if (event.metaKey || event.ctrlKey) {
         // When ctrl or meta is pressed we want to suppress some default bound
         // browser actions (like CMD+Plus/Minus to zoom).
         switch (event.keyCode) {
-          case 187:
-          case 189:
+          case 187: // = for zoom in
+          case 189: // - for zoom out
             event.preventDefault();
             break;
         }
       }
       // Suppress backspace triggering a navigate back action.
-      if (event.keyCode == 8 && event.target == document.body)
+      if (event.keyCode == 8 && event.target == document.body) {
         event.preventDefault();
-    }
+      }
+    });
   </script>
 
   <!-- This is the counterpart to the window_utils_web.dart drop files interface. TODO: get this into Dart/plugin land.  -->
@@ -104,36 +105,84 @@
 
     function initInputHelper() {
 
-      var isMetaDown = false;
-      var isControlDown = false;
-      var isCapsLockDown = false;
-      var isShiftDown = false;
-      var isOptionDown = false;
+      const pressedKeys = new Set();
 
-      window.onfocus = function (event) {
-        // report modifiers released...
-        // alt
-        keyPressed(0x12 | 1 << 18);
-        // shift
-        keyPressed(0x10 | 1 << 18);
-        // meta
-        keyPressed(0x5B | 1 << 18);
-        // ctrl
-        keyPressed(0x11 | 1 << 18);
-        // shift
-        keyPressed(0x10 | 1 << 18);
-      };
+      const metaKeyCode = 0x5B;
+      const ctrlKeyCode = 0x11;
+      const shiftKeyCode = 0x10;
+      const altKeyCode = 0x12;
 
-      window.onkeydown = function (event) {
-        var code = event.keyCode;
-        if (event.repeat) {
+      function isModifier(code) {
+        switch (code) {
+          case metaKeyCode:
+          case ctrlKeyCode:
+          case shiftKeyCode:
+          case altKeyCode:
+            return true;
+          default:
+            return false;
+        }
+      }
+
+      window.addEventListener("focus", function (event) {
+        // Sync modifiers to released state.
+        reportKey(metaKeyCode, false);
+        reportKey(ctrlKeyCode, false);
+        reportKey(shiftKeyCode, false);
+        reportKey(altKeyCode, false);
+      });
+
+      function reportKey(code, isPress, isRepeat) {
+        if (isModifier(code) && isPress && pressedKeys.has(code)) {
+          // We already think this modifier key is pressed. We allow reporting
+          // other keys multiple times.
+          return false;
+        }
+        if (!isPress && !pressedKeys.has(code)) {
+          // We already think the key is not pressed.
+          return false;
+        }
+
+        // We need to report the key.
+        if (isPress) {
+          pressedKeys.add(code);
+        } else {
+          pressedKeys.delete(code);
+        }
+
+        if (!isPress) {
+          code |= 1 << 18;
+        }
+        if (isRepeat) {
           code |= 1 << 17;
         }
         keyPressed(code);
-      };
-      window.onkeyup = function (event) {
-        keyPressed(event.keyCode | 1 << 18);
-      };
+        return true;
+      }
+
+      function syncModifiers(event) {
+        if (reportKey(metaKeyCode, event.metaKey) && !event.metaKey) {
+          // If meta was released, we need to notify that all other non modifier keys were released too.
+          for (const code of pressedKeys) {
+            if (!isModifier(code) && code != event.keyCode) {
+              reportKey(code, false);
+            }
+          }
+        }
+        reportKey(ctrlKeyCode, event.ctrlKey);
+        reportKey(shiftKeyCode, event.shiftKey);
+        reportKey(altKeyCode, event.altKey);
+      }
+
+      window.addEventListener("keydown", function (event) {
+        syncModifiers(event);
+        reportKey(event.keyCode, true, event.repeat);
+      });
+
+      window.addEventListener("keyup", function (event) {
+        syncModifiers(event);
+        reportKey(event.keyCode, false);
+      });
     }
   </script>
   <script src="main.dart.js?v=DEPLOYMENTVERSION" type="application/javascript"></script>

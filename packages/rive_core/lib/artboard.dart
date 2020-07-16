@@ -310,6 +310,17 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     }
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, width, height));
+    // Get into artboard's world space. This is because the artboard draws
+    // components in the artboard's space (in component lingo we call this world
+    // space). The artboards themselves are drawn in the editor's world space,
+    // which is the world space that is used by stageItems. This is a little
+    // confusing and perhaps we should find a better wording for the transform
+    // spaces. We used "world space" in components as that's the game engine
+    // ratified way of naming the top-most transformation. Perhaps we should
+    // rename those to artboardTransform and worldTransform is only reserved for
+    // stageItems? The other option is to stick with 'worldTransform' in
+    // components and use 'editor or stageTransform' for stageItems.
+    canvas.translate(width * (originX ?? 0), height * (originY ?? 0));
 
     for (final drawable in _drawables) {
       drawable.draw(canvas);
@@ -334,10 +345,14 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   // <- editor-only
 
   @override
-  void originXChanged(double from, double to) {}
+  void originXChanged(double from, double to) {
+    addDirt(ComponentDirt.worldTransform);
+  }
 
   @override
-  void originYChanged(double from, double to) {}
+  void originYChanged(double from, double to) {
+    addDirt(ComponentDirt.worldTransform);
+  }
 
   /// Called by rive_core to add an Animation to an Artboard. This should be
   /// @internal when it's supported.

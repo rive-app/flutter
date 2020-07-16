@@ -7,7 +7,6 @@ import 'shortcut_keys.dart';
 class Shortcut {
   final ShortcutAction action;
   final Set<ShortcutKey> keys;
-  bool strictMatch = false;
 
   Shortcut(this.action, this.keys);
 }
@@ -26,31 +25,13 @@ class ShortcutKeyBinding {
 
       var list = _finalKeyToShortcuts[shortcut.keys.last] ??= [];
       list.add(shortcut);
-
-      // See if the binding needs to be strict, meaning that all keys must be
-      // pressed. This is necessary as in the web the metakey hides when other
-      // keys are released. This causes Flutter to assume those keys are still
-      // pressed and send them again.
-
-      // First check only if this binding includes the meta key. Similarly check
-      // only other bindings that have meta.
-
-      if (shortcut.keys.length > 1 &&
-          shortcut.keys.contains(ShortcutKey.systemCmd)) {
-        for (final otherShortcut in shortcuts) {
-          if (otherShortcut == shortcut) {
-            continue;
-          }
-
-          if (otherShortcut.keys.length > shortcut.keys.length &&
-              otherShortcut.keys.intersection(shortcut.keys).length ==
-                  shortcut.keys.length) {
-            shortcut.strictMatch = true;
-            break;
-          }
-        }
-      }
     }
+
+    _finalKeyToShortcuts.forEach((key, shortcuts) {
+      // sort the list such that the shortcuts with most keys get priority (sort
+      // desc).
+      shortcuts.sort((a, b) => b.keys.length.compareTo(a.keys.length));
+    });
   }
 
   /// Find an action triggered by a specific set of keys.
@@ -71,9 +52,14 @@ class ShortcutKeyBinding {
     var pressedKeySet = keys.toSet();
     var shortcuts = _finalKeyToShortcuts[lastPressed];
     if (shortcuts != null) {
+      Shortcut lastTriggered;
       for (final shortcut in shortcuts) {
-        if (shortcut.strictMatch &&
-            shortcut.keys.length != pressedKeySet.length) {
+        // Early out if some previous shortcut on this key just triggered and
+        // contains more modifiers/keys. This prevents things like undo (cmd+z)
+        // triggering when redo (cmd+shift+z) is pressed. This requires the
+        // shortcuts to be sorted in desc modifier key length.
+        if (lastTriggered != null &&
+            lastTriggered.keys.length != shortcut.keys.length) {
           continue;
         }
         if (shortcut.keys.intersection(pressedKeySet).length !=
@@ -82,7 +68,8 @@ class ShortcutKeyBinding {
           continue;
         }
         // this shortcut was triggered
-        actions.add(shortcut.action);
+
+        actions.add((lastTriggered = shortcut).action);
       }
     }
     return actions;

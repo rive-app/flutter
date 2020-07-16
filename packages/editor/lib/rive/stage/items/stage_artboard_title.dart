@@ -60,7 +60,6 @@ class StageArtboardTitle extends StageItem<Artboard> {
     if (_nameSize == null) {
       return false;
     }
-    var originWorld = component.originWorld;
     var scale = stage.zoomLevel;
 
     double textPaddingLeft = 0;
@@ -68,10 +67,10 @@ class StageArtboardTitle extends StageItem<Artboard> {
       textPaddingLeft = activeMarkerSize + 4;
     }
 
-    var y = originWorld[1] - (namePadding + _nameSize.height) / scale;
+    var y = component.y - (namePadding + _nameSize.height) / scale;
     var worldWidth = (textPaddingLeft + _nameSize.width) / stage.zoomLevel;
     var worldHeight = _nameSize.height / stage.zoomLevel;
-    return Rect.fromLTWH(originWorld[0], y, worldWidth, worldHeight)
+    return Rect.fromLTWH(component.x, y, worldWidth, worldHeight)
         .contains(Offset(worldMouse[0], worldMouse[1]));
   }
 
@@ -90,7 +89,6 @@ class StageArtboardTitle extends StageItem<Artboard> {
     //   );
     // }
 
-    var originWorld = component.originWorld;
 
     // Hacky way to update the text color when the backboard changes color.
     if (_lastTextColor != StageItem.backboardContrastPaint.color) {
@@ -98,7 +96,7 @@ class StageArtboardTitle extends StageItem<Artboard> {
     }
 
     canvas.save();
-    canvas.translate(originWorld[0], originWorld[1]);
+    canvas.translate(component.x, component.y);
     canvas.scale(1 / stage.viewZoom);
 
     double textPaddingLeft = 0;
