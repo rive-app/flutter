@@ -118,6 +118,7 @@ class AnimationsManager {
 
   void _deleteLinearAnimation(LinearAnimation animation) {
     assert(animation.context != null);
+
     // delete all keyedObjects, keyedProperties, and keys themselves.
     final file = animation.context;
     List<KeyedObject>.from(animation.keyedObjects, growable: false)
@@ -136,6 +137,10 @@ class AnimationsManager {
     });
     file.removeObject(animation);
     file.captureJournalEntry();
+
+    if (_selectedAnimation == animation) {
+      _selectedAnimation = null;
+    }
   }
 
   void _setHovered(AnimationViewModel animationViewModel) {
