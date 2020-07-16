@@ -4,7 +4,7 @@ RUN apt update && apt-get -y install unzip zip
 
 RUN git clone https://github.com/flutter/flutter.git
 ENV PATH "$PATH:/flutter/bin"
-RUN flutter channel master
+RUN flutter channel dev
 RUN flutter doctor
 RUN flutter config --enable-web
 

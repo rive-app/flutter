@@ -120,7 +120,6 @@ class _InitWindowWidgetState extends State<InitWindowWidget> {
   }
 
   void _initWindow() {
-    print("INIT!");
     win_utils.hideTitleBar();
     win_utils.setSize(kDefaultWIndowSize);
     win_utils.initInputHelper();
