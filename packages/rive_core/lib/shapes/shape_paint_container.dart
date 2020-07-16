@@ -151,7 +151,7 @@ abstract class ShapePaintContainer {
         ..color = const Color(0xFF000000)
         ..position = 0;
       final gradientStopB = GradientStop()
-        ..color = const Color(0xFFFFFFFF)
+        ..color = const Color(0x00000000)
         ..position = 1;
 
       context.addObject(fill);
