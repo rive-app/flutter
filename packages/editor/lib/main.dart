@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:core/debounce.dart';
 import 'package:core/error_logger/error_logger.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
@@ -113,20 +114,13 @@ class InitWindowWidget extends StatefulWidget {
 }
 
 class _InitWindowWidgetState extends State<InitWindowWidget> {
-  // Wait for this timing count to finally register things.
-  int _timingsCount = 5;
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance.addTimingsCallback(_onFirstTimings);
+    debounce(_initWindow, duration: const Duration(seconds: 1));
   }
 
-  void _onFirstTimings(List<FrameTiming> times) {
-    _timingsCount--;
-    if (_timingsCount != 0) {
-      return;
-    }
-    SchedulerBinding.instance.removeTimingsCallback(_onFirstTimings);
+  void _initWindow() {
     print("INIT!");
     win_utils.hideTitleBar();
     win_utils.setSize(kDefaultWIndowSize);

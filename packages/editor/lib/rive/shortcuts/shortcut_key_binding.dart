@@ -1,7 +1,5 @@
 import 'dart:collection';
 
-import 'package:flutter/services.dart';
-
 import 'shortcut_actions.dart';
 import 'shortcut_keys.dart';
 

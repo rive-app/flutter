@@ -359,10 +359,10 @@ class InputHelperView: NSView {
     func reportKey(_ code:UInt32, _ isPressed:Bool, _ isRepeat:Bool) {
         var fullKeyCode:UInt32 = code
         if(!isPressed) {
-            fullKeyCode |= (1<<31)
+            fullKeyCode |= (1<<18)
         } 
         if(isRepeat) {
-            fullKeyCode |= (1<<30)
+            fullKeyCode |= (1<<17)
         }
         keyPressHandler.keyPress(fullKeyCode)
     }

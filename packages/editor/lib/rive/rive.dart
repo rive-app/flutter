@@ -96,9 +96,9 @@ class Rive {
   void _onKeyEvent(dynamic event) {
     assert(event is int);
     var code = event as int;
-    var isRelease = (code & (1 << 31)) != 0;
-    var isRepeat = (code & (1 << 30)) != 0;
-    var keyCode = code & ~(1 << 31 | 1 << 30);
+    var isRelease = (code & (1 << 18)) != 0;
+    var isRepeat = (code & (1 << 17)) != 0;
+    var keyCode = code & ~(1 << 18 | 1 << 17);
     // print('KEY: ${keyForCode(keyCode)}');
     // if (isRelease) {
     //   print('Released: $keyCode');
