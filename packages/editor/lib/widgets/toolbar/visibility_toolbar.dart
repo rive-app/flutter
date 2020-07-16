@@ -28,7 +28,7 @@ class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
         return ValueListenableBuilder<double>(
           valueListenable: rive.stage.zoomLevelNotifier,
           builder: (context, value, _) => SizedBox(
-            width: 32,
+            width: 40,
             child: Text(
               PercentageInputConverter.instance.toDisplayValue(value),
               textAlign: TextAlign.right,

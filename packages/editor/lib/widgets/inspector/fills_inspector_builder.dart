@@ -13,7 +13,7 @@ class FillsInspectorBuilder extends ShapePaintInspectorBuilder {
 
   @override
   ShapePaint createFor(ShapePaintContainer container) =>
-      container.createFill(const Color(0xFFFF5678));
+      container.createGradientFill();
 
   @override
   String get name => 'Fills';
