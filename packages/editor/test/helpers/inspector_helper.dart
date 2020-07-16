@@ -40,6 +40,7 @@ class _TestInspectorState extends State<TestInspector> {
     _iconCache = RiveIconCache(rootBundle);
     _rive = Rive(
       iconCache: _iconCache,
+      enableKeyEventStream: false,
     );
     super.initState();
   }

@@ -75,7 +75,7 @@ class Rive {
 
   final eventChannel = const EventChannel('plugins.rive.app/key_press');
 
-  Rive({this.iconCache}) : api = RiveApi() {
+  Rive({this.iconCache, bool enableKeyEventStream = true}) : api = RiveApi() {
     _focusNode = FocusNode(
         canRequestFocus: true,
         skipTraversal: true,
@@ -90,7 +90,11 @@ class Rive {
         });
 
     _filesApi = FileApi(api);
-    eventChannel.receiveBroadcastStream().listen(_onKeyEvent);
+
+    // Disable this when there's no plugins (e.g. for testing)
+    if (enableKeyEventStream) {
+      eventChannel.receiveBroadcastStream().listen(_onKeyEvent);
+    }
   }
 
   void _onKeyEvent(dynamic event) {

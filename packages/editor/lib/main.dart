@@ -7,7 +7,6 @@ import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:rive_api/data_model.dart';
