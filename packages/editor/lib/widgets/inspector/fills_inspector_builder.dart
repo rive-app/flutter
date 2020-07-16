@@ -12,7 +12,8 @@ class FillsInspectorBuilder extends ShapePaintInspectorBuilder {
   Event changedEventOf(ShapePaintContainer container) => container.fillsChanged;
 
   @override
-  ShapePaint createFor(ShapePaintContainer container) => container.createFill();
+  ShapePaint createFor(ShapePaintContainer container) =>
+      container.createGradientFill();
 
   @override
   String get name => 'Fills';

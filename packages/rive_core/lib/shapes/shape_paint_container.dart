@@ -8,6 +8,8 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:meta/meta.dart';
+import 'package:rive_core/shapes/paint/gradient_stop.dart';
+import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
@@ -120,6 +122,47 @@ abstract class ShapePaintContainer {
       context.addObject(solidColor);
 
       fill.appendChild(solidColor);
+      appendChild(fill);
+    });
+    return fill;
+  }
+
+  /// Creates a default linear gradient fill
+  Fill createGradientFill() {
+    assert(context != null);
+
+    Fill fill;
+    context.batchAdd(() {
+      fill = Fill()..name = 'Fill ${fills.length + 1}';
+
+      final gradient = LinearGradient();
+
+      // Get the gradient bounds
+      var rect = Rect.fromLTRB(
+          localBounds[0], localBounds[1], localBounds[2], localBounds[3]);
+      gradient
+        ..startX = rect.left
+        ..startY = rect.centerLeft.dy
+        ..endX = rect.right
+        ..endY = rect.centerLeft.dy;
+
+      // Add the two stops
+      final gradientStopA = GradientStop()
+        ..color = const Color(0xFF000000)
+        ..position = 0;
+      final gradientStopB = GradientStop()
+        ..color = const Color(0xFFFFFFFF)
+        ..position = 1;
+
+      context.addObject(fill);
+      context.addObject(gradient);
+      context.addObject(gradientStopA);
+      context.addObject(gradientStopB);
+
+      gradient.appendChild(gradientStopA);
+      gradient.appendChild(gradientStopB);
+
+      fill.appendChild(gradient);
       appendChild(fill);
     });
     return fill;
