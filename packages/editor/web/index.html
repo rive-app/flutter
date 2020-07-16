@@ -101,6 +101,40 @@
         fileReader.readAsArrayBuffer(file);
       }
     };
+
+    function initInputHelper() {
+
+      var isMetaDown = false;
+      var isControlDown = false;
+      var isCapsLockDown = false;
+      var isShiftDown = false;
+      var isOptionDown = false;
+
+      window.onfocus = function (event) {
+        // report modifiers released...
+        // alt
+        keyPressed(0x12 | 1 << 18);
+        // shift
+        keyPressed(0x10 | 1 << 18);
+        // meta
+        keyPressed(0x5B | 1 << 18);
+        // ctrl
+        keyPressed(0x11 | 1 << 18);
+        // shift
+        keyPressed(0x10 | 1 << 18);
+      };
+
+      window.onkeydown = function (event) {
+        var code = event.keyCode;
+        if (event.repeat) {
+          code |= 1 << 17;
+        }
+        keyPressed(code);
+      };
+      window.onkeyup = function (event) {
+        keyPressed(event.keyCode | 1 << 18);
+      };
+    }
   </script>
   <script src="main.dart.js?v=DEPLOYMENTVERSION" type="application/javascript"></script>
 </body>

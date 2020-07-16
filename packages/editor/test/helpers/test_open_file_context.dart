@@ -5,7 +5,12 @@ import 'package:rive_editor/rive/rive.dart';
 
 /// A fake open file context that's valid and usable for testing.
 class TestOpenFileContext extends OpenFileContext {
-  TestOpenFileContext() : super(10, 10, rive: Rive());
+  TestOpenFileContext()
+      : super(
+          10,
+          10,
+          rive: Rive(enableKeyEventStream: false),
+        );
   Future<bool> fakeConnect() async {
     LocalDataPlatform dataPlatform = LocalDataPlatform.make();
     core = TestRiveFile('fake', localDataPlatform: dataPlatform);

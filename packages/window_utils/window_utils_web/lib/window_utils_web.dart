@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:js' as js;
 
+import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:window_utils_platform_interface/window_utils_platform_interface.dart';
 import 'package:window_utils_web/browser.dart' as browser;
@@ -12,10 +13,15 @@ import 'package:window_utils_web/browser.dart' as browser;
 ///
 /// This class implements (or stubs out) `package:window_utils` functionality for the web.
 class WindowUtilsPlugin extends WindowUtilsPlatform {
+  final BinaryMessenger messenger;
+  static const String keyChannelName = 'plugins.rive.app/key_press';
+
   /// Registers this class as the default instance of [UrlLauncherPlatform].
   static void registerWith(Registrar registrar) {
-    WindowUtilsPlatform.instance = WindowUtilsPlugin();
+    WindowUtilsPlatform.instance = WindowUtilsPlugin(registrar.messenger);
   }
+
+  WindowUtilsPlugin(this.messenger);
 
   /// Stubbed out for web; does nothing except return true
   @override
@@ -82,7 +88,16 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
   }
 
   @override
-  Future<bool> initDropTarget() async {
+  Future<bool> initInputHelper() async {
+    js.context.callMethod('initInputHelper');
+    js.context['keyPressed'] = (dynamic test) {
+      if (test is int) {
+        var codec = const StandardMethodCodec();
+        
+        messenger.send(keyChannelName, codec.encodeSuccessEnvelope(test));
+      }
+    };
+
     js.context['filesDropped'] = (dynamic test) {
       if (test is! js.JsArray) {
         return;

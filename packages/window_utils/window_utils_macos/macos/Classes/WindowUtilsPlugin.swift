@@ -5,11 +5,35 @@ import WebKit
 import AppKit
 
 
+class KeyPressHandler : NSObject, FlutterStreamHandler {
+    private var _eventSink: FlutterEventSink?
+
+    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        _eventSink = events
+        return nil
+    }
+
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        _eventSink = nil
+        return nil;
+    }
+
+    func keyPress(_ keyCode: UInt32) {
+        _eventSink?(keyCode)
+    }
+}
+
+// Global handler for routing key presses
+let keyPressHandler = KeyPressHandler()
+
 public class WindowUtilsPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugins.rive.app/window_utils", binaryMessenger: registrar.messenger)
         let instance = WindowUtilsPlugin(channel: channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
+
+        let keypressChannel = FlutterEventChannel(name: "plugins.rive.app/key_press", binaryMessenger: registrar.messenger)
+        keypressChannel.setStreamHandler(keyPressHandler)
     }
     
     var mouseStackCount = 1;
@@ -221,14 +245,14 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
             let window = NSApp.windows.first(where: { $0.title == _key })
             window?.setContentSize(NSSize(width: width, height: height))
             result(true)
-        case "initDropTarget":
+        case "initInputHelper":
             if let window = NSApplication.shared.mainWindow
             {
                 let screen = window.frame
                 let size = screen.size
                 
                 let frame:CGRect = CGRect(origin: .zero, size: size)
-                let view:DropView = DropView(frame: frame, channel: _channel)
+                let view:InputHelperView = InputHelperView(frame: frame, channel: _channel)
                 
                 window.contentView?.addSubview(view)
                 
@@ -293,17 +317,112 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
     }
 }
 
-class DropView: NSView {
+
+class InputHelperView: NSView {
     let fileTypes = ["jpg", "jpeg", "bmp", "png", "gif", "riv"]
     
     let NSFilenamesPboardType = NSPasteboard.PasteboardType("NSFilenamesPboardType")
     var channel:FlutterMethodChannel?
+
+    var isMetaDown:Bool = false
+    var isControlDown:Bool = false
+    var isCapsLockDown:Bool = false
+    var isShiftDown:Bool = false
+    var isOptionDown:Bool = false
     
     init(frame frameRect: NSRect, channel flutterChannel:FlutterMethodChannel) {
         channel = flutterChannel
         super.init(frame: frameRect)
         self.autoresizingMask = [.width, .height]
         registerForDraggedTypes([NSFilenamesPboardType])
+        
+        NotificationCenter.default.addObserver(self,
+    selector: #selector(appFocused),
+    name: NSWindow.didBecomeKeyNotification, // UIApplication.didBecomeActiveNotification for swift 4.2+
+    object: nil)
+
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: keyDownHandler)
+        NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: keyUpHandler)
+        NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: flagsChangedHandler)
+    }
+
+    @objc func appFocused() {
+        syncFlags(NSEvent.modifierFlags.rawValue)
+    }
+
+    func keyDownHandler(with event: NSEvent) -> NSEvent? {
+        // print("down \(event.keyCode) \(event.isARepeat)")
+        reportMacKey(event.keyCode, true, event.isARepeat)
+        return event
+    }
+
+    func reportKey(_ code:UInt32, _ isPressed:Bool, _ isRepeat:Bool) {
+        var fullKeyCode:UInt32 = code
+        if(!isPressed) {
+            fullKeyCode |= (1<<18)
+        } 
+        if(isRepeat) {
+            fullKeyCode |= (1<<17)
+        }
+        keyPressHandler.keyPress(fullKeyCode)
+    }
+
+    func reportMacKey(_ macKeyCode:UInt16, _ isPressed:Bool, _ isRepeat:Bool) {
+        if(macKeyCode < MacToWeb.count) {
+            reportKey(MacToWeb[Int(macKeyCode)], isPressed, isRepeat)
+        }
+        else {
+            print("Unhandled keycode \(macKeyCode)")
+        }
+    }
+
+    func keyUpHandler(with event: NSEvent) -> NSEvent? {
+        // print("up \(event.keyCode)")
+        reportMacKey(event.keyCode, false, false)
+        return event
+    }
+
+    func syncFlags(_ rawValue:UInt) {
+        let meta = (rawValue & NSEvent.ModifierFlags.command.rawValue) != 0
+        if(meta != isMetaDown) {
+            isMetaDown = meta
+            // print("Meta changed \(meta)")
+            reportKey(KeyCode.lwin.rawValue, isMetaDown, false)
+            // report meta down...
+        }
+        let ctrl = (rawValue & NSEvent.ModifierFlags.control.rawValue) != 0
+        if(ctrl != isControlDown) {
+            isControlDown = ctrl
+            // print("ctrl changed \(ctrl)")
+            reportKey(KeyCode.control.rawValue, isControlDown, false)
+            // report control down...
+        }
+        let caps = (rawValue & NSEvent.ModifierFlags.capsLock.rawValue) != 0
+        if(caps != isCapsLockDown) {
+            isCapsLockDown = caps
+            // report caps down...
+            // print("caps changed \(caps)")
+            reportKey(KeyCode.capital.rawValue, isCapsLockDown, false)
+        }
+        let shift = (rawValue & NSEvent.ModifierFlags.shift.rawValue) != 0
+        if(shift != isShiftDown) {
+            isShiftDown = shift
+            // report shift down...
+            // print("shift changed \(shift)")
+            reportKey(KeyCode.shift.rawValue, isShiftDown, false)
+        }
+        let option = (rawValue & NSEvent.ModifierFlags.option.rawValue) != 0
+        if(option != isOptionDown) {
+            isOptionDown = option
+            // print("option changed \(option)")
+            // report shift down...
+            reportKey(KeyCode.menu.rawValue, isOptionDown, false)
+        }
+    }
+    
+    func flagsChangedHandler(with event: NSEvent) -> NSEvent? {
+        syncFlags(event.modifierFlags.rawValue)
+        return event
     }
     
     required init?(coder: NSCoder) {
@@ -329,12 +448,6 @@ class DropView: NSView {
         return false
     }
     
-    //    override func draggingExited(_ sender: NSDraggingInfo?) {
-    //    }
-    //
-    //    override func draggingEnded(_ sender: NSDraggingInfo) {
-    //    }
-    
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         guard let pasteboard = sender.draggingPasteboard.propertyList(forType: NSFilenamesPboardType) as? NSArray,
             let path = pasteboard[0] as? String
@@ -343,6 +456,14 @@ class DropView: NSView {
         channel?.invokeMethod("filesDropped", arguments: [path])
         
         return true
+    }
+    
+    override var acceptsFirstResponder : Bool {
+        return false
+    }
+    
+    override var canBecomeKeyView : Bool {
+        return false
     }
 }
 
@@ -424,3 +545,5 @@ class WebView: NSViewController, WKUIDelegate, WKScriptMessageHandler, WKNavigat
         webView = nil
     }
 }
+
+

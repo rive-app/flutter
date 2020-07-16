@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:core/debounce.dart';
 import 'package:core/error_logger/error_logger.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
@@ -64,16 +65,6 @@ Future<void> main() async {
   };
 
   WidgetsFlutterBinding.ensureInitialized();
-  WidgetsBinding.instance.addPostFrameCallback(
-    (_) {
-      win_utils.hideTitleBar();
-      win_utils.setSize(kDefaultWIndowSize);
-      win_utils.initDropTarget();
-      win_utils.listenFilesDropped((files) {
-        print("We got $files");
-      });
-    },
-  );
 
   final iconCache = RiveIconCache(rootBundle);
   final rive = Rive(
@@ -95,9 +86,11 @@ Future<void> main() async {
   // to our logger service.
   runZoned(
     () => runApp(
-      RiveEditorShell(
-        rive: rive,
-        iconCache: iconCache,
+      InitWindowWidget(
+        child: RiveEditorShell(
+          rive: rive,
+          iconCache: iconCache,
+        ),
       ),
     ),
     onError: (Object error, StackTrace stackTrace) {
@@ -109,6 +102,36 @@ Future<void> main() async {
       }
     },
   );
+}
+
+class InitWindowWidget extends StatefulWidget {
+  final Widget child;
+
+  const InitWindowWidget({Key key, this.child}) : super(key: key);
+  @override
+  _InitWindowWidgetState createState() => _InitWindowWidgetState();
+}
+
+class _InitWindowWidgetState extends State<InitWindowWidget> {
+  @override
+  void initState() {
+    super.initState();
+    debounce(_initWindow, duration: const Duration(seconds: 1));
+  }
+
+  void _initWindow() {
+    win_utils.hideTitleBar();
+    win_utils.setSize(kDefaultWIndowSize);
+    win_utils.initInputHelper();
+    win_utils.listenFilesDropped((files) {
+      print("We got $files");
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }
 
 GlobalKey loadingScreenKey = GlobalKey();

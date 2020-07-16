@@ -16,6 +16,8 @@ import 'window_utils_platform_interface.dart';
 
 // const MethodChannel _channel = MethodChannel('plugins.flutter.io/url_launcher');
 const MethodChannel _channel = MethodChannel('plugins.rive.app/window_utils');
+const EventChannel _keyPressChannel =
+    EventChannel('plugins.rive.app/key_press');
 final _random = Random.secure();
 
 /// An implementation of [WindowUtilsPlatform] that uses method channels.
@@ -347,6 +349,7 @@ class MethodChannelWindowUtils extends WindowUtilsPlatform {
   @override
   Future<String> getErrorMessage() async => '';
 
-  Future<bool> initDropTarget() =>
-      _channel.invokeMethod<bool>('initDropTarget');
+  @override
+  Future<bool> initInputHelper() =>
+      _channel.invokeMethod<bool>('initInputHelper');
 }
