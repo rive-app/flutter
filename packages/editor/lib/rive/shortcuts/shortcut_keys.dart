@@ -164,19 +164,6 @@ String keyname(ShortcutKey key) {
   }
 }
 
-bool isModifierKey(ShortcutKey key) {
-  switch (key) {
-    case ShortcutKey.alt:
-    case ShortcutKey.shift:
-    case ShortcutKey.systemCmd:
-    case ShortcutKey.meta:
-    case ShortcutKey.ctrl:
-      return true;
-    default:
-      return false;
-  }
-}
-
 ShortcutKey keyForCode(int code) {
   switch (code) {
     case 0x12:
