@@ -12,8 +12,7 @@ class FillsInspectorBuilder extends ShapePaintInspectorBuilder {
   Event changedEventOf(ShapePaintContainer container) => container.fillsChanged;
 
   @override
-  ShapePaint createFor(ShapePaintContainer container) =>
-      container.createFill(const Color(0xFFFF5678));
+  ShapePaint createFor(ShapePaintContainer container) => container.createFill();
 
   @override
   String get name => 'Fills';

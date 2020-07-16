@@ -105,14 +105,16 @@ abstract class ShapePaintContainer {
 
   // -> editor-only
   /// Create a new color fill and add it to this shape.
-  Fill createFill(Color color) {
+  Fill createFill([Color color]) {
     assert(context != null);
-    assert(color != null);
 
     Fill fill;
     context.batchAdd(() {
       fill = Fill()..name = 'Fill ${fills.length + 1}';
-      var solidColor = SolidColor()..color = color;
+      final solidColor = SolidColor();
+      if (color != null) {
+        solidColor.color = color;
+      }
 
       context.addObject(fill);
       context.addObject(solidColor);
