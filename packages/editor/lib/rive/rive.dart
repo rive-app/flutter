@@ -267,15 +267,6 @@ class Rive {
     selectedTab.value = value;
   }
 
-  // Keys that we think are currently pressed. Note that on platforms like web
-  // releasing some keys results in a key press of another key. One such example
-  // is the command key when pressed with another key. So if you are pressing
-  // Command + 1 and you release Command, the browser effectively triggers two
-  // keypresses for 1, first with metakey=true and second with metakey=false.
-  // Flutter also will interpret this as two presses so we do some work to see
-  // if we thought it was already pressed.
-  final Set<_Key> _pressed = {};
-
   // Actions that the pressed keys are triggering. These get updated as keys are
   // released.
   final Set<ShortcutAction> _pressedActions = {};
@@ -310,12 +301,9 @@ class Rive {
     if (key == ShortcutKey.systemCmd) {
       _isSystemCmdPressed = isPress;
     }
-    // Always update whether we're multi selecting.
-    if (key == ShortcutKey.shift) {
-      selectionMode.value = isPress
-          ? SelectionMode.range
-          : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
-    }
+    selectionMode.value = key == ShortcutKey.shift && isPress
+        ? SelectionMode.range
+        : _isSystemCmdPressed ? SelectionMode.multi : SelectionMode.single;
 
     // If something else has focus, don't process actions (usually when a text
     // field is focused somewhere).
