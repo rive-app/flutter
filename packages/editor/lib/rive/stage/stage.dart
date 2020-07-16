@@ -84,8 +84,8 @@ class StageItemFriend {
 /// Some notes about how the Stage works and future plans for it here:
 /// https://www.notion.so/Stage-65da45b819b249839e2ca0bb659c6a01
 class Stage extends Debouncer {
-  static const double minZoom = 0.1;
-  static const double maxZoom = 8;
+  static const double minZoom = 0.01;
+  static const double maxZoom = 16;
 
   /// Reference to the file that owns this stage.
   final OpenFileContext file;
