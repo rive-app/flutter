@@ -9,7 +9,7 @@ class TestOpenFileContext extends OpenFileContext {
       : super(
           10,
           10,
-          rive: Rive(enableKeyEventStream: false),
+          rive: Rive(),
         );
   Future<bool> fakeConnect() async {
     LocalDataPlatform dataPlatform = LocalDataPlatform.make();
