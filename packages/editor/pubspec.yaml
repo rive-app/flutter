@@ -27,7 +27,7 @@ dependencies:
     path: ../rive_widgets
   utilities:
     path: ../utilities
-  rive: ^0.0.1+2
+  rive: ^0.0.2
 
   http: ^0.12.1
   dotted_border: ^1.0.5
