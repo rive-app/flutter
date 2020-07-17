@@ -107,6 +107,9 @@ class _InspectorPopoutState extends State<InspectorPopout> {
     var popup = InspectorPopout.popout(
       context,
       onClose: () {
+        if(!mounted) {
+          return;
+        }
         setState(() {
           widget.closed?.call(_popup);
           _popup = null;
