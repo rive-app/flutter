@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
 import 'package:rive_editor/rive/managers/follow_manager.dart';
@@ -6,6 +9,7 @@ import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
 import 'package:rive_editor/rive/shortcuts/default_key_binding.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_key_binding.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_keys.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 /// Inherited widget that will pass the theme down the tree
@@ -215,4 +219,58 @@ class _InheritedImageCacheProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(_InheritedImageCacheProvider old) =>
       manager != old.manager;
+}
+
+typedef KeyPressCallback = void Function(
+    ShortcutKey key, bool isPress, bool isRepeat);
+
+class KeyPressProvider extends StatefulWidget {
+  const KeyPressProvider({@required this.listener, this.child});
+  final Widget child;
+  final KeyPressCallback listener;
+
+  @override
+  _KeyPressProviderState createState() => _KeyPressProviderState();
+}
+
+class _KeyPressProviderState extends State<KeyPressProvider> {
+  final eventChannel = const EventChannel('plugins.rive.app/key_press');
+  StreamSubscription _subscription;
+  @override
+  void initState() {
+    _subscription = eventChannel.receiveBroadcastStream().listen(_onKeyEvent);
+    super.initState();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  void _onKeyEvent(dynamic event) {
+    assert(event is int);
+    var code = event as int;
+    var isRelease = (code & (1 << 18)) != 0;
+    var isRepeat = (code & (1 << 17)) != 0;
+    var keyCode = code & ~(1 << 18 | 1 << 17);
+    // print('KEY: ${keyForCode(keyCode)}');
+    // if (isRelease) {
+    //   print('Released: $keyCode');
+    // } else {
+    //   print('Pressed: $keyCode $isRepeat');
+    // }
+    var key = keyForCode(keyCode);
+    if (key != null) {
+      widget.listener?.call(key, !isRelease, isRepeat);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
