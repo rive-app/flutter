@@ -63,6 +63,7 @@ class InspectorPopout extends StatefulWidget {
       onClose: onClose,
       autoClose: autoClose,
       shouldClose: shouldClose,
+      canCancelWithAction: true,
       builder: (context) {
         return InspectorPopoutPositioner(
           top: boxOffset.dy,

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:core/debounce.dart';
 import 'package:core/error_logger/error_logger.dart';
+import 'package:core/error_logger/native_error_logger.dart';
 import 'package:cursor/cursor_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -84,16 +85,31 @@ Future<void> main() async {
   // Runs the app in a custom [Zone] (i.e. an execution context).
   // Provides a convenient way to capture all errors, so they can be reported
   // to our logger service.
-  runZoned(
-    () => runApp(
-      InitWindowWidget(
-        child: RiveEditorShell(
-          rive: rive,
-          iconCache: iconCache,
+  await runZonedGuarded<Future<void>>(
+    () async {
+      var zone = Zone.current;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        if (isInDebugMode) {
+          FlutterError.dumpErrorToConsole(details);
+          return;
+        }
+
+        // Figure out if we want to let the app limp along in debug mode...If
+        // so, move this catastrophe pipe to after the return.
+        Plumber().message<AppState>(AppState.catastrophe);
+
+        zone.handleUncaughtError(details.exception, details.stack);
+      };
+      runApp(
+        InitWindowWidget(
+          child: RiveEditorShell(
+            rive: rive,
+            iconCache: iconCache,
+          ),
         ),
-      ),
-    ),
-    onError: (Object error, StackTrace stackTrace) {
+      );
+    },
+    (Object error, StackTrace stackTrace) {
       try {
         ErrorLogger.instance.reportException(error, stackTrace);
       } on Exception catch (e) {
@@ -258,7 +274,10 @@ class InsertInheritedWidgets extends StatelessWidget {
                     // Passing the child in separate from the value listenable
                     // builder as anything interested in the ActiveFile will
                     // .of() from the context anyway to trigger a rebuild.
-                    child: child,
+                    child: KeyPressProvider(
+                      listener: rive.onRawKeyPress,
+                      child: child,
+                    ),
                   ),
                 ),
               ),

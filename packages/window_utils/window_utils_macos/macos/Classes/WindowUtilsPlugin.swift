@@ -24,7 +24,7 @@ class KeyPressHandler : NSObject, FlutterStreamHandler {
 }
 
 // Global handler for routing key presses
-let keyPressHandler = KeyPressHandler()
+var keyPressHandler:KeyPressHandler? = nil
 
 public class WindowUtilsPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -33,6 +33,7 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance, channel: channel)
 
         let keypressChannel = FlutterEventChannel(name: "plugins.rive.app/key_press", binaryMessenger: registrar.messenger)
+        keyPressHandler = KeyPressHandler()
         keypressChannel.setStreamHandler(keyPressHandler)
     }
     
@@ -254,6 +255,13 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
                 let frame:CGRect = CGRect(origin: .zero, size: size)
                 let view:InputHelperView = InputHelperView(frame: frame, channel: _channel)
                 
+                for subview in window.contentView!.subviews {
+                    if subview is InputHelperView {
+                        (subview as! InputHelperView).removeMonitors()
+                        subview.removeFromSuperview()
+                    }
+                }
+                
                 window.contentView?.addSubview(view)
                 
                 result(true)
@@ -330,6 +338,10 @@ class InputHelperView: NSView {
     var isShiftDown:Bool = false
     var isOptionDown:Bool = false
     
+    var monitorKeyDown: Any?
+    var monitorKeyUp: Any?
+    var monitorKeyFlags: Any?
+    
     init(frame frameRect: NSRect, channel flutterChannel:FlutterMethodChannel) {
         channel = flutterChannel
         super.init(frame: frameRect)
@@ -337,13 +349,23 @@ class InputHelperView: NSView {
         registerForDraggedTypes([NSFilenamesPboardType])
         
         NotificationCenter.default.addObserver(self,
-    selector: #selector(appFocused),
-    name: NSWindow.didBecomeKeyNotification, // UIApplication.didBecomeActiveNotification for swift 4.2+
-    object: nil)
+                                               selector: #selector(appFocused),
+                                               name: NSWindow.didBecomeKeyNotification,
+                                               object: nil)
 
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: keyDownHandler)
-        NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: keyUpHandler)
-        NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: flagsChangedHandler)
+        monitorKeyDown = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: keyDownHandler)
+        monitorKeyUp = NSEvent.addLocalMonitorForEvents(matching: .keyUp, handler: keyUpHandler)
+        monitorKeyFlags = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: flagsChangedHandler)
+    }
+    
+    func removeMonitors() {
+        NotificationCenter.default.removeObserver(self,
+        name: NSWindow.didBecomeKeyNotification,
+        object: nil)
+
+        NSEvent.removeMonitor(monitorKeyDown!)
+        NSEvent.removeMonitor(monitorKeyUp!)
+        NSEvent.removeMonitor(monitorKeyFlags!)
     }
 
     @objc func appFocused() {
@@ -364,7 +386,7 @@ class InputHelperView: NSView {
         if(isRepeat) {
             fullKeyCode |= (1<<17)
         }
-        keyPressHandler.keyPress(fullKeyCode)
+        keyPressHandler!.keyPress(fullKeyCode)
     }
 
     func reportMacKey(_ macKeyCode:UInt16, _ isPressed:Bool, _ isRepeat:Bool) {

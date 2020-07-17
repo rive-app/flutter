@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 
 /// Manage a set of popup windows and close them when you click anywhere on the
 /// screen outside the popups.
@@ -83,6 +85,7 @@ class Popup {
     VoidCallback onClose,
     bool autoClose = true,
     bool includeCloseGuard = false,
+    bool canCancelWithAction = false,
     Future<bool> Function() shouldClose,
   }) {
     OverlayState overlay = Overlay.of(context);
@@ -119,18 +122,35 @@ class Popup {
       overlay.insert(firstGuard._entry);
     }
 
+    Popup popup;
+    var file = ActiveFile.find(context);
+    bool handler(ShortcutAction action) {
+      switch (action) {
+        case ShortcutAction.cancel:
+          popup.close();
+          return true;
+        default:
+          return false;
+      }
+    }
+
     Popup ownGuard;
-    var popup = Popup(
+    popup = Popup(
       OverlayEntry(builder: builder),
-      onClose: includeCloseGuard && autoClose
-          ? () {
-              ownGuard.close();
-              onClose?.call();
-            }
-          : onClose,
+      onClose: () {
+        if (includeCloseGuard && autoClose) {
+          ownGuard.close();
+        }
+        file?.removeActionHandler(handler);
+        onClose?.call();
+      },
       canAutoClose: autoClose,
       shouldClose: shouldClose,
     );
+
+    if (canCancelWithAction) {
+      file?.addActionHandler(handler);
+    }
     if (includeCloseGuard && autoClose) {
       // place our own catch guard for this specific popup
       ownGuard = Popup(

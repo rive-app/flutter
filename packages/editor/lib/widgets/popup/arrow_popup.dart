@@ -84,6 +84,10 @@ class ArrowPopup {
     /// other popups open when clicking off of this popup).
     bool includeCloseGuard = false,
 
+    /// Whether the popup can be closed by hitting ESC or whatever is mapped to
+    /// cancel.
+    bool canCancelWithAction = false,
+
     /// Callback invoked whenver the popup is closed.
     VoidCallback onClose,
 
@@ -99,6 +103,7 @@ class ArrowPopup {
         context,
         onClose: onClose,
         includeCloseGuard: includeCloseGuard,
+        canCancelWithAction: canCancelWithAction,
         shouldClose: shouldClose,
         builder: (context) {
           return IgnorePointer(

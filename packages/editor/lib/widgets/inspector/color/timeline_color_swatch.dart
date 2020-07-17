@@ -84,6 +84,7 @@ class _TimelineColorSwatchState extends State<TimelineColorSwatch> {
             _arrowPopup = ArrowPopup.show(
               context,
               background: RiveTheme.of(context).colors.panelBackgroundDarkGrey,
+              canCancelWithAction: true,
               borderRadius: BorderRadius.circular(10),
               showArrow: false,
               width: 206,

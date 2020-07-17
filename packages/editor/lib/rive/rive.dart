@@ -73,9 +73,7 @@ class Rive {
 
   final ScrollController treeScrollController = ScrollController();
 
-  final eventChannel = const EventChannel('plugins.rive.app/key_press');
-
-  Rive({this.iconCache, bool enableKeyEventStream = true}) : api = RiveApi() {
+  Rive({this.iconCache}) : api = RiveApi() {
     _focusNode = FocusNode(
         canRequestFocus: true,
         skipTraversal: true,
@@ -90,29 +88,6 @@ class Rive {
         });
 
     _filesApi = FileApi(api);
-
-    // Disable this when there's no plugins (e.g. for testing)
-    if (enableKeyEventStream) {
-      eventChannel.receiveBroadcastStream().listen(_onKeyEvent);
-    }
-  }
-
-  void _onKeyEvent(dynamic event) {
-    assert(event is int);
-    var code = event as int;
-    var isRelease = (code & (1 << 18)) != 0;
-    var isRepeat = (code & (1 << 17)) != 0;
-    var keyCode = code & ~(1 << 18 | 1 << 17);
-    // print('KEY: ${keyForCode(keyCode)}');
-    // if (isRelease) {
-    //   print('Released: $keyCode');
-    // } else {
-    //   print('Pressed: $keyCode $isRepeat');
-    // }
-    var key = keyForCode(keyCode);
-    if (key != null) {
-      onRawKeyPress(key, !isRelease, isRepeat);
-    }
   }
 
   /// Available tabs in the editor

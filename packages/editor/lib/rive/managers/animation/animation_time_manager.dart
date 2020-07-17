@@ -6,6 +6,7 @@ import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/loop.dart';
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -170,13 +171,15 @@ abstract class AnimationTimeManager extends AnimationManager {
   final _playbackController = StreamController<bool>();
 
   _SimpleAnimationController _controller;
+  Artboard _artboard;
   AnimationTimeManager(LinearAnimation animation, this.activeFile)
       : super(animation) {
     _controller = _SimpleAnimationController(animation, (frames) {
       _changePlayback(_controller.sustainedPlayback);
       _timeStream.add(frames.clamp(0, animation.duration).toDouble());
     });
-    animation.artboard.addController(_controller);
+    _artboard = animation.artboard;
+    _artboard.addController(_controller);
     _controller.isActive = true;
 
     _isPlayingStream.add(false);
@@ -290,7 +293,7 @@ abstract class AnimationTimeManager extends AnimationManager {
       return;
     }
     _controller.sustainedPlayback = play;
-    if(!play) {
+    if (!play) {
       // We should round to the closest frame when we pause (fixes #469).
       _changeCurrentTime(_controller.time);
     }
@@ -375,7 +378,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     _loop.close();
     _loopController.close();
     activeFile.removeReleaseActionHandler(_releaseAction);
-    animation.artboard.removeController(_controller);
+    _artboard.removeController(_controller);
     animation.keyframesChanged.removeListener(_keyframesChanged);
     animation.keyframeValueChanged.removeListener(_keyframesChanged);
 
