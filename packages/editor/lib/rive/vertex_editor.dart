@@ -180,6 +180,9 @@ class VertexEditor with RiveFileDelegate {
       // Put us into editing path mode.
       _changeMode(VertexEditorMode.editingPath);
       _editingPaths.value = HashSet<PointsPath>.from(<PointsPath>[path]);
+    } else {
+      // Editing/Creating is on, make sure the path is in the editing set.
+      _editingPaths.value.add(path);
     }
     stage.debounce(_syncSolo);
   }
