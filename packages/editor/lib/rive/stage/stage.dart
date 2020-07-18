@@ -900,6 +900,8 @@ class Stage extends Debouncer {
         // Only automatically add items that are marked automatic.
         if (stageItem.isAutomatic(this)) {
           addItem(stageItem);
+          // Auto select items automatically added to the stage
+          file.select(stageItem);
         }
       }
     }
