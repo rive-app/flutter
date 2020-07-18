@@ -5,6 +5,7 @@ import 'package:core/core.dart';
 import 'package:core/debounce.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/animation/linear_animation_instance.dart';
 import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/rive_file.dart';
@@ -18,8 +19,10 @@ import 'package:rive_core/rive_animation_controller.dart';
 class _SimpleAnimationController
     extends RiveAnimationController<RiveCoreContext> {
   final LinearAnimation animation;
+  final LinearAnimationInstance animationInstance;
   void Function(double) onTimeChanged;
-  _SimpleAnimationController(this.animation, this.onTimeChanged);
+  _SimpleAnimationController(this.animation, this.onTimeChanged)
+      : animationInstance = LinearAnimationInstance(animation);
 
   // This controller distinguishes between playing an animation (sustained
   // playback) and applying a single frame (isPlaying).
@@ -35,7 +38,7 @@ class _SimpleAnimationController
       var start = animation.enableWorkArea ? animation.workStart : 0;
       var end =
           animation.enableWorkArea ? animation.workEnd : animation.duration;
-      double frames = _time * animation.fps;
+      double frames = animationInstance.time * animation.fps;
       if (frames < start) {
         frames = start.toDouble();
         time = frames / animation.fps;
@@ -49,72 +52,21 @@ class _SimpleAnimationController
     isActive = true;
   }
 
-  double _time = 0;
-  double get time => _time;
-  set time(double value) {
-    if (_time == value) {
-      return;
-    }
-    _time = value;
-    direction = 1;
-  }
+  double get time => animationInstance.time;
+  set time(double value) => animationInstance.time = value;
 
-  int direction = 1;
   @override
   void apply(CoreContext core, double elapsedSeconds) {
     // Reset all previously animated properties.
     core.resetAnimation();
-    animation.apply(_time, coreContext: core);
+    animation.apply(animationInstance.time, coreContext: core);
 
     if (_sustainedPlayback) {
-      _time += elapsedSeconds * animation.speed * direction;
-
-      double frames = _time * animation.fps;
-
-      var start = animation.enableWorkArea ? animation.workStart : 0;
-      var end =
-          animation.enableWorkArea ? animation.workEnd : animation.duration;
-      var range = end - start;
-
-      switch (animation.loop) {
-        case Loop.oneShot:
-          if (frames > end) {
-            _sustainedPlayback = false;
-            frames = end.toDouble();
-            _time = frames / animation.fps;
-          }
-          break;
-        case Loop.loop:
-          if (frames >= end) {
-            frames = _time * animation.fps;
-            frames = start + (frames - start) % range;
-            _time = frames / animation.fps;
-          }
-          break;
-        case Loop.pingPong:
-          // ignore: literal_only_boolean_expressions
-          while (true) {
-            if (direction == 1 && frames >= end) {
-              direction = -1;
-              frames = end + (end - frames);
-              _time = frames / animation.fps;
-            } else if (direction == -1 && frames < start) {
-              direction = 1;
-              frames = start + (start - frames);
-              _time = frames / animation.fps;
-            } else {
-              // we're within the range, we can stop fixing. We do this in a
-              // loop to fix conditions when time has advanced so far that we've
-              // ping-ponged back and forth a few times in a single frame. We
-              // want to accomodate for this in cases where animations are not
-              // advanced on regular intervals.
-              break;
-            }
-          }
-          break;
+      if (!animationInstance.advance(elapsedSeconds)) {
+        _sustainedPlayback = false;
       }
       isActive = true;
-      onTimeChanged(frames);
+      onTimeChanged(animationInstance.time * animation.fps);
     } else {
       // after apply, pause
       isActive = false;
@@ -135,8 +87,6 @@ class _SimpleAnimationController
 /// the viewport, changing animation duration, and tracking editing animation
 /// time.
 abstract class AnimationTimeManager extends AnimationManager {
-  static const int _playPressThresholdMs = 250;
-
   final OpenFileContext activeFile;
   final _fpsStream = BehaviorSubject<int>();
 
@@ -223,7 +173,7 @@ abstract class AnimationTimeManager extends AnimationManager {
     animation.loop = loop;
 
     /// Whenever changing loop, set direction back to 1;
-    _controller.direction = 1;
+    _controller.animationInstance.direction = 1;
     animation.context.captureJournalEntry();
   }
 
