@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
@@ -23,6 +23,8 @@ class NodeTranslateTransformer extends StageTransformer {
   void advance(DragTransformDetails details) {
     _snapper.advance(details.world.current, lockAxis);
     return;
+    // TODO: @luigi-rosso is this code dead now?
+    /*
     Map<Node, Mat2D> worldToParents = {};
 
     var failedInversion = Mat2D();
@@ -62,6 +64,7 @@ class NodeTranslateTransformer extends StageTransformer {
       node.x += delta[0];
       node.y += delta[1];
     }
+    */
   }
 
   @override
@@ -73,7 +76,14 @@ class NodeTranslateTransformer extends StageTransformer {
         topComponents(items.mapWhereType<Node>((element) => element.component));
     if (_nodes.isNotEmpty) {
       _snapper = Snapper.build(details.world.current, _nodes, (item) {
-        return item is StageShape || item is StageNode;
+        // Filter out components that are not shapes or nodes, or not in the
+        // active artboard
+        final activeArtboard = details.artboard;
+        if (item is StageShape || item is StageNode) {
+          final itemArtboard = (item.component as Component).artboard;
+          return activeArtboard == itemArtboard;
+        }
+        return false;
       });
       return true;
     }
