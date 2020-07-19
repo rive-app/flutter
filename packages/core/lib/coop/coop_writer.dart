@@ -21,7 +21,7 @@ class CoopWriter {
   }
 
   void writeReady() {
-    var writer = BinaryWriter();
+    var writer = BinaryWriter(alignment: 1);
     writer.writeVarUint(CoopCommand.ready);
     write(writer.uint8Buffer);
   }
@@ -35,7 +35,7 @@ class CoopWriter {
   }
 
   void writePing() {
-    var writer = BinaryWriter();
+    var writer = BinaryWriter(alignment: 1);
     writer.writeVarUint(CoopCommand.ping);
     write(writer.uint8Buffer);
   }
@@ -53,13 +53,13 @@ class CoopWriter {
   }
 
   void writeChanges(ChangeSet changes) {
-    var writer = BinaryWriter();
+    var writer = BinaryWriter(alignment: max(1, changes.objects.length * 32));
     changes.serialize(writer);
     write(writer.uint8Buffer);
   }
 
   void writeSync(List<ChangeSet> changes) {
-    var writer = BinaryWriter(alignment: max(1, changes.length * 16));
+    var writer = BinaryWriter(alignment: max(1, changes.length * 32));
     writer.writeVarUint(CoopCommand.synchronize);
     for (final change in changes) {
       change.serialize(writer);
@@ -104,7 +104,7 @@ class CoopWriter {
   }
 
   void writeRevision(int id) {
-    var writer = BinaryWriter(alignment: 2);
+    var writer = BinaryWriter(alignment: 4);
     writer.writeVarUint(CoopCommand.revision);
     writer.writeVarUint(id);
     write(writer.uint8Buffer);
