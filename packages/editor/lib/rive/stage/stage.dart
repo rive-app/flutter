@@ -298,6 +298,15 @@ class Stage extends Debouncer {
     }
   }
 
+  // Enable snapping flag
+  final ValueNotifier<bool> enableSnappingNotifier = ValueNotifier<bool>(true);
+  bool get enableSnapping => enableSnappingNotifier.value;
+  set enableSnapping(bool value) {
+    if (enableSnappingNotifier.value != value) {
+      enableSnappingNotifier.value = value;
+    }
+  }
+
   // Show Axis flag
   final ValueNotifier<bool> showAxisNotifier = ValueNotifier<bool>(false);
   bool get showAxis => showAxisNotifier.value;

@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
@@ -17,14 +19,18 @@ class NodeTranslateTransformer extends StageTransformer {
   final Vec2D lockAxis;
   Snapper _snapper;
 
-  NodeTranslateTransformer({this.lockAxis});
+  /// Should items snap while translating?
+  final ValueNotifier<bool> _snap;
+
+  NodeTranslateTransformer({this.lockAxis, ValueNotifier<bool> snap})
+      : _snap = snap ?? ValueNotifier<bool>(true);
 
   @override
   void advance(DragTransformDetails details) {
-    _snapper.advance(details.world.current, lockAxis);
-    return;
-    // TODO: @luigi-rosso is this code dead now?
-    /*
+    if (_snap.value) {
+      _snapper.advance(details.world.current, lockAxis);
+      return;
+    }
     Map<Node, Mat2D> worldToParents = {};
 
     var failedInversion = Mat2D();
@@ -64,7 +70,6 @@ class NodeTranslateTransformer extends StageTransformer {
       node.x += delta[0];
       node.y += delta[1];
     }
-    */
   }
 
   @override
@@ -79,7 +84,7 @@ class NodeTranslateTransformer extends StageTransformer {
         // Filter out components that are not shapes or nodes, or not in the
         // active artboard
         final activeArtboard = details.artboard;
-        if (item is StageShape || item is StageNode) {
+        if (_snap.value && (item is StageShape || item is StageNode)) {
           final itemArtboard = (item.component as Component).artboard;
           return activeArtboard == itemArtboard;
         }
@@ -92,6 +97,8 @@ class NodeTranslateTransformer extends StageTransformer {
 
   @override
   void draw(Canvas canvas) {
-    _snapper?.draw(canvas);
+    if (_snap.value) {
+      _snapper?.draw(canvas);
+    }
   }
 }

@@ -281,6 +281,11 @@ class OpenFileContext with RiveFileDelegate {
 
     core.advance(0);
     makeStage();
+    // We need to first activate the translate tool so that its activate()
+    // function is called and the stage set in the tool. If we don't do this and
+    // use the autotool first, translating won't have access to the stage, which
+    // will break snapping selection.
+    stage.tool = TranslateTool.instance;
     stage.tool = AutoTool.instance;
     _resetManagers();
     stateChanged.notify();
