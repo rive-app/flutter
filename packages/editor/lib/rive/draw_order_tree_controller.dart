@@ -43,11 +43,13 @@ class DrawOrderTreeController extends ComponentTreeController {
   }
 
   @override
+  // ignore: must_call_super
   void dispose() {
     cancelDebounce(_updateActiveArtboard);
     activeArtboard?.drawOrderChanged?.removeListener(flatten);
     backboard.activeArtboardChanged.removeListener(_activeArtboardChanged);
-    super.dispose();
+    // See issue #1015
+    // super.dispose();
   }
 
   @override
