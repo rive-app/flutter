@@ -373,7 +373,23 @@ class InputHelperView: NSView {
     }
 
     func keyDownHandler(with event: NSEvent) -> NSEvent? {
-        // print("down \(event.keyCode) \(event.isARepeat)")
+        // NSLog("down \(event.keyCode) \(event.characters) \(event.isARepeat)")
+        // First check the logical key mapping. If there's no mapping, fall back to the physical key mapping
+        if let logicalCharacters = event.characters {
+            // If it's not empty, grab the first key
+            if let char = logicalCharacters.first {
+                // NSLog("Logical key \(char) pressed")
+                // Calculate the unicode value
+                let unicode:UInt32 = char.unicodeScalars.map { $0.value }.reduce(0, +)
+                // NSLog(String(format: "Unicode value 0x%X", unicode))
+                // If it maps, report the mapped keycode
+                if let mappedLogicalKeyCode = MacLogicalToWeb[unicode] {
+                    reportKey(mappedLogicalKeyCode, true, event.isARepeat)
+                    return event
+                }
+            }
+        }
+        // No logical key mapping found, return the physical mapped keycode
         reportMacKey(event.keyCode, true, event.isARepeat)
         return event
     }
