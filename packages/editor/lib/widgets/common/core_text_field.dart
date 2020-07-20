@@ -23,7 +23,7 @@ class CoreTextField<T> extends StatelessWidget {
   final Iterable<Core> objects;
   final int propertyKey;
   final InputValueConverter<T> converter;
-  final void Function(List<T> originalValues, T newValue) change;
+  final void Function(List<T> originalValues) change;
   final FocusNode focusNode;
   final bool frozen;
 
@@ -37,7 +37,7 @@ class CoreTextField<T> extends StatelessWidget {
     @required Iterable<Core> objects,
     @required int propertyKey,
     InputValueConverter<T> converter,
-    void Function(List<T> originalValues, T value) change,
+    void Function(List<T> originalValues) change,
     FocusNode focusNode,
     Color underlineColor,
     Color focusedUnderlineColor,
@@ -137,6 +137,24 @@ class CoreTextField<T> extends StatelessWidget {
                 )
               : null,
           disabledText: '-',
+
+          // Called when dragging the whole set as one fails, so we attempt to
+          // drag individual values. This occurs when the field shows the 'no
+          // common value' (usually a '-') marker.
+          dragFail: objects == null || objects.isEmpty
+              ? null
+              : (double dragAmount) {
+                  final originalValues = <T>[];
+                  for (final object in objects) {
+                    var from = object.getProperty<T>(propertyKey);
+                    originalValues.add(from);
+                    // Drag failed for the whole set, so attempt invididual
+                    var value = converter.drag(from, dragAmount);
+                    object.context
+                        .setObjectProperty(object, propertyKey, value);
+                  }
+                  change?.call(originalValues);
+                },
           change: objects == null || objects.isEmpty
               ? null
               : (T value) {
@@ -147,7 +165,7 @@ class CoreTextField<T> extends StatelessWidget {
                     object.context
                         .setObjectProperty(object, propertyKey, value);
                   }
-                  change?.call(originalValues, value);
+                  change?.call(originalValues);
                 },
         ),
       ),
