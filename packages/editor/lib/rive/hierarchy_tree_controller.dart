@@ -46,13 +46,20 @@ class HierarchyTreeController extends ComponentTreeController {
   }
 
   @override
+  // ignore: must_call_super
   void dispose() {
     cancelDebounce(_updateActiveArtboard);
     // N.B. assumes backboard doesn't change.
     backboard.activeArtboardChanged.removeListener(_activeArtboardChanged);
     // Remove the item selection listener
     file.selection.removeListener(_onItemSelected);
-    super.dispose();
+    
+    // See issue #1015
+    //
+    // Do we really need to dispose the super class here? This happens to be a
+    // ChangeNotifier which then leaves anything still trying to unsubscribe in
+    // a bad state. ListenableBuilders could still be listening here...
+    // super.dispose();
   }
 
   void _activeArtboardChanged() {

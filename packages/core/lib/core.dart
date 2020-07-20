@@ -366,7 +366,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   /// Creates a connection to the co-op web socket server
   Future<ConnectResult> connect(String host, String path,
       [String token]) async {
-    int clientId = await getIntSetting('clientId');
+    int clientId = await getIntSetting('clientId') ?? 0;
     _client?.dispose();
     _client = CoopClient(
       host,

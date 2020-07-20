@@ -6,10 +6,11 @@ import 'package:core/core.dart';
 import 'package:core/id.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/animation.dart';
+import 'package:rive_core/animation/cubic_interpolator.dart';
+import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:core/export_rules.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
@@ -108,12 +109,53 @@ class RuntimeExporter {
       // (meaning it's not wrapped in some parent like keyframes are with keyed
       // properties).
 
+      // -> TODO: luigi - re-enable this when #1016 is fixed
       // We find objects that want to be exported in this list by having them
       // implement ExporterInfo and returning true to exportAsArtboardObject.
-      artboardObjects.addAll(core
-          .objectsOfType<ExportRules>()
-          .where((info) => info.exportAsContextObject)
-          .cast<Core<RiveCoreContext>>());
+      // artboardObjects.addAll(core
+      //     .objectsOfType<ExportRules>()
+      //     .where((info) => info.exportAsContextObject)
+      //     .cast<Core<RiveCoreContext>>());
+      // <- TODO: luigi - re-enable this when #1016 is fixed
+
+      // -> TODO: remove this when #1016 is fixed. This is basically iterating
+      // all the keyframes in this artboard and making a unique set of cubic
+      // that are needed at runtime. Remap all other cubics to the actual
+      // exported ones.
+      Set<CubicInterpolator> cubicInterpolators = {};
+      Map<CubicInterpolator, int> interpolatorIndices = {};
+      for (final animation in artboard.animations) {
+        if (animation is LinearAnimation) {
+          for (final keyedObject in animation.keyedObjects) {
+            for (final keyedProperty in keyedObject.keyedProperties) {
+              for (final keyframe in keyedProperty.keyframes) {
+                // Right now these are only CubicInterpolators
+                var interpolator = keyframe.interpolator;
+                if (interpolator is CubicInterpolator) {
+                  var cubic = interpolator as CubicInterpolator;
+                  for (final otherCubic in cubicInterpolators) {
+                    if (otherCubic.equalParameters(interpolator)) {
+                      // This matches an already exported cubic.
+                      interpolator = otherCubic;
+
+                      // Make sure to map this cubic to the actual exported one.
+                      idToIndex[interpolator.id] =
+                          interpolatorIndices[otherCubic];
+                      break;
+                    }
+                  }
+                  if (!cubicInterpolators.contains(interpolator)) {
+                    interpolatorIndices[cubic] = artboardObjects.length;
+                    artboardObjects.add(cubic);
+                    cubicInterpolators.add(cubic);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      // <- TODO: remove this when #1016 is fixed.
 
       var artboardObjectsList = artboardObjects.toList(growable: false);
       for (int i = 0; i < artboardObjectsList.length; i++) {
