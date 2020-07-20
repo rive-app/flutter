@@ -135,12 +135,11 @@ class RuntimeExporter {
                   var cubic = interpolator as CubicInterpolator;
                   for (final otherCubic in cubicInterpolators) {
                     if (otherCubic.equalParameters(interpolator)) {
-                      // This matches an already exported cubic.
-                      interpolator = otherCubic;
-
                       // Make sure to map this cubic to the actual exported one.
                       idToIndex[interpolator.id] =
                           interpolatorIndices[otherCubic];
+                      // This matches an already exported cubic.
+                      interpolator = otherCubic;
                       break;
                     }
                   }
