@@ -43,6 +43,10 @@ class VertexInspector extends ListenableInspectorBuilder {
 
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) {
+    // We assume inspection set has nothing but vertices in it, so filter
+    // anything else out (paths may end up here too).
+    var vertices =
+        inspecting.components.whereType<PathVertex>().toList(growable: false);
     return [
       (context) {
         return Padding(
@@ -100,7 +104,6 @@ class VertexInspector extends ListenableInspectorBuilder {
           CubicDetachedVertexBase.typeKey: PackedIcon.vertexDetached,
           CubicAsymmetricVertexBase.typeKey: PackedIcon.vertexAsymmetric,
         };
-        var vertices = inspecting.components.cast<PathVertex>();
         int vertexType = equalValue<PathVertex, int>(
             vertices, (PathVertex vertex) => vertex.coreType);
 
@@ -148,7 +151,7 @@ class VertexInspector extends ListenableInspectorBuilder {
       },
       (context) => PropertyDual<double>(
             name: 'Position',
-            objects: inspecting.components,
+            objects: vertices,
             propertyKeyA: PathVertexBase.xPropertyKey,
             propertyKeyB: PathVertexBase.yPropertyKey,
             labelA: 'X',
@@ -159,7 +162,7 @@ class VertexInspector extends ListenableInspectorBuilder {
         (context) {
           return PropertySingle(
             name: 'Corner',
-            objects: inspecting.components,
+            objects: vertices,
             propertyKey: StraightVertexBase.radiusPropertyKey,
             converter: TranslationValueConverter.instance,
           );
@@ -170,7 +173,7 @@ class VertexInspector extends ListenableInspectorBuilder {
         (context) {
           return PropertyDual<double>(
             name: 'Bezier',
-            objects: inspecting.components,
+            objects: vertices,
             propertyKeyA: CubicMirroredVertexBase.rotationPropertyKey,
             propertyKeyB: CubicMirroredVertexBase.distancePropertyKey,
             labelA: 'Angle',
@@ -181,7 +184,7 @@ class VertexInspector extends ListenableInspectorBuilder {
           .contains(CubicAsymmetricVertexBase.typeKey)) ...[
         (context) => PropertyDual<double>(
               name: 'Bezier',
-              objects: inspecting.components,
+              objects: vertices,
               propertyKeyA: CubicAsymmetricVertexBase.rotationPropertyKey,
               propertyKeyB: CubicAsymmetricVertexBase.inDistancePropertyKey,
               labelA: 'Angle',
@@ -189,7 +192,7 @@ class VertexInspector extends ListenableInspectorBuilder {
             ),
         (context) => PropertyDual<double>(
               name: '',
-              objects: inspecting.components,
+              objects: vertices,
               propertyKeyA: null,
               propertyKeyB: CubicAsymmetricVertexBase.outDistancePropertyKey,
               labelB: 'Length Out',
@@ -201,7 +204,7 @@ class VertexInspector extends ListenableInspectorBuilder {
         (context) {
           return PropertyDual<double>(
             name: 'Bezier',
-            objects: inspecting.components,
+            objects: vertices,
             propertyKeyA: CubicDetachedVertexBase.inRotationPropertyKey,
             propertyKeyB: CubicDetachedVertexBase.inDistancePropertyKey,
             labelA: 'Angle In',
@@ -211,7 +214,7 @@ class VertexInspector extends ListenableInspectorBuilder {
         (context) {
           return PropertyDual<double>(
             name: '',
-            objects: inspecting.components,
+            objects: vertices,
             propertyKeyA: CubicDetachedVertexBase.outRotationPropertyKey,
             propertyKeyB: CubicDetachedVertexBase.outDistancePropertyKey,
             labelA: 'Angle Out',
