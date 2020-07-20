@@ -37,8 +37,8 @@ void main() {
     // The autotool should be automatically selected after rectangle creation
     expect(stage.tool, AutoTool.instance);
 
-    // Nothing should be selected
-    expect(file.selection.isEmpty, true);
+    // Rectangle should be auto-selected
+    expect(file.selection.isEmpty, false);
 
     final shape = core.objectsOfType<Shape>().first;
 

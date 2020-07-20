@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/widgets/common/converters/percentage_input_converter.dart';
 import 'package:rive_editor/widgets/common/value_listenable_text_field.dart';
 
@@ -78,6 +77,14 @@ class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
         ),
         PopupContextItem.separator(),
         CheckPopupItem(
+          'Snapping',
+          notifier: file.stage.enableSnappingNotifier,
+          isChecked: () => file.stage.enableSnapping,
+          select: () => file.stage.enableSnapping = !file.stage.enableSnapping,
+          dismissOnSelect: false,
+        ),
+        /*
+        CheckPopupItem(
           'Images',
           notifier: file.stage.showImagesNotifier,
           isChecked: () => file.stage.showImages,
@@ -133,6 +140,7 @@ class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
           select: () => file.stage.showAxis = !file.stage.showAxis,
           dismissOnSelect: false,
         ),
+        */
       ],
     );
   }

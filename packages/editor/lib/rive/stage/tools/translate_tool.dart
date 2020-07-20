@@ -41,11 +41,11 @@ class TranslateTool extends TransformHandleTool {
 
           ArtboardTranslateTransformer(),
 
-          NodeTranslateTransformer(),
+          NodeTranslateTransformer(snap: stage.enableSnappingNotifier),
 
           PathVertexTranslateTransformer(),
         ];
-  
+
   static final TranslateTool instance = TranslateTool();
 
   @override

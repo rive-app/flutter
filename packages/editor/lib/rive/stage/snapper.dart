@@ -118,7 +118,7 @@ class _SnappingAxes {
 
 /// A snapping context.
 class Snapper {
-  static const double snapDistance = 10;
+  static const double snapDistance = 5;
   static const double snapIconRadius = 3;
   Stage _stage;
 
