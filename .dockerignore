@@ -1,9 +1,6 @@
-*/*/.packages
-*/*/.pub-cache
-*/*/build
-*/*/.dart_tool
-*/*/*/.packages
-*/*/*/.pub-cache
-*/*/*/build
-*/*/*/.dart_tool
+**/.packages
+**/.pub-cache
+**/build
+**/output
+**/.dart_tool
 .git
