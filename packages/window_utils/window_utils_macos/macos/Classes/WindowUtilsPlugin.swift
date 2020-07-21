@@ -2,9 +2,8 @@ import Cocoa
 import Foundation
 import FlutterMacOS
 import WebKit
-import AppKit
 
-
+// Handler class for handling keypresses
 class KeyPressHandler : NSObject, FlutterStreamHandler {
     private var _eventSink: FlutterEventSink?
 
@@ -35,6 +34,8 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
         let keypressChannel = FlutterEventChannel(name: "plugins.rive.app/key_press", binaryMessenger: registrar.messenger)
         keyPressHandler = KeyPressHandler()
         keypressChannel.setStreamHandler(keyPressHandler)
+        
+        NSLog("Registering windows plugin")
     }
     
     var mouseStackCount = 1;
@@ -109,9 +110,7 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
             let args = call.arguments as? [String: Any]
             let width: Double = (args?["width"] as? Double)!
             let height: Double = (args?["height"] as? Double)!
-            let size: NSSize = NSSize(width: width, height: height)
-            let window = NSApplication.shared.keyWindow
-            window?.setContentSize(size)
+            resizeWindowWithDelay(width: width, height: height, retries: 0)
             result(true)
         case "startDrag":
             let window = NSApplication.shared.keyWindow
@@ -247,27 +246,8 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
             window?.setContentSize(NSSize(width: width, height: height))
             result(true)
         case "initInputHelper":
-            if let window = NSApplication.shared.mainWindow
-            {
-                let screen = window.frame
-                let size = screen.size
-                
-                let frame:CGRect = CGRect(origin: .zero, size: size)
-                let view:InputHelperView = InputHelperView(frame: frame, channel: _channel)
-                
-                for subview in window.contentView!.subviews {
-                    if subview is InputHelperView {
-                        (subview as! InputHelperView).removeMonitors()
-                        subview.removeFromSuperview()
-                    }
-                }
-                
-                window.contentView?.addSubview(view)
-                
-                result(true)
-            } else {
-                result(false)
-            }
+            initInputHelperWithDelay(channel: _channel, retries: 0)
+            result(true)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -325,6 +305,46 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
     }
 }
 
+func resizeWindowWithDelay(width: Double, height: Double, retries: UInt8) {
+    let maxRetries = 10
+    if (retries < maxRetries) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            if let window = NSApplication.shared.mainWindow
+            {
+                window.setContentSize(NSSize(width: width, height: height))
+            } else {
+                resizeWindowWithDelay(width: width, height: height, retries: retries + 1)
+            }
+        }
+    }
+}
+
+
+func initInputHelperWithDelay(channel: FlutterMethodChannel, retries: UInt8) {
+    let maxRetries = 10
+    if (retries < maxRetries) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            if let window = NSApplication.shared.mainWindow
+            {
+                let screen = window.frame
+                let size = screen.size
+                
+                let frame:CGRect = CGRect(origin: .zero, size: size)
+                let view:InputHelperView = InputHelperView(frame: frame, channel: channel)
+                
+                for subview in window.contentView!.subviews {
+                    if subview is InputHelperView {
+                        (subview as! InputHelperView).removeMonitors()
+                        subview.removeFromSuperview()
+                    }
+                }
+                window.contentView?.addSubview(view)
+            } else {
+                initInputHelperWithDelay(channel: channel, retries: retries + 1)
+            }
+        }
+    }
+}
 
 class InputHelperView: NSView {
     let fileTypes = ["jpg", "jpeg", "bmp", "png", "gif", "riv"]
