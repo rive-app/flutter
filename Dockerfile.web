@@ -1,18 +1,22 @@
+# To run this locally, use:
+# docker build -f Dockerfile.web . -t test
+
 FROM google/dart
 
 RUN apt update && apt-get -y install unzip zip
 
 RUN git clone https://github.com/flutter/flutter.git
 ENV PATH "$PATH:/flutter/bin"
-RUN flutter channel master
-RUN flutter doctor
-RUN flutter config --enable-web
 
 WORKDIR /app/packages/editor
 ADD packages /app/packages
-RUN flutter upgrade
+ADD dev /app/dev
+ADD .flutter_version /app/.flutter_version
+
+RUN FLUTTER_ROOT=/flutter RIVE_ROOT=/app /app/dev/update_flutter.sh
+RUN flutter config --enable-web
 RUN flutter pub get
 RUN flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true
+
 WORKDIR /app/packages/editor/build 
 ENTRYPOINT ["mv", "web", "/output"]
-

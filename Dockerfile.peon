@@ -4,10 +4,18 @@ RUN apt update && apt-get -y install unzip zip clang cmake ninja-build pkg-confi
 
 RUN git clone https://github.com/flutter/flutter.git
 ENV PATH "$PATH:/flutter/bin"
-RUN flutter channel dev
-RUN flutter upgrade
-RUN flutter config --enable-linux-desktop
-ADD packages /app/packages
+
 WORKDIR /app/packages/peon
+ADD packages /app/packages
+ADD dev /app/dev
+ADD .flutter_version /app/.flutter_version
+
+RUN FLUTTER_ROOT=/flutter RIVE_ROOT=/app /app/dev/update_flutter.sh
+RUN flutter config --enable-linux-desktop
 RUN flutter pub get
+
+# build the linux distro
+# flutter build linux
+# run.sh should just start the xvfb session & launch the build
+
 ENTRYPOINT ["sh", "run.sh"]
