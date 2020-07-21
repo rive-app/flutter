@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:core/debounce.dart';
 import 'package:core/error_logger/error_logger.dart';
 import 'package:core/error_logger/native_error_logger.dart';
 import 'package:cursor/cursor_view.dart';
