@@ -132,7 +132,8 @@ class _InitWindowWidgetState extends State<InitWindowWidget> {
   @override
   void initState() {
     super.initState();
-    debounce(_initWindow, duration: const Duration(seconds: 1));
+    _initWindow();
+    // debounce(_initWindow, duration: const Duration(seconds: 1));
   }
 
   void _initWindow() {
@@ -145,9 +146,7 @@ class _InitWindowWidgetState extends State<InitWindowWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 }
 
 GlobalKey loadingScreenKey = GlobalKey();
