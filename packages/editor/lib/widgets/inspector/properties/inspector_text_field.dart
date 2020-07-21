@@ -85,6 +85,11 @@ class InspectorTextField<T> extends StatefulWidget {
   /// the changes as they are made.
   final void Function(T value) change;
 
+  /// Callback invoked whenever a drop operation isn't possible because the
+  /// displayed value isn't compatible with the value converter. This allows the
+  /// controlling widget to do something with the drag amount if it wishes to.
+  final void Function(double delta) dragFail;
+
   /// Callback for when the editing operation is fully complete. This is when
   /// you want to save the changed value (or track the change for undo/redo).
   final void Function(T value) completeChange;
@@ -111,6 +116,7 @@ class InspectorTextField<T> extends StatefulWidget {
     this.disabledText = '',
     this.focusNode,
     this.change,
+    this.dragFail,
     this.completeChange,
     this.captureJournalEntry = true,
     this.underlineColor,
@@ -296,9 +302,20 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
                     _completeChange();
                   },
                   drag: (amount) {
-                    widget.change(
-                        _lastValue = widget.converter.drag(_lastValue, amount));
-                    _controller.rawValue = _lastValue;
+                    if (_lastValue == null) {
+                      // If an error occurs when attempting to convert drag
+                      // values, just bubble up that the drag failed and how
+                      // much we tried to drag by. This can occur in our system
+                      // when dragging multiple values that are displaying an
+                      // empty state that the converter cannot deal with. It's
+                      // up to the controlling widget to process the drag
+                      // individually for each object. See #1020
+                      widget.dragFail?.call(amount);
+                    } else {
+                      widget.change(_lastValue =
+                          widget.converter.drag(_lastValue, amount));
+                      _controller.rawValue = _lastValue;
+                    }
                   },
                   completeDrag: _completeChange,
                   onSubmitted: (string) {

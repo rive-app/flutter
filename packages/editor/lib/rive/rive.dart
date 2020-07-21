@@ -33,29 +33,6 @@ enum SelectionMode {
   range,
 }
 
-class _Key {
-  final LogicalKeyboardKey logical;
-  final PhysicalKeyboardKey physical;
-
-  _Key(this.logical, this.physical);
-
-  @override
-  int get hashCode => logical.keyId;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is _Key && other.logical.keyId == logical.keyId;
-  }
-
-  @override
-  String toString() {
-    return physical.toString();
-  }
-}
-
 /// Main context for Rive editor.
 class Rive {
   /// The system tab for your files and settings.
@@ -300,11 +277,7 @@ class Rive {
 
       if (isPress) {
         for (final action in actions) {
-          if (action.repeats) {
-            toTrigger.add(action);
-          } else if (!_pressedActions.contains(action)) {
-            // Action is not a repeating action, however it wasn't previously
-            // pressed so this is the first press down.
+          if (!isRepeat || action.repeats) {
             toTrigger.add(action);
           }
         }

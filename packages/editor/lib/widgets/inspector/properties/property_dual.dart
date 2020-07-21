@@ -71,11 +71,13 @@ class PropertyDual<T> extends StatelessWidget {
         propertyKey: propertyKey,
         converter: converter,
         change: isLinked
-            ? (List<T> originalValues, T value) {
+            ? (List<T> originalValues) {
                 assert(objects.length == originalValues.length);
                 for (int i = 0; i < objects.length; i++) {
                   final originalValue = originalValues[i];
                   final object = objects[i];
+                  final value =
+                      object.context.getObjectProperty(object, propertyKey);
                   final linkedValue =
                       object.context.getObjectProperty(object, linkedKey);
                   final updatedValue =
@@ -83,9 +85,6 @@ class PropertyDual<T> extends StatelessWidget {
                   object.context
                       .setObjectProperty(object, linkedKey, updatedValue);
                 }
-                // for (final object in objects) {
-                //   object.context.setObjectProperty(object, linkedKey, value);
-                // }
               }
             : null,
       );
@@ -140,12 +139,8 @@ class PropertyDual<T> extends StatelessWidget {
 /// changes the updateValue by the same scale.
 T _calculateScaledChange<T>(T oldValue, T newValue, T updateValue) {
   if (oldValue is num && newValue is num && updateValue is num) {
-    print('Old value: $oldValue');
-    print('New value: $newValue');
-    print('Update value: $updateValue');
     final percentChange = (newValue - oldValue) / oldValue;
     final updatedValue = (updateValue * percentChange) + updateValue;
-    print('Updated value: $updatedValue');
     return updatedValue as T;
   }
   // If the values are not int or double, just return the new value
