@@ -20,6 +20,7 @@ services:
     environment:
         - AWS_ACCESS_KEY=$AWS_ACCESS_KEY
         - AWS_SECRET_KEY=$AWS_SECRET_KEY
-        - AWS_QUEUE=$AWS_QUEUE
+        - AWS_JS_QUEUE=$AWS_JS_QUEUE
+        - AWS_DART_QUEUE=$AWS_DART_QUEUE
     stdin_open: true
     tty: true 
