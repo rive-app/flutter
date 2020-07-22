@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:aws_client/aws_client.dart';
-import 'package:aws_client/s3.dart';
+import 'package:aws_client/src/credentials.dart';
 import 'package:aws_client/sqs.dart';
 import 'package:http_client/console.dart';
 

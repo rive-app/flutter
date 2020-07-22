@@ -11,7 +11,7 @@ Future<void> main(List<String> arguments) async {
   var runner = CommandRunner<dynamic>("pumper", "Beastly task driver.")
     ..addCommand(PingCommand())
     ..addCommand(EchoCommand())
-    ..addCommand(MakeFile());
+    ..addCommand(SvgToRive());
 
   await runner.run(arguments); // Ca
 
@@ -33,25 +33,6 @@ class PingCommand extends Command<dynamic> {
     // passed to this command.
     var queue = getQueue();
     await queue.sendMessage(json.encode({"action": "ping"}));
-  }
-}
-
-class MakeFile extends Command<dynamic> {
-  @override
-  final name = "makefile";
-  @override
-  final description = "Tell the peons to make a standard rive file, they're "
-      "not that creative so dont expect much.";
-
-  MakeFile();
-
-  // [run] may also return a Future.
-  @override
-  Future<void> run() async {
-    // [argResults] is set before [run()] is called and contains the options
-    // passed to this command.
-    var queue = getQueue();
-    await queue.sendMessage(json.encode({"action": "makefile"}));
   }
 }
 
@@ -77,6 +58,40 @@ class EchoCommand extends Command<dynamic> {
     await queue.sendMessage(json.encode({
       "action": "echo",
       "params": {"message": argResults["message"] as String}
+    }));
+  }
+}
+
+class SvgToRive extends Command<dynamic> {
+  @override
+  final name = "svgtorive";
+  @override
+  final description = "Get the peons to say what we say.";
+
+  SvgToRive() {
+    argParser.addOption('sourceLocation',
+        defaultsTo: "https://source.location",
+        help: "Where to get the svg file from");
+    argParser.addOption('targetLocation',
+        defaultsTo: "https://target.location",
+        help: "Where to put hte rive file");
+    argParser.addOption('notifyUserId', help: "Where to put hte rive file");
+  }
+
+  // [run] may also return a Future.
+  @override
+  Future<void> run() async {
+    // [argResults] is set before [run()] is called and contains the options
+    // passed to this command.
+    var queue = getQueue();
+
+    await queue.sendMessage(json.encode({
+      "action": "svgtorive",
+      "params": {
+        "sourceLocation": argResults["sourceLocation"] as String,
+        "targetLocation": argResults["targetLocation"] as String,
+        "notifyUserId": int.parse(argResults["notifyUserId"] as String)
+      }
     }));
   }
 }
