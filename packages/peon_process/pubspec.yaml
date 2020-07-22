@@ -1,0 +1,32 @@
+name: peon_process
+description: Flutter wrapper around peon, with some flutter specific tasks
+homepage: https://rive.app/
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.8.4 <3.0.0"
+
+dependencies:
+  peon:
+    path: ../peon
+  rive_core:
+    path: ../rive_core
+  local_data:
+    path: ../local_data
+  flutter:
+    sdk: flutter
+  flutter_svg:
+    git: git@github.com:rive-app/flutter_svg.git
+  cupertino_icons: ^0.1.3
+
+dev_dependencies:
+  pedantic: ^1.9.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
