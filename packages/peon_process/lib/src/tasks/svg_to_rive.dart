@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
@@ -13,12 +14,19 @@ import 'package:flutter_svg/src/svg/parser_state.dart';
 import 'package:utilities/deserialize.dart';
 
 class SvgToRiveTask with Task {
+  final String taskId;
   final String sourceLocation;
   final String targetLocation;
+  final String relativeUrl;
   // should switch to connection id I guess?
   final int notifyUserId;
 
-  SvgToRiveTask({this.sourceLocation, this.targetLocation, this.notifyUserId});
+  SvgToRiveTask(
+      {this.taskId,
+      this.sourceLocation,
+      this.targetLocation,
+      this.notifyUserId,
+      this.relativeUrl});
 
   static SvgToRiveTask fromData(Map<String, dynamic> data) {
     if (!data.containsKey("params")) {
@@ -29,17 +37,15 @@ class SvgToRiveTask with Task {
     var params = data.getMap<String, Object>('params');
 
     return SvgToRiveTask(
+        taskId: params.getString('taskId'),
         sourceLocation: params.getString('sourceLocation'),
         targetLocation: params.getString('targetLocation'),
+        relativeUrl: params.getString('relativeUrl'),
         notifyUserId: params.getInt('notifyUserId'));
   }
 
   @override
   Future<bool> execute() async {
-    print(sourceLocation);
-    print(targetLocation);
-    print(notifyUserId);
-
     var data = await getS3Key(sourceLocation);
 
     var drawable =
@@ -52,6 +58,17 @@ class SvgToRiveTask with Task {
     var uint8data = exporter.export();
 
     await putS3Key(targetLocation, uint8data);
+    var queue = getJSQueue();
+
+    await queue.sendMessage(json.encode({
+      "work": "ApiGatewayPushMessage",
+      "ownerId": notifyUserId,
+      "payload": {
+        "action": "TaskCompleted",
+        "params": {"taskId": taskId, "relativeUrl": relativeUrl}
+      }
+    }));
+
     return true;
   }
 }

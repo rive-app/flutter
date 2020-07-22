@@ -6,7 +6,7 @@ import 'package:peon/src/queue.dart';
 
 Future<void> main(List<String> arguments) async {
   // e.g
-  // AWS_ACCESS_KEY=<> AWS_SECRET_KEY=<> AWS_QUEUE=https://sqs.us-west-1.amazonaws.com/654831454668/tester dart lib/pumper.dart --help
+  // AWS_ACCESS_KEY=<> AWS_SECRET_KEY=<> AWS_DART_QUEUE=<> AWS_JS_QUEUE=<> dart lib/pumper.dart --help
 
   var runner = CommandRunner<dynamic>("pumper", "Beastly task driver.")
     ..addCommand(PingCommand())

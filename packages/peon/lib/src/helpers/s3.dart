@@ -31,11 +31,11 @@ Future<String> getS3Key(String sourceLocation) async {
     final data = await response.readAsString();
     return data;
   } finally {
-    client.close();
+    await client.close();
   }
 }
 
-Future<void> putS3Key(targetLocation, Uint8List payload) async {
+Future<void> putS3Key(String targetLocation, Uint8List payload) async {
   // Watch out here, the capitalization in the header is important.
   // lowercase it will mess with the signature and break it.
   var client = ConsoleClient();
