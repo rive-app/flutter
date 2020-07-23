@@ -7,5 +7,5 @@ Future<void> main() async {
   registeredTasks['ping'] = PingTask.fromData;
   registeredTasks['echo'] = EchoTask.fromData;
 
-  await loop(getQueue(), registeredTasks);
+  await loop(getQueue, registeredTasks);
 }

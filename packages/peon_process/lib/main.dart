@@ -11,7 +11,7 @@ void main() {
     registeredTasks['echo'] = EchoTask.fromData;
     registeredTasks['svgtorive'] = SvgToRiveTask.fromData;
 
-    loop(getQueue(), registeredTasks);
+    loop(getQueue, registeredTasks);
   }, onError: (dynamic e, dynamic s) {
     print('Me not that kind of orc!\nError: $e\nStackTrace: $s');
   });

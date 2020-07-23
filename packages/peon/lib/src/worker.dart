@@ -2,25 +2,35 @@ import 'dart:convert';
 import 'package:aws_client/sqs.dart';
 import 'package:peon/src/tasks/base.dart';
 
-Future<void> loop(SqsQueue queue,
+Future<void> loop(Future<SqsQueue> Function() getQueue,
     Map<String, Task Function(Map<String, dynamic>)> tasks) async {
   print('Ready to work.');
+  SqsQueue queue;
   while (true) {
-    print('What you want?');
-    List<SqsMessage> messages = await queue.receiveMessage(2, waitSeconds: 10);
-    messages.forEach((message) async {
-      try {
-        bool success = await execute(message, tasks);
-        if (success) {
-          await queue.deleteMessage(message.receiptHandle);
+    try {
+      print('What you want?');
+      queue = await getQueue();
+      List<SqsMessage> messages =
+          await queue.receiveMessage(2, waitSeconds: 10);
+      messages.forEach((message) async {
+        try {
+          bool success = await execute(message, tasks);
+          if (success) {
+            await queue.deleteMessage(message.receiptHandle);
+            print('work done.');
+          }
+          // ignore: avoid_catches_without_on_clauses
+        } catch (e, stacktrace) {
+          print('Encountered Error: $e\n'
+              'MESSAGE\n$message\n'
+              'STACKTRACE:\n$stacktrace');
         }
-        // ignore: avoid_catches_without_on_clauses
-      } catch (e, stacktrace) {
-        print('Encountered Error: $e\n'
-            'MESSAGE\n$message\n'
-            'STACKTRACE:\n$stacktrace');
-      }
-    });
+      });
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e, stacktrace) {
+      print('Encountered Error: $e\n'
+          'STACKTRACE:\n$stacktrace');
+    }
   }
 }
 
