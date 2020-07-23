@@ -383,7 +383,7 @@ class _RiveHierarchyClipboard extends RiveClipboard {
 
     // Finally select the firs of the newly added items.
     var selection = <StageItem>{};
-    for (final component in objects) {
+    for (final component in _onlyParents(objects)) {
       // Select only stageItems that have been added to the stage.
       if (component == null ||
           component.stageItem == null ||
@@ -391,7 +391,6 @@ class _RiveHierarchyClipboard extends RiveClipboard {
         continue;
       }
       selection.add(component.stageItem);
-      break;
     }
     if (selection.isNotEmpty) {
       file.selection.selectMultiple(selection);
@@ -400,3 +399,8 @@ class _RiveHierarchyClipboard extends RiveClipboard {
     return true;
   }
 }
+
+/// Returns a set of only those items who have no parents within the same set
+Set<Component> _onlyParents(Iterable<Component> components) => components
+    .where((component) => !components.contains(component.parent))
+    .toSet();
