@@ -21,4 +21,7 @@ class TranslationValueConverter extends InputValueConverter<double> {
 
   @override
   double drag(double value, double amount) => value - amount;
+
+  @override
+  double fromNull() => 0;
 }

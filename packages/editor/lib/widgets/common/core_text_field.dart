@@ -141,12 +141,13 @@ class CoreTextField<T> extends StatelessWidget {
           // Called when dragging the whole set as one fails, so we attempt to
           // drag individual values. This occurs when the field shows the 'no
           // common value' (usually a '-') marker.
-          dragFail: objects == null || objects.isEmpty
+          dragNull: objects == null || objects.isEmpty
               ? null
               : (double dragAmount) {
                   final originalValues = <T>[];
                   for (final object in objects) {
                     var from = object.getProperty<T>(propertyKey);
+                    from ??= converter.fromNull();
                     originalValues.add(from);
                     // Drag failed for the whole set, so attempt invididual
                     var value = converter.drag(from, dragAmount);

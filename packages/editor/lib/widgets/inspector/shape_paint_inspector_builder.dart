@@ -120,14 +120,20 @@ abstract class ShapePaintInspectorBuilder extends ListenableInspectorBuilder {
 
   @protected
   void _createShapePaint(OpenFileContext file, InspectionSet inspecting) {
-    // We know these are all shapes, so we can iterate them and add a new
-    // fill/stroke to each one. Let's do it in a batch operation.
+    // Create shape paints for objects in our inspection set that are shape
+    // paint containers.
     var core = file.core;
 
+    var shapePaintContainers =
+        inspecting.components.whereType<ShapePaintContainer>();
+
+    // Early out if there are none (shouldn't really ever happen, but some race
+    // condition may cause this).
+    if (shapePaintContainers.isEmpty) {
+      return;
+    }
     core.batchAdd(() {
-      for (final component in inspecting.components) {
-        createFor(component as ShapePaintContainer);
-      }
+      shapePaintContainers.forEach(createFor);
     });
     core.captureJournalEntry();
   }

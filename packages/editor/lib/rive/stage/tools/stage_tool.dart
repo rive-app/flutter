@@ -7,6 +7,7 @@ import 'package:rive_editor/packed_icon.dart';
 
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 
 abstract class StageTool implements StageDrawable {
   Stage _stage;
@@ -92,4 +93,9 @@ abstract class StageTool implements StageDrawable {
 
   @override
   void draw(Canvas canvas, StageDrawPass drawPass) {}
+
+  /// Whether or not this tool can select an item. Override this to prevent
+  /// certain tools from selecting certain things. If a tool can't select
+  /// anything, consider using stage.suppressSelection instead of this.
+  bool canSelect(StageItem item) => true;
 }

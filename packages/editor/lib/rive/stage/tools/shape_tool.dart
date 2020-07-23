@@ -68,7 +68,6 @@ abstract class ShapeTool extends CreateTool {
     // Track the artboard we're using for this operation (in case it changes via
     // a shortcut or something while the drag operation is continuing).
     _currentArtboard = activeArtboard;
-
     _shape = makeShape(activeArtboard, (_path = makePath()))
       ..name = shapeName
       ..x = worldMouse[0]
@@ -119,6 +118,10 @@ abstract class ShapeTool extends CreateTool {
 
   @override
   void endDrag() {
+    if (_shape != null) {
+      // Operation complete, let's select the shape. #970 #1030
+      stage.file.select(_shape.stageItem);
+    }
     _shape = null;
     _dragging = false;
     _end = _start = null;

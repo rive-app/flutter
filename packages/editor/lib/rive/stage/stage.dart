@@ -436,6 +436,11 @@ class Stage extends Debouncer {
     return _handleSuppression == 0;
   }
 
+  bool isItemSelectable(StageItem item) =>
+      item.isHoverSelectable &&
+      tool.canSelect(item) &&
+      (soloItems == null || isValidSoloSelection(item));
+
   void _updateHover() {
     if (isSelectionEnabled && _worldMouse != null) {
       AABB cursorAABB = AABB.fromValues(_worldMouse[0], _worldMouse[1],
@@ -443,8 +448,7 @@ class Stage extends Debouncer {
       StageItem hover;
       if (_hoverOffsetIndex == -1) {
         visTree.query(cursorAABB, (int proxyId, StageItem item) {
-          if (item.isHoverSelectable &&
-              (soloItems == null || isValidSoloSelection(item)) &&
+          if (isItemSelectable(item) &&
               (hover == null || item.compareDrawOrderTo(hover) >= 0) &&
               item.hitHiFi(_worldMouse)) {
             hover = item.selectionTarget;
@@ -454,7 +458,7 @@ class Stage extends Debouncer {
       } else {
         List<StageItem> candidates = [];
         visTree.query(cursorAABB, (int proxyId, StageItem item) {
-          if (item.isHoverSelectable && item.hitHiFi(_worldMouse)) {
+          if (isItemSelectable(item) && item.hitHiFi(_worldMouse)) {
             candidates.add(item);
           }
           return true;
@@ -504,9 +508,8 @@ class Stage extends Debouncer {
         } else if (isSelectionEnabled) {
           if (_hoverItem != null) {
             _mouseDownHit = _hoverItem;
-            // We need to specifically use range selection for multi select as
-            // command (multi-select) becomes something else in the future...
-            _mouseDownSelectAppend = file.selectionMode == SelectionMode.range;
+
+            _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
 
             bool selectionHandled = false;
             for (final handler in _selectionHandlers) {
@@ -530,17 +533,19 @@ class Stage extends Debouncer {
           }
         }
 
-        // If the click operation didn't hit anything, pipe the click to the
-        // tool.
-        if (_mouseDownHit == null) {
-          final artboard = activeArtboard;
-          _clickTool = tool;
-          tool.click(
-              artboard,
-              artboard == null
-                  ? _worldMouse
-                  : tool.mouseWorldSpace(artboard, _worldMouse));
-        }
+        // Always pipe clicks to tools or weird things may happen (see
+        // VectorPenTool's click). If for some reason we want to filter this
+        // based on whether _mouseDownHit or not, then consider altering logic
+        // in click of autoTool and adding a separate clickSelection callback on
+        // the tools so tools like the PenTool can still track the intention of
+        // a click occurred. if (_mouseDownHit == null) {
+        final artboard = activeArtboard;
+        _clickTool = tool;
+        tool.click(
+            artboard,
+            artboard == null
+                ? _worldMouse
+                : tool.mouseWorldSpace(artboard, _worldMouse));
         break;
       case 2:
         _isPanning = true;
@@ -913,8 +918,6 @@ class Stage extends Debouncer {
         // Only automatically add items that are marked automatic.
         if (stageItem.isAutomatic(this)) {
           addItem(stageItem);
-          // Auto select items automatically added to the stage
-          file.select(stageItem);
         }
       }
     }

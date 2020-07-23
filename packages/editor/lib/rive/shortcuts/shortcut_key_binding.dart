@@ -39,6 +39,7 @@ class ShortcutKeyBinding {
     Iterable<ShortcutKey> keys,
     ShortcutKey lastPressed,
   ) {
+
     assert(
         keys.contains(lastPressed),
         'lastPressed must be in keys, it just helps us figure out what the '
@@ -70,6 +71,26 @@ class ShortcutKeyBinding {
         // this shortcut was triggered
 
         actions.add((lastTriggered = shortcut).action);
+      }
+    }
+
+    // Also iterate keys to find any HoldShortcutActions that may still be
+    // pressed.
+    for (final key in keys) {
+      if (key == lastPressed) {
+        continue;
+      }
+      shortcuts = _finalKeyToShortcuts[key];
+      if (shortcuts != null) {
+        for (final shortcut in shortcuts) {
+          // If it's a hold and the keys are still pressed, make sure it's still
+          // considered active.
+          if (shortcut.action is HoldShortcutAction &&
+              shortcut.keys.intersection(pressedKeySet).length ==
+                  shortcut.keys.length) {
+            actions.add(shortcut.action);
+          }
+        }
       }
     }
     return actions;
