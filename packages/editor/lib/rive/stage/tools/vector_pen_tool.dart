@@ -16,6 +16,7 @@ import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
+import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/pen_tool.dart';
@@ -176,7 +177,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
         // Draw line to ghost point from last point.
         if (path.editingMode == PointsPathEditMode.creating &&
-            path.vertices.isNotEmpty) {
+            path.vertices.isNotEmpty &&
+            // Don't draw line if we're about to split the curve...
+            insertTarget == null) {
           Offset targetOffset;
           PathVertex closeTarget;
           // Draw line to next point (note this should curve if last point is a
@@ -545,6 +548,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     }
     super.startTransformers(selection, worldMouse);
   }
+
+  @override
+  bool canSelect(StageItem item) => item is StageVertex;
 }
 
 FractionalIndex _fractionalIndexAt(List<PathVertex> vertices, int index) {
