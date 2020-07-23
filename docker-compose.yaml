@@ -1,4 +1,4 @@
-version: "3"
+version: "2"
 
 services:
   coop:
@@ -18,8 +18,6 @@ services:
     volumes:
         - "./source:/app/source"
     environment:
-        - AWS_ACCESS_KEY=$AWS_ACCESS_KEY
-        - AWS_SECRET_KEY=$AWS_SECRET_KEY
         - AWS_JS_QUEUE=$AWS_JS_QUEUE
         - AWS_DART_QUEUE=$AWS_DART_QUEUE
     stdin_open: true
