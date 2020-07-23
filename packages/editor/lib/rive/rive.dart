@@ -245,6 +245,8 @@ class Rive {
   void onRawKeyPress(ShortcutKey key, bool isPress, bool isRepeat) {
     // First update our pressed set.
     if (isPress) {
+      // remove and re-add so it's always at the end.
+      _pressedKeys.remove(key);
       _pressedKeys.add(key);
     } else {
       _pressedKeys.remove(key);
@@ -265,21 +267,18 @@ class Rive {
     }
 
     ShortcutKeyBinding keyBinding = defaultKeyBinding;
-    var actions = <ShortcutAction>{};
+    var actions = _pressedKeys.isEmpty
+        ? <ShortcutAction>{}
+        : keyBinding.lookupAction(_pressedKeys, _pressedKeys.last);
     var toTrigger = <ShortcutAction>{};
+    // Some actions don't repeat, so remove them from the trigger list if
+    // they've already triggered for press. N.B. most platforms give  us a way
+    // to determine if this keydown is a repeat, Flutter does this only for
+    // Android so we have to do it ourselves here.
     if (isPress) {
-      // Only trigger actions if a key was pressed.
-      actions = keyBinding.lookupAction(_pressedKeys, key);
-      // Some actions don't repeat, so remove them from the trigger list if
-      // they've already triggered for press. N.B. most platforms give  us a way
-      // to determine if this keydown is a repeat, Flutter does this only for
-      // Android so we have to do it ourselves here.
-
-      if (isPress) {
-        for (final action in actions) {
-          if (!isRepeat || action.repeats) {
-            toTrigger.add(action);
-          }
+      for (final action in actions) {
+        if (!isRepeat || action.repeats) {
+          toTrigger.add(action);
         }
       }
     }

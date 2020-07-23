@@ -508,9 +508,8 @@ class Stage extends Debouncer {
         } else if (isSelectionEnabled) {
           if (_hoverItem != null) {
             _mouseDownHit = _hoverItem;
-            // We need to specifically use range selection for multi select as
-            // command (multi-select) becomes something else in the future...
-            _mouseDownSelectAppend = file.selectionMode == SelectionMode.range;
+
+            _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
 
             bool selectionHandled = false;
             for (final handler in _selectionHandlers) {
