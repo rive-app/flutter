@@ -74,8 +74,8 @@ class SvgToRive extends Command<dynamic> {
         help: "Where to get the svg file from");
     argParser.addOption('targetLocation',
         defaultsTo: "https://target.location",
-        help: "Where to put hte rive file");
-    argParser.addOption('notifyUserId', help: "Where to put hte rive file");
+        help: "Where to put the rive file");
+    argParser.addOption('notifyUserId', help: "Where to put the rive file");
   }
 
   // [run] may also return a Future.

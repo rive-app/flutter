@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:aws_client/src/request.dart';
 import 'package:http_client/console.dart';
 import 'package:peon/src/queue.dart';
+
+String getRegion() {
+  return Platform.environment['AWS_REGION'] ?? 'us-east-1';
+}
 
 Future<String> getS3Key(String sourceLocation) async {
   // Watch out here, the capitalization in the header is important.
@@ -24,7 +29,7 @@ Future<String> getS3Key(String sourceLocation) async {
     var getRequest = AwsRequestBuilder(
         body: [],
         headers: headers,
-        region: 'us-east-1',
+        region: getRegion(),
         uri: Uri.parse(sourceLocation),
         credentials: credentials,
         httpClient: client,
@@ -55,7 +60,7 @@ Future<void> putS3Key(String targetLocation, Uint8List payload) async {
         method: 'PUT',
         body: payload,
         headers: headers,
-        region: 'us-east-1',
+        region: getRegion(),
         uri: Uri.parse(targetLocation),
         credentials: credentials,
         httpClient: client,
