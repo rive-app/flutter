@@ -5,17 +5,19 @@ RUN apt update && apt-get -y install unzip zip clang cmake ninja-build pkg-confi
 RUN git clone https://github.com/flutter/flutter.git
 ENV PATH "$PATH:/flutter/bin"
 
-WORKDIR /app/packages/peon
-ADD packages /app/packages
-ADD dev /app/dev
 ADD .flutter_version /app/.flutter_version
-
+ADD dev /app/dev
 RUN FLUTTER_ROOT=/flutter RIVE_ROOT=/app /app/dev/update_flutter.sh
 RUN flutter config --enable-linux-desktop
+
+WORKDIR /app/packages/peon_process
+ADD packages /app/packages
+
+# need to make sure we're setup to trust github for our pub get.
 RUN flutter pub get
 
 # build the linux distro
-# flutter build linux
-# run.sh should just start the xvfb session & launch the build
+RUN flutter build linux
 
+# run.sh should just start the xvfb session & launch the build
 ENTRYPOINT ["sh", "run.sh"]
