@@ -119,7 +119,7 @@ abstract class ShapeTool extends CreateTool {
   @override
   void endDrag() {
     if (_shape != null) {
-      // Operation complete, let's select the shape.
+      // Operation complete, let's select the shape. #970 #1030
       stage.file.select(_shape.stageItem);
     }
     _shape = null;

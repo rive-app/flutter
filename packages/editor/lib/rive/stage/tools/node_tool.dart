@@ -4,6 +4,7 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 
 class NodeTool extends CreateTool {
   @override
@@ -26,6 +27,10 @@ class NodeTool extends CreateTool {
 
   @override
   bool endClick() {
+    if (_node != null) {
+      // Operation complete, let's select the node. #970
+      stage.file.select(_node.stageItem);
+    }
     _node = null;
     return super.endClick();
   }
