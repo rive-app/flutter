@@ -31,7 +31,7 @@ class PingCommand extends Command<dynamic> {
   Future<void> run() async {
     // [argResults] is set before [run()] is called and contains the options
     // passed to this command.
-    var queue = getQueue();
+    var queue = await getQueue();
     await queue.sendMessage(json.encode({"action": "ping"}));
   }
 }
@@ -53,7 +53,7 @@ class EchoCommand extends Command<dynamic> {
   Future<void> run() async {
     // [argResults] is set before [run()] is called and contains the options
     // passed to this command.
-    var queue = getQueue();
+    var queue = await getQueue();
 
     await queue.sendMessage(json.encode({
       "action": "echo",
@@ -74,8 +74,8 @@ class SvgToRive extends Command<dynamic> {
         help: "Where to get the svg file from");
     argParser.addOption('targetLocation',
         defaultsTo: "https://target.location",
-        help: "Where to put hte rive file");
-    argParser.addOption('notifyUserId', help: "Where to put hte rive file");
+        help: "Where to put the rive file");
+    argParser.addOption('notifyUserId', help: "Where to put the rive file");
   }
 
   // [run] may also return a Future.
@@ -83,7 +83,7 @@ class SvgToRive extends Command<dynamic> {
   Future<void> run() async {
     // [argResults] is set before [run()] is called and contains the options
     // passed to this command.
-    var queue = getQueue();
+    var queue = await getQueue();
 
     await queue.sendMessage(json.encode({
       "action": "svgtorive",

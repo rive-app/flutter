@@ -58,7 +58,7 @@ class SvgToRiveTask with Task {
     var uint8data = exporter.export();
 
     await putS3Key(targetLocation, uint8data);
-    var queue = getJSQueue();
+    var queue = await getJSQueue();
 
     await queue.sendMessage(json.encode({
       "work": "ApiGatewayPushMessage",
