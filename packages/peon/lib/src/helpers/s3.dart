@@ -1,29 +1,32 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:aws_client/src/request.dart';
-import 'package:aws_client/src/credentials.dart';
 import 'package:http_client/console.dart';
-
-Credentials getCredentials() {
-  return Credentials(
-      accessKey: Platform.environment['AWS_ACCESS_KEY'],
-      secretKey: Platform.environment['AWS_SECRET_KEY']);
-}
+import 'package:peon/src/queue.dart';
 
 Future<String> getS3Key(String sourceLocation) async {
   // Watch out here, the capitalization in the header is important.
   // lowercase it will mess with the signature and break it.
   var client = ConsoleClient();
+
+  // TODO: pr this back into the aws client, it should add the session token
+  // before signing.
+  var credentials = await getCredentials();
+  var headers = <String, String>{
+    'X-Amz-Content-Sha256': sha256.convert([]).toString()
+  };
+  if (credentials.sessionToken != null) {
+    headers['X-Amz-Security-Token'] = credentials.sessionToken;
+  }
   try {
     var getRequest = AwsRequestBuilder(
         body: [],
-        headers: {'X-Amz-Content-Sha256': sha256.convert([]).toString()},
+        headers: headers,
         region: 'us-east-1',
         uri: Uri.parse(sourceLocation),
-        credentials: getCredentials(),
+        credentials: credentials,
         httpClient: client,
         service: 's3');
 
@@ -38,18 +41,28 @@ Future<String> getS3Key(String sourceLocation) async {
 Future<void> putS3Key(String targetLocation, Uint8List payload) async {
   // Watch out here, the capitalization in the header is important.
   // lowercase it will mess with the signature and break it.
+  var credentials = await getCredentials();
+  var headers = <String, String>{
+    'X-Amz-Content-Sha256': sha256.convert(payload).toString()
+  };
+  if (credentials.sessionToken != null) {
+    headers['X-Amz-Security-Token'] = credentials.sessionToken;
+  }
+
   var client = ConsoleClient();
   try {
     var putRequest = AwsRequestBuilder(
         method: 'PUT',
         body: payload,
-        headers: {'X-Amz-Content-Sha256': sha256.convert(payload).toString()},
+        headers: headers,
         region: 'us-east-1',
         uri: Uri.parse(targetLocation),
-        credentials: getCredentials(),
+        credentials: credentials,
         httpClient: client,
         service: 's3');
-    await putRequest.sendRequest();
+
+    final response = await putRequest.sendRequest();
+    assert(response.statusCode == 200);
   } finally {
     await client.close();
   }
