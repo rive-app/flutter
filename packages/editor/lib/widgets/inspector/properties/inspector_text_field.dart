@@ -88,7 +88,7 @@ class InspectorTextField<T> extends StatefulWidget {
   /// Callback invoked whenever a drop operation isn't possible because the
   /// displayed value isn't compatible with the value converter. This allows the
   /// controlling widget to do something with the drag amount if it wishes to.
-  final void Function(double delta) dragFail;
+  final void Function(double delta) dragNull;
 
   /// Callback for when the editing operation is fully complete. This is when
   /// you want to save the changed value (or track the change for undo/redo).
@@ -116,7 +116,7 @@ class InspectorTextField<T> extends StatefulWidget {
     this.disabledText = '',
     this.focusNode,
     this.change,
-    this.dragFail,
+    this.dragNull,
     this.completeChange,
     this.captureJournalEntry = true,
     this.underlineColor,
@@ -303,14 +303,13 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
                   },
                   drag: (amount) {
                     if (_lastValue == null) {
-                      // If an error occurs when attempting to convert drag
-                      // values, just bubble up that the drag failed and how
-                      // much we tried to drag by. This can occur in our system
-                      // when dragging multiple values that are displaying an
-                      // empty state that the converter cannot deal with. It's
+                      // If we're attempting to drag a null value, it could mean
+                      // that multiple values of different value are selected,
+                      // just bubble up the condition and how much we tried to
+                      // drag by.  It could also mean the value wasn't set. It's
                       // up to the controlling widget to process the drag
-                      // individually for each object. See #1020
-                      widget.dragFail?.call(amount);
+                      // individually for each object. See #1020 #1029
+                      widget.dragNull?.call(amount);
                     } else {
                       widget.change(_lastValue =
                           widget.converter.drag(_lastValue, amount));

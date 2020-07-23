@@ -27,6 +27,10 @@ abstract class InputValueConverter<T> {
 
   /// Mutate the value when amount is dragged.
   T drag(T value, double amount) => value;
+
+  /// Get a sensical default value or return null meaning this value
+  /// cannot/should not have a default.
+  T fromNull() => null;
 }
 
 class DoubleFormatter {
