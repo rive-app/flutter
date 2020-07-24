@@ -306,6 +306,17 @@ class Stage extends Debouncer {
     }
   }
 
+  // Show nodes flag
+  final ValueNotifier<bool> showNodesNotifier = ValueNotifier<bool>(true);
+  bool get showNodes => showNodesNotifier.value;
+  set showNodes(bool value) {
+    if (showNodesNotifier.value != value) {
+      showNodesNotifier.value = value;
+      // Redraw the stage to show or hide the nodes
+      markNeedsRedraw();
+    }
+  }
+
   // Show Axis flag
   final ValueNotifier<bool> showAxisNotifier = ValueNotifier<bool>(false);
   bool get showAxis => showAxisNotifier.value;

@@ -83,6 +83,14 @@ class _VisibilityPopupButtonState extends State<VisibilityPopupButton> {
           select: () => file.stage.enableSnapping = !file.stage.enableSnapping,
           dismissOnSelect: false,
         ),
+        CheckPopupItem(
+          'Nodes',
+          notifier: file.stage.showNodesNotifier,
+          isChecked: () => file.stage.showNodes,
+          select: () => file.stage.showNodes = !file.stage.showNodes,
+          dismissOnSelect: false,
+        ),
+
         /*
         CheckPopupItem(
           'Images',
