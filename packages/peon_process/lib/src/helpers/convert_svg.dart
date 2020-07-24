@@ -443,6 +443,18 @@ void addChild(RiveFile file, ContainerComponent parent, Drawable drawable) {
         ..x = 0
         ..y = 0
         ..opacity = drawableGroup.style.groupOpacity;
+
+      if (drawableGroup.transform != null) {
+        // need to unpack the transform into rotation, scale and transform
+        var transform = TransformComponents();
+        Mat2D.decompose(Mat2D.fromMat4(drawableGroup.transform), transform);
+        node.rotation += transform.rotation;
+        node.x += transform.x;
+        node.y += transform.y;
+        node.scaleX *= transform.scaleX;
+        node.scaleY *= transform.scaleY;
+      }
+
       file.addObject(node);
       parent.appendChild(node);
 
