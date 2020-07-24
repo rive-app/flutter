@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
@@ -47,6 +48,42 @@ class SvgToRiveTask with Task {
   @override
   Future<bool> execute() async {
     var data = await getS3Key(sourceLocation);
+
+    // if we have svgcleaner install lets run that to clean this file.
+
+    ProcessResult output;
+    Directory tempDir;
+
+    try {
+      var tmpName = sourceLocation.hashCode.toString();
+      var tempDir = await Directory.systemTemp.createTemp();
+      var inPath = "${tempDir.path}/$tmpName.in.svg";
+      var outPath = "${tempDir.path}/$tmpName.out.svg";
+      var inFile = File(inPath);
+      await inFile.create();
+      await inFile.writeAsString(data);
+      output = await Process.run('svgcleaner', [
+        '--remove-nonsvg-elements=false',
+        '--ungroup-groups=false',
+        '--group-by-style=false',
+        '--merge-gradients=false',
+        '--remove-nonsvg-attributes=false',
+        '--remove-unreferenced-ids=false',
+        '--trim-ids=false',
+        '--indent=4',
+        '--allow-bigger-file',
+        inPath,
+        outPath
+      ]);
+      if (output.exitCode == 0) {
+        var outFile = File(outPath);
+        data = await outFile.readAsString();
+      }
+    } on ProcessException {
+      print('Problem running command, skipping');
+    } finally {
+      await tempDir?.delete(recursive: true);
+    }
 
     var drawable =
         await SvgParserStateRived(xml.parseEvents(data), 'bob', svgPathFuncs)
