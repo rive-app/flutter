@@ -45,12 +45,9 @@ class SvgToRiveTask with Task {
         notifyUserId: params.getInt('notifyUserId'));
   }
 
-  @override
-  Future<bool> execute() async {
-    var data = await getS3Key(sourceLocation);
-
+  Future<String> clean(String input) async {
+    String cleaned = input;
     // if we have svgcleaner install lets run that to clean this file.
-
     ProcessResult output;
     Directory tempDir;
 
@@ -61,7 +58,7 @@ class SvgToRiveTask with Task {
       var outPath = "${tempDir.path}/$tmpName.out.svg";
       var inFile = File(inPath);
       await inFile.create();
-      await inFile.writeAsString(data);
+      await inFile.writeAsString(input);
       output = await Process.run('svgcleaner', [
         '--remove-nonsvg-elements=false',
         '--ungroup-groups=false',
@@ -77,17 +74,25 @@ class SvgToRiveTask with Task {
       ]);
       if (output.exitCode == 0) {
         var outFile = File(outPath);
-        data = await outFile.readAsString();
+        cleaned = await outFile.readAsString();
       }
     } on ProcessException {
       print('Problem running command, skipping');
     } finally {
       await tempDir?.delete(recursive: true);
     }
+    return cleaned;
+  }
 
-    var drawable =
-        await SvgParserStateRived(xml.parseEvents(data), 'bob', svgPathFuncs)
-            .parse();
+  @override
+  Future<bool> execute() async {
+    var data = await getS3Key(sourceLocation);
+    var cleanedData = await clean(data);
+
+    // the key is just there for debugging purposes
+    var drawable = await SvgParserStateRived(
+            xml.parseEvents(cleanedData), 'rive_key', svgPathFuncs)
+        .parse();
     RiveFile _riveFile = createFromSvg(drawable);
 
     var exporter = RuntimeExporter(
