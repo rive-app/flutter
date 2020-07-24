@@ -385,7 +385,7 @@ void addChild(RiveFile file, ContainerComponent parent, Drawable drawable) {
     case DrawableShape:
       var drawableShape = drawable as DrawableShape;
       var shape = Shape()
-        ..name = 'PathShape'
+        ..name = attrOrDefault(drawableShape.attributes, 'id', 'Shape')
         ..x = 0
         ..y = 0;
       // we do not do this here, as the color already contains this?
@@ -439,10 +439,22 @@ void addChild(RiveFile file, ContainerComponent parent, Drawable drawable) {
     case DrawableGroup:
       var drawableGroup = drawable as DrawableGroup;
       var node = Node()
-        ..name = 'Group'
+        ..name = attrOrDefault(drawableGroup.attributes, 'id', 'Node')
         ..x = 0
         ..y = 0
         ..opacity = drawableGroup.style.groupOpacity;
+
+      if (drawableGroup.transform != null) {
+        // need to unpack the transform into rotation, scale and transform
+        var transform = TransformComponents();
+        Mat2D.decompose(Mat2D.fromMat4(drawableGroup.transform), transform);
+        node.rotation += transform.rotation;
+        node.x += transform.x;
+        node.y += transform.y;
+        node.scaleX *= transform.scaleX;
+        node.scaleY *= transform.scaleY;
+      }
+
       file.addObject(node);
       parent.appendChild(node);
 
@@ -466,6 +478,21 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
 
     switch (instruction[0] as pathFuncs) {
       case pathFuncs.moveTo:
+        if (vertices.isNotEmpty) {
+          var path = PointsPath()
+            ..isClosed = false
+            ..name = 'Points Path'
+            ..x = 0
+            ..y = 0;
+          file.addObject(path);
+          vertices.forEach((element) {
+            file.addObject(element);
+            path.appendChild(element);
+          });
+
+          components.add(path);
+          vertices = <PathVertex>[];
+        }
         moveInstruction = instruction;
         break;
       case pathFuncs.addOval:
@@ -533,7 +560,7 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
         if (vertices.isNotEmpty) {
           var path = PointsPath()
             ..isClosed = true
-            ..name = 'Points Path'
+            ..name = 'Path'
             ..x = 0
             ..y = 0;
           file.addObject(path);
@@ -598,7 +625,7 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
   if (vertices.isNotEmpty) {
     var path = PointsPath()
       ..isClosed = false
-      ..name = 'Points Path'
+      ..name = 'Path'
       ..x = 0
       ..y = 0;
     file.addObject(path);
@@ -615,7 +642,18 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
 
 RiveFile createFromSvg(DrawableRoot svgDrawable) {
   // LocalDataPlatform dataPlatform = LocalDataPlatform.make();
-  var riveFile = RiveFile('something', localDataPlatform: null);
+
+  var riveFile = RiveFile(
+      attrOrDefault(svgDrawable.attributes, 'id', 'FileName'),
+      localDataPlatform: null);
   addArtboard(riveFile, svgDrawable);
   return riveFile;
+}
+
+String attrOrDefault(List<XmlEventAttribute> attributes, String attributeName,
+    String defaultValue) {
+  var match = attributes.firstWhere(
+      (XmlEventAttribute attribute) => attribute.name == attributeName,
+      orElse: () => null);
+  return match?.value ?? defaultValue;
 }

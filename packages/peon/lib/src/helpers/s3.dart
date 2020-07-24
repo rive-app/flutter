@@ -37,6 +37,10 @@ Future<String> getS3Key(String sourceLocation) async {
 
     final response = await getRequest.sendRequest();
     final data = await response.readAsString();
+    if (response.statusCode != 200) {
+      throw Exception(
+          'Could not get file from s3, status ${response.statusCode}\n$data');
+    }
     return data;
   } finally {
     await client.close();
