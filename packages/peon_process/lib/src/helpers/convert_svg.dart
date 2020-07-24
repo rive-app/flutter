@@ -478,6 +478,21 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
 
     switch (instruction[0] as pathFuncs) {
       case pathFuncs.moveTo:
+        if (vertices.isNotEmpty) {
+          var path = PointsPath()
+            ..isClosed = false
+            ..name = 'Points Path'
+            ..x = 0
+            ..y = 0;
+          file.addObject(path);
+          vertices.forEach((element) {
+            file.addObject(element);
+            path.appendChild(element);
+          });
+
+          components.add(path);
+          vertices = <PathVertex>[];
+        }
         moveInstruction = instruction;
         break;
       case pathFuncs.addOval:
