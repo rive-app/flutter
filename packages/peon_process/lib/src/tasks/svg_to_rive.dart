@@ -93,6 +93,11 @@ class SvgToRiveTask with Task {
     var drawable = await SvgParserStateRived(
             xml.parseEvents(cleanedData), 'rive_key', svgPathFuncs)
         .parse();
+    if (drawable == null) {
+      throw Exception('Could not parse svg file\n\n'
+          'Original:\n$data\n\n'
+          'Cleaned:\n$cleanedData\n\n');
+    }
     RiveFile _riveFile = createFromSvg(drawable);
 
     var exporter = RuntimeExporter(
