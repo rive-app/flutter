@@ -27,6 +27,7 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/triangle.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
@@ -44,6 +45,7 @@ import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
 import 'package:rive_editor/rive/stage/tools/late_draw_stage_tool.dart';
@@ -127,6 +129,11 @@ class Stage extends Debouncer {
 
   bool _isPanning = false;
   bool get isPanning => _isPanning;
+
+  /// Flag to track when a drag operation causes an error. When this happens,
+  /// all drag events are ignored until the drag operation is ended (e.g. on
+  /// mouse up)
+  bool _dragInError = false;
 
   /// Register a selection handler that will be called back whenever an item is
   /// clicked on the stage.
@@ -569,6 +576,10 @@ class Stage extends Debouncer {
   }
 
   void mouseDrag(int button, double x, double y) {
+    // If a drag error has occurred, ignore the drag
+    if (_dragInError) {
+      return;
+    }
     _computeWorldMouse(x, y);
     file.core.cursorMoved(_worldMouse[0], _worldMouse[1]);
     // Store the tool that got activated by this operation separate from the
@@ -597,6 +608,15 @@ class Stage extends Debouncer {
       }
       if (tool is DraggableTool) {
         var artboard = activeArtboard;
+        if (artboard == null && !(tool is ArtboardTool)) {
+          // Things are going to go boom; warn the user and put the drag
+          // operation into an error state
+          file.addAlert(
+            SimpleAlert('Create an artboard before adding items.'),
+          );
+          _dragInError = true;
+          return;
+        }
         var worldMouse = tool.mouseWorldSpace(artboard, _worldMouse);
 
         // [_dragTool] is [null] before dragging operation starts.
@@ -632,6 +652,7 @@ class Stage extends Debouncer {
   }
 
   void mouseUp(int button, double x, double y) {
+    _dragInError = false;
     _isPanning = false;
     _rightClickHandCursor?.remove();
     _rightClickHandCursor = null;
