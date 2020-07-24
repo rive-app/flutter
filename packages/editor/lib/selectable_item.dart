@@ -6,7 +6,6 @@ enum SelectionState { selected, hovered, none }
 class _SelectionFlags {
   static const int selected = 1 << 0;
   static const int hovered = 1 << 1;
-  static const int none = 0;
 }
 
 /// Selection states are also entirely left up to the tree implementation, the

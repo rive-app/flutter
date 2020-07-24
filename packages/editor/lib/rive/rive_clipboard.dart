@@ -250,8 +250,8 @@ class _RiveHierarchyClipboard extends RiveClipboard {
 
     Component pasteDestination = topSelectedComponents.isEmpty
         ? file.backboard.activeArtboard
-        : topSelectedComponents
-            .first; // topParentsOfSelection.first ?? topSelectedComponents.first;
+        : topSelectedComponents.first;
+    // topParentsOfSelection.first ?? topSelectedComponents.first;
     var pasteDestinationParent =
         pasteDestination.parent ?? file.backboard.activeArtboard;
     // if (selectedItem is StageItem &&
@@ -343,10 +343,7 @@ class _RiveHierarchyClipboard extends RiveClipboard {
               // Store the world center with the item that later needs to be
               // centered at that world coordinate.
               needsCentering[toCenter] = Vec2D.transformMat2D(
-                  Vec2D(),
-                  localCenter,
-                  pasteDestination.worldTransform);
-              
+                  Vec2D(), localCenter, pasteDestination.worldTransform);
             }
           }
         }
@@ -358,7 +355,6 @@ class _RiveHierarchyClipboard extends RiveClipboard {
 
     // Iterate all objects that need centering.
     for (final node in needsCentering.keys) {
-
       // Get the target (center in world space) of this object.
       var target = needsCentering[node];
 
@@ -370,8 +366,7 @@ class _RiveHierarchyClipboard extends RiveClipboard {
 
       // This is our center in local space.
       Vec2D center = Vec2D.transformMat2D(Vec2D(), target, toLocal);
-      
-      
+
       // Compute our local bounds.
       var nodeTransformedBounds = node.localBounds.transform(node.transform);
       // Get our individual center in local bounds.
@@ -386,9 +381,9 @@ class _RiveHierarchyClipboard extends RiveClipboard {
       node.y = center[1] - toNodeCenter[1];
     }
 
-    // Finally select the newly added items.
+    // Finally select the firs of the newly added items.
     var selection = <StageItem>{};
-    for (final component in objects) {
+    for (final component in _onlyParents(objects)) {
       // Select only stageItems that have been added to the stage.
       if (component == null ||
           component.stageItem == null ||
@@ -404,3 +399,8 @@ class _RiveHierarchyClipboard extends RiveClipboard {
     return true;
   }
 }
+
+/// Returns a set of only those items who have no parents within the same set
+Set<Component> _onlyParents(Iterable<Component> components) => components
+    .where((component) => !components.contains(component.parent))
+    .toSet();

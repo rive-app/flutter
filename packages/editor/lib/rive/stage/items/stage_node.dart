@@ -36,8 +36,17 @@ class StageNode extends StageItem<Node> with BoundsDelegate {
 
   @override
   void draw(Canvas canvas, StageDrawPass pass) {
-    // TODO: make this efficient
     var state = selectionState.value;
+
+    // Don't show node if hidden node is active, and it is not hovered of
+    // selected
+    if (!stage.showNodes &&
+        state != SelectionState.hovered &&
+        state != SelectionState.selected) {
+      return;
+    }
+
+    // TODO: make this efficient
     if (state == SelectionState.hovered || state == SelectionState.selected) {
       _nodeStroke.color = _nodeFill.color = StageItem.selectedPaint.color;
     } else {

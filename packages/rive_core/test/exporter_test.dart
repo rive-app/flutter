@@ -203,8 +203,15 @@ void main() {
     );
     var bytes = exporter.export();
 
-    var file = File('rectangle.riv');
+    const filePath = './rectangle.riv';
+    var file = File(filePath);
     file.create(recursive: true);
     file.writeAsBytesSync(bytes, flush: true);
+
+    assert(
+      FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound,
+    );
+
+    file.delete();
   });
 }
