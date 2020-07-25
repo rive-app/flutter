@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rive_core/math/circle_constant.dart';
 
 enum TabDecorationStyle { separator, fill }
 
@@ -82,8 +83,7 @@ class TabDecoration extends Decoration {
   }
 }
 
-const double _arcConstant = 0.55;
-const double _iarcConstant = 1.0 - _arcConstant;
+const double _iarcConstant = 1.0 - circleConstant;
 const double _cornerRadius = TabDecoration.cornerRadius;
 
 /// An object that paints a [_TabDecorationPainter] into a canvas.
@@ -142,7 +142,7 @@ class _TabDecorationPainter extends BoxPainter {
         if (invertLeft) {
           path.moveTo(_cornerRadius, rect.height);
           path.cubicTo(
-              _cornerRadius - _cornerRadius * _arcConstant,
+              _cornerRadius - _cornerRadius * circleConstant,
               rect.height,
               0,
               rect.height - _cornerRadius * _iarcConstant,
@@ -151,7 +151,7 @@ class _TabDecorationPainter extends BoxPainter {
         } else {
           path.moveTo(-_cornerRadius, rect.height);
           path.cubicTo(
-              -_cornerRadius + _cornerRadius * _arcConstant,
+              -_cornerRadius + _cornerRadius * circleConstant,
               rect.height,
               0,
               rect.height - _iarcConstant * _cornerRadius,
