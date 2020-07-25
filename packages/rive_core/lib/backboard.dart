@@ -27,18 +27,29 @@ class Backboard extends BackboardBase {
   @override
   void activeArtboardIdChanged(Id from, Id to) {
     _activeArtboard = context?.resolve(to);
+    _activeArtboard?.whenRemoved(_validateArtboards);
     _activeArtboard?.addDirt(ComponentDirt.paint);
+  }
+
+  void _validateArtboards() {
+    activeArtboard = context?.resolve(activeArtboardId);
+    mainArtboard = context?.resolve(mainArtboardId);
   }
 
   Artboard _mainArtboard;
   Artboard get mainArtboard => _mainArtboard;
   set mainArtboard(Artboard value) {
-    mainArtboardId = value.id;
+    if (_mainArtboard == value) {
+      return;
+    }
+    _mainArtboard = value;
+    mainArtboardId = value?.id;
   }
 
   @override
   void mainArtboardIdChanged(Id from, Id to) {
     _mainArtboard = context?.resolve(to);
+    _mainArtboard?.whenRemoved(_validateArtboards);
     _mainArtboard?.addDirt(ComponentDirt.paint);
   }
 
