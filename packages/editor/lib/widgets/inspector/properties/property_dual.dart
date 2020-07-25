@@ -138,7 +138,13 @@ class PropertyDual<T> extends StatelessWidget {
 /// Calculates the scaled change between the old and new values, and then
 /// changes the updateValue by the same scale.
 T _calculateScaledChange<T>(T oldValue, T newValue, T updateValue) {
-  if (oldValue is num && newValue is num && updateValue is num) {
+  // If the old value is zero, we're in an undefined state, as we can't
+  // calculate the percentage change from zero. In this case, make the
+  // updateValue the same as the new value
+  if (oldValue is num &&
+      newValue is num &&
+      updateValue is num &&
+      oldValue != 0) {
     final percentChange = (newValue - oldValue) / oldValue;
     final updatedValue = (updateValue * percentChange) + updateValue;
     return updatedValue as T;
