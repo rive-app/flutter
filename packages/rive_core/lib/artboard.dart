@@ -230,6 +230,11 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   }
 
   // -> editor-only
+
+  /// Artboards shouldn't be parented to anything.
+  @override
+  bool validate() => parent == null;
+
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is ArtboardDelegate) {
