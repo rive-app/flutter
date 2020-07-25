@@ -9,6 +9,8 @@ import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/selectable_item.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 /// StageItem icon usually displayed in a tree like the Hierarchy or the
@@ -18,9 +20,11 @@ import 'package:rive_editor/widgets/tinted_icon.dart';
 /// themselves/their contents like the paths/shapes).
 class StageItemIcon extends StatelessWidget {
   final StageItem item;
+  final SelectionState selectionState;
 
   const StageItemIcon({
     @required this.item,
+    this.selectionState,
     Key key,
   })  : assert(item != null, 'StageItem cannot be null'),
         super(key: key);
@@ -68,13 +72,18 @@ class StageItemIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = RiveTheme.of(context);
+    var color = theme.colors.hierarchyText;
+    if (selectionState != null && selectionState == SelectionState.selected) {
+      color = theme.colors.selectedText;
+    }
     final icon = _icon();
     return icon != null
-        ? TintedIcon(color: const Color(0xFF999999), icon: icon)
+        ? TintedIcon(color: color, icon: icon)
         : Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFF999999),
-              borderRadius: BorderRadius.all(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: const BorderRadius.all(
                 Radius.circular(2),
               ),
             ),

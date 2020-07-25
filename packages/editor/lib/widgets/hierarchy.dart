@@ -57,7 +57,13 @@ class HierarchyTreeView extends StatelessWidget {
             ),
           ),
           iconBuilder: (context, item, style) =>
-              StageItemIcon(item: item.data.stageItem),
+              ValueListenableBuilder<SelectionState>(
+            valueListenable: item.data.stageItem?.selectionState,
+            builder: (context, state, _) => StageItemIcon(
+              item: item.data.stageItem,
+              selectionState: state,
+            ),
+          ),
           backgroundBuilder: (context, item, style) =>
               ValueListenableBuilder<DropState>(
             valueListenable: item.dropState,
