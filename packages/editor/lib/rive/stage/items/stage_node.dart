@@ -5,6 +5,7 @@ import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
+// import 'package:rive_editor/rive/stage/stage_hideable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
@@ -35,18 +36,13 @@ class StageNode extends StageItem<Node> with BoundsDelegate {
   bool intersectsRect(Float32List rectPoly) => true;
 
   @override
+  bool get isVisible =>
+      stage.showNodes || selectionState.value == SelectionState.selected;
+
+  @override
   void draw(Canvas canvas, StageDrawPass pass) {
-    var state = selectionState.value;
-
-    // Don't show node if hidden node is active, and it is not hovered of
-    // selected
-    if (!stage.showNodes &&
-        state != SelectionState.hovered &&
-        state != SelectionState.selected) {
-      return;
-    }
-
     // TODO: make this efficient
+    final state = selectionState.value;
     if (state == SelectionState.hovered || state == SelectionState.selected) {
       _nodeStroke.color = _nodeFill.color = StageItem.selectedPaint.color;
     } else {
