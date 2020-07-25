@@ -1274,4 +1274,10 @@ class Stage extends Debouncer {
   final ValueNotifier<HashSet<StageItem>> _soloNotifier =
       ValueNotifier<HashSet<StageItem>>(null);
   ValueListenable<HashSet<StageItem>> get soloListenable => _soloNotifier;
+
+  /// Hide an item on the stage
+  void hideItem(StageItem item) => removeItem(item);
+
+  /// Unhide an item on the stage
+  void unhideItem(StageItem item) => addItem(item);
 }
