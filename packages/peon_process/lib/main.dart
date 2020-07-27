@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:peon/peon.dart';
+import 'package:peon_process/src/tasks/flare_to_rive.dart';
 import 'package:peon_process/src/tasks/svg_to_rive.dart';
 
 void main() {
@@ -10,6 +11,7 @@ void main() {
     registeredTasks['ping'] = PingTask.fromData;
     registeredTasks['echo'] = EchoTask.fromData;
     registeredTasks['svgtorive'] = SvgToRiveTask.fromData;
+    registeredTasks['flaretorive'] = FlareToRiveTask.fromData;
 
     loop(getQueue, registeredTasks);
   }, onError: (dynamic e, dynamic s) {
