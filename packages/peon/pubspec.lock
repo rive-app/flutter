@@ -14,7 +14,7 @@ packages:
       path: "aws_client/"
       ref: HEAD
       resolved-ref: "1d163193d05db2e6a56042d2cef6b657b57c8ac0"
-      url: "git@github.com:rive-app/aws_client.git"
+      url: "https://github.com/rive-app/aws_client.git"
     source: git
     version: "0.3.0-dev"
   buffer:
