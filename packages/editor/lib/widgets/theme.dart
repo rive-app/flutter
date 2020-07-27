@@ -211,6 +211,9 @@ class RiveColors {
   Color get getTransparent => transparent;
   Color get getBlack => black;
   Color get getWhite => white;
+
+  // Snapping colors
+  Color get snappingLine => red;
 }
 
 /// TextStyles used in the Rive Theme

@@ -10,6 +10,9 @@ import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/widgets/theme.dart';
+
+final snapLineColor = RiveColors().snappingLine;
 
 typedef SnappingFilter = bool Function(StageItem);
 
@@ -289,7 +292,7 @@ class Snapper {
     ..lineTo(snapIconRadius, -snapIconRadius);
 
   final snapPointPaint = Paint()
-    ..color = const Color(0xFFFF0000)
+    ..color = snapLineColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1.0;
 
