@@ -14,6 +14,7 @@ import 'package:rive_editor/rive/stage/items/stage_path.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
+import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/widgets/inspector/inspect_vertices.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 
@@ -309,6 +310,8 @@ class VertexEditor with RiveFileDelegate {
           } else {
             file.showSelectionAlert('Done editing paths.');
           }
+          // Select the auto tool
+          stage.tool = AutoTool.instance;
           return true;
         }
     }
