@@ -793,6 +793,7 @@ class Stage extends Debouncer {
           solo(null);
 
           file.selection.selectMultiple(items);
+          tool = AutoTool.instance;
           return true;
         }
         return false;
