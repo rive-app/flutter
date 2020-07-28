@@ -1,7 +1,9 @@
 import 'dart:collection';
 import 'dart:ui';
 
+import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/segment2d.dart';
@@ -21,6 +23,7 @@ class _SnappingItem {
   final Vec2D worldTranslation;
 
   _SnappingItem(this.toParent, this.worldTranslation);
+
   factory _SnappingItem.fromNode(Node node) {
     var artboard = node.artboard;
     var world = artboard.transform(
@@ -32,6 +35,14 @@ class _SnappingItem {
     return _SnappingItem(inverse,
         Mat2D.getTranslation(artboard.transform(node.worldTransform), Vec2D()));
   }
+
+  factory _SnappingItem.fromArtboard(Artboard artboard) => _SnappingItem(
+        Mat2D(),
+        Mat2D.getTranslation(
+          artboard.transform(artboard.worldTransform),
+          Vec2D(),
+        ),
+      );
 }
 
 class _SnapAxis {
@@ -131,21 +142,23 @@ class Snapper {
   final _targets = _SnappingAxes();
   final _source = _SnappingAxes();
 
-  final Map<Node, _SnappingItem> _items = {};
+  final Map<Component, _SnappingItem> _items = {};
   final Vec2D startMouse;
 
-  Snapper.build(
-      this.startMouse, Iterable<Node> nodes, SnappingFilter itemFilter)
-      : assert(nodes.isNotEmpty),
-        assert(nodes.first.stageItem.stage != null) {
-    _stage = nodes.first.stageItem.stage;
+  Snapper.build(this.startMouse, Iterable<Component> components,
+      SnappingFilter itemFilter)
+      : assert(components.isNotEmpty),
+        assert(components.first.stageItem.stage != null) {
+    _stage = components.first.stageItem.stage;
 
     final exclusion = HashSet<Component>();
-    for (final node in nodes) {
-      node.forAll((component) {
-        exclusion.add(component);
-        return true;
-      });
+    for (final component in components) {
+      if (component is ContainerComponent) {
+        component.forAll((c) {
+          exclusion.add(c);
+          return true;
+        });
+      }
     }
     // x.add(100);
     _stage.visTree.all((id, item) {
@@ -160,24 +173,29 @@ class Snapper {
     });
     _targets.complete();
 
-    if (nodes.length > 1) {
+    if (components.length > 1) {
       // Build up bounds
-      AABB bounds = nodes.first.stageItem.aabb;
-      for (final node in nodes.skip(1)) {
-        AABB.combine(bounds, bounds, node.stageItem.aabb);
+      AABB bounds = components.first.stageItem.aabb;
+      for (final component in components.skip(1)) {
+        AABB.combine(bounds, bounds, component.stageItem.aabb);
       }
       _source.addAABB(bounds);
     } else {
-      _source.add(nodes.first.stageItem);
+      _source.add(components.first.stageItem);
     }
     _source.complete();
 
-    for (final node in nodes) {
-      _items[node] = _SnappingItem.fromNode(node);
+    for (final component in components) {
+      if (component is Node) {
+        _items[component] = _SnappingItem.fromNode(component);
+      } else if (component is Artboard) {
+        _items[component] = _SnappingItem.fromArtboard(component);
+      }
+      // Unsupported snapping type; ignore
     }
   }
 
-  void advance(Vec2D worldMouse, Vec2D lockAxis) {
+  void advance(Vec2D worldMouse, {Vec2D lockAxis}) {
     Vec2D diff;
     if (lockAxis == null) {
       diff = Vec2D.subtract(Vec2D(), worldMouse, startMouse);
@@ -277,11 +295,18 @@ class Snapper {
       }
     }
 
-    _items.forEach((node, details) {
+    _items.forEach((component, details) {
       var world = Vec2D.add(Vec2D(), details.worldTranslation, diff);
       var local = Vec2D.transformMat2D(Vec2D(), world, details.toParent);
-      node.x = local[0];
-      node.y = local[1];
+      // These components are either nodes or artboards, so cast to change their
+      // coordinates
+      if (component is Node) {
+        component.x = local[0];
+        component.y = local[1];
+      } else if (component is Artboard) {
+        component.x = local[0];
+        component.y = local[1];
+      }
     });
   }
 
