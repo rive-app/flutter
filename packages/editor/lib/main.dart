@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_core/runtime/runtime_importer.dart';
@@ -139,9 +140,6 @@ class _InitWindowWidgetState extends State<InitWindowWidget> {
     win_utils.hideTitleBar();
     win_utils.setSize(kDefaultWIndowSize);
     win_utils.initInputHelper();
-    win_utils.listenFilesDropped((files) {
-      print("We got $files");
-    });
   }
 
   @override
@@ -299,29 +297,85 @@ class Editor extends StatefulWidget {
 }
 
 class _EditorState extends State<Editor> {
-  void _filesDropped(Iterable<DroppedFile> files) {
+  Future<void> _filesDropped(Iterable<DroppedFile> files) async {
     var activeFile = ActiveFile.find(context);
     if (activeFile == null || activeFile.state != OpenFileState.open) {
       return;
+    } else {
+      // TODO: maybe we're in the files view?
     }
 
-    List<DroppedFile> importedFiles = [];
+    List<DroppedFile> importedRive = [];
+    Map<DroppedFile, TaskResult> backendConverting = {};
+    TasksApi taskApi;
     bool imported = false;
     for (final file in files) {
-      if (file.filename.endsWith('.riv')) {
-        var importer = RuntimeImporter(core: activeFile.core);
-        if (importer.import(file.bytes)) {
-          importedFiles.add(file);
-          imported = true;
-        }
+      var idx = file.filename.lastIndexOf('.');
+      if (idx == -1) {
+        continue;
+      }
+      var ext = file.filename.substring(idx + 1);
+      switch (ext) {
+        case "riv":
+          var importer = RuntimeImporter(core: activeFile.core);
+          if (importer.import(file.bytes)) {
+            importedRive.add(file);
+            imported = true;
+          }
+          break;
+        case "flr2d":
+          taskApi ??= TasksApi(activeFile.rive.api);
+          var taskResult = await taskApi.convertFLR(file.bytes);
+          if (taskResult != null) {
+            backendConverting[file] = taskResult;
+          }
+          break;
+        case "svg":
+          taskApi ??= TasksApi(activeFile.rive.api);
+          var taskResult = await taskApi.convertSVG(file.bytes);
+          if (taskResult != null) {
+            backendConverting[file] = taskResult;
+          }
+          break;
       }
     }
     if (imported) {
       activeFile.core.captureJournalEntry();
     }
 
-    activeFile.addAlert(SimpleAlert(
-        'Imported ${importedFiles.map((file) => file.filename).join(', ')}.'));
+    if (importedRive.isNotEmpty) {
+      activeFile.addAlert(SimpleAlert(
+          'Imported ${importedRive.map((file) => file.filename).join(', ')}.'));
+    }
+    if (backendConverting.isNotEmpty) {
+      activeFile.addAlert(SimpleAlert(
+          'Importing ${backendConverting.keys.map((file) => file.filename).join(', ')}.'));
+
+      // Start polling...
+      // needs max tries?
+      while (backendConverting.isNotEmpty) {
+        await Future.delayed(const Duration(seconds: 1), () => null);
+        Set<DroppedFile> completedSVGs = {};
+        // TODO: HELP.
+        for (final file in backendConverting.keys) {
+          var taskResult = backendConverting[file];
+          var rivBytes = await taskApi.taskData(taskResult.taskId);
+          if (rivBytes == null) {
+            return;
+          }
+          completedSVGs.add(file);
+
+          var importer = RuntimeImporter(core: activeFile.core);
+          // TODO: replace with progress across the top screen figma style...
+          if (importer.import(rivBytes)) {
+            activeFile.addAlert(SimpleAlert('Imported ${file.filename}.'));
+          }
+          activeFile.core.captureJournalEntry();
+        }
+        // TODO: HELP.
+        completedSVGs.forEach(backendConverting.remove);
+      }
+    }
   }
 
   @override

@@ -347,7 +347,7 @@ func initInputHelperWithDelay(channel: FlutterMethodChannel, retries: UInt8) {
 }
 
 class InputHelperView: NSView {
-    let fileTypes = ["jpg", "jpeg", "bmp", "png", "gif", "riv"]
+    let fileTypes = ["jpg", "jpeg", "bmp", "png", "gif", "riv", "svg", "flr2d"]
     
     let NSFilenamesPboardType = NSPasteboard.PasteboardType("NSFilenamesPboardType")
     var channel:FlutterMethodChannel?
