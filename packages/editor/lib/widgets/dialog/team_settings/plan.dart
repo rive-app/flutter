@@ -566,7 +566,7 @@ class _BillState extends State<BillingStatus> {
     final colors = theme.colors;
 
     final errorText =
-        textStyles.loginText.copyWith(height: 1.6, color: colors.getMagenta);
+        textStyles.loginText.copyWith(height: 1.6, color: colors.errorText);
     final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
     final darkGreyText = textStyles.notificationTitle.copyWith(height: 1.6);
 
@@ -885,7 +885,7 @@ class _MethodState extends State<PaymentMethod> {
                     fontSize: 13,
                     height: 1.15,
                     color: _lastPaymentFailed
-                        ? colors.getMagenta
+                        ? colors.errorText
                         : styles.fileGreyTextLarge.color),
               ),
             ],

@@ -313,6 +313,11 @@ class Stage extends Debouncer {
     }
   }
 
+  // Track the previous value of the snapping flag, so that the snapping
+  // shortcut can return to the prior snappig state when it is enabled/disabled
+  var _priorEnableSnapping = true;
+  var _disableSnappingShortcutEnabled = false;
+
   // Show nodes flag
   final ValueNotifier<bool> showNodesNotifier = ValueNotifier<bool>(true);
   bool get showNodes => showNodesNotifier.value;
@@ -886,11 +891,25 @@ class Stage extends Debouncer {
       tool?.activate(this);
       ShortcutAction.deepClick.addListener(_deepClickChanged);
       ShortcutAction.pan.addListener(_panActionChanged);
+      ShortcutAction.disableSnapping.addListener(_disableSnappingChanged);
     } else {
       tool?.deactivate();
       ShortcutAction.pan.removeListener(_panActionChanged);
       ShortcutAction.deepClick.removeListener(_deepClickChanged);
+      ShortcutAction.disableSnapping.addListener(_disableSnappingChanged);
     }
+  }
+
+  void _disableSnappingChanged() {
+    // If the shortcut key is pressed, save snapping state and disable
+    if (!_disableSnappingShortcutEnabled) {
+      _priorEnableSnapping = enableSnapping;
+      enableSnapping = false;
+    } else {
+      // Set the snapping state to its prior
+      enableSnapping = _priorEnableSnapping;
+    }
+    _disableSnappingShortcutEnabled = !_disableSnappingShortcutEnabled;
   }
 
   void _deepClickChanged() => _updateHover();

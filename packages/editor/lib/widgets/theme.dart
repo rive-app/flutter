@@ -9,6 +9,7 @@ const lightGrey = Color(0xFF8C8C8C);
 const white = Color(0xFFFFFFFF);
 const black = Color(0xFF000000);
 const red = Color(0xFFFF5678);
+const magenta = Color(0xFFFF5777);
 const purple = Color(0xFFD041AB);
 const transparent = Color(0x00000000);
 const transparent50 = Color(0x88FFFFFF);
@@ -213,8 +214,10 @@ class RiveColors {
   Color get getWhite => white;
 
   // Snapping colors
-  Color get snappingLine => red;
-  Color get getMagenta => const Color(0xFFFF5777);
+  Color get snappingLine => magenta;
+
+  // Plans
+  Color get errorText => magenta;
 }
 
 /// TextStyles used in the Rive Theme

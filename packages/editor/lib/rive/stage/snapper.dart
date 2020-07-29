@@ -86,6 +86,8 @@ class _SnappingAxes {
     }
   }
 
+  void addAll(Iterable<StageItem> items) => items.forEach(add);
+
   void addAABB(AABB bounds) {
     //tl
     addPoint(bounds[0], bounds[1]);
@@ -168,9 +170,21 @@ class Snapper {
       if (itemFilter(item)) {
         _targets.add(item);
       }
-
       return true;
     });
+
+    // Add the item's parent artboard if all the items being dragged belong to
+    // the same artboard and an artboard is not being dragged. We loop before we
+    // add to filter out duplicate artboard entries
+    final snapArtboards = HashSet<StageItem<Artboard>>();
+    components.forEach((component) {
+      // Artboards have no parent artboards, so exclude
+      if (component is! Artboard && component.artboard?.stageItem != null) {
+        snapArtboards.add(component.artboard.stageItem as StageItem<Artboard>);
+      }
+    });
+    _targets.addAll(snapArtboards);
+
     _targets.complete();
 
     if (components.length > 1) {
