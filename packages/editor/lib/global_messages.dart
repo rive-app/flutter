@@ -48,7 +48,7 @@ class _GlobalMessagesState extends State<GlobalMessages> {
                   key: const ValueKey('neo'),
                   alert: alert,
                   isVisible: true,
-                  topPadding: 20)),
+                  topPadding: 40)),
         );
       },
     );
