@@ -3,27 +3,23 @@
 # Apparently libraries shouldn't track their pubspec
 # but applications should
 
+packages/coop_server/pubspec.lock
 packages/core/pubspec.lock
 packages/cursor/pubspec.lock
 packages/cursor/example/pubspec.lock
+packages/fractional/pubspec.lock
 packages/local_data/pubspec.lock
-
 packages/peon/pubspec.lock
-
 packages/rive_api/example/pubspec.lock
 packages/rive_api/pubspec.lock
-
 packages/rive_core/pubspec.lock
-
-
 packages/rive_widgets/pubspec.lock
-
-packages/tree_widget.pubspec.lock
+packages/tree_widget/pubspec.lock
 packages/tree_widget/example/pubspec.lock
-
-
+packages/utilities/pubspec.lock
 packages/window_utils/window_utils/pubspec.lock
 packages/window_utils/window_utils/example/pubspec.lock
+packages/window_utils/window_utils_macos/pubspec.lock
 packages/window_utils/window_utils_platform_interface/pubspec.lock
 packages/window_utils/window_utils_web/pubspec.lock
 
