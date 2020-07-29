@@ -301,22 +301,37 @@ abstract class CubicDetachedVertexBase extends CubicVertex {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_inRotation != null) {
+    if (_inRotation != null && exports(inRotationPropertyKey)) {
       context.doubleType
-          .writeProperty(inRotationPropertyKey, writer, _inRotation);
+          .writeRuntimeProperty(inRotationPropertyKey, writer, _inRotation);
     }
-    if (_inDistance != null) {
+    if (_inDistance != null && exports(inDistancePropertyKey)) {
       context.doubleType
-          .writeProperty(inDistancePropertyKey, writer, _inDistance);
+          .writeRuntimeProperty(inDistancePropertyKey, writer, _inDistance);
     }
-    if (_outRotation != null) {
+    if (_outRotation != null && exports(outRotationPropertyKey)) {
       context.doubleType
-          .writeProperty(outRotationPropertyKey, writer, _outRotation);
+          .writeRuntimeProperty(outRotationPropertyKey, writer, _outRotation);
     }
-    if (_outDistance != null) {
+    if (_outDistance != null && exports(outDistancePropertyKey)) {
       context.doubleType
-          .writeProperty(outDistancePropertyKey, writer, _outDistance);
+          .writeRuntimeProperty(outDistancePropertyKey, writer, _outDistance);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case inRotationPropertyKey:
+        return _inRotation != 0;
+      case inDistancePropertyKey:
+        return _inDistance != 0;
+      case outRotationPropertyKey:
+        return _outRotation != 0;
+      case outDistancePropertyKey:
+        return _outDistance != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

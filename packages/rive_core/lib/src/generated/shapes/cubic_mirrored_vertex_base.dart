@@ -165,12 +165,25 @@ abstract class CubicMirroredVertexBase extends CubicVertex {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_rotation != null) {
-      context.doubleType.writeProperty(rotationPropertyKey, writer, _rotation);
+    if (_rotation != null && exports(rotationPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(rotationPropertyKey, writer, _rotation);
     }
-    if (_distance != null) {
-      context.doubleType.writeProperty(distancePropertyKey, writer, _distance);
+    if (_distance != null && exports(distancePropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(distancePropertyKey, writer, _distance);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case rotationPropertyKey:
+        return _rotation != 0;
+      case distancePropertyKey:
+        return _distance != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

@@ -46,8 +46,8 @@ abstract class KeyFrameDoubleBase extends KeyFrame {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_value != null) {
-      context.doubleType.writeProperty(valuePropertyKey, writer, _value);
+    if (_value != null && exports(valuePropertyKey)) {
+      context.doubleType.writeRuntimeProperty(valuePropertyKey, writer, _value);
     }
   }
 

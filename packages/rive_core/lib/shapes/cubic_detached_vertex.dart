@@ -122,4 +122,19 @@ class CubicDetachedVertex extends CubicDetachedVertexBase {
     _outPoint = null;
     path?.markPathDirty();
   }
+
+  // -> editor-only
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case CubicDetachedVertexBase.inRotationPropertyKey:
+      case CubicDetachedVertexBase.inDistancePropertyKey:
+        return inDistance.abs() > 0.001;
+      case CubicDetachedVertexBase.outRotationPropertyKey:
+      case CubicDetachedVertexBase.outDistancePropertyKey:
+        return outDistance.abs() > 0.001;
+    }
+    return super.exports(propertyKey);
+  }
+  // <- editor-only
 }

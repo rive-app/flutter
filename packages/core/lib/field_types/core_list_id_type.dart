@@ -30,4 +30,12 @@ class CoreListIdType extends CoreFieldType<List<Id>> {
     }
     return writer.uint8Buffer;
   }
+
+  @override
+  List<Id> runtimeDeserialize(BinaryReader reader) =>
+      throw UnimplementedError();
+
+  @override
+  void runtimeSerialize(BinaryWriter writer, List<Id> value) =>
+      throw UnimplementedError();
 }

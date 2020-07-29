@@ -23,4 +23,12 @@ class CoreIdType extends CoreFieldType<Id> {
     writer.writeVarUint(value.object);
     return writer.uint8Buffer;
   }
+
+  @override
+  Id runtimeDeserialize(BinaryReader reader) => throw UnimplementedError();
+
+  @override
+  void runtimeSerialize(BinaryWriter writer, Id value) {
+    throw UnimplementedError();
+  }
 }

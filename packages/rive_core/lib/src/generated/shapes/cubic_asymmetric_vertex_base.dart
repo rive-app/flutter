@@ -233,17 +233,31 @@ abstract class CubicAsymmetricVertexBase extends CubicVertex {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_rotation != null) {
-      context.doubleType.writeProperty(rotationPropertyKey, writer, _rotation);
-    }
-    if (_inDistance != null) {
+    if (_rotation != null && exports(rotationPropertyKey)) {
       context.doubleType
-          .writeProperty(inDistancePropertyKey, writer, _inDistance);
+          .writeRuntimeProperty(rotationPropertyKey, writer, _rotation);
     }
-    if (_outDistance != null) {
+    if (_inDistance != null && exports(inDistancePropertyKey)) {
       context.doubleType
-          .writeProperty(outDistancePropertyKey, writer, _outDistance);
+          .writeRuntimeProperty(inDistancePropertyKey, writer, _inDistance);
     }
+    if (_outDistance != null && exports(outDistancePropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(outDistancePropertyKey, writer, _outDistance);
+    }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case rotationPropertyKey:
+        return _rotation != 0;
+      case inDistancePropertyKey:
+        return _inDistance != 0;
+      case outDistancePropertyKey:
+        return _outDistance != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

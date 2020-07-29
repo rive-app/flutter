@@ -17,4 +17,12 @@ class CoreBoolType extends CoreFieldType<bool> {
     writer.writeInt8(value ? 1 : 0);
     return writer.uint8Buffer;
   }
+
+  @override
+  bool runtimeDeserialize(BinaryReader reader) => reader.readInt8() == 1;
+
+  @override
+  void runtimeSerialize(BinaryWriter writer, bool value) {
+    writer.writeInt8(value ? 1 : 0);
+  }
 }

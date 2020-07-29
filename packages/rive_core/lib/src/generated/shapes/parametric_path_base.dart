@@ -82,12 +82,24 @@ abstract class ParametricPathBase extends Path {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_width != null) {
-      context.doubleType.writeProperty(widthPropertyKey, writer, _width);
+    if (_width != null && exports(widthPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(widthPropertyKey, writer, _width);
     }
-    if (_height != null) {
-      context.doubleType.writeProperty(heightPropertyKey, writer, _height);
+    if (_height != null && exports(heightPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(heightPropertyKey, writer, _height);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case widthPropertyKey:
+        return _width != 0;
+      case heightPropertyKey:
+        return _height != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

@@ -419,24 +419,47 @@ abstract class NodeBase extends ContainerComponent {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_x != null) {
-      context.doubleType.writeProperty(xPropertyKey, writer, _x);
+    if (_x != null && exports(xPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(xPropertyKey, writer, _x);
     }
-    if (_y != null) {
-      context.doubleType.writeProperty(yPropertyKey, writer, _y);
+    if (_y != null && exports(yPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(yPropertyKey, writer, _y);
     }
-    if (_rotation != null) {
-      context.doubleType.writeProperty(rotationPropertyKey, writer, _rotation);
+    if (_rotation != null && exports(rotationPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(rotationPropertyKey, writer, _rotation);
     }
-    if (_scaleX != null) {
-      context.doubleType.writeProperty(scaleXPropertyKey, writer, _scaleX);
+    if (_scaleX != null && exports(scaleXPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(scaleXPropertyKey, writer, _scaleX);
     }
-    if (_scaleY != null) {
-      context.doubleType.writeProperty(scaleYPropertyKey, writer, _scaleY);
+    if (_scaleY != null && exports(scaleYPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(scaleYPropertyKey, writer, _scaleY);
     }
-    if (_opacity != null) {
-      context.doubleType.writeProperty(opacityPropertyKey, writer, _opacity);
+    if (_opacity != null && exports(opacityPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(opacityPropertyKey, writer, _opacity);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case xPropertyKey:
+        return _x != 0;
+      case yPropertyKey:
+        return _y != 0;
+      case rotationPropertyKey:
+        return _rotation != 0;
+      case scaleXPropertyKey:
+        return _scaleX != 1;
+      case scaleYPropertyKey:
+        return _scaleY != 1;
+      case opacityPropertyKey:
+        return _opacity != 1;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

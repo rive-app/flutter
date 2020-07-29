@@ -59,10 +59,19 @@ abstract class RectangleBase extends ParametricPath {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_cornerRadius != null) {
+    if (_cornerRadius != null && exports(cornerRadiusPropertyKey)) {
       context.doubleType
-          .writeProperty(cornerRadiusPropertyKey, writer, _cornerRadius);
+          .writeRuntimeProperty(cornerRadiusPropertyKey, writer, _cornerRadius);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case cornerRadiusPropertyKey:
+        return _cornerRadius != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

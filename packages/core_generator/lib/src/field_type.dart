@@ -1,4 +1,13 @@
+import 'package:utilities/binary_buffer/binary_reader.dart';
+
 Map<String, FieldType> _types = <String, FieldType>{};
+
+class DeserializedResult {
+  final int length;
+  final dynamic value;
+
+  DeserializedResult(this.length, this.value);
+}
 
 abstract class FieldType {
   final String name;
@@ -44,6 +53,9 @@ abstract class FieldType {
       .replaceAll('<', '')
       .replaceAll('>', '');
 
-  String get snakeName => name.replaceAllMapped(RegExp('(.+?)([A-Z])'),
-      (Match m) => '${m[1]}_${m[2]}').toLowerCase();
+  String get snakeName => name
+      .replaceAllMapped(RegExp('(.+?)([A-Z])'), (Match m) => '${m[1]}_${m[2]}')
+      .toLowerCase();
+
+  DeserializedResult deserializeRuntime(BinaryReader reader);
 }

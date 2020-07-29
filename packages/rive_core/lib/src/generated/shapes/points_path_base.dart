@@ -84,9 +84,19 @@ abstract class PointsPathBase extends Path {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_isClosed != null) {
-      context.boolType.writeProperty(isClosedPropertyKey, writer, _isClosed);
+    if (_isClosed != null && exports(isClosedPropertyKey)) {
+      context.boolType
+          .writeRuntimeProperty(isClosedPropertyKey, writer, _isClosed);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case editingModeValuePropertyKey:
+        return _editingModeValue != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

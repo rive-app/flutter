@@ -202,28 +202,49 @@ abstract class LinearAnimationBase extends Animation {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_fps != null) {
-      context.intType.writeProperty(fpsPropertyKey, writer, _fps);
+    if (_fps != null && exports(fpsPropertyKey)) {
+      context.intType.writeRuntimeProperty(fpsPropertyKey, writer, _fps);
     }
-    if (_duration != null) {
-      context.intType.writeProperty(durationPropertyKey, writer, _duration);
+    if (_duration != null && exports(durationPropertyKey)) {
+      context.intType
+          .writeRuntimeProperty(durationPropertyKey, writer, _duration);
     }
-    if (_speed != null) {
-      context.doubleType.writeProperty(speedPropertyKey, writer, _speed);
+    if (_speed != null && exports(speedPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(speedPropertyKey, writer, _speed);
     }
-    if (_loopValue != null) {
-      context.intType.writeProperty(loopValuePropertyKey, writer, _loopValue);
+    if (_loopValue != null && exports(loopValuePropertyKey)) {
+      context.intType
+          .writeRuntimeProperty(loopValuePropertyKey, writer, _loopValue);
     }
-    if (_workStart != null) {
-      context.intType.writeProperty(workStartPropertyKey, writer, _workStart);
+    if (_workStart != null && exports(workStartPropertyKey)) {
+      context.intType
+          .writeRuntimeProperty(workStartPropertyKey, writer, _workStart);
     }
-    if (_workEnd != null) {
-      context.intType.writeProperty(workEndPropertyKey, writer, _workEnd);
+    if (_workEnd != null && exports(workEndPropertyKey)) {
+      context.intType
+          .writeRuntimeProperty(workEndPropertyKey, writer, _workEnd);
     }
-    if (_enableWorkArea != null) {
-      context.boolType
-          .writeProperty(enableWorkAreaPropertyKey, writer, _enableWorkArea);
+    if (_enableWorkArea != null && exports(enableWorkAreaPropertyKey)) {
+      context.boolType.writeRuntimeProperty(
+          enableWorkAreaPropertyKey, writer, _enableWorkArea);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case fpsPropertyKey:
+        return _fps != 60;
+      case durationPropertyKey:
+        return _duration != 60;
+      case speedPropertyKey:
+        return _speed != 1;
+      case loopValuePropertyKey:
+        return _loopValue != 0;
+      case enableWorkAreaPropertyKey:
+        return _enableWorkArea != false;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

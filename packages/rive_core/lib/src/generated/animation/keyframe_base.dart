@@ -127,17 +127,18 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_frame != null) {
-      context.intType.writeProperty(framePropertyKey, writer, _frame);
+    if (_frame != null && exports(framePropertyKey)) {
+      context.intType.writeRuntimeProperty(framePropertyKey, writer, _frame);
     }
-    if (_interpolationType != null) {
-      context.intType.writeProperty(
+    if (_interpolationType != null && exports(interpolationTypePropertyKey)) {
+      context.intType.writeRuntimeProperty(
           interpolationTypePropertyKey, writer, _interpolationType);
     }
-    if (_interpolatorId != null) {
+    if (_interpolatorId != null && exports(interpolatorIdPropertyKey)) {
       var value = idLookup[_interpolatorId];
       if (value != null) {
-        context.intType.writeProperty(interpolatorIdPropertyKey, writer, value);
+        context.uintType
+            .writeRuntimeProperty(interpolatorIdPropertyKey, writer, value);
       }
     }
   }

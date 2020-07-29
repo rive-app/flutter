@@ -1,3 +1,4 @@
+import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:core_generator/src/field_type.dart';
 
 class IdFieldType extends FieldType {
@@ -7,4 +8,8 @@ class IdFieldType extends FieldType {
           'CoreIdType',
         );
 
+  @override
+  DeserializedResult deserializeRuntime(BinaryReader reader) {
+    throw UnimplementedError();
+  }
 }

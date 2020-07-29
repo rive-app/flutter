@@ -90,10 +90,19 @@ abstract class SolidColorBase extends Component {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_colorValue != null) {
+    if (_colorValue != null && exports(colorValuePropertyKey)) {
       context.colorType
-          .writeProperty(colorValuePropertyKey, writer, _colorValue);
+          .writeRuntimeProperty(colorValuePropertyKey, writer, _colorValue);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case colorValuePropertyKey:
+        return _colorValue != 0xFF747474;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

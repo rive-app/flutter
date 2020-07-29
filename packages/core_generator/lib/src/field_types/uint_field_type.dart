@@ -1,11 +1,11 @@
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import '../field_type.dart';
 
-class ColorFieldType extends FieldType {
-  ColorFieldType()
+class UintFieldType extends FieldType {
+  UintFieldType()
       : super(
-          'Color',
-          'CoreColorType',
+          'uint',
+          'CoreUintType',
           dartName: 'int',
         );
 
@@ -14,6 +14,8 @@ class ColorFieldType extends FieldType {
 
   @override
   DeserializedResult deserializeRuntime(BinaryReader reader) {
-    return DeserializedResult(4, reader.readUint32());
+    var position = reader.position;
+    var value = reader.readVarUint();
+    return DeserializedResult(reader.position - position, value);
   }
 }

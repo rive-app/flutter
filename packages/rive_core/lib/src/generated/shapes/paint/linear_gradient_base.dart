@@ -359,21 +359,41 @@ abstract class LinearGradientBase extends ContainerComponent {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_startX != null) {
-      context.doubleType.writeProperty(startXPropertyKey, writer, _startX);
+    if (_startX != null && exports(startXPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(startXPropertyKey, writer, _startX);
     }
-    if (_startY != null) {
-      context.doubleType.writeProperty(startYPropertyKey, writer, _startY);
+    if (_startY != null && exports(startYPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(startYPropertyKey, writer, _startY);
     }
-    if (_endX != null) {
-      context.doubleType.writeProperty(endXPropertyKey, writer, _endX);
+    if (_endX != null && exports(endXPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(endXPropertyKey, writer, _endX);
     }
-    if (_endY != null) {
-      context.doubleType.writeProperty(endYPropertyKey, writer, _endY);
+    if (_endY != null && exports(endYPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(endYPropertyKey, writer, _endY);
     }
-    if (_opacity != null) {
-      context.doubleType.writeProperty(opacityPropertyKey, writer, _opacity);
+    if (_opacity != null && exports(opacityPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(opacityPropertyKey, writer, _opacity);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case startXPropertyKey:
+        return _startX != 0;
+      case startYPropertyKey:
+        return _startY != 0;
+      case endXPropertyKey:
+        return _endX != 0;
+      case endYPropertyKey:
+        return _endY != 0;
+      case opacityPropertyKey:
+        return _opacity != 1;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

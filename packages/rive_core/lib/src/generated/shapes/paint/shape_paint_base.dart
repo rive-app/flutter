@@ -51,9 +51,19 @@ abstract class ShapePaintBase extends ContainerComponent {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_isVisible != null) {
-      context.boolType.writeProperty(isVisiblePropertyKey, writer, _isVisible);
+    if (_isVisible != null && exports(isVisiblePropertyKey)) {
+      context.boolType
+          .writeRuntimeProperty(isVisiblePropertyKey, writer, _isVisible);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case isVisiblePropertyKey:
+        return _isVisible != true;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

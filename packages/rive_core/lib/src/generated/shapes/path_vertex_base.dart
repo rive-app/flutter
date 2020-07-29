@@ -155,11 +155,11 @@ abstract class PathVertexBase extends Component {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_x != null) {
-      context.doubleType.writeProperty(xPropertyKey, writer, _x);
+    if (_x != null && exports(xPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(xPropertyKey, writer, _x);
     }
-    if (_y != null) {
-      context.doubleType.writeProperty(yPropertyKey, writer, _y);
+    if (_y != null && exports(yPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(yPropertyKey, writer, _y);
     }
   }
 

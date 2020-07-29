@@ -156,13 +156,25 @@ abstract class GradientStopBase extends Component {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_colorValue != null) {
+    if (_colorValue != null && exports(colorValuePropertyKey)) {
       context.colorType
-          .writeProperty(colorValuePropertyKey, writer, _colorValue);
+          .writeRuntimeProperty(colorValuePropertyKey, writer, _colorValue);
     }
-    if (_position != null) {
-      context.doubleType.writeProperty(positionPropertyKey, writer, _position);
+    if (_position != null && exports(positionPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(positionPropertyKey, writer, _position);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case colorValuePropertyKey:
+        return _colorValue != 0xFFFFFFFF;
+      case positionPropertyKey:
+        return _position != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

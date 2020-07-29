@@ -34,6 +34,7 @@ class RuntimeExporter {
     Set<Artboard> artboards,
     Set<Animation> animations,
   }) {
+    CoreDoubleType.max32Bit = true;
     var writer = BinaryWriter();
     // Write the header, start with fingerprint.
     RuntimeHeader.fingerprint.codeUnits.forEach(writer.writeUint8);
@@ -185,6 +186,7 @@ class RuntimeExporter {
         animation.writeRuntime(writer, idToIndex);
       }
     }
+    CoreDoubleType.max32Bit = false;
 
     return writer.uint8Buffer;
   }

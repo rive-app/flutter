@@ -318,9 +318,15 @@ class _EditorState extends State<Editor> {
       switch (ext) {
         case "riv":
           var importer = RuntimeImporter(core: activeFile.core);
-          if (importer.import(file.bytes)) {
-            importedRive.add(file);
-            imported = true;
+          try {
+            if (importer.import(file.bytes)) {
+              importedRive.add(file);
+              imported = true;
+            }
+            // ignore: avoid_catching_errors
+          } on UnsupportedError {
+            activeFile
+                .addAlert(SimpleAlert('${file.filename} is unsupported.'));
           }
           break;
         case "flr2d":
@@ -367,10 +373,15 @@ class _EditorState extends State<Editor> {
 
           var importer = RuntimeImporter(core: activeFile.core);
           // TODO: replace with progress across the top screen figma style...
-          if (importer.import(rivBytes)) {
-            activeFile.addAlert(SimpleAlert('Imported ${file.filename}.'));
+          try {
+            if (importer.import(rivBytes)) {
+              activeFile.addAlert(SimpleAlert('Imported ${file.filename}.'));
+            }
+            activeFile.core.captureJournalEntry();
+          } on UnsupportedError {
+            activeFile
+                .addAlert(SimpleAlert('${file.filename} is unsupported.'));
           }
-          activeFile.core.captureJournalEntry();
         }
         // TODO: HELP.
         completedSVGs.forEach(backendConverting.remove);

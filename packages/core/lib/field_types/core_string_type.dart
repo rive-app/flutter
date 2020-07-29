@@ -27,4 +27,12 @@ class CoreStringType extends CoreFieldType<String> {
     writer.writeString(value, explicitLength: false);
     return writer.uint8Buffer;
   }
+
+  @override
+  String runtimeDeserialize(BinaryReader reader) =>
+      reader.readString(explicitLength: true);
+
+  @override
+  void runtimeSerialize(BinaryWriter writer, String value) =>
+      writer.writeString(value, explicitLength: true);
 }
