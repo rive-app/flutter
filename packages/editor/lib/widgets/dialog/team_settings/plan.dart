@@ -179,7 +179,8 @@ class _PlanState extends State<PlanSettings>
                           value: _plan?.billing ?? BillingFrequency.monthly,
                           toLabel: (option) => describeEnum(option).capsFirst,
                           change: (billing) => _plan.billing = billing,
-                          disabled: isPlanCanceled,
+                          disabled: isPlanCanceled ||
+                              _plan.status == TeamStatus.failedPayment,
                         ),
                       ),
                       const Spacer(),
