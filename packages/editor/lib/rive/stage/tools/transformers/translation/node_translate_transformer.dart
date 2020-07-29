@@ -28,7 +28,7 @@ class NodeTranslateTransformer extends StageTransformer {
   @override
   void advance(DragTransformDetails details) {
     if (_snap.value) {
-      _snapper.advance(details.world.current, lockAxis);
+      _snapper.advance(details.world.current, lockAxis: lockAxis);
       return;
     }
     Map<Node, Mat2D> worldToParents = {};
