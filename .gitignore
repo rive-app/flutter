@@ -1,6 +1,6 @@
 # Rive
 
-# Apparently libraries shouldn't track their pubspec
+# Apparently libraries shouldn't track their pubspec.lock
 # but applications should
 
 packages/coop_server/pubspec.lock
