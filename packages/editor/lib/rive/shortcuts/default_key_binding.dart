@@ -19,6 +19,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(ShortcutAction.multiSelect, {ShortcutKey.shift}),
     Shortcut(ShortcutAction.togglePlay, {ShortcutKey.space}),
     Shortcut(ShortcutAction.mouseWheelZoom, {ShortcutKey.systemCmd}),
+    Shortcut(ShortcutAction.disableSnapping, {ShortcutKey.systemCmd}),
     Shortcut(ShortcutAction.deepClick, {ShortcutKey.systemCmd}),
     Shortcut(ShortcutAction.symmetricDraw, {ShortcutKey.shift}),
     Shortcut(ShortcutAction.pan, {ShortcutKey.space}),

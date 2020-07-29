@@ -143,6 +143,9 @@ class ShortcutAction {
   static const ShortcutAction freezeImagesToggle =
       ShortcutAction('freeze-images');
 
+  static HoldShortcutAction disableSnapping =
+      HoldShortcutAction('disable-snapping');
+
   static HoldShortcutAction mouseWheelZoom =
       HoldShortcutAction('mouse-wheel-zoom');
   static HoldShortcutAction deepClick = HoldShortcutAction('deep-click');
