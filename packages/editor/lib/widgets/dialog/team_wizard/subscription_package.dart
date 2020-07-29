@@ -206,6 +206,10 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     notifyListeners();
   }
 
+  int balance;
+  int nextBill;
+  TeamStatus status;
+
   bool get isChanging => costDifference != 0;
   int get costDifference => calculatedCost - currentCost;
 
@@ -254,18 +258,26 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
 
     var subscription = PlanSubscriptionPackage(team)
       ..api = api
-      ..option = billing.plan
-      ..billing = billing.frequency
-      ..nextDue = billing.nextDue
-      .._isCanceled = billing.isCanceled
       .._teamSize = collaborators
           .where((element) => element.status == TeamInviteStatus.accepted)
-          .length
-      ..setDescriptions(billing);
+          .length;
+
+    subscription.updateBilling(billing);
 
     subscription._currentCost = subscription.calculatedCost;
 
     return subscription;
+  }
+
+  void updateBilling(RiveTeamBilling teamBilling) {
+    option = teamBilling.plan;
+    billing = teamBilling.frequency;
+    nextDue = teamBilling.nextDue;
+    _isCanceled = teamBilling.isCanceled;
+    nextBill = teamBilling.nextBill;
+    balance = teamBilling.balance;
+    status = teamBilling.status;
+    setDescriptions(teamBilling);
   }
 
   Future<bool> _updatePlan() async {
@@ -320,6 +332,28 @@ class PlanSubscriptionPackage extends SubscriptionPackage {
     // All good.
     processing = false;
     return true;
+  }
+
+  Future<bool> retryPayment(bool hasNewCC) async {
+    if (processing) {
+      return false;
+    }
+    processing = true;
+
+    if (hasNewCC) {
+      if (!await _updateCard()) {
+        processing = false;
+        return false;
+      }
+    }
+
+    var success = await RiveTeamsApi(api).retryPayment(team.ownerId);
+    var billing = await RiveTeamsApi(api).getBillingInfo(team.ownerId);
+    updateBilling(billing);
+    await TeamManager().loadTeams();
+    // All good.
+    processing = false;
+    return success;
   }
 
   Future<bool> _updateCard() async {
