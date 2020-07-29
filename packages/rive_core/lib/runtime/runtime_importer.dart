@@ -45,9 +45,9 @@ class RuntimeImporter {
       for (int i = 0; i < numArtboards; i++) {
         // The properties we remap at runtime, currently only Ids. This whole
         // idRemap stuff should be stripped at runtime.
-        var idRemap = RuntimeIdRemap(core.idType, core.intType);
+        var idRemap = RuntimeIdRemap(core.idType, core.uintType);
         var drawOrderRemap =
-            DrawOrderRemap(core.fractionalIndexType, core.intType);
+            DrawOrderRemap(core.fractionalIndexType, core.uintType);
 
         var remaps = <RuntimeRemap>[idRemap, drawOrderRemap];
 
@@ -160,7 +160,7 @@ class RuntimeIdRemap extends RuntimeRemap<int, Id> {
   @override
   bool add(Core<CoreContext> object, int propertyKey, BinaryReader reader) {
     properties.add(RuntimeRemapProperty<int>(
-        object, propertyKey, runtimeFieldType.deserialize(reader)));
+        object, propertyKey, runtimeFieldType.runtimeDeserialize(reader)));
     return true;
   }
 }
@@ -176,7 +176,7 @@ class DrawOrderRemap extends RuntimeRemap<int, FractionalIndex> {
       return false;
     }
     properties.add(RuntimeRemapProperty<int>(
-        object, propertyKey, runtimeFieldType.deserialize(reader)));
+        object, propertyKey, runtimeFieldType.runtimeDeserialize(reader)));
     return true;
   }
 

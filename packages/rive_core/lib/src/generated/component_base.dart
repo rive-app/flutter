@@ -122,13 +122,14 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_name != null) {
-      context.stringType.writeProperty(namePropertyKey, writer, _name);
+    if (_name != null && exports(namePropertyKey)) {
+      context.stringType.writeRuntimeProperty(namePropertyKey, writer, _name);
     }
-    if (_parentId != null) {
+    if (_parentId != null && exports(parentIdPropertyKey)) {
       var value = idLookup[_parentId];
       if (value != null) {
-        context.intType.writeProperty(parentIdPropertyKey, writer, value);
+        context.uintType
+            .writeRuntimeProperty(parentIdPropertyKey, writer, value);
       }
     }
   }

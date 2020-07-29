@@ -168,20 +168,36 @@ abstract class StrokeBase extends ShapePaint {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_thickness != null) {
+    if (_thickness != null && exports(thicknessPropertyKey)) {
       context.doubleType
-          .writeProperty(thicknessPropertyKey, writer, _thickness);
+          .writeRuntimeProperty(thicknessPropertyKey, writer, _thickness);
     }
-    if (_cap != null) {
-      context.intType.writeProperty(capPropertyKey, writer, _cap);
+    if (_cap != null && exports(capPropertyKey)) {
+      context.intType.writeRuntimeProperty(capPropertyKey, writer, _cap);
     }
-    if (_join != null) {
-      context.intType.writeProperty(joinPropertyKey, writer, _join);
+    if (_join != null && exports(joinPropertyKey)) {
+      context.intType.writeRuntimeProperty(joinPropertyKey, writer, _join);
     }
-    if (_transformAffectsStroke != null) {
-      context.boolType.writeProperty(
+    if (_transformAffectsStroke != null &&
+        exports(transformAffectsStrokePropertyKey)) {
+      context.boolType.writeRuntimeProperty(
           transformAffectsStrokePropertyKey, writer, _transformAffectsStroke);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case thicknessPropertyKey:
+        return _thickness != 1;
+      case capPropertyKey:
+        return _cap != 0;
+      case joinPropertyKey:
+        return _join != 0;
+      case transformAffectsStrokePropertyKey:
+        return _transformAffectsStroke != true;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

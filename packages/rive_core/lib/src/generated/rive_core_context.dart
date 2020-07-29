@@ -417,6 +417,7 @@ abstract class RiveCoreContext extends CoreContext {
   }
 
   CoreIdType get idType;
+  CoreUintType get uintType;
   CoreIntType get intType;
   CoreStringType get stringType;
   CoreFractionalIndexType get fractionalIndexType;

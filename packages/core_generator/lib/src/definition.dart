@@ -38,6 +38,7 @@ class Definition {
 
   Definition _extensionOf;
   Key _key;
+  Key get key => _key;
   bool _isAbstract = false;
   bool _exportsWithContext = false;
   bool _editorOnly = false;
@@ -241,23 +242,26 @@ class Definition {
           continue;
         }
         if (property.type is IdFieldType) {
-          code.writeln('''if(_${property.name} != null) {
+          code.writeln(
+              '''if(_${property.name} != null && exports(${property.name}PropertyKey)) {
           var value = idLookup[_${property.name}];
           if(value != null) {
-            context.intType.writeProperty(${property.name}PropertyKey, writer, value);
+            context.uintType.writeRuntimeProperty(${property.name}PropertyKey, writer, value);
           }
         }''');
         } else if (property.type != property.typeRuntime &&
             property.typeRuntime != null) {
           runtimeRemapDefinition.writeln(
               '${property.typeRuntime.dartName} runtimeValue${property.capitalizedName}(${property.type.dartName} editorValue);');
-          code.writeln('''if(_${property.name} != null) {
+          code.writeln(
+              '''if(_${property.name} != null && exports(${property.name}PropertyKey)) {
           var runtimeValue = runtimeValue${property.capitalizedName}(_${property.name});
-          context.${property.typeRuntime.uncapitalizedName}Type.writeProperty(${property.name}PropertyKey, writer, runtimeValue);
+          context.${property.typeRuntime.uncapitalizedName}Type.writeRuntimeProperty(${property.name}PropertyKey, writer, runtimeValue);
         }''');
         } else {
-          code.writeln('''if(_${property.name} != null) {
-          context.${property.type.uncapitalizedName}Type.writeProperty(${property.name}PropertyKey, writer, _${property.name});
+          code.writeln(
+              '''if(_${property.name} != null && exports(${property.name}PropertyKey)) {
+          context.${property.type.uncapitalizedName}Type.writeRuntimeProperty(${property.name}PropertyKey, writer, _${property.name});
         }''');
         }
       }
@@ -265,6 +269,32 @@ class Definition {
 
       if (runtimeRemapDefinition.isNotEmpty) {
         code.write(runtimeRemapDefinition.toString());
+      }
+
+      if (!config.isRuntime) {
+        bool hasDefaults = false;
+        for (final property in properties) {
+          if (property.initialValue != null) {
+            hasDefaults = true;
+            break;
+          }
+        }
+        if (hasDefaults) {
+          code.writeln('@override');
+          code.writeln('bool exports(int propertyKey) {');
+          code.writeln('   switch(propertyKey) {');
+          for (final property in properties) {
+            if (property.initialValue == null) {
+              continue;
+            }
+            code.writeln('     case ${property.name}PropertyKey:');
+            code.writeln(
+                '     return _${property.name} != ${property.initialValue};');
+          }
+          code.writeln('   }');
+          code.writeln('return super.exports(propertyKey);');
+          code.writeln('}');
+        }
       }
 
       code.writeln('''@override
@@ -488,9 +518,16 @@ class Definition {
     Map<FieldType, List<Property>> groups = {};
     Map<String, List<Property>> propertyGroupToKey = {};
 
+    Set<FieldType> usedFields = {};
+
     for (final definition in definitions.values) {
       for (final property in definition.properties) {
         var exportType = property.getExportType(config.isRuntime);
+        usedFields.add(exportType);
+        // Editor always uses both fields.
+        if (!config.isRuntime) {
+          usedFields.add(property.getExportType(true));
+        }
         groups[exportType] ??= <Property>[];
         groups[exportType].add(property);
         if (property.group != null) {
@@ -601,7 +638,7 @@ class Definition {
       ctxCode.writeln('default: return null; }}');
 
       // Iterate used fields to get getters.
-      for (final fieldType in groups.keys) {
+      for (final fieldType in usedFields) {
         ctxCode.writeln(
             '${fieldType.runtimeCoreType} get ${fieldType.uncapitalizedName}Type;');
       }
@@ -909,7 +946,7 @@ class Definition {
         //static CoreFieldType intType = CoreIntType();
 
         var capitalizedType =
-            '${type.dartName[0].toUpperCase()}${type.dartName.substring(1)}'
+            '${type.name[0].toUpperCase()}${type.name.substring(1)}'
                 .replaceAll('<', '')
                 .replaceAll('>', '');
         ctxCode.writeln('static CoreFieldType ${type.uncapitalizedName}Type = '

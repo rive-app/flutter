@@ -6,12 +6,12 @@ import 'package:utilities/binary_buffer/binary_writer.dart';
 abstract class CoreFieldType<T> {
   T deserialize(BinaryReader reader);
   Uint8List serialize(T value);
-  void writeProperty(int propertyKey, BinaryWriter writer, T value) {
-    var bytes = serialize(value);
 
+  T runtimeDeserialize(BinaryReader reader);
+  void runtimeSerialize(BinaryWriter writer, T value);
+  void writeRuntimeProperty(int propertyKey, BinaryWriter writer, T value) {
     writer.writeVarUint(propertyKey);
-    writer.writeVarUint(bytes.length);
-    writer.write(bytes);
+    runtimeSerialize(writer, value);
   }
 
   T lerp(T from, T to, double f);

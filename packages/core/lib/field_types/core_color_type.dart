@@ -17,4 +17,12 @@ class CoreColorType extends CoreFieldType<int> {
     writer.writeVarInt(value);
     return writer.uint8Buffer;
   }
+
+  @override
+  int runtimeDeserialize(BinaryReader reader) => reader.readUint32();
+
+  @override
+  void runtimeSerialize(BinaryWriter writer, int value) {
+    writer.writeUint32(value);
+  }
 }

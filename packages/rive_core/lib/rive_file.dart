@@ -427,6 +427,9 @@ class RiveFile extends RiveCoreContext {
   CoreIntType get intType => RiveIntType.instance;
 
   @override
+  CoreUintType get uintType => RiveUintType.instance;
+
+  @override
   CoreStringType get stringType => RiveStringType.instance;
 
   @override

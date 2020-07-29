@@ -77,17 +77,27 @@ abstract class DrawableBase extends Node {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_drawOrder != null) {
+    if (_drawOrder != null && exports(drawOrderPropertyKey)) {
       var runtimeValue = runtimeValueDrawOrder(_drawOrder);
-      context.intType.writeProperty(drawOrderPropertyKey, writer, runtimeValue);
+      context.uintType
+          .writeRuntimeProperty(drawOrderPropertyKey, writer, runtimeValue);
     }
-    if (_blendModeValue != null) {
-      context.intType
-          .writeProperty(blendModeValuePropertyKey, writer, _blendModeValue);
+    if (_blendModeValue != null && exports(blendModeValuePropertyKey)) {
+      context.intType.writeRuntimeProperty(
+          blendModeValuePropertyKey, writer, _blendModeValue);
     }
   }
 
   int runtimeValueDrawOrder(FractionalIndex editorValue);
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case blendModeValuePropertyKey:
+        return _blendModeValue != 3;
+    }
+    return super.exports(propertyKey);
+  }
+
   @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {

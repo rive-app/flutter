@@ -12,6 +12,7 @@ import 'package:rive_core/animation/keyframe_interpolation.dart';
 /// right kind of keyframe and provide any specific details that may be
 /// pertinent during keyframe creation (perhaps if it supports certain kinds of
 /// interpolation).
+// ignore: one_member_abstracts
 abstract class KeyFrameGenerator<T extends KeyFrame> {
   T makeKeyFrame();
 }
@@ -44,6 +45,11 @@ class RiveIdType extends CoreIdType {
 class RiveIntType extends CoreIntType {
   RiveIntType._constructor();
   static RiveIntType instance = RiveIntType._constructor();
+}
+
+class RiveUintType extends CoreUintType {
+  RiveUintType._constructor();
+  static RiveUintType instance = RiveUintType._constructor();
 }
 
 class RiveStringType extends CoreStringType {

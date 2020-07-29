@@ -52,9 +52,19 @@ abstract class FillBase extends ShapePaint {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_fillRule != null) {
-      context.intType.writeProperty(fillRulePropertyKey, writer, _fillRule);
+    if (_fillRule != null && exports(fillRulePropertyKey)) {
+      context.intType
+          .writeRuntimeProperty(fillRulePropertyKey, writer, _fillRule);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case fillRulePropertyKey:
+        return _fillRule != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

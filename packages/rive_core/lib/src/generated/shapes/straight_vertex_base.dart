@@ -96,9 +96,19 @@ abstract class StraightVertexBase extends PathVertex {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_radius != null) {
-      context.doubleType.writeProperty(radiusPropertyKey, writer, _radius);
+    if (_radius != null && exports(radiusPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(radiusPropertyKey, writer, _radius);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case radiusPropertyKey:
+        return _radius != 0;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

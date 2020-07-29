@@ -96,15 +96,17 @@ abstract class KeyFrameDrawOrderValueBase<T extends RiveCoreContext>
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_drawableId != null) {
+    if (_drawableId != null && exports(drawableIdPropertyKey)) {
       var value = idLookup[_drawableId];
       if (value != null) {
-        context.intType.writeProperty(drawableIdPropertyKey, writer, value);
+        context.uintType
+            .writeRuntimeProperty(drawableIdPropertyKey, writer, value);
       }
     }
-    if (_value != null) {
+    if (_value != null && exports(valuePropertyKey)) {
       var runtimeValue = runtimeValueValue(_value);
-      context.intType.writeProperty(valuePropertyKey, writer, runtimeValue);
+      context.uintType
+          .writeRuntimeProperty(valuePropertyKey, writer, runtimeValue);
     }
   }
 

@@ -117,18 +117,33 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext> extends Core<T>
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_x1 != null) {
-      context.doubleType.writeProperty(x1PropertyKey, writer, _x1);
+    if (_x1 != null && exports(x1PropertyKey)) {
+      context.doubleType.writeRuntimeProperty(x1PropertyKey, writer, _x1);
     }
-    if (_y1 != null) {
-      context.doubleType.writeProperty(y1PropertyKey, writer, _y1);
+    if (_y1 != null && exports(y1PropertyKey)) {
+      context.doubleType.writeRuntimeProperty(y1PropertyKey, writer, _y1);
     }
-    if (_x2 != null) {
-      context.doubleType.writeProperty(x2PropertyKey, writer, _x2);
+    if (_x2 != null && exports(x2PropertyKey)) {
+      context.doubleType.writeRuntimeProperty(x2PropertyKey, writer, _x2);
     }
-    if (_y2 != null) {
-      context.doubleType.writeProperty(y2PropertyKey, writer, _y2);
+    if (_y2 != null && exports(y2PropertyKey)) {
+      context.doubleType.writeRuntimeProperty(y2PropertyKey, writer, _y2);
     }
+  }
+
+  @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case x1PropertyKey:
+        return _x1 != 0.42;
+      case y1PropertyKey:
+        return _y1 != 0;
+      case x2PropertyKey:
+        return _x2 != 0.58;
+      case y2PropertyKey:
+        return _y2 != 1;
+    }
+    return super.exports(propertyKey);
   }
 
   @override

@@ -95,8 +95,8 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
-    if (_name != null) {
-      context.stringType.writeProperty(namePropertyKey, writer, _name);
+    if (_name != null && exports(namePropertyKey)) {
+      context.stringType.writeRuntimeProperty(namePropertyKey, writer, _name);
     }
   }
 

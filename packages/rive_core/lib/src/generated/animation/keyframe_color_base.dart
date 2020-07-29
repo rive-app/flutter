@@ -46,8 +46,8 @@ abstract class KeyFrameColorBase extends KeyFrame {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_value != null) {
-      context.colorType.writeProperty(valuePropertyKey, writer, _value);
+    if (_value != null && exports(valuePropertyKey)) {
+      context.colorType.writeRuntimeProperty(valuePropertyKey, writer, _value);
     }
   }
 

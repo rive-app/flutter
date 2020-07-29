@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:core/field_types/core_field_type.dart';
 import 'package:logging/logging.dart';
@@ -30,6 +29,7 @@ export 'package:core/field_types/core_double_type.dart';
 export 'package:core/field_types/core_fractional_index_type.dart';
 export 'package:core/field_types/core_id_type.dart';
 export 'package:core/field_types/core_int_type.dart';
+export 'package:core/field_types/core_uint_type.dart';
 export 'package:core/field_types/core_list_id_type.dart';
 export 'package:core/field_types/core_string_type.dart';
 export 'package:core/field_types/core_color_type.dart';
@@ -58,6 +58,8 @@ abstract class Core<T extends CoreContext> {
 
   @protected
   void changeNonNull();
+
+  bool exports(int propertyKey) => true;
 
   void writeRuntime(BinaryWriter writer, [HashMap<Id, int> idLookup]) {
     writer.writeVarUint(coreType);
@@ -892,25 +894,19 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
         // Terminator. https://media.giphy.com/media/7TtvTUMm9mp20/giphy.gif
         break;
       }
-      int propertyLength = reader.readVarUint();
-      Uint8List valueBytes = reader.read(propertyLength);
+      // int propertyLength = reader.readVarUint();
+      // Uint8List valueBytes = reader.read(propertyLength);
 
       var fieldType = coreType(propertyKey);
       if (fieldType == null) {
-        // This is considered an acceptable failure. A runtime/editor may not
-        // support the same properties that were exported. The older object
-        // could still function without them, however, so it's up to the
-        // implementation to make sure that major versions are revved when
-        // breaking properties are added. Note that we intentionally first read
-        // the entire value bytes for the property so we can advance as expected
-        // even if we are skipping this value.
-        continue;
+        throw UnsupportedError('Found unsupported propertyKey $propertyKey. '
+            'File may have been exported from a newer version of Rive.');
       }
 
       // We know what to expect, let's try to read the value. We instance a new
       // reader here so that we don't overflow the exact length we're allowed to
       // read.
-      var valueReader = BinaryReader.fromList(valueBytes);
+      // var valueReader = BinaryReader.fromList(valueBytes);
       bool remapped = false;
       if (remaps != null) {
         for (final remap in remaps) {
@@ -919,7 +915,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
             // external process to then map those integers to those ids. This
             // should be done before the batch add wrapping this entire
             // operation completes.
-            if (remap.add(object, propertyKey, valueReader)) {
+            if (remap.add(object, propertyKey, reader)) {
               remapped = true;
               break;
             }
@@ -931,7 +927,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
         // This will attempt to set the object property, but failure here is
         // acceptable.
         setObjectPropertyCore(
-            object, propertyKey, fieldType.deserialize(valueReader));
+            object, propertyKey, fieldType.runtimeDeserialize(reader));
       }
     }
     return object as T;

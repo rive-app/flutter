@@ -24,4 +24,13 @@ class CoreFractionalIndexType extends CoreFieldType<FractionalIndex> {
     writer.writeVarInt(value.denominator);
     return writer.uint8Buffer;
   }
+
+  @override
+  FractionalIndex runtimeDeserialize(BinaryReader reader) =>
+      throw UnimplementedError();
+
+  @override
+  void runtimeSerialize(BinaryWriter writer, FractionalIndex value) {
+    throw UnimplementedError();
+  }
 }

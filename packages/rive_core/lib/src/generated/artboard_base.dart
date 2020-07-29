@@ -177,23 +177,26 @@ abstract class ArtboardBase extends ContainerComponent {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_width != null) {
-      context.doubleType.writeProperty(widthPropertyKey, writer, _width);
+    if (_width != null && exports(widthPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(widthPropertyKey, writer, _width);
     }
-    if (_height != null) {
-      context.doubleType.writeProperty(heightPropertyKey, writer, _height);
+    if (_height != null && exports(heightPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(heightPropertyKey, writer, _height);
     }
-    if (_x != null) {
-      context.doubleType.writeProperty(xPropertyKey, writer, _x);
+    if (_x != null && exports(xPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(xPropertyKey, writer, _x);
     }
-    if (_y != null) {
-      context.doubleType.writeProperty(yPropertyKey, writer, _y);
+    if (_y != null && exports(yPropertyKey)) {
+      context.doubleType.writeRuntimeProperty(yPropertyKey, writer, _y);
     }
-    if (_originX != null) {
-      context.doubleType.writeProperty(originXPropertyKey, writer, _originX);
+    if (_originX != null && exports(originXPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(originXPropertyKey, writer, _originX);
     }
-    if (_originY != null) {
-      context.doubleType.writeProperty(originYPropertyKey, writer, _originY);
+    if (_originY != null && exports(originYPropertyKey)) {
+      context.doubleType
+          .writeRuntimeProperty(originYPropertyKey, writer, _originY);
     }
   }
 

@@ -100,6 +100,15 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {}
   @override
+  bool exports(int propertyKey) {
+    switch (propertyKey) {
+      case colorValuePropertyKey:
+        return _colorValue != 0xFF222222;
+    }
+    return super.exports(propertyKey);
+  }
+
+  @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {
       case activeArtboardIdPropertyKey:
