@@ -12,6 +12,8 @@ abstract class PushActionDM {
         return PingNotificationDM();
       case 'FolderChange':
         return FolderNotificationDM.fromData(data);
+      case 'TaskCompleted':
+        return TaskCompletedDM.fromData(data);
       default:
         throw Exception('Unknown action $data');
     }
@@ -33,6 +35,21 @@ class FolderNotificationDM extends PushActionDM {
     return FolderNotificationDM(
       folderOwnerId: params.getInt('folderOwnerId'),
       folderId: params.getInt('folderId'),
+    );
+  }
+}
+
+class TaskCompletedDM extends PushActionDM {
+  final Map<String, dynamic> attrs;
+  final String taskId;
+
+  TaskCompletedDM({this.taskId, this.attrs});
+
+  factory TaskCompletedDM.fromData(Map<String, dynamic> data) {
+    var params = data.getMap<String, Object>('params');
+    return TaskCompletedDM(
+      taskId: params.getString('taskId'),
+      attrs: data,
     );
   }
 }

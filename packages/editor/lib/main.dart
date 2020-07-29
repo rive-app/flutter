@@ -20,6 +20,7 @@ import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/managers/global_message_manager.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
+import 'package:rive_editor/rive/managers/task_manager.dart';
 import 'package:rive_editor/rive/managers/websocket_comms_manager.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -306,7 +307,7 @@ class _EditorState extends State<Editor> {
     }
 
     List<DroppedFile> importedRive = [];
-    Map<DroppedFile, TaskResult> backendConverting = {};
+    Map<String, DroppedFile> backendConverting = {};
     TasksApi taskApi;
     bool imported = false;
     for (final file in files) {
@@ -333,14 +334,14 @@ class _EditorState extends State<Editor> {
           taskApi ??= TasksApi(activeFile.rive.api);
           var taskResult = await taskApi.convertFLR(file.bytes);
           if (taskResult != null) {
-            backendConverting[file] = taskResult;
+            backendConverting[taskResult.taskId] = file;
           }
           break;
         case "svg":
           taskApi ??= TasksApi(activeFile.rive.api);
           var taskResult = await taskApi.convertSVG(file.bytes);
           if (taskResult != null) {
-            backendConverting[file] = taskResult;
+            backendConverting[taskResult.taskId] = file;
           }
           break;
       }
@@ -354,38 +355,38 @@ class _EditorState extends State<Editor> {
           'Imported ${importedRive.map((file) => file.filename).join(', ')}.'));
     }
     if (backendConverting.isNotEmpty) {
-      activeFile.addAlert(SimpleAlert(
-          'Importing ${backendConverting.keys.map((file) => file.filename).join(', ')}.'));
+      var fileNames =
+          backendConverting.values.map((file) => file.filename).join(', ');
+      activeFile.addAlert(SimpleAlert('Importing $fileNames.'));
 
-      // Start polling...
-      // needs max tries?
-      while (backendConverting.isNotEmpty) {
-        await Future.delayed(const Duration(seconds: 1), () => null);
-        Set<DroppedFile> completedSVGs = {};
-        // TODO: HELP.
-        for (final file in backendConverting.keys) {
-          var taskResult = backendConverting[file];
-          var rivBytes = await taskApi.taskData(taskResult.taskId);
-          if (rivBytes == null) {
-            return;
-          }
-          completedSVGs.add(file);
+      var taskIds = backendConverting.keys.toSet();
 
+      var completer =
+          TaskManager().notifyTasks(taskIds, (TaskCompleted result) async {
+        try {
+          var rivBytes = await taskApi.taskData(result.taskId);
           var importer = RuntimeImporter(core: activeFile.core);
-          // TODO: replace with progress across the top screen figma style...
-          try {
-            if (importer.import(rivBytes)) {
-              activeFile.addAlert(SimpleAlert('Imported ${file.filename}.'));
-            }
-            activeFile.core.captureJournalEntry();
-          } on UnsupportedError {
-            activeFile
-                .addAlert(SimpleAlert('${file.filename} is unsupported.'));
+          if (importer.import(rivBytes)) {
+            activeFile.addAlert(SimpleAlert(
+                'Imported ${backendConverting[result.taskId].filename}.'));
           }
+          activeFile.core.captureJournalEntry();
+        } on ApiException {
+          activeFile.addAlert(SimpleAlert('Error converting '
+              '${backendConverting[result.taskId].filename}.'));
+          rethrow;
+        } on UnsupportedError {
+          activeFile.addAlert(SimpleAlert(
+              '${backendConverting[result.taskId].filename} is unsupported.'));
+          rethrow;
         }
-        // TODO: HELP.
-        completedSVGs.forEach(backendConverting.remove);
-      }
+      });
+
+      await completer.future.timeout(const Duration(seconds: 10),
+          onTimeout: () {
+        activeFile.addAlert(SimpleAlert('Timed out converting files.'));
+        return null;
+      });
     }
   }
 
