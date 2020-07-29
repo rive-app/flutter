@@ -114,7 +114,7 @@ class AlertDisplay extends StatelessWidget {
                 alignment: Alignment.topCenter,
                 child: Padding(
                   padding: EdgeInsets.only(
-                      left: 20, right: 20, bottom: 20 + topPadding),
+                      left: 20, right: 20, bottom: 20, top: topPadding),
                   child: alert.build(context),
                 ),
               ),

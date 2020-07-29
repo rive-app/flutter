@@ -1,8 +1,14 @@
 # Rive
+# Apparantly libraries shouldnt put their pubspec in SC
+# but applications should
 packages/core/pubspec.lock
 packages/rive_api/example/pubspec.lock
 packages/rive_api/pubspec.lock
+packages/peon/pubspec.lock
+packages/window_utils/window_utils/pubspec.lock
+
 dev/bin/
+
 
 # Miscellaneous
 *.class
@@ -28,6 +34,10 @@ dev/bin/
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
 #.vscode/
+
+# output from a test
+packages/rive_core/test/rectangle.riv
+
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -80,6 +90,11 @@ output/
 **/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 **/Flutter-Generated.xcconfig
+
+# Linux related 
+**/linux/**/generated_plugin_registrant.h
+**/linux/**/generated_plugin_registrant.cc
+**/linux/**/generated_plugins.cmake
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3

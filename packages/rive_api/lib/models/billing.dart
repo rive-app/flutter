@@ -1,3 +1,4 @@
+import 'package:rive_api/model.dart';
 import 'package:utilities/deserialize.dart';
 
 /// The subscription frequency options
@@ -44,16 +45,18 @@ extension FrequencyExtension on BillingFrequency {
 /// Represents the Billing information for a team:
 
 class RiveTeamBilling {
-  const RiveTeamBilling._({
-    this.plan,
-    this.frequency,
-    this.isCanceled,
-    this.brand,
-    this.lastFour,
-    this.expiryMonth,
-    this.expiryYear,
-    this.nextDue,
-  });
+  const RiveTeamBilling._(
+      {this.plan,
+      this.frequency,
+      this.isCanceled,
+      this.brand,
+      this.lastFour,
+      this.expiryMonth,
+      this.expiryYear,
+      this.nextDue,
+      this.balance,
+      this.nextBill,
+      this.status});
 
   /// - plan type: {studio | org}
   final TeamsOption plan;
@@ -78,17 +81,29 @@ class RiveTeamBilling {
   /// - Plan next payment date
   final DateTime nextDue;
 
+  /// - Current balance on the account, can be negative to indicate credit
+  final int balance;
+
+  /// - How much the next bill is going to be, this includes the current balance
+  /// - if its negative, there won't be a next bill
+  final int nextBill;
+
+  /// - up to date team billing status.
+  final TeamStatus status;
+
   factory RiveTeamBilling.fromData(Map<String, Object> data) {
     return RiveTeamBilling._(
-      plan: data.getPlan(),
-      frequency: data.getFrequency(),
-      isCanceled: data.getBool('isCanceled'),
-      brand: data.getString('brand'),
-      lastFour: data.getString('last4'),
-      expiryMonth: data.getString('expMonth'),
-      expiryYear: data.getString('expYear'),
-      nextDue: DateTime.parse(data.getString('nextDue')),
-    );
+        plan: data.getPlan(),
+        frequency: data.getFrequency(),
+        isCanceled: data.getBool('isCanceled'),
+        brand: data.getString('brand'),
+        lastFour: data.getString('last4'),
+        expiryMonth: data.getString('expMonth'),
+        expiryYear: data.getString('expYear'),
+        balance: data.getInt('balance'),
+        nextBill: data.getInt('nextBill'),
+        nextDue: DateTime.parse(data.getString('nextDue')),
+        status: TeamStatusExtension.fromString(data.getString('status')));
   }
 
   @override

@@ -214,6 +214,7 @@ class RiveColors {
 
   // Snapping colors
   Color get snappingLine => red;
+  Color get getMagenta => const Color(0xFFFF5777);
 }
 
 /// TextStyles used in the Rive Theme

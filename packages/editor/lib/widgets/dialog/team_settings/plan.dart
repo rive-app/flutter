@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/models/billing.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
+import 'package:rive_editor/widgets/common/currency.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/rive_radio.dart';
@@ -34,11 +37,14 @@ class PlanSettings extends StatefulWidget {
   State<StatefulWidget> createState() => _PlanState();
 }
 
+enum RetryPaymentState { notApplicable, success, failure }
+
 class _PlanState extends State<PlanSettings>
     with SingleTickerProviderStateMixin {
   PlanSubscriptionPackage _plan;
   AnimationController _controller;
   bool _usingSavedCC = true;
+  RetryPaymentState _retryState = RetryPaymentState.notApplicable;
   // Flag to activate the flow for canceling the current plan:
   bool _cancelFlow = false;
 
@@ -86,6 +92,18 @@ class _PlanState extends State<PlanSettings>
         _usingSavedCC = true;
       });
     }
+  }
+
+  Future<void> _onTryAgain() async {
+    var success = await _plan.retryPayment(!_usingSavedCC);
+    setState(() {
+      // Go back to previous view.
+      if (success) {
+        _retryState = RetryPaymentState.success;
+      } else {
+        _retryState = RetryPaymentState.failure;
+      }
+    });
   }
 
   void _toggleController() {
@@ -161,7 +179,8 @@ class _PlanState extends State<PlanSettings>
                           value: _plan?.billing ?? BillingFrequency.monthly,
                           toLabel: (option) => describeEnum(option).capsFirst,
                           change: (billing) => _plan.billing = billing,
-                          disabled: isPlanCanceled,
+                          disabled: isPlanCanceled ||
+                              _plan.status == TeamStatus.failedPayment,
                         ),
                       ),
                       const Spacer(),
@@ -236,7 +255,7 @@ class _PlanState extends State<PlanSettings>
           Separator(color: colors.fileLineGrey),
           // Vertical padding.
           const SizedBox(height: 30),
-          BillCalculator(
+          BillingStatus(
             plan: _plan,
             onBillChanged: isPlanCanceled
                 // The button in the widget will reactivate the widget.
@@ -246,7 +265,9 @@ class _PlanState extends State<PlanSettings>
                     }
                   }
                 : _onBillChanged,
+            onTryAgain: _onTryAgain,
             updatingCC: !_usingSavedCC,
+            retryState: _retryState,
           ),
         ],
       );
@@ -254,15 +275,19 @@ class _PlanState extends State<PlanSettings>
   }
 }
 
-class BillCalculator extends StatefulWidget {
+class BillingStatus extends StatefulWidget {
   final VoidCallback onBillChanged;
+  final VoidCallback onTryAgain;
   final PlanSubscriptionPackage plan;
   final bool updatingCC;
+  final RetryPaymentState retryState;
 
-  const BillCalculator({
+  const BillingStatus({
     this.plan,
     this.updatingCC,
+    this.retryState,
     this.onBillChanged,
+    this.onTryAgain,
     Key key,
   }) : super(key: key);
 
@@ -270,7 +295,7 @@ class BillCalculator extends StatefulWidget {
   State<StatefulWidget> createState() => _BillState();
 }
 
-class _BillState extends State<BillCalculator> {
+class _BillState extends State<BillingStatus> {
   bool _processingPayment = false;
 
   BillingFrequency get billingPlan => widget.plan.billing;
@@ -425,11 +450,13 @@ class _BillState extends State<BillCalculator> {
     ];
   }
 
-  Widget _yearlyBill() {
+  Widget _regularBill() {
     final theme = RiveTheme.of(context);
     final textStyles = theme.textStyles;
     final colors = theme.colors;
 
+    final successText =
+        textStyles.loginText.copyWith(height: 1.6, color: colors.accentBlue);
     final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
     final darkGreyText = textStyles.notificationTitle.copyWith(height: 1.6);
 
@@ -437,6 +464,40 @@ class _BillState extends State<BillCalculator> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
+        if (widget.plan.balance < 0)
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Credit\t',
+                  style: lightGreyText,
+                ),
+                TextSpan(
+                  text: (widget.plan == null)
+                      ? '-'
+                      : asDollars(-widget.plan.balance),
+                  style: darkGreyText,
+                ),
+              ],
+            ),
+          ),
+        if (widget.plan.balance > 0)
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Pro rata\t',
+                  style: lightGreyText,
+                ),
+                TextSpan(
+                  text: (widget.plan == null)
+                      ? '-'
+                      : asDollars(widget.plan.balance),
+                  style: darkGreyText,
+                ),
+              ],
+            ),
+          ),
         RichText(
           text: TextSpan(
             children: [
@@ -445,12 +506,32 @@ class _BillState extends State<BillCalculator> {
                 style: lightGreyText,
               ),
               TextSpan(
-                text: '\$${widget.plan?.currentCost ?? '-'}',
+                text: (widget.plan == null)
+                    ? '-'
+                    : asDollars(widget.plan.nextBill),
                 style: darkGreyText,
               ),
             ],
           ),
         ),
+        if (widget.plan.balance != 0)
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Next Bill Total\t',
+                  style: lightGreyText,
+                ),
+                TextSpan(
+                  text: (widget.plan == null)
+                      ? '-'
+                      : asDollars(
+                          max(widget.plan.nextBill + widget.plan.balance, 0)),
+                  style: darkGreyText,
+                ),
+              ],
+            ),
+          ),
         if (widget.updatingCC) ...[
           const SizedBox(height: 30),
           FlatIconButton(
@@ -462,9 +543,110 @@ class _BillState extends State<BillCalculator> {
             onTap: widget.onBillChanged,
             elevation: _processingPayment ? 0 : 8,
           ),
+        ],
+        if (widget.retryState == RetryPaymentState.success) ...[
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "Success! Thanks for the payment.",
+                  style: successText,
+                ),
+              ],
+            ),
+          ),
         ]
       ],
     );
+  }
+
+  List<Widget> _retryPayment() {
+    final theme = RiveTheme.of(context);
+    final textStyles = theme.textStyles;
+    final colors = theme.colors;
+
+    final errorText =
+        textStyles.loginText.copyWith(height: 1.6, color: colors.getMagenta);
+    final lightGreyText = textStyles.loginText.copyWith(height: 1.6);
+    final darkGreyText = textStyles.notificationTitle.copyWith(height: 1.6);
+
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text:
+                      "We weren’t able to bill your credit card. Please update "
+                      "your payment information and try again.",
+                  style: lightGreyText,
+                )
+              ],
+            ),
+          ),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Amount due  ',
+                  style: lightGreyText,
+                ),
+                TextSpan(
+                  text: asDollars(widget.plan.balance),
+                  style: darkGreyText,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 30),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (widget.retryState == RetryPaymentState.failure)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Looks like somethign still isn't working",
+                            style: errorText,
+                          ),
+                        ],
+                      ),
+                    ),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Drop us a note if you need any help.",
+                            style: errorText,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              Padding(
+                padding: const EdgeInsets.only(left: 17.0),
+                child: FlatIconButton(
+                  label: 'Try Again',
+                  color: _processingPayment
+                      ? colors.commonLightGrey
+                      : colors.commonDarkGrey,
+                  textColor: Colors.white,
+                  onTap: widget.onTryAgain,
+                  elevation: _processingPayment ? 0 : 8,
+                ),
+              ),
+            ],
+          ),
+        ],
+      )
+    ];
   }
 
   Widget _canceledPlanDue() {
@@ -599,8 +781,15 @@ class _BillState extends State<BillCalculator> {
       return const SizedBox();
     }
     final diff = plan.costDifference;
-
-    if (plan.isCanceled) {
+    if (plan.status == TeamStatus.failedPayment) {
+      return SettingsPanelSection(
+        label: 'Billing Problem',
+        contents: (ctx) => Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [..._retryPayment()],
+        ),
+      );
+    } else if (plan.isCanceled) {
       return SettingsPanelSection(
         label: 'Re-activate',
         contents: (ctx) => Column(
@@ -614,7 +803,7 @@ class _BillState extends State<BillCalculator> {
         contents: (ctx) => Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (diff == 0) _yearlyBill(),
+            if (diff == 0) _regularBill(),
             if (diff > 0) ..._debit(),
             if (diff < 0) ..._credit(),
           ],
@@ -643,6 +832,7 @@ class PaymentMethod extends StatefulWidget {
 class _MethodState extends State<PaymentMethod> {
   String _cardDescription;
   String _nextDue;
+  bool _lastPaymentFailed;
 
   @override
   void initState() {
@@ -655,14 +845,17 @@ class _MethodState extends State<PaymentMethod> {
 
   void _onCardChange() {
     var sub = widget.plan;
+    var lastPaymentFailed = widget.plan.status == TeamStatus.failedPayment;
     if (_cardDescription == sub.cardDescription &&
-        _nextDue == sub.nextDueDescription) {
+        _nextDue == sub.nextDueDescription &&
+        _lastPaymentFailed == lastPaymentFailed) {
       return;
     }
 
     setState(() {
       _cardDescription = sub.cardDescription;
       _nextDue = sub.nextDueDescription;
+      _lastPaymentFailed = lastPaymentFailed;
     });
   }
 
@@ -672,11 +865,12 @@ class _MethodState extends State<PaymentMethod> {
     super.dispose();
   }
 
-  Widget _nextPayment(Color iconColor, TextStyles styles) {
+  Widget _nextPayment(RiveColors colors, TextStyles styles) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        TintedIcon(icon: PackedIcon.calendar, color: iconColor),
+        TintedIcon(
+            icon: PackedIcon.calendar, color: colors.commonButtonTextColor),
         const SizedBox(width: 10),
         RichText(
           text: TextSpan(
@@ -688,9 +882,11 @@ class _MethodState extends State<PaymentMethod> {
               TextSpan(
                 text: _nextDue,
                 style: styles.fileGreyTextLarge.copyWith(
-                  fontSize: 13,
-                  height: 1.15,
-                ),
+                    fontSize: 13,
+                    height: 1.15,
+                    color: _lastPaymentFailed
+                        ? colors.getMagenta
+                        : styles.fileGreyTextLarge.color),
               ),
             ],
           ),
@@ -727,7 +923,7 @@ class _MethodState extends State<PaymentMethod> {
         ),
         if (!widget.plan.isCanceled) ...[
           const SizedBox(height: 15),
-          _nextPayment(colors.commonButtonTextColor, styles)
+          _nextPayment(colors, styles)
         ]
       ],
     );
@@ -748,7 +944,7 @@ class _MethodState extends State<PaymentMethod> {
                 )),
         if (!widget.plan.isCanceled) ...[
           const SizedBox(height: 30),
-          _nextPayment(colors.commonButtonTextColor, styles)
+          _nextPayment(colors, styles)
         ]
       ],
     );
