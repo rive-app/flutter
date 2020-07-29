@@ -9,8 +9,10 @@ abstract class PushAction {
       return PingNotification();
     } else if (action is FolderNotificationDM) {
       return FolderNotification.fromDM(action);
+    } else if (action is TaskCompletedDM) {
+      return TaskCompleted.fromDM(action);
     }
-    throw Exception('unkown action $action');
+    throw Exception('unknown action $action');
   }
 }
 
@@ -26,5 +28,19 @@ class FolderNotification extends PushAction {
 
   factory FolderNotification.fromDM(FolderNotificationDM action) {
     return FolderNotification(action.folderOwnerId, action.folderId);
+  }
+}
+
+class TaskCompleted extends PushAction {
+  final Map<String, dynamic> attrs;
+  final String taskId;
+
+  TaskCompleted({this.taskId, this.attrs});
+
+  factory TaskCompleted.fromDM(TaskCompletedDM action) {
+    return TaskCompleted(
+      taskId: action.taskId,
+      attrs: action.attrs,
+    );
   }
 }

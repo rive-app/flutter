@@ -63,6 +63,8 @@ class WebsocketCommsManager with Subscriptions {
           currentDirectory.folderId == action.folderId) {
         Plumber().message(currentDirectory);
       }
+    } else if (action is model.TaskCompleted) {
+      Plumber().message(action);
     }
   }
 
