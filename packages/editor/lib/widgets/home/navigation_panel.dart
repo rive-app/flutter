@@ -34,6 +34,7 @@ class NavigationPanel extends StatefulWidget {
 class _NavigationPanelState extends State<NavigationPanel> {
   bool _bottomSliverDocked = false;
   bool get bottomSliverDocked => _bottomSliverDocked;
+  ScrollController scrollController;
 
   set bottomSliverDocked(bool bottomSliverDocked) {
     if (_bottomSliverDocked != bottomSliverDocked) {
@@ -45,13 +46,15 @@ class _NavigationPanelState extends State<NavigationPanel> {
 
   @override
   void initState() {
-    FolderTreeManager();
+    scrollController = ScrollController();
+
+    var manager = FolderTreeManager();
+    manager.scrollController = scrollController;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    var scrollController = RiveContext.of(context).treeScrollController;
     scrollController.addListener(() {
       // this KINDA works, sometimes window size changes trigger this
       // sometimes they do not :( Matt will fix it up later though
@@ -205,8 +208,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                   ),
                 );
                 return TreeScrollView(
-                  scrollController:
-                      RiveContext.of(context).treeScrollController,
+                  scrollController: scrollController,
                   slivers: slivers,
                 );
               },
