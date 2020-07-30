@@ -30,7 +30,7 @@ class InviteBox extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.only(top: 7, bottom: 8, left: 8, right: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,

@@ -105,6 +105,16 @@ class TeamManager with Subscriptions {
   Future<bool> saveToken(Team team, String token) async =>
       _teamApi.saveToken(team.ownerId, token);
 
+  Future<Team> createTeam(String teamName, String plan, String frequency,
+      String stripeToken) async {
+    var teamDM =
+        await _teamApi.createTeam(teamName, plan, frequency, stripeToken);
+    await loadTeams();
+    var team = Team.fromDM(teamDM);
+    Plumber().message(CurrentDirectory(team, 1));
+    return Team.fromDM(teamDM);
+  }
+
   Future<void> getCharges(Team team) async {
     final detailsDM = await _teamApi.getBillingHistory(team.ownerId);
     final details = BillingDetails.fromDM(detailsDM);

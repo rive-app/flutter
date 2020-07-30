@@ -406,6 +406,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         var selection = Plumber().peek<Selection>();
         if (rightClick && selection != null) {
           ListPopup.show(context,
+              margin: 5,
               itemBuilder: (popupContext, PopupContextItem item, isHovered) =>
                   item.itemBuilder(popupContext, isHovered),
               items: [
@@ -420,10 +421,14 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                         editName(context, selection.folders.first);
                       }
                     },
+                    leftMargin: 15,
+                    height: 35,
                   ),
                 PopupContextItem(
                   'Delete',
                   select: () => FolderContentsManager().delete(),
+                  leftMargin: 15,
+                  height: 35,
                 )
               ],
               position: event.pointerEvent.position);

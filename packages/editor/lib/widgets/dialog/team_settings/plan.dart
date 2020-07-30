@@ -549,7 +549,7 @@ class _BillState extends State<BillingStatus> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "Success! Thanks for the payment.",
+                  text: 'Success! Thanks for the payment.',
                   style: successText,
                 ),
               ],
@@ -578,9 +578,8 @@ class _BillState extends State<BillingStatus> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text:
-                      "We weren’t able to bill your credit card. Please update "
-                      "your payment information and try again.",
+                  text: 'We weren\'t able to bill your credit card. '
+                      'Please update your payment information and try again.',
                   style: lightGreyText,
                 )
               ],
@@ -612,7 +611,7 @@ class _BillState extends State<BillingStatus> {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: "Looks like somethign still isn't working",
+                            text: 'Looks like something still isn\'t working',
                             style: errorText,
                           ),
                         ],
@@ -622,7 +621,7 @@ class _BillState extends State<BillingStatus> {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: "Drop us a note if you need any help.",
+                            text: 'Drop us a note if you need any help.',
                             style: errorText,
                           ),
                         ],

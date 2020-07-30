@@ -1,9 +1,11 @@
+import 'package:flutter/widgets.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/file_browser/browser_tree_controller.dart';
 
 class FolderTreeManager with Subscriptions {
+  ScrollController scrollController;
   static final FolderTreeManager _instance = FolderTreeManager._();
   factory FolderTreeManager() => _instance;
 
@@ -60,6 +62,10 @@ class FolderTreeManager with Subscriptions {
       controllers.forEach((element) {
         element.select(currentDirectory);
       });
+      // TODO: now how do we get the offset of the selected item? any ideas?
+      //
+      // scrollController.animateTo(100,
+      //     duration: const Duration(seconds: 1), curve: Curves.easeIn);
     }
   }
 

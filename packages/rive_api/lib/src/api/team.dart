@@ -27,6 +27,26 @@ class TeamApi {
     }
   }
 
+  /// POST /api/teams
+  Future<TeamDM> createTeam(String teamName, String plan, String frequency,
+      String stripeToken) async {
+    String payload = jsonEncode({
+      'data': {
+        'name': teamName,
+        'username': teamName,
+        'billingPlan': plan,
+        'billingCycle': frequency,
+        'billingToken': stripeToken
+      }
+    });
+    var response = await api.post(api.host + '/api/teams', body: payload);
+    final data = json.decodeMap(response.body);
+
+    final team = TeamDM.fromData(data);
+
+    return team;
+  }
+
   Future<Iterable<TeamMemberDM>> teamMembers(int teamId) async {
     final res = await api.getFromPath('/api/teams/$teamId/affiliates');
     try {
@@ -158,8 +178,7 @@ class TeamApi {
 
   Future<BillingDetailsDM> getBillingHistory(int teamId) async {
     try {
-      var response =
-          await api.get('${api.host}/api/teams/$teamId/charges');
+      var response = await api.get('${api.host}/api/teams/$teamId/charges');
       final data = json.decodeMap(response.body);
       return BillingDetailsDM.fromData(data);
     } on ApiException catch (apiException) {

@@ -305,7 +305,7 @@ class FollowNotificationWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('${notification.followerName} started following you.'),
+        Text('${notification.followerDisplayName} started following you.'),
         const SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,

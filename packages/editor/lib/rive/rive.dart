@@ -47,9 +47,6 @@ class Rive {
   void startDragOperation() => isDragOperationActive.value = true;
   void endDragOperation() => isDragOperationActive.value = false;
   RiveClipboard _clipboard;
-
-  final ScrollController treeScrollController = ScrollController();
-
   Rive({this.iconCache}) : api = RiveApi() {
     _focusNode = FocusNode(
         canRequestFocus: true,
