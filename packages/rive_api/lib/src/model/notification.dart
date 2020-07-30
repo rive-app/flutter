@@ -56,6 +56,8 @@ class FollowNotification extends Notification {
       dateTime: invite.dateTime,
     );
   }
+
+  String get followerDisplayName => followerName ?? followerUsername;
 }
 
 /// A team invite notification
