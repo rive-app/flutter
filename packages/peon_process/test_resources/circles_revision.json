@@ -1,0 +1,133 @@
+{
+  "artboards": {
+    "type": "artboards",
+    "id": 985,
+    "name": "Artboards",
+    "main": 0,
+    "children": [
+      {
+        "type": "artboard",
+        "id": 986,
+        "name": "Artboard",
+        "translation": [
+          0,
+          0
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "width": 1024,
+        "height": 768,
+        "color": [
+          0.6619047522544861,
+          0.22835715115070343,
+          0.37142789363861084,
+          0.46000000834465027
+        ],
+        "clipContents": true,
+        "animations": [
+          {
+            "displayEnd": 1,
+            "displayStart": 0,
+            "duration": 1,
+            "fps": 60,
+            "id": 9000,
+            "isWorkAreaActive": false,
+            "loop": true,
+            "name": "play",
+            "order": -1,
+            "nodes": {
+              "987": {
+                "framePosX": [
+                  {
+                    "t": 0,
+                    "v": 445.5,
+                    "i": 1
+                  },
+                  {
+                    "t": 0.5,
+                    "v": 796.5,
+                    "i": 1
+                  },
+                  {
+                    "t": 1,
+                    "v": 445.5,
+                    "i": 1
+                  }
+                ]
+              }
+            },
+            "position": 0.9750000000000018,
+            "workAreaEnd": 1,
+            "workAreaStart": 0
+          }
+        ],
+        "children": [
+          {
+            "type": "node",
+            "id": 993,
+            "name": "Group",
+            "displayType": "empty",
+            "children": [
+              {
+                "type": "shape",
+                "id": 987,
+                "name": "Ellipse",
+                "translation": [
+                  100,
+                  100
+                ],
+                "blendMode": "srcOver",
+                "drawOrder": 1,
+                "transformAffectsStroke": false,
+                "children": [
+                  {
+                    "type": "colorStroke",
+                    "id": 988,
+                    "name": "Color",
+                    "opacity": 1,
+                    "color": [
+                      0.800000011920929,
+                      0.800000011920929,
+                      0.800000011920929,
+                      1
+                    ],
+                    "width": 32.80000000000001,
+                    "cap": "butt",
+                    "join": "miter",
+                    "trim": "off",
+                    "trimStart": 0,
+                    "trimEnd": 1,
+                    "trimOffset": 0
+                  },
+                  {
+                    "type": "colorFill",
+                    "id": 989,
+                    "name": "Color",
+                    "opacity": 1,
+                    "color": [
+                      0.43529412150382996,
+                      0.4718039929866791,
+                      0.95686274766922,
+                      1
+                    ],
+                    "fillRule": "nonzero"
+                  },
+                  {
+                    "type": "ellipse",
+                    "id": 990,
+                    "name": "Ellipse Path",
+                    "width": 415,
+                    "height": 415
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "settings": {}
+}

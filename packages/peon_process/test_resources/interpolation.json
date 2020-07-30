@@ -1,0 +1,112 @@
+{
+  "artboards": {
+    "type": "artboards",
+    "id": 985,
+    "name": "Artboards",
+    "main": 0,
+    "children": [
+      {
+        "type": "artboard",
+        "id": 986,
+        "name": "Artboard",
+        "translation": [
+          0,
+          0
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "width": 1024,
+        "height": 768,
+        "color": [
+          0.364705890417099,
+          0.364705890417099,
+          0.364705890417099,
+          1
+        ],
+        "clipContents": true,
+        "animations": [
+          {
+            "displayEnd": 1,
+            "displayStart": 0,
+            "duration": 1,
+            "fps": 60,
+            "id": 9000,
+            "isWorkAreaActive": false,
+            "loop": false,
+            "name": "Untitled",
+            "order": -1,
+            "nodes": {
+              "987": {
+                "framePosX": [
+                  {
+                    "t": 0,
+                    "v": 383,
+                    "i": 2,
+                    "curve": [
+                      0.015463917525773196,
+                      2.9226804123711343,
+                      0.58,
+                      1
+                    ]
+                  },
+                  {
+                    "t": 0.5,
+                    "v": 808.8973388671875,
+                    "i": 0
+                  },
+                  {
+                    "t": 1,
+                    "v": 383,
+                    "i": 1
+                  }
+                ]
+              }
+            },
+            "position": 0,
+            "workAreaEnd": 1,
+            "workAreaStart": 0
+          }
+        ],
+        "children": [
+          {
+            "type": "shape",
+            "id": 987,
+            "name": "Ellipse",
+            "translation": [
+              383,
+              400
+            ],
+            "blendMode": "srcOver",
+            "drawOrder": 1,
+            "transformAffectsStroke": false,
+            "children": [
+              {
+                "type": "colorFill",
+                "id": 989,
+                "name": "Color",
+                "opacity": 1,
+                "color": [
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "fillRule": "nonzero"
+              },
+              {
+                "type": "ellipse",
+                "id": 990,
+                "name": "Ellipse Path",
+                "width": 432,
+                "height": 432
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "settings": {}
+}
