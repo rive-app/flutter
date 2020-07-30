@@ -10,6 +10,7 @@ class RiveTextField extends StatefulWidget {
   final String errorText;
   final double fontSize;
   final double errorFontSize;
+  final EdgeInsets contentPadding;
   final int maxCharacters;
   final FocusNode focusNode;
   final ValueChanged<String> onSubmit;
@@ -35,6 +36,7 @@ class RiveTextField extends StatefulWidget {
     this.formatters,
     this.errorAlignment = MainAxisAlignment.end,
     this.editableKey,
+    this.contentPadding = const EdgeInsets.only(bottom: 8),
     Key key,
   }) : super(key: key);
 
@@ -125,10 +127,10 @@ class _RiveTextFieldState extends State<RiveTextField>
             hintText: widget.hintText,
             hintStyle: textStyles.textFieldInputHint
                 .copyWith(fontSize: widget.fontSize, height: 1.15),
-            contentPadding: const EdgeInsets.only(bottom: 8),
+            contentPadding: widget.contentPadding,
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                color: hasError ? colors.accentMagenta : colors.input,
+                color: hasError ? colors.accentMagenta : colors.inputUnderline,
                 width: 2,
               ),
             ),

@@ -73,10 +73,11 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                       hintText: 'Team name',
                       errorText: sub.nameValidationError,
                       errorAlignment: MainAxisAlignment.start,
+                      contentPadding: const EdgeInsets.only(bottom: 4),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 7, left: 30),
+                    padding: const EdgeInsets.only(top: 3, left: 30),
                     child: SizedBox(
                       width: 71,
                       child: ComboBox<BillingFrequency>(
@@ -88,7 +89,7 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
                         options: BillingFrequency.values,
                         value: sub.billing,
                         toLabel: (option) => describeEnum(option).capsFirst,
-                        contentPadding: const EdgeInsets.only(bottom: 3),
+                        contentPadding: const EdgeInsets.only(bottom: 1),
                         change: (billing) => sub.billing = billing,
                       ),
                     ),
@@ -98,8 +99,8 @@ class _ChoicePanelState extends State<TeamWizardPanelOne>
             ),
             Padding(
               padding: sub.nameValidationError == null
-                  ? const EdgeInsets.only(top: 23, bottom: 23)
-                  : const EdgeInsets.only(top: 5, bottom: 23),
+                  ? const EdgeInsets.only(top: 25, bottom: 23)
+                  : const EdgeInsets.only(top: 6, bottom: 23),
               child: SizedBox(
                 height: 220,
                 child: Row(
