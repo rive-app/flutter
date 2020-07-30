@@ -57,21 +57,26 @@ class PopupContextItem extends PopupListItem {
   @override
   final bool dismissOnSelect;
 
-  PopupContextItem(
-    this.name, {
-    this.icon,
-    this.iconColor,
-    this.iconBuilder,
-    this.shortcut,
-    this.child,
-    this.popup,
-    this.select,
-    this.rebuildItem,
-    this.iconColorBuilder,
-    this.padIcon = false,
-    this.dismissOnSelect = true,
-    this.popupWidth,
-  });
+  final double leftMargin;
+
+  @override
+  final double height;
+
+  PopupContextItem(this.name,
+      {this.icon,
+      this.iconColor,
+      this.iconBuilder,
+      this.shortcut,
+      this.child,
+      this.popup,
+      this.select,
+      this.rebuildItem,
+      this.iconColorBuilder,
+      this.padIcon = false,
+      this.dismissOnSelect = true,
+      this.popupWidth,
+      this.leftMargin = 20,
+      this.height = 40});
 
   @override
   String toString() {
@@ -91,7 +96,9 @@ class PopupContextItem extends PopupListItem {
         rebuildItem = null,
         padIcon = null,
         popupWidth = null,
-        dismissOnSelect = true;
+        dismissOnSelect = true,
+        leftMargin = 20,
+        height = 20;
 
   /// Make a focusable PopupContexItem that gets a callback with the generated
   /// key and focusNode to build the child. Note the child is built only once.
@@ -128,7 +135,7 @@ class PopupContextItem extends PopupListItem {
         ),
       ));
     }
-    final children = <Widget>[const SizedBox(width: 20)];
+    final children = <Widget>[SizedBox(width: leftMargin)];
 
     if (iconBuilder != null) {
       children.addAll(
@@ -164,7 +171,7 @@ class PopupContextItem extends PopupListItem {
           ShortcutBindings.of(context)
                   ?.lookupKeysLabel(shortcut)
                   ?.toUpperCase() ??
-              "",
+              '',
           style: RiveTheme.of(context).textStyles.popupShortcutText,
         ),
       if (child != null) ...[
@@ -185,9 +192,6 @@ class PopupContextItem extends PopupListItem {
 
   @override
   bool get canSelect => !isSeparator;
-
-  @override
-  double get height => isSeparator ? 20 : 40;
 
   /// Find the context item with the specified icon (if one exists).
   static PopupContextItem withIcon(
