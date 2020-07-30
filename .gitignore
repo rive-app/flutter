@@ -120,3 +120,15 @@ output/
 .vscode/launch.json
 /dev/extract_icons/package-lock.json
 /dev/extract_icons/node_modules
+packages/admin/pubspec.lock
+packages/cursor/pubspec.lock
+packages/cursor/example/pubspec.lock
+packages/local_data/pubspec.lock
+packages/rive_core/pubspec.lock
+packages/rive_widgets/pubspec.lock
+packages/tree_widget/pubspec.lock
+packages/tree_widget/example/pubspec.lock
+packages/window_utils/window_utils/pubspec.lock
+packages/window_utils/window_utils/example/pubspec.lock
+packages/window_utils/window_utils_platform_interface/pubspec.lock
+packages/window_utils/window_utils_web/pubspec.lock
