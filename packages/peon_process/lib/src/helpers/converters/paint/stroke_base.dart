@@ -1,7 +1,8 @@
-import 'package:peon_process/src/helpers/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
+
+import '../../converters.dart';
 
 class StrokeBaseConverter extends ShapePaintConverter {
   StrokeBaseConverter(

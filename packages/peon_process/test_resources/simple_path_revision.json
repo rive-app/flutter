@@ -1,0 +1,272 @@
+{
+  "artboards": {
+    "children": [
+      {
+        "animations": [],
+        "children": [
+          {
+            "blendMode": "srcOver",
+            "children": [
+              {
+                "children": [
+                  {
+                    "id": 1006,
+                    "in": [
+                      20,
+                      0
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      -20,
+                      0
+                    ],
+                    "pointType": "S",
+                    "radius": 0,
+                    "translation": [
+                      0,
+                      0
+                    ],
+                    "type": "point"
+                  },
+                  {
+                    "id": 1007,
+                    "in": [
+                      14.184493064880371,
+                      -163.12179565429688
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      17.649675369262695,
+                      -202.971435546875
+                    ],
+                    "pointType": "S",
+                    "radius": 0,
+                    "translation": [
+                      15.917083740234375,
+                      -183.04661560058594
+                    ],
+                    "type": "point"
+                  },
+                  {
+                    "id": 1008,
+                    "in": [
+                      290.41253662109375,
+                      -197.88421630859375
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      330.354248046875,
+                      -200.043212890625
+                    ],
+                    "pointType": "S",
+                    "radius": 0,
+                    "translation": [
+                      310.3833923339844,
+                      -198.96371459960938
+                    ],
+                    "type": "point"
+                  },
+                  {
+                    "id": 1009,
+                    "in": [
+                      317.7652587890625,
+                      56.94096374511719
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      318.91864013671875,
+                      96.92433166503906
+                    ],
+                    "pointType": "S",
+                    "radius": 0,
+                    "translation": [
+                      318.3419494628906,
+                      76.93264770507812
+                    ],
+                    "type": "point"
+                  }
+                ],
+                "id": 1004,
+                "isClosed": true,
+                "name": "First",
+                "type": "path"
+              },
+              {
+                "cap": "butt",
+                "color": [
+                  0.9666666388511658,
+                  0.5774866342544556,
+                  0.328666627407074,
+                  1
+                ],
+                "id": 1005,
+                "join": "miter",
+                "name": "Color",
+                "opacity": 1,
+                "trim": "off",
+                "trimEnd": 1,
+                "trimOffset": 0,
+                "trimStart": 0,
+                "type": "colorStroke",
+                "width": 8.900000000000002
+              },
+              {
+                "color": [
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "fillRule": "evenodd",
+                "id": 1010,
+                "name": "Color",
+                "opacity": 1,
+                "type": "colorFill"
+              },
+              {
+                "children": [
+                  {
+                    "id": 1016,
+                    "in": [
+                      -117.16307067871094,
+                      232.1488494873047
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      -137.51051330566406,
+                      266.5869445800781
+                    ],
+                    "pointType": "S",
+                    "radius": 0,
+                    "translation": [
+                      -127.3367919921875,
+                      249.36788940429688
+                    ],
+                    "type": "point"
+                  },
+                  {
+                    "id": 1017,
+                    "in": [
+                      -313.0362548828125,
+                      198.96371459960938
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      26.528472900390625,
+                      66.32125854492188
+                    ],
+                    "pointType": "M",
+                    "radius": 0,
+                    "translation": [
+                      -143.25389099121094,
+                      132.64248657226562
+                    ],
+                    "type": "point",
+                    "weights": []
+                  },
+                  {
+                    "id": 1018,
+                    "in": [
+                      -13.264251708984375,
+                      2.652862548828125
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      135.29531860351562,
+                      204.26943969726562
+                    ],
+                    "pointType": "M",
+                    "radius": 0,
+                    "translation": [
+                      61.015533447265625,
+                      103.46115112304688
+                    ],
+                    "type": "point",
+                    "weights": []
+                  },
+                  {
+                    "id": 1019,
+                    "in": [
+                      302.42486572265625,
+                      222.83938598632812
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      58.3626708984375,
+                      350.1761779785156
+                    ],
+                    "pointType": "M",
+                    "radius": 0,
+                    "translation": [
+                      180.39376831054688,
+                      286.5077819824219
+                    ],
+                    "type": "point",
+                    "weights": []
+                  }
+                ],
+                "id": 1014,
+                "isClosed": true,
+                "name": "Second",
+                "type": "path"
+              },
+              {
+                "cap": "butt",
+                "color": [
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "id": 1015,
+                "join": "miter",
+                "name": "Color",
+                "opacity": 1,
+                "trim": "off",
+                "trimEnd": 1,
+                "trimOffset": 0,
+                "trimStart": 0,
+                "type": "colorStroke",
+                "width": 1
+              }
+            ],
+            "drawOrder": 1,
+            "id": 1003,
+            "name": "Container",
+            "transformAffectsStroke": false,
+            "translation": [
+              339.5647277832031,
+              398.5906677246094
+            ],
+            "type": "shape"
+          }
+        ],
+        "clipContents": true,
+        "color": [
+          0.364705890417099,
+          0.364705890417099,
+          0.364705890417099,
+          1
+        ],
+        "height": 768,
+        "id": 986,
+        "name": "Artboard",
+        "origin": [
+          0,
+          0
+        ],
+        "translation": [
+          0,
+          0
+        ],
+        "type": "artboard",
+        "width": 1024
+      }
+    ],
+    "id": 985,
+    "main": 0,
+    "name": "Artboards",
+    "type": "artboards"
+  },
+  "settings": {}
+}

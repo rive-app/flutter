@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:local_data/local_data.dart';
-import 'package:peon_process/src/helpers/converters.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
@@ -16,6 +15,8 @@ import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/triangle.dart';
 
+import 'converters.dart';
+
 typedef bool DescentCallback(Object obj);
 
 class FlareToRive {
@@ -26,7 +27,7 @@ class FlareToRive {
         )..addObject(Backboard());
 
   final RiveFile riveFile;
-  final _fileComponents = <int, Component>{};
+  final _fileComponents = <String, Component>{};
   AnimationConverter _animationConverter;
 
   void toFile(String revision) {
@@ -52,9 +53,9 @@ class FlareToRive {
 
     // Iterate over all the artboard objects in this 'artboards' container,
     for (final child in children) {
-      final artboardID = child['id'];
-      if (!(artboardID is num)) {
-        continue;
+      final artboardID = child['id']?.toString();
+      if (artboardID == null) {
+        throw StateError('Artboard ID cannot be null ${child['id']}');
       }
       final animations = child['animations'];
       if (animations is List) {
@@ -72,22 +73,18 @@ class FlareToRive {
 
     while (queue.isNotEmpty) {
       var head = queue.removeAt(0);
-      int headId = head['id'].hashCode;
-
+      final headId = head['id'].toString();
       final parentId = head['parent'];
 
       ContainerComponent parent;
-      if (parentId is int) {
-        parent = _fileComponents[parentId] as ContainerComponent;
+      if (parentId != null) {
+        parent = _fileComponents[parentId.toString()] as ContainerComponent;
       }
 
       final component = _fromJSON(head, parent);
       if (component != null) {
         // Update the component mapping.
         _fileComponents[headId] = component;
-
-        // If this component has a parent, and that parent is a
-        // ContainerComponent add it as their child.
       }
 
       // Proceed by looping on all the children, if any.
@@ -217,6 +214,6 @@ class FlareToRive {
 /// [jsonAnimations] is the list of JSON objects that'll be deserialized.
 class _ArtboardAnimations {
   const _ArtboardAnimations(this.artboardID, this.jsonAnimations);
-  final int artboardID;
+  final String artboardID;
   final List jsonAnimations;
 }

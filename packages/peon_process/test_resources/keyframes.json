@@ -1,0 +1,182 @@
+{
+  "artboards": {
+    "children": [
+      {
+        "animations": [
+          {
+            "displayEnd": 1,
+            "displayStart": 0,
+            "duration": 1,
+            "fps": 60,
+            "id": 9000,
+            "isWorkAreaActive": false,
+            "loop": true,
+            "name": "play",
+            "nodes": {
+              "987": {
+                "frameFillColor": [
+                  {
+                    "i": 1,
+                    "t": 0,
+                    "v": [
+                      0.43529412150382996,
+                      0.4718039929866791,
+                      0.95686274766922,
+                      1
+                    ]
+                  },
+                  {
+                    "i": 1,
+                    "t": 0.5,
+                    "v": [
+                      0.9666666388511658,
+                      0.2220916450023651,
+                      0.024166643619537354,
+                      1
+                    ]
+                  },
+                  {
+                    "i": 1,
+                    "t": 1,
+                    "v": [
+                      0.43529412150382996,
+                      0.4718039929866791,
+                      0.95686274766922,
+                      1
+                    ]
+                  }
+                ],
+                "frameFillOpacity": [
+                  {
+                    "i": 1,
+                    "t": 0,
+                    "v": 1
+                  },
+                  {
+                    "i": 1,
+                    "t": 0.5,
+                    "v": 0
+                  },
+                  {
+                    "i": 1,
+                    "t": 1,
+                    "v": 1
+                  }
+                ],
+                "framePosX": [
+                  {
+                    "i": 1,
+                    "t": 0,
+                    "v": 445.5
+                  },
+                  {
+                    "i": 1,
+                    "t": 0.5,
+                    "v": 796.5
+                  },
+                  {
+                    "i": 1,
+                    "t": 1,
+                    "v": 445.5
+                  }
+                ]
+              }
+            },
+            "order": -1,
+            "position": 0.5,
+            "workAreaEnd": 1,
+            "workAreaStart": 0
+          }
+        ],
+        "children": [
+          {
+            "children": [
+              {
+                "blendMode": "srcOver",
+                "children": [
+                  {
+                    "cap": "butt",
+                    "color": [
+                      0.800000011920929,
+                      0.800000011920929,
+                      0.800000011920929,
+                      1
+                    ],
+                    "id": 988,
+                    "join": "miter",
+                    "name": "Color",
+                    "opacity": 1,
+                    "trim": "off",
+                    "trimEnd": 1,
+                    "trimOffset": 0,
+                    "trimStart": 0,
+                    "type": "colorStroke",
+                    "width": 32.80000000000001
+                  },
+                  {
+                    "color": [
+                      0.43529412150382996,
+                      0.4718039929866791,
+                      0.95686274766922,
+                      1
+                    ],
+                    "fillRule": "nonzero",
+                    "id": 989,
+                    "name": "Color",
+                    "opacity": 1,
+                    "type": "colorFill"
+                  },
+                  {
+                    "height": 415,
+                    "id": 990,
+                    "name": "Ellipse Path",
+                    "type": "ellipse",
+                    "width": 415
+                  }
+                ],
+                "drawOrder": 1,
+                "id": 987,
+                "name": "Ellipse",
+                "transformAffectsStroke": false,
+                "translation": [
+                  100,
+                  100
+                ],
+                "type": "shape"
+              }
+            ],
+            "displayType": "empty",
+            "id": 993,
+            "name": "Group",
+            "type": "node"
+          }
+        ],
+        "clipContents": true,
+        "color": [
+          0.6619047522544861,
+          0.22835715115070343,
+          0.37142789363861084,
+          0.46000000834465027
+        ],
+        "height": 768,
+        "id": 986,
+        "name": "Artboard",
+        "origin": [
+          0,
+          0
+        ],
+        "translation": [
+          0,
+          0
+        ],
+        "type": "artboard",
+        "width": 1024
+      }
+    ],
+    "id": 985,
+    "main": 0,
+    "name": "Artboards",
+    "type": "artboards"
+  },
+  "settings": {}
+}

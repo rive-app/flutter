@@ -22,7 +22,12 @@ abstract class DrawableConverter extends NodeConverter {
     final drawable = component as DrawableBase;
 
     if (drawOrder is int) {
-      // TODO: how do I calculate this??
+      // Flare drawOrder starts at 0 and grows idefinetely, with smaller 
+      // drawOrder values that are stored in the 'back', and higher drawOrder
+      // values in the 'front'.
+      // We use the progression: n/(n + 1), knowing that
+      // n/(n + 1) < (n + 1) / (n + 2), ∀ n > 0
+      // https://bit.ly/3jD3xCm
       drawable.drawOrder = FractionalIndex(drawOrder, drawOrder + 1);
     }
 

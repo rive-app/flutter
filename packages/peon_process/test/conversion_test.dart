@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
+import 'package:peon_process/src/helpers/flare_to_rive.dart';
 import 'package:peon_process/src/tasks/svg_to_rive.dart';
+import 'package:rive_core/runtime/runtime_exporter.dart';
+import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:xml/xml_events.dart' as xml show parseEvents;
 import 'package:flutter_svg/src/svg/parser_state.dart';
 
@@ -45,5 +50,43 @@ void main() {
           .parse();
       createFromSvg(drawable);
     });
+  });
+
+  const flareRevisionFiles = [
+    'circles_revision',
+    'gradient_revision',
+    'interpolation',
+    'keyframe_gradient',
+    'keyframes',
+    'lottie_circle_revision',
+    'path_vertices',
+    'simple_path_revision',
+    'stroke_color',
+    'stroke_gradient',
+    'vertex_path_revision'
+  ];
+
+  void convertFlareRevision(String filename) {
+    // Pick one of the files in the `test_resouces` folder.
+    final fileString = File('test_resources/$filename.json').readAsStringSync();
+    expect(fileString.isNotEmpty, true);
+    int ownerId = 0; // TODO: should be a real one
+    final converter = FlareToRive(filename)..toFile(fileString);
+    final exporter = RuntimeExporter(
+      core: converter.riveFile,
+      info: RuntimeHeader(ownerId: ownerId, fileId: 0),
+    );
+    final bytes = exporter.export();
+    var file = File('out/$filename.riv');
+    file.create(recursive: true);
+    file.writeAsBytesSync(bytes, flush: true);
+  }
+
+  test('Converts Flare revision to Rive', () {
+    convertFlareRevision('interpolation');
+  });
+
+  test('Converts all test files', () {
+    flareRevisionFiles.forEach(convertFlareRevision);
   });
 }

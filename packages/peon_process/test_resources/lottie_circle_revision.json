@@ -1,0 +1,228 @@
+{
+  "artboards": {
+    "type": "artboards",
+    "id": 10,
+    "name": "Artboards",
+    "main": 0,
+    "children": [
+      {
+        "type": "artboard",
+        "id": 8,
+        "name": "Composition",
+        "translation": [
+          0,
+          0
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "width": 100,
+        "height": 100,
+        "color": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "clipContents": true,
+        "animations": [
+          {
+            "displayEnd": 5.88,
+            "displayStart": 0,
+            "duration": 5.88,
+            "fps": 25,
+            "id": 9,
+            "isWorkAreaActive": true,
+            "loop": false,
+            "name": "Animations",
+            "order": -1,
+            "nodes": {
+              "6": {
+                "frameScaleX": [
+                  {
+                    "v": 1,
+                    "curve": [
+                      0.16699999570846558,
+                      0.16699999570846558,
+                      0.8330000042915344,
+                      0.8330000042915344
+                    ],
+                    "i": 2,
+                    "t": 0
+                  },
+                  {
+                    "v": 1.36,
+                    "curve": [
+                      0.16699999570846558,
+                      0.16699999570846558,
+                      0.8330000042915344,
+                      0.8330000042915344
+                    ],
+                    "i": 2,
+                    "t": 1
+                  },
+                  {
+                    "v": 1,
+                    "curve": [
+                      1,
+                      1,
+                      0,
+                      0
+                    ],
+                    "i": 2,
+                    "t": 1.84
+                  }
+                ],
+                "frameScaleY": [
+                  {
+                    "v": 1,
+                    "curve": [
+                      0.16699999570846558,
+                      0.16699999570846558,
+                      0.8330000042915344,
+                      0.8330000042915344
+                    ],
+                    "i": 2,
+                    "t": 0
+                  },
+                  {
+                    "v": 1.36,
+                    "curve": [
+                      0.16699999570846558,
+                      0.16699999570846558,
+                      0.8330000042915344,
+                      0.8330000042915344
+                    ],
+                    "i": 2,
+                    "t": 1
+                  },
+                  {
+                    "v": 1,
+                    "curve": [
+                      1,
+                      1,
+                      0,
+                      0
+                    ],
+                    "i": 2,
+                    "t": 1.84
+                  }
+                ]
+              }
+            },
+            "workAreaStart": 0,
+            "workAreaEnd": 1.88
+          }
+        ],
+        "children": [
+          {
+            "type": "node",
+            "id": 7,
+            "name": "Precomp_Container",
+            "opacity": 1,
+            "displayType": "empty",
+            "children": [
+              {
+                "type": "node",
+                "id": 6,
+                "name": "Shape Layer 1_Outer",
+                "translation": [
+                  50,
+                  50
+                ],
+                "scale": [
+                  1,
+                  1
+                ],
+                "opacity": 1,
+                "displayType": "empty",
+                "children": [
+                  {
+                    "type": "node",
+                    "id": 5,
+                    "name": "Shapes_Container",
+                    "opacity": 1,
+                    "displayType": "empty",
+                    "children": [
+                      {
+                        "type": "node",
+                        "id": 4,
+                        "name": "Container_Outer",
+                        "translation": [
+                          -0.629,
+                          2.063
+                        ],
+                        "opacity": 1,
+                        "displayType": "empty",
+                        "children": [
+                          {
+                            "type": "shape",
+                            "id": 2,
+                            "name": "Shape",
+                            "opacity": 1,
+                            "displayType": "empty",
+                            "children": [
+                              {
+                                "type": "colorFill",
+                                "id": 3,
+                                "name": "Color",
+                                "opacity": 1,
+                                "displayType": "empty",
+                                "children": null,
+                                "clips": null,
+                                "color": [
+                                  0.203922002456,
+                                  0.552940996955,
+                                  0.666666965859,
+                                  1
+                                ],
+                                "fillRule": "nonzero",
+                                "trim": "off",
+                                "trimStart": 0,
+                                "trimEnd": 1,
+                                "trimOffset": 0
+                              },
+                              {
+                                "type": "ellipse",
+                                "id": 1,
+                                "name": "Ellipse Path",
+                                "opacity": 1,
+                                "displayType": "empty",
+                                "children": [],
+                                "clips": null,
+                                "translation": [
+                                  0,
+                                  0
+                                ],
+                                "width": 59.279,
+                                "height": 59.279
+                              }
+                            ],
+                            "clips": null,
+                            "blendMode": "srcOver",
+                            "drawOrder": 1,
+                            "transformAffectsStroke": true,
+                            "hidden": false
+                          }
+                        ],
+                        "clips": null
+                      }
+                    ],
+                    "clips": null,
+                    "maskType": "alpha"
+                  }
+                ],
+                "clips": null
+              }
+            ],
+            "clips": null,
+            "maskType": "alpha"
+          }
+        ]
+      }
+    ]
+  },
+  "assets": [],
+  "settings": {}
+}
