@@ -68,6 +68,7 @@ class _BillingHistoryState extends State<BillingHistory> {
 
     return Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: columnAlignemnt,
         children: [
           Text(header, style: headerStyle),
@@ -125,12 +126,20 @@ class _BillingHistoryState extends State<BillingHistory> {
                   ),
                 ),
               )
-            : const SizedBox(),
+            // easier to keep the sizes of this stuff in check with
+            // an empty string over a sized box.
+            : Text(
+                '',
+                style: rowStyle.copyWith(
+                  decoration: TextDecoration.underline,
+                ),
+              ),
       );
     }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _receiptColumn('Date', dates),
         _receiptColumn('Amount', amounts),
