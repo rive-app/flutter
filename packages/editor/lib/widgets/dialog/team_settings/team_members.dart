@@ -305,7 +305,7 @@ class _InvitePanelState extends State<InvitePanel> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.only(top: 7, bottom: 8),
                         child: ComboBox<Invite>(
                           trigger: _openCombo,
                           // Start with an empty value.
@@ -364,6 +364,7 @@ class _InvitePanelState extends State<InvitePanel> {
                 underline: false,
                 valueColor: colors.fileBackgroundDarkGrey,
                 sizing: ComboSizing.content,
+                contentPadding: EdgeInsets.only(bottom: 1),
               ),
             ),
           ),
