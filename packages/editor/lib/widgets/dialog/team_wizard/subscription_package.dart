@@ -529,18 +529,9 @@ class TeamSubscriptionPackage extends SubscriptionPackage {
         var publicKey = await StripeApi(api).getStripePublicKey();
         var tokenResponse = await createToken(
             publicKey, cardNumber, expMonth, expYear, ccv, zip);
-        var newTeam = await RiveTeamsApi(api).createTeam(
-            teamName: name,
-            plan: _option.name,
-            frequency: _billing.name,
-            stripeToken: tokenResponse.token);
-        // TODO: try to just push the new team right into
-        // to avoid reloading all other teams
-        // TODO: select team on create
-        TeamManager().loadTeams();
-        // todo kill this once we kill old system:
-        // await RiveContext.of(context).reloadTeams();
-        // await RiveContext.of(context).selectRiveOwner(newTeam.ownerId);
+        await TeamManager()
+            .createTeam(name, _option.name, _billing.name, tokenResponse.token);
+
         Navigator.of(context, rootNavigator: true).pop();
       } on StripeAPIError catch (error) {
         switch (error.type) {
