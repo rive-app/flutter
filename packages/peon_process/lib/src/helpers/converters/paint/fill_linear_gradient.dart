@@ -1,8 +1,9 @@
-import 'package:peon_process/src/helpers/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
+
+import '../../converters.dart';
 
 class LinearGradientConverter extends ComponentConverter {
   LinearGradientConverter(

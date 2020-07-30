@@ -1,30 +1,18 @@
-import 'package:rive_core/animation/keyframe_double.dart';
-import 'package:rive_core/animation/keyframe_draw_order.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/drawable.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
-import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
-import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
-import 'package:rive_core/shapes/paint/linear_gradient.dart';
-import 'package:rive_core/shapes/path_vertex.dart';
 
-class _KeyFrameInfo {
-  const _KeyFrameInfo(this.keyFrameType, this.propertyKey);
-  final Type keyFrameType;
-  final int propertyKey;
-}
+import '../converters.dart';
 
 class AnimationConverter {
   const AnimationConverter(this._fileComponents, this.riveFile);
 
-  final Map<int, Component> _fileComponents;
+  final Map<String, Component> _fileComponents;
   final RiveFile riveFile;
 
-  deserialize(Map<String, Object> animationRevision, int parentId) {
+  deserialize(Map<String, Object> animationRevision, String parentId) {
     final parent = _fileComponents[parentId] as Artboard;
     if (parent == null) {
       throw ArgumentError('Cannot find parent id: $parentId');
@@ -37,7 +25,7 @@ class AnimationConverter {
     final displayEnd = animationRevision['displayEnd'];
     final isLooping = animationRevision['loop'];
     final isWorkAreaActive = animationRevision['isWorkAreaActive'];
-    // final order = animationRevision['order'];
+    final order = animationRevision['order'];
 
     assert(name is String);
     assert(duration is num);
@@ -47,19 +35,19 @@ class AnimationConverter {
     assert(isLooping is bool);
     assert(isWorkAreaActive is bool);
 
-    final riveAnimation = LinearAnimation()
-      ..name = name
-      ..duration = (duration as num).toInt()
-      ..fps = (fps as num).toInt()
-      ..workStart = (displayStart as num).toInt()
-      ..workEnd = (displayEnd as num).toInt()
-      ..loop = _getLoopType(isLooping, isWorkAreaActive)
-      ..enableWorkArea = isWorkAreaActive
-      ..artboardId = parent.id;
-
     riveFile.batchAdd(() {
+      final riveAnimation = LinearAnimation();
       riveFile.addObject(riveAnimation);
 
+      riveAnimation
+        ..name = name
+        ..fps = (fps as num).toInt()
+        ..duration = (duration as num).toInt() * riveAnimation.fps
+        ..workStart = (displayStart as num).toInt()
+        ..workEnd = (displayEnd as num).toInt()
+        ..loop = _getLoopType(isLooping, isWorkAreaActive)
+        ..enableWorkArea = isWorkAreaActive
+        ..artboardId = parent.id;
       final animationNodes = animationRevision['nodes'];
       _extractKeyFrames(riveAnimation, animationNodes);
     });
@@ -85,178 +73,205 @@ class AnimationConverter {
     // and converted to our desired int format, to extract the component from
     // the map.
     for (final id in nodeIds) {
-      final intId = int.parse(id);
-      final component = _fileComponents[intId];
-
-      var keyedObject = animation.getKeyed(component);
-      if (keyedObject == null) {
-        keyedObject = animation.makeKeyed(component);
-      }
+      final component = _fileComponents[id];
 
       final keyFrameGroups = animationNodes[id] as Map<String, Object>;
       for (final keyGroupName in keyFrameGroups.keys) {
         final allKeys = keyFrameGroups[keyGroupName] as List;
-        for (final key in allKeys) {
-          // final keyToAdd = _getKeyFrame(keyGroupName, key);
+        for (final jsonKey in allKeys) {
+          _addKeyFrame(animation, component, keyGroupName, jsonKey);
         }
       }
     }
   }
 
-  _KeyFrameInfo _getKeyFrame(
-      String keyName, Map<String, num> jsonKey, Component component) {
-    Type keyFrameType;
-    int propertyKey;
-    switch (keyName) {
+  void _addKeyFrame(LinearAnimation animation, Component component,
+      String keyGroupName, Map<String, Object> jsonKey) {
+    final value = jsonKey['v'];
+    final time = jsonKey['t'] as num;
+    final frame = (time * animation.fps).floor();
+    final interpolatorType = jsonKey['i'];
+    final interpolatorCurve = jsonKey['curve'];
+
+    switch (keyGroupName) {
       case "framePosX":
-        keyFrameType = KeyFrameDouble;
-        if (component is ArtboardBase) {
-          propertyKey = ArtboardBase.xPropertyKey;
-        } else if (component is NodeBase) {
-          propertyKey = NodeBase.xPropertyKey;
-        } else if (component is PathVertexBase) {
-          propertyKey = PathVertexBase.xPropertyKey;
-        }
-        break;
+        KeyFramePosX(value, interpolatorType, interpolatorCurve)
+            .convertKey(component, animation, frame);
+        return;
       case "framePosY":
-        keyFrameType = KeyFrameDouble;
-        if (component is ArtboardBase) {
-          propertyKey = ArtboardBase.yPropertyKey;
-        } else if (component is NodeBase) {
-          propertyKey = NodeBase.yPropertyKey;
-        } else if (component is PathVertexBase) {
-          propertyKey = PathVertexBase.yPropertyKey;
-        }
-        break;
+        KeyFramePosY(value, interpolatorType, interpolatorCurve)
+            .convertKey(component, animation, frame);
+        return;
       case "frameScaleX":
-        keyFrameType = KeyFrameDouble;
-        if (component is NodeBase) {
-          propertyKey = NodeBase.scaleXPropertyKey;
-        }
-        break;
+        KeyFrameScaleX(value, interpolatorType, interpolatorCurve)
+            .convertKey(component, animation, frame);
+        return;
       case "frameScaleY":
-        keyFrameType = KeyFrameDouble;
-        if (component is NodeBase) {
-          propertyKey = NodeBase.scaleXPropertyKey;
-        }
-        break;
+        KeyFrameScaleY(value, interpolatorType, interpolatorCurve)
+            .convertKey(component, animation, frame);
+        return;
       case "frameRotation":
-        keyFrameType = KeyFrameDouble;
-        if (component is NodeBase) {
-          propertyKey = NodeBase.rotationPropertyKey;
-        } else if (component is CubicMirroredVertexBase) {
-          propertyKey = CubicMirroredVertexBase.rotationPropertyKey;
-        } else if (component is CubicAsymmetricVertexBase) {
-          propertyKey = CubicAsymmetricVertexBase.rotationPropertyKey;
-        }
-        break;
+        KeyFrameRotation(value, interpolatorType, interpolatorCurve)
+            .convertKey(component, animation, frame);
+        return;
       case "frameOpacity":
-        keyFrameType = KeyFrameDouble;
-        if (component is NodeBase) {
-          propertyKey = NodeBase.opacityPropertyKey;
-        } else if (component is LinearGradientBase) {
-          propertyKey = LinearGradientBase.opacityPropertyKey;
-        }
-        break;
+        KeyFrameOpacity(value, interpolatorType, interpolatorCurve)
+            .convertKey(component, animation, frame);
+        return;
       case "frameDrawOrder":
-        keyFrameType = KeyFrameDrawOrder;
-        if (component is DrawableBase) {
-          propertyKey = DrawableBase.drawOrderPropertyKey;
-        }
-        break;
+        KeyFrameDrawOrderConverter(value, interpolatorType, interpolatorCurve)
+            .convertKey(component, animation, frame);
+        return;
       case "frameLength":
-        // TODO:
+        // Needs bones.
         break;
       case "frameImageVertices":
-        // TODO:
+        // Needs images.
         break;
       case "frameStrength":
-        // TODO:
+        // Needs bones.
         break;
       case "frameTrigger":
-        // TODO:
+        // Needs triggers.
         break;
       case "frameIntValue":
-        // TODO:
+        // Needs custom properties.
         break;
       case "frameFloatValue":
-        // TODO:
+        // Needs custom properties.
         break;
       case "frameStringValue":
-        // TODO:
+        // Needs custom properties.
         break;
       case "frameBooleanValue":
-        // TODO:
+        // Needs custom properties.
         break;
       case "frameIsCollisionEnabled":
-        // TODO:
+        // Needs collision detectors..
         break;
       case "frameSequence":
-        // TODO:
+        // Needs image sequences.
         break;
       case "frameActiveChild":
-        // TODO:
+        // Needs Solo nodes.
         break;
       case "framePathVertices":
+        if (value is Map) {
+          for (final vertexId in value.keys) {
+            final vertexComponent = _fileComponents[vertexId];
+            final vertexValues = value[vertexId] as Map;
+
+            final converter = KeyFrameVertexConverter.fromVertex(
+              vertexComponent,
+              vertexValues,
+              interpolatorType,
+              interpolatorCurve,
+            );
+
+            if (converter == null) {
+              throw StateError(
+                  'Cannot find a converter for ${vertexComponent.runtimeType}');
+            }
+
+            converter.convertKey(vertexComponent, animation, frame);
+          }
+        }
         break;
       case "frameFillColor":
+        if (value is List) {
+          KeyFrameSolidColorConverter(
+                  value, interpolatorType, interpolatorCurve)
+              .convertKey(component, animation, frame);
+          break;
+        }
+        throw UnsupportedError('Not a valid fill color list $value');
+      case "frameFillRadial":
+        if (value is List) {
+          KeyFrameRadialGradientConverter(
+                  value, interpolatorType, interpolatorCurve)
+              .convertKey(component, animation, frame);
+        }
         break;
       case "frameFillGradient":
-        break;
-      case "frameFillRadial":
+        if (value is List) {
+          KeyFrameGradientConverter(value, interpolatorType, interpolatorCurve)
+              .convertKey(component, animation, frame);
+        }
         break;
       case "frameStrokeColor":
+        if (value is List) {
+          KeyFrameSolidStrokeConverter(
+                  value, interpolatorType, interpolatorCurve)
+              .convertKey(component, animation, frame);
+        }
         break;
       case "frameStrokeGradient":
+        if (value is List) {
+          KeyFrameStrokeGradientConverter(
+                  value, interpolatorType, interpolatorCurve)
+              .convertKey(component, animation, frame);
+        }
         break;
       case "frameStrokeRadial":
+        if (value is List) {
+          KeyFrameStrokeRadialGradientConverter(
+                  value, interpolatorType, interpolatorCurve)
+              .convertKey(component, animation, frame);
+        }
         break;
       case "frameStrokeWidth":
+        if (value is num) {
+          KeyFrameStrokeWidthConverter(
+                  value, interpolatorType, interpolatorCurve)
+              .convertKey(component, animation, frame);
+        }
         break;
       case "frameStrokeOpacity":
+        // TODO: KeyFrameDouble;
         break;
       case "frameFillOpacity":
+        if (value is num) {
+          KeyFrameFillOpacityConverter(
+                  value, interpolatorType, interpolatorCurve)
+              .convertKey(component, animation, frame);
+        }
         break;
       case "frameWidth":
+        // TODO: KeyFrameDouble;
         break;
       case "frameHeight":
+        // TODO: KeyFrameDouble;
         break;
       case "frameCornerRadius":
+        // TODO: KeyFrameDouble;
         break;
       case "frameInnerRadius":
+        // Needs stars.
         break;
       case "frameStrokeStart":
+        // Needs trim paths.
         break;
       case "frameStrokeEnd":
+        // Needs trim paths.
         break;
       case "frameStrokeOffset":
+        // Needs trim paths.
         break;
       case "frameColor":
+        // Needs shadows.
         break;
       case "frameOffsetX":
+        // Needs shadows.
         break;
       case "frameOffsetY":
+        // Needs shadows.
         break;
       case "frameBlurX":
+        // Needs blurs.
         break;
       case "frameBlurY":
+        // Needs blurs.
         break;
     }
-    return _KeyFrameInfo(keyFrameType, propertyKey);
   }
 }
-/**
- * To add a keyframe to a component: 
- * 1 - Key the object:
- * keyedObject = animation.makeKeyed(component);
- * 2 - Start keying a given property:
- * keyedObject.makedKeyed([Component].[name]propertyKey)
- * 3 - Create a keyframe:
- * keyframe = component.addKeyFrame<KeyFrame[Type]>(
- *    animation, 
- *    [Component].[name]propertyKey, 
- *    frame
- *  )
- * 4 - set the keyframe value
- * keyframe.value = value
- */

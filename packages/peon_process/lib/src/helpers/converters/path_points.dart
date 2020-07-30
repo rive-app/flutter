@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:peon_process/src/helpers/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
@@ -8,6 +7,8 @@ import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
+
+import '../converters.dart';
 
 class PathPointConverter extends ComponentConverter {
   PathPointConverter(
@@ -53,23 +54,23 @@ class PathPointConverter extends ComponentConverter {
       // - distance is just the distance between translation and either in or out
       // - rotation
       pathVertex
-        ..rotation = _getRotation(translation, outVec)
-        ..distance = _getDistance(translation, outVec);
+        ..rotation = getRotation(translation, outVec)
+        ..distance = getDistance(translation, outVec);
     } else if (pathVertex is CubicDetachedVertex) {
       pathVertex
-        ..inRotation = _getRotation(translation, inVec)
-        ..inDistance = _getDistance(translation, inVec)
-        ..outRotation = _getRotation(translation, outVec)
-        ..outDistance = _getDistance(translation, outVec);
+        ..inRotation = getRotation(translation, inVec)
+        ..inDistance = getDistance(translation, inVec)
+        ..outRotation = getRotation(translation, outVec)
+        ..outDistance = getDistance(translation, outVec);
     } else if (pathVertex is CubicAsymmetricVertex) {
       pathVertex
-        ..rotation = _getRotation(translation, outVec)
-        ..inDistance = _getDistance(translation, inVec)
-        ..outDistance = _getDistance(translation, outVec);
+        ..rotation = getRotation(translation, outVec)
+        ..inDistance = getDistance(translation, inVec)
+        ..outDistance = getDistance(translation, outVec);
     }
   }
 
-  _getDistance(List start, List end) {
+  static double getDistance(List start, List end) {
     final x1 = start[0].toDouble();
     final x2 = end[0].toDouble();
     final y1 = start[1].toDouble();
@@ -80,12 +81,11 @@ class PathPointConverter extends ComponentConverter {
     return sqrt(dx * dx + dy * dy);
   }
 
-  _getRotation(List first, List second) {
+  static double getRotation(List first, List second) {
     final x1 = first[0].toDouble();
     final x2 = second[0].toDouble();
     final y1 = first[1].toDouble();
     final y2 = second[1].toDouble();
-    // final angle = atan2(y2, x2) - atan2(y1, x1);
     final angle = atan2(y2 - y1, x2 - x1);
     return angle;
   }
