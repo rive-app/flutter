@@ -73,7 +73,12 @@ class AnimationConverter {
     // and converted to our desired int format, to extract the component from
     // the map.
     for (final id in nodeIds) {
-      final component = _fileComponents[id];
+      Component component;
+      if (id == "ORDER") {
+        component = animation.artboard;
+      } else {
+        component = _fileComponents[id];
+      }
 
       final keyFrameGroups = animationNodes[id] as Map<String, Object>;
       for (final keyGroupName in keyFrameGroups.keys) {
@@ -119,7 +124,8 @@ class AnimationConverter {
             .convertKey(component, animation, frame);
         return;
       case "frameDrawOrder":
-        KeyFrameDrawOrderConverter(value, interpolatorType, interpolatorCurve)
+        KeyFrameDrawOrderConverter(
+                _fileComponents, value, interpolatorType, interpolatorCurve)
             .convertKey(component, animation, frame);
         return;
       case "frameLength":
