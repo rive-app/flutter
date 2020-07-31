@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
@@ -7,8 +8,6 @@ import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
-
-import '../converters.dart';
 
 class PathPointConverter extends ComponentConverter {
   PathPointConverter(

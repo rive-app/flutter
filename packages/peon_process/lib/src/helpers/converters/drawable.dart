@@ -1,9 +1,8 @@
 import 'package:core/core.dart';
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_file.dart';
-
-import 'node.dart';
 
 abstract class DrawableConverter extends NodeConverter {
   DrawableConverter(
@@ -22,7 +21,7 @@ abstract class DrawableConverter extends NodeConverter {
     final drawable = component as DrawableBase;
 
     if (drawOrder is int) {
-      // Flare drawOrder starts at 0 and grows idefinetely, with smaller 
+      // Flare drawOrder starts at 0 and grows idefinetely, with smaller
       // drawOrder values that are stored in the 'back', and higher drawOrder
       // values in the 'front'.
       // We use the progression: n/(n + 1), knowing that

@@ -1,8 +1,8 @@
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/fill.dart';
 
-import '../../converters.dart';
 import 'shape_paint.dart';
 
 class FillBaseConverter extends ShapePaintConverter {

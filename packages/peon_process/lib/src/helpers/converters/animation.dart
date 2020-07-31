@@ -1,10 +1,9 @@
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
-
-import '../converters.dart';
 
 class AnimationConverter {
   const AnimationConverter(this._fileComponents, this.riveFile);

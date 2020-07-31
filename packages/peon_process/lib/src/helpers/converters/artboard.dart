@@ -1,10 +1,9 @@
 import 'dart:ui';
 
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
-
-import 'component.dart';
 
 class ArtboardConverter extends ComponentConverter {
   ArtboardConverter(

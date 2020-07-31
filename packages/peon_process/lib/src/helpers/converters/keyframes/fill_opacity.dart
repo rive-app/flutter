@@ -1,3 +1,4 @@
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
@@ -5,8 +6,6 @@ import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
-
-import 'key_frame.dart';
 
 class KeyFrameFillOpacityConverter extends KeyFrameConverter {
   const KeyFrameFillOpacityConverter(
