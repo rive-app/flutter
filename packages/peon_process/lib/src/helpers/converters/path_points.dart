@@ -36,6 +36,7 @@ class PathPointConverter extends ComponentConverter {
     final translation = jsonData['translation'];
     final inVec = jsonData['in'];
     final outVec = jsonData['out'];
+    final radius = jsonData['radius'];
 
     final pathVertex = component as PathVertexBase;
 
@@ -45,7 +46,9 @@ class PathPointConverter extends ComponentConverter {
         ..y = (translation[1] as num).toDouble();
     }
 
-    if (pathVertex is CubicMirroredVertex) {
+    if (pathVertex is StraightVertex) {
+      pathVertex.radius = (radius as num).toDouble();
+    } else if (pathVertex is CubicMirroredVertex) {
       // Cubic Mirrored Vertex needs a rotation and a distance.
       // In Flare a Mirrored vertex had:
       //    a translation, an in-point and an out-point.
