@@ -1,4 +1,5 @@
-import 'package:file_chooser/file_chooser.dart';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
@@ -7,6 +8,7 @@ import 'package:rive_api/models/team.dart';
 import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_api/teams.dart';
+import 'package:rive_editor/platform/load_file.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/dialog/rive_dialog.dart';
@@ -93,20 +95,11 @@ class _SettingsState extends State<Settings> {
       );
 
   Future<void> changeAvatar() async {
-    FileChooserResult result = await showOpenPanel(
-      allowedFileTypes: [
-        const FileTypeFilterGroup(
-          fileExtensions: ['png'],
-        )
-      ],
-      canSelectDirectories: false,
-      allowsMultipleSelection: false,
-      confirmButtonText: 'Select',
-    );
+    Uint8List data = await LoadFile.getUserFile(['png']);
 
-    if (result.paths.isNotEmpty) {
+    if (data != null) {
       final remoteAvatarPath = await RiveTeamsApi(widget.api)
-          .uploadAvatar(widget.owner.ownerId, result.paths.first);
+          .uploadAvatar(widget.owner.ownerId, data);
       // TODO: need error handling.
       // also we could display the avatar before uploading it on 'save'
       // but there's a bit of a journey issue there as the avatar is shown on

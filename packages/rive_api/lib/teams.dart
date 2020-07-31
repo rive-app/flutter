@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/models/billing.dart';
@@ -25,12 +25,12 @@ class RiveTeamsApi<T extends RiveTeam> {
       @required String frequency,
       @required String stripeToken}) async {
     String payload = jsonEncode({
-      "data": {
-        "name": teamName,
-        "username": teamName,
-        "billingPlan": plan,
-        "billingCycle": frequency,
-        "billingToken": stripeToken
+      'data': {
+        'name': teamName,
+        'username': teamName,
+        'billingPlan': plan,
+        'billingCycle': frequency,
+        'billingToken': stripeToken
       }
     });
     var response = await api.post(api.host + '/api/teams', body: payload);
@@ -44,8 +44,8 @@ class RiveTeamsApi<T extends RiveTeam> {
 
   Future<bool> checkName({@required String teamName}) async {
     String payload = jsonEncode({
-      "data": {
-        "username": teamName,
+      'data': {
+        'username': teamName,
       }
     });
     try {
@@ -111,11 +111,9 @@ class RiveTeamsApi<T extends RiveTeam> {
     }
   }
 
-  Future<String> uploadAvatar(int teamId, String localUrl) async {
-    ByteData bytes = await rootBundle.load(localUrl);
-
-    var response = await api.post(api.host + '/api/teams/$teamId/avatar',
-        body: bytes.buffer.asInt8List());
+  Future<String> uploadAvatar(int teamId, Uint8List bytes) async {
+    var response =
+        await api.post(api.host + '/api/teams/$teamId/avatar', body: bytes);
     final data = json.decodeMap(response.body);
 
     return data.getString('url');
