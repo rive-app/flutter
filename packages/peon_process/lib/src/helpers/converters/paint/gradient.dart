@@ -14,15 +14,17 @@ abstract class ColorExtractor {
 
   void extractColor(Map<String, Object> jsonData) {
     final color = jsonData['color'];
+    final opacity = jsonData['opacity'];
 
     if (color is List) {
       assert(color.every((Object e) => e is num));
+      assert(opacity is num);
 
       final colorValue = Color.fromRGBO(
         ((color[0] as num) * 255).toInt(),
         ((color[1] as num) * 255).toInt(),
         ((color[2] as num) * 255).toInt(),
-        (color[3] as num).toDouble(),
+        (opacity as num).toDouble(),
       );
       final solidColor = SolidColor()..color = colorValue;
 
@@ -45,6 +47,8 @@ abstract class ColorExtractor {
     // Ending position in local coordinates for this gradient
     final end = jsonData["end"];
     final type = jsonData["type"];
+    final opacity = jsonData['opacity'];
+
     final isRadial = (type as String).toLowerCase().contains("radial");
     final gradient = isRadial ? RadialGradient() : LinearGradient();
 
@@ -58,6 +62,10 @@ abstract class ColorExtractor {
       gradient
         ..endX = end[0].toDouble()
         ..endY = end[1].toDouble();
+    }
+
+    if (opacity is num) {
+      gradient.opacity = opacity.toDouble();
     }
 
     final stops = <GradientStop>[];

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
@@ -7,10 +8,6 @@ import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
-
-import '../../converters.dart';
-import 'key_frame.dart';
-
 ///
 /// The input value in this case is a JSON object containing:
 /// - 'pos' that is the vertex translation in this keyframe
