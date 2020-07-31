@@ -5,6 +5,7 @@ import 'package:admin/teams.dart';
 import 'package:admin/charges.dart';
 import 'package:admin/transactions.dart';
 import 'package:admin/token_generator.dart';
+import 'package:admin/users.dart';
 import 'package:flutter/material.dart';
 
 class AdminView extends StatelessWidget {
@@ -20,6 +21,7 @@ class AdminView extends StatelessWidget {
           children: [
             const AdminPageButton('Impersonate'),
             const AdminPageButton('Invite'),
+            const AdminPageButton('Users'),
             const AdminPageButton('Teams'),
             const AdminPageButton('Charges'),
             const AdminPageButton('Transactions'),
@@ -64,4 +66,5 @@ final _routeNameToPage = <String, Widget>{
   'Teams': Teams(),
   'Charges': Charges(),
   'Transactions': Transactions(),
+  'Users': Users(),
 };

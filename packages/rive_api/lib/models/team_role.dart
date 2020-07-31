@@ -16,8 +16,7 @@ bool canEditTeam(TeamRole role) => adminRoles.contains(role);
 extension TeamRoleExtension on TeamRole {
   String get name => describeEnum(this).capsFirst;
 
-  static List<String> get names =>
-      TeamRole.values.map((e) => e.name).toList();
+  static List<String> get names => TeamRole.values.map((e) => e.name).toList();
 
   static TeamRole teamRoleFromString(String value) {
     switch (value) {
@@ -36,9 +35,6 @@ extension TeamRoleExtension on TeamRole {
     }
   }
 
-  static List<TeamRole> get dropdownOptions => [
-    TeamRole.member,
-    TeamRole.admin,
-    TeamRole.owner
-  ];
+  static List<TeamRole> get dropdownOptions =>
+      [TeamRole.member, TeamRole.admin];
 }
