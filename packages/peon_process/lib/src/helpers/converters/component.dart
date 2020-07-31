@@ -24,7 +24,7 @@ abstract class ComponentConverter {
     final name = jsonData['name'];
     // final parentId = jsonData['parent'];
 
-    print('"Component" Name $name');
+    print('Component ${_component.runtimeType} "$name"');
     if (name is String) {
       _component.name = name;
     }

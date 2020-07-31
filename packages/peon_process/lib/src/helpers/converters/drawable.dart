@@ -28,6 +28,8 @@ abstract class DrawableConverter extends NodeConverter {
       // n/(n + 1) < (n + 1) / (n + 2), ∀ n > 0
       // https://bit.ly/3jD3xCm
       drawable.drawOrder = FractionalIndex(drawOrder, drawOrder + 1);
+      final artboard = drawable.artboard;
+      artboard.drawables.sortDrawables();
     }
 
     if (blendMode is String) {

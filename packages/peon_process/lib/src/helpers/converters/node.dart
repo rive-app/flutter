@@ -23,11 +23,10 @@ class NodeConverter extends ComponentConverter {
     final clips = jsonData['clips'];
     final clipsOptions = jsonData['clipsOptions'];
 
-    // print('Node: $jsonData');
-    print('Node');
-    print('Translation: $translation');
-    print('Scale: $scale');
-    print('Opacity: $opacity');
+    // print('Node');
+    // print('Translation: $translation');
+    // print('Scale: $scale');
+    // print('Opacity: $opacity');
 
     final node = component as Node;
 
