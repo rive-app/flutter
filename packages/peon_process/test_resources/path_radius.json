@@ -1,0 +1,181 @@
+{
+  "artboards": {
+    "children": [
+      {
+        "animations": [],
+        "children": [
+          {
+            "blendMode": "srcOver",
+            "children": [
+              {
+                "cap": "butt",
+                "color": [
+                  0.800000011920929,
+                  0.800000011920929,
+                  0.800000011920929,
+                  1
+                ],
+                "id": 1001,
+                "join": "miter",
+                "name": "Color",
+                "opacity": 1,
+                "trim": "off",
+                "trimEnd": 1,
+                "trimOffset": 0,
+                "trimStart": 0,
+                "type": "colorStroke",
+                "width": 1
+              },
+              {
+                "children": [
+                  {
+                    "id": 1005,
+                    "in": [
+                      0,
+                      0
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      0,
+                      0
+                    ],
+                    "pointType": "S",
+                    "radius": 0,
+                    "translation": [
+                      -240,
+                      -160
+                    ],
+                    "type": "point"
+                  },
+                  {
+                    "id": 1006,
+                    "in": [
+                      0,
+                      0
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      0,
+                      0
+                    ],
+                    "pointType": "S",
+                    "radius": 0,
+                    "translation": [
+                      240,
+                      -160
+                    ],
+                    "type": "point"
+                  },
+                  {
+                    "id": 1007,
+                    "in": [
+                      0,
+                      0
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      0,
+                      0
+                    ],
+                    "pointType": "S",
+                    "radius": 67,
+                    "translation": [
+                      240,
+                      160
+                    ],
+                    "type": "point"
+                  },
+                  {
+                    "id": 1008,
+                    "in": [
+                      0,
+                      0
+                    ],
+                    "name": "Path Point",
+                    "out": [
+                      0,
+                      0
+                    ],
+                    "pointType": "S",
+                    "radius": 0,
+                    "translation": [
+                      -240,
+                      160
+                    ],
+                    "type": "point"
+                  }
+                ],
+                "id": 1004,
+                "isClosed": true,
+                "name": "Rectangle Path",
+                "type": "path"
+              },
+              {
+                "colorStops": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  1
+                ],
+                "end": [
+                  0,
+                  160
+                ],
+                "fillRule": "nonzero",
+                "id": 1009,
+                "name": "Color",
+                "opacity": 0.5049999999999997,
+                "secondaryRadiusScale": 1,
+                "start": [
+                  0,
+                  -160
+                ],
+                "type": "radialGradientFill"
+              }
+            ],
+            "drawOrder": 1,
+            "id": 1000,
+            "name": "Rectangle",
+            "transformAffectsStroke": false,
+            "translation": [
+              361,
+              287
+            ],
+            "type": "shape"
+          }
+        ],
+        "clipContents": true,
+        "color": [
+          0.364705890417099,
+          0.364705890417099,
+          0.364705890417099,
+          1
+        ],
+        "height": 716,
+        "id": 999,
+        "name": "Main",
+        "origin": [
+          0,
+          0
+        ],
+        "translation": [
+          187,
+          -356
+        ],
+        "type": "artboard",
+        "width": 890
+      }
+    ],
+    "id": 985,
+    "main": 0,
+    "name": "Artboards",
+    "type": "artboards"
+  },
+  "settings": {}
+}

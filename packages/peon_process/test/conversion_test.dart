@@ -83,7 +83,7 @@ void main() {
   }
 
   test('Converts Flare revision to Rive', () {
-    convertFlareRevision('draw_order');
+    convertFlareRevision('multiple_paths');
   });
 
   test('Converts all test files', () {
