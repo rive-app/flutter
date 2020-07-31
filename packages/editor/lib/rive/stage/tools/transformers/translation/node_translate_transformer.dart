@@ -12,12 +12,14 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:utilities/iterable.dart';
+import 'package:utilities/restorer.dart';
 
 /// Transformer that translates [StageItem]'s with underlying [Node] components.
 class NodeTranslateTransformer extends StageTransformer {
   Iterable<Node> _nodes;
   final Vec2D lockAxis;
   Snapper _snapper;
+  Restorer _handleRestorer;
 
   /// Should items snap while translating?
   final ValueNotifier<bool> _snap;
@@ -73,10 +75,22 @@ class NodeTranslateTransformer extends StageTransformer {
   }
 
   @override
-  void complete() {}
+  void complete() => // Restore the hidden handles if necessary
+      _handleRestorer?.restore();
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
+    assert(
+      items.isNotEmpty,
+      'Initializing transformer on an empty set of items',
+    );
+    // If there's no lock axis, then it's a freeform translate, so hide all the
+    // transform handles on stage.
+    if (lockAxis == null) {
+      final stage = items.first.stage;
+      _handleRestorer = stage.hideHandles();
+    }
+
     _nodes =
         topComponents(items.mapWhereType<Node>((element) => element.component));
     if (_nodes.isNotEmpty) {
