@@ -75,6 +75,22 @@ class AdminManager {
     return false;
   }
 
+  Future<dynamic> listUsers() async {
+    var response = await api.get(api.host + '/api/admin/users');
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['data'];
+    }
+    return false;
+  }
+
+  Future<dynamic> deleteUser(int ownerId) async {
+    var response = await api.delete(api.host + '/api/admin/users/$ownerId');
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['data'];
+    }
+    return false;
+  }
+
   Future<dynamic> listCharges() async {
     var response = await api.get(api.host + '/api/admin/charges');
     if (response.statusCode == 200) {
