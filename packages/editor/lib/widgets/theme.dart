@@ -471,13 +471,13 @@ class TextStyles {
 
   // Get started
   TextStyle get cardHeading =>
-      const TextStyle(fontFamily: 'Roboto-Regular', color: white, fontSize: 16);
+      const TextStyle(fontFamily: 'Roboto-Regular', color: white, fontSize: 16, height: 1.6,);
 
   TextStyle get cardBlurb => const TextStyle(
         fontFamily: 'Roboto-Regular',
         color: white,
-        fontSize: 11,
-        height: 1.5,
+        fontSize: 13,
+        height: 1.6,
       );
 
   TextStyle get urlBlurb => const TextStyle(

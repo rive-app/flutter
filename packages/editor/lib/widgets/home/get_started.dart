@@ -70,37 +70,37 @@ class RightPanel extends StatelessWidget {
       child: Column(
         children: const [
           UrlCard(
-            icon: PackedIcon.settings,
+            icon: PackedIcon.desktop,
             blurb: 'Get the desktop app!',
             url: 'https://rive.app/',
           ),
           SizedBox(height: 20),
           UrlCard(
-            icon: PackedIcon.settings,
+            icon: PackedIcon.runtimes,
             blurb: 'Get the Runtimes',
             url: 'https://github.com/rive-app/rive-flutter',
           ),
           SizedBox(height: 20),
           UrlCard(
-            icon: PackedIcon.settings,
+            icon: PackedIcon.helpCenter,
             blurb: 'Help Center',
             url: 'https://help.rive.app',
           ),
           SizedBox(height: 20),
           UrlCard(
-            icon: PackedIcon.settings,
+            icon: PackedIcon.discord,
             blurb: 'Join us on Discord',
             url: 'https://discord.gg/FGjmaTr',
           ),
           SizedBox(height: 20),
           UrlCard(
-            icon: PackedIcon.settings,
+            icon: PackedIcon.signinTwitter,
             blurb: 'Follow us on Twitter',
             url: 'https://twitter.com/rive_app',
           ),
           SizedBox(height: 20),
           UrlCard(
-            icon: PackedIcon.settings,
+            icon: PackedIcon.feedback,
             blurb: 'Send feedback',
             url: 'https://feedback.rive.app',
           ),
@@ -140,12 +140,26 @@ class LargeCard extends StatelessWidget {
             // width: 685,
             height: 384,
             decoration: BoxDecoration(
-              image: DecorationImage(
+                image: DecorationImage(
                 image: AssetImage(backgroundImageAsset),
                 fit: BoxFit.cover,
               ),
               borderRadius: const BorderRadius.all(
                 Radius.circular(10),
+              ),
+            ),
+            child: Container(
+              //add gradient overlay to image so text is more legible
+              height: 384,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                begin: Alignment(0.0, 0.3),
+                end: Alignment.bottomCenter,
+                colors: [const Color(0x00000000), const Color(0x59000000)],
+                ),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(10),
+                ),
               ),
             ),
           ),
@@ -246,11 +260,12 @@ class PlayIcon extends LeafRenderObjectWidget {
 class PlayIconRenderBox extends RenderBox {
   final _circlePaint = Paint()
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 5
+    ..strokeWidth = 1
     ..color = const Color(0xFFFFFFFF);
 
   final _trianglePaint = Paint()
-    ..style = PaintingStyle.fill
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1
     ..color = const Color(0xFFFFFFFF);
 
   @override
