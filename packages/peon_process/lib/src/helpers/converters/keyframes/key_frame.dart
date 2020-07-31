@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
-
-import 'interpolator.dart';
 
 abstract class KeyFrameConverter {
   const KeyFrameConverter(

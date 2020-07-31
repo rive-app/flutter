@@ -1,3 +1,4 @@
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/keyframe_color.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/animation/linear_animation.dart';
@@ -5,8 +6,6 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
-
-import '../../converters.dart';
 
 class KeyFrameRadialGradientConverter extends KeyFrameGradientConverter {
   /// Radial Gradients in Flare had the same format as normal gradients, with

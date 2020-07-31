@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/keyframe_draw_order.dart';
 import 'package:rive_core/animation/keyframe_draw_order_value.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
@@ -6,12 +7,12 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/drawable.dart';
 
-import 'key_frame.dart';
-
 class KeyFrameDrawOrderConverter extends KeyFrameConverter {
-  const KeyFrameDrawOrderConverter(
-      num value, int interpolatorType, List interpolatorCurve)
+  const KeyFrameDrawOrderConverter(this.fileComponents, Map value,
+      int interpolatorType, List interpolatorCurve)
       : super(value, interpolatorType, interpolatorCurve);
+
+  final Map<String, Component> fileComponents;
 
   @override
   void convertKey(Component component, LinearAnimation animation, int frame) {
@@ -20,15 +21,16 @@ class KeyFrameDrawOrderConverter extends KeyFrameConverter {
     final key = generateKey<KeyFrameDrawOrder>(
         artboard, animation, frame, DrawableBase.drawOrderPropertyKey);
 
-    final numValue = value as num;
+    final drawOrderValues = value as Map<String, Object>;
 
-    // TODO:
-    // make sure that this makes sense, and it doesn't need an
-    // extra pre-processing step.
-    final drawOrderValue = KeyFrameDrawOrderValue()
-      ..drawableId = component.id
-      ..value = FractionalIndex(numValue, numValue + 1);
-    key.internalAddValue(drawOrderValue);
-    key.interpolation = KeyFrameInterpolation.hold;
+    for (final componentId in drawOrderValues.keys) {
+      final drawOrderComponent = fileComponents[componentId];
+      final drawOrder = drawOrderValues[componentId] as num;
+      final drawOrderValue = KeyFrameDrawOrderValue()
+        ..drawableId = drawOrderComponent.id
+        ..value = FractionalIndex(drawOrder, drawOrder + 1);
+      key.internalAddValue(drawOrderValue);
+      key.interpolation = KeyFrameInterpolation.hold;
+    }
   }
 }

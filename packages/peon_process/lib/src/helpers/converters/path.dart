@@ -1,11 +1,10 @@
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/shapes/points_path.dart';
 
-import '../converters.dart';
-
-class PathConverter extends ComponentConverter {
+class PathConverter extends NodeConverter {
   PathConverter(
       Path component, RiveFile context, ContainerComponent maybeParent)
       : super(component, context, maybeParent);

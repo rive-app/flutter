@@ -1,8 +1,7 @@
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/shape.dart';
-
-import 'drawable.dart';
 
 class ShapeConverter extends DrawableConverter {
   ShapeConverter(

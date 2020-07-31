@@ -1,11 +1,11 @@
 import 'dart:math';
 
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/node.dart';
 
-import 'key_frame.dart';
 
 class KeyFrameRotation extends KeyFrameConverter {
   KeyFrameRotation(num value, int interpolatorType, List interpolatorCurve)

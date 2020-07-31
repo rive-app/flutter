@@ -83,7 +83,7 @@ void main() {
   }
 
   test('Converts Flare revision to Rive', () {
-    convertFlareRevision('interpolation');
+    convertFlareRevision('multiple_paths');
   });
 
   test('Converts all test files', () {

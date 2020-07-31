@@ -1,10 +1,9 @@
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/rive_file.dart';
-
-import '../converters.dart';
 
 class AnimationConverter {
   const AnimationConverter(this._fileComponents, this.riveFile);
@@ -73,7 +72,12 @@ class AnimationConverter {
     // and converted to our desired int format, to extract the component from
     // the map.
     for (final id in nodeIds) {
-      final component = _fileComponents[id];
+      Component component;
+      if (id == "ORDER") {
+        component = animation.artboard;
+      } else {
+        component = _fileComponents[id];
+      }
 
       final keyFrameGroups = animationNodes[id] as Map<String, Object>;
       for (final keyGroupName in keyFrameGroups.keys) {
@@ -119,7 +123,8 @@ class AnimationConverter {
             .convertKey(component, animation, frame);
         return;
       case "frameDrawOrder":
-        KeyFrameDrawOrderConverter(value, interpolatorType, interpolatorCurve)
+        KeyFrameDrawOrderConverter(
+                _fileComponents, value, interpolatorType, interpolatorCurve)
             .convertKey(component, animation, frame);
         return;
       case "frameLength":

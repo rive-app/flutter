@@ -1,0 +1,223 @@
+{
+  "artboards": {
+    "children": [
+      {
+        "animations": [
+          {
+            "displayEnd": 1,
+            "displayStart": 0,
+            "duration": 1,
+            "fps": 60,
+            "id": 9000,
+            "isWorkAreaActive": false,
+            "loop": false,
+            "name": "bla",
+            "nodes": {
+              "991": {
+                "framePosX": [
+                  {
+                    "i": 1,
+                    "t": 0,
+                    "v": 310.5
+                  },
+                  {
+                    "i": 1,
+                    "t": 0.5,
+                    "v": 563.4156494140625
+                  },
+                  {
+                    "i": 1,
+                    "t": 1,
+                    "v": 310.5
+                  }
+                ],
+                "framePosY": [
+                  {
+                    "i": 1,
+                    "t": 0,
+                    "v": 354.5
+                  },
+                  {
+                    "i": 1,
+                    "t": 0.5,
+                    "v": 220.84548950195312
+                  },
+                  {
+                    "i": 1,
+                    "t": 1,
+                    "v": 354.5
+                  }
+                ]
+              },
+              "ORDER": {
+                "frameDrawOrder": [
+                  {
+                    "i": 1,
+                    "t": 0,
+                    "v": {
+                      "991": 1,
+                      "995": 2
+                    }
+                  },
+                  {
+                    "i": 1,
+                    "t": 0.5,
+                    "v": {
+                      "991": 2,
+                      "995": 1
+                    }
+                  },
+                  {
+                    "i": 1,
+                    "t": 1,
+                    "v": {
+                      "991": 1,
+                      "995": 2
+                    }
+                  }
+                ]
+              }
+            },
+            "order": -1,
+            "position": 0.2,
+            "workAreaEnd": 1,
+            "workAreaStart": 0
+          }
+        ],
+        "children": [
+          {
+            "blendMode": "srcOver",
+            "children": [
+              {
+                "cap": "butt",
+                "color": [
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "id": 992,
+                "join": "miter",
+                "name": "Color",
+                "opacity": 1,
+                "trim": "off",
+                "trimEnd": 1,
+                "trimOffset": 0,
+                "trimStart": 0,
+                "type": "colorStroke",
+                "width": 14.7
+              },
+              {
+                "color": [
+                  0.08925002068281174,
+                  0.6902424097061157,
+                  0.8500000238418579,
+                  1
+                ],
+                "fillRule": "nonzero",
+                "id": 993,
+                "name": "Color",
+                "opacity": 1,
+                "type": "colorFill"
+              },
+              {
+                "cornerRadius": 0,
+                "height": 200,
+                "id": 994,
+                "name": "Rectangle Path",
+                "type": "rectangle",
+                "width": 500
+              }
+            ],
+            "drawOrder": 1,
+            "id": 991,
+            "name": "Rectangle",
+            "transformAffectsStroke": false,
+            "translation": [
+              310.5,
+              354.5
+            ],
+            "type": "shape"
+          },
+          {
+            "blendMode": "srcOver",
+            "children": [
+              {
+                "cap": "butt",
+                "color": [
+                  0.800000011920929,
+                  0.800000011920929,
+                  0.800000011920929,
+                  1
+                ],
+                "id": 996,
+                "join": "miter",
+                "name": "Color",
+                "opacity": 1,
+                "trim": "off",
+                "trimEnd": 1,
+                "trimOffset": 0,
+                "trimStart": 0,
+                "type": "colorStroke",
+                "width": 1
+              },
+              {
+                "color": [
+                  0.4000000059604645,
+                  0.4000000059604645,
+                  0.4000000059604645,
+                  1
+                ],
+                "fillRule": "nonzero",
+                "id": 997,
+                "name": "Color",
+                "opacity": 0.695,
+                "type": "colorFill"
+              },
+              {
+                "height": 408,
+                "id": 998,
+                "name": "Ellipse Path",
+                "type": "ellipse",
+                "width": 408
+              }
+            ],
+            "drawOrder": 2,
+            "id": 995,
+            "name": "Ellipse",
+            "transformAffectsStroke": false,
+            "translation": [
+              447,
+              342
+            ],
+            "type": "shape"
+          }
+        ],
+        "clipContents": true,
+        "color": [
+          0.364705890417099,
+          0.364705890417099,
+          0.364705890417099,
+          1
+        ],
+        "height": 768,
+        "id": 986,
+        "name": "Artboard",
+        "origin": [
+          0,
+          0
+        ],
+        "translation": [
+          0,
+          0
+        ],
+        "type": "artboard",
+        "width": 1024
+      }
+    ],
+    "id": 985,
+    "main": 0,
+    "name": "Artboards",
+    "type": "artboards"
+  }
+}

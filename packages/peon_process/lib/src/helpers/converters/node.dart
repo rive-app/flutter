@@ -1,10 +1,9 @@
 import 'dart:math';
 
+import 'package:peon_process/converters.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
-
-import 'component.dart';
 
 class NodeConverter extends ComponentConverter {
   NodeConverter(
@@ -24,11 +23,10 @@ class NodeConverter extends ComponentConverter {
     final clips = jsonData['clips'];
     final clipsOptions = jsonData['clipsOptions'];
 
-    // print('Node: $jsonData');
-    print('Node');
-    print('Translation: $translation');
-    print('Scale: $scale');
-    print('Opacity: $opacity');
+    // print('Node');
+    // print('Translation: $translation');
+    // print('Scale: $scale');
+    // print('Opacity: $opacity');
 
     final node = component as Node;
 
