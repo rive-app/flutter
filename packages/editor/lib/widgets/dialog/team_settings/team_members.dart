@@ -419,6 +419,7 @@ class _MemberRowState extends State<_MemberRow> {
     var me = Plumber().peek<Me>();
     var options = TeamRoleExtension.dropdownOptions;
     if (me.ownerId != widget.user.ownerId) {
+      options.add(null);
       options.add(TeamRole.delete);
     }
     return options;
@@ -490,17 +491,30 @@ class _MemberRowState extends State<_MemberRow> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 2),
-                ComboBox<TeamRole>(
-                  value: _currentRole,
-                  change: _onRoleChanged,
-                  alignment: Alignment.topRight,
-                  options: _dropdownOptions,
-                  toLabel: (option) => option.name,
-                  popupWidth: 116,
-                  underline: false,
-                  valueColor: colors.fileBackgroundDarkGrey,
-                  sizing: ComboSizing.content,
-                ),
+                if (_currentRole == TeamRole.owner)
+                  Row(
+                    children: [
+                      Text(
+                        _currentRole.name,
+                        style: theme.textStyles.basic
+                            .copyWith(color: colors.fileBackgroundDarkGrey),
+                      ),
+                      const SizedBox(width: 24),
+                    ],
+                  ),
+                if (_currentRole != TeamRole.owner)
+                  ComboBox<TeamRole>(
+                    value: _currentRole,
+                    change: _onRoleChanged,
+                    alignment: Alignment.topRight,
+                    options: _dropdownOptions,
+                    toLabel: (option) => option?.name ?? '-',
+                    popupWidth: 116,
+                    underline: false,
+                    valueColor: colors.fileBackgroundDarkGrey,
+                    sizing: ComboSizing.content,
+                    disabled: _currentRole == TeamRole.owner,
+                  ),
               ],
             ),
           ],
