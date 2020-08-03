@@ -66,6 +66,7 @@ mixin TransformingTool {
   /// Start a drag operation in world coordinates relative to the origin of the
   /// [activeArtboard]. The [activeArtboard] for this operation is provided as
   /// well.
+  @mustCallSuper
   void startTransformers(
     Iterable<StageItem> selection,
     Vec2D worldMouse,
@@ -86,7 +87,7 @@ mixin TransformingTool {
       // Make a mutable list so that the transformers can modify it if they want
       // to take items out of play from other transformers. N.B. transformer
       // order is important in such cases.
-      var mutableSelection = Set<StageItem>.from(details.items);
+      final mutableSelection = Set<StageItem>.from(details.items);
 
       for (final transformer in transformers) {
         // Because previous transformers can mutate the set...
@@ -125,7 +126,7 @@ mixin TransformingTool {
   List<StageTransformer> get transformers => [];
 
   void drawTransformers(Canvas canvas) {
-    if(_artboardTransformSpaces == null) {
+    if (_artboardTransformSpaces == null) {
       return;
     }
     for (final details in _artboardTransformSpaces.values) {

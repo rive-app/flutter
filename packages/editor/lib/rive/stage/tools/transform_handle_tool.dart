@@ -14,6 +14,7 @@ import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
+import 'package:utilities/restorer.dart';
 
 abstract class TransformHandleTool extends StageTool
     with DraggableTool, TransformingTool {
@@ -61,6 +62,9 @@ abstract class TransformHandleTool extends StageTool
   SelectionContext<SelectableItem> _selectionContext;
   Set<Node> _nodes = {};
 
+  /// Tracks hidden handles that should be restored when transformers complete
+  Restorer restoreHandles;
+
   @override
   bool activate(Stage stage) {
     if (!super.activate(stage)) {
@@ -73,6 +77,31 @@ abstract class TransformHandleTool extends StageTool
     stage.isHidingHandlesChanged.addListener(_selectionChanged);
     _selectionChanged();
     return true;
+  }
+
+  @override
+  void startTransformers(
+    covariant Iterable<StageItem> selection,
+    Vec2D worldMouse,
+  ) {
+    // Call the super before messing with hiding things
+    super.startTransformers(selection, worldMouse);
+    for (final transformer in transformers) {
+      if (transformer.hideHandles) {
+        restoreHandles = stage.hideHandles();
+        break;
+      }
+    }
+  }
+
+  @override
+  void completeTransformers() {
+    super.completeTransformers();
+    // Restore handles if necessary
+    if (restoreHandles != null) {
+      restoreHandles.restore();
+      restoreHandles = null;
+    }
   }
 
   StageHandle _transformingHandle;
