@@ -1072,8 +1072,9 @@ class CreditCardForm extends StatelessWidget {
               RiveTextField(
                 initialValue: sub.zip,
                 formatters: <TextInputFormatter>[
-                  WhitelistingTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(5),
+                  // Field lengths : the longest postal code currently
+                  // in use in the world is 10 digits long.
+                  LengthLimitingTextInputFormatter(10),
                 ],
                 hintText: '90210',
                 onChanged: (zip) => sub.zip = zip,
