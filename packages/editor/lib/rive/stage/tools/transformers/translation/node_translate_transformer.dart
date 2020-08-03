@@ -12,20 +12,23 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:utilities/iterable.dart';
-import 'package:utilities/restorer.dart';
 
 /// Transformer that translates [StageItem]'s with underlying [Node] components.
 class NodeTranslateTransformer extends StageTransformer {
+  NodeTranslateTransformer({this.lockAxis, ValueNotifier<bool> snap})
+      : _snap = snap ?? ValueNotifier<bool>(true);
+
   Iterable<Node> _nodes;
   final Vec2D lockAxis;
   Snapper _snapper;
-  Restorer _handleRestorer;
 
   /// Should items snap while translating?
   final ValueNotifier<bool> _snap;
 
-  NodeTranslateTransformer({this.lockAxis, ValueNotifier<bool> snap})
-      : _snap = snap ?? ValueNotifier<bool>(true);
+  /// Hide the handles while transforming across both axes, i.e. when not locked
+  /// to one axis
+  @override
+  bool get hideHandles => lockAxis == null;
 
   @override
   void advance(DragTransformDetails details) {
@@ -75,8 +78,7 @@ class NodeTranslateTransformer extends StageTransformer {
   }
 
   @override
-  void complete() => // Restore the hidden handles if necessary
-      _handleRestorer?.restore();
+  void complete() {}
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
@@ -84,12 +86,6 @@ class NodeTranslateTransformer extends StageTransformer {
       items.isNotEmpty,
       'Initializing transformer on an empty set of items',
     );
-    // If there's no lock axis, then it's a freeform translate, so hide all the
-    // transform handles on stage.
-    if (lockAxis == null) {
-      final stage = items.first.stage;
-      _handleRestorer = stage.hideHandles();
-    }
 
     _nodes =
         topComponents(items.mapWhereType<Node>((element) => element.component));
