@@ -84,6 +84,7 @@ abstract class TransformHandleTool extends StageTool
     covariant Iterable<StageItem> selection,
     Vec2D worldMouse,
   ) {
+    // Call the super before messing with hiding things
     super.startTransformers(selection, worldMouse);
     for (final transformer in transformers) {
       if (transformer.hideHandles) {
