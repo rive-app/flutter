@@ -164,15 +164,19 @@ abstract class TreeController<T> with ChangeNotifier {
   }
 
   /// Show the children of [item].
-  void expand(T item) {
+  bool expand(T item, {bool callFlatten = true}) {
     final expanded = _expanded;
     if (!expanded.contains(item)) {
       var children = childrenOf(item);
       if (children?.isNotEmpty ?? false) {
-        expanded.add(item);
-        flatten();
+        bool added = expanded.add(item);
+        if (callFlatten) {
+          flatten();
+        }
+        return added;
       }
     }
+    return false;
   }
 
   /// Show the item by expanding its parents
@@ -180,7 +184,16 @@ abstract class TreeController<T> with ChangeNotifier {
     for (final d in data) {
       final parents = _findParents(null, d, item);
       if (parents.isNotEmpty) {
-        parents.forEach(expand);
+        bool needsFlatten = false;
+        for (final parent in parents) {
+          if (expand(parent, callFlatten: false)) {
+            needsFlatten = true;
+          }
+        }
+        if (needsFlatten) {
+          flatten();
+        }
+
         break;
       }
     }
