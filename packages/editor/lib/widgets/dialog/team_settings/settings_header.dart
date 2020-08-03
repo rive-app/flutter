@@ -14,10 +14,15 @@ class SettingsHeader extends StatefulWidget {
   final String name;
   final int teamSize;
   final String avatarPath;
+  final bool avatarUploading;
   final VoidCallback changeAvatar;
 
   const SettingsHeader(
-      {@required this.name, this.teamSize, this.avatarPath, this.changeAvatar});
+      {@required this.name,
+      this.teamSize,
+      this.avatarPath,
+      this.changeAvatar,
+      this.avatarUploading});
 
   @override
   _SettingsHeaderState createState() => _SettingsHeaderState();
@@ -91,9 +96,9 @@ class _SettingsHeaderState extends State<SettingsHeader> {
           mainAxisSize: MainAxisSize.min,
           children: [
             EditableAvatar(
-              avatarPath: widget.avatarPath,
-              changeAvatar: widget.changeAvatar,
-            ),
+                avatarPath: widget.avatarPath,
+                changeAvatar: widget.changeAvatar,
+                avatarUploading: widget.avatarUploading),
             const SizedBox(width: 10),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -124,12 +129,14 @@ class EditableAvatar extends StatefulWidget {
   const EditableAvatar({
     @required this.avatarPath,
     @required this.changeAvatar,
+    @required this.avatarUploading,
     this.avatarRadius = 25,
     Key key,
   }) : super(key: key);
 
   final String avatarPath;
   final VoidCallback changeAvatar;
+  final bool avatarUploading;
 
   @override
   _EditableAvatarState createState() =>
@@ -153,7 +160,13 @@ class _EditableAvatarState extends State<EditableAvatar> {
     final theme = RiveTheme.of(context);
     final riveColors = theme.colors;
 
-    if (widget.avatarPath == null) {
+    if (widget.avatarUploading) {
+      children.add(Center(
+          child: SizedBox(
+              width: radius * 2,
+              height: radius * 2,
+              child: const CircularProgressIndicator())));
+    } else if (widget.avatarPath == null) {
       children.addAll([
         Positioned.fill(
             child: CustomPaint(
@@ -183,7 +196,10 @@ class _EditableAvatarState extends State<EditableAvatar> {
       width: radius * 2,
       height: radius * 2,
       child: GestureDetector(
-        onTap: widget.changeAvatar,
+        onTap: () {
+          setHover(false);
+          widget.changeAvatar();
+        },
         child: MouseRegion(
           // only trigger hover change if we have a changeAvatar implementation
           onEnter: (_) => setHover((widget.changeAvatar != null) && true),

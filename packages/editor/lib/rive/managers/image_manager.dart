@@ -49,16 +49,25 @@ class CachedCircleAvatar extends StatelessWidget {
       );
     }
 
+    Future<Widget> _getFutureAvatar(String url) async {
+      var bytes =
+          await ImageCacheProvider.of(context).loadRawImageFromUrl(imageUrl);
+      return getAvatar(bytes);
+    }
+
     Widget getCachedAvatar(Uint8List cachedImage) {
       if (cachedImage != null) {
         return getAvatar(cachedImage);
       } else {
-        return FutureBuilder<Uint8List>(
-            future:
-                ImageCacheProvider.of(context).loadRawImageFromUrl(imageUrl),
-            builder: (context, snapshot) {
-              return getAvatar(snapshot.hasData ? snapshot.data : null);
-            });
+        return FutureBuilder<Widget>(
+          future: _getFutureAvatar(imageUrl),
+          builder: (context, snapshot) {
+            return snapshot.hasData
+                ? snapshot.data
+                : const CircularProgressIndicator();
+          },
+          initialData: const CircularProgressIndicator(),
+        );
       }
     }
 

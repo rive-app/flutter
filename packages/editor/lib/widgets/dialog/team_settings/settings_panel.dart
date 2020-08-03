@@ -69,6 +69,7 @@ class _SettingsState extends State<Settings> {
   }
   int _selectedIndex;
   String newAvatarPath;
+  bool avatarUploading = false;
 
   bool get isTeam => widget.owner is Team;
   Team get team => isTeam ? widget.owner as Team : null;
@@ -99,20 +100,27 @@ class _SettingsState extends State<Settings> {
 
     if (data != null) {
       String remoteAvatarPath;
-      if (isTeam) {
-        remoteAvatarPath = await RiveTeamsApi(widget.api)
-            .uploadAvatar(widget.owner.ownerId, data);
-      } else {
-        remoteAvatarPath = await MeApi(widget.api).uploadAvatar(data);
-      }
+      setState(() {
+        avatarUploading = true;
+      });
 
-      if (remoteAvatarPath != null) {
+      try {
+        if (isTeam) {
+          remoteAvatarPath = await RiveTeamsApi(widget.api)
+              .uploadAvatar(widget.owner.ownerId, data);
+        } else {
+          remoteAvatarPath = await MeApi(widget.api).uploadAvatar(data);
+        }
+      } finally {
         setState(() {
-          newAvatarPath = remoteAvatarPath;
-          if (isTeam) {
-            TeamManager().loadTeams();
-          } else {
-            UserManager().updateAvatar(remoteAvatarPath);
+          avatarUploading = false;
+          if (remoteAvatarPath != null) {
+            newAvatarPath = remoteAvatarPath;
+            if (isTeam) {
+              TeamManager().loadTeams();
+            } else {
+              UserManager().updateAvatar(remoteAvatarPath);
+            }
           }
         });
       }
@@ -170,7 +178,7 @@ class _SettingsState extends State<Settings> {
               children: <Widget>[
                 SettingsHeader(
                   name: widget.owner.displayName,
-                  // TODO: hm, we probably should store avatar with team.
+                  avatarUploading: avatarUploading,
                   avatarPath: (newAvatarPath == null)
                       ? widget.owner.avatarUrl
                       : newAvatarPath,
