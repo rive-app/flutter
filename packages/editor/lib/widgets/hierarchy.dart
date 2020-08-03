@@ -44,6 +44,9 @@ class _HierarchyTreeViewState extends State<HierarchyTreeView> {
   void _ensureComponentVisible(Component component) {
     var key = ValueKey(component);
     var index = widget.controller.indexLookup[key];
+    if(index == null) {
+      return;
+    }
 
     final theme = RiveTheme.find(context);
 
