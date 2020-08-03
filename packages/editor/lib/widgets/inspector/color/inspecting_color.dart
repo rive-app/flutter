@@ -751,10 +751,11 @@ class ShapesInspectingColor extends InspectingColor {
       changeStopIndex(stopIndex, updatePaints: false);
       _changeEditingColor(
           HSVColor.fromColor(stops.value[editingIndex.value].color));
-      return false;
     }
 
-    return true;
+    // We never handle stage selection, always allow the stage to proceed as it
+    // needs. #1097
+    return false;
   }
 
   @override
