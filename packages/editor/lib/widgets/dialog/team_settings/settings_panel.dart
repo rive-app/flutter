@@ -98,16 +98,22 @@ class _SettingsState extends State<Settings> {
     Uint8List data = await LoadFile.getUserFile(['png']);
 
     if (data != null) {
-      final remoteAvatarPath = await RiveTeamsApi(widget.api)
-          .uploadAvatar(widget.owner.ownerId, data);
-      // TODO: need error handling.
-      // also we could display the avatar before uploading it on 'save'
-      // but there's a bit of a journey issue there as the avatar is shown on
-      // lots of settings pages.
+      String remoteAvatarPath;
+      if (isTeam) {
+        remoteAvatarPath = await RiveTeamsApi(widget.api)
+            .uploadAvatar(widget.owner.ownerId, data);
+      } else {
+        remoteAvatarPath = await MeApi(widget.api).uploadAvatar(data);
+      }
+
       if (remoteAvatarPath != null) {
         setState(() {
           newAvatarPath = remoteAvatarPath;
-          TeamManager().loadTeams();
+          if (isTeam) {
+            TeamManager().loadTeams();
+          } else {
+            UserManager().updateAvatar(remoteAvatarPath);
+          }
         });
       }
     }

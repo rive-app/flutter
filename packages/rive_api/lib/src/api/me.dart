@@ -1,6 +1,7 @@
 /// API calls for the logged-in user
 
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:logging/logging.dart';
 import 'package:rive_api/api.dart';
 import 'package:rive_api/data_model.dart';
@@ -142,5 +143,11 @@ class MeApi {
       final res = apiException.response;
       log.severe('Could not mark first run: ${res.statusCode} - ${res.body}');
     }
+  }
+
+  Future<String> uploadAvatar(Uint8List bytes) async {
+    var response = await api.post('${api.host}/api/avatar', body: bytes);
+    final data = json.decodeMap(response.body);
+    return data.getString('url');
   }
 }
