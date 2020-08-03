@@ -46,10 +46,14 @@
         // When ctrl or meta is pressed we want to suppress some default bound
         // browser actions (like CMD+Plus/Minus to zoom).
         switch (event.keyCode) {
-          case 187: // = for zoom in
-          case 189: // - for zoom out
+          case 187: // '=' for zoom in
+          case 189: // '-' for zoom out
+          case 90:  // 'z' for preventing opening a previous tab in Safari
+          case 67:  // 'c' for preventing negative beep on Safari
             event.preventDefault();
             break;
+          default:
+            console.log('Keycode pressed: ' + event.keyCode);
         }
       }
       // Suppress backspace triggering a navigate back action.
