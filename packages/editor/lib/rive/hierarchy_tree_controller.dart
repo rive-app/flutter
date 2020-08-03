@@ -5,6 +5,7 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:tree_widget/flat_tree_item.dart';
@@ -22,6 +23,12 @@ class HierarchyTreeController extends ComponentTreeController {
   List<Component> _data = [];
   final Backboard backboard;
   Artboard _showingArtboard;
+  final DetailedEvent<Component> _requestVisibility =
+      DetailedEvent<Component>();
+
+  /// Called by the tree hierarchy controller when it wants to ensure the
+  /// component is visible.
+  DetailListenable<Component> get requestVisibility => _requestVisibility;
 
   HierarchyTreeController(this.file)
       : backboard = file.core.backboard,
@@ -53,7 +60,7 @@ class HierarchyTreeController extends ComponentTreeController {
     backboard.activeArtboardChanged.removeListener(_activeArtboardChanged);
     // Remove the item selection listener
     file.selection.removeListener(_onItemSelected);
-    
+
     // See issue #1015
     //
     // Do we really need to dispose the super class here? This happens to be a
@@ -233,6 +240,7 @@ class HierarchyTreeController extends ComponentTreeController {
 
     if (topComponents.isNotEmpty) {
       expandTo(topComponents.first);
+      _requestVisibility.notify(topComponents.first);
     }
   }
 
