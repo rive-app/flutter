@@ -49,6 +49,15 @@ class MeApi {
     return false;
   }
 
+  Future<bool> signoutApi() async {
+    var response = await api.post('${api.host}/api/signout');
+    if (response.statusCode == 200 || response.statusCode == 302) {
+      await api.clearCookies();
+      return true;
+    }
+    return false;
+  }
+
   Future<MeDM> linkAccounts() async {
     try {
       final res = await api.getFromPath('/api/linkAccount');

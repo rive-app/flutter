@@ -91,12 +91,17 @@ class UserManager with Subscriptions {
     _plumber.message<Me>(emptyMe);
   }
 
-  Future<bool> signout() async {
-    final res = await _meApi.signout();
-    if (res) {
+  Future<bool> signout(bool isWeb) async {
+    bool signedOut;
+    if (isWeb) {
+      signedOut = await _meApi.signout();
+    } else {
+      signedOut = await _meApi.signoutApi();
+    }
+    if (signedOut) {
       logout();
     }
-    return res;
+    return signedOut;
   }
 
   /// On FlutterWeb: read the error message from the cookies, if present.

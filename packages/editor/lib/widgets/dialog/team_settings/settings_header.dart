@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:path_drawing/path_drawing.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/platform/platform.dart';
 import 'package:rive_editor/preferences.dart';
 import 'package:rive_editor/rive/managers/image_manager.dart';
 import 'package:rive_editor/widgets/common/underline_text_button.dart';
@@ -60,7 +61,10 @@ class _SettingsHeaderState extends State<SettingsHeader> {
             _isSigningOut = true;
           });
 
-          UserManager().signout().then(
+          // Question:
+          // This could live in the manager, but then the manager woudl need
+          // to know about editor. maybe the manager should be moved to editor?
+          UserManager().signout(Platform.instance.isWeb).then(
             (success) {
               if (!success) {
                 setState(() {
