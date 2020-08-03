@@ -751,10 +751,9 @@ class ShapesInspectingColor extends InspectingColor {
       changeStopIndex(stopIndex, updatePaints: false);
       _changeEditingColor(
           HSVColor.fromColor(stops.value[editingIndex.value].color));
-      return false;
+      return true;
     }
-
-    return true;
+    return false;
   }
 
   @override
