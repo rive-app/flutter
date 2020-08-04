@@ -10,6 +10,7 @@ packages/cursor/example/pubspec.lock
 packages/fractional/pubspec.lock
 packages/local_data/pubspec.lock
 packages/peon/pubspec.lock
+packages/peon_process/pubspec.lock
 packages/rive_api/example/pubspec.lock
 packages/rive_api/pubspec.lock
 packages/rive_core/pubspec.lock
