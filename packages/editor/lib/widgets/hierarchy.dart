@@ -15,7 +15,7 @@ import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_widget.dart';
 
 /// An example tree view, shows how to implement TreeView widget and style it.
-class HierarchyTreeView extends StatelessWidget {
+class HierarchyTreeView extends StatefulWidget {
   final HierarchyTreeController controller;
 
   const HierarchyTreeView({
@@ -24,16 +24,60 @@ class HierarchyTreeView extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _HierarchyTreeViewState createState() => _HierarchyTreeViewState();
+}
+
+class _HierarchyTreeViewState extends State<HierarchyTreeView> {
+  final ScrollController scrollController = ScrollController();
+  @override
+  void initState() {
+    widget.controller.requestVisibility.addListener(_ensureComponentVisible);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.requestVisibility.removeListener(_ensureComponentVisible);
+    super.dispose();
+  }
+
+  void _ensureComponentVisible(Component component) {
+    var key = ValueKey(component);
+    var index = widget.controller.indexLookup[key];
+    if(index == null) {
+      return;
+    }
+
+    final theme = RiveTheme.find(context);
+
+    var firstVisible =
+        (scrollController.offset / theme.treeStyles.hierarchy.itemHeight)
+            .ceil();
+    var lastVisible = ((scrollController.offset +
+                scrollController.position.viewportDimension -
+                theme.treeStyles.hierarchy.itemHeight) /
+            theme.treeStyles.hierarchy.itemHeight)
+        .floor();
+    if (index < firstVisible || index > lastVisible) {
+      scrollController.jumpTo((index * theme.treeStyles.hierarchy.itemHeight)
+          .clamp(scrollController.position.minScrollExtent,
+              scrollController.position.maxScrollExtent)
+          .toDouble());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
     var style = theme.treeStyles.hierarchy;
 
     return RiveTreeView(
       padding: style.padding,
+      scrollController: scrollController,
       slivers: [
         TreeView<Component>(
           style: style,
-          controller: controller,
+          controller: widget.controller,
           expanderBuilder: (context, item, style) => Container(
             child: Center(
               child: TreeExpander(
@@ -98,7 +142,7 @@ class HierarchyTreeView extends StatelessWidget {
                             : theme.colors.hierarchyText,
                         onRename: (name) {
                           item.data.name = name;
-                          controller.file.core.captureJournalEntry();
+                          widget.controller.file.core.captureJournalEntry();
                         },
                       ),
                     ),
