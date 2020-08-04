@@ -13,6 +13,8 @@ import 'package:rive_core/animation/keyframe_draw_order_value.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
@@ -42,6 +44,8 @@ import 'package:rive_core/src/generated/animation/keyframe_draw_order_value_base
 import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 import 'package:rive_core/src/generated/artboard_base.dart';
 import 'package:rive_core/src/generated/backboard_base.dart';
+import 'package:rive_core/src/generated/bones/bone_base.dart';
+import 'package:rive_core/src/generated/bones/root_bone_base.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/drawable_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
@@ -64,6 +68,7 @@ import 'package:rive_core/src/generated/shapes/rectangle_base.dart';
 import 'package:rive_core/src/generated/shapes/shape_base.dart';
 import 'package:rive_core/src/generated/shapes/straight_vertex_base.dart';
 import 'package:rive_core/src/generated/shapes/triangle_base.dart';
+import 'package:rive_core/src/generated/transform_component_base.dart';
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
@@ -127,6 +132,10 @@ abstract class RiveCoreContext extends CoreContext {
         return Artboard();
       case BackboardBase.typeKey:
         return Backboard();
+      case BoneBase.typeKey:
+        return Bone();
+      case RootBoneBase.typeKey:
+        return RootBone();
       default:
         return null;
     }
@@ -143,13 +152,15 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearGradientBase.endXPropertyKey:
       case LinearGradientBase.endYPropertyKey:
         return 2;
+      case TransformComponentBase.scaleXPropertyKey:
+      case TransformComponentBase.scaleYPropertyKey:
+        return 3;
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
-        return 3;
-      case NodeBase.scaleXPropertyKey:
-      case NodeBase.scaleYPropertyKey:
+      case RootBoneBase.xPropertyKey:
+      case RootBoneBase.yPropertyKey:
         return 4;
       case CubicDetachedVertexBase.inRotationPropertyKey:
       case CubicDetachedVertexBase.inDistancePropertyKey:
@@ -220,6 +231,10 @@ abstract class RiveCoreContext extends CoreContext {
         return 'Artboard';
       case BackboardBase.typeKey:
         return 'Backboard';
+      case BoneBase.typeKey:
+        return 'Bone';
+      case RootBoneBase.typeKey:
+        return 'RootBone';
     }
     return null;
   }
@@ -232,14 +247,16 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearGradientBase.endXPropertyKey:
       case LinearGradientBase.endYPropertyKey:
         return 'end';
+      case TransformComponentBase.scaleXPropertyKey:
+      case TransformComponentBase.scaleYPropertyKey:
+        return 'scale';
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
+      case RootBoneBase.xPropertyKey:
+      case RootBoneBase.yPropertyKey:
         return 'position';
-      case NodeBase.scaleXPropertyKey:
-      case NodeBase.scaleYPropertyKey:
-        return 'scale';
       case CubicDetachedVertexBase.inRotationPropertyKey:
       case CubicDetachedVertexBase.inDistancePropertyKey:
         return 'bezier_in';
@@ -343,18 +360,18 @@ abstract class RiveCoreContext extends CoreContext {
         return 'position';
       case FillBase.fillRulePropertyKey:
         return 'fillRule';
+      case TransformComponentBase.rotationPropertyKey:
+        return 'rotation';
+      case TransformComponentBase.scaleXPropertyKey:
+        return 'scaleX';
+      case TransformComponentBase.scaleYPropertyKey:
+        return 'scaleY';
+      case TransformComponentBase.opacityPropertyKey:
+        return 'opacity';
       case NodeBase.xPropertyKey:
         return 'x';
       case NodeBase.yPropertyKey:
         return 'y';
-      case NodeBase.rotationPropertyKey:
-        return 'rotation';
-      case NodeBase.scaleXPropertyKey:
-        return 'scaleX';
-      case NodeBase.scaleYPropertyKey:
-        return 'scaleY';
-      case NodeBase.opacityPropertyKey:
-        return 'opacity';
       case DrawableBase.drawOrderPropertyKey:
         return 'drawOrder';
       case DrawableBase.blendModeValuePropertyKey:
@@ -411,6 +428,12 @@ abstract class RiveCoreContext extends CoreContext {
         return 'mainArtboardId';
       case BackboardBase.colorValuePropertyKey:
         return 'colorValue';
+      case BoneBase.lengthPropertyKey:
+        return 'length';
+      case RootBoneBase.xPropertyKey:
+        return 'x';
+      case RootBoneBase.yPropertyKey:
+        return 'y';
       default:
         return null;
     }
@@ -520,12 +543,12 @@ abstract class RiveCoreContext extends CoreContext {
         case LinearGradientBase.opacityPropertyKey:
         case StrokeBase.thicknessPropertyKey:
         case GradientStopBase.positionPropertyKey:
+        case TransformComponentBase.rotationPropertyKey:
+        case TransformComponentBase.scaleXPropertyKey:
+        case TransformComponentBase.scaleYPropertyKey:
+        case TransformComponentBase.opacityPropertyKey:
         case NodeBase.xPropertyKey:
         case NodeBase.yPropertyKey:
-        case NodeBase.rotationPropertyKey:
-        case NodeBase.scaleXPropertyKey:
-        case NodeBase.scaleYPropertyKey:
-        case NodeBase.opacityPropertyKey:
         case PathVertexBase.xPropertyKey:
         case PathVertexBase.yPropertyKey:
         case StraightVertexBase.radiusPropertyKey:
@@ -547,6 +570,9 @@ abstract class RiveCoreContext extends CoreContext {
         case ArtboardBase.yPropertyKey:
         case ArtboardBase.originXPropertyKey:
         case ArtboardBase.originYPropertyKey:
+        case BoneBase.lengthPropertyKey:
+        case RootBoneBase.xPropertyKey:
+        case RootBoneBase.yPropertyKey:
           var value = doubleType.deserialize(reader);
           setDouble(object, change.op, value);
           break;
@@ -656,12 +682,12 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearGradientBase.opacityPropertyKey:
       case StrokeBase.thicknessPropertyKey:
       case GradientStopBase.positionPropertyKey:
+      case TransformComponentBase.rotationPropertyKey:
+      case TransformComponentBase.scaleXPropertyKey:
+      case TransformComponentBase.scaleYPropertyKey:
+      case TransformComponentBase.opacityPropertyKey:
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
-      case NodeBase.rotationPropertyKey:
-      case NodeBase.scaleXPropertyKey:
-      case NodeBase.scaleYPropertyKey:
-      case NodeBase.opacityPropertyKey:
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
       case StraightVertexBase.radiusPropertyKey:
@@ -683,6 +709,9 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.yPropertyKey:
       case ArtboardBase.originXPropertyKey:
       case ArtboardBase.originYPropertyKey:
+      case BoneBase.lengthPropertyKey:
+      case RootBoneBase.xPropertyKey:
+      case RootBoneBase.yPropertyKey:
         if (value != null && value is double) {
           change.value = doubleType.serialize(value);
         } else {
@@ -954,6 +983,26 @@ abstract class RiveCoreContext extends CoreContext {
           object.fillRule = value;
         }
         break;
+      case TransformComponentBase.rotationPropertyKey:
+        if (object is TransformComponentBase && value is double) {
+          object.rotation = value;
+        }
+        break;
+      case TransformComponentBase.scaleXPropertyKey:
+        if (object is TransformComponentBase && value is double) {
+          object.scaleX = value;
+        }
+        break;
+      case TransformComponentBase.scaleYPropertyKey:
+        if (object is TransformComponentBase && value is double) {
+          object.scaleY = value;
+        }
+        break;
+      case TransformComponentBase.opacityPropertyKey:
+        if (object is TransformComponentBase && value is double) {
+          object.opacity = value;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase && value is double) {
           object.x = value;
@@ -962,26 +1011,6 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.yPropertyKey:
         if (object is NodeBase && value is double) {
           object.y = value;
-        }
-        break;
-      case NodeBase.rotationPropertyKey:
-        if (object is NodeBase && value is double) {
-          object.rotation = value;
-        }
-        break;
-      case NodeBase.scaleXPropertyKey:
-        if (object is NodeBase && value is double) {
-          object.scaleX = value;
-        }
-        break;
-      case NodeBase.scaleYPropertyKey:
-        if (object is NodeBase && value is double) {
-          object.scaleY = value;
-        }
-        break;
-      case NodeBase.opacityPropertyKey:
-        if (object is NodeBase && value is double) {
-          object.opacity = value;
         }
         break;
       case DrawableBase.drawOrderPropertyKey:
@@ -1122,6 +1151,21 @@ abstract class RiveCoreContext extends CoreContext {
       case BackboardBase.colorValuePropertyKey:
         if (object is BackboardBase && value is int) {
           object.colorValue = value;
+        }
+        break;
+      case BoneBase.lengthPropertyKey:
+        if (object is BoneBase && value is double) {
+          object.length = value;
+        }
+        break;
+      case RootBoneBase.xPropertyKey:
+        if (object is RootBoneBase && value is double) {
+          object.x = value;
+        }
+        break;
+      case RootBoneBase.yPropertyKey:
+        if (object is RootBoneBase && value is double) {
+          object.y = value;
         }
         break;
     }
@@ -1359,6 +1403,26 @@ abstract class RiveCoreContext extends CoreContext {
           object.fillRule = value;
         }
         break;
+      case TransformComponentBase.rotationPropertyKey:
+        if (object is TransformComponentBase && value is double) {
+          object.rotationCore = value;
+        }
+        break;
+      case TransformComponentBase.scaleXPropertyKey:
+        if (object is TransformComponentBase && value is double) {
+          object.scaleXCore = value;
+        }
+        break;
+      case TransformComponentBase.scaleYPropertyKey:
+        if (object is TransformComponentBase && value is double) {
+          object.scaleYCore = value;
+        }
+        break;
+      case TransformComponentBase.opacityPropertyKey:
+        if (object is TransformComponentBase && value is double) {
+          object.opacityCore = value;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase && value is double) {
           object.xCore = value;
@@ -1367,26 +1431,6 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.yPropertyKey:
         if (object is NodeBase && value is double) {
           object.yCore = value;
-        }
-        break;
-      case NodeBase.rotationPropertyKey:
-        if (object is NodeBase && value is double) {
-          object.rotationCore = value;
-        }
-        break;
-      case NodeBase.scaleXPropertyKey:
-        if (object is NodeBase && value is double) {
-          object.scaleXCore = value;
-        }
-        break;
-      case NodeBase.scaleYPropertyKey:
-        if (object is NodeBase && value is double) {
-          object.scaleYCore = value;
-        }
-        break;
-      case NodeBase.opacityPropertyKey:
-        if (object is NodeBase && value is double) {
-          object.opacityCore = value;
         }
         break;
       case DrawableBase.drawOrderPropertyKey:
@@ -1529,6 +1573,21 @@ abstract class RiveCoreContext extends CoreContext {
           object.colorValue = value;
         }
         break;
+      case BoneBase.lengthPropertyKey:
+        if (object is BoneBase && value is double) {
+          object.lengthCore = value;
+        }
+        break;
+      case RootBoneBase.xPropertyKey:
+        if (object is RootBoneBase && value is double) {
+          object.xCore = value;
+        }
+        break;
+      case RootBoneBase.yPropertyKey:
+        if (object is RootBoneBase && value is double) {
+          object.yCore = value;
+        }
+        break;
     }
   }
 
@@ -1543,12 +1602,12 @@ abstract class RiveCoreContext extends CoreContext {
       case SolidColorBase.colorValuePropertyKey:
       case GradientStopBase.colorValuePropertyKey:
       case GradientStopBase.positionPropertyKey:
+      case TransformComponentBase.rotationPropertyKey:
+      case TransformComponentBase.scaleXPropertyKey:
+      case TransformComponentBase.scaleYPropertyKey:
+      case TransformComponentBase.opacityPropertyKey:
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
-      case NodeBase.rotationPropertyKey:
-      case NodeBase.scaleXPropertyKey:
-      case NodeBase.scaleYPropertyKey:
-      case NodeBase.opacityPropertyKey:
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
       case StraightVertexBase.radiusPropertyKey:
@@ -1561,6 +1620,9 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicDetachedVertexBase.inDistancePropertyKey:
       case CubicDetachedVertexBase.outRotationPropertyKey:
       case CubicDetachedVertexBase.outDistancePropertyKey:
+      case BoneBase.lengthPropertyKey:
+      case RootBoneBase.xPropertyKey:
+      case RootBoneBase.yPropertyKey:
         return true;
       default:
         return false;
@@ -1596,23 +1658,23 @@ abstract class RiveCoreContext extends CoreContext {
       case GradientStopBase.positionPropertyKey:
         return (object as GradientStopBase).positionKeyState;
         break;
+      case TransformComponentBase.rotationPropertyKey:
+        return (object as TransformComponentBase).rotationKeyState;
+        break;
+      case TransformComponentBase.scaleXPropertyKey:
+        return (object as TransformComponentBase).scaleXKeyState;
+        break;
+      case TransformComponentBase.scaleYPropertyKey:
+        return (object as TransformComponentBase).scaleYKeyState;
+        break;
+      case TransformComponentBase.opacityPropertyKey:
+        return (object as TransformComponentBase).opacityKeyState;
+        break;
       case NodeBase.xPropertyKey:
         return (object as NodeBase).xKeyState;
         break;
       case NodeBase.yPropertyKey:
         return (object as NodeBase).yKeyState;
-        break;
-      case NodeBase.rotationPropertyKey:
-        return (object as NodeBase).rotationKeyState;
-        break;
-      case NodeBase.scaleXPropertyKey:
-        return (object as NodeBase).scaleXKeyState;
-        break;
-      case NodeBase.scaleYPropertyKey:
-        return (object as NodeBase).scaleYKeyState;
-        break;
-      case NodeBase.opacityPropertyKey:
-        return (object as NodeBase).opacityKeyState;
         break;
       case PathVertexBase.xPropertyKey:
         return (object as PathVertexBase).xKeyState;
@@ -1649,6 +1711,15 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case CubicDetachedVertexBase.outDistancePropertyKey:
         return (object as CubicDetachedVertexBase).outDistanceKeyState;
+        break;
+      case BoneBase.lengthPropertyKey:
+        return (object as BoneBase).lengthKeyState;
+        break;
+      case RootBoneBase.xPropertyKey:
+        return (object as RootBoneBase).xKeyState;
+        break;
+      case RootBoneBase.yPropertyKey:
+        return (object as RootBoneBase).yKeyState;
         break;
       default:
         return null;
@@ -1702,6 +1773,26 @@ abstract class RiveCoreContext extends CoreContext {
           object.positionKeyState = value;
         }
         break;
+      case TransformComponentBase.rotationPropertyKey:
+        if (object is TransformComponentBase) {
+          object.rotationKeyState = value;
+        }
+        break;
+      case TransformComponentBase.scaleXPropertyKey:
+        if (object is TransformComponentBase) {
+          object.scaleXKeyState = value;
+        }
+        break;
+      case TransformComponentBase.scaleYPropertyKey:
+        if (object is TransformComponentBase) {
+          object.scaleYKeyState = value;
+        }
+        break;
+      case TransformComponentBase.opacityPropertyKey:
+        if (object is TransformComponentBase) {
+          object.opacityKeyState = value;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase) {
           object.xKeyState = value;
@@ -1710,26 +1801,6 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.yPropertyKey:
         if (object is NodeBase) {
           object.yKeyState = value;
-        }
-        break;
-      case NodeBase.rotationPropertyKey:
-        if (object is NodeBase) {
-          object.rotationKeyState = value;
-        }
-        break;
-      case NodeBase.scaleXPropertyKey:
-        if (object is NodeBase) {
-          object.scaleXKeyState = value;
-        }
-        break;
-      case NodeBase.scaleYPropertyKey:
-        if (object is NodeBase) {
-          object.scaleYKeyState = value;
-        }
-        break;
-      case NodeBase.opacityPropertyKey:
-        if (object is NodeBase) {
-          object.opacityKeyState = value;
         }
         break;
       case PathVertexBase.xPropertyKey:
@@ -1792,6 +1863,21 @@ abstract class RiveCoreContext extends CoreContext {
           object.outDistanceKeyState = value;
         }
         break;
+      case BoneBase.lengthPropertyKey:
+        if (object is BoneBase) {
+          object.lengthKeyState = value;
+        }
+        break;
+      case RootBoneBase.xPropertyKey:
+        if (object is RootBoneBase) {
+          object.xKeyState = value;
+        }
+        break;
+      case RootBoneBase.yPropertyKey:
+        if (object is RootBoneBase) {
+          object.yKeyState = value;
+        }
+        break;
     }
   }
 
@@ -1852,6 +1938,30 @@ abstract class RiveCoreContext extends CoreContext {
           object.positionKeyState = KeyState.none;
         }
         break;
+      case TransformComponentBase.rotationPropertyKey:
+        if (object is TransformComponentBase) {
+          object.rotationAnimated = null;
+          object.rotationKeyState = KeyState.none;
+        }
+        break;
+      case TransformComponentBase.scaleXPropertyKey:
+        if (object is TransformComponentBase) {
+          object.scaleXAnimated = null;
+          object.scaleXKeyState = KeyState.none;
+        }
+        break;
+      case TransformComponentBase.scaleYPropertyKey:
+        if (object is TransformComponentBase) {
+          object.scaleYAnimated = null;
+          object.scaleYKeyState = KeyState.none;
+        }
+        break;
+      case TransformComponentBase.opacityPropertyKey:
+        if (object is TransformComponentBase) {
+          object.opacityAnimated = null;
+          object.opacityKeyState = KeyState.none;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase) {
           object.xAnimated = null;
@@ -1862,30 +1972,6 @@ abstract class RiveCoreContext extends CoreContext {
         if (object is NodeBase) {
           object.yAnimated = null;
           object.yKeyState = KeyState.none;
-        }
-        break;
-      case NodeBase.rotationPropertyKey:
-        if (object is NodeBase) {
-          object.rotationAnimated = null;
-          object.rotationKeyState = KeyState.none;
-        }
-        break;
-      case NodeBase.scaleXPropertyKey:
-        if (object is NodeBase) {
-          object.scaleXAnimated = null;
-          object.scaleXKeyState = KeyState.none;
-        }
-        break;
-      case NodeBase.scaleYPropertyKey:
-        if (object is NodeBase) {
-          object.scaleYAnimated = null;
-          object.scaleYKeyState = KeyState.none;
-        }
-        break;
-      case NodeBase.opacityPropertyKey:
-        if (object is NodeBase) {
-          object.opacityAnimated = null;
-          object.opacityKeyState = KeyState.none;
         }
         break;
       case PathVertexBase.xPropertyKey:
@@ -1958,6 +2044,24 @@ abstract class RiveCoreContext extends CoreContext {
         if (object is CubicDetachedVertexBase) {
           object.outDistanceAnimated = null;
           object.outDistanceKeyState = KeyState.none;
+        }
+        break;
+      case BoneBase.lengthPropertyKey:
+        if (object is BoneBase) {
+          object.lengthAnimated = null;
+          object.lengthKeyState = KeyState.none;
+        }
+        break;
+      case RootBoneBase.xPropertyKey:
+        if (object is RootBoneBase) {
+          object.xAnimated = null;
+          object.xKeyState = KeyState.none;
+        }
+        break;
+      case RootBoneBase.yPropertyKey:
+        if (object is RootBoneBase) {
+          object.yAnimated = null;
+          object.yKeyState = KeyState.none;
         }
         break;
     }
@@ -2191,6 +2295,26 @@ abstract class RiveCoreContext extends CoreContext {
           return object.fillRule;
         }
         break;
+      case TransformComponentBase.rotationPropertyKey:
+        if (object is TransformComponentBase) {
+          return object.rotation;
+        }
+        break;
+      case TransformComponentBase.scaleXPropertyKey:
+        if (object is TransformComponentBase) {
+          return object.scaleX;
+        }
+        break;
+      case TransformComponentBase.scaleYPropertyKey:
+        if (object is TransformComponentBase) {
+          return object.scaleY;
+        }
+        break;
+      case TransformComponentBase.opacityPropertyKey:
+        if (object is TransformComponentBase) {
+          return object.opacity;
+        }
+        break;
       case NodeBase.xPropertyKey:
         if (object is NodeBase) {
           return object.x;
@@ -2199,26 +2323,6 @@ abstract class RiveCoreContext extends CoreContext {
       case NodeBase.yPropertyKey:
         if (object is NodeBase) {
           return object.y;
-        }
-        break;
-      case NodeBase.rotationPropertyKey:
-        if (object is NodeBase) {
-          return object.rotation;
-        }
-        break;
-      case NodeBase.scaleXPropertyKey:
-        if (object is NodeBase) {
-          return object.scaleX;
-        }
-        break;
-      case NodeBase.scaleYPropertyKey:
-        if (object is NodeBase) {
-          return object.scaleY;
-        }
-        break;
-      case NodeBase.opacityPropertyKey:
-        if (object is NodeBase) {
-          return object.opacity;
         }
         break;
       case DrawableBase.drawOrderPropertyKey:
@@ -2361,6 +2465,21 @@ abstract class RiveCoreContext extends CoreContext {
           return object.colorValue;
         }
         break;
+      case BoneBase.lengthPropertyKey:
+        if (object is BoneBase) {
+          return object.length;
+        }
+        break;
+      case RootBoneBase.xPropertyKey:
+        if (object is RootBoneBase) {
+          return object.x;
+        }
+        break;
+      case RootBoneBase.yPropertyKey:
+        if (object is RootBoneBase) {
+          return object.y;
+        }
+        break;
     }
     return null;
   }
@@ -2446,12 +2565,12 @@ abstract class RiveCoreContext extends CoreContext {
       case LinearGradientBase.opacityPropertyKey:
       case StrokeBase.thicknessPropertyKey:
       case GradientStopBase.positionPropertyKey:
+      case TransformComponentBase.rotationPropertyKey:
+      case TransformComponentBase.scaleXPropertyKey:
+      case TransformComponentBase.scaleYPropertyKey:
+      case TransformComponentBase.opacityPropertyKey:
       case NodeBase.xPropertyKey:
       case NodeBase.yPropertyKey:
-      case NodeBase.rotationPropertyKey:
-      case NodeBase.scaleXPropertyKey:
-      case NodeBase.scaleYPropertyKey:
-      case NodeBase.opacityPropertyKey:
       case PathVertexBase.xPropertyKey:
       case PathVertexBase.yPropertyKey:
       case StraightVertexBase.radiusPropertyKey:
@@ -2473,6 +2592,9 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.yPropertyKey:
       case ArtboardBase.originXPropertyKey:
       case ArtboardBase.originYPropertyKey:
+      case BoneBase.lengthPropertyKey:
+      case RootBoneBase.xPropertyKey:
+      case RootBoneBase.yPropertyKey:
         return doubleType;
       case KeyFrameColorBase.valuePropertyKey:
       case SolidColorBase.colorValuePropertyKey:
@@ -2603,18 +2725,18 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as StrokeBase).thickness;
       case GradientStopBase.positionPropertyKey:
         return (object as GradientStopBase).position;
+      case TransformComponentBase.rotationPropertyKey:
+        return (object as TransformComponentBase).rotation;
+      case TransformComponentBase.scaleXPropertyKey:
+        return (object as TransformComponentBase).scaleX;
+      case TransformComponentBase.scaleYPropertyKey:
+        return (object as TransformComponentBase).scaleY;
+      case TransformComponentBase.opacityPropertyKey:
+        return (object as TransformComponentBase).opacity;
       case NodeBase.xPropertyKey:
         return (object as NodeBase).x;
       case NodeBase.yPropertyKey:
         return (object as NodeBase).y;
-      case NodeBase.rotationPropertyKey:
-        return (object as NodeBase).rotation;
-      case NodeBase.scaleXPropertyKey:
-        return (object as NodeBase).scaleX;
-      case NodeBase.scaleYPropertyKey:
-        return (object as NodeBase).scaleY;
-      case NodeBase.opacityPropertyKey:
-        return (object as NodeBase).opacity;
       case PathVertexBase.xPropertyKey:
         return (object as PathVertexBase).x;
       case PathVertexBase.yPropertyKey:
@@ -2657,6 +2779,12 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as ArtboardBase).originX;
       case ArtboardBase.originYPropertyKey:
         return (object as ArtboardBase).originY;
+      case BoneBase.lengthPropertyKey:
+        return (object as BoneBase).length;
+      case RootBoneBase.xPropertyKey:
+        return (object as RootBoneBase).x;
+      case RootBoneBase.yPropertyKey:
+        return (object as RootBoneBase).y;
     }
     return 0.0;
   }
@@ -2849,23 +2977,23 @@ abstract class RiveCoreContext extends CoreContext {
       case GradientStopBase.positionPropertyKey:
         (object as GradientStopBase).positionCore = value;
         break;
+      case TransformComponentBase.rotationPropertyKey:
+        (object as TransformComponentBase).rotationCore = value;
+        break;
+      case TransformComponentBase.scaleXPropertyKey:
+        (object as TransformComponentBase).scaleXCore = value;
+        break;
+      case TransformComponentBase.scaleYPropertyKey:
+        (object as TransformComponentBase).scaleYCore = value;
+        break;
+      case TransformComponentBase.opacityPropertyKey:
+        (object as TransformComponentBase).opacityCore = value;
+        break;
       case NodeBase.xPropertyKey:
         (object as NodeBase).xCore = value;
         break;
       case NodeBase.yPropertyKey:
         (object as NodeBase).yCore = value;
-        break;
-      case NodeBase.rotationPropertyKey:
-        (object as NodeBase).rotationCore = value;
-        break;
-      case NodeBase.scaleXPropertyKey:
-        (object as NodeBase).scaleXCore = value;
-        break;
-      case NodeBase.scaleYPropertyKey:
-        (object as NodeBase).scaleYCore = value;
-        break;
-      case NodeBase.opacityPropertyKey:
-        (object as NodeBase).opacityCore = value;
         break;
       case PathVertexBase.xPropertyKey:
         (object as PathVertexBase).xCore = value;
@@ -2930,6 +3058,15 @@ abstract class RiveCoreContext extends CoreContext {
       case ArtboardBase.originYPropertyKey:
         (object as ArtboardBase).originY = value;
         break;
+      case BoneBase.lengthPropertyKey:
+        (object as BoneBase).lengthCore = value;
+        break;
+      case RootBoneBase.xPropertyKey:
+        (object as RootBoneBase).xCore = value;
+        break;
+      case RootBoneBase.yPropertyKey:
+        (object as RootBoneBase).yCore = value;
+        break;
     }
   }
 
@@ -2956,23 +3093,23 @@ abstract class RiveCoreContext extends CoreContext {
       case GradientStopBase.positionPropertyKey:
         (object as GradientStopBase).positionAnimated = value;
         break;
+      case TransformComponentBase.rotationPropertyKey:
+        (object as TransformComponentBase).rotationAnimated = value;
+        break;
+      case TransformComponentBase.scaleXPropertyKey:
+        (object as TransformComponentBase).scaleXAnimated = value;
+        break;
+      case TransformComponentBase.scaleYPropertyKey:
+        (object as TransformComponentBase).scaleYAnimated = value;
+        break;
+      case TransformComponentBase.opacityPropertyKey:
+        (object as TransformComponentBase).opacityAnimated = value;
+        break;
       case NodeBase.xPropertyKey:
         (object as NodeBase).xAnimated = value;
         break;
       case NodeBase.yPropertyKey:
         (object as NodeBase).yAnimated = value;
-        break;
-      case NodeBase.rotationPropertyKey:
-        (object as NodeBase).rotationAnimated = value;
-        break;
-      case NodeBase.scaleXPropertyKey:
-        (object as NodeBase).scaleXAnimated = value;
-        break;
-      case NodeBase.scaleYPropertyKey:
-        (object as NodeBase).scaleYAnimated = value;
-        break;
-      case NodeBase.opacityPropertyKey:
-        (object as NodeBase).opacityAnimated = value;
         break;
       case PathVertexBase.xPropertyKey:
         (object as PathVertexBase).xAnimated = value;
@@ -3009,6 +3146,15 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case CubicDetachedVertexBase.outDistancePropertyKey:
         (object as CubicDetachedVertexBase).outDistanceAnimated = value;
+        break;
+      case BoneBase.lengthPropertyKey:
+        (object as BoneBase).lengthAnimated = value;
+        break;
+      case RootBoneBase.xPropertyKey:
+        (object as RootBoneBase).xAnimated = value;
+        break;
+      case RootBoneBase.yPropertyKey:
+        (object as RootBoneBase).yAnimated = value;
         break;
     }
   }

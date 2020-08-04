@@ -1,33 +1,37 @@
-/// Core automatically generated lib/src/generated/node_base.dart.
+/// Core automatically generated lib/src/generated/bones/root_bone_base.dart.
 /// Do not modify manually.
 
 import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:core/key_state.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/src/generated/bones/bone_base.dart';
+import 'package:rive_core/src/generated/bones/skeletal_component_base.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/transform_component_base.dart';
-import 'package:rive_core/transform_component.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
-abstract class NodeBase extends TransformComponent {
-  static const int typeKey = 2;
+abstract class RootBoneBase extends Bone {
+  static const int typeKey = 41;
   @override
-  int get coreType => NodeBase.typeKey;
+  int get coreType => RootBoneBase.typeKey;
   @override
   Set<int> get coreTypes => {
-        NodeBase.typeKey,
+        RootBoneBase.typeKey,
+        BoneBase.typeKey,
+        SkeletalComponentBase.typeKey,
         TransformComponentBase.typeKey,
         ContainerComponentBase.typeKey,
         ComponentBase.typeKey
       };
 
   /// --------------------------------------------------------------------------
-  /// X field with key 13.
+  /// X field with key 90.
   double _x = 0;
   double _xAnimated;
   KeyState _xKeyState = KeyState.none;
-  static const int xPropertyKey = 13;
+  static const int xPropertyKey = 90;
 
   /// Get the [_x] field value.Note this may not match the core value if
   /// animation mode is active.
@@ -87,11 +91,11 @@ abstract class NodeBase extends TransformComponent {
   void xChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
-  /// Y field with key 14.
+  /// Y field with key 91.
   double _y = 0;
   double _yAnimated;
   KeyState _yKeyState = KeyState.none;
-  static const int yPropertyKey = 14;
+  static const int yPropertyKey = 91;
 
   /// Get the [_y] field value.Note this may not match the core value if
   /// animation mode is active.

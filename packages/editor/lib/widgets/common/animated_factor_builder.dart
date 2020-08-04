@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Widget that takes a factor (expected to be between 0-1) and calls back a
 /// builder with the interpolated value as it animates. Useful when combined
