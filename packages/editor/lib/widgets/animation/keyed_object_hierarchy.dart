@@ -24,7 +24,7 @@ import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_widget.dart';
 
-class KeyedObjectHierarchy extends StatelessWidget {
+class KeyedObjectHierarchy extends StatefulWidget {
   final ScrollController scrollController;
   final KeyedObjectTreeController treeController;
   final bool isPlaying;
@@ -37,18 +37,37 @@ class KeyedObjectHierarchy extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _KeyedObjectHierarchyState createState() => _KeyedObjectHierarchyState();
+}
+
+class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
+  @override
+  void initState() {
+    widget.treeController.requestVisibility
+        .addListener(_ensureKeyedComponentVisible);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.treeController.requestVisibility
+        .removeListener(_ensureKeyedComponentVisible);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     var style = theme.treeStyles.timeline;
 
     return TreeScrollView(
-      scrollController: scrollController,
+      scrollController: widget.scrollController,
       padding: style.padding,
       physics: const NeverScrollableScrollPhysics(),
       slivers: [
         TreeView<KeyHierarchyViewModel>(
           style: style,
-          controller: treeController,
+          controller: widget.treeController,
           expanderBuilder: (context, item, style) => Container(
             child: Center(
               child: TreeExpander(
@@ -102,6 +121,28 @@ class KeyedObjectHierarchy extends StatelessWidget {
     );
   }
 
+  void _ensureKeyedComponentVisible(KeyHierarchyViewModel model) {
+    final key = ValueKey(model);
+    final index = widget.treeController.indexLookup[key];
+
+    if (index != null) {
+      final itemHeight = RiveTheme.find(context).treeStyles.timeline.itemHeight;
+
+      final firstVisible = (widget.scrollController.offset / itemHeight).ceil();
+      final lastVisible = ((widget.scrollController.offset +
+                  widget.scrollController.position.viewportDimension -
+                  itemHeight) /
+              itemHeight)
+          .floor();
+      if (index < firstVisible || index > lastVisible) {
+        widget.scrollController.jumpTo((index * itemHeight)
+            .clamp(widget.scrollController.position.minScrollExtent,
+                widget.scrollController.position.maxScrollExtent)
+            .toDouble());
+      }
+    }
+  }
+
   Widget _buildKeyedComponent(BuildContext context, RiveThemeData theme,
       KeyedComponentViewModel model) {
     var component = model.component;
@@ -116,20 +157,22 @@ class KeyedObjectHierarchy extends StatelessWidget {
       );
     }
 
-    return Expanded(child:CorePropertyBuilder<String>(
-      object: component,
-      propertyKey: ComponentBase.namePropertyKey,
-      builder: (context, name, _) => Renamable(
-        style: theme.textStyles.inspectorPropertyLabel,
-        name: name,
-        color: theme.colors.hierarchyText,
-        editingColor: theme.colors.selectedText,
-        onRename: (name) {
-          component.name = name;
-          component.context.captureJournalEntry();
-        },
+    return Expanded(
+      child: CorePropertyBuilder<String>(
+        object: component,
+        propertyKey: ComponentBase.namePropertyKey,
+        builder: (context, name, _) => Renamable(
+          style: theme.textStyles.inspectorPropertyLabel,
+          name: name,
+          color: theme.colors.hierarchyText,
+          editingColor: theme.colors.selectedText,
+          onRename: (name) {
+            component.name = name;
+            component.context.captureJournalEntry();
+          },
+        ),
       ),
-    ),);
+    );
   }
 
   Widget _buildKeyedGroup(
@@ -172,7 +215,7 @@ class KeyedObjectHierarchy extends StatelessWidget {
       switch (model.component.coreType) {
         case SolidColorBase.typeKey:
           return TimelineColorSwatch(
-            frozen: isPlaying,
+            frozen: widget.isPlaying,
             component: model.component as SolidColor,
             colorPropertyKey: SolidColorBase.colorValuePropertyKey,
           );
@@ -181,7 +224,7 @@ class KeyedObjectHierarchy extends StatelessWidget {
 
         case GradientStopBase.typeKey:
           return TimelineColorSwatch(
-            frozen: isPlaying,
+            frozen: widget.isPlaying,
             component: model.component as GradientStop,
             colorPropertyKey: GradientStopBase.colorValuePropertyKey,
           );
@@ -194,7 +237,7 @@ class KeyedObjectHierarchy extends StatelessWidget {
         child: SizedBox(
           width: 69,
           child: CoreTextField<double>(
-            frozen: isPlaying,
+            frozen: widget.isPlaying,
             underlineColor: theme.colors.timelineUnderline,
             objects: [model.component],
             propertyKey: model.keyedProperty.propertyKey,
