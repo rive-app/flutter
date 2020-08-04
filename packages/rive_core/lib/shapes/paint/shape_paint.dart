@@ -6,6 +6,7 @@ import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
+import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/src/generated/shapes/paint/shape_paint_base.dart';
@@ -61,6 +62,24 @@ abstract class ShapePaint extends ShapePaintBase {
       _initMutator();
     }
   }
+
+  // -> editor-only
+  @override
+  void onAdded() {
+    super.onAdded();
+    // ShapePaint has been added and is clean (all artboards and ancestors of
+    // the current hierarchy's components have resolved). This is a good
+    // opportunity to self-heal when paint mutators are missing.
+    if (_paintMutator == null) {
+      var solid = SolidColor()..colorValue = 0xFF000000;
+      context?.batchAdd(() {
+        context.addObject(solid);
+        appendChild(solid);
+      });
+      context.objectPatched(this);
+    }
+  }
+  // <- editor-only
 
   @override
   void isVisibleChanged(bool from, bool to) {
