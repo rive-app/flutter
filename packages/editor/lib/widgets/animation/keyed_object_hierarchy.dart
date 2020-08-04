@@ -41,10 +41,14 @@ class KeyedObjectHierarchy extends StatefulWidget {
 }
 
 class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
+  /// Set of selected items
+  final _selectedItems = <KeyHierarchyViewModel>{};
+
   @override
   void initState() {
     widget.treeController.requestVisibility
         .addListener(_ensureKeyedComponentVisible);
+    widget.treeController.highlight.addListener(_highlightKeyedComponents);
     super.initState();
   }
 
@@ -52,6 +56,7 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
   void dispose() {
     widget.treeController.requestVisibility
         .removeListener(_ensureKeyedComponentVisible);
+    widget.treeController.highlight.removeListener(_highlightKeyedComponents);
     super.dispose();
   }
 
@@ -97,6 +102,9 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
             }
             return StageItemIcon(
               item: (item.data as KeyedComponentViewModel).component.stageItem,
+              selectionState: _selectedItems.contains(item.data)
+                  ? SelectionState.selected
+                  : SelectionState.none,
             );
           },
           backgroundBuilder: (context, item, style) => DropItemBackground(
@@ -121,6 +129,8 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
     );
   }
 
+  /// Autoscrolls the hierarchy if necessary to ensure that the model is is
+  /// visible
   void _ensureKeyedComponentVisible(KeyHierarchyViewModel model) {
     final key = ValueKey(model);
     final index = widget.treeController.indexLookup[key];
@@ -141,6 +151,14 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
             .toDouble());
       }
     }
+  }
+
+  /// Highlights the given set of models
+  void _highlightKeyedComponents(Set<KeyHierarchyViewModel> models) {
+    setState(() {
+      _selectedItems.clear();
+      _selectedItems.addAll(models);
+    });
   }
 
   Widget _buildKeyedComponent(BuildContext context, RiveThemeData theme,

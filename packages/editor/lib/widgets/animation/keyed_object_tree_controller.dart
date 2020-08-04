@@ -21,13 +21,21 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
   StreamSubscription<Iterable<KeyHierarchyViewModel>> _subscription;
   Iterable<KeyHierarchyViewModel> _data = [];
 
-  final DetailedEvent<KeyedComponentViewModel> _requestVisibility =
-      DetailedEvent<KeyedComponentViewModel>();
+  /// Event to request that a model be visible in the hierarchy
+  final DetailedEvent<KeyHierarchyViewModel> _requestVisibility =
+      DetailedEvent<KeyHierarchyViewModel>();
 
-  /// Called by the tree hierarchy controller when it wants to ensure the
-  /// component is visible.
-  DetailListenable<KeyedComponentViewModel> get requestVisibility =>
+  /// Event that requests a set of models to be highlighted
+  final DetailedEvent<Set<KeyHierarchyViewModel>> _highlight =
+      DetailedEvent<Set<KeyHierarchyViewModel>>();
+
+  /// Called by the  hierarchy when it wants to ensure a model is visible
+  DetailListenable<KeyHierarchyViewModel> get requestVisibility =>
       _requestVisibility;
+
+  /// Called by the  hierarchy when it wants to ensure a set of models are
+  /// highlighted
+  DetailListenable<Set<KeyHierarchyViewModel>> get highlight => _highlight;
 
   @override
   Iterable<KeyHierarchyViewModel> get data => _data;
@@ -42,6 +50,8 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
   void _onItemSelected() {
     final file = animationManager.activeFile;
     if (file.selection.items.isEmpty) {
+      // Wipe out any highlighted items
+      _highlight.notify({});
       return;
     }
     // Fetch the selected items
@@ -51,7 +61,6 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
 
     // Determine if any of the selected items map to the keyed items, and if
     // they do, get the first one
-
     killDaLoop:
     for (final selectedItem in selectedItems) {
       if (selectedItem is StageItem<Component>) {
@@ -61,11 +70,15 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
             final keyedComponent = keyedItem.component;
             if (selectedComponent == keyedComponent) {
               _requestVisibility.notify(keyedItem);
+              _highlight.notify({keyedItem});
               break killDaLoop;
             }
           }
         }
       }
+      // If we've not broken out, then we've found nothing, so ensure any
+      // highlighted items are cleared
+      _highlight.notify({});
     }
   }
 
