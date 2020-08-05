@@ -39,5 +39,7 @@ void main() {
       hsvExpectedColor.alpha.toStringAsFixed(2),
       hsvCalculatedColor.alpha.toStringAsFixed(2),
     );
+
+    expect(converter.fromEditingValue('malformed'), null);
   });
 }
