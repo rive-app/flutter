@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rive_editor/widgets/common/converters/alpha_value_converter.dart';
+import 'package:rive_editor/widgets/common/converters/hex_value_converter.dart';
 
 void main() {
-  test('alpha value converter correctly converts a string', () {
+  test('alpha value converter', () {
     const color = Color(0xFF112233);
     final hsvColor = HSVColor.fromColor(color);
     final converter = AlphaValueConverter(hsvColor);
@@ -40,6 +41,24 @@ void main() {
       hsvCalculatedColor.alpha.toStringAsFixed(2),
     );
 
+    expect(converter.fromEditingValue('malformed'), null);
+  });
+
+  test('hex value converter', () {
+    // test fromEditingValue
+    final converter = HexValueConverter();
+    expect(
+      converter.fromEditingValue('AABBCC'),
+      HSVColor.fromColor(const Color(0xFFAABBCC)),
+    );
+    expect(
+      converter.fromEditingValue('ABC'),
+      HSVColor.fromColor(const Color(0xFFAABBCC)),
+    );
+    expect(
+      converter.fromEditingValue('80112233'),
+      HSVColor.fromColor(const Color(0x80112233)),
+    );
     expect(converter.fromEditingValue('malformed'), null);
   });
 }
