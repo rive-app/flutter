@@ -134,7 +134,7 @@ abstract class SubscriptionPackage with ChangeNotifier {
       return false;
     }
 
-    if (_zip.length < 5) {
+    if (_zip.length < 3) {
       _zipError = 'Incomplete';
       return false;
     }

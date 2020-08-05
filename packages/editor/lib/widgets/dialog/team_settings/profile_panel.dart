@@ -107,7 +107,12 @@ class _ProfileSettingsState extends State<ProfileSettings> {
       isForHire: _isForHire,
     );
     await ProfileManager().updateProfile(widget.owner, updatedProfile);
-    await TeamManager().loadTeams();
+    if (widget.owner is Team) {
+      await TeamManager().loadTeams();
+    } else {
+      await UserManager().loadMe();
+    }
+
     // Close the popup
     Navigator.of(context).pop();
   }

@@ -37,6 +37,7 @@ const double belowHeaderPadding = 26;
 const int scrollEdgeMilliseconds = 1000 ~/ 60;
 const double scrollSensitivity = 75;
 const double scrollStrength = 6;
+const double selectedWidth = 4;
 
 class FileBrowserWrapper extends StatefulWidget {
   @override
@@ -158,8 +159,8 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
     final int maxColumns = _getMaxColumns(context.size.width, cellWidth);
     startDx -= horizontalPadding;
     endDx -= horizontalPadding;
-    startDy -= headerHeight + sectionPadding;
-    endDy -= headerHeight + sectionPadding;
+    startDy -= headerHeight + sectionPadding + selectedWidth;
+    endDy -= headerHeight + sectionPadding + selectedWidth;
 
     var overlappingColumns =
         getOverlap(maxColumns, cellWidth, spacing, 0, startDx, endDx);
@@ -264,6 +265,9 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
           return null;
         }
         elementIndex = row * maxColumns + column;
+        if (elementIndex < 0) {
+          return null;
+        }
         if (elementIndex < folderContents.folders.length) {
           return folderContents.folders[elementIndex];
         }

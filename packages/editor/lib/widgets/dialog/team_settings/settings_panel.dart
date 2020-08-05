@@ -69,6 +69,7 @@ class _SettingsState extends State<Settings> {
   }
   int _selectedIndex;
   String newAvatarPath;
+  bool avatarUploading = false;
 
   bool get isTeam => widget.owner is Team;
   Team get team => isTeam ? widget.owner as Team : null;
@@ -98,16 +99,29 @@ class _SettingsState extends State<Settings> {
     Uint8List data = await LoadFile.getUserFile(['png']);
 
     if (data != null) {
-      final remoteAvatarPath = await RiveTeamsApi(widget.api)
-          .uploadAvatar(widget.owner.ownerId, data);
-      // TODO: need error handling.
-      // also we could display the avatar before uploading it on 'save'
-      // but there's a bit of a journey issue there as the avatar is shown on
-      // lots of settings pages.
-      if (remoteAvatarPath != null) {
+      String remoteAvatarPath;
+      setState(() {
+        avatarUploading = true;
+      });
+
+      try {
+        if (isTeam) {
+          remoteAvatarPath = await RiveTeamsApi(widget.api)
+              .uploadAvatar(widget.owner.ownerId, data);
+        } else {
+          remoteAvatarPath = await MeApi(widget.api).uploadAvatar(data);
+        }
+      } finally {
         setState(() {
-          newAvatarPath = remoteAvatarPath;
-          TeamManager().loadTeams();
+          avatarUploading = false;
+          if (remoteAvatarPath != null) {
+            newAvatarPath = remoteAvatarPath;
+            if (isTeam) {
+              TeamManager().loadTeams();
+            } else {
+              UserManager().updateAvatar(remoteAvatarPath);
+            }
+          }
         });
       }
     }
@@ -164,7 +178,7 @@ class _SettingsState extends State<Settings> {
               children: <Widget>[
                 SettingsHeader(
                   name: widget.owner.displayName,
-                  // TODO: hm, we probably should store avatar with team.
+                  avatarUploading: avatarUploading,
                   avatarPath: (newAvatarPath == null)
                       ? widget.owner.avatarUrl
                       : newAvatarPath,

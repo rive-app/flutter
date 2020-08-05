@@ -84,4 +84,20 @@ class Me extends User {
         notice: notice,
         isFirstRun: isFirstRun,
       );
+
+  Me copyWith({String avatarUrl, String name, String username}) => Me(
+        name: name ?? this.name,
+        username: username ?? this.username,
+        avatarUrl: avatarUrl ?? this.avatarUrl,
+        ownerId: ownerId,
+        signedIn: signedIn,
+        id: id,
+        isAdmin: isAdmin,
+        isPaid: isPaid,
+        notificationCount: notificationCount,
+        verified: verified,
+        notice: notice,
+        socialLink: socialLink,
+        isFirstRun: isFirstRun,
+      );
 }
