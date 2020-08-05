@@ -35,6 +35,7 @@ class StageNode extends HideableStageItem<Node> with BoundsDelegate {
   @override
   bool intersectsRect(Float32List rectPoly) => true;
 
+  @override
   void draw(Canvas canvas, StageDrawPass pass) {
     // TODO: make this efficient
     final state = selectionState.value;

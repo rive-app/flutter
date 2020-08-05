@@ -53,7 +53,8 @@ abstract class StageTool implements StageDrawable {
 
   void _addCursor() {
     if (cursorName != null) {
-      _customCursor ??= stage.showCustomCursor(cursorName);
+      _customCursor ??=
+          stage.showCustomCursor(cursorName, alignment: cursorAlignment);
     }
   }
 
@@ -90,6 +91,8 @@ abstract class StageTool implements StageDrawable {
 
   /// Custom cursor for drawing
   Iterable<PackedIcon> get cursorName => null;
+
+  Alignment get cursorAlignment => Alignment.center;
 
   @override
   void draw(Canvas canvas, StageDrawPass drawPass) {}

@@ -20,6 +20,7 @@ abstract class TransformComponent extends TransformComponentBase {
       _delegate = null;
     }
   }
+
   final Event _worldTransformChanged = Event();
   Listenable get worldTransformChanged => _worldTransformChanged;
   // <- editor-only

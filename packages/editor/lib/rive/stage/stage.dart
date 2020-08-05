@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -33,6 +35,7 @@ import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/aabb_tree.dart';
 import 'package:rive_editor/rive/stage/advancer.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
+import 'package:rive_editor/rive/stage/items/stage_bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_ellipse.dart';
 import 'package:rive_editor/rive/stage/items/stage_gradient_stop.dart';
 import 'package:rive_editor/rive/stage/items/stage_linear_gradient.dart';
@@ -1228,6 +1231,8 @@ class Stage extends Debouncer {
     LinearGradientBase.typeKey: () => StageLinearGradient(),
     RadialGradientBase.typeKey: () => StageRadialGradient(),
     GradientStopBase.typeKey: () => StageGradientStop(),
+    BoneBase.typeKey: () => StageBone(),
+    RootBoneBase.typeKey: () => StageBone(),
   };
 
   @override
@@ -1249,9 +1254,12 @@ class Stage extends Debouncer {
     _customCursor?.show();
   }
 
-  CursorInstance showCustomCursor(Iterable<PackedIcon> icon) {
+  CursorInstance showCustomCursor(
+    Iterable<PackedIcon> icon, {
+    Alignment alignment = Alignment.center,
+  }) {
     if (_customCursor != null) {
-      return CursorIcon.build(_customCursor, icon);
+      return CursorIcon.build(_customCursor, icon, alignment);
     }
     return null;
   }

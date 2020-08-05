@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:bezier/bezier.dart';
+import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -54,6 +55,12 @@ class PenToolInsertTarget {
 }
 
 abstract class PenTool<T extends Component> extends StageTool {
+  @override
+  Iterable<PackedIcon> get cursorName => PackedIcon.cursorPen;
+
+  @override
+  Alignment get cursorAlignment => Alignment.topLeft;
+
   // Draw after most stage content, but before vertices.
   @override
   Iterable<StageDrawPass> get drawPasses => [

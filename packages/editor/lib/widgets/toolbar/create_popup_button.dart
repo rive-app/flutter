@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
+import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/node_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
@@ -73,18 +74,21 @@ class CreatePopupButton extends StatelessWidget {
           },
         ),
         PopupContextItem.separator(),
-        ToolPopupItem('Artboard',
-            icon: ArtboardTool.instance.icon,
-            listenable: file.stage.toolListenable,
-            isSelected: () => file.stage.tool == ArtboardTool.instance,
-            shortcut: ShortcutAction.artboardTool,
-            select: () => file.stage.tool = ArtboardTool.instance),
-        // PopupContextItem(
-        //   'Bone',
-        //   icon: 'tool-bone',
-        //   shortcut: ShortcutAction.boneTool,
-        //   select: () {},
-        // ),
+        ToolPopupItem(
+          'Artboard',
+          icon: ArtboardTool.instance.icon,
+          listenable: file.stage.toolListenable,
+          isSelected: () => file.stage.tool == ArtboardTool.instance,
+          shortcut: ShortcutAction.artboardTool,
+          select: () => file.stage.tool = ArtboardTool.instance,
+        ),
+        ToolPopupItem(
+          'Bone',
+          icon: PackedIcon.toolBone,
+          shortcut: ShortcutAction.boneTool,
+          isSelected: () => file.stage.tool == BoneTool.instance,
+          select: () => file.stage.tool = BoneTool.instance,
+        ),
         ToolPopupItem(
           'Node',
           icon: PackedIcon.toolNode,
