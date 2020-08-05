@@ -42,7 +42,7 @@ class EditingAnimationManager extends AnimationTimeManager
   /// Set a keyframe on a property for a bunch of components.
   Sink<KeyComponentsEvent> get keyComponents => _keyController;
 
-  Stream<Iterable<KeyHierarchyViewModel>> get hierarchy =>
+  ValueStream<Iterable<KeyHierarchyViewModel>> get hierarchy =>
       _hierarchyController.stream;
 
   final HashSet<_AllPropertiesHelper> _allPropertiesHelpers =
