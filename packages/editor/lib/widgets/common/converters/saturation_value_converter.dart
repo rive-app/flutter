@@ -9,12 +9,17 @@ class SaturationValueConverter extends InputValueConverter<HSVColor> {
   SaturationValueConverter(this.color);
 
   @override
-  HSVColor fromEditingValue(String value) => HSVColor.fromAHSV(
-        color.alpha,
-        color.hue,
-        double.parse(value) / 100,
-        color.value,
-      );
+  HSVColor fromEditingValue(String value) {
+    final parsedValue = double.tryParse(value);
+    return parsedValue == null
+        ? null
+        : HSVColor.fromAHSV(
+            color.alpha,
+            color.hue,
+            parsedValue / 100,
+            color.value,
+          );
+  }
 
   @override
   String toDisplayValue(HSVColor value) =>
@@ -28,7 +33,7 @@ class SaturationValueConverter extends InputValueConverter<HSVColor> {
   HSVColor drag(HSVColor value, double amount) => HSVColor.fromAHSV(
         color.alpha,
         color.hue,
-        (value.saturation - amount/100).clamp(0,1).toDouble(),
+        (value.saturation - amount / 100).clamp(0, 1).toDouble(),
         color.value,
       );
 }

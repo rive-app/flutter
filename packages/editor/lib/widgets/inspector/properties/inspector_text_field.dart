@@ -169,9 +169,7 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
       }
     }
 
-    setState(() {
-      _hasFocus = hasFocus;
-    });
+    setState(() => _hasFocus = hasFocus);
     if (!hasFocus) {
       return;
     }
@@ -324,17 +322,20 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
                     }
                   },
                   completeDrag: _completeChange,
-                  onSubmitted: (string) {
+                  onSubmitted: (str) {
+                    print('Submitting $str');
                     _submitOnLoseFocus = false;
                     final convertedValue =
-                        widget.converter.fromEditingValue(string);
+                        widget.converter.fromEditingValue(str);
                     // Check that the value converted correctly
                     if (convertedValue != null) {
+                      print('Saving converted value');
                       widget.change?.call(_lastValue = convertedValue);
                       _completeChange(debounceFocus: true);
                     } else {
                       // Parsing failed, set the raw controller text to the last
                       // value
+                      print('Converter failed');
                       _controller.text = _controller.displayValue;
                     }
                   },

@@ -7,7 +7,10 @@ class PercentageInputConverter extends InputValueConverter<double> {
   PercentageInputConverter(int significantDigits)
       : editFormatter = DoubleFormatter(significantDigits);
   @override
-  double fromEditingValue(String value) => double.parse(value) / 100;
+  double fromEditingValue(String value) {
+    final parsedValue = double.tryParse(value);
+    return parsedValue == null ? null : parsedValue / 100;
+  }
 
   @override
   String toDisplayValue(double value) => '${(value * 100).round()}%';

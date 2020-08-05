@@ -11,12 +11,17 @@ class HueValueConverter extends InputValueConverter<HSVColor> {
   HueValueConverter(this.color);
 
   @override
-  HSVColor fromEditingValue(String value) => HSVColor.fromAHSV(
-        color.alpha,
-        double.parse(value).clamp(0, 360).toDouble(),
-        color.saturation,
-        color.value,
-      );
+  HSVColor fromEditingValue(String value) {
+    final parsedValue = double.tryParse(value);
+    return parsedValue == null
+        ? null
+        : HSVColor.fromAHSV(
+            color.alpha,
+            parsedValue.clamp(0, 360).toDouble(),
+            color.saturation,
+            color.value,
+          );
+  }
 
   @override
   String toDisplayValue(HSVColor value) => displayFormatter.format(value.hue);

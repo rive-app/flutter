@@ -7,7 +7,10 @@ class RotationValueConverter extends InputValueConverter<double> {
   static final DoubleFormatter editFormatter = DoubleFormatter(3);
 
   @override
-  double fromEditingValue(String value) => radians(double.parse(value));
+  double fromEditingValue(String value) {
+    final parsedValue = double.tryParse(value);
+    return parsedValue == null ? null : radians(parsedValue);
+  }
 
   @override
   String toDisplayValue(double value) =>

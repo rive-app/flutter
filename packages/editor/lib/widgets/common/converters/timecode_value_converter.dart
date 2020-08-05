@@ -7,7 +7,7 @@ class TimeCodeValueConverter extends InputValueConverter<int> {
 
   @override
   int fromEditingValue(String value) {
-    var parts = value.split(":");
+    var parts = value.split(':');
     if (parts.isEmpty || parts.length == 1) {
       return double.parse(value).round();
     } else if (parts.length == 2) {
