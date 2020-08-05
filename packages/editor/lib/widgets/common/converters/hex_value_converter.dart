@@ -5,13 +5,19 @@ import 'package:rive_editor/widgets/common/converters/input_value_converter.dart
 class HexValueConverter extends InputValueConverter<HSVColor> {
   @override
   HSVColor fromEditingValue(String value) {
+    print('Converting string $value to hex');
     var hex = value.replaceAll('#', '');
     if (hex.length == 6) {
       hex = 'FF$hex';
     } else if (hex.length == 3) {
       hex = 'FF${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}';
     }
-    return HSVColor.fromColor(Color(int.parse('0x$hex')));
+    final parsedHex = int.tryParse('0x$hex');
+    // returns null if the parsing fails
+    if (parsedHex == null) {
+      print('Pasing failed');
+    }
+    return parsedHex == null ? null : HSVColor.fromColor(Color(parsedHex));
   }
 
   @override
