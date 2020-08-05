@@ -1,3 +1,6 @@
 [submodule "submodules/rive-flutter"]
 	path = submodules/rive-flutter
 	url = git@github.com:rive-app/rive-flutter.git
+[submodule "submodules/rive-cpp"]
+	path = submodules/rive-cpp
+	url = git@github.com:rive-app/rive-cpp.git
