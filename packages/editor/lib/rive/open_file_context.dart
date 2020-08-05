@@ -276,6 +276,9 @@ class OpenFileContext with RiveFileDelegate {
       stateChanged.notify();
       return;
     }
+    if (core.patched) {
+      _showPatchedAlert();
+    }
     core.addDelegate(this);
     selection.clear();
 
@@ -883,5 +886,11 @@ class OpenFileContext with RiveFileDelegate {
     } else {
       _labeledAlert.label = label;
     }
+  }
+
+  void _showPatchedAlert() {
+    addAlert(LabeledAlert(
+        'Rive had to patch up your file due to some bad data.',
+        autoDismiss: true));
   }
 }

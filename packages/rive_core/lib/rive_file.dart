@@ -30,6 +30,8 @@ class RiveFile extends RiveCoreContext {
   final Set<ClientSidePlayer> _dirtyPlayers = {};
   Backboard _backboard;
   Backboard get backboard => _backboard;
+  bool _patched = false;
+  bool get patched => _patched;
 
   /// Track if a property has changed since last advance, force an advance (and
   /// redraw) if any have.
@@ -257,6 +259,7 @@ class RiveFile extends RiveCoreContext {
     // Remove corrupt objects immediately.
     if (!object.validate()) {
       removeObject(object);
+      _patched = true;
       return;
     }
     object.onAdded();
@@ -456,6 +459,11 @@ class RiveFile extends RiveCoreContext {
       }
     }
     return null;
+  }
+
+  /// Let the system know that a core object needed to be patched.
+  void objectPatched(Core object) {
+    _patched = true;
   }
 }
 

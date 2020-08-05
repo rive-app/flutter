@@ -192,4 +192,9 @@ class LinearGradient extends LinearGradientBase with ShapePaintMutator {
     paint?.color = const ui.Color(0xFFFFFFFF)
         .withOpacity((opacity * renderOpacity).clamp(0, 1).toDouble());
   }
+
+  @override
+  bool validate() {
+    return shapePaintContainer != null;
+  }
 }
