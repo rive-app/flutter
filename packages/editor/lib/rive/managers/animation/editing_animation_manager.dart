@@ -28,33 +28,31 @@ class KeyComponentsEvent {
 /// Animation manager for the currently editing [LinearAnimation].
 class EditingAnimationManager extends AnimationTimeManager
     with RiveFileDelegate {
-  final HashMap<Component, KeyedComponentViewModel> _componentViewModels =
-      HashMap<Component, KeyedComponentViewModel>();
-  final HashMap<Component, HashMap<String, KeyedGroupViewModel>>
-      _componentGroupViewModels =
+  EditingAnimationManager(LinearAnimation animation, OpenFileContext activeFile)
+      : super(animation, activeFile) {
+    animation.context.addDelegate(this);
+    _updateHierarchy();
+    _keyController.stream.listen(_keyComponents);
+  }
+
+  final _componentViewModels = HashMap<Component, KeyedComponentViewModel>();
+  HashMap<Component, KeyedComponentViewModel> get componentViewModels =>
+      _componentViewModels;
+
+  final _componentGroupViewModels =
       HashMap<Component, HashMap<String, KeyedGroupViewModel>>();
+
+  final _allPropertiesHelpers = HashSet<_AllPropertiesHelper>();
 
   final _hierarchyController =
       BehaviorSubject<Iterable<KeyHierarchyViewModel>>();
+  ValueStream<Iterable<KeyHierarchyViewModel>> get hierarchy =>
+      _hierarchyController.stream;
 
   final _keyController = StreamController<KeyComponentsEvent>();
 
   /// Set a keyframe on a property for a bunch of components.
   Sink<KeyComponentsEvent> get keyComponents => _keyController;
-
-  ValueStream<Iterable<KeyHierarchyViewModel>> get hierarchy =>
-      _hierarchyController.stream;
-
-  final HashSet<_AllPropertiesHelper> _allPropertiesHelpers =
-      HashSet<_AllPropertiesHelper>();
-
-  EditingAnimationManager(LinearAnimation animation, OpenFileContext activeFile)
-      : super(animation, activeFile) {
-    animation.context.addDelegate(this);
-    _updateHierarchy();
-
-    _keyController.stream.listen(_keyComponents);
-  }
 
   void _keyComponents(KeyComponentsEvent event) {
     for (final component in event.components) {
@@ -371,8 +369,8 @@ class KeyedComponentViewModel extends AllKeysViewModel {
   const KeyedComponentViewModel({
     @required this.component,
     this.keyedObject,
-    this.children,
     this.allProperties,
+    this.children = const {},
   }) : assert(component != null);
 }
 
@@ -394,8 +392,8 @@ class KeyedGroupViewModel extends AllKeysViewModel {
 
   const KeyedGroupViewModel({
     this.label,
-    this.children,
     this.allProperties,
+    this.children = const {},
   });
 }
 
@@ -414,7 +412,7 @@ class KeyedPropertyViewModel extends KeyHierarchyViewModel {
   final Component component;
 
   @override
-  Set<KeyHierarchyViewModel> get children => null;
+  Set<KeyHierarchyViewModel> get children => {};
 
   const KeyedPropertyViewModel({
     this.keyedProperty,

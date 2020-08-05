@@ -54,32 +54,32 @@ class KeyedObjectTreeController extends TreeController<KeyHierarchyViewModel> {
       _highlight.notify({});
       return;
     }
-    // Fetch the selected items
+    // selected items
     final selectedItems = file.selection.items;
-    // Fetch the keyedItems in the tree
-    final keyedItems = animationManager.hierarchy.value;
+    final selectedComponents =
+        selectedItems.whereType<StageItem<Component>>().map((i) => i.component);
+    // Fetch the keyed components, mapped to their respective models
+    final keyedComponentsMap = animationManager.componentViewModels;
+    final keyedComponents = keyedComponentsMap.keys;
 
-    // Determine if any of the selected items map to the keyed items, and if
-    // they do, get the first one
-    killDaLoop:
-    for (final selectedItem in selectedItems) {
-      if (selectedItem is StageItem<Component>) {
-        final selectedComponent = selectedItem.component;
-        for (final keyedItem in keyedItems) {
-          if (keyedItem is KeyedComponentViewModel) {
-            final keyedComponent = keyedItem.component;
-            if (selectedComponent == keyedComponent) {
-              _requestVisibility.notify(keyedItem);
-              _highlight.notify({keyedItem});
-              break killDaLoop;
-            }
-          }
-        }
+    // Determine if any of the selected components is keyed , and if so, scroll
+    // to and select the first one
+    for (final selectedComponent in selectedComponents) {
+      if (keyedComponents.contains(selectedComponent)) {
+        final model = keyedComponentsMap[selectedComponent];
+        // expand the tree if necessary
+        expandTo(model);
+        // scroll to make the item visible if necessary
+        _requestVisibility.notify(model);
+        // highlight the item
+        _highlight.notify({model});
+        // break out of the function, as job's done
+        return;
       }
-      // If we've not broken out, then we've found nothing, so ensure any
-      // highlighted items are cleared
-      _highlight.notify({});
     }
+    // If we've not broken out, then we've found nothing, so ensure any
+    // highlighted items are cleared
+    _highlight.notify({});
   }
 
   @override

@@ -129,8 +129,7 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
     );
   }
 
-  /// Autoscrolls the hierarchy if necessary to ensure that the model is is
-  /// visible
+  /// Autoscrolls the hierarchy if necessary to ensure that the model's visible
   void _ensureKeyedComponentVisible(KeyHierarchyViewModel model) {
     final key = ValueKey(model);
     final index = widget.treeController.indexLookup[key];
@@ -155,10 +154,11 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
 
   /// Highlights the given set of models
   void _highlightKeyedComponents(Set<KeyHierarchyViewModel> models) {
-    setState(() {
-      _selectedItems.clear();
-      _selectedItems.addAll(models);
-    });
+    setState(
+      () => _selectedItems
+        ..clear()
+        ..addAll(models),
+    );
   }
 
   Widget _buildKeyedComponent(BuildContext context, RiveThemeData theme,
