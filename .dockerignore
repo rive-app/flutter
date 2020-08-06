@@ -4,3 +4,4 @@
 **/output
 **/.dart_tool
 .git
+!submodules/rive-cpp/**/build
