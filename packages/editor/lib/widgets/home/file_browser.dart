@@ -26,7 +26,7 @@ import 'package:rive_editor/widgets/theme.dart';
 
 typedef FolderContentsBuilder = Widget Function(FolderContents, Selection);
 
-const double folderCellHeight = 50;
+const double folderCellHeight = 58;  //Should be 50 but had to add an extra 8 to account for the padding added by the 4px border when selected
 const double fileCellHeight = 182;
 const double cellWidth = 187;
 const double spacing = 22;
