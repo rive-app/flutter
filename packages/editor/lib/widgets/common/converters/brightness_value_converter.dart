@@ -9,12 +9,17 @@ class BrightnessValueConverter extends InputValueConverter<HSVColor> {
   BrightnessValueConverter(this.color);
 
   @override
-  HSVColor fromEditingValue(String value) => HSVColor.fromAHSV(
-        color.alpha,
-        color.hue,
-        color.saturation,
-        double.parse(value) / 100,
-      );
+  HSVColor fromEditingValue(String value) {
+    final parsedValue = double.tryParse(value);
+    return parsedValue == null
+        ? null
+        : HSVColor.fromAHSV(
+            color.alpha,
+            color.hue,
+            color.saturation,
+            parsedValue / 100,
+          );
+  }
 
   @override
   String toDisplayValue(HSVColor value) => '${(value.value * 100).round()}%';

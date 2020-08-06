@@ -166,7 +166,7 @@ abstract class TreeController<T> with ChangeNotifier {
   /// Show the children of [item].
   bool expand(T item, {bool callFlatten = true}) {
     final expanded = _expanded;
-    if (!expanded.contains(item)) {
+    if (!expanded.contains(item) && item != null) {
       var children = childrenOf(item);
       if (children?.isNotEmpty ?? false) {
         bool added = expanded.add(item);

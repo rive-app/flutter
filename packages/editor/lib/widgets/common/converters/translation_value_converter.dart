@@ -9,7 +9,7 @@ class TranslationValueConverter extends InputValueConverter<double> {
   DoubleFormatter get editFormatter => _editFormatter;
 
   @override
-  double fromEditingValue(String value) => double.parse(value);
+  double fromEditingValue(String value) => double.tryParse(value);
 
   @override
   String toDisplayValue(double value) => displayFormatter.format(value);

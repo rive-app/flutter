@@ -8,14 +8,19 @@ class AlphaValueConverter extends InputValueConverter<HSVColor> {
   AlphaValueConverter(HSVColor hsv) : color = hsv.toColor();
 
   @override
-  HSVColor fromEditingValue(String value) => HSVColor.fromColor(
-        Color.fromARGB(
-          (double.parse(value) / 100 * 255).clamp(0, 255).toInt(),
-          color.red,
-          color.green,
-          color.blue,
-        ),
-      );
+  HSVColor fromEditingValue(String value) {
+    final parsedValue = double.tryParse(value);
+    return parsedValue == null
+        ? null
+        : HSVColor.fromColor(
+            Color.fromARGB(
+              (parsedValue / 100 * 255).clamp(0, 255).toInt(),
+              color.red,
+              color.green,
+              color.blue,
+            ),
+          );
+  }
 
   @override
   String toEditingValue(HSVColor value) =>

@@ -154,17 +154,22 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
         _submitOnLoseFocus &&
         _stringValueOnFocus != _controller.text) {
       // Before changing state, try to submit the value.
-      widget.change?.call(
-          _lastValue = widget.converter.fromEditingValue(_controller.text));
-      if (widget.captureJournalEntry) {
-        ActiveFile.find(context)?.core?.captureJournalEntry();
+      final convertedValue =
+          widget.converter.fromEditingValue(_controller.text);
+      // Check that the value converted correctly
+      if (convertedValue != null) {
+        widget.change?.call(_lastValue = convertedValue);
+        if (widget.captureJournalEntry) {
+          ActiveFile.find(context)?.core?.captureJournalEntry();
+        }
+        widget.completeChange?.call(_lastValue);
+      } else {
+        // Parsing failed, set the raw controller text to the last value
+        _controller.text = _controller.displayValue;
       }
-      widget.completeChange?.call(_lastValue);
     }
 
-    setState(() {
-      _hasFocus = hasFocus;
-    });
+    setState(() => _hasFocus = hasFocus);
     if (!hasFocus) {
       return;
     }
@@ -317,11 +322,22 @@ class _InspectorTextFieldState<T> extends State<InspectorTextField<T>> {
                     }
                   },
                   completeDrag: _completeChange,
-                  onSubmitted: (string) {
+                  onSubmitted: (str) {
+                    print('Submitting $str');
                     _submitOnLoseFocus = false;
-                    widget.change?.call(
-                        _lastValue = widget.converter.fromEditingValue(string));
-                    _completeChange(debounceFocus: true);
+                    final convertedValue =
+                        widget.converter.fromEditingValue(str);
+                    // Check that the value converted correctly
+                    if (convertedValue != null) {
+                      print('Saving converted value');
+                      widget.change?.call(_lastValue = convertedValue);
+                      _completeChange(debounceFocus: true);
+                    } else {
+                      // Parsing failed, set the raw controller text to the last
+                      // value
+                      print('Converter failed');
+                      _controller.text = _controller.displayValue;
+                    }
                   },
                 ),
               ),

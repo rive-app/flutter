@@ -49,7 +49,8 @@
           case 187: // '=' for zoom in
           case 189: // '-' for zoom out
           case 90:  // 'z' for preventing opening a previous tab in Safari
-          case 67:  // 'c' for preventing negative beep on Safari
+          // Needs to be removed as it kills text copy
+          // case 67:  // 'c' for preventing negative beep on Safari
             event.preventDefault();
             break;
           default:

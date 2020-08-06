@@ -5,7 +5,7 @@ class SpeedValueConverter extends InputValueConverter<double> {
   static final DoubleFormatter editFormatter = DoubleFormatter(4);
 
   @override
-  double fromEditingValue(String value) => double.parse(value);
+  double fromEditingValue(String value) => double.tryParse(value);
 
   @override
   String toDisplayValue(double value) => '${displayFormatter.format(value)}x';
@@ -16,5 +16,5 @@ class SpeedValueConverter extends InputValueConverter<double> {
   static final SpeedValueConverter instance = SpeedValueConverter();
 
   @override
-  double drag(double value, double amount) => value - amount/10;
+  double drag(double value, double amount) => value - amount / 10;
 }

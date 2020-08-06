@@ -8,14 +8,19 @@ class BlueValueConverter extends InputValueConverter<HSVColor> {
   BlueValueConverter(HSVColor hsv) : color = hsv.toColor();
 
   @override
-  HSVColor fromEditingValue(String value) => HSVColor.fromColor(
-        Color.fromARGB(
-          color.alpha,
-          color.red,
-          color.green,
-          int.parse(value).clamp(0, 255).toInt(),
-        ),
-      );
+  HSVColor fromEditingValue(String value) {
+    final parsedValue = int.tryParse(value);
+    return parsedValue == null
+        ? null
+        : HSVColor.fromColor(
+            Color.fromARGB(
+              color.alpha,
+              color.red,
+              color.green,
+              parsedValue.clamp(0, 255).toInt(),
+            ),
+          );
+  }
 
   @override
   String toEditingValue(HSVColor value) => value.toColor().blue.toString();

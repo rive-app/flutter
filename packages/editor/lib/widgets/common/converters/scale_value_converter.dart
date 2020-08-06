@@ -8,7 +8,7 @@ class ScaleValueConverter extends InputValueConverter<double> {
   static final ScaleValueConverter instance = ScaleValueConverter();
 
   @override
-  double fromEditingValue(String value) => double.parse(value);
+  double fromEditingValue(String value) => double.tryParse(value);
 
   @override
   String toDisplayValue(double value) => displayFormatter.format(value);
