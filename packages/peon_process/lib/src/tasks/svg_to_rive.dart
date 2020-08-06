@@ -87,7 +87,7 @@ class SvgToRiveTask with Task {
   @override
   Future<bool> execute() async {
     var data = await getS3Key(sourceLocation);
-    var cleanedData = await clean(data);
+    var cleanedData = await clean(String.fromCharCodes(data));
 
     // the key is just there for debugging purposes
     var drawable = await SvgParserStateRived(

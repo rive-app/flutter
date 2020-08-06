@@ -45,7 +45,7 @@ class FlareToRiveTask with Task {
   Future<bool> execute() async {
     var data = await getS3Key(sourceLocation);
 
-    final converter = FlareToRive(taskId)..toFile(data);
+    final converter = FlareToRive(taskId)..toFile(String.fromCharCodes(data));
 
     var exporter = RuntimeExporter(
         core: converter.riveFile,

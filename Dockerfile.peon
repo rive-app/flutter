@@ -23,7 +23,7 @@ RUN /app/submodules/rive-cpp/skia/dependencies/make_glfw.sh
 RUN cargo install svgcleaner
 WORKDIR /
 RUN git clone https://github.com/flutter/flutter.git
-ENV PATH "$PATH:/flutter/bin:/root/.cargo/bin"
+ENV PATH "$PATH:/flutter/bin:/root/.cargo/bin:/app/submodules/rive-cpp/skia/thumbnail_generator/build/bin/debug/"
 
 # Go make sure we got the right flutter version
 ADD .flutter_version /app/.flutter_version
@@ -46,5 +46,7 @@ RUN flutter pub get
 # build the linux distro
 RUN flutter build linux
 
+# set thumbnail generator path
+ENV THUMBNAIL_GENERATOR_PATH=rive_thumbnail_generator
 # run.sh should just start the xvfb session & launch the build
 ENTRYPOINT ["sh", "run.sh"]
