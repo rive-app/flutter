@@ -112,6 +112,13 @@ public class WindowUtilsPlugin: NSObject, FlutterPlugin {
             let height: Double = (args?["height"] as? Double)!
             resizeWindowWithDelay(width: width, height: height, retries: 0)
             result(true)
+        case "setMinWindowSize":
+            let args = call.arguments as? [String: Any]
+            let width: Double = (args?["width"] as? Double)!
+            let height: Double = (args?["height"] as? Double)!
+            let window = NSApplication.shared.keyWindow
+            window?.minSize = NSSize(width: width, height: height)
+            result(true)
         case "startDrag":
             let window = NSApplication.shared.keyWindow
             if let event: NSEvent = window?.currentEvent

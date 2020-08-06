@@ -33,6 +33,10 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
 
   /// Stubbed out for web; does nothing except return true
   @override
+  Future<bool> setMinWindowSize(Size size) => Future.value(true);
+
+  /// Stubbed out for web; does nothing except return true
+  @override
   Future<bool> startDrag() => Future.value(true);
 
   /// Stubbed out for web; does nothing except return the zero offset
@@ -93,7 +97,7 @@ class WindowUtilsPlugin extends WindowUtilsPlatform {
     js.context['keyPressed'] = (dynamic test) {
       if (test is int) {
         var codec = const StandardMethodCodec();
-        
+
         messenger.send(keyChannelName, codec.encodeSuccessEnvelope(test));
       }
     };

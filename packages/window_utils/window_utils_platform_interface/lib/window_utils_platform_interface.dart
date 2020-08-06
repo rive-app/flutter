@@ -111,6 +111,9 @@ abstract class WindowUtilsPlatform extends PlatformInterface {
   Future<bool> setSize(Size size) =>
       throw UnimplementedError('setSize() has not been implemented.');
 
+  Future<bool> setMinWindowSize(Size size) =>
+      throw UnimplementedError('setMinWindowSize() has not been implemented.');
+
   Future<bool> startDrag() =>
       throw UnimplementedError('startDrag() has not been implemented.');
 

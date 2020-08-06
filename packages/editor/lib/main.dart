@@ -141,6 +141,7 @@ class _InitWindowWidgetState extends State<InitWindowWidget> {
     win_utils.hideTitleBar();
     win_utils.setSize(kDefaultWIndowSize);
     win_utils.initInputHelper();
+    win_utils.setMinWindowSize(const Size(600, 500));
   }
 
   @override
