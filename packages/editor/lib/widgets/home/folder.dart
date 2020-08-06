@@ -15,7 +15,7 @@ class BrowserFolder extends StatelessWidget {
   final bool selected;
 
   EdgeInsetsGeometry get padding =>
-      const EdgeInsets.only(left: 14, top: 12, bottom: 12, right: 15);
+      const EdgeInsets.only(left: 15, top: 12, bottom: 12, right: 15);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class BrowserFolder extends StatelessWidget {
         padding: padding,
         decoration: BoxDecoration(
           color: colors.fileBackgroundLightGrey,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(15),
           border: Border.all(
             color: selected
                 ? colors.fileSelectedBlue
@@ -49,11 +49,14 @@ class BrowserFolder extends StatelessWidget {
                 color: colors.black30),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                folderName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: styles.greyText,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 1),
+                child: Text(
+                  folderName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: styles.greyText,
+                ),
               ),
             ),
           ],

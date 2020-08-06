@@ -14,7 +14,7 @@ class BrowserFile extends StatelessWidget {
     final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left:15, top:13, bottom:14),
       child: Row(
         children: [
           Expanded(
@@ -35,8 +35,8 @@ class BrowserFile extends StatelessWidget {
     final colors = theme.colors;
     return ClipRRect(
       borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(5),
-        topRight: Radius.circular(5),
+        topLeft: Radius.circular(10),
+        topRight: Radius.circular(10),
       ),
       child: Container(
         color: colors.fileBackgroundDarkGrey,
@@ -57,7 +57,7 @@ class BrowserFile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colors.fileBackgroundLightGrey,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(15),
           border: Border.all(
             color: selected
                 ? colors.fileSelectedBlue
@@ -69,7 +69,7 @@ class BrowserFile extends StatelessWidget {
           foregroundDecoration: BoxDecoration(
             color: suspended ? colors.getTransparent50 : colors.getTransparent,
             backgroundBlendMode: BlendMode.overlay,
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
             children: [
