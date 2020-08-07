@@ -11,7 +11,8 @@ String getRegion() {
   return Platform.environment['AWS_REGION'] ?? 'us-east-1';
 }
 
-Future<Uint8List> getS3Key(String sourceLocation) async {
+Future<Uint8List> getS3Key(String sourceLocation,
+    [String regionOverride]) async {
   // Watch out here, the capitalization in the header is important.
   // lowercase it will mess with the signature and break it.
   var client = ConsoleClient();
@@ -29,7 +30,7 @@ Future<Uint8List> getS3Key(String sourceLocation) async {
     var getRequest = AwsRequestBuilder(
         body: [],
         headers: headers,
-        region: getRegion(),
+        region: regionOverride ?? getRegion(),
         uri: Uri.parse(sourceLocation),
         credentials: credentials,
         httpClient: client,
@@ -48,7 +49,8 @@ Future<Uint8List> getS3Key(String sourceLocation) async {
   }
 }
 
-Future<void> putS3Key(String targetLocation, Uint8List payload) async {
+Future<void> putS3Key(String targetLocation, Uint8List payload,
+    [String regionOverride]) async {
   // Watch out here, the capitalization in the header is important.
   // lowercase it will mess with the signature and break it.
   var credentials = await getCredentials();
@@ -65,7 +67,7 @@ Future<void> putS3Key(String targetLocation, Uint8List payload) async {
         method: 'PUT',
         body: payload,
         headers: headers,
-        region: getRegion(),
+        region: regionOverride ?? getRegion(),
         uri: Uri.parse(targetLocation),
         credentials: credentials,
         httpClient: client,

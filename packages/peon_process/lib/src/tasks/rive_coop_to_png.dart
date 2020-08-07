@@ -87,7 +87,8 @@ class RiveCoopToPng with Task {
 
   @override
   Future<bool> execute() async {
-    var data = await getS3Key(sourceLocation);
+    // FML
+    var data = await getS3Key(sourceLocation, 'us-east-1');
     var riveFile = RiveFile('0', localDataPlatform: null);
     var coopImporter = CoopImporter(core: riveFile);
     coopImporter.import(data);
@@ -100,7 +101,7 @@ class RiveCoopToPng with Task {
       return false;
     }
 
-    await putS3Key(targetLocation, svgdata);
+    await putS3Key(targetLocation, svgdata, 'us-east-1');
 
     return true;
   }
