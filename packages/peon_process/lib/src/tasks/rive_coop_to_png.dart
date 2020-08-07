@@ -101,16 +101,6 @@ class RiveCoopToPng with Task {
     }
 
     await putS3Key(targetLocation, svgdata);
-    var queue = await getJSQueue();
-
-    await queue.sendMessage(json.encode({
-      "work": "ApiGatewayPushMessage",
-      "ownerId": notifyUserId,
-      "payload": {
-        "action": "TaskCompleted",
-        "params": {"taskId": taskId}
-      }
-    }));
 
     return true;
   }
