@@ -16,6 +16,11 @@ class CdnDM {
         params: data.getString('params'),
       );
 
+  static Map<String, CdnDM> fromDataMap(Map<String, dynamic> data) {
+    return data.map<String, CdnDM>((key, dynamic value) =>
+        MapEntry(key, CdnDM.fromData(value as Map<String, dynamic>)));
+  }
+
   @override
   String toString() => 'CdnDM($base, $params)';
 }

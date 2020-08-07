@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_editor/widgets/common/click_listener.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class BrowserFile extends StatelessWidget {
   const BrowserFile(this.file, this.selected, this.suspended, {Key key})
@@ -33,14 +34,26 @@ class BrowserFile extends StatelessWidget {
   Widget _screenshot(BuildContext context) {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
+
+    final placeholder = Container(
+      color: colors.fileBackgroundDarkGrey,
+    );
+
     return ClipRRect(
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(10),
         topRight: Radius.circular(10),
       ),
-      child: Container(
-        color: colors.fileBackgroundDarkGrey,
-      ),
+      child: (file.preview == null)
+          ? placeholder
+          : CachedNetworkImage(
+              width: double.infinity,
+              placeholder: (context, url) => placeholder,
+              imageUrl: file.preview,
+              fit: BoxFit.cover,
+              fadeInDuration: Duration.zero,
+              fadeOutDuration: Duration.zero,
+            ),
     );
   }
 

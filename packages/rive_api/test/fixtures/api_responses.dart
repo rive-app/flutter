@@ -171,11 +171,14 @@ final successRecentFilesResponse = Response("""
 "64uLPb"
 ]""", 200);
 
-final successRecentFilesDetailsResponse = Response("""
-[
+final successRecentFilesDetailsResponse = Response("""{
+"cdns":{
+  "40842":{"base":"foo", "params":"?fii"}
+},
+"files":[
 {"id":"64uLPb","name":"Bill","isPublic":true,"route":"/a/matt/files/rive/bill","preview":"krypton/40842-43-revis-7-krypton-preview","product":"rive","state":"READY"},
 {"id":"DeCo6G","name":"july","isPublic":true,"route":"/a/matt/files/rive/july","preview":"krypton/40842-40-revis-13-krypton-preview","product":"rive","state":"READY"}
-]
+]}
 """, 200);
 
 final successFileDetailsResponse = Response("""
