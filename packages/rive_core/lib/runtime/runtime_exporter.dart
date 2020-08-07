@@ -45,7 +45,7 @@ class RuntimeExporter {
 
     var backboards = core.objectsOfType<Backboard>();
     if (backboards.isEmpty) {
-      _log.severe("No backboards in file.");
+      _log.severe('No backboards in file.');
       return null;
     }
 
@@ -75,6 +75,9 @@ class RuntimeExporter {
     var allComponents = core.objectsOfType<Component>().toList();
     // Export artboards.
     for (final artboard in exportArtboards) {
+      // Make sure everything is updated (ensures drawables are in order) before
+      // exporting.
+      artboard.advance(0.0);
       // Build a lookup table for components that are in this artboard.
       HashMap<Id, int> idToIndex = HashMap<Id, int>();
       // Find all the components that belong to this artboard.

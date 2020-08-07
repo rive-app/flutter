@@ -133,3 +133,4 @@ packages/window_utils/window_utils/pubspec.lock
 packages/window_utils/window_utils/example/pubspec.lock
 packages/window_utils/window_utils_platform_interface/pubspec.lock
 packages/window_utils/window_utils_web/pubspec.lock
+/packages/rive_core/test/assets/file_teeny_tiny.riv
