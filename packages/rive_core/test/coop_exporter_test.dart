@@ -21,7 +21,9 @@ bool _isSorted<T>(List<T> list, [int Function(T, T) compare]) {
 
 void main() {
   test('Export a Rive Coop file', () {
-    var file = File('./test/assets/file_teeny_tiny.coop');
+    var file =
+        File('./${Directory.current.path.endsWith('/test') ? '' : 'test/'}'
+            'assets/file_teeny_tiny.coop');
     var data = file.readAsBytesSync();
     var riveFile = RiveFile('0', localDataPlatform: null);
     var coopImporter = CoopImporter(core: riveFile);
@@ -43,7 +45,9 @@ void main() {
             (Drawable a, Drawable b) => a.drawOrder.compareTo(b.drawOrder)),
         true);
 
-    var fileOut = File('./test/assets/file_teeny_tiny.riv');
+    var fileOut =
+        File('./${Directory.current.path.endsWith('/test') ? '' : 'test/'}'
+            'assets/file_teeny_tiny.riv');
     fileOut.writeAsBytesSync(exportedRiveBinary);
   });
 }
