@@ -70,7 +70,8 @@ class FileDM {
       id: ids[0],
       ownerId: ids[1],
       name: data.getString('name'),
-      preview: data.getString('preview'),
+      // we need the cdn deatils to do preview 'properly'
+      // preview: data.getString('preview'),
     );
   }
 
