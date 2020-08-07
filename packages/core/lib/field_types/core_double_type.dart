@@ -10,6 +10,7 @@ class CoreDoubleType extends CoreFieldType<double> {
   @override
   double deserialize(BinaryReader reader) {
     var length = reader.buffer.lengthInBytes;
+    // Remove this length < 4 at some point...
     if (length < 4) {
       return reader.readVarInt() / 10;
     } else if (length == 4) {
@@ -24,13 +25,6 @@ class CoreDoubleType extends CoreFieldType<double> {
 
   @override
   Uint8List serialize(double value) {
-    if (((value * 10).roundToDouble() - (value * 10)).abs() == 0) {
-      var w = BinaryWriter(alignment: 4);
-      w.writeVarInt((value * 10).round());
-      if (w.uint8Buffer.length < 4) {
-        return w.uint8Buffer;
-      }
-    }
     BinaryWriter writer;
     if (max32Bit) {
       writer = BinaryWriter(alignment: 4);
