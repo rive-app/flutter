@@ -62,10 +62,4 @@ class Segment2D {
       ),
     );
   }
-
-  /// Finds the closest distance from [point] to the segment.
-  double squaredDistance(Vec2D point) {
-    var result = projectPoint(point);
-    return Vec2D.squaredDistance(result.point, point);
-  }
 }

@@ -30,6 +30,9 @@ class BoneJointRenderer {
   static Paint selectedFill = Paint()
     ..style = PaintingStyle.fill
     ..color = const Color(0xFF008BFF);
+  static Paint hoveredFill = Paint()
+    ..style = PaintingStyle.fill
+    ..color = const Color(0xCCFFFFFF);
   static Paint stroke = Paint()
     ..style = PaintingStyle.stroke
     ..color = const Color(0x40000000)
@@ -42,6 +45,10 @@ class BoneJointRenderer {
   static void draw(Canvas canvas, SelectionState state) {
     Paint renderStroke, renderFill;
     switch (state) {
+      case SelectionState.hovered:
+        renderStroke = stroke;
+        renderFill = hoveredFill;
+        break;
       case SelectionState.selected:
         renderStroke = jointSelectedStroke;
         renderFill = selectedFill;

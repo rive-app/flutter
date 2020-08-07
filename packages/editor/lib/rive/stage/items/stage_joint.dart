@@ -9,6 +9,8 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
 
 class StageJoint extends StageItem<Bone> {
+  static const double hitRadius = BoneJointRenderer.radius + 2;
+  static const double hitRadiusSquared = hitRadius * hitRadius;
   static const double _maxWorldJointSize =
       BoneJointRenderer.radius / Stage.minZoom;
   Vec2D _worldTranslation;
@@ -27,8 +29,14 @@ class StageJoint extends StageItem<Bone> {
   Vec2D get worldTranslation => _worldTranslation;
 
   @override
+  bool hitHiFi(Vec2D worldMouse) {
+    return Vec2D.squaredDistance(worldMouse, _worldTranslation) <=
+        hitRadiusSquared / (stage.viewZoom * stage.viewZoom);
+  }
+
+  @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(draw, order: 2, inWorldSpace: false)];
+      [StageDrawPass(draw, order: 3, inWorldSpace: false)];
 
   @override
   void draw(Canvas canvas, StageDrawPass pass) {
@@ -39,5 +47,6 @@ class StageJoint extends StageItem<Bone> {
     canvas.translate(screen[0], screen[1]);
     BoneJointRenderer.draw(canvas, selectionState.value);
     canvas.restore();
+    drawBounds(canvas, pass);
   }
 }

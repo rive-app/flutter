@@ -21,6 +21,7 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
   double _worldLength = 0;
   double _screenLength = 0;
   double _angle = 0;
+  double _tMin = 0, _tMax = 1;
 
   // Store computed segment for the bone (start->end).
   Segment2D _segment;
@@ -39,7 +40,7 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
     _tipJoint = StageJoint();
     _tipJoint.initialize(component);
     stage.addItem(_tipJoint);
-    
+
     boundsChanged();
   }
 
@@ -93,9 +94,17 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
   /// Do a high fidelity hover hit check against the actual path geometry.
   @override
   bool hitHiFi(Vec2D worldMouse) {
-    return _segment != null &&
-        _segment.squaredDistance(worldMouse) <
-            hitDistanceSquared / stage.viewZoom;
+    if (_segment == null) {
+      return false;
+    }
+
+    var result = _segment.projectPoint(worldMouse);
+    if (result.t < _tMin || result.t > _tMax) {
+      return false;
+    }
+
+    return Vec2D.squaredDistance(result.point, worldMouse) <
+        hitDistanceSquared / stage.viewZoom;
   }
 
   @override
@@ -103,6 +112,8 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
     var screenLength = stage.viewZoom * _worldLength;
     if (_needsUpdate || screenLength != _screenLength) {
       _screenLength = screenLength;
+      _tMin = BoneRenderer.radius / _screenLength;
+      _tMax = 1 - _tMin;
       _needsUpdate = false;
 
       BoneRenderer.updatePath(path, screenLength,
@@ -119,5 +130,6 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
     canvas.rotate(_angle);
     BoneRenderer.draw(canvas, selectionState.value, path);
     canvas.restore();
+    drawBounds(canvas, pass);
   }
 }
