@@ -56,6 +56,9 @@ Future<bool> setPosition(Offset offset) =>
 
 Future<bool> setSize(Size size) => WindowUtilsPlatform.instance.setSize(size);
 
+Future<bool> setMinWindowSize(Size size) =>
+    WindowUtilsPlatform.instance.setMinWindowSize(size);
+
 Future<bool> startDrag() => WindowUtilsPlatform.instance.startDrag();
 
 /// [Windows] Only

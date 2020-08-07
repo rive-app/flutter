@@ -16,8 +16,8 @@ import 'window_utils_platform_interface.dart';
 
 // const MethodChannel _channel = MethodChannel('plugins.flutter.io/url_launcher');
 const MethodChannel _channel = MethodChannel('plugins.rive.app/window_utils');
-const EventChannel _keyPressChannel =
-    EventChannel('plugins.rive.app/key_press');
+// const EventChannel _keyPressChannel =
+//     EventChannel('plugins.rive.app/key_press');
 final _random = Random.secure();
 
 /// An implementation of [WindowUtilsPlatform] that uses method channels.
@@ -54,6 +54,7 @@ class MethodChannelWindowUtils extends WindowUtilsPlatform {
     }
   }
 
+  @override
   Future<String> openWebView(String key, String url,
       {Offset offset, Size size, String jsMessage = ''}) async {
     return _channel.invokeMethod<String>('openWebView', {
@@ -73,7 +74,7 @@ class MethodChannelWindowUtils extends WindowUtilsPlatform {
       return _channel.invokeMethod<bool>('closeWebView', {
         'key': key,
       });
-    } catch (e) {
+    } on Exception catch (_) {
       return Future.value(false);
     }
   }
@@ -181,6 +182,14 @@ class MethodChannelWindowUtils extends WindowUtilsPlatform {
   @override
   Future<bool> setSize(Size size) {
     return _channel.invokeMethod<bool>('setSize', {
+      'width': size.width,
+      'height': size.height,
+    });
+  }
+
+  @override
+  Future<bool> setMinWindowSize(Size size) {
+    return _channel.invokeMethod<bool>('setMinWindowSize', {
       'width': size.width,
       'height': size.height,
     });
