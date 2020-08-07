@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/node.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
@@ -60,7 +60,7 @@ abstract class TransformHandleTool extends StageTool
   bool get showScaleHandle => true;
 
   SelectionContext<SelectableItem> _selectionContext;
-  Set<Node> _nodes = {};
+  Set<TransformComponent> _transformComponents = {};
 
   /// Tracks hidden handles that should be restored when transformers complete
   Restorer restoreHandles;
@@ -129,10 +129,10 @@ abstract class TransformHandleTool extends StageTool
   }
 
   void _selectionChanged() {
-    var nodes = <Node>{};
+    var nodes = <TransformComponent>{};
     for (final item in _selectionContext.items) {
-      if (item is StageItem && item.component is Node) {
-        nodes.add(item.component as Node);
+      if (item is StageItem && item.component is TransformComponent) {
+        nodes.add(item.component as TransformComponent);
       }
     }
     _setSelection(nodes);
@@ -152,14 +152,14 @@ abstract class TransformHandleTool extends StageTool
     stage.removeItem(handle);
   }
 
-  void _setSelection(Set<Node> nodes) {
+  void _setSelection(Set<TransformComponent> transformComponents) {
     // TODO: check equals with IterableEquals to avoid recompute?
-    for (final node in _nodes) {
-      node.worldTransformChanged.removeListener(_selectionChanged);
+    for (final xform in transformComponents) {
+      xform.worldTransformChanged.removeListener(_selectionChanged);
     }
 
-    _nodes = nodes;
-    if (nodes.isEmpty || stage.isHidingHandles) {
+    _transformComponents = transformComponents;
+    if (transformComponents.isEmpty || stage.isHidingHandles) {
       _removeHandle(_translateX);
       _removeHandle(_translateY);
       _removeHandle(_rotation);
@@ -175,16 +175,16 @@ abstract class TransformHandleTool extends StageTool
       _computeHandleTransform();
     }
 
-    for (final node in nodes) {
+    for (final node in transformComponents) {
       node.worldTransformChanged.addListener(_selectionTransformChanged);
     }
   }
 
   void _computeHandleTransform() {
-    if (_nodes.isEmpty) {
+    if (_transformComponents.isEmpty) {
       return;
     }
-    var first = _nodes.first;
+    var first = _transformComponents.first;
     var transform = first.worldTransform;
     var renderTransform = first.artboard.transform(transform);
     _translateX?.setTransform(transform, renderTransform);

@@ -2,8 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/artboard.dart';
+import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/math/circle_constant.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
@@ -56,10 +58,14 @@ class BoneJointRenderer {
 
 class BoneRenderer {
   static const double radius = 7;
+  static const double endRadius = 1;
 
   static Paint fill = Paint()
     ..style = PaintingStyle.fill
     ..color = const Color(0x80FFFFFF);
+  static Paint hoveredFill = Paint()
+    ..style = PaintingStyle.fill
+    ..color = const Color(0xCCFFFFFF);
   static Paint selectedFill = Paint()
     ..style = PaintingStyle.fill
     ..color = const Color(0xFF008BFF);
@@ -72,39 +78,43 @@ class BoneRenderer {
     ..color = const Color(0xFFFFFFFF)
     ..strokeWidth = 2;
 
-  static void updatePath(Path path, double length) {
+  static void updatePath(Path path, double length, {double scale = 1}) {
     path.reset();
+
+    var renderRadius = scale * radius;
+    var renderEndRadius = scale * endRadius;
+
     double padding = radius;
-    double renderLength = length - padding * 2;
-    if (renderLength <= radius + padding) {
+    double renderLength = length - padding;
+    if (renderLength <= renderRadius + padding) {
       // Do we want to just draw a line here? Figure out what to do... for now
       // don't draw the bone portion.
       return;
     }
-
     path.moveTo(padding, 0);
     path.cubicTo(
         // Out
         padding,
-        -radius * circleConstant,
+        -renderRadius * circleConstant,
         // In
-        padding + radius * (1 - circleConstant),
-        -radius,
+        padding + renderRadius * (1 - circleConstant),
+        -renderRadius,
         // Pos
-        padding + radius,
-        -radius);
+        padding + renderRadius,
+        -renderRadius);
 
-    path.lineTo(renderLength, 0);
-    path.lineTo(padding + radius, radius);
+    path.lineTo(renderLength, -renderEndRadius);
+    path.lineTo(renderLength, renderEndRadius);
+    path.lineTo(padding + renderRadius, renderRadius);
 
     path.cubicTo(
         // Out
-        padding + radius * (1 - circleConstant),
+        padding + renderRadius * (1 - circleConstant),
         // In
-        radius,
+        renderRadius,
         padding,
         // Pos
-        radius * circleConstant,
+        renderRadius * circleConstant,
         padding,
         0);
 
@@ -114,6 +124,10 @@ class BoneRenderer {
   static void draw(Canvas canvas, SelectionState state, Path path) {
     Paint renderStroke, renderFill;
     switch (state) {
+      case SelectionState.hovered:
+        renderStroke = stroke;
+        renderFill = hoveredFill;
+        break;
       case SelectionState.selected:
         renderStroke = jointSelectedStroke;
         renderFill = selectedFill;
@@ -165,16 +179,18 @@ class BoneTool extends StageTool {
     _selectionRestorer?.restore();
     super.deactivate();
     _firstJointWorld = null;
+    _parentBone = null;
     stage.markNeedsRedraw();
   }
 
-  Vec2D _ghostPointWorld;
+  // Vec2D _ghostPointWorld;
   Vec2D _ghostPointScreen;
 
   Vec2D _firstJointWorld;
 
+  Bone _parentBone;
+
   void _showGhostPoint(Vec2D world) {
-    _ghostPointWorld = Vec2D.clone(world);
     _ghostPointScreen = Vec2D.transformMat2D(Vec2D(),
         stageWorldSpace(stage.activeArtboard, world), stage.viewTransform);
     stage.markNeedsRedraw();
@@ -187,19 +203,41 @@ class BoneTool extends StageTool {
       // make the root bone.
       var file = activeArtboard.context;
       file.batchAdd(() {
-        // TODO: worldMouse & firstJointWorld need to be in parent space
-        // (currently the artboard is the parent, so world space matches
-        // artboard space).
-        var diff = Vec2D.subtract(Vec2D(), worldMouse, _firstJointWorld);
-        var bone = RootBone()
-          ..x = _firstJointWorld[0]
-          ..y = _firstJointWorld[1]
+        Vec2D diff;
+        Bone bone;
+        if (_parentBone != null) {
+          bone = Bone();
+          var iworld = Mat2D();
+          if (!Mat2D.invert(iworld, _parentBone.worldTransform)) {
+            // Inversion failed. 0 scale? for now fallback to world, but we may
+            // want to show some error here.
+            Mat2D.identity(iworld);
+          }
+          // in this case diff is just the world mouse in local as 0,0 is the
+          // previous joint.
+          diff = Vec2D.subtract(
+              Vec2D(),
+              Vec2D.transformMat2D(Vec2D(), worldMouse, iworld),
+              Vec2D.fromValues(_parentBone.length, 0));
+        } else {
+          bone = RootBone()
+            ..x = _firstJointWorld[0]
+            ..y = _firstJointWorld[1];
+          diff = Vec2D.subtract(Vec2D(), worldMouse, _firstJointWorld);
+        }
+
+        bone
           ..length = Vec2D.length(diff)
           ..rotation = atan2(diff[1], diff[0]);
-
         file.addObject(bone);
-        activeArtboard.appendChild(bone);
+        if (_parentBone != null) {
+          _parentBone.appendChild(bone);
+        } else {
+          activeArtboard.appendChild(bone);
+        }
+        _parentBone = bone;
       });
+      file.captureJournalEntry();
     }
     _firstJointWorld = Vec2D.clone(worldMouse);
     stage.markNeedsRedraw();
@@ -234,7 +272,7 @@ class BoneTool extends StageTool {
       var length = Vec2D.length(diff);
       var path = Path();
       canvas.rotate(angle);
-      BoneRenderer.updatePath(path, length);
+      BoneRenderer.updatePath(path, length, scale: min(1, stage.viewZoom));
       BoneRenderer.draw(canvas, SelectionState.selected, path);
       canvas.restore();
     }

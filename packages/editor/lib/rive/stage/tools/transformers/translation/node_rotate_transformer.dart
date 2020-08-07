@@ -5,6 +5,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
@@ -13,11 +14,12 @@ import 'package:utilities/utilities.dart';
 
 /// Transformer that rotates [StageItem]'s with underlying [Node] components.
 class NodeRotateTransformer extends StageTransformer {
-  Iterable<Node> _nodes;
+  Iterable<TransformComponent> _nodes;
   final StageRotationHandle handle;
   final TransformComponents transformComponents = TransformComponents();
 
-  final HashMap<Node, Mat2D> _inHandleSpace = HashMap<Node, Mat2D>();
+  final HashMap<TransformComponent, Mat2D> _inHandleSpace =
+      HashMap<TransformComponent, Mat2D>();
 
   NodeRotateTransformer({this.handle}) {
     Mat2D.decompose(handle.transform, transformComponents);
@@ -50,8 +52,9 @@ class NodeRotateTransformer extends StageTransformer {
       var nodeWorld = Mat2D.multiply(Mat2D(), transform, inHandleSpace);
 
       var toParent = Mat2D();
-      if (node.parent is Node) {
-        if (!Mat2D.invert(toParent, (node.parent as Node).worldTransform)) {
+      if (node.parent is TransformComponent) {
+        if (!Mat2D.invert(
+            toParent, (node.parent as TransformComponent).worldTransform)) {
           Mat2D.identity(toParent);
         }
       }
@@ -70,6 +73,9 @@ class NodeRotateTransformer extends StageTransformer {
       }
       if (threshold(node.scaleX, components.scaleX)) {
         node.scaleX = components.scaleX;
+      }
+      if (threshold(node.scaleY, components.scaleY)) {
+        node.scaleY = components.scaleY;
       }
 
       var lastRotation = node.rotation;
@@ -93,7 +99,9 @@ class NodeRotateTransformer extends StageTransformer {
         Vec2D(), details.artboardWorld.current, handle.translation);
     _cursorAngle = _startCursorAngle = atan2(toCursor[1], toCursor[0]);
 
-    _nodes = items.mapWhereType<Node>((element) => element.component).toList();
+    _nodes = items
+        .mapWhereType<TransformComponent>((element) => element.component)
+        .toList();
 
     var handleTransform = handle.transform;
 

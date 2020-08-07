@@ -4,28 +4,60 @@ import 'dart:ui';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/stage/items/stage_joint.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_hideable.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
-import 'package:rive_editor/selectable_item.dart';
 
 class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
+  static const double hitDistance = 4;
+  static const double hitDistanceSquared = hitDistance * hitDistance;
   final Path path = Path();
   bool _needsUpdate = true;
   double _worldLength = 0;
   double _screenLength = 0;
   double _angle = 0;
+
+  // Store computed segment for the bone (start->end).
+  Segment2D _segment;
+
+  // Every stage bone manages the joint at its tip.
+  StageJoint _tipJoint;
+
   @override
   Iterable<StageDrawPass> get drawPasses =>
       [StageDrawPass(draw, order: 2, inWorldSpace: false)];
 
   @override
+  void addedToStage(Stage stage) {
+    super.addedToStage(stage);
+
+    _tipJoint = StageJoint();
+    _tipJoint.initialize(component);
+    stage.addItem(_tipJoint);
+    
+    boundsChanged();
+  }
+
+  @override
+  void removedFromStage(Stage stage) {
+    stage.removeItem(_tipJoint);
+    _tipJoint = null;
+    super.removedFromStage(stage);
+  }
+
+  @override
   void boundsChanged() {
+    final artboard = component.artboard;
     // Compute aabb
-    var start = component.worldTranslation;
-    var end = component.tipWorldTranslation;
+    var start =
+        component.artboard.renderTranslation(component.worldTranslation);
+    var end =
+        component.artboard.renderTranslation(component.tipWorldTranslation);
     var diff = Vec2D.subtract(Vec2D(), end, start);
     _angle = atan2(diff[1], diff[0]);
     _worldLength = Vec2D.length(diff);
@@ -35,7 +67,7 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
     }
 
     // max bone radius when fully zoomed out in world space
-    var maxBoneRadius = BoneRenderer.radius / Stage.minZoom;
+    var maxBoneRadius = BoneRenderer.radius; // / Stage.minZoom;
     var radiusVector = Vec2D.scale(Vec2D(), diff, maxBoneRadius);
     radiusVector = Vec2D.fromValues(-radiusVector[1], radiusVector[0]);
 
@@ -46,7 +78,24 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
       Vec2D.subtract(Vec2D(), end, radiusVector),
     ];
     aabb = AABB.fromPoints(boundingPoints);
+
+    obb = OBB(
+      bounds: AABB.fromValues(0, hitDistance, component.length, -hitDistance),
+      transform: artboard.transform(component.worldTransform),
+    );
+
+    _segment = Segment2D(start, end);
     _needsUpdate = true;
+
+    _tipJoint.worldTranslation = end;
+  }
+
+  /// Do a high fidelity hover hit check against the actual path geometry.
+  @override
+  bool hitHiFi(Vec2D worldMouse) {
+    return _segment != null &&
+        _segment.squaredDistance(worldMouse) <
+            hitDistanceSquared / stage.viewZoom;
   }
 
   @override
@@ -55,7 +104,9 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
     if (_needsUpdate || screenLength != _screenLength) {
       _screenLength = screenLength;
       _needsUpdate = false;
-      BoneRenderer.updatePath(path, screenLength);
+
+      BoneRenderer.updatePath(path, screenLength,
+          scale: min(1, stage.viewZoom));
     }
 
     var screen = Vec2D.transformMat2D(
@@ -66,7 +117,7 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
     canvas.save();
     canvas.translate(screen[0], screen[1]);
     canvas.rotate(_angle);
-    BoneRenderer.draw(canvas, SelectionState.none, path);
+    BoneRenderer.draw(canvas, selectionState.value, path);
     canvas.restore();
   }
 }

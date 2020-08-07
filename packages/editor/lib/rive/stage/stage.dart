@@ -1202,6 +1202,7 @@ class Stage extends Debouncer {
       // different space types might be interleaved at different draw orders.
       if (inWorldSpace != pass.inWorldSpace) {
         if (inWorldSpace = pass.inWorldSpace) {
+          canvas.save();
           canvas.transform(viewTransform.mat4);
         } else {
           canvas.restore();
