@@ -43,8 +43,10 @@ class FileApi {
   Future<Iterable<FileDM>> recentFilesDetails() async {
     final res = await api.get('${api.host}/api/v2/my/recents/files');
     try {
-      final data = json.decodeList<Map<String, dynamic>>(res.body);
-      return FileDM.fromHashedIdDataList(data);
+      final data = json.decodeMap(res.body);
+      final cdns = CdnDM.fromDataMap(data.getMap<String, dynamic>('cdns'));
+
+      return FileDM.fromHashedIdDataList(data.getList('files'), cdns);
     } on FormatException catch (e) {
       _log.severe('Error formatting recent files details api response: $e');
       rethrow;

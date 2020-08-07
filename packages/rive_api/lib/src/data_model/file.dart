@@ -59,19 +59,23 @@ class FileDM {
   // Returns an iterable of files from a list of json maps
   // representing the files, which use a hashed id
   static Iterable<FileDM> fromHashedIdDataList(
-          List<Map<String, dynamic>> data) =>
-      data.map((d) => FileDM.fromHashedIdData(d)).toList(growable: false);
+          List<Map<String, dynamic>> data, Map<String, CdnDM> cdns) =>
+      data.map((d) => FileDM.fromHashedIdData(d, cdns)).toList(growable: false);
 
   // Creates a file from json which uses a hashed id
-  factory FileDM.fromHashedIdData(Map<String, dynamic> data) {
+  factory FileDM.fromHashedIdData(
+      Map<String, dynamic> data, Map<String, CdnDM> cdns) {
     final ids = decodeIds(data.getString('id'));
     assert(ids.length == 2);
+    final ownerIdString = ids[1].toString();
+    final cdn = cdns[ownerIdString];
     return FileDM(
       id: ids[0],
       ownerId: ids[1],
       name: data.getString('name'),
-      // we need the cdn deatils to do preview 'properly'
-      // preview: data.getString('preview'),
+      preview: (data.getString('preview') == null || cdn == null)
+          ? null
+          : cdn.base + data.getString('preview') + cdn.params,
     );
   }
 
