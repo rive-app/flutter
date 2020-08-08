@@ -193,20 +193,6 @@ void main() {
     expect(reader.readUint64(), 9223372036854775807);
   });
 
-  test('varint', () {
-    var writer = BinaryWriter();
-    writer.writeVarInt(7);
-    writer.writeVarInt(127);
-    writer.writeVarInt(8192);
-    writer.writeVarInt(-9);
-
-    var reader = BinaryReader(writer.buffer);
-    expect(reader.readVarInt(), 7);
-    expect(reader.readVarInt(), 127);
-    expect(reader.readVarInt(), 8192);
-    expect(reader.readVarInt(), -9);
-  });
-
   test('varuint', () {
     var writer = BinaryWriter();
     writer.writeVarUint(7);
@@ -238,7 +224,6 @@ void main() {
     writer.writeInt32(1920);
 
     var reader = BinaryReader(writer.buffer);
-    expect(reader.readVarInt(), 10);
     expect(reader.readString(), "Node");
     expect(reader.readFloat32(), 22.100000381469727);
     expect(reader.readFloat32(), 129.3000030517578);
@@ -251,19 +236,5 @@ void main() {
 
     var reader = BinaryReader(writer.buffer);
     expect(reader.read(3), Uint8List.fromList([7, 31, 1982]));
-  });
-
-  test('integer list', () {
-    List<int> ids = [1, 3, 3, 7, 256];
-
-    var writer = BinaryWriter();
-    writer.writeIntList(ids);
-
-    var reader = BinaryReader(writer.buffer);
-    var readIds = reader.readIntList();
-    expect(readIds.length, ids.length);
-    for (int i = 0; i < readIds.length; i++) {
-      expect(readIds[i], readIds[i]);
-    }
   });
 }

@@ -80,6 +80,7 @@ class OpenFileContext with RiveFileDelegate {
   Stage get stage => _stage.value;
 
   OpenFileState _state = OpenFileState.loading;
+  String _stateInfo;
 
   final _alerts = ValueNotifier<Iterable<EditorAlert>>([]);
 
@@ -233,6 +234,8 @@ class OpenFileContext with RiveFileDelegate {
   }) : _name = ValueNotifier<String>(fileName);
 
   OpenFileState get state => _state;
+  String get stateInfo => _stateInfo;
+
   final Event stateChanged = Event();
 
   Future<bool> connect() async {
@@ -261,16 +264,20 @@ class OpenFileContext with RiveFileDelegate {
         filePath,
         spectre,
       );
-      completeInitialConnection(result == ConnectResult.connected
-          ? OpenFileState.open
-          : OpenFileState.error);
+      completeInitialConnection(
+          result.state == ConnectState.connected
+              ? OpenFileState.open
+              : OpenFileState.error,
+          result.info);
     }
 
     return true;
   }
 
   @protected
-  void completeInitialConnection(OpenFileState state) {
+  void completeInitialConnection(OpenFileState state, [String info]) {
+    print("COMPLETE WITH $state $info");
+    _stateInfo = info;
     _state = state;
     if (state == OpenFileState.error) {
       stateChanged.notify();

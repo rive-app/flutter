@@ -42,11 +42,6 @@ class RiveIdType extends CoreIdType {
   static RiveIdType instance = RiveIdType._constructor();
 }
 
-class RiveIntType extends CoreIntType {
-  RiveIntType._constructor();
-  static RiveIntType instance = RiveIntType._constructor();
-}
-
 class RiveUintType extends CoreUintType {
   RiveUintType._constructor();
   static RiveUintType instance = RiveUintType._constructor();

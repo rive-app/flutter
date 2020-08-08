@@ -27,7 +27,7 @@ writer.writeFloat32(129.3000030517578);
 writer.writeInt32(1920);
 
 var reader = BinaryReader(writer.buffer);
-expect(reader.readVarInt(), 10);
+expect(reader.readVarUint(), 10);
 expect(reader.readString(), "Node");
 expect(reader.readFloat32(), 22.100000381469727);
 expect(reader.readFloat32(), 129.3000030517578);

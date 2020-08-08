@@ -28,7 +28,6 @@ export 'package:core/field_types/core_bool_type.dart';
 export 'package:core/field_types/core_double_type.dart';
 export 'package:core/field_types/core_fractional_index_type.dart';
 export 'package:core/field_types/core_id_type.dart';
-export 'package:core/field_types/core_int_type.dart';
 export 'package:core/field_types/core_uint_type.dart';
 export 'package:core/field_types/core_list_id_type.dart';
 export 'package:core/field_types/core_string_type.dart';
@@ -402,7 +401,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       ..stateChanged = connectionStateChanged;
 
     var result = await _client.connect();
-    if (result == ConnectResult.connected) {
+    if (result.state == ConnectState.connected) {
       int maxId = 0;
       for (final object in _objects.values) {
         if (object.id.client == clientId) {

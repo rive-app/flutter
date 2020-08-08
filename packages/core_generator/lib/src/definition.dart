@@ -661,7 +661,7 @@ class Definition {
           return;
         }
         var reader = BinaryReader.fromList(addChange.value);
-        object = makeCoreInstance(reader.readVarInt());
+        object = makeCoreInstance(reader.readVarUint());
         if (object != null) {
           object.id = objectChanges.objectId;
           justAdded = true;
@@ -716,7 +716,7 @@ class Definition {
                     case CoreContext.removeKey:           
         if (value != null && value is int) {
           var writer = BinaryWriter(alignment: 4);
-          writer.writeVarInt(value);
+          writer.writeVarUint(value);
           change.value = writer.uint8Buffer;
         }break;''');
 

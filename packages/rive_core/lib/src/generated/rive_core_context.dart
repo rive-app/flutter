@@ -418,7 +418,6 @@ abstract class RiveCoreContext extends CoreContext {
 
   CoreIdType get idType;
   CoreUintType get uintType;
-  CoreIntType get intType;
   CoreStringType get stringType;
   CoreFractionalIndexType get fractionalIndexType;
   CoreDoubleType get doubleType;
@@ -442,7 +441,7 @@ abstract class RiveCoreContext extends CoreContext {
         return;
       }
       var reader = BinaryReader.fromList(addChange.value);
-      object = makeCoreInstance(reader.readVarInt());
+      object = makeCoreInstance(reader.readVarUint());
       if (object != null) {
         object.id = objectChanges.objectId;
         justAdded = true;
@@ -493,8 +492,8 @@ abstract class RiveCoreContext extends CoreContext {
         case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModeValuePropertyKey:
         case PointsPathBase.editingModeValuePropertyKey:
-          var value = intType.deserialize(reader);
-          setInt(object, change.op, value);
+          var value = uintType.deserialize(reader);
+          setUint(object, change.op, value);
           break;
         case AnimationBase.namePropertyKey:
         case ComponentBase.namePropertyKey:
@@ -586,7 +585,7 @@ abstract class RiveCoreContext extends CoreContext {
       case CoreContext.removeKey:
         if (value != null && value is int) {
           var writer = BinaryWriter(alignment: 4);
-          writer.writeVarInt(value);
+          writer.writeVarUint(value);
           change.value = writer.uint8Buffer;
         }
         break;
@@ -621,7 +620,7 @@ abstract class RiveCoreContext extends CoreContext {
       case DrawableBase.blendModeValuePropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
         if (value != null && value is int) {
-          change.value = intType.serialize(value);
+          change.value = uintType.serialize(value);
         } else {
           return null;
         }
@@ -2425,7 +2424,7 @@ abstract class RiveCoreContext extends CoreContext {
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModeValuePropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
-        return intType;
+        return uintType;
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
         return stringType;
@@ -2520,7 +2519,7 @@ abstract class RiveCoreContext extends CoreContext {
     return null;
   }
 
-  static int getInt(Core object, int propertyKey) {
+  static int getUint(Core object, int propertyKey) {
     switch (propertyKey) {
       case KeyedPropertyBase.propertyKeyPropertyKey:
         return (object as KeyedPropertyBase).propertyKey;
@@ -2736,7 +2735,7 @@ abstract class RiveCoreContext extends CoreContext {
     }
   }
 
-  static void setInt(Core object, int propertyKey, int value) {
+  static void setUint(Core object, int propertyKey, int value) {
     switch (propertyKey) {
       case KeyedPropertyBase.propertyKeyPropertyKey:
         (object as KeyedPropertyBase).propertyKey = value;

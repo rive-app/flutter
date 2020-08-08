@@ -73,7 +73,7 @@ abstract class KeyedPropertyBase<T extends RiveCoreContext> extends Core<T> {
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     if (_propertyKey != null && exports(propertyKeyPropertyKey)) {
-      context.intType
+      context.uintType
           .writeRuntimeProperty(propertyKeyPropertyKey, writer, _propertyKey);
     }
   }

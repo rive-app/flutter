@@ -203,25 +203,25 @@ abstract class LinearAnimationBase extends Animation {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_fps != null && exports(fpsPropertyKey)) {
-      context.intType.writeRuntimeProperty(fpsPropertyKey, writer, _fps);
+      context.uintType.writeRuntimeProperty(fpsPropertyKey, writer, _fps);
     }
     if (_duration != null && exports(durationPropertyKey)) {
-      context.intType
+      context.uintType
           .writeRuntimeProperty(durationPropertyKey, writer, _duration);
     }
     if (_speed != null && exports(speedPropertyKey)) {
       context.doubleType.writeRuntimeProperty(speedPropertyKey, writer, _speed);
     }
     if (_loopValue != null && exports(loopValuePropertyKey)) {
-      context.intType
+      context.uintType
           .writeRuntimeProperty(loopValuePropertyKey, writer, _loopValue);
     }
     if (_workStart != null && exports(workStartPropertyKey)) {
-      context.intType
+      context.uintType
           .writeRuntimeProperty(workStartPropertyKey, writer, _workStart);
     }
     if (_workEnd != null && exports(workEndPropertyKey)) {
-      context.intType
+      context.uintType
           .writeRuntimeProperty(workEndPropertyKey, writer, _workEnd);
     }
     if (_enableWorkArea != null && exports(enableWorkAreaPropertyKey)) {

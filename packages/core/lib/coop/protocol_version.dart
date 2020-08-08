@@ -1,1 +1,1 @@
-const int protocolVersion = 4;
+const int protocolVersion = 5;

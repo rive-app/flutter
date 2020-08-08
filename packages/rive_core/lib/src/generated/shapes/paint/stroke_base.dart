@@ -173,10 +173,10 @@ abstract class StrokeBase extends ShapePaint {
           .writeRuntimeProperty(thicknessPropertyKey, writer, _thickness);
     }
     if (_cap != null && exports(capPropertyKey)) {
-      context.intType.writeRuntimeProperty(capPropertyKey, writer, _cap);
+      context.uintType.writeRuntimeProperty(capPropertyKey, writer, _cap);
     }
     if (_join != null && exports(joinPropertyKey)) {
-      context.intType.writeRuntimeProperty(joinPropertyKey, writer, _join);
+      context.uintType.writeRuntimeProperty(joinPropertyKey, writer, _join);
     }
     if (_transformAffectsStroke != null &&
         exports(transformAffectsStrokePropertyKey)) {

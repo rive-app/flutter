@@ -10,9 +10,11 @@ class CoreDoubleType extends CoreFieldType<double> {
   @override
   double deserialize(BinaryReader reader) {
     var length = reader.buffer.lengthInBytes;
-    // Remove this length < 4 at some point...
     if (length < 4) {
-      return reader.readVarInt() / 10;
+      // Error condition where we were writing <3 bytes as varint, which isn't
+      // compatible with flutter web. If we encounter this, don't crash but
+      // return a 0 value.
+      return 0;
     } else if (length == 4) {
       return reader.readFloat32();
     } else {

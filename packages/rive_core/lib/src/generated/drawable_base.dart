@@ -83,7 +83,7 @@ abstract class DrawableBase extends Node {
           .writeRuntimeProperty(drawOrderPropertyKey, writer, runtimeValue);
     }
     if (_blendModeValue != null && exports(blendModeValuePropertyKey)) {
-      context.intType.writeRuntimeProperty(
+      context.uintType.writeRuntimeProperty(
           blendModeValuePropertyKey, writer, _blendModeValue);
     }
   }
