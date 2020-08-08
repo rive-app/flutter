@@ -6,7 +6,7 @@ import 'package:utilities/dependency_sorter.dart';
 import 'package:core/coop/change.dart';
 import 'package:core/coop/coop_command.dart';
 import 'package:core/core.dart';
-import 'package:core/coop/protocol_version.dart' show protocolVersion;
+import 'package:core/coop/protocol_version.dart';
 
 import 'entity.dart';
 
@@ -22,7 +22,7 @@ class CoopFile {
   Map<Id, CoopFileObject> objects;
 
   bool deserialize(BinaryReader reader) {
-    if (reader.readVarUint() != protocolVersion) {
+    if (reader.readVarUint() != coopFileVersion) {
       return false;
     }
     nextClientId = reader.readVarUint();
