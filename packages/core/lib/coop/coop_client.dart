@@ -34,6 +34,7 @@ class CoopClient extends CoopReader {
   bool get isAuthenticated => _isAuthenticated;
   CoopConnectionState get connectionState => _connectionState;
   CoopConnectionState _connectionState = CoopConnectionState.disconnected;
+
   void _changeState(CoopConnectionState state) {
     if (_connectionState != state) {
       _connectionState = state;
@@ -119,7 +120,8 @@ class CoopClient extends CoopReader {
     _allowReconnect = true;
     _pingTimer?.cancel();
     if (_channel == null) {
-      return await connect() == ConnectResult.connected;
+      var result = await connect();
+      return result.state == ConnectState.connected;
     }
     await _channel?.sink?.close();
     return true;
@@ -153,9 +155,12 @@ class CoopClient extends CoopReader {
           _channel.stream.listen(_onStreamData, onError: (dynamic error) {
         _disconnected();
       }, onDone: () async {
+        // Get the reason before disconnecting...
+        var reason = _channel?.closeReason;
         await _disconnected();
 
-        _connectionCompleter?.complete(ConnectResult.networkError);
+        _connectionCompleter
+            ?.complete(ConnectResult(ConnectState.networkError, info: reason));
         _connectionCompleter = null;
         if (_allowReconnect) {
           _reconnect();
@@ -199,7 +204,7 @@ class CoopClient extends CoopReader {
     // Handle the server telling us to disconnect.
     _allowReconnect = false;
     await _disconnected();
-    _connectionCompleter?.complete(ConnectResult.notAuthorized);
+    _connectionCompleter?.complete(ConnectResult(ConnectState.notAuthorized));
     _connectionCompleter = null;
   }
 
@@ -251,7 +256,7 @@ class CoopClient extends CoopReader {
   @override
   Future<void> recvReady() async {
     _changeState(CoopConnectionState.connected);
-    _connectionCompleter?.complete(ConnectResult.connected);
+    _connectionCompleter?.complete(ConnectResult(ConnectState.connected));
     _connectionCompleter = null;
     _ping();
   }

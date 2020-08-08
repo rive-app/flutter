@@ -18,7 +18,7 @@ class CoopImporter {
 
   bool import(Uint8List data) {
     var coop = CoopFile();
-    if(!coop.deserialize(BinaryReader.fromList(data))) {
+    if (!coop.deserialize(BinaryReader.fromList(data))) {
       _log.severe('Failed to deserialize coop file.');
       return false;
     }

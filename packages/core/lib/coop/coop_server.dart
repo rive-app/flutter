@@ -77,6 +77,14 @@ abstract class CoopServer {
         // Attempt to upgrade the HTTP connection to a web socket
         var ws = await WebSocketTransformer.upgrade(request);
 
+        if (data.version != protocolVersion) {
+          _log.info('Client connected with version ${data.version} server is '
+              '$protocolVersion');
+          await ws.close(
+              1011, 'Unsupported Coop protocol version ${data.version}.');
+          return;
+        }
+
         String key = _isolateKey(data.ownerId, data.fileId);
         var isolate = _isolates[key];
         if (isolate == null) {
@@ -137,10 +145,6 @@ class WebSocketData {
       }
       // Remove 'v' in 'v2'
       version = int.parse(segments[0].substring(1));
-      if (version != protocolVersion) {
-        _log.severe('Client requests older protocal version nr: $version');
-        throw const FormatException();
-      }
       // Parse all the other segments, which should be ints
       ownerId = int.parse(segments[1]);
       fileId = int.parse(segments[2]);

@@ -89,7 +89,8 @@ class KeyFrameDrawOrder extends KeyFrameDrawOrderBase {
       final value = list[i];
       int integerId = idLookup[value.drawableId];
       assert(integerId != null);
-      writer.writeVarInt(integerId);
+      assert(integerId >= 0);
+      writer.writeVarUint(integerId);
     }
   }
 

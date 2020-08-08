@@ -426,8 +426,8 @@ class _EditorState extends State<Editor> {
               child: const CircularProgressIndicator(),
             );
           case OpenFileState.error:
-            return const Center(
-              child: Text('An error occurred...'),
+            return Center(
+              child: Text(file.stateInfo ?? 'An error occurred...'),
             );
           case OpenFileState.open:
           default:

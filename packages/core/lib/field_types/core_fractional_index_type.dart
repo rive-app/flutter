@@ -8,8 +8,8 @@ import 'package:utilities/binary_buffer/binary_writer.dart';
 class CoreFractionalIndexType extends CoreFieldType<FractionalIndex> {
   @override
   FractionalIndex deserialize(BinaryReader reader) {
-    var numerator = reader.readVarInt();
-    var denominator = reader.readVarInt();
+    var numerator = reader.readVarUint();
+    var denominator = reader.readVarUint();
     return FractionalIndex(numerator, denominator);
   }
 
@@ -20,8 +20,8 @@ class CoreFractionalIndexType extends CoreFieldType<FractionalIndex> {
   @override
   Uint8List serialize(FractionalIndex value) {
     var writer = BinaryWriter(alignment: 8);
-    writer.writeVarInt(value.numerator);
-    writer.writeVarInt(value.denominator);
+    writer.writeVarUint(value.numerator);
+    writer.writeVarUint(value.denominator);
     return writer.uint8Buffer;
   }
 

@@ -4,15 +4,40 @@ import 'package:core/field_types/core_field_type.dart';
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
+// TODO: murder once all files are converter
+int _readVarInt(BinaryReader reader) {
+  var buffer = reader.buffer;
+  int result = 0;
+  int shift = 0;
+  while (true) {
+    int byte = buffer.getUint8(reader.readIndex);
+    result |= (byte & 0x7f) << shift;
+    shift += 7;
+    if ((byte & 0x80) == 0) {
+      break;
+    } else {
+      reader.readIndex++;
+    }
+  }
+  if ((shift < 64) && (buffer.getUint8(reader.readIndex) & 0x40) != 0) {
+    result |= ~0 << shift;
+  }
+  reader.readIndex += 1;
+  return result;
+}
+
 class CoreDoubleType extends CoreFieldType<double> {
   static bool max32Bit = false;
 
   @override
   double deserialize(BinaryReader reader) {
     var length = reader.buffer.lengthInBytes;
-    // Remove this length < 4 at some point...
     if (length < 4) {
-      return reader.readVarInt() / 10;
+      // TODO: catch this and force re-save this field.
+      // Error condition where we were writing <3 bytes as varint, which isn't
+      // compatible with flutter web. If we encounter this, don't crash but
+      // return a 0 value.
+      return _readVarInt(reader) / 10;
     } else if (length == 4) {
       return reader.readFloat32();
     } else {

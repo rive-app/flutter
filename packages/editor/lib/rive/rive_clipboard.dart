@@ -104,7 +104,7 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
         }
       }
 
-      var idRemap = RuntimeIdRemap(core.idType, core.intType);
+      var idRemap = RuntimeIdRemap(core.idType, core.uintType);
       var remaps = <RuntimeRemap>[idRemap];
 
       int minTime = double.maxFinite.toInt();
@@ -266,8 +266,9 @@ class _RiveHierarchyClipboard extends RiveClipboard {
     var numObjects = reader.readVarUint();
     var core = file.core;
 
-    var idRemap = RuntimeIdRemap(core.idType, core.intType);
-    var drawOrderRemap = DrawOrderRemap(core.fractionalIndexType, core.intType);
+    var idRemap = RuntimeIdRemap(core.idType, core.uintType);
+    var drawOrderRemap =
+        DrawOrderRemap(core.fractionalIndexType, core.uintType);
     var remaps = <RuntimeRemap>[idRemap, drawOrderRemap];
 
     var targetArtboard = file.backboard.activeArtboard;

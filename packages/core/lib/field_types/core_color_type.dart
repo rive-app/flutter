@@ -6,7 +6,7 @@ import 'package:utilities/binary_buffer/binary_writer.dart';
 
 class CoreColorType extends CoreFieldType<int> {
   @override
-  int deserialize(BinaryReader reader) => reader.readVarInt();
+  int deserialize(BinaryReader reader) => reader.readVarUint();
 
   @override
   int lerp(int from, int to, double f) => (from + (to - from) * f).round();
@@ -14,7 +14,7 @@ class CoreColorType extends CoreFieldType<int> {
   @override
   Uint8List serialize(int value) {
     var writer = BinaryWriter(alignment: 4);
-    writer.writeVarInt(value);
+    writer.writeVarUint(value);
     return writer.uint8Buffer;
   }
 

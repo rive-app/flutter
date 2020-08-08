@@ -43,8 +43,9 @@ void main() {
       );
 
       expect(
-          await client1.connect('ws://localhost:$coopPort', filePath, 'fake'),
-          ConnectResult.networkError,
+          (await client1.connect('ws://localhost:$coopPort', filePath, 'fake'))
+              .state,
+          ConnectState.networkError,
           reason: 'expect network error when no private api is available');
 
       expect(server.clientCount, 0,
@@ -58,8 +59,9 @@ void main() {
       unawaited(privateApi.startServing());
 
       expect(
-        await client1.connect('ws://localhost:$coopPort', filePath, 'fake'),
-        ConnectResult.connected,
+        (await client1.connect('ws://localhost:$coopPort', filePath, 'fake'))
+            .state,
+        ConnectState.connected,
       );
 
       // Make a somewhat sane file.
@@ -100,8 +102,9 @@ void main() {
       );
 
       expect(
-        await client2.connect('ws://localhost:$coopPort', filePath, 'fake'),
-        ConnectResult.connected,
+        (await client2.connect('ws://localhost:$coopPort', filePath, 'fake'))
+            .state,
+        ConnectState.connected,
       );
 
       // Wait for the second connection to settle (perform any initialization

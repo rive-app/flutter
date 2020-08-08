@@ -53,7 +53,7 @@ abstract class FillBase extends ShapePaint {
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
     if (_fillRule != null && exports(fillRulePropertyKey)) {
-      context.intType
+      context.uintType
           .writeRuntimeProperty(fillRulePropertyKey, writer, _fillRule);
     }
   }
