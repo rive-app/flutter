@@ -40,7 +40,7 @@ class CoopFile {
   }
 
   void serialize(BinaryWriter writer) {
-    writer.writeVarUint(protocolVersion);
+    writer.writeVarUint(coopFileVersion);
     writer.writeVarUint(nextClientId);
     writer.writeVarUint(ownerId);
     writer.writeVarUint(fileId);
