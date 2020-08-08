@@ -33,12 +33,6 @@ void main() {
       expect(() => WebSocketData.fromSegments(testSegments),
           throwsA(const TypeMatcher<FormatException>()));
     });
-    test('WebSocketData throws format exception for incorrect version', () {
-      final testSegments = List<String>.from(segments);
-      testSegments[0] = 'v3'; // Current version is 4 03/09/20
-      expect(() => WebSocketData.fromSegments(testSegments),
-          throwsA(const TypeMatcher<FormatException>()));
-    });
     test('WebSocketData throws format exception for non int ids', () {
       final testSegments = List<String>.from(segments);
       testSegments[1] = 'bob';
