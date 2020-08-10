@@ -1,3 +1,4 @@
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/bones/bone_base.dart';
 export 'package:rive_core/src/generated/bones/bone_base.dart';
@@ -34,5 +35,9 @@ class Bone extends BoneBase {
     Vec2D.transformMat2D(tip, Vec2D.fromValues(length, 0), worldTransform);
     return tip;
   }
+
+  Mat2D get tipWorldTransform => Mat2D.multiply(Mat2D(), worldTransform,
+      Mat2D.fromTranslation(Vec2D.fromValues(length, 0)));
+
   // <- editor-only
 }

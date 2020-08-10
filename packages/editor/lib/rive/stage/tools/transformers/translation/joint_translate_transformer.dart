@@ -1,13 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/node.dart';
-import 'package:rive_core/transform_component.dart';
+import 'package:rive_core/bones/bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
@@ -17,11 +14,11 @@ import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:utilities/iterable.dart';
 
 /// Transformer that translates [StageItem]'s with underlying [Node] components.
-class NodeTranslateTransformer extends StageTransformer {
-  NodeTranslateTransformer({this.lockAxis, ValueNotifier<bool> snap})
+class JointTranslateTransformer extends StageTransformer {
+  JointTranslateTransformer({this.lockAxis, ValueNotifier<bool> snap})
       : _snap = snap ?? ValueNotifier<bool>(true);
 
-  Iterable<TransformComponent> _transformComponents;
+  Iterable<Bone> _bones;
   final Vec2D lockAxis;
   Snapper _snapper;
 
@@ -39,7 +36,7 @@ class NodeTranslateTransformer extends StageTransformer {
       _snapper.advance(details.world.current, lockAxis: lockAxis);
       return;
     }
-    Map<Node, Mat2D> worldToParents = {};
+    Map<Bone, Mat2D> worldToParents = {};
 
     var failedInversion = Mat2D();
     // First assume we can use artboard level mouse move.
@@ -48,12 +45,12 @@ class NodeTranslateTransformer extends StageTransformer {
       var d = Vec2D.dot(constraintedDelta, lockAxis);
       constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
     }
-    for (final node in _transformComponents) {
+    for (final node in _bones) {
       var delta = constraintedDelta;
       // If it's a node, we have to get into its parent's space as that's where
       // its translation lives.
-      if (node.parent is Node) {
-        var parentNode = node.parent as Node;
+      if (node.parent is Bone) {
+        var parentNode = node.parent as Bone;
         var parentWorldInverse = worldToParents[parentNode];
         if (parentWorldInverse == null) {
           Mat2D inverse = Mat2D();
@@ -85,22 +82,16 @@ class NodeTranslateTransformer extends StageTransformer {
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
+    return false;
     assert(
       items.isNotEmpty,
       'Initializing transformer on an empty set of items',
     );
 
-    // Get Node and RootBones as TransformComponents (we can't just cast to
-    // TransformComponent as there are some TransformComponents we're not
-    // interested in, like non-root Bones).
-    _transformComponents = items
-        .where((item) => item.component is Node || item.component is RootBone)
-        .map((item) => item.component as TransformComponent);
-    // _transformComponents =
-    //     topComponents(items.mapWhereType<Node>((element) => element.component));
-    if (_transformComponents.isNotEmpty) {
-      _snapper =
-          Snapper.build(details.world.current, _transformComponents, (item) {
+    _bones =
+        topComponents(items.mapWhereType<Bone>((element) => element.component));
+    if (_bones.isNotEmpty) {
+      _snapper = Snapper.build(details.world.current, _bones, (item) {
         // Filter out components that are not shapes or nodes, or not in the
         // active artboard
         final activeArtboard = details.artboard;

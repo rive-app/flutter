@@ -5,6 +5,7 @@ import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/artboard_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/node_translate_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/joint_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/gradient_stop_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/path_vertex_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transform_handle_tool.dart';
@@ -42,6 +43,8 @@ class TranslateTool extends TransformHandleTool {
           ArtboardTranslateTransformer(snap: stage.enableSnappingNotifier),
 
           NodeTranslateTransformer(snap: stage.enableSnappingNotifier),
+
+          JointTranslateTransformer(snap: stage.enableSnappingNotifier),
 
           PathVertexTranslateTransformer(),
         ];

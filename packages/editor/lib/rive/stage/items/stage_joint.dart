@@ -1,13 +1,16 @@
 import 'dart:ui';
 
+import 'package:flutter/src/foundation/change_notifier.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
 
-class StageJoint extends StageItem<Bone> {
+class StageJoint extends StageItem<Bone> implements StageTransformable {
   static const double hitRadius = BoneJointRenderer.radius + 3;
   static const double minJointZoom = 0.5;
   static const double hitRadiusSquared = hitRadius * hitRadius;
@@ -31,12 +34,11 @@ class StageJoint extends StageItem<Bone> {
   @override
   bool hitHiFi(Vec2D worldMouse) {
     var zoom = stage.viewZoom;
-    if(zoom < minJointZoom) {
-      zoom/=minJointZoom;
+    if (zoom < minJointZoom) {
+      zoom /= minJointZoom;
     }
     return Vec2D.squaredDistance(worldMouse, _worldTranslation) <=
-        hitRadiusSquared /
-            (zoom*zoom);
+        hitRadiusSquared / (zoom * zoom);
   }
 
   @override
@@ -51,12 +53,22 @@ class StageJoint extends StageItem<Bone> {
     canvas.save();
     canvas.translate(screen[0], screen[1]);
 
-    if(stage.viewZoom < minJointZoom) {
-      canvas.scale(stage.viewZoom/minJointZoom);
+    if (stage.viewZoom < minJointZoom) {
+      canvas.scale(stage.viewZoom / minJointZoom);
     }
-    
+
     BoneJointRenderer.draw(canvas, selectionState.value);
     canvas.restore();
     // drawBounds(canvas, pass);
   }
+
+  @override
+  Mat2D get renderTransform =>
+      component.artboard.transform(component.tipWorldTransform);
+
+  @override
+  Mat2D get worldTransform => component.tipWorldTransform;
+
+  @override
+  Listenable get worldTransformChanged => component.worldTransformChanged;
 }
