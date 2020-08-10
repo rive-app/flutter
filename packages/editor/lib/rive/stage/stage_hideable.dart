@@ -3,7 +3,6 @@ import 'package:core/debounce.dart';
 /// Show/hide a stage item based on a boolean value notifier
 
 import 'package:flutter/foundation.dart';
-import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 

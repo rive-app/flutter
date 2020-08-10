@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -82,6 +81,7 @@ class NodeRotateTransformer extends StageTransformer {
       var rotation = lastRotation +
           atan2(sin(components.rotation - lastRotation),
               cos(components.rotation - lastRotation));
+              
       if (threshold(node.rotation, rotation)) {
         node.rotation = rotation;
       }

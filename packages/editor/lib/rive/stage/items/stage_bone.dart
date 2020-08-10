@@ -7,13 +7,15 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/items/stage_joint.dart';
+import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_hideable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
 
-class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
+class StageBone extends HideableStageItem<Bone>
+    with BoundsDelegate, StageTransformableComponent<Bone> {
   static const double hitDistance = 4;
   static const double hitDistanceSquared = hitDistance * hitDistance;
   final Path path = Path();
@@ -130,6 +132,6 @@ class StageBone extends HideableStageItem<Bone> with BoundsDelegate {
     canvas.rotate(_angle);
     BoneRenderer.draw(canvas, selectionState.value, path);
     canvas.restore();
-    drawBounds(canvas, pass);
+    // drawBounds(canvas, pass);
   }
 }

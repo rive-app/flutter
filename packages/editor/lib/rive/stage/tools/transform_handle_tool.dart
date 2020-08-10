@@ -1,12 +1,12 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_scale_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_translation_handle.dart';
+import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -60,7 +60,7 @@ abstract class TransformHandleTool extends StageTool
   bool get showScaleHandle => true;
 
   SelectionContext<SelectableItem> _selectionContext;
-  Set<TransformComponent> _transformComponents = {};
+  StageTransformable _transformable;
 
   /// Tracks hidden handles that should be restored when transformers complete
   Restorer restoreHandles;
@@ -129,13 +129,8 @@ abstract class TransformHandleTool extends StageTool
   }
 
   void _selectionChanged() {
-    var nodes = <TransformComponent>{};
-    for (final item in _selectionContext.items) {
-      if (item is StageItem && item.component is TransformComponent) {
-        nodes.add(item.component as TransformComponent);
-      }
-    }
-    _setSelection(nodes);
+    _setSelection(
+        _selectionContext.items.whereType<StageTransformable>().toSet());
   }
 
   void _addHandle(StageItem handle) {
@@ -152,20 +147,19 @@ abstract class TransformHandleTool extends StageTool
     stage.removeItem(handle);
   }
 
-  void _setSelection(Set<TransformComponent> transformComponents) {
-    // TODO: check equals with IterableEquals to avoid recompute?
-    for (final xform in transformComponents) {
-      xform.worldTransformChanged.removeListener(_selectionChanged);
-    }
+  void _setSelection(Set<StageTransformable> transformables) {
+    _transformable?.worldTransformChanged
+        ?.removeListener(_selectionTransformChanged);
 
-    _transformComponents = transformComponents;
-    if (transformComponents.isEmpty || stage.isHidingHandles) {
+    if (transformables.isEmpty || stage.isHidingHandles) {
+      _transformable = null;
       _removeHandle(_translateX);
       _removeHandle(_translateY);
       _removeHandle(_rotation);
       _removeHandle(_scaleX);
       _removeHandle(_scaleY);
     } else {
+      _transformable = transformables.first;
       _addHandle(_translateX);
       _addHandle(_translateY);
       _addHandle(_rotation);
@@ -175,18 +169,18 @@ abstract class TransformHandleTool extends StageTool
       _computeHandleTransform();
     }
 
-    for (final node in transformComponents) {
-      node.worldTransformChanged.addListener(_selectionTransformChanged);
-    }
+    _transformable?.worldTransformChanged
+        ?.addListener(_selectionTransformChanged);
   }
 
   void _computeHandleTransform() {
-    if (_transformComponents.isEmpty) {
+    if (_transformable == null) {
       return;
     }
-    var first = _transformComponents.first;
-    var transform = first.worldTransform;
-    var renderTransform = first.artboard.transform(transform);
+
+    var transform = _transformable.worldTransform;
+    var renderTransform =
+        _transformable.renderTransform;
     _translateX?.setTransform(transform, renderTransform);
     _translateY?.setTransform(transform, renderTransform);
     _rotation?.setTransform(transform, renderTransform);
