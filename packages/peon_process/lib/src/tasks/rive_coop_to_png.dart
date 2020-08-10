@@ -50,7 +50,7 @@ class RiveCoopToPng with Task {
     try {
       var tmpName = sourceLocation.hashCode.toString();
       var tempDir = await Directory.systemTemp.createTemp();
-      var inPath = "${tempDir.path}/$tmpName.in.coop";
+      var inPath = "${tempDir.path}/$tmpName.in.riv";
       var outPath = "${tempDir.path}/$tmpName.out.png";
       var inFile = File(inPath);
       await inFile.create();
