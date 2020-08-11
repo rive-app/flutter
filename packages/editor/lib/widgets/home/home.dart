@@ -39,12 +39,14 @@ class _HomeState extends State<Home> {
     // Check whether the first run flag is set for the user.
     // If it is, show the getting started section
     final me = Plumber().peek<Me>();
-    if (me.isFirstRun) {
-      Plumber().message<HomeSection>(HomeSection.getStarted);
-    }
-    // If this isn't a first run, then show the user's recent files
-    else {
-      Plumber().message<HomeSection>(HomeSection.recents);
+    if (Plumber().peek<HomeSection>() == null) {
+      if (me.isFirstRun) {
+        Plumber().message<HomeSection>(HomeSection.getStarted);
+      }
+      // If this isn't a first run, then show the user's recent files
+      else {
+        Plumber().message<HomeSection>(HomeSection.recents);
+      }
     }
     super.initState();
   }
