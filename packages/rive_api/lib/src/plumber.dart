@@ -72,4 +72,12 @@ class Plumber {
     });
     _pipes.clear();
   }
+
+  void flushAll() {
+    _pipes.values.forEach((pipeMap) {
+      pipeMap.values.forEach((pipe) {
+        pipe.add(null);
+      });
+    });
+  }
 }

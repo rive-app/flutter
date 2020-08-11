@@ -58,10 +58,11 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   }
 
   void _onProfile(Profile profile) {
-    assert(profile != null);
-    setState(() {
-      _isForHire = profile.isForHire == true;
-    });
+    if (profile != null) {
+      setState(() {
+        _isForHire = profile.isForHire == true;
+      });
+    }
   }
 
   @override

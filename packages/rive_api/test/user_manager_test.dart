@@ -45,9 +45,9 @@ void main() {
 
     test('logout', () async {
       final testComplete = testStream(Plumber().getStream<Me>(), [
-        (Me me) => me.isEmpty,
+        (Me me) => me == null,
         (Me me) => me.name == 'MaxMax',
-        (Me me) => me.isEmpty,
+        (Me me) => me == null,
       ]);
 
       // Send empty user first.
@@ -61,7 +61,7 @@ void main() {
     test('sequence', () async {
       final testComplete = testStream(Plumber().getStream<Me>(), [
         (Me me) => me.name == 'MaxMax',
-        (Me me) => me.isEmpty,
+        (Me me) => me == null,
         (Me me) => me.name == 'MaxMax',
       ]);
 

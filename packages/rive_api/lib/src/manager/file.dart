@@ -41,7 +41,7 @@ class FileManager with Subscriptions {
       _clearFolderList();
     }
     _me = me;
-    if (_me.isEmpty) {
+    if (_me == null || _me.isEmpty) {
       return;
     }
 
