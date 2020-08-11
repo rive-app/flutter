@@ -88,9 +88,11 @@ class FolderContentsManager with Subscriptions {
       cache.files.add(file);
       plumber.message<File>(file, file.hashCode);
     }
+
+    final fileList = files.map(cache.files.lookup).toList();
+
     Plumber().message<FolderContents>(
-        FolderContents(
-            files: cache.files.toList(), folders: cache.folders.toList()),
+        FolderContents(files: fileList, folders: cache.folders.toList()),
         directory.hashId);
   }
 

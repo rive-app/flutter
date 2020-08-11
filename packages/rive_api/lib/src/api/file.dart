@@ -16,10 +16,10 @@ class FileApi {
   final RiveApi api;
 
   Future<List<FileDM>> myFiles(int ownerId, int folderId) async =>
-      _files('/api/my/files/a-z/rive/$folderId', ownerId);
+      _files('/api/my/files/recent/rive/$folderId', ownerId);
 
   Future<List<FileDM>> teamFiles(int ownerId, int folderId) async =>
-      _files('/api/teams/$ownerId/files/a-z/rive/$folderId', ownerId);
+      _files('/api/teams/$ownerId/files/recent/rive/$folderId', ownerId);
 
   /// Return the user's file ids in most recent order
   /// This returns the new combo file id format.
@@ -67,8 +67,8 @@ class FileApi {
     // TODO: changing input is pretty yuk.
     folderIds.removeWhere((folderId) => specialFolderIds.contains(folderId));
     var payload = <String, List<int>>{
-      "files": fileIds ?? [],
-      "folders": folderIds ?? [],
+      'files': fileIds ?? [],
+      'folders': folderIds ?? [],
     };
     print(jsonEncode(payload));
     await api.delete(api.host + url, body: jsonEncode(payload));
