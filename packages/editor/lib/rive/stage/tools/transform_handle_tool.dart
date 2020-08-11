@@ -32,12 +32,14 @@ abstract class TransformHandleTool extends StageTool
             ? StageTranslationHandle(
                 color: const Color(0xFF16E7B3),
                 direction: Vec2D.fromValues(1, 0),
+                transformType: TransformFlags.x,
               )
             : null,
         _translateY = hasTranslationHandles
             ? StageTranslationHandle(
                 color: const Color(0xFFFF929F),
                 direction: Vec2D.fromValues(0, -1),
+                transformType: TransformFlags.y,
               )
             : null,
         _rotation =
@@ -46,12 +48,14 @@ abstract class TransformHandleTool extends StageTool
             ? StageScaleHandle(
                 color: const Color(0xFF16E7B3),
                 direction: Vec2D.fromValues(1, 0),
+                transformType: TransformFlags.scaleX,
               )
             : null,
         _scaleY = hasScaleHandles
             ? StageScaleHandle(
                 color: const Color(0xFFFF929F),
                 direction: Vec2D.fromValues(0, -1),
+                transformType: TransformFlags.scaleY,
               )
             : null;
 
@@ -133,14 +137,17 @@ abstract class TransformHandleTool extends StageTool
         _selectionContext.items.whereType<StageTransformable>().toSet());
   }
 
-  void _addHandle(StageItem handle) {
-    if (handle == null) {
+  void _addHandle(StageHandle handle) {
+    if (handle == null ||
+        (_transformable.transformFlags & handle.transformType) !=
+            handle.transformType) {
+      _removeHandle(handle);
       return;
     }
     stage.addItem(handle);
   }
 
-  void _removeHandle(StageItem handle) {
+  void _removeHandle(StageHandle handle) {
     if (handle == null) {
       return;
     }
@@ -179,8 +186,7 @@ abstract class TransformHandleTool extends StageTool
     }
 
     var transform = _transformable.worldTransform;
-    var renderTransform =
-        _transformable.renderTransform;
+    var renderTransform = _transformable.renderTransform;
     _translateX?.setTransform(transform, renderTransform);
     _translateY?.setTransform(transform, renderTransform);
     _rotation?.setTransform(transform, renderTransform);

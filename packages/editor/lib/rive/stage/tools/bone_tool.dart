@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:core/id.dart';
 import 'package:flutter/rendering.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/bones/bone.dart';
@@ -8,9 +9,11 @@ import 'package:rive_core/math/circle_constant.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/stage/items/stage_joint.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
+import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:utilities/restorer.dart';
 
@@ -177,6 +180,12 @@ class BoneTool extends StageTool {
     if (!super.activate(stage)) {
       return false;
     }
+    var firstJoint = stage.file.selection.items
+        .firstWhere((item) => item is StageJoint, orElse: () => null);
+    if (firstJoint is StageJoint) {
+      _firstJointWorld = firstJoint.worldTranslation;
+      _buildingBones.add(firstJoint.component.id);
+    }
     _selectionRestorer = stage.suppressSelection();
     return true;
   }
@@ -186,7 +195,7 @@ class BoneTool extends StageTool {
     _selectionRestorer?.restore();
     super.deactivate();
     _firstJointWorld = null;
-    _parentBone = null;
+    _buildingBones.clear();
     stage.markNeedsRedraw();
   }
 
@@ -195,7 +204,22 @@ class BoneTool extends StageTool {
 
   Vec2D _firstJointWorld;
 
-  Bone _parentBone;
+  final List<Id> _buildingBones = [];
+
+  Bone get lastBoneInChain {
+    Bone validBone;
+    for (int i = 0; i < _buildingBones.length; i++) {
+      Bone bone = stage.file.core.resolve(_buildingBones[i]);
+      if (bone != null) {
+        validBone = bone;
+      }
+    }
+    return validBone;
+  }
+
+  bool get undidToStart {
+    return _buildingBones.isNotEmpty && lastBoneInChain == null;
+  }
 
   void _showGhostPoint(Vec2D world) {
     _ghostPointScreen = Vec2D.transformMat2D(Vec2D(),
@@ -212,10 +236,11 @@ class BoneTool extends StageTool {
       file.batchAdd(() {
         Vec2D diff;
         Bone bone;
-        if (_parentBone != null) {
+        var parentBone = lastBoneInChain;
+        if (parentBone != null) {
           bone = Bone();
           var iworld = Mat2D();
-          if (!Mat2D.invert(iworld, _parentBone.worldTransform)) {
+          if (!Mat2D.invert(iworld, parentBone.worldTransform)) {
             // Inversion failed. 0 scale? for now fallback to world, but we may
             // want to show some error here.
             Mat2D.identity(iworld);
@@ -225,7 +250,7 @@ class BoneTool extends StageTool {
           diff = Vec2D.subtract(
               Vec2D(),
               Vec2D.transformMat2D(Vec2D(), worldMouse, iworld),
-              Vec2D.fromValues(_parentBone.length, 0));
+              Vec2D.fromValues(parentBone.length, 0));
         } else {
           bone = RootBone()
             ..x = _firstJointWorld[0]
@@ -237,16 +262,17 @@ class BoneTool extends StageTool {
           ..length = Vec2D.length(diff)
           ..rotation = atan2(diff[1], diff[0]);
         file.addObject(bone);
-        if (_parentBone != null) {
-          _parentBone.appendChild(bone);
+        if (parentBone != null) {
+          parentBone.appendChild(bone);
         } else {
           activeArtboard.appendChild(bone);
         }
-        _parentBone = bone;
+        _buildingBones.add(bone.id);
       });
       file.captureJournalEntry();
+    } else {
+      _firstJointWorld = Vec2D.clone(worldMouse);
     }
-    _firstJointWorld = Vec2D.clone(worldMouse);
     stage.markNeedsRedraw();
   }
 
@@ -264,10 +290,17 @@ class BoneTool extends StageTool {
         _ghostPointScreen[0].round() + 0.5, _ghostPointScreen[1].round() + 0.5);
     BoneJointRenderer.draw(canvas, SelectionState.none);
     canvas.restore();
+
+    if (undidToStart) {
+      _firstJointWorld = null;
+      _buildingBones.clear();
+    }
+
     if (_firstJointWorld != null) {
       var firstJointScreen = Vec2D.transformMat2D(
           Vec2D(),
-          stageWorldSpace(stage.activeArtboard, _firstJointWorld),
+          stageWorldSpace(stage.activeArtboard,
+              lastBoneInChain?.tipWorldTranslation ?? _firstJointWorld),
           stage.viewTransform);
       canvas.save();
       canvas.translate(

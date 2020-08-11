@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:flutter/src/foundation/change_notifier.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -71,4 +71,7 @@ class StageJoint extends StageItem<Bone> implements StageTransformable {
 
   @override
   Listenable get worldTransformChanged => component.worldTransformChanged;
+
+  @override
+  int get transformFlags => TransformFlags.x | TransformFlags.rotation;
 }

@@ -97,7 +97,6 @@ abstract class TransformComponent extends TransformComponentBase {
       }
       parent = parent.parent;
     }
-
     for (final item in chain) {
       item.updateTransform();
       item.updateWorldTransform();

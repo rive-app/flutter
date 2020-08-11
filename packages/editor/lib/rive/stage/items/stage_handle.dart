@@ -41,4 +41,7 @@ abstract class StageHandle extends StageItem<void> {
 
   List<StageTransformer> makeTransformers();
   void transformChanged();
+
+  /// Return the TransformFlags that matches this transform handle.
+  int get transformType;
 }

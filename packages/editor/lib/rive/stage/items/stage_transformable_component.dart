@@ -16,4 +16,7 @@ abstract class StageTransformableComponent<T extends TransformComponent>
 
   @override
   Listenable get worldTransformChanged => component.worldTransformChanged;
+
+  @override
+  int get transformFlags => TransformFlags.all;
 }

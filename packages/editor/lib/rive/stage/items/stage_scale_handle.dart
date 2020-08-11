@@ -12,6 +12,8 @@ import 'package:rive_editor/rive/stage/tools/transformers/translation/node_scale
 import 'package:rive_editor/selectable_item.dart';
 
 class StageScaleHandle extends StageHandle {
+  @override
+  final int transformType;
   final Vec2D direction;
   final Paint paint = Paint()
     ..style = PaintingStyle.stroke
@@ -44,7 +46,7 @@ class StageScaleHandle extends StageHandle {
       selectionThreshold * selectionThreshold;
   static const minScaleCorrection = 1 / Stage.minZoom;
   static const double halfSelectionThreshold = selectionThreshold / 2;
-  StageScaleHandle({Color color, this.direction}) {
+  StageScaleHandle({Color color, this.direction, this.transformType}) {
     headPaint.color = paint.color = color;
   }
 
@@ -78,7 +80,6 @@ class StageScaleHandle extends StageHandle {
 
   @override
   void transformChanged() {
-    
     var axisNormalized = computeAxis();
     var axis =
         Vec2D.scale(Vec2D(), axisNormalized, handleLength * minScaleCorrection);
@@ -135,7 +136,6 @@ class StageScaleHandle extends StageHandle {
 
   @override
   List<StageTransformer> makeTransformers() {
-    return [NodeScaleTransformer(
-      lockAxis: direction, handle: this)];
+    return [NodeScaleTransformer(lockAxis: direction, handle: this)];
   }
 }

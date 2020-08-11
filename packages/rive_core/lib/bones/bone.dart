@@ -8,9 +8,18 @@ class Bone extends BoneBase {
   void lengthChanged(double from, double to) {
     for (final child in children) {
       if (child.coreType == BoneBase.typeKey) {
-        markTransformDirty();
+        (child as Bone).markTransformDirty();
       }
     }
+  }
+
+  Bone get firstChildBone {
+    for (final child in children) {
+      if (child.coreType == BoneBase.typeKey) {
+        return child as Bone;
+      }
+    }
+    return null;
   }
 
   @override

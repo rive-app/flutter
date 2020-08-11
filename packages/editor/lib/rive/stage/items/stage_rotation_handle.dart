@@ -5,6 +5,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
+import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
@@ -166,4 +167,7 @@ class StageRotationHandle extends StageHandle {
   List<StageTransformer> makeTransformers() {
     return [NodeRotateTransformer(handle: this)];
   }
+
+  @override
+  int get transformType => TransformFlags.rotation;
 }

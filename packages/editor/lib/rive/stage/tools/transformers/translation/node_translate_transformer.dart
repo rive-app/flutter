@@ -8,13 +8,13 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/transform_component.dart';
+import 'package:rive_editor/rive/stage/items/stage_joint.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
-import 'package:utilities/iterable.dart';
 
 /// Transformer that translates [StageItem]'s with underlying [Node] components.
 class NodeTranslateTransformer extends StageTransformer {
@@ -93,9 +93,12 @@ class NodeTranslateTransformer extends StageTransformer {
     // Get Node and RootBones as TransformComponents (we can't just cast to
     // TransformComponent as there are some TransformComponents we're not
     // interested in, like non-root Bones).
-    _transformComponents = items
-        .where((item) => item.component is Node || item.component is RootBone)
-        .map((item) => item.component as TransformComponent);
+    _transformComponents = topComponents(items
+        .where((item) =>
+            item.component is Node ||
+            // TODO: replace with is StageRootJoint when we have it...
+            (item is! StageJoint && item.component is RootBone))
+        .map((item) => item.component as TransformComponent));
     // _transformComponents =
     //     topComponents(items.mapWhereType<Node>((element) => element.component));
     if (_transformComponents.isNotEmpty) {
