@@ -7,6 +7,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
+import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
@@ -81,5 +82,10 @@ class StageJoint extends StageItem<Bone>
       // itself.
       selection.add(component.stageItem);
     }
+  }
+
+  @override
+  void addSnapTarget(SnappingAxes axes) {
+    axes.addVec(_worldTranslation);
   }
 }

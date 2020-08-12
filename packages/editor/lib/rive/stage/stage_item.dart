@@ -7,6 +7,7 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -290,6 +291,23 @@ abstract class StageItem<T> extends SelectableItem
         stage.viewTransform,
         aabb,
       );
+    }
+  }
+
+  /// Called when this item has been selected as a snap target by the snapper.
+  /// The item is responsible for adding the points that dragged items could
+  /// snap to.
+  void addSnapTarget(SnappingAxes axes) {
+    if (obb != null) {
+      var poly = obb.poly;
+      axes.addPoint(poly[0], poly[1]);
+      axes.addPoint(poly[2], poly[3]);
+      axes.addPoint(poly[4], poly[5]);
+      axes.addPoint(poly[6], poly[7]);
+      var center = obb.center;
+      axes.addPoint(center[0], center[1]);
+    } else {
+      axes.addAABB(aabb);
     }
   }
 }

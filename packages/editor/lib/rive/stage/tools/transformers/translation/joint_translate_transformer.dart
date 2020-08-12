@@ -68,7 +68,7 @@ class JointTranslateTransformer extends StageTransformer {
         // Filter out components that are not shapes or nodes, or not in the
         // active artboard
         final activeArtboard = details.artboard;
-        if (item is StageShape || item is StageNode) {
+        if (item is StageShape || item is StageNode || item is StageJoint) {
           final itemArtboard = (item.component as Component).artboard;
           return activeArtboard == itemArtboard;
         }

@@ -6,7 +6,6 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -45,27 +44,6 @@ class SnappingAxes {
   final _axes = [<_SnapAxis>[], <_SnapAxis>[]];
 
   AABB _accumulatedBounds;
-  void add(StageItem item) {
-    if (item is StageNode) {
-      var center = AABB.center(Vec2D(), item.aabb);
-      addPoint(center[0], center[1]);
-    } else {
-      var obb = item.obb;
-      if (obb != null) {
-        var poly = obb.poly;
-        addPoint(poly[0], poly[1]);
-        addPoint(poly[2], poly[3]);
-        addPoint(poly[4], poly[5]);
-        addPoint(poly[6], poly[7]);
-        var center = obb.center;
-        addPoint(center[0], center[1]);
-      } else {
-        addAABB(item.aabb);
-      }
-    }
-  }
-
-  void addAll(Iterable<StageItem> items) => items.forEach(add);
 
   void accumulateBounds(AABB bounds) {
     if (_accumulatedBounds == null) {
@@ -169,7 +147,7 @@ class Snapper {
       }
 
       if (filters.every((filter) => filter(item))) {
-        _targets.add(item);
+        item.addSnapTarget(_targets);
       }
       return true;
     });
