@@ -84,7 +84,6 @@ void main() {
       final checks = [
         (FolderContents cts) => cts.files == null && cts.folders == null,
         (FolderContents cts) => cts.files.length == 2,
-        (FolderContents cts) => cts.files.length == 2,
       ];
 
       final me = _plumber.peek<Me>();
