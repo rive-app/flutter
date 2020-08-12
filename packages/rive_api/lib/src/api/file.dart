@@ -108,10 +108,10 @@ class FileApi {
     }
   }
 
-  Future<FileDM> createFile(int folderId, [int teamId]) async {
+  Future<FileDM> createFile(int folderId, [int projectId]) async {
     FileDM newFile;
-    if (teamId != null) {
-      newFile = await _createTeamFile(folderId, teamId);
+    if (projectId != null) {
+      newFile = await _createProjectFile(folderId, projectId);
     } else {
       newFile = await _createFile(folderId);
     }
@@ -122,9 +122,9 @@ class FileApi {
     return _renameFile(api.host + '/api/files/$ownerId/$fileId/name', name);
   }
 
-  Future<bool> renameTeamFile(int ownerId, int fileId, String name) async {
+  Future<bool> renameProjectFile(int ownerId, int fileId, String name) async {
     return _renameFile(
-        api.host + '/api/teams/$ownerId/files/$fileId/name', name);
+        api.host + '/api/projects/$ownerId/files/$fileId/name', name);
   }
 
   Future<bool> _renameFile(String url, String name) async {
@@ -141,15 +141,15 @@ class FileApi {
     return _parseFileResponse(response);
   }
 
-  Future<FileDM> _createTeamFile(
+  Future<FileDM> _createProjectFile(
     int folderId,
-    int teamId,
+    int projectId,
   ) async {
     String payload = json.encode({
       'data': {'fileName': 'New File'}
     });
     var response = await api.post(
-        api.host + '/api/teams/$teamId/folders/$folderId/new/rive/',
+        api.host + '/api/projects/$projectId/folders/$folderId/new/rive/',
         body: payload);
     return _parseFileResponse(response);
   }

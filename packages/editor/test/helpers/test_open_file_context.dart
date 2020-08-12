@@ -1,3 +1,4 @@
+import 'package:rive_api/model.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:local_data/local_data.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
@@ -7,8 +8,7 @@ import 'package:rive_editor/rive/rive.dart';
 class TestOpenFileContext extends OpenFileContext {
   TestOpenFileContext()
       : super(
-          10,
-          10,
+          File(id: 10, ownerId: 10),
           rive: Rive(),
         );
   Future<bool> fakeConnect() async {

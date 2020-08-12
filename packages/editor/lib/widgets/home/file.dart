@@ -15,7 +15,7 @@ class BrowserFile extends StatelessWidget {
     final theme = RiveTheme.of(context);
     final styles = theme.textStyles;
     return Padding(
-      padding: const EdgeInsets.only(left:15, top:13, bottom:14),
+      padding: const EdgeInsets.only(left: 15, top: 13, bottom: 14),
       child: Row(
         children: [
           Expanded(
@@ -64,7 +64,7 @@ class BrowserFile extends StatelessWidget {
     return ClickListener(
       onDoubleClick: (_) {
         if (!suspended) {
-          RiveContext.of(context).open(file.fileOwnerId, file.id, file.name);
+          RiveContext.of(context).open(file);
         }
       },
       child: Container(

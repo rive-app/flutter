@@ -57,7 +57,10 @@ class UserManager with Subscriptions {
     var me = _plumber.peek<Me>();
     if (currentDirectory != null &&
         currentDirectory.owner.ownerId == me.ownerId) {
-      _plumber.message(CurrentDirectory(me, currentDirectory.folderId));
+      _plumber.message(CurrentDirectory(
+        me,
+        currentDirectory.folder,
+      ));
     }
   }
 

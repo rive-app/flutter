@@ -48,5 +48,8 @@ List<FolderDM> getFoldersDM(OwnerDM owner) {
 }
 
 CurrentDirectory getCurrentDirectory(Owner owner) {
-  return CurrentDirectory(owner, 1);
+  return CurrentDirectory(
+    owner,
+    Folder.fromDM(getFolder(owner.asDM)),
+  );
 }

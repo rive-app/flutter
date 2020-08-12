@@ -347,14 +347,13 @@ class Rive {
   }
 
   /// Open a Rive file with a specific id. Ids are composed of owner_id:file_id.
-  Future<OpenFileContext> open(int ownerId, int fileId, String name,
-      {bool makeActive = true}) async {
+  Future<OpenFileContext> open(File file, {bool makeActive = true}) async {
     // see if it's already open
     var openFileTab = fileTabs.firstWhere(
         (tab) =>
             tab.file != null &&
-            tab.file.ownerId == ownerId &&
-            tab.file.fileId == fileId,
+            tab.file.ownerId == file.fileOwnerId &&
+            tab.file.fileId == file.id,
         orElse: () => null);
 
     ErrorLogger.instance.dropCrumb(
@@ -362,18 +361,16 @@ class Rive {
       message: openFileTab == null ? 'open file' : 're-open file',
       severity: CrumbSeverity.info,
       data: {
-        'ownerId': ownerId.toString(),
-        'fileId': fileId.toString(),
-        'name': name,
+        'ownerId': file.fileOwnerId.toString(),
+        'fileId': file.id.toString(),
+        'name': file.name,
       },
     );
 
     if (openFileTab == null) {
       var openFile = OpenFileContext(
-        ownerId,
-        fileId,
+        file,
         rive: this,
-        fileName: name,
         api: api,
         fileApi: _filesApi,
       );
@@ -393,9 +390,9 @@ class Rive {
         message: connected ? 'connected to file' : 'failed to connect to file',
         severity: connected ? CrumbSeverity.info : CrumbSeverity.warning,
         data: {
-          'ownerId': ownerId.toString(),
-          'fileId': fileId.toString(),
-          'name': name,
+          'ownerId': file.fileOwnerId.toString(),
+          'fileId': file.id.toString(),
+          'name': file.name,
         },
       );
     }
@@ -408,9 +405,9 @@ class Rive {
         message: 'marking first run',
         severity: CrumbSeverity.debug,
         data: {
-          'ownerId': ownerId.toString(),
-          'fileId': fileId.toString(),
-          'name': name,
+          'ownerId': file.fileOwnerId.toString(),
+          'fileId': file.id.toString(),
+          'name': file.name,
         },
       );
       UserManager().markFirstRun();

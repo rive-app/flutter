@@ -7,11 +7,9 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class BrowserFolder extends StatelessWidget {
-  const BrowserFolder(this.folderName, this.folderId, this.selected, {Key key})
-      : super(key: key);
+  const BrowserFolder(this.folder, this.selected, {Key key}) : super(key: key);
 
-  final String folderName;
-  final int folderId;
+  final Folder folder;
   final bool selected;
 
   EdgeInsetsGeometry get padding =>
@@ -26,8 +24,7 @@ class BrowserFolder extends StatelessWidget {
       onDoubleTap: () {
         final plumber = Plumber();
         final currentDirectory = plumber.peek<CurrentDirectory>();
-        final nextDirectory =
-            CurrentDirectory(currentDirectory.owner, folderId);
+        final nextDirectory = CurrentDirectory(currentDirectory.owner, folder);
         plumber.message<CurrentDirectory>(nextDirectory);
       },
       child: Container(
@@ -45,14 +42,14 @@ class BrowserFolder extends StatelessWidget {
         child: Row(
           children: [
             TintedIcon(
-                icon: (folderId == 0) ? PackedIcon.trash : PackedIcon.folder,
+                icon: (folder.id == 0) ? PackedIcon.trash : PackedIcon.folder,
                 color: colors.black30),
             const SizedBox(width: 8),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 1),
                 child: Text(
-                  folderName,
+                  folder.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: styles.greyText,

@@ -57,8 +57,10 @@ class TeamManager with Subscriptions {
           (element) => element.ownerId == _currentDirectory.owner.ownerId,
           orElse: () => null);
       if (_currentTeam != null) {
-        _plumber.message(
-            CurrentDirectory(_currentTeam, _currentDirectory.folderId));
+        _plumber.message(CurrentDirectory(
+          _currentTeam,
+          _currentDirectory.folder,
+        ));
       }
     }
   }
@@ -111,7 +113,7 @@ class TeamManager with Subscriptions {
         await _teamApi.createTeam(teamName, plan, frequency, stripeToken);
     await loadTeams();
     var team = Team.fromDM(teamDM);
-    Plumber().message(CurrentDirectory(team, 1));
+    FileManager().loadBaseFolder(team);
     return Team.fromDM(teamDM);
   }
 

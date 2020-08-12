@@ -57,17 +57,6 @@ class FolderContentsManager with Subscriptions {
       List<File> files, CurrentDirectory directory) async {
     final plumber = Plumber();
 
-    final cache = _cache[directory.hashId] ??= _FolderContentsCache();
-
-    for (final file in files) {
-      final cachedFile = cache.files.lookup(file);
-      if (cachedFile != null) {
-        plumber.message<File>(cachedFile, cachedFile.hashCode);
-      }
-    }
-    final fileIdSet = files.toSet();
-    cache.files.removeWhere((file) => !fileIdSet.contains(file));
-
     final teamOwnerId =
         directory.owner is Team ? directory.owner.ownerId : null;
     List<int> fileIds = files.map((file) => file.id).toList(growable: false);
@@ -78,22 +67,10 @@ class FolderContentsManager with Subscriptions {
         : _fileApi.myFileDetails(fileIds));
 
     final fileDetailsList = File.fromDMList(fileDetails, teamOwnerId);
-    final currentDirectoryId = plumber.peek<CurrentDirectory>().folderId;
-    // Early out if we swapped folders in quick succession.
-    if (currentDirectoryId != directory.folderId) {
-      return;
-    }
 
     for (final file in fileDetailsList) {
-      cache.files.add(file);
       plumber.message<File>(file, file.hashCode);
     }
-
-    final fileList = files.map(cache.files.lookup).toList();
-
-    Plumber().message<FolderContents>(
-        FolderContents(files: fileList, folders: cache.folders.toList()),
-        directory.hashId);
   }
 
   _FolderContentsCache _initCache(
@@ -127,7 +104,7 @@ class FolderContentsManager with Subscriptions {
     List<FolderDM> folders;
     final owner = directory.owner;
     final ownerId = owner.ownerId;
-    final currentFolderId = directory.folderId;
+    final currentFolderId = directory.folder.id;
 
     if (owner is Team) {
       files = await _fileApi.teamFiles(ownerId, currentFolderId);
@@ -141,14 +118,14 @@ class FolderContentsManager with Subscriptions {
         _initCache(Folder.fromDMList(folders), ownerId, currentFolderId);
 
     List<File> fileList = File.fromDMList(files);
-    List<Folder> folderList = folderCache.folders.toList(growable: false);
+    folderCache.setFiles(fileList);
 
     if (files.isNotEmpty) {
       unawaited(_loadFileDetails(fileList, directory));
     }
 
     Plumber().message<FolderContents>(
-        FolderContents(files: fileList, folders: folderList), directory.hashId);
+        folderCache.getAsFolderContents(), directory.hashId);
   }
 
   Future<void> delete() async {
@@ -174,21 +151,14 @@ class FolderContentsManager with Subscriptions {
   Future<void> rename(Object target, String newName) async {
     var currentDirectory = Plumber().peek<CurrentDirectory>();
     if (target is File) {
-      if (currentDirectory.owner is User) {
-        await FileApi()
-            .renameMyFile(currentDirectory.owner.ownerId, target.id, newName);
-      } else {
-        await FileApi()
-            .renameTeamFile(currentDirectory.owner.ownerId, target.id, newName);
-      }
+      await FileManager().renameFile(target, newName);
     }
     if (target is Folder) {
       if (currentDirectory.owner is User) {
-        await FolderApi().renameMyFolder(
-            currentDirectory.owner.ownerId, target.asDM, newName);
+        await FolderApi().renameMyFolder(target.ownerId, target.asDM, newName);
       } else {
         await FolderApi().updateTeamFolder(
-          currentDirectory.owner.ownerId,
+          target.ownerId,
           target.asDM,
           newName,
           target.parent,
@@ -204,19 +174,16 @@ class FolderContentsManager with Subscriptions {
 class _FolderContentsCache {
   /// Maps parent Folder ID to the Files/Folders it contains.
   /// Files/Folders are also mapped <id, Folder>
-  final Set<File> files = {};
+  final List<File> _files = [];
   final Set<Folder> folders = {};
 
-  List<Folder> getFoldersByParent(int parentId) => folders
-      .where((folder) =>
-          // Add to results if:
-          // - parent id is the same
-          // - downloading top folder: we want to show 'Deleted Files'.
-          folder.parent == parentId || (parentId == 1 && folder.id == 0))
-      .toList(growable: false);
+  void setFiles(List<File> files) {
+    _files.clear();
+    _files.addAll(files);
+  }
 
   FolderContents getAsFolderContents({bool loading = false}) => FolderContents(
-        files: files.toList(growable: false),
+        files: _files.toList(growable: false),
         folders: folders.toList(growable: false),
         isLoading: loading,
       );

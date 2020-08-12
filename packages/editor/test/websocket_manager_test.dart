@@ -96,40 +96,44 @@ void main() {
         Plumber().getStream<CurrentDirectory>(),
         <Function(CurrentDirectory)>[],
       );
-      await client.handleData(
-          '{"action": "FolderChange", "params": {"folderOwnerId": 1, "folderId": 1}}');
+      await client.handleData('''
+{"action": "FolderChange", "params": {"folderOwnerId": 1, "folderId": 1}}''');
       await testComplete.future;
     });
 
     test('updating folder with different currentDirectory does nothing',
         () async {
-      Plumber().message<CurrentDirectory>(CurrentDirectory(getTeam(), 2));
+      var team = getTeam();
+      Plumber().message<CurrentDirectory>(
+          CurrentDirectory(getTeam(), getFolder(team, 2)));
 
       final testComplete = testStream(
         Plumber().getStream<CurrentDirectory>(),
-        [(CurrentDirectory d) => d.folderId == 2],
+        [(CurrentDirectory d) => d.folder.id == 2],
       );
-      await client.handleData(
-          '{"action": "FolderChange", "params":{"folderOwnerId": 1, "folderId": 1}}');
-      await client.handleData(
-          '{"action": "FolderChange", "params":{"folderOwnerId": 2, "folderId": 2}}');
+      await client.handleData('''
+{"action": "FolderChange", "params":{"folderOwnerId": 1, "folderId": 1}}''');
+      await client.handleData('''
+{"action": "FolderChange", "params":{"folderOwnerId": 2, "folderId": 2}}''');
       await testComplete.future;
     });
 
     test(
-        'updating folder with matching currentDirectory reloads the current directory',
-        () async {
-      Plumber().message<CurrentDirectory>(CurrentDirectory(getTeam(), 1));
+        'updating folder with matching currentDirectory '
+        'reloads the current directory', () async {
+      var team = getTeam();
+      Plumber().message<CurrentDirectory>(
+          CurrentDirectory(getTeam(), getFolder(team, 1)));
 
       final testComplete = testStream(
         Plumber().getStream<CurrentDirectory>(),
         [
-          (CurrentDirectory d) => d.folderId == 1,
-          (CurrentDirectory d) => d.folderId == 1
+          (CurrentDirectory d) => d.folder.id == 1,
+          (CurrentDirectory d) => d.folder.id == 1
         ],
       );
-      await client.handleData(
-          '{"action": "FolderChange", "params":{"folderOwnerId": 1, "folderId": 1}}');
+      await client.handleData('''
+{"action": "FolderChange", "params":{"folderOwnerId": 1, "folderId": 1}}''');
       await testComplete.future;
     });
   });

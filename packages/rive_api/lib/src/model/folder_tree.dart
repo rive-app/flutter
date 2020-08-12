@@ -41,7 +41,7 @@ class FolderTreeItem {
 
     final currentDirectory = Plumber().peek<CurrentDirectory>();
     if (currentDirectory != null &&
-        (currentDirectory.folderId == folder?.id &&
+        (currentDirectory.folder.id == folder?.id &&
             currentDirectory.owner == owner)) {
       selected = true;
     } else {

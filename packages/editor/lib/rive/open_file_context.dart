@@ -56,8 +56,9 @@ enum EditorMode { design, animate }
 /// tab) but it is not guaranteed to be in memory.
 class OpenFileContext with RiveFileDelegate {
   /// Globally unique identifier set for the file, composed of ownerId/fileId.
-  final int ownerId;
-  final int fileId;
+  final File file;
+  int get ownerId => file.fileOwnerId;
+  int get fileId => file.id;
 
   /// Application context.
   final Rive rive;
@@ -71,6 +72,10 @@ class OpenFileContext with RiveFileDelegate {
   /// File name
   final ValueNotifier<String> _name;
   ValueListenable<String> get name => _name;
+
+  // this complains about types as a setter.
+  // ignore: use_setters_to_change_properties
+  void updateName(String name) => _name.value = name;
 
   /// The Core representation of the file.
   RiveFile core;
@@ -226,13 +231,11 @@ class OpenFileContext with RiveFileDelegate {
       _editingAnimationManager;
 
   OpenFileContext(
-    this.ownerId,
-    this.fileId, {
+    this.file, {
     this.rive,
-    String fileName,
     this.api,
     this.fileApi,
-  }) : _name = ValueNotifier<String>(fileName);
+  }) : _name = ValueNotifier<String>(file.name);
 
   OpenFileState get state => _state;
   String get stateInfo => _stateInfo;
@@ -660,8 +663,8 @@ class OpenFileContext with RiveFileDelegate {
 
   /// Save an updated file name
   void changeFileName(String name) {
-    _name.value = name;
-    FileManager().renameFile(ownerId, fileId, name);
+    updateName(name);
+    FileManager().renameFile(file, name);
   }
 
   final ValueNotifier<RevisionManager> _revisionManager =

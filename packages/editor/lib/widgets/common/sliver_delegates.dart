@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -43,10 +45,12 @@ class SliverGridDelegateFixedSize extends SliverGridDelegate {
     assert(_debugAssertIsValid());
     // (count * Width) + ((count -1) * spacers) = overall Width
     // solved for count, rounded down.
-    final int crossAxisCount =
+    final crossAxisCount = max(
         ((constraints.crossAxisExtent + crossAxisSpacing) /
                 (crossAxisExtent + crossAxisSpacing))
-            .floor();
+            .floor(),
+        1);
+
     return SliverGridRegularTileLayout(
       crossAxisCount: crossAxisCount,
       mainAxisStride: mainAxisExtent + mainAxisSpacing,

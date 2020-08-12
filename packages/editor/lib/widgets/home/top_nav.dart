@@ -17,7 +17,6 @@ class TopNav extends StatelessWidget {
   final CurrentDirectory currentDirectory;
 
   Owner get owner => currentDirectory.owner;
-  int get folderId => currentDirectory.folderId;
 
   const TopNav(this.currentDirectory, {Key key}) : super(key: key);
 
@@ -25,7 +24,7 @@ class TopNav extends StatelessWidget {
     final riveColors = RiveTheme.of(context).colors;
     final children = <Widget>[];
     final currentFolder =
-        folders.firstWhere((folder) => folder.id == currentDirectory.folderId);
+        folders.firstWhere((folder) => folder.id == currentDirectory.folder.id);
     if (owner != null && currentFolder.id == 1) {
       children.add(
         AvatarView(
@@ -46,24 +45,24 @@ class TopNav extends StatelessWidget {
             width: 30,
             height: 30,
             child: GestureDetector(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: riveColors.fileBackgroundLightGrey,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Center(
-                  child: TintedIcon(
-                    icon: PackedIcon.back,
-                    color: riveColors.inspectorTextColor,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: riveColors.fileBackgroundLightGrey,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Center(
+                    child: TintedIcon(
+                      icon: PackedIcon.back,
+                      color: riveColors.inspectorTextColor,
+                    ),
                   ),
                 ),
-              ),
-              // if the current folder has no parent, just take you back to the
-              // magic folder nbr 1. (this deals with the Deleted folder
-              // anomaly)
-              onTap: () => Plumber().message(CurrentDirectory(
-                  currentDirectory.owner, currentFolder.parent ?? 1)),
-            ),
+                // if the current folder has no parent, just take you back to the
+                // magic folder nbr 1. (this deals with the Deleted folder
+                // anomaly)
+                onTap: () {
+                  FileManager().loadParentFolder(currentDirectory);
+                }),
           ),
         ),
       );
@@ -86,31 +85,20 @@ class TopNav extends StatelessWidget {
         PopupContextItem(
           'New File',
           select: () async {
-            final createdFile = (owner is Team)
-                ? await FileManager().createFile(folderId, owner.ownerId)
-                : await FileManager().createFile(folderId);
+            final createdFile = await FileManager().createFile(
+              owner,
+              currentDirectory.folder,
+            );
 
             await FileManager().loadFolders(owner);
             Plumber().message(currentDirectory);
-            await RiveContext.of(context).open(
-              createdFile.fileOwnerId,
-              createdFile.id,
-              createdFile.name,
-            );
+            await RiveContext.of(context).open(createdFile);
           },
         ),
         PopupContextItem(
           'New Folder',
           select: () async {
-            if (owner is Team) {
-              await FileManager().createTeamFolder(folderId, owner.ownerId);
-            } else {
-              await FileManager().createPersonalFolder(folderId, owner.ownerId);
-            }
-            // NOTE: bit funky, feels like it'd be nice
-            // to control both managers through one message
-            // pretty sure we can do that if we back onto
-            // a more generic FileManager
+            await FileManager().createFolder(owner, currentDirectory.folder);
             await FileManager().loadFolders(owner);
             Plumber().message(currentDirectory);
           },

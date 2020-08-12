@@ -1,3 +1,4 @@
+import 'package:rive_api/data_model.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/api.dart';
@@ -68,18 +69,28 @@ class FileManager with Subscriptions {
     teams?.forEach(loadFolders);
   }
 
-  Future<File> createFile(int folderId, [int teamId]) async {
-    final fileDM = await _fileApi.createFile(folderId, teamId);
-    return File.fromDM(fileDM);
+  Future<File> createFile(Owner owner, [Folder folder]) async {
+    folder ??= _folderMap[owner].firstWhere((element) => element.id == 1);
+    FileDM fileDM;
+    if (owner is Team) {
+      fileDM = await _fileApi.createFile(folder.id, folder.ownerId);
+    } else {
+      fileDM = await _fileApi.createFile(folder.id);
+    }
+
+    return File.fromDM(fileDM, owner.ownerId);
   }
 
-  Future<Folder> createTeamFolder(int folderId, [int teamId]) async {
-    final folderDM = await _folderApi.createTeamFolder(folderId, teamId);
-    return Folder.fromDM(folderDM);
-  }
+  Future<Folder> createFolder(Owner owner, [Folder folder]) async {
+    folder ??= _folderMap[owner].firstWhere((element) => element.id == 1);
+    FolderDM folderDM;
+    if (owner is Team) {
+      folderDM = await _folderApi.createTeamFolder(folder.id, folder.ownerId);
+    } else {
+      folderDM =
+          await _folderApi.createPersonalFolder(folder.id, folder.ownerId);
+    }
 
-  Future<Folder> createPersonalFolder(int folderId, int ownerId) async {
-    final folderDM = await _folderApi.createPersonalFolder(folderId, ownerId);
     return Folder.fromDM(folderDM);
   }
 
@@ -128,24 +139,53 @@ class FileManager with Subscriptions {
   }
 
   /// Save the file name. This involves not only passing the new
-  /// fiule name to the backend via the api, but also updating the
+  /// file name to the backend via the api, but also updating the
   /// file data in the stream, allowing the file browser to update.
-  Future<void> renameFile(int ownerId, int fileId, String name) async {
-    final changed = await _fileApi.renameMyFile(ownerId, fileId, name);
+  Future<void> renameFile(File file, String name) async {
+    // if me's not set you have other problems.
+    final changed = (_me != null && _me.ownerId == file.fileOwnerId)
+        ? await _fileApi.renameMyFile(file.fileOwnerId, file.id, name)
+        : await _fileApi.renameProjectFile(file.fileOwnerId, file.id, name);
     if (changed) {
-      // Update the file info in the plumber streams
-      final fileStreamId = szudzik(fileId, ownerId);
-      final file = Plumber().peek<File>(fileStreamId);
-      if (file != null) {
-        File updatedFile = File(
-          id: file.id,
-          name: name,
-          ownerId: file.ownerId,
-          fileOwnerId: file.fileOwnerId,
-          preview: file.preview,
-        );
-        Plumber().message<File>(updatedFile, fileStreamId);
-      }
+      File updatedFile = File(
+        id: file.id,
+        name: name,
+        ownerId: file.ownerId,
+        fileOwnerId: file.fileOwnerId,
+        preview: file.preview,
+      );
+
+      Plumber().message<File>(updatedFile);
     }
+  }
+
+  void loadParentFolder(CurrentDirectory currentDirectory) {
+    final targetFolder = _folderMap[currentDirectory.owner].firstWhere(
+      (element) => element.id == currentDirectory.folder.parent,
+      orElse: () {
+        return _folderMap[currentDirectory.owner]
+            .firstWhere((folder) => folder.id == 1);
+      },
+    );
+    Plumber().message(CurrentDirectory(currentDirectory.owner, targetFolder));
+  }
+
+  void loadBaseFolder(Owner owner) {
+    final backupFolder = Folder(
+      id: 1,
+      name: 'unknown',
+      parent: null,
+      order: 1,
+      ownerId: owner.ownerId,
+    );
+    final targetFolder = (_folderMap[owner] == null)
+        ? backupFolder
+        : _folderMap[owner].firstWhere(
+            (folder) => folder.id == 1,
+            orElse: () {
+              return backupFolder;
+            },
+          );
+    Plumber().message(CurrentDirectory(owner, targetFolder));
   }
 }
