@@ -2,12 +2,22 @@ import 'package:rive_api/model.dart';
 import 'package:rive_api/data_model.dart';
 import 'package:rive_api/models/team_role.dart';
 
+Folder getFolder(Owner owner, int id) {
+  return Folder(
+    id: id,
+    ownerId: owner.ownerId,
+    name: 'whatever',
+    order: 1,
+    parent: null,
+  );
+}
+
 CurrentDirectory getCurrentDirectory({Owner owner, int folderId = 1}) {
   var _owner = owner;
   if (owner == null) {
     _owner = getOwner();
   }
-  return CurrentDirectory(_owner, folderId);
+  return CurrentDirectory(_owner, getFolder(_owner, folderId));
 }
 
 Owner getOwner({int ownerId = 1}) => Team(

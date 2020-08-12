@@ -125,25 +125,18 @@ class FolderTreeView extends StatelessWidget {
                   icon: PackedIcon.add,
                   tooltip: 'New File',
                   onPress: () async {
-                    final createdFile = (item.data.owner is Team)
-                        // 1 is the magic 'Your Files' folder
-                        ? await FileManager()
-                            .createFile(1, item.data.owner.ownerId)
-                        : await FileManager().createFile(1);
+                    final createdFile =
+                        await FileManager().createFile(item.data.owner);
 
                     // Update current directory.
                     final currentDirectory = Plumber().peek<CurrentDirectory>();
                     if (currentDirectory != null &&
                         currentDirectory.owner == item.data.owner &&
-                        currentDirectory.folderId == 1) {
+                        currentDirectory.folder.id == 1) {
                       Plumber().message(currentDirectory);
                     }
 
-                    await RiveContext.of(context).open(
-                      createdFile.fileOwnerId,
-                      createdFile.id,
-                      createdFile.name,
-                    );
+                    await RiveContext.of(context).open(createdFile);
                   },
                 ),
               )

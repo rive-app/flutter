@@ -64,13 +64,13 @@ class FolderApi {
     await api.post(api.host + url, body: payload);
   }
 
-  Future<void> updateTeamFolder(
-      int teamOwnerId, FolderDM folder, String newName, int newParentId) async {
+  Future<void> updateTeamFolder(int projectOwnerId, FolderDM folder,
+      String newName, int newParentId) async {
     String payload = json.encode({
       'data': {'folderName': newName, 'folderParentId': newParentId}
     });
     return api.patch(
-        api.host + '/api/teams/$teamOwnerId/folders/${folder.id}',
+        api.host + '/api/projects/$projectOwnerId/folders/${folder.id}',
         body: payload);
   }
 
@@ -85,15 +85,15 @@ class FolderApi {
 
   Future<FolderDM> createTeamFolder(
     int folderId,
-    int teamId,
+    int projectId,
   ) async {
     String payload = json.encode({
       'data': {'folderName': 'New Folder'}
     });
     var response = await api.post(
-        api.host + '/api/teams/$teamId/folders/$folderId',
+        api.host + '/api/projects/$projectId/folders/$folderId',
         body: payload);
-    return _parseFolderResponse(response, teamId);
+    return _parseFolderResponse(response, projectId);
   }
 
   FolderDM _parseFolderResponse(Response response, int ownerId) {

@@ -26,7 +26,8 @@ import 'package:rive_editor/widgets/theme.dart';
 
 typedef FolderContentsBuilder = Widget Function(FolderContents, Selection);
 
-const double folderCellHeight = 58;  //Should be 50 but had to add an extra 8 to account for the padding added by the 4px border when selected
+const double folderCellHeight =
+    58; //Should be 50 but had to add an extra 8 to account for the padding added by the 4px border when selected
 const double fileCellHeight = 182;
 const double cellWidth = 187;
 const double spacing = 22;
@@ -420,7 +421,9 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                     select: () async {
                       final selection = Plumber().peek<Selection>();
                       if (selection.files.isNotEmpty) {
-                        editName(context, selection.files.first);
+                        final file = Plumber()
+                            .peek<File>(selection.files.first.hashCode);
+                        editName(context, file);
                       } else if (selection.folders.isNotEmpty) {
                         editName(context, selection.folders.first);
                       }
@@ -630,8 +633,10 @@ class FileBrowser extends StatelessWidget {
       cellBuilder: SliverChildBuilderDelegate(
         (context, index) {
           var folder = folders.elementAt(index);
-          return BrowserFolder(folder.name, folder.id,
-              selection?.folders?.contains(folder) == true);
+          return BrowserFolder(
+            folder,
+            selection?.folders?.contains(folder) == true,
+          );
         },
         childCount: folders.length,
       ),

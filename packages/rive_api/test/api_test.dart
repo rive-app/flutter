@@ -182,7 +182,7 @@ void main() {
       final riveApi = MockRiveApi();
       final team = getTeam();
       const folderId = 1;
-      when(riveApi.post('/api/teams/${team.ownerId}/folders/$folderId',
+      when(riveApi.post('/api/projects/${team.ownerId}/folders/$folderId',
               body: '{"data":{"folderName":"New Folder"}}'))
           .thenAnswer((_) async => successTeamFolderCreationResponse);
       final mockApi = FolderApi(riveApi);
@@ -293,7 +293,7 @@ void main() {
       final team = getTeam();
       const folderId = 1;
       when(riveApi.post(
-              '/api/teams/${team.ownerId}/folders/$folderId/new/rive/',
+              '/api/projects/${team.ownerId}/folders/$folderId/new/rive/',
               body: '{"data":{"fileName":"New File"}}'))
           .thenAnswer((_) async => successFileCreationResponse);
       final mockApi = FileApi(riveApi);

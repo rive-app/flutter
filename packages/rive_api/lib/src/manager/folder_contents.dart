@@ -104,7 +104,7 @@ class FolderContentsManager with Subscriptions {
     List<FolderDM> folders;
     final owner = directory.owner;
     final ownerId = owner.ownerId;
-    final currentFolderId = directory.folderId;
+    final currentFolderId = directory.folder.id;
 
     if (owner is Team) {
       files = await _fileApi.teamFiles(ownerId, currentFolderId);
@@ -151,21 +151,14 @@ class FolderContentsManager with Subscriptions {
   Future<void> rename(Object target, String newName) async {
     var currentDirectory = Plumber().peek<CurrentDirectory>();
     if (target is File) {
-      if (currentDirectory.owner is User) {
-        await FileApi()
-            .renameMyFile(currentDirectory.owner.ownerId, target.id, newName);
-      } else {
-        await FileApi()
-            .renameTeamFile(currentDirectory.owner.ownerId, target.id, newName);
-      }
+      await FileManager().renameFile(target, newName);
     }
     if (target is Folder) {
       if (currentDirectory.owner is User) {
-        await FolderApi().renameMyFolder(
-            currentDirectory.owner.ownerId, target.asDM, newName);
+        await FolderApi().renameMyFolder(target.ownerId, target.asDM, newName);
       } else {
         await FolderApi().updateTeamFolder(
-          currentDirectory.owner.ownerId,
+          target.ownerId,
           target.asDM,
           newName,
           target.parent,

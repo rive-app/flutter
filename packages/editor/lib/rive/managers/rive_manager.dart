@@ -9,6 +9,8 @@ class RiveManager with Subscriptions {
   static final RiveManager _instance = RiveManager._();
   factory RiveManager() => _instance;
 
+  Rive rive;
+
   NotificationManager _notificationsManager;
 
   RiveManager._() {
@@ -24,6 +26,7 @@ class RiveManager with Subscriptions {
   void _attach() {
     subscribe<HomeSection>(_newHomeSection);
     subscribe<CurrentDirectory>(_newCurrentDirectory);
+    subscribe<File>(_fileUpdates);
   }
 
   /// Initiatize the state
@@ -52,11 +55,24 @@ class RiveManager with Subscriptions {
   void viewTeam(int teamOwnerId) {
     // NOTE: you hit this, without having loaded the team
     // this will obviously fail.
-    final _plumber = Plumber();
     final teams = Plumber().peek<List<Team>>();
     final targetTeam =
         teams.firstWhere((element) => element.ownerId == teamOwnerId);
     // 1 is the magic base folder
-    _plumber.message(CurrentDirectory(targetTeam, 1));
+    FileManager().loadBaseFolder(targetTeam);
+  }
+
+  void _fileUpdates(File file) {
+    Plumber().message<File>(file, file.hashCode);
+    var openFileTab = rive.fileTabs.firstWhere(
+        (tab) =>
+            tab.file != null &&
+            tab.file.ownerId == file.fileOwnerId &&
+            tab.file.fileId == file.id,
+        orElse: () => null);
+    if (openFileTab == null) {
+      return;
+    }
+    openFileTab.file.updateName(file.name);
   }
 }

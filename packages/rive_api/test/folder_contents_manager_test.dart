@@ -30,7 +30,9 @@ void main() {
       _plumber = Plumber();
 
       // Set up the 'Me' message.
+      final meDm = getMe();
       final me = Me.fromDM(getMe());
+      final folder = Folder.fromDM(getFolder(meDm));
       _plumber.message<Me>(me);
       _mockedFileApi = MockFileApi();
       _mockedFolderApi = MockFolderApi();
@@ -40,7 +42,7 @@ void main() {
       );
 
       // Load the user's directory
-      _plumber.message<CurrentDirectory>(CurrentDirectory(me, 1));
+      _plumber.message<CurrentDirectory>(CurrentDirectory(me, folder));
 
       // 'Your Files' folder.
       when(_mockedFileApi.myFiles(2, 1)).thenAnswer((_) async {

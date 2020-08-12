@@ -60,7 +60,7 @@ class WebsocketCommsManager with Subscriptions {
       var currentDirectory = Plumber().peek<CurrentDirectory>();
       if (currentDirectory != null &&
           currentDirectory.owner.ownerId == action.folderOwnerId &&
-          currentDirectory.folderId == action.folderId) {
+          currentDirectory.folder.id == action.folderId) {
         Plumber().message(currentDirectory);
       }
     } else if (action is model.TaskCompleted) {
