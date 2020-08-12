@@ -127,15 +127,10 @@ class StageTranslationHandle extends StageHandle {
 
   @override
   List<StageTransformer> makeTransformers() {
+    stage.snapper.lockAxis = computeAxis();
     return [
-      NodeTranslateTransformer(
-        lockAxis: computeAxis(),
-        snap: stage.enableSnappingNotifier,
-      ),
-      JointTranslateTransformer(
-        lockAxis: computeAxis(),
-        snap: stage.enableSnappingNotifier,
-      ),
+      NodeTranslateTransformer(),
+      JointTranslateTransformer(),
     ];
   }
 }

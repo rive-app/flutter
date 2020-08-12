@@ -16,6 +16,15 @@ import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:utilities/restorer.dart';
 
+/// An abstraction allowing a StageItem to mutate the selection prior to
+/// initializing transformers based on some selected handle. For example, a
+/// StageJoint includes the parent bone in the transform selection when the Y
+/// translation handle is selected.
+// ignore: one_member_abstracts
+abstract class TransfomHandleSelectionMutator {
+  void mutateTransformSelection(StageHandle handle, List<StageItem> selection);
+}
+
 abstract class TransformHandleTool extends StageTool
     with DraggableTool, TransformingTool {
   final StageTranslationHandle _translateX;
@@ -88,14 +97,27 @@ abstract class TransformHandleTool extends StageTool
     covariant Iterable<StageItem> selection,
     Vec2D worldMouse,
   ) {
-    // Call the super before messing with hiding things
-    super.startTransformers(selection, worldMouse);
-    for (final transformer in transformers) {
-      if (transformer.hideHandles) {
-        restoreHandles = stage.hideHandles();
-        break;
+    Iterable<StageItem> transformSelection = selection;
+
+    // If a handle was hit, check if there are any StageItems that may want to
+    // mutate the transform selection.
+    if (_transformingHandle != null) {
+      var mutators = selection.whereType<TransfomHandleSelectionMutator>();
+      if (mutators.isNotEmpty) {
+        // The selection handle may want to mutate selection...
+        var mutatedSelection =
+            transformSelection = selection.toList(growable: true);
+        for (final mutator in mutators) {
+          mutator.mutateTransformSelection(
+              _transformingHandle, mutatedSelection);
+        }
       }
+    } else {
+      restoreHandles = stage.hideHandles();
     }
+
+    // Call the super before messing with hiding things
+    super.startTransformers(transformSelection, worldMouse);
   }
 
   @override

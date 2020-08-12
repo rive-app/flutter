@@ -40,11 +40,11 @@ class TranslateTool extends TransformHandleTool {
           // order to allow them to cull nodes from the transformation set
           GradientStopTranslateTransformer(),
 
-          ArtboardTranslateTransformer(snap: stage.enableSnappingNotifier),
+          ArtboardTranslateTransformer(),
 
-          NodeTranslateTransformer(snap: stage.enableSnappingNotifier),
+          NodeTranslateTransformer(),
 
-          JointTranslateTransformer(snap: stage.enableSnappingNotifier),
+          JointTranslateTransformer(),
 
           PathVertexTranslateTransformer(),
         ];

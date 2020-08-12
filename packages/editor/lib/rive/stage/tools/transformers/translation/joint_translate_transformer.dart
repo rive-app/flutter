@@ -1,8 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -19,78 +15,87 @@ import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 
 /// Transformer that translates [StageItem]'s with underlying [Node] components.
 class JointTranslateTransformer extends StageTransformer {
-  JointTranslateTransformer({this.lockAxis, ValueNotifier<bool> snap})
-      : _snap = snap ?? ValueNotifier<bool>(true);
-
-  Iterable<Bone> _bones;
-  final Vec2D lockAxis;
-  Vec2D startMouse;
-  Snapper _snapper;
-
-  /// Should items snap while translating?
-  final ValueNotifier<bool> _snap;
-
-  /// Hide the handles while transforming across both axes, i.e. when not locked
-  /// to one axis
   @override
-  bool get hideHandles => lockAxis == null;
-
-  Map<Bone, Vec2D> boneTips = {};
+  void advance(DragTransformDetails details) {}
 
   @override
-  void advance(DragTransformDetails details) {
-    if (_snap.value) {
-      _snapper.advance(details.world.current, lockAxis: lockAxis);
-      return;
+  void complete() {}
+
+  @override
+  bool init(Set<StageItem> items, DragTransformDetails details) {
+    assert(
+      items.isNotEmpty,
+      'Initializing transformer on an empty set of items',
+    );
+
+    Map<Bone, Bone> boneChildToInclude = {};
+    var bones = <Bone>{};
+    Map<Bone, Vec2D> boneTips = {};
+    for (final item in items) {
+      if (item is StageJoint) {
+        bones.add(item.component);
+      } else if (item is StageBone &&
+          item.component.coreType == BoneBase.typeKey) {
+        bones.add(item.component.parent as Bone);
+        boneChildToInclude[item.component.parent as Bone] = item.component;
+      }
     }
-    // Map<TransformComponent, Mat2D> worldToParents = {};
+    Iterable<Bone> topBones = topComponents(bones);
 
-    // var failedInversion = Mat2D();
-    // First assume we can use artboard level mouse move.
-    var constraintedDelta =
-        Vec2D.subtract(Vec2D(), details.artboardWorld.current, startMouse);
-    if (lockAxis != null) {
-      var d = Vec2D.dot(constraintedDelta, lockAxis);
-      constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
+    if (topBones.isNotEmpty) {
+      for (final bone in topBones) {
+        boneTips[bone] = bone.tipWorldTranslation;
+        bone.forAll((component) {
+          if (component.coreType == BoneBase.typeKey) {
+            var bone = component as Bone;
+            boneTips[bone] = bone.tipWorldTranslation;
+          }
+          return true;
+        });
+      }
+      var snapper = details.artboard.stageItem.stage.snapper;
+
+      snapper.add(
+          bones
+              .map(
+                (bone) => _JointSnappingItem(
+                  bone,
+                  boneChildToInclude[bone],
+                  boneTips,
+                ),
+              )
+              .toList(), (item) {
+        // Filter out components that are not shapes or nodes, or not in the
+        // active artboard
+        final activeArtboard = details.artboard;
+        if (item is StageShape || item is StageNode) {
+          final itemArtboard = (item.component as Component).artboard;
+          return activeArtboard == itemArtboard;
+        }
+        return false;
+      });
+      return true;
     }
-    for (final bone in _bones) {
-      _translateChain(bone, constraintedDelta);
-      //   var delta = constraintedDelta;
-      //   // If it's a node, we have to get into its parent's space as that's where
-      //   // its translation lives.
-
-      //   if (bone.parent is TransformComponent) {
-      //     var parentNode = bone.parent as TransformComponent;
-      //     var parentWorldInverse = worldToParents[parentNode];
-      //     if (parentWorldInverse == null) {
-      //       Mat2D inverse = Mat2D();
-      //       if (!Mat2D.invert(inverse, parentNode.worldTransform)) {
-      //         // If the inversion fails (0 scale?) then set the inverse as a
-      //         // failed inversion so we don't attempt to re-process it.
-      //         worldToParents[parentNode] = failedInversion;
-      //       } else {
-      //         worldToParents[parentNode] = parentWorldInverse = inverse;
-      //       }
-      //     }
-
-      //     // Only process items with valid transform spaces.
-      //     if (parentWorldInverse == null ||
-      //         parentWorldInverse == failedInversion) {
-      //       continue;
-      //     }
-      //     delta = Vec2D.transformMat2(Vec2D(), delta, parentWorldInverse);
-      //   }
-
-      //   var parentTip = Vec2D.transformMat2D(
-      //       Vec2D(), Vec2D.fromValues(bone.length, 0), bone.transform);
-      //   var tip = Vec2D.add(Vec2D(), parentTip, delta);
-
-      //   var diffToBoneStart = Vec2D.subtract(Vec2D(), tip, bone.translation);
-      //   bone.rotation = atan2(diffToBoneStart[1], diffToBoneStart[0]);
-      //   bone.length = Vec2D.length(diffToBoneStart);
-
-    }
+    return false;
   }
+}
+
+class _JointSnappingItem extends SnappingItem {
+  final Bone bone;
+  final Map<Bone, Vec2D> boneTips;
+  final Bone childBone;
+
+  @override
+  Component get component => bone;
+
+  _JointSnappingItem(
+    this.bone,
+    this.childBone,
+    this.boneTips,
+  );
+
+  @override
+  void translateWorld(Vec2D diff) => _translateChain(bone, diff);
 
   void _translateChain(Bone bone, Vec2D worldTranslation) {
     // Translate this bone's tip and figure out rotation and length for this
@@ -125,57 +130,16 @@ class JointTranslateTransformer extends StageTransformer {
   }
 
   @override
-  void complete() {}
-
-  @override
-  bool init(Set<StageItem> items, DragTransformDetails details) {
-    assert(
-      items.isNotEmpty,
-      'Initializing transformer on an empty set of items',
-    );
-    startMouse = details.world.current;
-
-    var bones = <Bone>{};
-    for (final item in items) {
-      if (item is StageJoint) {
-        bones.add(item.component);
-      } else if (item is StageBone &&
-          item.component.coreType == BoneBase.typeKey) {
-        bones.add(item.component.parent as Bone);
-      }
-    }
-    _bones = topComponents(bones);
-
-    if (_bones.isNotEmpty) {
-      for (final bone in _bones) {
-        boneTips[bone] = bone.tipWorldTranslation;
-        bone.forAll((component) {
-          if (component.coreType == BoneBase.typeKey) {
-            var bone = component as Bone;
-            boneTips[bone] = bone.tipWorldTranslation;
-          }
-          return true;
-        });
-      }
-      _snapper = Snapper.build(details.world.current, _bones, (item) {
-        // Filter out components that are not shapes or nodes, or not in the
-        // active artboard
-        final activeArtboard = details.artboard;
-        if (_snap.value && (item is StageShape || item is StageNode)) {
-          final itemArtboard = (item.component as Component).artboard;
-          return activeArtboard == itemArtboard;
-        }
-        return false;
-      });
-      return true;
-    }
-    return false;
-  }
-
-  @override
-  void draw(Canvas canvas) {
-    if (_snap.value) {
-      _snapper?.draw(canvas);
+  void addSources(SnappingAxes snap, bool isSingleSelection) {
+    snap.addVec(Mat2D.getTranslation(
+      bone.artboard.transform(bone.tipWorldTransform),
+      Vec2D(),
+    ));
+    if (childBone != null) {
+      snap.addVec(Mat2D.getTranslation(
+        childBone.artboard.transform(childBone.tipWorldTransform),
+        Vec2D(),
+      ));
     }
   }
 }

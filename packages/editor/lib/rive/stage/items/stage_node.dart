@@ -18,7 +18,7 @@ class StageNode extends HideableStageItem<Node>
         StageDrawPass(
           draw,
           inWorldSpace: true,
-          order: 2,
+          order: 3,
         )
       ];
 

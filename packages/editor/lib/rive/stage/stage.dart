@@ -46,6 +46,7 @@ import 'package:rive_editor/rive/stage/items/stage_radial_gradient.dart';
 import 'package:rive_editor/rive/stage/items/stage_rectangle.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/items/stage_triangle.dart';
+import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
@@ -137,6 +138,10 @@ class Stage extends Debouncer {
   /// all drag events are ignored until the drag operation is ended (e.g. on
   /// mouse up)
   bool _dragInError = false;
+
+  /// The snapping context for the current drag operation.
+  Snapper _snapper;
+  Snapper get snapper => _snapper ??= Snapper(this, _worldMouse);
 
   /// Register a selection handler that will be called back whenever an item is
   /// clicked on the stage.
@@ -610,7 +615,13 @@ class Stage extends Debouncer {
           dragTool = tool;
           (dragTool as TransformingTool).startTransformers(
               file.selection.items.whereType<StageItem>(), _worldMouse);
+          // If a snapping context was created by the transformers, initialize
+          // it.
+          if (_snapper != null) {
+            _snapper.init();
+          }
         } else {
+          _snapper?.advance(_worldMouse, enableSnapping);
           (_dragTool as TransformingTool).advanceTransformers(_worldMouse);
         }
       }
@@ -699,6 +710,7 @@ class Stage extends Debouncer {
       if (_dragTool is TransformingTool) {
         (_dragTool as TransformingTool).completeTransformers();
         toolCompleted = true;
+        _snapper = null;
       }
       if (_dragTool is DraggableTool) {
         (_dragTool as DraggableTool).endDrag();
@@ -1214,6 +1226,7 @@ class Stage extends Debouncer {
     if (inWorldSpace) {
       canvas.restore();
     }
+    _snapper?.draw(canvas);
     canvas.restore();
   }
 
