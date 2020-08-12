@@ -15,10 +15,9 @@ import 'package:rive_editor/rive/stage/tools/transform_handle_tool.dart';
 class StageJoint extends StageItem<Bone>
     implements StageTransformable, TransfomHandleSelectionMutator {
   static const double hitRadius = BoneJointRenderer.radius + 3;
-  static const double minJointZoom = 0.5;
   static const double hitRadiusSquared = hitRadius * hitRadius;
   static const double _maxWorldJointSize =
-      BoneJointRenderer.radius / minJointZoom;
+      BoneJointRenderer.radius / BoneJointRenderer.minJointScale;
   Vec2D _worldTranslation;
 
   set worldTranslation(Vec2D value) {
@@ -37,8 +36,8 @@ class StageJoint extends StageItem<Bone>
   @override
   bool hitHiFi(Vec2D worldMouse) {
     var zoom = stage.viewZoom;
-    if (zoom < minJointZoom) {
-      zoom /= minJointZoom;
+    if (zoom < BoneJointRenderer.minJointScale) {
+      zoom /= BoneJointRenderer.minJointScale;
     }
     return Vec2D.squaredDistance(worldMouse, _worldTranslation) <=
         hitRadiusSquared / (zoom * zoom);
@@ -56,11 +55,7 @@ class StageJoint extends StageItem<Bone>
     canvas.save();
     canvas.translate(screen[0], screen[1]);
 
-    if (stage.viewZoom < minJointZoom) {
-      canvas.scale(stage.viewZoom / minJointZoom);
-    }
-
-    BoneJointRenderer.draw(canvas, selectionState.value);
+    BoneJointRenderer.draw(canvas, selectionState.value, stage.viewZoom);
     canvas.restore();
     // drawBounds(canvas, pass);
   }

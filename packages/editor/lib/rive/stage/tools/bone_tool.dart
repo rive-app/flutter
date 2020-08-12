@@ -19,6 +19,7 @@ import 'package:utilities/restorer.dart';
 // ignore: avoid_classes_with_only_static_members
 class BoneJointRenderer {
   static const double radius = 3.5;
+  static const double minJointScale = 0.5;
   static Path path = Path()
     ..addOval(const Rect.fromLTRB(
       -radius,
@@ -44,7 +45,7 @@ class BoneJointRenderer {
     ..color = const Color(0xFFFFFFFF)
     ..strokeWidth = 2;
 
-  static void draw(Canvas canvas, SelectionState state) {
+  static void draw(Canvas canvas, SelectionState state, double viewZoom) {
     Paint renderStroke, renderFill;
     switch (state) {
       case SelectionState.hovered:
@@ -59,6 +60,10 @@ class BoneJointRenderer {
         renderStroke = stroke;
         renderFill = fill;
         break;
+    }
+
+    if (viewZoom < BoneJointRenderer.minJointScale) {
+      canvas.scale(viewZoom / BoneJointRenderer.minJointScale);
     }
     canvas.drawPath(path, renderStroke);
     canvas.drawPath(path, renderFill);
@@ -287,7 +292,7 @@ class BoneTool extends StageTool {
     canvas.save();
     canvas.translate(
         _ghostPointScreen[0].round() + 0.5, _ghostPointScreen[1].round() + 0.5);
-    BoneJointRenderer.draw(canvas, SelectionState.none);
+    BoneJointRenderer.draw(canvas, SelectionState.none, stage.viewZoom);
     canvas.restore();
 
     if (undidToStart) {
@@ -304,7 +309,9 @@ class BoneTool extends StageTool {
       canvas.save();
       canvas.translate(
           firstJointScreen[0].round() + 0.5, firstJointScreen[1].round() + 0.5);
-      BoneJointRenderer.draw(canvas, SelectionState.selected);
+      canvas.save();
+      BoneJointRenderer.draw(canvas, SelectionState.selected, stage.viewZoom);
+      canvas.restore();
 
       var diff = Vec2D.subtract(Vec2D(), _ghostPointScreen, firstJointScreen);
       var angle = atan2(diff[1], diff[0]);
