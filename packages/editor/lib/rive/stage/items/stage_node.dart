@@ -4,19 +4,21 @@ import 'dart:ui';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_hideable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 /// A Node component as it's drawn on the stage.
-class StageNode extends HideableStageItem<Node> with BoundsDelegate {
+class StageNode extends HideableStageItem<Node>
+    with BoundsDelegate, StageTransformableComponent<Node> {
   @override
   Iterable<StageDrawPass> get drawPasses => [
         StageDrawPass(
           draw,
           inWorldSpace: true,
-          order: 2,
+          order: 3,
         )
       ];
 
@@ -35,6 +37,7 @@ class StageNode extends HideableStageItem<Node> with BoundsDelegate {
   @override
   bool intersectsRect(Float32List rectPoly) => true;
 
+  @override
   void draw(Canvas canvas, StageDrawPass pass) {
     // TODO: make this efficient
     final state = selectionState.value;

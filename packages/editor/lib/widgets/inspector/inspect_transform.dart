@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
@@ -11,19 +12,20 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
   bool _isScaleLinked = false;
   @override
   bool validate(InspectionSet inspecting) =>
-      inspecting.intersectingCoreTypes.contains(NodeBase.typeKey);
+      inspecting.intersectingCoreTypes.contains(TransformComponentBase.typeKey);
 
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) {
     return [
-      (context) => PropertyDual<double>(
-            name: 'Position',
-            objects: inspecting.components,
-            propertyKeyA: NodeBase.xPropertyKey,
-            propertyKeyB: NodeBase.yPropertyKey,
-            labelA: 'X',
-            labelB: 'Y',
-          ),
+      if (inspecting.intersectingCoreTypes.contains(NodeBase.typeKey))
+        (context) => PropertyDual<double>(
+              name: 'Position',
+              objects: inspecting.components,
+              propertyKeyA: NodeBase.xPropertyKey,
+              propertyKeyB: NodeBase.yPropertyKey,
+              labelA: 'X',
+              labelB: 'Y',
+            ),
       (context) => PropertyDual<double>(
             name: 'Scale',
             linkable: true,
@@ -33,15 +35,15 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
               notifyListeners();
             },
             objects: inspecting.components,
-            propertyKeyA: NodeBase.scaleXPropertyKey,
-            propertyKeyB: NodeBase.scaleYPropertyKey,
+            propertyKeyA: TransformComponentBase.scaleXPropertyKey,
+            propertyKeyB: TransformComponentBase.scaleYPropertyKey,
             labelA: 'X',
             labelB: 'Y',
           ),
       (context) => PropertySingle<double>(
             name: 'Rotate',
             objects: inspecting.components,
-            propertyKey: NodeBase.rotationPropertyKey,
+            propertyKey: TransformComponentBase.rotationPropertyKey,
           ),
 
       // If the inspection set has all parametric paths, show the width/height

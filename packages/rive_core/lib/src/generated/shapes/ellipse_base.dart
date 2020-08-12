@@ -7,6 +7,7 @@ import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
 import 'package:rive_core/src/generated/shapes/parametric_path_base.dart';
 import 'package:rive_core/src/generated/shapes/path_base.dart';
+import 'package:rive_core/src/generated/transform_component_base.dart';
 
 abstract class EllipseBase extends ParametricPath {
   static const int typeKey = 4;
@@ -18,6 +19,7 @@ abstract class EllipseBase extends ParametricPath {
         ParametricPathBase.typeKey,
         PathBase.typeKey,
         NodeBase.typeKey,
+        TransformComponentBase.typeKey,
         ContainerComponentBase.typeKey,
         ComponentBase.typeKey
       };

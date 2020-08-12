@@ -8,10 +8,13 @@ import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/joint_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/node_translate_transformer.dart';
 import 'package:rive_editor/selectable_item.dart';
 
 class StageTranslationHandle extends StageHandle {
+  @override
+  final int transformType;
   final Vec2D direction;
   final Paint paint = Paint()
     ..style = PaintingStyle.stroke
@@ -46,7 +49,7 @@ class StageTranslationHandle extends StageHandle {
       selectionThreshold * selectionThreshold;
   static const minScaleCorrection = 1 / Stage.minZoom;
   static const double halfSelectionThreshold = selectionThreshold / 2;
-  StageTranslationHandle({Color color, this.direction}) {
+  StageTranslationHandle({Color color, this.direction, this.transformType}) {
     paint.color = color;
   }
 
@@ -124,11 +127,10 @@ class StageTranslationHandle extends StageHandle {
 
   @override
   List<StageTransformer> makeTransformers() {
+    stage.snapper.lockAxis = computeAxis();
     return [
-      NodeTranslateTransformer(
-        lockAxis: computeAxis(),
-        snap: stage.enableSnappingNotifier,
-      ),
+      NodeTranslateTransformer(),
+      JointTranslateTransformer(),
     ];
   }
 }

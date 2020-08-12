@@ -9,10 +9,6 @@ abstract class StageTransformer {
   void advance(DragTransformDetails details);
   void complete();
 
-  /// Return true in implementing classes to hide any handles while the
-  /// transformer is active
-  bool get hideHandles => false;
-
   void draw(Canvas canvas) {}
 
   Iterable<T> topComponents<T extends Component>(Iterable<T> items) => utils

@@ -3,7 +3,6 @@ import 'package:core/debounce.dart';
 /// Show/hide a stage item based on a boolean value notifier
 
 import 'package:flutter/foundation.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
@@ -37,12 +36,12 @@ class HideableStageItem<T> extends StageItem<T> {
 
   /// Bind the notifier to the stage's notifier
   void _bindNotifier(Stage stage) {
-    if (T == Node) {
-      isShownNotifier = stage.showNodesNotifier;
-      isShownNotifier.addListener(_changeHidden);
-    } else {
-      assert(false, 'Type "$T" is not a supported hideable stage type');
-    }
+    // if (T == TransformComponent) {
+    isShownNotifier = stage.showNodesNotifier;
+    isShownNotifier.addListener(_changeHidden);
+    // } else {
+    //   assert(false, 'Type "$T" is not a supported hideable stage type');
+    // }
   }
 
   void _unhide() {

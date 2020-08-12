@@ -388,6 +388,9 @@ abstract class Component extends ComponentBase<RiveFile>
   final Set<VoidCallback> _whenRemoved = {};
   bool whenRemoved(VoidCallback callback) => _whenRemoved.add(callback);
 
+  bool cancelWhenRemoved(VoidCallback callback) =>
+      _whenRemoved.remove(callback);
+
   int computeDepth() {
     int depth = 0;
     for (Component current = parent;

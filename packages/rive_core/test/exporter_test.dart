@@ -10,6 +10,7 @@ import 'package:rive_core/animation/loop.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
@@ -181,17 +182,17 @@ void main() {
       var keyedObject = animation.makeKeyed(a);
 
       // Start keying rotation
-      keyedObject.makeKeyed(NodeBase.rotationPropertyKey);
+      keyedObject.makeKeyed(TransformComponentBase.rotationPropertyKey);
 
       // Add keyframe at 0 frames with value of 0
       a
           .addKeyFrame<KeyFrameDouble>(
-              animation, NodeBase.rotationPropertyKey, 0)
+              animation, TransformComponentBase.rotationPropertyKey, 0)
           .value = 0;
       // Add keyframe at 60 frames (1 second) with value of 2 pi (360)
       a
           .addKeyFrame<KeyFrameDouble>(
-              animation, NodeBase.rotationPropertyKey, 60)
+              animation, TransformComponentBase.rotationPropertyKey, 60)
           .value = 2 * pi;
 
       exportFrom.captureJournalEntry();

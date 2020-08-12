@@ -8,6 +8,7 @@ import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
 import 'package:rive_core/src/generated/shapes/path_base.dart';
+import 'package:rive_core/src/generated/transform_component_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
 abstract class PointsPathBase extends Path {
@@ -19,6 +20,7 @@ abstract class PointsPathBase extends Path {
         PointsPathBase.typeKey,
         PathBase.typeKey,
         NodeBase.typeKey,
+        TransformComponentBase.typeKey,
         ContainerComponentBase.typeKey,
         ComponentBase.typeKey
       };

@@ -6,13 +6,14 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
+import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 
 abstract class StagePath<T extends core.Path> extends StageItem<T>
-    with BoundsDelegate {
+    with BoundsDelegate, StageTransformableComponent<T> {
   @override
   void addedToStage(Stage stage) {
     super.addedToStage(stage);

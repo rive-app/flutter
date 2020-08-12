@@ -1,12 +1,12 @@
 import 'dart:ui';
 
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/selection_context.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_rotation_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_scale_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_translation_handle.dart';
+import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/draggable_tool.dart';
@@ -15,6 +15,15 @@ import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:utilities/restorer.dart';
+
+/// An abstraction allowing a StageItem to mutate the selection prior to
+/// initializing transformers based on some selected handle. For example, a
+/// StageJoint includes the parent bone in the transform selection when the Y
+/// translation handle is selected.
+// ignore: one_member_abstracts
+abstract class TransfomHandleSelectionMutator {
+  void mutateTransformSelection(StageHandle handle, List<StageItem> selection);
+}
 
 abstract class TransformHandleTool extends StageTool
     with DraggableTool, TransformingTool {
@@ -32,12 +41,14 @@ abstract class TransformHandleTool extends StageTool
             ? StageTranslationHandle(
                 color: const Color(0xFF16E7B3),
                 direction: Vec2D.fromValues(1, 0),
+                transformType: TransformFlags.x,
               )
             : null,
         _translateY = hasTranslationHandles
             ? StageTranslationHandle(
                 color: const Color(0xFFFF929F),
                 direction: Vec2D.fromValues(0, -1),
+                transformType: TransformFlags.y,
               )
             : null,
         _rotation =
@@ -46,12 +57,14 @@ abstract class TransformHandleTool extends StageTool
             ? StageScaleHandle(
                 color: const Color(0xFF16E7B3),
                 direction: Vec2D.fromValues(1, 0),
+                transformType: TransformFlags.scaleX,
               )
             : null,
         _scaleY = hasScaleHandles
             ? StageScaleHandle(
                 color: const Color(0xFFFF929F),
                 direction: Vec2D.fromValues(0, -1),
+                transformType: TransformFlags.scaleY,
               )
             : null;
 
@@ -60,7 +73,7 @@ abstract class TransformHandleTool extends StageTool
   bool get showScaleHandle => true;
 
   SelectionContext<SelectableItem> _selectionContext;
-  Set<Node> _nodes = {};
+  StageTransformable _transformable;
 
   /// Tracks hidden handles that should be restored when transformers complete
   Restorer restoreHandles;
@@ -84,14 +97,27 @@ abstract class TransformHandleTool extends StageTool
     covariant Iterable<StageItem> selection,
     Vec2D worldMouse,
   ) {
-    // Call the super before messing with hiding things
-    super.startTransformers(selection, worldMouse);
-    for (final transformer in transformers) {
-      if (transformer.hideHandles) {
-        restoreHandles = stage.hideHandles();
-        break;
+    Iterable<StageItem> transformSelection = selection;
+
+    // If a handle was hit, check if there are any StageItems that may want to
+    // mutate the transform selection.
+    if (_transformingHandle != null) {
+      var mutators = selection.whereType<TransfomHandleSelectionMutator>();
+      if (mutators.isNotEmpty) {
+        // The selection handle may want to mutate selection...
+        var mutatedSelection =
+            transformSelection = selection.toList(growable: true);
+        for (final mutator in mutators) {
+          mutator.mutateTransformSelection(
+              _transformingHandle, mutatedSelection);
+        }
       }
+    } else {
+      restoreHandles = stage.hideHandles();
     }
+
+    // Call the super before messing with hiding things
+    super.startTransformers(transformSelection, worldMouse);
   }
 
   @override
@@ -129,43 +155,40 @@ abstract class TransformHandleTool extends StageTool
   }
 
   void _selectionChanged() {
-    var nodes = <Node>{};
-    for (final item in _selectionContext.items) {
-      if (item is StageItem && item.component is Node) {
-        nodes.add(item.component as Node);
-      }
-    }
-    _setSelection(nodes);
+    _setSelection(
+        _selectionContext.items.whereType<StageTransformable>().toSet());
   }
 
-  void _addHandle(StageItem handle) {
-    if (handle == null) {
+  void _addHandle(StageHandle handle) {
+    if (handle == null ||
+        (_transformable.transformFlags & handle.transformType) !=
+            handle.transformType) {
+      _removeHandle(handle);
       return;
     }
     stage.addItem(handle);
   }
 
-  void _removeHandle(StageItem handle) {
+  void _removeHandle(StageHandle handle) {
     if (handle == null) {
       return;
     }
     stage.removeItem(handle);
   }
 
-  void _setSelection(Set<Node> nodes) {
-    // TODO: check equals with IterableEquals to avoid recompute?
-    for (final node in _nodes) {
-      node.worldTransformChanged.removeListener(_selectionChanged);
-    }
+  void _setSelection(Set<StageTransformable> transformables) {
+    _transformable?.worldTransformChanged
+        ?.removeListener(_selectionTransformChanged);
 
-    _nodes = nodes;
-    if (nodes.isEmpty || stage.isHidingHandles) {
+    if (transformables.isEmpty || stage.isHidingHandles) {
+      _transformable = null;
       _removeHandle(_translateX);
       _removeHandle(_translateY);
       _removeHandle(_rotation);
       _removeHandle(_scaleX);
       _removeHandle(_scaleY);
     } else {
+      _transformable = transformables.first;
       _addHandle(_translateX);
       _addHandle(_translateY);
       _addHandle(_rotation);
@@ -175,18 +198,17 @@ abstract class TransformHandleTool extends StageTool
       _computeHandleTransform();
     }
 
-    for (final node in nodes) {
-      node.worldTransformChanged.addListener(_selectionTransformChanged);
-    }
+    _transformable?.worldTransformChanged
+        ?.addListener(_selectionTransformChanged);
   }
 
   void _computeHandleTransform() {
-    if (_nodes.isEmpty) {
+    if (_transformable == null) {
       return;
     }
-    var first = _nodes.first;
-    var transform = first.worldTransform;
-    var renderTransform = first.artboard.transform(transform);
+
+    var transform = _transformable.worldTransform;
+    var renderTransform = _transformable.renderTransform;
     _translateX?.setTransform(transform, renderTransform);
     _translateY?.setTransform(transform, renderTransform);
     _rotation?.setTransform(transform, renderTransform);

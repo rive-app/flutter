@@ -34,6 +34,7 @@ import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/artboard_tool.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
+import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
 import 'package:rive_editor/rive/stage/tools/ellipse_tool.dart';
 import 'package:rive_editor/rive/stage/tools/node_tool.dart';
 import 'package:rive_editor/rive/stage/tools/rectangle_tool.dart';
@@ -588,6 +589,10 @@ class OpenFileContext with RiveFileDelegate {
 
       case ShortcutAction.penTool:
         stage?.tool = VectorPenTool.instance;
+        return true;
+
+      case ShortcutAction.boneTool:
+        stage?.tool = BoneTool.instance;
         return true;
 
       case ShortcutAction.rectangleTool:

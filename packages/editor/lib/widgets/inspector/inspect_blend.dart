@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/drawable.dart';
-import 'package:rive_core/node.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
 import 'package:rive_editor/widgets/common/core_combo_box.dart';
 import 'package:rive_editor/widgets/common/inspector_row.dart';
@@ -39,7 +39,7 @@ List<BlendMode> displayBlendModes = [
 class BlendInspectorBuilder extends ListenableInspectorBuilder {
   @override
   bool validate(InspectionSet inspecting) =>
-      inspecting.intersectingCoreTypes.contains(NodeBase.typeKey);
+      inspecting.intersectingCoreTypes.contains(TransformComponentBase.typeKey);
 
   @override
   List<WidgetBuilder> expand(InspectionSet inspecting) {
@@ -83,7 +83,7 @@ class BlendInspectorBuilder extends ListenableInspectorBuilder {
       (context) => PropertyDual<double>(
             name: '',
             objects: inspecting.components,
-            propertyKeyA: NodeBase.opacityPropertyKey,
+            propertyKeyA: TransformComponentBase.opacityPropertyKey,
             labelA: 'Opacity',
             propertyKeyB: null,
           )

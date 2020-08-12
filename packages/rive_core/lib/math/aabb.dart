@@ -56,8 +56,13 @@ class AABB {
     var transformedPoint = transform == null
         ? point
         : Vec2D.transformMat2D(Vec2D(), point, transform);
-    var x = transformedPoint[0];
-    var y = transformedPoint[1];
+    expandToPoint(transformedPoint);
+    return transformedPoint;
+  }
+
+  void expandToPoint(Vec2D point) {
+    var x = point[0];
+    var y = point[1];
     if (x < _buffer[0]) {
       _buffer[0] = x;
     }
@@ -70,7 +75,6 @@ class AABB {
     if (y > _buffer[3]) {
       _buffer[3] = y;
     }
-    return transformedPoint;
   }
 
   AABB.fromMinMax(Vec2D min, Vec2D max) {

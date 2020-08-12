@@ -1,5 +1,6 @@
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
@@ -17,9 +18,9 @@ InputValueConverter<T> converterForProperty<T>(int propertyKey) {
   switch (propertyKey) {
     case GradientStopBase.positionPropertyKey:
     case LinearGradientBase.opacityPropertyKey:
-    case NodeBase.opacityPropertyKey:
+    case TransformComponentBase.opacityPropertyKey:
       return ClampedPercentageInputConverter.instance as InputValueConverter<T>;
-    case NodeBase.rotationPropertyKey:
+    case TransformComponentBase.rotationPropertyKey:
     case CubicAsymmetricVertexBase.rotationPropertyKey:
     case CubicDetachedVertexBase.inRotationPropertyKey:
     case CubicDetachedVertexBase.outRotationPropertyKey:
@@ -29,14 +30,12 @@ InputValueConverter<T> converterForProperty<T>(int propertyKey) {
     case ArtboardBase.yPropertyKey:
     case NodeBase.xPropertyKey:
     case NodeBase.yPropertyKey:
-      return TranslationValueConverter.instance
-          as InputValueConverter<T>;
-    case NodeBase.scaleXPropertyKey:
-    case NodeBase.scaleYPropertyKey:
+      return TranslationValueConverter.instance as InputValueConverter<T>;
+    case TransformComponentBase.scaleXPropertyKey:
+    case TransformComponentBase.scaleYPropertyKey:
       return ScalePercentageValueConverter.instance as InputValueConverter<T>;
 
     default:
-      return TranslationValueConverter.instance
-          as InputValueConverter<T>;
+      return TranslationValueConverter.instance as InputValueConverter<T>;
   }
 }

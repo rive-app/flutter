@@ -63,6 +63,9 @@ const password = 'cyLqEUmuV9BmLHsKRQtV';
     if (exportButton) {
         await exportButton.click();
     }
+    else {
+        console.log("Couldn't find an export button...");
+    }
 
     // This starts processing the export.
     console.log('exporting...');

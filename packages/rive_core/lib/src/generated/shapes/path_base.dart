@@ -5,6 +5,7 @@ import 'package:rive_core/node.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
+import 'package:rive_core/src/generated/transform_component_base.dart';
 
 abstract class PathBase extends Node {
   static const int typeKey = 12;
@@ -14,6 +15,7 @@ abstract class PathBase extends Node {
   Set<int> get coreTypes => {
         PathBase.typeKey,
         NodeBase.typeKey,
+        TransformComponentBase.typeKey,
         ContainerComponentBase.typeKey,
         ComponentBase.typeKey
       };
