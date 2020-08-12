@@ -199,7 +199,7 @@ void main() {
   group('Files', () {
     test('get user files', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.get('/api/my/files/a-z/rive/1'))
+      when(riveApi.get('/api/my/files/recent/rive/1'))
           .thenAnswer((_) async => successFilesResponse);
       final mockApi = FileApi(riveApi);
       final me = getMe();
@@ -237,7 +237,7 @@ void main() {
 
     test('get team files', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.get('/api/teams/3/files/a-z/rive/1'))
+      when(riveApi.get('/api/teams/3/files/recent/rive/1'))
           .thenAnswer((_) async => successFilesResponse);
       final mockApi = FileApi(riveApi);
       final team = getTeam();

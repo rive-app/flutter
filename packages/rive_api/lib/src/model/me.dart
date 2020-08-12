@@ -52,6 +52,8 @@ class Me extends User {
         isFirstRun: me?.isFirstRun,
       );
 
+  // Me.isEmpty is currently neccessary to hold onto 'social links'
+  // during the sign up process
   bool get isEmpty => ownerId == null;
 
   @override

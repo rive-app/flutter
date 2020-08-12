@@ -326,9 +326,38 @@ class FollowNotificationWidget extends StatelessWidget {
   }
 }
 
-class TeamInviteNotificationWidget extends StatelessWidget {
+class TeamInviteNotificationWidget extends StatefulWidget {
   const TeamInviteNotificationWidget(this.notification);
   final model.TeamInviteNotification notification;
+
+  @override
+  _TeamInviteNotificationWidgetState createState() =>
+      _TeamInviteNotificationWidgetState();
+}
+
+class _TeamInviteNotificationWidgetState
+    extends State<TeamInviteNotificationWidget> {
+  bool activity = false;
+
+  void _accept() {
+    if (activity == true) {
+      return;
+    }
+    setState(() {
+      activity = true;
+    });
+    NotificationManager().acceptTeamInvite(widget.notification);
+  }
+
+  void _reject() {
+    if (activity == true) {
+      return;
+    }
+    setState(() {
+      activity = true;
+    });
+    NotificationManager().declineTeamInvite(widget.notification);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -342,7 +371,7 @@ class TeamInviteNotificationWidget extends StatelessWidget {
               RichText(
                 text: TextSpan(children: [
                   TextSpan(
-                    text: notification.senderName,
+                    text: widget.notification.senderName,
                     style: theme.textStyles.notificationTitle,
                   ),
                   TextSpan(
@@ -350,7 +379,7 @@ class TeamInviteNotificationWidget extends StatelessWidget {
                     style: theme.textStyles.fileLightGreyText,
                   ),
                   TextSpan(
-                    text: notification.teamName,
+                    text: widget.notification.teamName,
                     style: theme.textStyles.notificationTitle,
                   ),
                   TextSpan(
@@ -369,7 +398,7 @@ class TeamInviteNotificationWidget extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    '${notification.dateTime.howLongAgo}',
+                    '${widget.notification.dateTime.howLongAgo}',
                     style: theme.textStyles.tooltipDisclaimer,
                   ),
                 ],
@@ -385,38 +414,47 @@ class TeamInviteNotificationWidget extends StatelessWidget {
               diameter: 50,
               borderWidth: 0,
               padding: 0,
-              imageUrl: notification.avatarUrl,
-              name: notification.teamName,
-              color: StageCursor.colorFromPalette(notification.teamId),
+              imageUrl: widget.notification.avatarUrl,
+              name: widget.notification.teamName,
+              color: StageCursor.colorFromPalette(widget.notification.teamId),
             ),
           ),
         ),
-        SizedBox(
-          width: 93,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FlatIconButton(
-                label: 'Accept',
-                color: theme.colors.commonDarkGrey,
-                textColor: Colors.white,
-                mainAxisAlignment: MainAxisAlignment.center,
-                elevation: flatButtonIconElevation,
-                onTap: () =>
-                    NotificationManager().acceptTeamInvite(notification),
-              ),
-              const SizedBox(height: 10),
-              FlatIconButton(
-                label: 'Dismiss',
-                color: theme.colors.buttonLight,
-                mainAxisAlignment: MainAxisAlignment.center,
-                textColor: theme.colors.commonButtonTextColorDark,
-                onTap: () =>
-                    NotificationManager().declineTeamInvite(notification),
-              ),
-            ],
+        if (activity)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 17.0),
+            child: SizedBox(
+                width: 93, child: Center(child: CircularProgressIndicator())),
           ),
-        ),
+        if (!activity)
+          SizedBox(
+            width: 93,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FlatIconButton(
+                  label: 'Accept',
+                  color: activity
+                      ? theme.colors.commonLightGrey
+                      : theme.colors.commonDarkGrey,
+                  textColor: Colors.white,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  elevation: flatButtonIconElevation,
+                  onTap: _accept,
+                ),
+                const SizedBox(height: 10),
+                FlatIconButton(
+                  label: 'Dismiss',
+                  color: activity
+                      ? theme.colors.commonLightGrey
+                      : theme.colors.buttonLight,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  textColor: theme.colors.commonButtonTextColorDark,
+                  onTap: _reject,
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }

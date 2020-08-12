@@ -6,8 +6,11 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart' as model;
 import 'package:rive_api/plumber.dart';
 import 'package:rive_api/rive_api.dart';
+import 'package:rive_editor/rive/rive.dart';
 
-const pollDuration = Duration(minutes: 2);
+// we really dont need to do this much. this only really is useful if we
+// lost our websocket comms right when we got a notification
+const pollInterval = Duration(minutes: 10);
 
 /// State manager for notifications
 class NotificationManager with Subscriptions {
@@ -50,7 +53,7 @@ class NotificationManager with Subscriptions {
 
   void _poll() {
     _poller = Timer.periodic(
-      pollDuration,
+      pollInterval,
       (t) => _fetchNotifications(),
     );
   }
@@ -122,6 +125,12 @@ class NotificationManager with Subscriptions {
   }
 
   Future<void> update() async {
-    await _fetchNotifications();
+    // if we update and are already on the home section
+    // we may as well mark the notificatinos as read, as we've just read them.
+    if (Plumber().peek<HomeSection>() == HomeSection.notifications) {
+      await markNotificationsRead();
+    } else {
+      await _fetchNotifications();
+    }
   }
 }

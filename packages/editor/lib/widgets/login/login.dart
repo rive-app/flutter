@@ -93,7 +93,7 @@ class _LoginState extends State<Login> {
       inviteValidator,
     ]);
     var currentMe = Plumber().peek<Me>();
-    if (currentMe.socialLink != null) {
+    if (currentMe?.socialLink != null) {
       _currentPanel = LoginPage.link;
     } else {
       // Defaulting to registration panel for the moment

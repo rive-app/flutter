@@ -48,8 +48,8 @@ class FolderTreeManager with Subscriptions {
     if (_me != null && me != _me) {
       _clearControllers();
     }
-    if (!me.isEmpty) {
-      _me = me;
+    _me = me;
+    if (me != null && !me.isEmpty) {
       _initFolderTree(me);
       subscribe<List<Folder>>(_handleNewTeamFolders(me), me.hashCode);
       _publishFolderTreeControllers();

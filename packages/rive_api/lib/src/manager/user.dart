@@ -87,8 +87,11 @@ class UserManager with Subscriptions {
   }
 
   void logout() {
-    var emptyMe = Me.fromDM(null);
-    _plumber.message<Me>(emptyMe);
+    // Its important to flush the appstate first
+    // as certain states expect resources to have been loaded.
+    _plumber.flush<AppState>();
+    _plumber.flushAll();
+    _plumber.message(AppState.login);
   }
 
   Future<bool> signout(bool isWeb) async {
