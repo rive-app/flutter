@@ -13,7 +13,6 @@ import 'package:rive_editor/rive/stage/items/stage_joint.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
-import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:utilities/restorer.dart';
 
