@@ -7,7 +7,6 @@ class Profile {
     this.name,
     this.username,
     this.email,
-    this.avatar,
     this.website,
     this.bio,
     this.location,
@@ -25,7 +24,6 @@ class Profile {
   final String name;
   final String username;
   final String email;
-  final String avatar;
   final String website;
   final String bio;
   final String location;
@@ -43,7 +41,6 @@ class Profile {
         name: profile?.name,
         username: profile?.username,
         email: profile?.email,
-        avatar: profile?.avatar,
         website: profile?.website,
         bio: profile?.bio,
         location: profile?.location,
@@ -62,7 +59,6 @@ class Profile {
         name: name,
         username: username,
         email: email,
-        avatar: avatar,
         website: website,
         bio: bio,
         location: location,
@@ -78,30 +74,28 @@ class Profile {
       );
 
   String get encoded => jsonEncode({
-      'name': name,
-      'username': username,
-      'email': email,
-      'location': location,
-      'avatar': avatar,
-      'website': website,
-      'blurb': bio,
-      'twitter': twitter,
-      'instagram': instagram,
-      'dribbble': dribbble,
-      'linkedin': linkedin,
-      'behance': behance,
-      'vimeo': vimeo,
-      'github': github,
-      'medium': medium,
-      'isForHire': isForHire
-    });
+        'name': name,
+        'username': username,
+        'email': email,
+        'location': location,
+        'website': website,
+        'blurb': bio,
+        'twitter': twitter,
+        'instagram': instagram,
+        'dribbble': dribbble,
+        'linkedin': linkedin,
+        'behance': behance,
+        'vimeo': vimeo,
+        'github': github,
+        'medium': medium,
+        'isForHire': isForHire
+      });
 
   @override
   String toString() => "name: $name\n"
       "username: $username\n"
       "email: $email\n"
       "location: $location\n"
-      "avatar: $avatar\n"
       "website: $website\n"
       "bio: $bio\n"
       "twitter: $twitter\n"
