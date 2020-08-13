@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -21,6 +22,8 @@ class StageJoint extends StageItem<Bone>
       BoneJointRenderer.radius / BoneJointRenderer.minJointScale;
   Vec2D _worldTranslation;
 
+  final Event _jointTransformChanged = Event();
+
   set worldTranslation(Vec2D value) {
     _worldTranslation = value;
     aabb = AABB.fromValues(
@@ -29,6 +32,7 @@ class StageJoint extends StageItem<Bone>
       _worldTranslation[0] + _maxWorldJointSize,
       _worldTranslation[1] + _maxWorldJointSize,
     );
+    _jointTransformChanged.notify();
     stage?.updateBounds(this);
   }
 
@@ -54,7 +58,7 @@ class StageJoint extends StageItem<Bone>
         Vec2D.transformMat2D(Vec2D(), _worldTranslation, stage.viewTransform);
 
     canvas.save();
-    canvas.translate(screen[0], screen[1]);
+    canvas.translate(screen[0].round() + 0.5, screen[1].round() + 0.5);
 
     BoneJointRenderer.draw(canvas, selectionState.value, stage.viewZoom);
     canvas.restore();
@@ -69,7 +73,7 @@ class StageJoint extends StageItem<Bone>
   Mat2D get worldTransform => component.tipWorldTransform;
 
   @override
-  Listenable get worldTransformChanged => component.worldTransformChanged;
+  Listenable get worldTransformChanged => _jointTransformChanged;
 
   @override
   int get transformFlags {
