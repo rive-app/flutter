@@ -6,7 +6,7 @@ import 'package:rive_api/plumber.dart';
 typedef SubscribeCallback<T> = void Function(T);
 
 mixin Subscriptions {
-  List<StreamSubscription> subscriptions;
+  Set<StreamSubscription> subscriptions;
 
   @mustCallSuper
   void dispose() {
@@ -14,10 +14,16 @@ mixin Subscriptions {
     subscriptions.clear();
   }
 
-  void subscribe<T>(SubscribeCallback<T> action, [int id]) {
-    subscriptions ??= [];
+  StreamSubscription<T> subscribe<T>(SubscribeCallback<T> action, [int id]) {
+    subscriptions ??= {};
     var stream = Plumber().getStream<T>(id);
     var subscription = stream.listen(action);
     subscriptions.add(subscription);
+    return subscription;
+  }
+
+  void removeSubscription(StreamSubscription sub) {
+    subscriptions.remove(sub);
+    sub.cancel();
   }
 }

@@ -1,8 +1,17 @@
+import 'dart:async';
+
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
+
+class FileCounter {
+  final StreamSubscription stream;
+  int hits;
+
+  FileCounter(this.stream, {this.hits = 0});
+}
 
 /// General manager for general ui things
 class RiveManager with Subscriptions {
@@ -10,6 +19,7 @@ class RiveManager with Subscriptions {
   factory RiveManager() => _instance;
 
   Rive rive;
+  final subs = <int, FileCounter>{};
 
   NotificationManager _notificationsManager;
 
@@ -26,7 +36,7 @@ class RiveManager with Subscriptions {
   void _attach() {
     subscribe<HomeSection>(_newHomeSection);
     subscribe<CurrentDirectory>(_newCurrentDirectory);
-    subscribe<File>(_fileUpdates);
+    subscribe<File>(_checkForUpdates);
   }
 
   /// Initiatize the state
@@ -62,8 +72,17 @@ class RiveManager with Subscriptions {
     FileManager().loadBaseFolder(targetTeam);
   }
 
-  void _fileUpdates(File file) {
-    Plumber().message<File>(file, file.hashCode);
+  void _checkForUpdates(File file) {
+    // File is getting updated.
+    // lets make sure we watch out for further changes
+    // as the backend may make amendments
+    Plumber().message(file, file.hashCode);
+    subs[file.hashCode] = FileCounter(
+      subscribe<File>(_updateEditor, file.hashCode),
+    );
+  }
+
+  void _updateEditor(File file) {
     var openFileTab = rive.fileTabs.firstWhere(
         (tab) =>
             tab.file != null &&
@@ -74,5 +93,10 @@ class RiveManager with Subscriptions {
       return;
     }
     openFileTab.file.updateName(file.name);
+    subs[file.hashCode].hits += 1;
+    if (subs[file.hashCode].hits > 1) {
+      removeSubscription(subs[file.hashCode].stream);
+      subs.remove(file.hashCode);
+    }
   }
 }
