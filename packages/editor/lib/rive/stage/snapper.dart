@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:ui';
 
-import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/segment2d.dart';
@@ -12,10 +11,10 @@ import 'package:rive_editor/widgets/theme.dart';
 
 final snapLineColor = RiveColors().snappingLine;
 
-typedef SnappingFilter = bool Function(StageItem);
+typedef SnappingFilter = bool Function(StageItem, Set<StageItem>);
 
 abstract class SnappingItem {
-  Component get component;
+  StageItem get stageItem;
   void translateWorld(Vec2D diff);
 
   ///  Add snapping sources to the snap axes.
@@ -130,23 +129,27 @@ class Snapper {
   Snapper(this.stage, this.startMouse);
 
   void init() {
-    final exclusion = HashSet<Component>();
+    final exclusion = HashSet<StageItem>();
     for (final item in items) {
-      var component = item.component;
-      if (component is ContainerComponent) {
-        component.forAll((c) {
-          exclusion.add(c);
+      var stageItem = item.stageItem;
+
+      exclusion.add(stageItem);
+      if (stageItem.component is ContainerComponent) {
+        (stageItem.component as ContainerComponent).forEachChild((c) {
+          if (c.stageItem != null) {
+            exclusion.add(c.stageItem);
+          }
           return true;
         });
       }
     }
 
     stage.visTree.all((id, item) {
-      if (exclusion.contains(item.component)) {
-        return true;
-      }
+      // if (exclusion.contains(item)) {
+      //   return true;
+      // }
 
-      if (filters.every((filter) => filter(item))) {
+      if (filters.every((filter) => filter(item, exclusion))) {
         item.addSnapTarget(_targets);
       }
       return true;

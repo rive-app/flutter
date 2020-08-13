@@ -1,9 +1,11 @@
 import 'dart:math';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/transform_component.dart';
+import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_joint.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
@@ -11,6 +13,7 @@ import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/node_translate_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
 
 /// Transformer that translates [StageItem]'s with underlying [Node] components.
@@ -30,9 +33,16 @@ class JointTranslateTransformer extends StageTransformer {
 
     Map<Bone, Bone> boneChildToInclude = {};
     var bones = <Bone>{};
+
     Map<Bone, Vec2D> boneTips = {};
+    Set<Bone> transformAsNode = {};
+
     for (final item in items) {
-      if (item is StageJoint) {
+      if (item is StageRootJoint ||
+          (item is StageBone && item.component is RootBone)) {
+        bones.add(item.component as RootBone);
+        transformAsNode.add(item.component as RootBone);
+      } else if (item is StageJoint) {
         bones.add(item.component);
       } else if (item is StageBone &&
           item.component.coreType == BoneBase.typeKey) {
@@ -40,7 +50,8 @@ class JointTranslateTransformer extends StageTransformer {
         boneChildToInclude[item.component.parent as Bone] = item.component;
       }
     }
-    Iterable<Bone> topBones = topComponents(bones);
+
+    var topBones = topComponents(bones);
 
     if (topBones.isNotEmpty) {
       for (final bone in topBones) {
@@ -55,25 +66,56 @@ class JointTranslateTransformer extends StageTransformer {
       }
       var snapper = details.artboard.stageItem.stage.snapper;
 
-      snapper.add(
-          bones
-              .map(
-                (bone) => _JointSnappingItem(
-                  bone,
-                  boneChildToInclude[bone],
-                  boneTips,
-                ),
-              )
-              .toList(), (item) {
+      var tcSnappingItems = <TransformComponentSnappingItem>[];
+      var jointSnappingItems = <_JointSnappingItem>[];
+      for (final bone in bones) {
+        if (bone is RootBone && transformAsNode.contains(bone)) {
+          var item = TransformComponentSnappingItem(bone);
+          if (item != null) {
+            tcSnappingItems.add(item);
+          }
+        } else {
+          jointSnappingItems.add(_JointSnappingItem(
+            bone.stageItem as StageBone,
+            boneChildToInclude[bone],
+            boneTips,
+          ));
+        }
+      }
+
+      bool _filterSnapSource(StageItem item, Set<StageItem> exclusion) {
+        // If it's a stage joint and the matching stageBone is excluded, don't
+        // include the joint.
+        if (item is StageJoint &&
+            exclusion.contains(item.component.stageItem)) {
+          return false;
+        } else if (exclusion.contains(item)) {
+          return false;
+        }
         // Filter out components that are not shapes or nodes, or not in the
         // active artboard
         final activeArtboard = details.artboard;
-        if (item is StageShape || item is StageNode || item is StageJoint) {
+        if (item is StageShape ||
+            item is StageNode ||
+            item is StageJoint ||
+            item is StageArtboard) {
           final itemArtboard = (item.component as Component).artboard;
           return activeArtboard == itemArtboard;
         }
         return false;
-      });
+      }
+
+      // Root bones transform as TransformComponents, so we add them separately.
+      // We do this here instead of in NodeTranslateTransformer as we want to
+      // filter the same snapping sources as a joint.
+      if (tcSnappingItems.isNotEmpty) {
+        snapper.add(tcSnappingItems, _filterSnapSource);
+      }
+
+      // The rest (if any) will be joints.
+      if (jointSnappingItems.isNotEmpty) {
+        snapper.add(jointSnappingItems, _filterSnapSource);
+      }
       return true;
     }
     return false;
@@ -81,21 +123,21 @@ class JointTranslateTransformer extends StageTransformer {
 }
 
 class _JointSnappingItem extends SnappingItem {
-  final Bone bone;
+  final StageBone stageBone;
   final Map<Bone, Vec2D> boneTips;
   final Bone childBone;
 
   @override
-  Component get component => bone;
+  StageItem get stageItem => stageBone.tipJoint;
 
   _JointSnappingItem(
-    this.bone,
+    this.stageBone,
     this.childBone,
     this.boneTips,
   );
 
   @override
-  void translateWorld(Vec2D diff) => _translateChain(bone, diff);
+  void translateWorld(Vec2D diff) => _translateChain(stageBone.component, diff);
 
   void _translateChain(Bone bone, Vec2D worldTranslation) {
     // Translate this bone's tip and figure out rotation and length for this
@@ -116,7 +158,11 @@ class _JointSnappingItem extends SnappingItem {
     var diff = Vec2D.subtract(Vec2D(), tip, base);
     var length = Vec2D.length(diff);
     bone.length = length / bone.scaleX;
-    bone.rotation = atan2(diff[1], diff[0]);
+
+    var lastRotation = bone.rotation;
+    var rotation = atan2(diff[1], diff[0]);
+    bone.rotation +=
+        atan2(sin(rotation - lastRotation), cos(rotation - lastRotation));
     bone.calculateWorldTransform();
 
     for (final child in bone.children) {
@@ -131,6 +177,7 @@ class _JointSnappingItem extends SnappingItem {
 
   @override
   void addSources(SnappingAxes snap, bool isSingleSelection) {
+    var bone = stageBone.component;
     snap.addVec(Mat2D.getTranslation(
       bone.artboard.transform(bone.tipWorldTransform),
       Vec2D(),

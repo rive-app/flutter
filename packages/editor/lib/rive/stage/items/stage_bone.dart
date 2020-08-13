@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/segment2d.dart';
@@ -28,8 +29,12 @@ class StageBone extends HideableStageItem<Bone>
   // Store computed segment for the bone (start->end).
   Segment2D _segment;
 
+  // Root bones also manage a base/root joint.
+  StageRootJoint _rootJoint;
+
   // Every stage bone manages the joint at its tip.
   StageJoint _tipJoint;
+  StageJoint get tipJoint => _tipJoint;
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
@@ -43,6 +48,11 @@ class StageBone extends HideableStageItem<Bone>
     _tipJoint.initialize(component);
     stage.addItem(_tipJoint);
 
+    if (component is RootBone) {
+      _rootJoint = StageRootJoint();
+      _rootJoint.initialize(component);
+      stage.addItem(_rootJoint);
+    }
     boundsChanged();
   }
 
@@ -50,6 +60,10 @@ class StageBone extends HideableStageItem<Bone>
   void removedFromStage(Stage stage) {
     stage.removeItem(_tipJoint);
     _tipJoint = null;
+    if (_rootJoint != null) {
+      stage.removeItem(_rootJoint);
+      _rootJoint = null;
+    }
     super.removedFromStage(stage);
   }
 
@@ -90,6 +104,7 @@ class StageBone extends HideableStageItem<Bone>
     _segment = Segment2D(start, end);
     _needsUpdate = true;
 
+    _rootJoint?.worldTranslation = start;
     _tipJoint.worldTranslation = end;
   }
 

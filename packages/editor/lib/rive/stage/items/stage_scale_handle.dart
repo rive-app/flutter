@@ -8,6 +8,7 @@ import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
+import 'package:rive_editor/rive/stage/tools/transformers/translation/joint_scale_transformer.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/translation/node_scale_transformer.dart';
 import 'package:rive_editor/selectable_item.dart';
 
@@ -136,6 +137,9 @@ class StageScaleHandle extends StageHandle {
 
   @override
   List<StageTransformer> makeTransformers() {
-    return [NodeScaleTransformer(lockAxis: direction, handle: this)];
+    return [
+      JointScaleTransformer(lockAxis: direction, handle: this),
+      NodeScaleTransformer(lockAxis: direction, handle: this),
+    ];
   }
 }

@@ -9,9 +9,11 @@ import 'package:rive_core/math/circle_constant.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_joint.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
+import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:utilities/restorer.dart';
@@ -179,11 +181,22 @@ class BoneTool extends StageTool {
 
   Restorer _selectionRestorer;
 
+  bool _handleShortcutAction(ShortcutAction action) {
+    switch (action) {
+      case ShortcutAction.cancel:
+        stage.tool = AutoTool.instance;
+        return true;
+    }
+    return false;
+  }
+
   @override
   bool activate(Stage stage) {
     if (!super.activate(stage)) {
       return false;
     }
+    stage.file.addActionHandler(_handleShortcutAction);
+
     var firstJoint = stage.file.selection.items
         .firstWhere((item) => item is StageJoint, orElse: () => null);
     if (firstJoint is StageJoint) {
@@ -196,6 +209,7 @@ class BoneTool extends StageTool {
 
   @override
   void deactivate() {
+    stage.file.removeActionHandler(_handleShortcutAction);
     _selectionRestorer?.restore();
     super.deactivate();
     _firstJointWorld = null;

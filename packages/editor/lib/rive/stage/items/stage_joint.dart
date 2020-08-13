@@ -72,8 +72,13 @@ class StageJoint extends StageItem<Bone>
   Listenable get worldTransformChanged => component.worldTransformChanged;
 
   @override
-  int get transformFlags =>
-      TransformFlags.x | TransformFlags.y | TransformFlags.rotation;
+  int get transformFlags {
+    int flags = TransformFlags.x | TransformFlags.y;
+    if (component.firstChildBone != null) {
+      flags |= TransformFlags.rotation;
+    }
+    return flags;
+  }
 
   @override
   void mutateTransformSelection(StageHandle handle, List<StageItem> selection) {
@@ -88,4 +93,26 @@ class StageJoint extends StageItem<Bone>
   void addSnapTarget(SnappingAxes axes) {
     axes.addVec(_worldTranslation);
   }
+}
+
+class StageRootJoint extends StageJoint {
+  @override
+  int get transformFlags =>
+      TransformFlags.x |
+      TransformFlags.y |
+      TransformFlags.rotation |
+      TransformFlags.scaleX |
+      TransformFlags.scaleY;
+  @override
+  void mutateTransformSelection(StageHandle handle, List<StageItem> selection) {
+    // Intentionally empty as this doesn't mutate the selection like the super
+    // (regular joint) does.
+  }
+
+  @override
+  Mat2D get renderTransform =>
+      component.artboard.transform(component.worldTransform);
+
+  @override
+  Mat2D get worldTransform => component.worldTransform;
 }
