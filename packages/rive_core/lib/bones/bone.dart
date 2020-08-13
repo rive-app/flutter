@@ -13,6 +13,9 @@ class Bone extends BoneBase {
         (child as Bone).markTransformDirty();
       }
     }
+    // -> editor-only
+    markBoundsChanged();
+    // <- editor-only
   }
 
   Bone get firstChildBone {

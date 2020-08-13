@@ -232,16 +232,10 @@ abstract class Component extends ComponentBase<RiveFile>
   void onDependencyRemoved(Component dependent) {}
 
   @override
-  @mustCallSuper
-  void onAdded() {
-    if (!canBeOrphaned && parent == null) {
-      // -> editor-only
-      _log.severe('Removed component \'$name\' $runtimeType. '
-          'Did not have a parent (looked for one with id $parentId).');
-      // <- editor-only
-      remove();
-    }
-  }
+  bool validate() => parent != null || canBeOrphaned;
+
+  @override
+  void onAdded() {}
 
   @override
   void onAddedDirty() {

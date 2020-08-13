@@ -192,6 +192,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
 
   final List<CorePropertyChanges> journal = [];
   CorePropertyChanges _currentChanges;
+  bool get hasRecordedChanges => _currentChanges != null;
 
   int _journalIndex = 0;
 
@@ -760,7 +761,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
     _delayAdd = [];
   }
 
-  void completeAdd() {
+  void completeAdd([bool forceEnableRecording = false]) {
     if (_delayAdd == null) {
       return;
     }
@@ -769,6 +770,9 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
 
     delayed.forEach(onAddedDirty);
     completeChanges();
+    if (forceEnableRecording) {
+      _isRecording = forceEnableRecording;
+    }
     delayed.forEach(onAddedClean);
   }
 
@@ -803,8 +807,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       }
       applyCoopChanges(objectChanges);
     }
-    completeAdd();
-    _isRecording = wasRecording;
+    completeAdd(wasRecording);
   }
 
   /// Helper to determine if a batch add operation is in progress.

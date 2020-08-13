@@ -70,11 +70,13 @@ class StageBone extends HideableStageItem<Bone>
   @override
   void boundsChanged() {
     final artboard = component.artboard;
+    if (artboard == null) {
+      // Bounds changed for bones gets called during initialization.
+      return;
+    }
     // Compute aabb
-    var start =
-        component.artboard.renderTranslation(component.worldTranslation);
-    var end =
-        component.artboard.renderTranslation(component.tipWorldTranslation);
+    var start = artboard.renderTranslation(component.worldTranslation);
+    var end = artboard.renderTranslation(component.tipWorldTranslation);
     var diff = Vec2D.subtract(Vec2D(), end, start);
     _angle = atan2(diff[1], diff[0]);
     _worldLength = Vec2D.length(diff);
@@ -84,7 +86,7 @@ class StageBone extends HideableStageItem<Bone>
     }
 
     // max bone radius when fully zoomed out in world space
-    var maxBoneRadius = BoneRenderer.radius; // / Stage.minZoom;
+    var maxBoneRadius = BoneRenderer.radius;
     var radiusVector = Vec2D.scale(Vec2D(), diff, maxBoneRadius);
     radiusVector = Vec2D.fromValues(-radiusVector[1], radiusVector[0]);
 
