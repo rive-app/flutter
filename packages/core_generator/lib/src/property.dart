@@ -17,6 +17,8 @@ class Property {
   bool isNullable = false;
   bool isRuntime = true;
   bool isCoop = true;
+  bool isSetOverride = false;
+  bool isGetOverride = false;
   FieldType typeRuntime;
 
   factory Property(Definition type, String name, Map<String, dynamic> data) {
@@ -41,6 +43,14 @@ class Property {
     dynamic init = data['initialValue'];
     if (init is String) {
       initialValue = init;
+    }
+    dynamic overrideSet = data['overrideSet'];
+    if (overrideSet is bool && overrideSet == true) {
+      isSetOverride = true;
+    }
+    dynamic overrideGet = data['overrideGet'];
+    if (overrideGet is bool && overrideGet == true) {
+      isGetOverride = true;
     }
     dynamic a = data['animates'];
     if (a is bool) {
@@ -181,6 +191,12 @@ class Property {
 
     if (initialValue != null) {
       data['initialValue'] = initialValue;
+    }
+    if (isGetOverride) {
+      data['overrideGet'] = true;
+    }
+    if (isSetOverride) {
+      data['overrideSet'] = true;
     }
     if (animates) {
       data['animates'] = true;
