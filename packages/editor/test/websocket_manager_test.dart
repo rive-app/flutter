@@ -96,8 +96,8 @@ void main() {
         Plumber().getStream<CurrentDirectory>(),
         <Function(CurrentDirectory)>[],
       );
-      await client.handleData('''
-{"action": "FolderChange", "params": {"folderOwnerId": 1, "folderId": 1}}''');
+      await client.handleData('{"action": "FolderChange", '
+          '"params": {"folderOwnerId": 1, "folderId": 1}}');
       await testComplete.future;
     });
 
@@ -111,10 +111,10 @@ void main() {
         Plumber().getStream<CurrentDirectory>(),
         [(CurrentDirectory d) => d.folder.id == 2],
       );
-      await client.handleData('''
-{"action": "FolderChange", "params":{"folderOwnerId": 1, "folderId": 1}}''');
-      await client.handleData('''
-{"action": "FolderChange", "params":{"folderOwnerId": 2, "folderId": 2}}''');
+      await client.handleData('{"action": "FolderChange", '
+          '"params":{"folderOwnerId": 1, "folderId": 1}}');
+      await client.handleData('{"action": "FolderChange", '
+          '"params":{"folderOwnerId": 2, "folderId": 2}}');
       await testComplete.future;
     });
 
@@ -132,8 +132,8 @@ void main() {
           (CurrentDirectory d) => d.folder.id == 1
         ],
       );
-      await client.handleData('''
-{"action": "FolderChange", "params":{"folderOwnerId": 1, "folderId": 1}}''');
+      await client.handleData('{"action": "FolderChange", '
+          '"params":{"folderOwnerId": 1, "folderId": 1}}');
       await testComplete.future;
     });
   });

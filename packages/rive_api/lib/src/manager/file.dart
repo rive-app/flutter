@@ -70,12 +70,14 @@ class FileManager with Subscriptions {
   }
 
   Future<File> createFile(Owner owner, [Folder folder]) async {
-    folder ??= _folderMap[owner].firstWhere((element) => element.id == 1);
+    var _folder = (folder == null)
+        ? _folderMap[owner].firstWhere((element) => element.id == 1)
+        : folder;
     FileDM fileDM;
     if (owner is Team) {
-      fileDM = await _fileApi.createFile(folder.id, folder.ownerId);
+      fileDM = await _fileApi.createFile(_folder.id, _folder.ownerId);
     } else {
-      fileDM = await _fileApi.createFile(folder.id);
+      fileDM = await _fileApi.createFile(_folder.id);
     }
 
     return File.fromDM(fileDM, owner.ownerId);
