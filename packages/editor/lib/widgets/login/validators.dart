@@ -12,7 +12,6 @@ class FormValidator {
   }
 }
 
-
 abstract class FieldValidator {
   final ValueChanged<String> onFieldError;
   const FieldValidator({@required this.onFieldError});
@@ -101,11 +100,11 @@ class EmailValidator extends FieldValidator {
       var error = errors[errorField];
       switch (error) {
         case 'invalid':
-          return onFieldError('Not a valid email');
+          return onFieldError('Not a valid email.');
         case 'in-use':
-          return onFieldError('Aready registered');
+          return onFieldError('Aready registered.');
         case 'missing':
-          return onFieldError('Please fill this in!');
+          return onFieldError('Please fill this in.');
         default:
           return onFieldError('Unknown error, please try again later.');
       }
