@@ -1,12 +1,11 @@
-import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/transform_component.dart';
+import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
 import 'package:rive_editor/rive/stage/items/stage_bone.dart';
-import 'package:rive_editor/rive/stage/items/stage_joint.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_shape.dart';
 import 'package:rive_editor/rive/stage/snapper.dart';
@@ -38,10 +37,7 @@ class NodeTranslateTransformer extends StageTransformer {
     // TransformComponent as there are some TransformComponents we're not
     // interested in, like non-root Bones).
     Iterable<TransformComponent> transformComponents = topComponents(items
-        .where((item) =>
-            item.component is Node ||
-            // TODO: replace with is StageRootJoint when we have it...
-            (item is! StageJoint && item.component is RootBone))
+        .where((item) => item.component is Node)
         .map((item) => item.component as TransformComponent));
 
     // Remove any items in the set that are in this hierarchy. Important to not
@@ -58,13 +54,16 @@ class NodeTranslateTransformer extends StageTransformer {
       var snapper = details.artboard.stageItem.stage.snapper;
       snapper.add(
           transformComponents
-              .map((tc) => _TransformComponentSnappingItem(tc))
+              .map((tc) => TransformComponentSnappingItem(tc))
               .where((item) => item != null)
-              .toList(), (item) {
+              .toList(), (item, exclusion) {
+        if (exclusion.contains(item)) {
+          return false;
+        }
         // Filter out components that are not shapes or nodes, or not in the
         // active artboard
         final activeArtboard = details.artboard;
-        if (item is StageShape || item is StageNode) {
+        if (item is StageShape || item is StageNode || item is StageArtboard) {
           final itemArtboard = (item.component as Component).artboard;
           return activeArtboard == itemArtboard;
         }
@@ -76,15 +75,15 @@ class NodeTranslateTransformer extends StageTransformer {
   }
 }
 
-class _TransformComponentSnappingItem extends SnappingItem {
+class TransformComponentSnappingItem extends SnappingItem {
   final Mat2D toParent;
   final Vec2D worldTranslation;
   final TransformComponent transformComponent;
 
   @override
-  Component get component => transformComponent;
+  StageItem get stageItem => transformComponent.stageItem;
 
-  factory _TransformComponentSnappingItem(TransformComponent tc) {
+  factory TransformComponentSnappingItem(TransformComponent tc) {
     var artboard = tc.artboard;
     var world = artboard.transform(tc.parent is TransformComponent
         ? (tc.parent as TransformComponent).worldTransform
@@ -93,7 +92,7 @@ class _TransformComponentSnappingItem extends SnappingItem {
     if (!Mat2D.invert(inverse, world)) {
       return null;
     }
-    return _TransformComponentSnappingItem._(
+    return TransformComponentSnappingItem._(
       tc,
       inverse,
       Mat2D.getTranslation(
@@ -103,7 +102,7 @@ class _TransformComponentSnappingItem extends SnappingItem {
     );
   }
 
-  _TransformComponentSnappingItem._(
+  TransformComponentSnappingItem._(
       this.transformComponent, this.toParent, this.worldTranslation);
   @override
   void translateWorld(Vec2D diff) {
@@ -116,7 +115,7 @@ class _TransformComponentSnappingItem extends SnappingItem {
 
   @override
   void addSources(SnappingAxes snap, bool isSingleSelection) {
-    var stageItem = component.stageItem;
+    var stageItem = transformComponent.stageItem;
     if (stageItem is StageNode) {
       snap.addVec(AABB.center(Vec2D(), stageItem.aabb));
     } else if (stageItem is StageBone) {

@@ -3,6 +3,8 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/bones/bone_base.dart';
 export 'package:rive_core/src/generated/bones/bone_base.dart';
 
+typedef bool BoneCallback(Bone bone);
+
 class Bone extends BoneBase {
   @override
   void lengthChanged(double from, double to) {
@@ -20,6 +22,20 @@ class Bone extends BoneBase {
       }
     }
     return null;
+  }
+
+  /// Iterate through the child bones. [BoneCallback] returns false if iteration
+  /// can stop. Returns false if iteration stopped, true if it made it through
+  /// the whole list.
+  bool forEachBone(BoneCallback callback) {
+    for (final child in children) {
+      if (child.coreType == BoneBase.typeKey) {
+        if (!callback(child as Bone)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   @override

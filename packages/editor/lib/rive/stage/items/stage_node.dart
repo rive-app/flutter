@@ -3,8 +3,10 @@ import 'dart:ui';
 
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/math/aabb.dart';
+import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable_component.dart';
+import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_hideable.dart';
 import 'package:rive_editor/selectable_item.dart';
@@ -124,5 +126,10 @@ class StageNode extends HideableStageItem<Node>
   @override
   void boundsChanged() {
     stage?.updateBounds(this);
+  }
+
+  @override
+  void addSnapTarget(SnappingAxes axes) {
+    axes.addVec(AABB.center(Vec2D(), aabb));
   }
 }

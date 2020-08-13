@@ -32,7 +32,7 @@ class ArtboardTranslateTransformer extends StageTransformer {
 
     artboards.first.stageItem.stage.snapper.add(
       artboards.map((artboard) => _ArtboardSnappingItem(artboard)),
-      (item) => item is StageArtboard,
+      (item, exclusion) => !exclusion.contains(item) && item is StageArtboard,
     );
 
     // Filter out any children of the artboard that may be in the set (prevent
@@ -74,7 +74,7 @@ class _ArtboardSnappingItem extends SnappingItem {
   }
 
   @override
-  Component get component => artboard;
+  StageItem get stageItem => artboard.stageItem;
 
   @override
   void translateWorld(Vec2D diff) {

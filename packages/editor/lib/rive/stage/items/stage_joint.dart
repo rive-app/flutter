@@ -7,6 +7,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/items/stage_transformable.dart';
+import 'package:rive_editor/rive/stage/snapper.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/bone_tool.dart';
@@ -15,10 +16,9 @@ import 'package:rive_editor/rive/stage/tools/transform_handle_tool.dart';
 class StageJoint extends StageItem<Bone>
     implements StageTransformable, TransfomHandleSelectionMutator {
   static const double hitRadius = BoneJointRenderer.radius + 3;
-  static const double minJointZoom = 0.5;
   static const double hitRadiusSquared = hitRadius * hitRadius;
   static const double _maxWorldJointSize =
-      BoneJointRenderer.radius / minJointZoom;
+      BoneJointRenderer.radius / BoneJointRenderer.minJointScale;
   Vec2D _worldTranslation;
 
   set worldTranslation(Vec2D value) {
@@ -37,8 +37,8 @@ class StageJoint extends StageItem<Bone>
   @override
   bool hitHiFi(Vec2D worldMouse) {
     var zoom = stage.viewZoom;
-    if (zoom < minJointZoom) {
-      zoom /= minJointZoom;
+    if (zoom < BoneJointRenderer.minJointScale) {
+      zoom /= BoneJointRenderer.minJointScale;
     }
     return Vec2D.squaredDistance(worldMouse, _worldTranslation) <=
         hitRadiusSquared / (zoom * zoom);
@@ -56,11 +56,7 @@ class StageJoint extends StageItem<Bone>
     canvas.save();
     canvas.translate(screen[0], screen[1]);
 
-    if (stage.viewZoom < minJointZoom) {
-      canvas.scale(stage.viewZoom / minJointZoom);
-    }
-
-    BoneJointRenderer.draw(canvas, selectionState.value);
+    BoneJointRenderer.draw(canvas, selectionState.value, stage.viewZoom);
     canvas.restore();
     // drawBounds(canvas, pass);
   }
@@ -76,8 +72,13 @@ class StageJoint extends StageItem<Bone>
   Listenable get worldTransformChanged => component.worldTransformChanged;
 
   @override
-  int get transformFlags =>
-      TransformFlags.x | TransformFlags.y | TransformFlags.rotation;
+  int get transformFlags {
+    int flags = TransformFlags.x | TransformFlags.y;
+    if (component.firstChildBone != null) {
+      flags |= TransformFlags.rotation;
+    }
+    return flags;
+  }
 
   @override
   void mutateTransformSelection(StageHandle handle, List<StageItem> selection) {
@@ -87,4 +88,31 @@ class StageJoint extends StageItem<Bone>
       selection.add(component.stageItem);
     }
   }
+
+  @override
+  void addSnapTarget(SnappingAxes axes) {
+    axes.addVec(_worldTranslation);
+  }
+}
+
+class StageRootJoint extends StageJoint {
+  @override
+  int get transformFlags =>
+      TransformFlags.x |
+      TransformFlags.y |
+      TransformFlags.rotation |
+      TransformFlags.scaleX |
+      TransformFlags.scaleY;
+  @override
+  void mutateTransformSelection(StageHandle handle, List<StageItem> selection) {
+    // Intentionally empty as this doesn't mutate the selection like the super
+    // (regular joint) does.
+  }
+
+  @override
+  Mat2D get renderTransform =>
+      component.artboard.transform(component.worldTransform);
+
+  @override
+  Mat2D get worldTransform => component.worldTransform;
 }

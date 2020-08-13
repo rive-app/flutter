@@ -1,22 +1,20 @@
 import 'dart:collection';
 import 'dart:ui';
 
-import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
-import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/theme.dart';
 
 final snapLineColor = RiveColors().snappingLine;
 
-typedef SnappingFilter = bool Function(StageItem);
+typedef SnappingFilter = bool Function(StageItem, Set<StageItem>);
 
 abstract class SnappingItem {
-  Component get component;
+  StageItem get stageItem;
   void translateWorld(Vec2D diff);
 
   ///  Add snapping sources to the snap axes.
@@ -45,27 +43,6 @@ class SnappingAxes {
   final _axes = [<_SnapAxis>[], <_SnapAxis>[]];
 
   AABB _accumulatedBounds;
-  void add(StageItem item) {
-    if (item is StageNode) {
-      var center = AABB.center(Vec2D(), item.aabb);
-      addPoint(center[0], center[1]);
-    } else {
-      var obb = item.obb;
-      if (obb != null) {
-        var poly = obb.poly;
-        addPoint(poly[0], poly[1]);
-        addPoint(poly[2], poly[3]);
-        addPoint(poly[4], poly[5]);
-        addPoint(poly[6], poly[7]);
-        var center = obb.center;
-        addPoint(center[0], center[1]);
-      } else {
-        addAABB(item.aabb);
-      }
-    }
-  }
-
-  void addAll(Iterable<StageItem> items) => items.forEach(add);
 
   void accumulateBounds(AABB bounds) {
     if (_accumulatedBounds == null) {
@@ -152,24 +129,28 @@ class Snapper {
   Snapper(this.stage, this.startMouse);
 
   void init() {
-    final exclusion = HashSet<Component>();
+    final exclusion = HashSet<StageItem>();
     for (final item in items) {
-      var component = item.component;
-      if (component is ContainerComponent) {
-        component.forAll((c) {
-          exclusion.add(c);
+      var stageItem = item.stageItem;
+
+      exclusion.add(stageItem);
+      if (stageItem.component is ContainerComponent) {
+        (stageItem.component as ContainerComponent).forEachChild((c) {
+          if (c.stageItem != null) {
+            exclusion.add(c.stageItem);
+          }
           return true;
         });
       }
     }
 
     stage.visTree.all((id, item) {
-      if (exclusion.contains(item.component)) {
-        return true;
-      }
+      // if (exclusion.contains(item)) {
+      //   return true;
+      // }
 
-      if (filters.every((filter) => filter(item))) {
-        _targets.add(item);
+      if (filters.every((filter) => filter(item, exclusion))) {
+        item.addSnapTarget(_targets);
       }
       return true;
     });
