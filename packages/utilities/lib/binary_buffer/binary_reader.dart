@@ -7,7 +7,12 @@ var _utf8Decoder = const Utf8Decoder();
 class BinaryReader {
   final ByteData buffer;
   final Endian endian;
+
+  /// TODO: remove setter for readIndex when we remove _readVarInt from
+  /// core_double_type.dart
   int readIndex = 0;
+
+  int get position => readIndex;
 
   BinaryReader(this.buffer, {this.endian = Endian.little});
 
@@ -103,8 +108,8 @@ class BinaryReader {
   }
 
   Uint8List read(int length, [bool allocNew = false]) {
-    var view = Uint8List.view(
-        buffer.buffer, buffer.offsetInBytes + readIndex, length);
+    var view =
+        Uint8List.view(buffer.buffer, buffer.offsetInBytes + readIndex, length);
     readIndex += length;
     return allocNew ? Uint8List.fromList(view) : view;
   }
