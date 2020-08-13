@@ -1,4 +1,7 @@
+import 'package:logging/logging.dart';
 import 'package:utilities/deserialize.dart';
+
+final _log = Logger('peon');
 
 class IllegalTask implements Exception {
   String issue;
@@ -20,7 +23,7 @@ class PingTask with Task {
 
   @override
   Future<bool> execute() async {
-    print('pinged');
+    _log.info('pinged');
     return true;
   }
 }
@@ -32,9 +35,9 @@ class EchoTask with Task {
   // NOTE: im doing this so i can 'register' task
   // ignore: prefer_constructors_over_static_methods
   static EchoTask fromData(Map<String, dynamic> data) {
-    if (!data.containsKey("params")) {
+    if (!data.containsKey('params')) {
       throw IllegalTask(
-          "Expecting a JSON structure with `params` but got $data");
+          'Expecting a JSON structure with `params` but got $data');
     }
 
     var params = data.getMap<String, Object>('params');
@@ -43,7 +46,7 @@ class EchoTask with Task {
 
   @override
   Future<bool> execute() async {
-    print(message);
+    _log.info(message);
     return true;
   }
 }

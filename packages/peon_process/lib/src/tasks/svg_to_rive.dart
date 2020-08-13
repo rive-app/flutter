@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:logging/logging.dart';
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
@@ -13,6 +14,8 @@ import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:xml/xml_events.dart' as xml show parseEvents;
 import 'package:flutter_svg/src/svg/parser_state.dart';
 import 'package:utilities/deserialize.dart';
+
+final _log = Logger('peon');
 
 class SvgToRiveTask with Task {
   final String taskId;
@@ -75,9 +78,13 @@ class SvgToRiveTask with Task {
       if (output.exitCode == 0) {
         var outFile = File(outPath);
         cleaned = await outFile.readAsString();
+      } else {
+        _log.severe('Problem running svgcleaner for ${this.taskId}'
+            '\nstdout:\n${output.stdout.toString().split('\n')}'
+            '\nstderr:\n${output.stderr.toString().split('\n')}');
       }
     } on ProcessException {
-      print('Problem running command, skipping');
+      _log.severe('Problem running svgcleaner for ${this.taskId}');
     } finally {
       await tempDir?.delete(recursive: true);
     }

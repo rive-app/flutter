@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:logging/logging.dart';
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
 import 'package:rive_core/coop_importer.dart';
@@ -12,6 +12,8 @@ import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 
 import 'package:utilities/deserialize.dart';
+
+final _log = Logger('peon');
 
 class RiveCoopToPng with Task {
   final String taskId;
@@ -73,15 +75,15 @@ class RiveCoopToPng with Task {
       if (execOutput.exitCode == 0) {
         var outFile = File(outPath);
         return await outFile.readAsBytes();
+      } else {
+        _log.severe('Thumbnail Generation Failed for ${taskId} '
+            '\nstdout:\n${execOutput.stdout.toString().split('\n')}'
+            '\nstderr:\n${execOutput.stderr.toString().split('\n')}');
       }
-    } on ProcessException catch (e) {
-      print(e);
-      print('Problem running command, skipping');
     } finally {
       await tempDir?.delete(recursive: true);
     }
 
-    // should probably just die
     return null;
   }
 
