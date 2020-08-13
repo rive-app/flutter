@@ -38,7 +38,7 @@ class _LoginState extends State<Login> {
   bool _buttonDisabled = false;
   bool _isSending = false;
   LoginPage _currentPanel;
-  String _usernameError, _emailError, _passwordError;
+  String _usernameError, _emailError, _passwordError, _generalError;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _LoginState extends State<Login> {
       // password error field as that is where we show errors in the
       // 'login' page.
       setState(() {
-        _passwordError = error;
+        _generalError = error;
       });
     });
 
@@ -73,7 +73,7 @@ class _LoginState extends State<Login> {
         errorField: 'error',
         onFieldError: (errorString) {
           setState(() {
-            _passwordError = errorString;
+            _generalError = errorString;
           });
         });
 
@@ -108,6 +108,7 @@ class _LoginState extends State<Login> {
       setState(() {
         _currentPanel = page;
         // Reset error fields.
+        _generalError = null;
         _passwordError = null;
         _emailError = null;
         _usernameError = null;
@@ -148,9 +149,9 @@ class _LoginState extends State<Login> {
     var emptyEmail = email.isEmpty;
     var emptyPassword = password.isEmpty;
     setState(() {
-      _usernameError = emptyUsername ? 'Please fill this in.' : null;
-      _passwordError = emptyPassword ? 'Please fill this in' : null;
-      _emailError = emptyEmail ? 'Please fill this in' : null;
+      _usernameError = emptyUsername ? 'Incomplete' : null;
+      _passwordError = emptyPassword ? 'Incomplete' : null;
+      _emailError = emptyEmail ? 'Incomplete' : null;
     });
 
     if (emptyEmail || emptyUsername || emptyPassword) {
@@ -185,8 +186,8 @@ class _LoginState extends State<Login> {
     var emptyUsername = username.isEmpty;
     var emptyPassword = password.isEmpty;
     setState(() {
-      _usernameError = emptyUsername ? 'Please fill this in.' : null;
-      _passwordError = emptyPassword ? 'Please fill this in' : null;
+      _usernameError = emptyUsername ? 'Incomplete' : null;
+      _passwordError = emptyPassword ? 'Incomplete' : null;
     });
     if (emptyUsername || emptyPassword) {
       return;
@@ -411,7 +412,9 @@ class _LoginState extends State<Login> {
             ),
           ],
         ),
-        const SizedBox(height: 30),
+        (_usernameError == null && _emailError == null)
+            ? const SizedBox(height: 30)
+            : const SizedBox(height: 10),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -429,7 +432,9 @@ class _LoginState extends State<Login> {
             const Spacer(),
           ],
         ),
-        const SizedBox(height: 40),
+        (_passwordError == null)
+            ? const SizedBox(height: 40)
+            : const SizedBox(height: 20),
         SizedBox(
           width: 145,
           child: FlatIconButton(
@@ -549,8 +554,11 @@ class _LoginState extends State<Login> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'One-click sign in if your account is connected to',
-          style: styles.loginText,
+          (_generalError == null)
+              ? 'One-click sign in if your account is connected to'
+              : _generalError,
+          style:
+              (_generalError == null) ? styles.loginText : styles.redErrorText,
         ),
         const SizedBox(height: 20),
         _socials(),
@@ -574,18 +582,27 @@ class _LoginState extends State<Login> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  LabeledTextField(
-                    label: 'Password',
-                    hintText: '6 character minumum…',
-                    enabled: !_buttonDisabled,
-                    controller: passwordController,
-                    onSubmit: (_) => _login(),
-                    errorText: _passwordError,
-                  ),
-                  const SizedBox(height: 8),
-                  UnderlineTextButton(
-                    text: 'Forgot your Password?',
-                    onPressed: () => _selectPanel(LoginPage.recover),
+                  Stack(
+                    children: [
+                      LabeledTextField(
+                        label: 'Password',
+                        hintText: '6 character minumum…',
+                        enabled: !_buttonDisabled,
+                        controller: passwordController,
+                        onSubmit: (_) => _login(),
+                        errorText: _passwordError,
+                      ),
+                      SizedBox(
+                        height: 73,
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: UnderlineTextButton(
+                            text: 'Forgot Password?',
+                            onPressed: () => _selectPanel(LoginPage.recover),
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                 ],
               ),

@@ -17,6 +17,11 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 /// Owner can be a [Team] or a [Me] user.
 ///
 /// Users will have fields to change their email and password.
+///
+
+final _emailRegEx = RegExp(
+    r'''(?:[a-z0-9!#\$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#\$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])''');
+
 class ProfileSettings extends StatefulWidget {
   final Owner owner;
   const ProfileSettings(this.owner);
@@ -26,96 +31,323 @@ class ProfileSettings extends StatefulWidget {
 }
 
 class _ProfileSettingsState extends State<ProfileSettings> {
-  // User info.
-  final _nameController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _websiteController = TextEditingController();
-  final _bioController = TextEditingController();
-  // Socials.
-  final _twitterController = TextEditingController();
-  final _instagramController = TextEditingController();
-  final _dribbbleController = TextEditingController();
-  final _linkedinController = TextEditingController();
-  final _behanceController = TextEditingController();
-  final _vimeoController = TextEditingController();
-  final _githubController = TextEditingController();
-  final _mediumController = TextEditingController();
-
-  bool _isForHire;
-
   StreamSubscription<Profile> _profileSubscription;
 
   @override
   void initState() {
     super.initState();
-    final profileId = widget.owner.ownerId;
-    _profileSubscription =
-        Plumber().getStream<Profile>(profileId).listen(_onProfile);
-    // TODO: check for errors
     ProfileManager().loadProfile(widget.owner);
   }
 
-  void _onProfile(Profile profile) {
-    if (profile != null) {
-      setState(() {
-        _isForHire = profile.isForHire == true;
-      });
-    }
+  @override
+  Widget build(BuildContext context) {
+    return ValueStreamBuilder<Profile>(
+      stream: Plumber().getStream<Profile>(widget.owner.ownerId),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final profile = snapshot.data;
+          return ProfileSettingsInner(profile: profile, owner: widget.owner);
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+}
+
+class OwnerPackage with ChangeNotifier {
+  /// The team data.
+  final bool isTeam;
+  String _name;
+  String _username;
+  String _email;
+  String _location;
+  String _website;
+  String _bio;
+  String _twitter;
+  String _instagram;
+  String _dribbble;
+  String _linkedin;
+  String _behance;
+  String _vimeo;
+  String _github;
+  String _medium;
+  bool _isForHire;
+
+  String nameValidationError;
+  String usernameValidationError;
+  String emailValidationError;
+
+  bool processing = false;
+
+  OwnerPackage(
+      {String name,
+      String username,
+      String email,
+      String location = '',
+      String website = '',
+      String bio = '',
+      String instagram = '',
+      String dribbble = '',
+      String twitter = '',
+      String linkedin = '',
+      String behance = '',
+      String vimeo = '',
+      String github = '',
+      String medium = '',
+      bool isForHire = false,
+      this.isTeam})
+      : _name = name,
+        _username = username,
+        _email = email,
+        _location = location,
+        _website = website,
+        _bio = bio,
+        _instagram = instagram,
+        _dribbble = dribbble,
+        _behance = behance,
+        _linkedin = linkedin,
+        _twitter = twitter,
+        _vimeo = vimeo,
+        _github = github,
+        _medium = medium,
+        _isForHire = isForHire;
+
+  String get name => _name;
+  String get username => _username;
+  String get email => _email;
+  String get location => _location;
+  String get website => _website;
+  String get bio => _bio;
+  String get twitter => _twitter;
+  String get instagram => _instagram;
+  String get dribbble => _dribbble;
+  String get linkedin => _linkedin;
+  String get behance => _behance;
+  String get vimeo => _vimeo;
+  String get github => _github;
+  String get medium => _medium;
+  bool get isForHire => _isForHire;
+
+  set isForHire(bool isForHire) {
+    if (_isForHire == isForHire) return;
+    _isForHire = isForHire;
+    notifyListeners();
   }
 
+  set name(String name) {
+    if (_name == name) return;
+    _name = name;
+    notifyListeners();
+  }
+
+  set username(String username) {
+    if (_username == username) return;
+    _username = username;
+    notifyListeners();
+  }
+
+  set email(String email) {
+    if (_email == email) return;
+    _email = email;
+    notifyListeners();
+  }
+
+  set location(String location) {
+    if (_location == location) return;
+    _location = location;
+    notifyListeners();
+  }
+
+  set website(String website) {
+    if (_website == website) return;
+    _website = website;
+    notifyListeners();
+  }
+
+  set bio(String bio) {
+    if (_bio == bio) return;
+    _bio = bio;
+    notifyListeners();
+  }
+
+  set twitter(String twitter) {
+    if (_twitter == twitter) return;
+    _twitter = twitter;
+    notifyListeners();
+  }
+
+  set instagram(String instagram) {
+    if (_instagram == instagram) return;
+    _instagram = instagram;
+    notifyListeners();
+  }
+
+  set dribbble(String dribbble) {
+    if (_dribbble == dribbble) return;
+    _dribbble = dribbble;
+    notifyListeners();
+  }
+
+  set linkedin(String linkedin) {
+    if (_linkedin == linkedin) return;
+    _linkedin = linkedin;
+    notifyListeners();
+  }
+
+  set behance(String behance) {
+    if (_behance == behance) return;
+    _behance = behance;
+    notifyListeners();
+  }
+
+  set vimeo(String vimeo) {
+    if (_vimeo == vimeo) return;
+    _vimeo = vimeo;
+    notifyListeners();
+  }
+
+  set github(String github) {
+    if (_github == github) return;
+    _github = github;
+    notifyListeners();
+  }
+
+  set medium(String medium) {
+    if (_medium == medium) return;
+    _medium = medium;
+    notifyListeners();
+  }
+
+  bool get isEmailValid {
+    if (isTeam) return true;
+    // ignore: lines_longer_than_80_chars
+    if (_email == null || _email == '') {
+      emailValidationError = 'Missing email';
+      return false;
+    }
+    if (!_emailRegEx.hasMatch(_email)) {
+      emailValidationError = 'Email invalid';
+      return false;
+    }
+    emailValidationError = null;
+    return true;
+  }
+
+  bool get isNameValid {
+    // ignore: lines_longer_than_80_chars
+    if (_name == null || _name == '') {
+      nameValidationError = 'Missing name';
+      return false;
+    }
+    if (_name.length < 3) {
+      nameValidationError = 'Name too short';
+      return false;
+    }
+    nameValidationError = null;
+    return true;
+  }
+
+  bool get isUsernameValid {
+    // ignore: lines_longer_than_80_chars
+    if (_username == null || _username == '') {
+      usernameValidationError = 'Missing username';
+      return false;
+    }
+    if (_username.length < 3) {
+      usernameValidationError = 'Username too short';
+      return false;
+    }
+    usernameValidationError = null;
+    return true;
+  }
+
+  bool get isValid {
+    var success = isEmailValid;
+    success = isNameValid && success;
+    success = isUsernameValid && success;
+    notifyListeners();
+    return success;
+  }
+
+  Profile profile() => Profile(
+        name: name,
+        username: username,
+        email: email,
+        website: website,
+        bio: bio,
+        location: location,
+        twitter: twitter,
+        instagram: instagram,
+        linkedin: linkedin,
+        medium: medium,
+        github: github,
+        behance: behance,
+        vimeo: vimeo,
+        dribbble: dribbble,
+        isForHire: isForHire,
+      );
+}
+
+class ProfileSettingsInner extends StatefulWidget {
+  final Profile profile;
+  final Owner owner;
+
+  const ProfileSettingsInner({Key key, this.profile, this.owner})
+      : super(key: key);
   @override
-  void dispose() {
-    // Cleanup.
-    _profileSubscription.cancel();
+  State<StatefulWidget> createState() => _ProfileSettingsInnerState();
+}
 
-    _nameController.dispose();
-    _usernameController.dispose();
-    _emailController.dispose();
-    _locationController.dispose();
-    _websiteController.dispose();
-    _bioController.dispose();
-    _twitterController.dispose();
-    _instagramController.dispose();
-    _dribbbleController.dispose();
-    _linkedinController.dispose();
-    _behanceController.dispose();
-    _vimeoController.dispose();
-    _githubController.dispose();
-    _mediumController.dispose();
+class _ProfileSettingsInnerState extends State<ProfileSettingsInner> {
+  // User info.
+  OwnerPackage package;
 
-    super.dispose();
+  @override
+  void initState() {
+    super.initState();
+    package = OwnerPackage(
+      name: widget.profile.name,
+      username: widget.profile.username,
+      email: widget.profile.email,
+      location: widget.profile.location,
+      website: widget.profile.website,
+      bio: widget.profile.bio,
+      twitter: widget.profile.twitter,
+      instagram: widget.profile.instagram,
+      dribbble: widget.profile.dribbble,
+      linkedin: widget.profile.linkedin,
+      behance: widget.profile.behance,
+      vimeo: widget.profile.vimeo,
+      github: widget.profile.github,
+      medium: widget.profile.medium,
+      isForHire: widget.profile.isForHire,
+      isTeam: widget.owner is Team,
+    );
+    // Magic.
+    package.addListener(() => setState(() {}));
   }
 
   Future<void> _submitChanges() async {
-    final updatedProfile = Profile(
-      name: _nameController.text,
-      username: _usernameController.text,
-      email: _emailController.text,
-      avatar: widget.owner.avatarUrl,
-      website: _websiteController.text,
-      bio: _bioController.text,
-      location: _locationController.text,
-      twitter: _twitterController.text,
-      instagram: _instagramController.text,
-      linkedin: _linkedinController.text,
-      medium: _mediumController.text,
-      github: _githubController.text,
-      behance: _behanceController.text,
-      vimeo: _vimeoController.text,
-      dribbble: _dribbbleController.text,
-      isForHire: _isForHire,
-    );
-    await ProfileManager().updateProfile(widget.owner, updatedProfile);
-    if (widget.owner is Team) {
-      await TeamManager().loadTeams();
-    } else {
-      await UserManager().loadMe();
-    }
+    if (package.processing) return;
+    package.processing = true;
 
-    // Close the popup
-    Navigator.of(context).pop();
+    try {
+      if (!package.isValid) {
+        return;
+      }
+      await ProfileManager().updateProfile(widget.owner, package.profile());
+      if (widget.owner is Team) {
+        await TeamManager().loadTeams();
+      } else {
+        await UserManager().loadMe();
+      }
+
+      // Close the popup
+      Navigator.of(context).pop();
+    } finally {
+      package.processing = false;
+    }
   }
 
   Widget _textFieldRow(List<Widget> children) {
@@ -156,12 +388,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-              child: FlatIconButton(
-                label: 'Save Changes',
-                color: colors.commonDarkGrey,
-                textColor: Colors.white,
-                onTap: _submitChanges,
-              ),
+              child: package.processing
+                  ? const Center(child: CircularProgressIndicator())
+                  : FlatIconButton(
+                      label: 'Save Changes',
+                      color: colors.commonDarkGrey,
+                      textColor: Colors.white,
+                      onTap: _submitChanges,
+                    ),
             )
           ],
         )
@@ -169,45 +403,55 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     );
   }
 
-  Widget _names(Profile profile) {
+  Widget _names() {
     var labelPrefix = widget.owner is Team ? 'Team ' : '';
     return _textFieldRow(
       [
         LabeledTextField(
           label: '${labelPrefix}Name',
-          controller: _nameController,
-          initialValue: profile.name,
+          onChanged: (name) => package.name = name,
+          initialValue: package.name,
           hintText: 'Pick a name',
+          enabled: !package.processing,
+          errorText: package.nameValidationError,
         ),
         LabeledTextField(
           label: '${labelPrefix}Username',
-          controller: _usernameController,
-          initialValue: profile.username,
+          onChanged: (username) => package.username = username,
+          initialValue: package.username,
           hintText: 'Pick a username',
-        )
+          enabled: !package.processing,
+          errorText: package.usernameValidationError,
+        ),
       ],
     );
   }
 
-  List<Widget> _info(Profile profile) {
+  List<Widget> _info() {
     if (widget.owner is Team) {
       return [
         const SizedBox(height: 3),
-        _names(profile),
-        const SizedBox(height: 30),
+        _names(),
+        SizedBox(
+            height: (package.nameValidationError == null &&
+                    package.usernameValidationError == null)
+                ? 30
+                : 10),
         _textFieldRow(
           [
             LabeledTextField(
               label: 'Location',
               hintText: 'Where is your team based?',
-              controller: _locationController,
-              initialValue: profile.location,
+              onChanged: (location) => package.location = location,
+              initialValue: package.location,
+              enabled: !package.processing,
             ),
             LabeledTextField(
               label: 'Website',
               hintText: 'www.myteam.com',
-              controller: _websiteController,
-              initialValue: profile.website,
+              onChanged: (website) => package.website = website,
+              initialValue: package.website,
+              enabled: !package.processing,
             ),
           ],
         ),
@@ -217,9 +461,10 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             LabeledTextField(
               label: 'Bio',
               hintText: 'Tell users a bit about your team',
-              controller: _bioController,
-              initialValue: profile.bio,
+              onChanged: (bio) => package.bio = bio,
+              initialValue: package.bio,
               maxCharacters: 160,
+              enabled: !package.processing,
             ),
           ],
         ),
@@ -227,32 +472,40 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     } else {
       return [
         const SizedBox(height: 3),
-        _names(profile),
-        const SizedBox(height: 30),
+        _names(),
+        SizedBox(
+            height: (package.nameValidationError == null &&
+                    package.usernameValidationError == null)
+                ? 30
+                : 10),
         _textFieldRow(
           [
             LabeledTextField(
               label: 'Email',
               hintText: 'Enter your email',
-              controller: _emailController,
-              initialValue: profile.email,
+              onChanged: (email) => package.email = email,
+              initialValue: package.email,
+              enabled: !package.processing,
+              errorText: package.emailValidationError,
             ),
             LabeledTextField(
               label: 'Website',
               hintText: 'www.mysite.com',
-              controller: _websiteController,
-              initialValue: profile.website,
+              onChanged: (website) => package.website = website,
+              initialValue: package.website,
+              enabled: !package.processing,
             ),
           ],
         ),
-        const SizedBox(height: 30),
+        SizedBox(height: (package.emailValidationError == null) ? 30 : 10),
         _textFieldRow(
           [
             LabeledTextField(
               label: 'Location',
               hintText: 'Where do you live?',
-              controller: _locationController,
-              initialValue: profile.location,
+              onChanged: (location) => package.location = location,
+              initialValue: package.location,
+              enabled: !package.processing,
             ),
             const SizedBox(),
           ],
@@ -263,9 +516,10 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             LabeledTextField(
               label: 'Bio',
               hintText: 'Tell users a bit about yourself...',
-              controller: _bioController,
-              initialValue: profile.bio,
+              onChanged: (bio) => package.bio = bio,
+              initialValue: package.bio,
               maxCharacters: 160,
+              enabled: !package.processing,
             ),
           ],
         ),
@@ -280,31 +534,23 @@ class _ProfileSettingsState extends State<ProfileSettings> {
         description: 'Allow other users to message you about work'
             ' opportunities. You will also show up in our'
             ' list of artists for hire.',
-        groupValue: _isForHire,
+        groupValue: package.isForHire,
         value: true,
-        onChanged: (value) {
-          setState(() {
-            _isForHire = value;
-          });
-        },
+        onChanged: (isForHire) => package.isForHire = isForHire,
       ),
       const SizedBox(height: 24),
       DescriptionRadio(
         label: 'Not Available For Hire',
         description: "Don't allow other users to contact you about"
             ' work opportunities.',
-        groupValue: _isForHire,
+        groupValue: package.isForHire,
         value: false,
-        onChanged: (value) {
-          setState(() {
-            _isForHire = value;
-          });
-        },
+        onChanged: (isForHire) => package.isForHire = isForHire,
       ),
     ];
   }
 
-  List<Widget> _socials(Profile profile) {
+  List<Widget> _socials() {
     return [
       const SizedBox(height: 3),
       _textFieldRow(
@@ -312,14 +558,16 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           LabeledTextField(
             label: 'Twitter',
             hintText: 'Link',
-            controller: _twitterController,
-            initialValue: profile.twitter,
+            onChanged: (twitter) => package.twitter = twitter,
+            initialValue: package.twitter,
+            enabled: !package.processing,
           ),
           LabeledTextField(
             label: 'Instagram',
             hintText: 'Link',
-            controller: _instagramController,
-            initialValue: profile.instagram,
+            onChanged: (instagram) => package.instagram = instagram,
+            initialValue: package.instagram,
+            enabled: !package.processing,
           )
         ],
       ),
@@ -329,14 +577,16 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           LabeledTextField(
             label: 'Dribbble',
             hintText: 'Link',
-            controller: _dribbbleController,
-            initialValue: profile.dribbble,
+            onChanged: (dribbble) => package.dribbble = dribbble,
+            initialValue: package.dribbble,
+            enabled: !package.processing,
           ),
           LabeledTextField(
             label: 'LinkedIn',
             hintText: 'Link',
-            controller: _linkedinController,
-            initialValue: profile.linkedin,
+            onChanged: (linkedin) => package.linkedin = linkedin,
+            initialValue: package.linkedin,
+            enabled: !package.processing,
           )
         ],
       ),
@@ -346,14 +596,16 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           LabeledTextField(
             label: 'Behance',
             hintText: 'Link',
-            controller: _behanceController,
-            initialValue: profile.behance,
+            onChanged: (behance) => package.behance = behance,
+            initialValue: package.behance,
+            enabled: !package.processing,
           ),
           LabeledTextField(
             label: 'Vimeo',
             hintText: 'Link',
-            controller: _vimeoController,
-            initialValue: profile.vimeo,
+            onChanged: (vimeo) => package.vimeo = vimeo,
+            initialValue: package.vimeo,
+            enabled: !package.processing,
           )
         ],
       ),
@@ -363,14 +615,16 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           LabeledTextField(
             label: 'GitHub',
             hintText: 'Link',
-            controller: _githubController,
-            initialValue: profile.github,
+            onChanged: (github) => package.github = github,
+            initialValue: package.github,
+            enabled: !package.processing,
           ),
           LabeledTextField(
             label: 'Medium',
             hintText: 'Link',
-            controller: _mediumController,
-            initialValue: profile.medium,
+            onChanged: (medium) => package.medium = medium,
+            initialValue: package.medium,
+            enabled: !package.processing,
           )
         ],
       ),
@@ -379,54 +633,45 @@ class _ProfileSettingsState extends State<ProfileSettings> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueStreamBuilder<Profile>(
-      stream: Plumber().getStream<Profile>(widget.owner.ownerId),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final theme = RiveTheme.of(context);
-          final colors = theme.colors;
-          final profile = snapshot.data;
-
-          return _list(
-            [
-              SettingsPanelSection(
-                label: 'Account',
-                contents: (panelContext) => Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: _info(profile),
-                ),
-              ),
-              const SizedBox(height: 30),
-              Separator(color: colors.fileLineGrey),
-              const SizedBox(height: 30),
-              SettingsPanelSection(
-                label: 'For Hire',
-                contents: (panelContext) => Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: _forHire,
-                ),
-              ),
-              const SizedBox(height: 30),
-              Separator(color: colors.fileLineGrey),
-              const SizedBox(height: 30),
-              SettingsPanelSection(
-                label: 'Social',
-                contents: (panelContext) => Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: _socials(profile),
-                ),
-              ),
-            ],
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    final theme = RiveTheme.of(context);
+    final colors = theme.colors;
+    return _list(
+      [
+        SettingsPanelSection(
+          label: 'Account',
+          contents: (panelContext) => Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _info(),
+          ),
+        ),
+        const SizedBox(height: 30),
+        Separator(color: colors.fileLineGrey),
+        const SizedBox(height: 30),
+        SettingsPanelSection(
+          label: 'For Hire',
+          contents: (panelContext) => Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _forHire,
+          ),
+        ),
+        const SizedBox(height: 30),
+        Separator(color: colors.fileLineGrey),
+        const SizedBox(height: 30),
+        SettingsPanelSection(
+          label: 'Social',
+          contents: (panelContext) => Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _socials(),
+          ),
+        ),
+      ],
     );
   }
+  // User info.
+
 }
 
 class DescriptionRadio extends StatelessWidget {

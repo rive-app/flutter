@@ -438,6 +438,9 @@ class TextStyles {
   TextStyle get errorText =>
       const TextStyle(color: white, fontFamily: 'Roboto-Regular', fontSize: 13);
 
+  TextStyle get redErrorText => const TextStyle(
+      color: magenta, fontFamily: 'Roboto-Regular', fontSize: 13);
+
   // Mode button
   TextStyle get modeLabel => const TextStyle(
         fontFamily: 'Roboto-Medium',
@@ -470,8 +473,12 @@ class TextStyles {
       fontFamily: 'Roboto-Regular', color: white, fontSize: 12.5);
 
   // Get started
-  TextStyle get cardHeading =>
-      const TextStyle(fontFamily: 'Roboto-Regular', color: white, fontSize: 16, height: 1.6,);
+  TextStyle get cardHeading => const TextStyle(
+        fontFamily: 'Roboto-Regular',
+        color: white,
+        fontSize: 16,
+        height: 1.6,
+      );
 
   TextStyle get cardBlurb => const TextStyle(
         fontFamily: 'Roboto-Regular',

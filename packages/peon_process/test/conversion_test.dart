@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
 import 'package:peon_process/src/helpers/flare_to_rive.dart';
 import 'package:peon_process/src/tasks/svg_to_rive.dart';
+import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_exporter.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:xml/xml_events.dart' as xml show parseEvents;
@@ -49,6 +50,18 @@ void main() {
               xml.parseEvents(cleanFilip), 'rive_key', svgPathFuncs)
           .parse();
       createFromSvg(drawable);
+    });
+
+    test('test brain svg', () async {
+      var drawable = await SvgParserStateRived(
+              xml.parseEvents(brain), 'rive_key', svgPathFuncs)
+          .parse();
+
+      RiveFile _riveFile = createFromSvg(drawable);
+
+      var exporter = RuntimeExporter(
+          core: _riveFile, info: RuntimeHeader(ownerId: 1, fileId: 1));
+      exporter.export();
     });
   });
 

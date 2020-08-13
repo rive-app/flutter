@@ -78,8 +78,7 @@ Future<void> main() async {
   TeamManager();
   FileManager();
   SelectionManager();
-  final riveManager = RiveManager();
-  riveManager.rive = rive;
+  RiveManager().rive = rive;
   NotificationManager();
   WebsocketCommsManager();
   GlobalMessageManager();

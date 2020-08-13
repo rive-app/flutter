@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'package:aws_client/sqs.dart';
+import 'package:logging/logging.dart';
 import 'package:peon/src/tasks/base.dart';
+
+final _log = Logger('peon');
 
 Future<void> loop(Future<SqsQueue> Function() getQueue,
     Map<String, Task Function(Map<String, dynamic>)> tasks) async {
-  print('Ready to work.');
+  _log.info('Ready to work.');
   SqsQueue queue;
   while (true) {
     try {
-      print('What you want?');
+      _log.fine('What you want?');
       queue = await getQueue();
       List<SqsMessage> messages =
           await queue.receiveMessage(2, waitSeconds: 10);
@@ -17,18 +20,21 @@ Future<void> loop(Future<SqsQueue> Function() getQueue,
           bool success = await execute(message, tasks);
           if (success) {
             await queue.deleteMessage(message.receiptHandle);
-            print('work done.');
+            _log.info('Work done.');
+          } else {
+            await queue.deleteMessage(message.receiptHandle);
+            _log.severe('Work failed, removing from queue.');
           }
           // ignore: avoid_catches_without_on_clauses
         } catch (e, stacktrace) {
-          print('Encountered Error: $e\n'
+          _log.severe('Encountered Error: $e\n'
               'MESSAGE\n$message\n'
               'STACKTRACE:\n$stacktrace');
         }
       });
       // ignore: avoid_catches_without_on_clauses
     } catch (e, stacktrace) {
-      print('Encountered Error: $e\n'
+      _log.severe('Encountered Error: $e\n'
           'STACKTRACE:\n$stacktrace');
     }
   }
@@ -36,19 +42,19 @@ Future<void> loop(Future<SqsQueue> Function() getQueue,
 
 Future<bool> execute(SqsMessage message,
     Map<String, Task Function(Map<String, dynamic>)> tasks) async {
-  print('Work, work: ${message.body}');
+  _log.info('Work, work: ${message.body}');
   Map<String, dynamic> data;
   try {
     data = json.decode(message.body) as Map<String, dynamic>;
   } on FormatException catch (_) {
-    print('Whaaat? JSON Error, message: ${message.body}');
+    _log.severe('Whaaat? JSON Error, message: ${message.body}');
     return false;
   }
   if (data.containsKey('action')) {
     final task = tasks[data['action']](data);
     return task.execute();
   } else {
-    print('Illegal task ${message.body}, must contain key "action"');
+    _log.severe('Illegal task ${message.body}, must contain key "action"');
     return false;
   }
 }

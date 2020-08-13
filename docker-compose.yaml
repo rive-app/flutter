@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     environment:
       - PRIVATE_API=$PRIVATE_API
+      - DISABLE_SENTRY=True
   peon:
     container_name: peon
     build: 
@@ -20,5 +21,6 @@ services:
     environment:
         - AWS_JS_QUEUE=$AWS_JS_QUEUE
         - AWS_DART_QUEUE=$AWS_DART_QUEUE
+        - DISABLE_SENTRY=True
     stdin_open: true
     tty: true 

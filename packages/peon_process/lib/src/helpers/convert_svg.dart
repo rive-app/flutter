@@ -441,8 +441,12 @@ void addChild(RiveFile file, ContainerComponent parent, Drawable drawable) {
       var node = Node()
         ..name = attrOrDefault(drawableGroup.attributes, 'id', 'Node')
         ..x = 0
-        ..y = 0
-        ..opacity = drawableGroup.style.groupOpacity;
+        ..y = 0;
+
+      // note: we REALLY dont want opacity to be null
+      if (drawableGroup.style.groupOpacity != null) {
+        node.opacity = drawableGroup.style.groupOpacity;
+      }
 
       if (drawableGroup.transform != null) {
         // need to unpack the transform into rotation, scale and transform
