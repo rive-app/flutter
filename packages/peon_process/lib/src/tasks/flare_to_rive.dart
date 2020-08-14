@@ -17,13 +17,15 @@ class FlareToRiveTask with Task {
   final String relativeUrl;
   // should switch to connection id I guess?
   final int notifyUserId;
+  final Map originalTaskData;
 
   FlareToRiveTask(
       {this.taskId,
       this.sourceLocation,
       this.targetLocation,
       this.notifyUserId,
-      this.relativeUrl});
+      this.relativeUrl,
+      this.originalTaskData});
 
   static FlareToRiveTask fromData(Map<String, dynamic> data) {
     if (!data.containsKey("params")) {
@@ -38,7 +40,8 @@ class FlareToRiveTask with Task {
         sourceLocation: params.getString('sourceLocation'),
         targetLocation: params.getString('targetLocation'),
         relativeUrl: params.getString('relativeUrl'),
-        notifyUserId: params.getInt('notifyUserId'));
+        notifyUserId: params.getInt('notifyUserId'),
+        originalTaskData: data);
   }
 
   @override
@@ -54,15 +57,12 @@ class FlareToRiveTask with Task {
     var bytes = exporter.export();
 
     await putS3Key(targetLocation, bytes);
-    var queue = await getJSQueue();
 
+    var queue = await getJSQueue();
     await queue.sendMessage(json.encode({
-      "work": "ApiGatewayPushMessage",
-      "ownerId": notifyUserId,
-      "payload": {
-        "action": "TaskCompleted",
-        "params": {"taskId": taskId, "relativeUrl": relativeUrl}
-      }
+      "work": "TaskCompleted",
+      "taskId": taskId,
+      "payload": originalTaskData
     }));
 
     return true;

@@ -70,7 +70,6 @@ class FileApi {
       'files': fileIds ?? [],
       'folders': folderIds ?? [],
     };
-    print(jsonEncode(payload));
     await api.delete(api.host + url, body: jsonEncode(payload));
   }
 

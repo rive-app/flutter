@@ -26,6 +26,7 @@ dependencies:
     path: ../utilities
   logging: ^0.11.4
   sentry: ">=3.0.0 <4.0.0"
+  archive: ^2.0.13
 
 dev_dependencies:
   pedantic: ^1.9.0

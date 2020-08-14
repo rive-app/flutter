@@ -376,13 +376,17 @@ class _LoginState extends State<Login> {
     final theme = RiveTheme.of(context);
     final colors = theme.colors;
     final styles = theme.textStyles;
+
     return Column(
       key: const ValueKey<int>(1),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Connect an account for one-click sign in',
-          style: styles.loginText,
+          (_generalError == null)
+              ? 'Connect an account for one-click sign in'
+              : _generalError,
+          style:
+              (_generalError == null) ? styles.loginText : styles.redErrorText,
         ),
         const SizedBox(height: 20),
         _socials(),

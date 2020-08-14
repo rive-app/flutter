@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -21,12 +22,14 @@ class RiveCoopToPng with Task {
   final String targetLocation;
   // should switch to connection id I guess?
   final int notifyUserId;
+  final Map originalTaskData;
 
   RiveCoopToPng(
       {this.taskId,
       this.sourceLocation,
       this.targetLocation,
-      this.notifyUserId});
+      this.notifyUserId,
+      this.originalTaskData});
 
   static RiveCoopToPng fromData(Map<String, dynamic> data) {
     if (!data.containsKey("params")) {
@@ -40,7 +43,8 @@ class RiveCoopToPng with Task {
         taskId: params.getString('taskId'),
         sourceLocation: params.getString('sourceLocation'),
         targetLocation: params.getString('targetLocation'),
-        notifyUserId: params.getInt('notifyUserId'));
+        notifyUserId: params.getInt('notifyUserId'),
+        originalTaskData: data);
   }
 
   Future<Uint8List> convert(Uint8List runtimeBinary) async {
@@ -104,6 +108,13 @@ class RiveCoopToPng with Task {
     }
 
     await putS3Key(targetLocation, svgdata, 'us-east-1');
+
+    var queue = await getJSQueue();
+    await queue.sendMessage(json.encode({
+      "work": "TaskCompleted",
+      "taskId": taskId,
+      "payload": originalTaskData
+    }));
 
     return true;
   }

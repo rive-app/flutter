@@ -24,13 +24,15 @@ class SvgToRiveTask with Task {
   final String relativeUrl;
   // should switch to connection id I guess?
   final int notifyUserId;
+  final Map originalTaskData;
 
   SvgToRiveTask(
       {this.taskId,
       this.sourceLocation,
       this.targetLocation,
       this.notifyUserId,
-      this.relativeUrl});
+      this.relativeUrl,
+      this.originalTaskData});
 
   static SvgToRiveTask fromData(Map<String, dynamic> data) {
     if (!data.containsKey("params")) {
@@ -45,7 +47,8 @@ class SvgToRiveTask with Task {
         sourceLocation: params.getString('sourceLocation'),
         targetLocation: params.getString('targetLocation'),
         relativeUrl: params.getString('relativeUrl'),
-        notifyUserId: params.getInt('notifyUserId'));
+        notifyUserId: params.getInt('notifyUserId'),
+        originalTaskData: data);
   }
 
   Future<String> clean(String input) async {
@@ -112,15 +115,12 @@ class SvgToRiveTask with Task {
     var uint8data = exporter.export();
 
     await putS3Key(targetLocation, uint8data);
-    var queue = await getJSQueue();
 
+    var queue = await getJSQueue();
     await queue.sendMessage(json.encode({
-      "work": "ApiGatewayPushMessage",
-      "ownerId": notifyUserId,
-      "payload": {
-        "action": "TaskCompleted",
-        "params": {"taskId": taskId, "relativeUrl": relativeUrl}
-      }
+      "work": "TaskCompleted",
+      "taskId": taskId,
+      "payload": originalTaskData
     }));
 
     return true;
