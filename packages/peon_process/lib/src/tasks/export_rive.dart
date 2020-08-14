@@ -21,13 +21,17 @@ class SourceDetail {
   final String key;
   final String name;
   final String path;
+  final int fileId;
+  final int ownerId;
 
-  SourceDetail({this.key, this.name, this.path});
+  SourceDetail({this.key, this.name, this.path, this.fileId, this.ownerId});
   static SourceDetail fromData(Map<String, Object> data) {
     return SourceDetail(
       key: data.getString('key'),
       name: data.getString('name'),
       path: data.getString('path'),
+      fileId: data.getInt('fileId'),
+      ownerId: data.getInt('ownerId'),
     );
   }
 }
@@ -82,12 +86,16 @@ class ExportRive with Task {
         var sourceLocation = '$sourceBase${sourceDetails[i].key}';
         var data = await getS3Key(sourceLocation, 'us-east-1');
 
-        var riveFile = RiveFile('1', localDataPlatform: null);
+        var riveFile = RiveFile(sourceDetails[i].fileId.toString(),
+            localDataPlatform: null);
         var coopImporter = CoopImporter(core: riveFile);
         coopImporter.import(data);
         var exporter = RuntimeExporter(
             core: riveFile,
-            info: RuntimeHeader(ownerId: notifyUserId, fileId: 1));
+            info: RuntimeHeader(
+              ownerId: sourceDetails[i].ownerId,
+              fileId: sourceDetails[i].fileId,
+            ));
         var exportedRiveBinary = exporter.export();
 
         var filePath =
@@ -105,8 +113,8 @@ class ExportRive with Task {
     }
 
     await putS3Key(targetLocation, zipBytes);
-    var queue = await getJSQueue();
 
+    var queue = await getJSQueue();
     await queue.sendMessage(json.encode({
       "work": "TaskCompleted",
       "taskId": taskId,

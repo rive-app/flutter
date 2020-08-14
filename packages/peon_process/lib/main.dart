@@ -20,7 +20,7 @@ void main() {
     registeredTasks['svgtorive'] = SvgToRiveTask.fromData;
     registeredTasks['flaretorive'] = FlareToRiveTask.fromData;
     registeredTasks['rivetopng'] = RiveCoopToPng.fromData;
-    registeredTasks['exportRive'] = ExportRive.fromData;
+    registeredTasks['exportrive'] = ExportRive.fromData;
 
     loop(getQueue, registeredTasks);
   }, onError: (dynamic e, dynamic s) {

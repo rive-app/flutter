@@ -123,15 +123,25 @@ class RiveManager with Subscriptions {
 
     selection.files.map((e) => e.id).toList();
 
+    Plumber().message(GlobalMessage(
+        'Exporting selected files, this can take a minute.',
+        'dismiss',
+        () => Plumber().flush<GlobalMessage>()));
     final task = await TasksApi().exportRiveFiles(payload);
 
     // TODO: handle timeout?
     TaskManager().notifyTasks({task.taskId}, (TaskCompleted result) async {
       var zipBytes = await TasksApi().taskData(result.taskId);
       if (await FileSave.save('export.zip', zipBytes)) {
-        print('yes');
+        Plumber().message(
+          GlobalMessage('Export completed.', 'dismiss',
+              () => Plumber().flush<GlobalMessage>()),
+        );
       } else {
-        print('no');
+        Plumber().message(
+          GlobalMessage('Export cancelled.', 'dismiss',
+              () => Plumber().flush<GlobalMessage>()),
+        );
       }
     });
   }
