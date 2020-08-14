@@ -453,9 +453,6 @@ abstract class RiveCoreContext extends CoreContext {
     Core<CoreContext> object = resolve(objectChanges.objectId);
     var justAdded = false;
     if (object == null) {
-      if (objectChanges.objectId.object == 211) {
-        print("211 not created yet, we need to make it.");
-      }
       // Only look for the addKey if the object was null, becase we propagate
       // changes to all clients, we'll receive our own adds which will result
       // in duplicates if we don't do this only for null objects.
@@ -463,9 +460,6 @@ abstract class RiveCoreContext extends CoreContext {
           (change) => change.op == CoreContext.addKey,
           orElse: () => null);
       if (addChange == null) {
-        if (objectChanges.objectId.object == 211) {
-          print("Missing create key");
-        }
         // Null object and no creation change.
         return;
       }
@@ -474,13 +468,7 @@ abstract class RiveCoreContext extends CoreContext {
       if (object != null) {
         object.id = objectChanges.objectId;
         justAdded = true;
-        if (objectChanges.objectId.object == 211) {
-        print("MADE 211!!");
-      }
       } else {
-        if (objectChanges.objectId.object == 211) {
-          print("Failed to make core instance :(");
-        }
         // object couldn't be created, don't attempt to change any properties on
         // a null object, so return.
         return;
@@ -493,9 +481,6 @@ abstract class RiveCoreContext extends CoreContext {
           // Ignore, we looked for it earlier if we needed to make the object.
           break;
         case CoreContext.removeKey:
-          if (objectChanges.objectId.object == 211) {
-            print("REMOVE KEY!? :(");
-          }
           // Don't remove null objects. This can happen as we acknowledge
           // changes, so we'll attempt to delete an object we ourselves have
           // already deleted.
@@ -615,9 +600,6 @@ abstract class RiveCoreContext extends CoreContext {
     }
     if (justAdded) {
       addObject(object);
-      if (objectChanges.objectId.object == 211) {
-        print("ADDING 211 TO CORE!!");
-      }
     }
   }
 
