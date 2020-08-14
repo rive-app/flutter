@@ -415,6 +415,13 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
               itemBuilder: (popupContext, PopupContextItem item, isHovered) =>
                   item.itemBuilder(popupContext, isHovered),
               items: [
+                PopupContextItem(
+                  'Export',
+                  select: () => FolderContentsManager().export(),
+                  leftMargin: 15,
+                  height: 35,
+                ),
+                PopupContextItem.separator(),
                 if (selection.files.length + selection.folders.length == 1)
                   PopupContextItem(
                     'Rename',

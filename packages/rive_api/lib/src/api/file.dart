@@ -70,8 +70,18 @@ class FileApi {
       'files': fileIds ?? [],
       'folders': folderIds ?? [],
     };
-    print(jsonEncode(payload));
     await api.delete(api.host + url, body: jsonEncode(payload));
+  }
+
+  Future<void> exportRiveFiles(
+      Map<String, Map<String, List<int>>> payload) async {
+    /// Export selected files
+    /// {
+    ///     "1": {"files": [1, 2, 3], "folders": [4, 5, 6]},
+    ///     "2": {"files": [1, 2, 3], "folders": [4, 5, 6]},
+    ///     ...
+    /// }
+    await api.post('${api.host}/api/tasks/export', body: jsonEncode(payload));
   }
 
   Future<List<FileDM>> _files(String url, [int ownerId]) async {
