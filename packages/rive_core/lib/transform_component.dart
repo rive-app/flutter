@@ -11,6 +11,10 @@ export 'package:rive_core/src/generated/transform_component_base.dart';
 
 abstract class TransformComponent extends TransformComponentBase {
   // -> editor-only
+  void markBoundsChanged() {
+    _delegate?.boundsChanged();
+  }
+
   BoundsDelegate _delegate;
   @override
   void userDataChanged(dynamic from, dynamic to) {

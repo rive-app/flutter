@@ -382,23 +382,19 @@ class RiveFile extends RiveCoreContext {
     // Let's validate the file. First thing we expect is that it has a
     // backboard.
     var backboards = objects.whereType<Backboard>();
-    bool didPatch = false;
+    bool fixedBackboard = false;
     if (backboards.isEmpty) {
       // Don't have one? Patch up the file and make one...
       batchAdd(() {
         _backboard = Backboard();
         addObject(_backboard);
       });
-      // Save the creation of the backboard.
-      captureJournalEntry();
-      // Don't allow undoing it.
-      clearJournal();
     } else {
       if (backboards.length > 1) {
         do {
           removeObject(backboards.last);
         } while (backboards.length > 1);
-        didPatch = true;
+        fixedBackboard = true;
       }
       _backboard = backboards.first;
     }
@@ -409,7 +405,7 @@ class RiveFile extends RiveCoreContext {
       _backboard.activeArtboard = artboards.first;
     }
 
-    if (didPatch) {
+    if (fixedBackboard || hasRecordedChanges) {
       // We had to patch up the file, save the changes and disallow undo.
       captureJournalEntry();
       clearJournal();

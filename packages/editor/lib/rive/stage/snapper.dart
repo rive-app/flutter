@@ -105,6 +105,7 @@ class SnappingAxes {
 
 /// A snapping context.
 class Snapper {
+  static const epsilon = 0.01;
   static const double snapDistance = 5;
   static const double snapIconRadius = 3;
   final Stage stage;
@@ -145,10 +146,6 @@ class Snapper {
     }
 
     stage.visTree.all((id, item) {
-      // if (exclusion.contains(item)) {
-      //   return true;
-      // }
-
       if (filters.every((filter) => filter(item, exclusion))) {
         item.addSnapTarget(_targets);
       }
@@ -188,6 +185,10 @@ class Snapper {
 
       for (int i = 0; i < 2; i++) {
         var threshold = snapDistance;
+
+        // Does our lock axis prevent this axis from moving at all?
+        bool isDeadAxis = lockAxis != null && lockAxis[i] == 0;
+
         // Store last screen difference without abs value to check if it matches
         // previous snap results (as we build up multiple snap results).
         double lastDiff = 0;
@@ -196,7 +197,13 @@ class Snapper {
 
           for (final cx in _targets._axes[i]) {
             var checkDiff = cx.value - checkX;
-
+            // When we're locked to an axis and we're fully axis aligned, we
+            // only want to show snaps that don't cause a change in value.
+            // Changing in value on this axis is not allowed because we're
+            // attempting to move only on the other axis.
+            if (isDeadAxis && checkDiff != 0) {
+              continue;
+            }
             var screenDiff = (checkDiff * stage.viewZoom).abs();
 
             if (screenDiff <= threshold) {
@@ -221,10 +228,11 @@ class Snapper {
         }
       }
 
-      // After we've processed both axes, we can apply the difference. If we're
-      // axis locked, we need to correct the diff on the opposite dimension,
-      // which likely means breaking snap on that opposite dimension (if there
-      // was).
+      // After we've processed both axes, we can apply the difference. If
+      // we're axis locked, we need to correct the diff on the opposite
+      // dimension, which likely means breaking snap on that opposite
+      // dimension (if there was).
+
       for (int i = 0; i < 2; i++) {
         var componentA = i;
         var componentB = (i + 1) % 2;
@@ -232,11 +240,12 @@ class Snapper {
         if (_snapResult[componentA].isNotEmpty) {
           diff[componentA] += diffDelta[componentA];
           // Don't process the lock axis if the denominator of the slope is 0.
-          if (lockAxis != null && lockAxis[componentA] != 0) {
+          if (lockAxis != null && lockAxis[componentA].abs() > epsilon) {
             // Solve for snap on opposite axis so the delta is is still on the
             // same locked slope.
             var axisAligned = diff[componentA] *
                 (lockAxis[componentB] / lockAxis[componentA]);
+
             if (diff[componentB] != axisAligned) {
               // The change results in a different coordinate which requires
               // canceling the snap on that axis.
