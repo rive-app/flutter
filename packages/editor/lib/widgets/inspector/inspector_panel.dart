@@ -83,6 +83,8 @@ class _InspectorPanelState extends State<InspectorPanel> {
               // Add the top padding
               builders.add(InspectorBuilder.padding);
 
+              bool addDivider = false;
+              var dividerBuilder = InspectorBuilder.divider;
               for (int i = 0, builderCount = inspectorBuilders.length;
                   i < builderCount;
                   i++) {
@@ -103,13 +105,15 @@ class _InspectorPanelState extends State<InspectorPanel> {
                   _changeNotifiers.add(notifier);
                 }
 
-                var dividerBuilder = InspectorBuilder.divider;
                 var expand = builder.expand(inspectionSet);
                 if (expand != null && expand.isNotEmpty) {
-                  builders.addAll(expand);
-                  if (i != builderCount - 1) {
+                  if (addDivider) {
                     builders.add(dividerBuilder);
                   }
+                  builders.addAll(expand);
+                  addDivider = true;
+                } else {
+                  addDivider = false;
                 }
               }
               if (builders.isNotEmpty) {
