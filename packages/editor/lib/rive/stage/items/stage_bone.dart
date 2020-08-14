@@ -70,7 +70,7 @@ class StageBone extends HideableStageItem<Bone>
   @override
   void boundsChanged() {
     final artboard = component.artboard;
-    if (artboard == null) {
+    if (artboard == null || stage == null) {
       // Bounds changed for bones gets called during initialization.
       return;
     }
