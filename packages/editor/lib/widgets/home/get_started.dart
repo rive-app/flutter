@@ -43,19 +43,19 @@ class MiddlePanel extends StatelessWidget {
         SizedBox(height: 30),
         LargeCard(
           backgroundImageAsset: 'assets/images/space_man.png',
-          url: 'https://help.rive.app',
+          url: 'https://f.io/39_jZ-_N',
           heading: 'Quick Start',
           blurb: 'Watch this video to learn the basics '
               'and core concepts you need to get started',
         ),
         SizedBox(height: 30),
-        LargeCard(
-          backgroundImageAsset: 'assets/images/mother_of_dashes.png',
-          url: 'https://www.youtube.com/watch?v=oHg5SJYRHA0',
-          heading: 'More Getting Started',
-          blurb: 'More getting started to go here',
-        ),
-        SizedBox(height: 30),
+        // LargeCard(
+        //   backgroundImageAsset: 'assets/images/mother_of_dashes.png',
+        //   url: 'https://www.youtube.com/watch?v=oHg5SJYRHA0',
+        //   heading: 'More Getting Started',
+        //   blurb: 'More getting started to go here',
+        // ),
+        // SizedBox(height: 30),
       ],
     );
   }
@@ -69,22 +69,22 @@ class RightPanel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 30, top: 30),
       child: Column(
         children: const [
+          // UrlCard(
+          //   icon: PackedIcon.desktop,
+          //   blurb: 'Get the desktop app!',
+          //   url: 'https://rive.app/',
+          // ),
+          // SizedBox(height: 20),
           UrlCard(
-            icon: PackedIcon.desktop,
-            blurb: 'Get the desktop app!',
-            url: 'https://rive.app/',
+            icon: PackedIcon.helpCenter,
+            blurb: 'Help Center',
+            url: 'https://help.rive.app',
           ),
           SizedBox(height: 20),
           UrlCard(
             icon: PackedIcon.runtimes,
             blurb: 'Get the Runtimes',
             url: 'https://github.com/rive-app/rive-flutter',
-          ),
-          SizedBox(height: 20),
-          UrlCard(
-            icon: PackedIcon.helpCenter,
-            blurb: 'Help Center',
-            url: 'https://help.rive.app',
           ),
           SizedBox(height: 20),
           UrlCard(
