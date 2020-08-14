@@ -169,31 +169,6 @@ class FolderContentsManager with Subscriptions {
     unawaited(_getFolderContents(currentDirectory));
     unawaited(FileManager().loadFolders(currentDirectory.owner));
   }
-
-  Future<void> export() async {
-    var selection = Plumber().peek<Selection>();
-
-    var payload = <String, Map<String, List<int>>>{};
-    selection.files.forEach((file) {
-      // TODO: untangle me
-      final actualFile = Plumber().peek<File>(file.hashCode);
-      payload[actualFile.fileOwnerId.toString()] ??= {
-        'files': [],
-        'folders': []
-      };
-      payload[actualFile.fileOwnerId.toString()]['files'].add(actualFile.id);
-    });
-    selection.folders.forEach((folder) {
-      payload[folder.ownerId.toString()] ??= {'files': [], 'folders': []};
-      payload[folder.ownerId.toString()]['folders'].add(folder.id);
-    });
-
-    selection.files.map((e) => e.id).toList();
-
-    await FileApi().exportRiveFiles(payload);
-    // TODO: do we need to do anything else.. maybe we put
-    // a message up saying download will start shortly
-  }
 }
 
 class _FolderContentsCache {

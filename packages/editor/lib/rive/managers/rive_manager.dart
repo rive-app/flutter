@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:rive_api/api.dart';
 import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/platform/file_save.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
+import 'package:rive_editor/rive/managers/task_manager.dart';
 import 'package:rive_editor/rive/rive.dart';
 
 class FileCounter {
@@ -98,5 +101,38 @@ class RiveManager with Subscriptions {
       removeSubscription(subs[file.hashCode].stream);
       subs.remove(file.hashCode);
     }
+  }
+
+  Future<void> export() async {
+    var selection = Plumber().peek<Selection>();
+
+    var payload = <String, Map<String, List<int>>>{};
+    selection.files.forEach((file) {
+      // TODO: untangle me
+      final actualFile = Plumber().peek<File>(file.hashCode);
+      payload[actualFile.fileOwnerId.toString()] ??= {
+        'files': [],
+        'folders': []
+      };
+      payload[actualFile.fileOwnerId.toString()]['files'].add(actualFile.id);
+    });
+    selection.folders.forEach((folder) {
+      payload[folder.ownerId.toString()] ??= {'files': [], 'folders': []};
+      payload[folder.ownerId.toString()]['folders'].add(folder.id);
+    });
+
+    selection.files.map((e) => e.id).toList();
+
+    final task = await TasksApi().exportRiveFiles(payload);
+
+    // TODO: handle timeout?
+    TaskManager().notifyTasks({task.taskId}, (TaskCompleted result) async {
+      var zipBytes = await TasksApi().taskData(result.taskId);
+      if (await FileSave.save('export.zip', zipBytes)) {
+        print('yes');
+      } else {
+        print('no');
+      }
+    });
   }
 }

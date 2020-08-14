@@ -47,6 +47,25 @@ class TasksApi {
     return task('flare', 'convert', flr);
   }
 
+  Future<TaskResult> exportRiveFiles(
+      Map<String, Map<String, List<int>>> payload) async {
+    /// Export selected files
+    /// {
+    ///     "1": {"files": [1, 2, 3], "folders": [4, 5, 6]},
+    ///     "2": {"files": [1, 2, 3], "folders": [4, 5, 6]},
+    ///     ...
+    /// }
+    var res = await api.post('${api.host}/api/tasks/export',
+        body: jsonEncode(payload));
+    try {
+      final data = json.decodeMap(res.body);
+      return TaskResult.fromData(data);
+    } on FormatException catch (e) {
+      _log.severe('Error reading task response: $e');
+      rethrow;
+    }
+  }
+
   Future<Uint8List> taskData(String taskId) async {
     var res = await api.get('${api.host}/api/tasks/$taskId');
     // TODO: log non 200s?

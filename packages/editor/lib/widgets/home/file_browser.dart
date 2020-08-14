@@ -9,6 +9,7 @@ import 'package:rive_api/manager.dart';
 import 'package:rive_api/model.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
+import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
@@ -417,7 +418,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
               items: [
                 PopupContextItem(
                   'Export',
-                  select: () => FolderContentsManager().export(),
+                  select: () => RiveManager().export(),
                   leftMargin: 15,
                   height: 35,
                 ),
