@@ -1,15 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:rive_core/bounds_delegate.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/shapes/clipping_shape.dart';
+import 'package:rive_core/src/generated/shapes/clipping_shape_base.dart';
 import 'package:rive_core/src/generated/transform_component_base.dart';
 export 'package:rive_core/src/generated/transform_component_base.dart';
 
 abstract class TransformComponent extends TransformComponentBase {
+  List<ClippingShape> _clippingShapes;
+  Iterable<ClippingShape> get clippingShapes => _clippingShapes;
+  // -> editor-only
+  final Event clippingShapesChanged = Event();
+  // <- editor-only
+
   // -> editor-only
   void markBoundsChanged() {
     _delegate?.boundsChanged();
@@ -148,6 +157,40 @@ abstract class TransformComponent extends TransformComponentBase {
   void parentChanged(ContainerComponent from, ContainerComponent to) {
     super.parentChanged(from, to);
     markWorldTransformDirty();
+  }
+
+  @override
+  void childAdded(Component child) {
+    super.childAdded(child);
+    switch (child.coreType) {
+      case ClippingShapeBase.typeKey:
+        _clippingShapes ??= <ClippingShape>[];
+        _clippingShapes.add(child as ClippingShape);
+        addDirt(ComponentDirt.clip, recurse: true);
+        // -> editor-only
+        clippingShapesChanged.notify();
+        // <- editor-only
+        break;
+    }
+  }
+
+  @override
+  void childRemoved(Component child) {
+    super.childRemoved(child);
+    switch (child.coreType) {
+      case ClippingShapeBase.typeKey:
+        if (_clippingShapes != null) {
+          _clippingShapes.remove(child as ClippingShape);
+          if (_clippingShapes.isEmpty) {
+            _clippingShapes = null;
+          }
+          addDirt(ComponentDirt.clip, recurse: true);
+          // -> editor-only
+          clippingShapesChanged.notify();
+          // <- editor-only
+        }
+        break;
+    }
   }
 
   // -> editor-only

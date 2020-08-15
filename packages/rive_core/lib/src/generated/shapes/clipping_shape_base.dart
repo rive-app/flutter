@@ -61,6 +61,26 @@ abstract class ClippingShapeBase extends Component {
 
   void clipOpValueChanged(int from, int to);
 
+  /// --------------------------------------------------------------------------
+  /// IsVisible field with key 94.
+  bool _isVisible = true;
+  static const int isVisiblePropertyKey = 94;
+  bool get isVisible => _isVisible;
+
+  /// Change the [_isVisible] field value.
+  /// [isVisibleChanged] will be invoked only if the field's value has changed.
+  set isVisible(bool value) {
+    if (_isVisible == value) {
+      return;
+    }
+    bool from = _isVisible;
+    _isVisible = value;
+    onPropertyChanged(isVisiblePropertyKey, from, value);
+    isVisibleChanged(from, value);
+  }
+
+  void isVisibleChanged(bool from, bool to);
+
   @override
   void changeNonNull() {
     super.changeNonNull();
@@ -69,6 +89,9 @@ abstract class ClippingShapeBase extends Component {
     }
     if (clipOpValue != null) {
       onPropertyChanged(clipOpValuePropertyKey, clipOpValue, clipOpValue);
+    }
+    if (isVisible != null) {
+      onPropertyChanged(isVisiblePropertyKey, isVisible, isVisible);
     }
   }
 
@@ -86,6 +109,10 @@ abstract class ClippingShapeBase extends Component {
       context.uintType
           .writeRuntimeProperty(clipOpValuePropertyKey, writer, _clipOpValue);
     }
+    if (_isVisible != null && exports(isVisiblePropertyKey)) {
+      context.boolType
+          .writeRuntimeProperty(isVisiblePropertyKey, writer, _isVisible);
+    }
   }
 
   @override
@@ -93,6 +120,8 @@ abstract class ClippingShapeBase extends Component {
     switch (propertyKey) {
       case clipOpValuePropertyKey:
         return _clipOpValue != 0;
+      case isVisiblePropertyKey:
+        return _isVisible != true;
     }
     return super.exports(propertyKey);
   }
@@ -104,6 +133,8 @@ abstract class ClippingShapeBase extends Component {
         return shapeId as K;
       case clipOpValuePropertyKey:
         return clipOpValue as K;
+      case isVisiblePropertyKey:
+        return isVisible as K;
       default:
         return super.getProperty<K>(propertyKey);
     }
@@ -114,6 +145,7 @@ abstract class ClippingShapeBase extends Component {
     switch (propertyKey) {
       case shapeIdPropertyKey:
       case clipOpValuePropertyKey:
+      case isVisiblePropertyKey:
         return true;
       default:
         return super.hasProperty(propertyKey);

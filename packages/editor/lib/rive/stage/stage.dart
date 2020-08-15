@@ -56,10 +56,10 @@ import 'package:rive_editor/rive/stage/tools/late_draw_stage_tool.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_editor/rive/stage/tools/transforming_tool.dart';
+import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:utilities/restorer.dart';
-
-typedef CustomSelectionHandler = bool Function(StageItem);
+import 'package:rive_editor/rive/selection_context.dart';
 
 enum AxisCheckState { local, parent, world }
 
@@ -124,8 +124,6 @@ class Stage extends Debouncer {
   bool _isHidingCursor = false;
   int _hoverOffsetIndex = -1;
 
-  final Set<CustomSelectionHandler> _selectionHandlers = {};
-
   /// We store these two separtely to avoid contention with how they are
   /// activated/disabled.
   CursorInstance _rightClickHandCursor;
@@ -143,15 +141,16 @@ class Stage extends Debouncer {
   Snapper _snapper;
   Snapper get snapper => _snapper ??= Snapper(this, _worldMouse);
 
-  /// Register a selection handler that will be called back whenever an item is
-  /// clicked on the stage.
-  bool addSelectionHandler(CustomSelectionHandler handler) {
-    return _selectionHandlers.add(handler);
-  }
-
-  // Remove a previously added selection handler.
-  bool removeSelectionHandler(CustomSelectionHandler handler) {
-    return _selectionHandlers.remove(handler);
+  /// Register a selection handler that will be called back when an item of type
+  /// T is selected.
+  Restorer addSelectionHandler<T extends SelectableItem>(
+      SelectionHandler<T> handler) {
+    return file.selection.addHandler((item) {
+      if (item is T) {
+        return handler(item);
+      }
+      return false;
+    });
   }
 
   LateDrawViewDelegate lateDrawDelegate;
@@ -432,7 +431,7 @@ class Stage extends Debouncer {
   int _selectionSuppression = 0;
   Restorer suppressSelection() {
     _selectionSuppression++;
-    return Restorer(_restoreSelection);
+    return RestoreCallback(_restoreSelection);
   }
 
   bool _restoreSelection() {
@@ -454,7 +453,7 @@ class Stage extends Debouncer {
   Restorer hideHandles() {
     _handleSuppression++;
     _isHidingHandlesNotifier.value = true;
-    return Restorer(_restoreHandles);
+    return RestoreCallback(_restoreHandles);
   }
 
   bool _restoreHandles() {
@@ -541,14 +540,7 @@ class Stage extends Debouncer {
 
             _mouseDownSelectAppend = ShortcutAction.multiSelect.value;
 
-            bool selectionHandled = false;
-            for (final handler in _selectionHandlers) {
-              if (handler(_hoverItem)) {
-                selectionHandled = true;
-                break;
-              }
-            }
-            if (!selectionHandled) {
+            if (!file.selection.isCustomHandled(_hoverItem)) {
               if (_hoverItem.isSelected) {
                 if (_mouseDownSelectAppend) {
                   // If the hover item is already selected and we're holding
@@ -557,7 +549,8 @@ class Stage extends Debouncer {
                   file.selection.deselect(_hoverItem);
                 }
               } else {
-                file.select(_hoverItem, append: _mouseDownSelectAppend);
+                file.select(_hoverItem,
+                    append: _mouseDownSelectAppend, skipHandlers: true);
               }
             }
           }

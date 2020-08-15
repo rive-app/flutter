@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/transform_component.dart';
 import 'package:rive_core/shapes/path.dart' as core;
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
-import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/inspector_group.dart';
+import 'package:rive_editor/widgets/inspector/properties/property_clip.dart';
+import 'package:utilities/restorer.dart';
 
 /// Example inspector builder with combo boxes.
 class InspectClipping extends ListenableInspectorBuilder {
   bool _isExpanded = true;
   SimpleAlert _pickClippingAlert;
-  Stage _handlerStage;
+  Restorer _selectionHandlerRestorer;
+  TransformComponent _clippableComponent;
 
   void _dismissAlert() {
     if (_pickClippingAlert != null) {
-      _handlerStage.removeSelectionHandler(_selectionHandler);
+      _selectionHandlerRestorer?.restore();
       SchedulerBinding.instance
           .scheduleTask(_pickClippingAlert.dismiss, Priority.touch);
     }
@@ -30,12 +33,21 @@ class InspectClipping extends ListenableInspectorBuilder {
     _dismissAlert();
   }
 
-  bool _selectionHandler(StageItem item) {
-    if (item.component is Shape) {
-      print("USE THIS SHAPE: ${item.component}");
-    }
-    _dismissAlert();
-    return true;
+  void _createClipper(InspectionSet inspecting, Shape shape) {
+    var file = inspecting.fileContext.core;
+    file.batchAdd(() {
+      for (final component in inspecting.components) {
+        if (component is! TransformComponent || component is core.Path) {
+          continue;
+        }
+
+        var clipper = ClippingShape();
+        file.addObject(clipper);
+        clipper.shape = shape;
+        (component as TransformComponent).appendChild(clipper);
+      }
+    });
+    file.captureJournalEntry();
   }
 
   @override
@@ -49,16 +61,41 @@ class InspectClipping extends ListenableInspectorBuilder {
               },
               add: () {
                 _dismissAlert();
-                inspecting.fileContext.addAlert(_pickClippingAlert =
-                    SimpleAlert('Pick a shape to use as a clipping source.',
-                        autoDismiss: false));
-                _handlerStage = inspecting.stage;
-                _handlerStage.addSelectionHandler(_selectionHandler);
+                inspecting.fileContext.addAlert(
+                  _pickClippingAlert = SimpleAlert(
+                      'Pick a shape to use as a clipping source.',
+                      autoDismiss: false),
+                );
+
+                _selectionHandlerRestorer =
+                    inspecting.stage.addSelectionHandler(
+                  (StageItem item) {
+                    if (item.component is Shape) {
+                      _createClipper(inspecting, item.component as Shape);
+                    }
+                    _dismissAlert();
+                    return true;
+                  },
+                );
               },
             ),
+        if (_isExpanded && _clippableComponent.clippingShapes != null)
+          for (var clippingShape in _clippableComponent.clippingShapes)
+            (context) => PropertyClip(clippingShape: clippingShape),
       ];
 
   @override
-  bool validate(InspectionSet inspecting) => inspecting.components
-      .any((item) => item is TransformComponent && item is! core.Path);
+  bool validate(InspectionSet inspecting) {
+    if (inspecting.components.length != 1) {
+      return false;
+    }
+    var selectedComponent = inspecting.components.first;
+    if (selectedComponent is TransformComponent &&
+        selectedComponent is! core.Path) {
+      _clippableComponent = selectedComponent;
+      changeWhen([_clippableComponent.clippingShapesChanged]);
+      return true;
+    }
+    return false;
+  }
 }

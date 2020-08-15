@@ -2,6 +2,9 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:rive_editor/selectable_item.dart';
+import 'package:utilities/restorer.dart';
+
+typedef SelectionHandler<T extends SelectableItem> = bool Function(T);
 
 /// Manages a list of selected items. Allows selecting and deselecting new
 /// items.
@@ -59,8 +62,29 @@ class SelectionContext<T extends SelectableItem> extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool select(T item, {bool append = false, bool notify = true}) {
+  bool isCustomHandled(T item) {
+    // See if a handler wants to swallow this event...
+    for (final handler in _handlers) {
+      if (handler.call(item)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool select(
+    T item, {
+    bool append = false,
+    bool notify = true,
+    bool skipHandlers = false,
+  }) {
     assert(item != null, 'should not select a null item');
+
+    // See if a handler wants to swallow this select...
+    if (!skipHandlers && isCustomHandled(item)) {
+      return false;
+    }
+
     if (!append) {
       clear(notify: false);
     }
@@ -86,5 +110,31 @@ class SelectionContext<T extends SelectableItem> extends ChangeNotifier {
       return true;
     }
     return false;
+  }
+
+  final Set<SelectionHandler<T>> _handlers = {};
+
+  Restorer addHandler(SelectionHandler<T> handler) {
+    assert(!_handlers.contains(handler));
+    if (_handlers.add(handler)) {
+      return _SelectionHandlerRestorer(handler, this);
+    }
+    return null;
+  }
+
+  bool _removeHandler(SelectionHandler<T> handler) => _handlers.remove(handler);
+}
+
+class _SelectionHandlerRestorer<T extends SelectableItem> implements Restorer {
+  final SelectionHandler<T> _handler;
+  SelectionContext<T> _context;
+
+  _SelectionHandlerRestorer(this._handler, this._context);
+
+  @override
+  bool restore() {
+    var removed = _context?._removeHandler(_handler) ?? false;
+    _context = null;
+    return removed;
   }
 }

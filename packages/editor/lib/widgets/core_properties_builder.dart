@@ -69,7 +69,8 @@ class _CorePropertiesBuilderState<T, K extends Core>
   void _bindListener() {
     var propertyKey = widget.propertyKey;
     for (final object in widget.objects) {
-      object.addListener(propertyKey, _valueChanged);
+      var eventDelegate = object.eventDelegateFor(propertyKey);
+      eventDelegate.addListener(propertyKey, _valueChanged);
     }
 
     value = _validateValue();

@@ -17,6 +17,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
 import 'package:rive_editor/widgets/inspector/inspect_vertices.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
+import 'package:utilities/restorer.dart';
 
 // A manager that has a sense of what's currently being edited in stage solo
 // mode. Meant to support shapes, paths, and meshes. It needs to track the set
@@ -48,6 +49,8 @@ class VertexEditor with RiveFileDelegate {
   ValueListenable<PointsPath> get creatingPath => _creatingPath;
   Iterable<PointsPath> get editingPaths => _editingPaths.value;
 
+  Restorer _selectionHandlerRestorer;
+
   VertexEditor(this.file, this.stage) {
     file.core.addDelegate(this);
     file.addActionHandler(_handleAction);
@@ -61,7 +64,8 @@ class VertexEditor with RiveFileDelegate {
     switch (_mode.value = mode) {
       case VertexEditorMode.editingPath:
         stage.soloListenable.addListener(_soloChanged);
-        stage.addSelectionHandler(_selectionHandler);
+        _selectionHandlerRestorer =
+            stage.addSelectionHandler(_selectionHandler);
         break;
       case VertexEditorMode.off:
       default:
@@ -69,7 +73,7 @@ class VertexEditor with RiveFileDelegate {
         _turnOff();
         stage.solo(null);
         stage.soloListenable.removeListener(_soloChanged);
-        stage.removeSelectionHandler(_selectionHandler);
+        _selectionHandlerRestorer?.restore();
         _editingPaths.value = null;
         break;
     }
