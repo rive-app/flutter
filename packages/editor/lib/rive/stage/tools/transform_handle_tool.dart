@@ -77,6 +77,7 @@ abstract class TransformHandleTool extends StageTool
 
   /// Tracks hidden handles that should be restored when transformers complete
   Restorer restoreHandles;
+  Restorer _selectionHandlerRestorer;
 
   @override
   bool activate(Stage stage) {
@@ -85,7 +86,7 @@ abstract class TransformHandleTool extends StageTool
     }
     _selectionContext = stage.file.selection;
     _selectionContext.addListener(_selectionChanged);
-    stage.addSelectionHandler(_handleStageSelection);
+    _selectionHandlerRestorer = stage.addSelectionHandler(_handleStageSelection);
     // Sync the selection whenver the show handles value changes.
     stage.isHidingHandlesChanged.addListener(_selectionChanged);
     _selectionChanged();
@@ -149,7 +150,7 @@ abstract class TransformHandleTool extends StageTool
   void deactivate() {
     super.deactivate();
     _selectionContext.removeListener(_selectionChanged);
-    stage.removeSelectionHandler(_handleStageSelection);
+    _selectionHandlerRestorer?.restore();
     stage.isHidingHandlesChanged.removeListener(_selectionChanged);
     _setSelection({});
   }

@@ -464,7 +464,11 @@ class OpenFileContext with RiveFileDelegate {
 
   SelectionMode get selectionMode => rive.selectionMode.value;
 
-  bool select(SelectableItem item, {bool append}) {
+  bool select(
+    SelectableItem item, {
+    bool append,
+    bool skipHandlers = false,
+  }) {
     append ??= rive.selectionMode.value == SelectionMode.multi;
 
     /// When appending, toggle selection in the set, so already selected items
@@ -474,7 +478,8 @@ class OpenFileContext with RiveFileDelegate {
       return selection.deselect(item);
     }
 
-    final success = selection.select(item, append: append);
+    final success =
+        selection.select(item, append: append, skipHandlers: skipHandlers);
     return success;
   }
 

@@ -81,6 +81,11 @@ abstract class Core<T extends CoreContext> {
     return false;
   }
 
+  /// If an object wishes to delegate specific property key event changes to
+  /// another one, override this method to return the appropriate core object
+  /// for the key.
+  Core eventDelegateFor(int propertyKey) => this;
+
   /// Register to receive a notification whenever a property with propertyKey
   /// changes on this object.
   bool addListener(int propertyKey, PropertyChangeCallback callback) {
@@ -212,7 +217,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   /// returns an AutoKeySupression subscription which can be canceled.
   Restorer suppressAutoKey() {
     _suppressAutoKey++;
-    return Restorer(_restoreAutoKey);
+    return RestoreCallback(_restoreAutoKey);
   }
 
   /// Restores auto key to previous setting, will return true if this result in

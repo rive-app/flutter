@@ -103,6 +103,10 @@ abstract class ShapePaintInspectorBuilder extends ListenableInspectorBuilder {
   bool validate(InspectionSet inspecting) {
     // Only interested in ShapeContainers...
     // ...with the same number of strokes/fills.
+    if (!inspecting.components
+        .every((component) => component is ShapePaintContainer)) {
+      return false;
+    }
     var isValid = inspecting.components
         .whereType<ShapePaintContainer>()
         .allSame((component) => shapePaintsOf(component).length,

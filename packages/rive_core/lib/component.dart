@@ -231,8 +231,10 @@ abstract class Component extends ComponentBase<RiveFile>
   /// necessary).
   void onDependencyRemoved(Component dependent) {}
 
+  // -> editor-only
   @override
   bool validate() => parent != null || canBeOrphaned;
+  // <- editor-only
 
   @override
   void onAdded() {}

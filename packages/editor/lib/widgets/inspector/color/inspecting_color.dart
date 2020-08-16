@@ -689,10 +689,13 @@ class ShapesInspectingColor extends InspectingColor {
     debounce(_updatePaints);
   }
 
+  Restorer _selectionHandlerRestorer;
+
   @override
   void startEditing(OpenFileContext context) {
     super.startEditing(context);
-    context.stage.addSelectionHandler(_stageSelected);
+    _selectionHandlerRestorer =
+        context.stage.addSelectionHandler(_stageSelected);
     context.addActionHandler(_handleShortcut);
   }
 
@@ -723,7 +726,7 @@ class ShapesInspectingColor extends InspectingColor {
 
   @override
   void stopEditing() {
-    context?.stage?.removeSelectionHandler(_stageSelected);
+    _selectionHandlerRestorer?.restore();
     context?.removeActionHandler(_handleShortcut);
 
     _hiddenHandles?.restore();
