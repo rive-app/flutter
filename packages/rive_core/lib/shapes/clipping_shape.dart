@@ -86,4 +86,9 @@ class ClippingShape extends ClippingShapeBase {
     // Redraw
     _shape?.addDirt(ComponentDirt.paint);
   }
+
+  @override
+  bool validate() {
+    return _shape != null && super.validate();
+  }
 }
