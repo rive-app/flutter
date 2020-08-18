@@ -645,7 +645,7 @@ class _ProfileSettingsInnerState extends State<ProfileSettingsInner> {
             children: _info(),
           ),
         ),
-        const SizedBox(height: 30),
+        /* const SizedBox(height: 30),
         Separator(color: colors.fileLineGrey),
         const SizedBox(height: 30),
         SettingsPanelSection(
@@ -655,7 +655,7 @@ class _ProfileSettingsInnerState extends State<ProfileSettingsInner> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: _forHire,
           ),
-        ),
+        ),*/
         const SizedBox(height: 30),
         Separator(color: colors.fileLineGrey),
         const SizedBox(height: 30),
