@@ -15,6 +15,6 @@ class KeyFrameRotation extends KeyFrameConverter {
     final radians = (value as num).toDouble() * pi / 180;
     generateKey<KeyFrameDoubleBase>(
         component, animation, frame, TransformComponentBase.rotationPropertyKey)
-      ..value = radians;
+      .value = radians;
   }
 }

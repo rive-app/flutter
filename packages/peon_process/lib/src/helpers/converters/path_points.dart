@@ -25,7 +25,7 @@ class PathPointConverter extends ComponentConverter {
       case 'A':
         return CubicAsymmetricVertex();
       default:
-        throw UnsupportedError("===== UNKNOWN VERTEX TYPE $pointType");
+        throw UnsupportedError('===== UNKNOWN VERTEX TYPE $pointType');
     }
   }
 
@@ -56,27 +56,27 @@ class PathPointConverter extends ComponentConverter {
       // - distance is just the distance between translation and either in or out
       // - rotation
       pathVertex
-        ..rotation = getRotation(translation, outVec)
-        ..distance = getDistance(translation, outVec);
+        ..rotation = getRotation(translation as List, outVec as List)
+        ..distance = getDistance(translation as List, outVec as List);
     } else if (pathVertex is CubicDetachedVertex) {
       pathVertex
-        ..inRotation = getRotation(translation, inVec)
-        ..inDistance = getDistance(translation, inVec)
-        ..outRotation = getRotation(translation, outVec)
-        ..outDistance = getDistance(translation, outVec);
+        ..inRotation = getRotation(translation as List, inVec as List)
+        ..inDistance = getDistance(translation as List, inVec as List)
+        ..outRotation = getRotation(translation as List, outVec as List)
+        ..outDistance = getDistance(translation as List, outVec as List);
     } else if (pathVertex is CubicAsymmetricVertex) {
       pathVertex
-        ..rotation = getRotation(translation, outVec)
-        ..inDistance = getDistance(translation, inVec)
-        ..outDistance = getDistance(translation, outVec);
+        ..rotation = getRotation(translation as List, outVec as List)
+        ..inDistance = getDistance(translation as List, inVec as List)
+        ..outDistance = getDistance(translation as List, outVec as List);
     }
   }
 
   static double getDistance(List start, List end) {
-    final x1 = start[0].toDouble();
-    final x2 = end[0].toDouble();
-    final y1 = start[1].toDouble();
-    final y2 = end[1].toDouble();
+    final x1 = (start[0] as num).toDouble();
+    final x2 = (end[0] as num).toDouble();
+    final y1 = (start[1] as num).toDouble();
+    final y2 = (end[1] as num).toDouble();
 
     var dx = x1 - x2;
     var dy = y1 - y2;
@@ -84,10 +84,10 @@ class PathPointConverter extends ComponentConverter {
   }
 
   static double getRotation(List first, List second) {
-    final x1 = first[0].toDouble();
-    final x2 = second[0].toDouble();
-    final y1 = first[1].toDouble();
-    final y2 = second[1].toDouble();
+    final x1 = (first[0] as num).toDouble();
+    final x2 = (second[0] as num).toDouble();
+    final y1 = (first[1] as num).toDouble();
+    final y2 = (second[1] as num).toDouble();
     final angle = atan2(y2 - y1, x2 - x1);
     return angle;
   }

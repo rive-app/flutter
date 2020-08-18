@@ -25,12 +25,12 @@ class KeyFrameFillOpacityConverter extends KeyFrameConverter {
     // but for gradients it is applied to the gradient itself.
     if (colorComponent is SolidColorBase) {
       generateKey<KeyFrameDouble>(component, animation, frame,
-          TransformComponentBase.opacityPropertyKey)
-        ..value = (value as num).toDouble();
+              TransformComponentBase.opacityPropertyKey)
+          .value = (value as num).toDouble();
     } else if (colorComponent is LinearGradientBase) {
       generateKey<KeyFrameDouble>(colorComponent, animation, frame,
-          LinearGradientBase.opacityPropertyKey)
-        ..value = (value as num).toDouble();
+              LinearGradientBase.opacityPropertyKey)
+          .value = (value as num).toDouble();
     }
   }
 }

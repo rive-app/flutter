@@ -28,7 +28,7 @@ abstract class KeyFrameConverter {
   }
 
   @protected
-  setInterpolation(KeyFrame keyFrame, RiveFile context) {
+  void setInterpolation(KeyFrame keyFrame, RiveFile context) {
     keyFrame.interpolation =
         InterpolatorConverter.getInterpolator(interpolatorType);
     if (keyFrame.interpolation == KeyFrameInterpolation.cubic) {
