@@ -15,6 +15,8 @@ import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/bones/bone.dart';
 import 'package:rive_core/bones/root_bone.dart';
+import 'package:rive_core/bones/skin.dart';
+import 'package:rive_core/bones/tendon.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
@@ -47,6 +49,8 @@ import 'package:rive_core/src/generated/artboard_base.dart';
 import 'package:rive_core/src/generated/backboard_base.dart';
 import 'package:rive_core/src/generated/bones/bone_base.dart';
 import 'package:rive_core/src/generated/bones/root_bone_base.dart';
+import 'package:rive_core/src/generated/bones/skin_base.dart';
+import 'package:rive_core/src/generated/bones/tendon_base.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/drawable_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
@@ -140,6 +144,10 @@ abstract class RiveCoreContext extends CoreContext {
         return Bone();
       case RootBoneBase.typeKey:
         return RootBone();
+      case SkinBase.typeKey:
+        return Skin();
+      case TendonBase.typeKey:
+        return Tendon();
       default:
         return null;
     }
@@ -241,6 +249,10 @@ abstract class RiveCoreContext extends CoreContext {
         return 'Bone';
       case RootBoneBase.typeKey:
         return 'RootBone';
+      case SkinBase.typeKey:
+        return 'Skin';
+      case TendonBase.typeKey:
+        return 'Tendon';
     }
     return null;
   }
@@ -446,6 +458,20 @@ abstract class RiveCoreContext extends CoreContext {
         return 'x';
       case RootBoneBase.yPropertyKey:
         return 'y';
+      case TendonBase.boneIdPropertyKey:
+        return 'boneId';
+      case TendonBase.xxPropertyKey:
+        return 'xx';
+      case TendonBase.yxPropertyKey:
+        return 'yx';
+      case TendonBase.xyPropertyKey:
+        return 'xy';
+      case TendonBase.yyPropertyKey:
+        return 'yy';
+      case TendonBase.txPropertyKey:
+        return 'tx';
+      case TendonBase.tyPropertyKey:
+        return 'ty';
       default:
         return null;
     }
@@ -512,6 +538,7 @@ abstract class RiveCoreContext extends CoreContext {
         case ClippingShapeBase.shapeIdPropertyKey:
         case BackboardBase.activeArtboardIdPropertyKey:
         case BackboardBase.mainArtboardIdPropertyKey:
+        case TendonBase.boneIdPropertyKey:
           var value = idType.deserialize(reader);
           setId(object, change.op, value);
           break;
@@ -587,6 +614,12 @@ abstract class RiveCoreContext extends CoreContext {
         case BoneBase.lengthPropertyKey:
         case RootBoneBase.xPropertyKey:
         case RootBoneBase.yPropertyKey:
+        case TendonBase.xxPropertyKey:
+        case TendonBase.yxPropertyKey:
+        case TendonBase.xyPropertyKey:
+        case TendonBase.yyPropertyKey:
+        case TendonBase.txPropertyKey:
+        case TendonBase.tyPropertyKey:
           var value = doubleType.deserialize(reader);
           setDouble(object, change.op, value);
           break;
@@ -642,6 +675,7 @@ abstract class RiveCoreContext extends CoreContext {
       case ClippingShapeBase.shapeIdPropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.mainArtboardIdPropertyKey:
+      case TendonBase.boneIdPropertyKey:
         if (value != null && value is Id) {
           change.value = idType.serialize(value);
         } else {
@@ -729,6 +763,12 @@ abstract class RiveCoreContext extends CoreContext {
       case BoneBase.lengthPropertyKey:
       case RootBoneBase.xPropertyKey:
       case RootBoneBase.yPropertyKey:
+      case TendonBase.xxPropertyKey:
+      case TendonBase.yxPropertyKey:
+      case TendonBase.xyPropertyKey:
+      case TendonBase.yyPropertyKey:
+      case TendonBase.txPropertyKey:
+      case TendonBase.tyPropertyKey:
         if (value != null && value is double) {
           change.value = doubleType.serialize(value);
         } else {
@@ -1201,6 +1241,41 @@ abstract class RiveCoreContext extends CoreContext {
           object.y = value;
         }
         break;
+      case TendonBase.boneIdPropertyKey:
+        if (object is TendonBase && value is Id) {
+          object.boneId = value;
+        }
+        break;
+      case TendonBase.xxPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.xx = value;
+        }
+        break;
+      case TendonBase.yxPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.yx = value;
+        }
+        break;
+      case TendonBase.xyPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.xy = value;
+        }
+        break;
+      case TendonBase.yyPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.yy = value;
+        }
+        break;
+      case TendonBase.txPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.tx = value;
+        }
+        break;
+      case TendonBase.tyPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.ty = value;
+        }
+        break;
     }
   }
 
@@ -1634,6 +1709,41 @@ abstract class RiveCoreContext extends CoreContext {
       case RootBoneBase.yPropertyKey:
         if (object is RootBoneBase && value is double) {
           object.yCore = value;
+        }
+        break;
+      case TendonBase.boneIdPropertyKey:
+        if (object is TendonBase && value is Id) {
+          object.boneId = value;
+        }
+        break;
+      case TendonBase.xxPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.xx = value;
+        }
+        break;
+      case TendonBase.yxPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.yx = value;
+        }
+        break;
+      case TendonBase.xyPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.xy = value;
+        }
+        break;
+      case TendonBase.yyPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.yy = value;
+        }
+        break;
+      case TendonBase.txPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.tx = value;
+        }
+        break;
+      case TendonBase.tyPropertyKey:
+        if (object is TendonBase && value is double) {
+          object.ty = value;
         }
         break;
     }
@@ -2543,6 +2653,41 @@ abstract class RiveCoreContext extends CoreContext {
           return object.y;
         }
         break;
+      case TendonBase.boneIdPropertyKey:
+        if (object is TendonBase) {
+          return object.boneId;
+        }
+        break;
+      case TendonBase.xxPropertyKey:
+        if (object is TendonBase) {
+          return object.xx;
+        }
+        break;
+      case TendonBase.yxPropertyKey:
+        if (object is TendonBase) {
+          return object.yx;
+        }
+        break;
+      case TendonBase.xyPropertyKey:
+        if (object is TendonBase) {
+          return object.xy;
+        }
+        break;
+      case TendonBase.yyPropertyKey:
+        if (object is TendonBase) {
+          return object.yy;
+        }
+        break;
+      case TendonBase.txPropertyKey:
+        if (object is TendonBase) {
+          return object.tx;
+        }
+        break;
+      case TendonBase.tyPropertyKey:
+        if (object is TendonBase) {
+          return object.ty;
+        }
+        break;
     }
     return null;
   }
@@ -2594,6 +2739,7 @@ abstract class RiveCoreContext extends CoreContext {
       case ClippingShapeBase.shapeIdPropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.mainArtboardIdPropertyKey:
+      case TendonBase.boneIdPropertyKey:
         return idType;
       case KeyedPropertyBase.propertyKeyPropertyKey:
       case KeyFrameBase.framePropertyKey:
@@ -2661,6 +2807,12 @@ abstract class RiveCoreContext extends CoreContext {
       case BoneBase.lengthPropertyKey:
       case RootBoneBase.xPropertyKey:
       case RootBoneBase.yPropertyKey:
+      case TendonBase.xxPropertyKey:
+      case TendonBase.yxPropertyKey:
+      case TendonBase.xyPropertyKey:
+      case TendonBase.yyPropertyKey:
+      case TendonBase.txPropertyKey:
+      case TendonBase.tyPropertyKey:
         return doubleType;
       case KeyFrameColorBase.valuePropertyKey:
       case SolidColorBase.colorValuePropertyKey:
@@ -2706,6 +2858,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as BackboardBase).activeArtboardId;
       case BackboardBase.mainArtboardIdPropertyKey:
         return (object as BackboardBase).mainArtboardId;
+      case TendonBase.boneIdPropertyKey:
+        return (object as TendonBase).boneId;
     }
     return null;
   }
@@ -2856,6 +3010,18 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as RootBoneBase).x;
       case RootBoneBase.yPropertyKey:
         return (object as RootBoneBase).y;
+      case TendonBase.xxPropertyKey:
+        return (object as TendonBase).xx;
+      case TendonBase.yxPropertyKey:
+        return (object as TendonBase).yx;
+      case TendonBase.xyPropertyKey:
+        return (object as TendonBase).xy;
+      case TendonBase.yyPropertyKey:
+        return (object as TendonBase).yy;
+      case TendonBase.txPropertyKey:
+        return (object as TendonBase).tx;
+      case TendonBase.tyPropertyKey:
+        return (object as TendonBase).ty;
     }
     return 0.0;
   }
@@ -2935,6 +3101,9 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case BackboardBase.mainArtboardIdPropertyKey:
         (object as BackboardBase).mainArtboardId = value;
+        break;
+      case TendonBase.boneIdPropertyKey:
+        (object as TendonBase).boneId = value;
         break;
     }
   }
@@ -3145,6 +3314,24 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case RootBoneBase.yPropertyKey:
         (object as RootBoneBase).yCore = value;
+        break;
+      case TendonBase.xxPropertyKey:
+        (object as TendonBase).xx = value;
+        break;
+      case TendonBase.yxPropertyKey:
+        (object as TendonBase).yx = value;
+        break;
+      case TendonBase.xyPropertyKey:
+        (object as TendonBase).xy = value;
+        break;
+      case TendonBase.yyPropertyKey:
+        (object as TendonBase).yy = value;
+        break;
+      case TendonBase.txPropertyKey:
+        (object as TendonBase).tx = value;
+        break;
+      case TendonBase.tyPropertyKey:
+        (object as TendonBase).ty = value;
         break;
     }
   }
