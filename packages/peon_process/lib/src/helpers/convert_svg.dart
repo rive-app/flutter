@@ -315,10 +315,10 @@ RivePath parseSvgPathData(String svg) {
   final SvgPathStringSource parser = SvgPathStringSource(svg);
   final RivePathProxy path = RivePathProxy();
   final SvgPathNormalizer normalizer = SvgPathNormalizer();
-  for (PathSegmentData seg in parser.parseSegments()) {
+  for (final seg in parser.parseSegments()) {
     normalizer.emitSegment(seg, path);
   }
-  return path.path as RivePath;
+  return path.path;
 }
 
 class RivePathProxy extends FlutterPathProxy {

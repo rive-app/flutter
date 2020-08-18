@@ -21,14 +21,16 @@ class RiveCoopToPng with Task {
   final String sourceLocation;
   final String targetLocation;
   // should switch to connection id I guess?
-  final int notifyUserId;
+  final int ownerId;
+  final int fileId;
   final Map originalTaskData;
 
   RiveCoopToPng(
       {this.taskId,
       this.sourceLocation,
       this.targetLocation,
-      this.notifyUserId,
+      this.ownerId,
+      this.fileId,
       this.originalTaskData});
 
   static RiveCoopToPng fromData(Map<String, dynamic> data) {
@@ -43,7 +45,8 @@ class RiveCoopToPng with Task {
         taskId: params.getString('taskId'),
         sourceLocation: params.getString('sourceLocation'),
         targetLocation: params.getString('targetLocation'),
-        notifyUserId: params.getInt('notifyUserId'),
+        ownerId: params.getInt('ownerId'),
+        fileId: params.getInt('fileId'),
         originalTaskData: data);
   }
 
@@ -95,12 +98,12 @@ class RiveCoopToPng with Task {
   Future<bool> execute() async {
     // FML
     var data = await getS3Key(sourceLocation, 'us-east-1');
-    var riveFile = RiveFile('0', localDataPlatform: null);
+    var riveFile = RiveFile(fileId.toString(), localDataPlatform: null);
     var coopImporter = CoopImporter(core: riveFile);
     coopImporter.import(data);
 
     var exporter = RuntimeExporter(
-        core: riveFile, info: RuntimeHeader(ownerId: notifyUserId, fileId: 1));
+        core: riveFile, info: RuntimeHeader(ownerId: ownerId, fileId: fileId));
     var exportedRiveBinary = exporter.export();
     var svgdata = await convert(exportedRiveBinary);
     if (svgdata == null) {
@@ -111,9 +114,9 @@ class RiveCoopToPng with Task {
 
     var queue = await getJSQueue();
     await queue.sendMessage(json.encode({
-      "work": "TaskCompleted",
-      "taskId": taskId,
-      "payload": originalTaskData
+      'work': 'TaskCompleted',
+      'taskId': taskId,
+      'payload': originalTaskData
     }));
 
     return true;

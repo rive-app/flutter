@@ -7,12 +7,12 @@ class FileDM {
     @required this.id,
     this.name,
     this.ownerId,
-    this.preview,
+    this.thumbnail,
   });
   final int id;
   final int ownerId;
   final String name;
-  final String preview;
+  final String thumbnail;
 
   static List<FileDM> fromDataList(
           List<Map<String, dynamic>> data, CdnDM cdn) =>
@@ -22,9 +22,9 @@ class FileDM {
     return FileDM(
       ownerId: data.getInt('oid'),
       name: data.getString('name'),
-      preview: (data.getString('preview') == null)
+      thumbnail: (data.getString('thumbnail') == null)
           ? null
-          : cdn.base + data.getString('preview') + cdn.params,
+          : cdn.base + data.getString('thumbnail') + cdn.params,
       id: data.getInt('id'),
     );
   }
@@ -73,9 +73,9 @@ class FileDM {
       id: ids[0],
       ownerId: ids[1],
       name: data.getString('name'),
-      preview: (data.getString('preview') == null || cdn == null)
+      thumbnail: (data.getString('thumbnail') == null || cdn == null)
           ? null
-          : cdn.base + data.getString('preview') + cdn.params,
+          : cdn.base + data.getString('thumbnail') + cdn.params,
     );
   }
 

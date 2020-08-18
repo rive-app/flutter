@@ -9,7 +9,7 @@ class File implements Named {
     this.name,
     int ownerId,
     this.fileOwnerId,
-    this.preview,
+    this.thumbnail,
   }) : _ownerId = ownerId;
 
   final int id;
@@ -21,7 +21,7 @@ class File implements Named {
   final int fileOwnerId;
   @override
   final String name;
-  final String preview;
+  final String thumbnail;
 
   static List<File> fromDMList(Iterable<FileDM> files, [int altOwnerId]) =>
       files.map((file) => File.fromDM(file, altOwnerId)).toList();
@@ -30,7 +30,7 @@ class File implements Named {
         ownerId: altOwnerId,
         fileOwnerId: file.ownerId,
         name: file.name,
-        preview: file.preview,
+        thumbnail: file.thumbnail,
         id: file.id,
       );
 

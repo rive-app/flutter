@@ -12,6 +12,7 @@ import 'package:rive_api/plumber.dart';
 import 'package:rive_editor/rive/managers/rive_manager.dart';
 import 'package:rive_editor/widgets/common/flat_icon_button.dart';
 import 'package:rive_editor/widgets/common/labeled_text_field.dart';
+import 'package:rive_editor/widgets/common/robot.dart';
 import 'package:rive_editor/widgets/common/separator.dart';
 import 'package:rive_editor/widgets/common/sliver_delegates.dart';
 import 'package:rive_editor/widgets/common/value_stream_builder.dart';
@@ -810,17 +811,28 @@ class FileBrowser extends StatelessWidget {
             // Empty view.
             slivers.add(
               SliverFillRemaining(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Image.asset('assets/images/robot.png'),
-                    // const SizedBox(height: 35),
-                    Text(
-                        'Hey, it looks like you don\'t have any files here '
-                        'yet!\nHit the plus button to create a new file!',
-                        style: RiveTheme.of(context).textStyles.fileBrowserText,
-                        textAlign: TextAlign.center),
-                  ],
+                child: Center(
+                  child: SizedBox(
+                    height: 600,
+                    child: Stack(
+                      children: [
+                        Align(
+                            alignment: Alignment.topCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 100.0),
+                              child: Text(
+                                  'Hey, it looks like you don\'t '
+                                  'have any files here yet!\n'
+                                  'Hit the plus button to create a new file!',
+                                  style: RiveTheme.of(context)
+                                      .textStyles
+                                      .fileBrowserText,
+                                  textAlign: TextAlign.center),
+                            )),
+                        const Robot()
+                      ],
+                    ),
+                  ),
                 ),
               ),
             );

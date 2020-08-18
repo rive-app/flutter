@@ -154,7 +154,7 @@ class FileManager with Subscriptions {
         name: name,
         ownerId: file.ownerId,
         fileOwnerId: file.fileOwnerId,
-        preview: file.preview,
+        thumbnail: file.thumbnail,
       );
 
       Plumber().message<File>(updatedFile);

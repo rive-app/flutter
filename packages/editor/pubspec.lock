@@ -458,7 +458,7 @@ packages:
       name: rive
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.6"
+    version: "0.0.7"
   rive_api:
     dependency: "direct main"
     description:
