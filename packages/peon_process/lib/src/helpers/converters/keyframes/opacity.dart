@@ -10,8 +10,8 @@ class KeyFrameOpacity extends KeyFrameConverter {
 
   @override
   void convertKey(Component component, LinearAnimation animation, int frame) {
-    generateKey<KeyFrameDoubleBase>(
-        component, animation, frame, TransformComponentBase.opacityPropertyKey)
-      ..value = (value as num).toDouble();
+    generateKey<KeyFrameDoubleBase>(component, animation, frame,
+            TransformComponentBase.opacityPropertyKey)
+        .value = (value as num).toDouble();
   }
 }

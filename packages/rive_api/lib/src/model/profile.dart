@@ -6,6 +6,7 @@ class Profile {
   const Profile({
     this.name,
     this.username,
+    this.password,
     this.email,
     this.website,
     this.bio,
@@ -23,6 +24,7 @@ class Profile {
 
   final String name;
   final String username;
+  final String password;
   final String email;
   final String website;
   final String bio;
@@ -88,23 +90,24 @@ class Profile {
         'vimeo': vimeo,
         'github': github,
         'medium': medium,
-        'isForHire': isForHire
+        'isForHire': isForHire,
+        'password': password,
       });
 
   @override
-  String toString() => "name: $name\n"
-      "username: $username\n"
-      "email: $email\n"
-      "location: $location\n"
-      "website: $website\n"
-      "bio: $bio\n"
-      "twitter: $twitter\n"
-      "instagram: $instagram\n"
-      "dribbble: $dribbble\n"
-      "linkedin: $linkedin\n"
-      "behance: $behance\n"
-      "vimeo: $vimeo\n"
-      "github: $github\n"
-      "medium: $medium\n"
-      "isForHire: $isForHire";
+  String toString() => 'name: $name\n'
+      'username: $username\n'
+      'email: $email\n'
+      'location: $location\n'
+      'website: $website\n'
+      'bio: $bio\n'
+      'twitter: $twitter\n'
+      'instagram: $instagram\n'
+      'dribbble: $dribbble\n'
+      'linkedin: $linkedin\n'
+      'behance: $behance\n'
+      'vimeo: $vimeo\n'
+      'github: $github\n'
+      'medium: $medium\n'
+      'isForHire: $isForHire';
 }

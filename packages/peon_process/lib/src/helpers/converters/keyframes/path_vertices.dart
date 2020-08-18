@@ -53,10 +53,10 @@ abstract class KeyFrameVertexConverter extends KeyFrameConverter {
 
     generateKey<KeyFrameDouble>(
         vertex, animation, frame, PathVertexBase.xPropertyKey)
-      ..value = xValue;
+      .value = xValue;
     generateKey<KeyFrameDouble>(
         vertex, animation, frame, PathVertexBase.yPropertyKey)
-      ..value = yValue;
+      .value = yValue;
   }
 
   @protected
@@ -85,7 +85,7 @@ class KeyFrameStraightVertexConverter extends KeyFrameVertexConverter {
 
     generateKey<KeyFrameDouble>(
         straightVertex, animation, frame, StraightVertexBase.radiusPropertyKey)
-      ..value = radiusValue.toDouble();
+      .value = radiusValue.toDouble();
   }
 }
 
@@ -112,11 +112,11 @@ class KeyFrameMirroredVertexConverter extends KeyFrameVertexConverter {
 
     generateKey<KeyFrameDouble>(mirroredVertex, animation, frame,
         CubicMirroredVertexBase.rotationPropertyKey)
-      ..value = rotation;
+      .value = rotation;
 
     generateKey<KeyFrameDouble>(mirroredVertex, animation, frame,
         CubicMirroredVertexBase.distancePropertyKey)
-      ..value = distance;
+      .value = distance;
   }
 }
 
@@ -145,19 +145,19 @@ class KeyFrameDetachedVertexConverter extends KeyFrameVertexConverter {
 
     generateKey<KeyFrameDouble>(detachedVertex, animation, frame,
         CubicDetachedVertexBase.inRotationPropertyKey)
-      ..value = inRotation;
+      .value = inRotation;
 
     generateKey<KeyFrameDouble>(detachedVertex, animation, frame,
         CubicDetachedVertexBase.outRotationPropertyKey)
-      ..value = outRotation;
+      .value = outRotation;
 
     generateKey<KeyFrameDouble>(detachedVertex, animation, frame,
         CubicDetachedVertexBase.inDistancePropertyKey)
-      ..value = inDistance;
+      .value = inDistance;
 
     generateKey<KeyFrameDouble>(detachedVertex, animation, frame,
         CubicDetachedVertexBase.outDistancePropertyKey)
-      ..value = outDistance;
+      .value = outDistance;
   }
 }
 
@@ -185,14 +185,14 @@ class KeyFrameAsymmetricVertexConverter extends KeyFrameVertexConverter {
 
     generateKey<KeyFrameDouble>(detachedVertex, animation, frame,
         CubicAsymmetricVertexBase.rotationPropertyKey)
-      ..value = rotation;
+      .value = rotation;
 
     generateKey<KeyFrameDouble>(detachedVertex, animation, frame,
         CubicAsymmetricVertexBase.inDistancePropertyKey)
-      ..value = inDistance;
+      .value = inDistance;
 
     generateKey<KeyFrameDouble>(detachedVertex, animation, frame,
         CubicAsymmetricVertexBase.outDistancePropertyKey)
-      ..value = outDistance;
+      .value = outDistance;
   }
 }

@@ -3,6 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/src/utilities/numbers.dart';
+import 'package:flutter_svg/src/utilities/xml.dart';
+import 'package:path_drawing/path_drawing.dart';
+import 'package:path_parsing/path_parsing.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
@@ -12,7 +16,6 @@ import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
-
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/path_composer.dart';
@@ -21,14 +24,7 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
-// :psyduck:
 import 'package:xml/xml_events.dart' hide parseEvents;
-import 'package:xml/xml_events.dart' as xml show parseEvents;
-import 'package:flutter_svg/src/utilities/numbers.dart';
-import 'package:flutter_svg/src/utilities/xml.dart';
-import 'package:flutter_svg/src/svg/parser_state.dart';
-import 'package:path_drawing/path_drawing.dart';
-import 'package:path_parsing/path_parsing.dart';
 
 typedef _PathFunc = Path Function(List<XmlEventAttribute> attributes);
 

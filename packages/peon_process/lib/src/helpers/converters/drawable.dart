@@ -39,63 +39,63 @@ abstract class DrawableConverter extends NodeConverter {
 
   int _blendModeFrom(String blendMode) {
     switch (blendMode) {
-      case "clear":
+      case 'clear':
         return 0;
-      case "src":
+      case 'src':
         return 1;
-      case "dst":
+      case 'dst':
         return 2;
-      case "srcOver":
+      case 'srcOver':
         return 3;
-      case "dstOver":
+      case 'dstOver':
         return 4;
-      case "srcIn":
+      case 'srcIn':
         return 5;
-      case "dstIn":
+      case 'dstIn':
         return 6;
-      case "srcOut":
+      case 'srcOut':
         return 7;
-      case "dstOut":
+      case 'dstOut':
         return 8;
-      case "srcATop":
+      case 'srcATop':
         return 9;
-      case "dstATop":
+      case 'dstATop':
         return 10;
-      case "xor":
+      case 'xor':
         return 11;
-      case "plus":
+      case 'plus':
         return 12;
-      case "modulate":
+      case 'modulate':
         return 13;
-      case "screen":
+      case 'screen':
         return 14;
-      case "overlay":
+      case 'overlay':
         return 15;
-      case "darken":
+      case 'darken':
         return 16;
-      case "lighten":
+      case 'lighten':
         return 17;
-      case "colorDodge":
+      case 'colorDodge':
         return 18;
-      case "colorBurn":
+      case 'colorBurn':
         return 19;
-      case "hardLight":
+      case 'hardLight':
         return 20;
-      case "softLight":
+      case 'softLight':
         return 21;
-      case "difference":
+      case 'difference':
         return 22;
-      case "exclusion":
+      case 'exclusion':
         return 23;
-      case "multiply":
+      case 'multiply':
         return 24;
-      case "hue":
+      case 'hue':
         return 25;
-      case "saturation":
+      case 'saturation':
         return 26;
-      case "color":
+      case 'color':
         return 27;
-      case "luminosity":
+      case 'luminosity':
         return 28;
       default:
         return 3;

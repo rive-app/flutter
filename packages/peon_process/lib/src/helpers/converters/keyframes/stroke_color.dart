@@ -36,6 +36,6 @@ class KeyFrameSolidStrokeConverter extends KeyFrameColorConverter {
     }
     final key = super.generateKey<KeyFrameColor>(
         colorComponent, animation, frame, SolidColorBase.colorValuePropertyKey);
-    key.value = getColorValue(value);
+    key.value = getColorValue(value as List);
   }
 }

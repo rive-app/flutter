@@ -25,7 +25,7 @@ class KeyFrameDrawOrderConverter extends KeyFrameConverter {
 
     for (final componentId in drawOrderValues.keys) {
       final drawOrderComponent = fileComponents[componentId];
-      final drawOrder = drawOrderValues[componentId] as num;
+      final drawOrder = (drawOrderValues[componentId] as num).toInt();
       final drawOrderValue = KeyFrameDrawOrderValue()
         ..drawableId = drawOrderComponent.id
         ..value = FractionalIndex(drawOrder, drawOrder + 1);

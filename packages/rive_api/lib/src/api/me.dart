@@ -133,12 +133,12 @@ class MeApi {
     try {
       var response =
           await api.put('${api.host}/api/profile', body: profile.encoded);
-      print("Response: ${response.body}, ${response.statusCode}");
+      print('Response: ${response.body}, ${response.statusCode}');
       return true;
     } on ApiException catch (apiException) {
       final response = apiException.response;
       var message = 'Could not update profile: ${response.body}';
-      print("Response [${response.statusCode}]:\n$message");
+      print('Response [${response.statusCode}]:\n$message');
       log.severe(message);
       return false;
     }

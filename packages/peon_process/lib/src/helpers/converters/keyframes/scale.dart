@@ -12,7 +12,7 @@ class KeyFrameScaleX extends KeyFrameConverter {
   void convertKey(Component component, LinearAnimation animation, int frame) {
     generateKey<KeyFrameDoubleBase>(
         component, animation, frame, TransformComponentBase.scaleXPropertyKey)
-      ..value = (value as num).toDouble();
+      .value = (value as num).toDouble();
   }
 }
 
@@ -24,6 +24,6 @@ class KeyFrameScaleY extends KeyFrameConverter {
   void convertKey(Component component, LinearAnimation animation, int frame) {
     generateKey<KeyFrameDoubleBase>(
         component, animation, frame, TransformComponentBase.scaleYPropertyKey)
-      ..value = (value as num).toDouble();
+      .value = (value as num).toDouble();
   }
 }

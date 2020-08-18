@@ -20,6 +20,6 @@ class KeyFrameStrokeWidthConverter extends KeyFrameConverter {
 
     generateKey<KeyFrameDouble>(
         strokeComponent, animation, frame, StrokeBase.thicknessPropertyKey)
-      ..value = (value as num).toDouble();
+      .value = (value as num).toDouble();
   }
 }
