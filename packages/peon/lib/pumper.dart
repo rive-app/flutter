@@ -110,7 +110,9 @@ class RiveToPNG extends Command<dynamic> {
     argParser.addOption('targetLocation',
         defaultsTo: 'https://target.location',
         help: 'Where to put the png file');
-    argParser.addOption('notifyUserId', help: 'who to tell about it');
+    argParser.addOption('fileId', help: 'who to tell about it');
+    argParser.addOption('revisionId', help: 'who to tell about it');
+    argParser.addOption('ownerId', help: 'who to tell about it');
   }
 
   // [run] may also return a Future.
@@ -123,9 +125,11 @@ class RiveToPNG extends Command<dynamic> {
     await queue.sendMessage(json.encode({
       'action': name,
       'params': {
+        'fileId': int.parse(argResults['fileId'] as String),
+        'revisionId': int.parse(argResults['revisionId'] as String),
+        'ownerId': int.parse(argResults['ownerId'] as String),
         'sourceLocation': argResults['sourceLocation'] as String,
-        'targetLocation': argResults['targetLocation'] as String,
-        'notifyUserId': int.parse(argResults['notifyUserId'] as String)
+        'targetLocation': argResults['targetLocation'] as String
       }
     }));
   }
