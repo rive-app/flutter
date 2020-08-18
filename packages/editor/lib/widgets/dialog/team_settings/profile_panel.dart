@@ -72,6 +72,7 @@ class OwnerPackage with ChangeNotifier {
   String _vimeo;
   String _github;
   String _medium;
+  String _password;
   bool _isForHire;
 
   String nameValidationError;
@@ -80,24 +81,24 @@ class OwnerPackage with ChangeNotifier {
 
   bool processing = false;
 
-  OwnerPackage(
-      {String name,
-      String username,
-      String email,
-      String location = '',
-      String website = '',
-      String bio = '',
-      String instagram = '',
-      String dribbble = '',
-      String twitter = '',
-      String linkedin = '',
-      String behance = '',
-      String vimeo = '',
-      String github = '',
-      String medium = '',
-      bool isForHire = false,
-      this.isTeam})
-      : _name = name,
+  OwnerPackage({
+    String name,
+    String username,
+    String email,
+    String location = '',
+    String website = '',
+    String bio = '',
+    String instagram = '',
+    String dribbble = '',
+    String twitter = '',
+    String linkedin = '',
+    String behance = '',
+    String vimeo = '',
+    String github = '',
+    String medium = '',
+    bool isForHire = false,
+    this.isTeam,
+  })  : _name = name,
         _username = username,
         _email = email,
         _location = location,
@@ -127,6 +128,7 @@ class OwnerPackage with ChangeNotifier {
   String get vimeo => _vimeo;
   String get github => _github;
   String get medium => _medium;
+  String get password => _password;
   bool get isForHire => _isForHire;
 
   set isForHire(bool isForHire) {
@@ -219,6 +221,12 @@ class OwnerPackage with ChangeNotifier {
     notifyListeners();
   }
 
+  set password(String pwd) {
+    if (_password == pwd) return;
+    _password = pwd;
+    notifyListeners();
+  }
+
   bool get isEmailValid {
     if (isTeam) return true;
     // ignore: lines_longer_than_80_chars
@@ -273,6 +281,7 @@ class OwnerPackage with ChangeNotifier {
   Profile profile() => Profile(
         name: name,
         username: username,
+        password: password,
         email: email,
         website: website,
         bio: bio,
@@ -507,7 +516,14 @@ class _ProfileSettingsInnerState extends State<ProfileSettingsInner> {
               initialValue: package.location,
               enabled: !package.processing,
             ),
-            const SizedBox(),
+            LabeledTextField(
+              label: 'Password',
+              hintText: 'New password',
+              onChanged: (password) => package.password = password,
+              initialValue: null,
+              obscureText: true,
+              enabled: !package.processing,
+            ),
           ],
         ),
         const SizedBox(height: 30),
