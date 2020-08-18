@@ -11,7 +11,7 @@ Future<void> loop(Future<SqsQueue> Function() getQueue,
   SqsQueue queue;
   while (true) {
     try {
-      _log.fine('What you want?');
+      _log.info('What you want?');
       queue = await getQueue();
       List<SqsMessage> messages =
           await queue.receiveMessage(2, waitSeconds: 10);
@@ -23,7 +23,7 @@ Future<void> loop(Future<SqsQueue> Function() getQueue,
             _log.info('Work done.');
           } else {
             await queue.deleteMessage(message.receiptHandle);
-            _log.severe('Work failed, removing from queue.');
+            _log.info('Work failed, removing from queue.');
           }
           // ignore: avoid_catches_without_on_clauses
         } catch (e, stacktrace) {
