@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_handle.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
@@ -139,7 +140,11 @@ class StageScaleHandle extends StageHandle {
   List<StageTransformer> makeTransformers() {
     return [
       JointScaleTransformer(lockAxis: direction, handle: this),
-      NodeScaleTransformer(lockAxis: direction, handle: this),
+      NodeScaleTransformer(
+        lockAxis: direction,
+        handle: this,
+        proportionalScaleShortcut: ShortcutAction.symmetricDraw,
+      ),
     ];
   }
 }
