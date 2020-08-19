@@ -60,8 +60,12 @@ import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/common/cursor_icon.dart';
 import 'package:utilities/restorer.dart';
 import 'package:rive_editor/rive/selection_context.dart';
+import 'package:utilities/utilities.dart';
 
 enum AxisCheckState { local, parent, world }
+
+/// Direction in which to nudge items
+enum NudgeDirection { up, down, left, right }
 
 typedef _ItemFactory = StageItem Function();
 
@@ -832,8 +836,62 @@ class Stage extends Debouncer {
       case ShortcutAction.zoomFit:
         zoomFit();
         break;
+      case ShortcutAction.nudgeUp:
+        _nudgeSelectedItems(NudgeDirection.up);
+        break;
+      case ShortcutAction.nudgeDown:
+        _nudgeSelectedItems(NudgeDirection.down);
+        break;
+      case ShortcutAction.nudgeLeft:
+        _nudgeSelectedItems(NudgeDirection.left);
+        break;
+      case ShortcutAction.nudgeRight:
+        _nudgeSelectedItems(NudgeDirection.right);
+        break;
     }
     return false;
+  }
+
+  /// Nudge the set of selected items in a given direction
+  void _nudgeSelectedItems(NudgeDirection direction) {
+    final nudgableComponents = tops<Component>(
+      file.selection.items
+          .whereType<StageItem>()
+          .map<Component>((i) => i.component as Component)
+          .where((c) => c is Node || c is RootBone),
+    );
+
+    for (final component in nudgableComponents) {
+      switch (direction) {
+        case NudgeDirection.up:
+          // nasty if/else to handle casting to either Node or RootBone
+          if (component is Node)
+            // ignore: curly_braces_in_flow_control_structures
+            component.y--;
+          else if (component is RootBone) component.y--;
+          break;
+        case NudgeDirection.down:
+          if (component is Node)
+            // ignore: curly_braces_in_flow_control_structures
+            component.y++;
+          else if (component is RootBone) component.y++;
+          break;
+          break;
+        case NudgeDirection.left:
+          if (component is Node)
+            // ignore: curly_braces_in_flow_control_structures
+            component.x--;
+          else if (component is RootBone) component.x--;
+          break;
+          break;
+        case NudgeDirection.right:
+          if (component is Node)
+            // ignore: curly_braces_in_flow_control_structures
+            component.x++;
+          else if (component is RootBone) component.x++;
+          break;
+      }
+    }
   }
 
   /// Fit the selection to the viewport bounds. If nothing is selected the
