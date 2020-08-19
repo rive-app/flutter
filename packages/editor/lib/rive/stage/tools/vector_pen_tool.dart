@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:bezier/bezier.dart';
@@ -329,7 +330,6 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         result = pathResult;
       }
     }
-
     return result;
   }
 
@@ -551,6 +551,62 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   @override
   bool canSelect(StageItem item) => item is StageVertex;
+
+  @override
+  bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {
+    // See if we're in path edit mode, and there's a previous vertex. If there
+    // is, get the previous vertex point and the mouse in local space, and
+    // calculate the sector in which the mouse currently sits
+    final editingPaths = vertexEditor.editingPaths;
+    if (editingPaths != null &&
+        editingPaths.isNotEmpty &&
+        ghostPointWorld != null) {
+      final path = editingPaths.last;
+      if (path.editingMode == PointsPathEditMode.creating &&
+          path.vertices.isNotEmpty) {
+        // We're in business; get the previous vertex and local mouse
+        final lastVertex = path.vertices.last;
+        final inversePath = Mat2D();
+        if (!Mat2D.invert(inversePath, path.pathTransform)) {
+          Mat2D.identity(inversePath);
+        }
+        final local =
+            Vec2D.transformMat2D(Vec2D(), ghostPointWorld, inversePath);
+        final reference = Vec2D.fromValues(lastVertex.x, lastVertex.y);
+        // Calculate what axis is the closest to the slope of the two points
+        ghostPointSector = _ghostPointSector(local, reference);
+      }
+    }
+    return super.mouseMove(activeArtboard, worldMouse);
+  }
+
+  /// Calculates the quadrant in which the world mouse is with reference to the
+  /// previous vertex
+  int _ghostPointSector(Vec2D position, Vec2D reference) {
+    // Calculate the slope of the line from reference to worldMouse
+    final toPosition = Vec2D.subtract(Vec2D(), position, reference);
+    final angle = atan2(toPosition[1], toPosition[0]);
+    if (angle >= -pi / 8 && angle < pi / 8) {
+      return 0;
+    } else if (angle >= pi / 8 && angle < pi / 8 * 3) {
+      return 1;
+    } else if (angle >= pi / 8 * 3 && angle < pi / 8 * 5) {
+      return 2;
+    } else if (angle >= pi / 8 * 5 && angle < pi / 8 * 7) {
+      return 3;
+      // Angle will revert to negative
+    } else if ((angle >= pi / 8 * 7 && angle < pi) ||
+        angle >= -pi && angle < -pi / 8 * 7) {
+      return 4;
+    } else if (angle >= -pi / 8 * 7 && angle < -pi / 8 * 5) {
+      return 5;
+    } else if (angle >= -pi / 8 * 5 && angle < -pi / 8 * 3) {
+      return 6;
+    } else if (angle >= -pi / 8 * 3 && angle < -pi / 8) {
+      return 7;
+    }
+    return 0;
+  }
 }
 
 FractionalIndex _fractionalIndexAt(List<PathVertex> vertices, int index) {

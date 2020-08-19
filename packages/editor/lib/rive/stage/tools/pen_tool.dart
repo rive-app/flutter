@@ -92,9 +92,23 @@ abstract class PenTool<T extends Component> extends StageTool {
   Vec2D _ghostPointWorld;
   Vec2D _ghostPointScreen;
 
+  // The sector the ghost point would lock to if required. This will be set by
+  // the class's children
+  int _ghostPointSector;
+  int get ghostPointSector => _ghostPointSector;
+  set ghostPointSector(int value) {
+    if (_ghostPointSector == value) {
+      return;
+    }
+    _ghostPointSector = value;
+  }
+
   Vec2D get ghostPointWorld => _ghostPointWorld;
 
   void _showGhostPoint(Vec2D world) {
+    if (_ghostPointSector != null) {
+      print('Could lock to $_ghostPointSector');
+    }
     _ghostPointWorld = Vec2D.clone(world);
     _ghostPointScreen = Vec2D.transformMat2D(Vec2D(),
         stageWorldSpace(stage.activeArtboard, world), stage.viewTransform);
