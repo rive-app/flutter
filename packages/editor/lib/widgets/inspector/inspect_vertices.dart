@@ -42,7 +42,8 @@ class VertexInspector extends ListenableInspectorBuilder {
   bool validate(InspectionSet inspecting) => true;
 
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) {
+  List<WidgetBuilder> expand(
+      BuildContext panelContext, InspectionSet inspecting) {
     // We assume inspection set has nothing but vertices in it, so filter
     // anything else out (paths may end up here too).
     var vertices =

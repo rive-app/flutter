@@ -14,7 +14,9 @@ class ArtboardInspectorBuilder extends ListenableInspectorBuilder {
       inspecting.intersectingCoreTypes.contains(ArtboardBase.typeKey);
 
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) => [
+  List<WidgetBuilder> expand(
+          BuildContext panelContext, InspectionSet inspecting) =>
+      [
         (context) => PropertyDual<double>(
               name: 'Position',
               objects: inspecting.components,

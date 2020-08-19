@@ -51,7 +51,9 @@ class InspectClipping extends ListenableInspectorBuilder {
   }
 
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) => [
+  List<WidgetBuilder> expand(
+          BuildContext panelContext, InspectionSet inspecting) =>
+      [
         (context) => InspectorGroup(
               name: 'CLIPPING',
               isExpanded: _isExpanded,

@@ -1,8 +1,8 @@
 {
-    "name": "Skin",
-    "key": {
-        "int": 43,
-        "string": "skin"
-    },
-    "extends": "container_component.json"
+  "name": "Skin",
+  "key": {
+    "int": 43,
+    "string": "skin"
+  },
+  "extends": "container_component.json"
 }

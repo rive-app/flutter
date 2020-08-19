@@ -7,8 +7,20 @@ abstract class CubicVertex extends CubicVertexBase {
 
   set outPoint(Vec2D value);
   set inPoint(Vec2D value);
-  
+
   // -> editor-only
   bool accumulateAngle = false;
   // <- editor-only
+
+  @override
+  void inWeightIndicesChanged(int from, int to) {}
+
+  @override
+  void inWeightsChanged(int from, int to) {}
+
+  @override
+  void outWeightIndicesChanged(int from, int to) {}
+
+  @override
+  void outWeightsChanged(int from, int to) {}
 }

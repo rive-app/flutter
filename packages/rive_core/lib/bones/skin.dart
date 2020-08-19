@@ -1,7 +1,8 @@
 import 'package:rive_core/bones/skeletal_component.dart';
+import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/bones/tendon.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/container_component.dart';
+
 import 'package:rive_core/src/generated/bones/skin_base.dart';
 export 'package:rive_core/src/generated/bones/skin_base.dart';
 
@@ -9,11 +10,32 @@ export 'package:rive_core/src/generated/bones/skin_base.dart';
 /// a set of bones.
 class Skin extends SkinBase {
   final List<Tendon> _tendons = [];
-  Iterable<Tendon> get tendons => _tendons;
+  List<Tendon> get tendons => _tendons;
+
+  @override
+  bool validate() {
+    return parent is Skinnable && super.validate();
+  }
 
   @override
   void update(int dirt) {
     // TODO: update
+  }
+
+  @override
+  void onAdded() {
+    super.onAdded();
+    if (parent is Skinnable) {
+      (parent as Skinnable).addSkin(this);
+    }
+  }
+
+  @override
+  void onRemoved() {
+    if (parent is Skinnable) {
+      (parent as Skinnable).removeSkin(this);
+    }
+    super.onRemoved();
   }
 
   @override
@@ -34,7 +56,7 @@ class Skin extends SkinBase {
       case TendonBase.typeKey:
         _tendons.add(child as Tendon);
         // -> editor-only
-        // clippingShapesChanged.notify();
+        (parent as Skinnable)?.internalTendonsChanged();
         // <- editor-only
         break;
     }
@@ -50,7 +72,7 @@ class Skin extends SkinBase {
           remove();
         }
         // -> editor-only
-        // clippingShapesChanged.notify();
+        (parent as Skinnable)?.internalTendonsChanged();
         // <- editor-only
 
         break;
@@ -58,7 +80,7 @@ class Skin extends SkinBase {
   }
 
   // -> editor-only
-  static Tendon bind(SkeletalComponent bone, ContainerComponent skinnable) {
+  static Tendon bind(SkeletalComponent bone, Skinnable skinnable) {
     assert(bone != null);
     assert(bone.context != null,
         'the bone needs to already have been added to core');
@@ -84,6 +106,9 @@ class Skin extends SkinBase {
         Skin skin;
         if (skinComponent != null) {
           skin = skinComponent as Skin;
+          if (skin.tendons.any((tendon) => tendon.bone == bone)) {
+            return null;
+          }
         } else {
           skin = core.addObject(Skin());
           skinnable.appendChild(skin);

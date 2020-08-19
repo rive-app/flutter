@@ -14,8 +14,9 @@ abstract class InspectorBuilder {
   /// expander can work with.
   bool validate(InspectionSet inspecting);
 
-  /// Gauranteed to be called only when sensible data is available.
-  List<WidgetBuilder> expand(InspectionSet inspecting);
+  /// Guaranteed to be called only when sensible data is available.
+  List<WidgetBuilder> expand(
+      BuildContext panelContext, InspectionSet inspecting);
 
   /// Reset any listeners that may have gotten previously subscribed.
   void clean() {}

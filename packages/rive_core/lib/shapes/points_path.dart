@@ -1,3 +1,4 @@
+import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -12,7 +13,7 @@ enum PointsPathEditMode {
   editing,
 }
 
-class PointsPath extends PointsPathBase {
+class PointsPath extends PointsPathBase with Skinnable {
   final List<PathVertex> _vertices = [];
 
   PointsPath() {

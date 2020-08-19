@@ -116,4 +116,10 @@ abstract class PathVertex extends PathVertexBase {
     return next;
   }
   // <- editor-only
+
+  @override
+  void weightIndicesChanged(int from, int to) {}
+
+  @override
+  void weightsChanged(int from, int to) {}
 }

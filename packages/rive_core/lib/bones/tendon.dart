@@ -1,5 +1,7 @@
+import 'package:core/core.dart';
 import 'package:core/id.dart';
 import 'package:rive_core/bones/skeletal_component.dart';
+import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/src/generated/bones/tendon_base.dart';
 export 'package:rive_core/src/generated/bones/tendon_base.dart';
@@ -17,6 +19,24 @@ class Tendon extends TendonBase {
     }
     return _inverseBind;
   }
+
+  // -> editor-only
+  @override
+  String get name => _bone?.name;
+
+  @override
+  set name(String value) => _bone?.name = value;
+
+  @override
+  Core eventDelegateFor(int propertyKey) {
+    switch (propertyKey) {
+      case ComponentBase.namePropertyKey:
+        return _bone;
+      default:
+        return this;
+    }
+  }
+  // <- editor-only
 
   @override
   void boneIdChanged(Id from, Id to) {

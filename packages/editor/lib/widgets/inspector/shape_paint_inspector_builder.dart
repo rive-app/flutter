@@ -28,7 +28,8 @@ abstract class ShapePaintInspectorBuilder extends ListenableInspectorBuilder {
       ShapesInspectingColor inspectingColor);
 
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) {
+  List<WidgetBuilder> expand(
+      BuildContext panelContext, InspectionSet inspecting) {
     var shapes = inspecting.components.whereType<ShapePaintContainer>();
 
     // Rebuild whenever the fills/strokes are changed on any of our shapes.

@@ -5,5 +5,39 @@
     "string": "cubicvertex"
   },
   "abstract": true,
-  "extends": "shapes/path_vertex.json"
+  "extends": "shapes/path_vertex.json",
+  "properties": {
+    "inWeights": {
+      "type": "uint",
+      "initialValue": "0",
+      "key": {
+        "int": 104,
+        "string": "inweights"
+      }
+    },
+    "inWeightIndices": {
+      "type": "uint",
+      "initialValue": "0",
+      "key": {
+        "int": 105,
+        "string": "inweightindices"
+      }
+    },
+    "outWeights": {
+      "type": "uint",
+      "initialValue": "0",
+      "key": {
+        "int": 106,
+        "string": "outweights"
+      }
+    },
+    "outWeightIndices": {
+      "type": "uint",
+      "initialValue": "0",
+      "key": {
+        "int": 107,
+        "string": "outweightindices"
+      }
+    }
+  }
 }

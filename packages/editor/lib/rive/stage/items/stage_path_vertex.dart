@@ -109,4 +109,11 @@ class StagePathVertex extends StageVertex<PathVertex> {
     component.translation = Vec2D.transformMat2D(
         Vec2D(), value, component.path.inverseWorldTransform);
   }
+
+
+  @override
+  int get weightIndices => component.weightIndices;
+
+  @override
+  int get weights => component.weights;
 }

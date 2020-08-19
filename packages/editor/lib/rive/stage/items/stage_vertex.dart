@@ -142,4 +142,7 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
     var y = worldTranslation[1];
     return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
+
+  int get weights;
+  int get weightIndices;
 }

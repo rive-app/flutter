@@ -26,6 +26,21 @@ class StageBone extends HideableStageItem<Bone>
   double _angle = 0;
   double _tMin = 0, _tMax = 1;
 
+  Paint _customStroke;
+
+  Color get highlightColor => _customStroke?.color;
+  set highlightColor(Color color) {
+    if (color == null) {
+      _customStroke = null;
+    } else {
+      _customStroke ??= Paint()
+        ..strokeWidth = 2
+        ..style = PaintingStyle.stroke
+        ..color = color;
+    }
+    stage?.markNeedsRedraw();
+  }
+
   // Store computed segment for the bone (start->end).
   Segment2D _segment;
 
@@ -147,7 +162,12 @@ class StageBone extends HideableStageItem<Bone>
     canvas.save();
     canvas.translate(screen[0], screen[1]);
     canvas.rotate(_angle);
-    BoneRenderer.draw(canvas, selectionState.value, path);
+    BoneRenderer.draw(
+      canvas,
+      selectionState.value,
+      path,
+      customStroke: _customStroke,
+    );
     canvas.restore();
     // drawBounds(canvas, pass);
   }

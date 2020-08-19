@@ -23,7 +23,9 @@ class AlignmentInspectorBuilder extends InspectorBuilder {
   bool validate(InspectionSet inspecting) => true;
 
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) => [
+  List<WidgetBuilder> expand(
+          BuildContext panelContext, InspectionSet inspecting) =>
+      [
         (context) => Padding(
               padding: const EdgeInsets.only(
                   top: 20, bottom: 10, left: 10, right: 10),

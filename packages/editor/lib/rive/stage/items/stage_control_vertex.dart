@@ -81,6 +81,12 @@ class StageControlIn extends StageControlVertex {
 
     return 0;
   }
+
+  @override
+  int get weightIndices => component.inWeightIndices;
+
+  @override
+  int get weights => component.inWeights;
 }
 
 /// Concrete stage control point for the out handle.
@@ -127,6 +133,12 @@ class StageControlOut extends StageControlVertex {
 
     return 0;
   }
+
+  @override
+  int get weightIndices => component.outWeightIndices;
+
+  @override
+  int get weights => component.outWeights;
 }
 
 class StagePathControlLine extends StageItem<CubicVertex> {
@@ -139,7 +151,7 @@ class StagePathControlLine extends StageItem<CubicVertex> {
   @override
   bool get isSelectable => false;
 
-    @override
+  @override
   Iterable<StageDrawPass> get drawPasses =>
       [StageDrawPass(draw, order: 3, inWorldSpace: true)];
 

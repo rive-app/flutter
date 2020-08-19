@@ -15,6 +15,7 @@ import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
+import 'package:rive_editor/widgets/inspector/inspect_skin.dart';
 import 'package:rive_editor/widgets/inspector/inspect_vertices.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:utilities/restorer.dart';
@@ -32,7 +33,10 @@ enum VertexEditorMode {
 }
 
 class VertexEditor with RiveFileDelegate {
-  final List<InspectorBuilder> _editingPathInspectors = [VertexInspector()];
+  final List<InspectorBuilder> _editingPathInspectors = [
+    VertexInspector(),
+    InspectSkin(),
+  ];
   final OpenFileContext file;
   final Stage stage;
   final ValueNotifier<HashSet<PointsPath>> _editingPaths =
@@ -329,9 +333,9 @@ class VertexEditor with RiveFileDelegate {
     file.removeActionHandler(_handleAction);
   }
 
+  bool get isActive => _mode.value == VertexEditorMode.editingPath;
+
   List<InspectorBuilder> inspectorBuilders() {
-    return _mode.value == VertexEditorMode.editingPath
-        ? _editingPathInspectors
-        : null;
+    return isActive ? _editingPathInspectors : null;
   }
 }
