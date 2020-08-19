@@ -167,7 +167,6 @@ class Snapper {
       item.addSources(_source, singleSelection);
     }
     _source.complete();
-    ShortcutAction.symmetricDraw.addListener(_advanceToCurrentMouse);
   }
 
   void advance(Vec2D worldMouse, bool enabled) {
