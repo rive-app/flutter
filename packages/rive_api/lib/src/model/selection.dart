@@ -10,4 +10,6 @@ class Selection {
 
   final Set<File> files;
   final Set<Folder> folders;
+
+  bool get isEmpty => files.isEmpty && folders.isEmpty;
 }
