@@ -139,7 +139,11 @@ class Stage extends Debouncer {
 
   /// The snapping context for the current drag operation.
   Snapper _snapper;
-  Snapper get snapper => _snapper ??= Snapper(this, _worldMouse);
+  Snapper get snapper => _snapper ??= Snapper(
+        this,
+        _worldMouse,
+        axisLockNotifier: ShortcutAction.symmetricDraw,
+      );
 
   /// Register a selection handler that will be called back when an item of type
   /// T is selected.
@@ -703,6 +707,7 @@ class Stage extends Debouncer {
       if (_dragTool is TransformingTool) {
         (_dragTool as TransformingTool).completeTransformers();
         toolCompleted = true;
+        _snapper?.dispose();
         _snapper = null;
       }
       if (_dragTool is DraggableTool) {
