@@ -24,22 +24,16 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(ShortcutAction.symmetricDraw, {ShortcutKey.shift}),
     Shortcut(ShortcutAction.pan, {ShortcutKey.space}),
     Shortcut(ShortcutAction.toggleEditMode, {ShortcutKey.enter}),
-    Shortcut(
-      ShortcutAction.left,
-      {ShortcutKey.left},
-    ),
-    Shortcut(
-      ShortcutAction.right,
-      {ShortcutKey.right},
-    ),
-    Shortcut(
-      ShortcutAction.up,
-      {ShortcutKey.up},
-    ),
-    Shortcut(
-      ShortcutAction.down,
-      {ShortcutKey.down},
-    ),
+
+    Shortcut(ShortcutAction.left, {ShortcutKey.left}),
+    Shortcut(ShortcutAction.right, {ShortcutKey.right}),
+    Shortcut(ShortcutAction.up, {ShortcutKey.up}),
+    Shortcut(ShortcutAction.down, {ShortcutKey.down}),
+    Shortcut(ShortcutAction.nudgeLeft, {ShortcutKey.left}),
+    Shortcut(ShortcutAction.nudgeRight, {ShortcutKey.right}),
+    Shortcut(ShortcutAction.nudgeUp, {ShortcutKey.up}),
+    Shortcut(ShortcutAction.nudgeDown, {ShortcutKey.down}),
+
     Shortcut(ShortcutAction.confirm, {ShortcutKey.enter}),
     Shortcut(
       ShortcutAction.copy,

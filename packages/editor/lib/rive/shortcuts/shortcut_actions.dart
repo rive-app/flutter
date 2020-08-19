@@ -101,15 +101,21 @@ class ShortcutAction {
       ShortcutAction('key-translation');
   static const ShortcutAction nextItem = ShortcutAction('next');
   static const ShortcutAction previousItem = ShortcutAction('prev');
+
   static const ShortcutAction bumpDown = ShortcutAction('bump-down');
   static const ShortcutAction bumpLeft = ShortcutAction('bump-left');
-
   static const ShortcutAction bumpRight = ShortcutAction('bump-right');
   static const ShortcutAction bumpUp = ShortcutAction('bump-up');
-  static const ShortcutAction nudgeDown = ShortcutAction('nudge-down');
-  static const ShortcutAction nudgeLeft = ShortcutAction('nudge-left');
-  static const ShortcutAction nudgeRight = ShortcutAction('nudge-right');
-  static const ShortcutAction nudgeUp = ShortcutAction('nudge-up');
+
+  static const ShortcutAction nudgeDown =
+      ShortcutAction('nudge-down', repeats: true);
+  static const ShortcutAction nudgeLeft =
+      ShortcutAction('nudge-left', repeats: true);
+  static const ShortcutAction nudgeRight =
+      ShortcutAction('nudge-right', repeats: true);
+  static const ShortcutAction nudgeUp =
+      ShortcutAction('nudge-up', repeats: true);
+
   static const ShortcutAction resetRulers = ShortcutAction('reset-rulers');
   static const ShortcutAction toggleRulers = ShortcutAction('rulers');
 

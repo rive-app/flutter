@@ -5,6 +5,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_scale_handle.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/transformers/stage_transformer.dart';
@@ -23,10 +24,15 @@ class NodeScaleTransformer extends StageTransformer {
   final Vec2D lockAxis;
   final StageScaleHandle handle;
   final TransformComponents transformComponents = TransformComponents();
+  final StatefulShortcutAction<bool> proportionalScaleShortcut;
 
   final _inHandleSpace = HashMap<Node, Mat2D>();
 
-  NodeScaleTransformer({this.handle, this.lockAxis}) {
+  NodeScaleTransformer({
+    this.handle,
+    this.lockAxis,
+    this.proportionalScaleShortcut,
+  }) {
     Mat2D.decompose(handle.transform, transformComponents);
   }
 
@@ -37,9 +43,22 @@ class NodeScaleTransformer extends StageTransformer {
       var d = Vec2D.dot(constraintedDelta, lockAxis);
       constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
     }
+    var constraintedDeltaX = constraintedDelta[0];
+    var constraintedDeltaY = constraintedDelta[1];
 
-    transformComponents.scaleX += constraintedDelta[0] * 0.01;
-    transformComponents.scaleY -= constraintedDelta[1] * 0.01;
+    // Lock scale if shortcut is detected and we're locked on an axis
+    if (lockAxis != null &&
+        proportionalScaleShortcut != null &&
+        proportionalScaleShortcut.value) {
+      if (constraintedDeltaX == 0) {
+        constraintedDeltaX = constraintedDeltaY;
+      } else if (constraintedDeltaY == 0) {
+        constraintedDeltaY = constraintedDeltaX;
+      }
+    }
+
+    transformComponents.scaleX += constraintedDeltaX * 0.01;
+    transformComponents.scaleY -= constraintedDeltaY * 0.01;
 
     var transform = Mat2D();
     Mat2D.compose(transform, transformComponents);
