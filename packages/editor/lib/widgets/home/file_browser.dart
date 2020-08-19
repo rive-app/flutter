@@ -816,20 +816,20 @@ class FileBrowser extends StatelessWidget {
                     height: 600,
                     child: Stack(
                       children: [
+                        const Robot(),
                         Align(
-                            alignment: Alignment.topCenter,
+                            alignment: Alignment.center,
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 100.0),
+                              padding: const EdgeInsets.only(top: 0.0),
                               child: Text(
                                   'Hey, it looks like you don\'t '
                                   'have any files here yet!\n'
-                                  'Hit the plus button to create a new file!',
+                                  'Hit the plus button to create a new file.',
                                   style: RiveTheme.of(context)
                                       .textStyles
                                       .fileBrowserText,
                                   textAlign: TextAlign.center),
-                            )),
-                        const Robot()
+                            ))
                       ],
                     ),
                   ),
