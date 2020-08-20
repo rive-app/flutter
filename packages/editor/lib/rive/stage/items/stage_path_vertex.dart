@@ -110,10 +110,32 @@ class StagePathVertex extends StageVertex<PathVertex> {
         Vec2D(), value, component.path.inverseWorldTransform);
   }
 
-
   @override
   int get weightIndices => component.weightIndices;
 
   @override
+  set weightIndices(int value) {
+    component.weightIndices = value;
+  }
+
+  @override
   int get weights => component.weights;
+
+  @override
+  set weights(int value) {
+    component.weights = value;
+  }
+
+  @override
+  void listenToWeightChange(
+      bool enable, void Function(dynamic, dynamic) callback) {
+    if (enable) {
+      component.addListener(PathVertexBase.weightIndicesPropertyKey, callback);
+      component.addListener(PathVertexBase.weightsPropertyKey, callback);
+    } else {
+      component.removeListener(
+          PathVertexBase.weightIndicesPropertyKey, callback);
+      component.removeListener(PathVertexBase.weightsPropertyKey, callback);
+    }
+  }
 }

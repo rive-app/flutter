@@ -44,11 +44,15 @@ class InspectSkin extends ListenableInspectorBuilder {
   @override
   List<WidgetBuilder> expand(
       BuildContext panelContext, InspectionSet inspecting) {
-    var stageVertices = inspecting.stageItems.whereType<StageVertex>();
-    if(stageVertices.isNotEmpty) {
-      print("HAVE ${stageVertices.length} STAGE VERTICES");
-      //stageVertices.first.weights;
-    }
+    var vertexEditor = inspecting.fileContext.vertexEditor;
+    var showWeights =
+        vertexEditor.isActive && vertexEditor.editingPaths.isNotEmpty;
+    print("SHOW WEIGHTS? $showWeights");
+    // var stageVertices = inspecting.stageItems.whereType<StageVertex>();
+    // if (stageVertices.isNotEmpty) {
+    //   print("HAVE ${stageVertices.length} STAGE VERTICES");
+    //   //stageVertices.first.weights;
+    // }
     var skin = _skinnable.skin;
     var boneColors = RiveTheme.of(panelContext).colors.boundBones;
     if (skin != null) {
@@ -93,6 +97,11 @@ class InspectSkin extends ListenableInspectorBuilder {
                   skin.tendons[i],
                 ],
                 color: boneColors[i % l],
+                boneIndex: i,
+                vertices: showWeights
+                    ? inspecting.stageItems.whereType<StageVertex>()
+                    : null,
+                boundBoneCount: l,
               ),
     ];
   }

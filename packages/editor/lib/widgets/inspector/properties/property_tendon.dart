@@ -1,16 +1,26 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/bones/tendon.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/widgets/common/converters/percentage_input_converter.dart';
+import 'package:rive_editor/widgets/inspector/properties/inspector_text_field.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_item.dart';
+import 'package:rive_editor/widgets/properties_builder.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
 
 class PropertyTendon extends StatelessWidget {
   final Iterable<Tendon> tendons;
+  final Iterable<StageVertex> vertices;
   final Color color;
+  final int boneIndex;
+  final int boundBoneCount;
   const PropertyTendon({
     Key key,
     this.tendons,
     this.color,
+    this.vertices,
+    this.boneIndex,
+    this.boundBoneCount,
   }) : super(key: key);
 
   @override
@@ -29,6 +39,34 @@ class PropertyTendon extends StatelessWidget {
           ),
         ),
         components: tendons,
+        postfix: vertices == null
+            ? null
+            : (context) => SizedBox(
+                  width: 40,
+                  child: PropertiesBuilder<double, StageVertex>(
+                    objects: vertices,
+                    builder: (context, weight, _) {
+                      return InspectorTextField(
+                        converter: ClampedPercentageInputConverter.instance,
+                        value: weight,
+                        change: (double value) {
+                          for (final vertex in vertices) {
+                            vertex.setWeight(
+                              boneIndex,
+                              boundBoneCount,
+                              value,
+                            );
+                          }
+                        },
+                      );
+                    },
+                    getValue: (object) => object.getWeight(boneIndex),
+                    listen: (object, enable, callback) {
+                      object.listenToWeightChange(enable, callback);
+                    },
+                    frozen: false,
+                  ),
+                ),
       ),
     );
   }

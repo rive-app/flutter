@@ -7,6 +7,7 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
+import 'package:rive_editor/rive/weighted_vertex.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -14,7 +15,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 /// Abstraction for any stage representation of a vertex (shared by meshes,
 /// paths, etc).
 abstract class StageVertex<T extends Component> extends StageItem<T>
-    with BoundsDelegate {
+    with BoundsDelegate, WeightedVertex {
   static const double _vertexRadius = 3.5;
   static const double _vertexRadiusSelected = 4.5;
   static const double hitRadiusSquared =
@@ -143,6 +144,6 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
     return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
 
-  int get weights;
-  int get weightIndices;
+  void listenToWeightChange(
+      bool enable, void Function(dynamic, dynamic) callback);
 }
