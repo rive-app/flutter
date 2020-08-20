@@ -15,6 +15,7 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
@@ -564,24 +565,33 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     // calculate the sector in which the mouse currently sits
     lockAxis = null;
     final editingPaths = vertexEditor.editingPaths;
+
     if (editingPaths != null &&
         editingPaths.isNotEmpty &&
         ghostPointWorld != null) {
-      final path = editingPaths.last;
-      if (path.editingMode == PointsPathEditMode.creating &&
+      // Current editing path is the last in the list
+      PointsPath path;
+      for (final p in editingPaths) {
+        if (p.editingMode == PointsPathEditMode.creating) {
+          path = p;
+          break;
+        }
+      }
+
+      if (path != null &&
+          (path.editingMode == PointsPathEditMode.creating ||
+              path.editingMode == PointsPathEditMode.editing) &&
           path.vertices.isNotEmpty) {
         // We're in business; get the previous vertex and local mouse
         final lastVertex = path.vertices.last;
-        final inversePath = Mat2D();
-        if (!Mat2D.invert(inversePath, path.pathTransform)) {
-          Mat2D.identity(inversePath);
-        }
-        final local = Vec2D.transformMat2D(Vec2D(), worldMouse, inversePath);
         final reference = Vec2D.fromValues(lastVertex.x, lastVertex.y);
-        final origin =
-            Vec2D.transformMat2D(Vec2D(), reference, path.pathTransform);
+        final origin = Vec2D.transformMat2D(
+          Vec2D(),
+          reference,
+          path.pathTransform,
+        );
         // Calculate what axis is the closest to the slope of the two points
-        lockAxis = LockAxis(origin, _calculateLockAxis(local, reference));
+        lockAxis = LockAxis(origin, _calculateLockAxis(worldMouse, origin));
       }
     }
     return super.mouseMove(activeArtboard, worldMouse);
@@ -589,9 +599,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   /// Calculates the quadrant in which the world mouse is with reference to the
   /// previous vertex
-  LockDirection _calculateLockAxis(Vec2D position, Vec2D reference) {
+  LockDirection _calculateLockAxis(Vec2D position, Vec2D origin) {
     // Calculate the slope of the line from reference to worldMouse
-    final toPosition = Vec2D.subtract(Vec2D(), position, reference);
+    final toPosition = Vec2D.subtract(Vec2D(), position, origin);
     final angle = atan2(toPosition[1], toPosition[0]);
     if (angle >= -pi / 8 && angle < pi / 8) {
       return LockDirection.x;
