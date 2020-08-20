@@ -125,8 +125,13 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     var path = vertexEditor.creatingPath.value ??
         _makeEditingPath(activeArtboard, ghostPointWorld);
 
-    var localTranslation =
-        Vec2D.transformMat2D(Vec2D(), worldMouse, path.inverseWorldTransform);
+    var localTranslation = Vec2D.transformMat2D(
+      Vec2D(),
+      // if there's a ghost point, use that as the vertex position, as the axis
+      // might be locked
+      ghostPointWorld ?? worldMouse,
+      path.inverseWorldTransform,
+    );
     var vertex = _clickCreatedVertex = StraightVertex()
       ..x = localTranslation[0]
       ..y = localTranslation[1]
