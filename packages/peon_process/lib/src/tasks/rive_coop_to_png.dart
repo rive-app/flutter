@@ -34,9 +34,9 @@ class RiveCoopToPng with Task {
       this.originalTaskData});
 
   static RiveCoopToPng fromData(Map<String, dynamic> data) {
-    if (!data.containsKey("params")) {
+    if (!data.containsKey('params')) {
       throw IllegalTask(
-          "Expecting a JSON structure with `params` but got $data");
+          'Expecting a JSON structure with `params` but got $data');
     }
 
     var params = data.getMap<String, Object>('params');
@@ -59,21 +59,20 @@ class RiveCoopToPng with Task {
     try {
       var tmpName = sourceLocation.hashCode.toString();
       var tempDir = await Directory.systemTemp.createTemp();
-      var inPath = "${tempDir.path}/$tmpName.in.riv";
-      var outPath = "${tempDir.path}/$tmpName.out.png";
+      var inPath = '${tempDir.path}/$tmpName.in.riv';
+      var outPath = '${tempDir.path}/$tmpName.out.png';
       var inFile = File(inPath);
       await inFile.create();
       await inFile.writeAsBytes(runtimeBinary);
 
-      var thumbnail_converter =
-          Platform.environment['THUMBNAIL_GENERATOR_PATH'];
-      if (thumbnail_converter == null) {
-        throw Exception(
-            'Env variable THUMBNAIL_GENERATOR_PATH is required for png generation');
+      var thumbnailConverter = Platform.environment['THUMBNAIL_GENERATOR_PATH'];
+      if (thumbnailConverter == null) {
+        throw Exception('Env variable THUMBNAIL_GENERATOR_PATH '
+            'is required for png generation');
       }
 
       execOutput = await Process.run(
-        thumbnail_converter,
+        thumbnailConverter,
         [
           inPath,
           outPath,
@@ -83,9 +82,10 @@ class RiveCoopToPng with Task {
         var outFile = File(outPath);
         return await outFile.readAsBytes();
       } else {
-        _log.severe('Thumbnail Generation Failed for ${taskId} '
-            '\nstdout:\n${execOutput.stdout.toString().split('\n')}'
-            '\nstderr:\n${execOutput.stderr.toString().split('\n')}');
+        _log.severe('Thumbnail Generation Failed for $taskId'
+            '\nexit_code: ${execOutput.exitCode}'
+            '\nstdout: ${execOutput.stdout.toString().split('\n')}'
+            '\nstderr: ${execOutput.stderr.toString().split('\n')}');
       }
     } finally {
       await tempDir?.delete(recursive: true);

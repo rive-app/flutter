@@ -106,6 +106,14 @@ class RiveManager with Subscriptions {
   Future<void> export() async {
     var selection = Plumber().peek<Selection>();
 
+    if (selection == null || selection.isEmpty) {
+      Plumber().message(GlobalMessage(
+          'Please select files or folders to export',
+          'dismiss',
+          () => Plumber().flush<GlobalMessage>()));
+      return;
+    }
+
     var payload = <String, Map<String, List<int>>>{};
     selection.files.forEach((file) {
       // TODO: untangle me

@@ -77,10 +77,10 @@ class TeamManager with Subscriptions {
     String email = member.ownerId <= 0 ? member.name : null;
     if (role == TeamRole.delete) {
       success = await _teamApi.rescindInvite(team.ownerId,
-          userId: member.ownerId, email: email);
+          ownerId: member.ownerId, email: email);
     } else {
       success = await _teamApi.updateInvite(team.ownerId, role,
-          userId: member.ownerId, email: email);
+          ownerId: member.ownerId, email: email);
     }
     if (success) {
       // Clean up stale data.
@@ -113,7 +113,7 @@ class TeamManager with Subscriptions {
         await _teamApi.createTeam(teamName, plan, frequency, stripeToken);
     await loadTeams();
     var team = Team.fromDM(teamDM);
-    FileManager().loadBaseFolder(team);
+    await FileManager().loadBaseFolder(team);
     return Team.fromDM(teamDM);
   }
 

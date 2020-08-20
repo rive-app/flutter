@@ -410,7 +410,7 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
         endScrollOffset = null;
         startScrollOffset = null;
         updateMarquee();
-        var selection = Plumber().peek<Selection>();
+        var selection = Plumber().peek<Selection>() ?? Selection();
         if (rightClick && selection != null) {
           ListPopup.show(context,
               margin: 5,
@@ -428,7 +428,8 @@ class _FileBrowserWrapperState extends State<FileBrowserWrapper> {
                   PopupContextItem(
                     'Rename',
                     select: () async {
-                      final selection = Plumber().peek<Selection>();
+                      final selection =
+                          Plumber().peek<Selection>() ?? Selection();
                       if (selection.files.isNotEmpty) {
                         final file = Plumber()
                             .peek<File>(selection.files.first.hashCode);

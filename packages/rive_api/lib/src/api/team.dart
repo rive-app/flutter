@@ -68,9 +68,9 @@ class TeamApi {
     await api.post('${api.host}/api/teams/$teamId/invite/reject');
   }
 
-  Future<bool> rescindInvite(int teamId, {int userId, String email}) async {
+  Future<bool> rescindInvite(int teamId, {int ownerId, String email}) async {
     String payload = json.encode({
-      if (userId > 0) 'userId': userId,
+      if (ownerId > 0) 'ownerId': ownerId,
       if (email != null) 'userEmail': email,
     });
     try {
@@ -85,11 +85,11 @@ class TeamApi {
   Future<bool> updateInvite(
     int teamId,
     TeamRole role, {
-    int userId,
+    int ownerId,
     String email,
   }) async {
     final payloadMap = {
-      if (userId != null) 'userId': userId,
+      if (ownerId != null) 'ownerId': ownerId,
       if (email != null) 'userEmail': email,
       'role': role.name
     };
