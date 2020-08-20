@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rive_api/model.dart';
 
-import 'package:rive_api/models/follow.dart';
 import 'package:rive_api/models/team_invite_status.dart';
 import 'package:rive_api/models/team_role.dart';
 import 'package:rive_api/plumber.dart';
@@ -123,44 +122,5 @@ class _TeamMember extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class FollowUnfollow extends StatelessWidget {
-  const FollowUnfollow(this.ownerId);
-  final int ownerId;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = RiveTheme.of(context);
-
-    return StreamBuilder<Iterable<RiveFollowee>>(
-        stream: FollowProvider.of(context).followeesStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final following = snapshot.data.any((f) => ownerId == f.ownerId);
-            if (following) {
-              return TintedIconButton(
-                  icon: PackedIcon.delete,
-                  padding: const EdgeInsets.all(0),
-                  backgroundHover: Colors.transparent,
-                  iconHover: theme.colors.buttonHover,
-                  onPress: () {
-                    FollowProvider.of(context).unfollowSink.add(ownerId);
-                  });
-            } else {
-              return TintedIconButton(
-                  icon: PackedIcon.toolCreate,
-                  padding: const EdgeInsets.all(0),
-                  backgroundHover: Colors.transparent,
-                  iconHover: theme.colors.buttonHover,
-                  onPress: () {
-                    FollowProvider.of(context).followSink.add(ownerId);
-                  });
-            }
-          } else {
-            return Container();
-          }
-        });
   }
 }
