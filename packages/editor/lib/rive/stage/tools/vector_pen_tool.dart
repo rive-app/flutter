@@ -557,6 +557,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     // See if we're in path edit mode, and there's a previous vertex. If there
     // is, get the previous vertex point and the mouse in local space, and
     // calculate the sector in which the mouse currently sits
+    lockAxis = null;
     final editingPaths = vertexEditor.editingPaths;
     if (editingPaths != null &&
         editingPaths.isNotEmpty &&
@@ -570,11 +571,12 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         if (!Mat2D.invert(inversePath, path.pathTransform)) {
           Mat2D.identity(inversePath);
         }
-        final local =
-            Vec2D.transformMat2D(Vec2D(), ghostPointWorld, inversePath);
+        final local = Vec2D.transformMat2D(Vec2D(), worldMouse, inversePath);
         final reference = Vec2D.fromValues(lastVertex.x, lastVertex.y);
+        final origin =
+            Vec2D.transformMat2D(Vec2D(), reference, path.pathTransform);
         // Calculate what axis is the closest to the slope of the two points
-        ghostPointSector = _ghostPointSector(local, reference);
+        lockAxis = LockAxis(origin, _calculateLockAxis(local, reference));
       }
     }
     return super.mouseMove(activeArtboard, worldMouse);
@@ -582,30 +584,30 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   /// Calculates the quadrant in which the world mouse is with reference to the
   /// previous vertex
-  int _ghostPointSector(Vec2D position, Vec2D reference) {
+  LockDirection _calculateLockAxis(Vec2D position, Vec2D reference) {
     // Calculate the slope of the line from reference to worldMouse
     final toPosition = Vec2D.subtract(Vec2D(), position, reference);
     final angle = atan2(toPosition[1], toPosition[0]);
     if (angle >= -pi / 8 && angle < pi / 8) {
-      return 0;
+      return LockDirection.x;
     } else if (angle >= pi / 8 && angle < pi / 8 * 3) {
-      return 1;
+      return LockDirection.neg45;
     } else if (angle >= pi / 8 * 3 && angle < pi / 8 * 5) {
-      return 2;
+      return LockDirection.y;
     } else if (angle >= pi / 8 * 5 && angle < pi / 8 * 7) {
-      return 3;
+      return LockDirection.pos45;
       // Angle will revert to negative
     } else if ((angle >= pi / 8 * 7 && angle < pi) ||
         angle >= -pi && angle < -pi / 8 * 7) {
-      return 4;
+      return LockDirection.x;
     } else if (angle >= -pi / 8 * 7 && angle < -pi / 8 * 5) {
-      return 5;
+      return LockDirection.neg45;
     } else if (angle >= -pi / 8 * 5 && angle < -pi / 8 * 3) {
-      return 6;
+      return LockDirection.y;
     } else if (angle >= -pi / 8 * 3 && angle < -pi / 8) {
-      return 7;
+      return LockDirection.pos45;
     }
-    return 0;
+    return LockDirection.x;
   }
 }
 
