@@ -56,9 +56,9 @@ class ExportRive with Task {
       this.originalTaskData});
 
   static ExportRive fromData(Map<String, Object> data) {
-    if (!data.containsKey("params")) {
+    if (!data.containsKey('params')) {
       throw IllegalTask(
-          "Expecting a JSON structure with `params` but got $data");
+          'Expecting a JSON structure with `params` but got $data');
     }
 
     var params = data.getMap<String, Object>('params');
@@ -99,7 +99,7 @@ class ExportRive with Task {
         var exportedRiveBinary = exporter.export();
 
         var filePath =
-            "${tempDir.path}${sourceDetails[i].path}/${sourceDetails[i].name}.riv";
+            '${tempDir.path}${sourceDetails[i].path}/${sourceDetails[i].name}.riv';
 
         var exportedFile = File(filePath);
         await exportedFile.create(recursive: true);
@@ -115,11 +115,13 @@ class ExportRive with Task {
     await putS3Key(targetLocation, zipBytes);
 
     var queue = await getJSQueue();
-    await queue.sendMessage(json.encode({
-      "work": "TaskCompleted",
-      "taskId": taskId,
-      "payload": originalTaskData
-    }));
+    await queue.sendMessage(
+        json.encode({
+          'work': 'TaskCompleted',
+          'taskId': taskId,
+          'payload': originalTaskData
+        }),
+        region: defaultRegion);
 
     return true;
   }

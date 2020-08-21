@@ -1,28 +1,34 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:aws_client/sqs.dart';
 import 'package:logging/logging.dart';
 import 'package:peon/src/tasks/base.dart';
 
 final _log = Logger('peon');
+final defaultRegion =
+    (Platform.environment['LOCAL_STACK_URL'] == null) ? null : 'us-east-1';
 
 Future<void> loop(Future<SqsQueue> Function() getQueue,
     Map<String, Task Function(Map<String, dynamic>)> tasks) async {
   _log.info('Ready to work.');
   SqsQueue queue;
+
   while (true) {
     try {
       _log.info('What you want?');
       queue = await getQueue();
       List<SqsMessage> messages =
-          await queue.receiveMessage(2, waitSeconds: 10);
+          await queue.receiveMessage(2, waitSeconds: 10, region: defaultRegion);
       messages.forEach((message) async {
         try {
           bool success = await execute(message, tasks);
           if (success) {
-            await queue.deleteMessage(message.receiptHandle);
+            await queue.deleteMessage(message.receiptHandle,
+                region: defaultRegion);
             _log.info('Work done.');
           } else {
-            await queue.deleteMessage(message.receiptHandle);
+            await queue.deleteMessage(message.receiptHandle,
+                region: defaultRegion);
             _log.info('Work failed, removing from queue.');
           }
           // ignore: avoid_catches_without_on_clauses

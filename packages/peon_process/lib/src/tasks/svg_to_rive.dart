@@ -35,9 +35,9 @@ class SvgToRiveTask with Task {
       this.originalTaskData});
 
   static SvgToRiveTask fromData(Map<String, dynamic> data) {
-    if (!data.containsKey("params")) {
+    if (!data.containsKey('params')) {
       throw IllegalTask(
-          "Expecting a JSON structure with `params` but got $data");
+          'Expecting a JSON structure with `params` but got $data');
     }
 
     var params = data.getMap<String, Object>('params');
@@ -60,8 +60,8 @@ class SvgToRiveTask with Task {
     try {
       var tmpName = sourceLocation.hashCode.toString();
       var tempDir = await Directory.systemTemp.createTemp();
-      var inPath = "${tempDir.path}/$tmpName.in.svg";
-      var outPath = "${tempDir.path}/$tmpName.out.svg";
+      var inPath = '${tempDir.path}/$tmpName.in.svg';
+      var outPath = '${tempDir.path}/$tmpName.out.svg';
       var inFile = File(inPath);
       await inFile.create();
       await inFile.writeAsString(input);
@@ -117,11 +117,14 @@ class SvgToRiveTask with Task {
     await putS3Key(targetLocation, uint8data);
 
     var queue = await getJSQueue();
-    await queue.sendMessage(json.encode({
-      "work": "TaskCompleted",
-      "taskId": taskId,
-      "payload": originalTaskData
-    }));
+    await queue.sendMessage(
+      json.encode({
+        'work': 'TaskCompleted',
+        'taskId': taskId,
+        'payload': originalTaskData
+      }),
+      region: defaultRegion,
+    );
 
     return true;
   }
