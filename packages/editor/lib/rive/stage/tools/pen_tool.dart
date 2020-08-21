@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:bezier/bezier.dart';
@@ -24,29 +25,16 @@ enum LockDirection {
 @immutable
 class LockAxis {
   final Vec2D origin;
-  final LockDirection direction;
+  final Vec2D direction;
   const LockAxis(this.origin, this.direction);
 
   /// Translate a point to the axis
   Vec2D translateToAxis(Vec2D point) {
-    switch (direction) {
-      case LockDirection.x:
-        return Vec2D.fromValues(point[0], origin[1]);
-      case LockDirection.y:
-        return Vec2D.fromValues(origin[0], point[1]);
-      case LockDirection.pos45:
-      case LockDirection.neg45:
-        final xDiff = point[0] - origin[0];
-        final yDiff = point[1] - origin[1];
-        final xSign = xDiff >= 0 ? 1 : -1;
-        final ySign = yDiff >= 0 ? 1 : -1;
-        final dist = (xDiff.abs() + yDiff.abs()) / 2;
-        return Vec2D.fromValues(
-          origin[0] + (dist * xSign),
-          origin[1] + (dist * ySign),
-        );
-    }
-    return point;
+    final xDiff = point[0] - origin[0];
+    final yDiff = point[1] - origin[1];
+    final dist = sqrt(xDiff * xDiff + yDiff * yDiff);
+    return Vec2D.fromValues(
+        origin[0] + (dist * direction[0]), origin[1] + (dist * direction[1]));
   }
 
   @override
@@ -56,11 +44,12 @@ class LockAxis {
   bool operator ==(Object o) =>
       o is LockAxis && o.direction == direction && o.origin == origin;
 
+  // TODO: hmmm what's a good hash for 4 floats?
   /// Simple formula to calculate reasonably unique hashes:
   /// h = (a * P1 + b) * P2 + c
-  @override
-  int get hashCode =>
-      (direction.index * 32 + origin[0].round()) * 113 + origin[1].round();
+  // @override
+  // int get hashCode =>
+  //     (direction.index * 32 + origin[0].round()) * 113 + origin[1].round();
 }
 
 @immutable

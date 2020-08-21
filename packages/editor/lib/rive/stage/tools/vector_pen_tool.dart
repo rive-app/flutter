@@ -591,30 +591,14 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   /// Calculates the quadrant in which the world mouse is with reference to the
   /// previous vertex
-  LockDirection _calculateLockAxis(Vec2D position, Vec2D origin) {
-    // Calculate the slope of the line from reference to worldMouse
-    final toPosition = Vec2D.subtract(Vec2D(), position, origin);
-    final angle = atan2(toPosition[1], toPosition[0]);
-    if (angle >= -pi / 8 && angle < pi / 8) {
-      return LockDirection.x;
-    } else if (angle >= pi / 8 && angle < pi / 8 * 3) {
-      return LockDirection.neg45;
-    } else if (angle >= pi / 8 * 3 && angle < pi / 8 * 5) {
-      return LockDirection.y;
-    } else if (angle >= pi / 8 * 5 && angle < pi / 8 * 7) {
-      return LockDirection.pos45;
-      // Angle will revert to negative
-    } else if ((angle >= pi / 8 * 7 && angle < pi) ||
-        angle >= -pi && angle < -pi / 8 * 7) {
-      return LockDirection.x;
-    } else if (angle >= -pi / 8 * 7 && angle < -pi / 8 * 5) {
-      return LockDirection.neg45;
-    } else if (angle >= -pi / 8 * 5 && angle < -pi / 8 * 3) {
-      return LockDirection.y;
-    } else if (angle >= -pi / 8 * 3 && angle < -pi / 8) {
-      return LockDirection.pos45;
-    }
-    return LockDirection.x;
+  Vec2D _calculateLockAxis(Vec2D position, Vec2D origin) {
+    var diff = Vec2D.subtract(Vec2D(), position, origin);
+
+    var angle = atan2(diff[1], diff[0]);
+    // 45 degree increments
+    var lockInc = pi / 4;
+    var lockAngle = (angle / lockInc).round() * lockInc;
+    return Vec2D.fromValues(cos(lockAngle), sin(lockAngle));
   }
 }
 
