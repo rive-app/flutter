@@ -26,6 +26,10 @@ class NodeScaleTransformer extends StageTransformer {
   final TransformComponents transformComponents = TransformComponents();
   final StatefulShortcutAction<bool> proportionalScaleShortcut;
 
+  // Record the scales for all the top nodes when intializing the tool so that
+  // the proportional scale shortcut knows what ratios to scale to
+  Vec2D _initialScale;
+
   final _inHandleSpace = HashMap<Node, Mat2D>();
 
   NodeScaleTransformer({
@@ -51,9 +55,14 @@ class NodeScaleTransformer extends StageTransformer {
         proportionalScaleShortcut != null &&
         proportionalScaleShortcut.value) {
       if (constraintedDeltaX == 0) {
-        constraintedDeltaX = constraintedDeltaY;
+        // Calculate the proportion delta x change
+        transformComponents.scaleX =
+            (transformComponents.scaleY / _initialScale[1] * _initialScale[0]) -
+                constraintedDeltaY * 0.01;
       } else if (constraintedDeltaY == 0) {
-        constraintedDeltaY = constraintedDeltaX;
+        transformComponents.scaleY =
+            (transformComponents.scaleX / _initialScale[0] * _initialScale[1]) +
+                constraintedDeltaX * 0.01;
       }
     }
 
@@ -125,6 +134,10 @@ class NodeScaleTransformer extends StageTransformer {
     }
 
     _nodes = topComponents(_nodes);
+
+    // HACK: the initial scale is the scale of the first node
+    // _initialScales = _nodes.map((node) => node.scale);
+    _initialScale = _nodes.first.scale;
 
     for (final node in _nodes) {
       _inHandleSpace[node] =
