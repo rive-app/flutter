@@ -79,6 +79,7 @@ void main() {
     expect(editingPath.editingMode, PointsPathEditMode.creating,
         reason: 'Path should be in creation mode.');
 
+    stage.mouseMove(1, 100, 200);
     stage.mouseDown(1, 100, 200);
     stage.mouseUp(1, 100, 200);
     expect(editingPath.vertices.length, 2,
@@ -86,6 +87,7 @@ void main() {
     expect(editingPath.vertices[1].x, 0);
     expect(editingPath.vertices[1].y, 100);
 
+    stage.mouseMove(1, 200, 200);
     stage.mouseDown(1, 200, 200);
     stage.mouseUp(1, 200, 200);
     expect(editingPath.vertices.length, 3,

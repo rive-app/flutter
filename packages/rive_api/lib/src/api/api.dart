@@ -51,7 +51,7 @@ class RiveApi extends WebServiceClient {
   static final RiveApi _instance = RiveApi._();
   factory RiveApi() => _instance;
 
-  String _host = 'https://slimer.rive.app';
+  String _host = 'https://zuul.rive.app';
 
   String get host => _host;
   set host(String host) {

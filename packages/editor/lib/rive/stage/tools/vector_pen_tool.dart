@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:bezier/bezier.dart';
@@ -124,8 +125,13 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     var path = vertexEditor.creatingPath.value ??
         _makeEditingPath(activeArtboard, ghostPointWorld);
 
-    var localTranslation =
-        Vec2D.transformMat2D(Vec2D(), worldMouse, path.inverseWorldTransform);
+    var localTranslation = Vec2D.transformMat2D(
+      Vec2D(),
+      // if there's a ghost point, use that as the vertex position, as the axis
+      // might be locked
+      ghostPointWorld ?? worldMouse,
+      path.inverseWorldTransform,
+    );
     var vertex = _clickCreatedVertex = StraightVertex()
       ..x = localTranslation[0]
       ..y = localTranslation[1]
@@ -329,7 +335,6 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         result = pathResult;
       }
     }
-
     return result;
   }
 
@@ -551,6 +556,66 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
 
   @override
   bool canSelect(StageItem item) => item is StageVertex;
+
+  @override
+  bool mouseMove(Artboard activeArtboard, Vec2D worldMouse) {
+    // See if we're in path edit mode, and there's a previous vertex. If there
+    // is, get the previous vertex point and the mouse in local space, and
+    // calculate the sector in which the mouse currently sits
+    lockAxis = null;
+    final editingPaths = vertexEditor.editingPaths;
+
+    if (editingPaths != null &&
+        editingPaths.isNotEmpty &&
+        ghostPointWorld != null) {
+      // Current editing path is in a hashset; go find it
+      final path = editingPaths.firstWhere(
+          (path) => path.editingMode == PointsPathEditMode.creating,
+          orElse: () => null);
+
+      if (path != null && path.vertices.isNotEmpty) {
+        // We're in business; get the previous vertex and local mouse
+        final lastVertex = path.vertices.last;
+        final reference = Vec2D.fromValues(lastVertex.x, lastVertex.y);
+        final origin = Vec2D.transformMat2D(
+          Vec2D(),
+          reference,
+          path.pathTransform,
+        );
+        // Calculate what axis is the closest to the slope of the two points
+        lockAxis = LockAxis(origin, _calculateLockAxis(worldMouse, origin));
+      }
+    }
+    return super.mouseMove(activeArtboard, worldMouse);
+  }
+
+  /// Calculates the quadrant in which the world mouse is with reference to the
+  /// previous vertex
+  LockDirection _calculateLockAxis(Vec2D position, Vec2D origin) {
+    // Calculate the slope of the line from reference to worldMouse
+    final toPosition = Vec2D.subtract(Vec2D(), position, origin);
+    final angle = atan2(toPosition[1], toPosition[0]);
+    if (angle >= -pi / 8 && angle < pi / 8) {
+      return LockDirection.x;
+    } else if (angle >= pi / 8 && angle < pi / 8 * 3) {
+      return LockDirection.neg45;
+    } else if (angle >= pi / 8 * 3 && angle < pi / 8 * 5) {
+      return LockDirection.y;
+    } else if (angle >= pi / 8 * 5 && angle < pi / 8 * 7) {
+      return LockDirection.pos45;
+      // Angle will revert to negative
+    } else if ((angle >= pi / 8 * 7 && angle < pi) ||
+        angle >= -pi && angle < -pi / 8 * 7) {
+      return LockDirection.x;
+    } else if (angle >= -pi / 8 * 7 && angle < -pi / 8 * 5) {
+      return LockDirection.neg45;
+    } else if (angle >= -pi / 8 * 5 && angle < -pi / 8 * 3) {
+      return LockDirection.y;
+    } else if (angle >= -pi / 8 * 3 && angle < -pi / 8) {
+      return LockDirection.pos45;
+    }
+    return LockDirection.x;
+  }
 }
 
 FractionalIndex _fractionalIndexAt(List<PathVertex> vertices, int index) {
