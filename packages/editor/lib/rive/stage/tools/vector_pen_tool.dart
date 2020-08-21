@@ -15,7 +15,6 @@ import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/cubic_mirrored_vertex.dart';
-import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
@@ -569,19 +568,12 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     if (editingPaths != null &&
         editingPaths.isNotEmpty &&
         ghostPointWorld != null) {
-      // Current editing path is the last in the list
-      PointsPath path;
-      for (final p in editingPaths) {
-        if (p.editingMode == PointsPathEditMode.creating) {
-          path = p;
-          break;
-        }
-      }
+      // Current editing path is in a hashset; go find it
+      final path = editingPaths.firstWhere(
+          (path) => path.editingMode == PointsPathEditMode.creating,
+          orElse: () => null);
 
-      if (path != null &&
-          (path.editingMode == PointsPathEditMode.creating ||
-              path.editingMode == PointsPathEditMode.editing) &&
-          path.vertices.isNotEmpty) {
+      if (path != null && path.vertices.isNotEmpty) {
         // We're in business; get the previous vertex and local mouse
         final lastVertex = path.vertices.last;
         final reference = Vec2D.fromValues(lastVertex.x, lastVertex.y);
