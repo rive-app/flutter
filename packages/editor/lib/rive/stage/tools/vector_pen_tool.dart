@@ -255,7 +255,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     PenToolInsertTarget result;
 
     for (final path in editingPaths) {
-      var vertices = path.renderVertices;
+      var vertices = path.displayVertices;
 
       double closestPathDistance = double.maxFinite;
       Vec2D intersection;

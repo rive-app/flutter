@@ -201,62 +201,32 @@ class Shape extends ShapeBase with ShapePaintContainer {
   }
 
   AABB computeWorldBounds() {
-    // When we have Path.getTightBounds exposed we'll be able to do:
-    // if (_wantWorldPath) {
-    //   return _pathComposer.worldPath.getTightBounds();
-    // } else {
-    //   _pathComposer.localPath.transform(worldTransform.mat4)
-    //    .getTightBounds();
-    // }
-    if (paths.isEmpty) {
+    var boundsPaths = paths.where((path) => path.hasBounds);
+    if (boundsPaths.isEmpty) {
       return AABB.fromMinMax(worldTranslation, worldTranslation);
     }
-    var path = paths.first;
-    var renderPoints = path.renderVertices;
-    if (renderPoints.isEmpty) {
-      // Can't build bounds from nothing...
-      return AABB.fromMinMax(worldTranslation, worldTranslation);
-    }
-    AABB worldBounds =
-        path.preciseComputeBounds(renderPoints, path.pathTransform);
-
-    for (final path in paths.skip(1)) {
-      var renderPoints = path.renderVertices;
+    var path = boundsPaths.first;
+    AABB worldBounds = path.preciseComputeBounds(path.pathTransform);
+    for (final path in boundsPaths.skip(1)) {
       AABB.combine(worldBounds, worldBounds,
-          path.preciseComputeBounds(renderPoints, path.pathTransform));
+          path.preciseComputeBounds(path.pathTransform));
     }
     return worldBounds;
   }
 
   AABB computeLocalBounds() {
-    // When we have Path.getTightBounds exposed we'll be able to do:
-    // if (_wantLocalPath) {
-    //   return _pathComposer.localPath.getTightBounds();
-    // } else {
-    //   var inverseShapeWorld = Mat2D();
-    //   if (Mat2D.invert(inverseShapeWorld, worldTransform)) {
-    //     return _pathComposer.worldPath
-    //         .transform(inverseShapeWorld.mat4)
-    //         .getTightBounds();
-    //   }
-    // }
-    if (paths.isEmpty) {
-      // return a 0, 0, 0, 0 AABB as it means we are at the origin of our world
+    var boundsPaths = paths.where((path) => path.hasBounds);
+    if (boundsPaths.isEmpty) {
       return AABB();
     }
-    var path = paths.first;
-    var renderPoints = path.renderVertices;
-    if (renderPoints.isEmpty) {
-      // Can't build bounds from nothing...
-      return AABB();
-    }
+    var path = boundsPaths.first;
+
     var toShapeTransform = Mat2D();
     if (!Mat2D.invert(toShapeTransform, worldTransform)) {
       Mat2D.identity(toShapeTransform);
     }
 
     AABB localBounds = path.preciseComputeBounds(
-      renderPoints,
       Mat2D.multiply(
         Mat2D(),
         toShapeTransform,
@@ -265,12 +235,10 @@ class Shape extends ShapeBase with ShapePaintContainer {
     );
 
     for (final path in paths.skip(1)) {
-      var renderPoints = path.renderVertices;
       AABB.combine(
         localBounds,
         localBounds,
         path.preciseComputeBounds(
-          renderPoints,
           Mat2D.multiply(
             Mat2D(),
             toShapeTransform,

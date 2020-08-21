@@ -63,6 +63,13 @@ class PointsPath extends PointsPathBase with Skinnable {
     markPathDirty();
   }
 
+  @override
+  void markPathDirty() {
+    // Make sure the skin gets marked dirty too.
+    skin?.addDirt(ComponentDirt.path);
+    super.markPathDirty();
+  }
+
   // -> editor-only
   @override
   void update(int dirt) {
@@ -71,6 +78,20 @@ class PointsPath extends PointsPathBase with Skinnable {
       _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
     }
     super.update(dirt);
+  }
+
+  @override
+  void initWeights() {
+    for (final vertex in _vertices) {
+      vertex.initWeight();
+    }
+  }
+
+  @override
+  void clearWeights() {
+    for (final vertex in _vertices) {
+      vertex.clearWeight();
+    }
   }
   // <- editor-only
 }

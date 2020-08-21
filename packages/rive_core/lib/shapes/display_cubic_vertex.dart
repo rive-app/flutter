@@ -1,15 +1,15 @@
+// -> editor-only
 import 'dart:collection';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:core/id.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
-/// Not actually a core path vertex, just used to build up the render path.
-class RenderCubicVertex extends CubicVertex {
-  // -> editor-only
+/// Not actually a core path vertex, just used to build up the helper display
+/// path used in the editor by things like the pen tool.
+class DisplayCubicVertex extends CubicVertex {
   @override
   void changeNonNull() {}
-  // <- editor-only
 
   @override
   Vec2D inPoint;
@@ -19,8 +19,7 @@ class RenderCubicVertex extends CubicVertex {
   @override
   void onAddedDirty() {}
 
-  // -> editor-only
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {}
-  // <- editor-only
 }
+// <- editor-only

@@ -11,6 +11,21 @@ abstract class CubicVertex extends CubicVertexBase {
 
   // -> editor-only
   bool accumulateAngle = false;
+
+  @override
+  void clearWeight() {
+    super.clearWeight();
+    inWeightIndices = inWeights = outWeightIndices = outWeights = 0;
+  }
+
+  @override
+  void initWeight() {
+    super.initWeight();
+    inWeightIndices = 1;
+    inWeights = 255;
+    outWeightIndices = 1;
+    outWeights = 255;
+  }
   // <- editor-only
 
   @override

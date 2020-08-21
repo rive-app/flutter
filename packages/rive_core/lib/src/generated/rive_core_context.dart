@@ -471,6 +471,18 @@ abstract class RiveCoreContext extends CoreContext {
         return 'x';
       case RootBoneBase.yPropertyKey:
         return 'y';
+      case SkinBase.xxPropertyKey:
+        return 'xx';
+      case SkinBase.yxPropertyKey:
+        return 'yx';
+      case SkinBase.xyPropertyKey:
+        return 'xy';
+      case SkinBase.yyPropertyKey:
+        return 'yy';
+      case SkinBase.txPropertyKey:
+        return 'tx';
+      case SkinBase.tyPropertyKey:
+        return 'ty';
       case TendonBase.boneIdPropertyKey:
         return 'boneId';
       case TendonBase.xxPropertyKey:
@@ -633,6 +645,12 @@ abstract class RiveCoreContext extends CoreContext {
         case BoneBase.lengthPropertyKey:
         case RootBoneBase.xPropertyKey:
         case RootBoneBase.yPropertyKey:
+        case SkinBase.xxPropertyKey:
+        case SkinBase.yxPropertyKey:
+        case SkinBase.xyPropertyKey:
+        case SkinBase.yyPropertyKey:
+        case SkinBase.txPropertyKey:
+        case SkinBase.tyPropertyKey:
         case TendonBase.xxPropertyKey:
         case TendonBase.yxPropertyKey:
         case TendonBase.xyPropertyKey:
@@ -788,6 +806,12 @@ abstract class RiveCoreContext extends CoreContext {
       case BoneBase.lengthPropertyKey:
       case RootBoneBase.xPropertyKey:
       case RootBoneBase.yPropertyKey:
+      case SkinBase.xxPropertyKey:
+      case SkinBase.yxPropertyKey:
+      case SkinBase.xyPropertyKey:
+      case SkinBase.yyPropertyKey:
+      case SkinBase.txPropertyKey:
+      case SkinBase.tyPropertyKey:
       case TendonBase.xxPropertyKey:
       case TendonBase.yxPropertyKey:
       case TendonBase.xyPropertyKey:
@@ -1296,6 +1320,36 @@ abstract class RiveCoreContext extends CoreContext {
           object.y = value;
         }
         break;
+      case SkinBase.xxPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.xx = value;
+        }
+        break;
+      case SkinBase.yxPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.yx = value;
+        }
+        break;
+      case SkinBase.xyPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.xy = value;
+        }
+        break;
+      case SkinBase.yyPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.yy = value;
+        }
+        break;
+      case SkinBase.txPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.tx = value;
+        }
+        break;
+      case SkinBase.tyPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.ty = value;
+        }
+        break;
       case TendonBase.boneIdPropertyKey:
         if (object is TendonBase && value is Id) {
           object.boneId = value;
@@ -1794,6 +1848,36 @@ abstract class RiveCoreContext extends CoreContext {
       case RootBoneBase.yPropertyKey:
         if (object is RootBoneBase && value is double) {
           object.yCore = value;
+        }
+        break;
+      case SkinBase.xxPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.xx = value;
+        }
+        break;
+      case SkinBase.yxPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.yx = value;
+        }
+        break;
+      case SkinBase.xyPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.xy = value;
+        }
+        break;
+      case SkinBase.yyPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.yy = value;
+        }
+        break;
+      case SkinBase.txPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.tx = value;
+        }
+        break;
+      case SkinBase.tyPropertyKey:
+        if (object is SkinBase && value is double) {
+          object.ty = value;
         }
         break;
       case TendonBase.boneIdPropertyKey:
@@ -2768,6 +2852,36 @@ abstract class RiveCoreContext extends CoreContext {
           return object.y;
         }
         break;
+      case SkinBase.xxPropertyKey:
+        if (object is SkinBase) {
+          return object.xx;
+        }
+        break;
+      case SkinBase.yxPropertyKey:
+        if (object is SkinBase) {
+          return object.yx;
+        }
+        break;
+      case SkinBase.xyPropertyKey:
+        if (object is SkinBase) {
+          return object.xy;
+        }
+        break;
+      case SkinBase.yyPropertyKey:
+        if (object is SkinBase) {
+          return object.yy;
+        }
+        break;
+      case SkinBase.txPropertyKey:
+        if (object is SkinBase) {
+          return object.tx;
+        }
+        break;
+      case SkinBase.tyPropertyKey:
+        if (object is SkinBase) {
+          return object.ty;
+        }
+        break;
       case TendonBase.boneIdPropertyKey:
         if (object is TendonBase) {
           return object.boneId;
@@ -2928,6 +3042,12 @@ abstract class RiveCoreContext extends CoreContext {
       case BoneBase.lengthPropertyKey:
       case RootBoneBase.xPropertyKey:
       case RootBoneBase.yPropertyKey:
+      case SkinBase.xxPropertyKey:
+      case SkinBase.yxPropertyKey:
+      case SkinBase.xyPropertyKey:
+      case SkinBase.yyPropertyKey:
+      case SkinBase.txPropertyKey:
+      case SkinBase.tyPropertyKey:
       case TendonBase.xxPropertyKey:
       case TendonBase.yxPropertyKey:
       case TendonBase.xyPropertyKey:
@@ -3143,6 +3263,18 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as RootBoneBase).x;
       case RootBoneBase.yPropertyKey:
         return (object as RootBoneBase).y;
+      case SkinBase.xxPropertyKey:
+        return (object as SkinBase).xx;
+      case SkinBase.yxPropertyKey:
+        return (object as SkinBase).yx;
+      case SkinBase.xyPropertyKey:
+        return (object as SkinBase).xy;
+      case SkinBase.yyPropertyKey:
+        return (object as SkinBase).yy;
+      case SkinBase.txPropertyKey:
+        return (object as SkinBase).tx;
+      case SkinBase.tyPropertyKey:
+        return (object as SkinBase).ty;
       case TendonBase.xxPropertyKey:
         return (object as TendonBase).xx;
       case TendonBase.yxPropertyKey:
@@ -3465,6 +3597,24 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case RootBoneBase.yPropertyKey:
         (object as RootBoneBase).yCore = value;
+        break;
+      case SkinBase.xxPropertyKey:
+        (object as SkinBase).xx = value;
+        break;
+      case SkinBase.yxPropertyKey:
+        (object as SkinBase).yx = value;
+        break;
+      case SkinBase.xyPropertyKey:
+        (object as SkinBase).xy = value;
+        break;
+      case SkinBase.yyPropertyKey:
+        (object as SkinBase).yy = value;
+        break;
+      case SkinBase.txPropertyKey:
+        (object as SkinBase).tx = value;
+        break;
+      case SkinBase.tyPropertyKey:
+        (object as SkinBase).ty = value;
         break;
       case TendonBase.xxPropertyKey:
         (object as TendonBase).xx = value;

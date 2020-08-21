@@ -115,6 +115,15 @@ abstract class PathVertex extends PathVertexBase {
     newVertex.parent = path;
     return next;
   }
+
+  void clearWeight() {
+    weightIndices = weights = 0;
+  }
+
+  void initWeight() {
+    weightIndices = 1;
+    weights = 255;
+  }
   // <- editor-only
 
   @override

@@ -39,7 +39,7 @@ class PropertyTendon extends StatelessWidget {
           ),
         ),
         components: tendons,
-        postfix: vertices == null
+        postfix: vertices == null || vertices.isEmpty
             ? null
             : (context) => SizedBox(
                   width: 40,

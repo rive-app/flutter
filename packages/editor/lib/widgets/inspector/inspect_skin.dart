@@ -47,12 +47,6 @@ class InspectSkin extends ListenableInspectorBuilder {
     var vertexEditor = inspecting.fileContext.vertexEditor;
     var showWeights =
         vertexEditor.isActive && vertexEditor.editingPaths.isNotEmpty;
-    print("SHOW WEIGHTS? $showWeights");
-    // var stageVertices = inspecting.stageItems.whereType<StageVertex>();
-    // if (stageVertices.isNotEmpty) {
-    //   print("HAVE ${stageVertices.length} STAGE VERTICES");
-    //   //stageVertices.first.weights;
-    // }
     var skin = _skinnable.skin;
     var boneColors = RiveTheme.of(panelContext).colors.boundBones;
     if (skin != null) {
