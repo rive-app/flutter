@@ -23,6 +23,7 @@ class Definition {
   final String _filename;
 
   String _name;
+  String _generic;
 
   final Configuration config;
   final List<Property> _properties = [];
@@ -70,6 +71,10 @@ class Definition {
     if (extendsFilename is String) {
       _extensionOf = Definition(config, extendsFilename);
     }
+    dynamic genericValue = data['generic'];
+    if (genericValue is String) {
+      _generic = genericValue;
+    }
     dynamic nameValue = data['name'];
     if (nameValue is String) {
       _name = nameValue;
@@ -107,6 +112,15 @@ class Definition {
   String get localCodeFilename => '${stripExtension(_filename)}_base.dart';
   String get concreteCodeFilename => '${stripExtension(_filename)}.dart';
   String get codeFilename => 'lib/src/generated/$localCodeFilename';
+  String get extendsString {
+    if (_extensionOf != null) {
+      if (_generic != null) {
+        return '${_extensionOf._name}<$_generic>}';
+      }
+      return _extensionOf._name;
+    }
+    return 'Core<T>';
+  }
 
   /// Generates Dart code based on the Definition
   void generateCode(String snakeContextName) {
@@ -194,7 +208,7 @@ class Definition {
 
     code.write(
         '''abstract class ${_name}Base${defineContextExtension ? '<T extends ${config.isRuntime ? 'CoreContext' : config.coreContextName}>' : ''} 
-            extends ${_extensionOf?._name ?? 'Core<T>'} ''');
+            extends $extendsString ''');
     if (exportsWithContext) {
       code.write(' implements ExportRules ');
     }
@@ -362,6 +376,9 @@ class Definition {
     }
     if (_extensionOf != null) {
       data['extends'] = _extensionOf.localFilename;
+    }
+    if (_generic != null) {
+      data['generic'] = _generic;
     }
     if (_properties.isNotEmpty) {
       Map<String, dynamic> propertiesData = <String, dynamic>{};

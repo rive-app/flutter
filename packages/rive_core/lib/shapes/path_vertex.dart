@@ -1,3 +1,4 @@
+import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
@@ -7,6 +8,7 @@ import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 
 abstract class PathVertex extends PathVertexBase {
+
   Path get path => parent as Path;
   // -> editor-only
   BoundsDelegate _delegate;
@@ -71,9 +73,9 @@ abstract class PathVertex extends PathVertexBase {
   }
   // <- editor-only
 
-  Vec2D get translation {
-    return Vec2D.fromValues(x, y);
-  }
+  final Vec2D _renderTranslation = Vec2D();
+  Vec2D get translation => Vec2D.fromValues(x, y);
+  Vec2D get renderTranslation => _renderTranslation;
 
   set translation(Vec2D value) {
     x = value[0];
@@ -82,12 +84,14 @@ abstract class PathVertex extends PathVertexBase {
 
   @override
   void xChanged(double from, double to) {
+    _renderTranslation[0] = to;
     addDirt(ComponentDirt.worldTransform);
     path?.markPathDirty();
   }
 
   @override
   void yChanged(double from, double to) {
+    _renderTranslation[1] = to;
     addDirt(ComponentDirt.worldTransform);
     path?.markPathDirty();
   }
@@ -116,19 +120,7 @@ abstract class PathVertex extends PathVertexBase {
     return next;
   }
 
-  void clearWeight() {
-    weightIndices = weights = 0;
-  }
-
-  void initWeight() {
-    weightIndices = 1;
-    weights = 255;
-  }
+  void initWeight();
+  void clearWeight();
   // <- editor-only
-
-  @override
-  void weightIndicesChanged(int from, int to) {}
-
-  @override
-  void weightsChanged(int from, int to) {}
 }

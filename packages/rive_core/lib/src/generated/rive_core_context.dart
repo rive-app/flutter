@@ -14,9 +14,11 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/cubic_weight.dart';
 import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/bones/skin.dart';
 import 'package:rive_core/bones/tendon.dart';
+import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/cubic_asymmetric_vertex.dart';
@@ -48,9 +50,11 @@ import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 import 'package:rive_core/src/generated/artboard_base.dart';
 import 'package:rive_core/src/generated/backboard_base.dart';
 import 'package:rive_core/src/generated/bones/bone_base.dart';
+import 'package:rive_core/src/generated/bones/cubic_weight_base.dart';
 import 'package:rive_core/src/generated/bones/root_bone_base.dart';
 import 'package:rive_core/src/generated/bones/skin_base.dart';
 import 'package:rive_core/src/generated/bones/tendon_base.dart';
+import 'package:rive_core/src/generated/bones/weight_base.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/drawable_base.dart';
 import 'package:rive_core/src/generated/node_base.dart';
@@ -58,7 +62,6 @@ import 'package:rive_core/src/generated/shapes/clipping_shape_base.dart';
 import 'package:rive_core/src/generated/shapes/cubic_asymmetric_vertex_base.dart';
 import 'package:rive_core/src/generated/shapes/cubic_detached_vertex_base.dart';
 import 'package:rive_core/src/generated/shapes/cubic_mirrored_vertex_base.dart';
-import 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 import 'package:rive_core/src/generated/shapes/ellipse_base.dart';
 import 'package:rive_core/src/generated/shapes/paint/fill_base.dart';
 import 'package:rive_core/src/generated/shapes/paint/gradient_stop_base.dart';
@@ -141,6 +144,8 @@ abstract class RiveCoreContext extends CoreContext {
         return Artboard();
       case BackboardBase.typeKey:
         return Backboard();
+      case WeightBase.typeKey:
+        return Weight();
       case BoneBase.typeKey:
         return Bone();
       case RootBoneBase.typeKey:
@@ -149,6 +154,8 @@ abstract class RiveCoreContext extends CoreContext {
         return Skin();
       case TendonBase.typeKey:
         return Tendon();
+      case CubicWeightBase.typeKey:
+        return CubicWeight();
       default:
         return null;
     }
@@ -246,6 +253,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'Artboard';
       case BackboardBase.typeKey:
         return 'Backboard';
+      case WeightBase.typeKey:
+        return 'Weight';
       case BoneBase.typeKey:
         return 'Bone';
       case RootBoneBase.typeKey:
@@ -254,6 +263,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'Skin';
       case TendonBase.typeKey:
         return 'Tendon';
+      case CubicWeightBase.typeKey:
+        return 'CubicWeight';
     }
     return null;
   }
@@ -399,20 +410,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'x';
       case PathVertexBase.yPropertyKey:
         return 'y';
-      case PathVertexBase.weightsPropertyKey:
-        return 'weights';
-      case PathVertexBase.weightIndicesPropertyKey:
-        return 'weightIndices';
       case StraightVertexBase.radiusPropertyKey:
         return 'radius';
-      case CubicVertexBase.inWeightsPropertyKey:
-        return 'inWeights';
-      case CubicVertexBase.inWeightIndicesPropertyKey:
-        return 'inWeightIndices';
-      case CubicVertexBase.outWeightsPropertyKey:
-        return 'outWeights';
-      case CubicVertexBase.outWeightIndicesPropertyKey:
-        return 'outWeightIndices';
       case CubicAsymmetricVertexBase.rotationPropertyKey:
         return 'rotation';
       case CubicAsymmetricVertexBase.inDistancePropertyKey:
@@ -465,6 +464,10 @@ abstract class RiveCoreContext extends CoreContext {
         return 'mainArtboardId';
       case BackboardBase.colorValuePropertyKey:
         return 'colorValue';
+      case WeightBase.valuesPropertyKey:
+        return 'values';
+      case WeightBase.indicesPropertyKey:
+        return 'indices';
       case BoneBase.lengthPropertyKey:
         return 'length';
       case RootBoneBase.xPropertyKey:
@@ -497,6 +500,14 @@ abstract class RiveCoreContext extends CoreContext {
         return 'tx';
       case TendonBase.tyPropertyKey:
         return 'ty';
+      case CubicWeightBase.inValuesPropertyKey:
+        return 'inValues';
+      case CubicWeightBase.inIndicesPropertyKey:
+        return 'inIndices';
+      case CubicWeightBase.outValuesPropertyKey:
+        return 'outValues';
+      case CubicWeightBase.outIndicesPropertyKey:
+        return 'outIndices';
       default:
         return null;
     }
@@ -579,14 +590,14 @@ abstract class RiveCoreContext extends CoreContext {
         case StrokeBase.joinPropertyKey:
         case FillBase.fillRulePropertyKey:
         case DrawableBase.blendModeValuePropertyKey:
-        case PathVertexBase.weightsPropertyKey:
-        case PathVertexBase.weightIndicesPropertyKey:
-        case CubicVertexBase.inWeightsPropertyKey:
-        case CubicVertexBase.inWeightIndicesPropertyKey:
-        case CubicVertexBase.outWeightsPropertyKey:
-        case CubicVertexBase.outWeightIndicesPropertyKey:
         case PointsPathBase.editingModeValuePropertyKey:
         case ClippingShapeBase.clipOpValuePropertyKey:
+        case WeightBase.valuesPropertyKey:
+        case WeightBase.indicesPropertyKey:
+        case CubicWeightBase.inValuesPropertyKey:
+        case CubicWeightBase.inIndicesPropertyKey:
+        case CubicWeightBase.outValuesPropertyKey:
+        case CubicWeightBase.outIndicesPropertyKey:
           var value = uintType.deserialize(reader);
           setUint(object, change.op, value);
           break;
@@ -731,14 +742,14 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.joinPropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModeValuePropertyKey:
-      case PathVertexBase.weightsPropertyKey:
-      case PathVertexBase.weightIndicesPropertyKey:
-      case CubicVertexBase.inWeightsPropertyKey:
-      case CubicVertexBase.inWeightIndicesPropertyKey:
-      case CubicVertexBase.outWeightsPropertyKey:
-      case CubicVertexBase.outWeightIndicesPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
       case ClippingShapeBase.clipOpValuePropertyKey:
+      case WeightBase.valuesPropertyKey:
+      case WeightBase.indicesPropertyKey:
+      case CubicWeightBase.inValuesPropertyKey:
+      case CubicWeightBase.inIndicesPropertyKey:
+      case CubicWeightBase.outValuesPropertyKey:
+      case CubicWeightBase.outIndicesPropertyKey:
         if (value != null && value is int) {
           change.value = uintType.serialize(value);
         } else {
@@ -1140,39 +1151,9 @@ abstract class RiveCoreContext extends CoreContext {
           object.y = value;
         }
         break;
-      case PathVertexBase.weightsPropertyKey:
-        if (object is PathVertexBase && value is int) {
-          object.weights = value;
-        }
-        break;
-      case PathVertexBase.weightIndicesPropertyKey:
-        if (object is PathVertexBase && value is int) {
-          object.weightIndices = value;
-        }
-        break;
       case StraightVertexBase.radiusPropertyKey:
         if (object is StraightVertexBase && value is double) {
           object.radius = value;
-        }
-        break;
-      case CubicVertexBase.inWeightsPropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.inWeights = value;
-        }
-        break;
-      case CubicVertexBase.inWeightIndicesPropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.inWeightIndices = value;
-        }
-        break;
-      case CubicVertexBase.outWeightsPropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.outWeights = value;
-        }
-        break;
-      case CubicVertexBase.outWeightIndicesPropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.outWeightIndices = value;
         }
         break;
       case CubicAsymmetricVertexBase.rotationPropertyKey:
@@ -1305,6 +1286,16 @@ abstract class RiveCoreContext extends CoreContext {
           object.colorValue = value;
         }
         break;
+      case WeightBase.valuesPropertyKey:
+        if (object is WeightBase && value is int) {
+          object.values = value;
+        }
+        break;
+      case WeightBase.indicesPropertyKey:
+        if (object is WeightBase && value is int) {
+          object.indices = value;
+        }
+        break;
       case BoneBase.lengthPropertyKey:
         if (object is BoneBase && value is double) {
           object.length = value;
@@ -1383,6 +1374,26 @@ abstract class RiveCoreContext extends CoreContext {
       case TendonBase.tyPropertyKey:
         if (object is TendonBase && value is double) {
           object.ty = value;
+        }
+        break;
+      case CubicWeightBase.inValuesPropertyKey:
+        if (object is CubicWeightBase && value is int) {
+          object.inValues = value;
+        }
+        break;
+      case CubicWeightBase.inIndicesPropertyKey:
+        if (object is CubicWeightBase && value is int) {
+          object.inIndices = value;
+        }
+        break;
+      case CubicWeightBase.outValuesPropertyKey:
+        if (object is CubicWeightBase && value is int) {
+          object.outValues = value;
+        }
+        break;
+      case CubicWeightBase.outIndicesPropertyKey:
+        if (object is CubicWeightBase && value is int) {
+          object.outIndices = value;
         }
         break;
     }
@@ -1670,39 +1681,9 @@ abstract class RiveCoreContext extends CoreContext {
           object.yCore = value;
         }
         break;
-      case PathVertexBase.weightsPropertyKey:
-        if (object is PathVertexBase && value is int) {
-          object.weights = value;
-        }
-        break;
-      case PathVertexBase.weightIndicesPropertyKey:
-        if (object is PathVertexBase && value is int) {
-          object.weightIndices = value;
-        }
-        break;
       case StraightVertexBase.radiusPropertyKey:
         if (object is StraightVertexBase && value is double) {
           object.radiusCore = value;
-        }
-        break;
-      case CubicVertexBase.inWeightsPropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.inWeights = value;
-        }
-        break;
-      case CubicVertexBase.inWeightIndicesPropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.inWeightIndices = value;
-        }
-        break;
-      case CubicVertexBase.outWeightsPropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.outWeights = value;
-        }
-        break;
-      case CubicVertexBase.outWeightIndicesPropertyKey:
-        if (object is CubicVertexBase && value is int) {
-          object.outWeightIndices = value;
         }
         break;
       case CubicAsymmetricVertexBase.rotationPropertyKey:
@@ -1835,6 +1816,16 @@ abstract class RiveCoreContext extends CoreContext {
           object.colorValue = value;
         }
         break;
+      case WeightBase.valuesPropertyKey:
+        if (object is WeightBase && value is int) {
+          object.values = value;
+        }
+        break;
+      case WeightBase.indicesPropertyKey:
+        if (object is WeightBase && value is int) {
+          object.indices = value;
+        }
+        break;
       case BoneBase.lengthPropertyKey:
         if (object is BoneBase && value is double) {
           object.lengthCore = value;
@@ -1913,6 +1904,26 @@ abstract class RiveCoreContext extends CoreContext {
       case TendonBase.tyPropertyKey:
         if (object is TendonBase && value is double) {
           object.ty = value;
+        }
+        break;
+      case CubicWeightBase.inValuesPropertyKey:
+        if (object is CubicWeightBase && value is int) {
+          object.inValues = value;
+        }
+        break;
+      case CubicWeightBase.inIndicesPropertyKey:
+        if (object is CubicWeightBase && value is int) {
+          object.inIndices = value;
+        }
+        break;
+      case CubicWeightBase.outValuesPropertyKey:
+        if (object is CubicWeightBase && value is int) {
+          object.outValues = value;
+        }
+        break;
+      case CubicWeightBase.outIndicesPropertyKey:
+        if (object is CubicWeightBase && value is int) {
+          object.outIndices = value;
         }
         break;
     }
@@ -2672,39 +2683,9 @@ abstract class RiveCoreContext extends CoreContext {
           return object.y;
         }
         break;
-      case PathVertexBase.weightsPropertyKey:
-        if (object is PathVertexBase) {
-          return object.weights;
-        }
-        break;
-      case PathVertexBase.weightIndicesPropertyKey:
-        if (object is PathVertexBase) {
-          return object.weightIndices;
-        }
-        break;
       case StraightVertexBase.radiusPropertyKey:
         if (object is StraightVertexBase) {
           return object.radius;
-        }
-        break;
-      case CubicVertexBase.inWeightsPropertyKey:
-        if (object is CubicVertexBase) {
-          return object.inWeights;
-        }
-        break;
-      case CubicVertexBase.inWeightIndicesPropertyKey:
-        if (object is CubicVertexBase) {
-          return object.inWeightIndices;
-        }
-        break;
-      case CubicVertexBase.outWeightsPropertyKey:
-        if (object is CubicVertexBase) {
-          return object.outWeights;
-        }
-        break;
-      case CubicVertexBase.outWeightIndicesPropertyKey:
-        if (object is CubicVertexBase) {
-          return object.outWeightIndices;
         }
         break;
       case CubicAsymmetricVertexBase.rotationPropertyKey:
@@ -2837,6 +2818,16 @@ abstract class RiveCoreContext extends CoreContext {
           return object.colorValue;
         }
         break;
+      case WeightBase.valuesPropertyKey:
+        if (object is WeightBase) {
+          return object.values;
+        }
+        break;
+      case WeightBase.indicesPropertyKey:
+        if (object is WeightBase) {
+          return object.indices;
+        }
+        break;
       case BoneBase.lengthPropertyKey:
         if (object is BoneBase) {
           return object.length;
@@ -2917,6 +2908,26 @@ abstract class RiveCoreContext extends CoreContext {
           return object.ty;
         }
         break;
+      case CubicWeightBase.inValuesPropertyKey:
+        if (object is CubicWeightBase) {
+          return object.inValues;
+        }
+        break;
+      case CubicWeightBase.inIndicesPropertyKey:
+        if (object is CubicWeightBase) {
+          return object.inIndices;
+        }
+        break;
+      case CubicWeightBase.outValuesPropertyKey:
+        if (object is CubicWeightBase) {
+          return object.outValues;
+        }
+        break;
+      case CubicWeightBase.outIndicesPropertyKey:
+        if (object is CubicWeightBase) {
+          return object.outIndices;
+        }
+        break;
     }
     return null;
   }
@@ -2982,14 +2993,14 @@ abstract class RiveCoreContext extends CoreContext {
       case StrokeBase.joinPropertyKey:
       case FillBase.fillRulePropertyKey:
       case DrawableBase.blendModeValuePropertyKey:
-      case PathVertexBase.weightsPropertyKey:
-      case PathVertexBase.weightIndicesPropertyKey:
-      case CubicVertexBase.inWeightsPropertyKey:
-      case CubicVertexBase.inWeightIndicesPropertyKey:
-      case CubicVertexBase.outWeightsPropertyKey:
-      case CubicVertexBase.outWeightIndicesPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
       case ClippingShapeBase.clipOpValuePropertyKey:
+      case WeightBase.valuesPropertyKey:
+      case WeightBase.indicesPropertyKey:
+      case CubicWeightBase.inValuesPropertyKey:
+      case CubicWeightBase.inIndicesPropertyKey:
+      case CubicWeightBase.outValuesPropertyKey:
+      case CubicWeightBase.outIndicesPropertyKey:
         return uintType;
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
@@ -3131,22 +3142,22 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as FillBase).fillRule;
       case DrawableBase.blendModeValuePropertyKey:
         return (object as DrawableBase).blendModeValue;
-      case PathVertexBase.weightsPropertyKey:
-        return (object as PathVertexBase).weights;
-      case PathVertexBase.weightIndicesPropertyKey:
-        return (object as PathVertexBase).weightIndices;
-      case CubicVertexBase.inWeightsPropertyKey:
-        return (object as CubicVertexBase).inWeights;
-      case CubicVertexBase.inWeightIndicesPropertyKey:
-        return (object as CubicVertexBase).inWeightIndices;
-      case CubicVertexBase.outWeightsPropertyKey:
-        return (object as CubicVertexBase).outWeights;
-      case CubicVertexBase.outWeightIndicesPropertyKey:
-        return (object as CubicVertexBase).outWeightIndices;
       case PointsPathBase.editingModeValuePropertyKey:
         return (object as PointsPathBase).editingModeValue;
       case ClippingShapeBase.clipOpValuePropertyKey:
         return (object as ClippingShapeBase).clipOpValue;
+      case WeightBase.valuesPropertyKey:
+        return (object as WeightBase).values;
+      case WeightBase.indicesPropertyKey:
+        return (object as WeightBase).indices;
+      case CubicWeightBase.inValuesPropertyKey:
+        return (object as CubicWeightBase).inValues;
+      case CubicWeightBase.inIndicesPropertyKey:
+        return (object as CubicWeightBase).inIndices;
+      case CubicWeightBase.outValuesPropertyKey:
+        return (object as CubicWeightBase).outValues;
+      case CubicWeightBase.outIndicesPropertyKey:
+        return (object as CubicWeightBase).outIndices;
     }
     return 0;
   }
@@ -3411,29 +3422,29 @@ abstract class RiveCoreContext extends CoreContext {
       case DrawableBase.blendModeValuePropertyKey:
         (object as DrawableBase).blendModeValue = value;
         break;
-      case PathVertexBase.weightsPropertyKey:
-        (object as PathVertexBase).weights = value;
-        break;
-      case PathVertexBase.weightIndicesPropertyKey:
-        (object as PathVertexBase).weightIndices = value;
-        break;
-      case CubicVertexBase.inWeightsPropertyKey:
-        (object as CubicVertexBase).inWeights = value;
-        break;
-      case CubicVertexBase.inWeightIndicesPropertyKey:
-        (object as CubicVertexBase).inWeightIndices = value;
-        break;
-      case CubicVertexBase.outWeightsPropertyKey:
-        (object as CubicVertexBase).outWeights = value;
-        break;
-      case CubicVertexBase.outWeightIndicesPropertyKey:
-        (object as CubicVertexBase).outWeightIndices = value;
-        break;
       case PointsPathBase.editingModeValuePropertyKey:
         (object as PointsPathBase).editingModeValue = value;
         break;
       case ClippingShapeBase.clipOpValuePropertyKey:
         (object as ClippingShapeBase).clipOpValue = value;
+        break;
+      case WeightBase.valuesPropertyKey:
+        (object as WeightBase).values = value;
+        break;
+      case WeightBase.indicesPropertyKey:
+        (object as WeightBase).indices = value;
+        break;
+      case CubicWeightBase.inValuesPropertyKey:
+        (object as CubicWeightBase).inValues = value;
+        break;
+      case CubicWeightBase.inIndicesPropertyKey:
+        (object as CubicWeightBase).inIndices = value;
+        break;
+      case CubicWeightBase.outValuesPropertyKey:
+        (object as CubicWeightBase).outValues = value;
+        break;
+      case CubicWeightBase.outIndicesPropertyKey:
+        (object as CubicWeightBase).outIndices = value;
         break;
     }
   }

@@ -4,16 +4,21 @@
 import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:core/key_state.dart';
-import 'package:rive_core/component.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
+import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
-abstract class PathVertexBase extends Component {
+abstract class PathVertexBase extends ContainerComponent {
   static const int typeKey = 14;
   @override
   int get coreType => PathVertexBase.typeKey;
   @override
-  Set<int> get coreTypes => {PathVertexBase.typeKey, ComponentBase.typeKey};
+  Set<int> get coreTypes => {
+        PathVertexBase.typeKey,
+        ContainerComponentBase.typeKey,
+        ComponentBase.typeKey
+      };
 
   /// --------------------------------------------------------------------------
   /// X field with key 24.
@@ -141,47 +146,6 @@ abstract class PathVertexBase extends Component {
 
   void yChanged(double from, double to);
 
-  /// --------------------------------------------------------------------------
-  /// Weights field with key 102.
-  int _weights = 0;
-  static const int weightsPropertyKey = 102;
-  int get weights => _weights;
-
-  /// Change the [_weights] field value.
-  /// [weightsChanged] will be invoked only if the field's value has changed.
-  set weights(int value) {
-    if (_weights == value) {
-      return;
-    }
-    int from = _weights;
-    _weights = value;
-    onPropertyChanged(weightsPropertyKey, from, value);
-    weightsChanged(from, value);
-  }
-
-  void weightsChanged(int from, int to);
-
-  /// --------------------------------------------------------------------------
-  /// WeightIndices field with key 103.
-  int _weightIndices = 0;
-  static const int weightIndicesPropertyKey = 103;
-  int get weightIndices => _weightIndices;
-
-  /// Change the [_weightIndices] field value.
-  /// [weightIndicesChanged] will be invoked only if the field's value has
-  /// changed.
-  set weightIndices(int value) {
-    if (_weightIndices == value) {
-      return;
-    }
-    int from = _weightIndices;
-    _weightIndices = value;
-    onPropertyChanged(weightIndicesPropertyKey, from, value);
-    weightIndicesChanged(from, value);
-  }
-
-  void weightIndicesChanged(int from, int to);
-
   @override
   void changeNonNull() {
     super.changeNonNull();
@@ -190,12 +154,6 @@ abstract class PathVertexBase extends Component {
     }
     if (y != null) {
       onPropertyChanged(yPropertyKey, y, y);
-    }
-    if (weights != null) {
-      onPropertyChanged(weightsPropertyKey, weights, weights);
-    }
-    if (weightIndices != null) {
-      onPropertyChanged(weightIndicesPropertyKey, weightIndices, weightIndices);
     }
   }
 
@@ -208,25 +166,6 @@ abstract class PathVertexBase extends Component {
     if (_y != null && exports(yPropertyKey)) {
       context.doubleType.writeRuntimeProperty(yPropertyKey, writer, _y);
     }
-    if (_weights != null && exports(weightsPropertyKey)) {
-      context.uintType
-          .writeRuntimeProperty(weightsPropertyKey, writer, _weights);
-    }
-    if (_weightIndices != null && exports(weightIndicesPropertyKey)) {
-      context.uintType.writeRuntimeProperty(
-          weightIndicesPropertyKey, writer, _weightIndices);
-    }
-  }
-
-  @override
-  bool exports(int propertyKey) {
-    switch (propertyKey) {
-      case weightsPropertyKey:
-        return _weights != 0;
-      case weightIndicesPropertyKey:
-        return _weightIndices != 0;
-    }
-    return super.exports(propertyKey);
   }
 
   @override
@@ -236,10 +175,6 @@ abstract class PathVertexBase extends Component {
         return x as K;
       case yPropertyKey:
         return y as K;
-      case weightsPropertyKey:
-        return weights as K;
-      case weightIndicesPropertyKey:
-        return weightIndices as K;
       default:
         return super.getProperty<K>(propertyKey);
     }
@@ -250,8 +185,6 @@ abstract class PathVertexBase extends Component {
     switch (propertyKey) {
       case xPropertyKey:
       case yPropertyKey:
-      case weightsPropertyKey:
-      case weightIndicesPropertyKey:
         return true;
       default:
         return super.hasProperty(propertyKey);

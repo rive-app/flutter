@@ -17,9 +17,9 @@ abstract class SkinBase extends ContainerComponent {
       {SkinBase.typeKey, ContainerComponentBase.typeKey, ComponentBase.typeKey};
 
   /// --------------------------------------------------------------------------
-  /// Xx field with key 108.
+  /// Xx field with key 104.
   double _xx = 1;
-  static const int xxPropertyKey = 108;
+  static const int xxPropertyKey = 104;
 
   /// x component of x unit vector in the bind transform
   double get xx => _xx;
@@ -39,9 +39,9 @@ abstract class SkinBase extends ContainerComponent {
   void xxChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
-  /// Yx field with key 109.
+  /// Yx field with key 105.
   double _yx = 0;
-  static const int yxPropertyKey = 109;
+  static const int yxPropertyKey = 105;
 
   /// y component of x unit vector in the bind transform
   double get yx => _yx;
@@ -61,9 +61,9 @@ abstract class SkinBase extends ContainerComponent {
   void yxChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
-  /// Xy field with key 110.
+  /// Xy field with key 106.
   double _xy = 0;
-  static const int xyPropertyKey = 110;
+  static const int xyPropertyKey = 106;
 
   /// x component of y unit vector in the bind transform
   double get xy => _xy;
@@ -83,9 +83,9 @@ abstract class SkinBase extends ContainerComponent {
   void xyChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
-  /// Yy field with key 111.
+  /// Yy field with key 107.
   double _yy = 1;
-  static const int yyPropertyKey = 111;
+  static const int yyPropertyKey = 107;
 
   /// y component of y unit vector in the bind transform
   double get yy => _yy;
@@ -105,9 +105,9 @@ abstract class SkinBase extends ContainerComponent {
   void yyChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
-  /// Tx field with key 112.
+  /// Tx field with key 108.
   double _tx = 0;
-  static const int txPropertyKey = 112;
+  static const int txPropertyKey = 108;
 
   /// x position component of the bind transform
   double get tx => _tx;
@@ -127,9 +127,9 @@ abstract class SkinBase extends ContainerComponent {
   void txChanged(double from, double to);
 
   /// --------------------------------------------------------------------------
-  /// Ty field with key 113.
+  /// Ty field with key 109.
   double _ty = 0;
-  static const int tyPropertyKey = 113;
+  static const int tyPropertyKey = 109;
 
   /// y position component of the bind transform
   double get ty => _ty;

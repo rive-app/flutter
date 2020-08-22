@@ -818,6 +818,8 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
   /// Helper to determine if a batch add operation is in progress.
   bool get isBatchAdding => _delayAdd != null;
 
+  bool get isRecording => _isRecording;
+
   /// Add a set of components as a batched operation, cleaning dirt and
   /// completing after all the components have been added and parented.
   void batchAdd(BatchAddCallback addCallback) {

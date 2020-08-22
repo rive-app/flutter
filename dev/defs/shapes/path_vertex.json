@@ -5,7 +5,7 @@
     "string": "pathvertex"
   },
   "abstract": true,
-  "extends": "component.json",
+  "extends": "container_component.json",
   "properties": {
     "x": {
       "type": "double",
@@ -26,22 +26,6 @@
         "string": "y"
       },
       "description": "Y value for the translation of the vertex."
-    },
-    "weights": {
-      "type": "uint",
-      "initialValue": "0",
-      "key": {
-        "int": 102,
-        "string": "weights"
-      }
-    },
-    "weightIndices": {
-      "type": "uint",
-      "initialValue": "0",
-      "key": {
-        "int": 103,
-        "string": "weightindices"
-      }
     }
   }
 }

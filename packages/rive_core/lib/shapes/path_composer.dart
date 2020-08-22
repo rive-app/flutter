@@ -1,6 +1,5 @@
 import 'dart:ui' as ui;
 
-import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -93,15 +92,7 @@ class PathComposer extends PathComposerBase {
     if (_shape != null) {
       _shape.addDependent(this);
       for (final path in _shape?.paths) {
-        Skinnable skinnable = path is Skinnable ? path as Skinnable : null;
-
-        // If the path is bound to bones, depend on the skin which resolves
-        // after all the bones have transformed.
-        if (skinnable?.skin != null) {
-          skinnable.skin.addDependent(this);
-        } else {
-          path.addDependent(this);
-        }
+        path.addDependent(this);
       }
     }
   }

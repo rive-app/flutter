@@ -10,7 +10,7 @@
       "type": "double",
       "initialValue": "1",
       "key": {
-        "int": 108,
+        "int": 104,
         "string": "xx"
       },
       "description": "x component of x unit vector in the bind transform"
@@ -19,7 +19,7 @@
       "type": "double",
       "initialValue": "0",
       "key": {
-        "int": 109,
+        "int": 105,
         "string": "yx"
       },
       "description": "y component of x unit vector in the bind transform"
@@ -28,7 +28,7 @@
       "type": "double",
       "initialValue": "0",
       "key": {
-        "int": 110,
+        "int": 106,
         "string": "xy"
       },
       "description": "x component of y unit vector in the bind transform"
@@ -37,7 +37,7 @@
       "type": "double",
       "initialValue": "1",
       "key": {
-        "int": 111,
+        "int": 107,
         "string": "yy"
       },
       "description": "y component of y unit vector in the bind transform"
@@ -46,7 +46,7 @@
       "type": "double",
       "initialValue": "0",
       "key": {
-        "int": 112,
+        "int": 108,
         "string": "tx"
       },
       "description": "x position component of the bind transform"
@@ -55,7 +55,7 @@
       "type": "double",
       "initialValue": "0",
       "key": {
-        "int": 113,
+        "int": 109,
         "string": "ty"
       },
       "description": "y position component of the bind transform"

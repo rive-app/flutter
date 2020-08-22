@@ -151,13 +151,16 @@ abstract class Path extends PathBase {
 
     if (firstPoint is CubicVertex) {
       startIsCubic = prevIsCubic = true;
-      var inPoint = firstPoint.inPoint;
+      var inPoint = firstPoint.renderIn;
       startInX = inPoint[0];
       startInY = inPoint[1];
-      var outPoint = firstPoint.outPoint;
+      var outPoint = firstPoint.renderOut;
       outX = outPoint[0];
       outY = outPoint[1];
-      _renderPath.moveTo(startX = firstPoint.x, startY = firstPoint.y);
+      var translation = firstPoint.renderTranslation;
+      startX = translation[0];
+      startY = translation[1];
+      _renderPath.moveTo(startX, startY);
     } else {
       startIsCubic = prevIsCubic = false;
       var point = firstPoint as StraightVertex;
@@ -166,10 +169,10 @@ abstract class Path extends PathBase {
       if (radius > 0) {
         var prev = vertices[length - 1];
 
-        var pos = point.translation;
+        var pos = point.renderTranslation;
 
         var toPrev = Vec2D.subtract(Vec2D(),
-            prev is CubicVertex ? prev.outPoint : prev.translation, pos);
+            prev is CubicVertex ? prev.renderOut : prev.renderTranslation, pos);
         var toPrevLength = Vec2D.length(toPrev);
         toPrev[0] /= toPrevLength;
         toPrev[1] /= toPrevLength;
@@ -177,7 +180,7 @@ abstract class Path extends PathBase {
         var next = vertices[1];
 
         var toNext = Vec2D.subtract(Vec2D(),
-            next is CubicVertex ? next.inPoint : next.translation, pos);
+            next is CubicVertex ? next.renderIn : next.renderTranslation, pos);
         var toNextLength = Vec2D.length(toNext);
         toNext[0] /= toNextLength;
         toNext[1] /= toNextLength;
@@ -199,8 +202,9 @@ abstract class Path extends PathBase {
             outX = posNext[0], outY = posNext[1]);
         prevIsCubic = false;
       } else {
-        outX = point.x;
-        outY = point.y;
+        var translation = point.renderTranslation;
+        outX = translation[0];
+        outY = translation[1];
         _renderPath.moveTo(startInX = startX = outX, startInY = startY = outY);
       }
     }
@@ -209,13 +213,13 @@ abstract class Path extends PathBase {
       var vertex = vertices[i];
 
       if (vertex is CubicVertex) {
-        var inPoint = vertex.inPoint;
-
+        var inPoint = vertex.renderIn;
+        var translation = vertex.renderTranslation;
         _renderPath.cubicTo(
-            outX, outY, inPoint[0], inPoint[1], vertex.x, vertex.y);
+            outX, outY, inPoint[0], inPoint[1], translation[0], translation[1]);
 
         prevIsCubic = true;
-        var outPoint = vertex.outPoint;
+        var outPoint = vertex.renderOut;
         outX = outPoint[0];
         outY = outPoint[1];
       } else {
@@ -223,7 +227,7 @@ abstract class Path extends PathBase {
 
         var radius = point.radius;
         if (radius > 0) {
-          var pos = point.translation;
+          var pos = point.renderTranslation;
 
           var toPrev =
               Vec2D.subtract(Vec2D(), Vec2D.fromValues(outX, outY), pos);
@@ -233,8 +237,10 @@ abstract class Path extends PathBase {
 
           var next = vertices[(i + 1) % length];
 
-          var toNext = Vec2D.subtract(Vec2D(),
-              next is CubicVertex ? next.inPoint : next.translation, pos);
+          var toNext = Vec2D.subtract(
+              Vec2D(),
+              next is CubicVertex ? next.renderIn : next.renderTranslation,
+              pos);
           var toNextLength = Vec2D.length(toNext);
           toNext[0] /= toNextLength;
           toNext[1] /= toNextLength;
@@ -261,15 +267,19 @@ abstract class Path extends PathBase {
               outX = posNext[0], outY = posNext[1]);
           prevIsCubic = false;
         } else if (prevIsCubic) {
-          var x = point.x;
-          var y = point.y;
+          var translation = point.renderTranslation;
+          var x = translation[0];
+          var y = translation[1];
           _renderPath.cubicTo(outX, outY, x, y, x, y);
 
           prevIsCubic = false;
           outX = x;
           outY = y;
         } else {
-          _renderPath.lineTo(outX = point.x, outY = point.y);
+          var translation = point.renderTranslation;
+          outX = translation[0];
+          outY = translation[1];
+          _renderPath.lineTo(outX, outY);
         }
       }
     }
@@ -343,11 +353,12 @@ abstract class Path extends PathBase {
               } else {
                 PathVertex next = pts[(i + 1) % pl];
                 Vec2D prevPoint = previous is CubicVertex
-                    ? previous.outPoint
-                    : previous.translation;
-                Vec2D nextPoint =
-                    next is CubicVertex ? next.inPoint : next.translation;
-                Vec2D pos = point.translation;
+                    ? previous.renderOut
+                    : previous.renderTranslation;
+                Vec2D nextPoint = next is CubicVertex
+                    ? next.renderIn
+                    : next.renderTranslation;
+                Vec2D pos = point.renderTranslation;
 
                 Vec2D toPrev = Vec2D.subtract(Vec2D(), prevPoint, pos);
                 double toPrevLength = Vec2D.length(toPrev);

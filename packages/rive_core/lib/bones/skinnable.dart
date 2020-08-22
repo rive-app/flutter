@@ -16,7 +16,7 @@ abstract class Skinnable {
     skinChanged.notify();
   }
   // <- editor-only
-  
+
   // These come in when Skinnable is mixedin/implemented with a
   // ContainerComponent (which is a requirement).
   ContainerChildren get children;
@@ -30,6 +30,7 @@ abstract class Skinnable {
     // -> editor-only
     skinChanged.notify();
     // <- editor-only
+    markSkinDirty();
   }
 
   void removeSkin(Skin skin) {
@@ -37,14 +38,18 @@ abstract class Skinnable {
       _skin = null;
       // -> editor-only
       clearWeights();
-      skinChanged.notify();
+    skinChanged.notify();
       // <- editor-only
+      markSkinDirty();
     }
   }
+
+  void markSkinDirty();
 
   // -> editor-only
   Mat2D get worldTransform;
   void initWeights();
   void clearWeights();
   // <- editor-only
+
 }

@@ -5,6 +5,7 @@
     "string": "straightvertex"
   },
   "extends": "shapes/path_vertex.json",
+  "generic": "Weight",
   "properties": {
     "radius": {
       "type": "double",

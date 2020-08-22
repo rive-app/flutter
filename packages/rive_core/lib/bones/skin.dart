@@ -4,8 +4,9 @@ import 'package:rive_core/bones/skeletal_component.dart';
 import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/bones/tendon.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/mat2d.dart';
+import 'package:rive_core/math/transform_components.dart';
+import 'package:rive_core/shapes/path_vertex.dart';
 
 import 'package:rive_core/src/generated/bones/skin_base.dart';
 export 'package:rive_core/src/generated/bones/skin_base.dart';
@@ -16,10 +17,21 @@ class Skin extends SkinBase {
   final List<Tendon> _tendons = [];
   List<Tendon> get tendons => _tendons;
   Float32List _boneTransforms;
+  final Mat2D _worldTransform = Mat2D();
 
   @override
   bool validate() {
     return parent is Skinnable && super.validate();
+  }
+
+  @override
+  void onDirty(int mask) {
+    // When the skin is dirty the deformed skinnable will need to regenerate its
+    // drawing commands.
+
+    // TODO: rename path to topology/surface something common between path &
+    // mesh.
+    (parent as Skinnable).markSkinDirty();
   }
 
   @override
@@ -43,12 +55,20 @@ class Skin extends SkinBase {
     for (final tendon in _tendons) {
       var boneWorld = tendon.bone.worldTransform;
       var wt = Mat2D.multiply(temp, boneWorld, tendon.inverseBind);
+      var tc = TransformComponents();
+      Mat2D.decompose(boneWorld, tc);
       _boneTransforms[bidx++] = wt[0];
       _boneTransforms[bidx++] = wt[1];
       _boneTransforms[bidx++] = wt[2];
       _boneTransforms[bidx++] = wt[3];
       _boneTransforms[bidx++] = wt[4];
       _boneTransforms[bidx++] = wt[5];
+    }
+  }
+
+  void deform(List<PathVertex> vertices) {
+    for (final vertex in vertices) {
+      // vertex.deform(_worldTransform, _boneTransforms);
     }
   }
 
@@ -71,7 +91,6 @@ class Skin extends SkinBase {
   @override
   void buildDependencies() {
     super.buildDependencies();
-
     // A skin depends on all its bones. N.B. that we don't depend on the parent
     // skinnable. The skinnable depends on us.
     for (final tendon in _tendons) {
@@ -90,6 +109,7 @@ class Skin extends SkinBase {
     switch (child.coreType) {
       case TendonBase.typeKey:
         _tendons.add(child as Tendon);
+        markRebuildDependencies();
         // -> editor-only
         (parent as Skinnable)?.internalTendonsChanged();
         // <- editor-only
@@ -105,6 +125,8 @@ class Skin extends SkinBase {
         _tendons.remove(child as Tendon);
         if (_tendons.isEmpty) {
           remove();
+        } else {
+          markRebuildDependencies();
         }
         // -> editor-only
         (parent as Skinnable)?.internalTendonsChanged();
@@ -164,23 +186,35 @@ class Skin extends SkinBase {
     );
     return tendon;
   }
-
-  @override
-  void txChanged(double from, double to) {}
-
-  @override
-  void tyChanged(double from, double to) {}
-
-  @override
-  void xxChanged(double from, double to) {}
-
-  @override
-  void xyChanged(double from, double to) {}
-
-  @override
-  void yxChanged(double from, double to) {}
-
-  @override
-  void yyChanged(double from, double to) {}
   // <- editor-only
+
+  @override
+  void txChanged(double from, double to) {
+    _worldTransform[4] = to;
+  }
+
+  @override
+  void tyChanged(double from, double to) {
+    _worldTransform[5] = to;
+  }
+
+  @override
+  void xxChanged(double from, double to) {
+    _worldTransform[0] = to;
+  }
+
+  @override
+  void xyChanged(double from, double to) {
+    _worldTransform[1] = to;
+  }
+
+  @override
+  void yxChanged(double from, double to) {
+    _worldTransform[2] = to;
+  }
+
+  @override
+  void yyChanged(double from, double to) {
+    _worldTransform[3] = to;
+  }
 }
