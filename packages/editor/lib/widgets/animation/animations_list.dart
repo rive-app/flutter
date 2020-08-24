@@ -25,7 +25,6 @@ class AnimationsList extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    print("REBUILDING LIST");
     return ValueListenableBuilder(
       valueListenable: ActiveFile.of(context).animationsManager,
       builder: (context, AnimationsManager animationManager, _) =>
