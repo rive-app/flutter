@@ -17,18 +17,29 @@ Future<void> loop(Future<SqsQueue> Function() getQueue,
     try {
       _log.info('What you want?');
       queue = await getQueue();
-      List<SqsMessage> messages =
-          await queue.receiveMessage(2, waitSeconds: 10, region: defaultRegion);
+      List<SqsMessage> messages = await queue.receiveMessage(
+        2,
+        waitSeconds: 10,
+        region: defaultRegion,
+        service: 'sqs',
+      );
       messages.forEach((message) async {
         try {
+          print('trying');
           bool success = await execute(message, tasks);
           if (success) {
-            await queue.deleteMessage(message.receiptHandle,
-                region: defaultRegion);
+            await queue.deleteMessage(
+              message.receiptHandle,
+              region: defaultRegion,
+              service: 'sqs',
+            );
             _log.info('Work done.');
           } else {
-            await queue.deleteMessage(message.receiptHandle,
-                region: defaultRegion);
+            await queue.deleteMessage(
+              message.receiptHandle,
+              region: defaultRegion,
+              service: 'sqs',
+            );
             _log.info('Work failed, removing from queue.');
           }
           // ignore: avoid_catches_without_on_clauses

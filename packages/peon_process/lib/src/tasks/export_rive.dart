@@ -116,12 +116,14 @@ class ExportRive with Task {
 
     var queue = await getJSQueue();
     await queue.sendMessage(
-        json.encode({
-          'work': 'TaskCompleted',
-          'taskId': taskId,
-          'payload': originalTaskData
-        }),
-        region: defaultRegion);
+      json.encode({
+        'work': 'TaskCompleted',
+        'taskId': taskId,
+        'payload': originalTaskData
+      }),
+      region: defaultRegion,
+      service: 'sqs',
+    );
 
     return true;
   }

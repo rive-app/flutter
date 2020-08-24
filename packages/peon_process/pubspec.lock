@@ -34,7 +34,7 @@ packages:
     description:
       path: "aws_client/"
       ref: HEAD
-      resolved-ref: "061a2af9303ab9c47f9eb505eb237a37094a10ac"
+      resolved-ref: b0770545817b3912a6e668a6d3fc960dbe90eeaf
       url: "https://github.com/rive-app/aws_client.git"
     source: git
     version: "0.3.0-dev"
@@ -264,7 +264,7 @@ packages:
       name: path_drawing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.1"
+    version: "0.4.1+1"
   path_parsing:
     dependency: transitive
     description:
@@ -278,7 +278,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.11"
+    version: "1.6.14"
   path_provider_linux:
     dependency: transitive
     description:
@@ -383,14 +383,14 @@ packages:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.8"
+    version: "0.5.10"
   shared_preferences_linux:
     dependency: transitive
     description:
       name: shared_preferences_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.2+1"
+    version: "0.0.2+2"
   shared_preferences_macos:
     dependency: transitive
     description:

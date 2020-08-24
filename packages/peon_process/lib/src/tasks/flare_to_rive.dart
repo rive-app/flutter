@@ -66,6 +66,7 @@ class FlareToRiveTask with Task {
         'payload': originalTaskData
       }),
       region: defaultRegion,
+      service: 'sqs',
     );
 
     return true;
