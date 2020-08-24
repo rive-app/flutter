@@ -16,19 +16,21 @@ class Backboard extends BackboardBase {
   Artboard _activeArtboard;
   Artboard get activeArtboard => _activeArtboard;
   set activeArtboard(Artboard value) {
+    print("SETTING ACTIVE ARTBOARD $value ${_activeArtboard == value}");
     if (_activeArtboard == value) {
       return;
     }
     _activeArtboard = value;
     activeArtboardId = value?.id;
+    _activeArtboard?.whenRemoved(_validateArtboards);
+    _activeArtboard?.addDirt(ComponentDirt.paint);
     activeArtboardChanged.notify();
   }
 
   @override
   void activeArtboardIdChanged(Id from, Id to) {
-    _activeArtboard = context?.resolve(to);
-    _activeArtboard?.whenRemoved(_validateArtboards);
-    _activeArtboard?.addDirt(ComponentDirt.paint);
+    activeArtboard = context?.resolve(to);
+    
   }
 
   void _validateArtboards() {
