@@ -154,7 +154,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
         ),
         Rect.fromLTWH(0, 0, width / resolution, height / resolution),
         _paint);
-        
+
     canvas.drawImageRect(
         _cursorFillImage.image,
         Rect.fromLTWH(
