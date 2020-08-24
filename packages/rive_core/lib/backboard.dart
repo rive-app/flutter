@@ -16,7 +16,6 @@ class Backboard extends BackboardBase {
   Artboard _activeArtboard;
   Artboard get activeArtboard => _activeArtboard;
   set activeArtboard(Artboard value) {
-    print("SETTING ACTIVE ARTBOARD $value ${_activeArtboard == value}");
     if (_activeArtboard == value) {
       return;
     }
@@ -30,7 +29,6 @@ class Backboard extends BackboardBase {
   @override
   void activeArtboardIdChanged(Id from, Id to) {
     activeArtboard = context?.resolve(to);
-    
   }
 
   void _validateArtboards() {
