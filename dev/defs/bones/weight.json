@@ -8,7 +8,7 @@
   "properties": {
     "values": {
       "type": "uint",
-      "initialValue": "0",
+      "initialValue": "255",
       "key": {
         "int": 102,
         "string": "values"
@@ -16,7 +16,7 @@
     },
     "indices": {
       "type": "uint",
-      "initialValue": "0",
+      "initialValue": "1",
       "key": {
         "int": 103,
         "string": "indices"

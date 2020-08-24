@@ -16,7 +16,7 @@ abstract class WeightBase extends Component {
 
   /// --------------------------------------------------------------------------
   /// Values field with key 102.
-  int _values = 0;
+  int _values = 255;
   static const int valuesPropertyKey = 102;
   int get values => _values;
 
@@ -36,7 +36,7 @@ abstract class WeightBase extends Component {
 
   /// --------------------------------------------------------------------------
   /// Indices field with key 103.
-  int _indices = 0;
+  int _indices = 1;
   static const int indicesPropertyKey = 103;
   int get indices => _indices;
 
@@ -81,9 +81,9 @@ abstract class WeightBase extends Component {
   bool exports(int propertyKey) {
     switch (propertyKey) {
       case valuesPropertyKey:
-        return _values != 0;
+        return _values != 255;
       case indicesPropertyKey:
-        return _indices != 0;
+        return _indices != 1;
     }
     return super.exports(propertyKey);
   }

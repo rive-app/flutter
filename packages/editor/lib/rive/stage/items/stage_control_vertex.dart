@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:rive_core/bones/cubic_weight.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -83,32 +84,33 @@ class StageControlIn extends StageControlVertex {
   }
 
   @override
-  int get weightIndices => component.inWeightIndices;
+  int get weightIndices => component.weight?.inIndices;
 
   @override
   set weightIndices(int value) {
-    component.inWeightIndices = value;
+    assert(component.weight != null);
+    component.weight.inIndices = value;
   }
 
   @override
-  int get weights => component.inWeights;
+  int get weights => component.weight?.inValues;
 
   @override
   set weights(int value) {
-    component.inWeights = value;
+    assert(component.weight != null);
+    component.weight.inValues = value;
   }
 
   @override
   void listenToWeightChange(
       bool enable, void Function(dynamic, dynamic) callback) {
+    var weight = component.weight;
     if (enable) {
-      component.addListener(
-          CubicVertexBase.inWeightIndicesPropertyKey, callback);
-      component.addListener(CubicVertexBase.inWeightsPropertyKey, callback);
+      weight.addListener(CubicWeightBase.inIndicesPropertyKey, callback);
+      weight.addListener(CubicWeightBase.inValuesPropertyKey, callback);
     } else {
-      component.removeListener(
-          CubicVertexBase.inWeightIndicesPropertyKey, callback);
-      component.removeListener(CubicVertexBase.inWeightsPropertyKey, callback);
+      weight.removeListener(CubicWeightBase.inIndicesPropertyKey, callback);
+      weight.removeListener(CubicWeightBase.inValuesPropertyKey, callback);
     }
   }
 }
@@ -159,32 +161,33 @@ class StageControlOut extends StageControlVertex {
   }
 
   @override
-  int get weightIndices => component.outWeightIndices;
+  int get weightIndices => component.weight?.outIndices;
 
   @override
   set weightIndices(int value) {
-    component.outWeightIndices = value;
+    assert(component.weight != null);
+    component.weight.outIndices = value;
   }
 
   @override
-  int get weights => component.outWeights;
+  int get weights => component.weight?.outValues;
 
   @override
   set weights(int value) {
-    component.outWeights = value;
+    assert(component.weight != null);
+    component.weight.outValues = value;
   }
 
   @override
   void listenToWeightChange(
       bool enable, void Function(dynamic, dynamic) callback) {
+    var weight = component.weight;
     if (enable) {
-      component.addListener(
-          CubicVertexBase.outWeightIndicesPropertyKey, callback);
-      component.addListener(CubicVertexBase.outWeightsPropertyKey, callback);
+      weight.addListener(CubicWeightBase.outIndicesPropertyKey, callback);
+      weight.addListener(CubicWeightBase.outValuesPropertyKey, callback);
     } else {
-      component.removeListener(
-          CubicVertexBase.outWeightIndicesPropertyKey, callback);
-      component.removeListener(CubicVertexBase.outWeightsPropertyKey, callback);
+      weight.removeListener(CubicWeightBase.outIndicesPropertyKey, callback);
+      weight.removeListener(CubicWeightBase.outValuesPropertyKey, callback);
     }
   }
 }

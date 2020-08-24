@@ -1,12 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:rive_core/bones/cubic_weight.dart';
-import 'package:rive_core/component.dart';
+import 'package:rive_core/bones/weight.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
 
 abstract class CubicVertex extends CubicVertexBase {
-  CubicWeight _weight;
-
   Vec2D get outPoint;
   Vec2D get inPoint;
 
@@ -14,21 +15,20 @@ abstract class CubicVertex extends CubicVertexBase {
   set inPoint(Vec2D value);
 
   @override
-  Vec2D get renderTranslation =>
-      _weight?.translation ?? super.renderTranslation;
+  Vec2D get renderTranslation => weight?.translation ?? super.renderTranslation;
 
-  Vec2D get renderIn => _weight?.inTranslation ?? inPoint;
-  Vec2D get renderOut => _weight?.outTranslation ?? outPoint;
+  Vec2D get renderIn => weight?.inTranslation ?? inPoint;
+  Vec2D get renderOut => weight?.outTranslation ?? outPoint;
 
-  // @override
-  // void deform(Mat2D world, Float32List boneTransforms) {
-  //   super.deform(world, boneTransforms);
+  @override
+  void deform(Mat2D world, Float32List boneTransforms) {
+    super.deform(world, boneTransforms);
 
-  //   PathVertex.deformWeighted(outPoint[0], outPoint[1], outWeightIndices,
-  //       outWeights, world, boneTransforms, _renderOut ??= Vec2D());
-  //   PathVertex.deformWeighted(inPoint[0], inPoint[1], inWeightIndices,
-  //       inWeights, world, boneTransforms, _renderIn ??= Vec2D());
-  // }
+    Weight.deform(outPoint[0], outPoint[1], weight.outIndices, weight.outValues,
+        world, boneTransforms, weight.outTranslation);
+    Weight.deform(inPoint[0], inPoint[1], weight.inIndices, weight.inValues,
+        world, boneTransforms, weight.inTranslation);
+  }
 
   // -> editor-only
   bool accumulateAngle = false;
@@ -50,34 +50,6 @@ abstract class CubicVertex extends CubicVertexBase {
   // }
   // <- editor-only
 
-  @override
-  void inWeightIndicesChanged(int from, int to) {}
-
-  @override
-  void inWeightsChanged(int from, int to) {}
-
-  @override
-  void outWeightIndicesChanged(int from, int to) {}
-
-  @override
-  void outWeightsChanged(int from, int to) {}
-
-  @override
-  void childAdded(Component component) {
-    super.childAdded(component);
-    if (component is CubicWeight) {
-      _weight = component;
-    }
-  }
-
-  @override
-  void childRemoved(Component component) {
-    super.childRemoved(component);
-    if (_weight == component) {
-      _weight = null;
-    }
-  }
-
   // -> editor-only
   @override
   void initWeight() {
@@ -85,11 +57,6 @@ abstract class CubicVertex extends CubicVertexBase {
     var weight = CubicWeight();
     context.addObject(weight);
     appendChild(weight);
-  }
-
-  @override
-  void clearWeight() {
-    _weight?.remove();
   }
   // <- editor-only
 }

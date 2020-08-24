@@ -5,13 +5,14 @@
 import 'dart:collection';
 import 'package:core/core.dart';
 import 'package:core/key_state.dart';
+import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
-abstract class StraightVertexBase extends PathVertex {
+abstract class StraightVertexBase extends PathVertex<Weight> {
   static const int typeKey = 5;
   @override
   int get coreType => StraightVertexBase.typeKey;

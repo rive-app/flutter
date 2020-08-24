@@ -1,13 +1,18 @@
+import 'dart:typed_data';
+
 import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path.dart';
 import 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 export 'package:rive_core/src/generated/shapes/path_vertex_base.dart';
 
-abstract class PathVertex extends PathVertexBase {
+abstract class PathVertex<T extends Weight> extends PathVertexBase {
+  T _weight;
+  T get weight => _weight;
 
   Path get path => parent as Path;
   // -> editor-only
@@ -101,6 +106,26 @@ abstract class PathVertex extends PathVertexBase {
     return translation.toString();
   }
 
+  @override
+  void childAdded(Component component) {
+    super.childAdded(component);
+    if (component is T) {
+      _weight = component;
+    }
+  }
+
+  @override
+  void childRemoved(Component component) {
+    super.childRemoved(component);
+    if (_weight == component) {
+      _weight = null;
+    }
+  }
+
+  void deform(Mat2D world, Float32List boneTransforms) {
+    Weight.deform(x, y, weight.indices, weight.values, world, boneTransforms,
+        _weight.translation);
+  }
   // -> editor-only
 
   /// Returns the vertex that will immediately follow this one after
@@ -121,6 +146,8 @@ abstract class PathVertex extends PathVertexBase {
   }
 
   void initWeight();
-  void clearWeight();
+  void clearWeight() {
+    _weight?.remove();
+  }
   // <- editor-only
 }

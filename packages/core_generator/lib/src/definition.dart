@@ -23,7 +23,6 @@ class Definition {
   final String _filename;
 
   String _name;
-  String _generic;
 
   final Configuration config;
   final List<Property> _properties = [];
@@ -38,6 +37,7 @@ class Definition {
       : _properties;
 
   Definition _extensionOf;
+  Definition _generic;
   Key _key;
   Key get key => _key;
   bool _isAbstract = false;
@@ -71,9 +71,9 @@ class Definition {
     if (extendsFilename is String) {
       _extensionOf = Definition(config, extendsFilename);
     }
-    dynamic genericValue = data['generic'];
-    if (genericValue is String) {
-      _generic = genericValue;
+    dynamic genericFilename = data['generic'];
+    if (genericFilename is String) {
+      _generic = Definition(config, genericFilename);
     }
     dynamic nameValue = data['name'];
     if (nameValue is String) {
@@ -115,7 +115,7 @@ class Definition {
   String get extendsString {
     if (_extensionOf != null) {
       if (_generic != null) {
-        return '${_extensionOf._name}<$_generic>}';
+        return '${_extensionOf._name}<${_generic._name}>';
       }
       return _extensionOf._name;
     }
@@ -168,6 +168,10 @@ class Definition {
     if (_extensionOf != null) {
       imports.add(
           'import \'package:$packageName/${_extensionOf.concreteCodeFilename}\';');
+    }
+    if (_generic != null) {
+      imports.add(
+          'import \'package:$packageName/${_generic.concreteCodeFilename}\';');
     }
 
     bool defineContextExtension = _extensionOf?._name == null;
@@ -378,7 +382,7 @@ class Definition {
       data['extends'] = _extensionOf.localFilename;
     }
     if (_generic != null) {
-      data['generic'] = _generic;
+      data['generic'] = _generic.localFilename;
     }
     if (_properties.isNotEmpty) {
       Map<String, dynamic> propertiesData = <String, dynamic>{};

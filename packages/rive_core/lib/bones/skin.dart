@@ -68,7 +68,7 @@ class Skin extends SkinBase {
 
   void deform(List<PathVertex> vertices) {
     for (final vertex in vertices) {
-      // vertex.deform(_worldTransform, _boneTransforms);
+      vertex.deform(_worldTransform, _boneTransforms);
     }
   }
 

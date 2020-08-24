@@ -43,10 +43,5 @@ class StraightVertex extends StraightVertexBase {
     context.addObject(weight);
     appendChild(weight);
   }
-
-  @override
-  void clearWeight() {
-    _weight?.remove();
-  }
   // <- editor-only
 }

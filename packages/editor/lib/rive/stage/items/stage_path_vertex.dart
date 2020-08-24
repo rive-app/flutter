@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
@@ -111,31 +112,34 @@ class StagePathVertex extends StageVertex<PathVertex> {
   }
 
   @override
-  int get weightIndices => component.weightIndices;
+  int get weightIndices => component.weight?.indices;
 
   @override
   set weightIndices(int value) {
-    component.weightIndices = value;
+    assert(component.weight != null);
+    component.weight.indices = value;
   }
 
   @override
-  int get weights => component.weights;
+  int get weights => component.weight?.values;
 
   @override
   set weights(int value) {
-    component.weights = value;
+    assert(component.weight != null);
+    component.weight.values = value;
   }
 
   @override
   void listenToWeightChange(
       bool enable, void Function(dynamic, dynamic) callback) {
+    assert(component.weight != null);
+    var weight = component.weight;
     if (enable) {
-      component.addListener(PathVertexBase.weightIndicesPropertyKey, callback);
-      component.addListener(PathVertexBase.weightsPropertyKey, callback);
+      weight.addListener(WeightBase.indicesPropertyKey, callback);
+      weight.addListener(WeightBase.valuesPropertyKey, callback);
     } else {
-      component.removeListener(
-          PathVertexBase.weightIndicesPropertyKey, callback);
-      component.removeListener(PathVertexBase.weightsPropertyKey, callback);
+      weight.removeListener(WeightBase.indicesPropertyKey, callback);
+      weight.removeListener(WeightBase.valuesPropertyKey, callback);
     }
   }
 }

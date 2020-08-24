@@ -4,6 +4,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/src/generated/bones/weight_base.dart';
+export 'package:rive_core/src/generated/bones/weight_base.dart';
 
 class Weight extends WeightBase {
   final Vec2D translation = Vec2D();
@@ -30,11 +31,6 @@ class Weight extends WeightBase {
     return parent is StraightVertex;
   }
   // <- editor-only
-
-  //   void deform(Mat2D world, Float32List boneTransforms) {
-  //   deformWeighted(x, y, weightIndices, weights, world, boneTransforms,
-  //       _renderTranslation);
-  // }
 
   static void deform(double x, double y, int indices, int weights, Mat2D world,
       Float32List boneTransforms, Vec2D result) {
