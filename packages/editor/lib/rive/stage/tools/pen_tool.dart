@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:bezier/bezier.dart';
@@ -8,9 +9,48 @@ import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/packed_icon.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/stage/tools/stage_tool.dart';
 import 'package:meta/meta.dart';
+
+enum LockDirection {
+  x, // horizontal
+  y, // vertical
+  pos45, // positive 45 slope
+  neg45, // negative 45 slope
+}
+
+/// Describes an axis lock with the axis reference point/origin and the aix that should be locked to
+@immutable
+class LockAxis {
+  final Vec2D origin;
+  final Vec2D direction;
+  const LockAxis(this.origin, this.direction);
+
+  /// Translate a point to the axis
+  Vec2D translateToAxis(Vec2D point) {
+    final xDiff = point[0] - origin[0];
+    final yDiff = point[1] - origin[1];
+    final dist = sqrt(xDiff * xDiff + yDiff * yDiff);
+    return Vec2D.fromValues(
+        origin[0] + (dist * direction[0]), origin[1] + (dist * direction[1]));
+  }
+
+  @override
+  String toString() => '<Origin: $origin, axis: ${direction.toString()}';
+
+  @override
+  bool operator ==(Object o) =>
+      o is LockAxis && o.direction == direction && o.origin == origin;
+
+  // TODO: hmmm what's a good hash for 4 floats?
+  /// Simple formula to calculate reasonably unique hashes:
+  /// h = (a * P1 + b) * P2 + c
+  // @override
+  // int get hashCode =>
+  //     (direction.index * 32 + origin[0].round()) * 113 + origin[1].round();
+}
 
 @immutable
 class PenToolInsertTarget {
@@ -92,6 +132,15 @@ abstract class PenTool<T extends Component> extends StageTool {
   Vec2D _ghostPointWorld;
   Vec2D _ghostPointScreen;
 
+  // Details for locking to an axis if required by the user
+  LockAxis _lockAxis;
+  LockAxis get lockAxis => _lockAxis;
+  set lockAxis(LockAxis value) {
+    if (_lockAxis != value) {
+      _lockAxis = value;
+    }
+  }
+
   Vec2D get ghostPointWorld => _ghostPointWorld;
 
   void _showGhostPoint(Vec2D world) {
@@ -124,8 +173,18 @@ abstract class PenTool<T extends Component> extends StageTool {
       _insertTarget = null;
       return false;
     }
+
     _insertTarget = computeInsertTarget(worldMouse);
-    _showGhostPoint(_insertTarget?.worldTranslation ?? worldMouse);
+    var ghostPoint = worldMouse;
+
+    // Should lock to an axis?
+    if (ShortcutAction.symmetricDraw.value &&
+        lockAxis != null &&
+        _insertTarget == null) {
+      ghostPoint = lockAxis.translateToAxis(worldMouse);
+    }
+
+    _showGhostPoint(_insertTarget?.worldTranslation ?? ghostPoint);
     return true;
   }
 
