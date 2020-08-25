@@ -2551,6 +2551,7 @@ abstract class RiveCoreContext extends CoreContext {
   bool isCoopProperty(int propertyKey) {
     switch (propertyKey) {
       case PointsPathBase.editingModeValuePropertyKey:
+      case BackboardBase.activeArtboardIdPropertyKey:
         return false;
       default:
         return true;

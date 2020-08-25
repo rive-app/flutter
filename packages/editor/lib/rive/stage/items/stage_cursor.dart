@@ -75,13 +75,15 @@ class StageCursor extends StageItem<ClientSidePlayer>
     // Don't necessarily care about optimizing for sync case here, legibility
     // wins.
     _fromCache('assets/images/icon_atlases/'
-            '${_cursorFill.scale}x_${_cursorFill.index}.png')
+            '${_cursorFill.scale}x_${_cursorFill.index}_'
+            '${PackedIcon.cachebust}.png')
         .then((image) {
       _cursorFillImage = image;
     });
 
     _fromCache('assets/images/icon_atlases/'
-            '${_cursor.scale}x_${_cursor.index}.png')
+            '${_cursor.scale}x_${_cursor.index}_'
+            '${PackedIcon.cachebust}.png')
         .then((image) {
       _cursorImage = image;
     });
@@ -154,7 +156,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
         ),
         Rect.fromLTWH(0, 0, width / resolution, height / resolution),
         _paint);
-        
+
     canvas.drawImageRect(
         _cursorFillImage.image,
         Rect.fromLTWH(
@@ -226,7 +228,11 @@ class StageCursor extends StageItem<ClientSidePlayer>
         textAlign: TextAlign.left, fontFamily: 'Roboto-Regular', fontSize: 13);
     ParagraphBuilder builder = ParagraphBuilder(style)
       ..pushStyle(
-        TextStyle(foreground: Paint()..color = const Color(0xFFFFFFFF)),
+        TextStyle(
+          color: const Color(0xFFFFFFFF),
+          fontFamily: 'Roboto-Regular',
+          fontSize: 13,
+        ),
       );
 
     final text = user.name ?? user.username;

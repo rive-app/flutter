@@ -2,18 +2,22 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:utilities/restorer.dart';
 
 // Just a way to get around the protected notifyListeners so we can use trigger
 // multiple events from a single object.
 class Event extends ChangeNotifier {
   void notify() => notifyListeners();
 }
+
 // -> editor-only
 /// A listenable with details of type [T].
 abstract class DetailListenable<T> {
   bool addListener(void Function(T) callback);
 
   bool removeListener(void Function(T) callback);
+
+  Restorer listen(void Function(T) callback);
 }
 
 /// An event with an argument of [T].
@@ -38,8 +42,15 @@ class DetailedEvent<T> implements DetailListenable<T> {
       listener(details);
     }
   }
-}
 
+  @override
+  Restorer listen(void Function(T) callback) {
+    if (addListener(callback)) {
+      return RestoreCallback(() => removeListener(callback));
+    }
+    return null;
+  }
+}
 
 /// A ValueNotifier that can optionally suppress notifying when setting values
 /// in bulk. Also allows later notifying once bulk operations are complete.

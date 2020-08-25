@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_style/dart_style.dart';
 import 'package:image/image.dart';
 import 'package:utilities/bitmap_packer/bitmap_rect.dart';
 import 'package:utilities/bitmap_packer/multi_atlas_packer.dart';
+import 'package:crypto/crypto.dart';
 
 class BitmapRectAtlas {
   final int scale;
@@ -26,9 +28,9 @@ void main(List<String> args) async {
   String dest = args[1];
   String dartFilename = args[2];
 
-  await packAtlas(1, directory, dest);
-  await packAtlas(2, '$directory/2.0x', dest);
-  await packAtlas(3, '$directory/3.0x', dest);
+  var cachebust = await packAtlas(1, directory, dest);
+  await packAtlas(2, '$directory/2.0x', dest, postfix: cachebust);
+  await packAtlas(3, '$directory/3.0x', dest, postfix: cachebust);
 
   final code = StringBuffer();
 
@@ -42,6 +44,8 @@ void main(List<String> args) async {
       final int x, y, width, height;
       final int scale;
       final int index;
+
+      static const String cachebust = '$cachebust';
 
       const PackedIcon._(this.x, this.y, this.width, this.height,
           this.scale, this.index);
@@ -65,8 +69,10 @@ void main(List<String> args) async {
   File(dartFilename).writeAsStringSync(formattedCode);
 }
 
-Future<void> packAtlas(int scale, String directory, String dest) async {
-  var completer = Completer<void>();
+Future<String> packAtlas(int scale, String directory, String dest,
+    {String postfix}) async {
+  String cachebust = postfix;
+  var completer = Completer<String>();
   var packer =
       MultiAtlasPacker(maxWidth: 1024, maxHeight: 1024, allowRotations: false);
   Directory(directory).list(recursive: false).listen((entity) {
@@ -103,12 +109,13 @@ Future<void> packAtlas(int scale, String directory, String dest) async {
       var image =
           Image.fromBytes(atlas.imageWidth, atlas.imageHeight, atlas.image);
 
-      File('$dest/${scale}x\_$atlasIndex.png').createSync(recursive: true);
-      File('$dest/${scale}x\_$atlasIndex.png')
-          .writeAsBytesSync(encodePng(image));
+      cachebust ??= sha1.convert(atlas.image).toString();
+      var filename = '$dest/${scale}x\_$atlasIndex\_$cachebust.png';
+      File(filename).createSync(recursive: true);
+      File(filename).writeAsBytesSync(encodePng(image));
       atlasIndex++;
     }
-    completer.complete();
+    completer.complete(cachebust);
   });
   return completer.future;
 }
