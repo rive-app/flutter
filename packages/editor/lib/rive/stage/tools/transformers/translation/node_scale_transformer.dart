@@ -146,10 +146,13 @@ class NodeScaleTransformer extends StageTransformer {
 
     // HACK: proportional scaling only activates with exactly one top component
     // selected
-    _proportionalScale = _nodes.length == 1 ? _nodes.first.scale : null;
-
-    // Subscribe to keypress events on the shortcut action
-    proportionalScaleShortcut?.addListener(_advanceWithPrevious);
+    if (_nodes.length == 1) {
+      _proportionalScale = _nodes.first.scale;
+      // Subscribe to keypress events on the shortcut action
+      proportionalScaleShortcut?.addListener(_advanceWithPrevious);
+    } else {
+      _proportionalScale = null;
+    }
 
     for (final node in _nodes) {
       _inHandleSpace[node] =
