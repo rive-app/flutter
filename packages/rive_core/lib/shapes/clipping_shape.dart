@@ -22,6 +22,15 @@ class ClippingShape extends ClippingShapeBase {
     if (_shape == value) {
       return;
     }
+
+    // -> editor-only
+    
+    // Handle when a shape is deleted. #1177
+    _shape?.cancelWhenRemoved(remove);
+    value?.whenRemoved(remove);
+    
+    // <- editor-only
+
     _shape = value;
     shapeId = value?.id;
   }
