@@ -47,13 +47,14 @@ abstract class InspectingColor {
   OpenFileContext _context;
   OpenFileContext get context => _context;
 
-  void startEditing(OpenFileContext context) {
+  bool startEditing(OpenFileContext context) {
     assert(context != null);
     if (_context == context) {
-      return;
+      return false;
     }
     _context = context;
     debounce(editorOpened);
+    return true;
   }
 
   void stopEditing() {
@@ -692,11 +693,17 @@ class ShapesInspectingColor extends InspectingColor {
   Restorer _selectionHandlerRestorer;
 
   @override
-  void startEditing(OpenFileContext context) {
-    super.startEditing(context);
-    _selectionHandlerRestorer =
-        context.stage.addSelectionHandler(_stageSelected);
-    context.addActionHandler(_handleShortcut);
+  bool startEditing(OpenFileContext context) {
+    if (super.startEditing(context)) {
+      _selectionHandlerRestorer?.restore();
+      context.removeActionHandler(_handleShortcut);
+
+      _selectionHandlerRestorer =
+          context.stage.addSelectionHandler(_stageSelected);
+      context.addActionHandler(_handleShortcut);
+      return true;
+    }
+    return false;
   }
 
   bool _handleShortcut(ShortcutAction action) {
