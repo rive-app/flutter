@@ -26,6 +26,14 @@ class NodeScaleTransformer extends StageTransformer {
   final TransformComponents transformComponents = TransformComponents();
   final StatefulShortcutAction<bool> proportionalScaleShortcut;
 
+  // Record the scales for all the top nodes when intializing the tool so that
+  // the proportional scale shortcut knows what ratios to scale to
+  Vec2D _proportionalScale;
+
+  // Tracks the scale at the time just before proportional scaling is
+  // activated, so we can return to the last scale if turns off
+  Vec2D _previousScale;
+
   final _inHandleSpace = HashMap<Node, Mat2D>();
 
   NodeScaleTransformer({
@@ -38,27 +46,36 @@ class NodeScaleTransformer extends StageTransformer {
 
   @override
   void advance(DragTransformDetails details) {
-    var constraintedDelta = details.artboardWorld.delta;
-    if (lockAxis != null) {
-      var d = Vec2D.dot(constraintedDelta, lockAxis);
-      constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
-    }
-    var constraintedDeltaX = constraintedDelta[0];
-    var constraintedDeltaY = constraintedDelta[1];
-
-    // Lock scale if shortcut is detected and we're locked on an axis
-    if (lockAxis != null &&
-        proportionalScaleShortcut != null &&
-        proportionalScaleShortcut.value) {
-      if (constraintedDeltaX == 0) {
-        constraintedDeltaX = constraintedDeltaY;
-      } else if (constraintedDeltaY == 0) {
-        constraintedDeltaY = constraintedDeltaX;
+    if (details != null) {
+      var constraintedDelta = details.artboardWorld.delta;
+      if (lockAxis != null) {
+        var d = Vec2D.dot(constraintedDelta, lockAxis);
+        constraintedDelta = Vec2D.fromValues(lockAxis[0] * d, lockAxis[1] * d);
       }
-    }
+      var constraintedDeltaX = constraintedDelta[0];
+      var constraintedDeltaY = constraintedDelta[1];
 
-    transformComponents.scaleX += constraintedDeltaX * 0.01;
-    transformComponents.scaleY -= constraintedDeltaY * 0.01;
+      // Lock scale if shortcut is detected and we're locked on an axis
+      if (lockAxis != null &&
+          _proportionalScale != null &&
+          proportionalScaleShortcut != null &&
+          proportionalScaleShortcut.value) {
+        if (constraintedDeltaX == 0) {
+          // Calculate the proportion delta x change
+          transformComponents.scaleX = transformComponents.scaleY /
+              _proportionalScale[1] *
+              _proportionalScale[0];
+        } else if (constraintedDeltaY == 0) {
+          // Calculate the proportion delta y change
+          transformComponents.scaleY = transformComponents.scaleX /
+              _proportionalScale[0] *
+              _proportionalScale[1];
+        }
+      }
+
+      transformComponents.scaleX += constraintedDeltaX * 0.01;
+      transformComponents.scaleY -= constraintedDeltaY * 0.01;
+    }
 
     var transform = Mat2D();
     Mat2D.compose(transform, transformComponents);
@@ -105,7 +122,8 @@ class NodeScaleTransformer extends StageTransformer {
   }
 
   @override
-  void complete() {}
+  void complete() =>
+      proportionalScaleShortcut?.removeListener(_advanceWithPrevious);
 
   @override
   bool init(Set<StageItem> items, DragTransformDetails details) {
@@ -126,11 +144,44 @@ class NodeScaleTransformer extends StageTransformer {
 
     _nodes = topComponents(_nodes);
 
+    // HACK: proportional scaling only activates with exactly one top component
+    // selected
+    _proportionalScale = _nodes.length == 1 ? _nodes.first.scale : null;
+
+    // Subscribe to keypress events on the shortcut action
+    proportionalScaleShortcut?.addListener(_advanceWithPrevious);
+
     for (final node in _nodes) {
       _inHandleSpace[node] =
           Mat2D.multiply(Mat2D(), toHandle, node.worldTransform);
     }
 
     return _nodes.isNotEmpty;
+  }
+
+  /// Advance using the previous scale details if there are any
+  void _advanceWithPrevious() {
+    // if the tool is activated, record the previous scale
+    if (proportionalScaleShortcut.value) {
+      _previousScale = Vec2D.clone(transformComponents.scale);
+
+      final deltaY = transformComponents.scaleX - _proportionalScale[0];
+      final deltaX = transformComponents.scaleY - _proportionalScale[1];
+
+      transformComponents.scaleX += _proportionalScale[0] * deltaX;
+      transformComponents.scaleY += _proportionalScale[1] * deltaY;
+    }
+    // otherwise, recalculate the current scale based on the recorded and wipe
+    // the previous scale
+    else {
+      final deltaX = transformComponents.scaleX - _previousScale[0];
+      final deltaY = transformComponents.scaleY - _previousScale[1];
+
+      transformComponents.scaleX -= _previousScale[0] * deltaX;
+      transformComponents.scaleY -= _previousScale[1] * deltaY;
+
+      _previousScale = null;
+    }
+    advance(null);
   }
 }
