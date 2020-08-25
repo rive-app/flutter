@@ -63,6 +63,22 @@ class PointsPath extends PointsPathBase with Skinnable {
     markPathDirty();
   }
 
+  // -> editor-only
+  @override
+  void onDirty(int mask) {
+    // When we receive path dirt, we'll be rebuilding the draw commands for the
+    // path. If we have skin, we'll also be deforming the vertices before
+    // building the commands. We can take this opportunity to tell the vertices
+    // that they will need to recompute their bounds (vertices recompute bounds
+    // when they receive worldTransform dirt).
+    if (dirt & ComponentDirt.path != 0 && skin != null) {
+      for (final child in children) {
+        child.addDirt(ComponentDirt.worldTransform);
+      }
+    }
+  }
+  // <- editor-only
+
   @override
   void markPathDirty() {
     // Make sure the skin gets marked dirty too.
@@ -86,6 +102,8 @@ class PointsPath extends PointsPathBase with Skinnable {
       // boneTransforms are up to date.
       skin?.deform(_vertices);
     }
+    // Finally call super.update so the path commands can actually be rebuilt
+    // (when ComponentDirt.path is set).
     super.update(dirt);
   }
 
@@ -97,7 +115,8 @@ class PointsPath extends PointsPathBase with Skinnable {
   }
 
   @override
-  void clearWeights() {    for (final vertex in _vertices) {
+  void clearWeights() {
+    for (final vertex in _vertices) {
       vertex.clearWeight();
     }
   }

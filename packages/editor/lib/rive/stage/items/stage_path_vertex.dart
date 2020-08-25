@@ -94,13 +94,14 @@ class StagePathVertex extends StageVertex<PathVertex> {
   }
 
   @override
-  Vec2D get translation => component.translation;
+  Vec2D get translation =>
+      component?.weight?.translation ?? component.translation;
 
   @override
   set translation(Vec2D value) => component.translation = value;
 
   @override
-  Mat2D get worldTransform => component.path.worldTransform;
+  Mat2D get worldTransform => component.path.pathTransform;
 
   @override
   set worldTranslation(Vec2D value) {

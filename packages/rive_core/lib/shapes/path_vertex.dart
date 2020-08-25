@@ -90,14 +90,18 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
   @override
   void xChanged(double from, double to) {
     _renderTranslation[0] = to;
+    // -> editor-only
     addDirt(ComponentDirt.worldTransform);
+    // <- editor-only
     path?.markPathDirty();
   }
 
   @override
   void yChanged(double from, double to) {
     _renderTranslation[1] = to;
+    // -> editor-only
     addDirt(ComponentDirt.worldTransform);
+    // <- editor-only
     path?.markPathDirty();
   }
 
