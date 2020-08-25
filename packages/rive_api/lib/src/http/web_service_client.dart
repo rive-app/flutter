@@ -136,11 +136,8 @@ class WebServiceClient {
   }
 
   Future<void> clearCookies() async {
-    print('CLEARING COOKIES');
     cookies.clear();
-    print(headers);
     headers['cookie'] = _generateCookieHeader();
-    print(headers);
     await persist();
   }
 
