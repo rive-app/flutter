@@ -9,6 +9,8 @@ class PackedIcon {
   final int scale;
   final int index;
 
+  static const String cachebust = '8bff976569ea87ff2c8999d80d5cdb1b8a259cf7';
+
   const PackedIcon._(
       this.x, this.y, this.width, this.height, this.scale, this.index);
   static const Iterable<PackedIcon> riveLogoLogin = [
