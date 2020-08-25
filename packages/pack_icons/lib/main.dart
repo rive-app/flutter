@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_style/dart_style.dart';
@@ -19,7 +18,7 @@ class BitmapRectAtlas {
 Map<String, List<BitmapRectAtlas>> _icons = {};
 Map<Image, String> _imageNames = {};
 
-void main(List<String> args) async {
+Future<void> main(List<String> args) async {
   if (args.length != 3) {
     print('Source and destination folders need to be specified.');
     exit(1);

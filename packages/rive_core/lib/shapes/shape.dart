@@ -1,11 +1,9 @@
 import 'dart:ui' as ui;
 
 import 'package:rive_core/bounds_delegate.dart';
-import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
-import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
@@ -63,32 +61,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
       path.markBoundsDirty();
     }
     // <- editor-only
-  }
-
-  @override
-  void childAdded(Component child) {
-    super.childAdded(child);
-    switch (child.coreType) {
-      case FillBase.typeKey:
-        addFill(child as Fill);
-        break;
-      case StrokeBase.typeKey:
-        addStroke(child as Stroke);
-        break;
-    }
-  }
-
-  @override
-  void childRemoved(Component child) {
-    super.childRemoved(child);
-    switch (child.coreType) {
-      case FillBase.typeKey:
-        removeFill(child as Fill);
-        break;
-      case StrokeBase.typeKey:
-        removeStroke(child as Stroke);
-        break;
-    }
   }
 
   bool addPath(Path path) {

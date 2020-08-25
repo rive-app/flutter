@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_core/component.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -13,10 +14,12 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
+import 'package:utilities/list_equality.dart';
 
 /// An abstraction to give a common interface to any component that can contain
 /// fills and strokes.
 abstract class ShapePaintContainer {
+  ContainerChildren get children;
   final Set<Fill> fills = {};
   // -> editor-only
   final Event fillsChanged = Event();
@@ -39,7 +42,6 @@ abstract class ShapePaintContainer {
   @protected
   void onStrokesChanged();
 
-  @protected
   bool addFill(Fill fill) {
     if (fills.add(fill)) {
       // -> editor-only
@@ -51,7 +53,26 @@ abstract class ShapePaintContainer {
     return false;
   }
 
-  @protected
+  // -> editor-only
+  void updateShapePaints() {
+    var nextFills = children.whereType<Fill>();
+    if (!iterableEquals(nextFills, fills)) {
+      fills.clear();
+      fills.addAll(nextFills);
+      fillsChanged.notify();
+      onFillsChanged();
+    }
+
+    var nextStrokes = children.whereType<Stroke>();
+    if (!iterableEquals(nextStrokes, strokes)) {
+      strokes.clear();
+      strokes.addAll(nextStrokes);
+      strokesChanged.notify();
+      onStrokesChanged();
+    }
+  }
+  // <- editor-only
+
   bool removeFill(Fill fill) {
     if (fills.remove(fill)) {
       // -> editor-only
@@ -63,7 +84,6 @@ abstract class ShapePaintContainer {
     return false;
   }
 
-  @protected
   bool addStroke(Stroke stroke) {
     if (strokes.add(stroke)) {
       // -> editor-only
@@ -75,7 +95,6 @@ abstract class ShapePaintContainer {
     return false;
   }
 
-  @protected
   bool removeStroke(Stroke stroke) {
     if (strokes.remove(stroke)) {
       // -> editor-only

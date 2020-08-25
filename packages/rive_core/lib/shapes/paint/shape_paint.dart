@@ -67,6 +67,11 @@ abstract class ShapePaint extends ShapePaintBase {
   @override
   void onAdded() {
     super.onAdded();
+
+    // Shape paints change out of order only during editing, we don't need to
+    // re-build the entire list every time one of these is added at runtime.
+    _shapePaintContainer?.updateShapePaints();
+
     // ShapePaint has been added and is clean (all artboards and ancestors of
     // the current hierarchy's components have resolved). This is a good
     // opportunity to self-heal when paint mutators are missing.
@@ -78,6 +83,12 @@ abstract class ShapePaint extends ShapePaintBase {
       });
       context.objectPatched(this);
     }
+  }
+
+  @override
+  void onRemoved() {
+    super.onRemoved();
+    _shapePaintContainer?.updateShapePaints();
   }
   // <- editor-only
 
