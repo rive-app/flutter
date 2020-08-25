@@ -11,7 +11,7 @@ import 'package:rive_core/shapes/points_path.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
-import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
+import 'package:rive_editor/rive/stage/items/stage_path_vertex.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/rive/stage/tools/auto_tool.dart';
@@ -85,7 +85,7 @@ class VertexEditor with RiveFileDelegate {
 
   bool _selectionHandler(StageItem item) {
     var path = _creatingPath.value;
-    if (item is StageVertex && path?.vertices?.first == item.component) {
+    if (item is StagePathVertex && path?.vertices?.first == item.component) {
       path.isClosed = true;
       path.editingMode = PointsPathEditMode.editing;
       path.context.captureJournalEntry();
