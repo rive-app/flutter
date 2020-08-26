@@ -48,10 +48,10 @@ class PackedIcon {
     PackedIcon._(180, 60, 41, 40, 2, 0),
     PackedIcon._(876, 42, 61, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> toolTriangle = [
+  static const Iterable<PackedIcon> toolEllipse = [
     PackedIcon._(46, 54, 20, 20, 1, 0),
-    PackedIcon._(92, 108, 40, 40, 2, 0),
-    PackedIcon._(810, 72, 60, 60, 3, 0),
+    PackedIcon._(768, 0, 40, 40, 2, 0),
+    PackedIcon._(960, 182, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> signinGoogle = [
     PackedIcon._(0, 64, 20, 20, 1, 0),
@@ -158,15 +158,15 @@ class PackedIcon {
     PackedIcon._(888, 0, 40, 40, 2, 0),
     PackedIcon._(120, 150, 60, 60, 3, 0),
   ];
-  static const Iterable<PackedIcon> toolEllipse = [
+  static const Iterable<PackedIcon> toolTriangle = [
     PackedIcon._(384, 0, 20, 20, 1, 0),
-    PackedIcon._(808, 0, 40, 40, 2, 0),
-    PackedIcon._(0, 150, 60, 60, 3, 0),
+    PackedIcon._(92, 108, 40, 40, 2, 0),
+    PackedIcon._(810, 72, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> settings = [
     PackedIcon._(404, 0, 20, 20, 1, 0),
-    PackedIcon._(768, 0, 40, 40, 2, 0),
-    PackedIcon._(960, 182, 60, 60, 3, 0),
+    PackedIcon._(808, 0, 40, 40, 2, 0),
+    PackedIcon._(0, 150, 60, 60, 3, 0),
   ];
   static const Iterable<PackedIcon> pathOpen = [
     PackedIcon._(424, 0, 20, 20, 1, 0),
@@ -372,7 +372,7 @@ class PackedIcon {
     PackedIcon._(0, 208, 30, 30, 2, 0),
     PackedIcon._(98, 255, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> trash = [
+  static const Iterable<PackedIcon> boneSmall = [
     PackedIcon._(825, 15, 15, 15, 1, 0),
     PackedIcon._(172, 140, 30, 30, 2, 0),
     PackedIcon._(864, 305, 45, 45, 3, 0),
@@ -382,7 +382,7 @@ class PackedIcon {
     PackedIcon._(120, 169, 30, 30, 2, 0),
     PackedIcon._(909, 305, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> ellipseSmall = [
+  static const Iterable<PackedIcon> trash = [
     PackedIcon._(855, 15, 15, 15, 1, 0),
     PackedIcon._(30, 208, 30, 30, 2, 0),
     PackedIcon._(51, 257, 45, 45, 3, 0),
@@ -402,7 +402,7 @@ class PackedIcon {
     PackedIcon._(439, 110, 30, 30, 2, 0),
     PackedIcon._(45, 302, 45, 45, 3, 0),
   ];
-  static const Iterable<PackedIcon> bone = [
+  static const Iterable<PackedIcon> ellipseSmall = [
     PackedIcon._(915, 15, 15, 15, 1, 0),
     PackedIcon._(232, 140, 30, 30, 2, 0),
     PackedIcon._(143, 255, 45, 45, 3, 0),
