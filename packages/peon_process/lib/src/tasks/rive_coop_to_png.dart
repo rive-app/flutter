@@ -98,8 +98,13 @@ class RiveCoopToPng extends PeonTask {
     // FML
     var data = await getS3Key(sourceLocation, 'us-east-1');
     var riveFile = RiveFile(fileId.toString(), localDataPlatform: null);
+
     var coopImporter = CoopImporter(core: riveFile);
     coopImporter.import(data);
+    if (riveFile.artboards.isEmpty) {
+      _log.info('No artboard found for $taskId, nothing to convert');
+      return true;
+    }
 
     var exporter = RuntimeExporter(
         core: riveFile, info: RuntimeHeader(ownerId: ownerId, fileId: fileId));
