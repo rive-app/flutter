@@ -14,7 +14,7 @@ dependencies:
     git: 
       url: https://github.com/rive-app/aws_client.git
       path: aws_client/
-  http_client: ^1.4.0
+  http_client: '>=0.5.0 <2.0.0'
   args: ^1.5.3
   utilities:
     path: ../utilities

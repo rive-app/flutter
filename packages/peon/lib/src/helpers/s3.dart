@@ -65,7 +65,7 @@ Future<void> putS3Key(String targetLocation, Uint8List payload,
       uri: targetLocation,
       client: client,
     );
-
+    await response.readAsBytes();
     assert(response.statusCode == 200);
   } finally {
     await client.close();
@@ -90,6 +90,7 @@ Future<bool> _exists({
       uri: uri,
       client: client,
     );
+    await response.readAsBytes();
     if (response.statusCode == 200) {
       return true;
     }

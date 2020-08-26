@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
 import 'package:peon_process/src/helpers/convert_svg.dart';
+import 'package:peon_process/src/helpers/task_utils.dart';
 
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_exporter.dart';
@@ -17,27 +17,26 @@ import 'package:utilities/deserialize.dart';
 
 final _log = Logger('peon');
 
-class SvgToRiveTask with Task {
-  final String taskId;
+class SvgToRiveTask extends PeonTask {
   final String sourceLocation;
   final String targetLocation;
   final String relativeUrl;
   // should switch to connection id I guess?
   final int notifyUserId;
-  final Map originalTaskData;
 
-  SvgToRiveTask(
-      {this.taskId,
-      this.sourceLocation,
-      this.targetLocation,
-      this.notifyUserId,
-      this.relativeUrl,
-      this.originalTaskData});
+  SvgToRiveTask({
+    String taskId,
+    Map originalTaskData,
+    this.sourceLocation,
+    this.targetLocation,
+    this.notifyUserId,
+    this.relativeUrl,
+  }) : super(taskId: taskId, originalTaskData: originalTaskData);
 
   static SvgToRiveTask fromData(Map<String, dynamic> data) {
-    if (!data.containsKey("params")) {
+    if (!data.containsKey('params')) {
       throw IllegalTask(
-          "Expecting a JSON structure with `params` but got $data");
+          'Expecting a JSON structure with `params` but got $data');
     }
 
     var params = data.getMap<String, Object>('params');
@@ -60,8 +59,8 @@ class SvgToRiveTask with Task {
     try {
       var tmpName = sourceLocation.hashCode.toString();
       var tempDir = await Directory.systemTemp.createTemp();
-      var inPath = "${tempDir.path}/$tmpName.in.svg";
-      var outPath = "${tempDir.path}/$tmpName.out.svg";
+      var inPath = '${tempDir.path}/$tmpName.in.svg';
+      var outPath = '${tempDir.path}/$tmpName.out.svg';
       var inFile = File(inPath);
       await inFile.create();
       await inFile.writeAsString(input);
@@ -115,14 +114,7 @@ class SvgToRiveTask with Task {
     var uint8data = exporter.export();
 
     await putS3Key(targetLocation, uint8data);
-
-    var queue = await getJSQueue();
-    await queue.sendMessage(json.encode({
-      "work": "TaskCompleted",
-      "taskId": taskId,
-      "payload": originalTaskData
-    }));
-
+    await completeTask(this);
     return true;
   }
 }
