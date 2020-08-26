@@ -34,7 +34,7 @@ packages:
     description:
       path: "aws_client/"
       ref: HEAD
-      resolved-ref: b0770545817b3912a6e668a6d3fc960dbe90eeaf
+      resolved-ref: "1818039dc8e76fe1bb391685782b71ddb694d483"
       url: "https://github.com/rive-app/aws_client.git"
     source: git
     version: "0.3.0-dev"
@@ -189,7 +189,7 @@ packages:
     source: hosted
     version: "0.12.2"
   http_client:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http_client
       url: "https://pub.dartlang.org"

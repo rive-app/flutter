@@ -3,20 +3,23 @@ import 'dart:io';
 import 'package:aws_client/sqs.dart';
 import 'package:logging/logging.dart';
 import 'package:peon/src/tasks/base.dart';
+import 'package:http_client/console.dart';
 
 final _log = Logger('peon');
 final defaultRegion =
     (Platform.environment['LOCAL_STACK_URL'] == null) ? null : 'us-east-1';
 
-Future<void> loop(Future<SqsQueue> Function() getQueue,
+Future<void> loop(Future<SqsQueue> Function(ConsoleClient) getQueue,
     Map<String, Task Function(Map<String, dynamic>)> tasks) async {
   _log.info('Ready to work.');
   SqsQueue queue;
-
+  ConsoleClient client = ConsoleClient();
   while (true) {
     try {
+      queue ??= await getQueue(client);
       _log.info('What you want?');
-      queue = await getQueue();
+      client = ConsoleClient();
+
       List<SqsMessage> messages = await queue.receiveMessage(
         2,
         waitSeconds: 10,
@@ -25,7 +28,6 @@ Future<void> loop(Future<SqsQueue> Function() getQueue,
       );
       messages.forEach((message) async {
         try {
-          print('trying');
           bool success = await execute(message, tasks);
           if (success) {
             await queue.deleteMessage(

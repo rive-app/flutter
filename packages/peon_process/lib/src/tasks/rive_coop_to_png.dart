@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
+import 'package:peon_process/src/helpers/task_utils.dart';
 import 'package:rive_core/coop_importer.dart';
 
 import 'package:rive_core/rive_file.dart';
@@ -16,22 +16,21 @@ import 'package:utilities/deserialize.dart';
 
 final _log = Logger('peon');
 
-class RiveCoopToPng with Task {
-  final String taskId;
+class RiveCoopToPng extends PeonTask {
   final String sourceLocation;
   final String targetLocation;
   // should switch to connection id I guess?
   final int ownerId;
   final int fileId;
-  final Map originalTaskData;
 
-  RiveCoopToPng(
-      {this.taskId,
-      this.sourceLocation,
-      this.targetLocation,
-      this.ownerId,
-      this.fileId,
-      this.originalTaskData});
+  RiveCoopToPng({
+    String taskId,
+    Map originalTaskData,
+    this.sourceLocation,
+    this.targetLocation,
+    this.ownerId,
+    this.fileId,
+  }) : super(taskId: taskId, originalTaskData: originalTaskData);
 
   static RiveCoopToPng fromData(Map<String, dynamic> data) {
     if (!data.containsKey('params')) {
@@ -111,18 +110,7 @@ class RiveCoopToPng with Task {
     }
 
     await putS3Key(targetLocation, svgdata, 'us-east-1');
-
-    var queue = await getJSQueue();
-    await queue.sendMessage(
-      json.encode({
-        'work': 'TaskCompleted',
-        'taskId': taskId,
-        'payload': originalTaskData
-      }),
-      region: defaultRegion,
-      service: 'sqs',
-    );
-
+    await completeTask(this);
     return true;
   }
 }

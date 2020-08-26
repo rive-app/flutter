@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,6 +6,7 @@ import 'package:archive/archive_io.dart';
 import 'package:logging/logging.dart';
 import 'package:peon/peon.dart';
 import 'package:peon/src/helpers/s3.dart';
+import 'package:peon_process/src/helpers/task_utils.dart';
 import 'package:rive_core/coop_importer.dart';
 
 import 'package:rive_core/rive_file.dart';
@@ -36,24 +36,23 @@ class SourceDetail {
   }
 }
 
-class ExportRive with Task {
-  final String taskId;
+class ExportRive extends PeonTask {
   final String sourceBase;
   final List<SourceDetail> sourceDetails;
   final String targetLocation;
   final String relativeUrl;
   // should switch to connection id I guess?
   final int notifyUserId;
-  final Map originalTaskData;
 
-  ExportRive(
-      {this.taskId,
-      this.sourceBase,
-      this.sourceDetails,
-      this.targetLocation,
-      this.notifyUserId,
-      this.relativeUrl,
-      this.originalTaskData});
+  ExportRive({
+    String taskId,
+    Map originalTaskData,
+    this.sourceBase,
+    this.sourceDetails,
+    this.targetLocation,
+    this.notifyUserId,
+    this.relativeUrl,
+  }) : super(taskId: taskId, originalTaskData: originalTaskData);
 
   static ExportRive fromData(Map<String, Object> data) {
     if (!data.containsKey('params')) {
@@ -113,17 +112,7 @@ class ExportRive with Task {
     }
 
     await putS3Key(targetLocation, zipBytes);
-
-    var queue = await getJSQueue();
-    await queue.sendMessage(
-      json.encode({
-        'work': 'TaskCompleted',
-        'taskId': taskId,
-        'payload': originalTaskData
-      }),
-      region: defaultRegion,
-      service: 'sqs',
-    );
+    await completeTask(this);
 
     return true;
   }
