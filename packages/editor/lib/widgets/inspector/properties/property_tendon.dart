@@ -34,7 +34,7 @@ class PropertyTendon extends StatelessWidget {
         prefix: (context) => Padding(
           padding: const EdgeInsets.only(right: 10),
           child: TintedIcon(
-            icon: PackedIcon.bone,
+            icon: PackedIcon.boneSmall,
             color: color,
           ),
         ),
