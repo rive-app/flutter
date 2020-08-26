@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
@@ -9,19 +10,32 @@ export 'package:rive_core/src/generated/bones/weight_base.dart';
 class Weight extends WeightBase {
   final Vec2D translation = Vec2D();
 
+  // -> editor-only
+  void invalidateDeform() {
+    if (parent?.parent is! Skinnable) {
+      return;
+    }
+    (parent.parent as Skinnable).markSkinDirty();
+  }
+  // <- editor-only
+
   @override
   void indicesChanged(int from, int to) {
-    // TODO: implement indicesChanged
+    // -> editor-only
+    invalidateDeform();
+    // <- editor-only
   }
 
   @override
   void update(int dirt) {
-    // TODO: implement update
+    // Intentionally empty. Weights don't update.
   }
 
   @override
   void valuesChanged(int from, int to) {
-    // TODO: implement valuesChanged
+    // -> editor-only
+    invalidateDeform();
+    // <- editor-only
   }
 
   // -> editor-only

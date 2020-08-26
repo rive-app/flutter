@@ -9,22 +9,30 @@ class CubicWeight extends CubicWeightBase {
 
   @override
   void inIndicesChanged(int from, int to) {
-    // TODO: implement inIndicesChanged
+    // -> editor-only
+    invalidateDeform();
+    // <- editor-only
   }
 
   @override
   void inValuesChanged(int from, int to) {
-    // TODO: implement inValuesChanged
+    // -> editor-only
+    invalidateDeform();
+    // <- editor-only
   }
 
   @override
   void outIndicesChanged(int from, int to) {
-    // TODO: implement outIndicesChanged
+    // -> editor-only
+    invalidateDeform();
+    // <- editor-only
   }
 
   @override
   void outValuesChanged(int from, int to) {
-    // TODO: implement outValuesChanged
+    // -> editor-only
+    invalidateDeform();
+    // <- editor-only
   }
 
   // -> editor-only
