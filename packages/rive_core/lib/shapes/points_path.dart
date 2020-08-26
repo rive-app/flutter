@@ -63,6 +63,16 @@ class PointsPath extends PointsPathBase with Skinnable {
     markPathDirty();
   }
 
+  @override
+  void buildDependencies() {
+    super.buildDependencies();
+
+    // Depend on the skin, if we have it. This works because the skin is not a
+    // node so we have no dependency on our parent yet (which would cause a
+    // dependency cycle).
+    skin?.addDependent(this);
+  }
+
   // -> editor-only
   @override
   void onDirty(int mask) {

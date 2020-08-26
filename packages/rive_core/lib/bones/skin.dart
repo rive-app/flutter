@@ -84,10 +84,11 @@ class Skin extends SkinBase {
   }
 
   @override
-  void onAdded() {
-    super.onAdded();
+  void onAddedDirty() {
+    super.onAddedDirty();
     if (parent is Skinnable) {
       (parent as Skinnable).addSkin(this);
+      parent.markRebuildDependencies();
     }
   }
 
@@ -95,6 +96,7 @@ class Skin extends SkinBase {
   void onRemoved() {
     if (parent is Skinnable) {
       (parent as Skinnable).removeSkin(this);
+      parent.markRebuildDependencies();
     }
     super.onRemoved();
   }
@@ -107,11 +109,6 @@ class Skin extends SkinBase {
     for (final tendon in _tendons) {
       tendon.bone.addDependent(this);
     }
-
-    // Have the skinnable depend on us. This works because we're not a node so
-    // we have no dependency on our parent yet (which would cause a dependency
-    // cycle).
-    addDependent(parent);
   }
 
   @override
@@ -121,6 +118,7 @@ class Skin extends SkinBase {
       case TendonBase.typeKey:
         _tendons.add(child as Tendon);
         markRebuildDependencies();
+        parent?.markRebuildDependencies();
         // -> editor-only
         (parent as Skinnable)?.internalTendonsChanged();
         // <- editor-only
@@ -139,6 +137,7 @@ class Skin extends SkinBase {
         } else {
           markRebuildDependencies();
         }
+        parent?.markRebuildDependencies();
         // -> editor-only
         (parent as Skinnable)?.internalTendonsChanged();
         // <- editor-only
