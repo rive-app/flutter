@@ -101,6 +101,17 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   StraightVertex _clickCreatedVertex;
   Restorer _restoreAutoKey;
 
+  /// Returns true if the vertex was given weight for bone binding.
+  static bool _addVertex(PointsPath path, PathVertex vertex) {
+    path.context.addObject(vertex);
+    vertex.parent = path;
+    if (path.skin != null) {
+      vertex.initWeight();
+      return true;
+    }
+    return false;
+  }
+
   @override
   void click(Artboard activeArtboard, Vec2D worldMouse) {
     _clickCreatedVertex = null;
@@ -109,6 +120,10 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         stage.file.addAlert(
           SimpleAlert('Failed to subdivide.'),
         );
+      } else {
+        // Make sure we clear the insert target after splitting as the old one
+        // is invalid.
+        clearInsertTarget();
       }
       return;
     }
@@ -140,8 +155,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     var file = path.context;
     _restoreAutoKey = file.suppressAutoKey();
     file.batchAdd(() {
-      file.addObject(vertex);
-      path.appendChild(vertex);
+      _addVertex(path, vertex);
     });
   }
 
@@ -191,6 +205,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           // Draw line to next point (note this should curve if last point is a
           // cubic).
           var lastVertex = path.vertices.last;
+          var translation = lastVertex.renderTranslation;
           if (ghostPointWorld != null) {
             // get ghost point into local
             var inversePath = Mat2D();
@@ -208,19 +223,19 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
           if (targetOffset != null) {
             if (lastVertex is CubicVertex) {
               var path = ui.Path();
-              path.moveTo(lastVertex.x, lastVertex.y);
+              path.moveTo(translation[0], translation[1]);
               if (closeTarget is CubicVertex) {
                 path.cubicTo(
-                    lastVertex.outPoint[0],
-                    lastVertex.outPoint[1],
-                    closeTarget.inPoint[0],
-                    closeTarget.inPoint[1],
+                    lastVertex.renderOut[0],
+                    lastVertex.renderOut[1],
+                    closeTarget.renderIn[0],
+                    closeTarget.renderIn[1],
                     targetOffset.dx,
                     targetOffset.dy);
               } else {
                 path.cubicTo(
-                    lastVertex.outPoint[0],
-                    lastVertex.outPoint[1],
+                    lastVertex.renderOut[0],
+                    lastVertex.renderOut[1],
                     targetOffset.dx,
                     targetOffset.dy,
                     targetOffset.dx,
@@ -229,13 +244,18 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
               canvas.drawPath(path, StageItem.selectedPaint);
             } else if (closeTarget is CubicVertex) {
               var path = ui.Path();
-              path.moveTo(lastVertex.x, lastVertex.y);
-              path.cubicTo(lastVertex.x, lastVertex.y, closeTarget.inPoint[0],
-                  closeTarget.inPoint[1], targetOffset.dx, targetOffset.dy);
+              path.moveTo(translation[0], translation[1]);
+              path.cubicTo(
+                  translation[0],
+                  translation[1],
+                  closeTarget.renderIn[0],
+                  closeTarget.renderIn[1],
+                  targetOffset.dx,
+                  targetOffset.dy);
               canvas.drawPath(path, StageItem.selectedPaint);
             } else {
-              canvas.drawLine(Offset(lastVertex.x, lastVertex.y), targetOffset,
-                  StageItem.selectedPaint);
+              canvas.drawLine(Offset(translation[0], translation[1]),
+                  targetOffset, StageItem.selectedPaint);
             }
           }
         }
@@ -284,13 +304,14 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         CubicBezier cubicBezier;
         double cubicSplitT;
 
-        Vec2D controlOut = vertex is CubicVertex ? vertex.outPoint : null;
-        Vec2D controlIn = nextVertex is CubicVertex ? nextVertex.inPoint : null;
+        Vec2D controlOut = vertex is CubicVertex ? vertex.renderOut : null;
+        Vec2D controlIn =
+            nextVertex is CubicVertex ? nextVertex.renderIn : null;
 
         // There are no cubic control points, this is just a linear edge.
         if (controlIn == null && controlOut == null) {
-          var v1 = vertex.translation;
-          var v2 = nextVertex.translation;
+          var v1 = vertex.renderTranslation;
+          var v2 = nextVertex.renderTranslation;
           var t = Vec2D.onSegment(v1, v2, localMouse);
           if (t <= 0) {
             intersection = v1;
@@ -300,16 +321,16 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             intersection = Vec2D.fromValues(
                 v1[0] + (v2[0] - v1[0]) * t, v1[1] + (v2[1] - v1[1]) * t);
           }
-          //localMouse vertex.translation, nextVertex.translation
         } else {
           // Either in, out, or both are cubic control points.
-          controlOut ??= vertex.translation;
-          controlIn ??= nextVertex.translation;
+          controlOut ??= vertex.renderTranslation;
+          controlIn ??= nextVertex.renderTranslation;
           cubicBezier = CubicBezier([
-            Vector2(vertex.translation[0], vertex.translation[1]),
+            Vector2(vertex.renderTranslation[0], vertex.renderTranslation[1]),
             Vector2(controlOut[0], controlOut[1]),
             Vector2(controlIn[0], controlIn[1]),
-            Vector2(nextVertex.translation[0], nextVertex.translation[1])
+            Vector2(nextVertex.renderTranslation[0],
+                nextVertex.renderTranslation[1])
           ]);
           // TODO: if a designer complains about the cubic being too coarse, we
           // may want to compute the screen length of the cubic and change the
@@ -321,10 +342,9 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         }
 
         // Compute distance in world space in case multiple paths are edited
-        // and have different world transform. TODO: if connected bones use
-        // closest as it'll be already in world space
+        // and have different world transform.
         var intersectionWorld =
-            Vec2D.transformMat2D(Vec2D(), intersection, path.worldTransform);
+            Vec2D.transformMat2D(Vec2D(), intersection, path.pathTransform);
 
         double distance = Vec2D.distance(worldMouse, intersectionWorld);
         if (distance < closestPathDistance) {
@@ -351,6 +371,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
   bool _split() {
     var target = insertTarget;
     var path = target.path;
+    var isBoundToBones = path.skin != null;
     // Copy it in case we make changes to it (this allows indexOf to return the
     // original index in the list before items were removed/swapped).
     var vertices = path.vertices.toList(growable: false);
@@ -367,13 +388,27 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         ..childOrder = _fractionalIndexAt(vertices, vertices.indexOf(from) + 1);
 
       file.batchAdd(() {
-        file.addObject(vertex);
-        vertex.parent = path;
+        _addVertex(path, vertex);
       });
+
+      // Gotta wait for the stage vertex to have been created, unfortunately
+      // that's after batch add. Our abstraction for setting world positions on
+      // vertices is there, so need to do it like this for now. This'll
+      // automatically invert the deformation to get to the correct local
+      // position.
+      if (isBoundToBones) {
+        (vertex.stageItem as StageVertex).worldTranslation =
+            path.artboard.renderTranslation(target.worldTranslation);
+      }
+
       file.captureJournalEntry();
       autoKeySuppression.restore();
       return true;
     }
+
+    // Store a list of cubic vertices that'll need to be patched up.
+    final patchBoundCubics =
+        isBoundToBones ? <CubicVertex, _PatchCubicOperation>{} : null;
 
     int insertionIndex;
     bool isNextCorner = target.to.isCornerRadius;
@@ -385,6 +420,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       // Both share the same original core vertex? Then they're the same
       // corner...
       if (to.coreVertex == from.coreVertex) {
+        CubicDetachedVertex vertexA, vertexB;
         var vertexIndex = vertices.indexOf(to.coreVertex);
         FractionalIndex before = vertexIndex == 0
             ? const FractionalIndex.min()
@@ -394,11 +430,14 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             : vertices[vertexIndex + 1].childOrder;
 
         file.batchAdd(() {
-          // Remove old corner point...
-          from.coreVertex.remove();
+          // Remove old corner point (and any associated weights)...It's
+          // imperative that the weights get removed too otherwise they'll get
+          // orphaned and pruned out by validation which means they won't be
+          // regenerated when the nzext undo occurs.
+          from.coreVertex.removeRecursive();
 
           // Add the corner cubics as real core points.
-          var vertexA = CubicDetachedVertex.fromValues(
+          vertexA = CubicDetachedVertex.fromValues(
             x: from.translation[0],
             y: from.translation[1],
             inX: from.inPoint[0],
@@ -407,7 +446,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             outY: from.outPoint[1],
           )..childOrder = FractionalIndex.between(before, after);
 
-          var vertexB = CubicDetachedVertex.fromValues(
+          vertexB = CubicDetachedVertex.fromValues(
             x: to.translation[0],
             y: to.translation[1],
             inX: to.inPoint[0],
@@ -416,10 +455,11 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             outY: to.outPoint[1],
           )..childOrder = FractionalIndex.between(vertexA.childOrder, after);
 
-          file.addObject(vertexA);
-          vertexA.parent = path;
-          file.addObject(vertexB);
-          vertexB.parent = path;
+          _addVertex(path, vertexA);
+          _addVertex(path, vertexB);
+
+          patchBoundCubics[vertexA] = _PatchCubicOperation.all;
+          patchBoundCubics[vertexB] = _PatchCubicOperation.all;
 
           // Update our insert target to include the new vertices.
           target = target.copyWith(
@@ -460,8 +500,17 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             outPoint: prev.outPoint,
           );
           prev.replaceWith(newVertex);
-          // TODO: accomodate for bones: https://github.com/2d-inc/2dimensions/blob/fc5a0128cb2419925f52e83e231192c645f58075/source/client/source/editors/flare/engine/Stage/Tools/VectorPenTool.jsx#L321
+
           newVertex.outPoint = leftSplit.points[1].toVec2D();
+          if (isBoundToBones) {
+            if (patchBoundCubics.containsKey(prev)) {
+              // Do the same thing to the replacement.
+              patchBoundCubics[newVertex] = patchBoundCubics[prev];
+              patchBoundCubics.remove(prev);
+            } else {
+              patchBoundCubics[newVertex] = _PatchCubicOperation.outOnly;
+            }
+          }
         }
       }
 
@@ -477,8 +526,17 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             outPoint: next.outPoint,
           );
           next.replaceWith(newVertex);
-          // TODO: fix bones: https://github.com/2d-inc/2dimensions/blob/fc5a0128cb2419925f52e83e231192c645f58075/source/client/source/editors/flare/engine/Stage/Tools/VectorPenTool.jsx#L338
+
           newVertex.inPoint = rightSplit.points[2].toVec2D();
+          if (isBoundToBones) {
+            if (patchBoundCubics.containsKey(next)) {
+              // Do the same thing to the replacement.
+              patchBoundCubics[newVertex] = patchBoundCubics[next];
+              patchBoundCubics.remove(next);
+            } else {
+              patchBoundCubics[newVertex] = _PatchCubicOperation.inOnly;
+            }
+          }
         }
       }
 
@@ -490,9 +548,38 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         outX: rightSplit.points[1].x,
         outY: rightSplit.points[1].y,
       )..childOrder = _fractionalIndexAt(vertices, insertionIndex);
-      file.addObject(vertex);
+      if (_addVertex(path, vertex)) {
+        patchBoundCubics[vertex] = _PatchCubicOperation.all;
+      }
+    });
+    patchBoundCubics.forEach((vertex, mode) {
+      var stageVertex = vertex.stageItem as StagePathVertex;
+      // Local translations have been saved in world space during creation as
+      // our paths are in world space when bound to bones. So we can use that
+      // temporary stored value to patch up the actual desired (un-deformed)
+      // local translation values.
 
-      vertex.parent = path;
+      // First store the translations (changing these can cause re-compute of
+      // others so we store the whole set first).
+      var translation = path.artboard.renderTranslation(vertex.translation);
+      var inTranslation = path.artboard.renderTranslation(vertex.inPoint);
+      var outTranslation = path.artboard.renderTranslation(vertex.outPoint);
+
+      switch (mode) {
+        case _PatchCubicOperation.inOnly:
+          stageVertex.controlIn.worldTranslation = inTranslation;
+          break;
+        case _PatchCubicOperation.outOnly:
+          stageVertex.controlOut.worldTranslation = outTranslation;
+          break;
+        case _PatchCubicOperation.all:
+
+          // Need to set the translation first, then the ins/outs as they use the
+          // translation to compute angles.
+          stageVertex.worldTranslation = translation;
+          stageVertex.controlIn.worldTranslation = inTranslation;
+          stageVertex.controlOut.worldTranslation = outTranslation;
+      }
     });
 
     // remove duplicates...
@@ -586,7 +673,8 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       if (path != null && path.vertices.isNotEmpty) {
         // We're in business; get the previous vertex and local mouse
         final lastVertex = path.vertices.last;
-        final reference = Vec2D.fromValues(lastVertex.x, lastVertex.y);
+        final translation = lastVertex.renderTranslation;
+        final reference = Vec2D.fromValues(translation[0], translation[1]);
         final origin = Vec2D.transformMat2D(
           Vec2D(),
           reference,
@@ -625,3 +713,5 @@ FractionalIndex _fractionalIndexAt(List<PathVertex> vertices, int index) {
   return FractionalIndex.between(
       vertices[index - 1].childOrder, vertices[index].childOrder);
 }
+
+enum _PatchCubicOperation { all, inOnly, outOnly }

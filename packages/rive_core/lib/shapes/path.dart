@@ -100,7 +100,7 @@ abstract class Path extends PathBase {
 
     // Paths store their inverse world so that it's available for skinning and
     // other operations that occur at runtime.
-    if (!Mat2D.invert(_inverseWorldTransform, worldTransform)) {
+    if (!Mat2D.invert(_inverseWorldTransform, pathTransform)) {
       // If for some reason the inversion fails (like we have a 0 scale) just
       // store the identity.
       Mat2D.identity(_inverseWorldTransform);
@@ -113,6 +113,9 @@ abstract class Path extends PathBase {
 
     if (dirt & ComponentDirt.path != 0) {
       _buildPath();
+      // -> editor-only
+      _cachedDisplayVertices = null;
+      // <- editor-only
     }
   }
 
@@ -124,10 +127,6 @@ abstract class Path extends PathBase {
     addDirt(ComponentDirt.path);
     _isValid = false;
     _shape?.pathChanged(this);
-
-    // -> editor-only
-    _cachedDisplayVertices = null;
-    // <- editor-only
   }
 
   List<PathVertex> get vertices;
@@ -321,7 +320,6 @@ abstract class Path extends PathBase {
   List<PathVertex> _cachedDisplayVertices;
 
   List<PathVertex> get displayVertices {
-    // TODO: add skin deformation (bones)
     if (_cachedDisplayVertices != null) {
       return _cachedDisplayVertices;
     }
