@@ -11,7 +11,9 @@ class BackboardInspectorBuilder extends ListenableInspectorBuilder {
       inspecting.stageItems.isEmpty && inspecting.backboard != null;
 
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) => [
+  List<WidgetBuilder> expand(
+          BuildContext panelContext, InspectionSet inspecting) =>
+      [
         (context) => PropertyColor(
               name: 'Background',
               objects: [inspecting.backboard],

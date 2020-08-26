@@ -205,7 +205,6 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
             // closing the loop
             targetOffset = Offset(closeTarget.x, closeTarget.y);
           }
-
           if (targetOffset != null) {
             if (lastVertex is CubicVertex) {
               var path = ui.Path();
@@ -219,9 +218,20 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
                     targetOffset.dx,
                     targetOffset.dy);
               } else {
-                path.quadraticBezierTo(lastVertex.outPoint[0],
-                    lastVertex.outPoint[1], targetOffset.dx, targetOffset.dy);
+                path.cubicTo(
+                    lastVertex.outPoint[0],
+                    lastVertex.outPoint[1],
+                    targetOffset.dx,
+                    targetOffset.dy,
+                    targetOffset.dx,
+                    targetOffset.dy);
               }
+              canvas.drawPath(path, StageItem.selectedPaint);
+            } else if (closeTarget is CubicVertex) {
+              var path = ui.Path();
+              path.moveTo(lastVertex.x, lastVertex.y);
+              path.cubicTo(lastVertex.x, lastVertex.y, closeTarget.inPoint[0],
+                  closeTarget.inPoint[1], targetOffset.dx, targetOffset.dy);
               canvas.drawPath(path, StageItem.selectedPaint);
             } else {
               canvas.drawLine(Offset(lastVertex.x, lastVertex.y), targetOffset,
@@ -255,7 +265,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
     PenToolInsertTarget result;
 
     for (final path in editingPaths) {
-      var vertices = path.renderVertices;
+      var vertices = path.displayVertices;
 
       double closestPathDistance = double.maxFinite;
       Vec2D intersection;

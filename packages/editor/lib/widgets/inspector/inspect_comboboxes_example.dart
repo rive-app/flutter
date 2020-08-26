@@ -9,7 +9,9 @@ import 'package:rive_editor/widgets/inspector/inspector_pill_button.dart';
 /// Example inspector builder with combo boxes.
 class InspectComboBoxExample extends InspectorBuilder {
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) => [
+  List<WidgetBuilder> expand(
+          BuildContext panelContext, InspectionSet inspecting) =>
+      [
         (context) => InspectorPillButton(
               icon: PackedIcon.pathClose,
               label: 'disconnect',
@@ -90,7 +92,7 @@ class _KILLME_ComboExamplesState extends State<KILLME_ComboExamples> {
               child: Text(
                 'Hero',
                 style: RiveTheme.of(context)
-                  .textStyles
+                    .textStyles
                     .basic
                     .copyWith(color: Colors.white),
               ),

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:rive_core/bones/cubic_weight.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
@@ -27,7 +28,7 @@ abstract class StageControlVertex extends StageVertex<CubicVertex> {
   double get radiusScale => 1;
 
   @override
-  Mat2D get worldTransform => component.path.worldTransform;
+  Mat2D get worldTransform => component.path.pathTransform;
 
   @override
   StageItem get soloParent => component.path.stageItem;
@@ -39,20 +40,10 @@ abstract class StageControlVertex extends StageVertex<CubicVertex> {
 /// Concrete stage control point for the in handle.
 class StageControlIn extends StageControlVertex {
   @override
-  Vec2D get translation => component.inPoint;
+  Vec2D get translation => component.weight?.inTranslation ?? component.inPoint;
 
   @override
   set translation(Vec2D value) => component.inPoint = value;
-
-  @override
-  set worldTranslation(Vec2D value) {
-    final origin = component.artboard.originWorld;
-    value[0] -= origin[0];
-    value[1] -= origin[1];
-
-    component.inPoint = Vec2D.transformMat2D(
-        Vec2D(), value, component.path.inverseWorldTransform);
-  }
 
   @override
   double get angle {
@@ -81,24 +72,40 @@ class StageControlIn extends StageControlVertex {
 
     return 0;
   }
+
+  @override
+  int get weightIndices => component.weight?.inIndices;
+
+  @override
+  set weightIndices(int value) {
+    assert(component.weight != null);
+    component.weight.inIndices = value;
+  }
+
+  @override
+  int get weights => component.weight?.inValues;
+
+  @override
+  set weights(int value) {
+    assert(component.weight != null);
+    component.weight.inValues = value;
+  }
+
+  @override
+  int get weightIndicesPropertyKey => CubicWeightBase.inIndicesPropertyKey;
+
+  @override
+  int get weightsPropertyKey => CubicWeightBase.inValuesPropertyKey;
 }
 
 /// Concrete stage control point for the out handle.
 class StageControlOut extends StageControlVertex {
   @override
-  Vec2D get translation => component.outPoint;
+  Vec2D get translation =>
+      component.weight?.outTranslation ?? component.outPoint;
 
   @override
   set translation(Vec2D value) => component.outPoint = value;
-
-  @override
-  set worldTranslation(Vec2D value) {
-    final origin = component.artboard.originWorld;
-    value[0] -= origin[0];
-    value[1] -= origin[1];
-    component.outPoint = Vec2D.transformMat2D(
-        Vec2D(), value, component.path.inverseWorldTransform);
-  }
 
   @override
   double get angle {
@@ -127,6 +134,30 @@ class StageControlOut extends StageControlVertex {
 
     return 0;
   }
+
+  @override
+  int get weightIndices => component.weight?.outIndices;
+
+  @override
+  set weightIndices(int value) {
+    assert(component.weight != null);
+    component.weight.outIndices = value;
+  }
+
+  @override
+  int get weights => component.weight?.outValues;
+
+  @override
+  set weights(int value) {
+    assert(component.weight != null);
+    component.weight.outValues = value;
+  }
+
+  @override
+  int get weightIndicesPropertyKey => CubicWeightBase.outIndicesPropertyKey;
+
+  @override
+  int get weightsPropertyKey => CubicWeightBase.outValuesPropertyKey;
 }
 
 class StagePathControlLine extends StageItem<CubicVertex> {
@@ -139,7 +170,7 @@ class StagePathControlLine extends StageItem<CubicVertex> {
   @override
   bool get isSelectable => false;
 
-    @override
+  @override
   Iterable<StageDrawPass> get drawPasses =>
       [StageDrawPass(draw, order: 3, inWorldSpace: true)];
 

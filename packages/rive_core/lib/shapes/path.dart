@@ -9,8 +9,8 @@ import 'package:rive_core/math/circle_constant.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/cubic_vertex.dart';
+import 'package:rive_core/shapes/display_cubic_vertex.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
-import 'package:rive_core/shapes/render_cubic_vertex.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/straight_vertex.dart';
 import 'package:rive_core/src/generated/shapes/path_base.dart';
@@ -20,12 +20,13 @@ export 'package:rive_core/src/generated/shapes/path_base.dart';
 /// based paths.
 abstract class Path extends PathBase {
   final Mat2D _inverseWorldTransform = Mat2D();
-  final ui.Path _uiPath = ui.Path();
+
+  final RenderPath _renderPath = RenderPath();
   ui.Path get uiPath {
     if (!_isValid) {
       _buildPath();
     }
-    return _uiPath;
+    return _renderPath.uiPath;
   }
 
   bool _isValid = false;
@@ -122,23 +123,212 @@ abstract class Path extends PathBase {
   void markPathDirty() {
     addDirt(ComponentDirt.path);
     _isValid = false;
-    _cachedRenderVertices = null;
     _shape?.pathChanged(this);
+
+    // -> editor-only
+    _cachedDisplayVertices = null;
+    // <- editor-only
   }
 
   List<PathVertex> get vertices;
 
-  List<PathVertex> _cachedRenderVertices;
-
-  List<PathVertex> get renderVertices {
-    // TODO: add skin deformation (bones)
-    if (_cachedRenderVertices != null) {
-      return _cachedRenderVertices;
+  bool _buildPath() {
+    _isValid = true;
+    _renderPath.reset();
+    List<PathVertex> vertices = this.vertices;
+    var length = vertices.length;
+    if (vertices == null || length < 2) {
+      return false;
     }
-    return _cachedRenderVertices = makeRenderVertices(vertices, isClosed);
+
+    var firstPoint = vertices.first;
+    double outX, outY;
+    bool prevIsCubic;
+
+    double startX, startY;
+    double startInX, startInY;
+    bool startIsCubic;
+
+    if (firstPoint is CubicVertex) {
+      startIsCubic = prevIsCubic = true;
+      var inPoint = firstPoint.renderIn;
+      startInX = inPoint[0];
+      startInY = inPoint[1];
+      var outPoint = firstPoint.renderOut;
+      outX = outPoint[0];
+      outY = outPoint[1];
+      var translation = firstPoint.renderTranslation;
+      startX = translation[0];
+      startY = translation[1];
+      _renderPath.moveTo(startX, startY);
+    } else {
+      startIsCubic = prevIsCubic = false;
+      var point = firstPoint as StraightVertex;
+
+      var radius = point.radius;
+      if (radius > 0) {
+        var prev = vertices[length - 1];
+
+        var pos = point.renderTranslation;
+
+        var toPrev = Vec2D.subtract(Vec2D(),
+            prev is CubicVertex ? prev.renderOut : prev.renderTranslation, pos);
+        var toPrevLength = Vec2D.length(toPrev);
+        toPrev[0] /= toPrevLength;
+        toPrev[1] /= toPrevLength;
+
+        var next = vertices[1];
+
+        var toNext = Vec2D.subtract(Vec2D(),
+            next is CubicVertex ? next.renderIn : next.renderTranslation, pos);
+        var toNextLength = Vec2D.length(toNext);
+        toNext[0] /= toNextLength;
+        toNext[1] /= toNextLength;
+
+        var renderRadius = min(toPrevLength, min(toNextLength, radius));
+
+        var translation = Vec2D.scaleAndAdd(Vec2D(), pos, toPrev, renderRadius);
+        _renderPath.moveTo(startInX = startX = translation[0],
+            startInY = startY = translation[1]);
+
+        var outPoint = Vec2D.scaleAndAdd(
+            Vec2D(), pos, toPrev, icircleConstant * renderRadius);
+
+        var inPoint = Vec2D.scaleAndAdd(
+            Vec2D(), pos, toNext, icircleConstant * renderRadius);
+
+        var posNext = Vec2D.scaleAndAdd(Vec2D(), pos, toNext, renderRadius);
+        _renderPath.cubicTo(outPoint[0], outPoint[1], inPoint[0], inPoint[1],
+            outX = posNext[0], outY = posNext[1]);
+        prevIsCubic = false;
+      } else {
+        var translation = point.renderTranslation;
+        outX = translation[0];
+        outY = translation[1];
+        _renderPath.moveTo(startInX = startX = outX, startInY = startY = outY);
+      }
+    }
+
+    for (int i = 1; i < length; i++) {
+      var vertex = vertices[i];
+
+      if (vertex is CubicVertex) {
+        var inPoint = vertex.renderIn;
+        var translation = vertex.renderTranslation;
+        _renderPath.cubicTo(
+            outX, outY, inPoint[0], inPoint[1], translation[0], translation[1]);
+
+        prevIsCubic = true;
+        var outPoint = vertex.renderOut;
+        outX = outPoint[0];
+        outY = outPoint[1];
+      } else {
+        var point = vertex as StraightVertex;
+
+        var radius = point.radius;
+        if (radius > 0) {
+          var pos = point.renderTranslation;
+
+          var toPrev =
+              Vec2D.subtract(Vec2D(), Vec2D.fromValues(outX, outY), pos);
+          var toPrevLength = Vec2D.length(toPrev);
+          toPrev[0] /= toPrevLength;
+          toPrev[1] /= toPrevLength;
+
+          var next = vertices[(i + 1) % length];
+
+          var toNext = Vec2D.subtract(
+              Vec2D(),
+              next is CubicVertex ? next.renderIn : next.renderTranslation,
+              pos);
+          var toNextLength = Vec2D.length(toNext);
+          toNext[0] /= toNextLength;
+          toNext[1] /= toNextLength;
+
+          var renderRadius = min(toPrevLength, min(toNextLength, radius));
+
+          var translation =
+              Vec2D.scaleAndAdd(Vec2D(), pos, toPrev, renderRadius);
+          if (prevIsCubic) {
+            _renderPath.cubicTo(outX, outY, translation[0], translation[1],
+                translation[0], translation[1]);
+          } else {
+            _renderPath.lineTo(translation[0], translation[1]);
+          }
+
+          var outPoint = Vec2D.scaleAndAdd(
+              Vec2D(), pos, toPrev, icircleConstant * renderRadius);
+
+          var inPoint = Vec2D.scaleAndAdd(
+              Vec2D(), pos, toNext, icircleConstant * renderRadius);
+
+          var posNext = Vec2D.scaleAndAdd(Vec2D(), pos, toNext, renderRadius);
+          _renderPath.cubicTo(outPoint[0], outPoint[1], inPoint[0], inPoint[1],
+              outX = posNext[0], outY = posNext[1]);
+          prevIsCubic = false;
+        } else if (prevIsCubic) {
+          var translation = point.renderTranslation;
+          var x = translation[0];
+          var y = translation[1];
+          _renderPath.cubicTo(outX, outY, x, y, x, y);
+
+          prevIsCubic = false;
+          outX = x;
+          outY = y;
+        } else {
+          var translation = point.renderTranslation;
+          outX = translation[0];
+          outY = translation[1];
+          _renderPath.lineTo(outX, outY);
+        }
+      }
+    }
+    if (isClosed) {
+      if (prevIsCubic || startIsCubic) {
+        _renderPath.cubicTo(outX, outY, startInX, startInY, startX, startY);
+      }
+      _renderPath.close();
+    }
+    return true;
   }
 
-  static List<PathVertex> makeRenderVertices(
+  // -> editor-only
+  @override
+  bool validate() => _shape != null;
+
+  @override
+  bool isValidParent(Component parent) {
+    // A parent for the path is valid if somewhere in its direct ancestors
+    // there's a shape.
+    for (var nextParent = parent;
+        nextParent != null;
+        nextParent = nextParent.parent) {
+      if (nextParent is Shape) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  AABB get localBounds => _renderPath.preciseComputeBounds();
+  AABB preciseComputeBounds(Mat2D transform) =>
+      _renderPath.preciseComputeBounds(transform);
+  bool get hasBounds => _renderPath.hasBounds;
+
+  // We keep this logic around for the pen tool to use to figure out where to
+  // split the display path.
+  List<PathVertex> _cachedDisplayVertices;
+
+  List<PathVertex> get displayVertices {
+    // TODO: add skin deformation (bones)
+    if (_cachedDisplayVertices != null) {
+      return _cachedDisplayVertices;
+    }
+    return _cachedDisplayVertices = makeDisplayVertices(vertices, isClosed);
+  }
+
+  static List<PathVertex> makeDisplayVertices(
       List<PathVertex> pts, bool isClosed) {
     if (pts == null || pts.isEmpty) {
       return [];
@@ -163,11 +353,12 @@ abstract class Path extends PathBase {
               } else {
                 PathVertex next = pts[(i + 1) % pl];
                 Vec2D prevPoint = previous is CubicVertex
-                    ? previous.outPoint
-                    : previous.translation;
-                Vec2D nextPoint =
-                    next is CubicVertex ? next.inPoint : next.translation;
-                Vec2D pos = point.translation;
+                    ? previous.renderOut
+                    : previous.renderTranslation;
+                Vec2D nextPoint = next is CubicVertex
+                    ? next.renderIn
+                    : next.renderTranslation;
+                Vec2D pos = point.renderTranslation;
 
                 Vec2D toPrev = Vec2D.subtract(Vec2D(), prevPoint, pos);
                 double toPrevLength = Vec2D.length(toPrev);
@@ -184,7 +375,7 @@ abstract class Path extends PathBase {
 
                 Vec2D translation =
                     Vec2D.scaleAndAdd(Vec2D(), pos, toPrev, renderRadius);
-                renderPoints.add(RenderCubicVertex()
+                renderPoints.add(DisplayCubicVertex()
                   // -> editor-only
                   ..original = point
                   ..isCornerRadius = true
@@ -195,7 +386,7 @@ abstract class Path extends PathBase {
                       Vec2D(), pos, toPrev, iarcConstant * renderRadius));
                 translation =
                     Vec2D.scaleAndAdd(Vec2D(), pos, toNext, renderRadius);
-                previous = RenderCubicVertex()
+                previous = DisplayCubicVertex()
                   // -> editor-only
                   ..original = point
                   ..isCornerRadius = true
@@ -221,146 +412,128 @@ abstract class Path extends PathBase {
     return renderPoints;
   }
 
-  bool _buildPath() {
-    _isValid = true;
+  // <- editor-only
+}
+
+// -> editor-only
+enum _PathCommand { moveTo, lineTo, cubicTo, close }
+// <- editor-only
+
+class RenderPath {
+  final ui.Path _uiPath = ui.Path();
+  ui.Path get uiPath => _uiPath;
+  // -> editor-only
+  final List<_PathCommand> _commands = [];
+  final List<double> _positions = [];
+  // <- editor-only
+
+  void reset() {
+    // -> editor-only
+    _commands.clear();
+    _positions.clear();
+    // <- editor-only
     _uiPath.reset();
-    List<PathVertex> pts = vertices;
-    if (pts == null || pts.isEmpty) {
-      return false;
-    }
+  }
 
-    var renderPoints = makeRenderVertices(pts, isClosed);
+  void lineTo(double x, double y) {
+    // -> editor-only
+    _commands.add(_PathCommand.lineTo);
+    _positions.add(x);
+    _positions.add(y);
+    // <- editor-only}
+    _uiPath.lineTo(x, y);
+  }
 
-    PathVertex firstPoint = renderPoints[0];
-    _uiPath.moveTo(firstPoint.translation[0], firstPoint.translation[1]);
-    for (int i = 0,
-            l = isClosed ? renderPoints.length : renderPoints.length - 1,
-            pl = renderPoints.length;
-        i < l;
-        i++) {
-      PathVertex point = renderPoints[i];
-      PathVertex nextPoint = renderPoints[(i + 1) % pl];
-      Vec2D cin = nextPoint is CubicVertex ? nextPoint.inPoint : null;
-      Vec2D cout = point is CubicVertex ? point.outPoint : null;
-      if (cin == null && cout == null) {
-        _uiPath.lineTo(nextPoint.translation[0], nextPoint.translation[1]);
-      } else {
-        cout ??= point.translation;
-        cin ??= nextPoint.translation;
+  void moveTo(double x, double y) {
+    // -> editor-only
+    _commands.add(_PathCommand.moveTo);
+    _positions.add(x);
+    _positions.add(y);
+    // <- editor-only
+    _uiPath.moveTo(x, y);
+  }
 
-        _uiPath.cubicTo(cout[0], cout[1], cin[0], cin[1],
-            nextPoint.translation[0], nextPoint.translation[1]);
-      }
-    }
+  void cubicTo(double ox, double oy, double ix, double iy, double x, double y) {
+    // -> editor-only
+    _commands.add(_PathCommand.cubicTo);
+    _positions.add(ox);
+    _positions.add(oy);
+    _positions.add(ix);
+    _positions.add(iy);
+    _positions.add(x);
+    _positions.add(y);
+    // <- editor-only
+    _uiPath.cubicTo(ox, oy, ix, iy, x, y);
+  }
 
-    if (isClosed) {
-      _uiPath.close();
-    }
-
-    return true;
+  void close() {
+    // -> editor-only
+    _commands.add(_PathCommand.close);
+    // <- editor-only
+    _uiPath.close();
   }
 
   // -> editor-only
-  @override
-  bool validate() => _shape != null;
 
-  @override
-  bool isValidParent(Component parent) {
-    // A parent for the path is valid if somewhere in its direct ancestors
-    // there's a shape.
-    for (var nextParent = parent;
-        nextParent != null;
-        nextParent = nextParent.parent) {
-      if (nextParent is Shape) {
-        return true;
-      }
-    }
-    return false;
+  bool get isClosed =>
+      _commands.isNotEmpty && _commands.last == _PathCommand.close;
+
+  bool get hasBounds {
+    return _commands.length > 1;
   }
 
-  AABB fastComputeBounds(List<PathVertex> renderPoints, Mat2D transform) {
-    AABB bounds = AABB.empty();
-    PathVertex firstPoint = renderPoints[0];
-    bounds.includePoint(firstPoint.translation, transform);
-    for (int i = 0,
-            l = isClosed ? renderPoints.length : renderPoints.length - 1,
-            pl = renderPoints.length;
-        i < l;
-        i++) {
-      PathVertex point = renderPoints[i];
-      PathVertex nextPoint = renderPoints[(i + 1) % pl];
-      Vec2D cin = nextPoint is CubicVertex ? nextPoint.inPoint : null;
-      Vec2D cout = point is CubicVertex ? point.outPoint : null;
-      if (cin == null && cout == null) {
-        bounds.includePoint(nextPoint.translation, transform);
-      } else {
-        cout ??= point.translation;
-        cin ??= nextPoint.translation;
-
-        bounds.includePoint(cout, transform);
-        bounds.includePoint(cin, transform);
-        bounds.includePoint(nextPoint.translation, transform);
-      }
+  AABB preciseComputeBounds([Mat2D transform]) {
+    if (_commands.isEmpty) {
+      return AABB.empty();
     }
-
-    return bounds;
-  }
-  // <- editor-only
-
-  @override
-  AABB get localBounds => preciseComputeBounds(renderVertices, Mat2D());
-
-  AABB preciseComputeBounds(List<PathVertex> renderPoints, Mat2D transform,
-      {bool debug = false}) {
-    if (renderPoints.isEmpty) {
-      return AABB();
-    }
-
     // Compute the extremas and use them to expand the bounds as detailed here:
     // https://pomax.github.io/bezierinfo/#extremities
 
     AABB bounds = AABB.empty();
-    PathVertex firstPoint = renderPoints[0];
-    Vec2D lastPoint = bounds.includePoint(firstPoint.translation, transform);
-    for (int i = 0,
-            l = isClosed ? renderPoints.length : renderPoints.length - 1,
-            pl = renderPoints.length;
-        i < l;
-        i++) {
-      PathVertex point = renderPoints[i];
-      PathVertex nextPoint = renderPoints[(i + 1) % pl];
-      Vec2D cin = nextPoint is CubicVertex ? nextPoint.inPoint : null;
-      Vec2D cout = point is CubicVertex ? point.outPoint : null;
-      if (cin == null && cout == null) {
-        lastPoint = bounds.includePoint(nextPoint.translation, transform);
-      } else {
-        cout ??= point.translation;
-        cin ??= nextPoint.translation;
+    var idx = 0;
+    var penPosition = Vec2D();
+    for (final command in _commands) {
+      switch (command) {
+        case _PathCommand.lineTo:
+          // Pen position already transformed...
+          bounds.includePoint(penPosition, null);
+          penPosition = bounds.includePoint(
+              Vec2D.fromValues(_positions[idx++], _positions[idx++]),
+              transform);
 
-        var next = bounds.includePoint(nextPoint.translation, transform);
-        if (transform != null) {
-          cin = Vec2D.transformMat2D(Vec2D(), cin, transform);
-          cout = Vec2D.transformMat2D(Vec2D(), cout, transform);
-        }
+          break;
+        // We only do moveTo at the start, effectively always the start of the
+        // first line segment (so always include it).
+        case _PathCommand.moveTo:
+          penPosition[0] = _positions[idx++];
+          penPosition[1] = _positions[idx++];
+          if (transform != null) {
+            Vec2D.transformMat2D(penPosition, penPosition, transform);
+          }
 
-        final double startX = lastPoint[0];
-        final double startY = lastPoint[1];
-        final double cpX1 = cout[0];
-        final double cpY1 = cout[1];
-        final double cpX2 = cin[0];
-        final double cpY2 = cin[1];
-        final double endX = next[0];
-        final double endY = next[1];
-
-        lastPoint = next;
-
-        _expandBoundsForAxis(bounds, 0, startX, cpX1, cpX2, endX);
-        _expandBoundsForAxis(bounds, 1, startY, cpY1, cpY2, endY);
+          break;
+        case _PathCommand.cubicTo:
+          var outPoint = Vec2D.fromValues(_positions[idx++], _positions[idx++]);
+          var inPoint = Vec2D.fromValues(_positions[idx++], _positions[idx++]);
+          var point = Vec2D.fromValues(_positions[idx++], _positions[idx++]);
+          if (transform != null) {
+            Vec2D.transformMat2D(outPoint, outPoint, transform);
+            Vec2D.transformMat2D(inPoint, inPoint, transform);
+            Vec2D.transformMat2D(point, point, transform);
+          }
+          _expandBoundsForAxis(
+              bounds, 0, penPosition[0], outPoint[0], inPoint[0], point[0]);
+          _expandBoundsForAxis(
+              bounds, 1, penPosition[1], outPoint[1], inPoint[1], point[1]);
+          penPosition = point;
+          break;
+        case _PathCommand.close:
+          break;
       }
     }
-
     return bounds;
   }
+  // <- editor-only
 }
 
 /// Expand our bounds to a point (in normalized T space) on the Cubic.

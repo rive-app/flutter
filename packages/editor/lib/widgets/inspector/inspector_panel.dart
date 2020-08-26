@@ -105,7 +105,7 @@ class _InspectorPanelState extends State<InspectorPanel> {
                   _changeNotifiers.add(notifier);
                 }
 
-                var expand = builder.expand(inspectionSet);
+                var expand = builder.expand(context, inspectionSet);
                 if (expand != null && expand.isNotEmpty) {
                   if (addDivider) {
                     builders.add(dividerBuilder);
