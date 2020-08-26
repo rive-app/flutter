@@ -57,6 +57,37 @@ class Weight extends WeightBase {
     result[1] = xy * rx + yy * ry + ty;
   }
 
+  // -> editor-only
+  static void computeDeformTransform(
+      int indices, int weights, Float32List boneTransforms, Mat2D result) {
+    double xx = 0, xy = 0, yx = 0, yy = 0, tx = 0, ty = 0;
+
+    for (int i = 0; i < 4; i++) {
+      var weight = encodedWeightValue(i, weights);
+      if (weight == 0) {
+        continue;
+      }
+
+      double normalizedWeight = weight / 255;
+      var index = encodedWeightValue(i, indices);
+      var startBoneTransformIndex = index * 6;
+      xx += boneTransforms[startBoneTransformIndex++] * normalizedWeight;
+      xy += boneTransforms[startBoneTransformIndex++] * normalizedWeight;
+      yx += boneTransforms[startBoneTransformIndex++] * normalizedWeight;
+      yy += boneTransforms[startBoneTransformIndex++] * normalizedWeight;
+      tx += boneTransforms[startBoneTransformIndex++] * normalizedWeight;
+      ty += boneTransforms[startBoneTransformIndex++] * normalizedWeight;
+    }
+
+    result[0] = xx;
+    result[1] = xy;
+    result[2] = yx;
+    result[3] = yy;
+    result[4] = tx;
+    result[5] = ty;
+  }
+  // <- editor-only
+
   static int encodedWeightValue(int index, int data) {
     return (data >> (index * 8)) & 0xFF;
   }

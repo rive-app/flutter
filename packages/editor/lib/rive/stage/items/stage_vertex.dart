@@ -1,11 +1,13 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:rive_core/bones/skinnable.dart';
+import 'package:rive_core/bones/weight.dart';
 import 'package:rive_core/bounds_delegate.dart';
-import 'package:rive_core/component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
 import 'package:rive_editor/rive/weighted_vertex.dart';
 import 'package:rive_editor/selectable_item.dart';
@@ -14,7 +16,7 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 
 /// Abstraction for any stage representation of a vertex (shared by meshes,
 /// paths, etc).
-abstract class StageVertex<T extends Component> extends StageItem<T>
+abstract class StageVertex<T extends PathVertex> extends StageItem<T>
     with BoundsDelegate, WeightedVertex {
   static const double _vertexRadius = 3.5;
   static const double _vertexRadiusSelected = 4.5;
@@ -48,7 +50,43 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
 
   final Vec2D _worldTranslation = Vec2D();
   Vec2D get worldTranslation => _worldTranslation;
-  set worldTranslation(Vec2D value);
+
+  static final Mat2D _skinTransform = Mat2D();
+
+  set worldTranslation(Vec2D value) {
+    final origin = component.artboard.originWorld;
+    value[0] -= origin[0];
+    value[1] -= origin[1];
+    // If the vertex is bound to weights, it's skinned.
+    if (component.weight != null) {
+      var path = component.path as Skinnable;
+
+      // Get the transform applied to the vertex to deform it. This helps us
+      // invert the deformed translation value into local space.
+      Weight.computeDeformTransform(
+          weightIndices, weights, path.skin.boneTransforms, _skinTransform);
+
+      if (!Mat2D.invert(_skinTransform, _skinTransform)) {
+        // can't invert
+        return;
+      }
+      // This is the transform of the vertex in bind space (world space of the
+      // path at bind time).
+      var boundTranslation =
+          Vec2D.transformMat2D(Vec2D(), value, _skinTransform);
+      // Invert by bind space to get actual local space to the path.
+      var inversePathBind = Mat2D();
+      if (!Mat2D.invert(inversePathBind, path.skin.worldTransform)) {
+        // couldn't invert path bind
+        return;
+      }
+      translation = Vec2D.transformMat2D(
+          boundTranslation, boundTranslation, inversePathBind);
+    } else {
+      translation = Vec2D.transformMat2D(
+          Vec2D(), value, component.path.inverseWorldTransform);
+    }
+  }
 
   @override
   bool get showInHierarchy => false;
@@ -58,7 +96,7 @@ abstract class StageVertex<T extends Component> extends StageItem<T>
   Vec2D translation;
 
   /// Expected to be implemented by the concrete point to return the runtime
-  /// world transorm (usually artboard space) of the parent (shape/image).
+  /// world transform (usually artboard space) of the parent (shape/image).
   Mat2D get worldTransform;
 
   @override

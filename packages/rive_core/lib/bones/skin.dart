@@ -19,6 +19,17 @@ class Skin extends SkinBase {
   Float32List _boneTransforms;
   final Mat2D _worldTransform = Mat2D();
 
+  // -> editor-only
+
+  /// These shouldn't be necessary at runtime as they're driven down to the path
+  /// via the update cycle.
+  Float32List get boneTransforms => _boneTransforms;
+
+  // World transform of the skinnable (path/mesh) at bind time.
+  Mat2D get worldTransform => _worldTransform;
+
+  // <- editor-only
+
   @override
   bool validate() {
     return parent is Skinnable && super.validate();
