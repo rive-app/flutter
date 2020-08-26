@@ -183,5 +183,24 @@ abstract class StageVertex<T extends PathVertex> extends StageItem<T>
   }
 
   void listenToWeightChange(
-      bool enable, void Function(dynamic, dynamic) callback);
+      bool enable, void Function(dynamic, dynamic) callback) {
+    assert(component.weight != null || !component.isActive,
+        'path vertex must have a weight or it must\'ve been removed from core');
+    var weight = component.weight;
+    if (weight == null) {
+      return;
+    }
+
+    if (enable) {
+      assert(component.weight != null);
+      weight.addListener(weightIndicesPropertyKey, callback);
+      weight.addListener(weightsPropertyKey, callback);
+    } else {
+      weight.removeListener(weightIndicesPropertyKey, callback);
+      weight.removeListener(weightsPropertyKey, callback);
+    }
+  }
+
+  int get weightIndicesPropertyKey => WeightBase.indicesPropertyKey;
+  int get weightsPropertyKey => WeightBase.valuesPropertyKey;
 }

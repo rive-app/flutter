@@ -37,6 +37,18 @@ class StraightVertex extends StraightVertexBase {
 
   // -> editor-only
   @override
+  void cloneWeight(Weight from) {
+    if (from.coreType == WeightBase.typeKey) {
+      appendChild(from);
+    } else {
+      initWeight();
+      weight.indices = from.indices;
+      weight.values = from.values;
+      from.remove();
+    }
+  }
+
+  @override
   void initWeight() {
     assert(context != null && context.isBatchAdding);
     var weight = Weight();

@@ -45,6 +45,7 @@ class PropertyTendon extends StatelessWidget {
                   width: 40,
                   child: PropertiesBuilder<double, StageVertex>(
                     objects: vertices,
+                    filter: (vertex) => vertex.component.isActive,
                     builder: (context, weight, _) {
                       return InspectorTextField(
                         converter: ClampedPercentageInputConverter.instance,

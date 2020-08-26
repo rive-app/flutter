@@ -132,6 +132,8 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
   }
   // -> editor-only
 
+  void cloneWeight(Weight weight);
+
   /// Returns the vertex that will immediately follow this one after
   /// replacement.
   PathVertex replaceWith(PathVertex newVertex) {
@@ -146,6 +148,11 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
     newVertex.childOrder = childOrder;
     context.addObject(newVertex);
     newVertex.parent = path;
+
+    if (weight != null) {
+      newVertex.cloneWeight(weight);
+    }
+
     return next;
   }
 

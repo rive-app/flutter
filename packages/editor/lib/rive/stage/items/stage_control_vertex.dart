@@ -92,17 +92,10 @@ class StageControlIn extends StageControlVertex {
   }
 
   @override
-  void listenToWeightChange(
-      bool enable, void Function(dynamic, dynamic) callback) {
-    var weight = component.weight;
-    if (enable) {
-      weight.addListener(CubicWeightBase.inIndicesPropertyKey, callback);
-      weight.addListener(CubicWeightBase.inValuesPropertyKey, callback);
-    } else {
-      weight.removeListener(CubicWeightBase.inIndicesPropertyKey, callback);
-      weight.removeListener(CubicWeightBase.inValuesPropertyKey, callback);
-    }
-  }
+  int get weightIndicesPropertyKey => CubicWeightBase.inIndicesPropertyKey;
+
+  @override
+  int get weightsPropertyKey => CubicWeightBase.inValuesPropertyKey;
 }
 
 /// Concrete stage control point for the out handle.
@@ -161,17 +154,10 @@ class StageControlOut extends StageControlVertex {
   }
 
   @override
-  void listenToWeightChange(
-      bool enable, void Function(dynamic, dynamic) callback) {
-    var weight = component.weight;
-    if (enable) {
-      weight.addListener(CubicWeightBase.outIndicesPropertyKey, callback);
-      weight.addListener(CubicWeightBase.outValuesPropertyKey, callback);
-    } else {
-      weight.removeListener(CubicWeightBase.outIndicesPropertyKey, callback);
-      weight.removeListener(CubicWeightBase.outValuesPropertyKey, callback);
-    }
-  }
+  int get weightIndicesPropertyKey => CubicWeightBase.outIndicesPropertyKey;
+
+  @override
+  int get weightsPropertyKey => CubicWeightBase.outValuesPropertyKey;
 }
 
 class StagePathControlLine extends StageItem<CubicVertex> {

@@ -33,24 +33,23 @@ abstract class CubicVertex extends CubicVertexBase {
   // -> editor-only
   bool accumulateAngle = false;
 
-  // @override
-  // void clearWeight() {
-  //   super.clearWeight();
-  //   _renderOut = _renderIn = null;
-  //   inWeightIndices = inWeights = outWeightIndices = outWeights = 0;
-  // }
-
-  // @override
-  // void initWeight() {
-  //   super.initWeight();
-  //   inWeightIndices = 1;
-  //   inWeights = 255;
-  //   outWeightIndices = 1;
-  //   outWeights = 255;
-  // }
-  // <- editor-only
-
   // -> editor-only
+  @override
+  void cloneWeight(Weight from) {
+    if (from.coreType == CubicWeightBase.typeKey) {
+      appendChild(from);
+    } else {
+      initWeight();
+      weight.inIndices = from.indices;
+      weight.inValues = from.values;
+      weight.indices = from.indices;
+      weight.values = from.values;
+      weight.outIndices = from.indices;
+      weight.outValues = from.values;
+      from.remove();
+    }
+  }
+
   @override
   void initWeight() {
     assert(context != null && context.isBatchAdding);

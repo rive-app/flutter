@@ -168,6 +168,9 @@ abstract class Core<T extends CoreContext> {
   /// If an object is in a corrupt state, it will be removed from core prior to
   /// calling onAdded for the object.
   bool validate() => true;
+
+  /// Returns true when the object is actively registered with the core context.
+  bool get isActive => context != null && context.isHolding(this);
 }
 
 /// Helper interface for something that can resolve Core objects.
@@ -551,6 +554,7 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
       }
     }
     onRemoved(object);
+    object._changeListeners?.clear();
   }
 
   /// Find a Core object by id.

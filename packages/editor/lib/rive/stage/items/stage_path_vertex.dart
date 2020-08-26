@@ -120,18 +120,4 @@ class StagePathVertex extends StageVertex<PathVertex> {
     assert(component.weight != null);
     component.weight.values = value;
   }
-
-  @override
-  void listenToWeightChange(
-      bool enable, void Function(dynamic, dynamic) callback) {
-    assert(component.weight != null);
-    var weight = component.weight;
-    if (enable) {
-      weight.addListener(WeightBase.indicesPropertyKey, callback);
-      weight.addListener(WeightBase.valuesPropertyKey, callback);
-    } else {
-      weight.removeListener(WeightBase.indicesPropertyKey, callback);
-      weight.removeListener(WeightBase.valuesPropertyKey, callback);
-    }
-  }
 }

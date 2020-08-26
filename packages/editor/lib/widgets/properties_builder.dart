@@ -10,6 +10,10 @@ class PropertiesBuilder<T, K> extends StatefulWidget {
   final T Function(K) getValue;
   final ValueWidgetBuilder<T> builder;
   final void Function(K, bool, void Function(dynamic, dynamic)) listen;
+
+  /// It's possible that we only want to use certain objects in our list, use
+  /// this filter to filter them.
+  final bool Function(K) filter;
   final Widget child;
   final bool frozen;
 
@@ -18,6 +22,7 @@ class PropertiesBuilder<T, K> extends StatefulWidget {
     @required this.getValue,
     @required this.builder,
     @required this.listen,
+    this.filter,
     this.child,
     this.frozen = false,
     Key key,
@@ -70,7 +75,10 @@ class _PropertiesBuilderState<T, K> extends State<PropertiesBuilder<T, K>> {
   /// Validates the values by this list of objects.
   /// Either all the values coincide, or we return [null].
   T _validateValue() {
-    var objects = widget.objects;
+    var objects = widget.filter != null
+        ? widget.objects.where(widget.filter)
+        : widget.objects;
+    ;
     if (objects.isEmpty) {
       return null;
     }
