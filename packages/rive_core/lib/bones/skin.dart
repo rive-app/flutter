@@ -28,13 +28,12 @@ class Skin extends SkinBase {
   // World transform of the skinnable (path/mesh) at bind time.
   Mat2D get worldTransform => _worldTransform;
 
-  // <- editor-only
-
   @override
   bool validate() {
     return parent is Skinnable && super.validate();
   }
-
+  // <- editor-only
+  
   @override
   void onDirty(int mask) {
     // When the skin is dirty the deformed skinnable will need to regenerate its

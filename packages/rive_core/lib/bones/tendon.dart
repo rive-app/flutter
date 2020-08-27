@@ -36,6 +36,11 @@ class Tendon extends TendonBase {
         return this;
     }
   }
+
+  @override
+  bool validate() {
+    return _bone != null && super.validate();
+  }
   // <- editor-only
 
   @override
@@ -50,11 +55,6 @@ class Tendon extends TendonBase {
     if (boneId != null) {
       _bone = context?.resolve(boneId);
     }
-  }
-
-  @override
-  bool validate() {
-    return _bone != null && super.validate();
   }
 
   @override

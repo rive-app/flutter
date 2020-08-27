@@ -36,14 +36,13 @@ class Shape extends ShapeBase with ShapePaintContainer {
 
   ui.Path get fillPath => _pathComposer.fillPath;
 
+  // -> editor-only
   // Build the bounds on demand, more efficient than re-computing whenever they
   // change as bounds rarely have bearing at runtime (they will in some cases
   // with constraints eventually).
   AABB _worldBounds;
   AABB _localBounds;
-  // -> editor-only
   BoundsDelegate _delegate;
-  // <- editor-only
 
   @override
   AABB get worldBounds => _worldBounds ??= computeWorldBounds();
@@ -55,13 +54,12 @@ class Shape extends ShapeBase with ShapePaintContainer {
   /// need to rebuild the cached bounds.
   void markBoundsDirty() {
     _worldBounds = _localBounds = null;
-    // -> editor-only
     _delegate?.boundsChanged();
     for (final path in paths) {
       path.markBoundsDirty();
     }
-    // <- editor-only
   }
+  // <- editor-only
 
   bool addPath(Path path) {
     paintChanged();
@@ -200,6 +198,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return paths.remove(path);
   }
 
+  // -> editor-only
   AABB computeWorldBounds() {
     var boundsPaths = paths.where((path) => path.hasBounds);
     if (boundsPaths.isEmpty) {
@@ -250,7 +249,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return localBounds;
   }
 
-  // -> editor-only
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is BoundsDelegate) {
