@@ -1,8 +1,11 @@
 # Rive
 
+# ignore auto-created null directories
+
+**/null/
+
 # Apparently libraries shouldn't track their pubspec.lock
 # but applications should
-
 
 **/pubspec.lock
 !packages/admin/pubspec.lock
