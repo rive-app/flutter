@@ -552,7 +552,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         patchBoundCubics[vertex] = _PatchCubicOperation.all;
       }
     });
-    patchBoundCubics.forEach((vertex, mode) {
+    patchBoundCubics?.forEach((vertex, mode) {
       var stageVertex = vertex.stageItem as StagePathVertex;
       // Local translations have been saved in world space during creation as
       // our paths are in world space when bound to bones. So we can use that
