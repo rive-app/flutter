@@ -15,11 +15,13 @@ abstract class Skinnable {
   void internalTendonsChanged() {
     skinChanged.notify();
   }
-  // <- editor-only
 
   // These come in when Skinnable is mixedin/implemented with a
-  // ContainerComponent (which is a requirement).
+  // ContainerComponent (which is a requirement). We only iterate the children
+  // in the editor.
   ContainerChildren get children;
+  // <- editor-only
+
   void appendChild(Component child);
 
   // ignore: use_setters_to_change_properties
@@ -38,7 +40,7 @@ abstract class Skinnable {
       _skin = null;
       // -> editor-only
       clearWeights();
-    skinChanged.notify();
+      skinChanged.notify();
       // <- editor-only
       markSkinDirty();
     }

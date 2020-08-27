@@ -63,6 +63,16 @@ class PointsPath extends PointsPathBase with Skinnable {
     markPathDirty();
   }
 
+  @override
+  void buildDependencies() {
+    super.buildDependencies();
+
+    // Depend on the skin, if we have it. This works because the skin is not a
+    // node so we have no dependency on our parent yet (which would cause a
+    // dependency cycle).
+    skin?.addDependent(this);
+  }
+
   // -> editor-only
   @override
   void onDirty(int mask) {
@@ -89,13 +99,14 @@ class PointsPath extends PointsPathBase with Skinnable {
   @override
   void markSkinDirty() => super.markPathDirty();
 
-  // -> editor-only
   @override
   void update(int dirt) {
+    // -> editor-only
     // Vertices just changed, make sure they're in order.
     if (dirt & ComponentDirt.vertices != 0) {
       _vertices.sort((a, b) => a.childOrder.compareTo(b.childOrder));
     }
+    // <- editor-only
     if (dirt & ComponentDirt.path != 0) {
       // Before calling super (which will build the path) make sure to deform
       // things if necessary. We depend on the skin which assures us that the
@@ -107,6 +118,7 @@ class PointsPath extends PointsPathBase with Skinnable {
     super.update(dirt);
   }
 
+  // -> editor-only
   @override
   void initWeights() {
     for (final vertex in _vertices) {

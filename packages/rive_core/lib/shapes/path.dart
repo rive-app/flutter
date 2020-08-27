@@ -100,7 +100,7 @@ abstract class Path extends PathBase {
 
     // Paths store their inverse world so that it's available for skinning and
     // other operations that occur at runtime.
-    if (!Mat2D.invert(_inverseWorldTransform, worldTransform)) {
+    if (!Mat2D.invert(_inverseWorldTransform, pathTransform)) {
       // If for some reason the inversion fails (like we have a 0 scale) just
       // store the identity.
       Mat2D.identity(_inverseWorldTransform);
@@ -113,6 +113,9 @@ abstract class Path extends PathBase {
 
     if (dirt & ComponentDirt.path != 0) {
       _buildPath();
+      // -> editor-only
+      _cachedDisplayVertices = null;
+      // <- editor-only
     }
   }
 
@@ -124,10 +127,6 @@ abstract class Path extends PathBase {
     addDirt(ComponentDirt.path);
     _isValid = false;
     _shape?.pathChanged(this);
-
-    // -> editor-only
-    _cachedDisplayVertices = null;
-    // <- editor-only
   }
 
   List<PathVertex> get vertices;
@@ -310,6 +309,7 @@ abstract class Path extends PathBase {
     return false;
   }
 
+  // -> editor-only
   @override
   AABB get localBounds => _renderPath.preciseComputeBounds();
   AABB preciseComputeBounds(Mat2D transform) =>
@@ -321,7 +321,6 @@ abstract class Path extends PathBase {
   List<PathVertex> _cachedDisplayVertices;
 
   List<PathVertex> get displayVertices {
-    // TODO: add skin deformation (bones)
     if (_cachedDisplayVertices != null) {
       return _cachedDisplayVertices;
     }
@@ -376,10 +375,8 @@ abstract class Path extends PathBase {
                 Vec2D translation =
                     Vec2D.scaleAndAdd(Vec2D(), pos, toPrev, renderRadius);
                 renderPoints.add(DisplayCubicVertex()
-                  // -> editor-only
                   ..original = point
                   ..isCornerRadius = true
-                  // <- editor-only
                   ..translation = translation
                   ..inPoint = translation
                   ..outPoint = Vec2D.scaleAndAdd(
@@ -387,10 +384,8 @@ abstract class Path extends PathBase {
                 translation =
                     Vec2D.scaleAndAdd(Vec2D(), pos, toNext, renderRadius);
                 previous = DisplayCubicVertex()
-                  // -> editor-only
                   ..original = point
                   ..isCornerRadius = true
-                  // <- editor-only
                   ..translation = translation
                   ..inPoint = Vec2D.scaleAndAdd(
                       Vec2D(), pos, toNext, iarcConstant * renderRadius)
@@ -440,7 +435,7 @@ class RenderPath {
     _commands.add(_PathCommand.lineTo);
     _positions.add(x);
     _positions.add(y);
-    // <- editor-only}
+    // <- editor-only
     _uiPath.lineTo(x, y);
   }
 
@@ -536,6 +531,7 @@ class RenderPath {
   // <- editor-only
 }
 
+// -> editor-only
 /// Expand our bounds to a point (in normalized T space) on the Cubic.
 void _expandBoundsToCubicPoint(AABB bounds, int component, double t, double a,
     double b, double c, double d) {
@@ -589,3 +585,4 @@ void _expandBoundsForAxis(AABB bounds, int component, double start, double cp1,
     }
   }
 }
+// <- editor-only

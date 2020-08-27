@@ -113,6 +113,9 @@ abstract class PenTool<T extends Component> extends StageTool {
   PenToolInsertTarget _insertTarget;
   PenToolInsertTarget get insertTarget => _insertTarget;
   PenToolInsertTarget computeInsertTarget(Vec2D worldMouse);
+  void clearInsertTarget() {
+    _insertTarget = null;
+  }
 
   @override
   void draw(Canvas canvas, StageDrawPass drawPass) {

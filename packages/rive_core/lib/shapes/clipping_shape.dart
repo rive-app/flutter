@@ -24,11 +24,11 @@ class ClippingShape extends ClippingShapeBase {
     }
 
     // -> editor-only
-    
+
     // Handle when a shape is deleted. #1177
     _shape?.cancelWhenRemoved(remove);
     value?.whenRemoved(remove);
-    
+
     // <- editor-only
 
     _shape = value;
@@ -95,9 +95,11 @@ class ClippingShape extends ClippingShapeBase {
     // Redraw
     _shape?.addDirt(ComponentDirt.paint);
   }
-
+  
+  // -> editor-only
   @override
   bool validate() {
     return _shape != null && super.validate();
   }
+  // <- editor-only
 }

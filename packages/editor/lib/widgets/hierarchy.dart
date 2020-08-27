@@ -44,7 +44,7 @@ class _HierarchyTreeViewState extends State<HierarchyTreeView> {
   void _ensureComponentVisible(Component component) {
     var key = ValueKey(component);
     var index = widget.controller.indexLookup[key];
-    if(index == null) {
+    if (index == null) {
       return;
     }
 
@@ -170,7 +170,7 @@ class _HierarchyTreeViewState extends State<HierarchyTreeView> {
             children: items
                 .map(
                   (item) => Text(
-                    item.data.name,
+                    item.data.name ?? '-',
                     style: theme.textStyles.treeDragItem,
                   ),
                 )

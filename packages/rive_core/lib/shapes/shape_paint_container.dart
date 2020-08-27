@@ -19,7 +19,6 @@ import 'package:utilities/list_equality.dart';
 /// An abstraction to give a common interface to any component that can contain
 /// fills and strokes.
 abstract class ShapePaintContainer {
-  ContainerChildren get children;
   final Set<Fill> fills = {};
   // -> editor-only
   final Event fillsChanged = Event();
@@ -54,6 +53,7 @@ abstract class ShapePaintContainer {
   }
 
   // -> editor-only
+  ContainerChildren get children;
   void updateShapePaints() {
     var nextFills = children.whereType<Fill>();
     if (!iterableEquals(nextFills, fills)) {
@@ -106,19 +106,22 @@ abstract class ShapePaintContainer {
     return false;
   }
 
+  /// These usually gets auto implemented as this mixin is meant to be added to
+  /// a ComponentBase. This way the implementor doesn't need to cast
+  /// ShapePaintContainer to ContainerComponent/Shape/Artboard/etc.
+  bool addDirt(int value, {bool recurse = false});
+
+  // -> editor-only
+
   /// Compute the bounds of this object in the requested transform space. This
   /// can be used by the color inspector to find the bounds of a shape or
   /// artboard to place the start/end at sensical locations.
   AABB get worldBounds;
   AABB get localBounds;
 
-  /// These usually gets auto implemented as this mixin is meant to be added to
-  /// a ComponentBase. This way the implementor doesn't need to cast
-  /// ShapePaintContainer to ContainerComponent/Shape/Artboard/etc.
-  bool addDirt(int value, {bool recurse = false});
-  // -> editor-only
   RiveFile get context;
   // <- editor-only
+
   bool addDependent(Component dependent);
   void appendChild(Component child);
   Mat2D get worldTransform;

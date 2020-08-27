@@ -202,8 +202,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   void update(int dirt) {
     if (dirt & ComponentDirt.worldTransform != 0) {
-      var bounds = worldBounds;
-      var rect = Rect.fromLTWH(bounds[0], bounds[1], bounds[2], bounds[3]);
+      var rect = Rect.fromLTWH(0, 0, width, height);
       path.reset();
       path.addRect(rect);
       // -> editor-only
@@ -316,12 +315,14 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     canvas.restore();
   }
 
+  // -> editor-only
   /// Artboard bounds (whether local or world) are always origin + size.
   @override
   AABB get localBounds => AABB.fromValues(0, 0, width, height);
 
   @override
   AABB get worldBounds => localBounds;
+  // <- editor-only
 
   /// Our world transform is always the identity. Artboard defines world space.
   @override
