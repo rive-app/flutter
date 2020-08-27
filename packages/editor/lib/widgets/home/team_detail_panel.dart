@@ -47,8 +47,8 @@ class TeamDetailPanel extends StatelessWidget {
 
             var memberCountWidget = Container(
               // color: Colors.yellow,
-              height: 35,
-              margin: const EdgeInsetsDirectional.only(bottom: 6),
+              height: 25,
+              margin: const EdgeInsetsDirectional.only(bottom: 13),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -63,6 +63,8 @@ class TeamDetailPanel extends StatelessWidget {
                     TintedIconButton(
                       // padding: EdgeInsets.zero,
                       icon: PackedIcon.add,
+                      backgroundHover: riveColors.fileTreeBackgroundHover,
+                      iconHover: riveColors.treeIconHovered,
                       onPress: () => showSettings(team,
                           context: context,
                           initialPanel: SettingsPanel.members),
