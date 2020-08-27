@@ -84,7 +84,7 @@ class RightPanel extends StatelessWidget {
           UrlCard(
             icon: PackedIcon.runtimes,
             blurb: 'Get the Runtimes',
-            url: 'https://github.com/rive-app/rive-flutter',
+            url: 'https://help.rive.app/runtimes/runtimes-overview',
           ),
           SizedBox(height: 20),
           UrlCard(
