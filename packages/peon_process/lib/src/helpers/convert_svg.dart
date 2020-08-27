@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ClipPath;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/src/utilities/numbers.dart';
 import 'package:flutter_svg/src/utilities/xml.dart';
@@ -16,6 +16,7 @@ import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/rive_file.dart';
+import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/shapes/cubic_detached_vertex.dart';
 import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/path_composer.dart';
@@ -167,9 +168,15 @@ class RivePath extends Path {
   }
 
   @override
-  Path transform(Float64List matrix4) {
-    instructions.add([pathFuncs.transform, matrix4]);
-    return super.transform(matrix4);
+  RivePath transform(Float64List matrix4) {
+    //TODO: figure out what we're doing with transform.
+    // we currently dont evalutate this really....
+
+    // instructions.add([pathFuncs.transform, matrix4]);
+    // final RivePath path = RivePath();
+    // path.instructions.addAll(instructions);
+    // _transform(path, matrix4);
+    return this;
   }
 
   @override
@@ -350,9 +357,10 @@ class RivePathProxy extends FlutterPathProxy {
   }
 }
 
-void addArtboard(RiveFile file, DrawableRoot svgDrawable) {
+void addArtboard(RiveFile file, DrawableRoot root) {
   Backboard backboard;
   Artboard artboard;
+  var clippingRefs = <String, Shape>{};
   file.batchAdd(() {
     backboard = Backboard();
     artboard = Artboard()
@@ -361,74 +369,106 @@ void addArtboard(RiveFile file, DrawableRoot svgDrawable) {
       ..y = 0
       ..originX = 0
       ..originY = 0
-      ..width = svgDrawable.viewport.viewBox.width
-      ..height = svgDrawable.viewport.viewBox.height;
+      ..width = root.viewport.viewBox.width
+      ..height = root.viewport.viewBox.height;
 
     file.addObject(backboard);
     file.addObject(artboard);
   });
 
+  // root.definitions.
+
   file.batchAdd(() {
-    for (var i = 0; i < svgDrawable.children.length; i++) {
-      addChild(file, artboard, svgDrawable.children[i]);
+    for (var i = 0; i < root.children.length; i++) {
+      addChild(root, file, artboard, root.children[i], clippingRefs);
     }
   });
 }
 
-void addChild(RiveFile file, ContainerComponent parent, Drawable drawable) {
-  // print('adding ${drawable.runtimeType}');
+void addChild(DrawableRoot root, RiveFile file, ContainerComponent parent,
+    Drawable drawable, Map<String, Shape> clippingRefs,
+    {bool forceNode = false}) {
   switch (drawable.runtimeType) {
     case DrawableShape:
       var drawableShape = drawable as DrawableShape;
-      var shape = Shape()
-        ..name = attrOrDefault(drawableShape.attributes, 'id', 'Shape')
-        ..x = 0
-        ..y = 0;
+      Node node;
+      if (forceNode) {
+        node = Node();
+      } else {
+        node = Shape();
+      }
+      node.name = attrOrDefault(drawableShape.attributes, 'id', null);
+      node.x = 0;
+      node.y = 0;
       // we do not do this here, as the color already contains this?
       // ..opacity = drawableShape.style.groupOpacity;
 
       var composer = PathComposer();
       file.addObject(composer);
-      file.addObject(shape);
-      shape.appendChild(composer);
-      parent.appendChild(shape);
+      file.addObject(node);
+      node.appendChild(composer);
+      parent.appendChild(node);
 
       if (drawableShape.transform != null) {
         // need to unpack the transform into rotation, scale and transform
         var transform = TransformComponents();
         Mat2D.decompose(Mat2D.fromMat4(drawableShape.transform), transform);
-        shape.rotation += transform.rotation;
-        shape.x += transform.x;
-        shape.y += transform.y;
-        shape.scaleX *= transform.scaleX;
-        shape.scaleY *= transform.scaleY;
+        node.rotation += transform.rotation;
+        node.x += transform.x;
+        node.y += transform.y;
+        node.scaleX *= transform.scaleX;
+        node.scaleY *= transform.scaleY;
       }
 
       var paths = getPaths(file, drawableShape.path as RivePath);
       paths.forEach((path) {
-        shape.appendChild(path);
+        node.appendChild(path);
       });
-      if (drawableShape.style != null) {
+      if (node is Shape && drawableShape.style != null) {
         if (drawableShape.style.fill != null &&
             drawableShape.style.fill.color != null) {
-          var fill = shape.createFill(drawableShape.style.fill.color);
+          var fill = node.createFill(drawableShape.style.fill.color);
           if (drawableShape.style.blendMode != null) {
             fill.blendMode = drawableShape.style.blendMode;
-            shape.blendMode = drawableShape.style.blendMode;
+            node.blendMode = drawableShape.style.blendMode;
           }
         }
         if (drawableShape.style.stroke != null &&
             drawableShape.style.stroke.color != null) {
-          var stroke = shape.createStroke(drawableShape.style.stroke.color);
+          var stroke = node.createStroke(drawableShape.style.stroke.color);
           stroke.thickness = drawableShape.style.stroke.strokeWidth;
           stroke.strokeCap = drawableShape.style.stroke.strokeCap;
           stroke.strokeJoin = drawableShape.style.stroke.strokeJoin;
 
           if (drawableShape.style.blendMode != null) {
             stroke.blendMode = drawableShape.style.blendMode;
-            shape.blendMode = drawableShape.style.blendMode;
+            node.blendMode = drawableShape.style.blendMode;
           }
         }
+      }
+
+      if (drawableShape.style.clipPath != null) {
+        var clipAttr = drawableShape.attributes
+            .firstWhere((element) =>
+                element.name == 'clip-path' ||
+                element.value.contains('clip-path'))
+            .value;
+        clipAttr = clipAttr.split(':').last;
+
+        if (!clippingRefs.containsKey(clipAttr)) {
+          clippingRefs[clipAttr] = getClippingShape(
+              drawableShape.style.clipPath,
+              root,
+              file,
+              parent,
+              drawable,
+              clippingRefs);
+        }
+
+        var clipper = ClippingShape();
+        file.addObject(clipper);
+        clipper.shape = clippingRefs[clipAttr];
+        node.appendChild(clipper);
       }
 
       break;
@@ -458,13 +498,82 @@ void addChild(RiveFile file, ContainerComponent parent, Drawable drawable) {
       file.addObject(node);
       parent.appendChild(node);
 
-      for (var i = 0; i < drawableGroup.children.length; i++) {
-        addChild(file, node, drawableGroup.children[i]);
+      if (drawableGroup.style.clipPath != null) {
+        var clipAttr = drawableGroup.attributes
+            .firstWhere((element) =>
+                element.name == 'clip-path' ||
+                element.value.contains('clip-path'))
+            .value;
+        clipAttr = clipAttr.split(':').last;
+
+        if (!clippingRefs.containsKey(clipAttr)) {
+          clippingRefs[clipAttr] = getClippingShape(
+              drawableGroup.style.clipPath,
+              root,
+              file,
+              parent,
+              drawable,
+              clippingRefs);
+        }
+
+        var clipper = ClippingShape();
+        file.addObject(clipper);
+        clipper.shape = clippingRefs[clipAttr];
+        node.appendChild(clipper);
       }
+
+      for (var i = 0; i < drawableGroup.children.length; i++) {
+        addChild(root, file, node, drawableGroup.children[i], clippingRefs);
+      }
+
       break;
     default:
       print('no idea what to do with $drawable');
   }
+}
+
+Shape getClippingShape(
+    ClipPath clipPath,
+    DrawableRoot root,
+    RiveFile file,
+    ContainerComponent parent,
+    Drawable drawable,
+    Map<String, Shape> clippingRefs) {
+  var clipShape = Shape()
+    ..name = clipPath.id
+    ..x = 0
+    ..y = 0;
+  // we do not do this here, as the color already contains this?
+  // ..opacity = drawableShape.style.groupOpacity;
+
+  var composer = PathComposer();
+  file.addObject(composer);
+  file.addObject(clipShape);
+  clipShape.appendChild(composer);
+  parent.artboard.appendChild(clipShape);
+
+  if (clipPath.transform != null) {
+    // need to unpack the transform into rotation, scale and transform
+    var transform = TransformComponents();
+    Mat2D.decompose(Mat2D.fromMat4(clipPath.transform), transform);
+    clipShape.rotation += transform.rotation;
+    clipShape.x += transform.x;
+    clipShape.y += transform.y;
+    clipShape.scaleX *= transform.scaleX;
+    clipShape.scaleY *= transform.scaleY;
+  }
+
+  clipPath.shapes.forEach((shape) {
+    addChild(
+      root,
+      file,
+      clipShape,
+      shape,
+      clippingRefs,
+      forceNode: true,
+    );
+  });
+  return clipShape;
 }
 
 List<Component> getPaths(RiveFile file, RivePath rivePath) {
@@ -475,7 +584,6 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
   var vertices = <PathVertex>[];
   for (var i = 0; i < rivePath.instructions.length; i++) {
     dynamic instruction = rivePath.instructions[i];
-
     switch (instruction[0] as pathFuncs) {
       case pathFuncs.moveTo:
         if (vertices.isNotEmpty) {
@@ -575,6 +683,7 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
         firstVertexInstruction = null;
         moveInstruction = null;
         vertices = [];
+
         break;
       case pathFuncs.addRect:
         var rect = instruction[1] as Rect;
@@ -614,6 +723,10 @@ List<Component> getPaths(RiveFile file, RivePath rivePath) {
           ..cornerRadius = radiusSet.first;
         file.addObject(rectangle);
         components.add(rectangle);
+        break;
+      case pathFuncs.transform:
+        // DO NOT apply transforms to these paths
+        // these transforms get applied to the shapes
         break;
       default:
         firstVertexInstruction = null;
