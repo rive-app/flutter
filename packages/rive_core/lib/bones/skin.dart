@@ -33,7 +33,7 @@ class Skin extends SkinBase {
     return parent is Skinnable && super.validate();
   }
   // <- editor-only
-  
+
   @override
   void onDirty(int mask) {
     // When the skin is dirty the deformed skinnable will need to regenerate its
@@ -65,8 +65,6 @@ class Skin extends SkinBase {
     for (final tendon in _tendons) {
       var boneWorld = tendon.bone.worldTransform;
       var wt = Mat2D.multiply(temp, boneWorld, tendon.inverseBind);
-      var tc = TransformComponents();
-      Mat2D.decompose(boneWorld, tc);
       _boneTransforms[bidx++] = wt[0];
       _boneTransforms[bidx++] = wt[1];
       _boneTransforms[bidx++] = wt[2];
