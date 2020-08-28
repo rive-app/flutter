@@ -552,37 +552,49 @@ void _expandBoundsToCubicPoint(AABB bounds, int component, double t, double a,
 
 void _expandBoundsForAxis(AABB bounds, int component, double start, double cp1,
     double cp2, double end) {
-  if (!(((start < cp1) && (cp1 < cp2) && (cp2 < end)) ||
-      ((start > cp1) && (cp1 > cp2) && (cp2 > end)))) {
-    // Find the first derivative
-    var a = 3 * (cp1 - start);
-    var b = 3 * (cp2 - cp1);
-    var c = 3 * (end - cp2);
-    var d = a - 2 * b + c;
+  // Check start/end as cubic goes through those.
+  if (start < bounds[component]) {
+    bounds[component] = start;
+  }
+  if (start > bounds[component + 2]) {
+    bounds[component + 2] = start;
+  }
+  if (end < bounds[component]) {
+    bounds[component] = end;
+  }
+  if (end > bounds[component + 2]) {
+    bounds[component + 2] = end;
+  }
+  // Now check extremas.
 
-    // Solve roots for first derivative.
-    if (d != 0) {
-      var m1 = -sqrt(b * b - a * c);
-      var m2 = -a + b;
+  // Find the first derivative
+  var a = 3 * (cp1 - start);
+  var b = 3 * (cp2 - cp1);
+  var c = 3 * (end - cp2);
+  var d = a - 2 * b + c;
 
-      // First root.
-      _expandBoundsToCubicPoint(
-          bounds, component, -(m1 + m2) / d, start, cp1, cp2, end);
-      _expandBoundsToCubicPoint(
-          bounds, component, -(-m1 + m2) / d, start, cp1, cp2, end);
-    } else if (b != c && d == 0) {
-      _expandBoundsToCubicPoint(
-          bounds, component, (2 * b - c) / (2 * (b - c)), start, cp1, cp2, end);
-    }
+  // Solve roots for first derivative.
+  if (d != 0) {
+    var m1 = -sqrt(b * b - a * c);
+    var m2 = -a + b;
 
-    // Derive the first derivative to get the 2nd and use the root of
-    // that (linear).
-    var d2a = 2 * (b - a);
-    var d2b = 2 * (c - b);
-    if (d2a != b) {
-      _expandBoundsToCubicPoint(
-          bounds, component, d2a / (d2a - d2b), start, cp1, cp2, end);
-    }
+    // First root.
+    _expandBoundsToCubicPoint(
+        bounds, component, -(m1 + m2) / d, start, cp1, cp2, end);
+    _expandBoundsToCubicPoint(
+        bounds, component, -(-m1 + m2) / d, start, cp1, cp2, end);
+  } else if (b != c && d == 0) {
+    _expandBoundsToCubicPoint(
+        bounds, component, (2 * b - c) / (2 * (b - c)), start, cp1, cp2, end);
+  }
+
+  // Derive the first derivative to get the 2nd and use the root of
+  // that (linear).
+  var d2a = 2 * (b - a);
+  var d2b = 2 * (c - b);
+  if (d2a != b) {
+    _expandBoundsToCubicPoint(
+        bounds, component, d2a / (d2a - d2b), start, cp1, cp2, end);
   }
 }
 // <- editor-only
