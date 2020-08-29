@@ -62,7 +62,7 @@ class PropertyTendon extends StatelessWidget {
                       );
                     },
                     getValue: (object) => object.getWeight(boneIndex),
-                    listen: (object, enable, callback) {
+                    listenCore: (object, enable, callback) {
                       object.listenToWeightChange(enable, callback);
                     },
                     frozen: false,

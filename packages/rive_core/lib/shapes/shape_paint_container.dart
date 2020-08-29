@@ -41,6 +41,14 @@ abstract class ShapePaintContainer {
   @protected
   void onStrokesChanged();
 
+  /// Called whenever the compound path for this shape is changed so that the
+  /// effects can be invalidated on all the strokes.
+  void invalidateStrokeEffects() {
+    for (final stroke in strokes) {
+      stroke.invalidateEffects();
+    }
+  }
+
   bool addFill(Fill fill) {
     if (fills.add(fill)) {
       // -> editor-only

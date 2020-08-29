@@ -9,7 +9,8 @@ class PropertiesBuilder<T, K> extends StatefulWidget {
 
   final T Function(K) getValue;
   final ValueWidgetBuilder<T> builder;
-  final void Function(K, bool, void Function(dynamic, dynamic)) listen;
+  final void Function(K, bool, void Function(dynamic, dynamic)) listenCore;
+  final void Function(K, bool, void Function()) listen;
 
   /// It's possible that we only want to use certain objects in our list, use
   /// this filter to filter them.
@@ -21,12 +22,14 @@ class PropertiesBuilder<T, K> extends StatefulWidget {
     @required this.objects,
     @required this.getValue,
     @required this.builder,
-    @required this.listen,
+    this.listen,
+    this.listenCore,
     this.filter,
     this.child,
     this.frozen = false,
     Key key,
-  })  : assert(objects != null),
+  })  : assert(listen != null || listenCore != null),
+        assert(objects != null),
         assert(getValue != null),
         assert(builder != null),
         super(key: key);
@@ -57,7 +60,11 @@ class _PropertiesBuilderState<T, K> extends State<PropertiesBuilder<T, K>> {
   void _unbindListener(Iterable<K> objects) {
     cancelFrameDebounce(_rebuild);
     for (final object in objects) {
-      widget.listen(object, false, _valueChanged);
+      if (widget.listenCore != null) {
+        widget.listenCore(object, false, _valueChangedCore);
+      } else {
+        widget.listen(object, false, _valueChanged);
+      }
     }
   }
 
@@ -66,7 +73,11 @@ class _PropertiesBuilderState<T, K> extends State<PropertiesBuilder<T, K>> {
   /// it.
   void _bindListener() {
     for (final object in widget.objects) {
-      widget.listen(object, true, _valueChanged);
+      if (widget.listenCore != null) {
+        widget.listenCore(object, true, _valueChangedCore);
+      } else {
+        widget.listen(object, true, _valueChanged);
+      }
     }
 
     value = _validateValue();
@@ -113,7 +124,9 @@ class _PropertiesBuilderState<T, K> extends State<PropertiesBuilder<T, K>> {
     (context as StatefulElement).markNeedsBuild();
   }
 
-  void _valueChanged(dynamic from, dynamic to) {
+  void _valueChangedCore(dynamic from, dynamic to) => _valueChanged();
+
+  void _valueChanged() {
     value = _validateValue();
     frameDebounce(_rebuild);
   }

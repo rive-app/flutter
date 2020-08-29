@@ -13,7 +13,8 @@ import 'package:rive_editor/widgets/inspector/properties/property_shape_paint_te
 import 'package:utilities/list_equality.dart';
 
 /// Inspect fills/strokes.
-abstract class ShapePaintInspectorBuilder extends ListenableInspectorBuilder {
+abstract class ShapePaintInspectorBuilder<T extends ShapePaint>
+    extends ListenableInspectorBuilder {
   bool _isExpanded = true;
 
   // We build and store a cache of inspecting colors as multiple inspector rows
@@ -21,10 +22,10 @@ abstract class ShapePaintInspectorBuilder extends ListenableInspectorBuilder {
   final List<ShapesInspectingColor> _inspectingColors = [];
 
   Event changedEventOf(ShapePaintContainer container);
-  Set<ShapePaint> shapePaintsOf(ShapePaintContainer container);
+  Set<T> shapePaintsOf(ShapePaintContainer container);
   String get name;
   ShapePaint createFor(ShapePaintContainer container);
-  Widget propertyEditorFor(BuildContext context, List<ShapePaint> shapePaints,
+  Widget propertyEditorFor(BuildContext context, List<T> shapePaints,
       ShapesInspectingColor inspectingColor);
 
   @override

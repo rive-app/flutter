@@ -5,7 +5,6 @@ import 'package:rive_core/bones/skinnable.dart';
 import 'package:rive_core/bones/tendon.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/math/mat2d.dart';
-import 'package:rive_core/math/transform_components.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 
 import 'package:rive_core/src/generated/bones/skin_base.dart';

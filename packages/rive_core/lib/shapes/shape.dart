@@ -83,9 +83,14 @@ class Shape extends ShapeBase with ShapePaintContainer {
   }
   // <- editor-only
 
-  void pathChanged(Path path) {
+  void _markComposerDirty() {
     _pathComposer?.addDirt(ComponentDirt.path);
+    // Stroke effects need to be rebuilt whenever the path composer rebuilds the
+    // compound path.
+    invalidateStrokeEffects();
   }
+
+  void pathChanged(Path path) => _markComposerDirty();
 
   void paintChanged() {
     addDirt(ComponentDirt.path);
@@ -101,7 +106,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
 
     // Path composer needs to update if we update the types of paths we want.
-    _pathComposer?.addDirt(ComponentDirt.path);
+    _markComposerDirty();
   }
 
   @override
@@ -122,7 +127,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
 
     // When the paint gets marked dirty, we need to sync the blend mode with the
     // paints.
-    if (dirt & ComponentDirt.paint != 0) {
+    if (dirt & ComponentDirt.blendMode != 0) {
       for (final fill in fills) {
         fill.blendMode = blendMode;
       }
@@ -285,6 +290,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     // gradients to have their offsets in the correct transform space (see our
     // update method).
     for (final stroke in strokes) {
+      // stroke.draw(canvas, _pathComposer);
       var transformAffectsStroke = stroke.transformAffectsStroke;
       var path = transformAffectsStroke
           ? _pathComposer.localPath
@@ -306,7 +312,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
   }
 
-  void _markBlendModeDirty() => addDirt(ComponentDirt.paint);
+  void _markBlendModeDirty() => addDirt(ComponentDirt.blendMode);
 
   @override
   void onPaintMutatorChanged(ShapePaintMutator mutator) {
