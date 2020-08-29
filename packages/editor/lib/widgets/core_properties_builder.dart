@@ -34,7 +34,7 @@ class CorePropertiesBuilder<T, K extends Core> extends StatelessWidget {
       objects: objects,
       builder: builder,
       getValue: (object) => object.getProperty<T>(propertyKey),
-      listen: (object, enable, callback) {
+      listenCore: (object, enable, callback) {
         if (enable) {
           object.addListener(propertyKey, callback);
         } else {

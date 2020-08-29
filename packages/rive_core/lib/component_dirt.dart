@@ -32,4 +32,7 @@ class ComponentDirt {
   /// Used by ClippingShape to help Shape know when to recalculate its list of
   /// clipping sources.
   static const int clip = 1 << 9;
+
+  /// Set when blend modes need to be updated.
+  static const int blendMode = 1 << 10;
 }

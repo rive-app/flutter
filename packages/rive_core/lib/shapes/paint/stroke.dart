@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/event.dart';
+import 'package:rive_core/shapes/paint/stroke_effect.dart';
 import 'package:rive_core/shapes/shape.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/src/generated/shapes/paint/stroke_base.dart';
@@ -7,6 +9,31 @@ export 'package:rive_core/src/generated/shapes/paint/stroke_base.dart';
 
 /// A stroke Shape painter.
 class Stroke extends StrokeBase {
+  StrokeEffect _effect;
+  StrokeEffect get effect => _effect;
+
+  // -> editor-only
+  final Event effectChanged = Event();
+  // <- editor-only
+
+  // Should be @internal when supported.
+  // ignore: use_setters_to_change_properties
+  void addStrokeEffect(StrokeEffect effect) {
+    _effect = effect;
+    // -> editor-only
+    effectChanged.notify();
+    // <- editor-only
+  }
+
+  void removeStrokeEffect(StrokeEffect effect) {
+    if (effect == _effect) {
+      _effect = null;
+      // -> editor-only
+      effectChanged.notify();
+      // <- editor-only
+    }
+  }
+
   @override
   Paint makePaint() => Paint()
     ..style = PaintingStyle.stroke
@@ -65,6 +92,10 @@ class Stroke extends StrokeBase {
     }
   }
 
+  void invalidateEffects() {
+    _effect?.invalidateEffect();
+  }
+
   // -> editor-only
   @override
   bool validate() => super.validate() && parent is ShapePaintContainer;
@@ -76,6 +107,6 @@ class Stroke extends StrokeBase {
       return;
     }
 
-    canvas.drawPath(path, paint);
+    canvas.drawPath(_effect?.effectPath(path) ?? path, paint);
   }
 }

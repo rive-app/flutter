@@ -114,5 +114,10 @@ HashMap<String, String> _defaultUIStrings =
   'hue': 'Hue',
   'saturation': 'Saturation',
   'color': 'Color',
-  'luminosity': 'Luminosity'
+  'luminosity': 'Luminosity',
+
+  // Trim Paths
+  'none': 'None',
+  'sequential': 'Sequential',
+  'synchronized': 'Synced',
 });
