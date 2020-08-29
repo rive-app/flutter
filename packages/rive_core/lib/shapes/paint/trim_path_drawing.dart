@@ -66,7 +66,7 @@ void _trimPathSequential(
   }
 }
 
-Path _trimPathSync(
+void _trimPathSync(
     Path path, Path result, double startT, double stopT, bool complement) {
   final PathMetrics metrics = path.computeMetrics();
   for (final PathMetric metric in metrics) {
@@ -89,7 +89,7 @@ Path _trimPathSync(
   }
 }
 
-Path updateTrimPath(Path path, Path result, double startT, double stopT,
+void updateTrimPath(Path path, Path result, double startT, double stopT,
     bool complement, bool isSequential) {
   if (isSequential) {
     _trimPathSequential(path, result, startT, stopT, complement);
