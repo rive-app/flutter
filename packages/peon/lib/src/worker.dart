@@ -15,47 +15,40 @@ Future<void> loop(Future<SqsQueue> Function(ConsoleClient) getQueue,
   SqsQueue queue;
   ConsoleClient client = ConsoleClient();
   while (true) {
-    try {
-      queue ??= await getQueue(client);
-      _log.info('What you want?');
-      client = ConsoleClient();
+    queue ??= await getQueue(client);
+    client = ConsoleClient();
 
-      List<SqsMessage> messages = await queue.receiveMessage(
-        2,
-        waitSeconds: 10,
-        region: defaultRegion,
-        service: 'sqs',
-      );
-      messages.forEach((message) async {
-        try {
-          bool success = await execute(message, tasks);
-          if (success) {
-            await queue.deleteMessage(
-              message.receiptHandle,
-              region: defaultRegion,
-              service: 'sqs',
-            );
-            _log.info('Work done.');
-          } else {
-            await queue.deleteMessage(
-              message.receiptHandle,
-              region: defaultRegion,
-              service: 'sqs',
-            );
-            _log.info('Work failed, removing from queue.');
-          }
-          // ignore: avoid_catches_without_on_clauses
-        } catch (e, stacktrace) {
-          _log.severe('Encountered Error: $e\n'
-              'MESSAGE\n$message\n'
-              'STACKTRACE:\n$stacktrace');
+    List<SqsMessage> messages = await queue.receiveMessage(
+      2,
+      waitSeconds: 10,
+      region: defaultRegion,
+      service: 'sqs',
+    );
+    messages.forEach((message) async {
+      try {
+        bool success = await execute(message, tasks);
+        if (success) {
+          await queue.deleteMessage(
+            message.receiptHandle,
+            region: defaultRegion,
+            service: 'sqs',
+          );
+          _log.info('Work done.');
+        } else {
+          await queue.deleteMessage(
+            message.receiptHandle,
+            region: defaultRegion,
+            service: 'sqs',
+          );
+          _log.info('Work failed, removing from queue.');
         }
-      });
-      // ignore: avoid_catches_without_on_clauses
-    } catch (e, stacktrace) {
-      _log.severe('Encountered Error: $e\n'
-          'STACKTRACE:\n$stacktrace');
-    }
+        // ignore: avoid_catches_without_on_clauses
+      } catch (e, stacktrace) {
+        _log.severe('Encountered Error: $e\n'
+            'MESSAGE\n$message\n'
+            'STACKTRACE:\n$stacktrace');
+      }
+    });
   }
 }
 
