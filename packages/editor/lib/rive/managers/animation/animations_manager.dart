@@ -251,7 +251,7 @@ class AnimationsManager {
 
   void _makeLinearAnimation() {
     assert(activeArtboard != null);
-    var regex = RegExp(r"Untitled ([0-9])+");
+    var regex = RegExp(r'Untitled ([0-9])+');
     int maxUntitled = 0;
     for (final animationStream in _animationStreamControllers.values) {
       var matches = regex.allMatches(animationStream.value.animation.name);
@@ -262,12 +262,15 @@ class AnimationsManager {
         }
       }
     }
-    var animation = LinearAnimation()
-      ..name = 'Untitled ${maxUntitled + 1}'
-      ..fps = 60
-      ..artboardId = activeArtboard.id;
     var core = activeArtboard.context;
-    core.addObject(animation);
+    core.batchAdd(() {
+      var animation = LinearAnimation()
+        ..name = 'Untitled ${maxUntitled + 1}'
+        ..fps = 60
+        ..artboardId = activeArtboard.id
+        ..order = activeArtboard.animations.nextFractionalIndex;
+      core.addObject(animation);
+    });
     core.captureJournalEntry();
   }
 
