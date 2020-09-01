@@ -103,7 +103,7 @@ class Skin extends SkinBase {
     // A skin depends on all its bones. N.B. that we don't depend on the parent
     // skinnable. The skinnable depends on us.
     for (final tendon in _tendons) {
-      tendon.bone.addDependent(this);
+      tendon.bone?.addDependent(this);
     }
   }
 
