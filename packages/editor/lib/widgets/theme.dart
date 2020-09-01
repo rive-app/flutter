@@ -493,6 +493,28 @@ class TextStyles {
         fontSize: 13,
       );
 
+  TextStyle get userQuery => const TextStyle(
+        fontFamily: 'Roboto-Medium',
+        color: black,
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+      );
+
+  TextStyle get videoSeriesTag => const TextStyle(
+    fontFamily: 'Roboto-Medium',
+    fontWeight: FontWeight.w600,
+    color: Color(0x80FFFFFF),
+    fontSize: 16);
+
+  TextStyle get videoSeriesTitle => const TextStyle(
+    fontSize: 28, 
+    fontWeight: FontWeight.w600, 
+    color: white);
+
+  TextStyle get videoSeriesBlurb => const TextStyle(
+    fontSize: 16, 
+    color: white);
+
   // Billing History
   TextStyle get receiptHeader => const TextStyle(
         fontFamily: 'Roboto-Regular',
