@@ -25,12 +25,15 @@ class AnimationsList extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    var animationManager = ActiveFile.of(context).animationsManager.value;
-    return animationManager == null
-        ? const SizedBox()
-        : _AnimationsListTree(
-            animationManager: animationManager,
-          );
+    return ValueListenableBuilder(
+      valueListenable: ActiveFile.of(context).animationsManager,
+      builder: (context, AnimationsManager animationManager, _) =>
+          animationManager == null
+              ? const SizedBox()
+              : _AnimationsListTree(
+                  animationManager: animationManager,
+                ),
+    );
   }
 }
 
@@ -80,11 +83,7 @@ class __AnimationsListTreeState extends State<_AnimationsListTree> {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 12
-            ),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 12),
             child: Row(
               children: [
                 Expanded(

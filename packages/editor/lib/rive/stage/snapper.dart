@@ -5,6 +5,7 @@ import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/segment2d.dart';
 import 'package:rive_core/math/vec2d.dart';
+import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/widgets/theme.dart';
@@ -109,6 +110,7 @@ class Snapper {
   static const double snapDistance = 5;
   static const double snapIconRadius = 3;
   final Stage stage;
+  final StatefulShortcutAction<bool> axisLockNotifier;
   Vec2D lockAxis;
 
   // AABB dragBounds;
@@ -122,12 +124,18 @@ class Snapper {
   final List<SnappingFilter> filters = [];
   final Vec2D startMouse;
 
+  // Records the last advanced world mouse
+  Vec2D _currentMouse;
+
   void add(Iterable<SnappingItem> snapItems, SnappingFilter filter) {
     items.addAll(snapItems);
     filters.add(filter);
   }
 
-  Snapper(this.stage, this.startMouse);
+  Snapper(this.stage, this.startMouse, {this.axisLockNotifier}) {
+    // listen for axis lock changes
+    axisLockNotifier.addListener(_advanceToCurrentMouse);
+  }
 
   void init() {
     final exclusion = HashSet<StageItem>();
@@ -163,11 +171,29 @@ class Snapper {
 
   void advance(Vec2D worldMouse, bool enabled) {
     Vec2D diff;
-    if (lockAxis == null) {
+    _currentMouse = worldMouse;
+
+    if (lockAxis == null && !axisLockNotifier.value) {
       diff = Vec2D.subtract(Vec2D(), worldMouse, startMouse);
     } else {
-      var segment =
-          Segment2D(startMouse, Vec2D.add(Vec2D(), startMouse, lockAxis));
+      Vec2D symmetricLockAxis;
+      // Preset lock axis takes precedence
+      if (lockAxis == null) {
+        // Shortcut being held for locking to axis; calculate the closest axis
+        // and lock to it.
+        symmetricLockAxis = _xIsClosestAxis(startMouse, worldMouse)
+            ? Vec2D.fromValues(1, 0)
+            : Vec2D.fromValues(0, 1);
+      }
+      var segment = Segment2D(
+        startMouse,
+        Vec2D.add(
+          Vec2D(),
+          startMouse,
+          // there must be a lock if we reach here
+          lockAxis ?? symmetricLockAxis,
+        ),
+      );
       var result = segment.projectPoint(worldMouse, clamp: false);
       diff = Vec2D.subtract(Vec2D(), result.point, startMouse);
     }
@@ -282,6 +308,20 @@ class Snapper {
     }
   }
 
+  /// Calculates is the x or y axis is closest to the world position. Returns
+  /// true if it's x, false if it's y
+  bool _xIsClosestAxis(Vec2D start, Vec2D world) =>
+      (start.values[0] - world.values[0]).abs() >=
+      (start.values[1] - world.values[1]).abs();
+
+  // Advances the snapper; this is used to pass to listeners for things like
+  // axis lock shortcut action activations and deactivations.
+  void _advanceToCurrentMouse() {
+    if (_currentMouse != null) {
+      advance(_currentMouse, true);
+    }
+  }
+
   final snapPointPath = Path()
     ..moveTo(-snapIconRadius, -snapIconRadius)
     ..lineTo(snapIconRadius, snapIconRadius)
@@ -355,4 +395,6 @@ class Snapper {
     }
     canvas.restore();
   }
+
+  void dispose() => axisLockNotifier?.removeListener(_advanceToCurrentMouse);
 }

@@ -76,7 +76,7 @@ class InterpolationPanel extends StatelessWidget {
                           ? ''
                           : UIStrings.find(context)
                                   .withKey(describeEnum(interpolation)) ??
-                              "???"),
+                              '???'),
             ],
           ),
           const SizedBox(height: 13),

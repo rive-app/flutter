@@ -67,20 +67,20 @@ class KeyFrameGradientConverter extends KeyFrameSolidColorConverter {
     }
 
     generateKey<KeyFrameDouble>(gradientComponent, animation, frame,
-        LinearGradientBase.startXPropertyKey)
-      ..value = startX;
+            LinearGradientBase.startXPropertyKey)
+        .value = startX;
 
     generateKey<KeyFrameDouble>(gradientComponent, animation, frame,
-        LinearGradientBase.startYPropertyKey)
-      ..value = startY;
+            LinearGradientBase.startYPropertyKey)
+        .value = startY;
 
-    generateKey<KeyFrameDouble>(
-        gradientComponent, animation, frame, LinearGradientBase.endXPropertyKey)
-      ..value = endX;
+    generateKey<KeyFrameDouble>(gradientComponent, animation, frame,
+            LinearGradientBase.endXPropertyKey)
+        .value = endX;
 
-    generateKey<KeyFrameDouble>(
-        gradientComponent, animation, frame, LinearGradientBase.endYPropertyKey)
-      ..value = endY;
+    generateKey<KeyFrameDouble>(gradientComponent, animation, frame,
+            LinearGradientBase.endYPropertyKey)
+        .value = endY;
 
     final gradientStops = (gradientComponent as LinearGradient).gradientStops;
     final stopValuesList = stopValues;
@@ -92,12 +92,12 @@ class KeyFrameGradientConverter extends KeyFrameSolidColorConverter {
       final stopComponent = gradientStops[i];
 
       generateKey<KeyFrameColor>(stopComponent, animation, frame,
-          GradientStopBase.colorValuePropertyKey)
-        ..value = getColorValue(stopValue.color);
+              GradientStopBase.colorValuePropertyKey)
+          .value = getColorValue(stopValue.color);
 
-      generateKey<KeyFrameDouble>(
-          stopComponent, animation, frame, GradientStopBase.positionPropertyKey)
-        ..value = stopValue.d.toDouble();
+      generateKey<KeyFrameDouble>(stopComponent, animation, frame,
+              GradientStopBase.positionPropertyKey)
+          .value = stopValue.d.toDouble();
     }
   }
 
@@ -109,11 +109,11 @@ class KeyFrameGradientConverter extends KeyFrameSolidColorConverter {
     int i = 4;
 
     while (i < stopValues.length) {
-      final r = stopValues[i++];
-      final g = stopValues[i++];
-      final b = stopValues[i++];
-      final a = stopValues[i++];
-      final d = stopValues[i++];
+      final r = stopValues[i++] as num;
+      final g = stopValues[i++] as num;
+      final b = stopValues[i++] as num;
+      final a = stopValues[i++] as num;
+      final d = stopValues[i++] as num;
       final stop = _ColorStop(r, g, b, a, d);
       stops.add(stop);
     }

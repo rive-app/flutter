@@ -154,7 +154,7 @@ class FileManager with Subscriptions {
         name: name,
         ownerId: file.ownerId,
         fileOwnerId: file.fileOwnerId,
-        preview: file.preview,
+        thumbnail: file.thumbnail,
       );
 
       Plumber().message<File>(updatedFile);
@@ -172,22 +172,13 @@ class FileManager with Subscriptions {
     Plumber().message(CurrentDirectory(currentDirectory.owner, targetFolder));
   }
 
-  void loadBaseFolder(Owner owner) {
-    final backupFolder = Folder(
-      id: 1,
-      name: 'unknown',
-      parent: null,
-      order: 1,
-      ownerId: owner.ownerId,
-    );
-    final targetFolder = (_folderMap[owner] == null)
-        ? backupFolder
-        : _folderMap[owner].firstWhere(
-            (folder) => folder.id == 1,
-            orElse: () {
-              return backupFolder;
-            },
-          );
+  Future<void> loadBaseFolder(Owner owner) async {
+    if (_folderMap[owner] == null) {
+      await loadFolders(owner);
+    }
+    final targetFolder =
+        _folderMap[owner].firstWhere((folder) => folder.id == 1);
+
     Plumber().message(CurrentDirectory(owner, targetFolder));
   }
 }

@@ -34,7 +34,7 @@ packages:
     description:
       path: "aws_client/"
       ref: HEAD
-      resolved-ref: "1d163193d05db2e6a56042d2cef6b657b57c8ac0"
+      resolved-ref: "1818039dc8e76fe1bb391685782b71ddb694d483"
       url: "https://github.com/rive-app/aws_client.git"
     source: git
     version: "0.3.0-dev"
@@ -146,7 +146,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "2c3c7055dfe248790dd2923ee0f65e6b1e161821"
+      resolved-ref: c77fc998bc17d6b6308cf4e3cb7e8e75ce907f8d
       url: "https://github.com/rive-app/flutter_svg.git"
     source: git
     version: "0.18.0"
@@ -187,9 +187,9 @@ packages:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.1"
+    version: "0.12.2"
   http_client:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http_client
       url: "https://pub.dartlang.org"
@@ -264,7 +264,7 @@ packages:
       name: path_drawing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.1"
+    version: "0.4.1+1"
   path_parsing:
     dependency: transitive
     description:
@@ -278,7 +278,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.11"
+    version: "1.6.14"
   path_provider_linux:
     dependency: transitive
     description:
@@ -299,14 +299,14 @@ packages:
       name: path_provider_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   pedantic:
     dependency: "direct dev"
     description:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.9.0"
+    version: "1.9.2"
   peon:
     dependency: "direct main"
     description:
@@ -320,7 +320,7 @@ packages:
       name: petitparser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.4"
+    version: "3.1.0"
   platform:
     dependency: transitive
     description:
@@ -383,14 +383,14 @@ packages:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.8"
+    version: "0.5.10"
   shared_preferences_linux:
     dependency: transitive
     description:
       name: shared_preferences_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.2+1"
+    version: "0.0.2+2"
   shared_preferences_macos:
     dependency: transitive
     description:
@@ -528,14 +528,14 @@ packages:
       name: xdg_directories
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.2"
   xml:
     dependency: transitive
     description:
       name: xml
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.2.0"
+    version: "4.4.1"
 sdks:
   dart: ">=2.10.0-0.0.dev <2.10.0"
   flutter: ">=1.18.0-6.0.pre <2.0.0"

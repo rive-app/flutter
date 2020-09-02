@@ -13,10 +13,7 @@ class PathConverter extends NodeConverter {
   void deserialize(Map<String, Object> jsonData) {
     super.deserialize(jsonData);
 
-    final isClosed = jsonData["isClosed"];
-
-    print("Path");
-    print("Closed? $isClosed");
+    final isClosed = jsonData['isClosed'];
     final pathComponent = component as PointsPath;
 
     if (isClosed is bool) {

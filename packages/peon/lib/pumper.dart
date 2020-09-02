@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:http_client/console.dart';
 import 'package:peon/src/queue.dart';
 
 Future<void> main(List<String> arguments) async {
@@ -32,7 +33,7 @@ class PingCommand extends Command<dynamic> {
   Future<void> run() async {
     // [argResults] is set before [run()] is called and contains the options
     // passed to this command.
-    var queue = await getQueue();
+    var queue = await getQueue(ConsoleClient());
     await queue.sendMessage(json.encode({'action': 'ping'}));
   }
 }
@@ -54,7 +55,7 @@ class EchoCommand extends Command<dynamic> {
   Future<void> run() async {
     // [argResults] is set before [run()] is called and contains the options
     // passed to this command.
-    var queue = await getQueue();
+    var queue = await getQueue(ConsoleClient());
 
     await queue.sendMessage(json.encode({
       'action': 'echo',
@@ -84,7 +85,7 @@ class SvgToRive extends Command<dynamic> {
   Future<void> run() async {
     // [argResults] is set before [run()] is called and contains the options
     // passed to this command.
-    var queue = await getQueue();
+    var queue = await getQueue(ConsoleClient());
 
     await queue.sendMessage(json.encode({
       'action': 'svgtorive',
@@ -110,7 +111,9 @@ class RiveToPNG extends Command<dynamic> {
     argParser.addOption('targetLocation',
         defaultsTo: 'https://target.location',
         help: 'Where to put the png file');
-    argParser.addOption('notifyUserId', help: 'who to tell about it');
+    argParser.addOption('fileId', help: 'who to tell about it');
+    argParser.addOption('revisionId', help: 'who to tell about it');
+    argParser.addOption('ownerId', help: 'who to tell about it');
   }
 
   // [run] may also return a Future.
@@ -118,14 +121,16 @@ class RiveToPNG extends Command<dynamic> {
   Future<void> run() async {
     // [argResults] is set before [run()] is called and contains the options
     // passed to this command.
-    var queue = await getQueue();
+    var queue = await getQueue(ConsoleClient());
 
     await queue.sendMessage(json.encode({
       'action': name,
       'params': {
+        'fileId': int.parse(argResults['fileId'] as String),
+        'revisionId': int.parse(argResults['revisionId'] as String),
+        'ownerId': int.parse(argResults['ownerId'] as String),
         'sourceLocation': argResults['sourceLocation'] as String,
-        'targetLocation': argResults['targetLocation'] as String,
-        'notifyUserId': int.parse(argResults['notifyUserId'] as String)
+        'targetLocation': argResults['targetLocation'] as String
       }
     }));
   }

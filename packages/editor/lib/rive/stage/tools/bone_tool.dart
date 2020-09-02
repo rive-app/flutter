@@ -137,19 +137,24 @@ class BoneRenderer {
     path.close();
   }
 
-  static void draw(Canvas canvas, SelectionState state, Path path) {
+  static void draw(
+    Canvas canvas,
+    SelectionState state,
+    Path path, {
+    Paint customStroke,
+  }) {
     Paint renderStroke, renderFill;
     switch (state) {
       case SelectionState.hovered:
-        renderStroke = stroke;
+        renderStroke = customStroke ?? stroke;
         renderFill = hoveredFill;
         break;
       case SelectionState.selected:
-        renderStroke = jointSelectedStroke;
+        renderStroke = customStroke ?? jointSelectedStroke;
         renderFill = selectedFill;
         break;
       default:
-        renderStroke = stroke;
+        renderStroke = customStroke ?? stroke;
         renderFill = fill;
         break;
     }

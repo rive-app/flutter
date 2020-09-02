@@ -521,11 +521,23 @@ class _InputHelper<T> extends StatelessWidget {
                     details, context, item, toDrag, dragItemBuilder, style);
               }
             },
-            onVerticalDragEnd: (details) {
-              controller.stopDrag();
-            },
             onVerticalDragUpdate: (details) {
+              // This can happen if the drag start didn't find any items to
+              // drag.
+              if (!controller.isDragging) {
+                return;
+              }
+
               controller.updateDrag(context, details, item, style);
+            },
+            onVerticalDragEnd: (details) {
+              // This can happen if the drag start didn't find any items to
+              // drag.
+              if (!controller.isDragging) {
+                return;
+              }
+
+              controller.stopDrag();
             },
             child: child,
           ),

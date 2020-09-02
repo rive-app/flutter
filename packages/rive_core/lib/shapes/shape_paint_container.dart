@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:rive_core/component.dart';
+import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
@@ -13,6 +14,7 @@ import 'package:rive_core/shapes/paint/linear_gradient.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/solid_color.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
+import 'package:utilities/list_equality.dart';
 
 /// An abstraction to give a common interface to any component that can contain
 /// fills and strokes.
@@ -39,7 +41,14 @@ abstract class ShapePaintContainer {
   @protected
   void onStrokesChanged();
 
-  @protected
+  /// Called whenever the compound path for this shape is changed so that the
+  /// effects can be invalidated on all the strokes.
+  void invalidateStrokeEffects() {
+    for (final stroke in strokes) {
+      stroke.invalidateEffects();
+    }
+  }
+
   bool addFill(Fill fill) {
     if (fills.add(fill)) {
       // -> editor-only
@@ -51,7 +60,27 @@ abstract class ShapePaintContainer {
     return false;
   }
 
-  @protected
+  // -> editor-only
+  ContainerChildren get children;
+  void updateShapePaints() {
+    var nextFills = children.whereType<Fill>();
+    if (!iterableEquals(nextFills, fills)) {
+      fills.clear();
+      fills.addAll(nextFills);
+      fillsChanged.notify();
+      onFillsChanged();
+    }
+
+    var nextStrokes = children.whereType<Stroke>();
+    if (!iterableEquals(nextStrokes, strokes)) {
+      strokes.clear();
+      strokes.addAll(nextStrokes);
+      strokesChanged.notify();
+      onStrokesChanged();
+    }
+  }
+  // <- editor-only
+
   bool removeFill(Fill fill) {
     if (fills.remove(fill)) {
       // -> editor-only
@@ -63,7 +92,6 @@ abstract class ShapePaintContainer {
     return false;
   }
 
-  @protected
   bool addStroke(Stroke stroke) {
     if (strokes.add(stroke)) {
       // -> editor-only
@@ -75,7 +103,6 @@ abstract class ShapePaintContainer {
     return false;
   }
 
-  @protected
   bool removeStroke(Stroke stroke) {
     if (strokes.remove(stroke)) {
       // -> editor-only
@@ -87,19 +114,22 @@ abstract class ShapePaintContainer {
     return false;
   }
 
+  /// These usually gets auto implemented as this mixin is meant to be added to
+  /// a ComponentBase. This way the implementor doesn't need to cast
+  /// ShapePaintContainer to ContainerComponent/Shape/Artboard/etc.
+  bool addDirt(int value, {bool recurse = false});
+
+  // -> editor-only
+
   /// Compute the bounds of this object in the requested transform space. This
   /// can be used by the color inspector to find the bounds of a shape or
   /// artboard to place the start/end at sensical locations.
   AABB get worldBounds;
   AABB get localBounds;
 
-  /// These usually gets auto implemented as this mixin is meant to be added to
-  /// a ComponentBase. This way the implementor doesn't need to cast
-  /// ShapePaintContainer to ContainerComponent/Shape/Artboard/etc.
-  bool addDirt(int value, {bool recurse = false});
-  // -> editor-only
   RiveFile get context;
   // <- editor-only
+
   bool addDependent(Component dependent);
   void appendChild(Component child);
   Mat2D get worldTransform;

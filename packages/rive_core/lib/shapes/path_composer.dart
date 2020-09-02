@@ -66,11 +66,13 @@ class PathComposer extends PathComposerBase {
             matrix4: localTransform?.mat4);
       }
 
+      // -> editor-only
       // If the world path doesn't get built, we should mark the bounds dirty
       // here.
       if (!buildWorldPath) {
         _shape.markBoundsDirty();
       }
+      // <- editor-only
     }
     if (buildWorldPath) {
       worldPath.reset();
@@ -78,7 +80,9 @@ class PathComposer extends PathComposerBase {
         worldPath.addPath(path.uiPath, ui.Offset.zero,
             matrix4: path.pathTransform?.mat4);
       }
+      // -> editor-only
       _shape.markBoundsDirty();
+      // <- editor-only
     }
     _fillPath = _shape.fillInWorld ? worldPath : localPath;
   }

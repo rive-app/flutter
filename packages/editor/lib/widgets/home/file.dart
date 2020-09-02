@@ -44,12 +44,12 @@ class BrowserFile extends StatelessWidget {
         topLeft: Radius.circular(10),
         topRight: Radius.circular(10),
       ),
-      child: (file.preview == null)
+      child: (file.thumbnail == null)
           ? placeholder
           : CachedNetworkImage(
               width: double.infinity,
               placeholder: (context, url) => placeholder,
-              imageUrl: file.preview,
+              imageUrl: file.thumbnail,
               fit: BoxFit.cover,
               fadeInDuration: Duration.zero,
               fadeOutDuration: Duration.zero,

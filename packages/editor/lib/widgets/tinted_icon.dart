@@ -193,7 +193,8 @@ class _TintedIconRendererObject extends RenderBox {
   }
 
   String get filename => 'assets/images/icon_atlases/'
-      '${_bestIconSize.scale}x_${_bestIconSize.index}.png';
+      '${_bestIconSize.scale}x_${_bestIconSize.index}_'
+      '${PackedIcon.cachebust}.png';
 
   void _load() {
     if (_cache == null) {

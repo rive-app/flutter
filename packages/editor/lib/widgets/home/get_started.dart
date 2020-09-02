@@ -19,16 +19,12 @@ class GetStartedPanel extends StatelessWidget {
       child: Container(
         color: theme.colors.fileBrowserBackground,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Flexible(
-                child: MiddlePanel()),
-              SizedBox(
-                width: 360, 
-                child: RightPanel()),
+              const Flexible(child: MiddlePanel()),
+              SizedBox(width: 360, child: RightPanel()),
             ],
           ),
         ),
@@ -44,104 +40,100 @@ class MiddlePanel extends StatelessWidget {
     return ListView(
       children: const [
         VideoSeriesContainer(
-          tag: '01',
-          title: 'Welcome to Rive!',
-          blurb: 'Jump straight in and get started'
-            ' with this ‘quick start’ video series.' 
-            ' We’ll walk you through all the basics'
-            ' to get you up and running in no time.',
-          riveFile: 'bird.riv',
-          fillColor: Color(0xFF0D101B),
-          episodes: [
-            VideoSeriesEpisode(
-              episodeNumber: 1,
-              title: 'Get started',
-              thumbnail: 's1e1.png',
-              url: 'https://f.io/39_jZ-_N'),
-            VideoSeriesEpisode(
-              episodeNumber: 2,
-              title: 'Tour the file browser',
-              thumbnail: 's1e2.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 3,
-              title: 'Artboards and shapes',
-              thumbnail: 's1e3.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 4,
-              title: 'Animate mode',
-              thumbnail: 's1e4.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 5,
-              title: 'Importing and exporting',
-              thumbnail: 's1e5.png'),
-          ]),
+            tag: '01',
+            title: 'Welcome to Rive!',
+            blurb: 'Jump straight in and get started'
+                ' with this ‘quick start’ video series.'
+                ' We’ll walk you through all the basics'
+                ' to get you up and running in no time.',
+            riveFile: 'bird.riv',
+            fillColor: Color(0xFF0D101B),
+            episodes: [
+              VideoSeriesEpisode(
+                  episodeNumber: 1,
+                  title: 'Get started',
+                  thumbnail: 's1e1.png',
+                  url: 'https://f.io/39_jZ-_N'),
+              VideoSeriesEpisode(
+                  episodeNumber: 2,
+                  title: 'Tour the file browser',
+                  thumbnail: 's1e2.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 3,
+                  title: 'Artboards and shapes',
+                  thumbnail: 's1e3.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 4,
+                  title: 'Animate mode',
+                  thumbnail: 's1e4.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 5,
+                  title: 'Importing and exporting',
+                  thumbnail: 's1e5.png'),
+            ]),
         VideoSeriesContainer(
-          tag: '02',
-          title: 'Distinctly Rive',
-          blurb: 'If you\'re familiar with other design and animation'
-            ' tools then you\'ll feel right at home with Rive. That said,'
-            ' there are some aspects we approach differently,'
-            ' so we created this video series to help.',
-          riveFile: 'campfire.riv',
-          fillColor: Color(0xFF2E162C),
-          episodes: [
-            VideoSeriesEpisode(
-              episodeNumber: 1,
-              title: 'Remixing!',
-              thumbnail: 's1e1.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 2,
-              title: 'The hierarchy tree',
-              thumbnail: 's1e2.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 3,
-              title: 'Draw order',
-              thumbnail: 's1e3.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 4,
-              title: 'Editing vertices',
-              thumbnail: 's1e4.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 5,
-              title: 'Time-saving shortcuts',
-              thumbnail: 's1e5.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 5,
-              title: 'Tips on collaborating',
-              thumbnail: 's3e1.png'),
-          ]),
+            tag: '02',
+            title: 'Distinctly Rive',
+            blurb: 'If you\'re familiar with other design and animation'
+                ' tools then you\'ll feel right at home with Rive. That said,'
+                ' there are some aspects we approach differently,'
+                ' so we created this video series to help.',
+            riveFile: 'campfire.riv',
+            fillColor: Color(0xFF2E162C),
+            episodes: [
+              VideoSeriesEpisode(
+                  episodeNumber: 1, title: 'Remixing!', thumbnail: 's1e1.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 2,
+                  title: 'The hierarchy tree',
+                  thumbnail: 's1e2.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 3, title: 'Draw order', thumbnail: 's1e3.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 4,
+                  title: 'Editing vertices',
+                  thumbnail: 's1e4.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 5,
+                  title: 'Time-saving shortcuts',
+                  thumbnail: 's1e5.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 5,
+                  title: 'Tips on collaborating',
+                  thumbnail: 's3e1.png'),
+            ]),
         VideoSeriesContainer(
-          tag: '03',
-          title: 'Runtime funtime',
-          blurb: 'Ready to integrate your Rive animations into your site,'
-            ' app, or game? Join us in this series on implementing' 
-            ' and interacting with your animations!',
-          riveFile: 'runtime_funtime_2.riv',
-          fillColor: Color(0xFFDFC0D8),
-          episodes: [
-            VideoSeriesEpisode(
-              episodeNumber: 1,
-              title: 'Our web runtime',
-              thumbnail: 's3e1.png',
-              type: ContentType.blog,
-              url: 'https://blog.rive.app/rives-web-runtime/'),
-            VideoSeriesEpisode(
-              episodeNumber: 2,
-              title: 'Integrating into your app',
-              thumbnail: 's1e2.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 3,
-              title: 'Loading a Rive file',
-              thumbnail: 's1e3.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 4,
-              title: 'Manipulating components',
-              thumbnail: 's1e4.png'),
-            VideoSeriesEpisode(
-              episodeNumber: 5,
-              title: 'Export via the API',
-              thumbnail: 's1e5.png'),
-          ]),
+            tag: '03',
+            title: 'Runtime funtime',
+            blurb: 'Ready to integrate your Rive animations into your site,'
+                ' app, or game? Join us in this series on implementing'
+                ' and interacting with your animations!',
+            riveFile: 'runtime_funtime_2.riv',
+            fillColor: Color(0xFFDFC0D8),
+            episodes: [
+              VideoSeriesEpisode(
+                  episodeNumber: 1,
+                  title: 'Our web runtime',
+                  thumbnail: 's3e1.png',
+                  type: ContentType.blog,
+                  url: 'https://blog.rive.app/rives-web-runtime/'),
+              VideoSeriesEpisode(
+                  episodeNumber: 2,
+                  title: 'Integrating into your app',
+                  thumbnail: 's1e2.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 3,
+                  title: 'Loading a Rive file',
+                  thumbnail: 's1e3.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 4,
+                  title: 'Manipulating components',
+                  thumbnail: 's1e4.png'),
+              VideoSeriesEpisode(
+                  episodeNumber: 5,
+                  title: 'Export via the API',
+                  thumbnail: 's1e5.png'),
+            ]),
         SizedBox(height: 30),
       ],
     );
@@ -154,7 +146,6 @@ class RightPanel extends StatefulWidget {
 }
 
 class _RightPanelState extends State<RightPanel> {
-  
   final _listKey = GlobalKey<AnimatedListState>();
   final _hasResponded = ValueNotifier<bool>(false);
   List<Widget> _panelContent;
@@ -164,7 +155,7 @@ class _RightPanelState extends State<RightPanel> {
     super.initState();
     _panelContent = [
       /// Removed until responses can be linked up to something.
-      /// 
+      ///
       // UserQuery(
       //   respond: _hasResponded,
       //   onDismiss: _dismissQueryPanel),
@@ -181,51 +172,43 @@ class _RightPanelState extends State<RightPanel> {
 
   /// Called upon selection of a response.
   void _submitResponse(String response) {
-
     if (_hasResponded.value == true) {
       return;
     }
 
-    int removeIndex = _panelContent.indexWhere((item) 
-      => item is QueryResponses);
+    int removeIndex =
+        _panelContent.indexWhere((item) => item is QueryResponses);
 
     Widget removedItem = _panelContent.removeAt(removeIndex);
 
     _listKey.currentState.removeItem(
-      removeIndex, 
-      (_, animation) => _buildItem(removedItem, animation),
-      duration: const Duration(milliseconds: 500));
+        removeIndex, (_, animation) => _buildItem(removedItem, animation),
+        duration: const Duration(milliseconds: 500));
 
     _hasResponded.value = true;
   }
 
   /// Panel becomes dismissable after responding.
   void _dismissQueryPanel() {
-    int removeIndex = _panelContent.indexWhere((item) 
-      => item is UserQuery);
+    int removeIndex = _panelContent.indexWhere((item) => item is UserQuery);
 
     final removedItem = _panelContent.removeAt(removeIndex);
 
     _listKey.currentState.removeItem(
-      removeIndex, (_, animation) 
-        => _buildItem(removedItem, animation, axisAlignment: 1.0),
-      duration: const Duration(milliseconds: 500));
+        removeIndex,
+        (_, animation) =>
+            _buildItem(removedItem, animation, axisAlignment: 1.0),
+        duration: const Duration(milliseconds: 500));
   }
-  
-  Widget _buildItem(Widget item, Animation<double> animation, 
-    { double axisAlignment = -1.0 }) {
 
+  Widget _buildItem(Widget item, Animation<double> animation,
+      {double axisAlignment = -1.0}) {
     return SizeTransition(
-      child: item,
-      axis: Axis.vertical,
-      axisAlignment: axisAlignment,
-      sizeFactor: Tween<double>(
-        begin: 0.0,
-        end: 1.0).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInCirc))
-    );
+        child: item,
+        axis: Axis.vertical,
+        axisAlignment: axisAlignment,
+        sizeFactor: Tween<double>(begin: 0.0, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeInCirc)));
   }
 
   @override
@@ -233,12 +216,11 @@ class _RightPanelState extends State<RightPanel> {
     return Padding(
       padding: const EdgeInsets.only(left: 30),
       child: AnimatedList(
-        key: _listKey,
-        initialItemCount: _panelContent.length,
-        itemBuilder: (context, index, animation) {
-          return _buildItem(_panelContent[index], animation);
-        }
-      ),
+          key: _listKey,
+          initialItemCount: _panelContent.length,
+          itemBuilder: (context, index, animation) {
+            return _buildItem(_panelContent[index], animation);
+          }),
     );
   }
 }
@@ -256,29 +238,29 @@ class QuickLinks extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: const [
             UrlCard(
-              icon: PackedIcon.helpCenter,
-              blurb: 'Help Center',
-              url: 'https://help.rive.app'),
+                icon: PackedIcon.helpCenter,
+                blurb: 'Help Center',
+                url: 'https://help.rive.app'),
             SizedBox(height: 2),
             UrlCard(
-              icon: PackedIcon.runtimes,
-              blurb: 'Get the Runtimes',
-              url: 'https://help.rive.app/runtimes/runtimes-overview'),
+                icon: PackedIcon.runtimes,
+                blurb: 'Get the Runtimes',
+                url: 'https://help.rive.app/runtimes/runtimes-overview'),
             SizedBox(height: 2),
             UrlCard(
-              icon: PackedIcon.discord,
-              blurb: 'Join us on Discord',
-              url: 'https://discord.gg/FGjmaTr'),
+                icon: PackedIcon.discord,
+                blurb: 'Join us on Discord',
+                url: 'https://discord.gg/FGjmaTr'),
             SizedBox(height: 2),
             UrlCard(
-              icon: PackedIcon.signinTwitter,
-              blurb: 'Follow us on Twitter',
-              url: 'https://twitter.com/rive_app'),
+                icon: PackedIcon.signinTwitter,
+                blurb: 'Follow us on Twitter',
+                url: 'https://twitter.com/rive_app'),
             SizedBox(height: 2),
             UrlCard(
-              icon: PackedIcon.feedback,
-              blurb: 'Send feedback',
-              url: 'https://feedback.rive.app'),
+                icon: PackedIcon.feedback,
+                blurb: 'Send feedback',
+                url: 'https://feedback.rive.app'),
           ],
         ),
       ),
@@ -287,7 +269,6 @@ class QuickLinks extends StatelessWidget {
 }
 
 class UrlCard extends StatefulWidget {
-
   const UrlCard({
     @required this.icon,
     @required this.blurb,
@@ -302,7 +283,6 @@ class UrlCard extends StatefulWidget {
 }
 
 class _UrlCardState extends State<UrlCard> {
-
   bool _isHovered = false;
 
   void _setHover(bool value) {
@@ -310,7 +290,7 @@ class _UrlCardState extends State<UrlCard> {
       return;
     }
 
-    setState(()  => _isHovered = value);
+    setState(() => _isHovered = value);
   }
 
   @override
@@ -331,20 +311,18 @@ class _UrlCardState extends State<UrlCard> {
           height: 60,
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: _isHovered 
-              ? theme.colors.buttonLightHover
-              : theme.colors.panelBackgroundLightGrey),
+              color: _isHovered
+                  ? theme.colors.buttonLightHover
+                  : theme.colors.panelBackgroundLightGrey),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              TintedIcon(
-                color: theme.colors.fileIconColor, icon: widget.icon),
+              TintedIcon(color: theme.colors.fileIconColor, icon: widget.icon),
               const SizedBox(width: 15),
               Text(widget.blurb, style: theme.textStyles.urlBlurb),
               const Spacer(),
               TintedIcon(
-                color: theme.colors.fileIconColor,
-                icon: PackedIcon.chevron)
+                  color: theme.colors.fileIconColor, icon: PackedIcon.chevron)
             ],
           ),
         ),
@@ -354,12 +332,7 @@ class _UrlCardState extends State<UrlCard> {
 }
 
 class UserQuery extends StatefulWidget {
-
-  const UserQuery({
-    Key key, 
-    this.respond,
-    this.onDismiss
-  }) : super(key: key);
+  const UserQuery({Key key, this.respond, this.onDismiss}) : super(key: key);
 
   final ValueListenable<bool> respond;
   final Function() onDismiss;
@@ -368,9 +341,8 @@ class UserQuery extends StatefulWidget {
   _UserQueryState createState() => _UserQueryState();
 }
 
-class _UserQueryState extends State<UserQuery> 
-  with SingleTickerProviderStateMixin {
-
+class _UserQueryState extends State<UserQuery>
+    with SingleTickerProviderStateMixin {
   Artboard _riveArtboard;
   Artboard _riveArtboardConfirm;
   Animation<BorderRadius> _borderRadiusAnimation;
@@ -380,11 +352,11 @@ class _UserQueryState extends State<UserQuery>
   void initState() {
     super.initState();
 
-    loadRiveFile('user_query.riv', 
-      (artboard) => setState(() => _riveArtboard = artboard));
+    loadRiveFile('user_query.riv',
+        (artboard) => setState(() => _riveArtboard = artboard));
 
-    loadRiveFile('user_query_confirm.riv', 
-      (artboard) => setState(() => _riveArtboardConfirm = artboard));
+    loadRiveFile('user_query_confirm.riv',
+        (artboard) => setState(() => _riveArtboardConfirm = artboard));
 
     _borderRadiusController = AnimationController(
       vsync: this,
@@ -392,85 +364,77 @@ class _UserQueryState extends State<UserQuery>
     );
 
     _borderRadiusAnimation = BorderRadiusTween(
-      begin: const BorderRadius.vertical(top: Radius.circular(10)),
-      end: BorderRadius.circular(10)
-    ).animate(_borderRadiusController);
+            begin: const BorderRadius.vertical(top: Radius.circular(10)),
+            end: BorderRadius.circular(10))
+        .animate(_borderRadiusController);
   }
 
   void loadRiveFile(String file, Function(Artboard) onLoad) {
-    rootBundle.load('assets/animations/$file').then(
-      (data) async {
-        var file = RiveFile();
-        var success = file.import(data);
-        if (success) {
-          var artboard = file.mainArtboard;
-          artboard.addController(
-            SimpleAnimation('Untitled 1'),
-          );
-          onLoad(artboard);
-        }
+    rootBundle.load('assets/animations/$file').then((data) async {
+      var file = RiveFile();
+      var success = file.import(data);
+      if (success) {
+        var artboard = file.mainArtboard;
+        artboard.addController(
+          SimpleAnimation('Untitled 1'),
+        );
+        onLoad(artboard);
       }
-    );
+    });
   }
 
   Widget get _requestState {
     final theme = RiveTheme.of(context);
-    return Column(
-      key: const ValueKey<int>(0),
-      children: [
-        SizedBox(
+    return Column(key: const ValueKey<int>(0), children: [
+      SizedBox(
           height: 100,
           child: _riveArtboard == null
-            ? const SizedBox()
-            : Rive(
-                artboard: _riveArtboard, 
-                fit: BoxFit.contain,
-                alignment: Alignment.center)),
-        Text('Quick question!', style: theme.textStyles.urlBlurb),
-        const SizedBox(height: 15),
-        Text('What role best describes you?', 
-          style: theme.textStyles.userQuery),
-        const SizedBox(height: 15),
-        Container(
+              ? const SizedBox()
+              : Rive(
+                  artboard: _riveArtboard,
+                  fit: BoxFit.contain,
+                  alignment: Alignment.center)),
+      Text('Quick question!', style: theme.textStyles.urlBlurb),
+      const SizedBox(height: 15),
+      Text('What role best describes you?', style: theme.textStyles.userQuery),
+      const SizedBox(height: 15),
+      Container(
           padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Text('Help us tailor your experience by getting' 
+          child: Text(
+              'Help us tailor your experience by getting'
               ' to know you and how you want to use Rive.',
-            style: theme.textStyles.urlBlurb,
-            textAlign: TextAlign.center)),
-        const SizedBox(height: 15),
-      ]
-    );
+              style: theme.textStyles.urlBlurb,
+              textAlign: TextAlign.center)),
+      const SizedBox(height: 15),
+    ]);
   }
 
   Widget get _responseState {
     final theme = RiveTheme.of(context);
     return GestureDetector(
       onTap: widget.onDismiss,
-      child: Column(
-        key: const ValueKey<int>(1),
-        children: [
-          SizedBox(
+      child: Column(key: const ValueKey<int>(1), children: [
+        SizedBox(
             height: 100,
             child: _riveArtboard == null
-              ? const SizedBox()
-              : Rive(
-                artboard: _riveArtboardConfirm, 
-                fit: BoxFit.contain,
-                alignment: Alignment.center)),
-          Text('High five!', style: theme.textStyles.urlBlurb),
-          const SizedBox(height: 15),
-          Text('Thanks for letting us know', 
-            style: theme.textStyles.userQuery),
-          const SizedBox(height: 15),
-          Container(
+                ? const SizedBox()
+                : Rive(
+                    artboard: _riveArtboardConfirm,
+                    fit: BoxFit.contain,
+                    alignment: Alignment.center)),
+        Text('High five!', style: theme.textStyles.urlBlurb),
+        const SizedBox(height: 15),
+        Text('Thanks for letting us know', style: theme.textStyles.userQuery),
+        const SizedBox(height: 15),
+        Container(
             padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: Text('We\'ll be sure to let you know when' 
-            ' we add new content we think you\'ll like.',
-              style: theme.textStyles.urlBlurb,
-              textAlign: TextAlign.center)),
-          const SizedBox(height: 15),
-        ]
-      ),
+            child: Text(
+                'We\'ll be sure to let you know when'
+                ' we add new content we think you\'ll like.',
+                style: theme.textStyles.urlBlurb,
+                textAlign: TextAlign.center)),
+        const SizedBox(height: 15),
+      ]),
     );
   }
 
@@ -483,9 +447,9 @@ class _UserQueryState extends State<UserQuery>
         animation: _borderRadiusController,
         builder: (_, child) {
           return Container(
-            decoration: BoxDecoration(
-              color: theme.colors.panelBackgroundLightGrey,
-              borderRadius: _borderRadiusAnimation.value),
+              decoration: BoxDecoration(
+                  color: theme.colors.panelBackgroundLightGrey,
+                  borderRadius: _borderRadiusAnimation.value),
               child: child);
         },
         child: ValueListenableBuilder<bool>(
@@ -498,23 +462,15 @@ class _UserQueryState extends State<UserQuery>
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 1000),
               transitionBuilder: (child, animation) {
-                
                 final opacityAnimation = TweenSequence([
+                  TweenSequenceItem(tween: ConstantTween(0.0), weight: 50),
                   TweenSequenceItem(
-                    tween: ConstantTween(0.0),
-                    weight: 50),
-                  TweenSequenceItem(
-                    tween: Tween<double>(begin: 0.0, end: 1.0),
-                    weight: 50),
+                      tween: Tween<double>(begin: 0.0, end: 1.0), weight: 50),
                 ]).animate(animation);
 
-                return FadeTransition(
-                  opacity: opacityAnimation,
-                  child: child);
+                return FadeTransition(opacity: opacityAnimation, child: child);
               },
-              child: responded
-                ? _responseState
-                : _requestState,
+              child: responded ? _responseState : _requestState,
             );
           },
         ),
@@ -524,12 +480,8 @@ class _UserQueryState extends State<UserQuery>
 }
 
 class QueryResponses extends StatefulWidget {
-
-  const QueryResponses({
-    @required this.options,
-    Key key, 
-    this.onSelection
-  }) : super(key: key);
+  const QueryResponses({@required this.options, Key key, this.onSelection})
+      : super(key: key);
 
   final List<String> options;
   final Function(String) onSelection;
@@ -539,40 +491,41 @@ class QueryResponses extends StatefulWidget {
 }
 
 class _QueryResponsesState extends State<QueryResponses> {
-
   int _hoverIndex;
 
   @override
   Widget build(BuildContext context) {
     final theme = RiveTheme.of(context);
     return Column(
-      children: widget.options.asMap().map((index, value) {
-        return MapEntry(index, MouseRegion(
-          onEnter: (_) => setState(() => _hoverIndex = index),
-          onExit: (_) => setState(() => _hoverIndex = null),
-          child: GestureDetector(
-            onTap: () => widget.onSelection(value),
-            child: Container(
-              height: 50,
-              margin: const EdgeInsets.only(top: 2),
-              decoration: BoxDecoration(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(
-                  index == widget.options.length - 1
-                    ? 10
-                    : 0)),
-              color: index == _hoverIndex
-                ? theme.colors.buttonLightHover
-                : theme.colors.panelBackgroundLightGrey,
-              ),
-              child: Center(
-                child: Text(value, 
-                  style: theme.textStyles.urlBlurb))
-              )
-            )
-          )
-        );
-      }).values.toList(),
+      children: widget.options
+          .asMap()
+          .map((index, value) {
+            return MapEntry(
+                index,
+                MouseRegion(
+                    onEnter: (_) => setState(() => _hoverIndex = index),
+                    onExit: (_) => setState(() => _hoverIndex = null),
+                    child: GestureDetector(
+                        onTap: () => widget.onSelection(value),
+                        child: Container(
+                            height: 50,
+                            margin: const EdgeInsets.only(top: 2),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                  bottom: Radius.circular(
+                                      index == widget.options.length - 1
+                                          ? 10
+                                          : 0)),
+                              color: index == _hoverIndex
+                                  ? theme.colors.buttonLightHover
+                                  : theme.colors.panelBackgroundLightGrey,
+                            ),
+                            child: Center(
+                                child: Text(value,
+                                    style: theme.textStyles.urlBlurb))))));
+          })
+          .values
+          .toList(),
     );
   }
 }

@@ -101,6 +101,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
             object = modifiedFile.objects.remove(objectId);
             // Destroy object with id
             break;
+
           default:
             break;
         }
@@ -136,6 +137,12 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     if (validateDependencies) {
       isChangeValid = !modifiedFile.hasCyclicDependencies();
     }
+
+    // Decide if we want to save the changeset (in the future we could make this
+    // depend on whether some flag is enabled for this
+    // user/owner/file/whatever). For now save em all.
+    _privateApi.persistChangeSet(
+        client, file, serverChangeId, changeSet, isChangeValid);
 
     if (isChangeValid) {
       // Changes were good, modify file and propagate them to other clients.
@@ -237,10 +244,10 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     }
     var data = await _privateApi.restoreRevision(
         file.ownerId, file.fileId, revisionId);
-        if(data == null) {
-          print('no data from restore?');
-          return;
-        }
+    if (data == null) {
+      print('no data from restore?');
+      return;
+    }
     var coopFile = CoopFile();
     if (coopFile.deserialize(BinaryReader.fromList(data))) {
       file = coopFile;

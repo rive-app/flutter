@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:aws_client/src/request.dart';
+import 'package:aws_client/src/credentials.dart';
 import 'package:http_client/console.dart';
 import 'package:peon/src/queue.dart';
 
@@ -15,34 +16,34 @@ Future<Uint8List> getS3Key(String sourceLocation,
     [String regionOverride]) async {
   // Watch out here, the capitalization in the header is important.
   // lowercase it will mess with the signature and break it.
-  var client = ConsoleClient();
-
-  // TODO: pr this back into the aws client, it should add the session token
-  // before signing.
   var credentials = await getCredentials();
-  var headers = <String, String>{
-    'X-Amz-Content-Sha256': sha256.convert([]).toString()
-  };
-  if (credentials.sessionToken != null) {
-    headers['X-Amz-Security-Token'] = credentials.sessionToken;
-  }
+  var client = ConsoleClient();
   try {
-    var getRequest = AwsRequestBuilder(
-        body: [],
-        headers: headers,
-        region: regionOverride ?? getRegion(),
-        uri: Uri.parse(sourceLocation),
-        credentials: credentials,
-        httpClient: client,
-        service: 's3');
+    if (!await _exists(
+      payload: Uint8List(0),
+      credentials: credentials,
+      region: regionOverride ?? getRegion(),
+      uri: sourceLocation,
+      client: client,
+    )) {
+      throw Exception('Could not get file from s3 [$sourceLocation]');
+    }
+    final response = await _request(
+      method: 'GET',
+      payload: Uint8List(0),
+      credentials: credentials,
+      region: regionOverride ?? getRegion(),
+      uri: sourceLocation,
+      client: client,
+    );
+    if (response.statusCode != 200) {
+      var body = await response.readAsString();
+      throw Exception(
+          'Could not get file from s3, $sourceLocation, status ${response.statusCode}\n$body');
+    }
 
-    final response = await getRequest.sendRequest();
     var intList = await response.readAsBytes();
     var data = Uint8List.fromList(intList);
-    if (response.statusCode != 200) {
-      throw Exception(
-          'Could not get file from s3, status ${response.statusCode}\n$data');
-    }
     return data;
   } finally {
     await client.close();
@@ -54,28 +55,73 @@ Future<void> putS3Key(String targetLocation, Uint8List payload,
   // Watch out here, the capitalization in the header is important.
   // lowercase it will mess with the signature and break it.
   var credentials = await getCredentials();
-  var headers = <String, String>{
-    'X-Amz-Content-Sha256': sha256.convert(payload).toString()
-  };
-  if (credentials.sessionToken != null) {
-    headers['X-Amz-Security-Token'] = credentials.sessionToken;
-  }
-
   var client = ConsoleClient();
   try {
-    var putRequest = AwsRequestBuilder(
-        method: 'PUT',
-        body: payload,
-        headers: headers,
-        region: regionOverride ?? getRegion(),
-        uri: Uri.parse(targetLocation),
-        credentials: credentials,
-        httpClient: client,
-        service: 's3');
-
-    final response = await putRequest.sendRequest();
+    final response = await _request(
+      method: 'PUT',
+      payload: payload,
+      credentials: credentials,
+      region: regionOverride ?? getRegion(),
+      uri: targetLocation,
+      client: client,
+    );
+    await response.readAsBytes();
     assert(response.statusCode == 200);
   } finally {
     await client.close();
   }
+}
+
+Future<bool> _exists({
+  String uri,
+  ConsoleClient client,
+  Credentials credentials,
+  Uint8List payload,
+  String region,
+  int attempts = 5,
+}) async {
+  int _attempts = attempts;
+  while (_attempts-- > 0) {
+    final response = await _request(
+      method: 'GET',
+      payload: payload,
+      credentials: credentials,
+      region: region,
+      uri: uri,
+      client: client,
+    );
+    await response.readAsBytes();
+    if (response.statusCode == 200) {
+      return true;
+    }
+    await Future<Object>.delayed(const Duration(seconds: 5));
+  }
+  return false;
+}
+
+Future<AwsResponse> _request({
+  String uri,
+  String method,
+  ConsoleClient client,
+  Credentials credentials,
+  Uint8List payload,
+  String region,
+}) async {
+  var headers = <String, String>{
+    'X-Amz-Content-Sha256': sha256.convert(payload.toList()).toString()
+  };
+  if (credentials.sessionToken != null) {
+    headers['X-Amz-Security-Token'] = credentials.sessionToken;
+  }
+  var getRequest = AwsRequestBuilder(
+      method: method,
+      body: payload.toList(),
+      headers: headers,
+      region: region,
+      uri: Uri.parse(uri),
+      credentials: credentials,
+      httpClient: client,
+      service: 's3');
+
+  return getRequest.sendRequest();
 }

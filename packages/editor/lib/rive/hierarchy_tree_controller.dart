@@ -3,10 +3,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/node.dart';
+import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
@@ -145,7 +147,9 @@ class HierarchyTreeController extends ComponentTreeController {
 
           // re-parent last after changing index
           treeItem.parent = parentContainer;
-          if (treeItem is Node) {
+          // We're including only Nodes and RootBones in this drag set to start
+          // with, so no non-translating bones should be in here.
+          if (treeItem is TransformComponent) {
             /// Keep the node in the same position it last was at before getting
             /// parented.
             treeItem.compensate();
@@ -169,7 +173,7 @@ class HierarchyTreeController extends ComponentTreeController {
           // treeItem.parent = target.data;
           targetContainer.children.moveToEnd(treeItem);
           treeItem.parent = targetContainer;
-          if (treeItem is Node) {
+          if (treeItem is TransformComponent) {
             /// Keep the node in the same position it last was at before getting
             /// parented.
             treeItem.compensate();
@@ -248,7 +252,10 @@ class HierarchyTreeController extends ComponentTreeController {
   List<FlatTreeItem<Component>> onDragStart(
       DragStartDetails details, FlatTreeItem<Component> item) {
     // Get the list of selected items.
-    var items = super.onDragStart(details, item).toSet();
+    var items = super
+        .onDragStart(details, item)
+        .where((element) => element.data is Node || element.data is RootBone)
+        .toSet();
 
     return tops(items).toList(growable: false);
   }

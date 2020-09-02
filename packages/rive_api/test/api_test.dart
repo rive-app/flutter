@@ -210,7 +210,7 @@ void main() {
         expect(file.id, isNotNull);
         expect(file.ownerId, isNotNull);
         expect(file.name, isNull);
-        expect(file.preview, isNull);
+        expect(file.thumbnail, isNull);
       });
     });
 
@@ -227,12 +227,12 @@ void main() {
         // expect(file.id, isNotNull);
         // expect(file.name, isNotNull);
         // expect(file.ownerId, 1);
-        // expect(file.preview, isNotNull);
+        // expect(file.thumbnail, isNotNull);
       });
       // expect(files.first.name, 'New File');
-      // expect(files.first.preview, 'http://foofo.com/<preview>?param');
+      // expect(files.first.thumbnail, 'http://foofo.com/<thumbnail>?param');
       // expect(files.last.name, 'New File 3');
-      // expect(files.last.preview, 'http://foofo.com/<preview3>?param');
+      // expect(files.last.thumbnail, 'http://foofo.com/<thumbnail3>?param');
     });
 
     test('get team files', () async {
@@ -251,13 +251,13 @@ void main() {
         expect(file.id != null, true);
         expect(file.name, null);
         expect(file.ownerId, 3);
-        expect(file.preview, null);
+        expect(file.thumbnail, null);
       });
     });
 
     test('get team file details', () async {
       final riveApi = MockRiveApi();
-      when(riveApi.post('/api/teams/3/files', body: "[1,2,3]"))
+      when(riveApi.post('/api/teams/3/files', body: '[1,2,3]'))
           .thenAnswer((_) async => successFileDetailsResponse);
       final mockApi = FileApi(riveApi);
       final team = getTeam();
@@ -268,12 +268,12 @@ void main() {
         expect(file.id != null, true);
         expect(file.name != null, true);
         expect(file.ownerId, 1);
-        expect(file.preview != null, true);
+        expect(file.thumbnail != null, true);
       });
       expect(files.first.name, 'New File');
-      expect(files.first.preview, 'http://foofo.com/<preview>?param');
+      expect(files.first.thumbnail, 'http://foofo.com/<thumbnail>?param');
       expect(files.last.name, 'New File 3');
-      expect(files.last.preview, 'http://foofo.com/<preview3>?param');
+      expect(files.last.thumbnail, 'http://foofo.com/<thumbnail3>?param');
     });
 
     test('get create user file', () async {
@@ -284,7 +284,7 @@ void main() {
       final newFile = await mockApi.createFile(1);
       expect(newFile.name, 'New File');
       expect(newFile.id, 10);
-      expect(newFile.preview, null);
+      expect(newFile.thumbnail, null);
       expect(newFile.ownerId, 1);
     });
 
@@ -301,7 +301,7 @@ void main() {
       final newFile = await mockApi.createFile(folderId, team.ownerId);
       expect(newFile.name, 'New File');
       expect(newFile.id, 10);
-      expect(newFile.preview, null);
+      expect(newFile.thumbnail, null);
       expect(newFile.ownerId, 1);
     });
 

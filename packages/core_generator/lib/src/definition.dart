@@ -37,6 +37,7 @@ class Definition {
       : _properties;
 
   Definition _extensionOf;
+  Definition _generic;
   Key _key;
   Key get key => _key;
   bool _isAbstract = false;
@@ -69,6 +70,10 @@ class Definition {
     dynamic extendsFilename = data['extends'];
     if (extendsFilename is String) {
       _extensionOf = Definition(config, extendsFilename);
+    }
+    dynamic genericFilename = data['generic'];
+    if (genericFilename is String) {
+      _generic = Definition(config, genericFilename);
     }
     dynamic nameValue = data['name'];
     if (nameValue is String) {
@@ -107,6 +112,15 @@ class Definition {
   String get localCodeFilename => '${stripExtension(_filename)}_base.dart';
   String get concreteCodeFilename => '${stripExtension(_filename)}.dart';
   String get codeFilename => 'lib/src/generated/$localCodeFilename';
+  String get extendsString {
+    if (_extensionOf != null) {
+      if (_generic != null) {
+        return '${_extensionOf._name}<${_generic._name}>';
+      }
+      return _extensionOf._name;
+    }
+    return 'Core<T>';
+  }
 
   /// Generates Dart code based on the Definition
   void generateCode(String snakeContextName) {
@@ -155,6 +169,10 @@ class Definition {
       imports.add(
           'import \'package:$packageName/${_extensionOf.concreteCodeFilename}\';');
     }
+    if (_generic != null) {
+      imports.add(
+          'import \'package:$packageName/${_generic.concreteCodeFilename}\';');
+    }
 
     bool defineContextExtension = _extensionOf?._name == null;
     if (defineContextExtension && !config.isRuntime) {
@@ -194,7 +212,7 @@ class Definition {
 
     code.write(
         '''abstract class ${_name}Base${defineContextExtension ? '<T extends ${config.isRuntime ? 'CoreContext' : config.coreContextName}>' : ''} 
-            extends ${_extensionOf?._name ?? 'Core<T>'} ''');
+            extends $extendsString ''');
     if (exportsWithContext) {
       code.write(' implements ExportRules ');
     }
@@ -362,6 +380,9 @@ class Definition {
     }
     if (_extensionOf != null) {
       data['extends'] = _extensionOf.localFilename;
+    }
+    if (_generic != null) {
+      data['generic'] = _generic.localFilename;
     }
     if (_properties.isNotEmpty) {
       Map<String, dynamic> propertiesData = <String, dynamic>{};

@@ -23,6 +23,7 @@ import 'package:rive_editor/widgets/ui_strings.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_scroll_view.dart';
 import 'package:tree_widget/tree_widget.dart';
+import 'package:utilities/restorer.dart';
 
 class KeyedObjectHierarchy extends StatefulWidget {
   final ScrollController scrollController;
@@ -44,19 +45,21 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
   /// Set of selected items
   final _selectedItems = <KeyHierarchyViewModel>{};
 
+  Restorer _visListenerRestorer;
+  Restorer _highlightListenerRestorer;
   @override
   void initState() {
-    widget.treeController.requestVisibility
-        .addListener(_ensureKeyedComponentVisible);
-    widget.treeController.highlight.addListener(_highlightKeyedComponents);
+    _visListenerRestorer = widget.treeController.requestVisibility
+        .listen(_ensureKeyedComponentVisible);
+    _highlightListenerRestorer =
+        widget.treeController.highlight.listen(_highlightKeyedComponents);
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.treeController.requestVisibility
-        .removeListener(_ensureKeyedComponentVisible);
-    widget.treeController.highlight.removeListener(_highlightKeyedComponents);
+    _visListenerRestorer.restore();
+    _highlightListenerRestorer.restore();
     super.dispose();
   }
 

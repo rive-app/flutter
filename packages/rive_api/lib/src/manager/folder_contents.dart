@@ -130,6 +130,15 @@ class FolderContentsManager with Subscriptions {
 
   Future<void> delete() async {
     var selection = Plumber().peek<Selection>();
+
+    if (selection == null || selection.isEmpty) {
+      Plumber().message(GlobalMessage(
+          'Please select files or folders to delete',
+          'dismiss',
+          () => Plumber().flush<GlobalMessage>()));
+      return;
+    }
+
     var currentDirectory = Plumber().peek<CurrentDirectory>();
     if (currentDirectory.owner is Team) {
       await FileApi().deleteTeamFiles(

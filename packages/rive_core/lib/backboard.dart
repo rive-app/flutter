@@ -21,14 +21,14 @@ class Backboard extends BackboardBase {
     }
     _activeArtboard = value;
     activeArtboardId = value?.id;
+    _activeArtboard?.whenRemoved(_validateArtboards);
+    _activeArtboard?.addDirt(ComponentDirt.paint);
     activeArtboardChanged.notify();
   }
 
   @override
   void activeArtboardIdChanged(Id from, Id to) {
-    _activeArtboard = context?.resolve(to);
-    _activeArtboard?.whenRemoved(_validateArtboards);
-    _activeArtboard?.addDirt(ComponentDirt.paint);
+    activeArtboard = context?.resolve(to);
   }
 
   void _validateArtboards() {

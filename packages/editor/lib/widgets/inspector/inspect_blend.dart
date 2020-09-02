@@ -42,7 +42,8 @@ class BlendInspectorBuilder extends ListenableInspectorBuilder {
       inspecting.intersectingCoreTypes.contains(TransformComponentBase.typeKey);
 
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) {
+  List<WidgetBuilder> expand(
+      BuildContext panelContext, InspectionSet inspecting) {
     return [
       (context) {
         var disableBlendMode =

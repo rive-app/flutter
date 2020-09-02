@@ -1,11 +1,9 @@
 import 'dart:ui' as ui;
 
 import 'package:rive_core/bounds_delegate.dart';
-import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
-import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/linear_gradient.dart' as core;
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/paint/stroke.dart';
@@ -38,14 +36,13 @@ class Shape extends ShapeBase with ShapePaintContainer {
 
   ui.Path get fillPath => _pathComposer.fillPath;
 
+  // -> editor-only
   // Build the bounds on demand, more efficient than re-computing whenever they
   // change as bounds rarely have bearing at runtime (they will in some cases
   // with constraints eventually).
   AABB _worldBounds;
   AABB _localBounds;
-  // -> editor-only
   BoundsDelegate _delegate;
-  // <- editor-only
 
   @override
   AABB get worldBounds => _worldBounds ??= computeWorldBounds();
@@ -57,39 +54,12 @@ class Shape extends ShapeBase with ShapePaintContainer {
   /// need to rebuild the cached bounds.
   void markBoundsDirty() {
     _worldBounds = _localBounds = null;
-    // -> editor-only
     _delegate?.boundsChanged();
     for (final path in paths) {
       path.markBoundsDirty();
     }
-    // <- editor-only
   }
-
-  @override
-  void childAdded(Component child) {
-    super.childAdded(child);
-    switch (child.coreType) {
-      case FillBase.typeKey:
-        addFill(child as Fill);
-        break;
-      case StrokeBase.typeKey:
-        addStroke(child as Stroke);
-        break;
-    }
-  }
-
-  @override
-  void childRemoved(Component child) {
-    super.childRemoved(child);
-    switch (child.coreType) {
-      case FillBase.typeKey:
-        removeFill(child as Fill);
-        break;
-      case StrokeBase.typeKey:
-        removeStroke(child as Stroke);
-        break;
-    }
-  }
+  // <- editor-only
 
   bool addPath(Path path) {
     paintChanged();
@@ -113,9 +83,14 @@ class Shape extends ShapeBase with ShapePaintContainer {
   }
   // <- editor-only
 
-  void pathChanged(Path path) {
+  void _markComposerDirty() {
     _pathComposer?.addDirt(ComponentDirt.path);
+    // Stroke effects need to be rebuilt whenever the path composer rebuilds the
+    // compound path.
+    invalidateStrokeEffects();
   }
+
+  void pathChanged(Path path) => _markComposerDirty();
 
   void paintChanged() {
     addDirt(ComponentDirt.path);
@@ -131,7 +106,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
 
     // Path composer needs to update if we update the types of paths we want.
-    _pathComposer?.addDirt(ComponentDirt.path);
+    _markComposerDirty();
   }
 
   @override
@@ -152,7 +127,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
 
     // When the paint gets marked dirty, we need to sync the blend mode with the
     // paints.
-    if (dirt & ComponentDirt.paint != 0) {
+    if (dirt & ComponentDirt.blendMode != 0) {
       for (final fill in fills) {
         fill.blendMode = blendMode;
       }
@@ -228,63 +203,34 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return paths.remove(path);
   }
 
+  // -> editor-only
   AABB computeWorldBounds() {
-    // When we have Path.getTightBounds exposed we'll be able to do:
-    // if (_wantWorldPath) {
-    //   return _pathComposer.worldPath.getTightBounds();
-    // } else {
-    //   _pathComposer.localPath.transform(worldTransform.mat4)
-    //    .getTightBounds();
-    // }
-    if (paths.isEmpty) {
+    var boundsPaths = paths.where((path) => path.hasBounds);
+    if (boundsPaths.isEmpty) {
       return AABB.fromMinMax(worldTranslation, worldTranslation);
     }
-    var path = paths.first;
-    var renderPoints = path.renderVertices;
-    if (renderPoints.isEmpty) {
-      // Can't build bounds from nothing...
-      return AABB.fromMinMax(worldTranslation, worldTranslation);
-    }
-    AABB worldBounds =
-        path.preciseComputeBounds(renderPoints, path.pathTransform);
-
-    for (final path in paths.skip(1)) {
-      var renderPoints = path.renderVertices;
+    var path = boundsPaths.first;
+    AABB worldBounds = path.preciseComputeBounds(path.pathTransform);
+    for (final path in boundsPaths.skip(1)) {
       AABB.combine(worldBounds, worldBounds,
-          path.preciseComputeBounds(renderPoints, path.pathTransform));
+          path.preciseComputeBounds(path.pathTransform));
     }
     return worldBounds;
   }
 
   AABB computeLocalBounds() {
-    // When we have Path.getTightBounds exposed we'll be able to do:
-    // if (_wantLocalPath) {
-    //   return _pathComposer.localPath.getTightBounds();
-    // } else {
-    //   var inverseShapeWorld = Mat2D();
-    //   if (Mat2D.invert(inverseShapeWorld, worldTransform)) {
-    //     return _pathComposer.worldPath
-    //         .transform(inverseShapeWorld.mat4)
-    //         .getTightBounds();
-    //   }
-    // }
-    if (paths.isEmpty) {
-      // return a 0, 0, 0, 0 AABB as it means we are at the origin of our world
+    var boundsPaths = paths.where((path) => path.hasBounds);
+    if (boundsPaths.isEmpty) {
       return AABB();
     }
-    var path = paths.first;
-    var renderPoints = path.renderVertices;
-    if (renderPoints.isEmpty) {
-      // Can't build bounds from nothing...
-      return AABB();
-    }
+    var path = boundsPaths.first;
+
     var toShapeTransform = Mat2D();
     if (!Mat2D.invert(toShapeTransform, worldTransform)) {
       Mat2D.identity(toShapeTransform);
     }
 
     AABB localBounds = path.preciseComputeBounds(
-      renderPoints,
       Mat2D.multiply(
         Mat2D(),
         toShapeTransform,
@@ -293,12 +239,10 @@ class Shape extends ShapeBase with ShapePaintContainer {
     );
 
     for (final path in paths.skip(1)) {
-      var renderPoints = path.renderVertices;
       AABB.combine(
         localBounds,
         localBounds,
         path.preciseComputeBounds(
-          renderPoints,
           Mat2D.multiply(
             Mat2D(),
             toShapeTransform,
@@ -310,7 +254,6 @@ class Shape extends ShapeBase with ShapePaintContainer {
     return localBounds;
   }
 
-  // -> editor-only
   @override
   void userDataChanged(dynamic from, dynamic to) {
     if (to is BoundsDelegate) {
@@ -347,6 +290,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     // gradients to have their offsets in the correct transform space (see our
     // update method).
     for (final stroke in strokes) {
+      // stroke.draw(canvas, _pathComposer);
       var transformAffectsStroke = stroke.transformAffectsStroke;
       var path = transformAffectsStroke
           ? _pathComposer.localPath
@@ -368,7 +312,7 @@ class Shape extends ShapeBase with ShapePaintContainer {
     }
   }
 
-  void _markBlendModeDirty() => addDirt(ComponentDirt.paint);
+  void _markBlendModeDirty() => addDirt(ComponentDirt.blendMode);
 
   @override
   void onPaintMutatorChanged(ShapePaintMutator mutator) {

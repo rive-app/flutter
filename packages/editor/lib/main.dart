@@ -36,7 +36,6 @@ import 'package:rive_api/plumber.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_editor/constants.dart';
 import 'package:rive_editor/rive/icon_cache.dart';
-import 'package:rive_editor/rive/managers/follow_manager.dart';
 import 'package:rive_editor/rive/managers/notification_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/rive.dart';
@@ -208,13 +207,7 @@ class RiveEditorApp extends StatelessWidget {
                     return Login();
 
                   case AppState.home:
-                    return FollowProvider(
-                      manager: FollowManager(
-                        api: rive.api,
-                        ownerId: Plumber().peek<Me>().ownerId,
-                      ),
-                      child: const EditorScaffold(),
-                    );
+                    return const EditorScaffold();
 
                   case AppState.disconnected:
                     return DisconnectedScreen();

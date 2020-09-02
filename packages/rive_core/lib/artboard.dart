@@ -15,7 +15,6 @@ import 'package:rive_core/math/aabb.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/rive_animation_controller.dart';
-import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:utilities/dependency_sorter.dart';
@@ -151,14 +150,6 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     return updateComponents() || didUpdate;
   }
 
-  @override
-  void childAdded(Component child) {
-    super.childAdded(child);
-    if (child is Fill) {
-      addFill(child);
-    }
-  }
-
   // -> editor-only
   @override
   void nameChanged(String from, String to) {
@@ -167,16 +158,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   // <- editor-only
 
   @override
-  void childRemoved(Component child) {
-    super.childRemoved(child);
-    if (child is Fill) {
-      removeFill(child);
-    }
-  }
-
-  @override
   void heightChanged(double from, double to) {
     addDirt(ComponentDirt.worldTransform);
+    invalidateStrokeEffects();
   }
 
   void onComponentDirty(Component component) {
@@ -219,8 +203,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   void update(int dirt) {
     if (dirt & ComponentDirt.worldTransform != 0) {
-      var bounds = worldBounds;
-      var rect = Rect.fromLTWH(bounds[0], bounds[1], bounds[2], bounds[3]);
+      var rect = Rect.fromLTWH(0, 0, width, height);
       path.reset();
       path.addRect(rect);
       // -> editor-only
@@ -248,6 +231,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   @override
   void widthChanged(double from, double to) {
     addDirt(ComponentDirt.worldTransform);
+    invalidateStrokeEffects();
   }
 
   @override
@@ -333,12 +317,14 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     canvas.restore();
   }
 
+  // -> editor-only
   /// Artboard bounds (whether local or world) are always origin + size.
   @override
   AABB get localBounds => AABB.fromValues(0, 0, width, height);
 
   @override
   AABB get worldBounds => localBounds;
+  // <- editor-only
 
   /// Our world transform is always the identity. Artboard defines world space.
   @override

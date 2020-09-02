@@ -3,6 +3,7 @@ import 'package:rive_core/shapes/ellipse.dart';
 import 'package:rive_core/shapes/rectangle.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/rive/stage/items/stage_artboard.dart';
+import 'package:rive_editor/rive/stage/items/stage_bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_ellipse.dart';
 import 'package:rive_editor/rive/stage/items/stage_node.dart';
 import 'package:rive_editor/rive/stage/items/stage_path.dart';
@@ -46,6 +47,9 @@ class StageItemIcon extends StatelessWidget {
     }
     if (item is StagePath) {
       return PackedIcon.curves;
+    }
+    if (item is StageBone) {
+      return PackedIcon.boneSmall;
     }
 
     if (item is StageShape) {

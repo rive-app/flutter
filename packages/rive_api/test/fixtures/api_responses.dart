@@ -191,17 +191,17 @@ final successFileDetailsResponse = Response("""
     "id":1,
     "oid":1,
     "name":"New File",
-    "preview":"<preview>"
+    "thumbnail":"<thumbnail>"
   }, {
     "id":2,
     "oid":1,
     "name":"New File 2",
-    "preview":"<preview2>"
+    "thumbnail":"<thumbnail2>"
   }, {
     "id":3,
     "oid":1,
     "name":"New File 3",
-    "preview":"<preview3>"
+    "thumbnail":"<thumbnail3>"
   }]
 }
 """, 200);

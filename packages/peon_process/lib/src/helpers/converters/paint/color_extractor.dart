@@ -40,28 +40,29 @@ abstract class ColorExtractor {
     // Color stops in Flare are maintained in a flat list of numbers:
     // [ R, G, B, A, D, ...[other stops] ]
     // R = Red, G = Green, B = Blue, A = Alpha
-    // and D is a number [0, 1] that is the distance of this stop from the start.
-    final colorStops = jsonData["colorStops"];
+    // and D is a number [0, 1] that is the distance of this stop
+    // from the start.
+    final colorStops = jsonData['colorStops'];
     // Starting position in local coordinates for this gradient
-    final start = jsonData["start"];
+    final start = jsonData['start'];
     // Ending position in local coordinates for this gradient
-    final end = jsonData["end"];
-    final type = jsonData["type"];
+    final end = jsonData['end'];
+    final type = jsonData['type'];
     final opacity = jsonData['opacity'];
 
-    final isRadial = (type as String).toLowerCase().contains("radial");
+    final isRadial = (type as String).toLowerCase().contains('radial');
     final gradient = isRadial ? RadialGradient() : LinearGradient();
 
     if (start is List) {
       gradient
-        ..startX = start[0].toDouble()
-        ..startY = start[1].toDouble();
+        ..startX = (start[0] as num).toDouble()
+        ..startY = (start[1] as num).toDouble();
     }
 
     if (end is List) {
       gradient
-        ..endX = end[0].toDouble()
-        ..endY = end[1].toDouble();
+        ..endX = (end[0] as num).toDouble()
+        ..endY = (end[1] as num).toDouble();
     }
 
     if (opacity is num) {
@@ -73,17 +74,17 @@ abstract class ColorExtractor {
       // final numStops = colorStops.length / 5;
       int i = 0;
       while (i < colorStops.length) {
-        final r = colorStops[i++];
-        final g = colorStops[i++];
-        final b = colorStops[i++];
-        final a = colorStops[i++];
-        final d = colorStops[i++];
+        final r = colorStops[i++] as num;
+        final g = colorStops[i++] as num;
+        final b = colorStops[i++] as num;
+        final a = colorStops[i++] as num;
+        final d = colorStops[i++] as num;
         final stop = GradientStop()
           ..color = Color.fromRGBO(
-            ((r as num) * 255).toInt(),
-            ((g as num) * 255).toInt(),
-            ((b as num) * 255).toInt(),
-            (a as num).toDouble(),
+            (r * 255).toInt(),
+            (g * 255).toInt(),
+            (b * 255).toInt(),
+            a.toDouble(),
           )
           ..position = d.toDouble();
         stops.add(stop);

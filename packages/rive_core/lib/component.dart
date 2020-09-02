@@ -39,7 +39,7 @@ abstract class Component extends ComponentBase<RiveFile>
 
   // Used during update process.
   int graphOrder = 0;
-  int dirt = 255;
+  int dirt = 0xFFFF;
 
   // This is really only for sanity and earlying out of recursive loops.
   static const int maxTreeDepth = 5000;

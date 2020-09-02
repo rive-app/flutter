@@ -23,7 +23,7 @@ class KeyFrameSolidColorConverter extends KeyFrameColorConverter {
     }
     final key = super.generateKey<KeyFrameColor>(
         colorComponent, animation, frame, SolidColorBase.colorValuePropertyKey);
-    key.value = getColorValue(value);
+    key.value = getColorValue(value as List);
   }
 
   @override
@@ -31,7 +31,7 @@ class KeyFrameSolidColorConverter extends KeyFrameColorConverter {
     final fill = from.fills.first;
     final fillComponent = fill.children.first;
     if (fillComponent is! SolidColorBase) {
-      print("Leftover fillComponent? ${fillComponent.runtimeType}");
+      print('Leftover fillComponent? ${fillComponent.runtimeType}');
       return null;
     }
 

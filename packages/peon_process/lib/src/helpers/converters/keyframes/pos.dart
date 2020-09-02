@@ -27,7 +27,7 @@ class KeyFramePosX extends KeyFrameConverter {
   void convertKey(Component component, LinearAnimation animation, int frame) {
     generateKey<KeyFrameDouble>(
         component, animation, frame, getPropertyKey(component))
-      ..value = (value as num).toDouble();
+      .value = (value as num).toDouble();
   }
 }
 
@@ -53,6 +53,6 @@ class KeyFramePosY extends KeyFrameConverter {
   void convertKey(Component component, LinearAnimation animation, int frame) {
     generateKey<KeyFrameDouble>(
         component, animation, frame, getPropertyKey(component))
-      ..value = (value as num).toDouble();
+      .value = (value as num).toDouble();
   }
 }

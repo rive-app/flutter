@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rive_core/bones/bone.dart';
+import 'package:rive_core/bones/root_bone.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/transform_component.dart';
 import 'package:rive_core/shapes/parametric_path.dart';
@@ -15,7 +17,8 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
       inspecting.intersectingCoreTypes.contains(TransformComponentBase.typeKey);
 
   @override
-  List<WidgetBuilder> expand(InspectionSet inspecting) {
+  List<WidgetBuilder> expand(
+      BuildContext panelContext, InspectionSet inspecting) {
     return [
       if (inspecting.intersectingCoreTypes.contains(NodeBase.typeKey))
         (context) => PropertyDual<double>(
@@ -25,6 +28,22 @@ class TransformInspectorBuilder extends ListenableInspectorBuilder {
               propertyKeyB: NodeBase.yPropertyKey,
               labelA: 'X',
               labelB: 'Y',
+            ),
+      if (inspecting.intersectingCoreTypes.contains(RootBoneBase.typeKey))
+        (context) => PropertyDual<double>(
+              name: 'Position',
+              objects: inspecting.components,
+              propertyKeyA: RootBoneBase.xPropertyKey,
+              propertyKeyB: RootBoneBase.yPropertyKey,
+              labelA: 'X',
+              labelB: 'Y',
+            ),
+      if (inspecting.intersectingCoreTypes.contains(BoneBase.typeKey))
+        (context) => PropertySingle<double>(
+              name: 'Length',
+              objects: inspecting.components,
+              propertyKey: BoneBase.lengthPropertyKey,
+              multiColumn: true,
             ),
       (context) => PropertyDual<double>(
             name: 'Scale',

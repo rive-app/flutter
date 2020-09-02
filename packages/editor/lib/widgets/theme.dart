@@ -218,6 +218,25 @@ class RiveColors {
 
   // Plans
   Color get errorText => magenta;
+  
+  // Bone Colors
+  List<Color> get boundBones => const [
+        Color.fromARGB(255, 109, 145, 255),
+        Color.fromARGB(255, 144, 90, 238),
+        Color.fromARGB(255, 255, 106, 147),
+        Color.fromARGB(255, 255, 214, 106),
+        Color.fromARGB(255, 104, 254, 217),
+        Color.fromARGB(255, 212, 222, 255),
+        Color.fromARGB(255, 209, 183, 255),
+        Color.fromARGB(255, 255, 153, 182),
+        Color.fromARGB(255, 255, 238, 195),
+        Color.fromARGB(255, 201, 255, 241),
+        Color.fromARGB(255, 18, 76, 255),
+        Color.fromARGB(255, 255, 0, 255),
+        Color.fromARGB(255, 244, 46, 100),
+        Color.fromARGB(255, 251, 188, 20),
+        Color.fromARGB(255, 0, 190, 143),
+      ];
 }
 
 /// TextStyles used in the Rive Theme

@@ -37,15 +37,13 @@ class FlareToRive {
     _getRiveComponents(artboards);
 
     _animationConverter = AnimationConverter(_fileComponents, riveFile);
-    for (final animation in animations) {
-      _generateAnimations(animation);
-    }
+    animations.forEach(_generateAnimations);
   }
 
   List<_ArtboardAnimations> _getAnimations(Map<String, Object> artboards) {
     final children = artboards['children'] as List;
     if (children == null || children.isEmpty) {
-      throw FormatException('"Artboards" object has no children');
+      throw const FormatException('"Artboards" object has no children');
     }
 
     final animationList = <_ArtboardAnimations>[];
@@ -56,7 +54,7 @@ class FlareToRive {
       if (artboardID == null) {
         throw StateError('Artboard ID cannot be null ${child['id']}');
       }
-      final animations = child['animations'];
+      final animations = child['animations'] as Object;
       if (animations is List) {
         animationList.add(_ArtboardAnimations(artboardID, animations));
       }
@@ -165,7 +163,7 @@ class FlareToRive {
           ..deserialize(object);
         break;
       case 'point':
-        final pointType = object['pointType'];
+        final pointType = object['pointType'] as String;
         converter = PathPointConverter(pointType, riveFile, maybeParent)
           ..deserialize(object);
         break;
@@ -198,12 +196,13 @@ class FlareToRive {
     }
   }
 
-  _generateAnimations(_ArtboardAnimations artboardAnimations) {
+  void _generateAnimations(_ArtboardAnimations artboardAnimations) {
     final animationList = artboardAnimations.jsonAnimations;
     final parentId = artboardAnimations.artboardID;
 
     for (final jsonAnimation in animationList) {
-      _animationConverter.deserialize(jsonAnimation, parentId);
+      _animationConverter.deserialize(
+          jsonAnimation as Map<String, Object>, parentId);
     }
   }
 }

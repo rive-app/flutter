@@ -58,22 +58,23 @@ Future<Credentials> getCredentials() async {
   }
 }
 
-Future<SqsQueue> getQueue() async {
+Future<SqsQueue> getQueue(ConsoleClient httpClient) async {
   if (Platform.environment['AWS_DART_QUEUE'] == null) {
     throw Exception('"AWS_DART_QUEUE" is required.');
   }
 
   var credentials = await getCredentials();
-  var aws = Aws(credentials: credentials, httpClient: ConsoleClient());
+  var aws = Aws(credentials: credentials, httpClient: httpClient);
   return aws.sqs.queue(Platform.environment['AWS_DART_QUEUE']);
 }
 
-Future<SqsQueue> getJSQueue() async {
+Future<SqsQueue> getJSQueue(ConsoleClient httpClient) async {
   if (Platform.environment['AWS_JS_QUEUE'] == null) {
     throw Exception('"AWS_JS_QUEUE" are required.');
   }
 
   var credentials = await getCredentials();
-  var aws = Aws(credentials: credentials, httpClient: ConsoleClient());
+  var aws = Aws(credentials: credentials, httpClient: httpClient);
+
   return aws.sqs.queue(Platform.environment['AWS_JS_QUEUE']);
 }

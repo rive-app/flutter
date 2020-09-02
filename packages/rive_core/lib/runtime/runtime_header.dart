@@ -6,7 +6,7 @@ import 'exceptions/rive_format_error_exception.dart';
 
 class RuntimeHeader {
   static const int majorVersion = 5;
-  static const int minorVersion = 0;
+  static const int minorVersion = 2;
   static const String fingerprint = 'RIVE';
 
   final int ownerId;
@@ -28,7 +28,8 @@ class RuntimeHeader {
 
     int readMajorVersion = reader.readVarUint();
     int readMinorVersion = reader.readVarUint();
-    if (readMajorVersion > majorVersion) {
+    if (readMajorVersion > majorVersion ||
+        (readMajorVersion == majorVersion && readMinorVersion > minorVersion)) {
       throw RiveUnsupportedVersionException(
           majorVersion, minorVersion, readMajorVersion, readMinorVersion);
     }

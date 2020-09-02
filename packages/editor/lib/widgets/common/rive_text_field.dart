@@ -5,6 +5,7 @@ import 'package:rive_editor/widgets/inherited_widgets.dart';
 class RiveTextField extends StatefulWidget {
   final bool enabled;
   final bool autofocus;
+  final bool obscureText;
   final String initialValue;
   final String hintText;
   final String errorText;
@@ -23,6 +24,7 @@ class RiveTextField extends StatefulWidget {
   const RiveTextField({
     this.enabled = true,
     this.autofocus = false,
+    this.obscureText = false,
     this.initialValue,
     this.hintText,
     this.errorText,
@@ -109,6 +111,7 @@ class _RiveTextFieldState extends State<RiveTextField>
           key: editableTextKey,
           enabled: widget.enabled,
           autofocus: widget.autofocus,
+          obscureText: widget.obscureText,
           onFieldSubmitted: widget.onSubmit,
           onChanged: widget.onChanged,
           inputFormatters: widget.formatters,

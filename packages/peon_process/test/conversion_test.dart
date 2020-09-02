@@ -80,8 +80,11 @@ void main() {
   ];
 
   void convertFlareRevision(String filename) {
-    // Pick one of the files in the `test_resouces` folder.
-    final fileString = File('test_resources/$filename.json').readAsStringSync();
+    // Make sure that resources are properly fetched when running tests 
+    // with VSCode or with /dev/test_all.sh
+    final prefix = Directory.current.path.endsWith('/test') ? '..' : '.';
+    final fileString =
+        File('$prefix/test_resources/$filename.json').readAsStringSync();
     expect(fileString.isNotEmpty, true);
     int ownerId = 0; // TODO: should be a real one
     final converter = FlareToRive(filename)..toFile(fileString);
@@ -90,14 +93,10 @@ void main() {
       info: RuntimeHeader(ownerId: ownerId, fileId: 0),
     );
     final bytes = exporter.export();
-    var file = File('out/$filename.riv');
-    file.create(recursive: true);
-    file.writeAsBytesSync(bytes, flush: true);
+    File('$prefix/out/$filename.riv')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(bytes, flush: true);
   }
-
-  test('Converts Flare revision to Rive', () {
-    convertFlareRevision('multiple_paths');
-  });
 
   test('Converts all test files', () {
     flareRevisionFiles.forEach(convertFlareRevision);

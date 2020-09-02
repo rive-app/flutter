@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rive_core/component.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_editor/widgets/common/combo_box.dart';
-import 'package:rive_editor/widgets/common/converters/string_value_converter.dart';
 import 'package:rive_editor/widgets/common/core_combo_box.dart';
-import 'package:rive_editor/widgets/common/core_text_field.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_component.dart';
-import 'package:rive_core/shapes/paint/fill.dart';
 import 'package:rive_editor/widgets/inspector/properties/inspector_popout_title.dart';
 
 /// Uses the InspectorPopoutComponent to build a row in the inspector for
