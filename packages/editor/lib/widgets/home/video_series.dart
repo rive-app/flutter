@@ -72,7 +72,7 @@ class _VideoSeriesContainerState extends State<VideoSeriesContainer> {
     return _episodeWidth * widget.episodes.length;
   }
 
-  void _paginate({ bool reverse }) {
+  void _paginate({ bool reverse = false }) {
     double destination = reverse 
     ? max(
       _scrollController.position.pixels - _episodeWidth * 2, 
@@ -236,13 +236,11 @@ class _VideoSeriesContainerState extends State<VideoSeriesContainer> {
                 left: 30, right: 30, bottom: 100,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     PaginateButton(
                       reverse: true,
                       onTap: () => _paginate(reverse: true),
                       visible: _displayPageBackward),
-                    const Spacer(),
                     PaginateButton(
                       onTap: _paginate,
                       visible: _displayPageForward
@@ -262,7 +260,7 @@ class PaginateButton extends StatelessWidget {
   const PaginateButton({
     Key key, 
     this.onTap,
-    this.reverse,
+    this.reverse = false,
     this.visible = true
   }) : super(key: key);
   

@@ -186,8 +186,6 @@ class _RightPanelState extends State<RightPanel> {
       return;
     }
 
-    print('Recieved $response');
-
     int removeIndex = _panelContent.indexWhere((item) 
       => item is QueryResponses);
 
@@ -391,7 +389,7 @@ class _UserQueryState extends State<UserQuery>
     _borderRadiusController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
-    )..addListener(() { setState((){}); });
+    );
 
     _borderRadiusAnimation = BorderRadiusTween(
       begin: const BorderRadius.vertical(top: Radius.circular(10)),
@@ -481,10 +479,15 @@ class _UserQueryState extends State<UserQuery>
     final theme = RiveTheme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 30),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colors.panelBackgroundLightGrey,
-          borderRadius: _borderRadiusAnimation.value),
+      child: AnimatedBuilder(
+        animation: _borderRadiusController,
+        builder: (_, child) {
+          return Container(
+            decoration: BoxDecoration(
+              color: theme.colors.panelBackgroundLightGrey,
+              borderRadius: _borderRadiusAnimation.value),
+              child: child);
+        },
         child: ValueListenableBuilder<bool>(
           valueListenable: widget.respond,
           builder: (conext, responded, child) {
@@ -514,7 +517,7 @@ class _UserQueryState extends State<UserQuery>
                 : _requestState,
             );
           },
-        )
+        ),
       ),
     );
   }
