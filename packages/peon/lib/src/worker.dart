@@ -9,15 +9,40 @@ final _log = Logger('peon');
 final defaultRegion =
     (Platform.environment['LOCAL_STACK_URL'] == null) ? null : 'us-east-1';
 
+class QueueManager {
+  final Future<SqsQueue> Function(ConsoleClient) getQueue;
+
+  DateTime _refreshTime;
+  SqsQueue _queue;
+  Future<SqsQueue> get queue async {
+    if (_queue == null || _refreshTime.isBefore(DateTime.now())) {
+      await _refreshQueue();
+    }
+    return _queue;
+  }
+
+  ConsoleClient client = ConsoleClient();
+
+  QueueManager(this.getQueue);
+
+  Future<void> _refreshQueue() async {
+    // Default expiration for tokens is 6 hours.
+    // https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+    _queue = await getQueue(client);
+    _refreshTime = DateTime.now().add(const Duration(hours: 1));
+  }
+}
+
 Future<void> loop(Future<SqsQueue> Function(ConsoleClient) getQueue,
     Map<String, Task Function(Map<String, dynamic>)> tasks) async {
   _log.info('Ready to work.');
-  SqsQueue queue;
-  ConsoleClient client = ConsoleClient();
-  while (true) {
-    queue ??= await getQueue(client);
-    client = ConsoleClient();
+  final queueManager = QueueManager(getQueue);
 
+  DateTime queueAccess;
+
+  while (true) {
+    queueAccess ??= DateTime.now();
+    var queue = await queueManager.queue;
     List<SqsMessage> messages = await queue.receiveMessage(
       2,
       waitSeconds: 10,
