@@ -51,7 +51,7 @@ class StageCursor extends StageItem<ClientSidePlayer>
 
   @override
   Iterable<StageDrawPass> get drawPasses =>
-      [StageDrawPass(draw, order: 2, inWorldSpace: true)];
+      [StageDrawPass(draw, order: 5000, inWorldSpace: true)];
 
   @override
   bool initialize(ClientSidePlayer object) {

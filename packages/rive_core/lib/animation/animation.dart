@@ -12,18 +12,14 @@ class Animation extends AnimationBase<RiveFile> {
     if (_artboard == value) {
       return;
     }
-    var old = _artboard;
+    _artboard?.internalRemoveAnimation(this);
     _artboard = value;
+    _artboard?.internalAddAnimation(this);
     // -> editor-only
-    artboardId = value?.id;
+    if (value != null) {
+      artboardId = value.id;
+    }
     // <- editor-only
-    artboardChanged(old, value);
-  }
-
-  @protected
-  void artboardChanged(Artboard from, Artboard to) {
-    from?.internalRemoveAnimation(this);
-    to?.internalAddAnimation(this);
   }
 
   @override
