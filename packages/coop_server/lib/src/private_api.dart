@@ -3,9 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:core/coop/change.dart';
+import 'package:core/coop/coop_command.dart';
+import 'package:core/coop/coop_file.dart';
+import 'package:core/coop/coop_server_client.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:retry/retry.dart';
+import 'package:utilities/binary_buffer/binary_writer.dart';
 
 /// Timeout value for communication to the 2D service
 const timeout = Duration(seconds: 5);
@@ -140,8 +145,8 @@ class PrivateApi {
   Future<Uint8List> restoreRevision(
       int ownerId, int fileId, int revisionId) async {
     try {
-      var response = await http
-          .post('$host/revision/$ownerId/$fileId/$revisionId');
+      var response =
+          await http.post('$host/revision/$ownerId/$fileId/$revisionId');
       if (response.statusCode == 200) {
         return response.bodyBytes;
       }
@@ -149,5 +154,26 @@ class PrivateApi {
     } on Exception catch (_) {
       return null;
     }
+  }
+
+  Future<void> persistChangeSet(CoopServerClient client, CoopFile file,
+      int serverChangeId, ChangeSet changes, bool accepted) async {
+    try {
+      var headers = <String, String>{
+        'X-rive-owner-id': client.ownerId.toString(),
+        'X-rive-accepted': accepted ? 'true' : 'false',
+      };
+      var writer = BinaryWriter();
+      changes.serialize(writer);
+
+      var response = await http.post(
+        '$host/changeset/${file.ownerId}/${file.fileId}/${serverChangeId - CoopCommand.minChangeId}',
+        headers: headers,
+        body: writer.uint8Buffer,
+      );
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      }
+    } on Exception catch (_) {}
   }
 }
