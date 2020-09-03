@@ -130,13 +130,17 @@ class PrivateApi {
 
   /// Load the latest revision data for a file.
   Future<Uint8List> load(int ownerId, int fileId) async {
+    print('loading $ownerId-$fileId');
     try {
       var response = await http.get('$host/revision/$ownerId/$fileId');
       if (response.statusCode == 200) {
+        print('good!');
         return response.bodyBytes;
       }
+      print('got ${response.statusCode}');
       return null;
-    } on Exception catch (_) {
+    } on Exception catch (error) {
+      print('got $error');
       return null;
     }
   }
@@ -144,10 +148,12 @@ class PrivateApi {
   /// Restore a revision by id for a file, and get the data for it.
   Future<Uint8List> restoreRevision(
       int ownerId, int fileId, int revisionId) async {
+    print('restoring revision $ownerId-$fileId $revisionId');
     try {
       var response =
           await http.post('$host/revision/$ownerId/$fileId/$revisionId');
       if (response.statusCode == 200) {
+        print('revision restored $ownerId-$fileId $revisionId');
         return response.bodyBytes;
       }
       return null;

@@ -757,9 +757,11 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
         sendChanges.objects.add(objectChanges);
       }
     });
-    freshChanges[sendChanges] = FreshChange(changes, useFrom);
-    _client?.queueChanges(sendChanges);
-    persistChanges(sendChanges);
+    if (sendChanges.objects.isNotEmpty) {
+      freshChanges[sendChanges] = FreshChange(changes, useFrom);
+      _client?.queueChanges(sendChanges);
+      persistChanges(sendChanges);
+    }
     return sendChanges;
   }
 
