@@ -582,10 +582,12 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
       }
     });
 
-    // remove duplicates...
+    // TODO: do want to remove duplicates?
+    /*
     bool replaced;
     do {
       replaced = false;
+      vertices = path.vertices;
       var length = vertices.length;
       for (var i = 1, limit = path.isClosed ? length + 1 : length;
           i < limit;
@@ -594,7 +596,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         var pointB = vertices[i % length];
 
         if (Vec2D.approximatelyEqual(pointA.translation, pointB.translation)) {
-          pointB.remove();
+          pointB.removeRecursive();
           if (pointA is CubicVertex && pointB is CubicVertex) {
             pointA.outPoint = pointB.outPoint;
           }
@@ -603,6 +605,7 @@ class VectorPenTool extends PenTool<Path> with TransformingTool {
         }
       }
     } while (replaced);
+    */
 
     // capture undo/redo
     file.captureJournalEntry();
