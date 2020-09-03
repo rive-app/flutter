@@ -168,13 +168,16 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
     // if it's { or something else, send wtf.
     var data = await _privateApi.load(ownerId, fileId);
     if (data == null) {
+      print('failed to load revision from private_api $ownerId-$fileId');
       // private api is currently not availble or somehow failed, make sure we
       // terminate the connect (client will retry).
       return false;
     }
 
+    print('revision data is ${data.length} $ownerId-$fileId');
     if ((data.isNotEmpty && data[0] == '{'.codeUnitAt(0)) ||
         (data == null || data.isEmpty)) {
+      print('bad data in revision for $ownerId-$fileId');
       file = CoopFile()
         ..ownerId = ownerId
         ..fileId = fileId
@@ -190,6 +193,7 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
           ),
         ),
       )) {
+        print('failed to deserialize revision for $ownerId-$fileId');
         file = CoopFile()
           ..ownerId = ownerId
           ..fileId = fileId
