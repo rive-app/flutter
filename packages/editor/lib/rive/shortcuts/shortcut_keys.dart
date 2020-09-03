@@ -76,6 +76,7 @@ Map<ShortcutKey, Set<PhysicalKeyboardKey>> keyToPhysical = {
   ShortcutKey.up: {PhysicalKeyboardKey.arrowUp},
   ShortcutKey.down: {PhysicalKeyboardKey.arrowDown},
   ShortcutKey.semiColon: {PhysicalKeyboardKey.semicolon},
+  ShortcutKey.tab: {PhysicalKeyboardKey.tab},
   ShortcutKey.enter: {
     PhysicalKeyboardKey.enter,
     PhysicalKeyboardKey.numpadEnter
@@ -166,6 +167,9 @@ String keyname(ShortcutKey key) {
 
 ShortcutKey keyForCode(int code) {
   switch (code) {
+    case 0x9:
+      return ShortcutKey.tab;
+      break;
     case 0x12:
       return ShortcutKey.alt;
     case 0x0D:
@@ -301,6 +305,7 @@ enum ShortcutKey {
   systemCmd,
   comma,
   period,
+  tab,
   a,
   b,
   c,
