@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -194,6 +195,12 @@ class RiveCoopIsolateProcess extends CoopIsolateProcess {
         ),
       )) {
         print('failed to deserialize revision for $ownerId-$fileId');
+        try {
+          var stringData = utf8.decode(data, allowMalformed: true);
+          print('failed data looks like $stringData');
+        } on Error {
+          print('failed to decode ${data.length} $data');
+        }
         file = CoopFile()
           ..ownerId = ownerId
           ..fileId = fileId
