@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -13,7 +14,7 @@ final log = Logger('peon');
 
 void main() {
   configureLogger();
-  runZoned(() {
+  runZonedGuarded<void>(() {
     final registeredTasks = <String, Task Function(Map<String, dynamic>)>{};
     registeredTasks['ping'] = PingTask.fromData;
     registeredTasks['echo'] = EchoTask.fromData;
@@ -23,8 +24,10 @@ void main() {
     registeredTasks['exportrive'] = ExportRive.fromData;
 
     loop(getQueue, registeredTasks);
-  }, onError: (dynamic e, dynamic s) {
+  }, (dynamic e, dynamic s) {
     log.severe('Me not that kind of orc!\nError: $e\nStackTrace: $s');
+    // Lets make sure we exit if the zone is done for
+    exit(1);
   });
 
   runApp(MyApp());
