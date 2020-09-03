@@ -1,0 +1,14 @@
+name: coop_replay
+
+environment:
+  sdk: ">=2.6.0 <3.0.0"
+
+dependencies:
+  args: ^1.5.0
+  colorize: ^2.0.0
+  dart_style: ^1.3.3
+  filesize: ^1.0.4
+  core:
+    path: ../core
+  core_generator:
+    path: ../core_generator
