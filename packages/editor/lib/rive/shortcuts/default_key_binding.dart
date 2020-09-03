@@ -81,7 +81,7 @@ final ShortcutKeyBinding defaultKeyBinding = ShortcutKeyBinding(
     Shortcut(
       ShortcutAction.switchMode,
       {
-        ShortcutKey.backquote,
+        ShortcutKey.tab,
       },
     ),
     Shortcut(

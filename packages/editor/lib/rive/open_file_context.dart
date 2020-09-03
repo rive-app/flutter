@@ -661,6 +661,17 @@ class OpenFileContext with RiveFileDelegate {
       case ShortcutAction.navigateTreeUp:
         return _strafeRabbits(-1);
 
+      case ShortcutAction.switchMode:
+        switch (_mode.value) {
+          case EditorMode.design:
+            changeMode(EditorMode.animate);
+            break;
+          case EditorMode.animate:
+            changeMode(EditorMode.design);
+            break;
+        }
+        return true;
+        
       default:
         return false;
     }

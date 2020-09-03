@@ -53,12 +53,8 @@ class Rive {
         skipTraversal: true,
         debugLabel: 'Rive Primary Focus Node',
         onKey: (focusNode, event) {
-          onKeyEvent(
-            defaultKeyBinding,
-            event,
-            _focusNode != FocusManager.instance.primaryFocus,
-          );
-          return false;
+          // Swallow focus if the primary focus node has focus...
+          return _focusNode == FocusManager.instance.primaryFocus;
         });
 
     _filesApi = FileApi(api);
