@@ -200,6 +200,17 @@ abstract class CoreContext implements LocalSettings, ObjectRoot {
 
   final List<CorePropertyChanges> journal = [];
   CorePropertyChanges _currentChanges;
+
+  void debugPrintChanges() {
+    print('${_currentChanges.entries.length} changes.');
+    _currentChanges.entries.forEach((key, value) {
+        var object = resolve<Core>(key);
+        print('- $object');
+        value.forEach((key, value) {
+            print('  - property $key: ${value.to}');
+        });
+    });
+  }
   bool get hasRecordedChanges => _currentChanges != null;
 
   int _journalIndex = 0;
