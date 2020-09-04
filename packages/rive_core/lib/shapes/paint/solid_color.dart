@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/shapes/paint/shape_paint.dart';
 import 'package:rive_core/shapes/paint/shape_paint_mutator.dart';
 import 'package:rive_core/shapes/shape_paint_container.dart';
 import 'package:rive_core/src/generated/shapes/paint/solid_color_base.dart';
@@ -50,4 +51,11 @@ class SolidColor extends SolidColorBase with ShapePaintMutator {
     paint?.color = color
         .withOpacity((color.opacity * renderOpacity).clamp(0, 1).toDouble());
   }
+
+  // -> editor-only
+  @override
+  bool validate() {
+    return super.validate() && parent is ShapePaint;
+  }
+  // <- editor-only
 }

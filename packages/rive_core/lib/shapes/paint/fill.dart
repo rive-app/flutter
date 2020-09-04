@@ -30,11 +30,6 @@ class Fill extends FillBase {
       (parent as ShapePaintContainer).addFill(this);
     }
   }
-  
-  // -> editor-only
-  @override
-  bool validate() => super.validate() && parent is ShapePaintContainer;
-  // <- editor-only
 
   @override
   void draw(Canvas canvas, Path path) {

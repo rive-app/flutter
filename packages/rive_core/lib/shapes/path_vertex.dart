@@ -160,5 +160,10 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
   void clearWeight() {
     _weight?.remove();
   }
+
+  @override
+  bool validate() {
+    return super.validate() && parent is Path;
+  }
   // <- editor-only
 }
