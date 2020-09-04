@@ -120,4 +120,11 @@ class PathComposer extends PathComposerBase {
       _changeShape(ancestor);
     }
   }
+
+  // -> editor-only
+  @override
+  bool validate() {
+    return super.validate() && _shape != null;
+  }
+  // <- editor-only
 }

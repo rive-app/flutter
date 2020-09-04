@@ -90,6 +90,11 @@ abstract class ShapePaint extends ShapePaintBase {
     super.onRemoved();
     _shapePaintContainer?.updateShapePaints();
   }
+
+  @override
+  bool validate() {
+    return super.validate() && parent is ShapePaintContainer;
+  }
   // <- editor-only
 
   @override

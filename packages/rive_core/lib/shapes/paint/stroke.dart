@@ -96,11 +96,6 @@ class Stroke extends StrokeBase {
     _effect?.invalidateEffect();
   }
 
-  // -> editor-only
-  @override
-  bool validate() => super.validate() && parent is ShapePaintContainer;
-  // <- editor-only
-
   @override
   void draw(Canvas canvas, Path path) {
     if (!isVisible) {
