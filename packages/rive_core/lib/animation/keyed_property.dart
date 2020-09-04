@@ -126,13 +126,22 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
   bool internalRemoveKeyFrame(KeyFrame frame) {
     var removed = _keyframes.remove(frame);
     if (_keyframes.isEmpty) {
-      // Remove this keyed property.
-      context.removeObject(this);
+      // If they keyframes are now empty, we might want to remove this keyed
+      // property. Wait for any other pending changes to complete before
+      // checking.
+      context?.dirty(_checkShouldRemove);
     }
     // -> editor-only
     context?.dirty(_notifyKeyframeRemoved);
     // <- editor-only
     return removed;
+  }
+
+  void _checkShouldRemove() {
+    if (_keyframes.isEmpty) {
+      // Remove this keyed property.
+      context?.removeObject(this);
+    }
   }
 
   // -> editor-only

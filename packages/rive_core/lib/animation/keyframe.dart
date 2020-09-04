@@ -42,14 +42,6 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   @override
   void onAdded() {
     // -> editor-only
-    if (keyedPropertyId != null) {
-      KeyedProperty keyedProperty = context?.resolve(keyedPropertyId);
-      if (keyedProperty == null) {
-        _log.finest("Failed to resolve KeyedProperty with id $keyedPropertyId");
-      } else {
-        keyedProperty.internalAddKeyFrame(this);
-      }
-    }
     _updateSeconds();
     // <- editor-only
   }
@@ -75,11 +67,24 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
 
   @override
   void onAddedDirty() {
+    // -> editor-only
+    if (keyedPropertyId != null) {
+      // Make sure we resolve keyed properties during dirty cycle so they don't
+      // get removed if they are empty (keyed properties should know what they
+      // contain by the time dirt is cleaned).
+      KeyedProperty keyedProperty = context?.resolve(keyedPropertyId);
+      if (keyedProperty == null) {
+        _log.finest('Failed to resolve KeyedProperty with id $keyedPropertyId');
+      } else {
+        keyedProperty.internalAddKeyFrame(this);
+      }
+    }
+    // <- editor-only
     if (interpolatorId != null) {
       interpolator = context?.resolve(interpolatorId);
       // -> editor-only
       if (interpolator == null) {
-        _log.finest("Failed to resolve interpolator with id $interpolatorId");
+        _log.finest('Failed to resolve interpolator with id $interpolatorId');
       }
       // <- editor-only
     }

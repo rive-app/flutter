@@ -6,6 +6,7 @@ import 'package:core/debounce.dart';
 import 'package:rive_core/animation/cubic_interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/linear_animation.dart';
+import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/managers/animation/animation_manager.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
 import 'package:rive_editor/rive/shortcuts/shortcut_actions.dart';
@@ -16,7 +17,7 @@ import 'package:utilities/list_equality.dart';
 import 'package:rive_core/animation/interpolator.dart';
 import 'package:meta/meta.dart';
 
-class KeyFrameManager extends AnimationManager {
+class KeyFrameManager extends AnimationManager with RiveFileDelegate {
   final OpenFileContext activeFile;
   final _selection =
       BehaviorSubject<HashSet<KeyFrame>>.seeded(HashSet<KeyFrame>());
@@ -35,12 +36,45 @@ class KeyFrameManager extends AnimationManager {
 
   KeyFrameManager(LinearAnimation animation, this.activeFile)
       : super(animation) {
+    activeFile.core.addDelegate(this);
     activeFile.addActionHandler(_onAction);
     activeFile.selection.addListener(_stageSelectionChanged);
 
     _interpolationController.stream.listen(_changeInterpolation);
     _cubicController.stream.listen(_changeCubicInterpolation);
     _updateCommonInterpolation();
+  }
+
+  @override
+  void onObjectRemoved(Core object) {
+    // When a keyframe is removed, schedule a pass to clean the selection when
+    // the dirty cycle completes.
+    if (object is KeyFrame) {
+      activeFile.core.dirty(_cleanSelection);
+    }
+  }
+
+  /// Check if any keyframes have been removed from core, this lets us clean up
+  /// our selection in a self contained way and dispatch only one change in the
+  /// stream even when multiple keyframes are deleted in a single action.
+  void _cleanSelection() {
+    // In case event comes in after we've closed.
+    if (_selection.isClosed) {
+      return;
+    }
+    var oldSelection = _selection.value;
+    var selection = HashSet<KeyFrame>.from(_selection.value);
+
+    bool changed = false;
+    for (final keyframe in oldSelection) {
+      if (!keyframe.isActive) {
+        selection.remove(keyframe);
+        changed = true;
+      }
+    }
+    if (changed) {
+      _selection.add(selection);
+    }
   }
 
   void _stageSelectionChanged() => _clearSelection();
@@ -178,6 +212,7 @@ class KeyFrameManager extends AnimationManager {
           _keyframeInterpolationTypeChanged);
     }
     _cubicController.close();
+    activeFile.core.removeDelegate(this);
     activeFile.removeActionHandler(_onAction);
     activeFile.selection.removeListener(_stageSelectionChanged);
     _selection.close();
