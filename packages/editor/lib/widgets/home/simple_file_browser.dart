@@ -678,6 +678,7 @@ class TopNav extends StatelessWidget {
 
   Widget _navControls(BuildContext context) {
     final riveColors = RiveTheme.of(context).colors;
+    final styles = RiveTheme.of(context).textStyles;
     final children = <Widget>[];
     const headerName = 'Recents';
 
@@ -692,7 +693,7 @@ class TopNav extends StatelessWidget {
       ),
     );
     children.add(const SizedBox(width: 9));
-    children.add(const Text(headerName));
+    children.add(Text(headerName, style: styles.fileGreyTextLarge));
     children.add(const Spacer());
     return Row(children: children);
   }

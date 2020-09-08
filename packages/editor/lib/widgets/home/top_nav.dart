@@ -22,6 +22,7 @@ class TopNav extends StatelessWidget {
 
   Widget _navControls(BuildContext context, List<Folder> folders) {
     final riveColors = RiveTheme.of(context).colors;
+    final styles = RiveTheme.of(context).textStyles;
     final children = <Widget>[];
     final currentFolder =
         folders.firstWhere((folder) => folder.id == currentDirectory.folder.id);
@@ -37,7 +38,7 @@ class TopNav extends StatelessWidget {
         ),
       );
       children.add(const SizedBox(width: 9));
-      children.add(Text(owner.displayName));
+      children.add(Text(owner.displayName, style: styles.fileGreyTextLarge));
     } else {
       children.add(
         Center(
@@ -67,7 +68,7 @@ class TopNav extends StatelessWidget {
         ),
       );
       children.add(const SizedBox(width: 9));
-      children.add(Text(currentFolder.name));
+      children.add(Text(currentFolder.name, style: styles.fileGreyTextLarge));
     }
     children.add(const Spacer());
     children.add(PopupButton<PopupContextItem>(
