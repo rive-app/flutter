@@ -11,7 +11,7 @@ import 'package:rive/rive.dart' hide LinearGradient;
 import 'package:flutter/services.dart';
 
 enum ContentType {
-  video, blog
+  video, blog, helpCenter
 }
 
 class VideoSeriesContainer extends StatefulWidget {
@@ -205,12 +205,12 @@ class _VideoSeriesContainerState extends State<VideoSeriesContainer> {
                       children: [
                         Text(widget.tag, 
                           style: theme.textStyles.videoSeriesTag),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 15),
                         Text(widget.title, 
                           style: theme.textStyles.videoSeriesTitle),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 15),
                         SizedBox(
-                          width: 500,
+                          width: 420,
                           child: Text(widget.blurb,
                             style: theme.textStyles.videoSeriesBlurb)),
                         const SizedBox(height: 30),
@@ -378,6 +378,7 @@ class _VideoSeriesEpisodeState extends State<VideoSeriesEpisode> {
   Iterable<PackedIcon> get _icon {
     switch (widget.type) {
       case ContentType.blog:
+      case ContentType.helpCenter:
         return PackedIcon.helpCenter;
       default:
         return PackedIcon.play;
