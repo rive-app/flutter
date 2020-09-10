@@ -130,9 +130,10 @@ class RiveFile extends RiveCoreContext {
 
     if (_needDependenciesBuilt.isNotEmpty) {
       // Copy it in case it is changed during the building (meaning this process
-      // needs to recurse).
+      // needs to recurse). Make sure to include only elements that are active
+      // (currently in core) as some may get added to this list before deleting.
       Set<Component> needDependenciesBuilt =
-          Set<Component>.from(_needDependenciesBuilt);
+          _needDependenciesBuilt.where((object) => object.isActive).toSet();
       _needDependenciesBuilt.clear();
 
       // First resolve the artboards
