@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:rive_core/bones/weight.dart';
+import 'package:rive_core/bones/weighted_vertex.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
@@ -157,6 +158,27 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
   }
 
   void initWeight();
+
+  bool validateWeight(int tendonCount) {
+    var helpers = weightedVertices;
+    bool wasValid = true;
+    for (final helper in helpers) {
+      for (int i = 0; i < 4; i++) {
+        var tendonIndex = helper.getTendon(i) - 1;
+        if (tendonIndex >= tendonCount) {
+          // This weight was set to a tendon that's no longer available, set the
+          // weight to 0.
+          helper.setWeight(tendonIndex, tendonCount, 0);
+          wasValid = false;
+        }
+      }
+    }
+    return wasValid;
+  }
+
+  // Helper to set specific weights for sub-vertices.
+  List<WeightedVertex> get weightedVertices => [TranslationWeight(this)];
+
   void clearWeight() {
     _weight?.remove();
   }
@@ -167,3 +189,23 @@ abstract class PathVertex<T extends Weight> extends PathVertexBase {
   }
   // <- editor-only
 }
+
+// -> editor-only
+class TranslationWeight extends WeightedVertex {
+  final PathVertex<Weight> vertex;
+
+  TranslationWeight(this.vertex);
+
+  @override
+  int get weightIndices => vertex.weight.indices;
+
+  @override
+  set weightIndices(int value) => vertex.weight.indices = value;
+
+  @override
+  int get weights => vertex.weight.values;
+
+  @override
+  set weights(int value) => vertex.weight.values = value;
+}
+// <- editor-only

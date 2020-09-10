@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:meta/meta.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/animation_base.dart';

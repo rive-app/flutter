@@ -116,7 +116,7 @@ class Skin extends SkinBase {
         markRebuildDependencies();
         parent?.markRebuildDependencies();
         // -> editor-only
-        (parent as Skinnable)?.internalTendonsChanged();
+        (parent as Skinnable)?.internalTendonsChanged(_tendons.length);
         // <- editor-only
         break;
     }
@@ -135,7 +135,7 @@ class Skin extends SkinBase {
         }
         parent?.markRebuildDependencies();
         // -> editor-only
-        (parent as Skinnable)?.internalTendonsChanged();
+        (parent as Skinnable)?.internalTendonsChanged(_tendons.length);
         // <- editor-only
 
         break;
