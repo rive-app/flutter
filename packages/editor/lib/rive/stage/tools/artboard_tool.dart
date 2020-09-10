@@ -103,6 +103,9 @@ class ArtboardTool extends CreateTool {
 
   @override
   void endDrag() {
+    if(_artboard != null) {
+      _artboard.stageItem.select(true);
+    }
     _artboard = null;
     _cursor = null;
   }
