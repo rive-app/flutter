@@ -54,6 +54,9 @@ class Tendon extends TendonBase {
     super.onAddedDirty();
     if (boneId != null) {
       _bone = context?.resolve(boneId);
+      // -> editor-only
+      _bone.whenRemoved(remove);
+      // <- editor-only
     }
   }
 

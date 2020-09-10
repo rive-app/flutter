@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rive_editor/rive/weighted_vertex.dart';
+import 'package:rive_core/bones/weighted_vertex.dart';
 
 class TestWeightedVertex extends WeightedVertex {
   @override

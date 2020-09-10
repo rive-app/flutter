@@ -12,8 +12,9 @@ abstract class Skinnable {
   // -> editor-only
   final Event skinChanged = Event();
   // Should be @internal when supported...
-  void internalTendonsChanged() {
+  void internalTendonsChanged(int tendonCount) {
     skinChanged.notify();
+    validateWeights(tendonCount);
   }
 
   // These come in when Skinnable is mixedin/implemented with a
@@ -52,6 +53,7 @@ abstract class Skinnable {
   Mat2D get worldTransform;
   void initWeights();
   void clearWeights();
+  void validateWeights(int tendonCount);
   // <- editor-only
 
 }

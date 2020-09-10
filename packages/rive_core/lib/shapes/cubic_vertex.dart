@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:rive_core/bones/cubic_weight.dart';
 import 'package:rive_core/bones/weight.dart';
+import 'package:rive_core/bones/weighted_vertex.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/src/generated/shapes/cubic_vertex_base.dart';
@@ -51,6 +52,14 @@ abstract class CubicVertex extends CubicVertexBase {
   }
 
   @override
+  List<WeightedVertex> get weightedVertices {
+    var helpers = super.weightedVertices;
+    helpers.add(InWeight(this));
+    helpers.add(OutWeight(this));
+    return helpers;
+  }
+
+  @override
   void initWeight() {
     assert(context != null && context.isBatchAdding);
     var weight = CubicWeight();
@@ -59,3 +68,41 @@ abstract class CubicVertex extends CubicVertexBase {
   }
   // <- editor-only
 }
+
+// -> editor-only
+class InWeight extends WeightedVertex {
+  final CubicVertex vertex;
+
+  InWeight(this.vertex);
+
+  @override
+  int get weightIndices => vertex.weight.inIndices;
+
+  @override
+  set weightIndices(int value) => vertex.weight.inIndices = value;
+
+  @override
+  int get weights => vertex.weight.inValues;
+
+  @override
+  set weights(int value) => vertex.weight.inValues = value;
+}
+
+class OutWeight extends WeightedVertex {
+  final CubicVertex vertex;
+
+  OutWeight(this.vertex);
+
+  @override
+  int get weightIndices => vertex.weight.outIndices;
+
+  @override
+  set weightIndices(int value) => vertex.weight.outIndices = value;
+
+  @override
+  int get weights => vertex.weight.outValues;
+
+  @override
+  set weights(int value) => vertex.weight.outValues = value;
+}
+// <- editor-only

@@ -9,7 +9,7 @@ import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/vec2d.dart';
 import 'package:rive_core/shapes/path_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_drawable.dart';
-import 'package:rive_editor/rive/weighted_vertex.dart';
+import 'package:rive_core/bones/weighted_vertex.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/rive/stage/stage.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';

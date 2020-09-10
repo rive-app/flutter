@@ -121,6 +121,11 @@ abstract class WeightedVertex {
     weightIndices = indexValues | (tendonIndex << (weightIndex * 8));
   }
 
+  int getTendon(int weightIndex) {
+    assert(weightIndex < 4 && weightIndex >= 0);
+    return (weightIndices >> (weightIndex*8)) & 0xFF;
+  }
+
   void _rawSetWeight(int weightIndex, int weightValue) {
     assert(weightIndex < 4 && weightIndex >= 0);
     var weightValues = weights;
@@ -133,15 +138,8 @@ abstract class WeightedVertex {
   int _getRawWeight(int weightIndex) => (weights >> (weightIndex * 8)) & 0xFF;
 
   double getWeight(int tendonIndex) {
-    var indices = weightIndices;
-    var bonesIndices = [
-      indices & 0xFF,
-      (indices >> 8) & 0xFF,
-      (indices >> 16) & 0xFF,
-      (indices >> 24) & 0xFF,
-    ];
     for (int i = 0; i < 4; i++) {
-      if (bonesIndices[i] == tendonIndex + 1) {
+      if (getTendon(i) == tendonIndex + 1) {
         return _getRawWeight(i) / 255;
       }
     }
