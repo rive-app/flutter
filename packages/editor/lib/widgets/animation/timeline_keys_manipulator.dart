@@ -490,6 +490,7 @@ class MouseTimelineViewportHelper {
 class MouseTimelineHelper extends MouseTimelineViewportHelper {
   // Row height in pixels.
   final double _rowHeight;
+  final double _keyHitRadius;
 
   // How far we can be from the key in frame space to consider it
   // selected/clicked.
@@ -502,6 +503,7 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
     TimelineViewport viewport,
     this.rows,
   })  : _rowHeight = theme.treeStyles.timeline.itemHeight,
+        _keyHitRadius = theme.dimensions.keySize / 2 + 1,
         super(widgetSize, theme, viewport) {
     _horizontalThreshold =
         theme.dimensions.keyUpper * secondsPerPixel * viewport.fps;
@@ -571,10 +573,17 @@ class MouseTimelineHelper extends MouseTimelineViewportHelper {
     HashSet<KeyHierarchyViewModel> expandedRows,
   ) {
     // First find closest row.
-    var rowIndex = ((verticalScroll + position.dy) / _rowHeight).floor();
+    var realRowIndex = (verticalScroll + position.dy) / _rowHeight;
+    var rowIndex = realRowIndex.floor();
     if (rowIndex < 0 || rowIndex >= rows.length) {
       return null;
     }
+    var distanceFromCenter =
+        (0.5 - (realRowIndex - rowIndex)).abs() * _rowHeight;
+    if (distanceFromCenter > _keyHitRadius) {
+      return null;
+    }
+
     var row = rows[rowIndex].data;
 
     // Closest seconds to where we clicked.
