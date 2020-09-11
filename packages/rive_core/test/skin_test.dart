@@ -47,7 +47,9 @@ void main() {
     file.captureJournalEntry();
 
     var tendon1 = Skin.bind(rootBone, path);
+    tendon1.name = 'First';
     var tendon2 = Skin.bind(bone, path);
+    tendon2.name = 'Second';
     expect(tendon1, isNotNull);
     expect(tendon2, isNotNull);
 
@@ -94,5 +96,28 @@ void main() {
     expect(skins.length, 1, reason: 'expect our skin to come back');
     skin = skins.first;
     expect(skin.tendons.length, 1);
+
+    file.undo();
+    expect(skin.tendons.length, 2);
+
+    // Remove both tendons in one op. Validates fix for:
+    // https://github.com/rive-app/rive/issues/1248
+    skin.tendons.first.remove();
+    skin.tendons.first.remove();
+    file.captureJournalEntry();
+    // Expect the skin to have been removed by the same op since we removed both
+    // tendons.
+    expect(skin.isActive, false);
+
+    file.undo();
+    // Skin should be re-added.
+    skins = path.children.whereType<Skin>();
+    expect(skins.length, 1, reason: 'expect our skin to come back');
+    skin = skins.first;
+    // Both tendons come back
+    expect(skin.tendons.length, 2);
+    // Tendons are in order.
+    expect(skin.tendons[0].name, 'First');
+    expect(skin.tendons[1].name, 'Second');
   });
 }
