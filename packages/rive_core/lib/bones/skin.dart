@@ -116,7 +116,8 @@ class Skin extends SkinBase {
         markRebuildDependencies();
         parent?.markRebuildDependencies();
         // -> editor-only
-        (parent as Skinnable)?.internalTendonsChanged(_tendons.length);
+        (parent as Skinnable)?.internalTendonsChanged();
+        context?.dirty(_validateTendons);
         // <- editor-only
         break;
     }
@@ -135,11 +136,27 @@ class Skin extends SkinBase {
         }
         parent?.markRebuildDependencies();
         // -> editor-only
-        (parent as Skinnable)?.internalTendonsChanged(_tendons.length);
+        (parent as Skinnable)?.internalTendonsChanged();
+        context?.dirty(_validateTendons);
         // <- editor-only
 
         break;
     }
+  }
+
+  /// Important that this be called at the end of an operation such that  all
+  /// the expected tendons have been added removed/added. For example, at the
+  /// end of an undo/redo or file load.
+  void _validateTendons() {
+    _tendons.sort((a, b) => a.index.compareTo(b.index));
+
+    // This is here just to patch up old coop files that didn't store the index.
+    // Having the index ensures the undo/redo operations put the tendons back in
+    // order.
+    for (int i = 0; i < _tendons.length; i++) {
+      _tendons[i].index = i;
+    }
+    (parent as Skinnable)?.validateWeights();
   }
 
   // -> editor-only

@@ -508,6 +508,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'tx';
       case SkinBase.tyPropertyKey:
         return 'ty';
+      case TendonBase.indexPropertyKey:
+        return 'index';
       case TendonBase.boneIdPropertyKey:
         return 'boneId';
       case TendonBase.xxPropertyKey:
@@ -613,6 +615,7 @@ abstract class RiveCoreContext extends CoreContext {
         case CubicWeightBase.outIndicesPropertyKey:
         case PointsPathBase.editingModeValuePropertyKey:
         case ClippingShapeBase.clipOpValuePropertyKey:
+        case TendonBase.indexPropertyKey:
           var value = uintType.deserialize(reader);
           setUint(object, change.op, value);
           break;
@@ -769,6 +772,7 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicWeightBase.outIndicesPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
       case ClippingShapeBase.clipOpValuePropertyKey:
+      case TendonBase.indexPropertyKey:
         if (value != null && value is int) {
           change.value = uintType.serialize(value);
         } else {
@@ -1403,6 +1407,11 @@ abstract class RiveCoreContext extends CoreContext {
           object.ty = value;
         }
         break;
+      case TendonBase.indexPropertyKey:
+        if (object is TendonBase && value is int) {
+          object.index = value;
+        }
+        break;
       case TendonBase.boneIdPropertyKey:
         if (object is TendonBase && value is Id) {
           object.boneId = value;
@@ -1951,6 +1960,11 @@ abstract class RiveCoreContext extends CoreContext {
       case SkinBase.tyPropertyKey:
         if (object is SkinBase && value is double) {
           object.ty = value;
+        }
+        break;
+      case TendonBase.indexPropertyKey:
+        if (object is TendonBase && value is int) {
+          object.index = value;
         }
         break;
       case TendonBase.boneIdPropertyKey:
@@ -3020,6 +3034,11 @@ abstract class RiveCoreContext extends CoreContext {
           return object.ty;
         }
         break;
+      case TendonBase.indexPropertyKey:
+        if (object is TendonBase) {
+          return object.index;
+        }
+        break;
       case TendonBase.boneIdPropertyKey:
         if (object is TendonBase) {
           return object.boneId;
@@ -3085,6 +3104,7 @@ abstract class RiveCoreContext extends CoreContext {
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.mainArtboardIdPropertyKey:
       case BackboardBase.colorValuePropertyKey:
+      case TendonBase.indexPropertyKey:
         return false;
       default:
         return true;
@@ -3129,6 +3149,7 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicWeightBase.outIndicesPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
       case ClippingShapeBase.clipOpValuePropertyKey:
+      case TendonBase.indexPropertyKey:
         return uintType;
       case AnimationBase.namePropertyKey:
       case ComponentBase.namePropertyKey:
@@ -3291,6 +3312,8 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as PointsPathBase).editingModeValue;
       case ClippingShapeBase.clipOpValuePropertyKey:
         return (object as ClippingShapeBase).clipOpValue;
+      case TendonBase.indexPropertyKey:
+        return (object as TendonBase).index;
     }
     return 0;
   }
@@ -3587,6 +3610,9 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case ClippingShapeBase.clipOpValuePropertyKey:
         (object as ClippingShapeBase).clipOpValue = value;
+        break;
+      case TendonBase.indexPropertyKey:
+        (object as TendonBase).index = value;
         break;
     }
   }
