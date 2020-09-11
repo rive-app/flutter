@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:core/core.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
@@ -9,6 +8,22 @@ import 'package:rive_core/transform_component.dart';
 export 'package:rive_core/src/generated/drawable_base.dart';
 
 abstract class Drawable extends DrawableBase {
+  /// The previous drawable in the draw order.
+  Drawable prev;
+
+  /// The next drawable in the draw order.
+  Drawable next;
+
+  @override
+  void buildDrawOrder(List<Drawable> drawables) {
+    drawables.add(this);
+    super.buildDrawOrder(drawables);
+  }
+
+  // -> editor-only
+  int drawOrder = 0;
+  // <- editor-only
+
   /// Draw the contents of this drawable component in world transform space.
   void draw(Canvas canvas);
 
@@ -17,11 +32,6 @@ abstract class Drawable extends DrawableBase {
 
   @override
   void blendModeValueChanged(int from, int to) {}
-
-  @override
-  void drawOrderChanged(FractionalIndex from, FractionalIndex to) {
-    artboard?.markDrawOrderDirty();
-  }
 
   List<ClippingShape> _clippingShapes;
 
@@ -75,11 +85,4 @@ abstract class Drawable extends DrawableBase {
       _clippingShapes = clippingShapes.isEmpty ? null : clippingShapes;
     }
   }
-
-  // -> editor-only
-  @override
-  int runtimeValueDrawOrder(FractionalIndex editorValue) {
-    return artboard.drawables.indexOf(this);
-  }
-  // <- editor-only
 }

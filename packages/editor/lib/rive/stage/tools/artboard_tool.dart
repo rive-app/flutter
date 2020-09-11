@@ -16,7 +16,7 @@ import 'package:rive_editor/rive/stage/tools/stage_tool_tip.dart';
 class ArtboardTool extends CreateTool {
   @override
   Iterable<PackedIcon> get cursorName => PackedIcon.cursorAdd;
-  
+
   Vec2D _startWorldMouse;
   Artboard _artboard;
 
@@ -103,7 +103,7 @@ class ArtboardTool extends CreateTool {
 
   @override
   void endDrag() {
-    if(_artboard != null) {
+    if (_artboard != null) {
       stage.file.select(_artboard.stageItem);
     }
     _artboard = null;

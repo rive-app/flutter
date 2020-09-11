@@ -19,7 +19,6 @@ import 'package:rive_core/event.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_editor/rive/alerts/action_alert.dart';
 import 'package:rive_editor/rive/alerts/simple_alert.dart';
-import 'package:rive_editor/rive/draw_order_tree_controller.dart';
 import 'package:rive_editor/rive/editor_alert.dart';
 import 'package:rive_editor/rive/hierarchy_tree_controller.dart';
 import 'package:rive_editor/rive/managers/animation/animations_manager.dart';
@@ -140,10 +139,6 @@ class OpenFileContext with RiveFileDelegate {
   /// Controller for the hierarchy of this file.
   final ValueNotifier<HierarchyTreeController> treeController =
       ValueNotifier<HierarchyTreeController>(null);
-
-  /// Controller for the draw order of this file.
-  final ValueNotifier<DrawOrderTreeController> drawOrderTreeController =
-      ValueNotifier<DrawOrderTreeController>(null);
 
   /// The selection context for this file.
   final SelectionContext<SelectableItem> selection =
@@ -343,9 +338,6 @@ class OpenFileContext with RiveFileDelegate {
     if (treeController.value != null) {
       debounce(treeController.value.flatten);
     }
-    if (drawOrderTreeController.value != null) {
-      debounce(drawOrderTreeController.value.flatten);
-    }
     stage?.markNeedsAdvance();
   }
 
@@ -355,7 +347,6 @@ class OpenFileContext with RiveFileDelegate {
       stage.initComponent(object);
     }
     debounce(treeController.value.flatten);
-    debounce(drawOrderTreeController.value.flatten);
   }
 
   @override
@@ -422,11 +413,6 @@ class OpenFileContext with RiveFileDelegate {
       debounce(oldController.dispose, duration: const Duration(seconds: 1));
       // oldController.dispose();
     }
-    if (drawOrderTreeController.value != null) {
-      cancelDebounce(drawOrderTreeController.value.flatten);
-      drawOrderTreeController.value.dispose();
-      drawOrderTreeController.value = null;
-    }
 
     _backboard?.activeArtboardChanged?.removeListener(_syncActiveArtboard);
     _backboard = null;
@@ -439,9 +425,6 @@ class OpenFileContext with RiveFileDelegate {
   void _resetManagers() {
     _disposeManagers();
     treeController.value = HierarchyTreeController(this);
-    drawOrderTreeController.value = DrawOrderTreeController(
-      file: this,
-    );
     _vertexEditor = VertexEditor(this, stage);
 
     // This can happen during a _wipe call during initialization, this is
@@ -671,7 +654,7 @@ class OpenFileContext with RiveFileDelegate {
             break;
         }
         return true;
-        
+
       default:
         return false;
     }

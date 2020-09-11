@@ -78,7 +78,7 @@ class HierarchyTreeController extends ComponentTreeController {
   void _updateActiveArtboard() {
     if (_showingArtboard != backboard.activeArtboard) {
       _showingArtboard = backboard.activeArtboard;
-      data = [if (_showingArtboard != null) _showingArtboard];
+      data = childrenOf(_showingArtboard) ?? [];
     }
   }
 
