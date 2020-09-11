@@ -15,6 +15,29 @@ abstract class TendonBase extends Component {
   Set<int> get coreTypes => {TendonBase.typeKey, ComponentBase.typeKey};
 
   /// --------------------------------------------------------------------------
+  /// Index field with key 118.
+  int _index = 0;
+  static const int indexPropertyKey = 118;
+
+  /// The index used for weighting. Implicit at runtime. Required at edit time
+  /// to allow undo ops to put them back in order.
+  int get index => _index;
+
+  /// Change the [_index] field value.
+  /// [indexChanged] will be invoked only if the field's value has changed.
+  set index(int value) {
+    if (_index == value) {
+      return;
+    }
+    int from = _index;
+    _index = value;
+    onPropertyChanged(indexPropertyKey, from, value);
+    indexChanged(from, value);
+  }
+
+  void indexChanged(int from, int to);
+
+  /// --------------------------------------------------------------------------
   /// BoneId field with key 95.
   Id _boneId;
   static const int boneIdPropertyKey = 95;
@@ -171,6 +194,9 @@ abstract class TendonBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
+    if (index != null) {
+      onPropertyChanged(indexPropertyKey, index, index);
+    }
     if (boneId != null) {
       onPropertyChanged(boneIdPropertyKey, boneId, boneId);
     }
@@ -226,6 +252,8 @@ abstract class TendonBase extends Component {
   @override
   bool exports(int propertyKey) {
     switch (propertyKey) {
+      case indexPropertyKey:
+        return _index != 0;
       case xxPropertyKey:
         return _xx != 1;
       case yxPropertyKey:
@@ -245,6 +273,8 @@ abstract class TendonBase extends Component {
   @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {
+      case indexPropertyKey:
+        return index as K;
       case boneIdPropertyKey:
         return boneId as K;
       case xxPropertyKey:
@@ -267,6 +297,7 @@ abstract class TendonBase extends Component {
   @override
   bool hasProperty(int propertyKey) {
     switch (propertyKey) {
+      case indexPropertyKey:
       case boneIdPropertyKey:
       case xxPropertyKey:
       case yxPropertyKey:

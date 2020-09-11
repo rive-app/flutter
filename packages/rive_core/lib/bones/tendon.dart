@@ -98,4 +98,11 @@ class Tendon extends TendonBase {
     _bind[3] = to;
     _inverseBind = null;
   }
+
+  // -> editor-only
+  @override
+  void indexChanged(int from, int to) {
+    // nothing to do here...
+  }
+  // <- editor-only
 }

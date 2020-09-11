@@ -129,7 +129,11 @@ class PointsPath extends PointsPathBase with Skinnable {
   /// Called whenever the tendonds have changed and the weights need to be
   /// validated (make sure they don't point to some non-existent weight).
   @override
-  void validateWeights(int tendonCount) {
+  void validateWeights() {
+    if (skin == null) {
+      return;
+    }
+    int tendonCount = skin.tendons.length;
     bool needDeform = false;
     for (final vertex in _vertices) {
       if (!vertex.validateWeight(tendonCount)) {
