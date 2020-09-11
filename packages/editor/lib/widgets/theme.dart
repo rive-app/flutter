@@ -270,7 +270,10 @@ class TextStyles {
       fontFamily: 'Roboto-Light', color: Color(0xFFE3E3E3), fontSize: 12.5);
 
   TextStyle get inspectorSectionHeader => const TextStyle(
-      fontFamily: 'Roboto-Medium', fontSize: 11, color: lightGrey);
+      fontFamily: 'Roboto-Medium', fontSize: 13, color: Color(0xFFAAAAAA));
+
+  TextStyle get animationsHeader => const TextStyle(
+      fontFamily: 'Roboto-Medium', fontSize: 11, color: lightGrey, height: 1);
 
   TextStyle get inspectorButton =>
       const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
@@ -278,6 +281,8 @@ class TextStyles {
   TextStyle get inspectorWhiteLabel => const TextStyle(
       fontFamily: 'Roboto-Regular', color: Color(0xFFC8C8C8), fontSize: 13);
 
+  TextStyle get inspectorDescription =>
+      const TextStyle(fontFamily: 'Roboto-Regular', color: lightGrey, fontSize: 13);
   // Popup Menus
   TextStyle get popupHovered =>
       const TextStyle(fontFamily: 'Roboto-Light', color: white, fontSize: 13);

@@ -3,6 +3,7 @@ import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/draw_rules.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
@@ -13,10 +14,14 @@ import 'package:rive_core/src/generated/transform_component_base.dart';
 export 'package:rive_core/src/generated/transform_component_base.dart';
 
 abstract class TransformComponent extends TransformComponentBase {
+  DrawRules _drawRules;
+  DrawRules get drawRules => _drawRules;
+
   List<ClippingShape> _clippingShapes;
   Iterable<ClippingShape> get clippingShapes => _clippingShapes;
   // -> editor-only
   final Event clippingShapesChanged = Event();
+  final Event drawRulesChanged = Event();
   // <- editor-only
 
   // -> editor-only
@@ -163,6 +168,13 @@ abstract class TransformComponent extends TransformComponentBase {
   void childAdded(Component child) {
     super.childAdded(child);
     switch (child.coreType) {
+      case DrawRulesBase.typeKey:
+        _drawRules = child as DrawRules;
+        // -> editor-only
+        artboard?.markNaturalDrawOrderDirty();
+        drawRulesChanged.notify();
+        // <- editor-only
+        break;
       case ClippingShapeBase.typeKey:
         _clippingShapes ??= <ClippingShape>[];
         _clippingShapes.add(child as ClippingShape);
@@ -178,6 +190,15 @@ abstract class TransformComponent extends TransformComponentBase {
   void childRemoved(Component child) {
     super.childRemoved(child);
     switch (child.coreType) {
+      case DrawRulesBase.typeKey:
+        if (_drawRules == child as DrawRules) {
+          _drawRules = null;
+          // -> editor-only
+          artboard?.markNaturalDrawOrderDirty();
+          drawRulesChanged.notify();
+          // <- editor-only
+        }
+        break;
       case ClippingShapeBase.typeKey:
         if (_clippingShapes != null) {
           _clippingShapes.remove(child as ClippingShape);

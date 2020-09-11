@@ -9,7 +9,6 @@ import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
-import 'package:rive_core/container_component.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';

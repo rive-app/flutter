@@ -4,6 +4,7 @@ import 'package:rive_editor/widgets/inspector/fills_inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/artboard_inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/inspect_blend.dart';
 import 'package:rive_editor/widgets/inspector/inspect_clipping.dart';
+import 'package:rive_editor/widgets/inspector/inspect_draw_order.dart';
 import 'package:rive_editor/widgets/inspector/inspect_skin.dart';
 import 'package:rive_editor/widgets/inspector/inspect_transform.dart';
 // import 'package:rive_editor/widgets/inspector/inspect_comboboxes_example.dart';
@@ -22,5 +23,6 @@ final List<InspectorBuilder> defaultInspectorBuilders = [
   StrokesInspectorBuilder(),
   InspectClipping(),
   InspectSkin(),
+  InspectDrawOrder(),
   // InspectComboBoxExample(),
 ];

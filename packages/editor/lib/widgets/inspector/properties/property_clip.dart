@@ -33,7 +33,7 @@ class PropertyClip extends StatelessWidget {
       popoutBuilder: (context) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const InspectorPopoutTitle(title: 'CLIP OPTIONS'),
+          const InspectorPopoutTitle(titleKey: 'clip_options'),
           const SizedBox(height: 20),
           Row(
             mainAxisSize: MainAxisSize.max,

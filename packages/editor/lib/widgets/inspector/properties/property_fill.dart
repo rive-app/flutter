@@ -39,7 +39,7 @@ class PropertyFill extends StatelessWidget {
       popoutBuilder: (context) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const InspectorPopoutTitle(title: 'FILL OPTIONS'),
+          const InspectorPopoutTitle(titleKey: 'fill_options'),
           const SizedBox(height: 20),
           Row(
             mainAxisSize: MainAxisSize.max,

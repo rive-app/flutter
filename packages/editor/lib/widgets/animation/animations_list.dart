@@ -89,8 +89,7 @@ class __AnimationsListTreeState extends State<_AnimationsListTree> {
                 Expanded(
                   child: Text(
                     'ANIMATIONS',
-                    style: theme.textStyles.inspectorSectionHeader
-                        .copyWith(height: 1),
+                    style: theme.textStyles.animationsHeader,
                   ),
                 ),
                 TintedIconButton(
