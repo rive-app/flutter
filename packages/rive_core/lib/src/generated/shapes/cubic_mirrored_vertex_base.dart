@@ -156,11 +156,11 @@ abstract class CubicMirroredVertexBase extends CubicVertex {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (rotation != null) {
-      onPropertyChanged(rotationPropertyKey, rotation, rotation);
+    if (_rotation != null) {
+      onPropertyChanged(rotationPropertyKey, _rotation, _rotation);
     }
-    if (distance != null) {
-      onPropertyChanged(distancePropertyKey, distance, distance);
+    if (_distance != null) {
+      onPropertyChanged(distancePropertyKey, _distance, _distance);
     }
   }
 

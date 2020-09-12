@@ -175,27 +175,27 @@ abstract class LinearAnimationBase extends Animation {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (fps != null) {
-      onPropertyChanged(fpsPropertyKey, fps, fps);
+    if (_fps != null) {
+      onPropertyChanged(fpsPropertyKey, _fps, _fps);
     }
-    if (duration != null) {
-      onPropertyChanged(durationPropertyKey, duration, duration);
+    if (_duration != null) {
+      onPropertyChanged(durationPropertyKey, _duration, _duration);
     }
-    if (speed != null) {
-      onPropertyChanged(speedPropertyKey, speed, speed);
+    if (_speed != null) {
+      onPropertyChanged(speedPropertyKey, _speed, _speed);
     }
-    if (loopValue != null) {
-      onPropertyChanged(loopValuePropertyKey, loopValue, loopValue);
+    if (_loopValue != null) {
+      onPropertyChanged(loopValuePropertyKey, _loopValue, _loopValue);
     }
-    if (workStart != null) {
-      onPropertyChanged(workStartPropertyKey, workStart, workStart);
+    if (_workStart != null) {
+      onPropertyChanged(workStartPropertyKey, _workStart, _workStart);
     }
-    if (workEnd != null) {
-      onPropertyChanged(workEndPropertyKey, workEnd, workEnd);
+    if (_workEnd != null) {
+      onPropertyChanged(workEndPropertyKey, _workEnd, _workEnd);
     }
-    if (enableWorkArea != null) {
+    if (_enableWorkArea != null) {
       onPropertyChanged(
-          enableWorkAreaPropertyKey, enableWorkArea, enableWorkArea);
+          enableWorkAreaPropertyKey, _enableWorkArea, _enableWorkArea);
     }
   }
 

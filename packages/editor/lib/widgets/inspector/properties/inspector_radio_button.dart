@@ -30,12 +30,12 @@ class _RadioPainter extends CustomPainter {
     canvas.drawCircle(size.center(Offset.zero), size.width / 2,
         Paint()..color = const Color(0xFF252525));
     if (isSelected) {
-      print('R: ${(size.width / 2) * 0.4}');
       canvas.drawCircle(size.center(Offset.zero), (size.width / 2) * 0.4,
           Paint()..color = const Color(0xFFFFFFFF));
     }
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(_RadioPainter oldDelegate) =>
+      oldDelegate.isSelected != isSelected;
 }

@@ -20,9 +20,9 @@ abstract class DrawRulesBase extends ContainerComponent {
       };
 
   /// --------------------------------------------------------------------------
-  /// DrawTargetId field with key 120.
+  /// DrawTargetId field with key 121.
   Id _drawTargetId;
-  static const int drawTargetIdPropertyKey = 120;
+  static const int drawTargetIdPropertyKey = 121;
 
   /// Id of the DrawTarget that is currently active for this set of rules.
   Id get drawTargetId => _drawTargetId;
@@ -45,8 +45,8 @@ abstract class DrawRulesBase extends ContainerComponent {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (drawTargetId != null) {
-      onPropertyChanged(drawTargetIdPropertyKey, drawTargetId, drawTargetId);
+    if (_drawTargetId != null) {
+      onPropertyChanged(drawTargetIdPropertyKey, _drawTargetId, _drawTargetId);
     }
   }
 

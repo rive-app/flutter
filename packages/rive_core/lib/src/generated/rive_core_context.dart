@@ -900,8 +900,12 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ComponentBase.namePropertyKey:
-        if (object is ComponentBase && value is String) {
-          object.name = value;
+        if (object is ComponentBase) {
+          if (value is String) {
+            object.name = value;
+          } else if (value == null) {
+            object.name = null;
+          }
         }
         break;
       case ComponentBase.parentIdPropertyKey:
@@ -1304,8 +1308,12 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case DrawRulesBase.drawTargetIdPropertyKey:
-        if (object is DrawRulesBase && value is Id) {
-          object.drawTargetId = value;
+        if (object is DrawRulesBase) {
+          if (value is Id) {
+            object.drawTargetId = value;
+          } else if (value == null) {
+            object.drawTargetId = null;
+          }
         }
         break;
       case ArtboardBase.widthPropertyKey:
@@ -1450,8 +1458,12 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case ComponentBase.namePropertyKey:
-        if (object is ComponentBase && value is String) {
-          object.name = value;
+        if (object is ComponentBase) {
+          if (value is String) {
+            object.name = value;
+          } else if (value == null) {
+            object.name = null;
+          }
         }
         break;
       case ComponentBase.parentIdPropertyKey:
@@ -1854,8 +1866,12 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case DrawRulesBase.drawTargetIdPropertyKey:
-        if (object is DrawRulesBase && value is Id) {
-          object.drawTargetId = value;
+        if (object is DrawRulesBase) {
+          if (value is Id) {
+            object.drawTargetId = value;
+          } else if (value == null) {
+            object.drawTargetId = null;
+          }
         }
         break;
       case ArtboardBase.widthPropertyKey:

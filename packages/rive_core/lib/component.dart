@@ -26,6 +26,11 @@ abstract class Component extends ComponentBase<RiveFile>
   // TODO: implement this so things can be renamed in the timeline if this
   // canRename returns true.
   bool get canRename => true;
+
+  String get defaultName => 'Component';
+
+  @override
+  String get name => super.name ?? defaultName;
   // <- editor-only
 
   /// Override to true if you want some object inheriting from Component to not

@@ -6,6 +6,19 @@ export 'package:rive_core/src/generated/bones/bone_base.dart';
 typedef bool BoneCallback(Bone bone);
 
 class Bone extends BoneBase {
+  // -> editor-only
+  @override
+  String get defaultName {
+    int boneIndex = 0;
+    var parentBone = parent;
+    while (parentBone is Bone) {
+      boneIndex++;
+      parentBone = parentBone.parent;
+    }
+    return 'Bone $boneIndex';
+  }
+  // <- editor-only
+
   @override
   void lengthChanged(double from, double to) {
     for (final child in children) {

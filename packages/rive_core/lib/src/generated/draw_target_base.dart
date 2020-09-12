@@ -15,9 +15,9 @@ abstract class DrawTargetBase extends Component {
   Set<int> get coreTypes => {DrawTargetBase.typeKey, ComponentBase.typeKey};
 
   /// --------------------------------------------------------------------------
-  /// DrawableId field with key 118.
+  /// DrawableId field with key 119.
   Id _drawableId;
-  static const int drawableIdPropertyKey = 118;
+  static const int drawableIdPropertyKey = 119;
 
   /// Id of the drawable this target references.
   Id get drawableId => _drawableId;
@@ -37,9 +37,9 @@ abstract class DrawTargetBase extends Component {
   void drawableIdChanged(Id from, Id to);
 
   /// --------------------------------------------------------------------------
-  /// PlacementValue field with key 119.
+  /// PlacementValue field with key 120.
   int _placementValue = 0;
-  static const int placementValuePropertyKey = 119;
+  static const int placementValuePropertyKey = 120;
 
   /// Backing enum value for the Placement.
   int get placementValue => _placementValue;
@@ -62,12 +62,12 @@ abstract class DrawTargetBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (drawableId != null) {
-      onPropertyChanged(drawableIdPropertyKey, drawableId, drawableId);
+    if (_drawableId != null) {
+      onPropertyChanged(drawableIdPropertyKey, _drawableId, _drawableId);
     }
-    if (placementValue != null) {
+    if (_placementValue != null) {
       onPropertyChanged(
-          placementValuePropertyKey, placementValue, placementValue);
+          placementValuePropertyKey, _placementValue, _placementValue);
     }
   }
 

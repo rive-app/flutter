@@ -4,6 +4,7 @@ import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/draw_rules.dart';
+import 'package:rive_core/drawable.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/mat2d.dart';
 import 'package:rive_core/math/transform_components.dart';
@@ -14,7 +15,9 @@ import 'package:rive_core/src/generated/transform_component_base.dart';
 export 'package:rive_core/src/generated/transform_component_base.dart';
 
 abstract class TransformComponent extends TransformComponentBase {
+  /// Draw rules saved against this transform component, inherited by children.
   DrawRules _drawRules;
+
   DrawRules get drawRules => _drawRules;
 
   List<ClippingShape> _clippingShapes;
@@ -256,4 +259,16 @@ abstract class TransformComponent extends TransformComponentBase {
     y = components.y;
   }
   // <- editor-only}
+
+  @override
+  void buildDrawOrder(
+      List<Drawable> drawables, DrawRules rules, List<DrawRules> allRules) {
+    if (drawRules != null) {
+      drawRules.parentRules = rules;
+      // ignore: parameter_assignments
+      rules = drawRules;
+      allRules.add(rules);
+    }
+    super.buildDrawOrder(drawables, rules, allRules);
+  }
 }

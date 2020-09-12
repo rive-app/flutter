@@ -10,10 +10,11 @@
       "type": "Id",
       "typeRuntime": "uint",
       "key": {
-        "int": 120,
+        "int": 121,
         "string": "drawtargetid"
       },
-      "description": "Id of the DrawTarget that is currently active for this set of rules."
+      "description": "Id of the DrawTarget that is currently active for this set of rules.",
+      "nullable": true
     }
   }
 }

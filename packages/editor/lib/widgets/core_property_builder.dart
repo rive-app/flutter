@@ -54,6 +54,7 @@ class _CorePropertyBuilderState<T> extends State<CorePropertyBuilder<T>> {
 
     var currentPropertyValue =
         object.context.getObjectProperty(object, propertyKey);
+
     assert(currentPropertyValue == null || currentPropertyValue is T,
         'expected $currentPropertyValue to be of type $T');
     value = currentPropertyValue as T;
@@ -74,7 +75,7 @@ class _CorePropertyBuilderState<T> extends State<CorePropertyBuilder<T>> {
   }
 
   void _rebuild() {
-    if(widget.frozen) {
+    if (widget.frozen) {
       return;
     }
     (context as StatefulElement).markNeedsBuild();

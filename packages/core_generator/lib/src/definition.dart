@@ -241,9 +241,9 @@ class Definition {
         code.writeln('super.changeNonNull();');
       }
       for (final property in properties) {
-        code.writeln('''if(${property.name} != null) {
+        code.writeln('''if(_${property.name} != null) {
           onPropertyChanged( 
-          ${property.name}PropertyKey, ${property.name}, ${property.name});
+          ${property.name}PropertyKey, _${property.name}, _${property.name});
         }''');
       }
       code.writeln('}');

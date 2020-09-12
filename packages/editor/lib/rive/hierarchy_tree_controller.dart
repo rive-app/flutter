@@ -22,7 +22,6 @@ import 'stage/stage_item.dart';
 class HierarchyTreeController extends ComponentTreeController {
   @override
   final OpenFileContext file;
-  List<Component> _data = [];
   final Backboard backboard;
   Artboard _showingArtboard;
   final DetailedEvent<Component> _requestVisibility =
@@ -47,12 +46,7 @@ class HierarchyTreeController extends ComponentTreeController {
   }
 
   @override
-  Iterable<Component> get data => _data;
-
-  set data(Iterable<Component> value) {
-    _data = value.toList();
-    flatten();
-  }
+  Iterable<Component> get data => childrenOf(_showingArtboard) ?? [];
 
   @override
   // ignore: must_call_super
@@ -78,7 +72,7 @@ class HierarchyTreeController extends ComponentTreeController {
   void _updateActiveArtboard() {
     if (_showingArtboard != backboard.activeArtboard) {
       _showingArtboard = backboard.activeArtboard;
-      data = childrenOf(_showingArtboard) ?? [];
+      flatten();
     }
   }
 

@@ -129,5 +129,11 @@ HashMap<String, String> _defaultUIStrings =
 
   'normal_draw_rule': 'Normal',
   'normal_draw_rule_desc':
-      'This is the default draw order position based on Hierarchy.'
+      'This is the default draw order position based on Hierarchy.',
+  'above_target': 'above target',
+  'below_target': 'below target',
+  'draw_order': 'Draw order',
+  'target': 'Target',
+  'select_drawable_target':
+      'Select a drawable target (no groups) on the Stage or in the Hierarchy.'
 });

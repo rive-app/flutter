@@ -9,6 +9,8 @@ import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/draw_rules.dart';
+import 'package:rive_core/draw_target.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
@@ -57,6 +59,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   final Path path = Path();
   List<Component> _dependencyOrder = [];
   final List<Drawable> _drawables = [];
+  final List<DrawRules> _rules = [];
+  List<DrawTarget> _sortedDrawRules;
+
   final Set<Component> _components = {};
 
   List<Drawable> get drawables => [];
@@ -457,21 +462,110 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   void computeDrawOrder() {
     _drawables.clear();
-    buildDrawOrder(_drawables);
+    _rules.clear();
+    buildDrawOrder(_drawables, null, _rules);
+// Build rule dependencies. In practice this'll need to happen anytime a
+    // target drawable is changed or rule is added/removed.
+    Set<DrawTarget> rootRules = {};
+    for (final nodeRules in _rules) {
+      for (final target in nodeRules.targets) {
+        target.isValid = true;
+        var dependentRules = target.drawable.flattenedDrawRules;
+        if (dependentRules != null) {
+          for (final dependentRule in dependentRules.targets) {
+            dependentRule.dependents.add(target);
+          }
+        } else {
+          rootRules.add(target);
+        }
+      }
+    }
+    var sorter = TarjansDependencySorter<Component>();
+    sorter.reset();
+    var valid = true;
+    if (rootRules.isNotEmpty) {
+      for (final rootRule in rootRules) {
+        if (!sorter.visit(rootRule)) {
+          valid = false;
+        }
+      }
+    }
+    if (sorter.cycleNodes.isNotEmpty) {
+      for (final invalidRule in sorter.cycleNodes) {
+        (invalidRule as DrawTarget).isValid = false;
+        // TODO: Show an alert of dependency cycle?
+      }
+    }
+
+    _sortedDrawRules = sorter.order.cast<DrawTarget>();
+
     sortDrawOrder();
   }
 
   void sortDrawOrder() {
+    // Clear out rule first/last items.
+    for (final rule in _sortedDrawRules) {
+      rule.first = rule.last = null;
+    }
+
     _firstDrawable = null;
     Drawable lastDrawable;
     for (final drawable in _drawables) {
-      drawable.prev = lastDrawable;
-      drawable.next = null;
-      if (lastDrawable == null) {
-        lastDrawable = _firstDrawable = drawable;
+      var rules = drawable.flattenedDrawRules;
+      // -> editor-only
+      while (rules != null &&
+          rules.activeTarget != null &&
+          !rules.activeTarget.isValid) {
+        rules = rules.parentRules;
+      }
+      // <- editor-only
+      var target = rules?.activeTarget;
+      if (target != null) {
+        if (target.first == null) {
+          target.first = target.last = drawable;
+          drawable.prev = drawable.next = null;
+        } else {
+          target.last.next = drawable;
+          drawable.prev = target.last;
+          target.last = drawable;
+          drawable.next = null;
+        }
       } else {
-        lastDrawable.next = drawable;
-        lastDrawable = drawable;
+        drawable.prev = lastDrawable;
+        drawable.next = null;
+        if (lastDrawable == null) {
+          lastDrawable = _firstDrawable = drawable;
+        } else {
+          lastDrawable.next = drawable;
+          lastDrawable = drawable;
+        }
+      }
+    }
+
+    for (final rule in _sortedDrawRules) {
+      if (rule.first == null) {
+        continue;
+      }
+      switch (rule.placement) {
+        case DrawTargetPlacement.before:
+          if (rule.drawable.prev != null) {
+            rule.drawable.prev.next = rule.first;
+            rule.first.prev = rule.drawable.prev;
+          }
+          if (rule.drawable == _firstDrawable) {
+            _firstDrawable = rule.first;
+          }
+          rule.drawable.prev = rule.last;
+          rule.last.next = rule.drawable;
+          break;
+        case DrawTargetPlacement.after:
+          if (rule.drawable.next != null) {
+            rule.drawable.next.prev = rule.last;
+            rule.last.next = rule.drawable.next;
+          }
+          rule.drawable.next = rule.first;
+          rule.first.prev = rule.drawable;
+          break;
       }
     }
 

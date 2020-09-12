@@ -53,8 +53,8 @@ abstract class RectangleBase extends ParametricPath {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (cornerRadius != null) {
-      onPropertyChanged(cornerRadiusPropertyKey, cornerRadius, cornerRadius);
+    if (_cornerRadius != null) {
+      onPropertyChanged(cornerRadiusPropertyKey, _cornerRadius, _cornerRadius);
     }
   }
 

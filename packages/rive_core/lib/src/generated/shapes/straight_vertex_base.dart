@@ -91,8 +91,8 @@ abstract class StraightVertexBase extends PathVertex<Weight> {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (radius != null) {
-      onPropertyChanged(radiusPropertyKey, radius, radius);
+    if (_radius != null) {
+      onPropertyChanged(radiusPropertyKey, _radius, _radius);
     }
   }
 

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:rive_core/bones/skeletal_component.dart';
 import 'package:rive_core/bones/skin.dart';
-import 'package:rive_editor/rive/alerts/simple_alert.dart';
 import 'package:rive_editor/rive/stage/items/stage_bone.dart';
 import 'package:rive_editor/rive/stage/items/stage_vertex.dart';
 import 'package:rive_editor/rive/stage/stage_item.dart';
@@ -11,28 +9,18 @@ import 'package:rive_editor/widgets/inspector/inspection_set.dart';
 import 'package:rive_editor/widgets/inspector/inspector_builder.dart';
 import 'package:rive_editor/widgets/inspector/inspector_group.dart';
 import 'package:rive_editor/widgets/inspector/properties/property_tendon.dart';
-import 'package:utilities/restorer.dart';
+import 'package:rive_editor/widgets/inspector/select_stage_item_helper.dart';
 import 'package:rive_core/bones/skinnable.dart';
 
 /// Example inspector builder with combo boxes.
 class InspectSkin extends ListenableInspectorBuilder {
+  final SelectStageItemHelper selectionHelper = SelectStageItemHelper();
   bool _isExpanded = true;
-  SimpleAlert _pickBonesAlert;
-  Restorer _selectionHandlerRestorer;
   Skinnable _skinnable;
-
-  void _dismissAlert() {
-    if (_pickBonesAlert != null) {
-      _selectionHandlerRestorer?.restore();
-      SchedulerBinding.instance
-          .scheduleTask(_pickBonesAlert.dismiss, Priority.touch);
-    }
-    _pickBonesAlert = null;
-  }
 
   @override
   void clean() {
-    _dismissAlert();
+    selectionHelper.dismiss();
     for (final stageBone in _coloredBones) {
       stageBone.highlightColor = null;
     }
@@ -59,29 +47,21 @@ class InspectSkin extends ListenableInspectorBuilder {
 
     return [
       (context) => InspectorGroup(
-            name: 'BIND BONES',
+            name: 'Bind Bones',
             isExpanded: _isExpanded,
             tapExpand: () {
               _isExpanded = !_isExpanded;
               notifyListeners();
             },
-            add: () {
-              _dismissAlert();
-              inspecting.fileContext.addAlert(
-                _pickBonesAlert =
-                    SimpleAlert('Pick a bone to bind.', autoDismiss: false),
-              );
-
-              _selectionHandlerRestorer = inspecting.stage.addSelectionHandler(
-                (StageItem item) {
-                  if (item.component is SkeletalComponent) {
-                    Skin.bind(item.component as SkeletalComponent, _skinnable);
-                  }
-                  inspecting.fileContext.core.captureJournalEntry();
-                  _dismissAlert();
-                  return true;
-                },
-              );
+            add: () async {
+              var items = await selectionHelper.show(
+                  inspecting.fileContext,
+                  'Pick a bone to bind.',
+                  (item) => item.component is SkeletalComponent);
+              for (final item in items) {
+                Skin.bind(item.component as SkeletalComponent, _skinnable);
+              }
+              inspecting.fileContext.core.captureJournalEntry();
             },
           ),
       if (_isExpanded && skin != null)

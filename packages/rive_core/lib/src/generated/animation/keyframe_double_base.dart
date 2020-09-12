@@ -38,8 +38,8 @@ abstract class KeyFrameDoubleBase extends KeyFrame {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (value != null) {
-      onPropertyChanged(valuePropertyKey, value, value);
+    if (_value != null) {
+      onPropertyChanged(valuePropertyKey, _value, _value);
     }
   }
 

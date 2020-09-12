@@ -108,20 +108,20 @@ abstract class KeyFrameBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void changeNonNull() {
-    if (keyedPropertyId != null) {
+    if (_keyedPropertyId != null) {
       onPropertyChanged(
-          keyedPropertyIdPropertyKey, keyedPropertyId, keyedPropertyId);
+          keyedPropertyIdPropertyKey, _keyedPropertyId, _keyedPropertyId);
     }
-    if (frame != null) {
-      onPropertyChanged(framePropertyKey, frame, frame);
+    if (_frame != null) {
+      onPropertyChanged(framePropertyKey, _frame, _frame);
     }
-    if (interpolationType != null) {
+    if (_interpolationType != null) {
       onPropertyChanged(
-          interpolationTypePropertyKey, interpolationType, interpolationType);
+          interpolationTypePropertyKey, _interpolationType, _interpolationType);
     }
-    if (interpolatorId != null) {
+    if (_interpolatorId != null) {
       onPropertyChanged(
-          interpolatorIdPropertyKey, interpolatorId, interpolatorId);
+          interpolatorIdPropertyKey, _interpolatorId, _interpolatorId);
     }
   }
 

@@ -99,17 +99,17 @@ abstract class CubicWeightBase extends Weight {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (inValues != null) {
-      onPropertyChanged(inValuesPropertyKey, inValues, inValues);
+    if (_inValues != null) {
+      onPropertyChanged(inValuesPropertyKey, _inValues, _inValues);
     }
-    if (inIndices != null) {
-      onPropertyChanged(inIndicesPropertyKey, inIndices, inIndices);
+    if (_inIndices != null) {
+      onPropertyChanged(inIndicesPropertyKey, _inIndices, _inIndices);
     }
-    if (outValues != null) {
-      onPropertyChanged(outValuesPropertyKey, outValues, outValues);
+    if (_outValues != null) {
+      onPropertyChanged(outValuesPropertyKey, _outValues, _outValues);
     }
-    if (outIndices != null) {
-      onPropertyChanged(outIndicesPropertyKey, outIndices, outIndices);
+    if (_outIndices != null) {
+      onPropertyChanged(outIndicesPropertyKey, _outIndices, _outIndices);
     }
   }
 

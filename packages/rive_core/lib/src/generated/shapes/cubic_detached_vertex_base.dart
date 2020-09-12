@@ -286,17 +286,17 @@ abstract class CubicDetachedVertexBase extends CubicVertex {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (inRotation != null) {
-      onPropertyChanged(inRotationPropertyKey, inRotation, inRotation);
+    if (_inRotation != null) {
+      onPropertyChanged(inRotationPropertyKey, _inRotation, _inRotation);
     }
-    if (inDistance != null) {
-      onPropertyChanged(inDistancePropertyKey, inDistance, inDistance);
+    if (_inDistance != null) {
+      onPropertyChanged(inDistancePropertyKey, _inDistance, _inDistance);
     }
-    if (outRotation != null) {
-      onPropertyChanged(outRotationPropertyKey, outRotation, outRotation);
+    if (_outRotation != null) {
+      onPropertyChanged(outRotationPropertyKey, _outRotation, _outRotation);
     }
-    if (outDistance != null) {
-      onPropertyChanged(outDistancePropertyKey, outDistance, outDistance);
+    if (_outDistance != null) {
+      onPropertyChanged(outDistancePropertyKey, _outDistance, _outDistance);
     }
   }
 

@@ -82,8 +82,8 @@ abstract class SolidColorBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (colorValue != null) {
-      onPropertyChanged(colorValuePropertyKey, colorValue, colorValue);
+    if (_colorValue != null) {
+      onPropertyChanged(colorValuePropertyKey, _colorValue, _colorValue);
     }
   }
 

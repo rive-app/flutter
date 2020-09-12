@@ -2,12 +2,17 @@ import 'dart:ui';
 
 import 'package:rive_core/component_dirt.dart';
 import 'package:rive_core/container_component.dart';
+import 'package:rive_core/draw_rules.dart';
 import 'package:rive_core/shapes/clipping_shape.dart';
 import 'package:rive_core/src/generated/drawable_base.dart';
 import 'package:rive_core/transform_component.dart';
 export 'package:rive_core/src/generated/drawable_base.dart';
 
 abstract class Drawable extends DrawableBase {
+  /// Flattened rules inherited from parents (or self) so we don't have to look
+  /// up the tree when re-sorting.
+  DrawRules flattenedDrawRules;
+
   /// The previous drawable in the draw order.
   Drawable prev;
 
@@ -15,9 +20,12 @@ abstract class Drawable extends DrawableBase {
   Drawable next;
 
   @override
-  void buildDrawOrder(List<Drawable> drawables) {
+  void buildDrawOrder(
+      List<Drawable> drawables, DrawRules rules, List<DrawRules> allRules) {
+    flattenedDrawRules = drawRules ?? rules;
     drawables.add(this);
-    super.buildDrawOrder(drawables);
+
+    super.buildDrawOrder(drawables, rules, allRules);
   }
 
   // -> editor-only

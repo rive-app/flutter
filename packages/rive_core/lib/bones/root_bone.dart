@@ -11,4 +11,9 @@ class RootBone extends RootBoneBase {
   void yChanged(double from, double to) {
     markTransformDirty();
   }
+
+  // -> editor-only
+  @override
+  String get defaultName => 'Root Bone';
+  // <- editor-only
 }

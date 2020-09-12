@@ -145,11 +145,11 @@ abstract class GradientStopBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (colorValue != null) {
-      onPropertyChanged(colorValuePropertyKey, colorValue, colorValue);
+    if (_colorValue != null) {
+      onPropertyChanged(colorValuePropertyKey, _colorValue, _colorValue);
     }
-    if (position != null) {
-      onPropertyChanged(positionPropertyKey, position, position);
+    if (_position != null) {
+      onPropertyChanged(positionPropertyKey, _position, _position);
     }
   }
 

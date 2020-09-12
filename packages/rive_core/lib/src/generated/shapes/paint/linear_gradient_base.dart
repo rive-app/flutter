@@ -339,20 +339,20 @@ abstract class LinearGradientBase extends ContainerComponent {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (startX != null) {
-      onPropertyChanged(startXPropertyKey, startX, startX);
+    if (_startX != null) {
+      onPropertyChanged(startXPropertyKey, _startX, _startX);
     }
-    if (startY != null) {
-      onPropertyChanged(startYPropertyKey, startY, startY);
+    if (_startY != null) {
+      onPropertyChanged(startYPropertyKey, _startY, _startY);
     }
-    if (endX != null) {
-      onPropertyChanged(endXPropertyKey, endX, endX);
+    if (_endX != null) {
+      onPropertyChanged(endXPropertyKey, _endX, _endX);
     }
-    if (endY != null) {
-      onPropertyChanged(endYPropertyKey, endY, endY);
+    if (_endY != null) {
+      onPropertyChanged(endYPropertyKey, _endY, _endY);
     }
-    if (opacity != null) {
-      onPropertyChanged(opacityPropertyKey, opacity, opacity);
+    if (_opacity != null) {
+      onPropertyChanged(opacityPropertyKey, _opacity, _opacity);
     }
   }
 

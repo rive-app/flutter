@@ -101,17 +101,17 @@ abstract class CubicInterpolatorBase<T extends RiveCoreContext> extends Core<T>
 
   @override
   void changeNonNull() {
-    if (x1 != null) {
-      onPropertyChanged(x1PropertyKey, x1, x1);
+    if (_x1 != null) {
+      onPropertyChanged(x1PropertyKey, _x1, _x1);
     }
-    if (y1 != null) {
-      onPropertyChanged(y1PropertyKey, y1, y1);
+    if (_y1 != null) {
+      onPropertyChanged(y1PropertyKey, _y1, _y1);
     }
-    if (x2 != null) {
-      onPropertyChanged(x2PropertyKey, x2, x2);
+    if (_x2 != null) {
+      onPropertyChanged(x2PropertyKey, _x2, _x2);
     }
-    if (y2 != null) {
-      onPropertyChanged(y2PropertyKey, y2, y2);
+    if (_y2 != null) {
+      onPropertyChanged(y2PropertyKey, _y2, _y2);
     }
   }
 

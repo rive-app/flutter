@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/draw_rules.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 
@@ -76,15 +77,11 @@ abstract class ContainerComponent extends ContainerComponentBase {
     deathRow.forEach(context.removeObject);
   }
 
-  void buildDrawOrder(List<Drawable> drawables) {
-    // if (drawRules != null) {
-    //   drawRules.parentRules = rules;
-    //   rules = drawRules;
-    //   allRules.add(rules);
-    // }
+  void buildDrawOrder(
+      List<Drawable> drawables, DrawRules rules, List<DrawRules> allRules) {
     for (final child in children) {
       if (child is ContainerComponent) {
-        child.buildDrawOrder(drawables);
+        child.buildDrawOrder(drawables, rules, allRules);
       }
     }
   }

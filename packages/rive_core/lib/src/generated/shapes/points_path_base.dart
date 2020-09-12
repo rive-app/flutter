@@ -74,12 +74,12 @@ abstract class PointsPathBase extends Path {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (isClosed != null) {
-      onPropertyChanged(isClosedPropertyKey, isClosed, isClosed);
+    if (_isClosed != null) {
+      onPropertyChanged(isClosedPropertyKey, _isClosed, _isClosed);
     }
-    if (editingModeValue != null) {
+    if (_editingModeValue != null) {
       onPropertyChanged(
-          editingModeValuePropertyKey, editingModeValue, editingModeValue);
+          editingModeValuePropertyKey, _editingModeValue, _editingModeValue);
     }
   }
 

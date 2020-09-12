@@ -221,14 +221,14 @@ abstract class CubicAsymmetricVertexBase extends CubicVertex {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (rotation != null) {
-      onPropertyChanged(rotationPropertyKey, rotation, rotation);
+    if (_rotation != null) {
+      onPropertyChanged(rotationPropertyKey, _rotation, _rotation);
     }
-    if (inDistance != null) {
-      onPropertyChanged(inDistancePropertyKey, inDistance, inDistance);
+    if (_inDistance != null) {
+      onPropertyChanged(inDistancePropertyKey, _inDistance, _inDistance);
     }
-    if (outDistance != null) {
-      onPropertyChanged(outDistancePropertyKey, outDistance, outDistance);
+    if (_outDistance != null) {
+      onPropertyChanged(outDistancePropertyKey, _outDistance, _outDistance);
     }
   }
 

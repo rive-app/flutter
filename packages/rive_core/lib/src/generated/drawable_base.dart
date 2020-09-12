@@ -47,9 +47,9 @@ abstract class DrawableBase extends Node {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (blendModeValue != null) {
+    if (_blendModeValue != null) {
       onPropertyChanged(
-          blendModeValuePropertyKey, blendModeValue, blendModeValue);
+          blendModeValuePropertyKey, _blendModeValue, _blendModeValue);
     }
   }
 
