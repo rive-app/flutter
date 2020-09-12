@@ -8,6 +8,7 @@ import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe_color.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
+import 'package:rive_core/animation/keyframe_id.dart';
 import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
@@ -45,6 +46,7 @@ import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 import 'package:rive_core/src/generated/animation/keyframe_base.dart';
 import 'package:rive_core/src/generated/animation/keyframe_color_base.dart';
 import 'package:rive_core/src/generated/animation/keyframe_double_base.dart';
+import 'package:rive_core/src/generated/animation/keyframe_id_base.dart';
 import 'package:rive_core/src/generated/animation/linear_animation_base.dart';
 import 'package:rive_core/src/generated/artboard_base.dart';
 import 'package:rive_core/src/generated/backboard_base.dart';
@@ -94,6 +96,8 @@ abstract class RiveCoreContext extends CoreContext {
         return KeyedObject();
       case KeyedPropertyBase.typeKey:
         return KeyedProperty();
+      case KeyFrameIdBase.typeKey:
+        return KeyFrameId();
       case AnimationBase.typeKey:
         return Animation();
       case CubicInterpolatorBase.typeKey:
@@ -205,6 +209,8 @@ abstract class RiveCoreContext extends CoreContext {
         return 'KeyedObject';
       case KeyedPropertyBase.typeKey:
         return 'KeyedProperty';
+      case KeyFrameIdBase.typeKey:
+        return 'KeyFrameId';
       case AnimationBase.typeKey:
         return 'Animation';
       case CubicInterpolatorBase.typeKey:
@@ -326,6 +332,16 @@ abstract class RiveCoreContext extends CoreContext {
         return 'keyedObjectId';
       case KeyedPropertyBase.propertyKeyPropertyKey:
         return 'propertyKey';
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        return 'keyedPropertyId';
+      case KeyFrameBase.framePropertyKey:
+        return 'frame';
+      case KeyFrameBase.interpolationTypePropertyKey:
+        return 'interpolationType';
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        return 'interpolatorId';
+      case KeyFrameIdBase.valuePropertyKey:
+        return 'value';
       case AnimationBase.artboardIdPropertyKey:
         return 'artboardId';
       case AnimationBase.namePropertyKey:
@@ -340,14 +356,6 @@ abstract class RiveCoreContext extends CoreContext {
         return 'x2';
       case CubicInterpolatorBase.y2PropertyKey:
         return 'y2';
-      case KeyFrameBase.keyedPropertyIdPropertyKey:
-        return 'keyedPropertyId';
-      case KeyFrameBase.framePropertyKey:
-        return 'frame';
-      case KeyFrameBase.interpolationTypePropertyKey:
-        return 'interpolationType';
-      case KeyFrameBase.interpolatorIdPropertyKey:
-        return 'interpolatorId';
       case KeyFrameDoubleBase.valuePropertyKey:
         return 'value';
       case KeyFrameColorBase.valuePropertyKey:
@@ -590,9 +598,10 @@ abstract class RiveCoreContext extends CoreContext {
         case KeyedObjectBase.objectIdPropertyKey:
         case KeyedObjectBase.animationIdPropertyKey:
         case KeyedPropertyBase.keyedObjectIdPropertyKey:
-        case AnimationBase.artboardIdPropertyKey:
         case KeyFrameBase.keyedPropertyIdPropertyKey:
         case KeyFrameBase.interpolatorIdPropertyKey:
+        case KeyFrameIdBase.valuePropertyKey:
+        case AnimationBase.artboardIdPropertyKey:
         case ClippingShapeBase.shapeIdPropertyKey:
         case DrawRulesBase.drawTargetIdPropertyKey:
         case BackboardBase.activeArtboardIdPropertyKey:
@@ -749,9 +758,10 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyedObjectBase.objectIdPropertyKey:
       case KeyedObjectBase.animationIdPropertyKey:
       case KeyedPropertyBase.keyedObjectIdPropertyKey:
-      case AnimationBase.artboardIdPropertyKey:
       case KeyFrameBase.keyedPropertyIdPropertyKey:
       case KeyFrameBase.interpolatorIdPropertyKey:
+      case KeyFrameIdBase.valuePropertyKey:
+      case AnimationBase.artboardIdPropertyKey:
       case ClippingShapeBase.shapeIdPropertyKey:
       case DrawRulesBase.drawTargetIdPropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
@@ -948,6 +958,35 @@ abstract class RiveCoreContext extends CoreContext {
           object.propertyKey = value;
         }
         break;
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        if (object is KeyFrameBase && value is Id) {
+          object.keyedPropertyId = value;
+        }
+        break;
+      case KeyFrameBase.framePropertyKey:
+        if (object is KeyFrameBase && value is int) {
+          object.frame = value;
+        }
+        break;
+      case KeyFrameBase.interpolationTypePropertyKey:
+        if (object is KeyFrameBase && value is int) {
+          object.interpolationType = value;
+        }
+        break;
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        if (object is KeyFrameBase) {
+          if (value is Id) {
+            object.interpolatorId = value;
+          } else if (value == null) {
+            object.interpolatorId = null;
+          }
+        }
+        break;
+      case KeyFrameIdBase.valuePropertyKey:
+        if (object is KeyFrameIdBase && value is Id) {
+          object.value = value;
+        }
+        break;
       case AnimationBase.artboardIdPropertyKey:
         if (object is AnimationBase && value is Id) {
           object.artboardId = value;
@@ -981,30 +1020,6 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicInterpolatorBase.y2PropertyKey:
         if (object is CubicInterpolatorBase && value is double) {
           object.y2 = value;
-        }
-        break;
-      case KeyFrameBase.keyedPropertyIdPropertyKey:
-        if (object is KeyFrameBase && value is Id) {
-          object.keyedPropertyId = value;
-        }
-        break;
-      case KeyFrameBase.framePropertyKey:
-        if (object is KeyFrameBase && value is int) {
-          object.frame = value;
-        }
-        break;
-      case KeyFrameBase.interpolationTypePropertyKey:
-        if (object is KeyFrameBase && value is int) {
-          object.interpolationType = value;
-        }
-        break;
-      case KeyFrameBase.interpolatorIdPropertyKey:
-        if (object is KeyFrameBase) {
-          if (value is Id) {
-            object.interpolatorId = value;
-          } else if (value == null) {
-            object.interpolatorId = null;
-          }
         }
         break;
       case KeyFrameDoubleBase.valuePropertyKey:
@@ -1308,12 +1323,8 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case DrawRulesBase.drawTargetIdPropertyKey:
-        if (object is DrawRulesBase) {
-          if (value is Id) {
-            object.drawTargetId = value;
-          } else if (value == null) {
-            object.drawTargetId = null;
-          }
+        if (object is DrawRulesBase && value is Id) {
+          object.drawTargetId = value;
         }
         break;
       case ArtboardBase.widthPropertyKey:
@@ -1506,6 +1517,35 @@ abstract class RiveCoreContext extends CoreContext {
           object.propertyKey = value;
         }
         break;
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        if (object is KeyFrameBase && value is Id) {
+          object.keyedPropertyId = value;
+        }
+        break;
+      case KeyFrameBase.framePropertyKey:
+        if (object is KeyFrameBase && value is int) {
+          object.frame = value;
+        }
+        break;
+      case KeyFrameBase.interpolationTypePropertyKey:
+        if (object is KeyFrameBase && value is int) {
+          object.interpolationType = value;
+        }
+        break;
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        if (object is KeyFrameBase) {
+          if (value is Id) {
+            object.interpolatorId = value;
+          } else if (value == null) {
+            object.interpolatorId = null;
+          }
+        }
+        break;
+      case KeyFrameIdBase.valuePropertyKey:
+        if (object is KeyFrameIdBase && value is Id) {
+          object.value = value;
+        }
+        break;
       case AnimationBase.artboardIdPropertyKey:
         if (object is AnimationBase && value is Id) {
           object.artboardId = value;
@@ -1539,30 +1579,6 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicInterpolatorBase.y2PropertyKey:
         if (object is CubicInterpolatorBase && value is double) {
           object.y2 = value;
-        }
-        break;
-      case KeyFrameBase.keyedPropertyIdPropertyKey:
-        if (object is KeyFrameBase && value is Id) {
-          object.keyedPropertyId = value;
-        }
-        break;
-      case KeyFrameBase.framePropertyKey:
-        if (object is KeyFrameBase && value is int) {
-          object.frame = value;
-        }
-        break;
-      case KeyFrameBase.interpolationTypePropertyKey:
-        if (object is KeyFrameBase && value is int) {
-          object.interpolationType = value;
-        }
-        break;
-      case KeyFrameBase.interpolatorIdPropertyKey:
-        if (object is KeyFrameBase) {
-          if (value is Id) {
-            object.interpolatorId = value;
-          } else if (value == null) {
-            object.interpolatorId = null;
-          }
         }
         break;
       case KeyFrameDoubleBase.valuePropertyKey:
@@ -1866,12 +1882,8 @@ abstract class RiveCoreContext extends CoreContext {
         }
         break;
       case DrawRulesBase.drawTargetIdPropertyKey:
-        if (object is DrawRulesBase) {
-          if (value is Id) {
-            object.drawTargetId = value;
-          } else if (value == null) {
-            object.drawTargetId = null;
-          }
+        if (object is DrawRulesBase && value is Id) {
+          object.drawTargetIdCore = value;
         }
         break;
       case ArtboardBase.widthPropertyKey:
@@ -2039,6 +2051,7 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicDetachedVertexBase.inDistancePropertyKey:
       case CubicDetachedVertexBase.outRotationPropertyKey:
       case CubicDetachedVertexBase.outDistancePropertyKey:
+      case DrawRulesBase.drawTargetIdPropertyKey:
       case BoneBase.lengthPropertyKey:
       case RootBoneBase.xPropertyKey:
       case RootBoneBase.yPropertyKey:
@@ -2139,6 +2152,9 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case CubicDetachedVertexBase.outDistancePropertyKey:
         return (object as CubicDetachedVertexBase).outDistanceKeyState;
+        break;
+      case DrawRulesBase.drawTargetIdPropertyKey:
+        return (object as DrawRulesBase).drawTargetIdKeyState;
         break;
       case BoneBase.lengthPropertyKey:
         return (object as BoneBase).lengthKeyState;
@@ -2304,6 +2320,11 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicDetachedVertexBase.outDistancePropertyKey:
         if (object is CubicDetachedVertexBase) {
           object.outDistanceKeyState = value;
+        }
+        break;
+      case DrawRulesBase.drawTargetIdPropertyKey:
+        if (object is DrawRulesBase) {
+          object.drawTargetIdKeyState = value;
         }
         break;
       case BoneBase.lengthPropertyKey:
@@ -2507,6 +2528,12 @@ abstract class RiveCoreContext extends CoreContext {
           object.outDistanceKeyState = KeyState.none;
         }
         break;
+      case DrawRulesBase.drawTargetIdPropertyKey:
+        if (object is DrawRulesBase) {
+          object.drawTargetIdAnimated = null;
+          object.drawTargetIdKeyState = KeyState.none;
+        }
+        break;
       case BoneBase.lengthPropertyKey:
         if (object is BoneBase) {
           object.lengthAnimated = null;
@@ -2581,6 +2608,31 @@ abstract class RiveCoreContext extends CoreContext {
           return object.propertyKey;
         }
         break;
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
+        if (object is KeyFrameBase) {
+          return object.keyedPropertyId;
+        }
+        break;
+      case KeyFrameBase.framePropertyKey:
+        if (object is KeyFrameBase) {
+          return object.frame;
+        }
+        break;
+      case KeyFrameBase.interpolationTypePropertyKey:
+        if (object is KeyFrameBase) {
+          return object.interpolationType;
+        }
+        break;
+      case KeyFrameBase.interpolatorIdPropertyKey:
+        if (object is KeyFrameBase) {
+          return object.interpolatorId;
+        }
+        break;
+      case KeyFrameIdBase.valuePropertyKey:
+        if (object is KeyFrameIdBase) {
+          return object.value;
+        }
+        break;
       case AnimationBase.artboardIdPropertyKey:
         if (object is AnimationBase) {
           return object.artboardId;
@@ -2614,26 +2666,6 @@ abstract class RiveCoreContext extends CoreContext {
       case CubicInterpolatorBase.y2PropertyKey:
         if (object is CubicInterpolatorBase) {
           return object.y2;
-        }
-        break;
-      case KeyFrameBase.keyedPropertyIdPropertyKey:
-        if (object is KeyFrameBase) {
-          return object.keyedPropertyId;
-        }
-        break;
-      case KeyFrameBase.framePropertyKey:
-        if (object is KeyFrameBase) {
-          return object.frame;
-        }
-        break;
-      case KeyFrameBase.interpolationTypePropertyKey:
-        if (object is KeyFrameBase) {
-          return object.interpolationType;
-        }
-        break;
-      case KeyFrameBase.interpolatorIdPropertyKey:
-        if (object is KeyFrameBase) {
-          return object.interpolatorId;
         }
         break;
       case KeyFrameDoubleBase.valuePropertyKey:
@@ -3093,9 +3125,9 @@ abstract class RiveCoreContext extends CoreContext {
       case ComponentBase.childOrderPropertyKey:
       case KeyedObjectBase.animationIdPropertyKey:
       case KeyedPropertyBase.keyedObjectIdPropertyKey:
+      case KeyFrameBase.keyedPropertyIdPropertyKey:
       case AnimationBase.artboardIdPropertyKey:
       case AnimationBase.orderPropertyKey:
-      case KeyFrameBase.keyedPropertyIdPropertyKey:
       case PointsPathBase.editingModeValuePropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
       case BackboardBase.mainArtboardIdPropertyKey:
@@ -3120,9 +3152,10 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyedObjectBase.objectIdPropertyKey:
       case KeyedObjectBase.animationIdPropertyKey:
       case KeyedPropertyBase.keyedObjectIdPropertyKey:
-      case AnimationBase.artboardIdPropertyKey:
       case KeyFrameBase.keyedPropertyIdPropertyKey:
       case KeyFrameBase.interpolatorIdPropertyKey:
+      case KeyFrameIdBase.valuePropertyKey:
+      case AnimationBase.artboardIdPropertyKey:
       case ClippingShapeBase.shapeIdPropertyKey:
       case DrawRulesBase.drawTargetIdPropertyKey:
       case BackboardBase.activeArtboardIdPropertyKey:
@@ -3261,12 +3294,14 @@ abstract class RiveCoreContext extends CoreContext {
         return (object as KeyedObjectBase).animationId;
       case KeyedPropertyBase.keyedObjectIdPropertyKey:
         return (object as KeyedPropertyBase).keyedObjectId;
-      case AnimationBase.artboardIdPropertyKey:
-        return (object as AnimationBase).artboardId;
       case KeyFrameBase.keyedPropertyIdPropertyKey:
         return (object as KeyFrameBase).keyedPropertyId;
       case KeyFrameBase.interpolatorIdPropertyKey:
         return (object as KeyFrameBase).interpolatorId;
+      case KeyFrameIdBase.valuePropertyKey:
+        return (object as KeyFrameIdBase).value;
+      case AnimationBase.artboardIdPropertyKey:
+        return (object as AnimationBase).artboardId;
       case ClippingShapeBase.shapeIdPropertyKey:
         return (object as ClippingShapeBase).shapeId;
       case DrawRulesBase.drawTargetIdPropertyKey:
@@ -3531,20 +3566,23 @@ abstract class RiveCoreContext extends CoreContext {
       case KeyedPropertyBase.keyedObjectIdPropertyKey:
         (object as KeyedPropertyBase).keyedObjectId = value;
         break;
-      case AnimationBase.artboardIdPropertyKey:
-        (object as AnimationBase).artboardId = value;
-        break;
       case KeyFrameBase.keyedPropertyIdPropertyKey:
         (object as KeyFrameBase).keyedPropertyId = value;
         break;
       case KeyFrameBase.interpolatorIdPropertyKey:
         (object as KeyFrameBase).interpolatorId = value;
         break;
+      case KeyFrameIdBase.valuePropertyKey:
+        (object as KeyFrameIdBase).value = value;
+        break;
+      case AnimationBase.artboardIdPropertyKey:
+        (object as AnimationBase).artboardId = value;
+        break;
       case ClippingShapeBase.shapeIdPropertyKey:
         (object as ClippingShapeBase).shapeId = value;
         break;
       case DrawRulesBase.drawTargetIdPropertyKey:
-        (object as DrawRulesBase).drawTargetId = value;
+        (object as DrawRulesBase).drawTargetIdCore = value;
         break;
       case BackboardBase.activeArtboardIdPropertyKey:
         (object as BackboardBase).activeArtboardId = value;
@@ -3554,6 +3592,14 @@ abstract class RiveCoreContext extends CoreContext {
         break;
       case TendonBase.boneIdPropertyKey:
         (object as TendonBase).boneId = value;
+        break;
+    }
+  }
+
+  static void animateId(Core object, int propertyKey, Id value) {
+    switch (propertyKey) {
+      case DrawRulesBase.drawTargetIdPropertyKey:
+        (object as DrawRulesBase).drawTargetIdAnimated = value;
         break;
     }
   }

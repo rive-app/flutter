@@ -31,6 +31,9 @@ class DrawRules extends DrawRulesBase {
     if (drawTargetId != null) {
       _activeTarget = context?.resolve(drawTargetId);
     }
+    else {
+      _activeTarget = null;
+    }
   }
 
   @override
@@ -78,7 +81,7 @@ class DrawRules extends DrawRulesBase {
     drawRulesChanged?.notify();
     // Make sure the active target is still in our list.
     if (!_targets.contains(_activeTarget)) {
-      drawTargetId = null;
+      drawTargetId = emptyId;
     }
   }
 

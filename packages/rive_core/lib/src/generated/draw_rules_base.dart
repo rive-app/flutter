@@ -3,6 +3,7 @@
 
 import 'dart:collection';
 import 'package:core/core.dart';
+import 'package:core/key_state.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/src/generated/component_base.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
@@ -22,15 +23,22 @@ abstract class DrawRulesBase extends ContainerComponent {
   /// --------------------------------------------------------------------------
   /// DrawTargetId field with key 121.
   Id _drawTargetId;
+  Id _drawTargetIdAnimated;
+  KeyState _drawTargetIdKeyState = KeyState.none;
   static const int drawTargetIdPropertyKey = 121;
 
   /// Id of the DrawTarget that is currently active for this set of rules.
-  Id get drawTargetId => _drawTargetId;
+  /// Get the [_drawTargetId] field value.Note this may not match the core value
+  /// if animation mode is active.
+  Id get drawTargetId => _drawTargetIdAnimated ?? _drawTargetId;
+
+  /// Get the non-animation [_drawTargetId] field value.
+  Id get drawTargetIdCore => _drawTargetId;
 
   /// Change the [_drawTargetId] field value.
   /// [drawTargetIdChanged] will be invoked only if the field's value has
   /// changed.
-  set drawTargetId(Id value) {
+  set drawTargetIdCore(Id value) {
     if (_drawTargetId == value) {
       return;
     }
@@ -38,6 +46,41 @@ abstract class DrawRulesBase extends ContainerComponent {
     _drawTargetId = value;
     onPropertyChanged(drawTargetIdPropertyKey, from, value);
     drawTargetIdChanged(from, value);
+  }
+
+  set drawTargetId(Id value) {
+    if (drawTargetId == value) {
+      return;
+    }
+    if (context != null && context.isAnimating) {
+      _drawTargetIdAnimate(value, true);
+      return;
+    }
+    drawTargetIdCore = value;
+  }
+
+  void _drawTargetIdAnimate(Id value, bool autoKey) {
+    if (_drawTargetIdAnimated == value) {
+      return;
+    }
+    Id from = drawTargetId;
+    _drawTargetIdAnimated = value;
+    Id to = drawTargetId;
+    onAnimatedPropertyChanged(drawTargetIdPropertyKey, autoKey, from, to);
+    drawTargetIdChanged(from, to);
+  }
+
+  Id get drawTargetIdAnimated => _drawTargetIdAnimated;
+  set drawTargetIdAnimated(Id value) => _drawTargetIdAnimate(value, false);
+  KeyState get drawTargetIdKeyState => _drawTargetIdKeyState;
+  set drawTargetIdKeyState(KeyState value) {
+    if (_drawTargetIdKeyState == value) {
+      return;
+    }
+    _drawTargetIdKeyState = value;
+    // Force update anything listening on this property.
+    onAnimatedPropertyChanged(drawTargetIdPropertyKey, false,
+        _drawTargetIdAnimated, _drawTargetIdAnimated);
   }
 
   void drawTargetIdChanged(Id from, Id to);

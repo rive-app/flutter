@@ -469,8 +469,8 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     Set<DrawTarget> rootRules = {};
     for (final nodeRules in _rules) {
       for (final target in nodeRules.targets) {
-        target.isValid = true;
-        var dependentRules = target.drawable.flattenedDrawRules;
+        target.isValid = target.drawable != null;
+        var dependentRules = target.drawable?.flattenedDrawRules;
         if (dependentRules != null) {
           for (final dependentRule in dependentRules.targets) {
             dependentRule.dependents.add(target);

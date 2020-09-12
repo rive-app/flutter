@@ -1,6 +1,8 @@
 import 'package:utilities/binary_buffer/binary_reader.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';
 
+const Id emptyId = Id(0,0);
+ 
 /// A client specific object id.
 class Id {
   final int client;

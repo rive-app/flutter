@@ -1,3 +1,4 @@
+import 'package:core/id.dart';
 import 'package:flutter/material.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/transform_component.dart';
@@ -74,7 +75,7 @@ class InspectDrawOrder extends ListenableInspectorBuilder {
       ];
 
   void _changeDrawTarget(DrawTarget target) {
-    _drawOrderComponent.drawRules?.activeTarget = target;
+    _drawOrderComponent.drawRules?.drawTargetId = target?.id ?? emptyId;
     _drawOrderComponent.context?.captureJournalEntry();
   }
 
