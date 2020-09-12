@@ -207,10 +207,13 @@ class _ComboBoxState<T> extends State<ComboBox<T>> {
         children: [
           _size(child),
           const SizedBox(width: 8),
-          TintedIcon(
-            color: theme.colors.toolbarButton,
-            icon: PackedIcon.dropdownNoSpace,
-          ),
+          if (widget.disabled)
+            const SizedBox(width: 5)
+          else
+            TintedIcon(
+              color: theme.colors.toolbarButton,
+              icon: PackedIcon.dropdownNoSpace,
+            ),
         ],
       );
     }
