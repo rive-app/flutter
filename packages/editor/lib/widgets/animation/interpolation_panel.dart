@@ -48,9 +48,7 @@ class InterpolationPanel extends StatelessWidget {
   Widget _buildPanel(BuildContext context, InterpolationViewModel interpolation,
       HashSet<KeyFrame> selection, KeyFrameManager manager) {
     var theme = RiveTheme.of(context);
-    bool disable = selection.isEmpty ||
-                      selection.any((keyframe) => !keyframe.canInterpolate);
-                      print("DIS: $disable");
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(

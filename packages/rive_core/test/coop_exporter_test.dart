@@ -28,6 +28,7 @@ void main() {
     var coopImporter = CoopImporter(core: riveFile);
     coopImporter.import(data);
     expect(riveFile.artboards.length, 1);
+    riveFile.artboards.first.advance(0);
     expect(riveFile.artboards.first.drawables.isNotEmpty, true);
 
     var exporter = RuntimeExporter(

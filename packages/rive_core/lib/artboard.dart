@@ -64,7 +64,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   final Set<Component> _components = {};
 
-  List<Drawable> get drawables => [];
+  List<Drawable> get drawables => _drawables;
 
   final AnimationList _animations = AnimationList();
 
