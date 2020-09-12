@@ -27,9 +27,11 @@ abstract class DrawableConverter extends NodeConverter {
       // We use the progression: n/(n + 1), knowing that
       // n/(n + 1) < (n + 1) / (n + 2), ∀ n > 0
       // https://bit.ly/3jD3xCm
-      drawable.drawOrder = FractionalIndex(drawOrder, drawOrder + 1);
-      final artboard = drawable.artboard;
-      artboard.drawables.sortDrawables();
+
+      // TODO: figure out what we're doing here with new draw order, if anything?
+      // drawable.drawOrder = FractionalIndex(drawOrder, drawOrder + 1);
+      // final artboard = drawable.artboard;
+      // artboard.drawables.sortDrawables();
     }
 
     if (blendMode is String) {
