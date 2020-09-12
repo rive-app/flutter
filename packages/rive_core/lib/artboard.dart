@@ -303,7 +303,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
     for (var drawable = _firstDrawable;
         drawable != null;
-        drawable = drawable.next) {
+        drawable = drawable.prev) {
       drawable.draw(canvas);
     }
     canvas.restore();
@@ -464,7 +464,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     _drawables.clear();
     _rules.clear();
     buildDrawOrder(_drawables, null, _rules);
-// Build rule dependencies. In practice this'll need to happen anytime a
+    // Build rule dependencies. In practice this'll need to happen anytime a
     // target drawable is changed or rule is added/removed.
     Set<DrawTarget> rootRules = {};
     for (final nodeRules in _rules) {
@@ -493,7 +493,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     if (sorter.cycleNodes.isNotEmpty) {
       for (final invalidRule in sorter.cycleNodes) {
         (invalidRule as DrawTarget).isValid = false;
-        // TODO: Show an alert of dependency cycle?
+        // TODO: Show an alert of dependency cycle?;
       }
     }
 
@@ -563,12 +563,16 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
             rule.drawable.next.prev = rule.last;
             rule.last.next = rule.drawable.next;
           }
+          if (rule.drawable == lastDrawable) {
+            lastDrawable = rule.last;
+          }
           rule.drawable.next = rule.first;
           rule.first.prev = rule.drawable;
           break;
       }
     }
 
+    _firstDrawable = lastDrawable;
     // -> editor-only
 
     // iterate all the drawables and give them their actual draw order which the
@@ -576,7 +580,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     int order = 0;
     for (var drawable = _firstDrawable;
         drawable != null;
-        drawable = drawable.next) {
+        drawable = drawable.prev) {
       drawable.drawOrder = order++;
     }
 

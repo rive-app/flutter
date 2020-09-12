@@ -95,6 +95,12 @@ class HierarchyTreeController extends ComponentTreeController {
     }
 
     var desiredParent = target.parent?.data;
+    if (desiredParent == null) {
+      // Null parent means it's the artboard...
+      if (target.item.data.parent == _showingArtboard) {
+        desiredParent = _showingArtboard;
+      }
+    }
     // state == DropState.into ? target.data : target.data.parent;
     for (final item in items) {
       if (!item.data.isValidParent(desiredParent)) {
@@ -112,7 +118,13 @@ class HierarchyTreeController extends ComponentTreeController {
       case DropState.above:
       case DropState.below:
         // Set<TreeItemChildren> toSort = {};
-        var parentComponent = target.parent.data;
+        var parentComponent = target.parent?.data;
+        if (parentComponent == null) {
+          // Null parent means it's the artboard...
+          if (target.item.data.parent == _showingArtboard) {
+            parentComponent = _showingArtboard;
+          }
+        }
         if (parentComponent is! ContainerComponent) {
           return;
         }
@@ -128,14 +140,14 @@ class HierarchyTreeController extends ComponentTreeController {
           if (state == DropState.above) {
             parentContainer.children.move(treeItem,
                 before: target.item.prev?.parent == target.parent
-                    ? target.item.prev.data
+                    ? target.item.prev?.data
                     : null,
                 after: target.item.data);
           } else {
             parentContainer.children.move(treeItem,
                 before: target.item.data,
                 after: target.item.next?.parent == target.parent
-                    ? target.item.next.data
+                    ? target.item.next?.data
                     : null);
           }
 
@@ -148,12 +160,8 @@ class HierarchyTreeController extends ComponentTreeController {
             /// parented.
             treeItem.compensate();
           }
-          // toSort.add(newParent.children);
         }
 
-        // for (final children in toSort) {
-        //   children.sortFractional();
-        // }
         break;
       case DropState.into:
         var targetComponent = target.item.data;
@@ -163,8 +171,6 @@ class HierarchyTreeController extends ComponentTreeController {
         var targetContainer = targetComponent as ContainerComponent;
         for (final item in items) {
           var treeItem = item.data;
-          // treeItem.parent.children.remove(treeItem);
-          // treeItem.parent = target.data;
           targetContainer.children.moveToEnd(treeItem);
           treeItem.parent = targetContainer;
           if (treeItem is TransformComponent) {
@@ -172,9 +178,6 @@ class HierarchyTreeController extends ComponentTreeController {
             /// parented.
             treeItem.compensate();
           }
-          // targetContainer.addChild(treeItem);
-          // target.data.children.append(treeItem);
-          // target.data.children.sortFractional();
         }
         break;
       default:

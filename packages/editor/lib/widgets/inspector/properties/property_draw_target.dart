@@ -104,9 +104,9 @@ class PropertyDrawTarget extends StatelessWidget {
                   options: DrawTargetPlacement.values,
                   toLabel: (DrawTargetPlacement placement) {
                     switch (placement) {
-                      case DrawTargetPlacement.after:
-                        return uiStrings.withKey('above_target');
                       case DrawTargetPlacement.before:
+                        return uiStrings.withKey('above_target');
+                      case DrawTargetPlacement.after:
                         return uiStrings.withKey('below_target');
                     }
                     return '-';
@@ -120,7 +120,7 @@ class PropertyDrawTarget extends StatelessWidget {
             const SizedBox(height: 20),
             InspectorPillButton(
               textColor: theme.colors.inspectorTextColor,
-              icon: PackedIcon.pathClose,
+              icon: PackedIcon.target,
               label: target?.drawable?.name ?? uiStrings.withKey('target'),
               press: pickTarget,
             )
