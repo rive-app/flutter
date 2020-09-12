@@ -4,6 +4,7 @@ import 'package:core/field_types/core_double_type.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/keyframe_color.dart';
 import 'package:rive_core/animation/keyframe_double.dart';
+import 'package:rive_core/animation/keyframe_id.dart';
 import 'package:rive_core/animation/keyframe_interpolation.dart';
 
 /// We extend the CoreFieldTypes to support Rive specific features that we're
@@ -37,9 +38,13 @@ class RiveColorType extends CoreColorType
       KeyFrameColor()..interpolation = KeyFrameInterpolation.linear;
 }
 
-class RiveIdType extends CoreIdType {
+class RiveIdType extends CoreIdType implements KeyFrameGenerator<KeyFrameId> {
   RiveIdType._constructor();
   static RiveIdType instance = RiveIdType._constructor();
+
+  @override
+  KeyFrameId makeKeyFrame() =>
+      KeyFrameId()..interpolation = KeyFrameInterpolation.hold;
 }
 
 class RiveUintType extends CoreUintType {

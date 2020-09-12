@@ -82,14 +82,14 @@ abstract class AnimationBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void changeNonNull() {
-    if (artboardId != null) {
-      onPropertyChanged(artboardIdPropertyKey, artboardId, artboardId);
+    if (_artboardId != null) {
+      onPropertyChanged(artboardIdPropertyKey, _artboardId, _artboardId);
     }
-    if (name != null) {
-      onPropertyChanged(namePropertyKey, name, name);
+    if (_name != null) {
+      onPropertyChanged(namePropertyKey, _name, _name);
     }
-    if (order != null) {
-      onPropertyChanged(orderPropertyKey, order, order);
+    if (_order != null) {
+      onPropertyChanged(orderPropertyKey, _order, _order);
     }
   }
 

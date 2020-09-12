@@ -86,16 +86,16 @@ abstract class BackboardBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void changeNonNull() {
-    if (activeArtboardId != null) {
+    if (_activeArtboardId != null) {
       onPropertyChanged(
-          activeArtboardIdPropertyKey, activeArtboardId, activeArtboardId);
+          activeArtboardIdPropertyKey, _activeArtboardId, _activeArtboardId);
     }
-    if (mainArtboardId != null) {
+    if (_mainArtboardId != null) {
       onPropertyChanged(
-          mainArtboardIdPropertyKey, mainArtboardId, mainArtboardId);
+          mainArtboardIdPropertyKey, _mainArtboardId, _mainArtboardId);
     }
-    if (colorValue != null) {
-      onPropertyChanged(colorValuePropertyKey, colorValue, colorValue);
+    if (_colorValue != null) {
+      onPropertyChanged(colorValuePropertyKey, _colorValue, _colorValue);
     }
   }
 

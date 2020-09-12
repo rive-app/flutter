@@ -33,11 +33,21 @@ class InspectorPopout extends StatefulWidget {
   /// Called when the popup is closed.
   final PopupCallback closed;
 
+  /// Custom padding to put around the entire row.
+  final EdgeInsets padding;
+
+  // Note that left padding is 15 as the popout button has a padding of 5,
+  // bringing the total left padding to 20. This is so the icon aligns at 20 but
+  // the hit area of the button starts at 15.
+  static const defaultPadding =
+      EdgeInsets.only(top: 8, bottom: 10, left: 15, right: 15);
+
   const InspectorPopout({
     @required this.contentBuilder,
     @required this.popupBuilder,
     this.opened,
     this.closed,
+    this.padding,
     Key key,
   }) : super(key: key);
   @override
@@ -107,7 +117,7 @@ class _InspectorPopoutState extends State<InspectorPopout> {
     var popup = InspectorPopout.popout(
       context,
       onClose: () {
-        if(!mounted) {
+        if (!mounted) {
           return;
         }
         setState(() {
@@ -124,71 +134,11 @@ class _InspectorPopoutState extends State<InspectorPopout> {
     });
   }
 
-  /* var theme = RiveTheme.of(context);
-
-    RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final boxOffset = renderBox.localToGlobal(Offset.zero);
-
-    var popoutWidth = widget.popoutWidth;
-    var left = boxOffset.dx - popoutWidth - _popoutToPanelOffset;
-    var top = boxOffset.dy;
-    var media = MediaQuery.of(context);
-
-    var availableHeight = media.size.height - top - _screenEdgeMargin;
-    if (widget.popupHeight != null) {
-      if (availableHeight < widget.popupHeight) {
-        top -= widget.popupHeight - availableHeight;
-      }
-    } else if (availableHeight < widget.minPopupHeight) {
-      top -= widget.minPopupHeight - availableHeight;
-    }
-
-    var popup = Popup.show(
-      context,
-      onClose: () {
-        setState(() {
-          _popup = null;
-        });
-      },
-      builder: (context) {
-        return InspectorPopoutPositioner(
-          right: right,
-          top: top,
-          child: Material(
-            type: MaterialType.transparency,
-            child: Container(
-              decoration: BoxDecoration(
-                color: theme.colors.panelBackgroundDarkGrey,
-                borderRadius: BorderRadius.circular(5.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.40),
-                    offset: const Offset(0, 50),
-                    blurRadius: 100,
-                  )
-                ],
-              ),
-              // height: 300,
-              child: widget.popupBuilder(context),
-            ),
-          ),
-        );
-      },
-    );
-
-    setState(() {
-      _popup = popup;
-    });
-  }
-*/
   @override
   Widget build(BuildContext context) {
     var theme = RiveTheme.of(context);
     return Padding(
-      // Note that left padding is 15 as the popout button has a padding of 5,
-      // bringing the total left padding to 20. This is so the icon aligns at 20
-      // but the hit area of the button starts at 15.
-      padding: const EdgeInsets.only(top: 8, bottom: 10, left: 15, right: 15),
+      padding: widget.padding ?? InspectorPopout.defaultPadding,
       child: Row(
         children: [
           IgnorePointer(

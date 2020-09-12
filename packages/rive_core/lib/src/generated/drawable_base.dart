@@ -24,26 +24,6 @@ abstract class DrawableBase extends Node {
       };
 
   /// --------------------------------------------------------------------------
-  /// DrawOrder field with key 22.
-  FractionalIndex _drawOrder;
-  static const int drawOrderPropertyKey = 22;
-  FractionalIndex get drawOrder => _drawOrder;
-
-  /// Change the [_drawOrder] field value.
-  /// [drawOrderChanged] will be invoked only if the field's value has changed.
-  set drawOrder(FractionalIndex value) {
-    if (_drawOrder == value) {
-      return;
-    }
-    FractionalIndex from = _drawOrder;
-    _drawOrder = value;
-    onPropertyChanged(drawOrderPropertyKey, from, value);
-    drawOrderChanged(from, value);
-  }
-
-  void drawOrderChanged(FractionalIndex from, FractionalIndex to);
-
-  /// --------------------------------------------------------------------------
   /// BlendModeValue field with key 23.
   int _blendModeValue = 3;
   static const int blendModeValuePropertyKey = 23;
@@ -67,30 +47,21 @@ abstract class DrawableBase extends Node {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (drawOrder != null) {
-      onPropertyChanged(drawOrderPropertyKey, drawOrder, drawOrder);
-    }
-    if (blendModeValue != null) {
+    if (_blendModeValue != null) {
       onPropertyChanged(
-          blendModeValuePropertyKey, blendModeValue, blendModeValue);
+          blendModeValuePropertyKey, _blendModeValue, _blendModeValue);
     }
   }
 
   @override
   void writeRuntimeProperties(BinaryWriter writer, HashMap<Id, int> idLookup) {
     super.writeRuntimeProperties(writer, idLookup);
-    if (_drawOrder != null && exports(drawOrderPropertyKey)) {
-      var runtimeValue = runtimeValueDrawOrder(_drawOrder);
-      context.uintType
-          .writeRuntimeProperty(drawOrderPropertyKey, writer, runtimeValue);
-    }
     if (_blendModeValue != null && exports(blendModeValuePropertyKey)) {
       context.uintType.writeRuntimeProperty(
           blendModeValuePropertyKey, writer, _blendModeValue);
     }
   }
 
-  int runtimeValueDrawOrder(FractionalIndex editorValue);
   @override
   bool exports(int propertyKey) {
     switch (propertyKey) {
@@ -103,8 +74,6 @@ abstract class DrawableBase extends Node {
   @override
   K getProperty<K>(int propertyKey) {
     switch (propertyKey) {
-      case drawOrderPropertyKey:
-        return drawOrder as K;
       case blendModeValuePropertyKey:
         return blendModeValue as K;
       default:
@@ -115,7 +84,6 @@ abstract class DrawableBase extends Node {
   @override
   bool hasProperty(int propertyKey) {
     switch (propertyKey) {
-      case drawOrderPropertyKey:
       case blendModeValuePropertyKey:
         return true;
       default:

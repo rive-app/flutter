@@ -120,4 +120,20 @@ HashMap<String, String> _defaultUIStrings =
   'none': 'None',
   'sequential': 'Sequential',
   'synchronized': 'Synced',
+
+  // Inspector Popout Titles
+  'clip_options': 'Clip Options',
+  'fill_options': 'Fill Options',
+  'draw_order_rule': 'Draw Order Rule',
+  'stroke_options': 'Stroke Options',
+
+  'normal_draw_rule': 'Normal',
+  'normal_draw_rule_desc':
+      'This is the default draw order position based on Hierarchy.',
+  'above_target': 'above target',
+  'below_target': 'below target',
+  'draw_order': 'Draw order',
+  'target': 'Target',
+  'select_drawable_target':
+      'Select a drawable target (no groups) on the Stage or in the Hierarchy.'
 });

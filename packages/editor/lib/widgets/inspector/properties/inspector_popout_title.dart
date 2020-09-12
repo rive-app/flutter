@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:rive_editor/packed_icon.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
 import 'package:rive_editor/widgets/tinted_icon.dart';
+import 'package:rive_editor/widgets/ui_strings.dart';
 
 /// Default title styling to display in the popout for the inspector. Includes
 /// an options icon.
 class InspectorPopoutTitle extends StatelessWidget {
-  final String title;
+  final String titleKey;
 
   const InspectorPopoutTitle({
     Key key,
-    this.title,
+    this.titleKey,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -23,8 +24,8 @@ class InspectorPopoutTitle extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Text(
-          title,
-          style: theme.textStyles.inspectorPropertySubLabel,
+          UIStrings.of(context).withKey(titleKey),
+          style: theme.textStyles.inspectorSectionHeader,
         ),
       ],
     );

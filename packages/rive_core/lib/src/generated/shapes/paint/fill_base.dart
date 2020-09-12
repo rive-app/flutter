@@ -44,8 +44,8 @@ abstract class FillBase extends ShapePaint {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (fillRule != null) {
-      onPropertyChanged(fillRulePropertyKey, fillRule, fillRule);
+    if (_fillRule != null) {
+      onPropertyChanged(fillRulePropertyKey, _fillRule, _fillRule);
     }
   }
 

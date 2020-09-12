@@ -194,29 +194,29 @@ abstract class TendonBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (index != null) {
-      onPropertyChanged(indexPropertyKey, index, index);
+    if (_index != null) {
+      onPropertyChanged(indexPropertyKey, _index, _index);
     }
-    if (boneId != null) {
-      onPropertyChanged(boneIdPropertyKey, boneId, boneId);
+    if (_boneId != null) {
+      onPropertyChanged(boneIdPropertyKey, _boneId, _boneId);
     }
-    if (xx != null) {
-      onPropertyChanged(xxPropertyKey, xx, xx);
+    if (_xx != null) {
+      onPropertyChanged(xxPropertyKey, _xx, _xx);
     }
-    if (yx != null) {
-      onPropertyChanged(yxPropertyKey, yx, yx);
+    if (_yx != null) {
+      onPropertyChanged(yxPropertyKey, _yx, _yx);
     }
-    if (xy != null) {
-      onPropertyChanged(xyPropertyKey, xy, xy);
+    if (_xy != null) {
+      onPropertyChanged(xyPropertyKey, _xy, _xy);
     }
-    if (yy != null) {
-      onPropertyChanged(yyPropertyKey, yy, yy);
+    if (_yy != null) {
+      onPropertyChanged(yyPropertyKey, _yy, _yy);
     }
-    if (tx != null) {
-      onPropertyChanged(txPropertyKey, tx, tx);
+    if (_tx != null) {
+      onPropertyChanged(txPropertyKey, _tx, _tx);
     }
-    if (ty != null) {
-      onPropertyChanged(tyPropertyKey, ty, ty);
+    if (_ty != null) {
+      onPropertyChanged(tyPropertyKey, _ty, _ty);
     }
   }
 

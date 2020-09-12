@@ -157,11 +157,11 @@ abstract class RootBoneBase extends Bone {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (x != null) {
-      onPropertyChanged(xPropertyKey, x, x);
+    if (_x != null) {
+      onPropertyChanged(xPropertyKey, _x, _x);
     }
-    if (y != null) {
-      onPropertyChanged(yPropertyKey, y, y);
+    if (_y != null) {
+      onPropertyChanged(yPropertyKey, _y, _y);
     }
   }
 

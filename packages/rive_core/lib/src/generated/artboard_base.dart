@@ -154,23 +154,23 @@ abstract class ArtboardBase extends ContainerComponent {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (width != null) {
-      onPropertyChanged(widthPropertyKey, width, width);
+    if (_width != null) {
+      onPropertyChanged(widthPropertyKey, _width, _width);
     }
-    if (height != null) {
-      onPropertyChanged(heightPropertyKey, height, height);
+    if (_height != null) {
+      onPropertyChanged(heightPropertyKey, _height, _height);
     }
-    if (x != null) {
-      onPropertyChanged(xPropertyKey, x, x);
+    if (_x != null) {
+      onPropertyChanged(xPropertyKey, _x, _x);
     }
-    if (y != null) {
-      onPropertyChanged(yPropertyKey, y, y);
+    if (_y != null) {
+      onPropertyChanged(yPropertyKey, _y, _y);
     }
-    if (originX != null) {
-      onPropertyChanged(originXPropertyKey, originX, originX);
+    if (_originX != null) {
+      onPropertyChanged(originXPropertyKey, _originX, _originX);
     }
-    if (originY != null) {
-      onPropertyChanged(originYPropertyKey, originY, originY);
+    if (_originY != null) {
+      onPropertyChanged(originYPropertyKey, _originY, _originY);
     }
   }
 

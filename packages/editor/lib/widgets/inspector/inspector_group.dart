@@ -63,7 +63,7 @@ class InspectorGroup extends StatelessWidget {
           const SizedBox(width: 5),
           Expanded(
             child: Text(
-              name.toUpperCase(),
+              name,
               style: RiveTheme.of(context).textStyles.inspectorSectionHeader,
             ),
           ),

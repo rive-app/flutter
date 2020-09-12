@@ -67,7 +67,7 @@ class PropertyStroke extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const InspectorPopoutTitle(title: 'STROKE OPTIONS'),
+              const InspectorPopoutTitle(titleKey: 'stroke_options'),
               const SizedBox(height: 20),
               Row(
                 mainAxisSize: MainAxisSize.max,

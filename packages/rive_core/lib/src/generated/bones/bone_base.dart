@@ -90,8 +90,8 @@ abstract class BoneBase extends SkeletalComponent {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (length != null) {
-      onPropertyChanged(lengthPropertyKey, length, length);
+    if (_length != null) {
+      onPropertyChanged(lengthPropertyKey, _length, _length);
     }
   }
 

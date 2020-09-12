@@ -48,6 +48,7 @@ class InterpolationPanel extends StatelessWidget {
   Widget _buildPanel(BuildContext context, InterpolationViewModel interpolation,
       HashSet<KeyFrame> selection, KeyFrameManager manager) {
     var theme = RiveTheme.of(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
@@ -58,13 +59,14 @@ class InterpolationPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  "Interpolation",
+                  'Interpolation',
                   style: theme.textStyles.inspectorPropertyLabel,
                 ),
               ),
               ComboBox(
                   underlineColor: theme.colors.interpolationUnderline,
-                  disabled: selection.isEmpty,
+                  disabled: selection.isEmpty ||
+                      selection.any((keyframe) => !keyframe.canInterpolate),
                   sizing: ComboSizing.content,
                   options: KeyFrameInterpolation.values,
                   value: interpolation.type,

@@ -73,11 +73,11 @@ abstract class ParametricPathBase extends Path {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (width != null) {
-      onPropertyChanged(widthPropertyKey, width, width);
+    if (_width != null) {
+      onPropertyChanged(widthPropertyKey, _width, _width);
     }
-    if (height != null) {
-      onPropertyChanged(heightPropertyKey, height, height);
+    if (_height != null) {
+      onPropertyChanged(heightPropertyKey, _height, _height);
     }
   }
 

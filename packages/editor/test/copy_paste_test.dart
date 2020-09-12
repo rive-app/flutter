@@ -38,22 +38,21 @@ void main() {
         reason: 'expect three shapes after pasting the Ellipse');
     expect(core.objectsOfType<ParametricPath>().length, 3,
         reason: 'also expect a second path');
+    
+    core.backboard.activeArtboard.advance(0);
     expect(core.backboard.activeArtboard.drawables.length, 3,
         reason: 'the artboard should now have two drawables');
 
-    // for (final drawable in core.backboard.activeArtboard.drawables) {
-    //   print("DRAWABLE: ${drawable.name} ${drawable.drawOrder} ");
-    // }
     expect(core.backboard.activeArtboard.drawables[0].drawOrder,
-        const FractionalIndex(1, 3));
-    expect(core.backboard.activeArtboard.drawables[0], ellipse);
+        2);
+    expect(core.backboard.activeArtboard.drawables[0], rectangle);
 
     expect(core.backboard.activeArtboard.drawables[1].drawOrder,
-        const FractionalIndex(1, 2));
-    expect(core.backboard.activeArtboard.drawables[1], rectangle);
+        1);
+    expect(core.backboard.activeArtboard.drawables[1], ellipse);
 
     expect(core.backboard.activeArtboard.drawables[2].drawOrder,
-        const FractionalIndex(2, 3));
+        0);
     // expect(core.backboard.activeArtboard.drawables[2], rectangle);
   });
 }

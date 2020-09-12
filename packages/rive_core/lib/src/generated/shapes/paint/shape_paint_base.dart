@@ -43,8 +43,8 @@ abstract class ShapePaintBase extends ContainerComponent {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (isVisible != null) {
-      onPropertyChanged(isVisiblePropertyKey, isVisible, isVisible);
+    if (_isVisible != null) {
+      onPropertyChanged(isVisiblePropertyKey, _isVisible, _isVisible);
     }
   }
 

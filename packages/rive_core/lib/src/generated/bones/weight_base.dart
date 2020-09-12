@@ -57,11 +57,11 @@ abstract class WeightBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (values != null) {
-      onPropertyChanged(valuesPropertyKey, values, values);
+    if (_values != null) {
+      onPropertyChanged(valuesPropertyKey, _values, _values);
     }
-    if (indices != null) {
-      onPropertyChanged(indicesPropertyKey, indices, indices);
+    if (_indices != null) {
+      onPropertyChanged(indicesPropertyKey, _indices, _indices);
     }
   }
 

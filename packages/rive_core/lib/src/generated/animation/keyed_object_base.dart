@@ -61,11 +61,11 @@ abstract class KeyedObjectBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void changeNonNull() {
-    if (objectId != null) {
-      onPropertyChanged(objectIdPropertyKey, objectId, objectId);
+    if (_objectId != null) {
+      onPropertyChanged(objectIdPropertyKey, _objectId, _objectId);
     }
-    if (animationId != null) {
-      onPropertyChanged(animationIdPropertyKey, animationId, animationId);
+    if (_animationId != null) {
+      onPropertyChanged(animationIdPropertyKey, _animationId, _animationId);
     }
   }
 

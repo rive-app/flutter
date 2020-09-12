@@ -276,17 +276,17 @@ abstract class TransformComponentBase extends ContainerComponent {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (rotation != null) {
-      onPropertyChanged(rotationPropertyKey, rotation, rotation);
+    if (_rotation != null) {
+      onPropertyChanged(rotationPropertyKey, _rotation, _rotation);
     }
-    if (scaleX != null) {
-      onPropertyChanged(scaleXPropertyKey, scaleX, scaleX);
+    if (_scaleX != null) {
+      onPropertyChanged(scaleXPropertyKey, _scaleX, _scaleX);
     }
-    if (scaleY != null) {
-      onPropertyChanged(scaleYPropertyKey, scaleY, scaleY);
+    if (_scaleY != null) {
+      onPropertyChanged(scaleYPropertyKey, _scaleY, _scaleY);
     }
-    if (opacity != null) {
-      onPropertyChanged(opacityPropertyKey, opacity, opacity);
+    if (_opacity != null) {
+      onPropertyChanged(opacityPropertyKey, _opacity, _opacity);
     }
   }
 

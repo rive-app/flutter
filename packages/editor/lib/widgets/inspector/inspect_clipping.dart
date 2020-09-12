@@ -55,7 +55,7 @@ class InspectClipping extends ListenableInspectorBuilder {
           BuildContext panelContext, InspectionSet inspecting) =>
       [
         (context) => InspectorGroup(
-              name: 'CLIPPING',
+              name: 'Clipping',
               isExpanded: _isExpanded,
               tapExpand: () {
                 _isExpanded = !_isExpanded;

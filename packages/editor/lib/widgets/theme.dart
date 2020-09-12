@@ -218,7 +218,7 @@ class RiveColors {
 
   // Plans
   Color get errorText => magenta;
-  
+
   // Bone Colors
   List<Color> get boundBones => const [
         Color.fromARGB(255, 109, 145, 255),
@@ -248,13 +248,10 @@ class TextStyles {
   TextStyle get basic =>
       const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
 
-  // Hierarchy panel
-  TextStyle get hierarchyTabActive => const TextStyle(
-      fontFamily: 'Roboto-Regular', color: Color(0xFFAAAAAA), fontSize: 11);
+  TextStyle get hierarchyName => const TextStyle(
+      fontFamily: 'Roboto-Medium', fontSize: 13, color: Color(0xFFAAAAAA));
 
-  TextStyle get hierarchyTabInactive => const TextStyle(
-      fontFamily: 'Roboto-Regular', color: Color(0xFF656565), fontSize: 11);
-
+  // TODO: Used in the settings pages, need to rename this...
   TextStyle get hierarchyTabHovered => const TextStyle(
       fontFamily: 'Roboto-Regular', color: Color(0xFF888888), fontSize: 11);
 
@@ -273,7 +270,14 @@ class TextStyles {
       fontFamily: 'Roboto-Light', color: Color(0xFFE3E3E3), fontSize: 12.5);
 
   TextStyle get inspectorSectionHeader => const TextStyle(
-      fontFamily: 'Roboto-Medium', fontSize: 11, color: lightGrey);
+        fontFamily: 'Roboto-Medium',
+        fontSize: 13,
+        color: Color(0xFFAAAAAA),
+        height: 1,
+      );
+
+  TextStyle get animationsHeader => const TextStyle(
+      fontFamily: 'Roboto-Medium', fontSize: 11, color: lightGrey, height: 1);
 
   TextStyle get inspectorButton =>
       const TextStyle(fontFamily: 'Roboto-Regular', fontSize: 13);
@@ -281,6 +285,8 @@ class TextStyles {
   TextStyle get inspectorWhiteLabel => const TextStyle(
       fontFamily: 'Roboto-Regular', color: Color(0xFFC8C8C8), fontSize: 13);
 
+  TextStyle get inspectorDescription => const TextStyle(
+      fontFamily: 'Roboto-Regular', color: lightGrey, fontSize: 13);
   // Popup Menus
   TextStyle get popupHovered =>
       const TextStyle(fontFamily: 'Roboto-Light', color: white, fontSize: 13);
@@ -520,19 +526,15 @@ class TextStyles {
       );
 
   TextStyle get videoSeriesTag => const TextStyle(
-    fontFamily: 'Roboto-Medium',
-    fontWeight: FontWeight.w600,
-    color: Color(0x80FFFFFF),
-    fontSize: 16);
+      fontFamily: 'Roboto-Medium',
+      fontWeight: FontWeight.w600,
+      color: Color(0x80FFFFFF),
+      fontSize: 16);
 
-  TextStyle get videoSeriesTitle => const TextStyle(
-    fontSize: 28, 
-    fontWeight: FontWeight.w600, 
-    color: white);
+  TextStyle get videoSeriesTitle =>
+      const TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: white);
 
-  TextStyle get videoSeriesBlurb => const TextStyle(
-    fontSize: 16, 
-    color: white);
+  TextStyle get videoSeriesBlurb => const TextStyle(fontSize: 16, color: white);
 
   // Billing History
   TextStyle get receiptHeader => const TextStyle(

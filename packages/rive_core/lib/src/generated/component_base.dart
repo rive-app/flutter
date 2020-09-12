@@ -106,17 +106,17 @@ abstract class ComponentBase<T extends RiveCoreContext> extends Core<T> {
 
   @override
   void changeNonNull() {
-    if (dependentIds != null) {
-      onPropertyChanged(dependentIdsPropertyKey, dependentIds, dependentIds);
+    if (_dependentIds != null) {
+      onPropertyChanged(dependentIdsPropertyKey, _dependentIds, _dependentIds);
     }
-    if (name != null) {
-      onPropertyChanged(namePropertyKey, name, name);
+    if (_name != null) {
+      onPropertyChanged(namePropertyKey, _name, _name);
     }
-    if (parentId != null) {
-      onPropertyChanged(parentIdPropertyKey, parentId, parentId);
+    if (_parentId != null) {
+      onPropertyChanged(parentIdPropertyKey, _parentId, _parentId);
     }
-    if (childOrder != null) {
-      onPropertyChanged(childOrderPropertyKey, childOrder, childOrder);
+    if (_childOrder != null) {
+      onPropertyChanged(childOrderPropertyKey, _childOrder, _childOrder);
     }
   }
 

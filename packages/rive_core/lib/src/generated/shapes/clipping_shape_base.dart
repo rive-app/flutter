@@ -84,14 +84,14 @@ abstract class ClippingShapeBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (shapeId != null) {
-      onPropertyChanged(shapeIdPropertyKey, shapeId, shapeId);
+    if (_shapeId != null) {
+      onPropertyChanged(shapeIdPropertyKey, _shapeId, _shapeId);
     }
-    if (clipOpValue != null) {
-      onPropertyChanged(clipOpValuePropertyKey, clipOpValue, clipOpValue);
+    if (_clipOpValue != null) {
+      onPropertyChanged(clipOpValuePropertyKey, _clipOpValue, _clipOpValue);
     }
-    if (isVisible != null) {
-      onPropertyChanged(isVisiblePropertyKey, isVisible, isVisible);
+    if (_isVisible != null) {
+      onPropertyChanged(isVisiblePropertyKey, _isVisible, _isVisible);
     }
   }
 

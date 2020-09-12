@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_core_field_type.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/shapes/paint/gradient_stop.dart';
@@ -10,7 +9,6 @@ import 'package:rive_editor/rive/stage/stage_item.dart';
 import 'package:rive_editor/selectable_item.dart';
 import 'package:rive_editor/widgets/animation/keyed_object_tree_controller.dart';
 import 'package:rive_editor/widgets/common/core_text_field.dart';
-import 'package:rive_editor/widgets/common/draw_order_key_button.dart';
 import 'package:rive_editor/widgets/common/renamable.dart';
 import 'package:rive_editor/widgets/core_property_builder.dart';
 import 'package:rive_editor/widgets/inherited_widgets.dart';
@@ -264,13 +262,6 @@ class _KeyedObjectHierarchyState extends State<KeyedObjectHierarchy> {
             propertyKey: model.keyedProperty.propertyKey,
           ),
         ),
-      );
-    } else if (model.keyedProperty.propertyKey ==
-        DrawableBase.drawOrderPropertyKey) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 3),
-        child: DrawOrderKeyButton(
-            manager: ActiveFile.of(context).editingAnimationManager.value),
       );
     }
     return const SizedBox();

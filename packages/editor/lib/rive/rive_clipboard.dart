@@ -7,7 +7,6 @@ import 'package:rive_core/animation/interpolator.dart';
 import 'package:rive_core/animation/keyframe.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
-import 'package:rive_core/animation/keyframe_draw_order.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/container_component.dart';
 import 'package:rive_core/math/aabb.dart';
@@ -159,9 +158,6 @@ class _RiveKeyFrameClipboard extends RiveClipboard {
             addedKeyFrames.add(keyframe);
             core.addObject(keyframe);
             keyframe.keyedPropertyId = keyedProperty.id;
-            if (keyframe is KeyFrameDrawOrder) {
-              keyframe.readRuntimeValues(core, reader, idRemap);
-            }
           }
         }
       }
@@ -267,9 +263,7 @@ class _RiveHierarchyClipboard extends RiveClipboard {
     var core = file.core;
 
     var idRemap = RuntimeIdRemap(core.idType, core.uintType);
-    var drawOrderRemap =
-        DrawOrderRemap(core.fractionalIndexType, core.uintType);
-    var remaps = <RuntimeRemap>[idRemap, drawOrderRemap];
+    var remaps = <RuntimeRemap>[idRemap];
 
     var targetArtboard = file.backboard.activeArtboard;
     var objects = List<Component>(numObjects);
@@ -288,14 +282,6 @@ class _RiveHierarchyClipboard extends RiveClipboard {
           core.addObject(component);
         }
       }
-
-      // Patch up the draw order using the last drawable as the min for the
-      // newly added drawables.
-      drawOrderRemap.remap(
-          core,
-          targetArtboard.drawables.isNotEmpty
-              ? targetArtboard.drawables.last?.drawOrder
-              : null);
 
       // Perform the id remapping.
       for (final remap in idRemap.properties) {

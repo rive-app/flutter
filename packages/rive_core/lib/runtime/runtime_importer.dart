@@ -7,11 +7,9 @@ import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyed_property.dart';
 import 'package:rive_core/animation/keyframe.dart';
-import 'package:rive_core/animation/keyframe_draw_order.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
-import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/exceptions/rive_format_error_exception.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
@@ -46,10 +44,8 @@ class RuntimeImporter {
         // The properties we remap at runtime, currently only Ids. This whole
         // idRemap stuff should be stripped at runtime.
         var idRemap = RuntimeIdRemap(core.idType, core.uintType);
-        var drawOrderRemap =
-            DrawOrderRemap(core.fractionalIndexType, core.uintType);
 
-        var remaps = <RuntimeRemap>[idRemap, drawOrderRemap];
+        var remaps = <RuntimeRemap>[idRemap];
 
         var numObjects = reader.readVarUint();
         var objects = List<Core<RiveCoreContext>>(numObjects);
@@ -115,16 +111,10 @@ class RuntimeImporter {
                 var keyframe = core.readRuntimeObject<KeyFrame>(reader, remaps);
                 core.addObject(keyframe);
                 keyframe.keyedPropertyId = keyedProperty.id;
-                if (keyframe is KeyFrameDrawOrder) {
-                  keyframe.readRuntimeValues(core, reader, idRemap);
-                }
               }
             }
           }
         }
-
-        // Patch up the draw order.
-        drawOrderRemap.remap(core);
 
         // Perform the id remapping.
         for (final remap in idRemap.properties) {
@@ -162,50 +152,6 @@ class RuntimeIdRemap extends RuntimeRemap<int, Id> {
     properties.add(RuntimeRemapProperty<int>(
         object, propertyKey, runtimeFieldType.runtimeDeserialize(reader)));
     return true;
-  }
-}
-
-class DrawOrderRemap extends RuntimeRemap<int, FractionalIndex> {
-  DrawOrderRemap(CoreFieldType<FractionalIndex> fieldType,
-      CoreFieldType<int> runtimeFieldType)
-      : super(fieldType, runtimeFieldType);
-
-  @override
-  bool add(Core<CoreContext> object, int propertyKey, BinaryReader reader) {
-    if (propertyKey != DrawableBase.drawOrderPropertyKey) {
-      return false;
-    }
-    properties.add(RuntimeRemapProperty<int>(
-        object, propertyKey, runtimeFieldType.runtimeDeserialize(reader)));
-    return true;
-  }
-
-  void remap(RiveCoreContext core, [FractionalIndex minimum]) {
-    var list = properties.toList(growable: false);
-    list.sort((a, b) => a.value.compareTo(b.value));
-    _ImportDrawOrderHelper helper = _ImportDrawOrderHelper(
-      values: list
-          .map((item) => item.object)
-          .toList(growable: false)
-          .cast<Drawable>(),
-      initOrder: minimum == null,
-    );
-    helper.validateFractional(minimum);
-  }
-}
-
-class _ImportDrawOrderHelper extends FractionallyIndexedList<Drawable> {
-  _ImportDrawOrderHelper({List<Drawable> values, bool initOrder})
-      : super(
-          values: values,
-          initOrder: initOrder,
-        );
-  @override
-  FractionalIndex orderOf(Drawable value) => value.drawOrder;
-
-  @override
-  void setOrderOf(Drawable value, FractionalIndex order) {
-    value.drawOrder = order;
   }
 }
 

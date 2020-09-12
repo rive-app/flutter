@@ -19,7 +19,6 @@ class Player {
   PlayerCursor _cursor;
   PlayerCursor get cursor => _cursor;
   set cursor(PlayerCursor value) {
-    ;
     if (_cursor == value) {
       return;
     }

@@ -10,6 +10,7 @@ class InspectorPillButton extends StatelessWidget {
   final Iterable<PackedIcon> icon;
   final String label;
   final bool accent;
+  final Color textColor;
 
   const InspectorPillButton({
     Key key,
@@ -17,6 +18,7 @@ class InspectorPillButton extends StatelessWidget {
     this.icon,
     this.label,
     this.accent = false,
+    this.textColor,
   }) : super(key: key);
 
   @override
@@ -34,9 +36,10 @@ class InspectorPillButton extends StatelessWidget {
         label: label,
         color: disabled ? disabledColor : color,
         hoverColor: colors.inspectorPillHover,
-        textColor: disabled
-            ? colors.inspectorPillDisabledText
-            : colors.inspectorPillText,
+        textColor: textColor ??
+            (disabled
+                ? colors.inspectorPillDisabledText
+                : colors.inspectorPillText),
         hoverTextColor: colors.activeText,
         icon: icon == null
             ? null

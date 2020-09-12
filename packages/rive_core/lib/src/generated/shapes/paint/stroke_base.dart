@@ -150,18 +150,18 @@ abstract class StrokeBase extends ShapePaint {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (thickness != null) {
-      onPropertyChanged(thicknessPropertyKey, thickness, thickness);
+    if (_thickness != null) {
+      onPropertyChanged(thicknessPropertyKey, _thickness, _thickness);
     }
-    if (cap != null) {
-      onPropertyChanged(capPropertyKey, cap, cap);
+    if (_cap != null) {
+      onPropertyChanged(capPropertyKey, _cap, _cap);
     }
-    if (join != null) {
-      onPropertyChanged(joinPropertyKey, join, join);
+    if (_join != null) {
+      onPropertyChanged(joinPropertyKey, _join, _join);
     }
-    if (transformAffectsStroke != null) {
+    if (_transformAffectsStroke != null) {
       onPropertyChanged(transformAffectsStrokePropertyKey,
-          transformAffectsStroke, transformAffectsStroke);
+          _transformAffectsStroke, _transformAffectsStroke);
     }
   }
 

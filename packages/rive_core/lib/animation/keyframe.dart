@@ -18,6 +18,8 @@ abstract class KeyFrame extends KeyFrameBase<RiveFile>
   double _timeInSeconds;
   double get seconds => _timeInSeconds;
 
+  bool get canInterpolate => true;
+
   KeyFrameInterpolation get interpolation => interpolationType == null
       ? null
       : KeyFrameInterpolation.values[interpolationType];

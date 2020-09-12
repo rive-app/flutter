@@ -228,17 +228,17 @@ abstract class TrimPathBase extends Component {
   @override
   void changeNonNull() {
     super.changeNonNull();
-    if (start != null) {
-      onPropertyChanged(startPropertyKey, start, start);
+    if (_start != null) {
+      onPropertyChanged(startPropertyKey, _start, _start);
     }
-    if (end != null) {
-      onPropertyChanged(endPropertyKey, end, end);
+    if (_end != null) {
+      onPropertyChanged(endPropertyKey, _end, _end);
     }
-    if (offset != null) {
-      onPropertyChanged(offsetPropertyKey, offset, offset);
+    if (_offset != null) {
+      onPropertyChanged(offsetPropertyKey, _offset, _offset);
     }
-    if (modeValue != null) {
-      onPropertyChanged(modeValuePropertyKey, modeValue, modeValue);
+    if (_modeValue != null) {
+      onPropertyChanged(modeValuePropertyKey, _modeValue, _modeValue);
     }
   }
 

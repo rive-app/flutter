@@ -9,6 +9,8 @@ import 'package:rive_core/animation/animation.dart';
 import 'package:rive_core/bounds_delegate.dart';
 import 'package:rive_core/component.dart';
 import 'package:rive_core/component_dirt.dart';
+import 'package:rive_core/draw_rules.dart';
+import 'package:rive_core/draw_target.dart';
 import 'package:rive_core/drawable.dart';
 import 'package:rive_core/event.dart';
 import 'package:rive_core/math/aabb.dart';
@@ -39,26 +41,11 @@ class AnimationList extends FractionallyIndexedList<Animation> {
     animation.order = order;
   }
 }
-
-class DrawableList extends FractionallyIndexedList<Drawable> {
-  @override
-  FractionalIndex orderOf(Drawable drawable) {
-    return drawable.drawOrder;
-  }
-
-  @override
-  void setOrderOf(Drawable drawable, FractionalIndex order) {
-    drawable.drawOrder = order;
-  }
-
-  void sortDrawables() => sortFractional();
-}
 // <- editor-only
 
 class Artboard extends ArtboardBase with ShapePaintContainer {
   // -> editor-only
   /// An event fired when the draw order changed,
-  final Event drawOrderChanged = Event();
   ArtboardDelegate _delegate;
 
   /// Event notified whenever the animations list changes.
@@ -71,10 +58,13 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
 
   final Path path = Path();
   List<Component> _dependencyOrder = [];
-  final DrawableList _drawables = DrawableList();
+  final List<Drawable> _drawables = [];
+  final List<DrawRules> _rules = [];
+  List<DrawTarget> _sortedDrawRules;
+
   final Set<Component> _components = {};
 
-  DrawableList get drawables => _drawables;
+  List<Drawable> get drawables => _drawables;
 
   final AnimationList _animations = AnimationList();
 
@@ -102,12 +92,16 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   /// any component updated.
   bool updateComponents() {
     bool didUpdate = false;
+    // -> editor-only
+    if ((_dirt & ComponentDirt.naturalDrawOrder) != 0) {
+      computeDrawOrder();
+      _dirt &= ~ComponentDirt.naturalDrawOrder;
+      didUpdate = true;
+    }
+    // <- editor-only
     if ((_dirt & ComponentDirt.drawOrder) != 0) {
-      _drawables.sortDrawables();
+      sortDrawOrder();
       _dirt &= ~ComponentDirt.drawOrder;
-      // -> editor-only
-      drawOrderChanged.notify();
-      // <- editor-only
       didUpdate = true;
     }
     if ((_dirt & ComponentDirt.components) != 0) {
@@ -256,32 +250,17 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     if (!_components.add(component)) {
       return;
     }
-    if (component is Drawable) {
-      assert(!_drawables.contains(component));
-      _drawables.add(component);
-
-      // -> editor-only
-      if (component.drawOrder == null && !_drawables.validateFractional()) {
-        // Draw order was missing, so force validate it (change the null draw
-        // orders) and hence we re=sort. This should only happen on creation or
-        // patchup of corrupt files.
-
-        // We sort immediately in-case more null drawOrder items are added.
-        _drawables.sortDrawables();
-      }
-      // <- editor-only
-      markDrawOrderDirty();
-    }
+    markNaturalDrawOrderDirty();
   }
 
   /// Remove a component from the artboard and its various tracked lists of
   /// components.
   void removeComponent(Component component) {
     _components.remove(component);
-    if (component is Drawable) {
-      _drawables.remove(component);
-    }
+    markNaturalDrawOrderDirty();
   }
+
+  // -> editor-only
 
   /// Let the artboard know that the drawables need to be resorted before
   /// drawing next.
@@ -289,6 +268,17 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     if ((dirt & ComponentDirt.drawOrder) == 0) {
       context?.markNeedsAdvance();
       _dirt |= ComponentDirt.drawOrder;
+    }
+  }
+  // <- editor-only
+
+  /// Let the artboard know that the natural draw order needs to be re-computed.
+  /// This happens when a rule is added, a child is moved in the hierarchy, or
+  /// an object is added to the hierarchy.
+  void markNaturalDrawOrderDirty() {
+    if ((dirt & ComponentDirt.naturalDrawOrder) == 0) {
+      context?.markNeedsAdvance();
+      _dirt |= ComponentDirt.naturalDrawOrder;
     }
   }
 
@@ -311,7 +301,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     // components and use 'editor or stageTransform' for stageItems.
     canvas.translate(width * (originX ?? 0), height * (originY ?? 0));
 
-    for (final drawable in _drawables) {
+    for (var drawable = _firstDrawable;
+        drawable != null;
+        drawable = drawable.prev) {
       drawable.draw(canvas);
     }
     canvas.restore();
@@ -465,4 +457,133 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
   // <- editor-only
   @override
   Vec2D get worldTranslation => Vec2D();
+
+  Drawable _firstDrawable;
+
+  void computeDrawOrder() {
+    _drawables.clear();
+    _rules.clear();
+    buildDrawOrder(_drawables, null, _rules);
+    // Build rule dependencies. In practice this'll need to happen anytime a
+    // target drawable is changed or rule is added/removed.
+    Set<DrawTarget> rootRules = {};
+    for (final nodeRules in _rules) {
+      for (final target in nodeRules.targets) {
+        target.isValid = target.drawable != null;
+        var dependentRules = target.drawable?.flattenedDrawRules;
+        if (dependentRules != null) {
+          for (final dependentRule in dependentRules.targets) {
+            dependentRule.dependents.add(target);
+          }
+        } else {
+          rootRules.add(target);
+        }
+      }
+    }
+    var sorter = TarjansDependencySorter<Component>();
+    sorter.reset();
+    var valid = true;
+    if (rootRules.isNotEmpty) {
+      for (final rootRule in rootRules) {
+        if (!sorter.visit(rootRule)) {
+          valid = false;
+        }
+      }
+    }
+    if (sorter.cycleNodes.isNotEmpty) {
+      for (final invalidRule in sorter.cycleNodes) {
+        (invalidRule as DrawTarget).isValid = false;
+        // TODO: Show an alert of dependency cycle?;
+      }
+    }
+
+    _sortedDrawRules = sorter.order.cast<DrawTarget>();
+
+    sortDrawOrder();
+  }
+
+  void sortDrawOrder() {
+    // Clear out rule first/last items.
+    for (final rule in _sortedDrawRules) {
+      rule.first = rule.last = null;
+    }
+
+    _firstDrawable = null;
+    Drawable lastDrawable;
+    for (final drawable in _drawables) {
+      var rules = drawable.flattenedDrawRules;
+      // -> editor-only
+      while (rules != null &&
+          rules.activeTarget != null &&
+          !rules.activeTarget.isValid) {
+        rules = rules.parentRules;
+      }
+      // <- editor-only
+      var target = rules?.activeTarget;
+      if (target != null) {
+        if (target.first == null) {
+          target.first = target.last = drawable;
+          drawable.prev = drawable.next = null;
+        } else {
+          target.last.next = drawable;
+          drawable.prev = target.last;
+          target.last = drawable;
+          drawable.next = null;
+        }
+      } else {
+        drawable.prev = lastDrawable;
+        drawable.next = null;
+        if (lastDrawable == null) {
+          lastDrawable = _firstDrawable = drawable;
+        } else {
+          lastDrawable.next = drawable;
+          lastDrawable = drawable;
+        }
+      }
+    }
+
+    for (final rule in _sortedDrawRules) {
+      if (rule.first == null) {
+        continue;
+      }
+      switch (rule.placement) {
+        case DrawTargetPlacement.before:
+          if (rule.drawable.prev != null) {
+            rule.drawable.prev.next = rule.first;
+            rule.first.prev = rule.drawable.prev;
+          }
+          if (rule.drawable == _firstDrawable) {
+            _firstDrawable = rule.first;
+          }
+          rule.drawable.prev = rule.last;
+          rule.last.next = rule.drawable;
+          break;
+        case DrawTargetPlacement.after:
+          if (rule.drawable.next != null) {
+            rule.drawable.next.prev = rule.last;
+            rule.last.next = rule.drawable.next;
+          }
+          if (rule.drawable == lastDrawable) {
+            lastDrawable = rule.last;
+          }
+          rule.drawable.next = rule.first;
+          rule.first.prev = rule.drawable;
+          break;
+      }
+    }
+
+    _firstDrawable = lastDrawable;
+    // -> editor-only
+
+    // iterate all the drawables and give them their actual draw order which the
+    // stage uses.
+    int order = 0;
+    for (var drawable = _firstDrawable;
+        drawable != null;
+        drawable = drawable.prev) {
+      drawable.drawOrder = order++;
+    }
+
+    // <- editor-only
+  }
 }

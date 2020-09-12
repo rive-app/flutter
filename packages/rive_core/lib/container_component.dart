@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/draw_rules.dart';
+import 'package:rive_core/drawable.dart';
 import 'package:rive_core/src/generated/container_component_base.dart';
 
 // -> editor-only
@@ -27,51 +29,12 @@ abstract class ContainerComponent extends ContainerComponentBase {
     child.parent = this;
   }
 
-  // @override
-  // void markArtboardDirty() {
-  //   super.markArtboardDirty();
-  //   for (final child in children) {
-  //     child.markArtboardDirty();
-  //   }
-  // }
-
-  // bool addChild(Component child, {bool updateIndex = true}) {
-  //   assert(child != null);
-
-  //   if (child.parent == this) {
-  //     return false;
-  //   }
-  //   child.parent?.removeChild(child);
-  //   child.parent = this;
-  //   if (updateIndex) {
-  //     children.append(child);
-  //   } else {
-  //     children.add(child);
-  //   }
-
-  //   // Let the context know that this item needs its children re-sorted.
-  //   context?.markChildSortDirty(this);
-
-  //   childAdded(child);
-  //   return true;
-  // }
-
   @mustCallSuper
   void childAdded(Component child) {
     // -> editor-only
     context?.markChildSortDirty(this);
     // <- editor-only
   }
-
-  // bool removeChild(Component child) {
-  //   assert(child != null);
-  //   if (child.parent != this) {
-  //     return false;
-  //   }
-  //   var removed = children.remove(child);
-  //   childRemoved(child);
-  //   return removed;
-  // }
 
   void childRemoved(Component child) {}
 
@@ -112,5 +75,14 @@ abstract class ContainerComponent extends ContainerComponentBase {
     Set<Component> deathRow = {this};
     forEachChild((child) => deathRow.add(child));
     deathRow.forEach(context.removeObject);
+  }
+
+  void buildDrawOrder(
+      List<Drawable> drawables, DrawRules rules, List<DrawRules> allRules) {
+    for (final child in children) {
+      if (child is ContainerComponent) {
+        child.buildDrawOrder(drawables, rules, allRules);
+      }
+    }
   }
 }

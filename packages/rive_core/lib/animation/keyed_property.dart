@@ -5,8 +5,6 @@ import 'package:core/key_state.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyframe.dart';
-import 'package:rive_core/artboard.dart';
-import 'package:rive_core/drawable.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';
@@ -86,7 +84,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
     if (keyedObjectId != null) {
       KeyedObject keyedObject = context?.resolve(keyedObjectId);
       if (keyedObject == null) {
-        _log.finest("Failed to resolve KeyedObject with id $keyedObjectId");
+        _log.finest('Failed to resolve KeyedObject with id $keyedObjectId');
       } else if (!keyedObject.internalAddKeyedProperty(this)) {
         // Somehow had a duplicate keyed property for this property in the
         // animation referenced.
@@ -271,16 +269,7 @@ class KeyedProperty extends KeyedPropertyBase<RiveFile>
   // -> editor-only
   static void _setKeyState(
       Core<CoreContext> object, int propertyKey, KeyState state) {
-    switch (propertyKey) {
-      case DrawableBase.drawOrderPropertyKey:
-        assert(object is Artboard);
-
-        (object as Artboard).drawOrderKeyState = state;
-        break;
-      default:
-        RiveCoreContext.setKeyState(object, propertyKey, state);
-        break;
-    }
+    RiveCoreContext.setKeyState(object, propertyKey, state);
   }
   // <- editor-only
 
