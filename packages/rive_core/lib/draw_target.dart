@@ -26,11 +26,8 @@ class DrawTarget extends DrawTargetBase {
     }
 
     // -> editor-only
-
-    // Handle when a shape is deleted. #1177
     _drawable?.cancelWhenRemoved(remove);
     value?.whenRemoved(remove);
-
     // <- editor-only
 
     _drawable = value;
@@ -43,7 +40,7 @@ class DrawTarget extends DrawTargetBase {
 
   @override
   void drawableIdChanged(Id from, Id to) {
-    _drawable = context?.resolve(to);
+    drawable = context?.resolve(to);
     // -> editor-only
     artboard?.markNaturalDrawOrderDirty();
     addDirt(ComponentDirt.naturalDrawOrder);
@@ -54,9 +51,9 @@ class DrawTarget extends DrawTargetBase {
   void onAddedDirty() {
     super.onAddedDirty();
     if (drawableId != null) {
-      _drawable = context?.resolve(drawableId);
+      drawable = context?.resolve(drawableId);
     } else {
-      _drawable = null;
+      drawable = null;
     }
   }
 
