@@ -91,6 +91,7 @@ void main(List<String> arguments) {
           Mutation('Id', 'int'),
           Mutation('FractionalIndex', 'int'),
           Mutation('animateDouble', 'setDouble'),
+          Mutation('animateId', 'setUint'),
           Mutation('animateColor', 'setColor'),
         ]);
 

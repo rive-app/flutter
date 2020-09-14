@@ -11,6 +11,8 @@ import 'package:rive_core/animation/linear_animation.dart';
 import 'package:rive_core/artboard.dart';
 import 'package:rive_core/backboard.dart';
 import 'package:rive_core/component.dart';
+import 'package:rive_core/draw_rules.dart';
+import 'package:rive_core/draw_target.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/runtime/runtime_header.dart';
 import 'package:utilities/binary_buffer/binary_writer.dart';

@@ -5,6 +5,7 @@ import 'package:core/key_state.dart';
 import 'package:logging/logging.dart';
 import 'package:rive_core/animation/keyed_object.dart';
 import 'package:rive_core/animation/keyframe.dart';
+import 'package:rive_core/animation/keyframe_id.dart';
 import 'package:rive_core/rive_file.dart';
 import 'package:rive_core/src/generated/animation/keyed_property_base.dart';
 import 'package:rive_core/src/generated/rive_core_context.dart';

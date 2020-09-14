@@ -250,17 +250,19 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     if (!_components.add(component)) {
       return;
     }
+    // -> editor-only
     markNaturalDrawOrderDirty();
+    // <- editor-only
   }
 
   /// Remove a component from the artboard and its various tracked lists of
   /// components.
   void removeComponent(Component component) {
     _components.remove(component);
+    // -> editor-only
     markNaturalDrawOrderDirty();
+    // <- editor-only
   }
-
-  // -> editor-only
 
   /// Let the artboard know that the drawables need to be resorted before
   /// drawing next.
@@ -270,7 +272,8 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
       _dirt |= ComponentDirt.drawOrder;
     }
   }
-  // <- editor-only
+
+  // -> editor-only
 
   /// Let the artboard know that the natural draw order needs to be re-computed.
   /// This happens when a rule is added, a child is moved in the hierarchy, or
@@ -281,6 +284,7 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
       _dirt |= ComponentDirt.naturalDrawOrder;
     }
   }
+  // <- editor-only
 
   /// Draw the drawable components in this artboard.
   void draw(Canvas canvas) {
@@ -469,7 +473,9 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
     Set<DrawTarget> rootRules = {};
     for (final nodeRules in _rules) {
       for (final target in nodeRules.targets) {
+        // -> editor-only
         target.isValid = target.drawable != null;
+        // <- editor-only
         var dependentRules = target.drawable?.flattenedDrawRules;
         if (dependentRules != null) {
           for (final dependentRule in dependentRules.targets) {
@@ -480,22 +486,24 @@ class Artboard extends ArtboardBase with ShapePaintContainer {
         }
       }
     }
+    // -> editor-only
     var sorter = TarjansDependencySorter<Component>();
+    // <- editor-only
+    // -> runtime-only
+    // var sorter = DependencySorter<Component>();
+    // <- runtime-only
     sorter.reset();
-    var valid = true;
     if (rootRules.isNotEmpty) {
-      for (final rootRule in rootRules) {
-        if (!sorter.visit(rootRule)) {
-          valid = false;
-        }
-      }
+      rootRules.forEach(sorter.visit);
     }
+    // -> editor-only
     if (sorter.cycleNodes.isNotEmpty) {
       for (final invalidRule in sorter.cycleNodes) {
         (invalidRule as DrawTarget).isValid = false;
         // TODO: Show an alert of dependency cycle?;
       }
     }
+    // <- editor-only
 
     _sortedDrawRules = sorter.order.cast<DrawTarget>();
 
