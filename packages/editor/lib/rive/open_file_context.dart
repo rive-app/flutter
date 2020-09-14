@@ -813,7 +813,9 @@ class OpenFileContext with RiveFileDelegate {
 
   bool _strafeRabbits(int direction) {
     var highest = _highestSelection();
-    if (highest != null) {
+    // If we don't have a parent, we can't have siblings... (artboards ain't
+    // rabbits!)
+    if (highest != null && highest.parent != null) {
       // Pick valid siblings (that are on the stage and hence selectable).
       var siblings = highest.parent.children
           .where((sibling) =>
