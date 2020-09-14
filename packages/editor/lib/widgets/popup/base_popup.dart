@@ -11,8 +11,13 @@ class Popup {
   final Future<bool> Function() shouldClose;
   bool _canAutoClose;
 
-  void markNeedsBuild() => SchedulerBinding.instance
-      .scheduleTask(_entry.markNeedsBuild, Priority.touch);
+  void markNeedsBuild() {
+    if (_entry == null) {
+      return;
+    }
+    SchedulerBinding.instance
+        .scheduleTask(_entry.markNeedsBuild, Priority.touch);
+  }
 
   @mustCallSuper
   bool close() {
