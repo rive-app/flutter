@@ -10,6 +10,9 @@ import 'package:rive_core/event.dart';
 import 'package:rive_core/node.dart';
 import 'package:rive_core/transform_component.dart';
 import 'package:rive_editor/rive/open_file_context.dart';
+import 'package:rive_editor/widgets/inherited_widgets.dart';
+import 'package:rive_editor/widgets/popup/context_popup.dart';
+import 'package:rive_editor/widgets/popup/list_popup.dart';
 import 'package:tree_widget/flat_tree_item.dart';
 import 'package:tree_widget/tree_controller.dart';
 import 'package:rive_editor/rive/component_tree_controller.dart';
@@ -211,10 +214,6 @@ class HierarchyTreeController extends ComponentTreeController {
     return 1;
   }
 
-  @override
-  void onRightClick(BuildContext context, PointerDownEvent event,
-      FlatTreeItem<Component> item) {}
-
   bool _suppressExpandSelected = false;
   @override
   void onTap(FlatTreeItem<Component> item) {
@@ -255,5 +254,55 @@ class HierarchyTreeController extends ComponentTreeController {
         .toSet();
 
     return tops(items).toList(growable: false);
+  }
+
+  @override
+  void onRightClick(BuildContext context, PointerDownEvent event,
+      FlatTreeItem<Component> item) {
+    // All items in draw order have a stage item.
+    if (!item.data.stageItem.isSelected) {
+      file.select(item.data.stageItem);
+    }
+    double width = RiveTheme.find(context).dimensions.contextMenuWidth;
+    ListPopup<PopupContextItem>.show(
+      context,
+      showArrow: false,
+      position: event.position + const Offset(0, -6),
+      width: width,
+      itemBuilder: (popupContext, item, isHovered) =>
+          item.itemBuilder(popupContext, isHovered),
+      items: [
+        if (item != null)
+          PopupContextItem(
+            'Reverse',
+            select: () {
+              // Reverse siblings.
+              var parent = item.data.parent;
+              if (parent == null) {
+                return;
+              }
+              parent.children.reverse();
+              file.core.captureJournalEntry();
+            },
+          ),
+        PopupContextItem(
+          'Reverse All',
+          select: () {
+            if (_showingArtboard == null) {
+              return;
+            }
+            _showingArtboard.forAll((component) {
+              switch (component.coreType) {
+                case NodeBase.typeKey:
+                case ArtboardBase.typeKey:
+                  (component as ContainerComponent).children.reverse();
+              }
+              return true;
+            });
+            file.core.captureJournalEntry();
+          },
+        ),
+      ],
+    );
   }
 }
