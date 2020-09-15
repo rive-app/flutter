@@ -33,8 +33,7 @@ class RuntimeHeader {
 
     int readMajorVersion = reader.readVarUint();
     int readMinorVersion = reader.readVarUint();
-    if (readMajorVersion > majorVersion ||
-        (readMajorVersion == majorVersion && readMinorVersion > minorVersion)) {
+    if (readMajorVersion > majorVersion) {
       throw RiveUnsupportedVersionException(
           majorVersion, minorVersion, readMajorVersion, readMinorVersion);
     }
